@@ -1,0 +1,4 @@
+D:\DX12\ElysiaRenderer\x64\Debug\D3D12\D3D12Core.dll
+D:\DX12\ElysiaRenderer\x64\Debug\D3D12\D3D12Core.pdb
+D:\DX12\ElysiaRenderer\x64\Debug\D3D12\D3D12SDKLayers.dll
+D:\DX12\ElysiaRenderer\x64\Debug\D3D12\D3D12SDKLayers.pdb

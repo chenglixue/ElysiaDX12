@@ -1,0 +1,70 @@
+﻿  D3D12Lite.cpp
+  D3D12MemAlloc.cpp
+  BC.cpp
+  BC4BC5.cpp
+  BC6HBC7.cpp
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DXTex\BC6HBC7.cpp(1000,13): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DXTex\BC6HBC7.cpp(1019,13): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DXTex\BC6HBC7.cpp(1036,13): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DXTex\BC6HBC7.cpp(1261,13): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DXTex\BC6HBC7.cpp(1263,17): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DXTex\BC6HBC7.cpp(1834,9): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DXTex\BC6HBC7.cpp(1886,13): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DXTex\BC6HBC7.cpp(1953,9): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DXTex\BC6HBC7.cpp(2054,21): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DXTex\BC6HBC7.cpp(2185,25): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DXTex\BC6HBC7.cpp(2186,25): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DXTex\BC6HBC7.cpp(2187,25): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DXTex\BC6HBC7.cpp(2225,25): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DXTex\BC6HBC7.cpp(2226,25): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DXTex\BC6HBC7.cpp(2227,25): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DXTex\BC6HBC7.cpp(2254,13): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DXTex\BC6HBC7.cpp(2259,13): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DXTex\BC6HBC7.cpp(2261,13): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DXTex\BC6HBC7.cpp(2460,13): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DXTex\BC6HBC7.cpp(2499,9): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DXTex\BC6HBC7.cpp(2510,13): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DXTex\BC6HBC7.cpp(2515,21): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DXTex\BC6HBC7.cpp(2524,13): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DXTex\BC6HBC7.cpp(2531,21): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DXTex\BC6HBC7.cpp(2540,21): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DXTex\BC6HBC7.cpp(2561,5): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DXTex\BC6HBC7.cpp(2656,9): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DXTex\BC6HBC7.cpp(2667,9): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DXTex\BC6HBC7.cpp(2694,9): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DXTex\BC6HBC7.cpp(2729,13): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DXTex\BC6HBC7.cpp(2766,17): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DXTex\BC6HBC7.cpp(2788,17): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DXTex\BC6HBC7.cpp(2795,17): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DXTex\BC6HBC7.cpp(2797,17): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DXTex\BC6HBC7.cpp(2803,9): warning C5033: 'register' is no longer a supported storage class
+  BCDirectCompute.cpp
+  DirectXTexCompress.cpp
+  DirectXTexCompressGPU.cpp
+  DirectXTexConvert.cpp
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DXTex\DirectXTexConvert.cpp(711,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  DirectXTexD3D11.cpp
+  DirectXTexDDS.cpp
+  DirectXTexFlipRotate.cpp
+  DirectXTexImage.cpp
+  DirectXTexMipmaps.cpp
+  DirectXTexMisc.cpp
+  DirectXTexNormalMaps.cpp
+  DirectXTexPMAlpha.cpp
+  DirectXTexResize.cpp
+  DirectXTexTGA.cpp
+  DirectXTexUtil.cpp
+  Generating Code...
+  Compiling...
+  DirectXTexWIC.cpp
+  imgui.cpp
+  imgui_demo.cpp
+  imgui_draw.cpp
+  imgui_impl_dx12.cpp
+  imgui_impl_win32.cpp
+  imgui_tables.cpp
+  imgui_widgets.cpp
+  main.cpp
+  Generating Code...
+     Creating library D:\DX12\ElysiaRenderer\x64\Debug\ElysiaRenderer.lib and object D:\DX12\ElysiaRenderer\x64\Debug\ElysiaRenderer.exp
+  ElysiaRenderer.vcxproj -> D:\DX12\ElysiaRenderer\x64\Debug\ElysiaRenderer.exe
