@@ -28,56 +28,58 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam)
     }
 }
 
-int main()
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, int nShowCmd)
 {
-    std::wstring applicationName = L"D3D12 Tutorial";
-    Uint2 windowSize = { 1920, 1080 };
-    HINSTANCE moduleHandle = GetModuleHandle(nullptr);
+	std::wstring applicationName = L"Elysia Renderer";
+	Uint2 windowSize = { 1920, 1080 };
+	HINSTANCE moduleHandle = GetModuleHandle(nullptr);
 
-    WNDCLASSEX wc = { 0 };
-    wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
-    wc.lpfnWndProc = WndProc;
-    wc.hInstance = moduleHandle;
-    wc.hIcon = LoadIcon(nullptr, IDI_WINLOGO);
-    wc.hIconSm = wc.hIcon;
-    wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
-    wc.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
-    wc.lpszMenuName = nullptr;
-    wc.lpszClassName = applicationName.c_str();
-    wc.cbSize = sizeof(WNDCLASSEX);
-    RegisterClassEx(&wc);
+	WNDCLASSEX wc = { 0 };
+	wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
+	wc.lpfnWndProc = WndProc;
+	wc.hInstance = moduleHandle;
+	wc.hIcon = LoadIcon(nullptr, IDI_WINLOGO);
+	wc.hIconSm = wc.hIcon;
+	wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
+	wc.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
+	wc.lpszMenuName = nullptr;
+	wc.lpszClassName = applicationName.c_str();
+	wc.cbSize = sizeof(WNDCLASSEX);
+	RegisterClassEx(&wc);
 
-    HWND windowHandle = CreateWindowEx(WS_EX_APPWINDOW, applicationName.c_str(), applicationName.c_str(),
-        WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_OVERLAPPED | WS_SIZEBOX,
-        (GetSystemMetrics(SM_CXSCREEN) - windowSize.x) / 2, (GetSystemMetrics(SM_CYSCREEN) - windowSize.y) / 2, windowSize.x, windowSize.y,
-        nullptr, nullptr, moduleHandle, nullptr);
+	HWND windowHandle = CreateWindowEx(WS_EX_APPWINDOW, applicationName.c_str(), applicationName.c_str(),
+		WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_OVERLAPPED | WS_SIZEBOX,
+		(GetSystemMetrics(SM_CXSCREEN) - windowSize.x) / 2, (GetSystemMetrics(SM_CYSCREEN) - windowSize.y) / 2, windowSize.x, windowSize.y,
+		nullptr, nullptr, moduleHandle, nullptr);
 
-    ShowWindow(windowHandle, SW_SHOW);
-    SetForegroundWindow(windowHandle);
-    SetFocus(windowHandle);
-    ShowCursor(true);
+	ShowWindow(windowHandle, SW_SHOW);
+	SetForegroundWindow(windowHandle);
+	SetFocus(windowHandle);
+	ShowCursor(true);
 
-    bool shouldExit = false;
-    while (!shouldExit)
-    {
-        MSG msg{ 0 };
-        if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
-        {
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
-        }
 
-        if (msg.message == WM_QUIT)
-        {
-            shouldExit = true;
-        }
-    }
+	bool shouldExit = false;
+	while (!shouldExit)
+	{
+		MSG msg{ 0 };
+		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
+		{
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
 
-    DestroyWindow(windowHandle);
-    windowHandle = nullptr;
+		if (msg.message == WM_QUIT)
+		{
+			shouldExit = true;
+		}
 
-    UnregisterClass(applicationName.c_str(), moduleHandle);
-    moduleHandle = nullptr;
+	}
 
-    return 0;
+	DestroyWindow(windowHandle);
+	windowHandle = nullptr;
+
+	UnregisterClass(applicationName.c_str(), moduleHandle);
+	moduleHandle = nullptr;
+
+	return 0;
 }
