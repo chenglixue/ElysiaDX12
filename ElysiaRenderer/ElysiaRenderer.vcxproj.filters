@@ -14,13 +14,13 @@
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
     <Filter Include="Header Files\DX12">
-      <UniqueIdentifier>{1a0ab220-0566-4009-9bac-2c8798cbcb6c}</UniqueIdentifier>
+      <UniqueIdentifier>{1ddce29f-eb12-4ccf-952a-da787b37eb2f}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\DX12">
-      <UniqueIdentifier>{b5f19365-edb1-4fef-bb87-4c973bafe625}</UniqueIdentifier>
+      <UniqueIdentifier>{75636589-f304-4496-90a9-0412e1bec502}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\Helper">
-      <UniqueIdentifier>{2b80a0ca-53f7-4c1e-8bbd-58e453f0a250}</UniqueIdentifier>
+      <UniqueIdentifier>{5b2e3e24-f9c9-461c-9274-13e4952421c0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -89,12 +89,6 @@
     </ClInclude>
     <ClInclude Include="Helper.h">
       <Filter>Header Files\Helper</Filter>
-    </ClInclude>
-    <ClInclude Include="DX12QueueManager.h">
-      <Filter>Header Files\DX12</Filter>
-    </ClInclude>
-    <ClInclude Include="GPUResource.h">
-      <Filter>Header Files\DX12</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -209,12 +203,6 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="DX12Queue.cpp">
       <Filter>Source Files\DX12</Filter>
-    </ClCompile>
-    <ClCompile Include="DX12QueueManager.cpp">
-      <Filter>Source Files\DX12</Filter>
-    </ClCompile>
-    <ClCompile Include="stdafx.h">
-      <Filter>Header Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

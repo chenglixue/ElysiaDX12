@@ -133,8 +133,10 @@
   <ItemGroup>
     <ClInclude Include="D3D12Lite.h" />
     <ClInclude Include="D3D12MemoryAllocator\D3D12MemAlloc.h" />
+    <ClInclude Include="DX12ConstantBuffer.h" />
     <ClInclude Include="DX12Queue.h" />
     <ClInclude Include="DX12QueueManager.h" />
+    <ClInclude Include="DX12VertexBuffer.h" />
     <ClInclude Include="dxc\inc\d3d12shader.h" />
     <ClInclude Include="dxc\inc\dxcapi.h" />
     <ClInclude Include="DXTex\BC.h" />
@@ -179,6 +181,7 @@
     <ClCompile Include="D3D12MemoryAllocator\D3D12MemAlloc.cpp" />
     <ClCompile Include="DX12Queue.cpp" />
     <ClCompile Include="DX12QueueManager.cpp" />
+    <ClCompile Include="DX12VertexBuffer.cpp" />
     <ClCompile Include="DXTex\BC.cpp" />
     <ClCompile Include="DXTex\BC4BC5.cpp" />
     <ClCompile Include="DXTex\BC6HBC7.cpp" />
@@ -198,6 +201,7 @@
     <ClCompile Include="DXTex\DirectXTexTGA.cpp" />
     <ClCompile Include="DXTex\DirectXTexUtil.cpp" />
     <ClCompile Include="DXTex\DirectXTexWIC.cpp" />
+    <ClCompile Include="GPUResource.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
     <ClCompile Include="imgui\imgui_demo.cpp" />
     <ClCompile Include="imgui\imgui_draw.cpp" />
@@ -206,7 +210,6 @@
     <ClCompile Include="imgui\imgui_tables.cpp" />
     <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="stdafx.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
