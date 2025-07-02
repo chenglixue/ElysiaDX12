@@ -23,7 +23,7 @@ namespace ElysiaRenderer
 
 		m_fence->Signal(m_lastCompletedFenceValue);
 
-		m_fenceEventHandle = CreateEventEx(NULL, false, false, EVENT_ALL_ACCESS);
+		m_fenceEventHandle = CreateEventEx(nullptr, nullptr, 0, EVENT_ALL_ACCESS);
 
 		assert(m_fenceEventHandle != INVALID_HANDLE_VALUE);
 	}
@@ -51,7 +51,7 @@ namespace ElysiaRenderer
 			PollCurrentFenceValue();
 		}
 
-		return m_lastCompletedFenceValue <= fenceValue;
+		return m_lastCompletedFenceValue >= fenceValue;
 	}
 
 	void DX12Queue::InsertWait(uint64_t fenceValue)

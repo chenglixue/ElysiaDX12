@@ -1,12 +1,5 @@
 #pragma once
-#include <d3d12.h>
-#include <dxgi1_6.h>
-#include <cstdint>
-#include <array>
-#include <vector>
-#include <mutex>
-#include <optional>
-#include "SimpleMath/SimpleMath.h"
+#include "stdafx.h"
 
 namespace ElysiaRenderer
 {

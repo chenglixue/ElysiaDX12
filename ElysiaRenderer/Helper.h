@@ -3,6 +3,7 @@
 #include <dxgi1_6.h>
 #include <cstdint>
 #include <array>
+#include <string>
 #include <vector>
 #include <mutex>
 #include <optional>
@@ -13,5 +14,10 @@ namespace ElysiaHelper
     inline void AssertIfFailed(HRESULT hr)
     {
         assert(SUCCEEDED(hr));
+    }
+
+    inline void ThrowRuntimeError(std::string output)
+    {
+        throw std::runtime_error(output);
     }
 }

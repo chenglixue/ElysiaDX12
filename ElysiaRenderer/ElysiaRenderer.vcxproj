@@ -133,6 +133,8 @@
   <ItemGroup>
     <ClInclude Include="D3D12Lite.h" />
     <ClInclude Include="D3D12MemoryAllocator\D3D12MemAlloc.h" />
+    <ClInclude Include="DX12Queue.h" />
+    <ClInclude Include="DX12QueueManager.h" />
     <ClInclude Include="dxc\inc\d3d12shader.h" />
     <ClInclude Include="dxc\inc\dxcapi.h" />
     <ClInclude Include="DXTex\BC.h" />
@@ -142,6 +144,8 @@
     <ClInclude Include="DXTex\DirectXTexP.h" />
     <ClInclude Include="DXTex\Filters.h" />
     <ClInclude Include="DXTex\scoped.h" />
+    <ClInclude Include="GPUResource.h" />
+    <ClInclude Include="Helper.h" />
     <ClInclude Include="imgui\imconfig.h" />
     <ClInclude Include="imgui\imgui.h" />
     <ClInclude Include="imgui\imgui_impl_dx12.h" />
@@ -173,6 +177,8 @@
   <ItemGroup>
     <ClCompile Include="D3D12Lite.cpp" />
     <ClCompile Include="D3D12MemoryAllocator\D3D12MemAlloc.cpp" />
+    <ClCompile Include="DX12Queue.cpp" />
+    <ClCompile Include="DX12QueueManager.cpp" />
     <ClCompile Include="DXTex\BC.cpp" />
     <ClCompile Include="DXTex\BC4BC5.cpp" />
     <ClCompile Include="DXTex\BC6HBC7.cpp" />
@@ -200,6 +206,7 @@
     <ClCompile Include="imgui\imgui_tables.cpp" />
     <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="stdafx.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
