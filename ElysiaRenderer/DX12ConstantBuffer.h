@@ -2,6 +2,8 @@
 #include "stdafx.h"
 #include "GPUResource.h"
 
+#define D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT
+
 namespace ElysiaRenderer
 {
 	class DX12ConstantBuffer : public DX12GPUResource

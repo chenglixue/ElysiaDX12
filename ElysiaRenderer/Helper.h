@@ -20,4 +20,25 @@ namespace ElysiaHelper
     {
         throw std::runtime_error(output);
     }
+
+    inline void ThrowIfFailed(HRESULT hr)
+    {
+        if (FAILED(hr))
+        {
+            // Set a breakpoint on this line to catch DirectX API errors
+            throw std::exception();
+        }
+    }
+
+    inline uint32_t AlignU32(uint32_t valueToAlign, uint32_t alignment)
+    {
+        alignment -= 1;
+        return (uint32_t)((valueToAlign + alignment) & ~alignment);
+    }
+
+    inline uint64_t AlignU64(uint64_t valueToAlign, uint64_t alignment)
+    {
+        alignment -= 1;
+        return (uint64_t)((valueToAlign + alignment) & ~alignment);
+    }
 }
