@@ -1,7 +1,3 @@
-D:\DX12\ElysiaRenderer\x64\Debug\D3D12\D3D12Core.dll
-D:\DX12\ElysiaRenderer\x64\Debug\D3D12\D3D12Core.pdb
-D:\DX12\ElysiaRenderer\x64\Debug\D3D12\D3D12SDKLayers.dll
-D:\DX12\ElysiaRenderer\x64\Debug\D3D12\D3D12SDKLayers.pdb
 C:\Users\wxy52\Desktop\DX\ElysiaDX12\x64\Debug\D3D12\D3D12Core.dll
 C:\Users\wxy52\Desktop\DX\ElysiaDX12\x64\Debug\D3D12\D3D12Core.pdb
 C:\Users\wxy52\Desktop\DX\ElysiaDX12\x64\Debug\D3D12\D3D12SDKLayers.dll

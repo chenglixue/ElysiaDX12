@@ -133,6 +133,7 @@
   <ItemGroup>
     <ClInclude Include="D3D12Lite.h" />
     <ClInclude Include="D3D12MemoryAllocator\D3D12MemAlloc.h" />
+    <ClInclude Include="DescriptorHeapHandle.h" />
     <ClInclude Include="DX12ConstantBuffer.h" />
     <ClInclude Include="DX12Queue.h" />
     <ClInclude Include="DX12QueueManager.h" />
@@ -179,6 +180,7 @@
   <ItemGroup>
     <ClCompile Include="D3D12Lite.cpp" />
     <ClCompile Include="D3D12MemoryAllocator\D3D12MemAlloc.cpp" />
+    <ClCompile Include="DX12ConstantBuffer.cpp" />
     <ClCompile Include="DX12Queue.cpp" />
     <ClCompile Include="DX12QueueManager.cpp" />
     <ClCompile Include="DX12VertexBuffer.cpp" />
