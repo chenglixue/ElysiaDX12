@@ -34,7 +34,7 @@ namespace ElysiaRenderer
 			return m_descriptorHeapGPUStart;
 		}
 
-	private:
+	protected:
 		ID3D12DescriptorHeap* m_descriptorHeap;
 		D3D12_DESCRIPTOR_HEAP_TYPE m_heapType;
 		UINT m_maxDescriptors;
