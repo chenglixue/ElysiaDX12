@@ -1,6 +1,6 @@
 #pragma once
 #include "stdafx.h"
-#include "GPUResource.h"
+#include "DX12GPUResource.h"
 
 #define D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT
 

@@ -1,6 +1,6 @@
 #pragma once
 #include "stdafx.h"
-#include "GPUResource.h"
+#include "DX12GPUResource.h"
 
 namespace ElysiaRenderer
 {

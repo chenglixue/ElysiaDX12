@@ -1,1 +1,16 @@
-﻿
+﻿  DX12StagingDescriptorHeap.cpp
+C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(50,20): warning C4552: '!=': result of expression not used
+  (compiling source file 'DX12StagingDescriptorHeap.cpp')
+  
+C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file 'DX12StagingDescriptorHeap.cpp')
+  
+C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12StagingDescriptorHeap.cpp(53,54): warning C4244: 'argument': conversion from 'uint64_t' to '_Ty', possible loss of data
+C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12StagingDescriptorHeap.cpp(53,54): warning C4244:         with
+C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12StagingDescriptorHeap.cpp(53,54): warning C4244:         [
+C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12StagingDescriptorHeap.cpp(53,54): warning C4244:             _Ty=UINT
+C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12StagingDescriptorHeap.cpp(53,54): warning C4244:         ]
+  main.cpp
+  Generating Code...
+     Creating library C:\Users\wxy52\Desktop\DX\ElysiaDX12\x64\Debug\ElysiaRenderer.lib and object C:\Users\wxy52\Desktop\DX\ElysiaDX12\x64\Debug\ElysiaRenderer.exp
+  ElysiaRenderer.vcxproj -> C:\Users\wxy52\Desktop\DX\ElysiaDX12\x64\Debug\ElysiaRenderer.exe

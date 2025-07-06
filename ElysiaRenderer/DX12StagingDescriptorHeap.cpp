@@ -44,6 +44,8 @@ namespace ElysiaRenderer
 		newHandle.SetCPUHandle(cpuHandle);
 		newHandle.SetHeapIndex(newHandleID);
 		m_activeHandleCount++;
+
+		return newHandle;
 	}
 
 	void DX12StagingDescriptorHeap::FreeDescriptorHeapHandle(DX12DescriptorHeapHandle heapHandle)
