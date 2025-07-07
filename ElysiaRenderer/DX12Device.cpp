@@ -3,7 +3,7 @@
 namespace ElysiaRenderer
 {
 	DX12Device::DX12Device(HWND windowHandle, UINT2 screenSize)
-		: m_screenSize(screenSize), m_frameID(0)
+		: m_screenSize(screenSize)
 	{
 		InitializeDeviceResources();
 		CreateWindowDependentResources(windowHandle, screenSize);
@@ -93,6 +93,8 @@ namespace ElysiaRenderer
 				continue;
 			}
 
+
+
 			// DedicatedVideoMemory:显卡自带的高速显存
 			// DedicatedSystemMemory:系统内存中划分给显卡专用的部分
 			if (adapterDesc.DedicatedVideoMemory > bestAdapterMemory)
@@ -115,6 +117,13 @@ namespace ElysiaRenderer
 		m_graphicsQueue = std::make_unique<DX12Queue>(m_device, D3D12_COMMAND_LIST_TYPE_DIRECT);
 		m_computeQueue = std::make_unique<DX12Queue>(m_device, D3D12_COMMAND_LIST_TYPE_COMPUTE);
 		m_copyQueue = std::make_unique<DX12Queue>(m_device, D3D12_COMMAND_LIST_TYPE_COPY);
+
+		m_RTVStagingDescriptorHeap = std::make_unique<DX12StagingDescriptorHeap>(m_device, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 
+			NUM_RTV_STAGING_DESCRIPTORS);
+		m_DSVStagingDescriptorHeap = std::make_unique<DX12StagingDescriptorHeap>(m_device, D3D12_DESCRIPTOR_HEAP_TYPE_DSV,
+			NUM_RTV_STAGING_DESCRIPTORS);
+		m_SRVStagingDescriptorHeap = std::make_unique<DX12StagingDescriptorHeap>(m_device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
+			NUM_RTV_STAGING_DESCRIPTORS);
 	}
 
 	void DX12Device::CreateWindowDependentResources(HWND windowHandle, UINT2 screenSize)
@@ -134,8 +143,19 @@ namespace ElysiaRenderer
 		swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
 
 		IDXGISwapChain1* swapChain;
-		AssertIfFailed(m_DXGIFactory->CreateSwapChainForHwnd(m_device, windowHandle, &swapChainDesc, nullptr, nullptr, &swapChain));
+		AssertIfFailed(m_DXGIFactory->CreateSwapChainForHwnd(m_graphicsQueue->GetCommandQueue(), windowHandle, &swapChainDesc, nullptr, nullptr, &swapChain));
 		AssertIfFailed(swapChain->QueryInterface(__uuidof(IDXGISwapChain3), (void**)&m_swapChain));
 		SafeRelease(swapChain);
+
+		for (UINT currBufferIndex = 0; currBufferIndex < NUM_BACK_BUFFERS; currBufferIndex++)
+		{
+			auto descriptorHandle = m_RTVStagingDescriptorHeap->NewDescriptorHeapHandle();
+
+			ID3D12Resource* backBufferResource = nullptr;
+			m_swapChain->GetBuffer(currBufferIndex, IID_PPV_ARGS(&backBufferResource));
+			m_device->CreateRenderTargetView(backBufferResource, , descriptorHandle.GetCPUHandle());33
+		}
+
+		m_frameID = 0;
 	}
 }

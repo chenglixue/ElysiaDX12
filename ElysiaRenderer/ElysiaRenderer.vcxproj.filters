@@ -90,9 +90,6 @@
     <ClInclude Include="Helper.h">
       <Filter>Header Files\Helper</Filter>
     </ClInclude>
-    <ClInclude Include="GPUResource.h">
-      <Filter>Header Files\DX12</Filter>
-    </ClInclude>
     <ClInclude Include="DX12ConstantBuffer.h">
       <Filter>Header Files\DX12</Filter>
     </ClInclude>
@@ -102,7 +99,28 @@
     <ClInclude Include="DX12VertexBuffer.h">
       <Filter>Header Files\DX12</Filter>
     </ClInclude>
-    <ClInclude Include="DescriptorHeapHandle.h">
+    <ClInclude Include="stdafx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DX12TextureBuffer.h">
+      <Filter>Header Files\DX12</Filter>
+    </ClInclude>
+    <ClInclude Include="DX12DescriptorHeap.h">
+      <Filter>Header Files\DX12</Filter>
+    </ClInclude>
+    <ClInclude Include="DX12DescriptorHeapHandle.h">
+      <Filter>Header Files\DX12</Filter>
+    </ClInclude>
+    <ClInclude Include="DX12Device.h">
+      <Filter>Header Files\DX12</Filter>
+    </ClInclude>
+    <ClInclude Include="DX12GPUResource.h">
+      <Filter>Header Files\DX12</Filter>
+    </ClInclude>
+    <ClInclude Include="DX12RenderPassDescriptorHeap.h">
+      <Filter>Header Files\DX12</Filter>
+    </ClInclude>
+    <ClInclude Include="DX12StagingDescriptorHeap.h">
       <Filter>Header Files\DX12</Filter>
     </ClInclude>
   </ItemGroup>
@@ -225,10 +243,25 @@
     <ClCompile Include="DX12VertexBuffer.cpp">
       <Filter>Source Files\DX12</Filter>
     </ClCompile>
-    <ClCompile Include="GPUResource.cpp">
+    <ClCompile Include="DX12ConstantBuffer.cpp">
       <Filter>Source Files\DX12</Filter>
     </ClCompile>
-    <ClCompile Include="DX12ConstantBuffer.cpp">
+    <ClCompile Include="DX12DescriptorHeap.cpp">
+      <Filter>Source Files\DX12</Filter>
+    </ClCompile>
+    <ClCompile Include="DX12Device.cpp">
+      <Filter>Source Files\DX12</Filter>
+    </ClCompile>
+    <ClCompile Include="DX12GPUResource.cpp">
+      <Filter>Source Files\DX12</Filter>
+    </ClCompile>
+    <ClCompile Include="DX12RenderPassDescriptorHeap.cpp">
+      <Filter>Source Files\DX12</Filter>
+    </ClCompile>
+    <ClCompile Include="DX12StagingDescriptorHeap.cpp">
+      <Filter>Source Files\DX12</Filter>
+    </ClCompile>
+    <ClCompile Include="DX12TextureBuffer.cpp">
       <Filter>Source Files\DX12</Filter>
     </ClCompile>
   </ItemGroup>

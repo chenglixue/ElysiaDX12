@@ -1007,7 +1007,7 @@ namespace D3D12Lite
 
         AssertIfFailed(CreateDXGIFactory1(IID_PPV_ARGS(&mDXGIFactory)));
 
-        IDXGIAdapter1* adapter = nullptr;
+        IDXGIAdapter3* adapter = nullptr;
         uint32_t bestAdapterIndex = 0;
         size_t bestAdapterMemory = 0;
 
@@ -1034,6 +1034,7 @@ namespace D3D12Lite
 
             SafeRelease(adapter);
         }
+        adapter->QueryVideoMemoryInfo();
 
         if (bestAdapterMemory == 0)
         {

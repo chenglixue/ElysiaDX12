@@ -1,4 +1,56 @@
-﻿  DX12StagingDescriptorHeap.cpp
+﻿  D3D12Lite.cpp
+  DX12ConstantBuffer.cpp
+C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\D3D12Lite.cpp(1014,55): error C2664: 'HRESULT IDXGIFactory1::EnumAdapters1(UINT,IDXGIAdapter1 **)': cannot convert argument 2 from 'IDXGIAdapter3 **' to 'IDXGIAdapter1 **'
+      C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\D3D12Lite.cpp(1014,83):
+      Types pointed to are unrelated; conversion requires reinterpret_cast, C-style cast or parenthesized function-style cast
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\shared\dxgi.h(2557,43):
+      see declaration of 'IDXGIFactory1::EnumAdapters1'
+      C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\D3D12Lite.cpp(1014,55):
+      while trying to match the argument list '(uint32_t, IDXGIAdapter3 **)'
+  
+C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\D3D12Lite.cpp(1037,18): error C2660: 'IDXGIAdapter3::QueryVideoMemoryInfo': function does not take 0 arguments
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\shared\dxgi1_4.h(1341,43):
+      see declaration of 'IDXGIAdapter3::QueryVideoMemoryInfo'
+      C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\D3D12Lite.cpp(1037,18):
+      while trying to match the argument list '()'
+  
+C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\D3D12Lite.cpp(1044,23): error C2664: 'HRESULT IDXGIFactory1::EnumAdapters1(UINT,IDXGIAdapter1 **)': cannot convert argument 2 from 'IDXGIAdapter3 **' to 'IDXGIAdapter1 **'
+      C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\D3D12Lite.cpp(1044,55):
+      Types pointed to are unrelated; conversion requires reinterpret_cast, C-style cast or parenthesized function-style cast
+      C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\shared\dxgi.h(2557,43):
+      see declaration of 'IDXGIFactory1::EnumAdapters1'
+      C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\D3D12Lite.cpp(1044,23):
+      while trying to match the argument list '(uint32_t, IDXGIAdapter3 **)'
+  
+C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12ConstantBuffer.h(5,9): warning C4005: 'D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT': macro redefinition
+  (compiling source file 'DX12ConstantBuffer.cpp')
+      C:\Users\wxy52\Desktop\DX\ElysiaDX12\packages\Microsoft.Direct3D.D3D12.1.616.1\build\native\include\d3d12.h(854,9):
+      see previous definition of 'D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT'
+  
+  DX12DescriptorHeap.cpp
+  DX12Device.cpp
+C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(50,20): warning C4552: '!=': result of expression not used
+  (compiling source file 'DX12Device.cpp')
+  
+C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file 'DX12Device.cpp')
+  
+C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12ConstantBuffer.h(5,9): warning C4005: 'D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT': macro redefinition
+  (compiling source file 'DX12Device.cpp')
+      C:\Users\wxy52\Desktop\DX\ElysiaDX12\packages\Microsoft.Direct3D.D3D12.1.616.1\build\native\include\d3d12.h(854,9):
+      see previous definition of 'D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT'
+  
+C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12Device.cpp(156,57): error C2059: syntax error: ','
+  DX12Queue.cpp
+  DX12QueueManager.cpp
+  DX12RenderPassDescriptorHeap.cpp
+C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(50,20): warning C4552: '!=': result of expression not used
+  (compiling source file 'DX12RenderPassDescriptorHeap.cpp')
+  
+C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file 'DX12RenderPassDescriptorHeap.cpp')
+  
+  DX12StagingDescriptorHeap.cpp
 C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(50,20): warning C4552: '!=': result of expression not used
   (compiling source file 'DX12StagingDescriptorHeap.cpp')
   
@@ -10,7 +62,8 @@ C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12StagingDescriptorHeap.cp
 C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12StagingDescriptorHeap.cpp(53,54): warning C4244:         [
 C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12StagingDescriptorHeap.cpp(53,54): warning C4244:             _Ty=UINT
 C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12StagingDescriptorHeap.cpp(53,54): warning C4244:         ]
+  DX12TextureBuffer.cpp
+  DX12VertexBuffer.cpp
+  DX12GPUResource.cpp
   main.cpp
   Generating Code...
-     Creating library C:\Users\wxy52\Desktop\DX\ElysiaDX12\x64\Debug\ElysiaRenderer.lib and object C:\Users\wxy52\Desktop\DX\ElysiaDX12\x64\Debug\ElysiaRenderer.exp
-  ElysiaRenderer.vcxproj -> C:\Users\wxy52\Desktop\DX\ElysiaDX12\x64\Debug\ElysiaRenderer.exe
