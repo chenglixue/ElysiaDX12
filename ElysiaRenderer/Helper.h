@@ -16,6 +16,11 @@ namespace ElysiaHelper
         assert(SUCCEEDED(hr));
     }
 
+    inline void AssertError(const char* errorMessage)
+    {
+        assert((errorMessage, false));
+    }
+
     inline void ThrowRuntimeError(std::string output)
     {
         throw std::runtime_error(output);
@@ -41,4 +46,19 @@ namespace ElysiaHelper
         alignment -= 1;
         return (uint64_t)((valueToAlign + alignment) & ~alignment);
     }
+
+    template <class T> void SafeRelease(T& ppT)
+    {
+        if (ppT)
+        {
+            ppT->Release();
+            ppT = nullptr;
+        }
+    }
+
+    struct UINT2
+    {
+        uint32_t x = 0;
+        uint32_t y = 0;
+    };
 }

@@ -136,10 +136,12 @@
     <ClInclude Include="DX12DescriptorHeap.h" />
     <ClInclude Include="DX12DescriptorHeapHandle.h" />
     <ClInclude Include="DX12ConstantBuffer.h" />
+    <ClInclude Include="DX12Device.h" />
     <ClInclude Include="DX12Queue.h" />
     <ClInclude Include="DX12QueueManager.h" />
     <ClInclude Include="DX12RenderPassDescriptorHeap.h" />
-    <ClInclude Include="DX12StagingDescriptorHeap .h" />
+    <ClInclude Include="DX12StagingDescriptorHeap.h" />
+    <ClInclude Include="DX12TextureBuffer.h" />
     <ClInclude Include="DX12VertexBuffer.h" />
     <ClInclude Include="dxc\inc\d3d12shader.h" />
     <ClInclude Include="dxc\inc\dxcapi.h" />
@@ -186,10 +188,12 @@
     <ClCompile Include="D3D12MemoryAllocator\D3D12MemAlloc.cpp" />
     <ClCompile Include="DX12ConstantBuffer.cpp" />
     <ClCompile Include="DX12DescriptorHeap.cpp" />
+    <ClCompile Include="DX12Device.cpp" />
     <ClCompile Include="DX12Queue.cpp" />
     <ClCompile Include="DX12QueueManager.cpp" />
     <ClCompile Include="DX12RenderPassDescriptorHeap.cpp" />
     <ClCompile Include="DX12StagingDescriptorHeap.cpp" />
+    <ClCompile Include="DX12TextureBuffer.cpp" />
     <ClCompile Include="DX12VertexBuffer.cpp" />
     <ClCompile Include="DXTex\BC.cpp" />
     <ClCompile Include="DXTex\BC4BC5.cpp" />

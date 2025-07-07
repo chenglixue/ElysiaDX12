@@ -1,4 +1,4 @@
-#include "DX12StagingDescriptorHeap .h"
+#include "DX12StagingDescriptorHeap.h"
 
 namespace ElysiaRenderer
 {

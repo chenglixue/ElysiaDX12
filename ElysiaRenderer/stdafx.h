@@ -1,6 +1,10 @@
 #pragma once
+#include <windows.h>
+#include <wrl.h>
+#include <shellapi.h>
 #include <d3d12.h>
 #include <dxgi1_6.h>
+#include <D3Dcompiler.h>
 #include <cstdint>
 #include <array>
 #include <string>
