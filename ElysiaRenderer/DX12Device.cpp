@@ -38,7 +38,7 @@ namespace ElysiaRenderer
 			AssertIfFailed(CreateDXGIFactory1(IID_PPV_ARGS(&m_DXGIFactory)));
 		}
 
-		// Get Adapter & Create Device
+		// Get Adapter & Create Device & Create Allocator
 		{
 			// Create Adapter
 			IDXGIAdapter1* adapter = nullptr;
@@ -135,9 +135,7 @@ namespace ElysiaRenderer
 
 		// Create Queue
 		{
-			m_graphicsQueue = std::make_unique<DX12Queue>(m_device, D3D12_COMMAND_LIST_TYPE_DIRECT);
-			m_computeQueue = std::make_unique<DX12Queue>(m_device, D3D12_COMMAND_LIST_TYPE_COMPUTE);
-			m_copyQueue = std::make_unique<DX12Queue>(m_device, D3D12_COMMAND_LIST_TYPE_COPY);
+			m_queueManager = std::make_unique<DX12QueueManager>(m_device);
 		}
 
 		// Create Descriptor Heap
@@ -198,5 +196,22 @@ namespace ElysiaRenderer
 		}
 
 		m_frameID = 0;
+	}
+
+	void DX12Device::BeginFrame()
+	{
+		m_frameID = (m_frameID + 1) % NUM_FRAMES_IN_FLIGHT;
+
+		m_queueManager->WaitForFenceCPUBlocking();
+	}
+
+	void DX12Device::EndFrame()
+	{
+
+	}
+
+	void DX12Device::Present()
+	{
+
 	}
 }

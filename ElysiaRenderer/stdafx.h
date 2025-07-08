@@ -13,3 +13,4 @@
 #include <optional>
 #include "SimpleMath/SimpleMath.h"
 #include "Helper.h"
+#include "Definition.h"
