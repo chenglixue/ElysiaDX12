@@ -25,6 +25,19 @@ namespace ElysiaRenderer
 		DX12Device(HWND windowHandle, UINT2 screenSize);
 		~DX12Device();
 
+		ID3D12Device5* GetDevice()
+		{
+			return m_device;
+		}
+		IDXGIFactory7* GetDXGIFactory()
+		{
+			return m_DXGIFactory;
+		}
+		IDXGISwapChain4* GetSwapChain()
+		{
+			return m_swapChain;
+		}
+
 	private:
 		struct EndOfFrameFences
 		{

@@ -228,7 +228,7 @@ namespace D3D12Lite
         {
             mType = GPUResourceType::buffer;
         }
-
+         
         void SetMappedData(void* data, size_t dataSize)
         {
             assert(mMappedResource != nullptr && data != nullptr && dataSize > 0 && dataSize <= mDesc.Width);

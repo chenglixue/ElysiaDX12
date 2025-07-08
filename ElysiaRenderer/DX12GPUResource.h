@@ -3,6 +3,8 @@
 
 namespace ElysiaRenderer
 {
+	constexpr uint32_t INVALID_RESOURCE_TABLE_INDEX = UINT_MAX;
+
 	class DX12GPUResource
 	{
 	public:
@@ -21,10 +23,18 @@ namespace ElysiaRenderer
 		{
 			return m_usageState;
 		}
+		D3D12_RESOURCE_DESC GetResourceDesc()
+		{
+			return m_resourceDesc;
+		}
 
 		void SetUsageState(D3D12_RESOURCE_STATES usageState)
 		{
 			m_usageState = usageState;
+		}
+		void SetResourceDesc(D3D12_RESOURCE_DESC resourceDesc)
+		{
+			m_resourceDesc = resourceDesc;
 		}
 
 		bool GetIsReady()
@@ -38,8 +48,10 @@ namespace ElysiaRenderer
 
 	protected:
 		ID3D12Resource* m_resource;
+		D3D12_RESOURCE_DESC m_resourceDesc;
 		D3D12_GPU_VIRTUAL_ADDRESS m_GPUAddress;
 		D3D12_RESOURCE_STATES m_usageState;
 		bool m_isReady;
+		UINT m_descriptorHeapIndex = INVALID_RESOURCE_TABLE_INDEX;
 	};
 }

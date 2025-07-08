@@ -246,7 +246,7 @@
     <ClCompile Include="DX12ConstantBuffer.cpp">
       <Filter>Source Files\DX12</Filter>
     </ClCompile>
-    <ClCompile Include="DX12DescriptorHeap.cpp">
+    <ClCompile Include="DX12TextureBuffer.cpp">
       <Filter>Source Files\DX12</Filter>
     </ClCompile>
     <ClCompile Include="DX12Device.cpp">
@@ -261,7 +261,7 @@
     <ClCompile Include="DX12StagingDescriptorHeap.cpp">
       <Filter>Source Files\DX12</Filter>
     </ClCompile>
-    <ClCompile Include="DX12TextureBuffer.cpp">
+    <ClCompile Include="DX12DescriptorHeap.cpp">
       <Filter>Source Files\DX12</Filter>
     </ClCompile>
   </ItemGroup>

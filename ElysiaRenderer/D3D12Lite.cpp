@@ -1007,7 +1007,7 @@ namespace D3D12Lite
 
         AssertIfFailed(CreateDXGIFactory1(IID_PPV_ARGS(&mDXGIFactory)));
 
-        IDXGIAdapter3* adapter = nullptr;
+        IDXGIAdapter1* adapter = nullptr;
         uint32_t bestAdapterIndex = 0;
         size_t bestAdapterMemory = 0;
 
@@ -1034,7 +1034,6 @@ namespace D3D12Lite
 
             SafeRelease(adapter);
         }
-        adapter->QueryVideoMemoryInfo();
 
         if (bestAdapterMemory == 0)
         {
@@ -1178,7 +1177,7 @@ namespace D3D12Lite
         swapChainDesc.Stereo = false;
         swapChainDesc.SampleDesc.Count = 1;
         swapChainDesc.SampleDesc.Quality = 0;
-        swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+        swapChainDesc.BufferUsage = 0x00000020UL;
         swapChainDesc.BufferCount = NUM_BACK_BUFFERS;
         swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
         swapChainDesc.Flags = 0;
