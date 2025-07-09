@@ -76,7 +76,9 @@ namespace ElysiaRenderer
 		IDXGIFactory7* m_DXGIFactory = nullptr;
 		IDXGISwapChain4* m_swapChain = nullptr;
 		D3D12MA::Allocator* m_allocator = nullptr;
-		std::unique_ptr<DX12QueueManager> m_queueManager;
+		std::unique_ptr<DX12Queue> m_graphicsQueue;
+		std::unique_ptr<DX12Queue> m_computeQueue;
+		std::unique_ptr<DX12Queue> m_copyQueue;
 		std::unique_ptr<DX12StagingDescriptorHeap> m_RTVStagingDescriptorHeap;
 		std::unique_ptr<DX12StagingDescriptorHeap> m_DSVStagingDescriptorHeap;
 		std::unique_ptr<DX12StagingDescriptorHeap> m_SRVStagingDescriptorHeap;

@@ -135,7 +135,9 @@ namespace ElysiaRenderer
 
 		// Create Queue
 		{
-			m_queueManager = std::make_unique<DX12QueueManager>(m_device);
+			m_graphicsQueue = std::make_unique<DX12Queue>(m_device);
+			m_computeQueue = std::make_unique<DX12Queue>(m_device);
+			m_copyQueue = std::make_unique<DX12Queue>(m_device);
 		}
 
 		// Create Descriptor Heap
@@ -202,7 +204,9 @@ namespace ElysiaRenderer
 	{
 		m_frameID = (m_frameID + 1) % NUM_FRAMES_IN_FLIGHT;
 
-		m_queueManager->WaitForFenceCPUBlocking();
+		m_graphicsQueue->WaitForFenceCPUBlocking(m_endOfFrameFences[m_frameID].m_graphicsQueueFence);
+		m_computeQueue->WaitForFenceCPUBlocking(m_endOfFrameFences[m_frameID].m_computeQueueFence);
+		m_copyQueue->WaitForFenceCPUBlocking(m_endOfFrameFences[m_frameID].m_copyQueueFence);
 	}
 
 	void DX12Device::EndFrame()

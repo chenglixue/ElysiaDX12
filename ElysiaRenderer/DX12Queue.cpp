@@ -9,8 +9,9 @@ namespace ElysiaRenderer
 		m_queueType = commandType;
 
 		m_fence = nullptr;
-		m_nextFenceValue = ((uint64_t)m_queueType << 56) + 1;
-		m_lastCompletedFenceValue = ((uint64_t)m_queueType << 56);
+		m_nextFenceValue = 1;
+		m_lastCompletedFenceValue = 0;
+		m_fenceEventHandle = 0;
 
 		D3D12_COMMAND_QUEUE_DESC queueDesc = {};
 		queueDesc.Type = m_queueType;
@@ -30,11 +31,8 @@ namespace ElysiaRenderer
 
 	DX12Queue::~DX12Queue()
 	{
-		m_commandQueue->Release();
-		m_commandQueue = nullptr;
-
-		m_fence->Release();
-		m_fence = nullptr;
+		ElysiaHelper::SafeRelease(m_commandQueue);
+		ElysiaHelper::SafeRelease(m_fence);
 
 		CloseHandle(m_fenceEventHandle);
 	}
@@ -88,6 +86,11 @@ namespace ElysiaRenderer
 		ElysiaHelper::AssertIfFailed(((ID3D12GraphicsCommandList*)commandList)->Close());
 		m_commandQueue->ExecuteCommandLists(1, &commandList);
 		
+		return SingalFence();
+	}
+
+	uint64_t DX12Queue::SingalFence()
+	{
 		std::lock_guard<std::mutex> lockGuard(m_fenceMutex);
 
 		m_commandQueue->Signal(m_fence, m_nextFenceValue);

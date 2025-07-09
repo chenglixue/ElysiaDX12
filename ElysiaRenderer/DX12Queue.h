@@ -13,9 +13,7 @@ namespace ElysiaRenderer
 		{
 			return m_commandQueue;
 		}
-		uint64_t ExecuteCommandList(ID3D12CommandList* commandList);
-
-		ID3D12Fence* GetFence() 
+		ID3D12Fence* GetFence()
 		{
 			return m_fence;
 		}
@@ -27,6 +25,10 @@ namespace ElysiaRenderer
 		{
 			return m_lastCompletedFenceValue;
 		}
+
+		uint64_t ExecuteCommandList(ID3D12CommandList* commandList);
+		uint64_t SingalFence();
+
 		bool IsFenceCompleted(uint64_t fenceValue);
 		uint64_t PollCurrentFenceValue();
 
