@@ -204,6 +204,7 @@ namespace ElysiaRenderer
 	{
 		m_frameID = (m_frameID + 1) % NUM_FRAMES_IN_FLIGHT;
 
+		// wait on fences from 2 frames ago
 		m_graphicsQueue->WaitForFenceCPUBlocking(m_endOfFrameFences[m_frameID].m_graphicsQueueFence);
 		m_computeQueue->WaitForFenceCPUBlocking(m_endOfFrameFences[m_frameID].m_computeQueueFence);
 		m_copyQueue->WaitForFenceCPUBlocking(m_endOfFrameFences[m_frameID].m_copyQueueFence);

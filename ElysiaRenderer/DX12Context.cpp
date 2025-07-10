@@ -31,5 +31,29 @@ namespace ElysiaRenderer
 		m_commandList->Reset(m_commandAllocators[currFrameID], nullptr);
 	}
 
+	void DX12Context::AddBarrier(DX12GPUResource& resource, D3D12_RESOURCE_STATES newState)
+	{
+		if (m_numQueuedBarriers >= MAX_QUEUED_BARRIERS)
+		{
+			
+		}
 
+		D3D12_RESOURCE_STATES oldState = resource.GetUsageState();
+		if (oldState != newState)
+		{
+			D3D12_RESOURCE_BARRIER& barrierDesc = m_resourceBarriers[m_numQueuedBarriers];
+			m_numQueuedBarriers++;
+
+			barrierDesc.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+			barrierDesc.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+			barrierDesc.Transition = {resource.GetResource(), D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES, oldState, newState};
+
+			resource.SetUsageState(newState);
+		}
+	}
+
+	void DX12Context::FlushBarrier()
+	{
+
+	}
 }
