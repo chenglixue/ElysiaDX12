@@ -47,7 +47,7 @@ namespace ElysiaRenderer
 
 		bool IsValid()
 		{
-			m_CPUHandle.ptr != NULL;
+			return m_CPUHandle.ptr != NULL;
 		}
 		bool IsReferenceShader()
 		{

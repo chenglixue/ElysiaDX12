@@ -1,7 +1,11 @@
 #include "DX12Context.h"
+#include "DX12Device.h"
 
 namespace ElysiaRenderer
 {
+	using namespace ElysiaHelper;
+	class DX12Device;
+
 	DX12Context::DX12Context(DX12Device* device, D3D12_COMMAND_LIST_TYPE commandType) :
 		m_device(device), m_contextType(commandType)
 	{
@@ -35,7 +39,7 @@ namespace ElysiaRenderer
 	{
 		if (m_numQueuedBarriers >= MAX_QUEUED_BARRIERS)
 		{
-			
+			FlushBarrier();
 		}
 
 		D3D12_RESOURCE_STATES oldState = resource.GetUsageState();
@@ -44,6 +48,7 @@ namespace ElysiaRenderer
 			D3D12_RESOURCE_BARRIER& barrierDesc = m_resourceBarriers[m_numQueuedBarriers];
 			m_numQueuedBarriers++;
 
+			// Describes the transition of subresources between different usages
 			barrierDesc.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 			barrierDesc.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 			barrierDesc.Transition = {resource.GetResource(), D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES, oldState, newState};
@@ -54,6 +59,10 @@ namespace ElysiaRenderer
 
 	void DX12Context::FlushBarrier()
 	{
-
+		if (m_numQueuedBarriers > 0)
+		{
+			// Synchronize resource usage by multiple threads
+			m_commandList->ResourceBarrier(m_numQueuedBarriers, m_resourceBarriers.data());
+		}
 	}
 }

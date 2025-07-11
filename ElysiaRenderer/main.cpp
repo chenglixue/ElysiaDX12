@@ -1,6 +1,12 @@
 #include "D3D12Lite.h"
+#include "DX12Device.h"
 
-using namespace D3D12Lite;
+//using namespace D3D12Lite;
+
+using namespace ElysiaRenderer;
+
+DX12Device* g_device = nullptr;
+DX12GraphicsContext* g_graphicsContext = nullptr;
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam)
 {
@@ -31,7 +37,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam)
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, int nShowCmd)
 {
 	std::wstring applicationName = L"Elysia Renderer";
-	Uint2 windowSize = { 1920, 1080 };
+	UINT2 windowSize = { 1920, 1080 };
 	HINSTANCE moduleHandle = GetModuleHandle(nullptr);
 
 	WNDCLASSEX wc = { 0 };

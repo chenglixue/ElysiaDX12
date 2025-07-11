@@ -47,11 +47,12 @@ namespace ElysiaRenderer
 		}
 
 	protected:
-		ID3D12Resource* m_resource;
-		D3D12_RESOURCE_DESC m_resourceDesc;
-		D3D12_GPU_VIRTUAL_ADDRESS m_GPUAddress;
-		D3D12_RESOURCE_STATES m_usageState;
-		bool m_isReady;
+		ID3D12Resource* m_resource = nullptr;
+		D3D12_RESOURCE_DESC m_resourceDesc = {};
+		D3D12_GPU_VIRTUAL_ADDRESS m_GPUAddress = 0;
+		// a resource must be in COMMON state before being used on a COPY queue
+		D3D12_RESOURCE_STATES m_usageState = D3D12_RESOURCE_STATE_COMMON;
+		bool m_isReady = false;
 		UINT m_descriptorHeapIndex = INVALID_RESOURCE_TABLE_INDEX;
 	};
 }

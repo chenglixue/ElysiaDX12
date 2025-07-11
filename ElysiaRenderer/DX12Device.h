@@ -5,11 +5,13 @@
 #include "DX12QueueManager.h"
 #include "DX12StagingDescriptorHeap.h"
 #include "DX12RenderPassDescriptorHeap.h"
-#include "DX12TextureBuffer.h"
 #include "DX12VertexBuffer.h"
 #include "DX12ConstantBuffer.h"
+#include "DX12BufferResource.h"
+#include "DX12TextureResource.h"
 #include "Definition.h"
 #include "DX12Context.h"
+#include "DX12GraphicsContext.h"
 
 namespace ElysiaRenderer
 {
@@ -46,6 +48,10 @@ namespace ElysiaRenderer
 		{
 			return m_screenSize;
 		}
+		DX12TextureResource& GetCurrBackBuffer()
+		{
+			return *m_backBuffers[m_swapChain->GetCurrentBackBufferIndex()];
+		}
 
 		void BeginFrame();
 		void EndFrame();
@@ -61,13 +67,14 @@ namespace ElysiaRenderer
 
 		struct DestructionQueue
 		{
-			std::vector<std::unique_ptr<DX12VertexBuffer>> m_vertexBuffer;
-			std::vector<std::unique_ptr<DX12ConstantBuffer>> m_constantBuffer;
-			std::vector<std::unique_ptr<DX12TextureBuffer>> m_textureBuffer;
+			std::vector<std::unique_ptr<DX12BufferResource>> m_buffers;
+			std::vector<std::unique_ptr<DX12TextureResource>> m_textures;
+			std::vector<std::unique_ptr<DX12Context>> m_contexts;
 		};
 
-		void InitializeDeviceResources();
-		void CreateWindowDependentResources(HWND windowHandle, UINT2 screenSize);
+		void InitializeDeviceResources(HWND windowHandle);
+		void CreateWindowDependentResources();
+		void ProcessDestruction(UINT frameIndex);
 
 		UINT2 m_screenSize;
 		UINT m_frameID;
@@ -83,8 +90,9 @@ namespace ElysiaRenderer
 		std::unique_ptr<DX12StagingDescriptorHeap> m_DSVStagingDescriptorHeap;
 		std::unique_ptr<DX12StagingDescriptorHeap> m_SRVStagingDescriptorHeap;
 		std::unique_ptr<DX12RenderPassDescriptorHeap> m_renderPassDescriptorHeap;
-		std::array<std::unique_ptr<DX12TextureBuffer>, NUM_BACK_BUFFERS> m_backBuffers;
+		std::array<std::unique_ptr<DX12TextureResource>, NUM_BACK_BUFFERS> m_backBuffers;
 		std::array<EndOfFrameFences, NUM_FRAMES_IN_FLIGHT> m_endOfFrameFences;
+		
 		std::array<std::pair<uint64_t, D3D12_COMMAND_LIST_TYPE>, NUM_FRAMES_IN_FLIGHT> m_contextSubmissions;
 		std::array<DestructionQueue, NUM_FRAMES_IN_FLIGHT> m_destructionQueues;
 	};

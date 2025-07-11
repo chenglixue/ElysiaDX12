@@ -1,9 +1,14 @@
 #pragma once
 #include "stdafx.h"
-#include "DX12Device.h"
+#include "DX12GPUResource.h"
+#include "DX12RenderPassDescriptorHeap.h"
+
 
 namespace ElysiaRenderer
 {
+	//extern class DX12Device;
+	class DX12Device;
+
 	class DX12Context
 	{
 	public:
@@ -24,7 +29,7 @@ namespace ElysiaRenderer
 		void FlushBarrier();
 
 	protected:
-		DX12Device* m_device;
+		DX12Device* m_device = nullptr;
 		D3D12_COMMAND_LIST_TYPE m_contextType = D3D12_COMMAND_LIST_TYPE_DIRECT;
 		ID3D12GraphicsCommandList4* m_commandList = nullptr;
 		std::array<ID3D12DescriptorHeap*, D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES> m_currDescriptorHeaps{ nullptr };
