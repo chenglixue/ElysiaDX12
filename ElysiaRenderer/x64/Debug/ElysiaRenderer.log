@@ -1,68 +1,42 @@
-﻿  DX12BufferResource.cpp
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file 'DX12BufferResource.cpp')
-  
-  DX12ConstantBuffer.cpp
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file 'DX12ConstantBuffer.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12ConstantBuffer.h(6,1): warning C4005: 'D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT': macro redefinition
-  (compiling source file 'DX12ConstantBuffer.cpp')
-      D:\DX12\ElysiaRenderer\packages\Microsoft.Direct3D.D3D12.1.616.1\build\native\include\d3d12.h(854,1):
-      see previous definition of 'D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT'
-  
+﻿  D3D12Lite.cpp
   DX12Context.cpp
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
   (compiling source file 'DX12Context.cpp')
   
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12ConstantBuffer.h(6,1): warning C4005: 'D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT': macro redefinition
+C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12ConstantBuffer.h(6,9): warning C4005: 'D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT': macro redefinition
   (compiling source file 'DX12Context.cpp')
-      D:\DX12\ElysiaRenderer\packages\Microsoft.Direct3D.D3D12.1.616.1\build\native\include\d3d12.h(854,1):
+      C:\Users\wxy52\Desktop\DX\ElysiaDX12\packages\Microsoft.Direct3D.D3D12.1.616.1\build\native\include\d3d12.h(854,9):
       see previous definition of 'D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT'
+  
+C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12GraphicsContext.h(8,15): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
+  (compiling source file 'DX12Context.cpp')
   
   DX12Device.cpp
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
   (compiling source file 'DX12Device.cpp')
   
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12ConstantBuffer.h(6,1): warning C4005: 'D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT': macro redefinition
+C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12ConstantBuffer.h(6,9): warning C4005: 'D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT': macro redefinition
   (compiling source file 'DX12Device.cpp')
-      D:\DX12\ElysiaRenderer\packages\Microsoft.Direct3D.D3D12.1.616.1\build\native\include\d3d12.h(854,1):
+      C:\Users\wxy52\Desktop\DX\ElysiaDX12\packages\Microsoft.Direct3D.D3D12.1.616.1\build\native\include\d3d12.h(854,9):
       see previous definition of 'D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT'
   
-  DX12GraphicsContext.cpp
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file 'DX12GraphicsContext.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12GraphicsContext.h(6,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
-  (compiling source file 'DX12GraphicsContext.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12GraphicsContext.cpp(5,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
-  DX12RenderPassDescriptorHeap.cpp
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file 'DX12RenderPassDescriptorHeap.cpp')
-  
-  DX12StagingDescriptorHeap.cpp
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file 'DX12StagingDescriptorHeap.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12StagingDescriptorHeap.cpp(53,54): warning C4244: 'argument': conversion from 'uint64_t' to '_Ty', possible loss of data
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12StagingDescriptorHeap.cpp(53,54): warning C4244:         with
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12StagingDescriptorHeap.cpp(53,54): warning C4244:         [
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12StagingDescriptorHeap.cpp(53,54): warning C4244:             _Ty=UINT
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12StagingDescriptorHeap.cpp(53,54): warning C4244:         ]
-  DX12TextureResource.cpp
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file 'DX12TextureResource.cpp')
+C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12GraphicsContext.h(8,15): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
+  (compiling source file 'DX12Device.cpp')
   
   main.cpp
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
   (compiling source file 'main.cpp')
   
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12ConstantBuffer.h(6,1): warning C4005: 'D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT': macro redefinition
+C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12ConstantBuffer.h(6,9): warning C4005: 'D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT': macro redefinition
   (compiling source file 'main.cpp')
-      D:\DX12\ElysiaRenderer\packages\Microsoft.Direct3D.D3D12.1.616.1\build\native\include\d3d12.h(854,1):
+      C:\Users\wxy52\Desktop\DX\ElysiaDX12\packages\Microsoft.Direct3D.D3D12.1.616.1\build\native\include\d3d12.h(854,9):
       see previous definition of 'D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT'
   
+C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12GraphicsContext.h(8,15): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
+  (compiling source file 'main.cpp')
+  
+C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\main.cpp(58,71): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\main.cpp(58,66): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\main.cpp(58,61): warning C4305: 'argument': truncation from 'double' to 'float'
   Generating Code...
-     Creating library D:\DX12\ElysiaRenderer\x64\Debug\ElysiaRenderer.lib and object D:\DX12\ElysiaRenderer\x64\Debug\ElysiaRenderer.exp
-  ElysiaRenderer.vcxproj -> D:\DX12\ElysiaRenderer\x64\Debug\ElysiaRenderer.exe
+  ElysiaRenderer.vcxproj -> C:\Users\wxy52\Desktop\DX\ElysiaDX12\x64\Debug\ElysiaRenderer.exe

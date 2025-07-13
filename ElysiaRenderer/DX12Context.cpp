@@ -61,8 +61,9 @@ namespace ElysiaRenderer
 	{
 		if (m_numQueuedBarriers > 0)
 		{
-			// Synchronize resource usage by multiple threads
+			// synchronize multiple accesses to resources.
 			m_commandList->ResourceBarrier(m_numQueuedBarriers, m_resourceBarriers.data());
+			m_numQueuedBarriers = 0;
 		}
 	}
 }

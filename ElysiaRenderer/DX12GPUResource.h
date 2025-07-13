@@ -27,6 +27,10 @@ namespace ElysiaRenderer
 		{
 			return m_resourceDesc;
 		}
+		D3D12MA::Allocation* GetAllocation()
+		{
+			return m_allocation;
+		}
 
 		void SetUsageState(D3D12_RESOURCE_STATES usageState)
 		{
@@ -48,6 +52,7 @@ namespace ElysiaRenderer
 
 	protected:
 		ID3D12Resource* m_resource = nullptr;
+		D3D12MA::Allocation* m_allocation = nullptr;
 		D3D12_RESOURCE_DESC m_resourceDesc = {};
 		D3D12_GPU_VIRTUAL_ADDRESS m_GPUAddress = 0;
 		// a resource must be in COMMON state before being used on a COPY queue

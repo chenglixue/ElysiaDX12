@@ -18,6 +18,12 @@ namespace ElysiaRenderer
 	using namespace ElysiaHelper;
 	using namespace DirectX::SimpleMath;
 
+	struct ContextSubmissionResult
+	{
+		UINT frameID = 0;
+		UINT submissionIndex = 0;
+	};
+
 	class DX12Device
 	{
 	public:
@@ -53,11 +59,20 @@ namespace ElysiaRenderer
 			return *m_backBuffers[m_swapChain->GetCurrentBackBufferIndex()];
 		}
 
+		std::unique_ptr<DX12GraphicsContext> CreateGraphicsContext();
+
+		void DestoryContext(std::unique_ptr<DX12Context> context);
+
+		ContextSubmissionResult SubmitContextWork(DX12Context* context);
+
+		void WaitForIdle();
+
 		void BeginFrame();
 		void EndFrame();
 		void Present();
 
 	private:
+		// 记录DX12Queu每次singal后的m_nextFenceValue
 		struct EndOfFrameFences
 		{
 			uint64_t m_graphicsQueueFence = 0;
@@ -92,8 +107,7 @@ namespace ElysiaRenderer
 		std::unique_ptr<DX12RenderPassDescriptorHeap> m_renderPassDescriptorHeap;
 		std::array<std::unique_ptr<DX12TextureResource>, NUM_BACK_BUFFERS> m_backBuffers;
 		std::array<EndOfFrameFences, NUM_FRAMES_IN_FLIGHT> m_endOfFrameFences;
-		
-		std::array<std::pair<uint64_t, D3D12_COMMAND_LIST_TYPE>, NUM_FRAMES_IN_FLIGHT> m_contextSubmissions;
+		std::array<std::vector<std::pair<uint64_t, D3D12_COMMAND_LIST_TYPE>>, NUM_FRAMES_IN_FLIGHT> m_contextSubmissions;
 		std::array<DestructionQueue, NUM_FRAMES_IN_FLIGHT> m_destructionQueues;
 	};
 }

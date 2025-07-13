@@ -14,3 +14,4 @@
 #include "SimpleMath/SimpleMath.h"
 #include "Helper.h"
 #include "Definition.h"
+#include "D3D12MemoryAllocator/D3D12MemAlloc.h"

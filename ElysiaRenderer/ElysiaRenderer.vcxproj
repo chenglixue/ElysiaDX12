@@ -133,6 +133,7 @@
   <ItemGroup>
     <ClInclude Include="D3D12Lite.h" />
     <ClInclude Include="D3D12MemoryAllocator\D3D12MemAlloc.h" />
+    <ClInclude Include="Definition.h" />
     <ClInclude Include="DX12BufferResource.h" />
     <ClInclude Include="DX12Context.h" />
     <ClInclude Include="DX12DescriptorHeap.h" />
@@ -145,7 +146,6 @@
     <ClInclude Include="DX12RenderPassDescriptorHeap.h" />
     <ClInclude Include="DX12StagingDescriptorHeap.h" />
     <ClInclude Include="DX12TextureResource.h" />
-    <ClInclude Include="DX12UploadContext.h" />
     <ClInclude Include="DX12VertexBuffer.h" />
     <ClInclude Include="dxc\inc\d3d12shader.h" />
     <ClInclude Include="dxc\inc\dxcapi.h" />

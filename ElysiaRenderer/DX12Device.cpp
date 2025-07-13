@@ -11,7 +11,10 @@ namespace ElysiaRenderer
 
 	DX12Device::~DX12Device()
 	{
-
+		for (UINT i = 0; i < NUM_FRAMES_IN_FLIGHT; ++i)
+		{
+			ProcessDestruction(i);
+		}
 	}
 
 	void DX12Device::InitializeDeviceResources(HWND windowHandle)
@@ -56,7 +59,7 @@ namespace ElysiaRenderer
 				}
 
 				// 在不创建Device的情况下，检测adapter是否支持D3D12
-				if (FAILED(D3D12CreateDevice(adapter, D3D_FEATURE_LEVEL_12_2, __uuidof(ID3D12Device), nullptr)))
+				if (FAILED(D3D12CreateDevice(adapter, D3D_FEATURE_LEVEL_11_0, __uuidof(ID3D12Device), nullptr)))
 				{
 					continue;
 				}
@@ -80,7 +83,7 @@ namespace ElysiaRenderer
 			m_DXGIFactory->EnumAdapters1(bestAdapterIndex, &adapter);
 
 			// Create Device
-			AssertIfFailed(D3D12CreateDevice(adapter, D3D_FEATURE_LEVEL_12_2, IID_PPV_ARGS(&m_device)));
+			AssertIfFailed(D3D12CreateDevice(adapter, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&m_device)));
 
 			// Create Allocator
 			{
@@ -92,29 +95,6 @@ namespace ElysiaRenderer
 				D3D12MA::CreateAllocator(&allocatorDesc, &m_allocator);
 			}
 		}
-
-		// Create Swap Chain
-		{
-			DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
-			swapChainDesc.Width = m_screenSize.x;
-			swapChainDesc.Height = m_screenSize.y;
-			swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-			swapChainDesc.Stereo = false;
-			swapChainDesc.SampleDesc.Count = 1;
-			swapChainDesc.SampleDesc.Quality = 0;
-			swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-			swapChainDesc.BufferCount = NUM_BACK_BUFFERS;
-			swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
-			swapChainDesc.Flags = 0;
-			swapChainDesc.Scaling = DXGI_SCALING_NONE;
-			swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
-
-			IDXGISwapChain1* swapChain;
-			AssertIfFailed(m_DXGIFactory->CreateSwapChainForHwnd(m_graphicsQueue->GetCommandQueue(), windowHandle, &swapChainDesc, nullptr, nullptr, &swapChain));
-			AssertIfFailed(swapChain->QueryInterface(__uuidof(IDXGISwapChain3), (void**)&m_swapChain));
-			SafeRelease(swapChain);
-		}
-		m_frameID = 0;
 
 		// Create Queue
 		{
@@ -132,6 +112,30 @@ namespace ElysiaRenderer
 			/*m_SRVStagingDescriptorHeap = std::make_unique<DX12StagingDescriptorHeap>(m_device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
 				NUM_RTV_STAGING_DESCRIPTORS);*/
 		}
+
+		// Create Swap Chain
+		{
+			DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
+			ZeroMemory(&swapChainDesc, sizeof(swapChainDesc));
+			swapChainDesc.Width = lround(m_screenSize.x);
+			swapChainDesc.Height = lround(m_screenSize.y);
+			swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+			swapChainDesc.Stereo = false;
+			swapChainDesc.SampleDesc.Count = 1;
+			swapChainDesc.SampleDesc.Quality = 0;
+			swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+			swapChainDesc.BufferCount = NUM_BACK_BUFFERS;
+			swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+			swapChainDesc.Flags = 0;
+			swapChainDesc.Scaling = DXGI_SCALING_NONE;
+			swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
+
+			IDXGISwapChain1* swapChain;
+			AssertIfFailed(m_DXGIFactory->CreateSwapChainForHwnd(m_graphicsQueue->GetCommandQueue(), windowHandle, &swapChainDesc, nullptr, nullptr, &swapChain));
+			AssertIfFailed(swapChain->QueryInterface(__uuidof(IDXGISwapChain3), (void**)&m_swapChain));
+			SafeRelease(swapChain);
+		}
+		m_frameID = 0;
 	}
 
 	void DX12Device::CreateWindowDependentResources()
@@ -140,7 +144,7 @@ namespace ElysiaRenderer
 		{
 			for (UINT currBufferIndex = 0; currBufferIndex < NUM_BACK_BUFFERS; currBufferIndex++)
 			{
-				auto descriptorHandle = m_RTVStagingDescriptorHeap->NewDescriptorHeapHandle();
+				auto currBackBufferRTVHandle = m_RTVStagingDescriptorHeap->NewDescriptorHeapHandle();
 
 				ID3D12Resource* backBufferResource = nullptr;
 				AssertIfFailed(m_swapChain->GetBuffer(currBufferIndex, IID_PPV_ARGS(&backBufferResource)));
@@ -150,13 +154,54 @@ namespace ElysiaRenderer
 				RTVDecs.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 				RTVDecs.Texture2D.MipSlice = 0;
 				RTVDecs.Texture2D.PlaneSlice = 0;
-				m_device->CreateRenderTargetView(backBufferResource, &RTVDecs, descriptorHandle.GetCPUHandle());
+				m_device->CreateRenderTargetView(backBufferResource, &RTVDecs, currBackBufferRTVHandle.GetCPUHandle());
 
 				m_backBuffers[currBufferIndex] = std::make_unique<DX12TextureResource>(
 					backBufferResource, D3D12_RESOURCE_STATE_PRESENT);
 				m_backBuffers[currBufferIndex]->SetResourceDesc(backBufferResource->GetDesc());
+				m_backBuffers[currBufferIndex]->SetRTVDescriptor(currBackBufferRTVHandle);
 			}
 		}
+	}
+
+	std::unique_ptr<DX12GraphicsContext> DX12Device::CreateGraphicsContext()
+	{
+		auto graphicsContext = std::make_unique<DX12GraphicsContext>(this);
+
+		return graphicsContext;
+	}
+
+	void DX12Device::DestoryContext(std::unique_ptr<DX12Context> context)
+	{
+		m_destructionQueues[m_frameID].m_contexts.push_back(std::move(context));
+	}
+
+	ContextSubmissionResult DX12Device::SubmitContextWork(DX12Context* context)
+	{
+		uint64_t fenceResult = 0;
+
+		switch (context->GetContextType())
+		{
+		case D3D12_COMMAND_LIST_TYPE_DIRECT:
+			fenceResult = m_graphicsQueue->ExecuteCommandList(context->GetCommandList());
+			break;
+		case D3D12_COMMAND_LIST_TYPE_COMPUTE:
+			fenceResult = m_computeQueue->ExecuteCommandList(context->GetCommandList());
+			break;
+		case D3D12_COMMAND_LIST_TYPE_COPY:
+			fenceResult = m_copyQueue->ExecuteCommandList(context->GetCommandList());
+			break;
+		default:
+			AssertError("Unsupported submission type.");
+		}
+
+		ContextSubmissionResult submissionResult;
+		submissionResult.frameID = m_frameID;
+		submissionResult.submissionIndex = static_cast<UINT>(m_contextSubmissions[m_frameID].size());
+
+		m_contextSubmissions[m_frameID].push_back(std::make_pair(fenceResult, context->GetContextType()));
+
+		return submissionResult;
 	}
 
 	void DX12Device::ProcessDestruction(UINT frameIndex)
@@ -173,6 +218,17 @@ namespace ElysiaRenderer
 			{
 				m_SRVStagingDescriptorHeap->FreeDescriptorHeapHandle(currBuffer->GetSRVDescriptor());
 			}
+			if (currBuffer->GetMappedResource() != nullptr)
+			{
+				currBuffer->GetResource()->Unmap(0, nullptr);
+			}
+
+			currFrameDestrctuionQueue.m_contexts.clear();
+
+			auto resource = currBuffer->GetResource();
+			auto allocation = currBuffer->GetAllocation();
+			SafeRelease(resource);
+			SafeRelease(allocation);
 		}
 	}
 
@@ -182,10 +238,12 @@ namespace ElysiaRenderer
 
 		// wait on fences from 2 frames ago
 		m_graphicsQueue->WaitForFenceCPUBlocking(m_endOfFrameFences[m_frameID].m_graphicsQueueFence);
-		m_computeQueue->WaitForFenceCPUBlocking(m_endOfFrameFences[m_frameID].m_computeQueueFence);
-		m_copyQueue->WaitForFenceCPUBlocking(m_endOfFrameFences[m_frameID].m_copyQueueFence);
+		/*m_computeQueue->WaitForFenceCPUBlocking(m_endOfFrameFences[m_frameID].m_computeQueueFence);
+		m_copyQueue->WaitForFenceCPUBlocking(m_endOfFrameFences[m_frameID].m_copyQueueFence);*/
 
+		ProcessDestruction(m_frameID);
 
+		m_contextSubmissions[m_frameID].clear();
 	}
 
 	void DX12Device::EndFrame()
@@ -195,6 +253,12 @@ namespace ElysiaRenderer
 
 	void DX12Device::Present()
 	{
+		m_swapChain->Present(0, 0);
+		m_endOfFrameFences[m_frameID].m_graphicsQueueFence = m_graphicsQueue->SingalFence();
+	}
 
+	void DX12Device::WaitForIdle()
+	{
+		m_graphicsQueue->WaitForIdle();
 	}
 }

@@ -17,6 +17,10 @@ namespace ElysiaRenderer
 			memcpy_s(m_mappedResource, m_resourceDesc.Width, data, dataSize);
 		}
 
+		uint8_t* GetMappedResource()
+		{
+			return m_mappedResource;
+		}
 		DX12DescriptorHeapHandle GetCBVDescriptor()
 		{
 			return m_CBVDescriptor;

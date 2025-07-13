@@ -1326,7 +1326,7 @@ namespace D3D12Lite
     {
         mUploadContexts[mFrameId]->ProcessUploads();
         SubmitContextWork(*mUploadContexts[mFrameId]);
-
+         
         mEndOfFrameFences[mFrameId].mComputeQueueFence = mComputeQueue->SignalFence();
         mEndOfFrameFences[mFrameId].mCopyQueueFence = mCopyQueue->SignalFence();
     }

@@ -39,4 +39,4 @@ namespace ElysiaRenderer
 		D3D12_CPU_DESCRIPTOR_HANDLE m_currSRVHeapHandle{ 0 };
 		DX12RenderPassDescriptorHeap* m_currSRVHeap = nullptr;
 	};
-} // namespace ElysiaRenderer
+}
