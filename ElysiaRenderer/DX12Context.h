@@ -6,7 +6,6 @@
 
 namespace ElysiaRenderer
 {
-	//extern class DX12Device;
 	class DX12Device;
 
 	class DX12Context

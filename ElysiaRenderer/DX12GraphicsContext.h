@@ -15,6 +15,11 @@ namespace ElysiaRenderer
 		~DX12GraphicsContext() override;
 
 		void ClearRenderTarget(const DX12TextureResource& renderTarget, Color color);
+		void ClearDepthStencilTarget(const DX12TextureResource& renderTarget, float depth, uint8_t stencil);
+
+		void SetDefaultViewportAndScissor(ElysiaHelper::UINT2 screenSize);
+		void SetViewport(D3D12_VIEWPORT& viewPort);
+		void SetScissorRect(D3D12_RECT& rect);
 
 	private:
 	};

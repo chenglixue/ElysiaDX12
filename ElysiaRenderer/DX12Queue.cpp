@@ -65,7 +65,7 @@ namespace ElysiaRenderer
 		m_commandQueue->Wait(otherQueue->GetFence(), otherQueue->GetNextFenceValue() - 1);
 	}
 
-	// 判断m_lastCompletedFenceValue是否>=fenceValue，是则说明已经同步，无需等待；否则，还需等待GPU，同步之后，使得m_lastCompletedFenceValue = fenceValue
+	// 判断m_lastCompletedFenceValue是否>=fenceValue，是则说明已经同步，无需等待；否则，还需等待GPU，同步之后，使得m_lastCompletedFenceValue = fenceValue,用于下次判断
 	void DX12Queue::WaitForFenceCPUBlocking(uint64_t fenceValue)
 	{
 		if (IsFenceCompleted(fenceValue))

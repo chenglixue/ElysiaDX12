@@ -1,70 +1,10 @@
 #include "D3D12Lite.h"
-#include "DX12Device.h"
+#include "Renderer.h"
 
 //using namespace D3D12Lite;
 
 using namespace ElysiaRenderer;
 using namespace DirectX::SimpleMath;
-
-class Renderer
-{
-public:
-	Renderer(HWND windowHandle, UINT2 screenSize);
-	~Renderer();
-
-	void Update()
-	{
-
-	}
-	void Render()
-	{
-		RenderClearColor();
-	}
-	void Destory()
-	{
-		m_device->WaitForIdle();
-		m_device->DestoryContext(std::move(m_graphicsContext));
-		m_device = nullptr;
-	}
-	void RenderClearColor();
-	
-private:
-	std::unique_ptr<DX12Device> m_device = nullptr;
-	std::unique_ptr<DX12GraphicsContext> m_graphicsContext = nullptr;
-
-};
-
-Renderer::Renderer(HWND windowHandle, UINT2 screenSize)
-{
-	m_device = std::make_unique<DX12Device>(windowHandle, screenSize);
-	m_graphicsContext = m_device->CreateGraphicsContext();
-}
-
-Renderer::~Renderer()
-{
-
-}
-
-void Renderer::RenderClearColor()
-{
-	m_device->BeginFrame();
-
-	auto& currBackBuffer = m_device->GetCurrBackBuffer();
-
-	m_graphicsContext->Reset();
-	m_graphicsContext->AddBarrier(currBackBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET);
-	m_graphicsContext->FlushBarrier();
-
-	m_graphicsContext->ClearRenderTarget(currBackBuffer, Color(0.3, 0.3, 0.8));
-
-	m_graphicsContext->AddBarrier(currBackBuffer, D3D12_RESOURCE_STATE_PRESENT);
-	m_graphicsContext->FlushBarrier();
-
-	m_device->SubmitContextWork(m_graphicsContext.get());
-
-	m_device->Present();
-	m_device->EndFrame();
-}
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam)
 {
@@ -113,7 +53,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 	RegisterClassEx(&wc);
 
 	HWND windowHandle = CreateWindowEx(WS_EX_APPWINDOW, applicationName.c_str(), applicationName.c_str(),
-		WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_OVERLAPPED | WS_SIZEBOX,
+		WS_OVERLAPPEDWINDOW,
 		(GetSystemMetrics(SM_CXSCREEN) - windowSize.x) / 2, (GetSystemMetrics(SM_CYSCREEN) - windowSize.y) / 2, windowSize.x, windowSize.y,
 		nullptr, nullptr, moduleHandle, nullptr);
 
@@ -122,7 +62,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 	SetFocus(windowHandle);
 	ShowCursor(true);
 
-	std::unique_ptr<Renderer> renderer = std::make_unique<Renderer>(windowHandle, windowSize);
+	std::unique_ptr<ElysiaRenderer::Renderer> renderer = std::make_unique<ElysiaRenderer::Renderer>(windowHandle, windowSize);
 
 	bool shouldExit = false;
 	while (!shouldExit)

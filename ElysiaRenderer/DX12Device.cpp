@@ -171,6 +171,11 @@ namespace ElysiaRenderer
 		return graphicsContext;
 	}
 
+	std::unique_ptr<DX12BufferResource> DX12Device::CreateBuffer()
+	{
+
+	}
+
 	void DX12Device::DestoryContext(std::unique_ptr<DX12Context> context)
 	{
 		m_destructionQueues[m_frameID].m_contexts.push_back(std::move(context));

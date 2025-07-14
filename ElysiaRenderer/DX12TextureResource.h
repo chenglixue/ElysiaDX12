@@ -15,15 +15,15 @@ namespace ElysiaRenderer
 		{
 			return m_RTVDescriptor;
 		}
-		DX12DescriptorHeapHandle GetDSVDescriptor()
+		DX12DescriptorHeapHandle GetDSVDescriptor() const
 		{
 			return m_DSVDescriptor;
 		}
-		DX12DescriptorHeapHandle GetSRVDescriptor()
+		DX12DescriptorHeapHandle GetSRVDescriptor() const
 		{
 			return m_SRVDescriptor;
 		}
-		DX12DescriptorHeapHandle GetUAVDescriptor()
+		DX12DescriptorHeapHandle GetUAVDescriptor() const
 		{
 			return m_UAVDescriptor;
 		}
