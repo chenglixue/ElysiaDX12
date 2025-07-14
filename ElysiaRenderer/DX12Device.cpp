@@ -171,9 +171,37 @@ namespace ElysiaRenderer
 		return graphicsContext;
 	}
 
-	std::unique_ptr<DX12BufferResource> DX12Device::CreateBuffer()
+	std::unique_ptr<DX12BufferResource> DX12Device::CreateBuffer(const BufferCreationDesc& bufferCreationDesc)
 	{
 
+		auto isHostViewable = bufferCreationDesc.bufferAccessFlags == BufferAccessFlags::HostWritable;
+
+		D3D12MA::ALLOCATION_DESC allocationDesc{};
+		allocationDesc.HeapType = isHostViewable ? D3D12_HEAP_TYPE_READBACK : D3D12_HEAP_TYPE_UPLOAD;
+		D3D12_RESOURCE_STATES usageState = isHostViewable ? D3D12_RESOURCE_STATE_GENERIC_READ : D3D12_RESOURCE_STATE_COPY_DEST;
+
+		// https://learn.microsoft.com/en-us/windows/win32/api/d3d12/ns-d3d12-d3d12_resource_desc
+		D3D12_RESOURCE_DESC resourceDesc = {};
+		resourceDesc.Width = AlignU64(static_cast<uint64_t>(bufferCreationDesc.m_size), D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
+		resourceDesc.Alignment = 0;
+		resourceDesc.Height = 1;
+		resourceDesc.DepthOrArraySize = 1;
+		resourceDesc.MipLevels = 1;
+		resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+		resourceDesc.Format = DXGI_FORMAT_UNKNOWN;
+		resourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+		resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+		resourceDesc.SampleDesc = {1, 0};
+
+		D3D12MA::Allocation* allocation = nullptr;
+		ID3D12Resource* resource = nullptr;
+		m_allocator->CreateResource(&allocationDesc, &resourceDesc, usageState, nullptr,
+			&allocation, IID_PPV_ARGS(&resource));
+
+		auto buffer = std::make_unique<DX12VertexBuffer>(resource, usageState, bufferCreationDesc.m_stride, bufferCreationDesc.m_size);
+		buffer->SetAllocation(allocation);
+
+		UINT numElements = static_cast<UINT>(bufferCreationDesc.m_stride > 0 ? bufferCreationDesc.m_size / bufferCreationDesc.m_stride : 1);
 	}
 
 	void DX12Device::DestoryContext(std::unique_ptr<DX12Context> context)

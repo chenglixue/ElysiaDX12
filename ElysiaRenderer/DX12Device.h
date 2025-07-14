@@ -60,7 +60,7 @@ namespace ElysiaRenderer
 		}
 
 		std::unique_ptr<DX12GraphicsContext> CreateGraphicsContext();
-		std::unique_ptr<DX12BufferResource> CreateBuffer();
+		std::unique_ptr<DX12BufferResource> CreateBuffer(const BufferCreationDesc& bufferCreationDesc);
 
 		void DestoryContext(std::unique_ptr<DX12Context> context);
 

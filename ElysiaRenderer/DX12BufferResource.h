@@ -5,10 +5,34 @@
 
 namespace ElysiaRenderer
 {
+	enum BufferTypeFlags : uint8_t
+	{
+		None,
+		CBV,
+		SRV,
+		UAV
+	};
+
+	enum BufferAccessFlags : uint8_t
+	{
+		GPUOnly,
+		HostWritable
+	};
+
+	struct BufferCreationDesc
+	{
+		UINT m_size = 0;
+		UINT m_stride = 0;
+		BufferTypeFlags bufferTypeFlags = BufferTypeFlags::None;
+		BufferAccessFlags bufferAccessFlags = BufferAccessFlags::GPUOnly;
+		bool m_isRawAccess = false;
+	};
+
 	class DX12BufferResource : public DX12GPUResource
 	{
 	public:
 		DX12BufferResource(ID3D12Resource* resource, D3D12_RESOURCE_STATES usageState);
+		DX12BufferResource(ID3D12Resource* resource, D3D12_RESOURCE_STATES usageState, bool isVertexBuffer);
 		~DX12BufferResource() override;
 
 		void SetMappedData(void* data, size_t dataSize)
@@ -16,10 +40,18 @@ namespace ElysiaRenderer
 			assert(m_mappedResource != nullptr && data != nullptr && dataSize > 0 && dataSize < m_resourceDesc.Width);
 			memcpy_s(m_mappedResource, m_resourceDesc.Width, data, dataSize);
 		}
+		void SetStride(UINT stride)
+		{
+			m_stride = stride;
+		}
 
 		uint8_t* GetMappedResource()
 		{
 			return m_mappedResource;
+		}
+		UINT GetStride()
+		{
+			return m_stride;
 		}
 		DX12DescriptorHeapHandle GetCBVDescriptor()
 		{
@@ -32,6 +64,19 @@ namespace ElysiaRenderer
 		DX12DescriptorHeapHandle GetUAVDescriptor()
 		{
 			return m_UAVDescriptor;
+		}
+
+		void SetCBVDescriptor(DX12DescriptorHeapHandle CBVDescriptor)
+		{
+			m_CBVDescriptor = CBVDescriptor;
+		}
+		void SetSRVDescriptor(DX12DescriptorHeapHandle SRVDescriptor)
+		{
+			m_SRVDescriptor = SRVDescriptor;
+		}
+		void SetUAVDescriptor(DX12DescriptorHeapHandle UAVDescriptor)
+		{
+			m_UAVDescriptor = UAVDescriptor;
 		}
 
 	private:

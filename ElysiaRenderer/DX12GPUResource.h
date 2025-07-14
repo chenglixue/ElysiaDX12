@@ -40,6 +40,14 @@ namespace ElysiaRenderer
 		{
 			m_resourceDesc = resourceDesc;
 		}
+		void SetGPUAddress(D3D12_GPU_VIRTUAL_ADDRESS GPUAddress)
+		{
+			m_GPUAddress = GPUAddress;
+		}
+		void SetAllocation(D3D12MA::Allocation* allocation)
+		{
+			m_allocation = allocation;
+		}
 
 		bool GetIsReady()
 		{
