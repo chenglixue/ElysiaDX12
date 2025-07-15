@@ -48,6 +48,10 @@ namespace ElysiaRenderer
 		{
 			m_allocation = allocation;
 		}
+		void SetDescriptorHeapIndex(UINT descriptorHeapIndex)
+		{
+			m_descriptorHeapIndex = descriptorHeapIndex;
+		}
 
 		bool GetIsReady()
 		{

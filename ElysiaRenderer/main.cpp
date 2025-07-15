@@ -63,6 +63,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 	ShowCursor(true);
 
 	std::unique_ptr<ElysiaRenderer::Renderer> renderer = std::make_unique<ElysiaRenderer::Renderer>(windowHandle, windowSize);
+	renderer->Init();
 
 	bool shouldExit = false;
 	while (!shouldExit)

@@ -109,8 +109,13 @@ namespace ElysiaRenderer
 				NUM_RTV_STAGING_DESCRIPTORS);
 			/*m_DSVStagingDescriptorHeap = std::make_unique<DX12StagingDescriptorHeap>(m_device, D3D12_DESCRIPTOR_HEAP_TYPE_DSV,
 				NUM_RTV_STAGING_DESCRIPTORS);*/
-			/*m_SRVStagingDescriptorHeap = std::make_unique<DX12StagingDescriptorHeap>(m_device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
-				NUM_RTV_STAGING_DESCRIPTORS);*/
+			m_SRVStagingDescriptorHeap = std::make_unique<DX12StagingDescriptorHeap>(m_device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
+				NUM_RTV_STAGING_DESCRIPTORS);
+
+			for (UINT currFrameIndex = 0; currFrameIndex < NUM_FRAMES_IN_FLIGHT; ++currFrameIndex)
+			{
+				//m_SRVStagingDescriptorHeap
+			}
 		}
 
 		// Create Swap Chain
@@ -136,6 +141,10 @@ namespace ElysiaRenderer
 			SafeRelease(swapChain);
 		}
 		m_frameID = 0;
+
+		// -1 for IMGUI Descriptor
+		m_freeReservedDescriptorIndices.resize(NUM_RESERVED_SRV_DESCRIPTORS - 1);
+		std::iota(m_freeReservedDescriptorIndices.begin(), m_freeReservedDescriptorIndices.end(), 1);
 	}
 
 	void DX12Device::CreateWindowDependentResources()
@@ -170,14 +179,18 @@ namespace ElysiaRenderer
 
 		return graphicsContext;
 	}
-
-	std::unique_ptr<DX12BufferResource> DX12Device::CreateBuffer(const BufferCreationDesc& bufferCreationDesc)
+	std::unique_ptr<DX12VertexBuffer> DX12Device::CreateVertexBuffer(const BufferCreationDesc& bufferCreationDesc, void* vertexData)
 	{
-
+		if (bufferCreationDesc.bufferTypeFlags != BufferTypeFlags::SRV)
+		{
+			AssertError("Vertex BufferµÄ BufferTypeFlags ²»Æ¥Åä");
+			return;
+		}
+		// CPU-writable/GPU-readable memory
 		auto isHostViewable = bufferCreationDesc.bufferAccessFlags == BufferAccessFlags::HostWritable;
 
 		D3D12MA::ALLOCATION_DESC allocationDesc{};
-		allocationDesc.HeapType = isHostViewable ? D3D12_HEAP_TYPE_READBACK : D3D12_HEAP_TYPE_UPLOAD;
+		allocationDesc.HeapType = isHostViewable ? D3D12_HEAP_TYPE_UPLOAD : D3D12_HEAP_TYPE_DEFAULT;
 		D3D12_RESOURCE_STATES usageState = isHostViewable ? D3D12_RESOURCE_STATE_GENERIC_READ : D3D12_RESOURCE_STATE_COPY_DEST;
 
 		// https://learn.microsoft.com/en-us/windows/win32/api/d3d12/ns-d3d12-d3d12_resource_desc
@@ -198,15 +211,90 @@ namespace ElysiaRenderer
 		m_allocator->CreateResource(&allocationDesc, &resourceDesc, usageState, nullptr,
 			&allocation, IID_PPV_ARGS(&resource));
 
-		auto buffer = std::make_unique<DX12VertexBuffer>(resource, usageState, bufferCreationDesc.m_stride, bufferCreationDesc.m_size);
-		buffer->SetAllocation(allocation);
+		auto vertexBuffer = std::make_unique<DX12VertexBuffer>(resource, usageState, bufferCreationDesc.m_stride, bufferCreationDesc.m_size, allocation);
+		
+		{
+			UINT numElements = static_cast<UINT>(bufferCreationDesc.m_stride > 0 ? bufferCreationDesc.m_size / bufferCreationDesc.m_stride : 1);
 
-		UINT numElements = static_cast<UINT>(bufferCreationDesc.m_stride > 0 ? bufferCreationDesc.m_size / bufferCreationDesc.m_stride : 1);
+			D3D12_SHADER_RESOURCE_VIEW_DESC SRVDesc{};
+			SRVDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+			SRVDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+			//SRVDesc.Format = bufferCreationDesc.m_isRawAccess ? DXGI_FORMAT_R32_TYPELESS : DXGI_FORMAT_UNKNOWN;
+			SRVDesc.Format = DXGI_FORMAT_UNKNOWN;
+			SRVDesc.Buffer.FirstElement = 0;
+			SRVDesc.Buffer.NumElements = numElements;
+			//SRVDesc.Buffer.StructureByteStride = bufferCreationDesc.m_isRawAccess ? 0 : vertexBuffer->GetVertexBufferView().StrideInBytes;
+			SRVDesc.Buffer.StructureByteStride = vertexBuffer->GetVertexBufferView().StrideInBytes;
+			SRVDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
+
+			vertexBuffer->SetMappedData(&vertexData, bufferCreationDesc.m_size);
+
+			vertexBuffer->SetSRVDescriptor(std::move(m_SRVStagingDescriptorHeap->NewDescriptorHeapHandle()));
+			/*vertexBuffer->SetDescriptorHeapIndex(m_freeReservedDescriptorIndices.back());
+			m_freeReservedDescriptorIndices.pop_back();*/
+
+			m_device->CreateShaderResourceView(vertexBuffer->GetResource(), &SRVDesc, vertexBuffer->GetSRVDescriptor().GetCPUHandle());
+		}
 	}
-
-	void DX12Device::DestoryContext(std::unique_ptr<DX12Context> context)
+	std::unique_ptr<DX12Shader> DX12Device::CreateShader(ShaderCreateDesc& shaderCreateDesc)
 	{
-		m_destructionQueues[m_frameID].m_contexts.push_back(std::move(context));
+		ID3DBlob* shader = nullptr;
+
+		/// Enable Debug
+#if defined(_DEBUG)
+		// Enable better shader debugging with the graphics debugging tools.
+		UINT compileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+#else
+		UINT compileFlags = 0;
+#endif
+
+		/// Switch Target
+		LPCSTR target = nullptr;
+		switch (shaderCreateDesc.shaderType)
+		{
+		case ShaderType::Vertex:
+			target = "vs_6_6";
+			break;
+		case ShaderType::Pixel:
+			target = "ps_6_6";
+			break;
+		case ShaderType::Compute:
+			target = "cs_6_6";
+			break;
+
+		default:
+			ElysiaHelper::AssertError("Unimplemented shader type.");
+			break;
+		}
+
+		WCHAR assetsPath[512];
+		GetAssetsPath(assetsPath, _countof(assetsPath));
+
+		std::wstring fileName;
+		fileName.append(SHADER_SOURCE_PATH);
+		fileName.append(shaderCreateDesc.shaderName);
+
+		ThrowIfFailed(D3DCompileFromFile(ElysiaHelper::GetAssetFullPath(assetsPath, fileName).c_str(),
+			nullptr, nullptr,
+			WStringToLPCTSTR(shaderCreateDesc.entryPoint.c_str()), target,
+			compileFlags, 0, &shader, nullptr));
+
+		std::unique_ptr<DX12Shader> o = std::make_unique<DX12Shader>(std::move(shader));
+		return o;
+	}
+	std::unique_ptr<DX12RootSignature> DX12Device::CreateRootSignature()
+	{
+		D3D12_ROOT_SIGNATURE_DESC rootSignatureDesc{};
+		rootSignatureDesc.NumParameters = 0;
+		rootSignatureDesc.pParameters = nullptr;
+		rootSignatureDesc.NumStaticSamplers = 0;
+		rootSignatureDesc.pStaticSamplers = nullptr;
+		rootSignatureDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+
+		ID3DBlob* signature = nullptr;
+		ID3DBlob* error = nullptr;
+
+		ThrowIfFailed(D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error));
 	}
 
 	ContextSubmissionResult DX12Device::SubmitContextWork(DX12Context* context)
@@ -235,6 +323,11 @@ namespace ElysiaRenderer
 		m_contextSubmissions[m_frameID].push_back(std::make_pair(fenceResult, context->GetContextType()));
 
 		return submissionResult;
+	}
+
+	void DX12Device::DestoryContext(std::unique_ptr<DX12Context> context)
+	{
+		m_destructionQueues[m_frameID].m_contexts.push_back(std::move(context));
 	}
 
 	void DX12Device::ProcessDestruction(UINT frameIndex)

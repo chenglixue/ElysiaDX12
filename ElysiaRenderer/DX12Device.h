@@ -12,6 +12,8 @@
 #include "Definition.h"
 #include "DX12Context.h"
 #include "DX12GraphicsContext.h"
+#include "DX12Shader.h"
+#include "DX12RootSignature.h"
 
 namespace ElysiaRenderer
 {
@@ -60,7 +62,9 @@ namespace ElysiaRenderer
 		}
 
 		std::unique_ptr<DX12GraphicsContext> CreateGraphicsContext();
-		std::unique_ptr<DX12BufferResource> CreateBuffer(const BufferCreationDesc& bufferCreationDesc);
+		std::unique_ptr<DX12VertexBuffer> CreateVertexBuffer(const BufferCreationDesc& bufferCreationDesc, void* vertexData);
+		std::unique_ptr<DX12Shader> CreateShader(ShaderCreateDesc& shaderCreateDesc);
+		std::unique_ptr<DX12RootSignature> CreateRootSignature();
 
 		void DestoryContext(std::unique_ptr<DX12Context> context);
 
@@ -106,6 +110,7 @@ namespace ElysiaRenderer
 		std::unique_ptr<DX12StagingDescriptorHeap> m_DSVStagingDescriptorHeap;
 		std::unique_ptr<DX12StagingDescriptorHeap> m_SRVStagingDescriptorHeap;
 		std::unique_ptr<DX12RenderPassDescriptorHeap> m_renderPassDescriptorHeap;
+		std::vector<UINT> m_freeReservedDescriptorIndices;
 		std::array<std::unique_ptr<DX12TextureResource>, NUM_BACK_BUFFERS> m_backBuffers;
 		std::array<EndOfFrameFences, NUM_FRAMES_IN_FLIGHT> m_endOfFrameFences;
 		std::array<std::vector<std::pair<uint64_t, D3D12_COMMAND_LIST_TYPE>>, NUM_FRAMES_IN_FLIGHT> m_contextSubmissions;

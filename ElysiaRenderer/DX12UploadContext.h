@@ -9,7 +9,7 @@ namespace ElysiaRenderer
 	class DX12UploadContext : public DX12Context
 	{
 	public:
-		//DX12UploadContext(DX12Device* device, std::unique_ptr<DX12BufferResource> textureUpload);
+		DX12UploadContext(DX12Device* device, std::unique_ptr<DX12BufferResource> textureUpload);
 	private:
 	};
 }

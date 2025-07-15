@@ -5,6 +5,7 @@
 #include <d3d12.h>
 #include <dxgi1_6.h>
 #include <D3Dcompiler.h>
+#include "dxcapi.h"
 #include <cstdint>
 #include <array>
 #include <string>
@@ -15,3 +16,4 @@
 #include "Helper.h"
 #include "Definition.h"
 #include "D3D12MemoryAllocator/D3D12MemAlloc.h"
+#include <numeric>
