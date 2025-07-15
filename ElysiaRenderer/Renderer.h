@@ -29,6 +29,11 @@ namespace ElysiaRenderer
 		std::unique_ptr<DX12Device> m_device = nullptr;
 		std::unique_ptr<DX12GraphicsContext> m_graphicsContext = nullptr;
 		std::unique_ptr<DX12VertexBuffer> m_vertexBuffer = nullptr;
+		std::unique_ptr<DX12RootSignature> m_rootSignature = nullptr;
+		std::unique_ptr<DX12Shader> m_vertexShader = nullptr;
+		std::unique_ptr<DX12Shader> m_pixelShader = nullptr;
+		std::unique_ptr<DX12Shader> m_computeShader = nullptr;
+		std::unique_ptr<DX12PipelineState> m_pipelineState = nullptr;
 	};
 
 	Renderer::Renderer(HWND windowHandle, UINT2 screenSize)
@@ -99,7 +104,28 @@ namespace ElysiaRenderer
 		vertexBufferCreationDesc.bufferTypeFlags = BufferTypeFlags::SRV;
 		vertexBufferCreationDesc.m_isRawAccess = false;
 
-		m_vertexBuffer = m_device->CreateVertexBuffer(vertexBufferCreationDesc, &triangleVertices);
+		m_vertexBuffer = std::move(m_device->CreateVertexBuffer(vertexBufferCreationDesc, &triangleVertices));
+
+		m_rootSignature = std::move(m_device->CreateRootSignature());
+
+		ShaderCreateDesc VSShaderCreateDesc{};
+		VSShaderCreateDesc.shaderName = L"DrawTriangle.hlsl";
+		VSShaderCreateDesc.entryPoint = L"VS";
+		VSShaderCreateDesc.shaderType = ShaderType::Vertex;
+
+		m_vertexShader = std::move(m_device->CreateShader(VSShaderCreateDesc));
+
+		ShaderCreateDesc PSShaderCreateDesc{};
+		PSShaderCreateDesc.shaderName = L"DrawTriangle.hlsl";
+		PSShaderCreateDesc.entryPoint = L"PS";
+		PSShaderCreateDesc.shaderType = ShaderType::Pixel;
+		m_pixelShader = std::move(m_device->CreateShader(PSShaderCreateDesc));
+
+		PipelineStateCreateDesc pipelineStateCreateDesc = std::move(CreateDefaultPipelineStateCreateDesc());
+		pipelineStateCreateDesc.m_vertexShader = m_vertexShader.get();
+		pipelineStateCreateDesc.m_pixelShader = m_pixelShader.get();
+
+		m_pipelineState = std::move(m_device->CreatePipelineState(pipelineStateCreateDesc));
 	}
 	void Renderer::RenderTriangle()
 	{

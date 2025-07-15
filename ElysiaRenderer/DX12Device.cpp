@@ -173,13 +173,13 @@ namespace ElysiaRenderer
 		}
 	}
 
-	std::unique_ptr<DX12GraphicsContext> DX12Device::CreateGraphicsContext()
+	std::unique_ptr<DX12GraphicsContext>	DX12Device::CreateGraphicsContext()
 	{
 		auto graphicsContext = std::make_unique<DX12GraphicsContext>(this);
 
 		return graphicsContext;
 	}
-	std::unique_ptr<DX12VertexBuffer> DX12Device::CreateVertexBuffer(const BufferCreationDesc& bufferCreationDesc, void* vertexData)
+	std::unique_ptr<DX12VertexBuffer>		DX12Device::CreateVertexBuffer(const BufferCreationDesc& bufferCreationDesc, void* vertexData)
 	{
 		if (bufferCreationDesc.bufferTypeFlags != BufferTypeFlags::SRV)
 		{
@@ -236,7 +236,7 @@ namespace ElysiaRenderer
 			m_device->CreateShaderResourceView(vertexBuffer->GetResource(), &SRVDesc, vertexBuffer->GetSRVDescriptor().GetCPUHandle());
 		}
 	}
-	std::unique_ptr<DX12Shader> DX12Device::CreateShader(ShaderCreateDesc& shaderCreateDesc)
+	std::unique_ptr<DX12Shader>				DX12Device::CreateShader(ShaderCreateDesc& shaderCreateDesc)
 	{
 		ID3DBlob* shader = nullptr;
 
@@ -282,7 +282,7 @@ namespace ElysiaRenderer
 		std::unique_ptr<DX12Shader> o = std::make_unique<DX12Shader>(std::move(shader));
 		return o;
 	}
-	std::unique_ptr<DX12RootSignature> DX12Device::CreateRootSignature()
+	std::unique_ptr<DX12RootSignature>		DX12Device::CreateRootSignature()
 	{
 		D3D12_ROOT_SIGNATURE_DESC rootSignatureDesc{};
 		rootSignatureDesc.NumParameters = 0;
@@ -295,6 +295,34 @@ namespace ElysiaRenderer
 		ID3DBlob* error = nullptr;
 
 		ThrowIfFailed(D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error));
+
+		ID3D12RootSignature* rootSignature = nullptr;
+		ThrowIfFailed(m_device->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&rootSignature)));
+
+		return std::make_unique<DX12RootSignature>(rootSignature);
+	}
+	std::unique_ptr<DX12PipelineState>		DX12Device::CreatePipelineState(PipelineStateCreateDesc& pipelineStateCreateDesc)
+	{
+		D3D12_GRAPHICS_PIPELINE_STATE_DESC PSODesc{};
+		if (pipelineStateCreateDesc.m_vertexShader != nullptr)
+		{
+			PSODesc.VS.pShaderBytecode = pipelineStateCreateDesc.m_vertexShader->GetShader()->GetBufferPointer();
+			PSODesc.VS.BytecodeLength = pipelineStateCreateDesc.m_vertexShader->GetShader()->GetBufferSize();
+		}
+
+		if (pipelineStateCreateDesc.m_pixelShader != nullptr)
+		{
+			PSODesc.PS.pShaderBytecode = pipelineStateCreateDesc.m_pixelShader->GetShader()->GetBufferPointer();
+			PSODesc.PS.BytecodeLength = pipelineStateCreateDesc.m_pixelShader->GetShader()->GetBufferSize();
+		}
+		
+		D3D12_INPUT_ELEMENT_DESC inputElementDescs[] =
+		{
+			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+			{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+		};
+		PSODesc.InputLayout = { pipelineStateCreateDesc.m_inputElementDesc.data(),
+			static_cast<UINT>(pipelineStateCreateDesc.m_inputElementDesc.size())};
 	}
 
 	ContextSubmissionResult DX12Device::SubmitContextWork(DX12Context* context)

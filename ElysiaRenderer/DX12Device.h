@@ -14,6 +14,7 @@
 #include "DX12GraphicsContext.h"
 #include "DX12Shader.h"
 #include "DX12RootSignature.h"
+#include "DX12PipelineState.h"
 
 namespace ElysiaRenderer
 {
@@ -65,6 +66,7 @@ namespace ElysiaRenderer
 		std::unique_ptr<DX12VertexBuffer> CreateVertexBuffer(const BufferCreationDesc& bufferCreationDesc, void* vertexData);
 		std::unique_ptr<DX12Shader> CreateShader(ShaderCreateDesc& shaderCreateDesc);
 		std::unique_ptr<DX12RootSignature> CreateRootSignature();
+		std::unique_ptr<DX12PipelineState> CreatePipelineState(PipelineStateCreateDesc& pipelineStateCreateDesc);
 
 		void DestoryContext(std::unique_ptr<DX12Context> context);
 
