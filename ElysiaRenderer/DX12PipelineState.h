@@ -6,11 +6,13 @@ namespace ElysiaRenderer
 {
 	extern class DX12RootSignature;
 	extern class DX12Shader;
+	extern class DX12TextureResource;
 
 	enum class PipleineType : uint8_t
 	{
-		Graphics = 0,
-		Compute = 1
+		None = 0,
+		Graphics = 1,
+		Compute = 2
 	};
 
 	struct RenderTargetDesc
@@ -35,37 +37,63 @@ namespace ElysiaRenderer
 		PipleineType m_pipelineStateType = PipleineType::Graphics;
 	};
 
+	struct PipelineStateData
+	{
+		DX12PipelineState* m_pipelineState;
+		std::vector<DX12TextureResource*> m_renderTargets;
+	};
+
 	class DX12PipelineState
 	{
 	public:
 		DX12PipelineState();
 		DX12PipelineState(ID3D12PipelineState* pipelineState);
+		DX12PipelineState(ID3D12PipelineState* pipelineState, ID3D12RootSignature* rootSignature);
 		virtual ~DX12PipelineState();
 
 		ID3D12PipelineState* GetPipelineState()
 		{
 			return m_pipelineState;
 		}
-
-	private:
-		ID3D12PipelineState* m_pipelineState;
-	};
-
-	class DX12GraphicsPipelineState : public DX12PipelineState
-	{
-	public:
-		DX12GraphicsPipelineState();
-		DX12GraphicsPipelineState(ID3D12PipelineState* pipelineState);
-		~DX12GraphicsPipelineState() override;
-
+		ID3D12RootSignature* GetRootSignature()
+		{
+			return m_rootSignature;
+		}
 		PipleineType GetPipelineType()
 		{
 			return m_pipelineType;
 		}
 
 	private:
+		ID3D12PipelineState* m_pipelineState;
+		ID3D12RootSignature* m_rootSignature;
 		PipleineType m_pipelineType;
 	};
+
+	class DX12GraphicsPipelineState : public DX12PipelineState
+	{
+	public:
+		DX12GraphicsPipelineState();
+		DX12GraphicsPipelineState(ID3D12PipelineState* pipelineState, ID3D12RootSignature* rootSignature);
+		~DX12GraphicsPipelineState() override;
+
+		DX12TextureResource* GetDepthStencilRT()
+		{
+			return m_depthStencilRT;
+		}
+
+	private:
+		DX12TextureResource* m_depthStencilRT = nullptr;
+	};
+
+	inline static RenderTargetDesc CreateDefaultRenderTargetDesc()
+	{
+		RenderTargetDesc desc{};
+		desc.m_renderTargetFormats.fill(DXGI_FORMAT_R8G8B8A8_UNORM);
+		desc.m_numRenderTargets = 1;
+		desc.m_depthStencilFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
+		return desc;
+	}
 
 	inline static PipelineStateCreateDesc CreateDefaultPipelineStateCreateDesc()
 	{
@@ -112,6 +140,18 @@ namespace ElysiaRenderer
 		desc.m_sampleDesc.Count = 1;
 		desc.m_sampleDesc.Quality = 0;
 
+		desc.m_renderTargetDesc = CreateDefaultRenderTargetDesc();
+
 		return desc;
+	}
+
+	inline static PipelineStateData CreatePipelineStateData(
+		DX12PipelineState* pipelineState, 
+		std::vector<DX12TextureResource*> renderTargets)
+	{
+		PipelineStateData data{};
+		data.m_pipelineState = pipelineState;
+		data.m_renderTargets = renderTargets;
+		return data;
 	}
 }

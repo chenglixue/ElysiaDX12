@@ -19,8 +19,8 @@ PSInput VS(float4 position : POSITION, float4 color : COLOR)
 {
     PSInput o;
     
-    o.position = i.position;
-    o.color = i.color;
+    o.position = position;
+    o.color = color;
     
     return o;
 }

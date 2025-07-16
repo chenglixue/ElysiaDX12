@@ -13,11 +13,11 @@ namespace ElysiaRenderer
 			D3D12MA::Allocation* allocation);
 		~DX12VertexBuffer() override;
 
-		D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView()
+		D3D12_VERTEX_BUFFER_VIEW& GetVertexBufferView()
 		{
 			return m_vertexBufferView;
 		}
-		DX12DescriptorHeapHandle GetSRVDescriptor()
+		DX12DescriptorHeapHandle& GetSRVDescriptor()
 		{
 			return m_SRVDescriptor;
 		}

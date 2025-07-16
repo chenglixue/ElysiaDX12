@@ -18,15 +18,16 @@ namespace ElysiaRenderer
 		void ClearRenderTarget(const DX12TextureResource& renderTarget, Color color);
 		void ClearDepthStencilTarget(const DX12TextureResource& renderTarget, float depth, uint8_t stencil);
 
-		void SetPipeline(DX12PipelineState& graphicsPipelineState)
-		{
-			//if()
-		}
+		void SetPipeline(PipelineStateData& pipelineStateData);
+		void SetRenderTargets(UINT numRenderTargets, const D3D12_CPU_DESCRIPTOR_HANDLE renderTargetHandle[],
+			const D3D12_CPU_DESCRIPTOR_HANDLE depthStencilHandle);
 		void SetDefaultViewportAndScissor(ElysiaHelper::UINT2 screenSize);
 		void SetViewport(D3D12_VIEWPORT& viewPort);
 		void SetScissorRect(D3D12_RECT& rect);
+		void SetPrimitiveTopology(D3D12_PRIMITIVE_TOPOLOGY topology);
+		void SetVertexBuffer(UINT startIndex, UINT numVertexBuffer, D3D12_VERTEX_BUFFER_VIEW& vertexBufferView);
 
 	private:
-		
+		DX12GraphicsPipelineState* m_graphicsPipelineState = nullptr;
 	};
 }

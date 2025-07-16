@@ -12,8 +12,8 @@ namespace ElysiaRenderer
 
 	struct ShaderCreateDesc
 	{
-		std::wstring shaderName;	// include file type(such as ".hlsl")
-		std::wstring entryPoint;	
+		LPCWSTR shaderName;	// include file type(such as ".hlsl")
+		LPCSTR entryPoint;
 		ShaderType shaderType;
 	};
 

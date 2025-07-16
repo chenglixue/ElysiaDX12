@@ -27,6 +27,41 @@ namespace ElysiaRenderer
 			depth, stencil, 0, nullptr);
 	}
 
+	void DX12GraphicsContext::SetPipeline(PipelineStateData& pipelineStateData)
+	{
+		auto pipelineState = pipelineStateData.m_pipelineState;
+		auto& renderTargets = pipelineStateData.m_renderTargets;
+
+		if (pipelineState->GetPipelineType() != PipleineType::Graphics)
+		{
+			ElysiaHelper::AssertError("Pipeline not graphics");
+			return;
+		}
+
+		m_graphicsPipelineState = dynamic_cast<DX12GraphicsPipelineState*>(pipelineState);
+
+		m_commandList->SetPipelineState(pipelineState->GetPipelineState());
+		m_commandList->SetGraphicsRootSignature(pipelineState->GetRootSignature());
+
+		D3D12_CPU_DESCRIPTOR_HANDLE renderTargetHandles[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT]{};
+		D3D12_CPU_DESCRIPTOR_HANDLE depthStencilHandle{ 0 };
+		auto numTarget = renderTargets.size();
+		for (size_t i = 0; i < numTarget; ++i)
+		{
+			renderTargetHandles[i] = renderTargets[i]->GetRTVDescriptor().GetCPUHandle();
+		}
+		if (m_graphicsPipelineState->GetDepthStencilRT() != nullptr)
+		{
+			depthStencilHandle = m_graphicsPipelineState->GetDepthStencilRT()->GetRTVDescriptor().GetCPUHandle();
+		}
+		SetRenderTargets(static_cast<UINT>(numTarget), renderTargetHandles, depthStencilHandle);
+	}
+	void DX12GraphicsContext::SetRenderTargets(UINT numRenderTargets, const D3D12_CPU_DESCRIPTOR_HANDLE renderTargetHandle[],
+		const D3D12_CPU_DESCRIPTOR_HANDLE depthStencilHandle)
+	{
+		m_commandList->OMSetRenderTargets(numRenderTargets, renderTargetHandle, FALSE, 
+			depthStencilHandle.ptr != 0 ? &depthStencilHandle : NULL);
+	}
 	void DX12GraphicsContext::SetDefaultViewportAndScissor(ElysiaHelper::UINT2 screenSize)
 	{
 		D3D12_VIEWPORT viewport = {};
@@ -53,5 +88,13 @@ namespace ElysiaRenderer
 	void DX12GraphicsContext::SetScissorRect(D3D12_RECT& rect)
 	{
 		m_commandList->RSSetScissorRects(1, &rect);
+	}
+	void DX12GraphicsContext::SetPrimitiveTopology(D3D12_PRIMITIVE_TOPOLOGY topology)
+	{
+		m_commandList->IASetPrimitiveTopology(topology);
+	}
+	void DX12GraphicsContext::SetVertexBuffer(UINT startIndex, UINT numVertexBuffer, D3D12_VERTEX_BUFFER_VIEW& vertexBufferView)
+	{
+		m_commandList->IASetVertexBuffers(startIndex, numVertexBuffer, &vertexBufferView);
 	}
 }

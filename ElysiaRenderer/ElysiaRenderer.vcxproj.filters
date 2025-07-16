@@ -136,9 +136,6 @@
     <ClInclude Include="DX12TextureResource.h">
       <Filter>Header Files\DX12</Filter>
     </ClInclude>
-    <ClInclude Include="DX12UploadContext.h">
-      <Filter>Header Files\DX12</Filter>
-    </ClInclude>
     <ClInclude Include="DX12Shader.h">
       <Filter>Header Files\DX12</Filter>
     </ClInclude>
@@ -172,6 +169,9 @@
       <Filter>Header Files</Filter>
     </None>
     <None Include="packages.config" />
+    <None Include="Shaders\DrawTriangle.hlsl">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DXTex\BC.cpp">
@@ -290,9 +290,6 @@
       <Filter>Source Files\DX12</Filter>
     </ClCompile>
     <ClCompile Include="Renderer.cpp" />
-    <ClCompile Include="DX12UploadContext.cpp">
-      <Filter>Source Files\DX12</Filter>
-    </ClCompile>
     <ClCompile Include="DX12Shader.cpp">
       <Filter>Source Files\DX12</Filter>
     </ClCompile>

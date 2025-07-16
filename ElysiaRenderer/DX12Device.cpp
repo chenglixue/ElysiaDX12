@@ -271,19 +271,17 @@ namespace ElysiaRenderer
 
 		WCHAR assetsPath[512];
 		ElysiaHelper::GetAssetsPath(assetsPath, _countof(assetsPath));
-		//GetCurrentDirectory(512, assetsPath);
 
-		std::wstring fileName;
-		//fileName.append(SHADER_SOURCE_PATH);
-		fileName.append(shaderCreateDesc.shaderName);
-		
+		auto shaderFullPath = ElysiaHelper::GetAssetFullPath(assetsPath, shaderCreateDesc.shaderName).c_str();
 
-		auto shaderFullPath = ElysiaHelper::GetAssetFullPath(assetsPath, L"shaders.hlsl").c_str();
-
-		ElysiaHelper::ThrowIfFailed(D3DCompileFromFile(shaderFullPath,
+		auto compleHR = D3DCompileFromFile(ElysiaHelper::GetAssetFullPath(assetsPath, shaderCreateDesc.shaderName).c_str(),
 			nullptr, nullptr,
-			"VSMain", "vs_5_0",
-			compileFlags, 0, &shader, nullptr));
+			shaderCreateDesc.entryPoint, target,
+			compileFlags, 0, &shader, nullptr);
+		if (FAILED(compleHR))
+		{
+			ElysiaHelper::AssertError("Failed to get compilation result.");
+		}
 
 		std::unique_ptr<DX12Shader> o = std::make_unique<DX12Shader>(std::move(shader));
 		return o;
@@ -340,9 +338,13 @@ namespace ElysiaRenderer
 		PSODesc.SampleDesc = pipelineStateCreateDesc.m_sampleDesc;
 
 		ID3D12PipelineState* pipelineState = nullptr;
-		ElysiaHelper::ThrowIfFailed(m_device->CreateGraphicsPipelineState(&PSODesc, IID_PPV_ARGS(&pipelineState)));
+		auto createPipelineStateHR = m_device->CreateGraphicsPipelineState(&PSODesc, IID_PPV_ARGS(&pipelineState));
+		if (FAILED(createPipelineStateHR))
+		{
+			ElysiaHelper::AssertError("Failed to create graphics pipeline state.");
+		}
 
-		auto graphicsPipeline = std::make_unique<DX12GraphicsPipelineState>(pipelineState);
+		auto graphicsPipeline = std::make_unique<DX12GraphicsPipelineState>(pipelineState, PSODesc.pRootSignature);
 		return graphicsPipeline;
 	}
 
