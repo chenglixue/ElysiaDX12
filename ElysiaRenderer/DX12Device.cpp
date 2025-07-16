@@ -2,7 +2,7 @@
 
 namespace ElysiaRenderer
 {
-	DX12Device::DX12Device(HWND windowHandle, UINT2 screenSize)
+	DX12Device::DX12Device(HWND windowHandle, ElysiaHelper::UINT2 screenSize)
 		: m_screenSize(screenSize)
 	{
 		InitializeDeviceResources(windowHandle);
@@ -30,7 +30,7 @@ namespace ElysiaRenderer
 			{
 				debugController->EnableDebugLayer();
 
-				SafeRelease(debugController);
+				ElysiaHelper::SafeRelease(debugController);
 			}
 #endif
 		}
@@ -38,7 +38,7 @@ namespace ElysiaRenderer
 
 		// Create DXGIFactory1
 		{
-			AssertIfFailed(CreateDXGIFactory1(IID_PPV_ARGS(&m_DXGIFactory)));
+			ElysiaHelper::AssertIfFailed(CreateDXGIFactory1(IID_PPV_ARGS(&m_DXGIFactory)));
 		}
 
 		// Get Adapter & Create Device & Create Allocator
@@ -50,7 +50,7 @@ namespace ElysiaRenderer
 			for (UINT currAdapterIndex = 0; m_DXGIFactory->EnumAdapters1(currAdapterIndex, &adapter) != DXGI_ERROR_NOT_FOUND; currAdapterIndex++)
 			{
 				DXGI_ADAPTER_DESC1 adapterDesc;
-				AssertIfFailed(adapter->GetDesc1(&adapterDesc));
+				ElysiaHelper::AssertIfFailed(adapter->GetDesc1(&adapterDesc));
 
 				// 软件adapter
 				if (adapterDesc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE)
@@ -72,18 +72,18 @@ namespace ElysiaRenderer
 					bestAdapterMemory = adapterDesc.DedicatedVideoMemory;
 				}
 
-				SafeRelease(adapter);
+				ElysiaHelper::SafeRelease(adapter);
 			}
 
 			if (bestAdapterMemory <= 0)
 			{
-				AssertError("Failed to find an adapter.");
+				ElysiaHelper::AssertError("Failed to find an adapter.");
 			}
 
 			m_DXGIFactory->EnumAdapters1(bestAdapterIndex, &adapter);
 
 			// Create Device
-			AssertIfFailed(D3D12CreateDevice(adapter, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&m_device)));
+			ElysiaHelper::AssertIfFailed(D3D12CreateDevice(adapter, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&m_device)));
 
 			// Create Allocator
 			{
@@ -136,9 +136,9 @@ namespace ElysiaRenderer
 			swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
 
 			IDXGISwapChain1* swapChain;
-			AssertIfFailed(m_DXGIFactory->CreateSwapChainForHwnd(m_graphicsQueue->GetCommandQueue(), windowHandle, &swapChainDesc, nullptr, nullptr, &swapChain));
-			AssertIfFailed(swapChain->QueryInterface(__uuidof(IDXGISwapChain3), (void**)&m_swapChain));
-			SafeRelease(swapChain);
+			ElysiaHelper::AssertIfFailed(m_DXGIFactory->CreateSwapChainForHwnd(m_graphicsQueue->GetCommandQueue(), windowHandle, &swapChainDesc, nullptr, nullptr, &swapChain));
+			ElysiaHelper::AssertIfFailed(swapChain->QueryInterface(__uuidof(IDXGISwapChain3), (void**)&m_swapChain));
+			ElysiaHelper::SafeRelease(swapChain);
 		}
 		m_frameID = 0;
 
@@ -156,7 +156,7 @@ namespace ElysiaRenderer
 				auto currBackBufferRTVHandle = m_RTVStagingDescriptorHeap->NewDescriptorHeapHandle();
 
 				ID3D12Resource* backBufferResource = nullptr;
-				AssertIfFailed(m_swapChain->GetBuffer(currBufferIndex, IID_PPV_ARGS(&backBufferResource)));
+				ElysiaHelper::AssertIfFailed(m_swapChain->GetBuffer(currBufferIndex, IID_PPV_ARGS(&backBufferResource)));
 
 				D3D12_RENDER_TARGET_VIEW_DESC RTVDecs = {};
 				RTVDecs.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
@@ -183,8 +183,8 @@ namespace ElysiaRenderer
 	{
 		if (bufferCreationDesc.bufferTypeFlags != BufferTypeFlags::SRV)
 		{
-			AssertError("Vertex Buffer的 BufferTypeFlags 不匹配");
-			return;
+			ElysiaHelper::AssertError("Vertex Buffer的 BufferTypeFlags 不匹配");
+			return nullptr;
 		}
 		// CPU-writable/GPU-readable memory
 		auto isHostViewable = bufferCreationDesc.bufferAccessFlags == BufferAccessFlags::HostWritable;
@@ -195,7 +195,7 @@ namespace ElysiaRenderer
 
 		// https://learn.microsoft.com/en-us/windows/win32/api/d3d12/ns-d3d12-d3d12_resource_desc
 		D3D12_RESOURCE_DESC resourceDesc = {};
-		resourceDesc.Width = AlignU64(static_cast<uint64_t>(bufferCreationDesc.m_size), D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
+		resourceDesc.Width = ElysiaHelper::AlignU64(static_cast<uint64_t>(bufferCreationDesc.m_size), D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
 		resourceDesc.Alignment = 0;
 		resourceDesc.Height = 1;
 		resourceDesc.DepthOrArraySize = 1;
@@ -235,8 +235,10 @@ namespace ElysiaRenderer
 
 			m_device->CreateShaderResourceView(vertexBuffer->GetResource(), &SRVDesc, vertexBuffer->GetSRVDescriptor().GetCPUHandle());
 		}
+
+		return vertexBuffer;
 	}
-	std::unique_ptr<DX12Shader>				DX12Device::CreateShader(ShaderCreateDesc& shaderCreateDesc)
+	std::unique_ptr<DX12Shader>				DX12Device::CreateShader(ShaderCreateDesc& shaderCreateDesc, LPCSTR entryPoint)
 	{
 		ID3DBlob* shader = nullptr;
 
@@ -253,13 +255,13 @@ namespace ElysiaRenderer
 		switch (shaderCreateDesc.shaderType)
 		{
 		case ShaderType::Vertex:
-			target = "vs_6_6";
+			target = "vs_5_0";
 			break;
 		case ShaderType::Pixel:
-			target = "ps_6_6";
+			target = "ps_5_0";
 			break;
 		case ShaderType::Compute:
-			target = "cs_6_6";
+			target = "cs_5_0";
 			break;
 
 		default:
@@ -268,15 +270,19 @@ namespace ElysiaRenderer
 		}
 
 		WCHAR assetsPath[512];
-		GetAssetsPath(assetsPath, _countof(assetsPath));
+		ElysiaHelper::GetAssetsPath(assetsPath, _countof(assetsPath));
+		//GetCurrentDirectory(512, assetsPath);
 
 		std::wstring fileName;
-		fileName.append(SHADER_SOURCE_PATH);
+		//fileName.append(SHADER_SOURCE_PATH);
 		fileName.append(shaderCreateDesc.shaderName);
+		
 
-		ThrowIfFailed(D3DCompileFromFile(ElysiaHelper::GetAssetFullPath(assetsPath, fileName).c_str(),
+		auto shaderFullPath = ElysiaHelper::GetAssetFullPath(assetsPath, L"shaders.hlsl").c_str();
+
+		ElysiaHelper::ThrowIfFailed(D3DCompileFromFile(shaderFullPath,
 			nullptr, nullptr,
-			WStringToLPCTSTR(shaderCreateDesc.entryPoint.c_str()), target,
+			"VSMain", "vs_5_0",
 			compileFlags, 0, &shader, nullptr));
 
 		std::unique_ptr<DX12Shader> o = std::make_unique<DX12Shader>(std::move(shader));
@@ -294,14 +300,14 @@ namespace ElysiaRenderer
 		ID3DBlob* signature = nullptr;
 		ID3DBlob* error = nullptr;
 
-		ThrowIfFailed(D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error));
+		ElysiaHelper::ThrowIfFailed(D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error));
 
 		ID3D12RootSignature* rootSignature = nullptr;
-		ThrowIfFailed(m_device->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&rootSignature)));
+		ElysiaHelper::ThrowIfFailed(m_device->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&rootSignature)));
 
 		return std::make_unique<DX12RootSignature>(rootSignature);
 	}
-	std::unique_ptr<DX12PipelineState>		DX12Device::CreatePipelineState(PipelineStateCreateDesc& pipelineStateCreateDesc)
+	std::unique_ptr<DX12GraphicsPipelineState>		DX12Device::CreateGraphicsPipelineState(PipelineStateCreateDesc& pipelineStateCreateDesc)
 	{
 		D3D12_GRAPHICS_PIPELINE_STATE_DESC PSODesc{};
 		if (pipelineStateCreateDesc.m_vertexShader != nullptr)
@@ -316,13 +322,28 @@ namespace ElysiaRenderer
 			PSODesc.PS.BytecodeLength = pipelineStateCreateDesc.m_pixelShader->GetShader()->GetBufferSize();
 		}
 		
-		D3D12_INPUT_ELEMENT_DESC inputElementDescs[] =
-		{
-			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-			{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
-		};
 		PSODesc.InputLayout = { pipelineStateCreateDesc.m_inputElementDesc.data(),
 			static_cast<UINT>(pipelineStateCreateDesc.m_inputElementDesc.size())};
+		PSODesc.pRootSignature = pipelineStateCreateDesc.m_rootSignature->GetSignature();
+		PSODesc.RasterizerState = pipelineStateCreateDesc.m_rasterDesc;
+		PSODesc.BlendState = pipelineStateCreateDesc.m_blendDesc;
+		PSODesc.DepthStencilState = pipelineStateCreateDesc.m_depthStencilDesc;
+		PSODesc.DSVFormat = pipelineStateCreateDesc.m_renderTargetDesc.m_depthStencilFormat;
+		PSODesc.NodeMask = 0;
+		PSODesc.SampleMask = 0xFFFFFFFF;
+		PSODesc.PrimitiveTopologyType = pipelineStateCreateDesc.m_topology;
+		PSODesc.NumRenderTargets = pipelineStateCreateDesc.m_renderTargetDesc.m_numRenderTargets;
+		for (UINT i = 0; i < pipelineStateCreateDesc.m_renderTargetDesc.m_numRenderTargets; ++i)
+		{
+			PSODesc.RTVFormats[i] = pipelineStateCreateDesc.m_renderTargetDesc.m_renderTargetFormats[i];
+		}
+		PSODesc.SampleDesc = pipelineStateCreateDesc.m_sampleDesc;
+
+		ID3D12PipelineState* pipelineState = nullptr;
+		ElysiaHelper::ThrowIfFailed(m_device->CreateGraphicsPipelineState(&PSODesc, IID_PPV_ARGS(&pipelineState)));
+
+		auto graphicsPipeline = std::make_unique<DX12GraphicsPipelineState>(pipelineState);
+		return graphicsPipeline;
 	}
 
 	ContextSubmissionResult DX12Device::SubmitContextWork(DX12Context* context)
@@ -341,7 +362,7 @@ namespace ElysiaRenderer
 			fenceResult = m_copyQueue->ExecuteCommandList(context->GetCommandList());
 			break;
 		default:
-			AssertError("Unsupported submission type.");
+			ElysiaHelper::AssertError("Unsupported submission type.");
 		}
 
 		ContextSubmissionResult submissionResult;
@@ -381,8 +402,8 @@ namespace ElysiaRenderer
 
 			auto resource = currBuffer->GetResource();
 			auto allocation = currBuffer->GetAllocation();
-			SafeRelease(resource);
-			SafeRelease(allocation);
+			ElysiaHelper::SafeRelease(resource);
+			ElysiaHelper::SafeRelease(allocation);
 		}
 	}
 

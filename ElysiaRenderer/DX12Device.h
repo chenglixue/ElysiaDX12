@@ -18,7 +18,6 @@
 
 namespace ElysiaRenderer
 {
-	using namespace ElysiaHelper;
 	using namespace DirectX::SimpleMath;
 
 	struct ContextSubmissionResult
@@ -30,7 +29,7 @@ namespace ElysiaRenderer
 	class DX12Device
 	{
 	public:
-		DX12Device(HWND windowHandle, UINT2 screenSize);
+		DX12Device(HWND windowHandle, ElysiaHelper::UINT2 screenSize);
 		~DX12Device();
 
 		ID3D12Device5* GetDevice()
@@ -53,7 +52,7 @@ namespace ElysiaRenderer
 		{
 			return m_frameID;
 		}
-		UINT2 GetScreenSize() const
+		ElysiaHelper::UINT2 GetScreenSize() const
 		{
 			return m_screenSize;
 		}
@@ -63,10 +62,10 @@ namespace ElysiaRenderer
 		}
 
 		std::unique_ptr<DX12GraphicsContext> CreateGraphicsContext();
-		std::unique_ptr<DX12VertexBuffer> CreateVertexBuffer(const BufferCreationDesc& bufferCreationDesc, void* vertexData);
-		std::unique_ptr<DX12Shader> CreateShader(ShaderCreateDesc& shaderCreateDesc);
+		std::unique_ptr<DX12VertexBuffer>	CreateVertexBuffer(const BufferCreationDesc& bufferCreationDesc, void* vertexData);
+		std::unique_ptr<DX12Shader> CreateShader(ShaderCreateDesc& shaderCreateDesc, LPCSTR entryPoint);
 		std::unique_ptr<DX12RootSignature> CreateRootSignature();
-		std::unique_ptr<DX12PipelineState> CreatePipelineState(PipelineStateCreateDesc& pipelineStateCreateDesc);
+		std::unique_ptr<DX12GraphicsPipelineState> CreateGraphicsPipelineState(PipelineStateCreateDesc& pipelineStateCreateDesc);
 
 		void DestoryContext(std::unique_ptr<DX12Context> context);
 
@@ -98,7 +97,7 @@ namespace ElysiaRenderer
 		void CreateWindowDependentResources();
 		void ProcessDestruction(UINT frameIndex);
 
-		UINT2 m_screenSize;
+		ElysiaHelper::UINT2 m_screenSize;
 		UINT m_frameID;
 
 		ID3D12Device5* m_device = nullptr;

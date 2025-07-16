@@ -5,18 +5,18 @@
 
 namespace ElysiaRenderer
 {
-	enum BufferTypeFlags : uint8_t
+	enum class BufferTypeFlags : uint8_t
 	{
-		None,
-		CBV,
-		SRV,
-		UAV
+		None = 0,
+		CBV = 1,
+		SRV = 2,
+		UAV = 3
 	};
 
-	enum BufferAccessFlags : uint8_t
+	enum class BufferAccessFlags : uint8_t
 	{
-		GPUOnly,
-		HostWritable
+		GPUOnly = 0,
+		HostWritable = 1
 	};
 
 	struct BufferCreationDesc

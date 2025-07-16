@@ -34,6 +34,12 @@ namespace ElysiaRenderer
 		m_commandAllocators[currFrameID]->Reset();
 		m_commandList->Reset(m_commandAllocators[currFrameID], nullptr);
 	}
+	void DX12Context::Reset(ID3D12PipelineState* pipelineState)
+	{
+		UINT currFrameID = m_device->GetFrameID();
+		m_commandAllocators[currFrameID]->Reset();
+		m_commandList->Reset(m_commandAllocators[currFrameID], pipelineState);
+	}
 
 	void DX12Context::AddBarrier(DX12GPUResource& resource, D3D12_RESOURCE_STATES newState)
 	{

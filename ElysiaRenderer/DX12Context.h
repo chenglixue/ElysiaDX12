@@ -4,6 +4,7 @@
 #include "DX12RenderPassDescriptorHeap.h"
 
 
+
 namespace ElysiaRenderer
 {
 	class DX12Device;
@@ -24,6 +25,7 @@ namespace ElysiaRenderer
 		}
 
 		void Reset();
+		void Reset(ID3D12PipelineState* pipelineState);
 		void AddBarrier(DX12GPUResource& resource, D3D12_RESOURCE_STATES newState);
 		void FlushBarrier();
 

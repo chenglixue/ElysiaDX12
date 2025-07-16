@@ -7,21 +7,22 @@ D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12ConstantBuffer.h(6,1): warning C4005: 
       D:\DX12\ElysiaRenderer\packages\Microsoft.Direct3D.D3D12.1.616.1\build\native\include\d3d12.h(854,1):
       see previous definition of 'D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT'
   
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12GraphicsContext.h(8,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12PipelineState.h(7,32): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12RootSignature' when no variable is declared
   (compiling source file 'main.cpp')
   
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.h(66,72): warning C4305: 'argument': truncation from 'double' to 'float'
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12PipelineState.h(8,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Shader' when no variable is declared
   (compiling source file 'main.cpp')
   
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.h(66,67): warning C4305: 'argument': truncation from 'double' to 'float'
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12GraphicsContext.h(9,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
   (compiling source file 'main.cpp')
   
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.h(66,62): warning C4305: 'argument': truncation from 'double' to 'float'
+D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.h(79,72): warning C4305: 'argument': truncation from 'double' to 'float'
   (compiling source file 'main.cpp')
   
-Renderer.obj : error LNK2005: "public: __cdecl ElysiaRenderer::Renderer::Renderer(struct HWND__ *,struct ElysiaHelper::UINT2)" (??0Renderer@ElysiaRenderer@@QEAA@PEAUHWND__@@UUINT2@ElysiaHelper@@@Z) already defined in main.obj
-Renderer.obj : error LNK2005: "public: __cdecl ElysiaRenderer::Renderer::~Renderer(void)" (??1Renderer@ElysiaRenderer@@QEAA@XZ) already defined in main.obj
-Renderer.obj : error LNK2005: "private: void __cdecl ElysiaRenderer::Renderer::RenderClearColor(void)" (?RenderClearColor@Renderer@ElysiaRenderer@@AEAAXXZ) already defined in main.obj
-Renderer.obj : error LNK2005: "private: void __cdecl ElysiaRenderer::Renderer::RenderTriangle(void)" (?RenderTriangle@Renderer@ElysiaRenderer@@AEAAXXZ) already defined in main.obj
-     Creating library D:\DX12\ElysiaRenderer\x64\Debug\ElysiaRenderer.lib and object D:\DX12\ElysiaRenderer\x64\Debug\ElysiaRenderer.exp
-D:\DX12\ElysiaRenderer\x64\Debug\ElysiaRenderer.exe : fatal error LNK1169: one or more multiply defined symbols found
+D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.h(79,67): warning C4305: 'argument': truncation from 'double' to 'float'
+  (compiling source file 'main.cpp')
+  
+D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.h(79,62): warning C4305: 'argument': truncation from 'double' to 'float'
+  (compiling source file 'main.cpp')
+  
+  ElysiaRenderer.vcxproj -> D:\DX12\ElysiaRenderer\x64\Debug\ElysiaRenderer.exe

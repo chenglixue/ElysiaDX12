@@ -3,11 +3,11 @@
 
 namespace ElysiaRenderer
 {
-	enum ShaderType : uint8_t
+	enum class ShaderType : uint8_t
 	{
-		Vertex,
-		Pixel,
-		Compute
+		Vertex = 0,
+		Pixel = 1,
+		Compute = 2
 	};
 
 	struct ShaderCreateDesc

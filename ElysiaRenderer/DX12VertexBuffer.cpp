@@ -19,7 +19,14 @@ namespace ElysiaRenderer
 		D3D12MA::Allocation* allocation)
 		: DX12GPUResource(resource, usageState)
 	{
-		DX12VertexBuffer(resource, usageState, vertexStride, bufferSize);
+		m_SRVDescriptor = {};
+		m_GPUAddress = resource->GetGPUVirtualAddress();
+		m_vertexBufferView.BufferLocation = m_GPUAddress;
+		m_vertexBufferView.SizeInBytes = bufferSize;
+		m_vertexBufferView.StrideInBytes = vertexStride;
+
+		m_mappedBuffer = nullptr;
+		m_resource->Map(0, nullptr, &m_mappedBuffer);
 
 		m_allocation = allocation;
 	}
@@ -34,7 +41,7 @@ namespace ElysiaRenderer
 
 	void DX12VertexBuffer::SetMappedData(const void* bufferData, uint32_t bufferSize)
 	{
-		assert(bufferSize <= m_bufferSize);
+		assert(bufferSize <= m_vertexBufferView.SizeInBytes);
 		memcpy(m_mappedBuffer, bufferData, bufferSize);
 	}
 }

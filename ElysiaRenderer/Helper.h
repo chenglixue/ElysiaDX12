@@ -12,6 +12,12 @@
 
 namespace ElysiaHelper
 {
+    struct UINT2
+    {
+        uint32_t x = 0;
+        uint32_t y = 0;
+    };
+
     inline void AssertIfFailed(HRESULT hr)
     {
         assert(SUCCEEDED(hr));
@@ -27,12 +33,27 @@ namespace ElysiaHelper
         throw std::runtime_error(output);
     }
 
+    inline std::string HrToString(HRESULT hr)
+    {
+        char s_str[64] = {};
+        sprintf_s(s_str, "HRESULT of 0x%08X", static_cast<UINT>(hr));
+        return std::string(s_str);
+    }
+
+    class HrException : public std::runtime_error
+    {
+    public:
+        HrException(HRESULT hr) : std::runtime_error(HrToString(hr)), m_hr(hr) {}
+        HRESULT Error() const { return m_hr; }
+    private:
+        const HRESULT m_hr;
+    };
+
     inline void ThrowIfFailed(HRESULT hr)
     {
         if (FAILED(hr))
         {
-            // Set a breakpoint on this line to catch DirectX API errors
-            throw std::exception();
+            throw HrException(hr);
         }
     }
 
@@ -57,10 +78,9 @@ namespace ElysiaHelper
         }
     }
 
-    // Helper function for resolving the full path of assets.
-    std::wstring GetAssetFullPath(std::wstring assetPath, std::wstring assetName)
+    inline std::wstring GetAssetFullPath(std::wstring assetPath, LPCWSTR assetName)
     {
-        return (assetPath + assetName);
+        return assetPath + assetName;
     }
 
     inline void GetAssetsPath(_Out_writes_(pathSize) WCHAR* path, UINT pathSize)
@@ -84,7 +104,7 @@ namespace ElysiaHelper
         }
     }
 
-    LPCSTR WStringToLPCTSTR(const std::wstring& wstr) 
+    inline LPCSTR WStringToLPCTSTR(const std::wstring& wstr)
     {
         if (wstr.empty()) return "";
 
@@ -95,9 +115,4 @@ namespace ElysiaHelper
         return strTo.c_str();
     }
 
-    struct UINT2
-    {
-        uint32_t x = 0;
-        uint32_t y = 0;
-    };
 }

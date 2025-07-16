@@ -126,16 +126,28 @@
     <ClInclude Include="Definition.h">
       <Filter>Header Files\Helper</Filter>
     </ClInclude>
+    <ClInclude Include="Renderer.h" />
     <ClInclude Include="DX12BufferResource.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\DX12</Filter>
     </ClInclude>
     <ClInclude Include="DX12GraphicsContext.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\DX12</Filter>
     </ClInclude>
     <ClInclude Include="DX12TextureResource.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\DX12</Filter>
     </ClInclude>
-    <ClInclude Include="Renderer.h" />
+    <ClInclude Include="DX12UploadContext.h">
+      <Filter>Header Files\DX12</Filter>
+    </ClInclude>
+    <ClInclude Include="DX12Shader.h">
+      <Filter>Header Files\DX12</Filter>
+    </ClInclude>
+    <ClInclude Include="DX12RootSignature.h">
+      <Filter>Header Files\DX12</Filter>
+    </ClInclude>
+    <ClInclude Include="DX12PipelineState.h">
+      <Filter>Header Files\DX12</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="DXTex\Shaders\Compiled\BC7Encode_TryMode02CS.inc">
@@ -277,16 +289,28 @@
     <ClCompile Include="DX12Context.cpp">
       <Filter>Source Files\DX12</Filter>
     </ClCompile>
+    <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="DX12UploadContext.cpp">
+      <Filter>Source Files\DX12</Filter>
+    </ClCompile>
+    <ClCompile Include="DX12Shader.cpp">
+      <Filter>Source Files\DX12</Filter>
+    </ClCompile>
+    <ClCompile Include="DX12RootSignature.cpp">
+      <Filter>Source Files\DX12</Filter>
+    </ClCompile>
     <ClCompile Include="DX12BufferResource.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\DX12</Filter>
     </ClCompile>
     <ClCompile Include="DX12GraphicsContext.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\DX12</Filter>
     </ClCompile>
     <ClCompile Include="DX12TextureResource.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\DX12</Filter>
     </ClCompile>
-    <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="DX12PipelineState.cpp">
+      <Filter>Source Files\DX12</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CopyFileToFolders Include="dxc\bin\x64\dxcompiler.dll" />

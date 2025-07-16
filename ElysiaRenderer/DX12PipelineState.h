@@ -1,15 +1,46 @@
 #pragma once
 #include "stdafx.h"
-#include "DX12Shader.h"
+//#include "DX12Shader.h"
 
 namespace ElysiaRenderer
 {
+	extern class DX12RootSignature;
+	extern class DX12Shader;
+
+	enum class PipleineType : uint8_t
+	{
+		Graphics = 0,
+		Compute = 1
+	};
+
+	struct RenderTargetDesc
+	{
+		std::array<DXGI_FORMAT, D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT> m_renderTargetFormats{ DXGI_FORMAT_UNKNOWN };
+		uint8_t m_numRenderTargets = 0;
+		DXGI_FORMAT m_depthStencilFormat = DXGI_FORMAT_UNKNOWN;
+	};
+
+	struct PipelineStateCreateDesc
+	{
+		DX12Shader* m_vertexShader;
+		DX12Shader* m_pixelShader;
+		DX12RootSignature* m_rootSignature;
+		D3D12_RASTERIZER_DESC m_rasterDesc{};
+		D3D12_BLEND_DESC m_blendDesc{};
+		D3D12_DEPTH_STENCIL_DESC m_depthStencilDesc{};
+		DXGI_SAMPLE_DESC m_sampleDesc{};
+		D3D12_PRIMITIVE_TOPOLOGY_TYPE m_topology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+		RenderTargetDesc m_renderTargetDesc{};
+		std::vector<D3D12_INPUT_ELEMENT_DESC> m_inputElementDesc;
+		PipleineType m_pipelineStateType = PipleineType::Graphics;
+	};
+
 	class DX12PipelineState
 	{
 	public:
 		DX12PipelineState();
 		DX12PipelineState(ID3D12PipelineState* pipelineState);
-		~DX12PipelineState();
+		virtual ~DX12PipelineState();
 
 		ID3D12PipelineState* GetPipelineState()
 		{
@@ -20,16 +51,20 @@ namespace ElysiaRenderer
 		ID3D12PipelineState* m_pipelineState;
 	};
 
-	struct PipelineStateCreateDesc
+	class DX12GraphicsPipelineState : public DX12PipelineState
 	{
-		DX12Shader* m_vertexShader;
-		DX12Shader* m_pixelShader;
-		D3D12_RASTERIZER_DESC m_rasterDesc;
-		D3D12_BLEND_DESC m_blendDesc;
-		D3D12_DEPTH_STENCIL_DESC m_depthStencilDesc;
-		DXGI_SAMPLE_DESC m_sampleDesc;
-		D3D12_PRIMITIVE_TOPOLOGY_TYPE m_topology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-		std::vector<D3D12_INPUT_ELEMENT_DESC> m_inputElementDesc;
+	public:
+		DX12GraphicsPipelineState();
+		DX12GraphicsPipelineState(ID3D12PipelineState* pipelineState);
+		~DX12GraphicsPipelineState() override;
+
+		PipleineType GetPipelineType()
+		{
+			return m_pipelineType;
+		}
+
+	private:
+		PipleineType m_pipelineType;
 	};
 
 	inline static PipelineStateCreateDesc CreateDefaultPipelineStateCreateDesc()

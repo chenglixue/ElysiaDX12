@@ -7,7 +7,7 @@ namespace ElysiaRenderer
 	class Renderer
 	{
 	public:
-		Renderer(HWND windowHandle, UINT2 screenSize);
+		Renderer(HWND windowHandle, ElysiaHelper::UINT2 screenSize);
 		~Renderer();
 
 		void Init();
@@ -33,10 +33,10 @@ namespace ElysiaRenderer
 		std::unique_ptr<DX12Shader> m_vertexShader = nullptr;
 		std::unique_ptr<DX12Shader> m_pixelShader = nullptr;
 		std::unique_ptr<DX12Shader> m_computeShader = nullptr;
-		std::unique_ptr<DX12PipelineState> m_pipelineState = nullptr;
+		std::unique_ptr<DX12GraphicsPipelineState> m_graphicsPipelineState = nullptr;
 	};
 
-	Renderer::Renderer(HWND windowHandle, UINT2 screenSize)
+	Renderer::Renderer(HWND windowHandle, ElysiaHelper::UINT2 screenSize)
 	{
 		m_device = std::make_unique<DX12Device>(windowHandle, screenSize);
 		m_graphicsContext = m_device->CreateGraphicsContext();
@@ -98,8 +98,8 @@ namespace ElysiaRenderer
 		triangleVertices[2].color = { 0, 0, 1 };
 
 		BufferCreationDesc vertexBufferCreationDesc{};
-		vertexBufferCreationDesc.m_size = sizeof(triangleVertices);
 		vertexBufferCreationDesc.m_stride = sizeof(TriangleVertex);
+		vertexBufferCreationDesc.m_size = sizeof(triangleVertices);
 		vertexBufferCreationDesc.bufferAccessFlags = BufferAccessFlags::HostWritable;
 		vertexBufferCreationDesc.bufferTypeFlags = BufferTypeFlags::SRV;
 		vertexBufferCreationDesc.m_isRawAccess = false;
@@ -108,31 +108,53 @@ namespace ElysiaRenderer
 
 		m_rootSignature = std::move(m_device->CreateRootSignature());
 
+
+		Microsoft::WRL::ComPtr<ID3DBlob> vertexShader;
+		Microsoft::WRL::ComPtr<ID3DBlob> pixelShader;
+		ID3DBlob* errorBlob;
+
+#if defined(_DEBUG)
+		// Enable better shader debugging with the graphics debugging tools.
+		UINT compileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+#else
+		UINT compileFlags = 0;
+#endif
+
+		WCHAR tempAssetsPath[512];
+		ElysiaHelper::GetAssetsPath(tempAssetsPath, _countof(tempAssetsPath));
+		std::wstring assetPath = tempAssetsPath;
+		auto HR = (D3DCompileFromFile(ElysiaHelper::GetAssetFullPath(assetPath, L"shaders.hlsl").c_str(), nullptr, nullptr,
+			"VSMain", "vs_5_0", compileFlags, 0, &vertexShader, &errorBlob));
+		if (FAILED(HR))
+		{
+			ElysiaHelper::AssertError("Failed to get compilation result.");
+		}
+
 		ShaderCreateDesc VSShaderCreateDesc{};
 		VSShaderCreateDesc.shaderName = L"DrawTriangle.hlsl";
-		VSShaderCreateDesc.entryPoint = L"VS";
+		VSShaderCreateDesc.entryPoint = L"VSMain";
 		VSShaderCreateDesc.shaderType = ShaderType::Vertex;
 
-		m_vertexShader = std::move(m_device->CreateShader(VSShaderCreateDesc));
+		m_vertexShader = std::move(m_device->CreateShader(VSShaderCreateDesc, "VSMain"));
 
 		ShaderCreateDesc PSShaderCreateDesc{};
 		PSShaderCreateDesc.shaderName = L"DrawTriangle.hlsl";
-		PSShaderCreateDesc.entryPoint = L"PS";
+		PSShaderCreateDesc.entryPoint = L"PSMain";
 		PSShaderCreateDesc.shaderType = ShaderType::Pixel;
-		m_pixelShader = std::move(m_device->CreateShader(PSShaderCreateDesc));
+		m_pixelShader = std::move(m_device->CreateShader(PSShaderCreateDesc, "PSMain"));
 
 		PipelineStateCreateDesc pipelineStateCreateDesc = std::move(CreateDefaultPipelineStateCreateDesc());
 		pipelineStateCreateDesc.m_vertexShader = m_vertexShader.get();
 		pipelineStateCreateDesc.m_pixelShader = m_pixelShader.get();
 
-		m_pipelineState = std::move(m_device->CreatePipelineState(pipelineStateCreateDesc));
+		m_graphicsPipelineState = std::move(m_device->CreateGraphicsPipelineState(pipelineStateCreateDesc));
 	}
 	void Renderer::RenderTriangle()
 	{
 		m_device->BeginFrame();
 
 		auto& currBackBuffer = m_device->GetCurrBackBuffer();
-		m_graphicsContext->Reset();
+		m_graphicsContext->Reset(m_graphicsPipelineState->GetPipelineState());
 		m_graphicsContext->AddBarrier(currBackBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET);
 		m_graphicsContext->FlushBarrier();
 	}

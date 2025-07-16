@@ -3,8 +3,6 @@
 
 namespace ElysiaRenderer
 {
-	constexpr uint32_t INVALID_RESOURCE_TABLE_INDEX = UINT_MAX;
-
 	class DX12GPUResource
 	{
 	public:

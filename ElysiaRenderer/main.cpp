@@ -36,7 +36,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam)
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, int nShowCmd)
 {
 	std::wstring applicationName = L"Elysia Renderer";
-	UINT2 windowSize = { 1920, 1080 };
+	ElysiaHelper::UINT2 windowSize = { 1920, 1080 };
 	HINSTANCE moduleHandle = GetModuleHandle(nullptr);
 
 	WNDCLASSEX wc = { 0 };

@@ -2,6 +2,7 @@
 #include "DX12Context.h"
 #include "stdafx.h"
 #include "DX12TextureResource.h"
+#include "DX12PipelineState.h"
 
 namespace ElysiaRenderer
 {
@@ -17,10 +18,15 @@ namespace ElysiaRenderer
 		void ClearRenderTarget(const DX12TextureResource& renderTarget, Color color);
 		void ClearDepthStencilTarget(const DX12TextureResource& renderTarget, float depth, uint8_t stencil);
 
+		void SetPipeline(DX12PipelineState& graphicsPipelineState)
+		{
+			//if()
+		}
 		void SetDefaultViewportAndScissor(ElysiaHelper::UINT2 screenSize);
 		void SetViewport(D3D12_VIEWPORT& viewPort);
 		void SetScissorRect(D3D12_RECT& rect);
 
 	private:
+		
 	};
 }

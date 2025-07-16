@@ -31,7 +31,6 @@ namespace ElysiaRenderer
 	private:
 		D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;
 		DX12DescriptorHeapHandle m_SRVDescriptor;
-		uint32_t m_bufferSize;
 		void* m_mappedBuffer;
 	};
 }
