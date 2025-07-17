@@ -1,12 +1,13 @@
 #pragma once
 #include "stdafx.h"
 //#include "DX12Shader.h"
+#include "DX12TextureResource.h"
 
 namespace ElysiaRenderer
 {
 	extern class DX12RootSignature;
 	extern class DX12Shader;
-	extern class DX12TextureResource;
+	//extern class DX12TextureResource;
 
 	enum class PipleineType : uint8_t
 	{
@@ -37,12 +38,6 @@ namespace ElysiaRenderer
 		PipleineType m_pipelineStateType = PipleineType::Graphics;
 	};
 
-	struct PipelineStateData
-	{
-		DX12PipelineState* m_pipelineState;
-		std::vector<DX12TextureResource*> m_renderTargets;
-	};
-
 	class DX12PipelineState
 	{
 	public:
@@ -64,7 +59,7 @@ namespace ElysiaRenderer
 			return m_pipelineType;
 		}
 
-	private:
+	protected:
 		ID3D12PipelineState* m_pipelineState;
 		ID3D12RootSignature* m_rootSignature;
 		PipleineType m_pipelineType;
@@ -86,12 +81,18 @@ namespace ElysiaRenderer
 		DX12TextureResource* m_depthStencilRT = nullptr;
 	};
 
+	struct PipelineStateData
+	{
+		DX12PipelineState* m_pipelineState;
+		std::vector<DX12TextureResource*> m_renderTargets;
+	};
+
 	inline static RenderTargetDesc CreateDefaultRenderTargetDesc()
 	{
 		RenderTargetDesc desc{};
-		desc.m_renderTargetFormats.fill(DXGI_FORMAT_R8G8B8A8_UNORM);
+		desc.m_renderTargetFormats.fill(DXGI_FORMAT_UNKNOWN);
 		desc.m_numRenderTargets = 1;
-		desc.m_depthStencilFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
+		desc.m_depthStencilFormat = DXGI_FORMAT_UNKNOWN;
 		return desc;
 	}
 
@@ -104,9 +105,9 @@ namespace ElysiaRenderer
 		desc.m_rasterDesc.DepthBias = D3D12_DEFAULT_DEPTH_BIAS;
 		desc.m_rasterDesc.DepthBiasClamp = D3D12_DEFAULT_DEPTH_BIAS_CLAMP;
 		desc.m_rasterDesc.SlopeScaledDepthBias = D3D12_DEFAULT_SLOPE_SCALED_DEPTH_BIAS;
-		desc.m_rasterDesc.DepthClipEnable = true;
-		desc.m_rasterDesc.MultisampleEnable = false;
-		desc.m_rasterDesc.AntialiasedLineEnable = false;
+		desc.m_rasterDesc.DepthClipEnable = TRUE;
+		desc.m_rasterDesc.MultisampleEnable = FALSE;
+		desc.m_rasterDesc.AntialiasedLineEnable = FALSE;
 		desc.m_rasterDesc.ForcedSampleCount = 0;
 		desc.m_rasterDesc.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
 
@@ -114,7 +115,7 @@ namespace ElysiaRenderer
 		desc.m_blendDesc.IndependentBlendEnable = false;
 		const D3D12_RENDER_TARGET_BLEND_DESC defaultRenderTargetBlendDesc =
 		{
-			false, false,
+			FALSE, FALSE,
 			D3D12_BLEND_ONE, D3D12_BLEND_ZERO, D3D12_BLEND_OP_ADD,
 			D3D12_BLEND_ONE, D3D12_BLEND_ZERO, D3D12_BLEND_OP_ADD,
 			D3D12_LOGIC_OP_NOOP,
@@ -125,22 +126,23 @@ namespace ElysiaRenderer
 			desc.m_blendDesc.RenderTarget[i] = defaultRenderTargetBlendDesc;
 		}
 
-		desc.m_depthStencilDesc.DepthEnable = true;
-		desc.m_depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
-		desc.m_depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+		desc.m_depthStencilDesc.DepthEnable = false;
+		/*desc.m_depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
+		desc.m_depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS;*/
 		desc.m_depthStencilDesc.StencilEnable = false;
-		desc.m_depthStencilDesc.StencilReadMask = D3D12_DEFAULT_STENCIL_READ_MASK;
-		desc.m_depthStencilDesc.StencilWriteMask = D3D12_DEFAULT_STENCIL_WRITE_MASK;
+		/*desc.m_depthStencilDesc.StencilReadMask = D3D12_DEFAULT_STENCIL_READ_MASK;
+		desc.m_depthStencilDesc.StencilWriteMask = D3D12_DEFAULT_STENCIL_WRITE_MASK;*/
 
 		const D3D12_DEPTH_STENCILOP_DESC defaultStencilOp =
 		{ D3D12_STENCIL_OP_KEEP, D3D12_STENCIL_OP_KEEP, D3D12_STENCIL_OP_KEEP, D3D12_COMPARISON_FUNC_ALWAYS };
-		desc.m_depthStencilDesc.FrontFace = defaultStencilOp;
-		desc.m_depthStencilDesc.BackFace = defaultStencilOp;
+		/*desc.m_depthStencilDesc.FrontFace = defaultStencilOp;
+		desc.m_depthStencilDesc.BackFace = defaultStencilOp;*/
 
 		desc.m_sampleDesc.Count = 1;
 		desc.m_sampleDesc.Quality = 0;
 
-		desc.m_renderTargetDesc = CreateDefaultRenderTargetDesc();
+		desc.m_renderTargetDesc.m_numRenderTargets = 1;
+		desc.m_renderTargetDesc.m_renderTargetFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 
 		return desc;
 	}

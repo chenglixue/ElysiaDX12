@@ -17,6 +17,11 @@ namespace ElysiaHelper
         uint32_t x = 0;
         uint32_t y = 0;
     };
+    struct FLOAT2
+    {
+        float x = 0;
+        float y = 0;
+    };
 
     inline void AssertIfFailed(HRESULT hr)
     {
@@ -77,6 +82,14 @@ namespace ElysiaHelper
             ppT = nullptr;
         }
     }
+    /*template <class T> void SafeRelease(T* ppT)
+    {
+        if (ppT)
+        {
+            ppT->Release();
+            ppT = nullptr;
+        }
+    }*/
 
     inline std::wstring GetAssetFullPath(std::wstring assetPath, LPCWSTR assetName)
     {

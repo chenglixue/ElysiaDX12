@@ -27,6 +27,9 @@ namespace ElysiaRenderer
 		void SetPrimitiveTopology(D3D12_PRIMITIVE_TOPOLOGY topology);
 		void SetVertexBuffer(UINT startIndex, UINT numVertexBuffer, D3D12_VERTEX_BUFFER_VIEW& vertexBufferView);
 
+		void Draw(UINT vertexCount, UINT vertexStartOffset);
+		void DrawInstanced(UINT vertexCount, UINT instanceCount, UINT vertexStartOffset, UINT startInstanceLocation);
+
 	private:
 		DX12GraphicsPipelineState* m_graphicsPipelineState = nullptr;
 	};

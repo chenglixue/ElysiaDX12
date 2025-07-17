@@ -12,5 +12,6 @@ namespace ElysiaRenderer
 	DX12GPUResource::~DX12GPUResource()
 	{
 		ElysiaHelper::SafeRelease(m_resource);
+		ElysiaHelper::SafeRelease(m_allocation);
 	}
 }

@@ -15,6 +15,11 @@ namespace ElysiaRenderer
 		{
 			ProcessDestruction(i);
 		}
+
+		ElysiaHelper::SafeRelease(m_device);
+		ElysiaHelper::SafeRelease(m_DXGIFactory);
+		ElysiaHelper::SafeRelease(m_swapChain);
+		ElysiaHelper::SafeRelease(m_allocator);
 	}
 
 	void DX12Device::InitializeDeviceResources(HWND windowHandle)
@@ -32,6 +37,8 @@ namespace ElysiaRenderer
 
 				ElysiaHelper::SafeRelease(debugController);
 			}
+
+			
 #endif
 		}
 		
@@ -95,6 +102,10 @@ namespace ElysiaRenderer
 				D3D12MA::CreateAllocator(&allocatorDesc, &m_allocator);
 			}
 		}
+
+#if defined(_DEBUG)
+		
+#endif
 
 		// Create Queue
 		{
@@ -179,7 +190,7 @@ namespace ElysiaRenderer
 
 		return graphicsContext;
 	}
-	std::unique_ptr<DX12VertexBuffer>		DX12Device::CreateVertexBuffer(const BufferCreationDesc& bufferCreationDesc, void* vertexData)
+	std::unique_ptr<DX12VertexBuffer>		DX12Device::CreateVertexBuffer(const BufferCreationDesc& bufferCreationDesc)
 	{
 		if (bufferCreationDesc.bufferTypeFlags != BufferTypeFlags::SRV)
 		{
@@ -195,7 +206,7 @@ namespace ElysiaRenderer
 
 		// https://learn.microsoft.com/en-us/windows/win32/api/d3d12/ns-d3d12-d3d12_resource_desc
 		D3D12_RESOURCE_DESC resourceDesc = {};
-		resourceDesc.Width = ElysiaHelper::AlignU64(static_cast<uint64_t>(bufferCreationDesc.m_size), D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
+		resourceDesc.Width = ElysiaHelper::AlignU32(static_cast<uint32_t>(bufferCreationDesc.m_size), D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
 		resourceDesc.Alignment = 0;
 		resourceDesc.Height = 1;
 		resourceDesc.DepthOrArraySize = 1;
@@ -208,8 +219,8 @@ namespace ElysiaRenderer
 
 		D3D12MA::Allocation* allocation = nullptr;
 		ID3D12Resource* resource = nullptr;
-		m_allocator->CreateResource(&allocationDesc, &resourceDesc, usageState, nullptr,
-			&allocation, IID_PPV_ARGS(&resource));
+		ElysiaHelper::ThrowIfFailed(m_allocator->CreateResource(&allocationDesc, &resourceDesc, usageState, nullptr,
+			&allocation, IID_PPV_ARGS(&resource)));
 
 		auto vertexBuffer = std::make_unique<DX12VertexBuffer>(resource, usageState, bufferCreationDesc.m_stride, bufferCreationDesc.m_size, allocation);
 		
@@ -227,18 +238,16 @@ namespace ElysiaRenderer
 			SRVDesc.Buffer.StructureByteStride = vertexBuffer->GetVertexBufferView().StrideInBytes;
 			SRVDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
 
-			vertexBuffer->SetMappedData(&vertexData, bufferCreationDesc.m_size);
-
-			vertexBuffer->SetSRVDescriptor(std::move(m_SRVStagingDescriptorHeap->NewDescriptorHeapHandle()));
+			//vertexBuffer->SetSRVDescriptor(std::move(m_SRVStagingDescriptorHeap->NewDescriptorHeapHandle()));
 			/*vertexBuffer->SetDescriptorHeapIndex(m_freeReservedDescriptorIndices.back());
 			m_freeReservedDescriptorIndices.pop_back();*/
 
-			m_device->CreateShaderResourceView(vertexBuffer->GetResource(), &SRVDesc, vertexBuffer->GetSRVDescriptor().GetCPUHandle());
+			//m_device->CreateShaderResourceView(vertexBuffer->GetResource(), &SRVDesc, vertexBuffer->GetSRVDescriptor().GetCPUHandle());
 		}
 
 		return vertexBuffer;
 	}
-	std::unique_ptr<DX12Shader>				DX12Device::CreateShader(ShaderCreateDesc& shaderCreateDesc, LPCSTR entryPoint)
+	std::unique_ptr<DX12Shader>				DX12Device::CreateShader(ShaderCreateDesc& shaderCreateDesc)
 	{
 		ID3DBlob* shader = nullptr;
 
@@ -255,13 +264,20 @@ namespace ElysiaRenderer
 		switch (shaderCreateDesc.shaderType)
 		{
 		case ShaderType::Vertex:
+		{
 			target = "vs_5_0";
+		}
+			
 			break;
 		case ShaderType::Pixel:
+		{
 			target = "ps_5_0";
+		}
 			break;
 		case ShaderType::Compute:
+		{
 			target = "cs_5_0";
+		}
 			break;
 
 		default:
@@ -272,16 +288,13 @@ namespace ElysiaRenderer
 		WCHAR assetsPath[512];
 		ElysiaHelper::GetAssetsPath(assetsPath, _countof(assetsPath));
 
-		auto shaderFullPath = ElysiaHelper::GetAssetFullPath(assetsPath, shaderCreateDesc.shaderName).c_str();
+		//auto shaderFullPath = ElysiaHelper::GetAssetFullPath(assetsPath, shaderCreateDesc.shaderName).c_str();
 
 		auto compleHR = D3DCompileFromFile(ElysiaHelper::GetAssetFullPath(assetsPath, shaderCreateDesc.shaderName).c_str(),
 			nullptr, nullptr,
 			shaderCreateDesc.entryPoint, target,
 			compileFlags, 0, &shader, nullptr);
-		if (FAILED(compleHR))
-		{
-			ElysiaHelper::AssertError("Failed to get compilation result.");
-		}
+		ElysiaHelper::ThrowIfFailed(compleHR);
 
 		std::unique_ptr<DX12Shader> o = std::make_unique<DX12Shader>(std::move(shader));
 		return o;
@@ -326,9 +339,9 @@ namespace ElysiaRenderer
 		PSODesc.RasterizerState = pipelineStateCreateDesc.m_rasterDesc;
 		PSODesc.BlendState = pipelineStateCreateDesc.m_blendDesc;
 		PSODesc.DepthStencilState = pipelineStateCreateDesc.m_depthStencilDesc;
-		PSODesc.DSVFormat = pipelineStateCreateDesc.m_renderTargetDesc.m_depthStencilFormat;
+		//PSODesc.DSVFormat = pipelineStateCreateDesc.m_renderTargetDesc.m_depthStencilFormat;
 		PSODesc.NodeMask = 0;
-		PSODesc.SampleMask = 0xFFFFFFFF;
+		PSODesc.SampleMask = UINT_MAX;
 		PSODesc.PrimitiveTopologyType = pipelineStateCreateDesc.m_topology;
 		PSODesc.NumRenderTargets = pipelineStateCreateDesc.m_renderTargetDesc.m_numRenderTargets;
 		for (UINT i = 0; i < pipelineStateCreateDesc.m_renderTargetDesc.m_numRenderTargets; ++i)
@@ -338,11 +351,7 @@ namespace ElysiaRenderer
 		PSODesc.SampleDesc = pipelineStateCreateDesc.m_sampleDesc;
 
 		ID3D12PipelineState* pipelineState = nullptr;
-		auto createPipelineStateHR = m_device->CreateGraphicsPipelineState(&PSODesc, IID_PPV_ARGS(&pipelineState));
-		if (FAILED(createPipelineStateHR))
-		{
-			ElysiaHelper::AssertError("Failed to create graphics pipeline state.");
-		}
+		ElysiaHelper::ThrowIfFailed(m_device->CreateGraphicsPipelineState(&PSODesc, IID_PPV_ARGS(&pipelineState)));
 
 		auto graphicsPipeline = std::make_unique<DX12GraphicsPipelineState>(pipelineState, PSODesc.pRootSignature);
 		return graphicsPipeline;
@@ -380,33 +389,63 @@ namespace ElysiaRenderer
 	{
 		m_destructionQueues[m_frameID].m_contexts.push_back(std::move(context));
 	}
+	void DX12Device::DestoryBuffer(std::unique_ptr<DX12GPUResource> buffer)
+	{
+		m_destructionQueues[m_frameID].m_buffers.push_back(std::move(buffer));
+	}
+	void DX12Device::DestoryPipelineState(std::unique_ptr<DX12PipelineState> pipelineState)
+	{
+		m_destructionQueues[m_frameID].m_pipelineStates.push_back(std::move(pipelineState));
+	}
+	void DX12Device::DestoryShader(std::unique_ptr<DX12Shader> shader)
+	{
+		auto tempShader = shader->GetShader();
+		ElysiaHelper::SafeRelease(tempShader);
+	}
 
 	void DX12Device::ProcessDestruction(UINT frameIndex)
 	{
 		auto& currFrameDestrctuionQueue = m_destructionQueues[frameIndex];
 
-		for (auto& currBuffer : currFrameDestrctuionQueue.m_buffers)
+		for (auto& currBuffer : m_destructionQueues[frameIndex].m_buffers)
 		{
-			if (currBuffer->GetCBVDescriptor().IsValid())
+			switch (currBuffer->GetBufferType())
 			{
-				m_SRVStagingDescriptorHeap->FreeDescriptorHeapHandle(currBuffer->GetCBVDescriptor());
+				case BufferType::Vertex:
+				{
+					auto vertexBuffer = dynamic_cast<DX12VertexBuffer*>(currBuffer.get());
+					if (vertexBuffer->GetSRVDescriptor().IsValid())
+					{
+						m_SRVStagingDescriptorHeap->FreeDescriptorHeapHandle(vertexBuffer->GetSRVDescriptor());
+					}
+					if (vertexBuffer->GetMappedBuffer() != nullptr)
+					{
+						vertexBuffer->GetResource()->Unmap(0, nullptr);
+					}
+					break;
+				}
+				default:
+					ElysiaHelper::AssertError("buffer type none");
+					break;
 			}
-			if (currBuffer->GetSRVDescriptor().IsValid())
-			{
-				m_SRVStagingDescriptorHeap->FreeDescriptorHeapHandle(currBuffer->GetSRVDescriptor());
-			}
-			if (currBuffer->GetMappedResource() != nullptr)
-			{
-				currBuffer->GetResource()->Unmap(0, nullptr);
-			}
-
-			currFrameDestrctuionQueue.m_contexts.clear();
 
 			auto resource = currBuffer->GetResource();
 			auto allocation = currBuffer->GetAllocation();
 			ElysiaHelper::SafeRelease(resource);
 			ElysiaHelper::SafeRelease(allocation);
 		}
+
+		for (auto& currPipelineState : m_destructionQueues[frameIndex].m_pipelineStates)
+		{
+			auto signature = currPipelineState->GetRootSignature();
+			auto pipelineState = currPipelineState->GetRootSignature();
+			ElysiaHelper::SafeRelease(signature);
+			ElysiaHelper::SafeRelease(pipelineState);
+		}
+
+		currFrameDestrctuionQueue.m_contexts.clear();
+		currFrameDestrctuionQueue.m_buffers.clear();
+		currFrameDestrctuionQueue.m_pipelineStates.clear();
 	}
 
 	void DX12Device::BeginFrame()

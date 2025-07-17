@@ -3,12 +3,24 @@
 
 namespace ElysiaRenderer
 {
+	enum class BufferType : uint8_t
+	{
+		 None = 0,
+		 Vertex = 1,
+		 Constant = 2,
+		 Texture = 3
+	};
+
 	class DX12GPUResource
 	{
 	public:
 		DX12GPUResource(ID3D12Resource* resource, D3D12_RESOURCE_STATES usageState);
 		virtual ~DX12GPUResource();
 
+		BufferType GetBufferType()
+		{
+			return m_bufferType;
+		}
 		ID3D12Resource* GetResource()
 		{
 			return m_resource;
@@ -69,5 +81,6 @@ namespace ElysiaRenderer
 		D3D12_RESOURCE_STATES m_usageState = D3D12_RESOURCE_STATE_COMMON;
 		bool m_isReady = false;
 		UINT m_descriptorHeapIndex = INVALID_RESOURCE_TABLE_INDEX;
+		BufferType m_bufferType = BufferType::None;
 	};
 }

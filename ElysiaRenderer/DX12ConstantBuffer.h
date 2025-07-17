@@ -3,7 +3,6 @@
 #include "DX12GPUResource.h"
 #include "DX12DescriptorHeapHandle.h"
 
-#define D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT
 
 namespace ElysiaRenderer
 {

@@ -28,9 +28,6 @@ namespace ElysiaRenderer
 	}
 	DX12DescriptorHeap::~DX12DescriptorHeap()
 	{
-		m_descriptorHeap->Release();
-		m_descriptorHeap = nullptr;
-
-
+		ElysiaHelper::SafeRelease(m_descriptorHeap);
 	}
 }

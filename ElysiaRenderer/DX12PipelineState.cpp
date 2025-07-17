@@ -22,6 +22,7 @@ namespace ElysiaRenderer
 	DX12PipelineState::~DX12PipelineState()
 	{
 		ElysiaHelper::SafeRelease(m_pipelineState);
+		ElysiaHelper::SafeRelease(m_rootSignature);
 	}
 
 
@@ -40,5 +41,7 @@ namespace ElysiaRenderer
 	}
 	DX12GraphicsPipelineState::~DX12GraphicsPipelineState()
 	{
+		//ElysiaHelper::SafeRelease(m_pipelineState);
+		//ElysiaHelper::SafeRelease(m_depthStencilRT);
 	}
 }

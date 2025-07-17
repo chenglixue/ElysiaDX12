@@ -62,12 +62,15 @@ namespace ElysiaRenderer
 		}
 
 		std::unique_ptr<DX12GraphicsContext> CreateGraphicsContext();
-		std::unique_ptr<DX12VertexBuffer>	CreateVertexBuffer(const BufferCreationDesc& bufferCreationDesc, void* vertexData);
-		std::unique_ptr<DX12Shader> CreateShader(ShaderCreateDesc& shaderCreateDesc, LPCSTR entryPoint);
+		std::unique_ptr<DX12VertexBuffer>	CreateVertexBuffer(const BufferCreationDesc& bufferCreationDesc);
+		std::unique_ptr<DX12Shader> CreateShader(ShaderCreateDesc& shaderCreateDesc);
 		std::unique_ptr<DX12RootSignature> CreateRootSignature();
 		std::unique_ptr<DX12GraphicsPipelineState> CreateGraphicsPipelineState(PipelineStateCreateDesc& pipelineStateCreateDesc);
 
 		void DestoryContext(std::unique_ptr<DX12Context> context);
+		void DestoryBuffer(std::unique_ptr<DX12GPUResource> buffer);
+		void DestoryPipelineState(std::unique_ptr<DX12PipelineState> pipelineState);
+		void DestoryShader(std::unique_ptr<DX12Shader> shader);
 
 		ContextSubmissionResult SubmitContextWork(DX12Context* context);
 
@@ -88,9 +91,10 @@ namespace ElysiaRenderer
 
 		struct DestructionQueue
 		{
-			std::vector<std::unique_ptr<DX12BufferResource>> m_buffers;
+			std::vector<std::unique_ptr<DX12GPUResource>> m_buffers;
 			std::vector<std::unique_ptr<DX12TextureResource>> m_textures;
 			std::vector<std::unique_ptr<DX12Context>> m_contexts;
+			std::vector<std::unique_ptr<DX12PipelineState>> m_pipelineStates;
 		};
 
 		void InitializeDeviceResources(HWND windowHandle);
