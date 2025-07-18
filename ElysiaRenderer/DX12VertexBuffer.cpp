@@ -6,7 +6,7 @@ namespace ElysiaRenderer
 		: DX12GPUResource(resource, usageState)
 	{
 		m_bufferType = BufferType::Vertex;
-		m_SRVDescriptor = {};
+		//m_SRVDescriptor = {};
 		m_GPUAddress = resource->GetGPUVirtualAddress();
 		m_vertexBufferView.BufferLocation = m_GPUAddress;
 		m_vertexBufferView.SizeInBytes = bufferSize;
@@ -21,7 +21,7 @@ namespace ElysiaRenderer
 		: DX12GPUResource(resource, usageState)
 	{
 		m_bufferType = BufferType::Vertex;
-		m_SRVDescriptor = {};
+		//m_SRVDescriptor = {};
 		m_GPUAddress = resource->GetGPUVirtualAddress();
 		m_vertexBufferView.BufferLocation = m_GPUAddress;
 		m_vertexBufferView.SizeInBytes = bufferSize;

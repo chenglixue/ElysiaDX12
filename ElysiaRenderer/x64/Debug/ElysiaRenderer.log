@@ -1,5 +1,4 @@
-﻿  D3D12Lite.cpp
-  DX12Context.cpp
+﻿  DX12Context.cpp
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
   (compiling source file 'DX12Context.cpp')
   
@@ -25,6 +24,8 @@ D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12PipelineState.h(9,25): warning C4091: 
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12GraphicsContext.h(9,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
   (compiling source file 'DX12Device.cpp')
   
+  DX12RootSignature.cpp
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12RootSignature.cpp(124,21): warning C4018: '<': signed/unsigned mismatch
   main.cpp
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
   (compiling source file 'main.cpp')
@@ -38,13 +39,13 @@ D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12PipelineState.h(9,25): warning C4091: 
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12GraphicsContext.h(9,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
   (compiling source file 'main.cpp')
   
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.h(149,72): warning C4305: 'argument': truncation from 'double' to 'float'
+D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.h(200,72): warning C4305: 'argument': truncation from 'double' to 'float'
   (compiling source file 'main.cpp')
   
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.h(149,67): warning C4305: 'argument': truncation from 'double' to 'float'
+D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.h(200,67): warning C4305: 'argument': truncation from 'double' to 'float'
   (compiling source file 'main.cpp')
   
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.h(149,62): warning C4305: 'argument': truncation from 'double' to 'float'
+D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.h(200,62): warning C4305: 'argument': truncation from 'double' to 'float'
   (compiling source file 'main.cpp')
   
   Generating Code...

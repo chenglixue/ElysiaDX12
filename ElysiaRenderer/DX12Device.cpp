@@ -103,10 +103,6 @@ namespace ElysiaRenderer
 			}
 		}
 
-#if defined(_DEBUG)
-		
-#endif
-
 		// Create Queue
 		{
 			m_graphicsQueue = std::make_unique<DX12Queue>(m_device, D3D12_COMMAND_LIST_TYPE_DIRECT);
@@ -157,7 +153,6 @@ namespace ElysiaRenderer
 		m_freeReservedDescriptorIndices.resize(NUM_RESERVED_SRV_DESCRIPTORS - 1);
 		std::iota(m_freeReservedDescriptorIndices.begin(), m_freeReservedDescriptorIndices.end(), 1);
 	}
-
 	void DX12Device::CreateWindowDependentResources()
 	{
 		// Create Render Target
@@ -182,6 +177,10 @@ namespace ElysiaRenderer
 				m_backBuffers[currBufferIndex]->SetRTVDescriptor(currBackBufferRTVHandle);
 			}
 		}
+	}
+	void DX12Device::CreateSamplers()
+	{
+
 	}
 
 	std::unique_ptr<DX12GraphicsContext>	DX12Device::CreateGraphicsContext()
@@ -299,24 +298,26 @@ namespace ElysiaRenderer
 		std::unique_ptr<DX12Shader> o = std::make_unique<DX12Shader>(std::move(shader));
 		return o;
 	}
-	std::unique_ptr<DX12RootSignature>		DX12Device::CreateRootSignature()
+	std::unique_ptr<DX12RootSignature>		DX12Device::CreateRootSignature(RootSignatureCreatDesc& rootSignatureCreatDesc)
 	{
-		D3D12_ROOT_SIGNATURE_DESC rootSignatureDesc{};
-		rootSignatureDesc.NumParameters = 0;
-		rootSignatureDesc.pParameters = nullptr;
-		rootSignatureDesc.NumStaticSamplers = 0;
-		rootSignatureDesc.pStaticSamplers = nullptr;
-		rootSignatureDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+		auto rootSignature = std::make_unique<DX12RootSignature>();
 
-		ID3DBlob* signature = nullptr;
-		ID3DBlob* error = nullptr;
+		D3D12_SAMPLER_DESC samplerDesc = {};
+		samplerDesc.Filter = D3D12_FILTER_MIN_MAG_MIP_POINT;
+		samplerDesc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+		samplerDesc.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+		samplerDesc.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+		samplerDesc.MipLODBias = 0;
+		samplerDesc.MaxAnisotropy = 0;
+		samplerDesc.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
+		//samplerDesc.BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
+		samplerDesc.MinLOD = 0;
+		samplerDesc.MaxLOD = D3D12_FLOAT32_MAX;
+		rootSignature->InitStaticSamplers(0, samplerDesc);
 
-		ElysiaHelper::ThrowIfFailed(D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error));
-
-		ID3D12RootSignature* rootSignature = nullptr;
-		ElysiaHelper::ThrowIfFailed(m_device->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&rootSignature)));
-
-		return std::make_unique<DX12RootSignature>(rootSignature);
+		rootSignature->Init(m_device, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+		
+		return rootSignature;
 	}
 	std::unique_ptr<DX12GraphicsPipelineState>		DX12Device::CreateGraphicsPipelineState(PipelineStateCreateDesc& pipelineStateCreateDesc)
 	{
@@ -339,7 +340,7 @@ namespace ElysiaRenderer
 		PSODesc.RasterizerState = pipelineStateCreateDesc.m_rasterDesc;
 		PSODesc.BlendState = pipelineStateCreateDesc.m_blendDesc;
 		PSODesc.DepthStencilState = pipelineStateCreateDesc.m_depthStencilDesc;
-		//PSODesc.DSVFormat = pipelineStateCreateDesc.m_renderTargetDesc.m_depthStencilFormat;
+		PSODesc.DSVFormat = pipelineStateCreateDesc.m_renderTargetDesc.m_depthStencilFormat;
 		PSODesc.NodeMask = 0;
 		PSODesc.SampleMask = UINT_MAX;
 		PSODesc.PrimitiveTopologyType = pipelineStateCreateDesc.m_topology;
@@ -356,6 +357,7 @@ namespace ElysiaRenderer
 		auto graphicsPipeline = std::make_unique<DX12GraphicsPipelineState>(pipelineState, PSODesc.pRootSignature);
 		return graphicsPipeline;
 	}
+
 
 	ContextSubmissionResult DX12Device::SubmitContextWork(DX12Context* context)
 	{
@@ -414,10 +416,10 @@ namespace ElysiaRenderer
 				case BufferType::Vertex:
 				{
 					auto vertexBuffer = dynamic_cast<DX12VertexBuffer*>(currBuffer.get());
-					if (vertexBuffer->GetSRVDescriptor().IsValid())
+					/*if (vertexBuffer->GetSRVDescriptor().IsValid())
 					{
 						m_SRVStagingDescriptorHeap->FreeDescriptorHeapHandle(vertexBuffer->GetSRVDescriptor());
-					}
+					}*/
 					if (vertexBuffer->GetMappedBuffer() != nullptr)
 					{
 						vertexBuffer->GetResource()->Unmap(0, nullptr);

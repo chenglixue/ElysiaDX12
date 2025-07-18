@@ -127,11 +127,11 @@ namespace ElysiaRenderer
 		}
 
 		desc.m_depthStencilDesc.DepthEnable = false;
-		/*desc.m_depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
-		desc.m_depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS;*/
+		desc.m_depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
+		desc.m_depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
 		desc.m_depthStencilDesc.StencilEnable = false;
-		/*desc.m_depthStencilDesc.StencilReadMask = D3D12_DEFAULT_STENCIL_READ_MASK;
-		desc.m_depthStencilDesc.StencilWriteMask = D3D12_DEFAULT_STENCIL_WRITE_MASK;*/
+		desc.m_depthStencilDesc.StencilReadMask = D3D12_DEFAULT_STENCIL_READ_MASK;
+		desc.m_depthStencilDesc.StencilWriteMask = D3D12_DEFAULT_STENCIL_WRITE_MASK;
 
 		const D3D12_DEPTH_STENCILOP_DESC defaultStencilOp =
 		{ D3D12_STENCIL_OP_KEEP, D3D12_STENCIL_OP_KEEP, D3D12_STENCIL_OP_KEEP, D3D12_COMPARISON_FUNC_ALWAYS };
@@ -141,8 +141,7 @@ namespace ElysiaRenderer
 		desc.m_sampleDesc.Count = 1;
 		desc.m_sampleDesc.Quality = 0;
 
-		desc.m_renderTargetDesc.m_numRenderTargets = 1;
-		desc.m_renderTargetDesc.m_renderTargetFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+		desc.m_renderTargetDesc = CreateDefaultRenderTargetDesc();
 
 		return desc;
 	}

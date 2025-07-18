@@ -64,8 +64,9 @@ namespace ElysiaRenderer
 		std::unique_ptr<DX12GraphicsContext> CreateGraphicsContext();
 		std::unique_ptr<DX12VertexBuffer>	CreateVertexBuffer(const BufferCreationDesc& bufferCreationDesc);
 		std::unique_ptr<DX12Shader> CreateShader(ShaderCreateDesc& shaderCreateDesc);
-		std::unique_ptr<DX12RootSignature> CreateRootSignature();
+		std::unique_ptr<DX12RootSignature> CreateRootSignature(RootSignatureCreatDesc& rootSignatureCreatDesc);
 		std::unique_ptr<DX12GraphicsPipelineState> CreateGraphicsPipelineState(PipelineStateCreateDesc& pipelineStateCreateDesc);
+		void CreateSamplers();
 
 		void DestoryContext(std::unique_ptr<DX12Context> context);
 		void DestoryBuffer(std::unique_ptr<DX12GPUResource> buffer);
@@ -120,5 +121,11 @@ namespace ElysiaRenderer
 		std::array<EndOfFrameFences, NUM_FRAMES_IN_FLIGHT> m_endOfFrameFences;
 		std::array<std::vector<std::pair<uint64_t, D3D12_COMMAND_LIST_TYPE>>, NUM_FRAMES_IN_FLIGHT> m_contextSubmissions;
 		std::array<DestructionQueue, NUM_FRAMES_IN_FLIGHT> m_destructionQueues;
+	};
+
+	struct RootSignatureCreatDesc
+	{
+		std::vector<DX12RootParameter> rootParamters;
+		std::vector<D3D12_STATIC_SAMPLER_DESC> staticSamplers;
 	};
 }

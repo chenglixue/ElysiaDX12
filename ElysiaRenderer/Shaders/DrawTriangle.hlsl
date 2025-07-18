@@ -1,13 +1,8 @@
-//*********************************************************
-//
-// Copyright (c) Microsoft. All rights reserved.
-// This code is licensed under the MIT License (MIT).
-// THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
-// ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
-// IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
-// PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
-//
-//*********************************************************
+struct VSInput
+{
+    float4 position : POSITION;
+    float4 color : COLOR;
+};
 
 struct PSInput
 {
@@ -15,17 +10,25 @@ struct PSInput
     float4 color : COLOR;
 };
 
-PSInput VSMain(float4 position : POSITION, float4 color : COLOR)
+struct PSOutput
+{
+    float4 target0 : SV_TARGET0;
+};
+
+PSInput VS(VSInput i)
 {
     PSInput result;
 
-    result.position = position;
-    result.color = color;
+    result.position = i.position;
+    result.color = i.color;
 
     return result;
 }
 
-float4 PSMain(PSInput input) : SV_TARGET
+PSOutput PS(PSInput i)
 {
-    return input.color;
+    PSOutput o;
+    
+    o.target0 = i.color;
+    return o;
 }

@@ -17,24 +17,24 @@ namespace ElysiaRenderer
 		{
 			return m_vertexBufferView;
 		}
-		DX12DescriptorHeapHandle& GetSRVDescriptor()
+		/*DX12DescriptorHeapHandle& GetSRVDescriptor()
 		{
 			return m_SRVDescriptor;
-		}
+		}*/
 		void* GetMappedBuffer()
 		{
 			return m_mappedBuffer;
 		}
 
-		void SetSRVDescriptor(DX12DescriptorHeapHandle&& SRVDescriptor)
+		/*void SetSRVDescriptor(DX12DescriptorHeapHandle&& SRVDescriptor)
 		{
 			m_SRVDescriptor = SRVDescriptor;
-		}
+		}*/
 		void SetMappedData(const void* bufferData, uint32_t bufferSize);
 
 	private:
 		D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;
-		DX12DescriptorHeapHandle m_SRVDescriptor;
+		//DX12DescriptorHeapHandle m_SRVDescriptor;
 		void* m_mappedBuffer;
 		BufferType m_bufferType = BufferType::Vertex;
 	};

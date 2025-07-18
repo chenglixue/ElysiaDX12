@@ -63,19 +63,19 @@ namespace ElysiaRenderer
 	}
 	void DX12GraphicsContext::SetDefaultViewportAndScissor(ElysiaHelper::UINT2 screenSize)
 	{
-		D3D12_VIEWPORT viewport = {0, 0, static_cast<float>(screenSize.x) , static_cast<float>(screenSize.y) };
-		/*viewport.Width			= static_cast<float>(screenSize.x);
+		D3D12_VIEWPORT viewport = {};
+		viewport.Width			= static_cast<float>(screenSize.x);
 		viewport.Height			= static_cast<float>(screenSize.y);
 		viewport.TopLeftX		= 0;
 		viewport.TopLeftY		= 0;
 		viewport.MinDepth		= 0;
-		viewport.MaxDepth		= 1;*/
+		viewport.MaxDepth		= 1;
 
-		D3D12_RECT scissorRect = {0, 0, screenSize.x , screenSize.y };
-		/*scissorRect.left = 0;
+		D3D12_RECT scissorRect = {};
+		scissorRect.left = 0;
 		scissorRect.right = screenSize.x;
 		scissorRect.bottom = screenSize.y;
-		scissorRect.top = 0;*/
+		scissorRect.top = 0;
 
 		SetViewport(viewport);
 		SetScissorRect(scissorRect);
