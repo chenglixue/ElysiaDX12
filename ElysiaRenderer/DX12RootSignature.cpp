@@ -152,6 +152,8 @@ namespace ElysiaRenderer
 
 		ID3D12RootSignature* rootSignature = nullptr;
 		ElysiaHelper::ThrowIfFailed(device->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&rootSignature)));
+	
+		m_isInited = true;
 	}
 
 	void DX12RootSignature::Reset(UINT numRootParams, UINT numStaticSamplers)

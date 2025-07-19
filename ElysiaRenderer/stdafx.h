@@ -12,6 +12,7 @@
 #include <vector>
 #include <mutex>
 #include <optional>
+#include "DXTex/DirectXTex.h"
 #include "SimpleMath/SimpleMath.h"
 #include "Helper.h"
 #include "Definition.h"

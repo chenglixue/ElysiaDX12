@@ -26,6 +26,7 @@ namespace ElysiaRenderer
 	public:
 		DX12RootSignature(UINT numRootParams = 0, UINT numStaticSamplers = 0);
 		DX12RootSignature(ID3D12RootSignature* rootSignature, UINT numRootParams = 0, UINT numStaticSamplers = 0);
+
 		~DX12RootSignature();
 
 		ID3D12RootSignature* GetSignature() const

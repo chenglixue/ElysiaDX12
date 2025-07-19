@@ -161,6 +161,7 @@
     <ClInclude Include="DX12RootSignature.h" />
     <ClInclude Include="DX12Shader.h" />
     <ClInclude Include="DX12StagingDescriptorHeap.h" />
+    <ClInclude Include="DX12TextureBuffer.h" />
     <ClInclude Include="DX12TextureResource.h" />
     <ClInclude Include="DX12VertexBuffer.h" />
     <ClInclude Include="dxc\inc\d3d12shader.h" />

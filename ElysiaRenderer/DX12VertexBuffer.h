@@ -5,6 +5,15 @@
 
 namespace ElysiaRenderer
 {
+	struct VertexBufferCreationDesc
+	{
+		UINT m_size = 0;
+		UINT m_stride = 0;
+		BufferTypeFlags bufferTypeFlags = BufferTypeFlags::None;
+		BufferAccessFlags bufferAccessFlags = BufferAccessFlags::GPUOnly;
+		bool m_isRawAccess = false;
+	};
+
 	class DX12VertexBuffer : public DX12GPUResource
 	{
 	public:

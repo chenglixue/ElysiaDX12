@@ -145,6 +145,9 @@
     <ClInclude Include="DX12PipelineState.h">
       <Filter>Header Files\DX12</Filter>
     </ClInclude>
+    <ClInclude Include="DX12TextureBuffer.h">
+      <Filter>Header Files\DX12</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="DXTex\Shaders\Compiled\BC7Encode_TryMode02CS.inc">

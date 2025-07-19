@@ -11,6 +11,20 @@ namespace ElysiaRenderer
 		 Texture = 3
 	};
 
+	enum class BufferTypeFlags : uint8_t
+	{
+		None = 0,
+		CBV = 1,
+		SRV = 2,
+		UAV = 3
+	};
+
+	enum class BufferAccessFlags : uint8_t
+	{
+		GPUOnly = 0,
+		HostWritable = 1
+	};
+
 	class DX12GPUResource
 	{
 	public:

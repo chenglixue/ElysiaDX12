@@ -5,29 +5,6 @@
 
 namespace ElysiaRenderer
 {
-	enum class BufferTypeFlags : uint8_t
-	{
-		None = 0,
-		CBV = 1,
-		SRV = 2,
-		UAV = 3
-	};
-
-	enum class BufferAccessFlags : uint8_t
-	{
-		GPUOnly = 0,
-		HostWritable = 1
-	};
-
-	struct BufferCreationDesc
-	{
-		UINT m_size = 0;
-		UINT m_stride = 0;
-		BufferTypeFlags bufferTypeFlags = BufferTypeFlags::None;
-		BufferAccessFlags bufferAccessFlags = BufferAccessFlags::GPUOnly;
-		bool m_isRawAccess = false;
-	};
-
 	class DX12BufferResource : public DX12GPUResource
 	{
 	public:
