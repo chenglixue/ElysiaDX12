@@ -29,7 +29,7 @@ namespace ElysiaRenderer
 
 	struct RootSignatureCreatDesc
 	{
-		std::vector<DX12RootParameter> rootParamters;
+		std::vector<DX12RootParameter*> rootParamters;
 
 	};
 
@@ -68,19 +68,20 @@ namespace ElysiaRenderer
 			return *m_backBuffers[m_swapChain->GetCurrentBackBufferIndex()];
 		}
 
-		std::unique_ptr<DX12GraphicsContext>	CreateGraphicsContext();
-		DX12VertexBuffer&						CreateVertexBuffer(const VertexBufferCreationDesc& bufferCreationDesc);
-		DX12TextureBuffer&						CreateTextureBuffer(const TextureBufferCreationDesc& textureCreationDesc);
-		DX12Shader&								CreateShader(ShaderCreateDesc& shaderCreateDesc);
-		void									CreateSamplers(DX12RootSignature* rootSignature, D3D12_SHADER_VISIBILITY shaderVisibility = D3D12_SHADER_VISIBILITY_ALL);
-		void									CreateRootParameters(DX12RootSignature* rootSignature, std::vector<DX12RootParameter>& rootParamters);
-		DX12RootSignature&						CreateRootSignature(RootSignatureCreatDesc& rootSignatureCreatDesc);
-		DX12GraphicsPipelineState&				CreateGraphicsPipelineState(PipelineStateCreateDesc& pipelineStateCreateDesc);
+		std::unique_ptr<DX12GraphicsContext>		CreateGraphicsContext();
+		std::unique_ptr<DX12VertexBuffer>			CreateVertexBuffer(const VertexBufferCreationDesc& bufferCreationDesc);
+		std::unique_ptr<DX12TextureBuffer>			CreateTextureBuffer(const TextureBufferCreationDesc& textureCreationDesc);
+		std::unique_ptr<DX12TextureResource>		CreateTexture(TexCreateDesc& desc);
+		std::unique_ptr<DX12Shader>					CreateShader(ShaderCreateDesc& shaderCreateDesc);
+		void										CreateSamplers(DX12RootSignature* rootSignature, D3D12_SHADER_VISIBILITY shaderVisibility = D3D12_SHADER_VISIBILITY_ALL);
+		void										CreateRootParameters(DX12RootSignature* rootSignature, std::vector<DX12RootParameter*>& rootParamters);
+		std::unique_ptr<DX12RootSignature>			CreateRootSignature(RootSignatureCreatDesc& rootSignatureCreatDesc);
+		std::unique_ptr<DX12GraphicsPipelineState>	CreateGraphicsPipelineState(PipelineStateCreateDesc& pipelineStateCreateDesc);
 
-		void DestoryShader(DX12Shader* shader);
-		void DestoryBuffer(DX12GPUResource* buffer);
-		void DestoryPipelineState(DX12PipelineState* pipelineState);
-		void DestoryContext(DX12Context* context);
+		void DestoryShader(std::unique_ptr<DX12Shader> shader);
+		void DestoryBuffer(std::unique_ptr<DX12GPUResource> buffer);
+		void DestoryPipelineState(std::unique_ptr<DX12PipelineState> pipelineState);
+		void DestoryContext(std::unique_ptr<DX12Context> context);
 
 		ContextSubmissionResult SubmitContextWork(DX12Context* context);
 
@@ -123,9 +124,9 @@ namespace ElysiaRenderer
 		std::unique_ptr<DX12Queue> m_copyQueue;
 		std::unique_ptr<DX12StagingDescriptorHeap> m_RTVStagingDescriptorHeap;
 		std::unique_ptr<DX12StagingDescriptorHeap> m_DSVStagingDescriptorHeap;
-		std::unique_ptr<DX12StagingDescriptorHeap> m_SRVStagingDescriptorHeap;
-		std::unique_ptr<DX12RenderPassDescriptorHeap> m_renderPassDescriptorHeap;
-		std::vector<UINT> m_freeReservedDescriptorIndices;
+		//std::unique_ptr<DX12StagingDescriptorHeap> m_SRVStagingDescriptorHeap;
+		std::unique_ptr<DX12RenderPassDescriptorHeap> m_SRVRenderPassDescriptorHeap;
+		std::unique_ptr<DX12RenderPassDescriptorHeap> m_samplerRenderPassDescriptorHeap;
 		std::array<std::unique_ptr<DX12TextureResource>, NUM_BACK_BUFFERS> m_backBuffers;
 		std::array<EndOfFrameFences, NUM_FRAMES_IN_FLIGHT> m_endOfFrameFences;
 		std::array<std::vector<std::pair<uint64_t, D3D12_COMMAND_LIST_TYPE>>, NUM_FRAMES_IN_FLIGHT> m_contextSubmissions;

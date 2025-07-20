@@ -51,7 +51,7 @@ namespace ElysiaRenderer
 		{
 			return m_resourceDesc;
 		}
-		D3D12MA::Allocation* GetAllocation()
+		D3D12MA::Allocation*& GetAllocation()
 		{
 			return m_allocation;
 		}

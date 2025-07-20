@@ -30,14 +30,14 @@ namespace ElysiaRenderer
 		float m_aspectRatio;
 		std::unique_ptr<DX12Device> m_device = nullptr;
 		std::unique_ptr<DX12GraphicsContext> m_graphicsContext = nullptr;
-		std::unique_ptr<std::vector<DX12VertexBuffer>> m_vertexBuffer = nullptr;
-		std::unique_ptr<std::vector<DX12RootParameter>> m_rootParameters;
-		std::unique_ptr<std::vector<D3D12_SAMPLER_DESC>> m_samplers;
-		std::unique_ptr<std::vector<DX12RootSignature>> m_rootSignatures = nullptr;
-		std::unique_ptr<std::vector<DX12Shader>> m_vertexShader = nullptr;
-		std::unique_ptr<std::vector<DX12Shader>> m_pixelShader = nullptr;
-		std::unique_ptr<std::vector<DX12Shader>> m_computeShader = nullptr;
-		std::unique_ptr<std::vector<DX12GraphicsPipelineState>> m_graphicsPipelineState = nullptr;
+		std::vector<std::unique_ptr<DX12VertexBuffer>> m_vertexBuffers;
+		std::vector<std::unique_ptr<DX12RootParameter>> m_rootParameters;
+		std::vector<std::unique_ptr<D3D12_SAMPLER_DESC>> m_samplers;
+		std::vector<std::unique_ptr<DX12RootSignature>> m_rootSignatures;
+		std::vector<std::unique_ptr<DX12Shader>> m_vertexShaders;
+		std::vector<std::unique_ptr<DX12Shader>> m_pixelShaders;
+		std::vector<std::unique_ptr<DX12Shader>> m_computeShaders;
+		std::vector<std::unique_ptr<DX12GraphicsPipelineState>> m_graphicsPipelineStates;
 	};
 
 	Renderer::Renderer(HWND windowHandle, ElysiaHelper::UINT2 screenSize)
@@ -68,33 +68,33 @@ namespace ElysiaRenderer
 	inline void Renderer::Destory()
 	{
 		m_device->WaitForIdle();
-		m_device->DestoryContext(m_graphicsContext.get());
-		for (size_t i = 0; i < m_vertexBuffer.get()->size(); ++i)
+		m_device->DestoryContext(std::move(m_graphicsContext));
+		for (size_t i = 0; i < m_vertexBuffers.size(); ++i)
 		{
-			m_device->DestoryBuffer(m_vertexBuffer.get()->data());
+			m_device->DestoryBuffer(std::move(m_vertexBuffers[i]));
 		}
-		for (size_t i = 0; i < m_graphicsPipelineState.get()->size(); ++i)
+		for (size_t i = 0; i < m_graphicsPipelineStates.size(); ++i)
 		{
-			m_device->DestoryPipelineState(m_graphicsPipelineState.get()->data());
+			m_device->DestoryPipelineState(std::move(m_graphicsPipelineStates[i]));
 		}
-		for (size_t i = 0; i < m_vertexShader.get()->size(); ++i)
+		for (size_t i = 0; i < m_vertexShaders.size(); ++i)
 		{
-			m_device->DestoryShader(m_vertexShader.get()->data());
+			m_device->DestoryShader(std::move(m_vertexShaders[i]));
 		}
-		for (size_t i = 0; i < m_pixelShader.get()->size(); ++i)
+		for (size_t i = 0; i < m_pixelShaders.size(); ++i)
 		{
-			m_device->DestoryShader(m_pixelShader.get()->data());
+			m_device->DestoryShader(std::move(m_pixelShaders[i]));
 		}
 		m_device = nullptr;
 
-		m_rootParameters.release();
+		m_rootParameters.clear();
 		m_graphicsContext.release();
-		m_vertexBuffer.release();
-		m_rootSignatures.release();
-		m_vertexShader.release();
-		m_pixelShader.release();
-		m_computeShader.release();
-		m_graphicsPipelineState.release();
+		m_vertexBuffers.clear();
+		m_rootSignatures.clear();
+		m_vertexShaders.clear();
+		m_pixelShaders.clear();
+		m_computeShaders.clear();
+		m_graphicsPipelineStates.clear();
 
 		if (IDXGIDebug* dxgiDebug = nullptr)
 		{
@@ -130,8 +130,8 @@ namespace ElysiaRenderer
 		vertexBufferCreationDesc.m_isRawAccess = false;
 
 		auto vertexBuffer = m_device->CreateVertexBuffer(vertexBufferCreationDesc);
-		vertexBuffer.SetMappedData(&triangleVertices, sizeof(triangleVertices));
-		m_vertexBuffer->push_back(std::move(vertexBuffer));
+		vertexBuffer->SetMappedData(triangleVertices.data(), sizeof(triangleVertices));
+		m_vertexBuffers.push_back(std::move(vertexBuffer));
 
 		//m_rootSignature = std::move(m_device->CreateRootSignature());
 
@@ -146,21 +146,21 @@ namespace ElysiaRenderer
 		VSShaderCreateDesc.shaderName = L"DrawTriangle.hlsl";
 		VSShaderCreateDesc.entryPoint = "VS";
 		VSShaderCreateDesc.shaderType = ShaderType::Vertex;
-		m_vertexShader->push_back(std::move(m_device->CreateShader(VSShaderCreateDesc)));
+		m_vertexShaders.push_back(std::move(m_device->CreateShader(VSShaderCreateDesc)));
 
 		ShaderCreateDesc PSShaderCreateDesc{};
 		PSShaderCreateDesc.shaderName = L"DrawTriangle.hlsl";
 		PSShaderCreateDesc.entryPoint = "PS";
 		PSShaderCreateDesc.shaderType = ShaderType::Pixel;
-		m_pixelShader->push_back(std::move(m_device->CreateShader(PSShaderCreateDesc)));
+		m_pixelShaders.push_back(std::move(m_device->CreateShader(PSShaderCreateDesc)));
 
 		PipelineStateCreateDesc pipelineStateCreateDesc = std::move(CreateDefaultPipelineStateCreateDesc());
-		pipelineStateCreateDesc.m_vertexShader = &m_vertexShader->back();
-		pipelineStateCreateDesc.m_pixelShader = &m_pixelShader->back();
-		pipelineStateCreateDesc.m_rootSignature = &m_rootSignatures->back();
+		pipelineStateCreateDesc.m_vertexShader = m_vertexShaders.back().get();
+		pipelineStateCreateDesc.m_pixelShader = m_pixelShaders.back().get();
+		pipelineStateCreateDesc.m_rootSignature = m_rootSignatures.back().get();
 		pipelineStateCreateDesc.m_inputElementDesc = inputElementDescs;
 		pipelineStateCreateDesc.m_renderTargetDesc.m_renderTargetFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-		m_graphicsPipelineState->push_back(std::move(m_device->CreateGraphicsPipelineState(pipelineStateCreateDesc)));
+		m_graphicsPipelineStates.push_back(std::move(m_device->CreateGraphicsPipelineState(pipelineStateCreateDesc)));
 	}
 	void Renderer::InitTexTriangle()
 	{
@@ -194,24 +194,29 @@ namespace ElysiaRenderer
 			vertexBufferCreationDesc.m_isRawAccess = false;
 
 			auto vertexBuffer = m_device->CreateVertexBuffer(vertexBufferCreationDesc);
-			vertexBuffer.SetMappedData(&triangleVertices, sizeof(triangleVertices));
-			m_vertexBuffer->push_back(std::move(vertexBuffer));
+			vertexBuffer->SetMappedData(&triangleVertices, sizeof(triangleVertices));
+			m_vertexBuffers.push_back(std::move(vertexBuffer));
 		}
 
 		// Create Root Parameter & Sampler & Root Signature
 		{
 			{
-				auto rootParameter = DX12RootParameter();
-				rootParameter.InitAsDescriptorTable(1, D3D12_SHADER_VISIBILITY_PIXEL);
-				rootParameter.SetTableRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0);
+				auto rootParameter = std::unique_ptr<DX12RootParameter>();
+				rootParameter->InitAsDescriptorTable(1, D3D12_SHADER_VISIBILITY_PIXEL);
+				rootParameter->SetTableRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0);
 
-				m_rootParameters->push_back(std::move(rootParameter));
+				m_rootParameters.push_back(std::move(rootParameter));
 			}
 
 			RootSignatureCreatDesc rootSignatureCreatDesc;
-			rootSignatureCreatDesc.rootParamters = *m_rootParameters.get();
+			std::vector<DX12RootParameter*> tempRootParameters{};
+			for (size_t i = 0; i < m_rootParameters.size(); ++i)
+			{
+				tempRootParameters.push_back(m_rootParameters[i].get());
+			}
+			rootSignatureCreatDesc.rootParamters = std::move(tempRootParameters);
 
-			m_rootSignatures->push_back(std::move(m_device->CreateRootSignature(rootSignatureCreatDesc)));
+			m_rootSignatures.push_back(std::move(m_device->CreateRootSignature(rootSignatureCreatDesc)));
 		}
 
 		// Create Shader
@@ -220,26 +225,26 @@ namespace ElysiaRenderer
 			VSShaderCreateDesc.shaderName = L"DrawTriangle.hlsl";
 			VSShaderCreateDesc.entryPoint = "VS";
 			VSShaderCreateDesc.shaderType = ShaderType::Vertex;
-			m_vertexShader->push_back(std::move(m_device->CreateShader(VSShaderCreateDesc)));
+			m_vertexShaders.push_back(std::move(m_device->CreateShader(VSShaderCreateDesc)));
 
 			ShaderCreateDesc PSShaderCreateDesc{};
 			PSShaderCreateDesc.shaderName = L"DrawTriangle.hlsl";
 			PSShaderCreateDesc.entryPoint = "PS";
 			PSShaderCreateDesc.shaderType = ShaderType::Pixel;
-			m_pixelShader->push_back(std::move(m_device->CreateShader(PSShaderCreateDesc)));
+			m_pixelShaders.push_back(std::move(m_device->CreateShader(PSShaderCreateDesc)));
 		}
 
 		// Create PSO
 		{
 			PipelineStateCreateDesc pipelineStateCreateDesc = std::move(CreateDefaultPipelineStateCreateDesc());
-			pipelineStateCreateDesc.m_vertexShader = &m_vertexShader->back();
-			pipelineStateCreateDesc.m_pixelShader = &m_pixelShader->back();
-			pipelineStateCreateDesc.m_rootSignature = &m_rootSignatures->back();
+			pipelineStateCreateDesc.m_vertexShader = m_vertexShaders.back().get();
+			pipelineStateCreateDesc.m_pixelShader = m_pixelShaders.back().get();
+			pipelineStateCreateDesc.m_rootSignature = m_rootSignatures.back().get();
 			pipelineStateCreateDesc.m_inputElementDesc = inputElementDescs;
 			pipelineStateCreateDesc.m_renderTargetDesc.m_numRenderTargets = 1;
 			pipelineStateCreateDesc.m_renderTargetDesc.m_renderTargetFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 
-			m_graphicsPipelineState->push_back(std::move(m_device->CreateGraphicsPipelineState(pipelineStateCreateDesc)));
+			m_graphicsPipelineStates.push_back(std::move(m_device->CreateGraphicsPipelineState(pipelineStateCreateDesc)));
 		}
 	}
 
@@ -271,14 +276,14 @@ namespace ElysiaRenderer
 
 		size_t pipelineStateIndex = 0;
 		size_t vertexBufferIndex = 0;
-		m_graphicsContext->Reset((*m_graphicsPipelineState)[pipelineStateIndex].GetPipelineState());
+		m_graphicsContext->Reset(m_graphicsPipelineStates[pipelineStateIndex]->GetPipelineState());
 		m_graphicsContext->AddBarrier(currBackBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET);
 		m_graphicsContext->FlushBarrier();
 
 		m_graphicsContext->ClearRenderTarget(currBackBuffer, Color(0., 0., 0.));
 
-		m_graphicsContext->SetVertexBuffer(0, 1, (*m_vertexBuffer)[vertexBufferIndex].GetVertexBufferView());
-		auto pipelineStateData = CreatePipelineStateData(&(*m_graphicsPipelineState)[pipelineStateIndex],
+		m_graphicsContext->SetVertexBuffer(0, 1, m_vertexBuffers[vertexBufferIndex]->GetVertexBufferView());
+		auto pipelineStateData = CreatePipelineStateData(m_graphicsPipelineStates[pipelineStateIndex].get(),
 			std::move(std::vector<DX12TextureResource*>{ &currBackBuffer }));
 		m_graphicsContext->SetPipeline(pipelineStateData);
 		m_graphicsContext->SetDefaultViewportAndScissor(m_device->GetScreenSize());

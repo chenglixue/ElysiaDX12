@@ -5,6 +5,33 @@
 
 namespace ElysiaRenderer
 {
+	enum TexTypeFlags : uint8_t
+	{
+		None,
+		SRV,
+		RTV
+	};
+	struct TexCreateDesc
+	{
+		TexCreateDesc()
+		{
+			m_resouceDesc.Format = DXGI_FORMAT_UNKNOWN;
+			m_resouceDesc.Width = 0;
+			m_resouceDesc.Height = 0;
+			m_resouceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+			m_resouceDesc.DepthOrArraySize = 1;
+			m_resouceDesc.MipLevels = 1;
+			m_resouceDesc.SampleDesc.Count = 1;
+			m_resouceDesc.SampleDesc.Quality = 0;
+			m_resouceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+			m_resouceDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+			m_resouceDesc.Alignment = 0;
+		}
+
+		D3D12_RESOURCE_DESC m_resouceDesc{};
+		TexTypeFlags m_typeFlag = TexTypeFlags::None;
+	};
+
 	class DX12TextureResource : public DX12GPUResource
 	{
 	public:
