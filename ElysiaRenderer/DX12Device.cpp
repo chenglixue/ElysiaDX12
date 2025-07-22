@@ -324,8 +324,6 @@ namespace ElysiaRenderer
 	}
 	std::unique_ptr<DX12TextureResource>		DX12Device::CreateTexture(TexCreateDesc& desc)
 	{
-		auto newTex = std::unique_ptr<DX12TextureResource>();
-
 		/// Create default heap for tex
 		D3D12MA::ALLOCATION_DESC allocationDesc{};
 		allocationDesc.HeapType = D3D12_HEAP_TYPE_DEFAULT;
@@ -333,8 +331,10 @@ namespace ElysiaRenderer
 		ID3D12Resource* texResource = nullptr;
 		D3D12MA::Allocation* allocation = nullptr;
 		m_allocator->CreateResource(&allocationDesc, &desc.m_resouceDesc, usageState, nullptr,
-			&newTex->GetAllocation(), IID_PPV_ARGS(&texResource));
+			&allocation, IID_PPV_ARGS(&texResource));
 		/// 
+
+		auto newTex = std::make_unique<DX12TextureResource>(texResource, usageState);
 
 		/// Create SRV
 		D3D12_SHADER_RESOURCE_VIEW_DESC SRV{};
@@ -350,7 +350,7 @@ namespace ElysiaRenderer
 		else
 		{
 			SRV.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-			SRV.Format = texDesc.Format;
+			SRV.Format = desc.m_resouceDesc.Format;
 			SRV.ViewDimension = is3DTex ? D3D12_SRV_DIMENSION_TEXTURE3D : D3D12_SRV_DIMENSION_TEXTURE2D;
 			if (is3DTex)
 			{
