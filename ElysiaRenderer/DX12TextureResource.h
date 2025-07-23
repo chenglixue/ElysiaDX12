@@ -7,9 +7,11 @@ namespace ElysiaRenderer
 {
 	enum TexTypeFlags : uint8_t
 	{
-		None,
+		None = 0,
 		SRV,
-		RTV
+		RTV,
+		DSV,
+		UAV
 	};
 	struct TexCreateDesc
 	{
@@ -36,6 +38,7 @@ namespace ElysiaRenderer
 	{
 	public:
 		DX12TextureResource(ID3D12Resource* resource, D3D12_RESOURCE_STATES usageState);
+		DX12TextureResource(ID3D12Resource* resource, D3D12_RESOURCE_STATES usageState, D3D12MA::Allocation* allocation);
 		~DX12TextureResource() override;
 
 		DX12DescriptorHeapHandle GetRTVDescriptor() const

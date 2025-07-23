@@ -197,7 +197,7 @@ namespace ElysiaRenderer
 			vertexBuffer->SetMappedData(&triangleVertices, sizeof(triangleVertices));
 			m_vertexBuffers.push_back(std::move(vertexBuffer));
 		}
-
+			
 		// Create Root Parameter & Sampler & Root Signature
 		{
 			{
@@ -245,6 +245,18 @@ namespace ElysiaRenderer
 			pipelineStateCreateDesc.m_renderTargetDesc.m_renderTargetFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 
 			m_graphicsPipelineStates.push_back(std::move(m_device->CreateGraphicsPipelineState(pipelineStateCreateDesc)));
+		}
+
+		// Create Tex & Buffer
+		{
+			TextureBufferCreationDesc texBufferCreateDesc{};
+
+			texBufferCreateDesc.isSRGB = true;
+			texBufferCreateDesc.bufferAccessFlags = BufferAccessFlags::HostWritable;
+			texBufferCreateDesc.bufferTypeFlags = BufferTypeFlags::SRV;
+			texBufferCreateDesc.texturePath = "";
+
+			m_device->CreateTextureBuffer(texBufferCreateDesc);
 		}
 	}
 

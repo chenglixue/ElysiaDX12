@@ -14,7 +14,7 @@ namespace ElysiaRenderer
 
 	struct TextureBufferCreationDesc
 	{
-		const std::string texturePath;
+		std::string texturePath = "";
 
 		bool isSRGB;
 		BufferTypeFlags bufferTypeFlags = BufferTypeFlags::None;
@@ -24,6 +24,7 @@ namespace ElysiaRenderer
 
 	class DX12TextureBuffer : public DX12GPUResource
 	{
+		class DX12TexResource;
 	public:
 		DX12TextureBuffer(ID3D12Resource* resource, D3D12_RESOURCE_STATES usageState);
 		~DX12TextureBuffer() override;
@@ -35,5 +36,6 @@ namespace ElysiaRenderer
 
 	private:
 		DX12DescriptorHeapHandle m_SRVDescriptorHeapHandle{};
+		DX12TexResource* m_tex = nullptr;
 	};
 }

@@ -268,7 +268,7 @@ namespace ElysiaRenderer
 		bool is3DTex = texMetaData.dimension == DirectX::TEX_DIMENSION_TEXTURE3D;
 		///
 		
-		/// create tex desc
+		/// create tex desc && tex resource
 		D3D12_RESOURCE_DESC texDesc{};
 		texDesc.Width = texMetaData.width;
 		texDesc.Height = texMetaData.height;
@@ -324,51 +324,56 @@ namespace ElysiaRenderer
 	}
 	std::unique_ptr<DX12TextureResource>		DX12Device::CreateTexture(TexCreateDesc& desc)
 	{
+		auto& resourceDesc = desc.m_resouceDesc;
+		auto& typeFlag = desc.m_typeFlag;
+
+		bool hasRTV = typeFlag == TexTypeFlags::RTV;
+		bool hasSRV = typeFlag == TexTypeFlags::SRV;
+		bool hasDSV = typeFlag == TexTypeFlags::DSV;
+		bool hasUAV = typeFlag == TexTypeFlags::UAV;
+
+		D3D12_CLEAR_VALUE clearValue = {};
+		clearValue.Format = resourceDesc.Format;
+		if (hasDSV)
+		{
+			clearValue.DepthStencil.Depth = 1.0f;
+		}
+
 		/// Create default heap for tex
 		D3D12MA::ALLOCATION_DESC allocationDesc{};
 		allocationDesc.HeapType = D3D12_HEAP_TYPE_DEFAULT;
 		D3D12_RESOURCE_STATES usageState = D3D12_RESOURCE_STATE_COPY_DEST;
 		ID3D12Resource* texResource = nullptr;
 		D3D12MA::Allocation* allocation = nullptr;
-		m_allocator->CreateResource(&allocationDesc, &desc.m_resouceDesc, usageState, nullptr,
+		m_allocator->CreateResource(&allocationDesc, &resourceDesc, usageState, (!hasRTV && !hasDSV) ? nullptr : &clearValue,
 			&allocation, IID_PPV_ARGS(&texResource));
 		/// 
 
-		auto newTex = std::make_unique<DX12TextureResource>(texResource, usageState);
+		auto newTex = std::make_unique<DX12TextureResource>(texResource, usageState, allocation);
+		newTex->SetResourceDesc(resourceDesc);
 
 		/// Create SRV
 		D3D12_SHADER_RESOURCE_VIEW_DESC SRV{};
-		if (desc.m_resouceDesc.Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE3D)
+		SRV.Format = resourceDesc.Format;
+		SRV.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+		if (resourceDesc.Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE3D && resourceDesc.DepthOrArraySize == 6)
 		{
-			assert(texMetaData.arraySize == 6);
-
 			SRV.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
 			SRV.TextureCube.MostDetailedMip = 0;
-			SRV.TextureCube.MipLevels = (UINT32)texMetaData.mipLevels;
+			SRV.TextureCube.MipLevels = (UINT)resourceDesc.MipLevels;
 			SRV.TextureCube.ResourceMinLODClamp = 0;
 		}
 		else
 		{
-			SRV.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-			SRV.Format = desc.m_resouceDesc.Format;
-			SRV.ViewDimension = is3DTex ? D3D12_SRV_DIMENSION_TEXTURE3D : D3D12_SRV_DIMENSION_TEXTURE2D;
-			if (is3DTex)
-			{
-				SRV.Texture3D.MostDetailedMip = 0;
-				SRV.Texture3D.MipLevels = (UINT32)texMetaData.mipLevels;
-				SRV.Texture3D.ResourceMinLODClamp = 0;
-			}
-			else
-			{
-				SRV.Texture2D.MostDetailedMip = 0;
-				SRV.Texture2D.MipLevels = (UINT32)texMetaData.mipLevels;
-				SRV.Texture2D.ResourceMinLODClamp = 0;
-			}
+			SRV.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+			SRV.Texture2D.MostDetailedMip = 0;
+			SRV.Texture2D.MipLevels = (UINT)resourceDesc.MipLevels;
+			SRV.Texture2D.ResourceMinLODClamp = 0;
 		}
 		m_device->CreateShaderResourceView(texResource, &SRV, m_SRVRenderPassDescriptorHeap->GetHeapHandleBlock(1).GetCPUHandle());
 		///
 
-		return nullptr;
+		return newTex;
 	}
 	std::unique_ptr<DX12Shader>					DX12Device::CreateShader(ShaderCreateDesc& shaderCreateDesc)
 	{
