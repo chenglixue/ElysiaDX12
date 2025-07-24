@@ -12,6 +12,8 @@ namespace ElysiaRenderer
 	constexpr uint32_t NUM_RESERVED_SRV_DESCRIPTORS = 8192;
 	constexpr uint32_t INVALID_RESOURCE_TABLE_INDEX = UINT_MAX;
 	constexpr uint32_t NUM_SAMPLER_DESCRIPTORS = 6;
+	constexpr uint32_t MAX_TEXTURE_SUBRESOURCE_COUNT = 32;
+
 
 	static const wchar_t* SHADER_SOURCE_PATH = L"Shaders/";
 	static const wchar_t* SHADER_OUTPUT_PATH = L"Shaders/Complied/";

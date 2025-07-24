@@ -242,23 +242,25 @@ namespace ElysiaRenderer
 		auto& texturePath = textureCreationDesc.texturePath;
 		bool isSRGB = textureCreationDesc.isSRGB;
 
-		/// load dds
-		///
-		auto s2ws = [](const std::string& s)
+		/// Load DDS
+		std::unique_ptr<DirectX::ScratchImage> imageData = nullptr;
 		{
-			//yoink https://stackoverflow.com/questions/27220/how-to-convert-stdstring-to-lpcwstr-in-c-unicode
-			int32_t len = 0;
-			int32_t slength = (int32_t)s.length() + 1;
-			len = MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, 0, 0);
-			wchar_t* buf = new wchar_t[len];
-			MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, buf, len);
-			std::wstring r(buf);
-			delete[] buf;
-			return r;
-		};
-		std::unique_ptr<DirectX::ScratchImage> imageData = std::make_unique<DirectX::ScratchImage>();
-		auto loadResult = DirectX::LoadFromDDSFile(s2ws(texturePath).c_str(), DirectX::DDS_FLAGS_NONE, nullptr, *imageData);
-		assert(loadResult == S_OK);
+			auto s2ws = [](const std::string& s)
+			{
+				//yoink https://stackoverflow.com/questions/27220/how-to-convert-stdstring-to-lpcwstr-in-c-unicode
+				int32_t len = 0;
+				int32_t slength = (int32_t)s.length() + 1;
+				len = MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, 0, 0);
+				wchar_t* buf = new wchar_t[len];
+				MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, buf, len);
+				std::wstring r(buf);
+				delete[] buf;
+				return r;
+			};
+			imageData = std::make_unique<DirectX::ScratchImage>();
+			auto loadResult = DirectX::LoadFromDDSFile(s2ws(texturePath).c_str(), DirectX::DDS_FLAGS_NONE, nullptr, *imageData);
+			assert(loadResult == S_OK);
+		}
 		///
 
 		/// grad tex data
@@ -268,7 +270,8 @@ namespace ElysiaRenderer
 		bool is3DTex = texMetaData.dimension == DirectX::TEX_DIMENSION_TEXTURE3D;
 		///
 		
-		/// create tex desc && tex resource
+		/// Create tex desc && tex resource
+		std::unique_ptr<DX12TextureResource> newTex = nullptr;
 		D3D12_RESOURCE_DESC texDesc{};
 		texDesc.Width = texMetaData.width;
 		texDesc.Height = texMetaData.height;
@@ -286,10 +289,26 @@ namespace ElysiaRenderer
 		createDesc.m_resouceDesc = std::move(texDesc);
 		createDesc.m_typeFlag = TexTypeFlags::SRV;
 
-		auto newTex = CreateTexture(createDesc);
+		newTex = CreateTexture(createDesc);
 		///
 
+		auto texBuffer = std::make_unique<DX12TextureBuffer>(newTex, texMetaData.mipLevels, texMetaData.arraySize);
+		UINT numRows[MAX_TEXTURE_SUBRESOURCE_COUNT];
+		uint64_t rowSizesInBytes[MAX_TEXTURE_SUBRESOURCE_COUNT];
+
+		m_device->GetCopyableFootprints(&newTex->GetResourceDesc(), 0, texBuffer->GetNumSubResources(), 0,
+			texBuffer->GetSubResourceLayouts().data(), numRows, rowSizesInBytes, &texBuffer->GetTextureDataSize());
 		
+		texBuffer->InitTexData();
+
+		for (size_t arrayIndex = 0; arrayIndex < texMetaData.arraySize; ++arrayIndex)
+		{
+			for (size_t mipIndex = 0; mipIndex < texMetaData.mipLevels; ++mipIndex)
+			{
+				const uint64_t subResourceIndex = mipIndex + (arrayIndex * texMetaData.mipLevels);
+
+			}
+		}
 
 		/// Create Upload Buffer
 		D3D12MA::ALLOCATION_DESC allocationDesc{};
