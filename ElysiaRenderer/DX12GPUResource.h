@@ -60,7 +60,7 @@ namespace ElysiaRenderer
 		{
 			m_usageState = usageState;
 		}
-		void SetResourceDesc(D3D12_RESOURCE_DESC& resourceDesc)
+		void SetResourceDesc(D3D12_RESOURCE_DESC resourceDesc)
 		{
 			m_resourceDesc = resourceDesc;
 		}

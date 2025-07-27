@@ -1,5 +1,4 @@
 ﻿  D3D12Lite.cpp
-  D3D12MemAlloc.cpp
   DX12BufferResource.cpp
 C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
   (compiling source file 'DX12BufferResource.cpp')
@@ -14,16 +13,6 @@ C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(5
   
 C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12TextureBuffer.h(25,15): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12TextureResource' when no variable is declared
   (compiling source file 'DX12Context.cpp')
-  
-C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12TextureBuffer.h(48,11): error C2440: 'return': cannot convert from 'const ElysiaRenderer::DX12TextureBuffer::SubResourceLayouts' to 'ElysiaRenderer::DX12TextureBuffer::SubResourceLayouts &'
-  (compiling source file 'DX12Context.cpp')
-      C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12TextureBuffer.h(48,11):
-      Conversion loses qualifiers
-  
-C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12TextureBuffer.h(52,11): error C2440: 'return': cannot convert from 'const size_t' to 'size_t &'
-  (compiling source file 'DX12Context.cpp')
-      C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12TextureBuffer.h(52,11):
-      Conversion loses qualifiers
   
 C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12PipelineState.h(8,15): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12RootSignature' when no variable is declared
   (compiling source file 'DX12Context.cpp')
@@ -42,16 +31,6 @@ C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(5
 C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12TextureBuffer.h(25,15): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12TextureResource' when no variable is declared
   (compiling source file 'DX12Device.cpp')
   
-C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12TextureBuffer.h(48,11): error C2440: 'return': cannot convert from 'const ElysiaRenderer::DX12TextureBuffer::SubResourceLayouts' to 'ElysiaRenderer::DX12TextureBuffer::SubResourceLayouts &'
-  (compiling source file 'DX12Device.cpp')
-      C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12TextureBuffer.h(48,11):
-      Conversion loses qualifiers
-  
-C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12TextureBuffer.h(52,11): error C2440: 'return': cannot convert from 'const size_t' to 'size_t &'
-  (compiling source file 'DX12Device.cpp')
-      C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12TextureBuffer.h(52,11):
-      Conversion loses qualifiers
-  
 C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12PipelineState.h(8,15): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12RootSignature' when no variable is declared
   (compiling source file 'DX12Device.cpp')
   
@@ -61,18 +40,10 @@ C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12PipelineState.h(9,15): w
 C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12GraphicsContext.h(9,15): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
   (compiling source file 'DX12Device.cpp')
   
-C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12Device.cpp(172,37): error C2664: 'void ElysiaRenderer::DX12GPUResource::SetResourceDesc(D3D12_RESOURCE_DESC &)': cannot convert argument 1 from 'D3D12_RESOURCE_DESC' to 'D3D12_RESOURCE_DESC &'
-      C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12Device.cpp(172,80):
-      A non-const reference may only be bound to an lvalue
-      C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12GPUResource.h(63,8):
-      see declaration of 'ElysiaRenderer::DX12GPUResource::SetResourceDesc'
-      C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12Device.cpp(172,37):
-      while trying to match the argument list '(D3D12_RESOURCE_DESC)'
-  
 C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12Device.cpp(277,31): warning C4267: '=': conversion from 'size_t' to 'UINT', possible loss of data
+C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12Device.cpp(300,103): error C2102: '&' requires l-value
 C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12Device.cpp(299,59): error C2102: '&' requires l-value
-C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12Device.cpp(504,24): warning C4267: 'initializing': conversion from 'size_t' to 'UINT', possible loss of data
-  DX12GPUResource.cpp
+C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12Device.cpp(514,24): warning C4267: 'initializing': conversion from 'size_t' to 'UINT', possible loss of data
   DX12GraphicsContext.cpp
 C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
   (compiling source file 'DX12GraphicsContext.cpp')
@@ -97,40 +68,12 @@ C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12PipelineState.h(8,15): w
 C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12PipelineState.h(9,15): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Shader' when no variable is declared
   (compiling source file 'DX12PipelineState.cpp')
   
-  DX12Queue.cpp
-  DX12QueueManager.cpp
-  DX12RenderPassDescriptorHeap.cpp
-C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file 'DX12RenderPassDescriptorHeap.cpp')
-  
-  DX12RootSignature.cpp
-C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12RootSignature.cpp(124,21): warning C4018: '<': signed/unsigned mismatch
-  DX12Shader.cpp
-  DX12StagingDescriptorHeap.cpp
-C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file 'DX12StagingDescriptorHeap.cpp')
-  
-C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12StagingDescriptorHeap.cpp(53,54): warning C4244: 'argument': conversion from 'uint64_t' to '_Ty', possible loss of data
-C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12StagingDescriptorHeap.cpp(53,54): warning C4244:         with
-C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12StagingDescriptorHeap.cpp(53,54): warning C4244:         [
-C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12StagingDescriptorHeap.cpp(53,54): warning C4244:             _Ty=UINT
-C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12StagingDescriptorHeap.cpp(53,54): warning C4244:         ]
   DX12TextureBuffer.cpp
 C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
   (compiling source file 'DX12TextureBuffer.cpp')
   
 C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12TextureBuffer.h(25,15): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12TextureResource' when no variable is declared
   (compiling source file 'DX12TextureBuffer.cpp')
-  
-C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12TextureBuffer.h(48,11): error C2440: 'return': cannot convert from 'const ElysiaRenderer::DX12TextureBuffer::SubResourceLayouts' to 'ElysiaRenderer::DX12TextureBuffer::SubResourceLayouts &'
-  (compiling source file 'DX12TextureBuffer.cpp')
-      C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12TextureBuffer.h(48,11):
-      Conversion loses qualifiers
-  
-C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12TextureBuffer.h(52,11): error C2440: 'return': cannot convert from 'const size_t' to 'size_t &'
-  (compiling source file 'DX12TextureBuffer.cpp')
-      C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12TextureBuffer.h(52,11):
-      Conversion loses qualifiers
   
   DX12TextureResource.cpp
 C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
@@ -140,26 +83,13 @@ C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(5
 C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
   (compiling source file 'DX12VertexBuffer.cpp')
   
-  DirectXTexImage.cpp
-  Generating Code...
-  Compiling...
-  imgui_impl_dx12.cpp
+  DX12GPUResource.cpp
   main.cpp
 C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
   (compiling source file 'main.cpp')
   
 C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12TextureBuffer.h(25,15): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12TextureResource' when no variable is declared
   (compiling source file 'main.cpp')
-  
-C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12TextureBuffer.h(48,11): error C2440: 'return': cannot convert from 'const ElysiaRenderer::DX12TextureBuffer::SubResourceLayouts' to 'ElysiaRenderer::DX12TextureBuffer::SubResourceLayouts &'
-  (compiling source file 'main.cpp')
-      C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12TextureBuffer.h(48,11):
-      Conversion loses qualifiers
-  
-C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12TextureBuffer.h(52,11): error C2440: 'return': cannot convert from 'const size_t' to 'size_t &'
-  (compiling source file 'main.cpp')
-      C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12TextureBuffer.h(52,11):
-      Conversion loses qualifiers
   
 C:\Users\wxy52\Desktop\DX\ElysiaDX12\ElysiaRenderer\DX12PipelineState.h(8,15): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12RootSignature' when no variable is declared
   (compiling source file 'main.cpp')

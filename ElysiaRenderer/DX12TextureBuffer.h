@@ -47,9 +47,13 @@ namespace ElysiaRenderer
 		{
 			return m_subResourceLayouts;
 		}
-		size_t& GetTextureDataSize() const
+		size_t& GetTextureDataSize() 
 		{
 			return m_textureDataSize;
+		}
+		std::unique_ptr<uint8_t[]>& GetTexData()
+		{
+			return m_textureData;
 		}
 
 		void InitTexData()
@@ -64,5 +68,6 @@ namespace ElysiaRenderer
 		std::array<D3D12_PLACED_SUBRESOURCE_FOOTPRINT, MAX_TEXTURE_SUBRESOURCE_COUNT> m_subResourceLayouts;
 		std::unique_ptr<uint8_t[]> m_textureData;
 		size_t m_textureDataSize = 0;
+		std::unique_ptr<DX12GPUResource> m_texUploadBuffer = nullptr;
 	};
 }

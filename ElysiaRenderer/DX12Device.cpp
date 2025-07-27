@@ -292,8 +292,9 @@ namespace ElysiaRenderer
 		newTex = CreateTexture(createDesc);
 		///
 
+		// 每个Mip图相当于一个子资源
 		auto texBuffer = std::make_unique<DX12TextureBuffer>(newTex, texMetaData.mipLevels, texMetaData.arraySize);
-		UINT numRows[MAX_TEXTURE_SUBRESOURCE_COUNT];
+		UINT numRows[MAX_TEXTURE_SUBRESOURCE_COUNT];	// 每个子资源的行数
 		uint64_t rowSizesInBytes[MAX_TEXTURE_SUBRESOURCE_COUNT];
 
 		m_device->GetCopyableFootprints(&newTex->GetResourceDesc(), 0, texBuffer->GetNumSubResources(), 0,
@@ -307,6 +308,26 @@ namespace ElysiaRenderer
 			{
 				const uint64_t subResourceIndex = mipIndex + (arrayIndex * texMetaData.mipLevels);
 
+				const D3D12_PLACED_SUBRESOURCE_FOOTPRINT& subResourcelayout = texBuffer->GetSubResourceLayouts()[subResourceIndex];
+				const uint64_t subResourceHeight = numRows[subResourceIndex];
+				// 每行数据的字节数
+				const uint64_t subResourcePitch = ElysiaHelper::AlignU32(subResourcelayout.Footprint.RowPitch, D3D12_TEXTURE_DATA_PITCH_ALIGNMENT);
+				const uint64_t subResourceDepth = subResourcelayout.Footprint.Depth;
+				uint8_t* destSubResourceMemory = texBuffer->GetTexData().get();
+
+				// sliceIndex是3D纹理的切片索引，2D纹理的切片索引为0
+				for (uint64_t sliceIndex = 0; sliceIndex < subResourceDepth; sliceIndex++)
+				{
+					const auto subImage = imageData->GetImage(mipIndex, arrayIndex, sliceIndex);
+					const uint8_t* sourceSubResourceMemory = subImage->pixels;
+					// 拷贝图片每行数据
+					for (uint64_t height = 0; height < subResourceHeight; ++height)
+					{
+						memcpy(destSubResourceMemory, sourceSubResourceMemory, (std::min)(subResourcePitch, subImage->rowPitch));
+						destSubResourceMemory += subResourcePitch;
+						sourceSubResourceMemory += subImage->rowPitch;
+					}
+				}
 			}
 		}
 
@@ -317,7 +338,7 @@ namespace ElysiaRenderer
 		ID3D12Resource* uploadHeap = nullptr;
 		D3D12MA::Allocation* allocation1 = nullptr;
 		D3D12_RESOURCE_DESC bufferDesc = {};
-		bufferDesc.Width = 10 * 1024 * 1024;
+		bufferDesc.Width = GetRequiredIntermediateSize(newTex->GetResource(), 0, texBuffer->GetNumSubResources());
 		bufferDesc.Alignment = 0;
 		bufferDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
 
@@ -325,20 +346,8 @@ namespace ElysiaRenderer
 		///
 
 		/// Copy tex data from upload heap to default heap
-		std::vector<D3D12_SUBRESOURCE_DATA> subresourceDatas{};
-		auto numSubresource = texMetaData.mipLevels * texMetaData.arraySize;
-		subresourceDatas.resize(numSubresource);
-		/*for (size_t arrayIndex = 0; arrayIndex < texMetaData.arraySize; ++arrayIndex)
-		{
-			for (size_t mipIndex = 0; mipIndex < texMetaData.mipLevels; ++mipIndex)
-			{
-				for (size_t sliceIndex = 0; sliceIndex < imageData->(); ++sliceIndex)
-				{
-					subresourceDatas[i].pData = imageData->GetImage(0, 0, 0)->pixels;
-				}
-			}
-		}*/
 
+		
 		return nullptr;
 	}
 	std::unique_ptr<DX12TextureResource>		DX12Device::CreateTexture(TexCreateDesc& desc)
