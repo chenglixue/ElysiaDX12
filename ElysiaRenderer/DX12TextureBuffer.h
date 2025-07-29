@@ -12,14 +12,20 @@ namespace ElysiaRenderer
 		TGA = 2
 	};
 
-	struct TextureBufferCreationDesc
+	struct TextureCreationDesc
 	{
 		std::string texturePath = "";
 
 		bool isSRGB;
-		BufferTypeFlags bufferTypeFlags = BufferTypeFlags::None;
+	};
+
+	struct TextureBufferCreationDesc
+	{
+		BufferTypeFlags bufferTypeFlags		= BufferTypeFlags::None;
 		BufferAccessFlags bufferAccessFlags = BufferAccessFlags::GPUOnly;
-		bool m_isRawAccess = false;
+		bool m_isRawAccess					= false;
+		UINT m_size							= 0;
+		UINT m_stride						= 0;
 	};
 
 	extern class DX12TextureResource;
@@ -29,6 +35,8 @@ namespace ElysiaRenderer
 		
 	public:
 		DX12TextureBuffer(DX12TextureResource* texResource, size_t mipLevels, size_t arraySize);
+		DX12TextureBuffer(ID3D12Resource* resource, D3D12_RESOURCE_STATES usageState, D3D12MA::Allocation* allocation);
+
 		~DX12TextureBuffer() override;
 
 		DX12DescriptorHeapHandle GetDescriptorHeapHandle() const
@@ -70,4 +78,5 @@ namespace ElysiaRenderer
 		size_t m_textureDataSize = 0;
 		std::unique_ptr<DX12GPUResource> m_texUploadBuffer = nullptr;
 	};
+
 }

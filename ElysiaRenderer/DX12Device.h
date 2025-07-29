@@ -16,6 +16,7 @@
 #include "DX12Shader.h"
 #include "DX12RootSignature.h"
 #include "DX12PipelineState.h"
+#include "DX12UploadContext.h"
 
 namespace ElysiaRenderer
 {
@@ -30,7 +31,6 @@ namespace ElysiaRenderer
 	struct RootSignatureCreatDesc
 	{
 		std::vector<DX12RootParameter*> rootParamters;
-
 	};
 
 	class DX12Device
@@ -71,6 +71,7 @@ namespace ElysiaRenderer
 		std::unique_ptr<DX12GraphicsContext>		CreateGraphicsContext();
 		std::unique_ptr<DX12VertexBuffer>			CreateVertexBuffer(const VertexBufferCreationDesc& bufferCreationDesc);
 		std::unique_ptr<DX12TextureBuffer>			CreateTextureBuffer(const TextureBufferCreationDesc& textureCreationDesc);
+		std::unique_ptr<DX12TextureResource>		CreateTextureFromFile(const TextureCreationDesc& textureCreationDesc);
 		std::unique_ptr<DX12TextureResource>		CreateTexture(TexCreateDesc& desc);
 		std::unique_ptr<DX12Shader>					CreateShader(ShaderCreateDesc& shaderCreateDesc);
 		void										CreateSamplers(DX12RootSignature* rootSignature, D3D12_SHADER_VISIBILITY shaderVisibility = D3D12_SHADER_VISIBILITY_ALL);
@@ -129,6 +130,7 @@ namespace ElysiaRenderer
 		std::unique_ptr<DX12RenderPassDescriptorHeap> m_CBVRenderPassDescriptorHeap;
 		std::unique_ptr<DX12RenderPassDescriptorHeap> m_samplerRenderPassDescriptorHeap;
 		std::unique_ptr<DX12RenderPassDescriptorHeap> m_UAVRenderPassDescriptorHeap;
+		std::array<std::unique_ptr<DX12UploadContext>, NUM_FRAMES_IN_FLIGHT> m_uploadContexts;
 		std::array<std::unique_ptr<DX12TextureResource>, NUM_BACK_BUFFERS> m_backBuffers;
 		std::array<EndOfFrameFences, NUM_FRAMES_IN_FLIGHT> m_endOfFrameFences;
 		std::array<std::vector<std::pair<uint64_t, D3D12_COMMAND_LIST_TYPE>>, NUM_FRAMES_IN_FLIGHT> m_contextSubmissions;

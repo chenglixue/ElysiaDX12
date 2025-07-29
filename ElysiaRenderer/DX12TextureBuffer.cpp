@@ -11,6 +11,13 @@ namespace ElysiaRenderer
 		m_allocation = texResource->GetAllocation();
 	}
 
+	DX12TextureBuffer::DX12TextureBuffer(ID3D12Resource* resource, D3D12_RESOURCE_STATES usageState, D3D12MA::Allocation* allocation)
+		: DX12GPUResource(resource, usageState)
+	{
+		m_allocation = allocation;
+		m_GPUAddress = resource->GetGPUVirtualAddress();
+	}
+
 	DX12TextureBuffer::~DX12TextureBuffer()
 	{
 		delete m_tex;
