@@ -28,11 +28,6 @@ namespace ElysiaRenderer
 		UINT submissionIndex = 0;
 	};
 
-	struct RootSignatureCreatDesc
-	{
-		std::vector<DX12RootParameter*> rootParamters;
-	};
-
 	class DX12Device
 	{
 	public:

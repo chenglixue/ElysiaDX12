@@ -14,7 +14,19 @@ namespace ElysiaRenderer
 		for (UINT i = 0; i < NUM_FRAMES_IN_FLIGHT; ++i)
 		{
 			ProcessDestruction(i);
+			m_uploadContexts[i] = nullptr;
 		}
+
+		m_SRVRenderPassDescriptorHeap = nullptr;
+		m_RTVStagingDescriptorHeap = nullptr;
+		m_DSVStagingDescriptorHeap = nullptr;
+		m_CBVRenderPassDescriptorHeap = nullptr;
+		m_samplerRenderPassDescriptorHeap = nullptr;
+		m_UAVRenderPassDescriptorHeap = nullptr;
+
+		m_graphicsQueue = nullptr;
+		m_computeQueue = nullptr;
+		m_copyQueue = nullptr;
 
 		ElysiaHelper::SafeRelease(m_device);
 		ElysiaHelper::SafeRelease(m_DXGIFactory);
@@ -715,7 +727,9 @@ namespace ElysiaRenderer
 	void DX12Device::EndFrame()
 	{
 		m_uploadContexts[m_frameID]->ProcessUploads();
-		SubmitContextWork()
+		SubmitContextWork(m_uploadContexts[m_frameID].get());
+
+		m_endOfFrameFences[m_frameID].m_copyQueueFence = m_computeQueue->SingalFence();
 	}
 
 	void DX12Device::Present()

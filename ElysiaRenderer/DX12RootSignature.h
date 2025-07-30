@@ -3,6 +3,7 @@
 
 namespace ElysiaRenderer
 {
+
 	class DX12RootParameter
 	{
 		friend class DX12RootSignature;
@@ -20,6 +21,11 @@ namespace ElysiaRenderer
 
 	private:
 		D3D12_ROOT_PARAMETER m_rootParamter;
+	};
+
+	struct RootSignatureCreatDesc
+	{
+		std::vector<DX12RootParameter*> rootParamters;
 	};
 
 	class DX12RootSignature

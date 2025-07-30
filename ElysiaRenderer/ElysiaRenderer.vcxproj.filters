@@ -148,6 +148,9 @@
     <ClInclude Include="DX12TextureBuffer.h">
       <Filter>Header Files\DX12</Filter>
     </ClInclude>
+    <ClInclude Include="DX12UploadContext.h">
+      <Filter>Header Files\DX12</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="DXTex\Shaders\Compiled\BC7Encode_TryMode02CS.inc">
@@ -309,6 +312,12 @@
       <Filter>Source Files\DX12</Filter>
     </ClCompile>
     <ClCompile Include="DX12PipelineState.cpp">
+      <Filter>Source Files\DX12</Filter>
+    </ClCompile>
+    <ClCompile Include="DX12TextureBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DX12UploadContext.cpp">
       <Filter>Source Files\DX12</Filter>
     </ClCompile>
   </ItemGroup>
