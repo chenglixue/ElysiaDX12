@@ -249,14 +249,12 @@ namespace ElysiaRenderer
 
 		// Create Tex & Buffer
 		{
-			TextureBufferCreationDesc texBufferCreateDesc{};
+			TextureCreationDesc texBufferCreateDesc{};
 
-			texBufferCreateDesc.isSRGB = true;
-			texBufferCreateDesc.bufferAccessFlags = BufferAccessFlags::HostWritable;
-			texBufferCreateDesc.bufferTypeFlags = BufferTypeFlags::SRV;
 			texBufferCreateDesc.texturePath = "";
+			texBufferCreateDesc.isSRGB = true;
 
-			m_device->CreateTextureBuffer(texBufferCreateDesc);
+			m_device->CreateTextureFromFile(texBufferCreateDesc);
 		}
 	}
 

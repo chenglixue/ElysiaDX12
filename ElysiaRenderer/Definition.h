@@ -14,6 +14,7 @@ namespace ElysiaRenderer
 	constexpr uint32_t NUM_SAMPLER_DESCRIPTORS = 6;
 	constexpr uint32_t MAX_TEXTURE_SUBRESOURCE_COUNT = 32;
 
+	using SubResourceLayouts = std::array<D3D12_PLACED_SUBRESOURCE_FOOTPRINT, MAX_TEXTURE_SUBRESOURCE_COUNT>;
 
 	static const wchar_t* SHADER_SOURCE_PATH = L"Shaders/";
 	static const wchar_t* SHADER_OUTPUT_PATH = L"Shaders/Complied/";

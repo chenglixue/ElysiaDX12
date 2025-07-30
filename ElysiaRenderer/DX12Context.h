@@ -28,6 +28,7 @@ namespace ElysiaRenderer
 		void Reset(ID3D12PipelineState* pipelineState);
 		void AddBarrier(DX12GPUResource& resource, D3D12_RESOURCE_STATES newState);
 		void FlushBarrier();
+		void CopyTextureRegion(DX12GPUResource& destination, DX12GPUResource& source, size_t sourceOffset, SubResourceLayouts subResourceLayouts, UINT numSubResources);
 
 	protected:
 		DX12Device* m_device = nullptr;

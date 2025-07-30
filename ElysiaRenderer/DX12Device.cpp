@@ -163,7 +163,7 @@ namespace ElysiaRenderer
 				m_uploadContexts[currFrameIndex] = std::make_unique<DX12UploadContext>(
 					this, 
 					//CreateVertexBuffer(vertexBufferCreationDesc),
-					CreateTextureBuffer(textureBufferCreationDesc));
+					CreateTextureUploadHeap(textureBufferCreationDesc));
 			}
 		}
 		m_frameID = 0;
@@ -256,7 +256,7 @@ namespace ElysiaRenderer
 
 		return vertexBuffer;
 	}
-	std::unique_ptr<DX12TextureBuffer>			DX12Device::CreateTextureBuffer(const TextureBufferCreationDesc& bufferCreationDesc)
+	std::unique_ptr<DX12TextureResource>		DX12Device::CreateTextureUploadHeap(const TextureBufferCreationDesc& bufferCreationDesc)
 	{
 		auto isHostViewable = bufferCreationDesc.bufferAccessFlags == BufferAccessFlags::HostWritable;
 
@@ -282,7 +282,7 @@ namespace ElysiaRenderer
 		ElysiaHelper::ThrowIfFailed(m_allocator->CreateResource(&allocationDesc, &resourceDesc, usageState, nullptr,
 			&allocation, IID_PPV_ARGS(&resource)));
 
-		auto texBuffer = std::make_unique<DX12TextureBuffer>(resource, usageState, allocation);
+		auto texBuffer = std::make_unique<DX12TextureResource>(resource, usageState, allocation);
 
 		return texBuffer;
 	}
@@ -342,7 +342,7 @@ namespace ElysiaRenderer
 		///
 
 		// 每个Mip图相当于一个子资源
-		auto texBuffer = std::make_unique<DX12TextureBuffer>(newTex, texMetaData.mipLevels, texMetaData.arraySize);
+		auto texBuffer = std::make_unique<DX12TextureBuffer>(newTex.get(), texMetaData.mipLevels, texMetaData.arraySize);
 		UINT numRows[MAX_TEXTURE_SUBRESOURCE_COUNT];	// 每个子资源的行数
 		uint64_t rowSizesInBytes[MAX_TEXTURE_SUBRESOURCE_COUNT];
 
@@ -707,12 +707,15 @@ namespace ElysiaRenderer
 
 		ProcessDestruction(m_frameID);
 
+		m_uploadContexts[m_frameID]->Reset();
+
 		m_contextSubmissions[m_frameID].clear();
 	}
 
 	void DX12Device::EndFrame()
 	{
-
+		m_uploadContexts[m_frameID]->ProcessUploads();
+		SubmitContextWork()
 	}
 
 	void DX12Device::Present()

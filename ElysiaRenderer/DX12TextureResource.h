@@ -63,7 +63,14 @@ namespace ElysiaRenderer
 			m_RTVDescriptor = handle;
 		}
 
+		uint8_t* GetMappedBuffer()
+		{
+			return m_mappedBuffer;
+		}
+
 	private:
+		uint8_t* m_mappedBuffer;
+
 		DX12DescriptorHeapHandle m_RTVDescriptor{};
 		DX12DescriptorHeapHandle m_DSVDescriptor{};
 		DX12DescriptorHeapHandle m_SRVDescriptor{};

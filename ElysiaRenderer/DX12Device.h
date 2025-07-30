@@ -70,7 +70,7 @@ namespace ElysiaRenderer
 
 		std::unique_ptr<DX12GraphicsContext>		CreateGraphicsContext();
 		std::unique_ptr<DX12VertexBuffer>			CreateVertexBuffer(const VertexBufferCreationDesc& bufferCreationDesc);
-		std::unique_ptr<DX12TextureBuffer>			CreateTextureBuffer(const TextureBufferCreationDesc& textureCreationDesc);
+		std::unique_ptr<DX12TextureResource>		CreateTextureUploadHeap(const TextureBufferCreationDesc& textureCreationDesc);
 		std::unique_ptr<DX12TextureResource>		CreateTextureFromFile(const TextureCreationDesc& textureCreationDesc);
 		std::unique_ptr<DX12TextureResource>		CreateTexture(TexCreateDesc& desc);
 		std::unique_ptr<DX12Shader>					CreateShader(ShaderCreateDesc& shaderCreateDesc);

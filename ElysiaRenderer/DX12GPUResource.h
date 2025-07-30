@@ -47,7 +47,7 @@ namespace ElysiaRenderer
 		{
 			return m_usageState;
 		}
-		D3D12_RESOURCE_DESC GetResourceDesc()
+		D3D12_RESOURCE_DESC& GetResourceDesc()
 		{
 			return m_resourceDesc;
 		}

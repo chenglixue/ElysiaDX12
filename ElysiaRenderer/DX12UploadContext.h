@@ -4,6 +4,7 @@
 #include "DX12BufferResource.h"
 #include "DX12VertexBuffer.h"
 #include "DX12TextureBuffer.h"
+#include "DX12TextureResource.h"
 #include "DX12ConstantBuffer.h"
 
 namespace ElysiaRenderer
@@ -13,20 +14,21 @@ namespace ElysiaRenderer
 	{
 	public:
 		DX12UploadContext(DX12Device* device, 
-			std::unique_ptr<DX12TextureBuffer> textureUploadHeap);
+			std::unique_ptr<DX12TextureResource> textureUploadHeap);
 		~DX12UploadContext() override;
 
 		void AddTextureBufferUpload(std::unique_ptr<DX12TextureBuffer> textureUpload)
 		{
-			m_textureUploads.push_back(std::move(textureUpload));
+			m_textureDefaults.push_back(std::move(textureUpload));
 		}
+		void ProcessUploads();
 
 	private:
 		//std::vector<std::unique_ptr<DX12VertexBuffer>> m_vertexBufferUploads;
 		std::vector<std::unique_ptr<DX12ConstantBuffer>> m_constantBufferUploads;
-		std::vector<std::unique_ptr<DX12TextureBuffer>> m_textureUploads;
+		std::vector<std::unique_ptr<DX12TextureBuffer>> m_textureDefaults;
 
 		//std::unique_ptr<DX12VertexBuffer> m_vertexUploadHeap;
-		std::unique_ptr<DX12TextureBuffer> m_textureUploadHeap;
+		std::unique_ptr<DX12TextureResource> m_textureUploadHeap;
 	};
 }

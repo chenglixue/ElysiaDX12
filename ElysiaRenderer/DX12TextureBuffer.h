@@ -31,7 +31,6 @@ namespace ElysiaRenderer
 	extern class DX12TextureResource;
 	class DX12TextureBuffer : public DX12GPUResource
 	{
-		using SubResourceLayouts = std::array<D3D12_PLACED_SUBRESOURCE_FOOTPRINT, MAX_TEXTURE_SUBRESOURCE_COUNT>;
 		
 	public:
 		DX12TextureBuffer(DX12TextureResource* texResource, size_t mipLevels, size_t arraySize);
@@ -73,7 +72,7 @@ namespace ElysiaRenderer
 		DX12DescriptorHeapHandle m_SRVDescriptorHeapHandle{};
 		DX12TextureResource* m_tex = nullptr;
 		UINT m_numSubResources = 0;
-		std::array<D3D12_PLACED_SUBRESOURCE_FOOTPRINT, MAX_TEXTURE_SUBRESOURCE_COUNT> m_subResourceLayouts;
+		SubResourceLayouts m_subResourceLayouts;
 		std::unique_ptr<uint8_t[]> m_textureData;
 		size_t m_textureDataSize = 0;
 		std::unique_ptr<DX12GPUResource> m_texUploadBuffer = nullptr;
