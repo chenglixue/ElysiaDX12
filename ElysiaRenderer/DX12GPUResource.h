@@ -35,7 +35,7 @@ namespace ElysiaRenderer
 		{
 			return m_bufferType;
 		}
-		ID3D12Resource* GetResource()
+		ID3D12Resource*& GetResource()
 		{
 			return m_resource;
 		}

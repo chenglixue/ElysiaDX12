@@ -2,11 +2,12 @@
 #include "stdafx.h"
 #include "DX12GPUResource.h"
 #include "DX12DescriptorHeapHandle.h"
+#include "DX12BufferResource.h"
 
 
 namespace ElysiaRenderer
 {
-	class DX12ConstantBuffer : public DX12GPUResource
+	class DX12ConstantBuffer : public DX12BufferResource
 	{
 	public:
 		DX12ConstantBuffer(ID3D12Resource* resource, D3D12_RESOURCE_STATES usageState, uint32_t bufferSize, 
@@ -23,5 +24,6 @@ namespace ElysiaRenderer
 		void* m_mappedBuffer;
 		uint32_t m_bufferSize;
 		DX12DescriptorHeapHandle m_constantBufferViewHandle;
+		BufferType m_bufferType = BufferType::Vertex;
 	};
 }

@@ -5,7 +5,7 @@
 #include <dxgidebug.h>
 #include <numeric>
 
-extern "C" { __declspec(dllexport) extern const UINT D3D12SDKVersion = 616; }
+extern "C" { __declspec(dllexport) extern const UINT D3D12SDKVersion = 602; }
 extern "C" { __declspec(dllexport) extern const char* D3D12SDKPath = ".\\D3D12\\"; }
 
 namespace D3D12Lite
@@ -403,7 +403,7 @@ namespace D3D12Lite
         if (mContextType == D3D12_COMMAND_LIST_TYPE_COMPUTE)
         {
             constexpr D3D12_RESOURCE_STATES VALID_COMPUTE_CONTEXT_STATES = (D3D12_RESOURCE_STATE_UNORDERED_ACCESS | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE |
-                                                                            D3D12_RESOURCE_STATE_COPY_DEST | D3D12_RESOURCE_STATE_COPY_SOURCE);
+                D3D12_RESOURCE_STATE_COPY_DEST | D3D12_RESOURCE_STATE_COPY_SOURCE);
 
             assert((oldState & VALID_COMPUTE_CONTEXT_STATES) == oldState);
             assert((newState & VALID_COMPUTE_CONTEXT_STATES) == newState);
@@ -583,7 +583,7 @@ namespace D3D12Lite
 
         static const uint32_t maxNumHandlesPerBinding = 16;
         static const uint32_t singleDescriptorRangeCopyArray[maxNumHandlesPerBinding]{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ,1 };
-        
+
         const BufferResource* cbv = resources.GetCBV();
         const auto& uavs = resources.GetUAVs();
         const auto& srvs = resources.GetSRVs();
@@ -592,7 +592,7 @@ namespace D3D12Lite
         uint32_t currentHandleIndex = 0;
         assert(numTableHandles <= maxNumHandlesPerBinding);
 
-        if(cbv)
+        if (cbv)
         {
             auto& cbvMapping = mCurrentPipeline->mPipelineResourceMapping.mCbvMapping[spaceId];
             assert(cbvMapping.has_value());
@@ -765,7 +765,7 @@ namespace D3D12Lite
 
         assert(numTableHandles <= maxNumHandlesPerBinding);
 
-        if(cbv)
+        if (cbv)
         {
             auto& cbvMapping = mCurrentPipeline->mPipelineResourceMapping.mCbvMapping[spaceId];
             assert(cbvMapping.has_value());
@@ -1177,7 +1177,7 @@ namespace D3D12Lite
         swapChainDesc.Stereo = false;
         swapChainDesc.SampleDesc.Count = 1;
         swapChainDesc.SampleDesc.Quality = 0;
-        swapChainDesc.BufferUsage = 0x00000020UL;
+        swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
         swapChainDesc.BufferCount = NUM_BACK_BUFFERS;
         swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
         swapChainDesc.Flags = 0;
@@ -1229,7 +1229,7 @@ namespace D3D12Lite
     {
         auto& destructionQueueForFrame = mDestructionQueues[frameIndex];
 
-        for(auto& bufferToDestroy : destructionQueueForFrame.mBuffersToDestroy)
+        for (auto& bufferToDestroy : destructionQueueForFrame.mBuffersToDestroy)
         {
             if (bufferToDestroy->mCBVDescriptor.IsValid())
             {
@@ -1326,7 +1326,7 @@ namespace D3D12Lite
     {
         mUploadContexts[mFrameId]->ProcessUploads();
         SubmitContextWork(*mUploadContexts[mFrameId]);
-         
+
         mEndOfFrameFences[mFrameId].mComputeQueueFence = mComputeQueue->SignalFence();
         mEndOfFrameFences[mFrameId].mCopyQueueFence = mCopyQueue->SignalFence();
     }
@@ -1591,17 +1591,17 @@ namespace D3D12Lite
     std::unique_ptr<TextureResource> Device::CreateTextureFromFile(const std::string& texturePath)
     {
         auto s2ws = [](const std::string& s)
-        {
-            //yoink https://stackoverflow.com/questions/27220/how-to-convert-stdstring-to-lpcwstr-in-c-unicode
-            int32_t len = 0;
-            int32_t slength = (int32_t)s.length() + 1;
-            len = MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, 0, 0);
-            wchar_t* buf = new wchar_t[len];
-            MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, buf, len);
-            std::wstring r(buf);
-            delete[] buf;
-            return r;
-        };
+            {
+                //yoink https://stackoverflow.com/questions/27220/how-to-convert-stdstring-to-lpcwstr-in-c-unicode
+                int32_t len = 0;
+                int32_t slength = (int32_t)s.length() + 1;
+                len = MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, 0, 0);
+                wchar_t* buf = new wchar_t[len];
+                MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, buf, len);
+                std::wstring r(buf);
+                delete[] buf;
+                return r;
+            };
 
         std::unique_ptr<DirectX::ScratchImage> imageData = std::make_unique<DirectX::ScratchImage>();
         HRESULT loadResult = DirectX::LoadFromDDSFile(s2ws(texturePath).c_str(), DirectX::DDS_FLAGS_NONE, nullptr, *imageData);
@@ -1918,7 +1918,7 @@ namespace D3D12Lite
 
         std::unique_ptr<PipelineStateObject> newPipeline = std::make_unique<PipelineStateObject>();
         newPipeline->mPipelineType = PipelineType::graphics;
-        
+
         pipelineDesc.pRootSignature = CreateRootSignature(layout, newPipeline->mPipelineResourceMapping);
 
         ID3D12PipelineState* graphicsPipeline = nullptr;

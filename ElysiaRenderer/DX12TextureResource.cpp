@@ -8,7 +8,7 @@ namespace ElysiaRenderer
 		m_mappedBuffer = nullptr;
 		m_GPUAddress = resource->GetGPUVirtualAddress();
 
-		resource->GetDesc();
+		m_resourceDesc = resource->GetDesc();
 		resource->Map(0, nullptr, reinterpret_cast<void**>(&m_mappedBuffer));
 	}
 
@@ -27,6 +27,6 @@ namespace ElysiaRenderer
 
 	DX12TextureResource::~DX12TextureResource()
 	{
-
+		Unmap();
 	}
 }

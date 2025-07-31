@@ -95,15 +95,6 @@ namespace ElysiaRenderer
 		m_pixelShaders.clear();
 		m_computeShaders.clear();
 		m_graphicsPipelineStates.clear();
-
-		if (IDXGIDebug* dxgiDebug = nullptr)
-		{
-			if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&dxgiDebug))))
-			{
-				dxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_FLAGS(DXGI_DEBUG_RLO_DETAIL | DXGI_DEBUG_RLO_IGNORE_INTERNAL));
-				dxgiDebug->Release();
-			}
-		}
 	}
 
 	void Renderer::InitTriangle()
@@ -222,13 +213,13 @@ namespace ElysiaRenderer
 		// Create Shader
 		{
 			ShaderCreateDesc VSShaderCreateDesc{};
-			VSShaderCreateDesc.shaderName = L"DrawTriangle.hlsl";
+			VSShaderCreateDesc.shaderName = L"Shaders\\DrawTriangle.hlsl";
 			VSShaderCreateDesc.entryPoint = "VS";
 			VSShaderCreateDesc.shaderType = ShaderType::Vertex;
 			m_vertexShaders.push_back(std::move(m_device->CreateShader(VSShaderCreateDesc)));
 
 			ShaderCreateDesc PSShaderCreateDesc{};
-			PSShaderCreateDesc.shaderName = L"DrawTriangle.hlsl";
+			PSShaderCreateDesc.shaderName = L"Shaders\\DrawTriangle.hlsl";
 			PSShaderCreateDesc.entryPoint = "PS";
 			PSShaderCreateDesc.shaderType = ShaderType::Pixel;
 			m_pixelShaders.push_back(std::move(m_device->CreateShader(PSShaderCreateDesc)));
@@ -251,7 +242,7 @@ namespace ElysiaRenderer
 		{
 			TextureCreationDesc texBufferCreateDesc{};
 
-			texBufferCreateDesc.texturePath = "";
+			texBufferCreateDesc.texturePath = "Tex\\Wood.dds";
 			texBufferCreateDesc.isSRGB = true;
 
 			m_device->CreateTextureFromFile(texBufferCreateDesc);

@@ -14,21 +14,27 @@ namespace ElysiaRenderer
 	{
 	public:
 		DX12UploadContext(DX12Device* device, 
-			std::unique_ptr<DX12TextureResource> textureUploadHeap);
+			std::unique_ptr<DX12TextureUploadBuffer> textureUploadHeap);
 		~DX12UploadContext() override;
+
+		std::unique_ptr<DX12TextureUploadBuffer> GetTexUploadHeap()
+		{
+			return std::move(m_textureUploadHeap);
+		}
 
 		void AddTextureBufferUpload(std::unique_ptr<DX12TextureBuffer> textureUpload)
 		{
-			m_textureDefaults.push_back(std::move(textureUpload));
+			m_textureUploads.push_back(std::move(textureUpload));
 		}
 		void ProcessUploads();
 
 	private:
 		//std::vector<std::unique_ptr<DX12VertexBuffer>> m_vertexBufferUploads;
+		// these not upload heap.their members have default heap, need upload data from m_textureUploadHeap to members's default heap
 		std::vector<std::unique_ptr<DX12ConstantBuffer>> m_constantBufferUploads;
-		std::vector<std::unique_ptr<DX12TextureBuffer>> m_textureDefaults;
+		std::vector<std::unique_ptr<DX12TextureBuffer>> m_textureUploads;
 
 		//std::unique_ptr<DX12VertexBuffer> m_vertexUploadHeap;
-		std::unique_ptr<DX12TextureResource> m_textureUploadHeap;
+		std::unique_ptr<DX12TextureUploadBuffer> m_textureUploadHeap;
 	};
 }

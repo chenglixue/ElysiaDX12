@@ -11,6 +11,13 @@ namespace ElysiaRenderer
 
 	DX12Device::~DX12Device()
 	{
+		WaitForIdle();
+
+		for (UINT i = 0; i < NUM_FRAMES_IN_FLIGHT; ++i)
+		{
+			DestoryBuffer(m_uploadContexts[i]->GetTexUploadHeap());
+		}
+
 		for (UINT i = 0; i < NUM_FRAMES_IN_FLIGHT; ++i)
 		{
 			ProcessDestruction(i);
@@ -32,6 +39,16 @@ namespace ElysiaRenderer
 		ElysiaHelper::SafeRelease(m_DXGIFactory);
 		ElysiaHelper::SafeRelease(m_swapChain);
 		ElysiaHelper::SafeRelease(m_allocator);
+
+#ifdef DEBUG
+		IDXGIDebug1* pDebug = nullptr;
+		if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&pDebug))))
+		{
+			pDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_FLAGS(DXGI_DEBUG_RLO_SUMMARY | DXGI_DEBUG_RLO_DETAIL | DXGI_DEBUG_RLO_IGNORE_INTERNAL));
+			SafeRelease(pDebug);
+		}
+#endif // DEBUG
+
 	}
 
 	void DX12Device::InitializeDeviceResources(HWND windowHandle)
@@ -49,11 +66,8 @@ namespace ElysiaRenderer
 
 				ElysiaHelper::SafeRelease(debugController);
 			}
-
-			
 #endif
 		}
-		
 
 		// Create DXGIFactory1
 		{
@@ -71,17 +85,15 @@ namespace ElysiaRenderer
 				DXGI_ADAPTER_DESC1 adapterDesc;
 				ElysiaHelper::AssertIfFailed(adapter->GetDesc1(&adapterDesc));
 
-				// 软件adapter
+				// soft ware adapter
 				if (adapterDesc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE)
 				{
 					continue;
 				}
 
-				// 在不创建Device的情况下，检测adapter是否支持D3D12
-				if (FAILED(D3D12CreateDevice(adapter, D3D_FEATURE_LEVEL_11_0, __uuidof(ID3D12Device), nullptr)))
-				{
-					continue;
-				}
+				// check support D3D12
+				auto hr = D3D12CreateDevice(adapter, D3D_FEATURE_LEVEL_10_0, __uuidof(ID3D12Device), nullptr));
+				ElysiaHelper::ThrowIfFailed(hr);
 
 				// DedicatedVideoMemory:显卡自带的高速显存
 				// DedicatedSystemMemory:系统内存中划分给显卡专用的部分
@@ -268,7 +280,7 @@ namespace ElysiaRenderer
 
 		return vertexBuffer;
 	}
-	std::unique_ptr<DX12TextureResource>		DX12Device::CreateTextureUploadHeap(const TextureBufferCreationDesc& bufferCreationDesc)
+	std::unique_ptr<DX12TextureUploadBuffer>	DX12Device::CreateTextureUploadHeap(const TextureBufferCreationDesc& bufferCreationDesc)
 	{
 		auto isHostViewable = bufferCreationDesc.bufferAccessFlags == BufferAccessFlags::HostWritable;
 
@@ -294,7 +306,7 @@ namespace ElysiaRenderer
 		ElysiaHelper::ThrowIfFailed(m_allocator->CreateResource(&allocationDesc, &resourceDesc, usageState, nullptr,
 			&allocation, IID_PPV_ARGS(&resource)));
 
-		auto texBuffer = std::make_unique<DX12TextureResource>(resource, usageState, allocation);
+		auto texBuffer = std::make_unique<DX12TextureUploadBuffer>(resource, usageState, allocation);
 
 		return texBuffer;
 	}
@@ -649,7 +661,7 @@ namespace ElysiaRenderer
 	{
 		m_destructionQueues[m_frameID].m_contexts->push_back(std::move(*context));
 	}
-	void DX12Device::DestoryBuffer(std::unique_ptr<DX12GPUResource> buffer)
+	void DX12Device::DestoryBuffer(std::unique_ptr<DX12BufferResource> buffer)
 	{
 		m_destructionQueues[m_frameID].m_buffers->push_back(std::move(*buffer));
 	}
@@ -659,8 +671,11 @@ namespace ElysiaRenderer
 	}
 	void DX12Device::DestoryShader(std::unique_ptr<DX12Shader> shader)
 	{
-		auto tempShader = shader->GetShader();
-		ElysiaHelper::SafeRelease(tempShader);
+		ElysiaHelper::SafeRelease(shader->GetShader());
+	}
+	void DX12Device::DestoryTexture(std::unique_ptr<DX12TextureResource> texture)
+	{
+		m_destructionQueues[m_frameID].m_textures->push_back(std::move(*texture));
 	}
 
 	void DX12Device::ProcessDestruction(UINT frameIndex)
@@ -678,34 +693,41 @@ namespace ElysiaRenderer
 					{
 						m_SRVStagingDescriptorHeap->FreeDescriptorHeapHandle(vertexBuffer->GetSRVDescriptor());
 					}*/
-					if (vertexBuffer->GetMappedBuffer() != nullptr)
-					{
-						vertexBuffer->GetResource()->Unmap(0, nullptr);
-					}
+					vertexBuffer->Unmap();
 					break;
+				}
+				case BufferType::Texture:
+				{
+					auto texUploadHeap = dynamic_cast<DX12TextureUploadBuffer*>(&currBuffer);
+					texUploadHeap->Unmap();
 				}
 				default:
 					ElysiaHelper::AssertError("buffer type none");
 					break;
 			}
 
-			auto resource = currBuffer.GetResource();
-			auto allocation = currBuffer.GetAllocation();
-			ElysiaHelper::SafeRelease(resource);
-			ElysiaHelper::SafeRelease(allocation);
+			ElysiaHelper::SafeRelease(currBuffer.GetResource());
+			ElysiaHelper::SafeRelease(currBuffer.GetAllocation());
+		}
+
+		for (auto& currTex : *m_destructionQueues[frameIndex].m_textures)
+		{
+			currTex.Unmap();
+
+			ElysiaHelper::SafeRelease(currTex.GetAllocation());
+			ElysiaHelper::SafeRelease(currTex.GetResource());
 		}
 
 		for (auto& currPipelineState : *m_destructionQueues[frameIndex].m_pipelineStates)
 		{
-			auto signature = currPipelineState.GetRootSignature();
-			auto pipelineState = currPipelineState.GetRootSignature();
-			ElysiaHelper::SafeRelease(signature);
-			ElysiaHelper::SafeRelease(pipelineState);
+			ElysiaHelper::SafeRelease(currPipelineState.GetRootSignature());
+			ElysiaHelper::SafeRelease(currPipelineState.GetPipelineState());
 		}
 
-		currFrameDestrctuionQueue.m_contexts.release();
-		currFrameDestrctuionQueue.m_buffers.release();
-		currFrameDestrctuionQueue.m_pipelineStates.release();
+		(*currFrameDestrctuionQueue.m_contexts).clear();
+		(*currFrameDestrctuionQueue.m_buffers).clear();
+		(*currFrameDestrctuionQueue.m_textures).clear();
+		(*currFrameDestrctuionQueue.m_pipelineStates).clear();
 	}
 
 	void DX12Device::BeginFrame()
@@ -714,6 +736,7 @@ namespace ElysiaRenderer
 
 		// wait on fences from 2 frames ago
 		m_graphicsQueue->WaitForFenceCPUBlocking(m_endOfFrameFences[m_frameID].m_graphicsQueueFence);
+		m_copyQueue->WaitForFenceCPUBlocking(m_endOfFrameFences[m_frameID].m_copyQueueFence);
 		/*m_computeQueue->WaitForFenceCPUBlocking(m_endOfFrameFences[m_frameID].m_computeQueueFence);
 		m_copyQueue->WaitForFenceCPUBlocking(m_endOfFrameFences[m_frameID].m_copyQueueFence);*/
 
@@ -741,5 +764,6 @@ namespace ElysiaRenderer
 	void DX12Device::WaitForIdle()
 	{
 		m_graphicsQueue->WaitForIdle();
+		m_copyQueue->WaitForIdle();
 	}
 }

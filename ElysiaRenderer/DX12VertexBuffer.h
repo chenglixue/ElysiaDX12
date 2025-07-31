@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "DX12GPUResource.h"
 #include "DX12DescriptorHeapHandle.h"
+#include "DX12BufferResource.h"
 
 namespace ElysiaRenderer
 {
@@ -14,7 +15,7 @@ namespace ElysiaRenderer
 		bool m_isRawAccess = false;
 	};
 
-	class DX12VertexBuffer : public DX12GPUResource
+	class DX12VertexBuffer : public DX12BufferResource
 	{
 	public:
 		DX12VertexBuffer(ID3D12Resource* resource, D3D12_RESOURCE_STATES usageState, uint32_t vertexStride, uint32_t bufferSize);
@@ -40,6 +41,14 @@ namespace ElysiaRenderer
 			m_SRVDescriptor = SRVDescriptor;
 		}*/
 		void SetMappedData(const void* bufferData, uint32_t bufferSize);
+
+		void Unmap()
+		{
+			if (m_mappedBuffer != nullptr)
+			{
+				m_resource->Unmap(0, nullptr);
+			}
+		}
 
 	private:
 		D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;

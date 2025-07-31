@@ -67,6 +67,14 @@ namespace ElysiaRenderer
 		{
 			return m_mappedBuffer;
 		}
+		void Unmap()
+		{
+			if (m_mappedBuffer != nullptr)
+			{
+				m_resource->Unmap(0, nullptr);
+
+			}
+		}
 
 	private:
 		uint8_t* m_mappedBuffer;

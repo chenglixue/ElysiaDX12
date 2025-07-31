@@ -24,7 +24,7 @@ namespace ElysiaRenderer
 		DX12Shader(ID3DBlob* shader);
 		~DX12Shader();
 
-		ID3DBlob* GetShader() const
+		ID3DBlob*& GetShader()
 		{
 			return m_shader;
 		}

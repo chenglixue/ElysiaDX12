@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "DX12GPUResource.h"
 #include "DX12DescriptorHeapHandle.h"
+#include "DX12BufferResource.h"
 
 namespace ElysiaRenderer
 {
@@ -29,12 +30,15 @@ namespace ElysiaRenderer
 	};
 
 	extern class DX12TextureResource;
-	class DX12TextureBuffer : public DX12GPUResource
+	/// <summary>
+	/// only save texture data, not a heap but save a default heap
+	/// </summary>
+	class DX12TextureBuffer : public DX12BufferResource
 	{
 		
 	public:
 		DX12TextureBuffer(DX12TextureResource* texResource, size_t mipLevels, size_t arraySize);
-		DX12TextureBuffer(ID3D12Resource* resource, D3D12_RESOURCE_STATES usageState, D3D12MA::Allocation* allocation);
+		//DX12TextureBuffer(ID3D12Resource* resource, D3D12_RESOURCE_STATES usageState, D3D12MA::Allocation* allocation);
 
 		~DX12TextureBuffer() override;
 
@@ -42,7 +46,7 @@ namespace ElysiaRenderer
 		{
 			return m_SRVDescriptorHeapHandle;
 		}
-		DX12TextureResource* GetTexResource() const
+		DX12TextureResource* GetDefaultHeap() const
 		{
 			return m_tex;
 		}
@@ -68,9 +72,8 @@ namespace ElysiaRenderer
 			m_textureData = std::make_unique<uint8_t[]>(m_textureDataSize);
 		}
 	private:
-
 		DX12DescriptorHeapHandle m_SRVDescriptorHeapHandle{};
-		DX12TextureResource* m_tex = nullptr;
+		DX12TextureResource* m_tex = nullptr;	// default heap
 		UINT m_numSubResources = 0;
 		SubResourceLayouts m_subResourceLayouts;
 		std::unique_ptr<uint8_t[]> m_textureData;
@@ -78,4 +81,27 @@ namespace ElysiaRenderer
 		std::unique_ptr<DX12GPUResource> m_texUploadBuffer = nullptr;
 	};
 
+	class DX12TextureUploadBuffer : public DX12BufferResource
+	{
+	public:
+		DX12TextureUploadBuffer(ID3D12Resource* resource, D3D12_RESOURCE_STATES usageState, D3D12MA::Allocation* allocation);
+		~DX12TextureUploadBuffer() override;
+
+		uint8_t* GetMappedBuffer()
+		{
+			return m_mappedBuffer;
+		}
+		void Unmap()
+		{
+			if (m_mappedBuffer != nullptr)
+			{
+				m_resource->Unmap(0, nullptr);
+
+			}
+		}
+
+	private:
+		uint8_t* m_mappedBuffer;
+		BufferType m_bufferType = BufferType::Texture;
+	};
 }

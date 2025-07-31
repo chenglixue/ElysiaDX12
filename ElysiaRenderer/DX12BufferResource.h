@@ -5,7 +5,7 @@
 
 namespace ElysiaRenderer
 {
-	class DX12BufferResource : public DX12GPUResource
+	/*class DX12BufferResource : public DX12GPUResource
 	{
 	public:
 		DX12BufferResource(ID3D12Resource* resource, D3D12_RESOURCE_STATES usageState);
@@ -62,5 +62,19 @@ namespace ElysiaRenderer
 		DX12DescriptorHeapHandle m_CBVDescriptor{};
 		DX12DescriptorHeapHandle m_SRVDescriptor{};
 		DX12DescriptorHeapHandle m_UAVDescriptor{};
+	};*/
+
+	class DX12BufferResource : public DX12GPUResource
+	{
+	public:
+		DX12BufferResource(ID3D12Resource* resource, D3D12_RESOURCE_STATES usageState)
+			: DX12GPUResource(resource, usageState)
+		{
+
+		}
+
+		~DX12BufferResource() override
+		{
+		}
 	};
 }

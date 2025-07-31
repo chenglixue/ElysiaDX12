@@ -114,7 +114,7 @@
       <AdditionalLibraryDirectories>D:\DX12\ElysiaRenderer\ElysiaRenderer\dxc\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy $(ProjectDir)Shaders $(TargetDir) /Y /E</Command>
+      <Command>xcopy $(ProjectDir)Resource $(TargetDir) /Y /E</Command>
     </PostBuildEvent>
     <PreBuildEvent>
       <Command>

@@ -46,11 +46,11 @@ namespace ElysiaRenderer
 		DX12PipelineState(ID3D12PipelineState* pipelineState, ID3D12RootSignature* rootSignature);
 		virtual ~DX12PipelineState();
 
-		ID3D12PipelineState* GetPipelineState()
+		ID3D12PipelineState*& GetPipelineState()
 		{
 			return m_pipelineState;
 		}
-		ID3D12RootSignature* GetRootSignature()
+		ID3D12RootSignature*& GetRootSignature()
 		{
 			return m_rootSignature;
 		}
