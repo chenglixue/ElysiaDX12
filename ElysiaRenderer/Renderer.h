@@ -63,7 +63,7 @@ namespace ElysiaRenderer
 	}
 	inline void Renderer::Render()
 	{
-		RenderTexTriangle();
+		//RenderTexTriangle();
 	}
 	inline void Renderer::Destory()
 	{
@@ -192,7 +192,7 @@ namespace ElysiaRenderer
 		// Create Root Parameter & Sampler & Root Signature
 		{
 			{
-				auto rootParameter = std::unique_ptr<DX12RootParameter>();
+				auto rootParameter = std::make_unique<DX12RootParameter>();
 				rootParameter->InitAsDescriptorTable(1, D3D12_SHADER_VISIBILITY_PIXEL);
 				rootParameter->SetTableRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0);
 
@@ -259,7 +259,7 @@ namespace ElysiaRenderer
 		m_graphicsContext->AddBarrier(currBackBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET);
 		m_graphicsContext->FlushBarrier();
 
-		m_graphicsContext->ClearRenderTarget(currBackBuffer, Color(0.3, 0.3, 0.8));
+		m_graphicsContext->ClearRenderTarget(currBackBuffer, Color(0.3f, 0.3f, 0.8f));
 
 		m_graphicsContext->AddBarrier(currBackBuffer, D3D12_RESOURCE_STATE_PRESENT);
 		m_graphicsContext->FlushBarrier();

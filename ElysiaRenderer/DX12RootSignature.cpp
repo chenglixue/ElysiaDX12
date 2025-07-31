@@ -114,16 +114,16 @@ namespace ElysiaRenderer
 		if (m_isInited) return;
 		assert(m_numInitedSamplers == m_numSamplers);
 
-		D3D12_ROOT_SIGNATURE_DESC rootSignatureDesc{};
-		rootSignatureDesc.NumParameters = m_numRootParameters;
-		rootSignatureDesc.pParameters = (const D3D12_ROOT_PARAMETER*)m_rootParametersArray.get();
-		rootSignatureDesc.NumStaticSamplers = m_numSamplers;
-		rootSignatureDesc.pStaticSamplers = (const D3D12_STATIC_SAMPLER_DESC*)m_samplerArray.get();
-		rootSignatureDesc.Flags = flags;
+		D3D12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDesc{};
+		rootSignatureDesc.Desc_1_0.NumParameters = m_numRootParameters;
+		rootSignatureDesc.Desc_1_0.pParameters = (const D3D12_ROOT_PARAMETER*)m_rootParametersArray.get();
+		rootSignatureDesc.Desc_1_0.NumStaticSamplers = m_numSamplers;
+		rootSignatureDesc.Desc_1_0.pStaticSamplers = (const D3D12_STATIC_SAMPLER_DESC*)m_samplerArray.get();
+		rootSignatureDesc.Desc_1_0.Flags = flags;
 
 		for (int i = 0; i < m_numRootParameters; ++i)
 		{
-			const D3D12_ROOT_PARAMETER& rootParam = rootSignatureDesc.pParameters[i];
+			const D3D12_ROOT_PARAMETER& rootParam = rootSignatureDesc.Desc_1_0.pParameters[i];
 			m_descriptorTableSize[i] = 0;
 
 			if (rootParam.ParameterType == D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE)
@@ -147,8 +147,7 @@ namespace ElysiaRenderer
 
 		ID3DBlob* signature = nullptr;
 		ID3DBlob* error = nullptr;
-
-		ElysiaHelper::ThrowIfFailed(D3D12SerializeRootSignature(&rootSignatureDesc, featureData.HighestVersion, &signature, &error));
+		ElysiaHelper::ThrowIfFailed(D3D12SerializeVersionedRootSignature(&rootSignatureDesc, &signature, &error));
 
 		ID3D12RootSignature* rootSignature = nullptr;
 		ElysiaHelper::ThrowIfFailed(device->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&rootSignature)));
@@ -158,7 +157,7 @@ namespace ElysiaRenderer
 
 	void DX12RootSignature::Reset(UINT numRootParams, UINT numStaticSamplers)
 	{
-		if (m_numRootParameters > 0)
+		if (numRootParams > 0)
 		{
 			m_rootParametersArray.reset(new DX12RootParameter[numRootParams]);
 		}
@@ -167,7 +166,7 @@ namespace ElysiaRenderer
 			m_rootParametersArray = nullptr;
 		}
 
-		if (m_numSamplers > 0)
+		if (numStaticSamplers > 0)
 		{
 			m_samplerArray.reset(new D3D12_STATIC_SAMPLER_DESC[numStaticSamplers]);
 		}

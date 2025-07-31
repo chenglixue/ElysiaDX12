@@ -1,5 +1,9 @@
 #include "DX12Device.h"
 
+extern "C" { __declspec(dllexport) extern const UINT D3D12SDKVersion = 616; }
+extern "C" { __declspec(dllexport) extern const char* D3D12SDKPath = ".\\D3D12\\"; }
+
+
 namespace ElysiaRenderer
 {
 	DX12Device::DX12Device(HWND windowHandle, ElysiaHelper::UINT2 screenSize)
@@ -59,11 +63,10 @@ namespace ElysiaRenderer
 		// 必须在创建D3D12 Device前启用调试层，启用后可以直接删除(因为创建D3D12 Device后，调用该API会在runtime自动删除Device)
 		// https://learn.microsoft.com/en-us/windows/win32/api/d3d12sdklayers/nf-d3d12sdklayers-id3d12debug-enabledebuglayer
 #if defined(_DEBUG)
-			ID3D12Debug* debugController = nullptr;
+			ID3D12Debug* debugController;
 			if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController))))
 			{
 				debugController->EnableDebugLayer();
-
 				ElysiaHelper::SafeRelease(debugController);
 			}
 #endif
@@ -80,7 +83,9 @@ namespace ElysiaRenderer
 			IDXGIAdapter1* adapter = nullptr;
 			UINT bestAdapterIndex = 0;
 			size_t bestAdapterMemory = 0;	// 记录最大专用显存
-			for (UINT currAdapterIndex = 0; m_DXGIFactory->EnumAdapters1(currAdapterIndex, &adapter) != DXGI_ERROR_NOT_FOUND; currAdapterIndex++)
+			for (UINT currAdapterIndex = 0; 
+				m_DXGIFactory->EnumAdapters1(currAdapterIndex, &adapter) != DXGI_ERROR_NOT_FOUND; 
+				currAdapterIndex++)
 			{
 				DXGI_ADAPTER_DESC1 adapterDesc;
 				ElysiaHelper::AssertIfFailed(adapter->GetDesc1(&adapterDesc));
@@ -92,8 +97,10 @@ namespace ElysiaRenderer
 				}
 
 				// check support D3D12
-				auto hr = D3D12CreateDevice(adapter, D3D_FEATURE_LEVEL_10_0, __uuidof(ID3D12Device), nullptr));
-				ElysiaHelper::ThrowIfFailed(hr);
+				if (FAILED(D3D12CreateDevice(adapter, D3D_FEATURE_LEVEL_11_0, _uuidof(ID3D12Device), nullptr)))
+				{
+					continue;
+				}
 
 				// DedicatedVideoMemory:显卡自带的高速显存
 				// DedicatedSystemMemory:系统内存中划分给显卡专用的部分

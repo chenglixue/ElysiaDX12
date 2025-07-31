@@ -5,8 +5,8 @@
 #include <dxgidebug.h>
 #include <numeric>
 
-extern "C" { __declspec(dllexport) extern const UINT D3D12SDKVersion = 602; }
-extern "C" { __declspec(dllexport) extern const char* D3D12SDKPath = ".\\D3D12\\"; }
+//extern "C" { __declspec(dllexport) extern const UINT D3D12SDKVersion = 616; }
+//extern "C" { __declspec(dllexport) extern const char* D3D12SDKPath = ".\\D3D12\\"; }
 
 namespace D3D12Lite
 {
@@ -1023,6 +1023,8 @@ namespace D3D12Lite
 
             if (FAILED(D3D12CreateDevice(adapter, D3D_FEATURE_LEVEL_12_2, _uuidof(ID3D12Device), nullptr)))
             {
+                bestAdapterIndex = adapterIndex;
+                bestAdapterMemory = adapterDesc.DedicatedVideoMemory;
                 continue;
             }
 
