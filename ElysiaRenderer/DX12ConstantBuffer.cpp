@@ -18,6 +18,8 @@ namespace ElysiaRenderer
 	DX12ConstantBuffer::~DX12ConstantBuffer()
 	{
 		m_resource->Unmap(0, nullptr);
+		ElysiaHelper::SafeRelease(m_resource);
+		ElysiaHelper::SafeRelease(m_allocation);
 	}
 
 	void DX12ConstantBuffer::SetConstantBufferData(const void* bufferData, uint32_t bufferSize)

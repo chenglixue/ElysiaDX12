@@ -19,7 +19,7 @@ namespace ElysiaRenderer
 
 		for (UINT i = 0; i < NUM_FRAMES_IN_FLIGHT; ++i)
 		{
-			DestoryBuffer(std::unique_ptr<DX12TextureUploadBuffer>(m_uploadContexts[i]->GetTexUploadHeap()));
+			DestoryBuffer(std::unique_ptr<DX12TextureUploadBuffer>(std::move(m_uploadContexts[i]->GetTexUploadHeap())));
 		}
 
 		for (UINT i = 0; i < NUM_FRAMES_IN_FLIGHT; ++i)
@@ -198,13 +198,13 @@ namespace ElysiaRenderer
 			}
 		}
 
-		for (UINT i = 0; i < NUM_FRAMES_IN_FLIGHT; ++i)
+		/*for (UINT i = 0; i < NUM_FRAMES_IN_FLIGHT; ++i)
 		{
 			m_destructionQueues[i].m_buffers = std::make_unique<std::vector<DX12BufferResource>>();
 			m_destructionQueues[i].m_textures = std::make_unique<std::vector<DX12TextureResource>>();
 			m_destructionQueues[i].m_contexts = std::make_unique<std::vector<DX12Context>>();
 			m_destructionQueues[i].m_pipelineStates = std::make_unique<std::vector<DX12PipelineState>>();
-		}
+		}*/
 		m_frameID = 0;
 	}
 	void DX12Device::CreateWindowDependentResources()
@@ -644,20 +644,20 @@ namespace ElysiaRenderer
 	}
 
 
-	ContextSubmissionResult DX12Device::SubmitContextWork(DX12Context* context)
+	ContextSubmissionResult DX12Device::SubmitContextWork(DX12Context& context)
 	{
 		uint64_t fenceResult = 0;
 
-		switch (context->GetContextType())
+		switch (context.GetContextType())
 		{
 		case D3D12_COMMAND_LIST_TYPE_DIRECT:
-			fenceResult = m_graphicsQueue->ExecuteCommandList(context->GetCommandList());
+			fenceResult = m_graphicsQueue->ExecuteCommandList(context.GetCommandList());
 			break;
 		case D3D12_COMMAND_LIST_TYPE_COMPUTE:
-			fenceResult = m_computeQueue->ExecuteCommandList(context->GetCommandList());
+			fenceResult = m_computeQueue->ExecuteCommandList(context.GetCommandList());
 			break;
 		case D3D12_COMMAND_LIST_TYPE_COPY:
-			fenceResult = m_copyQueue->ExecuteCommandList(context->GetCommandList());
+			fenceResult = m_copyQueue->ExecuteCommandList(context.GetCommandList());
 			break;
 		default:
 			ElysiaHelper::AssertError("Unsupported submission type.");
@@ -667,22 +667,22 @@ namespace ElysiaRenderer
 		submissionResult.frameID = m_frameID;
 		submissionResult.submissionIndex = static_cast<UINT>(m_contextSubmissions[m_frameID].size());
 
-		m_contextSubmissions[m_frameID].push_back(std::make_pair(fenceResult, context->GetContextType()));
+		m_contextSubmissions[m_frameID].push_back(std::make_pair(fenceResult, context.GetContextType()));
 
 		return submissionResult;
 	}
 
 	void DX12Device::DestoryContext(std::unique_ptr<DX12Context> context)
 	{
-		m_destructionQueues[m_frameID].m_contexts->push_back(std::move(*context));
+		m_destructionQueues[m_frameID].m_contexts.push_back(std::move(context));
 	}
 	void DX12Device::DestoryBuffer(std::unique_ptr<DX12BufferResource> buffer)
 	{
-		m_destructionQueues[m_frameID].m_buffers->push_back(std::move(*buffer));
+		m_destructionQueues[m_frameID].m_buffers.push_back(std::move(buffer));
 	}
 	void DX12Device::DestoryPipelineState(std::unique_ptr<DX12PipelineState> pipelineState)
 	{
-		m_destructionQueues[m_frameID].m_pipelineStates->push_back(std::move(*pipelineState));
+		m_destructionQueues[m_frameID].m_pipelineStates.push_back(std::move(pipelineState));
 	}
 	void DX12Device::DestoryShader(std::unique_ptr<DX12Shader> shader)
 	{
@@ -690,20 +690,20 @@ namespace ElysiaRenderer
 	}
 	void DX12Device::DestoryTexture(std::unique_ptr<DX12TextureResource> texture)
 	{
-		m_destructionQueues[m_frameID].m_textures->push_back(std::move(*texture));
+		m_destructionQueues[m_frameID].m_textures.push_back(std::move(texture));
 	}
 
 	void DX12Device::ProcessDestruction(UINT frameIndex)
 	{
 		auto& currFrameDestrctuionQueue = m_destructionQueues[frameIndex];
 
-		for (auto& currBuffer : *m_destructionQueues[frameIndex].m_buffers)
+		for (auto& currBuffer : m_destructionQueues[frameIndex].m_buffers)
 		{
-			switch (currBuffer.GetBufferType())
+			switch (currBuffer->GetBufferType())
 			{
 				case BufferType::Vertex:
 				{
-					auto vertexBuffer = dynamic_cast<DX12VertexBuffer*>(&currBuffer);
+					auto vertexBuffer = dynamic_cast<DX12VertexBuffer*>(currBuffer.get());
 					/*if (vertexBuffer->GetSRVDescriptor().IsValid())
 					{
 						m_SRVStagingDescriptorHeap->FreeDescriptorHeapHandle(vertexBuffer->GetSRVDescriptor());
@@ -713,7 +713,7 @@ namespace ElysiaRenderer
 				}
 				case BufferType::Texture:
 				{
-					auto texUploadHeap = dynamic_cast<DX12TextureUploadBuffer*>(&currBuffer);
+					auto texUploadHeap = dynamic_cast<DX12TextureUploadBuffer*>(currBuffer.get());
 					texUploadHeap->Unmap();
 				}
 				default:
@@ -725,22 +725,22 @@ namespace ElysiaRenderer
 			//ElysiaHelper::SafeRelease(currBuffer.GetAllocation());
 		}
 
-		for (auto& currTex : *m_destructionQueues[frameIndex].m_textures)
+		for (auto& currTex : m_destructionQueues[frameIndex].m_textures)
 		{
 			/*ElysiaHelper::SafeRelease(currTex.GetAllocation());
 			ElysiaHelper::SafeRelease(currTex.GetResource());*/
 		}
 
-		for (auto& currPipelineState : *m_destructionQueues[frameIndex].m_pipelineStates)
+		for (auto& currPipelineState : m_destructionQueues[frameIndex].m_pipelineStates)
 		{
 			/*ElysiaHelper::SafeRelease(currPipelineState.GetRootSignature());
 			ElysiaHelper::SafeRelease(currPipelineState.GetPipelineState());*/
 		}
 
-		(*currFrameDestrctuionQueue.m_contexts).clear();
-		(*currFrameDestrctuionQueue.m_buffers).clear();
-		(*currFrameDestrctuionQueue.m_textures).clear();
-		(*currFrameDestrctuionQueue.m_pipelineStates).clear();
+		(currFrameDestrctuionQueue.m_contexts).clear();
+		(currFrameDestrctuionQueue.m_buffers).clear();
+		(currFrameDestrctuionQueue.m_textures).clear();
+		(currFrameDestrctuionQueue.m_pipelineStates).clear();
 	}
 
 	void DX12Device::BeginFrame()
@@ -763,7 +763,7 @@ namespace ElysiaRenderer
 	void DX12Device::EndFrame()
 	{
 		m_uploadContexts[m_frameID]->ProcessUploads();
-		SubmitContextWork(m_uploadContexts[m_frameID].get());
+		SubmitContextWork(*m_uploadContexts[m_frameID]);
 
 		m_endOfFrameFences[m_frameID].m_copyQueueFence = m_copyQueue->SingalFence();
 	}

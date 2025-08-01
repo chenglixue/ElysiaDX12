@@ -264,7 +264,7 @@ namespace ElysiaRenderer
 		m_graphicsContext->AddBarrier(currBackBuffer, D3D12_RESOURCE_STATE_PRESENT);
 		m_graphicsContext->FlushBarrier();
 
-		m_device->SubmitContextWork(m_graphicsContext.get());
+		m_device->SubmitContextWork(*m_graphicsContext);
 
 		m_device->Present();
 		m_device->EndFrame();
@@ -294,7 +294,7 @@ namespace ElysiaRenderer
 		m_graphicsContext->AddBarrier(currBackBuffer, D3D12_RESOURCE_STATE_PRESENT);
 		m_graphicsContext->FlushBarrier();
 
-		m_device->SubmitContextWork(m_graphicsContext.get());
+		m_device->SubmitContextWork(*m_graphicsContext);
 
 		m_device->Present();
 		m_device->EndFrame();

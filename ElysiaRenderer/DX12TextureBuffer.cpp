@@ -20,7 +20,11 @@ namespace ElysiaRenderer
 
 	DX12TextureBuffer::~DX12TextureBuffer()
 	{
-		
+		if (m_tex != nullptr)
+		{
+			m_tex.release();
+			m_tex = nullptr;
+		}
 	}
 
 	DX12TextureUploadBuffer::DX12TextureUploadBuffer(ID3D12Resource* resource, D3D12_RESOURCE_STATES usageState, D3D12MA::Allocation* allocation)
@@ -32,5 +36,7 @@ namespace ElysiaRenderer
 	DX12TextureUploadBuffer::~DX12TextureUploadBuffer()
 	{
 		Unmap();
+		ElysiaHelper::SafeRelease(m_resource);
+		ElysiaHelper::SafeRelease(m_allocation);
 	}
 }

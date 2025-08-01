@@ -72,9 +72,5 @@ namespace ElysiaRenderer
 		{
 
 		}
-
-		~DX12BufferResource() override
-		{
-		}
 	};
 }

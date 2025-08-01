@@ -35,7 +35,6 @@ namespace ElysiaRenderer
 	/// </summary>
 	class DX12TextureBuffer : public DX12BufferResource
 	{
-		
 	public:
 		DX12TextureBuffer(std::unique_ptr<DX12TextureResource> texResource, size_t mipLevels, size_t arraySize);
 		//DX12TextureBuffer(ID3D12Resource* resource, D3D12_RESOURCE_STATES usageState, D3D12MA::Allocation* allocation);
@@ -78,7 +77,6 @@ namespace ElysiaRenderer
 		SubResourceLayouts m_subResourceLayouts;
 		std::unique_ptr<uint8_t[]> m_textureData;
 		size_t m_textureDataSize = 0;
-		std::unique_ptr<DX12GPUResource> m_texUploadBuffer = nullptr;
 	};
 
 	class DX12TextureUploadBuffer : public DX12BufferResource

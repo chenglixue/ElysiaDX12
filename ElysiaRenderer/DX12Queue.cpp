@@ -84,7 +84,7 @@ namespace ElysiaRenderer
 
 	uint64_t DX12Queue::ExecuteCommandList(ID3D12CommandList* commandList)
 	{
-		ElysiaHelper::AssertIfFailed(((ID3D12GraphicsCommandList*)commandList)->Close());
+		ElysiaHelper::AssertIfFailed(static_cast<ID3D12GraphicsCommandList*>(commandList)->Close());
 		m_commandQueue->ExecuteCommandLists(1, &commandList);
 		
 		return SingalFence();

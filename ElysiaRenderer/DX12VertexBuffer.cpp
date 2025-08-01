@@ -37,7 +37,8 @@ namespace ElysiaRenderer
 	{
 		m_resource->Unmap(0, nullptr);
 
-		
+		ElysiaHelper::SafeRelease(m_resource);
+		ElysiaHelper::SafeRelease(m_allocation);
 	}
 
 	void DX12VertexBuffer::SetMappedData(const void* bufferData, uint32_t bufferSize)

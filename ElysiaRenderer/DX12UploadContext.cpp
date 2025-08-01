@@ -15,6 +15,11 @@ namespace ElysiaRenderer
 	DX12UploadContext::~DX12UploadContext()
 	{
 		assert(m_textureUploadHeap == nullptr);
+		if (m_textureUploadHeap != nullptr)
+		{
+			m_textureUploadHeap.release();
+			m_textureUploadHeap = nullptr;
+		}
 	}
 
 	void DX12UploadContext::ProcessUploads()

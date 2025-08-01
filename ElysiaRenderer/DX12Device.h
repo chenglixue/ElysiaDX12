@@ -80,7 +80,7 @@ namespace ElysiaRenderer
 		void DestoryContext(std::unique_ptr<DX12Context> context);
 		void DestoryTexture(std::unique_ptr<DX12TextureResource> texture);
 
-		ContextSubmissionResult SubmitContextWork(DX12Context* context);
+		ContextSubmissionResult SubmitContextWork(DX12Context& context);
 
 		void WaitForIdle();
 
@@ -99,10 +99,10 @@ namespace ElysiaRenderer
 
 		struct DestructionQueue
 		{
-			std::unique_ptr<std::vector<DX12BufferResource>> m_buffers;
-			std::unique_ptr<std::vector<DX12TextureResource>> m_textures;
-			std::unique_ptr<std::vector<DX12Context>> m_contexts;
-			std::unique_ptr<std::vector<DX12PipelineState>> m_pipelineStates;
+			std::vector<std::unique_ptr<DX12BufferResource>> m_buffers;
+			std::vector<std::unique_ptr<DX12TextureResource>> m_textures;
+			std::vector<std::unique_ptr<DX12Context>> m_contexts;
+			std::vector<std::unique_ptr<DX12PipelineState>> m_pipelineStates;
 		};
 
 		void InitializeDeviceResources(HWND windowHandle);

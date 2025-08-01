@@ -335,7 +335,7 @@ namespace D3D12Lite
     }
 
     void Queue::WaitForIdle()
-    {
+    {   
         WaitForFenceCPUBlocking(mNextFenceValue - 1);
     }
 
