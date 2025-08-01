@@ -17,13 +17,15 @@ namespace ElysiaRenderer
 			std::unique_ptr<DX12TextureUploadBuffer> textureUploadHeap);
 		~DX12UploadContext() override;
 
-		std::unique_ptr<DX12TextureUploadBuffer> GetTexUploadHeap()
+		DX12TextureUploadBuffer* GetTexUploadHeap()
 		{
-			return std::move(m_textureUploadHeap);
+			return m_textureUploadHeap.get();
 		}
 
 		void AddTextureBufferUpload(std::unique_ptr<DX12TextureBuffer> textureUpload)
 		{
+			assert(textureUpload->GetTextureDataSize() <= m_textureUploadHeap->GetResourceDesc().Width);
+
 			m_textureUploads.push_back(std::move(textureUpload));
 		}
 		void ProcessUploads();

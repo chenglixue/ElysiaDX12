@@ -14,9 +14,7 @@ namespace ElysiaRenderer
 
 	DX12UploadContext::~DX12UploadContext()
 	{
-		m_constantBufferUploads.clear();
-		m_textureUploads.clear();
-		m_textureUploadHeap.release();
+		assert(m_textureUploadHeap == nullptr);
 	}
 
 	void DX12UploadContext::ProcessUploads()
@@ -34,12 +32,11 @@ namespace ElysiaRenderer
 			}
 
 			memcpy(m_textureUploadHeap->GetMappedBuffer() + texUploadHeapOffset, currUpload.GetTexData().get(), currUpload.GetTextureDataSize());
+			CopyTextureRegion(*currUpload.GetDefaultHeap(), *m_textureUploadHeap, texUploadHeapOffset,
+				currUpload.GetSubResourceLayouts(), currUpload.GetNumSubResources());
 
 			texUploadHeapOffset += currUpload.GetTextureDataSize();
 			texUploadHeapOffset = ElysiaHelper::AlignU64(texUploadHeapOffset, 512);
-
-			CopyTextureRegion(*currUpload.GetDefaultHeap(), *m_textureUploadHeap, texUploadHeapOffset,
-				currUpload.GetSubResourceLayouts(), currUpload.GetNumSubResources());
 		}
 
 		if (numTexsProcessed > 0)

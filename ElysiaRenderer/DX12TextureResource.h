@@ -63,22 +63,7 @@ namespace ElysiaRenderer
 			m_RTVDescriptor = handle;
 		}
 
-		uint8_t* GetMappedBuffer()
-		{
-			return m_mappedBuffer;
-		}
-		void Unmap()
-		{
-			if (m_mappedBuffer != nullptr)
-			{
-				m_resource->Unmap(0, nullptr);
-
-			}
-		}
-
 	private:
-		uint8_t* m_mappedBuffer;
-
 		DX12DescriptorHeapHandle m_RTVDescriptor{};
 		DX12DescriptorHeapHandle m_DSVDescriptor{};
 		DX12DescriptorHeapHandle m_SRVDescriptor{};

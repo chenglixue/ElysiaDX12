@@ -85,7 +85,7 @@ namespace ElysiaRenderer
 
 			D3D12_TEXTURE_COPY_LOCATION sourceLocation{};
 			sourceLocation.pResource = source.GetResource();
-			destLocation.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
+			sourceLocation.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
 			sourceLocation.PlacedFootprint = subResourceLayouts[currSubResourceIndex];
 			sourceLocation.PlacedFootprint.Offset += sourceOffset;
 

@@ -1,13 +1,15 @@
 struct VSInput
 {
     float4 position : POSITION;
-    float4 color : COLOR;
+    float2 texcoord : TEXCOORD;
+    //float4 color : COLOR;
 };
 
 struct PSInput
 {
     float4 position : SV_POSITION;
-    float4 color : COLOR;
+    float2 texcoord : TEXCOORD;
+    //float4 color : COLOR;
 };
 
 struct PSOutput
@@ -17,18 +19,19 @@ struct PSOutput
 
 PSInput VS(VSInput i)
 {
-    PSInput result;
+    PSInput o;
 
-    result.position = i.position;
-    result.color = i.color;
+    o.position = i.position;
+    o.texcoord = i.texcoord;
+    //result.color = i.color;
 
-    return result;
+    return o;
 }
 
 PSOutput PS(PSInput i)
 {
     PSOutput o;
     
-    o.target0 = i.color;
+    o.target0.rg = i.texcoord;
     return o;
 }

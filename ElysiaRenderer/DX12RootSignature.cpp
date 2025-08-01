@@ -114,16 +114,22 @@ namespace ElysiaRenderer
 		if (m_isInited) return;
 		assert(m_numInitedSamplers == m_numSamplers);
 
-		D3D12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDesc{};
+		/*D3D12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDesc{};
 		rootSignatureDesc.Desc_1_0.NumParameters = m_numRootParameters;
 		rootSignatureDesc.Desc_1_0.pParameters = (const D3D12_ROOT_PARAMETER*)m_rootParametersArray.get();
 		rootSignatureDesc.Desc_1_0.NumStaticSamplers = m_numSamplers;
 		rootSignatureDesc.Desc_1_0.pStaticSamplers = (const D3D12_STATIC_SAMPLER_DESC*)m_samplerArray.get();
-		rootSignatureDesc.Desc_1_0.Flags = flags;
+		rootSignatureDesc.Desc_1_0.Flags = flags;*/
+		D3D12_ROOT_SIGNATURE_DESC rootSignatureDesc{};
+		rootSignatureDesc.NumParameters = m_numRootParameters;
+		rootSignatureDesc.pParameters = (const D3D12_ROOT_PARAMETER*)m_rootParametersArray.get();
+		rootSignatureDesc.NumStaticSamplers = m_numSamplers;
+		rootSignatureDesc.pStaticSamplers = (const D3D12_STATIC_SAMPLER_DESC*)m_samplerArray.get();
+		rootSignatureDesc.Flags = flags;
 
 		for (int i = 0; i < m_numRootParameters; ++i)
 		{
-			const D3D12_ROOT_PARAMETER& rootParam = rootSignatureDesc.Desc_1_0.pParameters[i];
+			const D3D12_ROOT_PARAMETER& rootParam = rootSignatureDesc.pParameters[i];
 			m_descriptorTableSize[i] = 0;
 
 			if (rootParam.ParameterType == D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE)
@@ -138,7 +144,7 @@ namespace ElysiaRenderer
 		}
 
 		D3D12_FEATURE_DATA_ROOT_SIGNATURE featureData = {};
-		featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_1;
+		featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1;
 
 		if (FAILED(device->CheckFeatureSupport(D3D12_FEATURE_ROOT_SIGNATURE, &featureData, sizeof(featureData))))
 		{
@@ -147,10 +153,11 @@ namespace ElysiaRenderer
 
 		ID3DBlob* signature = nullptr;
 		ID3DBlob* error = nullptr;
-		ElysiaHelper::ThrowIfFailed(D3D12SerializeVersionedRootSignature(&rootSignatureDesc, &signature, &error));
+		//ElysiaHelper::ThrowIfFailed(D3D12SerializeVersionedRootSignature(&rootSignatureDesc, &signature, &error));
+		ElysiaHelper::ThrowIfFailed(D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error));
 
-		ID3D12RootSignature* rootSignature = nullptr;
-		ElysiaHelper::ThrowIfFailed(device->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&rootSignature)));
+		//ID3D12RootSignature* rootSignature = nullptr;
+		ElysiaHelper::ThrowIfFailed(device->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&m_rootSignature)));
 	
 		m_isInited = true;
 	}

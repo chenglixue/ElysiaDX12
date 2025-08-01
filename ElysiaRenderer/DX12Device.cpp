@@ -19,7 +19,7 @@ namespace ElysiaRenderer
 
 		for (UINT i = 0; i < NUM_FRAMES_IN_FLIGHT; ++i)
 		{
-			DestoryBuffer(m_uploadContexts[i]->GetTexUploadHeap());
+			DestoryBuffer(std::unique_ptr<DX12TextureUploadBuffer>(m_uploadContexts[i]->GetTexUploadHeap()));
 		}
 
 		for (UINT i = 0; i < NUM_FRAMES_IN_FLIGHT; ++i)
@@ -137,8 +137,8 @@ namespace ElysiaRenderer
 		// Create Queue
 		{
 			m_graphicsQueue = std::make_unique<DX12Queue>(m_device, D3D12_COMMAND_LIST_TYPE_DIRECT);
-			/*m_computeQueue = std::make_unique<DX12Queue>(m_device);
-			m_copyQueue = std::make_unique<DX12Queue>(m_device);*/
+			//m_computeQueue = std::make_unique<DX12Queue>(m_device);
+			m_copyQueue = std::make_unique<DX12Queue>(m_device, D3D12_COMMAND_LIST_TYPE_COPY);
 		}
 
 		// Create Descriptor Heap
@@ -196,6 +196,14 @@ namespace ElysiaRenderer
 					//CreateVertexBuffer(vertexBufferCreationDesc),
 					CreateTextureUploadHeap(textureBufferCreationDesc));
 			}
+		}
+
+		for (UINT i = 0; i < NUM_FRAMES_IN_FLIGHT; ++i)
+		{
+			m_destructionQueues[i].m_buffers = std::make_unique<std::vector<DX12BufferResource>>();
+			m_destructionQueues[i].m_textures = std::make_unique<std::vector<DX12TextureResource>>();
+			m_destructionQueues[i].m_contexts = std::make_unique<std::vector<DX12Context>>();
+			m_destructionQueues[i].m_pipelineStates = std::make_unique<std::vector<DX12PipelineState>>();
 		}
 		m_frameID = 0;
 	}
@@ -317,7 +325,7 @@ namespace ElysiaRenderer
 
 		return texBuffer;
 	}
-	std::unique_ptr<DX12TextureResource>		DX12Device::CreateTextureFromFile(const TextureCreationDesc& textureCreationDesc)
+	void										DX12Device::CreateTextureFromFile(const TextureCreationDesc& textureCreationDesc)
 	{
 		auto& texturePath = textureCreationDesc.texturePath;
 		bool isSRGB = textureCreationDesc.isSRGB;
@@ -337,8 +345,12 @@ namespace ElysiaRenderer
 				delete[] buf;
 				return r;
 			};
+
+			WCHAR assetsPath[512];
+			ElysiaHelper::GetAssetsPath(assetsPath, _countof(assetsPath));
+
 			imageData = std::make_unique<DirectX::ScratchImage>();
-			auto loadResult = DirectX::LoadFromDDSFile(s2ws(texturePath).c_str(), DirectX::DDS_FLAGS_NONE, nullptr, *imageData);
+			auto loadResult = DirectX::LoadFromDDSFile(ElysiaHelper::GetAssetFullPath(assetsPath, textureCreationDesc.texturePath).c_str(), DirectX::DDS_FLAGS_NONE, nullptr, *imageData);
 			assert(loadResult == S_OK);
 		}
 		///
@@ -351,10 +363,9 @@ namespace ElysiaRenderer
 		///
 		
 		/// Create tex desc && tex resource
-		std::unique_ptr<DX12TextureResource> newTex = nullptr;
 		D3D12_RESOURCE_DESC texDesc{};
 		texDesc.Width = texMetaData.width;
-		texDesc.Height = texMetaData.height;
+		texDesc.Height = static_cast<UINT>(texMetaData.height);
 		texDesc.Dimension = is3DTex ? D3D12_RESOURCE_DIMENSION_TEXTURE3D : D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 		texDesc.Format = texFormat;
 		texDesc.MipLevels = static_cast<UINT16>(texMetaData.mipLevels);
@@ -369,15 +380,15 @@ namespace ElysiaRenderer
 		createDesc.m_resouceDesc = std::move(texDesc);
 		createDesc.m_typeFlag = TexTypeFlags::SRV;
 
-		newTex = CreateTexture(createDesc);
+		auto newTex = std::move(CreateTexture(createDesc));
 		///
 
 		// 每个Mip图相当于一个子资源
-		auto texBuffer = std::make_unique<DX12TextureBuffer>(newTex.get(), texMetaData.mipLevels, texMetaData.arraySize);
+		auto texBuffer = std::make_unique<DX12TextureBuffer>(std::move(newTex), texMetaData.mipLevels, texMetaData.arraySize);
 		UINT numRows[MAX_TEXTURE_SUBRESOURCE_COUNT];	// 每个子资源的行数
 		uint64_t rowSizesInBytes[MAX_TEXTURE_SUBRESOURCE_COUNT];
 
-		m_device->GetCopyableFootprints(&newTex->GetResourceDesc(), 0, texBuffer->GetNumSubResources(), 0,
+		m_device->GetCopyableFootprints(&texBuffer->GetDefaultHeap()->GetResourceDesc(), 0, texBuffer->GetNumSubResources(), 0,
 			texBuffer->GetSubResourceLayouts().data(), numRows, rowSizesInBytes, &texBuffer->GetTextureDataSize());
 		
 		texBuffer->InitTexData();
@@ -393,7 +404,7 @@ namespace ElysiaRenderer
 				// 每行数据的字节数
 				const uint64_t subResourcePitch = ElysiaHelper::AlignU32(subResourcelayout.Footprint.RowPitch, D3D12_TEXTURE_DATA_PITCH_ALIGNMENT);
 				const uint64_t subResourceDepth = subResourcelayout.Footprint.Depth;
-				uint8_t* destSubResourceMemory = texBuffer->GetTexData().get();
+				uint8_t* destSubResourceMemory = texBuffer->GetTexData().get() + subResourcelayout.Offset;
 
 				// sliceIndex是3D纹理的切片索引，2D纹理的切片索引为0
 				for (uint64_t sliceIndex = 0; sliceIndex < subResourceDepth; sliceIndex++)
@@ -412,8 +423,6 @@ namespace ElysiaRenderer
 		}
 
 		m_uploadContexts[m_frameID]->AddTextureBufferUpload(std::move(texBuffer));
-		
-		return newTex;
 	}
 	std::unique_ptr<DX12TextureResource>		DX12Device::CreateTexture(TexCreateDesc& desc)
 	{
@@ -443,7 +452,6 @@ namespace ElysiaRenderer
 		/// 
 
 		auto newTex = std::make_unique<DX12TextureResource>(texResource, usageState, allocation);
-		newTex->SetResourceDesc(resourceDesc);
 
 		/// Create SRV
 		D3D12_SHADER_RESOURCE_VIEW_DESC SRV{};
@@ -713,22 +721,20 @@ namespace ElysiaRenderer
 					break;
 			}
 
-			ElysiaHelper::SafeRelease(currBuffer.GetResource());
-			ElysiaHelper::SafeRelease(currBuffer.GetAllocation());
+			//ElysiaHelper::SafeRelease(currBuffer.GetResource());
+			//ElysiaHelper::SafeRelease(currBuffer.GetAllocation());
 		}
 
 		for (auto& currTex : *m_destructionQueues[frameIndex].m_textures)
 		{
-			currTex.Unmap();
-
-			ElysiaHelper::SafeRelease(currTex.GetAllocation());
-			ElysiaHelper::SafeRelease(currTex.GetResource());
+			/*ElysiaHelper::SafeRelease(currTex.GetAllocation());
+			ElysiaHelper::SafeRelease(currTex.GetResource());*/
 		}
 
 		for (auto& currPipelineState : *m_destructionQueues[frameIndex].m_pipelineStates)
 		{
-			ElysiaHelper::SafeRelease(currPipelineState.GetRootSignature());
-			ElysiaHelper::SafeRelease(currPipelineState.GetPipelineState());
+			/*ElysiaHelper::SafeRelease(currPipelineState.GetRootSignature());
+			ElysiaHelper::SafeRelease(currPipelineState.GetPipelineState());*/
 		}
 
 		(*currFrameDestrctuionQueue.m_contexts).clear();
@@ -759,7 +765,7 @@ namespace ElysiaRenderer
 		m_uploadContexts[m_frameID]->ProcessUploads();
 		SubmitContextWork(m_uploadContexts[m_frameID].get());
 
-		m_endOfFrameFences[m_frameID].m_copyQueueFence = m_computeQueue->SingalFence();
+		m_endOfFrameFences[m_frameID].m_copyQueueFence = m_copyQueue->SingalFence();
 	}
 
 	void DX12Device::Present()

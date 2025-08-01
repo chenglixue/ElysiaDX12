@@ -15,7 +15,7 @@ namespace ElysiaRenderer
 
 	struct TextureCreationDesc
 	{
-		std::string texturePath = "";
+		LPCWSTR texturePath;
 
 		bool isSRGB;
 	};
@@ -37,7 +37,7 @@ namespace ElysiaRenderer
 	{
 		
 	public:
-		DX12TextureBuffer(DX12TextureResource* texResource, size_t mipLevels, size_t arraySize);
+		DX12TextureBuffer(std::unique_ptr<DX12TextureResource> texResource, size_t mipLevels, size_t arraySize);
 		//DX12TextureBuffer(ID3D12Resource* resource, D3D12_RESOURCE_STATES usageState, D3D12MA::Allocation* allocation);
 
 		~DX12TextureBuffer() override;
@@ -48,7 +48,7 @@ namespace ElysiaRenderer
 		}
 		DX12TextureResource* GetDefaultHeap() const
 		{
-			return m_tex;
+			return m_tex.get();
 		}
 		UINT GetNumSubResources() const
 		{
@@ -73,7 +73,7 @@ namespace ElysiaRenderer
 		}
 	private:
 		DX12DescriptorHeapHandle m_SRVDescriptorHeapHandle{};
-		DX12TextureResource* m_tex = nullptr;	// default heap
+		std::unique_ptr<DX12TextureResource> m_tex;	// default heap
 		UINT m_numSubResources = 0;
 		SubResourceLayouts m_subResourceLayouts;
 		std::unique_ptr<uint8_t[]> m_textureData;

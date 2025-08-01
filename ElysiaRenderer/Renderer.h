@@ -63,7 +63,7 @@ namespace ElysiaRenderer
 	}
 	inline void Renderer::Render()
 	{
-		//RenderTexTriangle();
+		RenderTexTriangle();
 	}
 	inline void Renderer::Destory()
 	{
@@ -155,13 +155,13 @@ namespace ElysiaRenderer
 	}
 	void Renderer::InitTexTriangle()
 	{
-		struct TriangleVertex
+		struct TexTriangleVertex
 		{
 			XMFLOAT3 position;
 			XMFLOAT2 uv;
 		};
 
-		std::array<TriangleVertex, 3> triangleVertices;
+		std::array<TexTriangleVertex, 3> triangleVertices;
 		triangleVertices[0].position = { 0, 0.5, 0.f };
 		triangleVertices[0].uv = { 0.5, 0 };
 		triangleVertices[1].position = { 0.5f, -0.5f, 0.f };
@@ -178,7 +178,7 @@ namespace ElysiaRenderer
 		// Create Vertex Buffer
 		{
 			VertexBufferCreationDesc vertexBufferCreationDesc{};
-			vertexBufferCreationDesc.m_stride = sizeof(TriangleVertex);
+			vertexBufferCreationDesc.m_stride = sizeof(TexTriangleVertex);
 			vertexBufferCreationDesc.m_size = sizeof(triangleVertices);
 			vertexBufferCreationDesc.bufferAccessFlags = BufferAccessFlags::HostWritable;
 			vertexBufferCreationDesc.bufferTypeFlags = BufferTypeFlags::SRV;
@@ -242,7 +242,7 @@ namespace ElysiaRenderer
 		{
 			TextureCreationDesc texBufferCreateDesc{};
 
-			texBufferCreateDesc.texturePath = "Tex\\Wood.dds";
+			texBufferCreateDesc.texturePath = L"Tex\\Wood.dds";
 			texBufferCreateDesc.isSRGB = true;
 
 			m_device->CreateTextureFromFile(texBufferCreateDesc);
@@ -301,6 +301,8 @@ namespace ElysiaRenderer
 	}
 	void Renderer::RenderTexTriangle()
 	{
-
+		m_device->BeginFrame();
+		m_device->EndFrame();
+		m_device->Present();
 	}
 }

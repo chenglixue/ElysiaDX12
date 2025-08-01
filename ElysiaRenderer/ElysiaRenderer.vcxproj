@@ -257,7 +257,7 @@
     <ClCompile Include="Renderer.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\DrawTriangle.hlsl">
+    <None Include="Resource\Shaders\DrawTriangle.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>
