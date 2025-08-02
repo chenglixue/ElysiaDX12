@@ -281,7 +281,7 @@ namespace ElysiaRenderer
 		m_graphicsContext->AddBarrier(currBackBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET);
 		m_graphicsContext->FlushBarrier();
 
-		m_graphicsContext->ClearRenderTarget(currBackBuffer, Color(0., 0., 0.));
+		m_graphicsContext->ClearRenderTarget(currBackBuffer, Color(1., 0., 0.));
 
 		m_graphicsContext->SetVertexBuffer(0, 1, m_vertexBuffers[vertexBufferIndex]->GetVertexBufferView());
 		auto pipelineStateData = CreatePipelineStateData(m_graphicsPipelineStates[pipelineStateIndex].get(),
@@ -302,6 +302,29 @@ namespace ElysiaRenderer
 	void Renderer::RenderTexTriangle()
 	{
 		m_device->BeginFrame();
+
+		auto& currBackBuffer = m_device->GetCurrBackBuffer();
+		size_t pipelineStateIndex = 0;
+		size_t vertexBufferIndex = 0;
+
+		m_graphicsContext->Reset(m_graphicsPipelineStates[pipelineStateIndex]->GetPipelineState());
+		m_graphicsContext->AddBarrier(currBackBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET);
+		m_graphicsContext->FlushBarrier();
+
+		m_graphicsContext->ClearRenderTarget(currBackBuffer, Color(1., 1., 1.));
+		m_graphicsContext->SetVertexBuffer(0, 1, m_vertexBuffers[vertexBufferIndex]->GetVertexBufferView());
+		auto pipelineStateData = CreatePipelineStateData(m_graphicsPipelineStates[pipelineStateIndex].get(),
+			std::move(std::vector<DX12TextureResource*>{ &currBackBuffer }));
+		m_graphicsContext->SetPipeline(pipelineStateData);
+		m_graphicsContext->SetDefaultViewportAndScissor(m_device->GetScreenSize());
+		m_graphicsContext->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		m_graphicsContext->Draw(3, 0);
+
+		m_graphicsContext->AddBarrier(currBackBuffer, D3D12_RESOURCE_STATE_PRESENT);
+		m_graphicsContext->FlushBarrier();
+
+		m_device->SubmitContextWork(*m_graphicsContext);
+
 		m_device->EndFrame();
 		m_device->Present();
 	}

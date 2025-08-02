@@ -325,4 +325,9 @@
     <CopyFileToFolders Include="dxc\bin\x64\dxcompiler.dll" />
     <CopyFileToFolders Include="dxc\bin\x64\dxil.dll" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="Resource\Tex\Wood.dds">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
 </Project>
