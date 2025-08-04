@@ -13,7 +13,7 @@ namespace ElysiaRenderer
 
 	}
 
-	DX12PipelineState::DX12PipelineState(ID3D12PipelineState* pipelineState, ID3D12RootSignature* rootSignature)
+	DX12PipelineState::DX12PipelineState(ID3D12PipelineState* pipelineState, DX12RootSignature* rootSignature)
 		: m_pipelineState(pipelineState), m_rootSignature(rootSignature)
 	{
 
@@ -22,7 +22,10 @@ namespace ElysiaRenderer
 	DX12PipelineState::~DX12PipelineState()
 	{
 		ElysiaHelper::SafeRelease(m_pipelineState);
-		ElysiaHelper::SafeRelease(m_rootSignature);
+		if (m_rootSignature != nullptr)
+		{
+			delete m_rootSignature;
+		}
 	}
 
 
@@ -34,7 +37,7 @@ namespace ElysiaRenderer
 	{
 		m_pipelineType = PipleineType::Graphics;
 	}
-	DX12GraphicsPipelineState::DX12GraphicsPipelineState(ID3D12PipelineState* pipelineState, ID3D12RootSignature* rootSignature)
+	DX12GraphicsPipelineState::DX12GraphicsPipelineState(ID3D12PipelineState* pipelineState, DX12RootSignature* rootSignature)
 		: DX12PipelineState(pipelineState, rootSignature)
 	{
 		m_pipelineType = PipleineType::Graphics;

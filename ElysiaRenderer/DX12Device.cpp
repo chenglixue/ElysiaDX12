@@ -471,7 +471,7 @@ namespace ElysiaRenderer
 			SRV.Texture2D.MipLevels = (UINT)resourceDesc.MipLevels;
 			SRV.Texture2D.ResourceMinLODClamp = 0;
 		}
-		m_device->CreateShaderResourceView(texResource, &SRV, m_SRVRenderPassDescriptorHeap->GetHeapHandleBlock(1).GetCPUHandle());
+		m_device->CreateShaderResourceView(texResource, &SRV, m_SRVStagingDescriptorHeap->NewDescriptorHeapHandle().GetCPUHandle());
 		///
 
 		return newTex;
@@ -639,7 +639,7 @@ namespace ElysiaRenderer
 		ID3D12PipelineState* pipelineState = nullptr;
 		ElysiaHelper::ThrowIfFailed(m_device->CreateGraphicsPipelineState(&PSODesc, IID_PPV_ARGS(&pipelineState)));
 
-		auto graphicsPipeline = std::make_unique<DX12GraphicsPipelineState>(pipelineState, PSODesc.pRootSignature);
+		auto graphicsPipeline = std::make_unique<DX12GraphicsPipelineState>(pipelineState, pipelineStateCreateDesc.m_rootSignature);
 		return graphicsPipeline;
 	}
 

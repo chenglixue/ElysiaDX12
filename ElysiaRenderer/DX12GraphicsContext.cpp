@@ -1,4 +1,5 @@
 #include "DX12GraphicsContext.h"
+#include "DX12RootSignature.h"
 
 
 namespace ElysiaRenderer
@@ -40,7 +41,9 @@ namespace ElysiaRenderer
 		m_graphicsPipelineState = dynamic_cast<DX12GraphicsPipelineState*>(pipelineState);
 
 		m_commandList->SetPipelineState(pipelineState->GetPipelineState());
-		m_commandList->SetGraphicsRootSignature(pipelineState->GetRootSignature());
+		m_commandList->SetGraphicsRootSignature(pipelineState->GetRootSignature()->GetSignature());
+
+
 
 		D3D12_CPU_DESCRIPTOR_HANDLE renderTargetHandles[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT]{};
 		D3D12_CPU_DESCRIPTOR_HANDLE depthStencilHandle{ 0 };

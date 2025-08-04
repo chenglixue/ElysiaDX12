@@ -4,6 +4,7 @@
 namespace ElysiaRenderer
 {
 
+
 	class DX12RootParameter
 	{
 		friend class DX12RootSignature;
