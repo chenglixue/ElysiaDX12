@@ -38,6 +38,7 @@ namespace ElysiaRenderer
 		std::vector<std::unique_ptr<DX12Shader>> m_pixelShaders;
 		std::vector<std::unique_ptr<DX12Shader>> m_computeShaders;
 		std::vector<std::unique_ptr<DX12GraphicsPipelineState>> m_graphicsPipelineStates;
+		PipelineBindResource m_pipelineBindResource;
 	};
 
 	Renderer::Renderer(HWND windowHandle, ElysiaHelper::UINT2 screenSize)
@@ -175,6 +176,21 @@ namespace ElysiaRenderer
 			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
 		};
 
+		// Create Shader
+		{
+			ShaderCreateDesc VSShaderCreateDesc{};
+			VSShaderCreateDesc.shaderName = L"Shaders\\DrawTriangle.hlsl";
+			VSShaderCreateDesc.entryPoint = "VS";
+			VSShaderCreateDesc.shaderType = ShaderType::Vertex;
+			m_vertexShaders.push_back(std::move(m_device->CreateShader(VSShaderCreateDesc)));
+
+			ShaderCreateDesc PSShaderCreateDesc{};
+			PSShaderCreateDesc.shaderName = L"Shaders\\DrawTriangle.hlsl";
+			PSShaderCreateDesc.entryPoint = "PS";
+			PSShaderCreateDesc.shaderType = ShaderType::Pixel;
+			m_pixelShaders.push_back(std::move(m_device->CreateShader(PSShaderCreateDesc)));
+		}
+
 		// Create Vertex Buffer
 		{
 			VertexBufferCreationDesc vertexBufferCreationDesc{};
@@ -188,7 +204,18 @@ namespace ElysiaRenderer
 			vertexBuffer->SetMappedData(&triangleVertices, sizeof(triangleVertices));
 			m_vertexBuffers.push_back(std::move(vertexBuffer));
 		}
-			
+
+		// Create Tex & Buffer
+		{
+			TextureCreationDesc texBufferCreateDesc{};
+
+			texBufferCreateDesc.texturePath = L"Tex\\Wood.dds";
+			texBufferCreateDesc.isSRGB = true;
+
+			auto newTex = std::move(m_device->CreateTextureFromFile(texBufferCreateDesc));
+			m_pipelineBindResource.m_SRVResources.push_back(std::move(newTex));
+		}
+
 		// Create Root Parameter & Sampler & Root Signature
 		{
 			{
@@ -210,21 +237,6 @@ namespace ElysiaRenderer
 			m_rootSignatures.push_back(std::move(m_device->CreateRootSignature(rootSignatureCreatDesc)));
 		}
 
-		// Create Shader
-		{
-			ShaderCreateDesc VSShaderCreateDesc{};
-			VSShaderCreateDesc.shaderName = L"Shaders\\DrawTriangle.hlsl";
-			VSShaderCreateDesc.entryPoint = "VS";
-			VSShaderCreateDesc.shaderType = ShaderType::Vertex;
-			m_vertexShaders.push_back(std::move(m_device->CreateShader(VSShaderCreateDesc)));
-
-			ShaderCreateDesc PSShaderCreateDesc{};
-			PSShaderCreateDesc.shaderName = L"Shaders\\DrawTriangle.hlsl";
-			PSShaderCreateDesc.entryPoint = "PS";
-			PSShaderCreateDesc.shaderType = ShaderType::Pixel;
-			m_pixelShaders.push_back(std::move(m_device->CreateShader(PSShaderCreateDesc)));
-		}
-
 		// Create PSO
 		{
 			PipelineStateCreateDesc pipelineStateCreateDesc = std::move(CreateDefaultPipelineStateCreateDesc());
@@ -236,16 +248,6 @@ namespace ElysiaRenderer
 			pipelineStateCreateDesc.m_renderTargetDesc.m_renderTargetFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 
 			m_graphicsPipelineStates.push_back(std::move(m_device->CreateGraphicsPipelineState(pipelineStateCreateDesc)));
-		}
-
-		// Create Tex & Buffer
-		{
-			TextureCreationDesc texBufferCreateDesc{};
-
-			texBufferCreateDesc.texturePath = L"Tex\\Wood.dds";
-			texBufferCreateDesc.isSRGB = true;
-
-			m_device->CreateTextureFromFile(texBufferCreateDesc);
 		}
 	}
 

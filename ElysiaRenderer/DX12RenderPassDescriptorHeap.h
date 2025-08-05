@@ -5,16 +5,18 @@
 
 namespace ElysiaRenderer
 {
-	class DX12RenderPassDescriptorHeap : DX12DescriptorHeap
+	class DX12RenderPassDescriptorHeap final : public DX12DescriptorHeap
 	{
 	public:
-		DX12RenderPassDescriptorHeap(ID3D12Device* device, D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDescriptor);
+		DX12RenderPassDescriptorHeap(ID3D12Device* device, D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT reservedCount);
 		~DX12RenderPassDescriptorHeap() final;
 
 		void Reset();
-		DX12DescriptorHeapHandle GetHeapHandleBlock(UINT count);
+		DX12DescriptorHeapHandle GetReservedDescriptor(UINT index);
 
 	private:
 		UINT m_currDescriptorIndex;
+		UINT m_reservedHandleCount;
+		std::mutex m_ssageMutex;
 	};
 }

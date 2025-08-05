@@ -20,20 +20,26 @@ namespace ElysiaRenderer
 		for (UINT i = 0; i < NUM_FRAMES_IN_FLIGHT; ++i)
 		{
 			DestoryBuffer(std::unique_ptr<DX12TextureUploadBuffer>(std::move(m_uploadContexts[i]->GetTexUploadHeap())));
+
 		}
 
 		for (UINT i = 0; i < NUM_FRAMES_IN_FLIGHT; ++i)
 		{
 			ProcessDestruction(i);
-			m_uploadContexts[i] = nullptr;
 		}
 
-		m_SRVRenderPassDescriptorHeap = nullptr;
+		
 		m_RTVStagingDescriptorHeap = nullptr;
 		m_DSVStagingDescriptorHeap = nullptr;
 		m_CBVRenderPassDescriptorHeap = nullptr;
 		m_samplerRenderPassDescriptorHeap = nullptr;
 		m_UAVRenderPassDescriptorHeap = nullptr;
+
+		for (UINT i = 0; i < NUM_FRAMES_IN_FLIGHT; ++i)
+		{
+			m_SRVRenderPassDescriptorHeaps[i] = nullptr;
+			m_uploadContexts[i] = nullptr;
+		}
 
 		m_graphicsQueue = nullptr;
 		m_computeQueue = nullptr;
@@ -145,8 +151,15 @@ namespace ElysiaRenderer
 		{
 			m_RTVStagingDescriptorHeap = std::make_unique<DX12StagingDescriptorHeap>(m_device, D3D12_DESCRIPTOR_HEAP_TYPE_RTV,
 				NUM_RTV_STAGING_DESCRIPTORS);
-			m_SRVRenderPassDescriptorHeap = std::make_unique<DX12RenderPassDescriptorHeap>(m_device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
+			m_SRVStagingDescriptorHeap = std::make_unique<DX12StagingDescriptorHeap>(m_device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
 				NUM_RTV_STAGING_DESCRIPTORS);
+
+			for (UINT currFrameIndex = 0; currFrameIndex < NUM_FRAMES_IN_FLIGHT; ++currFrameIndex)
+			{
+				m_SRVRenderPassDescriptorHeaps[currFrameIndex] = std::make_unique<DX12RenderPassDescriptorHeap>(m_device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
+					NUM_SRV_RENDER_PASS_USER_DESCRIPTORS);
+			}
+			
 			m_samplerRenderPassDescriptorHeap = std::make_unique<DX12RenderPassDescriptorHeap>(m_device, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER,
 				NUM_SAMPLER_DESCRIPTORS);
 
@@ -206,6 +219,8 @@ namespace ElysiaRenderer
 			m_destructionQueues[i].m_pipelineStates = std::make_unique<std::vector<DX12PipelineState>>();
 		}*/
 		m_frameID = 0;
+		mFreeReservedDescriptorIndices.resize(NUM_RESERVED_SRV_DESCRIPTORS - 1);
+		std::iota(mFreeReservedDescriptorIndices.begin(), mFreeReservedDescriptorIndices.end(), 1);
 	}
 	void DX12Device::CreateWindowDependentResources()
 	{
@@ -325,7 +340,7 @@ namespace ElysiaRenderer
 
 		return texBuffer;
 	}
-	void										DX12Device::CreateTextureFromFile(const TextureCreationDesc& textureCreationDesc)
+	std::unique_ptr<DX12TextureResource>		DX12Device::CreateTextureFromFile(const TextureCreationDesc& textureCreationDesc)
 	{
 		auto& texturePath = textureCreationDesc.texturePath;
 		bool isSRGB = textureCreationDesc.isSRGB;
@@ -384,7 +399,7 @@ namespace ElysiaRenderer
 		///
 
 		// 每个Mip图相当于一个子资源
-		auto texBuffer = std::make_unique<DX12TextureBuffer>(std::move(newTex), texMetaData.mipLevels, texMetaData.arraySize);
+		auto texBuffer = std::make_unique<DX12TextureBuffer>(newTex.get(), texMetaData.mipLevels, texMetaData.arraySize);
 		UINT numRows[MAX_TEXTURE_SUBRESOURCE_COUNT];	// 每个子资源的行数
 		uint64_t rowSizesInBytes[MAX_TEXTURE_SUBRESOURCE_COUNT];
 
@@ -423,6 +438,8 @@ namespace ElysiaRenderer
 		}
 
 		m_uploadContexts[m_frameID]->AddTextureBufferUpload(std::move(texBuffer));
+
+		return newTex;
 	}
 	std::unique_ptr<DX12TextureResource>		DX12Device::CreateTexture(TexCreateDesc& desc)
 	{
@@ -471,8 +488,11 @@ namespace ElysiaRenderer
 			SRV.Texture2D.MipLevels = (UINT)resourceDesc.MipLevels;
 			SRV.Texture2D.ResourceMinLODClamp = 0;
 		}
-		m_device->CreateShaderResourceView(texResource, &SRV, m_SRVStagingDescriptorHeap->NewDescriptorHeapHandle().GetCPUHandle());
+		auto SRVHandle = m_SRVStagingDescriptorHeap->NewDescriptorHeapHandle();
+		m_device->CreateShaderResourceView(texResource, &SRV, SRVHandle.GetCPUHandle());
 		///
+		newTex->SetSRVDescriptor(SRVHandle);
+		CopyDescriptorFromStageToRenderPass(newTex->GetSRVDescriptor(), )
 
 		return newTex;
 	}
@@ -643,7 +663,24 @@ namespace ElysiaRenderer
 		return graphicsPipeline;
 	}
 
-
+	void DX12Device::CopyDescriptors(uint32_t numDestDescriptorRanges, const D3D12_CPU_DESCRIPTOR_HANDLE* destDescriptorRangeStarts, const uint32_t* destDescriptorRangeSizes,
+		uint32_t numSrcDescriptorRanges, const D3D12_CPU_DESCRIPTOR_HANDLE* srcDescriptorRangeStarts, const uint32_t* srcDescriptorRangeSizes, D3D12_DESCRIPTOR_HEAP_TYPE descriptorType)
+	{
+		m_device->CopyDescriptors(numDestDescriptorRanges, destDescriptorRangeStarts, destDescriptorRangeSizes, numSrcDescriptorRanges, srcDescriptorRangeStarts, srcDescriptorRangeSizes, descriptorType);
+	}
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="SRVHandle"> stage SRV Handle in buffer or tex </param>
+	/// <param name="index"> RenderPass descriptor index in heap </param>
+	void DX12Device::CopyDescriptorFromStageToRenderPass(DX12DescriptorHeapHandle SRVHandle, UINT index)
+	{
+		for (UINT currFrameIndex = 0; currFrameIndex < NUM_FRAMES_IN_FLIGHT; ++currFrameIndex)
+		{
+			auto targetDescriptor = m_SRVRenderPassDescriptorHeaps[currFrameIndex]->GetReservedDescriptor(index);
+			m_device->CopyDescriptorsSimple(1, targetDescriptor.GetCPUHandle(), SRVHandle.GetCPUHandle(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		}
+	}
 	ContextSubmissionResult DX12Device::SubmitContextWork(DX12Context& context)
 	{
 		uint64_t fenceResult = 0;

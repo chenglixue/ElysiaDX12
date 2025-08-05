@@ -36,6 +36,16 @@ namespace ElysiaRenderer
 		RenderTargetDesc m_renderTargetDesc{};
 		std::vector<D3D12_INPUT_ELEMENT_DESC> m_inputElementDesc;
 		PipleineType m_pipelineStateType = PipleineType::Graphics;
+
+		std::vector<DX12GPUResource*> m_SRVResources{};
+	};
+
+	/// <summary>
+	/// save all resource in root parameters
+	/// </summary>
+	struct PipelineBindResource
+	{
+		std::vector<std::unique_ptr<DX12GPUResource>> m_SRVResources{};
 	};
 
 	class DX12PipelineState

@@ -62,11 +62,19 @@ namespace ElysiaRenderer
 		{
 			return *m_backBuffers[m_swapChain->GetCurrentBackBufferIndex()];
 		}
+		DX12RenderPassDescriptorHeap GetSRVHeap(UINT frameIndex)
+		{
+			return *m_SRVRenderPassDescriptorHeaps[frameIndex];
+		}
+		DX12RenderPassDescriptorHeap GetSamplerHeap()
+		{
+			return *m_samplerRenderPassDescriptorHeap;
+		}
 
 		std::unique_ptr<DX12GraphicsContext>		CreateGraphicsContext();
 		std::unique_ptr<DX12VertexBuffer>			CreateVertexBuffer(const VertexBufferCreationDesc& bufferCreationDesc);
 		std::unique_ptr<DX12TextureUploadBuffer>	CreateTextureUploadHeap(const TextureBufferCreationDesc& textureCreationDesc);
-		void										CreateTextureFromFile(const TextureCreationDesc& textureCreationDesc);
+		std::unique_ptr<DX12TextureResource>		CreateTextureFromFile(const TextureCreationDesc& textureCreationDesc);
 		std::unique_ptr<DX12TextureResource>		CreateTexture(TexCreateDesc& desc);
 		std::unique_ptr<DX12Shader>					CreateShader(ShaderCreateDesc& shaderCreateDesc);
 		void										CreateSamplers(DX12RootSignature* rootSignature, D3D12_SHADER_VISIBILITY shaderVisibility = D3D12_SHADER_VISIBILITY_ALL);
@@ -80,6 +88,9 @@ namespace ElysiaRenderer
 		void DestoryContext(std::unique_ptr<DX12Context> context);
 		void DestoryTexture(std::unique_ptr<DX12TextureResource> texture);
 
+		void CopyDescriptors(uint32_t numDestDescriptorRanges, const D3D12_CPU_DESCRIPTOR_HANDLE* destDescriptorRangeStarts, const uint32_t* destDescriptorRangeSizes,
+			uint32_t numSrcDescriptorRanges, const D3D12_CPU_DESCRIPTOR_HANDLE* srcDescriptorRangeStarts, const uint32_t* srcDescriptorRangeSizes, D3D12_DESCRIPTOR_HEAP_TYPE descriptorType);
+		void CopyDescriptorFromStageToRenderPass(DX12DescriptorHeapHandle SRVHandle, UINT index);
 		ContextSubmissionResult SubmitContextWork(DX12Context& context);
 
 		void WaitForIdle();
@@ -123,10 +134,11 @@ namespace ElysiaRenderer
 		std::unique_ptr<DX12StagingDescriptorHeap> m_DSVStagingDescriptorHeap;
 		std::unique_ptr<DX12StagingDescriptorHeap> m_SRVStagingDescriptorHeap;
 		//std::unique_ptr<DX12StagingDescriptorHeap> m_SRVStagingDescriptorHeap;
-		std::unique_ptr<DX12RenderPassDescriptorHeap> m_SRVRenderPassDescriptorHeap;
+		std::array<std::unique_ptr<DX12RenderPassDescriptorHeap>, NUM_FRAMES_IN_FLIGHT> m_SRVRenderPassDescriptorHeaps;
 		std::unique_ptr<DX12RenderPassDescriptorHeap> m_CBVRenderPassDescriptorHeap;
 		std::unique_ptr<DX12RenderPassDescriptorHeap> m_samplerRenderPassDescriptorHeap;
 		std::unique_ptr<DX12RenderPassDescriptorHeap> m_UAVRenderPassDescriptorHeap;
+		std::vector<UINT> mFreeReservedDescriptorIndices;
 		std::array<std::unique_ptr<DX12UploadContext>, NUM_FRAMES_IN_FLIGHT> m_uploadContexts;
 		std::array<std::unique_ptr<DX12TextureResource>, NUM_BACK_BUFFERS> m_backBuffers;
 		std::array<EndOfFrameFences, NUM_FRAMES_IN_FLIGHT> m_endOfFrameFences;

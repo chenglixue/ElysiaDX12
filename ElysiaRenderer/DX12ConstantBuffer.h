@@ -12,7 +12,7 @@ namespace ElysiaRenderer
 	public:
 		DX12ConstantBuffer(ID3D12Resource* resource, D3D12_RESOURCE_STATES usageState, uint32_t bufferSize, 
 			DX12DescriptorHeapHandle constantBufferViewHandle);
-		~DX12ConstantBuffer() override;
+		~DX12ConstantBuffer();
 
 		void SetConstantBufferData(const void* bufferData, uint32_t bufferSize);
 		DX12DescriptorHeapHandle GetConstantBufferViewHandle()

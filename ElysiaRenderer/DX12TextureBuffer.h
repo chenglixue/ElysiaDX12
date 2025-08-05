@@ -36,10 +36,10 @@ namespace ElysiaRenderer
 	class DX12TextureBuffer : public DX12BufferResource
 	{
 	public:
-		DX12TextureBuffer(std::unique_ptr<DX12TextureResource> texResource, size_t mipLevels, size_t arraySize);
+		DX12TextureBuffer(DX12TextureResource* texResource, size_t mipLevels, size_t arraySize);
 		//DX12TextureBuffer(ID3D12Resource* resource, D3D12_RESOURCE_STATES usageState, D3D12MA::Allocation* allocation);
 
-		~DX12TextureBuffer() override;
+		~DX12TextureBuffer();
 
 		DX12DescriptorHeapHandle GetDescriptorHeapHandle() const
 		{
@@ -47,7 +47,7 @@ namespace ElysiaRenderer
 		}
 		DX12TextureResource* GetDefaultHeap() const
 		{
-			return m_tex.get();
+			return m_tex;
 		}
 		UINT GetNumSubResources() const
 		{
@@ -72,7 +72,7 @@ namespace ElysiaRenderer
 		}
 	private:
 		DX12DescriptorHeapHandle m_SRVDescriptorHeapHandle{};
-		std::unique_ptr<DX12TextureResource> m_tex;	// default heap
+		DX12TextureResource* m_tex;	// default heap
 		UINT m_numSubResources = 0;
 		SubResourceLayouts m_subResourceLayouts;
 		std::unique_ptr<uint8_t[]> m_textureData;
@@ -83,7 +83,7 @@ namespace ElysiaRenderer
 	{
 	public:
 		DX12TextureUploadBuffer(ID3D12Resource* resource, D3D12_RESOURCE_STATES usageState, D3D12MA::Allocation* allocation);
-		~DX12TextureUploadBuffer() override;
+		~DX12TextureUploadBuffer();
 
 		uint8_t* GetMappedBuffer()
 		{

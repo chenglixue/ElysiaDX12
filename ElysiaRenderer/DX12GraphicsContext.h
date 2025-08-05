@@ -18,7 +18,7 @@ namespace ElysiaRenderer
 		void ClearRenderTarget(const DX12TextureResource& renderTarget, Color color);
 		void ClearDepthStencilTarget(const DX12TextureResource& renderTarget, float depth, uint8_t stencil);
 
-		void SetPipeline(PipelineStateData& pipelineStateData);
+		void SetPipeline(PipelineStateData& pipelineStateData, PipelineBindResource& pipelineBindResource);
 		void SetRenderTargets(UINT numRenderTargets, const D3D12_CPU_DESCRIPTOR_HANDLE renderTargetHandle[],
 			const D3D12_CPU_DESCRIPTOR_HANDLE depthStencilHandle);
 		void SetDefaultViewportAndScissor(ElysiaHelper::UINT2 screenSize);

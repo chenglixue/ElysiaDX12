@@ -21,7 +21,7 @@ namespace ElysiaRenderer
 		DX12VertexBuffer(ID3D12Resource* resource, D3D12_RESOURCE_STATES usageState, uint32_t vertexStride, uint32_t bufferSize);
 		DX12VertexBuffer(ID3D12Resource* resource, D3D12_RESOURCE_STATES usageState, uint32_t vertexStride, uint32_t bufferSize, 
 			D3D12MA::Allocation* allocation);
-		~DX12VertexBuffer() override;
+		~DX12VertexBuffer();
 
 		D3D12_VERTEX_BUFFER_VIEW& GetVertexBufferView()
 		{

@@ -39,7 +39,7 @@ namespace ElysiaRenderer
 	public:
 		DX12TextureResource(ID3D12Resource* resource, D3D12_RESOURCE_STATES usageState);
 		DX12TextureResource(ID3D12Resource* resource, D3D12_RESOURCE_STATES usageState, D3D12MA::Allocation* allocation);
-		~DX12TextureResource() override;
+		~DX12TextureResource() ;
 
 		DX12DescriptorHeapHandle GetRTVDescriptor() const
 		{
@@ -63,10 +63,16 @@ namespace ElysiaRenderer
 			m_RTVDescriptor = handle;
 		}
 
+		void SetSRVDescriptor(DX12DescriptorHeapHandle& handle)
+		{
+			m_SRVDescriptor = handle;
+		}
+
 	private:
 		DX12DescriptorHeapHandle m_RTVDescriptor{};
 		DX12DescriptorHeapHandle m_DSVDescriptor{};
 		DX12DescriptorHeapHandle m_SRVDescriptor{};
 		DX12DescriptorHeapHandle m_UAVDescriptor{};
+		BufferType m_bufferType = BufferType::Texture;
 	};
 }

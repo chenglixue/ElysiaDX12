@@ -19,5 +19,6 @@ namespace ElysiaRenderer
 		std::vector<UINT> m_freeDescriptors;
 		UINT m_currDescriptorIndex;
 		UINT m_activeHandleCount;
+		std::mutex m_usageMutex;
 	};
 }

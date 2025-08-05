@@ -2,47 +2,37 @@
 
 namespace ElysiaRenderer
 {
-	DX12RenderPassDescriptorHeap::DX12RenderPassDescriptorHeap(ID3D12Device* device, D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDescriptor)
-		: DX12DescriptorHeap(device, heapType, numDescriptor, true)
+	DX12RenderPassDescriptorHeap::DX12RenderPassDescriptorHeap(ID3D12Device* device, D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT reservedCount)
+		: DX12DescriptorHeap(device, heapType, reservedCount, true)
 	{
-		m_currDescriptorIndex = 0;
+		m_currDescriptorIndex = reservedCount;
+		m_reservedHandleCount = reservedCount;
 	}
 
 	DX12RenderPassDescriptorHeap::~DX12RenderPassDescriptorHeap()
 	{
 		m_currDescriptorIndex = 0;
+		m_reservedHandleCount = 0;
 	}
 
 	void DX12RenderPassDescriptorHeap::Reset()
 	{
-		m_currDescriptorIndex = 0;
+		m_currDescriptorIndex = m_reservedHandleCount;
 	}
 
-	DX12DescriptorHeapHandle DX12RenderPassDescriptorHeap::GetHeapHandleBlock(UINT count)
+	DX12DescriptorHeapHandle DX12RenderPassDescriptorHeap::GetReservedDescriptor(UINT index)
 	{
-		UINT newHandleID = 0;
-		UINT blockEnd = m_currDescriptorIndex + count;
+		assert(index < m_reservedHandleCount);
 
-		if (blockEnd < m_maxDescriptors)
-		{
-			newHandleID = m_currDescriptorIndex;
-			m_currDescriptorIndex = blockEnd;
-		}
-		else
-		{
-			ElysiaHelper::ThrowRuntimeError("Ran out of render pass descriptor heap handles, need to increase heap size.");
-		}
+		auto CPUHandle = m_descriptorHeapCPUStart;
+		auto GPUHandle = m_descriptorHeapGPUStart;
+		CPUHandle.ptr += static_cast<size_t>(index) * m_descriptorSize;
+		GPUHandle.ptr += static_cast<size_t>(index) * m_descriptorSize;
 
-		DX12DescriptorHeapHandle newHandle;
-		D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle = m_descriptorHeapCPUStart;
-		cpuHandle.ptr += newHandleID * m_descriptorSize;
-		newHandle.SetCPUHandle(cpuHandle);
-
-		D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle = m_descriptorHeapGPUStart;
-		gpuHandle.ptr += newHandleID * m_descriptorSize;
-		newHandle.SetGPUHandle(gpuHandle);
-
-		newHandle.SetHeapIndex(newHandleID);
+		DX12DescriptorHeapHandle newHandle = DX12DescriptorHeapHandle();
+		newHandle.SetHeapIndex(index);
+		newHandle.SetCPUHandle(CPUHandle);
+		newHandle.SetGPUHandle(GPUHandle);
 
 		return newHandle;
 	}

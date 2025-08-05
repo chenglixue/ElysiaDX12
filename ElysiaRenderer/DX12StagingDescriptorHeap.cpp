@@ -5,7 +5,7 @@ namespace ElysiaRenderer
 	DX12StagingDescriptorHeap::DX12StagingDescriptorHeap(ID3D12Device* device, D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDescriptor) :
 		DX12DescriptorHeap(device, heapType, numDescriptor, false)
 	{
-		m_freeDescriptors = std::vector<UINT>();
+		m_freeDescriptors.reserve(numDescriptor);
 		m_activeHandleCount = 0;
 		m_currDescriptorIndex = 0;
 	}
@@ -21,6 +21,8 @@ namespace ElysiaRenderer
 
 	DX12DescriptorHeapHandle DX12StagingDescriptorHeap::NewDescriptorHeapHandle()
 	{
+		std::lock_guard<std::mutex> lockGuard(m_usageMutex);
+
 		UINT newHandleID = 0;
 
 		if (m_currDescriptorIndex < m_maxDescriptors)

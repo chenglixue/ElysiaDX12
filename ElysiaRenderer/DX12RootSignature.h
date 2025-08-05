@@ -13,6 +13,10 @@ namespace ElysiaRenderer
 		DX12RootParameter();
 		~DX12RootParameter();
 		
+		D3D12_ROOT_PARAMETER_TYPE GetType()
+		{
+			return m_rootParamter.ParameterType;
+		}
 
 		void InitAsDescriptorRange(D3D12_DESCRIPTOR_RANGE_TYPE rangeType, UINT numDescriptors, UINT slotIndex, D3D12_SHADER_VISIBILITY shaderVisibility = D3D12_SHADER_VISIBILITY_ALL);
 		void InitAsDescriptorTable(UINT rangeCount, D3D12_SHADER_VISIBILITY shaderVisibility = D3D12_SHADER_VISIBILITY_ALL);
@@ -40,6 +44,14 @@ namespace ElysiaRenderer
 		ID3D12RootSignature* GetSignature() const
 		{
 			return m_rootSignature;
+		}
+		UINT GetNumRootParams()
+		{
+			return m_numRootParameters;
+		}
+		DX12RootParameter* GetRootParameters()
+		{
+			return m_rootParametersArray.get();
 		}
 
 		void InitStaticSamplers(UINT slotIndex, const D3D12_SAMPLER_DESC& nonStaticSamplerDesc, D3D12_SHADER_VISIBILITY shaderVisibility = D3D12_SHADER_VISIBILITY_ALL);

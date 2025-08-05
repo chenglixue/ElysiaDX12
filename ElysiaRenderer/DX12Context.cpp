@@ -33,12 +33,22 @@ namespace ElysiaRenderer
 		UINT currFrameID = m_device->GetFrameID();
 		m_commandAllocators[currFrameID]->Reset();
 		m_commandList->Reset(m_commandAllocators[currFrameID], nullptr);
+
+		if (m_contextType != D3D12_COMMAND_LIST_TYPE_COPY)
+		{
+			BindDescriptorHeaps(currFrameID);
+		}
 	}
 	void DX12Context::Reset(ID3D12PipelineState* pipelineState)
 	{
 		UINT currFrameID = m_device->GetFrameID();
 		m_commandAllocators[currFrameID]->Reset();
 		m_commandList->Reset(m_commandAllocators[currFrameID], pipelineState);
+
+		if (m_contextType != D3D12_COMMAND_LIST_TYPE_COPY)
+		{
+			BindDescriptorHeaps(currFrameID);
+		}
 	}
 
 	void DX12Context::AddBarrier(DX12GPUResource& resource, D3D12_RESOURCE_STATES newState)
@@ -91,6 +101,21 @@ namespace ElysiaRenderer
 
 			m_commandList->CopyTextureRegion(&destLocation, 0, 0, 0, &sourceLocation, nullptr);
 		}
+	}
+
+
+	/// <summary>
+	/// bind needed SRV resource and sampler resource for root parameters
+	/// </summary>
+	/// <param name="frameIndex"></param>
+	void DX12Context::BindDescriptorHeaps(UINT frameIndex)
+	{
+		m_currSRVHeap = &m_device->GetSRVHeap();
+		m_currSRVHeap->Reset();
+
+		ID3D12DescriptorHeap* heapsToBind[2];
+		heapsToBind[0] = m_device->GetSRVHeap().GetDescriptorHeap();
+		heapsToBind[1] = m_device->GetSamplerHeap().GetDescriptorHeap();
 	}
 
 }
