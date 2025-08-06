@@ -110,12 +110,14 @@ namespace ElysiaRenderer
 	/// <param name="frameIndex"></param>
 	void DX12Context::BindDescriptorHeaps(UINT frameIndex)
 	{
-		m_currSRVHeap = &m_device->GetSRVHeap();
+		m_currSRVHeap = &m_device->GetSRVHeap(frameIndex);
 		m_currSRVHeap->Reset();
 
 		ID3D12DescriptorHeap* heapsToBind[2];
-		heapsToBind[0] = m_device->GetSRVHeap().GetDescriptorHeap();
+		heapsToBind[0] = m_device->GetSRVHeap(frameIndex).GetDescriptorHeap();
 		heapsToBind[1] = m_device->GetSamplerHeap().GetDescriptorHeap();
+		
+		m_commandList->SetDescriptorHeaps(2, heapsToBind);
 	}
 
 }

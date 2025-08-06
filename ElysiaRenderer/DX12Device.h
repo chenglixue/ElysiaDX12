@@ -62,11 +62,11 @@ namespace ElysiaRenderer
 		{
 			return *m_backBuffers[m_swapChain->GetCurrentBackBufferIndex()];
 		}
-		DX12RenderPassDescriptorHeap GetSRVHeap(UINT frameIndex)
+		DX12RenderPassDescriptorHeap& GetSRVHeap(UINT frameIndex)
 		{
 			return *m_SRVRenderPassDescriptorHeaps[frameIndex];
 		}
-		DX12RenderPassDescriptorHeap GetSamplerHeap()
+		DX12RenderPassDescriptorHeap& GetSamplerHeap()
 		{
 			return *m_samplerRenderPassDescriptorHeap;
 		}
@@ -138,7 +138,7 @@ namespace ElysiaRenderer
 		std::unique_ptr<DX12RenderPassDescriptorHeap> m_CBVRenderPassDescriptorHeap;
 		std::unique_ptr<DX12RenderPassDescriptorHeap> m_samplerRenderPassDescriptorHeap;
 		std::unique_ptr<DX12RenderPassDescriptorHeap> m_UAVRenderPassDescriptorHeap;
-		std::vector<UINT> mFreeReservedDescriptorIndices;
+		std::vector<UINT> m_freeReservedDescriptorIndices;
 		std::array<std::unique_ptr<DX12UploadContext>, NUM_FRAMES_IN_FLIGHT> m_uploadContexts;
 		std::array<std::unique_ptr<DX12TextureResource>, NUM_BACK_BUFFERS> m_backBuffers;
 		std::array<EndOfFrameFences, NUM_FRAMES_IN_FLIGHT> m_endOfFrameFences;

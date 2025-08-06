@@ -221,7 +221,7 @@ namespace ElysiaRenderer
 			{
 				auto rootParameter = std::make_unique<DX12RootParameter>();
 				rootParameter->InitAsDescriptorTable(1, D3D12_SHADER_VISIBILITY_PIXEL);
-				rootParameter->SetTableRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0);
+				rootParameter->SetTableRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, m_pipelineBindResource.m_SRVResources.size(), 0, 0);
 
 				m_rootParameters.push_back(std::move(rootParameter));
 			}
@@ -288,7 +288,7 @@ namespace ElysiaRenderer
 		m_graphicsContext->SetVertexBuffer(0, 1, m_vertexBuffers[vertexBufferIndex]->GetVertexBufferView());
 		auto pipelineStateData = CreatePipelineStateData(m_graphicsPipelineStates[pipelineStateIndex].get(),
 			std::move(std::vector<DX12TextureResource*>{ &currBackBuffer }));
-		m_graphicsContext->SetPipeline(pipelineStateData);
+		m_graphicsContext->SetPipeline(pipelineStateData, m_pipelineBindResource);
 		m_graphicsContext->SetDefaultViewportAndScissor(m_device->GetScreenSize());
 		m_graphicsContext->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		m_graphicsContext->Draw(3, 0);
@@ -317,7 +317,7 @@ namespace ElysiaRenderer
 		m_graphicsContext->SetVertexBuffer(0, 1, m_vertexBuffers[vertexBufferIndex]->GetVertexBufferView());
 		auto pipelineStateData = CreatePipelineStateData(m_graphicsPipelineStates[pipelineStateIndex].get(),
 			std::move(std::vector<DX12TextureResource*>{ &currBackBuffer }));
-		m_graphicsContext->SetPipeline(pipelineStateData);
+		m_graphicsContext->SetPipeline(pipelineStateData, m_pipelineBindResource);
 		m_graphicsContext->SetDefaultViewportAndScissor(m_device->GetScreenSize());
 		m_graphicsContext->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		m_graphicsContext->Draw(3, 0);

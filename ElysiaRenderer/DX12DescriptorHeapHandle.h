@@ -19,11 +19,11 @@ namespace ElysiaRenderer
 			m_heapIndex = 0;
 		}
 
-		D3D12_CPU_DESCRIPTOR_HANDLE GetCPUHandle()
+		D3D12_CPU_DESCRIPTOR_HANDLE& GetCPUHandle()
 		{
 			return m_CPUHandle;
 		}
-		D3D12_GPU_DESCRIPTOR_HANDLE GetGPUHandle()
+		D3D12_GPU_DESCRIPTOR_HANDLE& GetGPUHandle()
 		{
 			return m_GPUHandle;
 		}

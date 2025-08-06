@@ -1,12 +1,4 @@
 ﻿  D3D12Lite.cpp
-  DX12BufferResource.cpp
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file 'DX12BufferResource.cpp')
-  
-  DX12ConstantBuffer.cpp
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file 'DX12ConstantBuffer.cpp')
-  
   DX12Context.cpp
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
   (compiling source file 'DX12Context.cpp')
@@ -26,36 +18,6 @@ D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12GraphicsContext.h(9,25): warning C4091
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12UploadContext.h(12,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
   (compiling source file 'DX12Context.cpp')
   
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Context.cpp(114,43): error C2247: 'ElysiaRenderer::DX12DescriptorHeap::GetDescriptorHeap' not accessible because 'ElysiaRenderer::DX12RenderPassDescriptorHeap' uses 'private' to inherit from 'ElysiaRenderer::DX12DescriptorHeap'
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeap.h(12,25):
-      see declaration of 'ElysiaRenderer::DX12DescriptorHeap::GetDescriptorHeap'
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12RenderPassDescriptorHeap.h(8,8):
-      see declaration of 'ElysiaRenderer::DX12RenderPassDescriptorHeap'
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeap.h(6,8):
-      see declaration of 'ElysiaRenderer::DX12DescriptorHeap'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Context.cpp(114,43): error C2248: 'ElysiaRenderer::DX12DescriptorHeap::GetDescriptorHeap': cannot access private member declared in class 'ElysiaRenderer::DX12RenderPassDescriptorHeap'
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeap.h(12,25):
-      see declaration of 'ElysiaRenderer::DX12DescriptorHeap::GetDescriptorHeap'
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12RenderPassDescriptorHeap.h(8,8):
-      see declaration of 'ElysiaRenderer::DX12RenderPassDescriptorHeap'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Context.cpp(115,47): error C2247: 'ElysiaRenderer::DX12DescriptorHeap::GetDescriptorHeap' not accessible because 'ElysiaRenderer::DX12RenderPassDescriptorHeap' uses 'private' to inherit from 'ElysiaRenderer::DX12DescriptorHeap'
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeap.h(12,25):
-      see declaration of 'ElysiaRenderer::DX12DescriptorHeap::GetDescriptorHeap'
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12RenderPassDescriptorHeap.h(8,8):
-      see declaration of 'ElysiaRenderer::DX12RenderPassDescriptorHeap'
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeap.h(6,8):
-      see declaration of 'ElysiaRenderer::DX12DescriptorHeap'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Context.cpp(115,47): error C2248: 'ElysiaRenderer::DX12DescriptorHeap::GetDescriptorHeap': cannot access private member declared in class 'ElysiaRenderer::DX12RenderPassDescriptorHeap'
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeap.h(12,25):
-      see declaration of 'ElysiaRenderer::DX12DescriptorHeap::GetDescriptorHeap'
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12RenderPassDescriptorHeap.h(8,8):
-      see declaration of 'ElysiaRenderer::DX12RenderPassDescriptorHeap'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Context.cpp(110,40): error C2102: '&' requires l-value
-  DX12DescriptorHeap.cpp
   DX12Device.cpp
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
   (compiling source file 'DX12Device.cpp')
@@ -75,7 +37,7 @@ D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12GraphicsContext.h(9,25): warning C4091
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12UploadContext.h(12,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
   (compiling source file 'DX12Device.cpp')
   
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.cpp(602,24): warning C4267: 'initializing': conversion from 'size_t' to 'UINT', possible loss of data
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.cpp(613,24): warning C4267: 'initializing': conversion from 'size_t' to 'UINT', possible loss of data
   DX12GraphicsContext.cpp
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
   (compiling source file 'DX12GraphicsContext.cpp')
@@ -89,46 +51,14 @@ D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12PipelineState.h(9,25): warning C4091: 
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12GraphicsContext.h(9,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
   (compiling source file 'DX12GraphicsContext.cpp')
   
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12GraphicsContext.cpp(7,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12GraphicsContext.cpp(81,3): error C2143: syntax error: missing ';' before '}'
-  DX12PipelineState.cpp
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file 'DX12PipelineState.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12PipelineState.h(8,32): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12RootSignature' when no variable is declared
-  (compiling source file 'DX12PipelineState.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12PipelineState.h(9,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Shader' when no variable is declared
-  (compiling source file 'DX12PipelineState.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12PipelineState.cpp(27,4): warning C4150: deletion of pointer to incomplete type 'ElysiaRenderer::DX12RootSignature'; no destructor called
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12PipelineState.h(8,15):
-      see declaration of 'ElysiaRenderer::DX12RootSignature'
-  
-  DX12RenderPassDescriptorHeap.cpp
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file 'DX12RenderPassDescriptorHeap.cpp')
-  
-  DX12StagingDescriptorHeap.cpp
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file 'DX12StagingDescriptorHeap.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12StagingDescriptorHeap.cpp(53,54): warning C4244: 'argument': conversion from 'uint64_t' to '_Ty', possible loss of data
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12StagingDescriptorHeap.cpp(53,54): warning C4244:         with
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12StagingDescriptorHeap.cpp(53,54): warning C4244:         [
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12StagingDescriptorHeap.cpp(53,54): warning C4244:             _Ty=UINT
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12StagingDescriptorHeap.cpp(53,54): warning C4244:         ]
-  DX12TextureBuffer.cpp
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file 'DX12TextureBuffer.cpp')
-  
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12TextureBuffer.h(32,34): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12TextureResource' when no variable is declared
-  (compiling source file 'DX12TextureBuffer.cpp')
+  (compiling source file 'DX12GraphicsContext.cpp')
   
-  DX12TextureResource.cpp
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file 'DX12TextureResource.cpp')
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12UploadContext.h(12,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
+  (compiling source file 'DX12GraphicsContext.cpp')
   
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12GraphicsContext.cpp(7,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12GraphicsContext.cpp(81,28): warning C4267: 'initializing': conversion from 'size_t' to 'UINT', possible loss of data
   DX12UploadContext.cpp
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
   (compiling source file 'DX12UploadContext.cpp')
@@ -138,10 +68,6 @@ D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12TextureBuffer.h(32,34): warning C4091:
   
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12UploadContext.h(12,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
   (compiling source file 'DX12UploadContext.cpp')
-  
-  DX12VertexBuffer.cpp
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file 'DX12VertexBuffer.cpp')
   
   main.cpp
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
@@ -162,18 +88,11 @@ D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12GraphicsContext.h(9,25): warning C4091
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12UploadContext.h(12,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
   (compiling source file 'main.cpp')
   
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.h(291,20): error C2660: 'ElysiaRenderer::DX12GraphicsContext::SetPipeline': function does not take 1 arguments
+D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.h(224,109): warning C4267: 'argument': conversion from 'size_t' to 'UINT', possible loss of data
   (compiling source file 'main.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12GraphicsContext.h(21,8):
-      see declaration of 'ElysiaRenderer::DX12GraphicsContext::SetPipeline'
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.h(291,20):
-      while trying to match the argument list '(ElysiaRenderer::PipelineStateData)'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.h(320,20): error C2660: 'ElysiaRenderer::DX12GraphicsContext::SetPipeline': function does not take 1 arguments
-  (compiling source file 'main.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12GraphicsContext.h(21,8):
-      see declaration of 'ElysiaRenderer::DX12GraphicsContext::SetPipeline'
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.h(320,20):
-      while trying to match the argument list '(ElysiaRenderer::PipelineStateData)'
   
   Generating Code...
+  ElysiaRenderer.vcxproj -> D:\DX12\ElysiaRenderer\x64\Debug\ElysiaRenderer.exe
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\DrawTriangle.hlsl
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Tex\Wood.dds
+  2 File(s) copied

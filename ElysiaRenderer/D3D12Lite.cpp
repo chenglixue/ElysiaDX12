@@ -580,10 +580,10 @@ namespace D3D12Lite
     {
         assert(mCurrentPipeline);
         assert(resources.IsLocked());
-
+        
         static const uint32_t maxNumHandlesPerBinding = 16;
         static const uint32_t singleDescriptorRangeCopyArray[maxNumHandlesPerBinding]{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ,1 };
-
+        
         const BufferResource* cbv = resources.GetCBV();
         const auto& uavs = resources.GetUAVs();
         const auto& srvs = resources.GetSRVs();

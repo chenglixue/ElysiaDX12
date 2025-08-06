@@ -48,12 +48,14 @@ namespace ElysiaRenderer
 		// each parameter has one descriptor table
 		{
 			static const uint32_t maxNumHandlesBinding = 16;
+			static const uint32_t singleDescriptorRangeCopyArray[maxNumHandlesBinding]{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ,1 };
+
 			D3D12_CPU_DESCRIPTOR_HANDLE handles[maxNumHandlesBinding]{};
 			UINT currentHandleIndex = 0;
-			UINT numTableHandles = SRVResources.size();
 
 			auto rootParameters = pipelineState->GetRootSignature()->GetRootParameters();
 			auto currRootParameter = rootParameters;
+			UINT currRootParameterIndex = 0;
 			for (; currRootParameter < rootParameters + pipelineState->GetRootSignature()->GetNumRootParams(); ++currRootParameter)
 			{
 				switch (currRootParameter->GetType())
@@ -67,20 +69,30 @@ namespace ElysiaRenderer
 								case BufferType::Texture:
 								{
 									handles[currentHandleIndex++] = static_cast<DX12TextureResource*>(SRVResource.get())->GetSRVDescriptor().GetCPUHandle();
+									break;
 								}
 
 								default:
 									ElysiaHelper::ThrowRuntimeError("SRVResource type is none");
+									break;
 							}
 						}
+
+						UINT numTableHandles = SRVResources.size();
+						auto blockStart = m_currSRVHeap->AllocateRenderPassDescriptorBlock(numTableHandles);
+						m_device->CopyDescriptors(1, &blockStart.GetCPUHandle(), &numTableHandles, numTableHandles, handles, singleDescriptorRangeCopyArray, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+
+						m_commandList->SetGraphicsRootDescriptorTable(currRootParameterIndex, blockStart.GetGPUHandle());
 
 						break;
 					}
 				}
+
+				currRootParameterIndex++;
 			}
 
-			auto blockStart = m_currSRVHeap->GetHeapHandleBlock(numTableHandles);
-			m_device->CopyDescriptors(1, &blockStart.GetCPUHandle(), &numTableHandles, numTableHandles, );
+			
+			
 		}
 
 		D3D12_CPU_DESCRIPTOR_HANDLE renderTargetHandles[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT]{};

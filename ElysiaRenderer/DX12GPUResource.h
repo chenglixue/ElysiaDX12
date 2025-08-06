@@ -55,6 +55,10 @@ namespace ElysiaRenderer
 		{
 			return m_allocation;
 		}
+		UINT GetResourceHeapIndex()
+		{
+			return m_descriptorHeapIndex;
+		}
 
 		void SetUsageState(D3D12_RESOURCE_STATES usageState)
 		{
@@ -72,7 +76,7 @@ namespace ElysiaRenderer
 		{
 			m_allocation = allocation;
 		}
-		void SetDescriptorHeapIndex(UINT descriptorHeapIndex)
+		void SetResourceHeapIndex(UINT descriptorHeapIndex)
 		{
 			m_descriptorHeapIndex = descriptorHeapIndex;
 		}

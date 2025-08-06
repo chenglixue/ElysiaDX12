@@ -157,16 +157,11 @@ namespace ElysiaRenderer
 			for (UINT currFrameIndex = 0; currFrameIndex < NUM_FRAMES_IN_FLIGHT; ++currFrameIndex)
 			{
 				m_SRVRenderPassDescriptorHeaps[currFrameIndex] = std::make_unique<DX12RenderPassDescriptorHeap>(m_device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
-					NUM_SRV_RENDER_PASS_USER_DESCRIPTORS);
+					NUM_RESERVED_SRV_DESCRIPTORS, NUM_SRV_RENDER_PASS_USER_DESCRIPTORS);
 			}
 			
 			m_samplerRenderPassDescriptorHeap = std::make_unique<DX12RenderPassDescriptorHeap>(m_device, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER,
-				NUM_SAMPLER_DESCRIPTORS);
-
-			for (UINT currFrameIndex = 0; currFrameIndex < NUM_FRAMES_IN_FLIGHT; ++currFrameIndex)
-			{
-				//m_SRVStagingDescriptorHeap
-			}
+				0, NUM_SAMPLER_DESCRIPTORS);
 		}
 
 		// Create Swap Chain
@@ -219,8 +214,8 @@ namespace ElysiaRenderer
 			m_destructionQueues[i].m_pipelineStates = std::make_unique<std::vector<DX12PipelineState>>();
 		}*/
 		m_frameID = 0;
-		mFreeReservedDescriptorIndices.resize(NUM_RESERVED_SRV_DESCRIPTORS - 1);
-		std::iota(mFreeReservedDescriptorIndices.begin(), mFreeReservedDescriptorIndices.end(), 1);
+		m_freeReservedDescriptorIndices.resize(NUM_RESERVED_SRV_DESCRIPTORS - 1);
+		std::iota(m_freeReservedDescriptorIndices.begin(), m_freeReservedDescriptorIndices.end(), 1);
 	}
 	void DX12Device::CreateWindowDependentResources()
 	{
@@ -492,7 +487,10 @@ namespace ElysiaRenderer
 		m_device->CreateShaderResourceView(texResource, &SRV, SRVHandle.GetCPUHandle());
 		///
 		newTex->SetSRVDescriptor(SRVHandle);
-		CopyDescriptorFromStageToRenderPass(newTex->GetSRVDescriptor(), )
+		newTex->SetResourceHeapIndex(m_freeReservedDescriptorIndices.back());
+		m_freeReservedDescriptorIndices.pop_back();
+
+		CopyDescriptorFromStageToRenderPass(newTex->GetSRVDescriptor(), newTex->GetResourceHeapIndex());
 
 		return newTex;
 	}
@@ -672,7 +670,7 @@ namespace ElysiaRenderer
 	/// 
 	/// </summary>
 	/// <param name="SRVHandle"> stage SRV Handle in buffer or tex </param>
-	/// <param name="index"> RenderPass descriptor index in heap </param>
+	/// <param name="index"> resource index in render pass heap </param>
 	void DX12Device::CopyDescriptorFromStageToRenderPass(DX12DescriptorHeapHandle SRVHandle, UINT index)
 	{
 		for (UINT currFrameIndex = 0; currFrameIndex < NUM_FRAMES_IN_FLIGHT; ++currFrameIndex)

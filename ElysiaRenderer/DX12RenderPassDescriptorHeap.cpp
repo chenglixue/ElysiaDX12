@@ -2,8 +2,8 @@
 
 namespace ElysiaRenderer
 {
-	DX12RenderPassDescriptorHeap::DX12RenderPassDescriptorHeap(ID3D12Device* device, D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT reservedCount)
-		: DX12DescriptorHeap(device, heapType, reservedCount, true)
+	DX12RenderPassDescriptorHeap::DX12RenderPassDescriptorHeap(ID3D12Device* device, D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT reservedCount, UINT userCount)
+		: DX12DescriptorHeap(device, heapType, reservedCount + userCount, true)
 	{
 		m_currDescriptorIndex = reservedCount;
 		m_reservedHandleCount = reservedCount;
@@ -33,6 +33,36 @@ namespace ElysiaRenderer
 		newHandle.SetHeapIndex(index);
 		newHandle.SetCPUHandle(CPUHandle);
 		newHandle.SetGPUHandle(GPUHandle);
+
+		return newHandle;
+	}
+
+	DX12DescriptorHeapHandle DX12RenderPassDescriptorHeap::AllocateRenderPassDescriptorBlock(UINT count)
+	{
+		std::lock_guard<std::mutex> lockGuard(m_usageMutex);
+
+		UINT newHandleID = 0;
+
+		UINT blockEnd = m_currDescriptorIndex + count;
+		if (blockEnd <= m_maxDescriptors)
+		{
+			newHandleID = m_currDescriptorIndex;
+			m_currDescriptorIndex = blockEnd;
+		}
+		else
+		{
+			ElysiaHelper::AssertError("Ran out of render pass descriptor heap handles, need to increase heap size");
+		}
+
+		DX12DescriptorHeapHandle newHandle;
+		D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle = m_descriptorHeapCPUStart;
+		cpuHandle.ptr += static_cast<size_t>(newHandleID) * m_descriptorSize;
+		D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle = m_descriptorHeapGPUStart;
+		gpuHandle.ptr += static_cast<size_t>(newHandleID) * m_descriptorSize;
+
+		newHandle.SetHeapIndex(newHandleID);
+		newHandle.SetCPUHandle(cpuHandle);
+		newHandle.SetGPUHandle(gpuHandle);
 
 		return newHandle;
 	}
