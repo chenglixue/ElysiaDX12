@@ -1,10 +1,17 @@
-Texture2D g_texture : register(t0);
 SamplerState g_Sampler_WarpU_WarpV_Point : register(s0);
 SamplerState g_Sampler_ClampU_ClampV_Point : register(s1);
 SamplerState g_Sampler_WarpU_WarpV_Linear : register(s2);
 SamplerState g_Sampler_ClampU_ClampV_Linear : register(s3);
 SamplerState g_Sampler_WarpU_WarpV_Anisotropic : register(s4);
 SamplerState g_Sampler_ClampU_ClampV_Anisotropic : register(s5);
+
+cbuffer SceneParameterBuffer : register(b0)
+{
+    float4 offset;
+    float4 padding[15];
+}
+
+Texture2D g_texture : register(t0);
 
 struct VSInput
 {
@@ -29,7 +36,7 @@ PSInput VS(VSInput i)
 {
     PSInput o;
 
-    o.position = i.position;
+    o.position = i.position + offset;
     o.uv = i.texcoord;
     //result.color = i.color;
 

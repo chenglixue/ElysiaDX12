@@ -42,11 +42,17 @@ namespace ElysiaRenderer
 
 			texUploadHeapOffset += currUpload.GetTextureDataSize();
 			texUploadHeapOffset = ElysiaHelper::AlignU64(texUploadHeapOffset, 512);
+
 		}
 
 		if (numTexsProcessed > 0)
 		{
 			m_textureUploads.erase(m_textureUploads.begin(), m_textureUploads.begin() + numTexsProcessed);
 		}
+	}
+
+	void DX12UploadContext::ResolveProcessedUploads()
+	{
+		m_textureUploadsInProgress.clear();
 	}
 }

@@ -26,6 +26,11 @@ namespace ElysiaRenderer
 		{
 			ElysiaHelper::SafeRelease(m_commandAllocators[frameIndex]);
 		}
+
+		/*for (int i = 0; i < m_bundleAllocators.size(); ++i)
+		{
+			ElysiaHelper::SafeRelease(m_bundleAllocators[i]);
+		}*/
 	}
 
 	void DX12Context::Reset()
@@ -119,5 +124,20 @@ namespace ElysiaRenderer
 		
 		m_commandList->SetDescriptorHeaps(2, heapsToBind);
 	}
+
+	/*ID3D12GraphicsCommandList4* DX12Context::CreateBundle()
+	{
+		ID3D12CommandAllocator* newBundleAllocator = nullptr;
+		ElysiaHelper::AssertIfFailed(m_device->GetDevice()->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_BUNDLE,
+			IID_PPV_ARGS(&newBundleAllocator)));
+
+		ID3D12GraphicsCommandList4* newBundle = nullptr;
+		ElysiaHelper::AssertIfFailed(m_device->GetDevice()->CreateCommandList1(0, D3D12_COMMAND_LIST_TYPE_BUNDLE, D3D12_COMMAND_LIST_FLAG_NONE,
+			IID_PPV_ARGS(&newBundle)));
+		m_bundleAllocators.push_back(std::move(newBundleAllocator));
+		m_bundles.push_back(std::move(newBundle));
+
+		return m_bundles.back();
+	}*/
 
 }

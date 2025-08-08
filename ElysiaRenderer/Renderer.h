@@ -39,6 +39,12 @@ namespace ElysiaRenderer
 		std::vector<std::unique_ptr<DX12Shader>> m_computeShaders;
 		std::vector<std::unique_ptr<DX12GraphicsPipelineState>> m_graphicsPipelineStates;
 		PipelineBindResource m_pipelineBindResource;
+
+		struct CBVSceneParameter
+		{
+			XMFLOAT4 offset;
+			XMFLOAT4 padding[15];
+		};
 	};
 
 	Renderer::Renderer(HWND windowHandle, ElysiaHelper::UINT2 screenSize)
@@ -205,6 +211,22 @@ namespace ElysiaRenderer
 			m_vertexBuffers.push_back(std::move(vertexBuffer));
 		}
 
+		// Create Constant Buffer
+		{
+			CBVSceneParameter sceneParameter{};
+			sceneParameter.offset = XMFLOAT4(1, 0, 0, 0);
+
+			ConstantBufferCreationDesc constantBufferCreationDesc{};
+			constantBufferCreationDesc.m_size = sizeof(CBVSceneParameter);
+			constantBufferCreationDesc.bufferAccessFlags = BufferAccessFlags::HostWritable;
+			constantBufferCreationDesc.bufferTypeFlags = BufferTypeFlags::CBV;
+			constantBufferCreationDesc.m_isRawAccess = false;
+
+			auto constantBuffer = m_device->CreateConstantBuffer(constantBufferCreationDesc);
+			constantBuffer->SetMappedData(&sceneParameter, sizeof(CBVSceneParameter));
+			m_pipelineBindResource.m_CBVResource = std::move(constantBuffer);
+		}
+
 		// Create Tex & Buffer
 		{
 			TextureCreationDesc texBufferCreateDesc{};
@@ -222,7 +244,10 @@ namespace ElysiaRenderer
 				auto rootParameter = std::make_unique<DX12RootParameter>();
 				rootParameter->InitAsDescriptorTable(1, D3D12_SHADER_VISIBILITY_PIXEL);
 				rootParameter->SetTableRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, m_pipelineBindResource.m_SRVResources.size(), 0, 0);
+				m_rootParameters.push_back(std::move(rootParameter));
 
+				rootParameter = std::make_unique<DX12RootParameter>();
+				rootParameter->InitAsConstantBuffer(1);
 				m_rootParameters.push_back(std::move(rootParameter));
 			}
 
@@ -249,6 +274,8 @@ namespace ElysiaRenderer
 
 			m_graphicsPipelineStates.push_back(std::move(m_device->CreateGraphicsPipelineState(pipelineStateCreateDesc)));
 		}
+
+		
 	}
 
 	void Renderer::RenderClearColor()

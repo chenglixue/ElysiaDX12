@@ -86,13 +86,19 @@ namespace ElysiaRenderer
 
 						break;
 					}
+
+					case D3D12_ROOT_PARAMETER_TYPE_CBV:
+					{
+						if (pipelineBindResource.m_CBVResource != nullptr)
+						{
+							m_commandList->SetGraphicsRootConstantBufferView(currentHandleIndex++, pipelineBindResource.m_CBVResource->GetGPUAddress());
+						}
+						break;
+					}
 				}
 
 				currRootParameterIndex++;
 			}
-
-			
-			
 		}
 
 		D3D12_CPU_DESCRIPTOR_HANDLE renderTargetHandles[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT]{};

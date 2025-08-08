@@ -7,14 +7,22 @@
 
 namespace ElysiaRenderer
 {
+	struct ConstantBufferCreationDesc
+	{
+		UINT m_size = 0;
+		BufferTypeFlags bufferTypeFlags = BufferTypeFlags::CBV;
+		BufferAccessFlags bufferAccessFlags = BufferAccessFlags::GPUOnly;
+		bool m_isRawAccess = false;
+	};
+
 	class DX12ConstantBuffer : public DX12BufferResource
 	{
 	public:
 		DX12ConstantBuffer(ID3D12Resource* resource, D3D12_RESOURCE_STATES usageState, uint32_t bufferSize, 
-			DX12DescriptorHeapHandle constantBufferViewHandle);
+			DX12DescriptorHeapHandle constantBufferViewHandle, D3D12MA::Allocation* allocator);
 		~DX12ConstantBuffer();
 
-		void SetConstantBufferData(const void* bufferData, uint32_t bufferSize);
+		void SetMappedData(const void* bufferData, uint32_t bufferSize);
 		DX12DescriptorHeapHandle GetConstantBufferViewHandle()
 		{
 			return m_constantBufferViewHandle;
