@@ -42,13 +42,20 @@ namespace ElysiaRenderer
 
 		struct CBVSceneParameter
 		{
-			XMFLOAT4 offset;
-			XMFLOAT4 padding[15];
+			XMFLOAT4X4 worldMatrix;
+			XMFLOAT4X4 viewMatrix;
+			XMFLOAT4X4 projMatrix;
+			XMFLOAT4 padding[4];
 		};
+		static_assert((sizeof(CBVSceneParameter) % 256) == 0, "Constant Buffer size must be 256-byte aligned");
 		CBVSceneParameter m_sceneParameter;
 
-		const float m_translateSpeed = 0.015f;
-		const float m_offsetBound = 1.25f;
+		struct SceneParameter
+		{
+			static XMMATRIX worldMatrix;
+			static XMMATRIX viewMatrix;
+			static XMMATRIX projMatrix;
+		};
 	};
 
 	Renderer::Renderer(HWND windowHandle, ElysiaHelper::UINT2 screenSize)
@@ -58,8 +65,6 @@ namespace ElysiaRenderer
 		m_device = std::make_unique<DX12Device>(windowHandle, screenSize);
 		m_graphicsContext = m_device->CreateGraphicsContext();
 
-		m_sceneParameter = CBVSceneParameter();
-		m_sceneParameter.offset = XMFLOAT4(1, 0, 0, 0);
 	}
 
 	Renderer::~Renderer()
@@ -69,17 +74,22 @@ namespace ElysiaRenderer
 
 	inline void Renderer::Init()
 	{
+		m_sceneParameter = CBVSceneParameter();
+
+		{
+			SceneParameter::worldMatrix = XMMatrixIdentity();
+
+			static const XMVECTORF32 eye{ 0.f, 3.f, -10.f, 0.f };
+			static const XMVECTORF32 up{ 0.f, 1.f, 0.f, 0.f };
+			static const XMVECTORF32 at{ 0.f, 0.f, 0.f, 0.f };
+			SceneParameter::viewMatrix = XMMatrixLookAtLH(eye, at, up);
+		}
+
 		InitTexTriangle();
 	}
 	inline void Renderer::Update()
 	{
-		m_sceneParameter.offset.x += m_translateSpeed;
-		if (m_sceneParameter.offset.x > m_offsetBound)
-		{
-			m_sceneParameter.offset.x -= m_offsetBound;
-		}
-
-		dynamic_cast<DX12ConstantBuffer*>(m_pipelineBindResource.m_CBVResource.get())->SetMappedData(&m_sceneParameter, sizeof(CBVSceneParameter));
+		
 	}
 	inline void Renderer::Render()
 	{

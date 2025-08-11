@@ -134,7 +134,6 @@ namespace ElysiaRenderer
 		std::unique_ptr<DX12StagingDescriptorHeap> m_RTVStagingDescriptorHeap;
 		std::unique_ptr<DX12StagingDescriptorHeap> m_DSVStagingDescriptorHeap;
 		std::unique_ptr<DX12StagingDescriptorHeap> m_SRVStagingDescriptorHeap;
-		//std::unique_ptr<DX12StagingDescriptorHeap> m_SRVStagingDescriptorHeap;
 		std::array<std::unique_ptr<DX12RenderPassDescriptorHeap>, NUM_FRAMES_IN_FLIGHT> m_SRVRenderPassDescriptorHeaps;
 		std::unique_ptr<DX12RenderPassDescriptorHeap> m_CBVRenderPassDescriptorHeap;
 		std::unique_ptr<DX12RenderPassDescriptorHeap> m_samplerRenderPassDescriptorHeap;

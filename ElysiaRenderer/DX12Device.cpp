@@ -153,6 +153,8 @@ namespace ElysiaRenderer
 				NUM_RTV_STAGING_DESCRIPTORS);
 			m_SRVStagingDescriptorHeap = std::make_unique<DX12StagingDescriptorHeap>(m_device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
 				NUM_RTV_STAGING_DESCRIPTORS);
+			m_DSVStagingDescriptorHeap = std::make_unique<DX12StagingDescriptorHeap>(m_device, D3D12_DESCRIPTOR_HEAP_TYPE_RTV,
+				NUM_DSV_STAGING_DESCRIPTORS);
 
 			for (UINT currFrameIndex = 0; currFrameIndex < NUM_FRAMES_IN_FLIGHT; ++currFrameIndex)
 			{
