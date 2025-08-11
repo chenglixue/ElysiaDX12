@@ -45,6 +45,10 @@ namespace ElysiaRenderer
 			XMFLOAT4 offset;
 			XMFLOAT4 padding[15];
 		};
+		CBVSceneParameter m_sceneParameter;
+
+		const float m_translateSpeed = 0.015f;
+		const float m_offsetBound = 1.25f;
 	};
 
 	Renderer::Renderer(HWND windowHandle, ElysiaHelper::UINT2 screenSize)
@@ -53,6 +57,9 @@ namespace ElysiaRenderer
 
 		m_device = std::make_unique<DX12Device>(windowHandle, screenSize);
 		m_graphicsContext = m_device->CreateGraphicsContext();
+
+		m_sceneParameter = CBVSceneParameter();
+		m_sceneParameter.offset = XMFLOAT4(1, 0, 0, 0);
 	}
 
 	Renderer::~Renderer()
@@ -66,7 +73,13 @@ namespace ElysiaRenderer
 	}
 	inline void Renderer::Update()
 	{
+		m_sceneParameter.offset.x += m_translateSpeed;
+		if (m_sceneParameter.offset.x > m_offsetBound)
+		{
+			m_sceneParameter.offset.x -= m_offsetBound;
+		}
 
+		dynamic_cast<DX12ConstantBuffer*>(m_pipelineBindResource.m_CBVResource.get())->SetMappedData(&m_sceneParameter, sizeof(CBVSceneParameter));
 	}
 	inline void Renderer::Render()
 	{
@@ -213,9 +226,6 @@ namespace ElysiaRenderer
 
 		// Create Constant Buffer
 		{
-			CBVSceneParameter sceneParameter{};
-			sceneParameter.offset = XMFLOAT4(1, 0, 0, 0);
-
 			ConstantBufferCreationDesc constantBufferCreationDesc{};
 			constantBufferCreationDesc.m_size = sizeof(CBVSceneParameter);
 			constantBufferCreationDesc.bufferAccessFlags = BufferAccessFlags::HostWritable;
@@ -223,7 +233,7 @@ namespace ElysiaRenderer
 			constantBufferCreationDesc.m_isRawAccess = false;
 
 			auto constantBuffer = m_device->CreateConstantBuffer(constantBufferCreationDesc);
-			constantBuffer->SetMappedData(&sceneParameter, sizeof(CBVSceneParameter));
+			constantBuffer->SetMappedData(&m_sceneParameter, sizeof(CBVSceneParameter));
 			m_pipelineBindResource.m_CBVResource = std::move(constantBuffer);
 		}
 
@@ -247,7 +257,7 @@ namespace ElysiaRenderer
 				m_rootParameters.push_back(std::move(rootParameter));
 
 				rootParameter = std::make_unique<DX12RootParameter>();
-				rootParameter->InitAsConstantBuffer(1);
+				rootParameter->InitAsConstantBuffer(0);
 				m_rootParameters.push_back(std::move(rootParameter));
 			}
 

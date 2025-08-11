@@ -20,3 +20,4 @@
 #include "D3D12MemoryAllocator/D3D12MemAlloc.h"
 #include <dxgidebug.h>
 #include <numeric>
+#include <pix3.h>
