@@ -16,7 +16,8 @@ namespace ElysiaRenderer
 		None = 0,
 		CBV = 1,
 		SRV = 2,
-		UAV = 3
+		UAV = 3,
+		DSV
 	};
 
 	enum class BufferAccessFlags : uint8_t

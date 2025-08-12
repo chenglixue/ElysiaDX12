@@ -153,7 +153,7 @@ namespace ElysiaRenderer
 				NUM_RTV_STAGING_DESCRIPTORS);
 			m_SRVStagingDescriptorHeap = std::make_unique<DX12StagingDescriptorHeap>(m_device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
 				NUM_RTV_STAGING_DESCRIPTORS);
-			m_DSVStagingDescriptorHeap = std::make_unique<DX12StagingDescriptorHeap>(m_device, D3D12_DESCRIPTOR_HEAP_TYPE_RTV,
+			m_DSVStagingDescriptorHeap = std::make_unique<DX12StagingDescriptorHeap>(m_device, D3D12_DESCRIPTOR_HEAP_TYPE_DSV,
 				NUM_DSV_STAGING_DESCRIPTORS);
 
 			for (UINT currFrameIndex = 0; currFrameIndex < NUM_FRAMES_IN_FLIGHT; ++currFrameIndex)
@@ -340,6 +340,7 @@ namespace ElysiaRenderer
 
 		return std::make_unique<DX12ConstantBuffer>(std::move(resource), usageState, bufferCreationDesc.m_size, std::move(CBVDescriptor), std::move(allocation));
 	}
+
 	std::unique_ptr<DX12TextureUploadBuffer>	DX12Device::CreateTextureUploadHeap(const TextureBufferCreationDesc& bufferCreationDesc)
 	{
 		auto isHostViewable = bufferCreationDesc.bufferAccessFlags == BufferAccessFlags::HostWritable;
@@ -473,16 +474,62 @@ namespace ElysiaRenderer
 	}
 	std::unique_ptr<DX12TextureResource>		DX12Device::CreateTexture(TexCreateDesc& desc)
 	{
-		auto& resourceDesc = desc.m_resouceDesc;
-		auto& typeFlag = desc.m_typeFlag;
+		auto resourceDesc = desc.m_resouceDesc;
+		resourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+		auto typeFlag = desc.m_typeFlag;
 
-		bool hasRTV = typeFlag == TexTypeFlags::RTV;
-		bool hasSRV = typeFlag == TexTypeFlags::SRV;
-		bool hasDSV = typeFlag == TexTypeFlags::DSV;
-		bool hasUAV = typeFlag == TexTypeFlags::UAV;
+		bool hasRTV = (typeFlag & TexTypeFlags::RTV) == TexTypeFlags::RTV;
+		bool hasSRV = (typeFlag & TexTypeFlags::SRV) == TexTypeFlags::SRV;
+		bool hasDSV = (typeFlag & TexTypeFlags::DSV) == TexTypeFlags::DSV;
+		bool hasUAV = (typeFlag & TexTypeFlags::UAV) == TexTypeFlags::UAV;
+
+		DXGI_FORMAT resourceFormat = resourceDesc.Format;
+		DXGI_FORMAT shaderResourceViewFormat = resourceDesc.Format;
+		D3D12_RESOURCE_STATES usageState = D3D12_RESOURCE_STATE_COPY_DEST;
+
+		if (hasDSV)
+		{
+			switch(desc.m_resouceDesc.Format)
+			{
+				case DXGI_FORMAT_D16_UNORM:
+				{
+					resourceFormat = DXGI_FORMAT_R16_TYPELESS;
+					shaderResourceViewFormat = DXGI_FORMAT_R16_UNORM;
+					break;
+				}
+				case DXGI_FORMAT_D24_UNORM_S8_UINT:
+				{
+					resourceFormat = DXGI_FORMAT_R24G8_TYPELESS;
+					shaderResourceViewFormat = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+					break;
+				}
+				case DXGI_FORMAT_D32_FLOAT:
+				{
+					resourceFormat = DXGI_FORMAT_R32_TYPELESS;
+					shaderResourceViewFormat = DXGI_FORMAT_R32_FLOAT;
+					break;
+				}
+				case DXGI_FORMAT_D32_FLOAT_S8X24_UINT:
+				{
+					resourceFormat = DXGI_FORMAT_R32G8X24_TYPELESS;
+					shaderResourceViewFormat = DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS;
+					break;
+				}
+				default:
+				{
+					ElysiaHelper::AssertError("Bad depth stencil format.");
+					break;
+				}
+			}
+
+			resourceDesc.Flags |= D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
+			usageState = D3D12_RESOURCE_STATE_DEPTH_WRITE;
+		}
+
+		resourceDesc.Format = resourceFormat;
 
 		D3D12_CLEAR_VALUE clearValue = {};
-		clearValue.Format = resourceDesc.Format;
+		clearValue.Format = desc.m_resouceDesc.Format;
 		if (hasDSV)
 		{
 			clearValue.DepthStencil.Depth = 1.0f;
@@ -491,7 +538,6 @@ namespace ElysiaRenderer
 		/// Create default heap for tex
 		D3D12MA::ALLOCATION_DESC allocationDesc{};
 		allocationDesc.HeapType = D3D12_HEAP_TYPE_DEFAULT;
-		D3D12_RESOURCE_STATES usageState = D3D12_RESOURCE_STATE_COPY_DEST;
 		ID3D12Resource* texResource = nullptr;
 		D3D12MA::Allocation* allocation = nullptr;
 		m_allocator->CreateResource(&allocationDesc, &resourceDesc, usageState, (!hasRTV && !hasDSV) ? nullptr : &clearValue,
@@ -501,31 +547,62 @@ namespace ElysiaRenderer
 		auto newTex = std::make_unique<DX12TextureResource>(std::move(texResource), usageState, std::move(allocation));
 
 		/// Create SRV
-		D3D12_SHADER_RESOURCE_VIEW_DESC SRV{};
-		SRV.Format = resourceDesc.Format;
-		SRV.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-		if (resourceDesc.Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE3D && resourceDesc.DepthOrArraySize == 6)
+		if (hasSRV)
 		{
-			SRV.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
-			SRV.TextureCube.MostDetailedMip = 0;
-			SRV.TextureCube.MipLevels = (UINT)resourceDesc.MipLevels;
-			SRV.TextureCube.ResourceMinLODClamp = 0;
-		}
-		else
-		{
-			SRV.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-			SRV.Texture2D.MostDetailedMip = 0;
-			SRV.Texture2D.MipLevels = (UINT)resourceDesc.MipLevels;
-			SRV.Texture2D.ResourceMinLODClamp = 0;
-		}
-		auto SRVHandle = m_SRVStagingDescriptorHeap->NewDescriptorHeapHandle();
-		m_device->CreateShaderResourceView(newTex->GetResource(), &SRV, SRVHandle.GetCPUHandle());
-		///
-		newTex->SetSRVDescriptor(SRVHandle);
-		newTex->SetResourceHeapIndex(m_freeReservedDescriptorIndices.back());
-		m_freeReservedDescriptorIndices.pop_back();
+			auto SRVHandle = m_SRVStagingDescriptorHeap->NewDescriptorHeapHandle();
 
-		CopyDescriptorFromStageToRenderPass(newTex->GetSRVDescriptor(), newTex->GetResourceHeapIndex());
+			if (hasDSV)
+			{
+				D3D12_SHADER_RESOURCE_VIEW_DESC SRV{};
+				SRV.Format = shaderResourceViewFormat;
+				SRV.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+				SRV.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+				SRV.Texture2D.MostDetailedMip = 0;
+				SRV.Texture2D.MipLevels = 1;
+				SRV.Texture2D.ResourceMinLODClamp = 0;
+				SRV.Texture2D.PlaneSlice = 0;
+
+				m_device->CreateShaderResourceView(newTex->GetResource(), &SRV, SRVHandle.GetCPUHandle());
+			}
+			else
+			{
+				D3D12_SHADER_RESOURCE_VIEW_DESC* srvDescPointer = nullptr;
+				D3D12_SHADER_RESOURCE_VIEW_DESC SRV = {};
+
+				bool isCubeMap = resourceDesc.Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE2D && resourceDesc.DepthOrArraySize == 6;
+				if (isCubeMap)
+				{
+					SRV.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
+					SRV.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+					SRV.TextureCube.MostDetailedMip = 0;
+					SRV.TextureCube.MipLevels = (UINT)resourceDesc.MipLevels;
+					SRV.TextureCube.ResourceMinLODClamp = 0;
+					srvDescPointer = &SRV;
+				}
+
+				m_device->CreateShaderResourceView(newTex->GetResource(), srvDescPointer, SRVHandle.GetCPUHandle());
+			}
+			
+			///
+			newTex->SetSRVDescriptor(SRVHandle);
+			newTex->SetResourceHeapIndex(m_freeReservedDescriptorIndices.back());
+			m_freeReservedDescriptorIndices.pop_back();
+
+			CopyDescriptorFromStageToRenderPass(newTex->GetSRVDescriptor(), newTex->GetResourceHeapIndex());
+		}
+
+		if (hasDSV)
+		{
+			D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
+			dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
+			dsvDesc.Format = desc.m_resouceDesc.Format;
+			dsvDesc.Texture2D.MipSlice = 0;
+			dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+
+			auto newDSVHandle = m_DSVStagingDescriptorHeap->NewDescriptorHeapHandle();
+			newTex->SetDSVDescriptor(newDSVHandle);
+			m_device->CreateDepthStencilView(newTex->GetResource(), &dsvDesc, newTex->GetDSVDescriptor().GetCPUHandle());
+		}
 
 		return newTex;
 	}

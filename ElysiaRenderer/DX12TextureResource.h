@@ -5,14 +5,22 @@
 
 namespace ElysiaRenderer
 {
-	enum TexTypeFlags : uint8_t
+	enum class TexTypeFlags : uint8_t
 	{
 		None = 0,
-		SRV,
-		RTV,
-		DSV,
-		UAV
+		RTV = 1 << 0,
+		DSV = 1 << 1,
+		SRV = 1 << 2,
+		UAV = 1 << 3
 	};
+	inline TexTypeFlags operator|(TexTypeFlags l, TexTypeFlags r)
+	{
+		return static_cast<TexTypeFlags>(static_cast<uint8_t>(l) | static_cast<uint8_t>(r));
+	}
+	inline TexTypeFlags operator&(TexTypeFlags a, TexTypeFlags b)
+	{
+		return static_cast<TexTypeFlags>(static_cast<uint8_t>(a) & static_cast<uint8_t>(b));
+	}
 	struct TexCreateDesc
 	{
 		TexCreateDesc()
@@ -63,10 +71,13 @@ namespace ElysiaRenderer
 		{
 			m_RTVDescriptor = handle;
 		}
-
 		void SetSRVDescriptor(DX12DescriptorHeapHandle& handle)
 		{
 			m_SRVDescriptor = handle;
+		}
+		void SetDSVDescriptor(DX12DescriptorHeapHandle& handle)
+		{
+			m_DSVDescriptor = handle;
 		}
 
 	private:

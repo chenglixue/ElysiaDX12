@@ -108,9 +108,9 @@ namespace ElysiaRenderer
 		{
 			renderTargetHandles[i] = renderTargets[i]->GetRTVDescriptor().GetCPUHandle();
 		}
-		if (m_graphicsPipelineState->GetDepthStencilRT() != nullptr)
+		if (pipelineStateData.m_depthStencilTarget != nullptr)
 		{
-			depthStencilHandle = m_graphicsPipelineState->GetDepthStencilRT()->GetRTVDescriptor().GetCPUHandle();
+			depthStencilHandle = pipelineStateData.m_depthStencilTarget->GetDSVDescriptor().GetCPUHandle();
 		}
 		SetRenderTargets(static_cast<UINT>(numTarget), renderTargetHandles, depthStencilHandle);
 	}

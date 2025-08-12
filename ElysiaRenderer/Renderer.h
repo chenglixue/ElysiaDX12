@@ -29,6 +29,7 @@ namespace ElysiaRenderer
 
 		float m_aspectRatio;
 		std::unique_ptr<DX12Device> m_device = nullptr;
+		std::unique_ptr<DX12TextureResource> m_depthBuffer = nullptr;
 		std::unique_ptr<DX12GraphicsContext> m_graphicsContext = nullptr;
 		std::vector<std::unique_ptr<DX12VertexBuffer>> m_vertexBuffers;
 		std::vector<std::unique_ptr<DX12RootParameter>> m_rootParameters;
@@ -50,12 +51,11 @@ namespace ElysiaRenderer
 		static_assert((sizeof(CBVSceneParameter) % 256) == 0, "Constant Buffer size must be 256-byte aligned");
 		CBVSceneParameter m_sceneParameter;
 
-		struct SceneParameter
-		{
-			static XMMATRIX worldMatrix;
-			static XMMATRIX viewMatrix;
-			static XMMATRIX projMatrix;
-		};
+		XMMATRIX m_worldMatrix;
+		XMMATRIX m_viewMatrix;
+		XMMATRIX m_projMatrix;
+		float m_nearZ = 0.01f;
+		float m_farZ = 100.f;
 	};
 
 	Renderer::Renderer(HWND windowHandle, ElysiaHelper::UINT2 screenSize)
@@ -77,12 +77,14 @@ namespace ElysiaRenderer
 		m_sceneParameter = CBVSceneParameter();
 
 		{
-			SceneParameter::worldMatrix = XMMatrixIdentity();
+			m_worldMatrix = XMMatrixIdentity();
 
 			static const XMVECTORF32 eye{ 0.f, 3.f, -10.f, 0.f };
 			static const XMVECTORF32 up{ 0.f, 1.f, 0.f, 0.f };
 			static const XMVECTORF32 at{ 0.f, 0.f, 0.f, 0.f };
-			SceneParameter::viewMatrix = XMMatrixLookAtLH(eye, at, up);
+			m_viewMatrix = XMMatrixLookAtLH(eye, at, up);
+
+			m_projMatrix = XMMatrixPerspectiveFovLH(XM_PIDIV4, m_aspectRatio, m_nearZ, m_farZ);
 		}
 
 		InitTexTriangle();
@@ -188,16 +190,20 @@ namespace ElysiaRenderer
 		struct TexTriangleVertex
 		{
 			XMFLOAT3 position;
-			XMFLOAT2 uv;
+			XMFLOAT4 color;
 		};
 
-		std::array<TexTriangleVertex, 3> triangleVertices;
-		triangleVertices[0].position = { 0, 0.5, 0.f };
-		triangleVertices[0].uv = { 0.5, 0 };
-		triangleVertices[1].position = { 0.5f, -0.5f, 0.f };
-		triangleVertices[1].uv = { 1, 1 };
-		triangleVertices[2].position = { -0.5f, -0.5f, 0.f };
-		triangleVertices[2].uv = { 0, 1 };
+		TexTriangleVertex triangleVertices[] = 
+		{
+			{ XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
+			{ XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
+			{ XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f) },
+			{ XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
+			{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT4(1.0f, 0.0f, 1.0f, 1.0f) },
+			{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f) },
+			{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f) },
+			{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) },
+		};
 
 		std::vector<D3D12_INPUT_ELEMENT_DESC> inputElementDescs =
 		{
@@ -247,6 +253,17 @@ namespace ElysiaRenderer
 			m_pipelineBindResource.m_CBVResource = std::move(constantBuffer);
 		}
 
+		// Create Depth Buffer
+		TexCreateDesc depthBufferCreateDesc{};
+		{
+			depthBufferCreateDesc.m_resouceDesc.Format = DXGI_FORMAT_D32_FLOAT;
+			depthBufferCreateDesc.m_resouceDesc.Width = m_device->GetScreenSize().x;
+			depthBufferCreateDesc.m_resouceDesc.Height = m_device->GetScreenSize().y;
+			depthBufferCreateDesc.m_typeFlag = TexTypeFlags::SRV | TexTypeFlags::DSV;
+
+			m_depthBuffer = m_device->CreateTexture(depthBufferCreateDesc);
+		}
+
 		// Create Tex & Buffer
 		{
 			TextureCreationDesc texBufferCreateDesc{};
@@ -291,6 +308,9 @@ namespace ElysiaRenderer
 			pipelineStateCreateDesc.m_inputElementDesc = inputElementDescs;
 			pipelineStateCreateDesc.m_renderTargetDesc.m_numRenderTargets = 1;
 			pipelineStateCreateDesc.m_renderTargetDesc.m_renderTargetFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+			pipelineStateCreateDesc.m_depthStencilDesc.DepthEnable = true;
+			pipelineStateCreateDesc.m_renderTargetDesc.m_depthStencilFormat = depthBufferCreateDesc.m_resouceDesc.Format;
+			pipelineStateCreateDesc.m_depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
 
 			m_graphicsPipelineStates.push_back(std::move(m_device->CreateGraphicsPipelineState(pipelineStateCreateDesc)));
 		}
@@ -318,7 +338,7 @@ namespace ElysiaRenderer
 		m_device->Present();
 		m_device->EndFrame();
 	}
-	void Renderer::RenderTriangle()
+	/*void Renderer::RenderTriangle()
 	{
 		m_device->BeginFrame();
 
@@ -347,7 +367,7 @@ namespace ElysiaRenderer
 
 		m_device->Present();
 		m_device->EndFrame();
-	}
+	}*/
 	void Renderer::RenderTexTriangle()
 	{
 		m_device->BeginFrame();
@@ -358,12 +378,15 @@ namespace ElysiaRenderer
 
 		m_graphicsContext->Reset(m_graphicsPipelineStates[pipelineStateIndex]->GetPipelineState());
 		m_graphicsContext->AddBarrier(currBackBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET);
+		m_graphicsContext->AddBarrier(*m_depthBuffer, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 		m_graphicsContext->FlushBarrier();
 
 		m_graphicsContext->ClearRenderTarget(currBackBuffer, Color(1., 1., 1.));
+		m_graphicsContext->ClearDepthStencilTarget(*m_depthBuffer, 1.f, 0);
 		m_graphicsContext->SetVertexBuffer(0, 1, m_vertexBuffers[vertexBufferIndex]->GetVertexBufferView());
 		auto pipelineStateData = CreatePipelineStateData(m_graphicsPipelineStates[pipelineStateIndex].get(),
-			std::move(std::vector<DX12TextureResource*>{ &currBackBuffer }));
+			std::move(std::vector<DX12TextureResource*>{ &currBackBuffer }),
+			m_depthBuffer.get());
 		m_graphicsContext->SetPipeline(pipelineStateData, m_pipelineBindResource);
 		m_graphicsContext->SetDefaultViewportAndScissor(m_device->GetScreenSize());
 		m_graphicsContext->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);

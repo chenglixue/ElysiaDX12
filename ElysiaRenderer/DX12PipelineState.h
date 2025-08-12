@@ -84,19 +84,14 @@ namespace ElysiaRenderer
 		DX12GraphicsPipelineState(ID3D12PipelineState* pipelineState, DX12RootSignature* rootSignature);
 		~DX12GraphicsPipelineState() override;
 
-		DX12TextureResource* GetDepthStencilRT()
-		{
-			return m_depthStencilRT;
-		}
-
 	private:
-		DX12TextureResource* m_depthStencilRT = nullptr;
 	};
 
 	struct PipelineStateData
 	{
 		DX12PipelineState* m_pipelineState;
 		std::vector<DX12TextureResource*> m_renderTargets;
+		DX12TextureResource* m_depthStencilTarget;
 	};
 
 	inline static RenderTargetDesc CreateDefaultRenderTargetDesc()
@@ -160,11 +155,13 @@ namespace ElysiaRenderer
 
 	inline static PipelineStateData CreatePipelineStateData(
 		DX12PipelineState* pipelineState, 
-		std::vector<DX12TextureResource*> renderTargets)
+		std::vector<DX12TextureResource*> renderTargets,
+		DX12TextureResource* depthStencilTarget)
 	{
 		PipelineStateData data{};
 		data.m_pipelineState = pipelineState;
 		data.m_renderTargets = renderTargets;
+		data.m_depthStencilTarget = depthStencilTarget;
 		return data;
 	}
 }

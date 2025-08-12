@@ -5,64 +5,26 @@
 
 namespace ElysiaRenderer
 {
-	/*class DX12BufferResource : public DX12GPUResource
+	struct DepthBufferCreateDesc
 	{
-	public:
-		DX12BufferResource(ID3D12Resource* resource, D3D12_RESOURCE_STATES usageState);
-		DX12BufferResource(ID3D12Resource* resource, D3D12_RESOURCE_STATES usageState, bool isVertexBuffer);
-		~DX12BufferResource() override;
-
-		void SetMappedData(void* data, size_t dataSize)
+		DepthBufferCreateDesc()
 		{
-			assert(m_mappedResource != nullptr && data != nullptr && dataSize > 0 && dataSize < m_resourceDesc.Width);
-			memcpy_s(m_mappedResource, m_resourceDesc.Width, data, dataSize);
-		}
-		void SetStride(UINT stride)
-		{
-			m_stride = stride;
-		}
-
-		uint8_t* GetMappedResource()
-		{
-			return m_mappedResource;
-		}
-		UINT GetStride()
-		{
-			return m_stride;
-		}
-		DX12DescriptorHeapHandle GetCBVDescriptor()
-		{
-			return m_CBVDescriptor;
-		}
-		DX12DescriptorHeapHandle GetSRVDescriptor()
-		{
-			return m_SRVDescriptor;
-		}
-		DX12DescriptorHeapHandle GetUAVDescriptor()
-		{
-			return m_UAVDescriptor;
+			m_resourceDesc.Format = DXGI_FORMAT_UNKNOWN;
+			m_resourceDesc.Width = 0;
+			m_resourceDesc.Height = 0;
+			m_resourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+			m_resourceDesc.DepthOrArraySize = 1;
+			m_resourceDesc.MipLevels = 1;
+			m_resourceDesc.SampleDesc.Count = 1;
+			m_resourceDesc.SampleDesc.Quality = 0;
+			m_resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+			m_resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+			m_resourceDesc.Alignment = 0;
 		}
 
-		void SetCBVDescriptor(DX12DescriptorHeapHandle CBVDescriptor)
-		{
-			m_CBVDescriptor = CBVDescriptor;
-		}
-		void SetSRVDescriptor(DX12DescriptorHeapHandle SRVDescriptor)
-		{
-			m_SRVDescriptor = SRVDescriptor;
-		}
-		void SetUAVDescriptor(DX12DescriptorHeapHandle UAVDescriptor)
-		{
-			m_UAVDescriptor = UAVDescriptor;
-		}
-
-	private:
-		uint8_t* m_mappedResource = nullptr;
-		uint32_t m_stride = 0;
-		DX12DescriptorHeapHandle m_CBVDescriptor{};
-		DX12DescriptorHeapHandle m_SRVDescriptor{};
-		DX12DescriptorHeapHandle m_UAVDescriptor{};
-	};*/
+		D3D12_RESOURCE_DESC m_resourceDesc{};
+		BufferTypeFlags bufferTypeFlags = BufferTypeFlags::DSV;
+	};
 
 	class DX12BufferResource : public DX12GPUResource
 	{
