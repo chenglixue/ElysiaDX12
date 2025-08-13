@@ -21,3 +21,4 @@
 #include <dxgidebug.h>
 #include <numeric>
 #include <pix3.h>
+#include <unordered_set>

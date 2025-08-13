@@ -43,19 +43,22 @@ namespace ElysiaRenderer
 
 		struct CBVSceneParameter
 		{
+			XMFLOAT4 cameraPosWS;
 			XMFLOAT4X4 worldMatrix;
 			XMFLOAT4X4 viewMatrix;
 			XMFLOAT4X4 projMatrix;
-			XMFLOAT4 padding[4];
+			XMFLOAT4 padding[3];
 		};
 		static_assert((sizeof(CBVSceneParameter) % 256) == 0, "Constant Buffer size must be 256-byte aligned");
 		CBVSceneParameter m_sceneParameter;
 
+		XMVECTORF32 m_cameraPos;
 		XMMATRIX m_worldMatrix;
 		XMMATRIX m_viewMatrix;
 		XMMATRIX m_projMatrix;
 		float m_nearZ = 0.01f;
 		float m_farZ = 100.f;
+		float m_curRotationAngleRad = 0.f;
 	};
 
 	Renderer::Renderer(HWND windowHandle, ElysiaHelper::UINT2 screenSize)
@@ -79,19 +82,27 @@ namespace ElysiaRenderer
 		{
 			m_worldMatrix = XMMatrixIdentity();
 
-			static const XMVECTORF32 eye{ 0.f, 3.f, -10.f, 0.f };
+			m_cameraPos = { 0.f, 3.f, -10.f, 0.f };
 			static const XMVECTORF32 up{ 0.f, 1.f, 0.f, 0.f };
 			static const XMVECTORF32 at{ 0.f, 0.f, 0.f, 0.f };
-			m_viewMatrix = XMMatrixLookAtLH(eye, at, up);
+			m_viewMatrix = XMMatrixLookAtLH(m_cameraPos, at, up);
 
 			m_projMatrix = XMMatrixPerspectiveFovLH(XM_PIDIV4, m_aspectRatio, m_nearZ, m_farZ);
+
 		}
 
 		InitTexTriangle();
 	}
 	inline void Renderer::Update()
 	{
-		
+		const float rotationSpeed = 0.015f;
+		m_curRotationAngleRad += rotationSpeed;
+		if (m_curRotationAngleRad >= XM_2PI)
+		{
+			m_curRotationAngleRad -= XM_2PI;
+		}
+		m_worldMatrix = XMMatrixRotationY(m_curRotationAngleRad);
+
 	}
 	inline void Renderer::Render()
 	{
@@ -190,19 +201,53 @@ namespace ElysiaRenderer
 		struct TexTriangleVertex
 		{
 			XMFLOAT3 position;
-			XMFLOAT4 color;
+
+			XMFLOAT2 uv;
+
+			XMFLOAT3 normal;
 		};
 
 		TexTriangleVertex triangleVertices[] = 
 		{
-			{ XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
-			{ XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
-			{ XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f) },
-			{ XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
-			{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT4(1.0f, 0.0f, 1.0f, 1.0f) },
-			{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f) },
-			{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f) },
-			{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) },
+			/*{{0.f, 0.25f, 0.0f}, {1.0f, 1.0f}, {0.0f, -1.0f, 0.0f}},
+		{{0.25f, -0.25f, 0.0f}, {1.0f, 0.0f}, {0.0f, -1.0f, 0.0f}},
+		{{-0.25f, -0.25f, 0.0f}, {0.0f, 1.0f}, {0.0f, -1.0f, 0.0f}},*/
+			{{1.0f, -1.0f, 1.0f}, {1.0f, 1.0f}, {0.0f, -1.0f, 0.0f}},
+		{{1.0f, -1.0f, -1.0f}, {1.0f, 0.0f}, {0.0f, -1.0f, 0.0f}},
+		{{-1.0f, -1.0f, 1.0f}, {0.0f, 1.0f}, {0.0f, -1.0f, 0.0f}},
+		{{-1.0f, -1.0f, 1.0f}, {0.0f, 1.0f}, {0.0f, -1.0f, 0.0f}},
+		{{1.0f, -1.0f, -1.0f}, {1.0f, 0.0f}, {0.0f, -1.0f, 0.0f}},
+		{{-1.0f, -1.0f, -1.0f}, {0.0f, 0.0f}, {0.0f, -1.0f, 0.0f}},
+		{{1.0f, 1.0f, -1.0f}, {1.0f, 1.0f}, {0.0f, 1.0f, 0.0f}},
+		{{1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}, {0.0f, 1.0f, 0.0f}},
+		{{-1.0f, 1.0f, -1.0f}, {0.0f, 1.0f}, {0.0f, 1.0f, 0.0f}},
+		{{-1.0f, 1.0f, -1.0f}, {0.0f, 1.0f}, {0.0f, 1.0f, 0.0f}},
+		{{1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}, {0.0f, 1.0f, 0.0f}},
+		{{-1.0f, 1.0f, 1.0f}, {0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}},
+		{{-1.0f, -1.0f, -1.0f}, {1.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}},
+		{{-1.0f, 1.0f, -1.0f}, {1.0f, 0.0f}, {-1.0f, 0.0f, 0.0f}},
+		{{-1.0f, -1.0f, 1.0f}, {0.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}},
+		{{-1.0f, -1.0f, 1.0f}, {0.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}},
+		{{-1.0f, 1.0f, -1.0f}, {1.0f, 0.0f}, {-1.0f, 0.0f, 0.0f}},
+		{{-1.0f, 1.0f, 1.0f}, {0.0f, 0.0f}, {-1.0f, 0.0f, 0.0f}},
+		{{-1.0f, -1.0f, 1.0f}, {1.0f, 1.0f}, {0.0f, 0.0f, 1.0f}},
+		{{-1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}},
+		{{1.0f, -1.0f, 1.0f}, {0.0f, 1.0f}, {0.0f, 0.0f, 1.0f}},
+		{{1.0f, -1.0f, 1.0f}, {0.0f, 1.0f}, {0.0f, 0.0f, 1.0f}},
+		{{-1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}},
+		{{1.0f, 1.0f, 1.0f}, {0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}},
+		{{1.0f, -1.0f, 1.0f}, {1.0f, 1.0f}, {1.0f, 0.0f, 0.0f}},
+		{{1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}},
+		{{1.0f, -1.0f, -1.0f}, {0.0f, 1.0f}, {1.0f, 0.0f, 0.0f}},
+		{{1.0f, -1.0f, -1.0f}, {0.0f, 1.0f}, {1.0f, 0.0f, 0.0f}},
+		{{1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}},
+		{{1.0f, 1.0f, -1.0f}, {0.0f, 0.0f}, {1.0f, 0.0f, 0.0f}},
+		{{1.0f, -1.0f, -1.0f}, {1.0f, 1.0f}, {0.0f, 0.0f, -1.0f}},
+		{{1.0f, 1.0f, -1.0f}, {1.0f, 0.0f}, {0.0f, 0.0f, -1.0f}},
+		{{-1.0f, -1.0f, -1.0f}, {0.0f, 1.0f}, {0.0f, 0.0f, -1.0f}},
+		{{-1.0f, -1.0f, -1.0f}, {0.0f, 1.0f}, {0.0f, 0.0f, -1.0f}},
+		{{1.0f, 1.0f, -1.0f}, {1.0f, 0.0f}, {0.0f, 0.0f, -1.0f}},
+		{{-1.0f, 1.0f, -1.0f}, {0.0f, 0.0f}, {0.0f, 0.0f, -1.0f}},
 		};
 
 		std::vector<D3D12_INPUT_ELEMENT_DESC> inputElementDescs =
@@ -250,7 +295,7 @@ namespace ElysiaRenderer
 
 			auto constantBuffer = m_device->CreateConstantBuffer(constantBufferCreationDesc);
 			constantBuffer->SetMappedData(&m_sceneParameter, sizeof(CBVSceneParameter));
-			m_pipelineBindResource.m_CBVResource = std::move(constantBuffer);
+			m_pipelineBindResource.m_CBVResource[ElysiaHelper::PER_PASS_SPACE] = std::move(constantBuffer);
 		}
 
 		// Create Depth Buffer
@@ -280,11 +325,11 @@ namespace ElysiaRenderer
 			{
 				auto rootParameter = std::make_unique<DX12RootParameter>();
 				rootParameter->InitAsDescriptorTable(1, D3D12_SHADER_VISIBILITY_PIXEL);
-				rootParameter->SetTableRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, m_pipelineBindResource.m_SRVResources.size(), 0, 0);
+				rootParameter->SetTableRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, m_pipelineBindResource.m_SRVResources.size(), 0, 0, ElysiaHelper::PER_OBJECT_SPACE);
 				m_rootParameters.push_back(std::move(rootParameter));
 
 				rootParameter = std::make_unique<DX12RootParameter>();
-				rootParameter->InitAsConstantBuffer(0);
+				rootParameter->InitAsConstantBuffer(0, D3D12_SHADER_VISIBILITY_ALL, ElysiaHelper::PER_PASS_SPACE);
 				m_rootParameters.push_back(std::move(rootParameter));
 			}
 

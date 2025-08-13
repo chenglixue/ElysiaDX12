@@ -229,6 +229,7 @@ namespace ElysiaRenderer
 
 				ID3D12Resource* backBufferResource = nullptr;
 				ElysiaHelper::AssertIfFailed(m_swapChain->GetBuffer(currBufferIndex, IID_PPV_ARGS(&backBufferResource)));
+				backBufferResource->SetName(L"Camera Color Buffer");
 
 				D3D12_RENDER_TARGET_VIEW_DESC RTVDecs = {};
 				RTVDecs.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;

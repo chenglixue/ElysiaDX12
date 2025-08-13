@@ -5,6 +5,9 @@ namespace ElysiaRenderer
 	DX12RootParameter::DX12RootParameter()
 	{
 		m_rootParamter.ParameterType = (D3D12_ROOT_PARAMETER_TYPE)0xFFFFFFFF;
+		m_rootParamter.Descriptor = {};
+		m_rootParamter.DescriptorTable = {};
+		m_rootParamter.Descriptor = {};
 	}
 	DX12RootParameter::~DX12RootParameter()
 	{
@@ -26,7 +29,7 @@ namespace ElysiaRenderer
 		m_rootParamter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 		m_rootParamter.ShaderVisibility = shaderVisibility;
 		m_rootParamter.Descriptor.ShaderRegister = slotIndex;
-		m_rootParamter.Descriptor.RegisterSpace = Space;
+		m_rootParamter.Descriptor.RegisterSpace = m_spaceID = Space;
 	}
 
 	/// <summary>
@@ -72,7 +75,7 @@ namespace ElysiaRenderer
 		range->RangeType = rangeType;
 		range->NumDescriptors = numDescriptors;
 		range->BaseShaderRegister = slotIndex;
-		range->RegisterSpace = space;
+		range->RegisterSpace = m_spaceID = space;
 		range->OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 	}
 
@@ -130,7 +133,7 @@ namespace ElysiaRenderer
 		rootSignatureDesc.Desc_1_0.Flags = flags;*/
 		D3D12_ROOT_SIGNATURE_DESC rootSignatureDesc{};
 		rootSignatureDesc.NumParameters = m_numRootParameters;
-		rootSignatureDesc.pParameters = (const D3D12_ROOT_PARAMETER*)m_rootParametersArray.get();
+		rootSignatureDesc.pParameters = GetRootParameters();
 		rootSignatureDesc.NumStaticSamplers = m_numSamplers;
 		rootSignatureDesc.pStaticSamplers = (const D3D12_STATIC_SAMPLER_DESC*)m_samplerArray.get();
 		rootSignatureDesc.Flags = flags;

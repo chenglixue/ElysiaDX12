@@ -3,8 +3,6 @@
 
 namespace ElysiaRenderer
 {
-
-
 	class DX12RootParameter
 	{
 		friend class DX12RootSignature;
@@ -13,10 +11,19 @@ namespace ElysiaRenderer
 		DX12RootParameter();
 		~DX12RootParameter();
 		
+		D3D12_ROOT_PARAMETER& GetRootParameter()
+		{
+			return m_rootParamter;
+		}
 		D3D12_ROOT_PARAMETER_TYPE GetType()
 		{
 			return m_rootParamter.ParameterType;
 		}
+		UINT GetSpaceID()
+		{
+			return m_spaceID;
+		}
+
 
 		void InitAsConstantBuffer(UINT slotIndex, D3D12_SHADER_VISIBILITY shaderVisibility = D3D12_SHADER_VISIBILITY_ALL, UINT Space = 0);
 		void InitAsDescriptorRange(D3D12_DESCRIPTOR_RANGE_TYPE rangeType, UINT numDescriptors, UINT slotIndex, D3D12_SHADER_VISIBILITY shaderVisibility = D3D12_SHADER_VISIBILITY_ALL);
@@ -27,6 +34,7 @@ namespace ElysiaRenderer
 
 	private:
 		D3D12_ROOT_PARAMETER m_rootParamter;
+		UINT m_spaceID;
 	};
 
 	struct RootSignatureCreatDesc
@@ -50,7 +58,7 @@ namespace ElysiaRenderer
 		{
 			return m_numRootParameters;
 		}
-		DX12RootParameter* GetRootParameters()
+		DX12RootParameter* GetDX12RootParameters()
 		{
 			return m_rootParametersArray.get();
 		}
@@ -59,6 +67,27 @@ namespace ElysiaRenderer
 		void Init(ID3D12Device5* device, D3D12_ROOT_SIGNATURE_FLAGS Flags = D3D12_ROOT_SIGNATURE_FLAG_NONE);
 
 		void Reset(UINT numRootParams = 0, UINT numStaticSamplers = 0);
+
+		DX12RootParameter& GetRootParameter(size_t index)
+		{
+			return m_rootParametersArray[index];
+		}
+		D3D12_ROOT_PARAMETER* GetRootParameters()
+		{
+			D3D12_ROOT_PARAMETER* rootParameters = new D3D12_ROOT_PARAMETER[m_numRootParameters];
+			for (int i = 0; i < m_numRootParameters; ++i)
+			{
+				rootParameters[i] = m_rootParametersArray[i].GetRootParameter();
+			}
+
+			return rootParameters;
+		}
+		
+		void AddRootParameter(DX12RootParameter& rootParameter, size_t index)
+		{
+			assert(index < m_numRootParameters);
+			m_rootParametersArray[index] = rootParameter;
+		}
 
 		DX12RootParameter& operator[](size_t index)
 		{

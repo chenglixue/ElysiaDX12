@@ -46,7 +46,7 @@ namespace ElysiaRenderer
 	struct PipelineBindResource
 	{
 		std::vector<std::unique_ptr<DX12GPUResource>> m_SRVResources{};
-		std::unique_ptr<DX12GPUResource> m_CBVResource = nullptr;
+		std::unordered_map<uint8_t, std::unique_ptr<DX12GPUResource>> m_CBVResource{};
 	};
 
 	class DX12PipelineState

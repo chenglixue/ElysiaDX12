@@ -23,6 +23,12 @@ namespace ElysiaHelper
         float y = 0;
     };
 
+    constexpr uint8_t PER_OBJECT_SPACE = 0;
+    constexpr uint8_t PER_MATERIAL_SPACE = 1;
+    constexpr uint8_t PER_PASS_SPACE = 2;
+    constexpr uint8_t PER_FRAME_SPACE = 3;
+    constexpr uint8_t NUM_RESOURCE_SPACES = 4;
+
     inline void AssertIfFailed(HRESULT hr)
     {
         assert(SUCCEEDED(hr));

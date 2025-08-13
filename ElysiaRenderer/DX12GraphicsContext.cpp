@@ -53,7 +53,7 @@ namespace ElysiaRenderer
 			D3D12_CPU_DESCRIPTOR_HANDLE handles[maxNumHandlesBinding]{};
 			UINT currentHandleIndex = 0;
 
-			auto rootParameters = pipelineState->GetRootSignature()->GetRootParameters();
+			auto rootParameters = pipelineState->GetRootSignature()->GetDX12RootParameters();
 			auto currRootParameter = rootParameters;
 			UINT currRootParameterIndex = 0;
 			for (; currRootParameter < rootParameters + pipelineState->GetRootSignature()->GetNumRootParams(); ++currRootParameter)
@@ -89,9 +89,10 @@ namespace ElysiaRenderer
 
 					case D3D12_ROOT_PARAMETER_TYPE_CBV:
 					{
-						if (pipelineBindResource.m_CBVResource != nullptr)
+						auto spaceID = currRootParameter->GetSpaceID();
+						if (pipelineBindResource.m_CBVResource[spaceID] != nullptr)
 						{
-							m_commandList->SetGraphicsRootConstantBufferView(currentHandleIndex++, pipelineBindResource.m_CBVResource->GetGPUAddress());
+							m_commandList->SetGraphicsRootConstantBufferView(currentHandleIndex++, pipelineBindResource.m_CBVResource[spaceID]->GetGPUAddress());
 						}
 						break;
 					}

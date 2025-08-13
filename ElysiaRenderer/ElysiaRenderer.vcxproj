@@ -257,12 +257,12 @@
     <ClCompile Include="Renderer.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resource\Shaders\DrawTriangle.hlsl">
-      <FileType>Document</FileType>
-    </None>
+    <Image Include="Resource\Tex\Wood.dds" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="Resource\Tex\Wood.dds" />
+    <None Include="Shaders\DrawTriangle.hlsl">
+      <FileType>Document</FileType>
+    </None>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
