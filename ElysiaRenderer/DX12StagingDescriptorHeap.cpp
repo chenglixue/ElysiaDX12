@@ -40,7 +40,7 @@ namespace ElysiaRenderer
 			ElysiaHelper::ThrowRuntimeError("Ran out of dynamic descriptor heap handles, need to increase heap size.");
 		}
 
-		DX12DescriptorHeapHandle newHandle;
+		DX12DescriptorHeapHandle newHandle{};
 		D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle = m_descriptorHeapCPUStart;
 		cpuHandle.ptr += newHandleID * m_descriptorSize;
 		newHandle.SetCPUHandle(cpuHandle);

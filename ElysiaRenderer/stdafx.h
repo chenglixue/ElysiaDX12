@@ -22,3 +22,6 @@
 #include <numeric>
 #include <pix3.h>
 #include <unordered_set>
+#include <set>
+#include "DirectXMath.h"
+#include <random>

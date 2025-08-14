@@ -41,16 +41,22 @@ namespace ElysiaRenderer
 		std::vector<std::unique_ptr<DX12GraphicsPipelineState>> m_graphicsPipelineStates;
 		PipelineBindResource m_pipelineBindResource;
 
-		struct CBVSceneParameter
+		struct CBVPassParameter
 		{
 			XMFLOAT4 cameraPosWS;
-			XMFLOAT4X4 worldMatrix;
 			XMFLOAT4X4 viewMatrix;
 			XMFLOAT4X4 projMatrix;
-			XMFLOAT4 padding[3];
+			XMFLOAT4 padding[7];
 		};
-		static_assert((sizeof(CBVSceneParameter) % 256) == 0, "Constant Buffer size must be 256-byte aligned");
-		CBVSceneParameter m_sceneParameter;
+		struct CBVObjectParameter
+		{
+			XMFLOAT4X4 worldMatrix;
+			XMFLOAT4 padding[12];
+		};
+		static_assert((sizeof(CBVPassParameter) % 256) == 0, "Constant Buffer size must be 256-byte aligned");
+		static_assert((sizeof(CBVObjectParameter) % 256) == 0, "Constant Buffer size must be 256-byte aligned");
+		CBVPassParameter m_passParameter;
+		CBVObjectParameter m_objectParameter;
 
 		XMVECTORF32 m_cameraPos;
 		XMMATRIX m_worldMatrix;
@@ -59,6 +65,7 @@ namespace ElysiaRenderer
 		float m_nearZ = 0.01f;
 		float m_farZ = 100.f;
 		float m_curRotationAngleRad = 0.f;
+		const float m_rotationSpeed = 0.01f;
 	};
 
 	Renderer::Renderer(HWND windowHandle, ElysiaHelper::UINT2 screenSize)
@@ -77,32 +84,30 @@ namespace ElysiaRenderer
 
 	inline void Renderer::Init()
 	{
-		m_sceneParameter = CBVSceneParameter();
+		m_passParameter = CBVPassParameter();
 
 		{
 			m_worldMatrix = XMMatrixIdentity();
 
-			m_cameraPos = { 0.f, 3.f, -10.f, 0.f };
+			m_cameraPos = { -3.0f, 3.0f, -8.0f, 0.f };
 			static const XMVECTORF32 up{ 0.f, 1.f, 0.f, 0.f };
 			static const XMVECTORF32 at{ 0.f, 0.f, 0.f, 0.f };
 			m_viewMatrix = XMMatrixLookAtLH(m_cameraPos, at, up);
 
 			m_projMatrix = XMMatrixPerspectiveFovLH(XM_PIDIV4, m_aspectRatio, m_nearZ, m_farZ);
 
+			XMStoreFloat4x4(&m_passParameter.viewMatrix, (m_viewMatrix));
+			XMStoreFloat4x4(&m_passParameter.projMatrix, (m_projMatrix));
+			XMStoreFloat4(&m_passParameter.cameraPosWS, m_cameraPos);
 		}
 
 		InitTexTriangle();
 	}
 	inline void Renderer::Update()
 	{
-		const float rotationSpeed = 0.015f;
-		m_curRotationAngleRad += rotationSpeed;
-		if (m_curRotationAngleRad >= XM_2PI)
-		{
-			m_curRotationAngleRad -= XM_2PI;
-		}
+		m_curRotationAngleRad += m_rotationSpeed;
 		m_worldMatrix = XMMatrixRotationY(m_curRotationAngleRad);
-
+		XMStoreFloat4x4(&m_objectParameter.worldMatrix, m_worldMatrix);
 	}
 	inline void Renderer::Render()
 	{
@@ -205,55 +210,65 @@ namespace ElysiaRenderer
 			XMFLOAT2 uv;
 
 			XMFLOAT3 normal;
+
+			XMFLOAT3 color;
 		};
 
+		std::random_device seed;
+		std::ranlux48 engine(seed());
+		std::uniform_real_distribution<> distrib(0.f, 1.f);
+		XMFLOAT3 randomColors[36];
+		for (int i = 0; i < 36; ++i)
+		{
+			randomColors[i] = { (float)distrib(engine), (float)distrib(engine), (float)distrib(engine) };
+		}
+		int colorIndex = 0;
 		TexTriangleVertex triangleVertices[] = 
 		{
-			/*{{0.f, 0.25f, 0.0f}, {1.0f, 1.0f}, {0.0f, -1.0f, 0.0f}},
-		{{0.25f, -0.25f, 0.0f}, {1.0f, 0.0f}, {0.0f, -1.0f, 0.0f}},
-		{{-0.25f, -0.25f, 0.0f}, {0.0f, 1.0f}, {0.0f, -1.0f, 0.0f}},*/
-			{{1.0f, -1.0f, 1.0f}, {1.0f, 1.0f}, {0.0f, -1.0f, 0.0f}},
-		{{1.0f, -1.0f, -1.0f}, {1.0f, 0.0f}, {0.0f, -1.0f, 0.0f}},
-		{{-1.0f, -1.0f, 1.0f}, {0.0f, 1.0f}, {0.0f, -1.0f, 0.0f}},
-		{{-1.0f, -1.0f, 1.0f}, {0.0f, 1.0f}, {0.0f, -1.0f, 0.0f}},
-		{{1.0f, -1.0f, -1.0f}, {1.0f, 0.0f}, {0.0f, -1.0f, 0.0f}},
-		{{-1.0f, -1.0f, -1.0f}, {0.0f, 0.0f}, {0.0f, -1.0f, 0.0f}},
-		{{1.0f, 1.0f, -1.0f}, {1.0f, 1.0f}, {0.0f, 1.0f, 0.0f}},
-		{{1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}, {0.0f, 1.0f, 0.0f}},
-		{{-1.0f, 1.0f, -1.0f}, {0.0f, 1.0f}, {0.0f, 1.0f, 0.0f}},
-		{{-1.0f, 1.0f, -1.0f}, {0.0f, 1.0f}, {0.0f, 1.0f, 0.0f}},
-		{{1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}, {0.0f, 1.0f, 0.0f}},
-		{{-1.0f, 1.0f, 1.0f}, {0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}},
-		{{-1.0f, -1.0f, -1.0f}, {1.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}},
-		{{-1.0f, 1.0f, -1.0f}, {1.0f, 0.0f}, {-1.0f, 0.0f, 0.0f}},
-		{{-1.0f, -1.0f, 1.0f}, {0.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}},
-		{{-1.0f, -1.0f, 1.0f}, {0.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}},
-		{{-1.0f, 1.0f, -1.0f}, {1.0f, 0.0f}, {-1.0f, 0.0f, 0.0f}},
-		{{-1.0f, 1.0f, 1.0f}, {0.0f, 0.0f}, {-1.0f, 0.0f, 0.0f}},
-		{{-1.0f, -1.0f, 1.0f}, {1.0f, 1.0f}, {0.0f, 0.0f, 1.0f}},
-		{{-1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}},
-		{{1.0f, -1.0f, 1.0f}, {0.0f, 1.0f}, {0.0f, 0.0f, 1.0f}},
-		{{1.0f, -1.0f, 1.0f}, {0.0f, 1.0f}, {0.0f, 0.0f, 1.0f}},
-		{{-1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}},
-		{{1.0f, 1.0f, 1.0f}, {0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}},
-		{{1.0f, -1.0f, 1.0f}, {1.0f, 1.0f}, {1.0f, 0.0f, 0.0f}},
-		{{1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}},
-		{{1.0f, -1.0f, -1.0f}, {0.0f, 1.0f}, {1.0f, 0.0f, 0.0f}},
-		{{1.0f, -1.0f, -1.0f}, {0.0f, 1.0f}, {1.0f, 0.0f, 0.0f}},
-		{{1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}},
-		{{1.0f, 1.0f, -1.0f}, {0.0f, 0.0f}, {1.0f, 0.0f, 0.0f}},
-		{{1.0f, -1.0f, -1.0f}, {1.0f, 1.0f}, {0.0f, 0.0f, -1.0f}},
-		{{1.0f, 1.0f, -1.0f}, {1.0f, 0.0f}, {0.0f, 0.0f, -1.0f}},
-		{{-1.0f, -1.0f, -1.0f}, {0.0f, 1.0f}, {0.0f, 0.0f, -1.0f}},
-		{{-1.0f, -1.0f, -1.0f}, {0.0f, 1.0f}, {0.0f, 0.0f, -1.0f}},
-		{{1.0f, 1.0f, -1.0f}, {1.0f, 0.0f}, {0.0f, 0.0f, -1.0f}},
-		{{-1.0f, 1.0f, -1.0f}, {0.0f, 0.0f}, {0.0f, 0.0f, -1.0f}},
+			{{1.0f, -1.0f, 1.0f}, {1.0f, 1.0f}, {0.0f, -1.0f, 0.0f}, randomColors[colorIndex++]},
+		{{1.0f, -1.0f, -1.0f}, {1.0f, 0.0f}, {0.0f, -1.0f, 0.0f}, randomColors[colorIndex++]},
+		{{-1.0f, -1.0f, 1.0f}, {0.0f, 1.0f}, {0.0f, -1.0f, 0.0f}, randomColors[colorIndex++]},
+		{{-1.0f, -1.0f, 1.0f}, {0.0f, 1.0f}, {0.0f, -1.0f, 0.0f}, randomColors[colorIndex++]},
+		{{1.0f, -1.0f, -1.0f}, {1.0f, 0.0f}, {0.0f, -1.0f, 0.0f}, randomColors[colorIndex++]},
+		{{-1.0f, -1.0f, -1.0f}, {0.0f, 0.0f}, {0.0f, -1.0f, 0.0f}, randomColors[colorIndex++]},
+		{{1.0f, 1.0f, -1.0f}, {1.0f, 1.0f}, {0.0f, 1.0f, 0.0f}, randomColors[colorIndex++]},
+		{{1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, randomColors[colorIndex++]},
+		{{-1.0f, 1.0f, -1.0f}, {0.0f, 1.0f}, {0.0f, 1.0f, 0.0f}, randomColors[colorIndex++]},
+		{{-1.0f, 1.0f, -1.0f}, {0.0f, 1.0f}, {0.0f, 1.0f, 0.0f}, randomColors[colorIndex++]},
+		{{1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, randomColors[colorIndex++]},
+		{{-1.0f, 1.0f, 1.0f}, {0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, randomColors[colorIndex++]},
+		{{-1.0f, -1.0f, -1.0f}, {1.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}, randomColors[colorIndex++]},
+		{{-1.0f, 1.0f, -1.0f}, {1.0f, 0.0f}, {-1.0f, 0.0f, 0.0f}, randomColors[colorIndex++]},
+		{{-1.0f, -1.0f, 1.0f}, {0.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}, randomColors[colorIndex++]},
+		{{-1.0f, -1.0f, 1.0f}, {0.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}, randomColors[colorIndex++]},
+		{{-1.0f, 1.0f, -1.0f}, {1.0f, 0.0f}, {-1.0f, 0.0f, 0.0f}, randomColors[colorIndex++]},
+		{{-1.0f, 1.0f, 1.0f}, {0.0f, 0.0f}, {-1.0f, 0.0f, 0.0f}, randomColors[colorIndex++]},
+		{{-1.0f, -1.0f, 1.0f}, {1.0f, 1.0f}, {0.0f, 0.0f, 1.0f}, randomColors[colorIndex++]},
+		{{-1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, randomColors[colorIndex++]},
+		{{1.0f, -1.0f, 1.0f}, {0.0f, 1.0f}, {0.0f, 0.0f, 1.0f}, randomColors[colorIndex++]},
+		{{1.0f, -1.0f, 1.0f}, {0.0f, 1.0f}, {0.0f, 0.0f, 1.0f}, randomColors[colorIndex++]},
+		{{-1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, randomColors[colorIndex++]},
+		{{1.0f, 1.0f, 1.0f}, {0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, randomColors[colorIndex++]},
+		{{1.0f, -1.0f, 1.0f}, {1.0f, 1.0f}, {1.0f, 0.0f, 0.0f}, randomColors[colorIndex++]},
+		{{1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, randomColors[colorIndex++]},
+		{{1.0f, -1.0f, -1.0f}, {0.0f, 1.0f}, {1.0f, 0.0f, 0.0f}, randomColors[colorIndex++]},
+		{{1.0f, -1.0f, -1.0f}, {0.0f, 1.0f}, {1.0f, 0.0f, 0.0f}, randomColors[colorIndex++]},
+		{{1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, randomColors[colorIndex++]},
+		{{1.0f, 1.0f, -1.0f}, {0.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, randomColors[colorIndex++]},
+		{{1.0f, -1.0f, -1.0f}, {1.0f, 1.0f}, {0.0f, 0.0f, -1.0f}, randomColors[colorIndex++]},
+		{{1.0f, 1.0f, -1.0f}, {1.0f, 0.0f}, {0.0f, 0.0f, -1.0f}, randomColors[colorIndex++]},
+		{{-1.0f, -1.0f, -1.0f}, {0.0f, 1.0f}, {0.0f, 0.0f, -1.0f}, randomColors[colorIndex++]},
+		{{-1.0f, -1.0f, -1.0f}, {0.0f, 1.0f}, {0.0f, 0.0f, -1.0f}, randomColors[colorIndex++]},
+		{{1.0f, 1.0f, -1.0f}, {1.0f, 0.0f}, {0.0f, 0.0f, -1.0f}, randomColors[colorIndex++]},
+		{{-1.0f, 1.0f, -1.0f}, {0.0f, 0.0f}, {0.0f, 0.0f, -1.0f}, randomColors[colorIndex++]},
 		};
 
 		std::vector<D3D12_INPUT_ELEMENT_DESC> inputElementDescs =
 		{
 			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }, 
+			{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 20, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+			{ "COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 32, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
 		};
 
 		// Create Shader
@@ -288,14 +303,18 @@ namespace ElysiaRenderer
 		// Create Constant Buffer
 		{
 			ConstantBufferCreationDesc constantBufferCreationDesc{};
-			constantBufferCreationDesc.m_size = sizeof(CBVSceneParameter);
+			constantBufferCreationDesc.m_size = sizeof(CBVPassParameter);
 			constantBufferCreationDesc.bufferAccessFlags = BufferAccessFlags::HostWritable;
 			constantBufferCreationDesc.bufferTypeFlags = BufferTypeFlags::CBV;
 			constantBufferCreationDesc.m_isRawAccess = false;
 
 			auto constantBuffer = m_device->CreateConstantBuffer(constantBufferCreationDesc);
-			constantBuffer->SetMappedData(&m_sceneParameter, sizeof(CBVSceneParameter));
+			constantBuffer->SetMappedData(&m_passParameter, sizeof(CBVPassParameter));
 			m_pipelineBindResource.m_CBVResource[ElysiaHelper::PER_PASS_SPACE] = std::move(constantBuffer);
+
+			constantBuffer = m_device->CreateConstantBuffer(constantBufferCreationDesc);
+			constantBuffer->SetMappedData(&m_objectParameter, sizeof(CBVObjectParameter));
+			m_pipelineBindResource.m_CBVResource[ElysiaHelper::PER_OBJECT_SPACE] = std::move(constantBuffer);
 		}
 
 		// Create Depth Buffer
@@ -325,11 +344,16 @@ namespace ElysiaRenderer
 			{
 				auto rootParameter = std::make_unique<DX12RootParameter>();
 				rootParameter->InitAsDescriptorTable(1, D3D12_SHADER_VISIBILITY_PIXEL);
-				rootParameter->SetTableRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, m_pipelineBindResource.m_SRVResources.size(), 0, 0, ElysiaHelper::PER_OBJECT_SPACE);
+				rootParameter->SetTableRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, m_pipelineBindResource.m_SRVResources.size(), 
+					0, 0, ElysiaHelper::PER_OBJECT_SPACE);
 				m_rootParameters.push_back(std::move(rootParameter));
 
 				rootParameter = std::make_unique<DX12RootParameter>();
 				rootParameter->InitAsConstantBuffer(0, D3D12_SHADER_VISIBILITY_ALL, ElysiaHelper::PER_PASS_SPACE);
+				m_rootParameters.push_back(std::move(rootParameter));
+
+				rootParameter = std::make_unique<DX12RootParameter>();
+				rootParameter->InitAsConstantBuffer(0, D3D12_SHADER_VISIBILITY_ALL, ElysiaHelper::PER_OBJECT_SPACE);
 				m_rootParameters.push_back(std::move(rootParameter));
 			}
 
@@ -359,8 +383,6 @@ namespace ElysiaRenderer
 
 			m_graphicsPipelineStates.push_back(std::move(m_device->CreateGraphicsPipelineState(pipelineStateCreateDesc)));
 		}
-
-		
 	}
 
 	void Renderer::RenderClearColor()
@@ -426,16 +448,20 @@ namespace ElysiaRenderer
 		m_graphicsContext->AddBarrier(*m_depthBuffer, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 		m_graphicsContext->FlushBarrier();
 
-		m_graphicsContext->ClearRenderTarget(currBackBuffer, Color(1., 1., 1.));
+		m_graphicsContext->ClearRenderTarget(currBackBuffer, Color(0., 0., 0.));
 		m_graphicsContext->ClearDepthStencilTarget(*m_depthBuffer, 1.f, 0);
+
 		m_graphicsContext->SetVertexBuffer(0, 1, m_vertexBuffers[vertexBufferIndex]->GetVertexBufferView());
+		auto objectConstanBuffer = dynamic_cast <DX12ConstantBuffer*>(m_pipelineBindResource.m_CBVResource[ElysiaHelper::PER_OBJECT_SPACE].get());
+		objectConstanBuffer->SetMappedData(&m_objectParameter, sizeof(CBVObjectParameter));
+
 		auto pipelineStateData = CreatePipelineStateData(m_graphicsPipelineStates[pipelineStateIndex].get(),
 			std::move(std::vector<DX12TextureResource*>{ &currBackBuffer }),
 			m_depthBuffer.get());
 		m_graphicsContext->SetPipeline(pipelineStateData, m_pipelineBindResource);
 		m_graphicsContext->SetDefaultViewportAndScissor(m_device->GetScreenSize());
 		m_graphicsContext->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		m_graphicsContext->Draw(3, 0);
+		m_graphicsContext->Draw(36, 0);
 
 		m_graphicsContext->AddBarrier(currBackBuffer, D3D12_RESOURCE_STATE_PRESENT);
 		m_graphicsContext->FlushBarrier();

@@ -1,3 +1,8 @@
+#define perObjectSpace   space0
+#define perMaterialSpace space1
+#define perPassSpace     space2
+#define perFrameSpace    space3
+
 SamplerState g_Sampler_WarpU_WarpV_Point : register(s0);
 SamplerState g_Sampler_ClampU_ClampV_Point : register(s1);
 SamplerState g_Sampler_WarpU_WarpV_Linear : register(s2);
@@ -5,26 +10,37 @@ SamplerState g_Sampler_ClampU_ClampV_Linear : register(s3);
 SamplerState g_Sampler_WarpU_WarpV_Anisotropic : register(s4);
 SamplerState g_Sampler_ClampU_ClampV_Anisotropic : register(s5);
 
-cbuffer SceneParameterBuffer : register(b0)
+cbuffer PerPassBuffer : register(b0, perPassSpace)
 {
-    float4 offset;
-    float4 padding[15];
+    float4      CameraPosWS;
+    float4x4    M_View;
+    float4x4    M_Proj;
+    //float4 padding[16];
+}
+cbuffer PerObjectBuffer : register(b0, perObjectSpace)
+{
+    float4x4 M_World;
+    //float4 padding[16];
 }
 
 Texture2D g_texture : register(t0);
 
 struct VSInput
 {
-    float4 position : POSITION;
-    float2 texcoord : TEXCOORD;
-    //float4 color : COLOR;
+    float3 positionOS   : POSITION;
+    float2 uv           : TEXCOORD0;
+    float3 normal       : NORMAL;
+    float3 color        : COLOR;
 };
 
 struct PSInput
 {
-    float4 position : SV_POSITION;
-    float2 uv : TEXCOORD;
-    //float4 color : COLOR;
+    float4 positionCS   : SV_POSITION;
+    float4 positionVS   : VIEW_POSITION;
+    float4 positionWS   : WORLD_POSITION;
+    float4 normalWS     : NORMAL;
+    float2 uv           : TEXCOORD;
+    float3 color        : COLOR;
 };
 
 struct PSOutput
@@ -36,18 +52,21 @@ PSInput VS(VSInput i)
 {
     PSInput o;
 
-    o.position = i.position + offset;
-    o.uv = i.texcoord;
-    //result.color = i.color;
-
+    o.positionWS = mul(M_World, float4(i.positionOS, 1.f));
+    o.positionVS = mul(M_View, o.positionWS);
+    o.positionCS = mul(M_Proj, o.positionVS);
+    o.uv = i.uv;
+    o.color = i.color;
+    
     return o;
 }
 
 PSOutput PS(PSInput i)
 {
-    PSOutput o;
+    PSOutput o = (PSOutput)0;
     
-    o.target0.rg = i.uv;
+    //o.target0.rg = i.uv;
     o.target0 = g_texture.Sample(g_Sampler_WarpU_WarpV_Linear, i.uv, 0);
+    o.target0 = float4(i.color, 1.f);
     return o;
 }

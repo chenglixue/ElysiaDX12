@@ -30,7 +30,7 @@ namespace ElysiaRenderer
 	{
 	public:
 		DX12GPUResource(ID3D12Resource* resource, D3D12_RESOURCE_STATES usageState);
-		virtual ~DX12GPUResource();
+		~DX12GPUResource();
 
 		BufferType GetBufferType()
 		{
@@ -89,6 +89,13 @@ namespace ElysiaRenderer
 		void SetIsReady(bool isReady)
 		{
 			m_isReady = isReady;
+		}
+
+		virtual void Destory()
+		{
+			//ElysiaHelper::SafeRelease(m_allocation);
+			ElysiaHelper::SafeRelease(m_resource);
+			m_GPUAddress = 0;
 		}
 
 	protected:

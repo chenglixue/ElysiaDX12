@@ -625,18 +625,18 @@ namespace ElysiaRenderer
 		{
 		case ShaderType::Vertex:
 		{
-			target = "vs_5_0";
+			target = "vs_5_1";
 		}
 			
 			break;
 		case ShaderType::Pixel:
 		{
-			target = "ps_5_0";
+			target = "ps_5_1";
 		}
 			break;
 		case ShaderType::Compute:
 		{
-			target = "cs_5_0";
+			target = "cs_5_1";
 		}
 			break;
 
@@ -731,7 +731,11 @@ namespace ElysiaRenderer
 
 		CreateRootParameters(rootSignature.get(), rootSignatureCreatDesc.rootParamters);
 
-		rootSignature->Init(m_device, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+		rootSignature->Init(m_device, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT /*|
+			D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS |
+			D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS |
+			D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS |
+			D3D12_ROOT_SIGNATURE_FLAG_DENY_PIXEL_SHADER_ROOT_ACCESS*/);
 		
 		return rootSignature;
 	}

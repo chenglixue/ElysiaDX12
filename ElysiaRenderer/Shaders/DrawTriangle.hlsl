@@ -10,11 +10,11 @@ SamplerState g_Sampler_ClampU_ClampV_Linear : register(s3);
 SamplerState g_Sampler_WarpU_WarpV_Anisotropic : register(s4);
 SamplerState g_Sampler_ClampU_ClampV_Anisotropic : register(s5);
 
-cbuffer SceneParameterBuffer : register(b0, space2)
-{
-    float4 offset;
-    float4 padding[15];
-}
+//cbuffer SceneParameterBuffer : register(b0, space2)
+//{
+//    float4 offset;
+//    float4 padding[15];
+//}
 
 Texture2D g_texture : register(t0);
 

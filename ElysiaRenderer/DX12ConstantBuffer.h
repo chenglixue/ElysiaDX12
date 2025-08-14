@@ -20,6 +20,11 @@ namespace ElysiaRenderer
 	public:
 		DX12ConstantBuffer(ID3D12Resource* resource, D3D12_RESOURCE_STATES usageState, uint32_t bufferSize, 
 			DX12DescriptorHeapHandle constantBufferViewHandle, D3D12MA::Allocation* allocator);
+		DX12ConstantBuffer(DX12ConstantBuffer&& a) = default;
+		DX12ConstantBuffer(DX12ConstantBuffer& a) = delete;
+		DX12ConstantBuffer& operator=(DX12ConstantBuffer& a) = delete;
+		DX12ConstantBuffer(const DX12ConstantBuffer& a) = delete;
+		DX12ConstantBuffer& operator=(const DX12ConstantBuffer& a) = delete;
 		~DX12ConstantBuffer();
 
 		void SetMappedData(const void* bufferData, uint32_t bufferSize);

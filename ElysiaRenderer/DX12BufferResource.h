@@ -34,5 +34,10 @@ namespace ElysiaRenderer
 		{
 
 		}
+
+		~DX12BufferResource()
+		{
+			Destory();
+		}
 	};
 }
