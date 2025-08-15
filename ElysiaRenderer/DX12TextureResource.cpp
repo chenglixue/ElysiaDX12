@@ -23,7 +23,5 @@ namespace ElysiaRenderer
 
 	DX12TextureResource::~DX12TextureResource()
 	{
-		/*ElysiaHelper::SafeRelease(m_resource);
-		ElysiaHelper::SafeRelease(m_allocation);*/
 	}
 }

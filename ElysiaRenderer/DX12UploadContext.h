@@ -21,6 +21,10 @@ namespace ElysiaRenderer
 		{
 			return m_textureUploadHeap.get();
 		}
+		std::vector<DX12TextureResource*>& GetTexUploadsInProgress()
+		{
+			return m_textureUploadsInProgress;
+		}
 
 		void AddTextureBufferUpload(std::unique_ptr<DX12TextureBuffer> textureUpload)
 		{

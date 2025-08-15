@@ -108,7 +108,7 @@ namespace ElysiaRenderer
 		PipelineStateCreateDesc desc{};
 		desc.m_rasterDesc.CullMode = D3D12_CULL_MODE_BACK;
 		desc.m_rasterDesc.FillMode = D3D12_FILL_MODE_SOLID;
-		desc.m_rasterDesc.FrontCounterClockwise = false;
+		desc.m_rasterDesc.FrontCounterClockwise = FALSE;
 		desc.m_rasterDesc.DepthBias = D3D12_DEFAULT_DEPTH_BIAS;
 		desc.m_rasterDesc.DepthBiasClamp = D3D12_DEFAULT_DEPTH_BIAS_CLAMP;
 		desc.m_rasterDesc.SlopeScaledDepthBias = D3D12_DEFAULT_SLOPE_SCALED_DEPTH_BIAS;
@@ -142,8 +142,8 @@ namespace ElysiaRenderer
 
 		const D3D12_DEPTH_STENCILOP_DESC defaultStencilOp =
 		{ D3D12_STENCIL_OP_KEEP, D3D12_STENCIL_OP_KEEP, D3D12_STENCIL_OP_KEEP, D3D12_COMPARISON_FUNC_ALWAYS };
-		/*desc.m_depthStencilDesc.FrontFace = defaultStencilOp;
-		desc.m_depthStencilDesc.BackFace = defaultStencilOp;*/
+		desc.m_depthStencilDesc.FrontFace = defaultStencilOp;
+		desc.m_depthStencilDesc.BackFace = defaultStencilOp;
 
 		desc.m_sampleDesc.Count = 1;
 		desc.m_sampleDesc.Quality = 0;

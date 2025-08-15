@@ -119,7 +119,7 @@ namespace ElysiaRenderer
 		const D3D12_CPU_DESCRIPTOR_HANDLE depthStencilHandle)
 	{
 		m_commandList->OMSetRenderTargets(numRenderTargets, renderTargetHandle, FALSE, 
-			depthStencilHandle.ptr != 0 ? &depthStencilHandle : NULL);
+			depthStencilHandle.ptr != 0 ? &depthStencilHandle : nullptr);
 	}
 	void DX12GraphicsContext::SetDefaultViewportAndScissor(ElysiaHelper::UINT2 screenSize)
 	{

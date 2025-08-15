@@ -63,7 +63,7 @@ namespace ElysiaRenderer
 		XMMATRIX m_viewMatrix;
 		XMMATRIX m_projMatrix;
 		float m_nearZ = 0.01f;
-		float m_farZ = 100.f;
+		float m_farZ = 1000.f;
 		float m_curRotationAngleRad = 0.f;
 		const float m_rotationSpeed = 0.01f;
 	};
@@ -207,11 +207,11 @@ namespace ElysiaRenderer
 		{
 			XMFLOAT3 position;
 
-			XMFLOAT2 uv;
+			/*XMFLOAT2 uv;
 
-			XMFLOAT3 normal;
+			XMFLOAT3 normal;*/
 
-			XMFLOAT3 color;
+			XMFLOAT4 color;
 		};
 
 		std::random_device seed;
@@ -225,49 +225,21 @@ namespace ElysiaRenderer
 		int colorIndex = 0;
 		TexTriangleVertex triangleVertices[] = 
 		{
-			{{1.0f, -1.0f, 1.0f}, {1.0f, 1.0f}, {0.0f, -1.0f, 0.0f}, randomColors[colorIndex++]},
-		{{1.0f, -1.0f, -1.0f}, {1.0f, 0.0f}, {0.0f, -1.0f, 0.0f}, randomColors[colorIndex++]},
-		{{-1.0f, -1.0f, 1.0f}, {0.0f, 1.0f}, {0.0f, -1.0f, 0.0f}, randomColors[colorIndex++]},
-		{{-1.0f, -1.0f, 1.0f}, {0.0f, 1.0f}, {0.0f, -1.0f, 0.0f}, randomColors[colorIndex++]},
-		{{1.0f, -1.0f, -1.0f}, {1.0f, 0.0f}, {0.0f, -1.0f, 0.0f}, randomColors[colorIndex++]},
-		{{-1.0f, -1.0f, -1.0f}, {0.0f, 0.0f}, {0.0f, -1.0f, 0.0f}, randomColors[colorIndex++]},
-		{{1.0f, 1.0f, -1.0f}, {1.0f, 1.0f}, {0.0f, 1.0f, 0.0f}, randomColors[colorIndex++]},
-		{{1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, randomColors[colorIndex++]},
-		{{-1.0f, 1.0f, -1.0f}, {0.0f, 1.0f}, {0.0f, 1.0f, 0.0f}, randomColors[colorIndex++]},
-		{{-1.0f, 1.0f, -1.0f}, {0.0f, 1.0f}, {0.0f, 1.0f, 0.0f}, randomColors[colorIndex++]},
-		{{1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, randomColors[colorIndex++]},
-		{{-1.0f, 1.0f, 1.0f}, {0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, randomColors[colorIndex++]},
-		{{-1.0f, -1.0f, -1.0f}, {1.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}, randomColors[colorIndex++]},
-		{{-1.0f, 1.0f, -1.0f}, {1.0f, 0.0f}, {-1.0f, 0.0f, 0.0f}, randomColors[colorIndex++]},
-		{{-1.0f, -1.0f, 1.0f}, {0.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}, randomColors[colorIndex++]},
-		{{-1.0f, -1.0f, 1.0f}, {0.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}, randomColors[colorIndex++]},
-		{{-1.0f, 1.0f, -1.0f}, {1.0f, 0.0f}, {-1.0f, 0.0f, 0.0f}, randomColors[colorIndex++]},
-		{{-1.0f, 1.0f, 1.0f}, {0.0f, 0.0f}, {-1.0f, 0.0f, 0.0f}, randomColors[colorIndex++]},
-		{{-1.0f, -1.0f, 1.0f}, {1.0f, 1.0f}, {0.0f, 0.0f, 1.0f}, randomColors[colorIndex++]},
-		{{-1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, randomColors[colorIndex++]},
-		{{1.0f, -1.0f, 1.0f}, {0.0f, 1.0f}, {0.0f, 0.0f, 1.0f}, randomColors[colorIndex++]},
-		{{1.0f, -1.0f, 1.0f}, {0.0f, 1.0f}, {0.0f, 0.0f, 1.0f}, randomColors[colorIndex++]},
-		{{-1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, randomColors[colorIndex++]},
-		{{1.0f, 1.0f, 1.0f}, {0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, randomColors[colorIndex++]},
-		{{1.0f, -1.0f, 1.0f}, {1.0f, 1.0f}, {1.0f, 0.0f, 0.0f}, randomColors[colorIndex++]},
-		{{1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, randomColors[colorIndex++]},
-		{{1.0f, -1.0f, -1.0f}, {0.0f, 1.0f}, {1.0f, 0.0f, 0.0f}, randomColors[colorIndex++]},
-		{{1.0f, -1.0f, -1.0f}, {0.0f, 1.0f}, {1.0f, 0.0f, 0.0f}, randomColors[colorIndex++]},
-		{{1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, randomColors[colorIndex++]},
-		{{1.0f, 1.0f, -1.0f}, {0.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, randomColors[colorIndex++]},
-		{{1.0f, -1.0f, -1.0f}, {1.0f, 1.0f}, {0.0f, 0.0f, -1.0f}, randomColors[colorIndex++]},
-		{{1.0f, 1.0f, -1.0f}, {1.0f, 0.0f}, {0.0f, 0.0f, -1.0f}, randomColors[colorIndex++]},
-		{{-1.0f, -1.0f, -1.0f}, {0.0f, 1.0f}, {0.0f, 0.0f, -1.0f}, randomColors[colorIndex++]},
-		{{-1.0f, -1.0f, -1.0f}, {0.0f, 1.0f}, {0.0f, 0.0f, -1.0f}, randomColors[colorIndex++]},
-		{{1.0f, 1.0f, -1.0f}, {1.0f, 0.0f}, {0.0f, 0.0f, -1.0f}, randomColors[colorIndex++]},
-		{{-1.0f, 1.0f, -1.0f}, {0.0f, 0.0f}, {0.0f, 0.0f, -1.0f}, randomColors[colorIndex++]},
+			{ XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
+			{ XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
+			{ XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f) },
+			{ XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
+			{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT4(1.0f, 0.0f, 1.0f, 1.0f) },
+			{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f) },
+			{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f) },
+			{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) },
 		};
 
 		std::vector<D3D12_INPUT_ELEMENT_DESC> inputElementDescs =
 		{
 			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }, 
-			{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 20, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+			/*{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }, 
+			{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 20, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },*/
 			{ "COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 32, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
 		};
 
@@ -325,7 +297,7 @@ namespace ElysiaRenderer
 			depthBufferCreateDesc.m_resouceDesc.Height = m_device->GetScreenSize().y;
 			depthBufferCreateDesc.m_typeFlag = TexTypeFlags::SRV | TexTypeFlags::DSV;
 
-			m_depthBuffer = m_device->CreateTexture(depthBufferCreateDesc);
+			m_depthBuffer = std::move(m_device->CreateTexture(depthBufferCreateDesc));
 		}
 
 		// Create Tex & Buffer
@@ -377,9 +349,11 @@ namespace ElysiaRenderer
 			pipelineStateCreateDesc.m_inputElementDesc = inputElementDescs;
 			pipelineStateCreateDesc.m_renderTargetDesc.m_numRenderTargets = 1;
 			pipelineStateCreateDesc.m_renderTargetDesc.m_renderTargetFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-			pipelineStateCreateDesc.m_depthStencilDesc.DepthEnable = true;
+			pipelineStateCreateDesc.m_depthStencilDesc.DepthEnable = TRUE;
 			pipelineStateCreateDesc.m_renderTargetDesc.m_depthStencilFormat = depthBufferCreateDesc.m_resouceDesc.Format;
 			pipelineStateCreateDesc.m_depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+
+			
 
 			m_graphicsPipelineStates.push_back(std::move(m_device->CreateGraphicsPipelineState(pipelineStateCreateDesc)));
 		}

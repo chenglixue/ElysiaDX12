@@ -43,6 +43,7 @@ namespace ElysiaRenderer
 			texUploadHeapOffset += currUpload.GetTextureDataSize();
 			texUploadHeapOffset = ElysiaHelper::AlignU64(texUploadHeapOffset, 512);
 
+			m_textureUploadsInProgress.push_back(currUpload.GetDefaultHeap());
 		}
 
 		if (numTexsProcessed > 0)

@@ -28,9 +28,9 @@ Texture2D g_texture : register(t0);
 struct VSInput
 {
     float3 positionOS   : POSITION;
-    float2 uv           : TEXCOORD0;
-    float3 normal       : NORMAL;
-    float3 color        : COLOR;
+    //float2 uv           : TEXCOORD0;
+    //float3 normal       : NORMAL;
+    float4 color        : COLOR;
 };
 
 struct PSInput
@@ -40,7 +40,7 @@ struct PSInput
     float4 positionWS   : WORLD_POSITION;
     float4 normalWS     : NORMAL;
     float2 uv           : TEXCOORD;
-    float3 color        : COLOR;
+    float4 color        : COLOR;
 };
 
 struct PSOutput
@@ -55,7 +55,7 @@ PSInput VS(VSInput i)
     o.positionWS = mul(M_World, float4(i.positionOS, 1.f));
     o.positionVS = mul(M_View, o.positionWS);
     o.positionCS = mul(M_Proj, o.positionVS);
-    o.uv = i.uv;
+    //o.uv = i.uv;
     o.color = i.color;
     
     return o;
@@ -66,7 +66,7 @@ PSOutput PS(PSInput i)
     PSOutput o = (PSOutput)0;
     
     //o.target0.rg = i.uv;
-    o.target0 = g_texture.Sample(g_Sampler_WarpU_WarpV_Linear, i.uv, 0);
-    o.target0 = float4(i.color, 1.f);
+    //o.target0 = g_texture.Sample(g_Sampler_WarpU_WarpV_Linear, i.uv, 0);
+    o.target0 = i.color;
     return o;
 }

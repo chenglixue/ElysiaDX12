@@ -48,6 +48,10 @@ namespace ElysiaRenderer
 		DX12TextureResource(ID3D12Resource* resource, D3D12_RESOURCE_STATES usageState);
 		DX12TextureResource(ID3D12Resource* resource, D3D12_RESOURCE_STATES usageState, D3D12MA::Allocation* allocation);
 		DX12TextureResource(DX12TextureResource&& texResource) = default;
+		DX12TextureResource(DX12TextureResource& a) = delete;
+		DX12TextureResource& operator=(DX12TextureResource& a) = delete;
+		DX12TextureResource(const DX12TextureResource& a) = delete;
+		DX12TextureResource& operator=(const DX12TextureResource& a) = delete;
 		~DX12TextureResource() ;
 
 		DX12DescriptorHeapHandle GetRTVDescriptor() const

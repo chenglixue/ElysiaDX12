@@ -76,7 +76,7 @@ namespace ElysiaRenderer
 		std::unique_ptr<DX12ConstantBuffer>			CreateConstantBuffer(const ConstantBufferCreationDesc& bufferCreationDesc);
 		std::unique_ptr<DX12TextureUploadBuffer>	CreateTextureUploadHeap(const TextureBufferCreationDesc& textureCreationDesc);
 		std::unique_ptr<DX12TextureResource>		CreateTextureFromFile(const TextureCreationDesc& textureCreationDesc);
-		std::unique_ptr<DX12TextureResource>		CreateTexture(TexCreateDesc& desc);
+		std::unique_ptr<DX12TextureResource>		CreateTexture(const TexCreateDesc& desc);
 		std::unique_ptr<DX12Shader>					CreateShader(ShaderCreateDesc& shaderCreateDesc);
 		void										CreateSamplers(DX12RootSignature* rootSignature, D3D12_SHADER_VISIBILITY shaderVisibility = D3D12_SHADER_VISIBILITY_ALL);
 		void										CreateRootParameters(DX12RootSignature* rootSignature, std::vector<DX12RootParameter*>& rootParamters);
@@ -93,6 +93,20 @@ namespace ElysiaRenderer
 			uint32_t numSrcDescriptorRanges, const D3D12_CPU_DESCRIPTOR_HANDLE* srcDescriptorRangeStarts, const uint32_t* srcDescriptorRangeSizes, D3D12_DESCRIPTOR_HEAP_TYPE descriptorType);
 		void CopyDescriptorFromStageToRenderPass(DX12DescriptorHeapHandle SRVHandle, UINT index);
 		ContextSubmissionResult SubmitContextWork(DX12Context& context);
+
+		void TranslateTexBarrier(DX12GraphicsContext* graphicsContext)
+		{
+			auto graphicsCMD = graphicsContext->GetCommandList();
+			auto toTranslateTexs = m_uploadContexts[m_frameID]->GetTexUploadsInProgress();
+
+			for(auto toTranslateTex : toTranslateTexs)
+			{
+				auto tran = CD3DX12_RESOURCE_BARRIER::Transition(toTranslateTex->GetResource(),
+					D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+				graphicsCMD->ResourceBarrier(1, &tran);
+			}
+			
+		}
 
 		void WaitForIdle();
 

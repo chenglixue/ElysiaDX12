@@ -7,6 +7,7 @@
 #include <mutex>
 #include <optional>
 #include "SimpleMath/SimpleMath.h"
+#include "DX12Shader.h"
 
 using namespace DirectX::SimpleMath;
 struct IDxcBlob;
@@ -313,8 +314,8 @@ namespace D3D12Lite
 
     struct GraphicsPipelineDesc
     {
-        Shader* mVertexShader = nullptr;
-        Shader* mPixelShader = nullptr;
+        ElysiaRenderer::DX12Shader* mVertexShader = nullptr;
+        ElysiaRenderer::DX12Shader* mPixelShader = nullptr;
         D3D12_RASTERIZER_DESC mRasterDesc{};
         D3D12_BLEND_DESC mBlendDesc{};
         D3D12_DEPTH_STENCIL_DESC mDepthStencilDesc{};
@@ -625,7 +626,7 @@ namespace D3D12Lite
         std::unique_ptr<BufferResource> CreateBuffer(const BufferCreationDesc& desc);
         std::unique_ptr<TextureResource> CreateTexture(const TextureCreationDesc& desc);
         std::unique_ptr<TextureResource> CreateTextureFromFile(const std::string& texturePath);
-        std::unique_ptr<Shader> CreateShader(const ShaderCreationDesc& desc);
+        std::unique_ptr<ElysiaRenderer::DX12Shader>		CreateShader(ElysiaRenderer::ShaderCreateDesc& shaderCreateDesc);
         std::unique_ptr<PipelineStateObject> CreateGraphicsPipeline(const GraphicsPipelineDesc& desc, const PipelineResourceLayout& layout);
         std::unique_ptr<PipelineStateObject> CreateComputePipeline(const ComputePipelineDesc& desc, const PipelineResourceLayout& layout);
         std::unique_ptr<GraphicsContext> CreateGraphicsContext();
@@ -633,7 +634,7 @@ namespace D3D12Lite
 
         void DestroyBuffer(std::unique_ptr<BufferResource> buffer);
         void DestroyTexture(std::unique_ptr<TextureResource> texture);
-        void DestroyShader(std::unique_ptr<Shader> shader);
+        void DestroyShader(std::unique_ptr<ElysiaRenderer::DX12Shader> shader);
         void DestroyPipelineStateObject(std::unique_ptr<PipelineStateObject> pso);
         void DestroyContext(std::unique_ptr<Context> context);
 

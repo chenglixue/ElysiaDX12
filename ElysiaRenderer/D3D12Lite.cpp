@@ -8,6 +8,8 @@
 //extern "C" { __declspec(dllexport) extern const UINT D3D12SDKVersion = 616; }
 //extern "C" { __declspec(dllexport) extern const char* D3D12SDKPath = ".\\D3D12\\"; }
 
+using namespace ElysiaRenderer;
+
 namespace D3D12Lite
 {
     DescriptorHeap::DescriptorHeap(ID3D12Device* device, D3D12_DESCRIPTOR_HEAP_TYPE heapType, uint32_t numDescriptors, bool isShaderVisible)
@@ -1672,130 +1674,57 @@ namespace D3D12Lite
         return newTexture;
     }
 
-    std::unique_ptr<Shader> Device::CreateShader(const ShaderCreationDesc& desc)
+    std::unique_ptr<DX12Shader>		Device::CreateShader(ShaderCreateDesc& shaderCreateDesc)
     {
-        IDxcUtils* dxcUtils = nullptr;
-        IDxcCompiler3* dxcCompiler = nullptr;
-        IDxcIncludeHandler* dxcIncludeHandler = nullptr;
+        ID3DBlob* shader = nullptr;
 
-        DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&dxcUtils));
-        DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&dxcCompiler));
-        dxcUtils->CreateDefaultIncludeHandler(&dxcIncludeHandler);
+        /// Enable Debug
+#if defined(_DEBUG)
+        // Enable better shader debugging with the graphics debugging tools.
+        UINT compileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+#else
+        UINT compileFlags = 0;
+#endif
 
-        std::wstring sourcePath;
-        sourcePath.append(SHADER_SOURCE_PATH);
-        sourcePath.append(desc.mShaderName);
-
-        IDxcBlobEncoding* sourceBlobEncoding = nullptr;
-        dxcUtils->LoadFile(sourcePath.c_str(), nullptr, &sourceBlobEncoding);
-
-        DxcBuffer sourceBuffer{};
-        sourceBuffer.Ptr = sourceBlobEncoding->GetBufferPointer();
-        sourceBuffer.Size = sourceBlobEncoding->GetBufferSize();
-        sourceBuffer.Encoding = DXC_CP_ACP;
-
-        LPCWSTR target = nullptr;
-
-        switch (desc.mType)
+        /// Switch Target
+        LPCSTR target = nullptr;
+        switch (shaderCreateDesc.shaderType)
         {
-        case ShaderType::vertex:
-            target = L"vs_6_6";
-            break;
-        case ShaderType::pixel:
-            target = L"ps_6_6";
-            break;
-        case ShaderType::compute:
-            target = L"cs_6_6";
-            break;
+        case ElysiaRenderer::ShaderType::Vertex:
+        {
+            target = "vs_5_1";
+        }
+
+        break;
+        case ElysiaRenderer::ShaderType::Pixel:
+        {
+            target = "ps_5_1";
+        }
+        break;
+        case ElysiaRenderer::ShaderType::Compute:
+        {
+            target = "cs_5_1";
+        }
+        break;
+
         default:
-            AssertError("Unimplemented shader type.");
+            ElysiaHelper::AssertError("Unimplemented shader type.");
             break;
         }
 
-        std::vector<LPCWSTR> arguments;
-        arguments.reserve(8);
+        WCHAR assetsPath[512];
+        ElysiaHelper::GetAssetsPath(assetsPath, _countof(assetsPath));
 
-        arguments.push_back(desc.mShaderName.c_str());
-        arguments.push_back(L"-E");
-        arguments.push_back(desc.mEntryPoint.c_str());
-        arguments.push_back(L"-T");
-        arguments.push_back(target);
-        arguments.push_back(L"-Zi");
-        arguments.push_back(L"-WX");
-        arguments.push_back(L"-Qstrip_reflect");
+        //auto shaderFullPath = ElysiaHelper::GetAssetFullPath(assetsPath, shaderCreateDesc.shaderName).c_str();
 
-        IDxcResult* compilationResults = nullptr;
-        dxcCompiler->Compile(&sourceBuffer, arguments.data(), static_cast<uint32_t>(arguments.size()), dxcIncludeHandler, IID_PPV_ARGS(&compilationResults));
+        auto compleHR = D3DCompileFromFile(ElysiaHelper::GetAssetFullPath(assetsPath, shaderCreateDesc.shaderName).c_str(),
+            nullptr, nullptr,
+            shaderCreateDesc.entryPoint, target,
+            compileFlags, 0, &shader, nullptr);
+        ElysiaHelper::ThrowIfFailed(compleHR);
 
-        IDxcBlobUtf8* errors = nullptr;
-        HRESULT getCompilationResults = compilationResults->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&errors), nullptr);
-
-        if (FAILED(getCompilationResults))
-        {
-            AssertError("Failed to get compilation result.");
-        }
-
-        if (errors != nullptr && errors->GetStringLength() != 0)
-        {
-            wprintf(L"Shader compilation error:\n%S\n", errors->GetStringPointer());
-            AssertError("Shader compilation error");
-        }
-
-        HRESULT statusResult;
-        compilationResults->GetStatus(&statusResult);
-        if (FAILED(statusResult))
-        {
-            AssertError("Shader compilation failed");
-        }
-
-        std::wstring dxilPath;
-        std::wstring pdbPath;
-
-        dxilPath.append(SHADER_OUTPUT_PATH);
-        dxilPath.append(desc.mShaderName);
-        dxilPath.erase(dxilPath.end() - 5, dxilPath.end());
-        dxilPath.append(L".dxil");
-
-        pdbPath = dxilPath;
-        pdbPath.append(L".pdb");
-
-        IDxcBlob* shaderBlob = nullptr;
-        compilationResults->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&shaderBlob), nullptr);
-        if (shaderBlob != nullptr)
-        {
-            FILE* fp = nullptr;
-
-            _wfopen_s(&fp, dxilPath.c_str(), L"wb");
-            assert(fp);
-
-            fwrite(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), 1, fp);
-            fclose(fp);
-        }
-
-        IDxcBlob* pdbBlob = nullptr;
-        compilationResults->GetOutput(DXC_OUT_PDB, IID_PPV_ARGS(&pdbBlob), nullptr);
-        {
-            FILE* fp = nullptr;
-
-            _wfopen_s(&fp, pdbPath.c_str(), L"wb");
-
-            assert(fp);
-
-            fwrite(pdbBlob->GetBufferPointer(), pdbBlob->GetBufferSize(), 1, fp);
-            fclose(fp);
-        }
-
-        SafeRelease(pdbBlob);
-        SafeRelease(errors);
-        SafeRelease(compilationResults);
-        SafeRelease(dxcIncludeHandler);
-        SafeRelease(dxcCompiler);
-        SafeRelease(dxcUtils);
-
-        std::unique_ptr<Shader> shader = std::make_unique<Shader>();
-        shader->mShaderBlob = shaderBlob;
-
-        return shader;
+        auto o = std::make_unique<DX12Shader>(std::move(shader));
+        return o;
     }
 
     ID3D12RootSignature* Device::CreateRootSignature(const PipelineResourceLayout& layout, PipelineResourceMapping& resourceMapping)
@@ -1908,14 +1837,14 @@ namespace D3D12Lite
 
         if (desc.mVertexShader)
         {
-            pipelineDesc.VS.pShaderBytecode = desc.mVertexShader->mShaderBlob->GetBufferPointer();
-            pipelineDesc.VS.BytecodeLength = desc.mVertexShader->mShaderBlob->GetBufferSize();
+            pipelineDesc.VS.pShaderBytecode = desc.mVertexShader->GetShader()->GetBufferPointer();
+            pipelineDesc.VS.BytecodeLength = desc.mVertexShader->GetShader()->GetBufferSize();
         }
 
         if (desc.mPixelShader)
         {
-            pipelineDesc.PS.pShaderBytecode = desc.mPixelShader->mShaderBlob->GetBufferPointer();
-            pipelineDesc.PS.BytecodeLength = desc.mPixelShader->mShaderBlob->GetBufferSize();
+            pipelineDesc.PS.pShaderBytecode = desc.mPixelShader->GetShader()->GetBufferPointer();
+            pipelineDesc.PS.BytecodeLength = desc.mPixelShader->GetShader()->GetBufferSize();
         }
 
         std::unique_ptr<PipelineStateObject> newPipeline = std::make_unique<PipelineStateObject>();
@@ -1976,9 +1905,9 @@ namespace D3D12Lite
         mDestructionQueues[mFrameId].mTexturesToDestroy.push_back(std::move(texture));
     }
 
-    void Device::DestroyShader(std::unique_ptr<Shader> shader)
+    void Device::DestroyShader(std::unique_ptr<DX12Shader> shader)
     {
-        SafeRelease(shader->mShaderBlob);
+        SafeRelease(shader->GetShader());
     }
 
     void Device::DestroyPipelineStateObject(std::unique_ptr<PipelineStateObject> pso)

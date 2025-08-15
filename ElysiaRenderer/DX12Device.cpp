@@ -473,7 +473,7 @@ namespace ElysiaRenderer
 
 		return newTex;
 	}
-	std::unique_ptr<DX12TextureResource>		DX12Device::CreateTexture(TexCreateDesc& desc)
+	std::unique_ptr<DX12TextureResource>		DX12Device::CreateTexture(const TexCreateDesc& desc)
 	{
 		auto resourceDesc = desc.m_resouceDesc;
 		resourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
@@ -494,25 +494,25 @@ namespace ElysiaRenderer
 			{
 				case DXGI_FORMAT_D16_UNORM:
 				{
-					resourceFormat = DXGI_FORMAT_R16_TYPELESS;
+					//resourceFormat = DXGI_FORMAT_R16_TYPELESS;
 					shaderResourceViewFormat = DXGI_FORMAT_R16_UNORM;
 					break;
 				}
 				case DXGI_FORMAT_D24_UNORM_S8_UINT:
 				{
-					resourceFormat = DXGI_FORMAT_R24G8_TYPELESS;
+					//resourceFormat = DXGI_FORMAT_R24G8_TYPELESS;
 					shaderResourceViewFormat = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
 					break;
 				}
 				case DXGI_FORMAT_D32_FLOAT:
 				{
-					resourceFormat = DXGI_FORMAT_R32_TYPELESS;
+					//resourceFormat = DXGI_FORMAT_R32_TYPELESS;
 					shaderResourceViewFormat = DXGI_FORMAT_R32_FLOAT;
 					break;
 				}
 				case DXGI_FORMAT_D32_FLOAT_S8X24_UINT:
 				{
-					resourceFormat = DXGI_FORMAT_R32G8X24_TYPELESS;
+					//resourceFormat = DXGI_FORMAT_R32G8X24_TYPELESS;
 					shaderResourceViewFormat = DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS;
 					break;
 				}
@@ -541,8 +541,8 @@ namespace ElysiaRenderer
 		allocationDesc.HeapType = D3D12_HEAP_TYPE_DEFAULT;
 		ID3D12Resource* texResource = nullptr;
 		D3D12MA::Allocation* allocation = nullptr;
-		m_allocator->CreateResource(&allocationDesc, &resourceDesc, usageState, (!hasRTV && !hasDSV) ? nullptr : &clearValue,
-			&allocation, IID_PPV_ARGS(&texResource));
+		ElysiaHelper::ThrowIfFailed(m_allocator->CreateResource(&allocationDesc, &resourceDesc, usageState, (!hasRTV && !hasDSV) ? nullptr : &clearValue,
+			&allocation, IID_PPV_ARGS(&texResource)));
 		/// 
 
 		auto newTex = std::make_unique<DX12TextureResource>(std::move(texResource), usageState, std::move(allocation));
@@ -762,7 +762,7 @@ namespace ElysiaRenderer
 		PSODesc.DepthStencilState = pipelineStateCreateDesc.m_depthStencilDesc;
 		PSODesc.DSVFormat = pipelineStateCreateDesc.m_renderTargetDesc.m_depthStencilFormat;
 		PSODesc.NodeMask = 0;
-		PSODesc.SampleMask = UINT_MAX;
+		PSODesc.SampleMask = 0xFFFFFFFF;
 		PSODesc.PrimitiveTopologyType = pipelineStateCreateDesc.m_topology;
 		PSODesc.NumRenderTargets = pipelineStateCreateDesc.m_renderTargetDesc.m_numRenderTargets;
 		for (UINT i = 0; i < pipelineStateCreateDesc.m_renderTargetDesc.m_numRenderTargets; ++i)
