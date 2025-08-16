@@ -44,5 +44,6 @@ D:\DX12\ElysiaRenderer\ElysiaRenderer\imgui\imgui_impl_dx12.cpp;D:\DX12\ElysiaRe
 D:\DX12\ElysiaRenderer\ElysiaRenderer\imgui\imgui_impl_win32.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\imgui_impl_win32.obj
 D:\DX12\ElysiaRenderer\ElysiaRenderer\imgui\imgui_tables.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\imgui_tables.obj
 D:\DX12\ElysiaRenderer\ElysiaRenderer\imgui\imgui_widgets.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\imgui_widgets.obj
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12IndexBuffer.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\DX12IndexBuffer.obj
 D:\DX12\ElysiaRenderer\ElysiaRenderer\main.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\main.obj
 D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\Renderer.obj

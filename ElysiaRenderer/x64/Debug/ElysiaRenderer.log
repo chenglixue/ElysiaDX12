@@ -20,7 +20,7 @@ D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12RootSignature.h(78,22): warning C4018:
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12UploadContext.h(12,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
   (compiling source file 'main.cpp')
   
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.h(319,109): warning C4267: 'argument': conversion from 'size_t' to 'UINT', possible loss of data
+D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.h(359,109): warning C4267: 'argument': conversion from 'size_t' to 'UINT', possible loss of data
   (compiling source file 'main.cpp')
   
   ElysiaRenderer.vcxproj -> D:\DX12\ElysiaRenderer\x64\Debug\ElysiaRenderer.exe

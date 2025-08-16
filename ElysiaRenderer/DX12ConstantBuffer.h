@@ -9,7 +9,8 @@ namespace ElysiaRenderer
 {
 	struct ConstantBufferCreationDesc
 	{
-		UINT m_size = 0;
+		UINT m_bufferSize = 0;
+		size_t m_bufferIndex = 0;
 		BufferTypeFlags bufferTypeFlags = BufferTypeFlags::CBV;
 		BufferAccessFlags bufferAccessFlags = BufferAccessFlags::GPUOnly;
 		bool m_isRawAccess = false;
@@ -34,9 +35,9 @@ namespace ElysiaRenderer
 		}
 
 	private:
-		void* m_mappedBuffer;
+		UINT8* m_mappedBuffer;
 		uint32_t m_bufferSize;
 		DX12DescriptorHeapHandle m_constantBufferViewHandle;
-		BufferType m_bufferType = BufferType::Vertex;
+		BufferType m_bufferType = BufferType::Constant;
 	};
 }

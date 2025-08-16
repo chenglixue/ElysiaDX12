@@ -267,7 +267,8 @@ namespace ElysiaRenderer
 
 		// https://learn.microsoft.com/en-us/windows/win32/api/d3d12/ns-d3d12-d3d12_resource_desc
 		D3D12_RESOURCE_DESC resourceDesc = {};
-		resourceDesc.Width = ElysiaHelper::AlignU32(static_cast<uint32_t>(bufferCreationDesc.m_size), D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
+		//resourceDesc.Width = ElysiaHelper::AlignU32(static_cast<uint32_t>(bufferCreationDesc.m_size), D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
+		resourceDesc.Width = bufferCreationDesc.m_size;
 		resourceDesc.Alignment = 0;
 		resourceDesc.Height = 1;
 		resourceDesc.DepthOrArraySize = 1;
@@ -282,6 +283,7 @@ namespace ElysiaRenderer
 		ID3D12Resource* resource = nullptr;
 		ElysiaHelper::ThrowIfFailed(m_allocator->CreateResource(&allocationDesc, &resourceDesc, usageState, nullptr,
 			&allocation, IID_PPV_ARGS(&resource)));
+		resource->SetName(L"Vertex Buffer");
 
 		auto vertexBuffer = std::make_unique<DX12VertexBuffer>(std::move(resource), usageState, bufferCreationDesc.m_stride, bufferCreationDesc.m_size, std::move(allocation));
 		
@@ -308,16 +310,17 @@ namespace ElysiaRenderer
 
 		return vertexBuffer;
 	}
-	std::unique_ptr<DX12ConstantBuffer>			DX12Device::CreateConstantBuffer(const ConstantBufferCreationDesc& bufferCreationDesc)
+	std::unique_ptr<DX12IndexBuffer>			DX12Device::CreateIndexBuffer(const IndexBufferCreateDesc& indexBufferCreateDesc)
 	{
-		auto isHostViewable = bufferCreationDesc.bufferAccessFlags == BufferAccessFlags::HostWritable;
+		// CPU-writable/GPU-readable memory
+		auto isHostViewable = indexBufferCreateDesc.bufferAccessFlags == BufferAccessFlags::HostWritable;
 
 		D3D12MA::ALLOCATION_DESC allocationDesc{};
 		allocationDesc.HeapType = isHostViewable ? D3D12_HEAP_TYPE_UPLOAD : D3D12_HEAP_TYPE_DEFAULT;
 		D3D12_RESOURCE_STATES usageState = isHostViewable ? D3D12_RESOURCE_STATE_GENERIC_READ : D3D12_RESOURCE_STATE_COPY_DEST;
 
 		D3D12_RESOURCE_DESC resourceDesc = {};
-		resourceDesc.Width = ElysiaHelper::AlignU32(static_cast<uint32_t>(bufferCreationDesc.m_size), D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
+		resourceDesc.Width = indexBufferCreateDesc.m_bufferSize;
 		resourceDesc.Alignment = 0;
 		resourceDesc.Height = 1;
 		resourceDesc.DepthOrArraySize = 1;
@@ -332,16 +335,47 @@ namespace ElysiaRenderer
 		ID3D12Resource* resource = nullptr;
 		ElysiaHelper::ThrowIfFailed(m_allocator->CreateResource(&allocationDesc, &resourceDesc, usageState, nullptr,
 			&allocation, IID_PPV_ARGS(&resource)));
+		resource->SetName(L"Index Buffer");
+
+		auto indexBuffer = std::make_unique<DX12IndexBuffer>(std::move(resource), usageState, 
+			indexBufferCreateDesc.m_format, indexBufferCreateDesc.m_bufferSize, indexBufferCreateDesc.m_vertexMappedBuffer, std::move(allocation));
+
+		return std::move(indexBuffer);
+	}
+	std::unique_ptr<DX12ConstantBuffer>			DX12Device::CreateConstantBuffer(const ConstantBufferCreationDesc& bufferCreationDesc)
+	{
+		auto isHostViewable = bufferCreationDesc.bufferAccessFlags == BufferAccessFlags::HostWritable;
+
+		D3D12MA::ALLOCATION_DESC allocationDesc{};
+		allocationDesc.HeapType = isHostViewable ? D3D12_HEAP_TYPE_UPLOAD : D3D12_HEAP_TYPE_DEFAULT;
+		D3D12_RESOURCE_STATES usageState = isHostViewable ? D3D12_RESOURCE_STATE_GENERIC_READ : D3D12_RESOURCE_STATE_COPY_DEST;
+
+		D3D12_RESOURCE_DESC resourceDesc = {};
+		resourceDesc.Width = ElysiaHelper::AlignU32(static_cast<uint32_t>(bufferCreationDesc.m_bufferSize), D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
+		resourceDesc.Alignment = 0;
+		resourceDesc.Height = 1;
+		resourceDesc.DepthOrArraySize = 1;
+		resourceDesc.MipLevels = 1;
+		resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+		resourceDesc.Format = DXGI_FORMAT_UNKNOWN;
+		resourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+		resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+		resourceDesc.SampleDesc = { 1, 0 };
+
+		D3D12MA::Allocation* allocation = nullptr;
+		ID3D12Resource* resource = nullptr;
+		ElysiaHelper::ThrowIfFailed(m_allocator->CreateResource(&allocationDesc, &resourceDesc, usageState, nullptr,
+			&allocation, IID_PPV_ARGS(&resource)));
+		resource->SetName(L"Constant Buffer");
 
 		D3D12_CONSTANT_BUFFER_VIEW_DESC CBVDesc{};
 		CBVDesc.BufferLocation = resource->GetGPUVirtualAddress();
-		CBVDesc.SizeInBytes = bufferCreationDesc.m_size;
+		CBVDesc.SizeInBytes = bufferCreationDesc.m_bufferSize;
 		auto CBVDescriptor = m_SRVStagingDescriptorHeap->NewDescriptorHeapHandle();
 		m_device->CreateConstantBufferView(&CBVDesc, CBVDescriptor.GetCPUHandle());
 
-		return std::make_unique<DX12ConstantBuffer>(std::move(resource), usageState, bufferCreationDesc.m_size, std::move(CBVDescriptor), std::move(allocation));
+		return std::make_unique<DX12ConstantBuffer>(std::move(resource), usageState, bufferCreationDesc.m_bufferSize, std::move(CBVDescriptor), std::move(allocation));
 	}
-
 	std::unique_ptr<DX12TextureUploadBuffer>	DX12Device::CreateTextureUploadHeap(const TextureBufferCreationDesc& bufferCreationDesc)
 	{
 		auto isHostViewable = bufferCreationDesc.bufferAccessFlags == BufferAccessFlags::HostWritable;

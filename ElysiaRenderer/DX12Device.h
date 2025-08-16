@@ -6,6 +6,7 @@
 #include "DX12StagingDescriptorHeap.h"
 #include "DX12RenderPassDescriptorHeap.h"
 #include "DX12VertexBuffer.h"
+#include "DX12IndexBuffer.h"
 #include "DX12TextureBuffer.h"
 #include "DX12ConstantBuffer.h"
 #include "DX12BufferResource.h"
@@ -73,6 +74,7 @@ namespace ElysiaRenderer
 
 		std::unique_ptr<DX12GraphicsContext>		CreateGraphicsContext();
 		std::unique_ptr<DX12VertexBuffer>			CreateVertexBuffer(const VertexBufferCreationDesc& bufferCreationDesc);
+		std::unique_ptr<DX12IndexBuffer>			CreateIndexBuffer(const IndexBufferCreateDesc& indexBufferCreateDesc);
 		std::unique_ptr<DX12ConstantBuffer>			CreateConstantBuffer(const ConstantBufferCreationDesc& bufferCreationDesc);
 		std::unique_ptr<DX12TextureUploadBuffer>	CreateTextureUploadHeap(const TextureBufferCreationDesc& textureCreationDesc);
 		std::unique_ptr<DX12TextureResource>		CreateTextureFromFile(const TextureCreationDesc& textureCreationDesc);

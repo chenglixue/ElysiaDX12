@@ -7,8 +7,9 @@ namespace ElysiaRenderer
 	{
 		 None = 0,
 		 Vertex = 1,
-		 Constant = 2,
-		 Texture = 3
+		 Index = 2,
+		 Constant = 3,
+		 Texture = 4
 	};
 
 	enum class BufferTypeFlags : uint8_t

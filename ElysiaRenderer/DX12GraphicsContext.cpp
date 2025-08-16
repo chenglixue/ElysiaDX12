@@ -90,9 +90,11 @@ namespace ElysiaRenderer
 					case D3D12_ROOT_PARAMETER_TYPE_CBV:
 					{
 						auto spaceID = currRootParameter->GetSpaceID();
-						if (pipelineBindResource.m_CBVResource[spaceID] != nullptr)
+						auto CBVSize = pipelineBindResource.CBVSizes[spaceID];
+						auto CBVIndex = pipelineBindResource.CBVIndexs[spaceID];
+						if (pipelineBindResource.m_CBVResource[spaceID][CBVIndex])
 						{
-							m_commandList->SetGraphicsRootConstantBufferView(currentHandleIndex++, pipelineBindResource.m_CBVResource[spaceID]->GetGPUAddress());
+							m_commandList->SetGraphicsRootConstantBufferView(currentHandleIndex++, pipelineBindResource.m_CBVResource[spaceID][CBVIndex]->GetGPUAddress() );
 						}
 						break;
 					}
@@ -156,12 +158,16 @@ namespace ElysiaRenderer
 	{
 		m_commandList->IASetVertexBuffers(startIndex, numVertexBuffer, &vertexBufferView);
 	}
-	void DX12GraphicsContext::Draw(UINT vertexCount, UINT vertexStartOffset)
+	void DX12GraphicsContext::SetIndexBuffer(const D3D12_INDEX_BUFFER_VIEW& indexBufferView)
 	{
-		DrawInstanced(vertexCount, 1, vertexStartOffset, 0);
+		m_commandList->IASetIndexBuffer(&indexBufferView);
 	}
-	void DX12GraphicsContext::DrawInstanced(UINT vertexCount, UINT instanceCount, UINT vertexStartOffset, UINT startInstanceLocation)
+	void DX12GraphicsContext::Draw(UINT vertexCount, UINT vertexStartOffset, UINT startIndexLocation)
 	{
-		m_commandList->DrawInstanced(vertexCount, instanceCount, vertexStartOffset, startInstanceLocation);
+		DrawInstanced(vertexCount, 1, startIndexLocation, vertexStartOffset, 0);
+	}
+	void DX12GraphicsContext::DrawInstanced(UINT vertexCount, UINT instanceCount, UINT startIndexLocation, UINT vertexStartOffset, UINT startInstanceLocation)
+	{
+		m_commandList->DrawIndexedInstanced(vertexCount, instanceCount, startIndexLocation, vertexStartOffset, startInstanceLocation);
 	}
 }

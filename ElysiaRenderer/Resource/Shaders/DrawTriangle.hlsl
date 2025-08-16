@@ -23,7 +23,7 @@ cbuffer PerObjectBuffer : register(b0, perObjectSpace)
     //float4 padding[16];
 }
 
-Texture2D g_texture : register(t0);
+Texture2D g_texture : register(t0, perObjectSpace);
 
 struct VSInput
 {

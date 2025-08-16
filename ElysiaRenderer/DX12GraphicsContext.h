@@ -26,9 +26,10 @@ namespace ElysiaRenderer
 		void SetScissorRect(D3D12_RECT& rect);
 		void SetPrimitiveTopology(D3D12_PRIMITIVE_TOPOLOGY topology);
 		void SetVertexBuffer(UINT startIndex, UINT numVertexBuffer, D3D12_VERTEX_BUFFER_VIEW& vertexBufferView);
+		void SetIndexBuffer(const D3D12_INDEX_BUFFER_VIEW& indexBufferView);
 
-		void Draw(UINT vertexCount, UINT vertexStartOffset);
-		void DrawInstanced(UINT vertexCount, UINT instanceCount, UINT vertexStartOffset, UINT startInstanceLocation);
+		void Draw(UINT vertexCount, UINT vertexStartOffset, UINT startIndexLocation);
+		void DrawInstanced(UINT vertexCount, UINT instanceCount, UINT startIndexLocation, UINT vertexStartOffset, UINT startInstanceLocation);
 
 	private:
 		DX12GraphicsPipelineState* m_graphicsPipelineState = nullptr;

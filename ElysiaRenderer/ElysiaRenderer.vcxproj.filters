@@ -151,6 +151,9 @@
     <ClInclude Include="DX12UploadContext.h">
       <Filter>Header Files\DX12</Filter>
     </ClInclude>
+    <ClInclude Include="DX12IndexBuffer.h">
+      <Filter>Header Files\DX12</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="DXTex\Shaders\Compiled\BC7Encode_TryMode02CS.inc">
@@ -318,6 +321,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DX12UploadContext.cpp">
+      <Filter>Source Files\DX12</Filter>
+    </ClCompile>
+    <ClCompile Include="DX12IndexBuffer.cpp">
       <Filter>Source Files\DX12</Filter>
     </ClCompile>
   </ItemGroup>
