@@ -22,6 +22,12 @@
     <Filter Include="Header Files\Helper">
       <UniqueIdentifier>{5b2e3e24-f9c9-461c-9274-13e4952421c0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Model">
+      <UniqueIdentifier>{8ccc4547-7587-4378-bf3f-dbeaa4391971}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Model">
+      <UniqueIdentifier>{673546aa-f760-45b4-af3d-b7300a3a6f9d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="imgui\imconfig.h">
@@ -153,6 +159,15 @@
     </ClInclude>
     <ClInclude Include="DX12IndexBuffer.h">
       <Filter>Header Files\DX12</Filter>
+    </ClInclude>
+    <ClInclude Include="DX12Model.h">
+      <Filter>Header Files\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="DX12Vertex.h">
+      <Filter>Header Files\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="DX12Mesh.h">
+      <Filter>Header Files\Model</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -325,6 +340,9 @@
     </ClCompile>
     <ClCompile Include="DX12IndexBuffer.cpp">
       <Filter>Source Files\DX12</Filter>
+    </ClCompile>
+    <ClCompile Include="DX12Model.cpp">
+      <Filter>Source Files\Model</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

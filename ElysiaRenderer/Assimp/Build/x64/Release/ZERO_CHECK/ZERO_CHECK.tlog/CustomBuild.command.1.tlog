@@ -1,0 +1,10 @@
+^D:\DX12\ELYSIARENDERER\ELYSIARENDERER\ASSIMP\BUILD\CMAKEFILES\B05A322B7B7EFD0CDF1B87FE2C6EE89C\GENERATE.STAMP.RULE
+setlocal
+D:\Cmake\bin\cmake.exe -SD:/DX12/ElysiaRenderer/ElysiaRenderer/Assimp/Release -BD:/DX12/ElysiaRenderer/ElysiaRenderer/Assimp/Build --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file D:/DX12/ElysiaRenderer/ElysiaRenderer/Assimp/Build/Assimp.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

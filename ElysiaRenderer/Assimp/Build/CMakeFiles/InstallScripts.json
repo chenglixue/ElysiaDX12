@@ -1,0 +1,12 @@
+{
+	"InstallScripts" : 
+	[
+		"D:/DX12/ElysiaRenderer/ElysiaRenderer/Assimp/Build/cmake_install.cmake",
+		"D:/DX12/ElysiaRenderer/ElysiaRenderer/Assimp/Build/contrib/zlib/cmake_install.cmake",
+		"D:/DX12/ElysiaRenderer/ElysiaRenderer/Assimp/Build/code/cmake_install.cmake",
+		"D:/DX12/ElysiaRenderer/ElysiaRenderer/Assimp/Build/tools/assimp_cmd/cmake_install.cmake",
+		"D:/DX12/ElysiaRenderer/ElysiaRenderer/Assimp/Build/test/cmake_install.cmake",
+		"D:/DX12/ElysiaRenderer/ElysiaRenderer/Assimp/Build/test/headercheck/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

@@ -28,9 +28,10 @@ Texture2D g_texture : register(t0, perObjectSpace);
 struct VSInput
 {
     float3 positionOS   : POSITION;
+    //float3 color        : COLOR;
     //float2 uv           : TEXCOORD0;
-    //float3 normal       : NORMAL;
-    float4 color        : COLOR;
+    //float3 normalOS     : NORMAL;
+    //float3 tangentOS    : TANGENT;
 };
 
 struct PSInput
@@ -40,13 +41,19 @@ struct PSInput
     float4 positionWS   : WORLD_POSITION;
     float4 normalWS     : NORMAL;
     float2 uv           : TEXCOORD;
-    float4 color        : COLOR;
+    float3 color        : COLOR;
 };
 
 struct PSOutput
 {
     float4 target0 : SV_TARGET0;
 };
+
+float3 Rand3d(float3 pos)
+{
+    float3 t = frac(sin(dot(pos, float3(12.9898, 45.164, 78.233))) * 43758.5453123);
+    return t;
+}
 
 PSInput VS(VSInput i)
 {
@@ -56,7 +63,7 @@ PSInput VS(VSInput i)
     o.positionVS = mul(M_View, o.positionWS);
     o.positionCS = mul(M_Proj, o.positionVS);
     //o.uv = i.uv;
-    o.color = i.color;
+    //o.color = i.color;
     
     return o;
 }
@@ -65,8 +72,6 @@ PSOutput PS(PSInput i)
 {
     PSOutput o = (PSOutput)0;
     
-    //o.target0.rg = i.uv;
-    //o.target0 = g_texture.Sample(g_Sampler_WarpU_WarpV_Linear, i.uv, 0);
-    o.target0 = i.color;
+    o.target0.rgb = 1;
     return o;
 }

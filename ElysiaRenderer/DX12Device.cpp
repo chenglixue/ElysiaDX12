@@ -682,7 +682,7 @@ namespace ElysiaRenderer
 		WCHAR assetsPath[512];
 		ElysiaHelper::GetAssetsPath(assetsPath, _countof(assetsPath));
 
-		//auto shaderFullPath = ElysiaHelper::GetAssetFullPath(assetsPath, shaderCreateDesc.shaderName).c_str();
+		auto shaderFullPath = ElysiaHelper::GetAssetFullPath(assetsPath, shaderCreateDesc.shaderName).c_str();
 
 		auto compleHR = D3DCompileFromFile(ElysiaHelper::GetAssetFullPath(assetsPath, shaderCreateDesc.shaderName).c_str(),
 			nullptr, nullptr,

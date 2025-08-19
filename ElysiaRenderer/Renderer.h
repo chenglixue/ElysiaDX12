@@ -1,6 +1,7 @@
 #pragma once
 #include "stdafx.h"
 #include "DX12Device.h"
+#include "DX12Model.h"
 #include <dxgidebug.h>
 
 namespace ElysiaRenderer
@@ -199,71 +200,48 @@ namespace ElysiaRenderer
 	}
 	void Renderer::InitTexTriangle()
 	{
-		struct TexTriangleVertex
-		{
-			XMFLOAT3 position;
-
-			/*XMFLOAT2 uv;
-
-			XMFLOAT3 normal;*/
-
-			XMFLOAT4 color;
-		};
-
-		std::random_device seed;
-		std::ranlux48 engine(seed());
-		std::uniform_real_distribution<> distrib(0.f, 1.f);
-		XMFLOAT3 randomColors[36];
-		for (int i = 0; i < 36; ++i)
-		{
-			randomColors[i] = { (float)distrib(engine), (float)distrib(engine), (float)distrib(engine) };
-		}
-		int colorIndex = 0;
-		TexTriangleVertex triangleVertices[] = 
-		{
-			{ XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
-			{ XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
-			{ XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f) },
-			{ XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
-			{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT4(1.0f, 0.0f, 1.0f, 1.0f) },
-			{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f) },
-			{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f) },
-			{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) },
-		};
-
-		UINT16 triangleIndices[] =
-		{
+		std::vector<DX12Vertex> vertices{};
+		vertices.emplace_back(DX12Vertex( XMFLOAT3(-1.0f, 1.0f, -1.0f)));
+		vertices.emplace_back(DX12Vertex( XMFLOAT3(1.0f, 1.0f, -1.0f)));
+		vertices.emplace_back(DX12Vertex( XMFLOAT3(1.0f, 1.0f, 1.0f)));
+		vertices.emplace_back(DX12Vertex( XMFLOAT3(-1.0f, 1.0f, 1.0f)));
+		vertices.emplace_back(DX12Vertex( XMFLOAT3(-1.0f, -1.0f, -1.0f)));
+		vertices.emplace_back(DX12Vertex( XMFLOAT3(1.0f, -1.0f, -1.0f)));
+		vertices.emplace_back(DX12Vertex( XMFLOAT3(1.0f, -1.0f, 1.0f)));
+		vertices.emplace_back(DX12Vertex( XMFLOAT3(-1.0f, -1.0f, 1.0f)));
+		std::vector<UINT> indices = {
 			// TOP
-			3,1,0,
-			2,1,3,
+			3, 1, 0,
+			2, 1, 3,
 
 			// FRONT
-			0,5,4,
-			1,5,0,
+			0, 5, 4,
+			1, 5, 0,
 
 			// RIGHT
-			3,4,7,
-			0,4,3,
+			3, 4, 7,
+			0, 4, 3,
 
 			// LEFT
-			1,6,5,
-			2,6,1,
+			1, 6, 5,
+			2, 6, 1,
 
 			// BACK
-			2,7,6,
-			3,7,2,
+			2, 7, 6,
+			3, 7, 2,
 
 			// BOTTOM
-			6,4,5,
-			7,4,6,
-		};
+			6, 4, 5,
+			7, 4, 6 };
+		auto mesh = DX12Mesh(vertices, indices);
 
 		std::vector<D3D12_INPUT_ELEMENT_DESC> inputElementDescs =
 		{
 			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-			/*{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }, 
-			{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 20, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },*/
-			{ "COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 32, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+			/*{ "COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }, 
+			{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 32, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+			{ "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 44, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }*/
 		};
 
 		// Create Shader
@@ -284,27 +262,27 @@ namespace ElysiaRenderer
 		// Create Vertex Buffer
 		{
 			VertexBufferCreationDesc vertexBufferCreationDesc{};
-			vertexBufferCreationDesc.m_stride = sizeof(TexTriangleVertex);
-			vertexBufferCreationDesc.m_size = sizeof(triangleVertices);
+			vertexBufferCreationDesc.m_stride = sizeof(DX12Vertex);
+			vertexBufferCreationDesc.m_size = sizeof(vertices) * vertexBufferCreationDesc.m_stride;
 			vertexBufferCreationDesc.bufferAccessFlags = BufferAccessFlags::HostWritable;
 			vertexBufferCreationDesc.bufferTypeFlags = BufferTypeFlags::SRV;
 			vertexBufferCreationDesc.m_isRawAccess = false;
 
 			m_vertexBuffer = m_device->CreateVertexBuffer(vertexBufferCreationDesc);
-			m_vertexBuffer->SetMappedData(&triangleVertices, sizeof(triangleVertices));
+			m_vertexBuffer->SetMappedData(&vertices, vertexBufferCreationDesc.m_size);
 		}
 
 		// Create Index Buffer
 		{
 			IndexBufferCreateDesc indexBufferCreationDesc{};
-			indexBufferCreationDesc.m_bufferSize = sizeof(triangleIndices);
+			indexBufferCreationDesc.m_bufferSize = sizeof(indices) * (sizeof(UINT));
 			indexBufferCreationDesc.m_format = DXGI_FORMAT_R16_UINT;
 			indexBufferCreationDesc.m_vertexMappedBuffer = m_vertexBuffer->GetMappedBuffer();
 			indexBufferCreationDesc.bufferTypeFlags = BufferTypeFlags::None;
 			indexBufferCreationDesc.bufferAccessFlags = BufferAccessFlags::HostWritable;
 
 			m_indexBuffer = m_device->CreateIndexBuffer(indexBufferCreationDesc);
-			m_indexBuffer->SetMappedData(triangleIndices, indexBufferCreationDesc.m_bufferSize);
+			m_indexBuffer->SetMappedData(&indices, indexBufferCreationDesc.m_bufferSize);
 		}
 
 		// Create Constant Buffer
@@ -486,7 +464,7 @@ namespace ElysiaRenderer
 		m_graphicsContext->SetPipeline(pipelineStateData, m_pipelineBindResource);
 		m_graphicsContext->Draw(36, 0, 0);
 
-		XMMATRIX scaleMatrix = XMMatrixScaling(0.2f, 0.2f, 0.2f);
+		/*XMMATRIX scaleMatrix = XMMatrixScaling(0.2f, 0.2f, 0.2f);
 		XMMATRIX translateMatrix = XMMatrixTranslation(-5.0f, 0.0f, 0.0f);
 		m_objectParameters.emplace_back(CBVObjectParameter());
 		XMStoreFloat4x4(&m_objectParameters.back().worldMatrix,  m_worldMatrix * scaleMatrix * translateMatrix);
@@ -496,7 +474,7 @@ namespace ElysiaRenderer
 		m_pipelineBindResource.CBVIndexs[ElysiaHelper::PER_OBJECT_SPACE] = objectCBVIndex;
 		objectCBVIndex++;
 		m_graphicsContext->SetPipeline(pipelineStateData, m_pipelineBindResource);
-		m_graphicsContext->Draw(36, 0, 0);
+		m_graphicsContext->Draw(36, 0, 0);*/
 
 		m_graphicsContext->AddBarrier(currBackBuffer, D3D12_RESOURCE_STATE_PRESENT);
 		m_graphicsContext->FlushBarrier();

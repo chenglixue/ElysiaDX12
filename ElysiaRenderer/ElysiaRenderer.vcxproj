@@ -71,6 +71,10 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>D:\DX12\ElysiaRenderer\x64\Debug\Assimp\include;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\DX12\ElysiaRenderer\x64\Debug\Assimp\Environment;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -110,7 +114,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
-      <AdditionalDependencies>d3d12.lib;dxcompiler.lib;dxgi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d12.lib;dxcompiler.lib;dxgi.lib;assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>D:\DX12\ElysiaRenderer\ElysiaRenderer\dxc\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
@@ -154,6 +158,8 @@
     <ClInclude Include="DX12ConstantBuffer.h" />
     <ClInclude Include="DX12Device.h" />
     <ClInclude Include="DX12GraphicsContext.h" />
+    <ClInclude Include="DX12Mesh.h" />
+    <ClInclude Include="DX12Model.h" />
     <ClInclude Include="DX12PipelineState.h" />
     <ClInclude Include="DX12Queue.h" />
     <ClInclude Include="DX12QueueManager.h" />
@@ -164,6 +170,7 @@
     <ClInclude Include="DX12TextureBuffer.h" />
     <ClInclude Include="DX12TextureResource.h" />
     <ClInclude Include="DX12UploadContext.h" />
+    <ClInclude Include="DX12Vertex.h" />
     <ClInclude Include="DX12VertexBuffer.h" />
     <ClInclude Include="dxc\inc\d3d12shader.h" />
     <ClInclude Include="dxc\inc\dxcapi.h" />
@@ -216,6 +223,7 @@
     <ClCompile Include="DX12DescriptorHeap.cpp" />
     <ClCompile Include="DX12Device.cpp" />
     <ClCompile Include="DX12GraphicsContext.cpp" />
+    <ClCompile Include="DX12Model.cpp" />
     <ClCompile Include="DX12PipelineState.cpp" />
     <ClCompile Include="DX12Queue.cpp" />
     <ClCompile Include="DX12QueueManager.cpp" />
