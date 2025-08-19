@@ -238,10 +238,10 @@ namespace ElysiaRenderer
 		std::vector<D3D12_INPUT_ELEMENT_DESC> inputElementDescs =
 		{
 			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-			/*{ "COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+			{ "COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
 			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }, 
 			{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 32, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-			{ "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 44, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }*/
+			{ "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 44, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
 		};
 
 		// Create Shader
@@ -263,26 +263,26 @@ namespace ElysiaRenderer
 		{
 			VertexBufferCreationDesc vertexBufferCreationDesc{};
 			vertexBufferCreationDesc.m_stride = sizeof(DX12Vertex);
-			vertexBufferCreationDesc.m_size = sizeof(vertices) * vertexBufferCreationDesc.m_stride;
+			vertexBufferCreationDesc.m_size = static_cast<UINT>(vertices.size()) * vertexBufferCreationDesc.m_stride;
 			vertexBufferCreationDesc.bufferAccessFlags = BufferAccessFlags::HostWritable;
 			vertexBufferCreationDesc.bufferTypeFlags = BufferTypeFlags::SRV;
 			vertexBufferCreationDesc.m_isRawAccess = false;
 
 			m_vertexBuffer = m_device->CreateVertexBuffer(vertexBufferCreationDesc);
-			m_vertexBuffer->SetMappedData(&vertices, vertexBufferCreationDesc.m_size);
+			m_vertexBuffer->SetMappedData(vertices.data(), vertexBufferCreationDesc.m_size);
 		}
 
 		// Create Index Buffer
 		{
 			IndexBufferCreateDesc indexBufferCreationDesc{};
-			indexBufferCreationDesc.m_bufferSize = sizeof(indices) * (sizeof(UINT));
-			indexBufferCreationDesc.m_format = DXGI_FORMAT_R16_UINT;
+			indexBufferCreationDesc.m_bufferSize = static_cast<UINT>(indices.size()) * (sizeof(UINT));
+			indexBufferCreationDesc.m_format = DXGI_FORMAT_R32_UINT;
 			indexBufferCreationDesc.m_vertexMappedBuffer = m_vertexBuffer->GetMappedBuffer();
 			indexBufferCreationDesc.bufferTypeFlags = BufferTypeFlags::None;
 			indexBufferCreationDesc.bufferAccessFlags = BufferAccessFlags::HostWritable;
 
 			m_indexBuffer = m_device->CreateIndexBuffer(indexBufferCreationDesc);
-			m_indexBuffer->SetMappedData(&indices, indexBufferCreationDesc.m_bufferSize);
+			m_indexBuffer->SetMappedData(indices.data(), indexBufferCreationDesc.m_bufferSize);
 		}
 
 		// Create Constant Buffer

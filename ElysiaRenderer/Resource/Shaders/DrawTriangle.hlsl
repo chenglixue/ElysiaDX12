@@ -28,10 +28,10 @@ Texture2D g_texture : register(t0, perObjectSpace);
 struct VSInput
 {
     float3 positionOS   : POSITION;
-    //float3 color        : COLOR;
-    //float2 uv           : TEXCOORD0;
-    //float3 normalOS     : NORMAL;
-    //float3 tangentOS    : TANGENT;
+    float3 color : COLOR;
+    float2 uv : TEXCOORD0;
+    float3 normalOS : NORMAL;
+    float3 tangentOS : TANGENT;
 };
 
 struct PSInput
