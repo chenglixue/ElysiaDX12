@@ -13,9 +13,6 @@
 #include <mutex>
 #include <optional>
 #include "DXTex/DirectXTex.h"
-#include "SimpleMath/SimpleMath.h"
-#include "Helper.h"
-#include "Definition.h"
 #include "D3dx12.h"
 #include "D3D12MemoryAllocator/D3D12MemAlloc.h"
 #include <dxgidebug.h>
@@ -27,3 +24,8 @@
 #include <random>
 #include <iostream>
 #include <sstream>
+
+#include "SimpleMath/SimpleMath.h"
+#include "Helper.h"
+#include "Math.h"
+#include "Definition.h"

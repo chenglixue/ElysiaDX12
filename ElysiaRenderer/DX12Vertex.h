@@ -14,19 +14,21 @@ namespace ElysiaRenderer
 			: m_position(position)
 		{
 		}
-		DX12Vertex(const DX12Vertex& rhs)
+		DX12Vertex(const DX12Vertex& rhs) = default;
+		DX12Vertex& operator=(DX12Vertex& rhs) = default;
+		DX12Vertex(DX12Vertex&& rhs) noexcept = default;
+		DX12Vertex& operator=(DX12Vertex&& rhs) noexcept
 		{
-			/*m_position = rhs.m_position;
-			m_color = rhs.m_color;
-			m_uv = rhs.m_uv;
-			m_normal = rhs.m_normal;
-			m_tangent = rhs.m_tangent;*/
+			if (this != &rhs)
+			{
+				this->m_position = rhs.m_position;
+				this->m_color = rhs.m_color;
+				this->m_uv = rhs.m_uv;
+				this->m_normal = rhs.m_normal;
+				this->m_tangent = rhs.m_tangent;
+			}
+			return *this;
 		}
-		DX12Vertex& operator=(DX12Vertex& rhs)
-		{
-			return rhs;
-		}
-		DX12Vertex(DX12Vertex&& rhs) = default;
 		~DX12Vertex() = default;
 		
 		XMFLOAT3 m_position;

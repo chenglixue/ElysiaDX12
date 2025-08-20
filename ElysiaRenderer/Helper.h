@@ -134,4 +134,13 @@ namespace ElysiaHelper
         return strTo.c_str();
     }
 
+
+    inline std::string GetLastSegmentAfterBackslash(const std::string& str) 
+    {
+        size_t found = str.rfind('\\');
+        if (found != std::string::npos) {
+            return str.substr(found + 1);
+        }
+        return str;
+    }
 }

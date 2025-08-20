@@ -169,6 +169,15 @@
     <ClInclude Include="DX12Mesh.h">
       <Filter>Header Files\Model</Filter>
     </ClInclude>
+    <ClInclude Include="DX12MeshRender.h">
+      <Filter>Header Files\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Math.h">
+      <Filter>Header Files\Helper</Filter>
+    </ClInclude>
+    <ClInclude Include="DX12Material.h">
+      <Filter>Header Files\Helper</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="DXTex\Shaders\Compiled\BC7Encode_TryMode02CS.inc">
