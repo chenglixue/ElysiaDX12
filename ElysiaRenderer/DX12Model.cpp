@@ -2,28 +2,34 @@
 
 namespace ElysiaRenderer
 {
-	DX12Model::DX12Model(const std::string& path)
+	DX12Model::DX12Model(const LPCWSTR& path)
 	{
 		Assimp::Importer localImporter;
 
+		WCHAR assetsPath[512];
+		ElysiaHelper::GetAssetsPath(assetsPath, _countof(assetsPath));
+
+		std::wstring modelFullPath = ElysiaHelper::GetAssetFullPath(assetsPath, path).c_str();
+		auto modelPath = std::filesystem::path(modelFullPath).string();
+
 		const aiScene* pLocalScene = localImporter.ReadFile(
-			path,
+			modelPath,
 			// Triangulates all faces of all meshes
-			//aiProcess_Triangulate |
+			aiProcess_Triangulate
 			// Supersedes the aiProcess_MakeLeftHanded and aiProcess_FlipUVs and aiProcess_FlipWindingOrder flags
-			//aiProcess_ConvertToLeftHanded
+			|aiProcess_ConvertToLeftHanded
 			// This preset enables almost every optimization step to achieve perfectly optimized data. In D3D, need combine with aiProcess_ConvertToLeftHanded
-			aiProcessPreset_TargetRealtime_MaxQuality |
+			//| aiProcessPreset_TargetRealtime_MaxQuality
 			// Calculates the tangents and bitangents for the imported meshes
-			aiProcess_CalcTangentSpace
+			| aiProcess_CalcTangentSpace
 			// Splits large meshes into smaller sub-meshes
 			// This is quite useful for real-time rendering, 
 			// where the number of triangles which can be maximally processed in a single draw - call is limited by the video driver / hardware
-			//aiProcess_SplitLargeMeshes |
+			| aiProcess_SplitLargeMeshes
 			// A postprocessing step to reduce the number of meshes
-			//aiProcess_OptimizeMeshes |
+			| aiProcess_OptimizeMeshes
 			// A postprocessing step to optimize the scene hierarchy
-			//aiProcess_OptimizeGraph);
+			| aiProcess_OptimizeGraph
 		);
 
 		// "localScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE" is used to check whether value data returned is incomplete
@@ -34,7 +40,7 @@ namespace ElysiaRenderer
 			ElysiaHelper::ThrowRuntimeError(ss.str());
 		}
 
-		m_directory = path.substr(0, path.find_last_of('/'));
+		m_directory = modelPath.substr(0, modelPath.find_last_of('/'));
 
 		TraverseNode(pLocalScene, pLocalScene->mRootNode);
 	}
@@ -87,7 +93,7 @@ namespace ElysiaRenderer
 	void DX12Model::LoadMesh(const aiScene* scene, aiMesh* mesh)
 	{
 		std::vector<DX12Vertex> localVertices;
-		std::vector<uint32_t> localIndices;
+		std::vector<UINT> localIndices;
 		std::vector<DX12Material*> m_localMaterials{};
 
 		// process vertex position, normal, tangent, texture coordinates

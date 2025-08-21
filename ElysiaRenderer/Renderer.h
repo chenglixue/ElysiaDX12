@@ -20,15 +20,6 @@ namespace ElysiaRenderer
 		void Destory();
 
 	private:
-		
-		void InitTriangle();
-		void InitTexTriangle();
-
-		void RenderClearColor();
-		void RenderTriangle();
-		void RenderTexTriangle();
-
-		void LoadModel();
 
 		float m_aspectRatio;
 		const std::vector<D3D12_INPUT_ELEMENT_DESC> m_inputElementDescs =
@@ -71,22 +62,34 @@ namespace ElysiaRenderer
 		std::vector<CBVObjectParameter> m_objectParameters{};
 
 		XMVECTORF32 m_cameraPos;
-		XMMATRIX m_worldMatrix;
-		XMMATRIX m_viewMatrix;
-		XMMATRIX m_projMatrix;
+		XMMATRIX m_worldMatrix = XMMatrixIdentity();
+		XMMATRIX m_viewMatrix = XMMatrixIdentity();
+		XMMATRIX m_projMatrix = XMMatrixIdentity();
 		const float m_nearZ = 0.01f;
-		const float m_farZ = 100.f;
+		const float m_farZ = 1000.f;
 		float m_curRotationAngleRad = 0.f;
-		const float m_rotationSpeed = 0.01f;
+		const float m_rotationSpeed = 0.001f;
+		const float m_FOV = 0.45f;
 
-		const std::vector<std::string> m_modelPaths
+		const std::vector<LPCWSTR> m_modelPaths
 		{
-			"Resource\\Mesh\\diablo3_pose.obj"
+			L"Mesh\\LOW_WEPON.fbx"
 		};
 		std::vector<DX12Model> m_models{};
 		std::vector<DX12Vertex> m_vertices{};
 		std::vector<UINT> m_indices{};
 		std::vector<std::unique_ptr<DX12MeshRender>> m_meshRenders{};
+
+		void InitTriangle();
+		void InitTexTriangle();
+
+		void RenderClearColor();
+		void RenderTriangle();
+		void RenderTexTriangle();
+
+		void LoadModel();
+		void BindObject(DX12TextureResource& currBackBuffer, size_t& objectCBVIndex, size_t& pipelineStateIndex,
+			const CBVObjectParameter& tempCBVObjectParameter);
 	};
 
 	Renderer::Renderer(HWND windowHandle, ElysiaHelper::UINT2 screenSize)
@@ -108,14 +111,12 @@ namespace ElysiaRenderer
 		m_passParameter = CBVPassParameter();
 
 		{
-			m_worldMatrix = XMMatrixIdentity();
-
-			m_cameraPos = { -3.0f, 3.0f, -8.0f, 0.f };
+			m_cameraPos = { 0.0f, -5.0f, -20.0f, 0.f };
 			static const XMVECTORF32 up{ 0.f, 1.f, 0.f, 0.f };
 			static const XMVECTORF32 at{ 0.f, 0.f, 0.f, 0.f };
 			m_viewMatrix = XMMatrixLookAtLH(m_cameraPos, at, up);
 
-			m_projMatrix = XMMatrixPerspectiveFovLH(XM_PIDIV4, m_aspectRatio, m_nearZ, m_farZ);
+			m_projMatrix = XMMatrixPerspectiveFovLH(m_FOV, m_aspectRatio, m_nearZ, m_farZ);
 
 			XMStoreFloat4x4(&m_passParameter.viewMatrix, (m_viewMatrix));
 			XMStoreFloat4x4(&m_passParameter.projMatrix, (m_projMatrix));
@@ -128,7 +129,7 @@ namespace ElysiaRenderer
 	inline void Renderer::Update()
 	{
 		m_curRotationAngleRad += m_rotationSpeed;
-		m_worldMatrix = XMMatrixRotationY(m_curRotationAngleRad);
+		m_worldMatrix = XMMatrixRotationZ(m_curRotationAngleRad);
 	}
 	inline void Renderer::Render()
 	{
@@ -255,7 +256,7 @@ namespace ElysiaRenderer
 		{
 			VertexBufferCreationDesc vertexBufferCreationDesc{};
 			vertexBufferCreationDesc.m_stride = sizeof(DX12Vertex);
-			vertexBufferCreationDesc.m_size = static_cast<UINT>(m_vertices.size()) * vertexBufferCreationDesc.m_stride;
+			vertexBufferCreationDesc.m_size = (m_vertices.size()) * vertexBufferCreationDesc.m_stride;
 			vertexBufferCreationDesc.bufferAccessFlags = BufferAccessFlags::HostWritable;
 			vertexBufferCreationDesc.bufferTypeFlags = BufferTypeFlags::SRV;
 			vertexBufferCreationDesc.m_isRawAccess = false;
@@ -434,7 +435,7 @@ namespace ElysiaRenderer
 		m_graphicsContext->AddBarrier(*m_depthBuffer, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 		m_graphicsContext->FlushBarrier();
 
-		m_graphicsContext->ClearRenderTarget(currBackBuffer, Color(1., 1., 1.));
+		m_graphicsContext->ClearRenderTarget(currBackBuffer, Color(1, 1, 1));
 		m_graphicsContext->ClearDepthStencilTarget(*m_depthBuffer, 1.f, 0);
 
 		m_graphicsContext->SetVertexBuffer(0, 1, m_vertexBuffer->GetVertexBufferView());
@@ -443,21 +444,22 @@ namespace ElysiaRenderer
 		m_graphicsContext->SetDefaultViewportAndScissor(m_device->GetScreenSize());
 		m_graphicsContext->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-		auto objectConstanBuffer = dynamic_cast <DX12ConstantBuffer*>(m_pipelineBindResource.m_CBVResource[ElysiaHelper::PER_OBJECT_SPACE][objectCBVIndex].get());
-		m_objectParameters.emplace_back(CBVObjectParameter());
-		XMMATRIX scaleMatrix = XMMatrixScaling(1.f, 1.f, 1.f);
-		XMStoreFloat4x4(&m_objectParameters.back().worldMatrix, m_worldMatrix * scaleMatrix);
-		objectConstanBuffer->SetMappedData(&m_objectParameters[objectCBVIndex], sizeof(CBVObjectParameter));
-		m_pipelineBindResource.CBVSizes[ElysiaHelper::PER_OBJECT_SPACE] = sizeof(CBVObjectParameter);
-		m_pipelineBindResource.CBVIndexs[ElysiaHelper::PER_OBJECT_SPACE] = objectCBVIndex;
-		objectCBVIndex++;
-		auto pipelineStateData = CreatePipelineStateData(m_graphicsPipelineStates[pipelineStateIndex].get(),
-			std::move(std::vector<DX12TextureResource*>{ &currBackBuffer }),
-			m_depthBuffer.get());
-		m_graphicsContext->SetPipeline(pipelineStateData, m_pipelineBindResource);
-		m_graphicsContext->Draw(m_vertices.size(), 0, 0);
+		{
+			CBVObjectParameter tempCBVObjectParameter{};
+			XMMATRIX scaleMatrix = XMMatrixScaling(1.f, 1.f, 1.f);
+			XMMATRIX rotationMatrix = XMMatrixRotationAxis(XMVectorSet(0, 1, 0, 0), 45) * XMMatrixRotationAxis(XMVectorSet(0, 0, 1, 0), 55);
+			XMStoreFloat4x4(&tempCBVObjectParameter.worldMatrix, m_worldMatrix * rotationMatrix * scaleMatrix);
+			BindObject(currBackBuffer, objectCBVIndex, pipelineStateIndex, tempCBVObjectParameter);
 
-		/*XMMATRIX scaleMatrix = XMMatrixScaling(0.2f, 0.2f, 0.2f);
+			scaleMatrix = XMMatrixScaling(0.2f, 0.2f, 0.2f);
+			XMMATRIX translateMatrix = XMMatrixTranslation(-5.0f, 0.0f, 0.0f);
+			XMStoreFloat4x4(&m_objectParameters.back().worldMatrix, m_worldMatrix * scaleMatrix * translateMatrix);
+			BindObject(currBackBuffer, objectCBVIndex, pipelineStateIndex, tempCBVObjectParameter);
+		}
+
+
+
+		/*scaleMatrix = XMMatrixScaling(0.2f, 0.2f, 0.2f);
 		XMMATRIX translateMatrix = XMMatrixTranslation(-5.0f, 0.0f, 0.0f);
 		m_objectParameters.emplace_back(CBVObjectParameter());
 		XMStoreFloat4x4(&m_objectParameters.back().worldMatrix,  m_worldMatrix * scaleMatrix * translateMatrix);
@@ -467,7 +469,7 @@ namespace ElysiaRenderer
 		m_pipelineBindResource.CBVIndexs[ElysiaHelper::PER_OBJECT_SPACE] = objectCBVIndex;
 		objectCBVIndex++;
 		m_graphicsContext->SetPipeline(pipelineStateData, m_pipelineBindResource);
-		m_graphicsContext->Draw(m_vertices.size(), 0, 0);*/
+		m_graphicsContext->Draw(m_indices.size(), 0, 0);*/
 
 		m_graphicsContext->AddBarrier(currBackBuffer, D3D12_RESOURCE_STATE_PRESENT);
 		m_graphicsContext->FlushBarrier();
@@ -476,5 +478,28 @@ namespace ElysiaRenderer
 
 		m_device->EndFrame();
 		m_device->Present();
+	}
+
+	void Renderer::BindObject(DX12TextureResource& currBackBuffer, size_t& objectCBVIndex, size_t& pipelineStateIndex,
+		const CBVObjectParameter& tempCBVObjectParameter)
+	{
+		// get object constant buffer
+		auto objectConstanBuffer = dynamic_cast <DX12ConstantBuffer*>(m_pipelineBindResource.m_CBVResource[ElysiaHelper::PER_OBJECT_SPACE][objectCBVIndex].get());
+		m_objectParameters.emplace_back(CBVObjectParameter());
+
+		// set object constant data in buffer
+		m_objectParameters.back() = tempCBVObjectParameter;
+		objectConstanBuffer->SetMappedData(&m_objectParameters[objectCBVIndex], sizeof(CBVObjectParameter));
+		m_pipelineBindResource.CBVSizes[ElysiaHelper::PER_OBJECT_SPACE] = sizeof(CBVObjectParameter);
+		m_pipelineBindResource.CBVIndexs[ElysiaHelper::PER_OBJECT_SPACE] = objectCBVIndex;
+		objectCBVIndex++;
+
+		// set pipeline & bind data
+		auto pipelineStateData = CreatePipelineStateData(m_graphicsPipelineStates[pipelineStateIndex].get(),
+			std::move(std::vector<DX12TextureResource*>{ &currBackBuffer }),
+			m_depthBuffer.get());
+		m_graphicsContext->SetPipeline(pipelineStateData, m_pipelineBindResource);
+
+		m_graphicsContext->Draw(m_indices.size(), 0, 0);
 	}
 }

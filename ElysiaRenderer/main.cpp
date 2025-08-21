@@ -1,4 +1,4 @@
-#include "D3D12Lite.h"
+#define _CRT_SECURE_NO_WARNINGS
 #include "Renderer.h"
 
 //using namespace D3D12Lite;

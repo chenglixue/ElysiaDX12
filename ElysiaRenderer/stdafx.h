@@ -24,6 +24,8 @@
 #include <random>
 #include <iostream>
 #include <sstream>
+#include <locale>
+#include <codecvt>
 
 #include "SimpleMath/SimpleMath.h"
 #include "Helper.h"

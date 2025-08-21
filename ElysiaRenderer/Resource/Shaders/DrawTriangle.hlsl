@@ -62,7 +62,7 @@ PSInput VS(VSInput i)
     o.positionWS = mul(M_World, float4(i.positionOS, 1.f));
     o.positionVS = mul(M_View, o.positionWS);
     o.positionCS = mul(M_Proj, o.positionVS);
-    //o.uv = i.uv;
+    o.uv = i.uv;
     o.color = i.color;
     
     return o;
@@ -72,6 +72,8 @@ PSOutput PS(PSInput i)
 {
     PSOutput o = (PSOutput)0;
     
-    o.target0.rgb = 0;
+    float2 screenUV = i.uv;
+    
+    o.target0.rg = screenUV;
     return o;
 }

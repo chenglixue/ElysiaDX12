@@ -6,13 +6,14 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+
 namespace ElysiaRenderer
 {
 	class DX12Model
 	{
 	public:
 		DX12Model() = default;
-		DX12Model(const std::string& path);
+		DX12Model(const LPCWSTR& path);
 		DX12Model(const DX12Model& rhs) = default;
 		DX12Model& operator=(const DX12Model& rhs) = default;
 		DX12Model(DX12Model&& rhs) = default;
