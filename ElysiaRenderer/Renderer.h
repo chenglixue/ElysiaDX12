@@ -54,6 +54,7 @@ namespace ElysiaRenderer
 		struct CBVObjectParameter
 		{
 			XMFLOAT4X4 worldMatrix;
+			
 			XMFLOAT4 padding[12];
 		};
 		static_assert((sizeof(CBVPassParameter) % 256) == 0, "Constant Buffer size must be 256-byte aligned");
@@ -66,14 +67,21 @@ namespace ElysiaRenderer
 		XMMATRIX m_viewMatrix = XMMatrixIdentity();
 		XMMATRIX m_projMatrix = XMMatrixIdentity();
 		const float m_nearZ = 0.01f;
-		const float m_farZ = 1000.f;
+		const float m_farZ = 100.f;
 		float m_curRotationAngleRad = 0.f;
-		const float m_rotationSpeed = 0.001f;
-		const float m_FOV = 0.45f;
+		const float m_rotationSpeed = 0.01f;
+		const float m_FOV = 0.8f;
 
 		const std::vector<LPCWSTR> m_modelPaths
 		{
-			L"Mesh\\LOW_WEPON.fbx"
+			L"Mesh\\LOW_WEPON.fbx",
+		};
+		const std::vector<LPCWSTR> m_texPaths
+		{
+			L"Tex\\CyborgWeapon_BaseColor.dds",
+			L"Tex\\CyborgWeapon_Normal.dds",
+			L"Tex\\CyborgWeapon_Metallic.dds",
+			L"Tex\\CyborgWeapon_Roughness.dds",
 		};
 		std::vector<DX12Model> m_models{};
 		std::vector<DX12Vertex> m_vertices{};
@@ -111,7 +119,7 @@ namespace ElysiaRenderer
 		m_passParameter = CBVPassParameter();
 
 		{
-			m_cameraPos = { 0.0f, -5.0f, -20.0f, 0.f };
+			m_cameraPos = { 0.0f, 5.0f, 10.0f, 0.f };
 			static const XMVECTORF32 up{ 0.f, 1.f, 0.f, 0.f };
 			static const XMVECTORF32 at{ 0.f, 0.f, 0.f, 0.f };
 			m_viewMatrix = XMMatrixLookAtLH(m_cameraPos, at, up);
@@ -178,7 +186,6 @@ namespace ElysiaRenderer
 			m_models.emplace_back(std::move(currModel));
 		}
 	}
-	
 
 	void Renderer::InitTriangle()
 	{
@@ -313,13 +320,17 @@ namespace ElysiaRenderer
 
 		// Create Tex & Buffer
 		{
-			TextureCreationDesc texBufferCreateDesc{};
+			for (int i = 0; i < m_texPaths.size(); ++i)
+			{
+				TextureCreationDesc texBufferCreateDesc{};
 
-			texBufferCreateDesc.texturePath = L"Tex\\Wood.dds";
-			texBufferCreateDesc.isSRGB = true;
+				texBufferCreateDesc.texturePath = m_texPaths[i];
+				texBufferCreateDesc.isSRGB = i == 0 ? true : false;
 
-			auto newTex = std::move(m_device->CreateTextureFromFile(texBufferCreateDesc));
-			m_pipelineBindResource.m_SRVResources.push_back(std::move(newTex));
+				auto newTex = std::move(m_device->CreateTextureFromFile(texBufferCreateDesc));
+				m_pipelineBindResource.m_SRVResources[ElysiaHelper::PER_PASS_SPACE].push_back(std::move(newTex));
+			}
+			
 		}
 
 		// Create Root Parameter & Sampler & Root Signature
@@ -327,8 +338,8 @@ namespace ElysiaRenderer
 			{
 				auto rootParameter = std::make_unique<DX12RootParameter>();
 				rootParameter->InitAsDescriptorTable(1, D3D12_SHADER_VISIBILITY_PIXEL);
-				rootParameter->SetTableRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, m_pipelineBindResource.m_SRVResources.size(), 
-					0, 0, ElysiaHelper::PER_OBJECT_SPACE);
+				rootParameter->SetTableRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, m_pipelineBindResource.m_SRVResources[ElysiaHelper::PER_PASS_SPACE].size(),
+					0, 0, ElysiaHelper::PER_PASS_SPACE);
 				m_rootParameters.push_back(std::move(rootParameter));
 
 				rootParameter = std::make_unique<DX12RootParameter>();

@@ -148,7 +148,7 @@ namespace ElysiaRenderer
 
 				DX12Material* currMaterial = new DX12Material();
 				currMaterial->m_material = material;
-			
+				
 				auto texData = new LoadTexData();
 				texData->m_path = path.C_Str();
 				switch (type)

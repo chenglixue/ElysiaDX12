@@ -138,7 +138,7 @@ namespace ElysiaRenderer
 		rootSignatureDesc.pStaticSamplers = (const D3D12_STATIC_SAMPLER_DESC*)m_samplerArray.get();
 		rootSignatureDesc.Flags = flags;
 
-		for (int i = 0; i < m_numRootParameters; ++i)
+		/*for (int i = 0; i < m_numRootParameters; ++i)
 		{
 			const D3D12_ROOT_PARAMETER& rootParam = rootSignatureDesc.pParameters[i];
 			m_descriptorTableSize[i] = 0;
@@ -152,7 +152,7 @@ namespace ElysiaRenderer
 					m_descriptorTableSize[i] += rootParam.DescriptorTable.pDescriptorRanges[rangeIndex].NumDescriptors;
 				}
 			}
-		}
+		}*/
 
 		D3D12_FEATURE_DATA_ROOT_SIGNATURE featureData = {};
 		featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1;

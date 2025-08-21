@@ -1,156 +1,4 @@
-﻿  D3D12Lite.cpp
-  DX12BufferResource.cpp
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file 'DX12BufferResource.cpp')
-  
-  DX12ConstantBuffer.cpp
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file 'DX12ConstantBuffer.cpp')
-  
-  DX12Context.cpp
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file 'DX12Context.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12TextureBuffer.h(32,34): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12TextureResource' when no variable is declared
-  (compiling source file 'DX12Context.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12PipelineState.h(8,32): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12RootSignature' when no variable is declared
-  (compiling source file 'DX12Context.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12PipelineState.h(9,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Shader' when no variable is declared
-  (compiling source file 'DX12Context.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12GraphicsContext.h(9,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
-  (compiling source file 'DX12Context.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12RootSignature.h(78,22): warning C4018: '<': signed/unsigned mismatch
-  (compiling source file 'DX12Context.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12UploadContext.h(12,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
-  (compiling source file 'DX12Context.cpp')
-  
-  DX12DescriptorHeap.cpp
-  DX12Device.cpp
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file 'DX12Device.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12TextureBuffer.h(32,34): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12TextureResource' when no variable is declared
-  (compiling source file 'DX12Device.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12PipelineState.h(8,32): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12RootSignature' when no variable is declared
-  (compiling source file 'DX12Device.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12PipelineState.h(9,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Shader' when no variable is declared
-  (compiling source file 'DX12Device.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12GraphicsContext.h(9,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
-  (compiling source file 'DX12Device.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12RootSignature.h(78,22): warning C4018: '<': signed/unsigned mismatch
-  (compiling source file 'DX12Device.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12UploadContext.h(12,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
-  (compiling source file 'DX12Device.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.cpp(760,24): warning C4267: 'initializing': conversion from 'size_t' to 'UINT', possible loss of data
-  DX12GPUResource.cpp
-  DX12GraphicsContext.cpp
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file 'DX12GraphicsContext.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12PipelineState.h(8,32): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12RootSignature' when no variable is declared
-  (compiling source file 'DX12GraphicsContext.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12PipelineState.h(9,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Shader' when no variable is declared
-  (compiling source file 'DX12GraphicsContext.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12GraphicsContext.h(9,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
-  (compiling source file 'DX12GraphicsContext.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12RootSignature.h(78,22): warning C4018: '<': signed/unsigned mismatch
-  (compiling source file 'DX12GraphicsContext.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12TextureBuffer.h(32,34): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12TextureResource' when no variable is declared
-  (compiling source file 'DX12GraphicsContext.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12UploadContext.h(12,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
-  (compiling source file 'DX12GraphicsContext.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12GraphicsContext.cpp(7,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12GraphicsContext.cpp(81,28): warning C4267: 'initializing': conversion from 'size_t' to 'UINT', possible loss of data
-  DX12IndexBuffer.cpp
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file 'DX12IndexBuffer.cpp')
-  
-  DX12Model.cpp
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Material.h(9,26): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Texture' when no variable is declared
-  (compiling source file 'DX12Model.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Model.cpp(178,35): warning C4267: '=': conversion from 'size_t' to 'UINT', possible loss of data
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Model.cpp(187,50): warning C4267: '+=': conversion from 'size_t' to 'UINT', possible loss of data
-  DX12PipelineState.cpp
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file 'DX12PipelineState.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12PipelineState.h(8,32): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12RootSignature' when no variable is declared
-  (compiling source file 'DX12PipelineState.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12PipelineState.h(9,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Shader' when no variable is declared
-  (compiling source file 'DX12PipelineState.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12PipelineState.cpp(27,4): warning C4150: deletion of pointer to incomplete type 'ElysiaRenderer::DX12RootSignature'; no destructor called
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12PipelineState.h(8,15):
-      see declaration of 'ElysiaRenderer::DX12RootSignature'
-  
-  DX12Queue.cpp
-  DX12QueueManager.cpp
-  DX12RenderPassDescriptorHeap.cpp
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file 'DX12RenderPassDescriptorHeap.cpp')
-  
-  DX12RootSignature.cpp
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12RootSignature.h(78,22): warning C4018: '<': signed/unsigned mismatch
-  (compiling source file 'DX12RootSignature.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12RootSignature.cpp(141,21): warning C4018: '<': signed/unsigned mismatch
-  DX12Shader.cpp
-  DX12StagingDescriptorHeap.cpp
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file 'DX12StagingDescriptorHeap.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12StagingDescriptorHeap.cpp(55,54): warning C4244: 'argument': conversion from 'uint64_t' to '_Ty', possible loss of data
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12StagingDescriptorHeap.cpp(55,54): warning C4244:         with
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12StagingDescriptorHeap.cpp(55,54): warning C4244:         [
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12StagingDescriptorHeap.cpp(55,54): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12StagingDescriptorHeap.cpp(55,54): warning C4244:         ]
-  DX12TextureBuffer.cpp
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file 'DX12TextureBuffer.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12TextureBuffer.h(32,34): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12TextureResource' when no variable is declared
-  (compiling source file 'DX12TextureBuffer.cpp')
-  
-  DX12TextureResource.cpp
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file 'DX12TextureResource.cpp')
-  
-  DX12UploadContext.cpp
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file 'DX12UploadContext.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12TextureBuffer.h(32,34): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12TextureResource' when no variable is declared
-  (compiling source file 'DX12UploadContext.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12UploadContext.h(12,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
-  (compiling source file 'DX12UploadContext.cpp')
-  
-  Generating Code...
-  Compiling...
-  DX12VertexBuffer.cpp
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file 'DX12VertexBuffer.cpp')
-  
-  main.cpp
+﻿  main.cpp
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
   (compiling source file 'main.cpp')
   
@@ -175,21 +23,24 @@ D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12UploadContext.h(12,25): warning C4091:
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Material.h(9,26): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Texture' when no variable is declared
   (compiling source file 'main.cpp')
   
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.h(259,58): warning C4267: '=': conversion from 'size_t' to 'UINT', possible loss of data
+D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.h(266,58): warning C4267: '=': conversion from 'size_t' to 'UINT', possible loss of data
   (compiling source file 'main.cpp')
   
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.h(330,109): warning C4267: 'argument': conversion from 'size_t' to 'UINT', possible loss of data
+D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.h(341,139): warning C4267: 'argument': conversion from 'size_t' to 'UINT', possible loss of data
   (compiling source file 'main.cpp')
   
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.h(503,41): warning C4267: 'argument': conversion from 'size_t' to 'UINT', possible loss of data
+D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.h(514,41): warning C4267: 'argument': conversion from 'size_t' to 'UINT', possible loss of data
   (compiling source file 'main.cpp')
   
-  Generating Code...
   ElysiaRenderer.vcxproj -> D:\DX12\ElysiaRenderer\x64\Debug\ElysiaRenderer.exe
   D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Mesh\diablo3_pose.obj
   D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Mesh\LOW_WEPON.fbx
   D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Mesh\UE.fbx
   D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\DrawTriangle.hlsl
   D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\Mesh.hlsl
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Tex\CyborgWeapon_BaseColor.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Tex\CyborgWeapon_Metallic.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Tex\CyborgWeapon_Normal.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Tex\CyborgWeapon_Roughness.dds
   D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Tex\Wood.dds
-  6 File(s) copied
+  10 File(s) copied

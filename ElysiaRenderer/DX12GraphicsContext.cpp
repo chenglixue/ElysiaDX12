@@ -62,27 +62,43 @@ namespace ElysiaRenderer
 				{
 					case D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE:
 					{
-						for (auto& SRVResource : SRVResources)
+						UINT spaceID = currRootParameter->GetSpaceID();
+						switch (spaceID)
 						{
-							switch (SRVResource->GetBufferType())
+							case ElysiaHelper::PER_OBJECT_SPACE:
 							{
-								case BufferType::Texture:
+								
+								break;
+							}
+
+							case ElysiaHelper::PER_PASS_SPACE:
+							{
+								for (auto& SRVResource : SRVResources[spaceID])
 								{
-									handles[currentHandleIndex++] = static_cast<DX12TextureResource*>(SRVResource.get())->GetSRVDescriptor().GetCPUHandle();
-									break;
+									switch (SRVResource->GetBufferType())
+									{
+									case BufferType::Texture:
+									{
+										handles[currentHandleIndex++] = static_cast<DX12TextureResource*>(SRVResource.get())->GetSRVDescriptor().GetCPUHandle();
+										break;
+									}
+
+									default:
+										ElysiaHelper::ThrowRuntimeError("SRVResource type is none");
+										break;
+									}
 								}
 
-								default:
-									ElysiaHelper::ThrowRuntimeError("SRVResource type is none");
-									break;
+								UINT numTableHandles = SRVResources[spaceID].size();
+								auto blockStart = m_currSRVHeap->AllocateRenderPassDescriptorBlock(numTableHandles);
+								m_device->CopyDescriptors(1, &blockStart.GetCPUHandle(), &numTableHandles, numTableHandles, handles, singleDescriptorRangeCopyArray, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+
+								m_commandList->SetGraphicsRootDescriptorTable(currRootParameterIndex, blockStart.GetGPUHandle());
+
+								break;
 							}
 						}
-
-						UINT numTableHandles = SRVResources.size();
-						auto blockStart = m_currSRVHeap->AllocateRenderPassDescriptorBlock(numTableHandles);
-						m_device->CopyDescriptors(1, &blockStart.GetCPUHandle(), &numTableHandles, numTableHandles, handles, singleDescriptorRangeCopyArray, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-
-						m_commandList->SetGraphicsRootDescriptorTable(currRootParameterIndex, blockStart.GetGPUHandle());
+						
 
 						break;
 					}
@@ -94,8 +110,11 @@ namespace ElysiaRenderer
 						auto CBVIndex = pipelineBindResource.CBVIndexs[spaceID];
 						if (pipelineBindResource.m_CBVResource[spaceID][CBVIndex])
 						{
-							m_commandList->SetGraphicsRootConstantBufferView(currentHandleIndex++, pipelineBindResource.m_CBVResource[spaceID][CBVIndex]->GetGPUAddress() );
+							m_commandList->SetGraphicsRootConstantBufferView(currentHandleIndex++, pipelineBindResource.m_CBVResource[spaceID][CBVIndex]->GetGPUAddress());
 						}
+						break;
+
+						
 						break;
 					}
 				}

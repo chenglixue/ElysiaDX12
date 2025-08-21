@@ -23,7 +23,10 @@ cbuffer PerObjectBuffer : register(b0, perObjectSpace)
     //float4 padding[16];
 }
 
-Texture2D g_texture : register(t0, perObjectSpace);
+Texture2D g_albedoTexture       : register(t0, perPassSpace);
+Texture2D g_normalTexture       : register(t1, perPassSpace);
+Texture2D g_metallicTexture     : register(t2, perPassSpace);
+Texture2D g_roughnessTexture    : register(t3, perPassSpace);
 
 struct VSInput
 {
@@ -62,6 +65,9 @@ PSInput VS(VSInput i)
     o.positionWS = mul(M_World, float4(i.positionOS, 1.f));
     o.positionVS = mul(M_View, o.positionWS);
     o.positionCS = mul(M_Proj, o.positionVS);
+    
+    o.normalWS = mul(M_World, float4(i.normalOS, 0.f));
+    
     o.uv = i.uv;
     o.color = i.color;
     
@@ -73,7 +79,11 @@ PSOutput PS(PSInput i)
     PSOutput o = (PSOutput)0;
     
     float2 screenUV = i.uv;
+    float4 baseColor = g_albedoTexture.Sample(g_Sampler_WarpU_WarpV_Linear, screenUV);
+    float4 normal = g_normalTexture.Sample(g_Sampler_WarpU_WarpV_Linear, screenUV);
+    float4 metallic = g_metallicTexture.Sample(g_Sampler_WarpU_WarpV_Linear, screenUV);
+    float4 roughness = g_roughnessTexture.Sample(g_Sampler_WarpU_WarpV_Linear, screenUV);
     
-    o.target0.rg = screenUV;
+    o.target0 = baseColor + normal + metallic + roughness;
     return o;
 }
