@@ -106,20 +106,23 @@ namespace ElysiaRenderer
 					case D3D12_ROOT_PARAMETER_TYPE_CBV:
 					{
 						auto spaceID = currRootParameter->GetSpaceID();
-						auto CBVSize = pipelineBindResource.CBVSizes[spaceID];
+						//auto CBVSize = pipelineBindResource.CBVSizes[spaceID];
 						auto CBVIndex = pipelineBindResource.CBVIndexs[spaceID];
 						if (pipelineBindResource.m_CBVResource[spaceID][CBVIndex])
 						{
-							m_commandList->SetGraphicsRootConstantBufferView(currentHandleIndex++, pipelineBindResource.m_CBVResource[spaceID][CBVIndex]->GetGPUAddress());
+							m_commandList->SetGraphicsRootConstantBufferView(currRootParameterIndex, pipelineBindResource.m_CBVResource[spaceID][CBVIndex]->GetGPUAddress());
 						}
 						break;
+					}
 
-						
-						break;
+					default:
+					{
+						ElysiaHelper::ThrowRuntimeError("invalid root parameter type");
 					}
 				}
 
 				currRootParameterIndex++;
+				currentHandleIndex = 0;
 			}
 		}
 

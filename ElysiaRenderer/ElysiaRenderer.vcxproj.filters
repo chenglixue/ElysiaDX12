@@ -178,6 +178,9 @@
     <ClInclude Include="DX12Material.h">
       <Filter>Header Files\Helper</Filter>
     </ClInclude>
+    <ClInclude Include="DX12Camera.h">
+      <Filter>Header Files\DX12</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="DXTex\Shaders\Compiled\BC7Encode_TryMode02CS.inc">

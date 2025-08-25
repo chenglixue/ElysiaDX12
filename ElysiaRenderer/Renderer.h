@@ -2,12 +2,11 @@
 #include "stdafx.h"
 #include "DX12Device.h"
 #include "DX12MeshRender.h"
+#include "DX12Camera.h"
 #include <dxgidebug.h>
 
 namespace ElysiaRenderer
 {
-	using namespace DirectX;
-
 	class Renderer
 	{
 	public:
@@ -21,6 +20,9 @@ namespace ElysiaRenderer
 
 	private:
 
+		/// <summary>
+		/// pipeline
+		/// </summary>
 		float m_aspectRatio;
 		const std::vector<D3D12_INPUT_ELEMENT_DESC> m_inputElementDescs =
 		{
@@ -33,8 +35,8 @@ namespace ElysiaRenderer
 		std::unique_ptr<DX12Device> m_device = nullptr;
 		std::unique_ptr<DX12TextureResource> m_depthBuffer = nullptr;
 		std::unique_ptr<DX12GraphicsContext> m_graphicsContext = nullptr;
-		std::unique_ptr<DX12VertexBuffer> m_vertexBuffer;
-		std::unique_ptr<DX12IndexBuffer> m_indexBuffer;
+		std::unique_ptr<DX12VertexBuffer> m_vertexBuffer = nullptr;
+		std::unique_ptr<DX12IndexBuffer> m_indexBuffer = nullptr;
 		std::vector<std::unique_ptr<DX12RootParameter>> m_rootParameters;
 		std::vector<std::unique_ptr<D3D12_SAMPLER_DESC>> m_samplers;
 		std::vector<std::unique_ptr<DX12RootSignature>> m_rootSignatures;
@@ -42,8 +44,12 @@ namespace ElysiaRenderer
 		std::vector<std::unique_ptr<DX12Shader>> m_pixelShaders;
 		std::vector<std::unique_ptr<DX12Shader>> m_computeShaders;
 		std::vector<std::unique_ptr<DX12GraphicsPipelineState>> m_graphicsPipelineStates;
+		std::vector<std::unique_ptr<DX12Camera>> m_cameras;
 		PipelineBindResource m_pipelineBindResource;
 
+		/// <summary>
+		/// Constant parameter
+		/// </summary>
 		struct CBVPassParameter
 		{
 			XMFLOAT4 cameraPosWS;
@@ -62,15 +68,22 @@ namespace ElysiaRenderer
 		CBVPassParameter m_passParameter;
 		std::vector<CBVObjectParameter> m_objectParameters{};
 
-		XMVECTORF32 m_cameraPos;
+		/// <summary>
+		/// Model
+		/// </summary>
+		std::vector<DX12Model> m_models{};
+		std::vector<DX12Vertex> m_vertices{};
+		std::vector<UINT> m_indices{};
+		std::vector<std::unique_ptr<DX12MeshRender>> m_meshRenders{};
+
+		/// <summary>
+		/// user data
+		/// </summary>
 		XMMATRIX m_worldMatrix = XMMatrixIdentity();
 		XMMATRIX m_viewMatrix = XMMatrixIdentity();
 		XMMATRIX m_projMatrix = XMMatrixIdentity();
-		const float m_nearZ = 0.01f;
-		const float m_farZ = 100.f;
 		float m_curRotationAngleRad = 0.f;
 		const float m_rotationSpeed = 0.01f;
-		const float m_FOV = 0.8f;
 
 		const std::vector<LPCWSTR> m_modelPaths
 		{
@@ -83,10 +96,6 @@ namespace ElysiaRenderer
 			L"Tex\\CyborgWeapon_Metallic.dds",
 			L"Tex\\CyborgWeapon_Roughness.dds",
 		};
-		std::vector<DX12Model> m_models{};
-		std::vector<DX12Vertex> m_vertices{};
-		std::vector<UINT> m_indices{};
-		std::vector<std::unique_ptr<DX12MeshRender>> m_meshRenders{};
 
 		void InitTriangle();
 		void InitTexTriangle();
@@ -119,16 +128,22 @@ namespace ElysiaRenderer
 		m_passParameter = CBVPassParameter();
 
 		{
-			m_cameraPos = { 0.0f, 5.0f, 10.0f, 0.f };
+			auto camera = std::make_unique<DX12Camera>();
+			camera->SetCameraPos({ 0.0f, 5.0f, 10.0f });
+			camera->SetCameraFOV(0.8f);
+			camera->SetCameraNearZ(0.01f);
+			camera->SetCameraFarz(100.f);
 			static const XMVECTORF32 up{ 0.f, 1.f, 0.f, 0.f };
 			static const XMVECTORF32 at{ 0.f, 0.f, 0.f, 0.f };
-			m_viewMatrix = XMMatrixLookAtLH(m_cameraPos, at, up);
+			m_viewMatrix = XMMatrixLookAtLH(camera->GetCameraPos(), at, up);
 
-			m_projMatrix = XMMatrixPerspectiveFovLH(m_FOV, m_aspectRatio, m_nearZ, m_farZ);
+			m_projMatrix = XMMatrixPerspectiveFovLH(camera->GetFOV(), m_aspectRatio, camera->GetNearZ(), camera->GetFarZ());
 
 			XMStoreFloat4x4(&m_passParameter.viewMatrix, (m_viewMatrix));
 			XMStoreFloat4x4(&m_passParameter.projMatrix, (m_projMatrix));
-			XMStoreFloat4(&m_passParameter.cameraPosWS, m_cameraPos);
+			XMStoreFloat4(&m_passParameter.cameraPosWS, camera->GetCameraPos());
+
+			m_cameras.emplace_back(std::move(camera));
 		}
 
 		LoadModel();
@@ -320,12 +335,16 @@ namespace ElysiaRenderer
 
 		// Create Tex & Buffer
 		{
+			
 			for (int i = 0; i < m_texPaths.size(); ++i)
 			{
+				auto strPath = ElysiaHelper::LPCWSTRToString(m_texPaths[i]);
+				bool isSRGB = strPath.find("_BaseColor") == strPath.npos ? false : true;
+
 				TextureCreationDesc texBufferCreateDesc{};
 
 				texBufferCreateDesc.texturePath = m_texPaths[i];
-				texBufferCreateDesc.isSRGB = i == 0 ? true : false;
+				texBufferCreateDesc.isSRGB = isSRGB;
 
 				auto newTex = std::move(m_device->CreateTextureFromFile(texBufferCreateDesc));
 				m_pipelineBindResource.m_SRVResources[ElysiaHelper::PER_PASS_SPACE].push_back(std::move(newTex));
@@ -461,6 +480,7 @@ namespace ElysiaRenderer
 			XMMATRIX rotationMatrix = XMMatrixRotationAxis(XMVectorSet(0, 1, 0, 0), 45) * XMMatrixRotationAxis(XMVectorSet(0, 0, 1, 0), 55);
 			XMStoreFloat4x4(&tempCBVObjectParameter.worldMatrix, m_worldMatrix * rotationMatrix * scaleMatrix);
 			BindObject(currBackBuffer, objectCBVIndex, pipelineStateIndex, tempCBVObjectParameter);
+			objectCBVIndex++;
 
 			scaleMatrix = XMMatrixScaling(0.2f, 0.2f, 0.2f);
 			XMMATRIX translateMatrix = XMMatrixTranslation(-5.0f, 0.0f, 0.0f);
@@ -503,7 +523,7 @@ namespace ElysiaRenderer
 		objectConstanBuffer->SetMappedData(&m_objectParameters[objectCBVIndex], sizeof(CBVObjectParameter));
 		m_pipelineBindResource.CBVSizes[ElysiaHelper::PER_OBJECT_SPACE] = sizeof(CBVObjectParameter);
 		m_pipelineBindResource.CBVIndexs[ElysiaHelper::PER_OBJECT_SPACE] = objectCBVIndex;
-		objectCBVIndex++;
+		
 
 		// set pipeline & bind data
 		auto pipelineStateData = CreatePipelineStateData(m_graphicsPipelineStates[pipelineStateIndex].get(),

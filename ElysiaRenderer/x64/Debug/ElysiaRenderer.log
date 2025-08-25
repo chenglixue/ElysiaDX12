@@ -23,13 +23,13 @@ D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12UploadContext.h(12,25): warning C4091:
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Material.h(9,26): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Texture' when no variable is declared
   (compiling source file 'main.cpp')
   
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.h(266,58): warning C4267: '=': conversion from 'size_t' to 'UINT', possible loss of data
+D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.h(281,58): warning C4267: '=': conversion from 'size_t' to 'UINT', possible loss of data
   (compiling source file 'main.cpp')
   
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.h(341,139): warning C4267: 'argument': conversion from 'size_t' to 'UINT', possible loss of data
+D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.h(360,139): warning C4267: 'argument': conversion from 'size_t' to 'UINT', possible loss of data
   (compiling source file 'main.cpp')
   
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.h(514,41): warning C4267: 'argument': conversion from 'size_t' to 'UINT', possible loss of data
+D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.h(534,41): warning C4267: 'argument': conversion from 'size_t' to 'UINT', possible loss of data
   (compiling source file 'main.cpp')
   
   ElysiaRenderer.vcxproj -> D:\DX12\ElysiaRenderer\x64\Debug\ElysiaRenderer.exe
@@ -38,9 +38,10 @@ D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.h(514,41): warning C4267: 'argume
   D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Mesh\UE.fbx
   D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\DrawTriangle.hlsl
   D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\Mesh.hlsl
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\Common.hlsl
   D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Tex\CyborgWeapon_BaseColor.dds
   D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Tex\CyborgWeapon_Metallic.dds
   D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Tex\CyborgWeapon_Normal.dds
   D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Tex\CyborgWeapon_Roughness.dds
   D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Tex\Wood.dds
-  10 File(s) copied
+  11 File(s) copied

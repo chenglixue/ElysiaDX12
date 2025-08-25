@@ -152,6 +152,7 @@
     <ClInclude Include="D3D12MemoryAllocator\D3D12MemAlloc.h" />
     <ClInclude Include="Definition.h" />
     <ClInclude Include="DX12BufferResource.h" />
+    <ClInclude Include="DX12Camera.h" />
     <ClInclude Include="DX12Context.h" />
     <ClInclude Include="DX12DescriptorHeap.h" />
     <ClInclude Include="DX12DescriptorHeapHandle.h" />

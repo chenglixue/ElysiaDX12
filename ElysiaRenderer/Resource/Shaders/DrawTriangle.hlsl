@@ -1,3 +1,6 @@
+#pragma once
+#include "private/Common.hlsl"
+
 #define perObjectSpace   space0
 #define perMaterialSpace space1
 #define perPassSpace     space2
@@ -84,6 +87,6 @@ PSOutput PS(PSInput i)
     float4 metallic = g_metallicTexture.Sample(g_Sampler_WarpU_WarpV_Linear, screenUV);
     float4 roughness = g_roughnessTexture.Sample(g_Sampler_WarpU_WarpV_Linear, screenUV);
     
-    o.target0 = baseColor + normal + metallic + roughness;
+    o.target0 = roughness;
     return o;
 }

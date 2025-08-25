@@ -31,3 +31,5 @@
 #include "Helper.h"
 #include "Math.h"
 #include "Definition.h"
+
+using namespace DirectX;
