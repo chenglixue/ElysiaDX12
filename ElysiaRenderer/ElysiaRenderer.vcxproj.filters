@@ -28,6 +28,15 @@
     <Filter Include="Source Files\Model">
       <UniqueIdentifier>{673546aa-f760-45b4-af3d-b7300a3a6f9d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\Shader">
+      <UniqueIdentifier>{9d3c5679-5874-4d7c-b569-dbe0d1d7472b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Shader\Priavte">
+      <UniqueIdentifier>{378b8fde-229a-4cd9-a799-7aa5cd62bf8d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Shader\Public">
+      <UniqueIdentifier>{e2335b91-bf71-4a5d-9fdb-f259078823ad}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="imgui\imconfig.h">
@@ -105,9 +114,6 @@
     <ClInclude Include="DX12VertexBuffer.h">
       <Filter>Header Files\DX12</Filter>
     </ClInclude>
-    <ClInclude Include="stdafx.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="DX12DescriptorHeap.h">
       <Filter>Header Files\DX12</Filter>
     </ClInclude>
@@ -181,6 +187,12 @@
     <ClInclude Include="DX12Camera.h">
       <Filter>Header Files\DX12</Filter>
     </ClInclude>
+    <ClInclude Include="DX12Light.h">
+      <Filter>Header Files\DX12</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>Header Files\Helper</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="DXTex\Shaders\Compiled\BC7Encode_TryMode02CS.inc">
@@ -206,7 +218,34 @@
     </None>
     <None Include="packages.config" />
     <None Include="Resource\Shaders\DrawTriangle.hlsl">
-      <Filter>Resource Files</Filter>
+      <Filter>Resource Files\Shader\Public</Filter>
+    </None>
+    <None Include="Resource\Shaders\private\SharedCommon.hlsli">
+      <Filter>Resource Files\Shader\Priavte</Filter>
+    </None>
+    <None Include="Resource\Shaders\private\Light.hlsli">
+      <Filter>Resource Files\Shader\Priavte</Filter>
+    </None>
+    <None Include="Resource\Shaders\private\Macros.hlsli">
+      <Filter>Resource Files\Shader\Priavte</Filter>
+    </None>
+    <None Include="Resource\Shaders\private\Math.hlsli">
+      <Filter>Resource Files\Shader\Priavte</Filter>
+    </None>
+    <None Include="Resource\Shaders\private\BRDF.hlsl">
+      <Filter>Resource Files\Shader\Priavte</Filter>
+    </None>
+    <None Include="Resource\Shaders\private\Common.hlsl">
+      <Filter>Resource Files\Shader\Priavte</Filter>
+    </None>
+    <None Include="Resource\Shaders\private\Light.hlsl">
+      <Filter>Resource Files\Shader\Priavte</Filter>
+    </None>
+    <None Include="Resource\Shaders\private\LightCommon.hlsl">
+      <Filter>Resource Files\Shader\Priavte</Filter>
+    </None>
+    <None Include="Resource\Shaders\private\ShadingCommon.hlsl">
+      <Filter>Resource Files\Shader\Priavte</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -220,9 +259,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DXTex\BCDirectCompute.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="D3D12Lite.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="D3D12MemoryAllocator\D3D12MemAlloc.cpp">
@@ -355,6 +391,9 @@
     </ClCompile>
     <ClCompile Include="DX12Model.cpp">
       <Filter>Source Files\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="DX12Light.cpp">
+      <Filter>Source Files\DX12</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

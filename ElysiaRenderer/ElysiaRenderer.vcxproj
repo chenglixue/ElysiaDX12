@@ -110,12 +110,13 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;USE_PIX;PROFILE;PROFILE_BUILD;DBG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>D:\DX12\ElysiaRenderer\x64\Debug\Shaders;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
       <AdditionalDependencies>d3d12.lib;dxcompiler.lib;dxgi.lib;assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>D:\DX12\ElysiaRenderer\ElysiaRenderer\dxc\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc\lib\spectre\x64;D:\DX12\ElysiaRenderer\ElysiaRenderer\dxc\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>xcopy $(ProjectDir)Resource $(TargetDir) /Y /E</Command>
@@ -159,6 +160,7 @@
     <ClInclude Include="DX12ConstantBuffer.h" />
     <ClInclude Include="DX12Device.h" />
     <ClInclude Include="DX12GraphicsContext.h" />
+    <ClInclude Include="DX12Light.h" />
     <ClInclude Include="DX12Material.h" />
     <ClInclude Include="DX12Mesh.h" />
     <ClInclude Include="DX12Model.h" />
@@ -217,9 +219,21 @@
     <None Include="DXTex\Shaders\Compiled\BC7Encode_TryMode137CS.inc" />
     <None Include="DXTex\Shaders\Compiled\BC7Encode_TryMode456CS.inc" />
     <None Include="packages.config" />
+    <None Include="Resource\Shaders\private\Light.hlsli">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+    </None>
+    <None Include="Resource\Shaders\private\Macros.hlsli">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+    </None>
+    <None Include="Resource\Shaders\private\Math.hlsli">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+    </None>
+    <None Include="Resource\Shaders\private\SharedCommon.hlsli">
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="D3D12Lite.cpp" />
     <ClCompile Include="D3D12MemoryAllocator\D3D12MemAlloc.cpp" />
     <ClCompile Include="DX12BufferResource.cpp" />
     <ClCompile Include="DX12ConstantBuffer.cpp" />
@@ -227,6 +241,7 @@
     <ClCompile Include="DX12DescriptorHeap.cpp" />
     <ClCompile Include="DX12Device.cpp" />
     <ClCompile Include="DX12GraphicsContext.cpp" />
+    <ClCompile Include="DX12Light.cpp" />
     <ClCompile Include="DX12Model.cpp" />
     <ClCompile Include="DX12PipelineState.cpp" />
     <ClCompile Include="DX12Queue.cpp" />
@@ -275,6 +290,28 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resource\Shaders\DrawTriangle.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resource\Shaders\private\BRDF.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Resource\Shaders\private\Common.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Resource\Shaders\private\Light.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Resource\Shaders\private\LightCommon.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Resource\Shaders\private\ShadingCommon.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <FileType>Document</FileType>
     </None>
   </ItemGroup>

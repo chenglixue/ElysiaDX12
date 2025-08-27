@@ -1,6 +1,9 @@
 #pragma once
 #include "stdafx.h"
 
+#include <dxcapi.h>         // Be sure to link with dxcompiler.lib.
+#include <d3d12shader.h>    // Shader reflection.
+
 namespace ElysiaRenderer
 {
 	enum class ShaderType : uint8_t
@@ -12,8 +15,8 @@ namespace ElysiaRenderer
 
 	struct ShaderCreateDesc
 	{
-		LPCWSTR shaderName;	// include file type(such as ".hlsl")
-		LPCSTR entryPoint;
+		std::wstring shaderName;	// include file type(such as ".hlsl")
+		std::wstring entryPoint;
 		ShaderType shaderType;
 	};
 
@@ -21,15 +24,15 @@ namespace ElysiaRenderer
 	{
 	public:
 		DX12Shader();
-		DX12Shader(ID3DBlob* shader);
+		DX12Shader(CComPtr<IDxcBlob> shader);
 		~DX12Shader();
 
-		ID3DBlob*& GetShader()
+		CComPtr<IDxcBlob>& GetShader()
 		{
 			return m_shader;
 		}
 
 	private:
-		ID3DBlob* m_shader;
+		CComPtr<IDxcBlob> m_shader;
 	};
 }

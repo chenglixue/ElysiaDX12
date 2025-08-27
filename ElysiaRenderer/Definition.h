@@ -19,4 +19,6 @@ namespace ElysiaRenderer
 
 	static const wchar_t* SHADER_SOURCE_PATH = L"Shaders/";
 	static const wchar_t* SHADER_OUTPUT_PATH = L"Shaders/Complied/";
+
+#define D3D_COMPILE_STANDARD_FILE_INCLUDE ((ID3DInclude*)(UINT_PTR)1)
 }

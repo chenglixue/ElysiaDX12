@@ -31,5 +31,7 @@
 #include "Helper.h"
 #include "Math.h"
 #include "Definition.h"
+#include "dxcapi.h"
+#include <atlbase.h>        // Common COM helpers.
 
 using namespace DirectX;

@@ -64,10 +64,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam)
     }
 }
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, int nShowCmd)
+int main()
 {
 	std::wstring applicationName = L"Elysia Renderer";
-	ElysiaHelper::UINT2 windowSize = { 1920, 1080 };
+	ElysiaHelper::UINT2 windowSize = { static_cast<UINT>(1920 * 0.6), static_cast < UINT>(1080 * 0.6) };
 	HINSTANCE moduleHandle = GetModuleHandle(nullptr);
 
 	WNDCLASSEX wc = { 0 };
@@ -88,7 +88,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 		(GetSystemMetrics(SM_CXSCREEN) - windowSize.x) / 2, (GetSystemMetrics(SM_CYSCREEN) - windowSize.y) / 2, windowSize.x, windowSize.y,
 		nullptr, nullptr, moduleHandle, nullptr);
 
-	ShowWindow(windowHandle, SW_SHOWMAXIMIZED);
+	ShowWindow(windowHandle, SW_SHOWNORMAL);
 	SetForegroundWindow(windowHandle);
 	SetFocus(windowHandle);
 	ShowCursor(true);

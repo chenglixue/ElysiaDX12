@@ -89,7 +89,7 @@ namespace ElysiaRenderer
 									}
 								}
 
-								UINT numTableHandles = SRVResources[spaceID].size();
+								UINT numTableHandles = static_cast<UINT>(SRVResources[spaceID].size());
 								auto blockStart = m_currSRVHeap->AllocateRenderPassDescriptorBlock(numTableHandles);
 								m_device->CopyDescriptors(1, &blockStart.GetCPUHandle(), &numTableHandles, numTableHandles, handles, singleDescriptorRangeCopyArray, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 

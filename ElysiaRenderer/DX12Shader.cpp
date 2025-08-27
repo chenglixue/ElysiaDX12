@@ -7,13 +7,13 @@ namespace ElysiaRenderer
 	{
 
 	}
-	DX12Shader::DX12Shader(ID3DBlob* shader)
+	DX12Shader::DX12Shader(CComPtr<IDxcBlob> shader)
 	{
 		m_shader = shader;
 	}
 
 	DX12Shader::~DX12Shader()
 	{
-		ElysiaHelper::SafeRelease(m_shader);
+		//ElysiaHelper::SafeRelease(m_shader);
 	}
 }

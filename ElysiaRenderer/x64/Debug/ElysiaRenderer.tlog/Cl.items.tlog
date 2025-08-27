@@ -1,4 +1,3 @@
-D:\DX12\ElysiaRenderer\ElysiaRenderer\D3D12Lite.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\D3D12Lite.obj
 D:\DX12\ElysiaRenderer\ElysiaRenderer\D3D12MemoryAllocator\D3D12MemAlloc.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\D3D12MemAlloc.obj
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12BufferResource.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\DX12BufferResource.obj
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12ConstantBuffer.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\DX12ConstantBuffer.obj
@@ -6,6 +5,7 @@ D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Context.cpp;D:\DX12\ElysiaRenderer\Ely
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeap.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\DX12DescriptorHeap.obj
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\DX12Device.obj
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12GraphicsContext.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\DX12GraphicsContext.obj
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Light.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\DX12Light.obj
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Model.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\DX12Model.obj
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12PipelineState.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\DX12PipelineState.obj
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Queue.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\DX12Queue.obj

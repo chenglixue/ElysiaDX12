@@ -3,6 +3,7 @@
 #include "DX12Device.h"
 #include "DX12MeshRender.h"
 #include "DX12Camera.h"
+#include "DX12Light.h"
 #include <dxgidebug.h>
 
 namespace ElysiaRenderer
@@ -45,6 +46,7 @@ namespace ElysiaRenderer
 		std::vector<std::unique_ptr<DX12Shader>> m_computeShaders;
 		std::vector<std::unique_ptr<DX12GraphicsPipelineState>> m_graphicsPipelineStates;
 		std::vector<std::unique_ptr<DX12Camera>> m_cameras;
+		std::vector<std::unique_ptr<DX12Light>> m_lights;
 		PipelineBindResource m_pipelineBindResource;
 
 		/// <summary>
@@ -52,10 +54,12 @@ namespace ElysiaRenderer
 		/// </summary>
 		struct CBVPassParameter
 		{
-			XMFLOAT4 cameraPosWS;
-			XMFLOAT4X4 viewMatrix;
-			XMFLOAT4X4 projMatrix;
-			XMFLOAT4 padding[7];
+			XMFLOAT4 cameraPosWS;	// 16
+			XMFLOAT4X4 viewMatrix;	// 64
+			XMFLOAT4X4 projMatrix;	// 64
+
+			LightData lights[1];	// 64
+			XMFLOAT4 padd[3];
 		};
 		struct CBVObjectParameter
 		{
@@ -97,13 +101,11 @@ namespace ElysiaRenderer
 			L"Tex\\CyborgWeapon_Roughness.dds",
 		};
 
-		void InitTriangle();
 		void InitTexTriangle();
 
-		void RenderClearColor();
-		void RenderTriangle();
 		void RenderTexTriangle();
 
+		void InitLight();
 		void LoadModel();
 		void BindObject(DX12TextureResource& currBackBuffer, size_t& objectCBVIndex, size_t& pipelineStateIndex,
 			const CBVObjectParameter& tempCBVObjectParameter);
@@ -147,6 +149,7 @@ namespace ElysiaRenderer
 		}
 
 		LoadModel();
+		InitLight();
 		InitTexTriangle();
 	}
 	inline void Renderer::Update()
@@ -187,6 +190,13 @@ namespace ElysiaRenderer
 		m_graphicsPipelineStates.clear();
 	}
 
+	inline void Renderer::InitLight()
+	{
+		auto dirLight = std::make_unique<DX12DirectionLight>(XMFLOAT4(1, 1, 1, 1), XMFLOAT4(0, 0, -1, 0), 1);
+		m_passParameter.lights[0] = std::move(dirLight->CreateLightData());
+
+		m_lights.emplace_back(std::move(dirLight));
+	}
 	inline void Renderer::LoadModel()
 	{
 		for (size_t currModelIndex = 0; currModelIndex < m_modelPaths.size(); ++currModelIndex)
@@ -202,74 +212,21 @@ namespace ElysiaRenderer
 		}
 	}
 
-	void Renderer::InitTriangle()
-	{
-		struct TriangleVertex
-		{
-			XMFLOAT3 position;
-			XMFLOAT4 color;
-		};
-
-		std::array<TriangleVertex, 3> triangleVertices;
-		triangleVertices[0].position = { 0, 0.5, 0.f };
-		triangleVertices[0].color = { 1, 0, 0, 1.f };
-		triangleVertices[1].position = { 0.5f, -0.5f, 0.f };
-		triangleVertices[1].color = { 0, 1, 0, 1.f };
-		triangleVertices[2].position = { -0.5f, -0.5f, 0.f };
-		triangleVertices[2].color = { 0, 0, 1, 1.f };
-
-		VertexBufferCreationDesc vertexBufferCreationDesc{};
-		vertexBufferCreationDesc.m_stride = sizeof(TriangleVertex);
-		vertexBufferCreationDesc.m_size = sizeof(triangleVertices);
-		vertexBufferCreationDesc.bufferAccessFlags = BufferAccessFlags::HostWritable;
-		vertexBufferCreationDesc.bufferTypeFlags = BufferTypeFlags::SRV;
-		vertexBufferCreationDesc.m_isRawAccess = false;
-
-		auto vertexBuffer = m_device->CreateVertexBuffer(vertexBufferCreationDesc);
-		vertexBuffer->SetMappedData(triangleVertices.data(), sizeof(triangleVertices));
-
-		//m_rootSignature = std::move(m_device->CreateRootSignature());
-
-		// Define the vertex input layout.
-		std::vector<D3D12_INPUT_ELEMENT_DESC> inputElementDescs =
-		{
-			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-			{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
-		};
-
-		ShaderCreateDesc VSShaderCreateDesc{};
-		VSShaderCreateDesc.shaderName = L"DrawTriangle.hlsl";
-		VSShaderCreateDesc.entryPoint = "VS";
-		VSShaderCreateDesc.shaderType = ShaderType::Vertex;
-		m_vertexShaders.push_back(std::move(m_device->CreateShader(VSShaderCreateDesc)));
-
-		ShaderCreateDesc PSShaderCreateDesc{};
-		PSShaderCreateDesc.shaderName = L"DrawTriangle.hlsl";
-		PSShaderCreateDesc.entryPoint = "PS";
-		PSShaderCreateDesc.shaderType = ShaderType::Pixel;
-		m_pixelShaders.push_back(std::move(m_device->CreateShader(PSShaderCreateDesc)));
-
-		PipelineStateCreateDesc pipelineStateCreateDesc = std::move(CreateDefaultPipelineStateCreateDesc());
-		pipelineStateCreateDesc.m_vertexShader = m_vertexShaders.back().get();
-		pipelineStateCreateDesc.m_pixelShader = m_pixelShaders.back().get();
-		pipelineStateCreateDesc.m_rootSignature = m_rootSignatures.back().get();
-		pipelineStateCreateDesc.m_inputElementDesc = inputElementDescs;
-		pipelineStateCreateDesc.m_renderTargetDesc.m_renderTargetFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-		m_graphicsPipelineStates.push_back(std::move(m_device->CreateGraphicsPipelineState(pipelineStateCreateDesc)));
-	}
 	void Renderer::InitTexTriangle()
 	{
+
+
 		// Create Shader
 		{
 			ShaderCreateDesc VSShaderCreateDesc{};
 			VSShaderCreateDesc.shaderName = L"Shaders\\DrawTriangle.hlsl";
-			VSShaderCreateDesc.entryPoint = "VS";
+			VSShaderCreateDesc.entryPoint = L"VS";
 			VSShaderCreateDesc.shaderType = ShaderType::Vertex;
 			m_vertexShaders.push_back(std::move(m_device->CreateShader(VSShaderCreateDesc)));
 
 			ShaderCreateDesc PSShaderCreateDesc{};
 			PSShaderCreateDesc.shaderName = L"Shaders\\DrawTriangle.hlsl";
-			PSShaderCreateDesc.entryPoint = "PS";
+			PSShaderCreateDesc.entryPoint = L"PS";
 			PSShaderCreateDesc.shaderType = ShaderType::Pixel;
 			m_pixelShaders.push_back(std::move(m_device->CreateShader(PSShaderCreateDesc)));
 		}
@@ -278,7 +235,7 @@ namespace ElysiaRenderer
 		{
 			VertexBufferCreationDesc vertexBufferCreationDesc{};
 			vertexBufferCreationDesc.m_stride = sizeof(DX12Vertex);
-			vertexBufferCreationDesc.m_size = (m_vertices.size()) * vertexBufferCreationDesc.m_stride;
+			vertexBufferCreationDesc.m_size = static_cast<UINT>(m_vertices.size()) * vertexBufferCreationDesc.m_stride;
 			vertexBufferCreationDesc.bufferAccessFlags = BufferAccessFlags::HostWritable;
 			vertexBufferCreationDesc.bufferTypeFlags = BufferTypeFlags::SRV;
 			vertexBufferCreationDesc.m_isRawAccess = false;
@@ -357,7 +314,7 @@ namespace ElysiaRenderer
 			{
 				auto rootParameter = std::make_unique<DX12RootParameter>();
 				rootParameter->InitAsDescriptorTable(1, D3D12_SHADER_VISIBILITY_PIXEL);
-				rootParameter->SetTableRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, m_pipelineBindResource.m_SRVResources[ElysiaHelper::PER_PASS_SPACE].size(),
+				rootParameter->SetTableRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, static_cast<UINT>(m_pipelineBindResource.m_SRVResources[ElysiaHelper::PER_PASS_SPACE].size()),
 					0, 0, ElysiaHelper::PER_PASS_SPACE);
 				m_rootParameters.push_back(std::move(rootParameter));
 
@@ -400,26 +357,6 @@ namespace ElysiaRenderer
 		}
 	}
 
-	void Renderer::RenderClearColor()
-	{
-		m_device->BeginFrame();
-
-		auto& currBackBuffer = m_device->GetCurrBackBuffer();
-
-		m_graphicsContext->Reset();
-		m_graphicsContext->AddBarrier(currBackBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET);
-		m_graphicsContext->FlushBarrier();
-
-		m_graphicsContext->ClearRenderTarget(currBackBuffer, Color(0.3f, 0.3f, 0.8f));
-
-		m_graphicsContext->AddBarrier(currBackBuffer, D3D12_RESOURCE_STATE_PRESENT);
-		m_graphicsContext->FlushBarrier();
-
-		m_device->SubmitContextWork(*m_graphicsContext);
-
-		m_device->Present();
-		m_device->EndFrame();
-	}
 	/*void Renderer::RenderTriangle()
 	{
 		m_device->BeginFrame();
@@ -531,6 +468,6 @@ namespace ElysiaRenderer
 			m_depthBuffer.get());
 		m_graphicsContext->SetPipeline(pipelineStateData, m_pipelineBindResource);
 
-		m_graphicsContext->Draw(m_indices.size(), 0, 0);
+		m_graphicsContext->Draw(static_cast<UINT>(m_indices.size()), 0, 0);
 	}
 }

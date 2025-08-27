@@ -139,4 +139,31 @@ namespace ElysiaHelper
         }
         return str;
     }
+
+    inline LPCWSTR stringToLPCWSTR(std::string orig)
+    {
+        size_t origsize = orig.length() + 1;
+        const size_t newsize = 100;
+        size_t convertedChars = 0;
+        wchar_t* wcstring = (wchar_t*)malloc(sizeof(wchar_t) * (orig.length() - 1));
+        mbstowcs_s(&convertedChars, wcstring, origsize, orig.c_str(), _TRUNCATE);
+
+        return wcstring;
+    }
+
+    inline WCHAR* concatWcharStr(const WCHAR* str1, const WCHAR* str2) {
+        size_t len1 = wcslen(str1) * 2;
+        size_t len2 = wcslen(str2) * 2;
+        size_t len3 = len1 + len2;
+        char* address = (char*)malloc(len3 + 2);
+        for (size_t i = 0; i < len1; i++)
+            address[i] = ((char*)str1)[i];
+        for (size_t i = len1; i < len3; i++)
+            address[i] = ((char*)str2)[i];
+
+        address[len3] = '\0';
+        address[len3 + 1] = '\0';
+
+        return (WCHAR*)address;
+    }
 }

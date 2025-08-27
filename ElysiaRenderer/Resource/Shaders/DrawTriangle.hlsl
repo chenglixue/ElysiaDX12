@@ -1,35 +1,11 @@
 #pragma once
+#include "private/SharedCommon.hlsli"
+
 #include "private/Common.hlsl"
-
-#define perObjectSpace   space0
-#define perMaterialSpace space1
-#define perPassSpace     space2
-#define perFrameSpace    space3
-
-SamplerState g_Sampler_WarpU_WarpV_Point : register(s0);
-SamplerState g_Sampler_ClampU_ClampV_Point : register(s1);
-SamplerState g_Sampler_WarpU_WarpV_Linear : register(s2);
-SamplerState g_Sampler_ClampU_ClampV_Linear : register(s3);
-SamplerState g_Sampler_WarpU_WarpV_Anisotropic : register(s4);
-SamplerState g_Sampler_ClampU_ClampV_Anisotropic : register(s5);
-
-cbuffer PerPassBuffer : register(b0, perPassSpace)
-{
-    float4      CameraPosWS;
-    float4x4    M_View;
-    float4x4    M_Proj;
-    //float4 padding[16];
-}
-cbuffer PerObjectBuffer : register(b0, perObjectSpace)
-{
-    float4x4 M_World;
-    //float4 padding[16];
-}
-
-Texture2D g_albedoTexture       : register(t0, perPassSpace);
-Texture2D g_normalTexture       : register(t1, perPassSpace);
-Texture2D g_metallicTexture     : register(t2, perPassSpace);
-Texture2D g_roughnessTexture    : register(t3, perPassSpace);
+#include "private/BRDF.hlsl"
+#include "private/Light.hlsl"
+#include "private/LightCommon.hlsl"
+#include "private/ShadingCommon.hlsl"
 
 struct VSInput
 {
@@ -55,12 +31,6 @@ struct PSOutput
     float4 target0 : SV_TARGET0;
 };
 
-float3 Rand3d(float3 pos)
-{
-    float3 t = frac(sin(dot(pos, float3(12.9898, 45.164, 78.233))) * 43758.5453123);
-    return t;
-}
-
 PSInput VS(VSInput i)
 {
     PSInput o;
@@ -81,12 +51,25 @@ PSOutput PS(PSInput i)
 {
     PSOutput o = (PSOutput)0;
     
-    float2 screenUV = i.uv;
-    float4 baseColor = g_albedoTexture.Sample(g_Sampler_WarpU_WarpV_Linear, screenUV);
-    float4 normal = g_normalTexture.Sample(g_Sampler_WarpU_WarpV_Linear, screenUV);
-    float4 metallic = g_metallicTexture.Sample(g_Sampler_WarpU_WarpV_Linear, screenUV);
-    float4 roughness = g_roughnessTexture.Sample(g_Sampler_WarpU_WarpV_Linear, screenUV);
+    FInputParams inputParam = (FInputParams) 0;
+    inputParam.PixelPos = i.positionCS.xy;
+    inputParam.ScreenUV = i.uv;
+    inputParam.ScreenVector = GetScreenVectorWS(CameraPosWS.xyz, i.positionWS.xyz);
     
-    o.target0 = roughness;
+    float4 baseColor = g_albedoTexture.Sample(g_Sampler_WarpU_WarpV_Linear, inputParam.ScreenUV);
+    float4 normal = g_normalTexture.Sample(g_Sampler_WarpU_WarpV_Linear, inputParam.ScreenUV);
+    float4 metallic = g_metallicTexture.Sample(g_Sampler_WarpU_WarpV_Linear, inputParam.ScreenUV);
+    float4 roughness = g_roughnessTexture.Sample(g_Sampler_WarpU_WarpV_Linear, inputParam.ScreenUV);
+    
+    float3 totalDirectRadiance = 0;
+    float3 totalIndirectRadiance = 0;
+    
+    Light mainLight = GetMainLight(lights[0]);
+    
+    
+    FDeferredLightingSplit lighting = (FDeferredLightingSplit) 0;
+    FDecodeGBufferData GBufferData = (FDecodeGBufferData) 0;
+    
+    o.target0.rgb = mainLight.color * normal;
     return o;
 }
