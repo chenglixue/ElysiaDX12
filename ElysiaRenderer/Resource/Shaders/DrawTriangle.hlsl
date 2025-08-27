@@ -21,7 +21,9 @@ struct PSInput
     float4 positionCS   : SV_POSITION;
     float4 positionVS   : VIEW_POSITION;
     float4 positionWS   : WORLD_POSITION;
-    float4 normalWS     : NORMAL;
+    float3 normalWS     : NORMAL;
+    float3 tangentWS    : TANGENT;
+    float3 bitTangentWS : BITTANGENT;
     float2 uv           : TEXCOORD;
     float3 color        : COLOR;
 };
@@ -39,7 +41,12 @@ PSInput VS(VSInput i)
     o.positionVS = mul(M_View, o.positionWS);
     o.positionCS = mul(M_Proj, o.positionVS);
     
-    o.normalWS = mul(M_World, float4(i.normalOS, 0.f));
+    float3 N = normalize(mul(i.normalOS, (float3x3)M_World));
+    float3 T = normalize(mul(i.tangentOS, (float3x3)M_World));
+    
+    o.tangentWS = normalize(T - dot(N, T) * N);
+    o.bitTangentWS = cross(o.tangentWS, N);
+    o.normalWS = N;
     
     o.uv = i.uv;
     o.color = i.color;
@@ -56,20 +63,17 @@ PSOutput PS(PSInput i)
     inputParam.ScreenUV = i.uv;
     inputParam.ScreenVector = GetScreenVectorWS(CameraPosWS.xyz, i.positionWS.xyz);
     
-    float4 baseColor = g_albedoTexture.Sample(g_Sampler_WarpU_WarpV_Linear, inputParam.ScreenUV);
-    float4 normal = g_normalTexture.Sample(g_Sampler_WarpU_WarpV_Linear, inputParam.ScreenUV);
-    float4 metallic = g_metallicTexture.Sample(g_Sampler_WarpU_WarpV_Linear, inputParam.ScreenUV);
-    float4 roughness = g_roughnessTexture.Sample(g_Sampler_WarpU_WarpV_Linear, inputParam.ScreenUV);
+    float3x3 TBN = float3x3(i.tangentWS, i.bitTangentWS, i.normalWS);
     
     float3 totalDirectRadiance = 0;
     float3 totalIndirectRadiance = 0;
     
     Light mainLight = GetMainLight(lights[0]);
-    
+    float3 toLight = -mainLight.direction;
     
     FDeferredLightingSplit lighting = (FDeferredLightingSplit) 0;
-    FDecodeGBufferData GBufferData = (FDecodeGBufferData) 0;
+    FDecodeGBufferData GBufferData = GetDecodeGBufferData(inputParam.ScreenUV, TBN);
     
-    o.target0.rgb = mainLight.color * normal;
+    o.target0.rgb = GBufferData.WorldNormal;
     return o;
 }

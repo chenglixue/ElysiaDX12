@@ -34,11 +34,18 @@ struct FDecodeGBufferData
     float Opacity;
 };
 
-FDecodeGBufferData GetDecodeGBufferData(float2 uv, bool bGetNormalizedNormal = true)
+FDecodeGBufferData GetDecodeGBufferData(float2 uv, float3x3 TBN, bool bGetNormalizedNormal = true)
 {
     FDecodeGBufferData o = (FDecodeGBufferData) 0;
     
+    float4 temp = g_albedoTexture.Sample(g_Sampler_WarpU_WarpV_Linear, uv);
     
+    o.BaseColor = temp.rgb;
+    o.Opacity = temp.a;
+    
+    float3 normalTS = g_normalTexture.Sample(g_Sampler_WarpU_WarpV_Linear, uv);
+    o.WorldNormal = normalize(mul(normalTS, TBN));
+    o.WorldTangent = TBN[0];
     
 
     return o;

@@ -1,40 +1,4 @@
-﻿  main.cpp
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file 'main.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12TextureBuffer.h(32,34): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12TextureResource' when no variable is declared
-  (compiling source file 'main.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12PipelineState.h(8,32): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12RootSignature' when no variable is declared
-  (compiling source file 'main.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12PipelineState.h(9,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Shader' when no variable is declared
-  (compiling source file 'main.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12GraphicsContext.h(9,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
-  (compiling source file 'main.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12RootSignature.h(78,22): warning C4018: '<': signed/unsigned mismatch
-  (compiling source file 'main.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12UploadContext.h(12,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
-  (compiling source file 'main.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Material.h(9,26): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Texture' when no variable is declared
-  (compiling source file 'main.cpp')
-  
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\memory(3465,56): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\memory(3465,56): warning C4244:         with
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\memory(3465,56): warning C4244:         [
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\memory(3465,56): warning C4244:             _Ty=int
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\memory(3465,56): warning C4244:         ]
-  (compiling source file 'main.cpp')
-      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\memory(3465,56):
-      the template instantiation context (the oldest one first) is
-          D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.h(195,24):
-          see reference to function template instantiation 'std::unique_ptr<ElysiaRenderer::DX12DirectionLight,std::default_delete<ElysiaRenderer::DX12DirectionLight>> std::make_unique<ElysiaRenderer::DX12DirectionLight,DirectX::XMFLOAT4,DirectX::XMFLOAT4,int,0>(DirectX::XMFLOAT4 &&,DirectX::XMFLOAT4 &&,int &&)' being compiled
-  
-  ElysiaRenderer.vcxproj -> D:\DX12\ElysiaRenderer\x64\Debug\ElysiaRenderer.exe
+﻿  ElysiaRenderer.vcxproj -> D:\DX12\ElysiaRenderer\x64\Debug\ElysiaRenderer.exe
   D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Mesh\diablo3_pose.obj
   D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Mesh\LOW_WEPON.fbx
   D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Mesh\UE.fbx
