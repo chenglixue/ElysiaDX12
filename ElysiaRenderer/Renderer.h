@@ -57,9 +57,10 @@ namespace ElysiaRenderer
 			XMFLOAT4 cameraPosWS;	// 16
 			XMFLOAT4X4 viewMatrix;	// 64
 			XMFLOAT4X4 projMatrix;	// 64
+			XMFLOAT4 screenSize;	// 16
 
 			LightData lights[1];	// 64
-			XMFLOAT4 padd[3];
+			XMFLOAT4 padd[2];
 		};
 		struct CBVObjectParameter
 		{
@@ -156,6 +157,9 @@ namespace ElysiaRenderer
 	{
 		m_curRotationAngleRad += m_rotationSpeed;
 		m_worldMatrix = XMMatrixRotationZ(m_curRotationAngleRad);
+
+		m_passParameter.screenSize = m_device->GetScreenSize();
+		m_pipelineBindResource.m_CBVResource[ElysiaHelper::PER_PASS_SPACE][0]->SetMappedData(&m_passParameter, sizeof(CBVPassParameter));
 	}
 	inline void Renderer::Render()
 	{
@@ -408,7 +412,7 @@ namespace ElysiaRenderer
 		m_graphicsContext->SetVertexBuffer(0, 1, m_vertexBuffer->GetVertexBufferView());
 		m_graphicsContext->SetIndexBuffer(m_indexBuffer->GetIndexBufferView());
 
-		m_graphicsContext->SetDefaultViewportAndScissor(m_device->GetScreenSize());
+		m_graphicsContext->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(static_cast<UINT>(m_device->GetScreenSize().x), static_cast<UINT>(m_device->GetScreenSize().y)));
 		m_graphicsContext->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		{
@@ -424,20 +428,6 @@ namespace ElysiaRenderer
 			XMStoreFloat4x4(&m_objectParameters.back().worldMatrix, m_worldMatrix * scaleMatrix * translateMatrix);
 			BindObject(currBackBuffer, objectCBVIndex, pipelineStateIndex, tempCBVObjectParameter);
 		}
-
-
-
-		/*scaleMatrix = XMMatrixScaling(0.2f, 0.2f, 0.2f);
-		XMMATRIX translateMatrix = XMMatrixTranslation(-5.0f, 0.0f, 0.0f);
-		m_objectParameters.emplace_back(CBVObjectParameter());
-		XMStoreFloat4x4(&m_objectParameters.back().worldMatrix,  m_worldMatrix * scaleMatrix * translateMatrix);
-		objectConstanBuffer = dynamic_cast <DX12ConstantBuffer*>(m_pipelineBindResource.m_CBVResource[ElysiaHelper::PER_OBJECT_SPACE][objectCBVIndex].get());
-		objectConstanBuffer->SetMappedData(&m_objectParameters[objectCBVIndex], sizeof(CBVObjectParameter));
-		m_pipelineBindResource.CBVSizes[ElysiaHelper::PER_OBJECT_SPACE] = sizeof(CBVObjectParameter);
-		m_pipelineBindResource.CBVIndexs[ElysiaHelper::PER_OBJECT_SPACE] = objectCBVIndex;
-		objectCBVIndex++;
-		m_graphicsContext->SetPipeline(pipelineStateData, m_pipelineBindResource);
-		m_graphicsContext->Draw(m_indices.size(), 0, 0);*/
 
 		m_graphicsContext->AddBarrier(currBackBuffer, D3D12_RESOURCE_STATE_PRESENT);
 		m_graphicsContext->FlushBarrier();

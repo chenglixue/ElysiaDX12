@@ -2,6 +2,7 @@
 #include "stdafx.h"
 //#include "DX12Shader.h"
 #include "DX12TextureResource.h"
+#include "DX12ConstantBuffer.h"
 
 namespace ElysiaRenderer
 {
@@ -46,7 +47,7 @@ namespace ElysiaRenderer
 	struct PipelineBindResource
 	{
 		std::unordered_map<UINT, std::vector<std::unique_ptr<DX12GPUResource>>> m_SRVResources{};
-		std::unordered_map<UINT, std::vector<std::unique_ptr<DX12GPUResource>>> m_CBVResource{};
+		std::unordered_map<UINT, std::vector<std::unique_ptr<DX12ConstantBuffer>>> m_CBVResource{};
 		std::unordered_map<UINT, UINT> CBVSizes{};
 		std::unordered_map<UINT, size_t> CBVIndexs{};
 	};

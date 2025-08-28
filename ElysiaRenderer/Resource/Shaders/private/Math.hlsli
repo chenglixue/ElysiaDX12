@@ -368,6 +368,12 @@ float E_Pow4(float x)
     return xx * xx;
 }
 
+float Pow4(float x)
+{
+    float xx = x * x;
+    return xx * xx;
+}
+
 float2 Pow4(float2 x)
 {
     float2 xx = x * x;

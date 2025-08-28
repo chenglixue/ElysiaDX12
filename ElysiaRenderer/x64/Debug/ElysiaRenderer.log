@@ -4,18 +4,23 @@
   D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Mesh\UE.fbx
   D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\DrawTriangle.hlsl
   D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\Mesh.hlsl
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\AreaLightCommon.hlsl
   D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\BRDF.hlsl
   D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\Common.hlsl
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\EnergyPreservation.hlsl
   D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\Light.hlsl
   D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\Light.hlsli
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\LightAccumulator.hlsl
   D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\LightCommon.hlsl
   D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\Macros.hlsli
   D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\Math.hlsli
   D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\ShadingCommon.hlsl
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\ShadingModel.hlsl
   D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\SharedCommon.hlsli
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\Transform.hlsli
   D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Tex\CyborgWeapon_BaseColor.dds
   D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Tex\CyborgWeapon_Metallic.dds
   D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Tex\CyborgWeapon_Normal.dds
   D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Tex\CyborgWeapon_Roughness.dds
   D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Tex\Wood.dds
-  19 File(s) copied
+  24 File(s) copied

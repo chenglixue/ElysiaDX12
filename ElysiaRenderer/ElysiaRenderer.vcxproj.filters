@@ -37,6 +37,9 @@
     <Filter Include="Resource Files\Shader\Public">
       <UniqueIdentifier>{e2335b91-bf71-4a5d-9fdb-f259078823ad}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\Shader\Priavte\Header">
+      <UniqueIdentifier>{959e42e0-9903-48ec-afc1-49cf8d47232a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="imgui\imconfig.h">
@@ -245,6 +248,21 @@
       <Filter>Resource Files\Shader\Priavte</Filter>
     </None>
     <None Include="Resource\Shaders\private\ShadingCommon.hlsl">
+      <Filter>Resource Files\Shader\Priavte</Filter>
+    </None>
+    <None Include="Resource\Shaders\private\Transform.hlsli">
+      <Filter>Resource Files\Shader\Priavte</Filter>
+    </None>
+    <None Include="Resource\Shaders\private\ShadingModel.hlsl">
+      <Filter>Resource Files\Shader\Priavte</Filter>
+    </None>
+    <None Include="Resource\Shaders\private\EnergyPreservation.hlsl">
+      <Filter>Resource Files\Shader\Priavte</Filter>
+    </None>
+    <None Include="Resource\Shaders\private\AreaLightCommon.hlsl">
+      <Filter>Resource Files\Shader\Priavte</Filter>
+    </None>
+    <None Include="Resource\Shaders\private\LightAccumulator.hlsl">
       <Filter>Resource Files\Shader\Priavte</Filter>
     </None>
   </ItemGroup>

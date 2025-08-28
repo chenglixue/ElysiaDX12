@@ -55,9 +55,9 @@ namespace ElysiaRenderer
 		{
 			return m_frameID;
 		}
-		ElysiaHelper::UINT2		GetScreenSize() const
+		const XMFLOAT4&			GetScreenSize() const
 		{
-			return m_screenSize;
+			return XMFLOAT4(m_screenSize.x, m_screenSize.y, 1. / m_screenSize.x, 1. / m_screenSize.y);
 		}
 		DX12TextureResource&	GetCurrBackBuffer()
 		{

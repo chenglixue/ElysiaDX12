@@ -4,6 +4,7 @@
 #include "Macros.hlsli"
 #include "Light.hlsli"
 #include "Math.hlsli"
+#include "Transform.hlsli"
 
 #define perObjectSpace   space0
 #define perMaterialSpace space1
@@ -22,8 +23,9 @@ cbuffer PerPassBuffer : register(b0, perPassSpace)
     float4      CameraPosWS;
     float4x4    M_View;
     float4x4    M_Proj;
+    float4      ScreenSize;
     
-    LightData lights[MAIN_LIGHT_NUM];
+    Light lights[MAIN_LIGHT_NUM];
 }
 cbuffer PerObjectBuffer : register(b0, perObjectSpace)
 {
@@ -37,13 +39,80 @@ Texture2D g_roughnessTexture : register(t3, perPassSpace);
 
 struct FInputParams
 {
+    float3 PositionWS;
+    float3 PositionVS;
     float2 PixelPos;
-    float4 ScreenPosition;
+    
+    float2 objectUV;
     float2 ScreenUV;
+    
+    float3 TangentWS;
+    float3 BitTangentWS;
+    float3 NormalWS;
     float3 ScreenVector;
-    float RawDepth;
-    float Linear01Depth;
-    float LinearEyeDepth;
+};
+
+struct MaterialData
+{
+    // 0..1, white for SHADINGMODELID_SUBSURFACE_PROFILE and SHADINGMODELID_EYE (apply BaseColor after scattering is more correct and less blurry)
+    float3 BaseColor;
+    float Opacity;
+    
+    // 0..1
+    float Metallic;
+    // 0..1
+    float Specular;
+    // 0..1
+    float Roughness;
+    // 0..1
+    float AO;
+    
+    // normalized
+    float3 WorldNormal;
+    
+    float3 DiffuseColor;
+    // 0..1 (derived from BaseColor, Metalness, Specular)
+    float3 SpecularColor;
+    // 0..1, white for SHADINGMODELID_SUBSURFACE_PROFILE and SHADINGMODELID_EYE (apply BaseColor after scattering is more correct and less blurry)
+    
+    float Depth;
+    float4 Velocity;
+    
+    // 0..1 (derived from BaseColor, Metalness, Specular)
+    float Anisotropy;
+    
+};
+
+struct FDecodeGBufferData
+{
+    // normalized
+    float3 WorldNormal;
+    // normalized, only valid if HAS_ANISOTROPY_MASK in SelectiveOutputMask
+    float3 WorldTangent;
+    // 0..1 (derived from BaseColor, Metalness, Specular)
+    float Anisotropy;
+    float3 DiffuseColor;
+    // 0..1 (derived from BaseColor, Metalness, Specular)
+    float3 SpecularColor;
+    // 0..1, white for SHADINGMODELID_SUBSURFACE_PROFILE and SHADINGMODELID_EYE (apply BaseColor after scattering is more correct and less blurry)
+    float3 BaseColor;
+    // 0..1
+    float Metallic;
+    // 0..1
+    float Specular;
+    // 0..1
+    float Roughness;
+    // 0..1
+    float AO;
+    // 0..255 
+    uint ShadingModelID;
+    // 0..1
+    float4 CustomData;
+    float Depth;
+    float4 Velocity;
+
+    float3 SceneColor;
+    float Opacity;
 };
 
 struct BxDFContext

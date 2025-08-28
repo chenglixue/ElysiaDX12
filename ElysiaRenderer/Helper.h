@@ -14,6 +14,11 @@ namespace ElysiaHelper
 {
     struct UINT2
     {
+        UINT2(UINT x, UINT y)
+        {
+            this->x = x;
+            this->y = y;
+        }
         uint32_t x = 0;
         uint32_t y = 0;
     };

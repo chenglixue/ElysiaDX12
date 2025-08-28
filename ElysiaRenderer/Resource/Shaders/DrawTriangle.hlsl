@@ -35,7 +35,7 @@ struct PSOutput
 
 PSInput VS(VSInput i)
 {
-    PSInput o;
+    PSInput o = (PSInput)0;
 
     o.positionWS = mul(M_World, float4(i.positionOS, 1.f));
     o.positionVS = mul(M_View, o.positionWS);
@@ -59,21 +59,22 @@ PSOutput PS(PSInput i)
     PSOutput o = (PSOutput)0;
     
     FInputParams inputParam = (FInputParams) 0;
+    inputParam.PositionWS = i.positionWS;
+    inputParam.PositionVS = i.positionVS;
     inputParam.PixelPos = i.positionCS.xy;
-    inputParam.ScreenUV = i.uv;
+    inputParam.objectUV = i.uv;
+    inputParam.ScreenUV = i.positionCS.xy / ScreenSize.xy;
+    inputParam.TangentWS = i.tangentWS;
+    inputParam.BitTangentWS = i.bitTangentWS;
+    inputParam.NormalWS = i.normalWS;
     inputParam.ScreenVector = GetScreenVectorWS(CameraPosWS.xyz, i.positionWS.xyz);
     
-    float3x3 TBN = float3x3(i.tangentWS, i.bitTangentWS, i.normalWS);
+    LightData mainLight = GetMainLight(lights[0]);
     
-    float3 totalDirectRadiance = 0;
-    float3 totalIndirectRadiance = 0;
+    MaterialData materialData = GetMaterialData(inputParam);
     
-    Light mainLight = GetMainLight(lights[0]);
-    float3 toLight = -mainLight.direction;
+    o.target0 = GetDynamicLighting(inputParam, materialData, mainLight);
     
-    FDeferredLightingSplit lighting = (FDeferredLightingSplit) 0;
-    FDecodeGBufferData GBufferData = GetDecodeGBufferData(inputParam.ScreenUV, TBN);
-    
-    o.target0.rgb = GBufferData.WorldNormal;
+    //o.target0.rgb = saturate(dot(materialData.WorldNormal, mainLight.toLight));
     return o;
 }

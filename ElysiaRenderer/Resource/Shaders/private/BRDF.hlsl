@@ -186,12 +186,6 @@ float3 Diffuse_Chan(float3 DiffuseColor, float a2, float NoV, float NoL, float V
     return DiffuseColor * Lobe;
 }
 
-
-
-
-
-
-
 // ----------------------------------------------------------------------- N
 
 // [Blinn 1977, "Models of light reflection for computer synthesized pictures"]
@@ -210,7 +204,7 @@ float D_Beckmann(float a2, float NoH)
 
 // GGX / Trowbridge-Reitz
 // [Walter et al. 2007, "Microfacet models for refraction through rough surfaces"]
-float NDF_GGX(float a2, float NoH)
+float D_GGX(float a2, float NoH)
 {
     float d = (NoH * a2 - NoH) * NoH + 1.f; // 2 mad
     return a2 / (PI * d * d); // 4 mul, 1 rcp

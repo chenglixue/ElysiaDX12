@@ -3,7 +3,7 @@
 
 #define MAIN_LIGHT_NUM 1
 
-struct Light
+struct LightData
 {
     float3 color;
     float intensity;
@@ -12,9 +12,11 @@ struct Light
     
     float3 direction;
     float3 position;
+    
+    float3 toLight;
 };
 
-struct LightData
+struct Light
 {
     float4 m_lightColor;
     float4 m_lightDir;
@@ -25,9 +27,13 @@ struct LightData
     float m_intensity;
 };
 
-struct FDeferredLightingSplit
+struct FAreaLight
 {
-    float4 DiffuseLighting;
-    float4 SpecularLighting;
+    float SphereSinAlpha;
+    float SphereSinAlphaSoft;
+    float LineCosSubtended;
+
+    float3 FalloffColor;
+    uint IsRectAndDiffuseMicroReflWeight;
 };
 #endif
