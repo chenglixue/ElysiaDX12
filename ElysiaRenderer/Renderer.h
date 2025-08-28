@@ -94,7 +94,12 @@ namespace ElysiaRenderer
 		{
 			L"Mesh\\LOW_WEPON.fbx",
 		};
-		const std::vector<LPCWSTR> m_texPaths
+		const std::vector<LPCWSTR> m_globalTexPaths
+		{
+			L"Tex\\GGX_E_LUT.dds",
+			L"Tex\\GGX_Eavg_LUT.dds",
+		};
+		const std::vector<LPCWSTR> m_objectTexPaths
 		{
 			L"Tex\\CyborgWeapon_BaseColor.dds",
 			L"Tex\\CyborgWeapon_Normal.dds",
@@ -296,19 +301,33 @@ namespace ElysiaRenderer
 
 		// Create Tex & Buffer
 		{
-			
-			for (int i = 0; i < m_texPaths.size(); ++i)
+			auto texPaths = m_globalTexPaths;
+			for (int i = 0; i < texPaths.size(); ++i)
 			{
-				auto strPath = ElysiaHelper::LPCWSTRToString(m_texPaths[i]);
+				auto strPath = ElysiaHelper::LPCWSTRToString(texPaths[i]);
+
+				TextureCreationDesc texBufferCreateDesc{};
+
+				texBufferCreateDesc.texturePath = texPaths[i];
+				texBufferCreateDesc.isSRGB = false;
+
+				auto newTex = std::move(m_device->CreateTextureFromFile(texBufferCreateDesc));
+				m_pipelineBindResource.m_SRVResources[ElysiaHelper::PER_PASS_SPACE].push_back(std::move(newTex));
+			}
+
+			texPaths = m_objectTexPaths;
+			for (int i = 0; i < texPaths.size(); ++i)
+			{
+				auto strPath = ElysiaHelper::LPCWSTRToString(texPaths[i]);
 				bool isSRGB = strPath.find("_BaseColor") == strPath.npos ? false : true;
 
 				TextureCreationDesc texBufferCreateDesc{};
 
-				texBufferCreateDesc.texturePath = m_texPaths[i];
+				texBufferCreateDesc.texturePath = texPaths[i];
 				texBufferCreateDesc.isSRGB = isSRGB;
 
 				auto newTex = std::move(m_device->CreateTextureFromFile(texBufferCreateDesc));
-				m_pipelineBindResource.m_SRVResources[ElysiaHelper::PER_PASS_SPACE].push_back(std::move(newTex));
+				m_pipelineBindResource.m_SRVResources[ElysiaHelper::PER_OBJECT_SPACE].push_back(std::move(newTex));
 			}
 			
 		}
@@ -320,6 +339,12 @@ namespace ElysiaRenderer
 				rootParameter->InitAsDescriptorTable(1, D3D12_SHADER_VISIBILITY_PIXEL);
 				rootParameter->SetTableRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, static_cast<UINT>(m_pipelineBindResource.m_SRVResources[ElysiaHelper::PER_PASS_SPACE].size()),
 					0, 0, ElysiaHelper::PER_PASS_SPACE);
+				m_rootParameters.push_back(std::move(rootParameter));
+
+				rootParameter = std::make_unique<DX12RootParameter>();
+				rootParameter->InitAsDescriptorTable(1, D3D12_SHADER_VISIBILITY_PIXEL);
+				rootParameter->SetTableRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, static_cast<UINT>(m_pipelineBindResource.m_SRVResources[ElysiaHelper::PER_OBJECT_SPACE].size()),
+					0, 0, ElysiaHelper::PER_OBJECT_SPACE);
 				m_rootParameters.push_back(std::move(rootParameter));
 
 				rootParameter = std::make_unique<DX12RootParameter>();

@@ -4,6 +4,7 @@
 #include "BRDF.hlsl"
 #include "AreaLightCommon.hlsl"
 #include "LightAccumulator.hlsl"
+#include "EnergyPreservation.hlsl"
 
 struct FShadowTerms
 {
@@ -90,11 +91,16 @@ FDirectLighting DefaultLitBxDF(MaterialData materialData, half3 N, half3 V, half
     Context.NoV = saturate(abs(Context.NoV) + 1e-5);
 
     Lighting.Diffuse = Diffuse_Chan(materialData.DiffuseColor, Pow4(materialData.Roughness), NoV, NoL, VoH, NoH, GetAreaLightDiffuseMicroReflWeight(AreaLight));
-    Lighting.Diffuse = Lighting.Diffuse * Falloff * NoL * AreaLight.FalloffColor;
+    Lighting.Diffuse *= AreaLight.FalloffColor * Falloff * NoL;
 
     Lighting.Specular = SpecularGGX(materialData.Roughness, materialData.SpecularColor, Context, NoL, AreaLight);
     //Lighting.Specular += GetSpecularEnergyPreservation(materialData.BaseColor, materialData.Roughness, Context.NoL, Context.NoV);
-    Lighting.Specular *= AreaLight.FalloffColor * (Falloff * NoL);
+    Lighting.Specular *= AreaLight.FalloffColor * Falloff * NoL;
+    
+    FBxDFEnergyTerms energyTerm = ComputeFresnelEnergyTerms(GGXEnergyLookup(materialData.Roughness, NoV), materialData.SpecularColor);
+    
+    Lighting.Diffuse *= ComputeEnergyPreservation(energyTerm);
+    Lighting.Specular *= ComputeEnergyConservation(energyTerm);
 
     return Lighting;
 }

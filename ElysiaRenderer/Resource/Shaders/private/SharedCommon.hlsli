@@ -32,10 +32,13 @@ cbuffer PerObjectBuffer : register(b0, perObjectSpace)
     float4x4 M_World;
 }
 
-Texture2D g_albedoTexture : register(t0, perPassSpace);
-Texture2D g_normalTexture : register(t1, perPassSpace);
-Texture2D g_metallicTexture : register(t2, perPassSpace);
-Texture2D g_roughnessTexture : register(t3, perPassSpace);
+Texture2D g_GGX_E_LUT : register(t0, perPassSpace);
+Texture2D g_GGX_EAvg_LUT : register(t1, perPassSpace);
+
+Texture2D g_albedoTexture : register(t0, perObjectSpace);
+Texture2D g_normalTexture : register(t1, perObjectSpace);
+Texture2D g_metallicTexture : register(t2, perObjectSpace);
+Texture2D g_roughnessTexture : register(t3, perObjectSpace);
 
 struct FInputParams
 {
