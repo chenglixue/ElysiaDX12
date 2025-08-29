@@ -1,5 +1,6 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include "Renderer.h"
+#include "pix3.h"
 
 //using namespace D3D12Lite;
 
@@ -66,6 +67,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam)
 
 int main()
 {
+	GetLatestWinPixGpuCapturerPath_Cpp17();
+
 	std::wstring applicationName = L"Elysia Renderer";
 	ElysiaHelper::UINT2 windowSize = { static_cast<UINT>(1920 * 0.6), static_cast < UINT>(1080 * 0.6) };
 	HINSTANCE moduleHandle = GetModuleHandle(nullptr);
@@ -93,7 +96,7 @@ int main()
 	SetFocus(windowHandle);
 	ShowCursor(true);
 
-	GetLatestWinPixGpuCapturerPath_Cpp17();
+	
 
 	std::unique_ptr<ElysiaRenderer::Renderer> renderer = std::make_unique<ElysiaRenderer::Renderer>(windowHandle, windowSize);
 	renderer->Init();

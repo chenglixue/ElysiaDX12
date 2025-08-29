@@ -72,8 +72,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>D:\DX12\ElysiaRenderer\x64\Debug\Assimp\include;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\DX12\ElysiaRenderer\x64\Debug\Assimp\Environment;$(LibraryPath)</LibraryPath>
+    <IncludePath>D:\DX12\ElysiaRenderer\x64\Debug\Assimp\include;D:\DX12\ElysiaDX12\x64\Debug\Assimp\Environment;D:\DX12\ElysiaDX12\x64\Debug\Assimp\include;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\DX12\ElysiaDX12\x64\Debug\Assimp\include;D:\DX12\ElysiaRenderer\x64\Debug\Assimp\Environment;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -110,13 +110,13 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;USE_PIX;PROFILE;PROFILE_BUILD;DBG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>D:\DX12\ElysiaRenderer\x64\Debug\Shaders;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\DX12\ElysiaRenderer\x64\Debug\Shaders;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc\include;D:\DX12\ElysiaDX12\x64\Debug\Assimp\include\assimp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
       <AdditionalDependencies>d3d12.lib;dxcompiler.lib;dxgi.lib;assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc\lib\spectre\x64;D:\DX12\ElysiaRenderer\ElysiaRenderer\dxc\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc\lib\spectre\x64;D:\DX12\ElysiaRenderer\ElysiaRenderer\dxc\lib\x64;D:\DX12\ElysiaDX12\x64\Debug\Assimp\Environment;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>xcopy $(ProjectDir)Resource $(TargetDir) /Y /E</Command>
