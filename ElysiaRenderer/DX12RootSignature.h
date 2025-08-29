@@ -50,7 +50,7 @@ namespace ElysiaRenderer
 
 		~DX12RootSignature();
 
-		ID3D12RootSignature* GetSignature() const
+		CComPtr<ID3D12RootSignature> GetSignature() const
 		{
 			return m_rootSignature;
 		}
@@ -105,7 +105,7 @@ namespace ElysiaRenderer
 		UINT m_numRootParameters;
 		UINT m_numSamplers;
 		UINT m_numInitedSamplers;
-		ID3D12RootSignature* m_rootSignature;
+		CComPtr<ID3D12RootSignature> m_rootSignature;
 		std::unique_ptr<DX12RootParameter[]> m_rootParametersArray;
 		std::unique_ptr<D3D12_STATIC_SAMPLER_DESC[]> m_samplerArray;
 		UINT32 m_descriptorTableSize[16];	// Non-sampler descriptor tables need to know their descriptor count. one index for one root parameter

@@ -43,7 +43,6 @@ namespace ElysiaRenderer
 		// load mesh, which includes vertex, index, normal, tangent, texture, material information
 		void LoadMesh(const aiScene* scene, aiMesh* mesh);
 
-
 	private:
 		std::string m_directory;
 		std::vector<DX12Mesh> m_meshs;

@@ -44,7 +44,7 @@ namespace ElysiaRenderer
 			BindDescriptorHeaps(currFrameID);
 		}
 	}
-	void DX12Context::Reset(ID3D12PipelineState* pipelineState)
+	void DX12Context::Reset(CComPtr<ID3D12PipelineState> pipelineState)
 	{
 		UINT currFrameID = m_device->GetFrameID();
 		m_commandAllocators[currFrameID]->Reset();

@@ -23,7 +23,7 @@ namespace ElysiaRenderer
 		
 	}
 
-	DX12TextureUploadBuffer::DX12TextureUploadBuffer(ID3D12Resource* resource, D3D12_RESOURCE_STATES usageState, D3D12MA::Allocation* allocation)
+	DX12TextureUploadBuffer::DX12TextureUploadBuffer(CComPtr<ID3D12Resource> resource, D3D12_RESOURCE_STATES usageState, CComPtr<D3D12MA::Allocation> allocation)
 		:	DX12BufferResource(resource, usageState)
 	{
 		resource->Map(0, nullptr, reinterpret_cast<void**>(&m_mappedBuffer));

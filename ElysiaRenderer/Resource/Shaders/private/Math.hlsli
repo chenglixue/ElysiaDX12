@@ -710,8 +710,7 @@ float4 Blend_LinearDodge_float4(float4 Base, float4 Blend, float Opacity)
 
 float4 Blend_LinearLight_float4(float4 Base, float4 Blend, float Opacity)
 {
-
-    float4 Out = select(Blend < 0.5, max(Base + (2. * Blend) - 1., 0), min(Base + 2. * (Blend - 0.5), 1.));
+    float4 Out = Blend < 0.5 ? max(Base + (2. * Blend) - 1., 0) : min(Base + 2. * (Blend - 0.5), 1.);
     Out = lerp(Base, Out, Opacity);
     return Out;
 }

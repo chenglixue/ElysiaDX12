@@ -2,8 +2,8 @@
 
 namespace ElysiaRenderer
 {
-	DX12ConstantBuffer::DX12ConstantBuffer(ID3D12Resource* resource, D3D12_RESOURCE_STATES usageState, uint32_t bufferSize, 
-		DX12DescriptorHeapHandle constantBufferViewHandle, D3D12MA::Allocation* allocator)
+	DX12ConstantBuffer::DX12ConstantBuffer(CComPtr<ID3D12Resource> resource, D3D12_RESOURCE_STATES usageState, uint32_t bufferSize,
+		DX12DescriptorHeapHandle constantBufferViewHandle, CComPtr<D3D12MA::Allocation> allocator)
 		: DX12BufferResource(resource, usageState)
 	{
 		m_GPUAddress = resource->GetGPUVirtualAddress();

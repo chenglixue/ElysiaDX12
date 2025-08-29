@@ -40,6 +40,9 @@
     <Filter Include="Resource Files\Shader\Priavte\Header">
       <UniqueIdentifier>{959e42e0-9903-48ec-afc1-49cf8d47232a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\Tex">
+      <UniqueIdentifier>{a7ed1da8-a8b9-4fdd-b060-c397b456b1fe}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="imgui\imconfig.h">
@@ -265,6 +268,9 @@
     <None Include="Resource\Shaders\private\LightAccumulator.hlsl">
       <Filter>Resource Files\Shader\Priavte</Filter>
     </None>
+    <None Include="Resource\Shaders\public\Skybox.hlsl">
+      <Filter>Resource Files\Shader\Public</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DXTex\BC.cpp">
@@ -421,6 +427,30 @@
   <ItemGroup>
     <Image Include="Resource\Tex\Wood.dds">
       <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\x64\Debug\Tex\CyborgWeapon_BaseColor.dds">
+      <Filter>Resource Files\Tex</Filter>
+    </Image>
+    <Image Include="..\x64\Debug\Tex\CyborgWeapon_Metallic.dds">
+      <Filter>Resource Files\Tex</Filter>
+    </Image>
+    <Image Include="..\x64\Debug\Tex\CyborgWeapon_Normal.dds">
+      <Filter>Resource Files\Tex</Filter>
+    </Image>
+    <Image Include="..\x64\Debug\Tex\CyborgWeapon_Roughness.dds">
+      <Filter>Resource Files\Tex</Filter>
+    </Image>
+    <Image Include="..\x64\Debug\Tex\GGX_E_LUT.dds">
+      <Filter>Resource Files\Tex</Filter>
+    </Image>
+    <Image Include="..\x64\Debug\Tex\GGX_Eavg_LUT.dds">
+      <Filter>Resource Files\Tex</Filter>
+    </Image>
+    <Image Include="..\x64\Debug\Tex\Skybox.dds">
+      <Filter>Resource Files\Tex</Filter>
+    </Image>
+    <Image Include="..\x64\Debug\Tex\Wood.dds">
+      <Filter>Resource Files\Tex</Filter>
     </Image>
   </ItemGroup>
 </Project>

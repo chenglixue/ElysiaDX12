@@ -56,11 +56,11 @@ namespace ElysiaRenderer
 	{
 	public:
 		DX12PipelineState();
-		DX12PipelineState(ID3D12PipelineState* pipelineState);
-		DX12PipelineState(ID3D12PipelineState* pipelineState, DX12RootSignature* rootSignature);
+		DX12PipelineState(CComPtr<ID3D12PipelineState> pipelineState);
+		DX12PipelineState(CComPtr<ID3D12PipelineState> pipelineState, DX12RootSignature* rootSignature);
 		virtual ~DX12PipelineState();
 
-		ID3D12PipelineState*& GetPipelineState()
+		CComPtr<ID3D12PipelineState> GetPipelineState()
 		{
 			return m_pipelineState;
 		}
@@ -74,7 +74,7 @@ namespace ElysiaRenderer
 		}
 
 	protected:
-		ID3D12PipelineState* m_pipelineState;
+		CComPtr<ID3D12PipelineState> m_pipelineState;
 		//ID3D12RootSignature* m_rootSignature;
 		PipleineType m_pipelineType;
 		DX12RootSignature* m_rootSignature;
@@ -84,7 +84,7 @@ namespace ElysiaRenderer
 	{
 	public:
 		DX12GraphicsPipelineState();
-		DX12GraphicsPipelineState(ID3D12PipelineState* pipelineState, DX12RootSignature* rootSignature);
+		DX12GraphicsPipelineState(CComPtr<ID3D12PipelineState> pipelineState, DX12RootSignature* rootSignature);
 		~DX12GraphicsPipelineState() override;
 
 	private:

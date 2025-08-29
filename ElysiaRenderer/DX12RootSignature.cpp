@@ -97,7 +97,7 @@ namespace ElysiaRenderer
 
 	DX12RootSignature::~DX12RootSignature()
 	{
-		ElysiaHelper::SafeRelease(m_rootSignature);
+		//ElysiaHelper::SafeRelease(m_rootSignature);
 	}
 
 	void DX12RootSignature::InitStaticSamplers(UINT slotIndex, const D3D12_SAMPLER_DESC& nonStaticSamplerDesc, D3D12_SHADER_VISIBILITY shaderVisibility)

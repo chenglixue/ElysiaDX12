@@ -37,7 +37,7 @@ namespace ElysiaRenderer
 		{
 			return m_bufferType;
 		}
-		ID3D12Resource*& GetResource()
+		CComPtr<ID3D12Resource> GetResource()
 		{
 			return m_resource;
 		}
@@ -53,7 +53,7 @@ namespace ElysiaRenderer
 		{
 			return m_resourceDesc;
 		}
-		D3D12MA::Allocation*& GetAllocation()
+		CComPtr<D3D12MA::Allocation> GetAllocation()
 		{
 			return m_allocation;
 		}
@@ -74,7 +74,7 @@ namespace ElysiaRenderer
 		{
 			m_GPUAddress = GPUAddress;
 		}
-		void SetAllocation(D3D12MA::Allocation* allocation)
+		void SetAllocation(CComPtr<D3D12MA::Allocation> allocation)
 		{
 			m_allocation = allocation;
 		}
@@ -95,13 +95,13 @@ namespace ElysiaRenderer
 		virtual void Destory()
 		{
 			//ElysiaHelper::SafeRelease(m_allocation);
-			ElysiaHelper::SafeRelease(m_resource);
+			//ElysiaHelper::SafeRelease(m_resource);
 			m_GPUAddress = 0;
 		}
 
 	protected:
-		ID3D12Resource* m_resource = nullptr;
-		D3D12MA::Allocation* m_allocation = nullptr;
+		CComPtr<ID3D12Resource> m_resource = nullptr;
+		CComPtr<D3D12MA::Allocation> m_allocation = nullptr;
 		D3D12_RESOURCE_DESC m_resourceDesc = {};
 		D3D12_GPU_VIRTUAL_ADDRESS m_GPUAddress = 0;
 		// a resource must be in COMMON state before being used on a COPY queue

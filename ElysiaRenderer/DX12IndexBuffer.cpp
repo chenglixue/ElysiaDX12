@@ -2,9 +2,9 @@
 
 namespace ElysiaRenderer
 {
-	DX12IndexBuffer::DX12IndexBuffer(ID3D12Resource* resource, D3D12_RESOURCE_STATES usageState, 
+	DX12IndexBuffer::DX12IndexBuffer(CComPtr<ID3D12Resource> resource, D3D12_RESOURCE_STATES usageState,
 		DXGI_FORMAT format, uint32_t bufferSize, void* vertexMappedBuffer,
-		D3D12MA::Allocation* allocation)
+		CComPtr<D3D12MA::Allocation> allocation)
 		: DX12BufferResource(resource, usageState)
 	{
 		m_bufferType = BufferType::Index;

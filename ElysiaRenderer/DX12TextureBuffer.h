@@ -82,7 +82,7 @@ namespace ElysiaRenderer
 	class DX12TextureUploadBuffer : public DX12BufferResource
 	{
 	public:
-		DX12TextureUploadBuffer(ID3D12Resource* resource, D3D12_RESOURCE_STATES usageState, D3D12MA::Allocation* allocation);
+		DX12TextureUploadBuffer(CComPtr<ID3D12Resource> resource, D3D12_RESOURCE_STATES usageState, CComPtr<D3D12MA::Allocation> allocation);
 		~DX12TextureUploadBuffer();
 
 		uint8_t* GetMappedBuffer()

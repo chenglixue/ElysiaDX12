@@ -286,6 +286,14 @@
     <ClCompile Include="Renderer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="..\x64\Debug\Tex\CyborgWeapon_BaseColor.dds" />
+    <Image Include="..\x64\Debug\Tex\CyborgWeapon_Metallic.dds" />
+    <Image Include="..\x64\Debug\Tex\CyborgWeapon_Normal.dds" />
+    <Image Include="..\x64\Debug\Tex\CyborgWeapon_Roughness.dds" />
+    <Image Include="..\x64\Debug\Tex\GGX_Eavg_LUT.dds" />
+    <Image Include="..\x64\Debug\Tex\GGX_E_LUT.dds" />
+    <Image Include="..\x64\Debug\Tex\Skybox.dds" />
+    <Image Include="..\x64\Debug\Tex\Wood.dds" />
     <Image Include="Resource\Tex\Wood.dds" />
   </ItemGroup>
   <ItemGroup>
@@ -338,6 +346,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resource\Shaders\private\LightAccumulator.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resource\Shaders\public\Skybox.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>

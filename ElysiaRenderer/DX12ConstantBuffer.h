@@ -19,8 +19,8 @@ namespace ElysiaRenderer
 	class DX12ConstantBuffer : public DX12BufferResource
 	{
 	public:
-		DX12ConstantBuffer(ID3D12Resource* resource, D3D12_RESOURCE_STATES usageState, uint32_t bufferSize, 
-			DX12DescriptorHeapHandle constantBufferViewHandle, D3D12MA::Allocation* allocator);
+		DX12ConstantBuffer(CComPtr<ID3D12Resource> resource, D3D12_RESOURCE_STATES usageState, uint32_t bufferSize,
+			DX12DescriptorHeapHandle constantBufferViewHandle, CComPtr<D3D12MA::Allocation> allocator);
 		DX12ConstantBuffer(DX12ConstantBuffer&& a) = default;
 		DX12ConstantBuffer(DX12ConstantBuffer& a) = delete;
 		DX12ConstantBuffer& operator=(DX12ConstantBuffer& a) = delete;

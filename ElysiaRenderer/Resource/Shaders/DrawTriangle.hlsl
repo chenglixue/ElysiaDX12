@@ -1,11 +1,7 @@
-#pragma once
-#include "private/SharedCommon.hlsli"
+#include "./private/ShadingCommon.hlsl"
 
-#include "private/Common.hlsl"
-#include "private/BRDF.hlsl"
-#include "private/Light.hlsl"
-#include "private/LightCommon.hlsl"
-#include "private/ShadingCommon.hlsl"
+#include "./private/Light.hlsl"
+#include "./private/LightCommon.hlsl"
 
 struct VSInput
 {
@@ -74,6 +70,7 @@ PSOutput PS(PSInput i)
     MaterialData materialData = GetMaterialData(inputParam);
     
     o.target0 = GetDynamicLighting(inputParam, materialData, mainLight);
+    o.target0 = g_SkyboxTex.Sample(g_Sampler_ClampU_ClampV_Linear, inputParam.ScreenUV);
     
     //o.target0.rgb = saturate(dot(materialData.WorldNormal, mainLight.toLight));
     return o;

@@ -34,6 +34,7 @@ cbuffer PerObjectBuffer : register(b0, perObjectSpace)
 
 Texture2D g_GGX_E_LUT : register(t0, perPassSpace);
 Texture2D g_GGX_EAvg_LUT : register(t1, perPassSpace);
+Texture2D g_SkyboxTex : register(t2, perPassSpace);
 
 Texture2D g_albedoTexture : register(t0, perObjectSpace);
 Texture2D g_normalTexture : register(t1, perObjectSpace);

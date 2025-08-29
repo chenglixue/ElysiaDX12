@@ -45,8 +45,8 @@ namespace ElysiaRenderer
 	class DX12TextureResource : public DX12GPUResource
 	{
 	public:
-		DX12TextureResource(ID3D12Resource* resource, D3D12_RESOURCE_STATES usageState);
-		DX12TextureResource(ID3D12Resource* resource, D3D12_RESOURCE_STATES usageState, D3D12MA::Allocation* allocation);
+		DX12TextureResource(CComPtr<ID3D12Resource> resource, D3D12_RESOURCE_STATES usageState);
+		DX12TextureResource(CComPtr<ID3D12Resource> resource, D3D12_RESOURCE_STATES usageState, CComPtr<D3D12MA::Allocation> allocation);
 		DX12TextureResource(DX12TextureResource&& texResource) = default;
 		DX12TextureResource(DX12TextureResource& a) = delete;
 		DX12TextureResource& operator=(DX12TextureResource& a) = delete;

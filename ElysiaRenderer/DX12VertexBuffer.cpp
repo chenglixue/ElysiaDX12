@@ -2,7 +2,7 @@
 
 namespace ElysiaRenderer
 {
-	DX12VertexBuffer::DX12VertexBuffer(ID3D12Resource* resource, D3D12_RESOURCE_STATES usageState, uint32_t vertexStride, uint32_t bufferSize)
+	DX12VertexBuffer::DX12VertexBuffer(CComPtr<ID3D12Resource> resource, D3D12_RESOURCE_STATES usageState, uint32_t vertexStride, uint32_t bufferSize)
 		: DX12BufferResource(resource, usageState)
 	{
 		m_bufferType = BufferType::Vertex;
@@ -16,8 +16,8 @@ namespace ElysiaRenderer
 		m_resource->Map(0, nullptr, reinterpret_cast<void**>(&m_mappedBuffer));
 	}
 
-	DX12VertexBuffer::DX12VertexBuffer(ID3D12Resource* resource, D3D12_RESOURCE_STATES usageState, uint32_t vertexStride, uint32_t bufferSize,
-		D3D12MA::Allocation* allocation)
+	DX12VertexBuffer::DX12VertexBuffer(CComPtr<ID3D12Resource> resource, D3D12_RESOURCE_STATES usageState, uint32_t vertexStride, uint32_t bufferSize,
+		CComPtr<D3D12MA::Allocation> allocation)
 		: DX12BufferResource(resource, usageState)
 	{
 		m_bufferType = BufferType::Vertex;

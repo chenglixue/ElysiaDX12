@@ -1,11 +1,17 @@
 #pragma once
 #include "stdafx.h"
-
 #include <dxcapi.h>         // Be sure to link with dxcompiler.lib.
 #include <d3d12shader.h>    // Shader reflection.
 
 namespace ElysiaRenderer
 {
+	enum ShaderQueue : uint8_t
+	{
+		Opaque = 2000,
+		Skybox = 3000,
+		Transparent = 4000
+	};
+
 	enum class ShaderType : uint8_t
 	{
 		Vertex = 0,
