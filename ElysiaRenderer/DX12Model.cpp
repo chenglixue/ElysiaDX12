@@ -15,21 +15,21 @@ namespace ElysiaRenderer
 		const aiScene* pLocalScene = localImporter.ReadFile(
 			modelPath,
 			// Triangulates all faces of all meshes
-			aiProcess_Triangulate
+			aiProcess_Triangulate |
 			// Supersedes the aiProcess_MakeLeftHanded and aiProcess_FlipUVs and aiProcess_FlipWindingOrder flags
-			|aiProcess_ConvertToLeftHanded
+			//aiProcess_ConvertToLeftHanded |
 			// This preset enables almost every optimization step to achieve perfectly optimized data. In D3D, need combine with aiProcess_ConvertToLeftHanded
-			//| aiProcessPreset_TargetRealtime_MaxQuality
+			aiProcessPreset_TargetRealtime_MaxQuality |
 			// Calculates the tangents and bitangents for the imported meshes
-			| aiProcess_CalcTangentSpace
+			aiProcess_CalcTangentSpace |
 			// Splits large meshes into smaller sub-meshes
 			// This is quite useful for real-time rendering, 
 			// where the number of triangles which can be maximally processed in a single draw - call is limited by the video driver / hardware
-			| aiProcess_SplitLargeMeshes
+			aiProcess_SplitLargeMeshes |
 			// A postprocessing step to reduce the number of meshes
-			| aiProcess_OptimizeMeshes
+			aiProcess_OptimizeMeshes |
 			// A postprocessing step to optimize the scene hierarchy
-			| aiProcess_OptimizeGraph
+			aiProcess_OptimizeGraph
 		);
 
 		// "localScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE" is used to check whether value data returned is incomplete
@@ -175,16 +175,16 @@ namespace ElysiaRenderer
 			}
 		}
 
-		m_indexCount = localIndices.size();
+		m_drawIndexCount = localIndices.size();
 
 		DX12Mesh resultMesh(localVertices, localIndices, m_localMaterials);
 		resultMesh.m_name = mesh->mName.C_Str();
-		resultMesh.m_indexCount = m_indexCount;
-		resultMesh.m_currStartIndex = m_currStartIndex;
-		resultMesh.m_currStartVertex = m_currStartVertex;
+		resultMesh.m_indexCount = m_drawIndexCount;
+		resultMesh.m_currStartIndex = m_startIndex;
+		resultMesh.m_currStartVertex = m_startVertex;
 
-		m_currStartIndex += m_indexCount;
-		m_currStartVertex += resultMesh.m_vertices.size();
+		m_startIndex += m_drawIndexCount;
+		m_startVertex += resultMesh.m_vertices.size();
 
 		m_meshs.emplace_back(std::move(resultMesh));
 	}

@@ -197,7 +197,7 @@ namespace ElysiaRenderer
 
 			TextureBufferCreationDesc textureBufferCreationDesc{};
 			textureBufferCreationDesc.bufferAccessFlags = BufferAccessFlags::HostWritable;
-			textureBufferCreationDesc.m_size = 40 * 1024 * 1024;
+			textureBufferCreationDesc.m_size = 40 * 4096 * 4096;
 
 			for (UINT currFrameIndex = 0; currFrameIndex < NUM_FRAMES_IN_FLIGHT; ++currFrameIndex)
 			{
@@ -594,7 +594,7 @@ namespace ElysiaRenderer
 					srvDescPointer = &SRV;
 				}
 
-				m_device->CreateShaderResourceView(newTex->GetResource(), srvDescPointer, SRVHandle.GetCPUHandle());
+				m_device->CreateShaderResourceView(newTex->GetResource(), isCubeMap ? srvDescPointer : nullptr, SRVHandle.GetCPUHandle());
 			}
 			
 			///

@@ -111,6 +111,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalIncludeDirectories>D:\DX12\ElysiaRenderer\x64\Debug\Shaders;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc\include;D:\DX12\ElysiaDX12\x64\Debug\Assimp\include\assimp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>0018;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -149,7 +150,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="D3D12Lite.h" />
     <ClInclude Include="D3D12MemoryAllocator\D3D12MemAlloc.h" />
     <ClInclude Include="Definition.h" />
     <ClInclude Include="DX12BufferResource.h" />
@@ -294,12 +294,8 @@
     <Image Include="..\x64\Debug\Tex\GGX_E_LUT.dds" />
     <Image Include="..\x64\Debug\Tex\Skybox.dds" />
     <Image Include="..\x64\Debug\Tex\Wood.dds" />
+    <Image Include="Resource\Tex\cubemap0.dds" />
     <Image Include="Resource\Tex\Wood.dds" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resource\Shaders\DrawTriangle.hlsl">
-      <FileType>Document</FileType>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resource\Shaders\private\BRDF.hlsl">
@@ -351,6 +347,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resource\Shaders\public\Skybox.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resource\Shaders\public\DrawTriangle.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>

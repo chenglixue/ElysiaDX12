@@ -27,15 +27,27 @@ namespace ElysiaRenderer
 		}
 		const UINT& GetVertexOffset()
 		{
-			return m_currStartVertex;
+			return m_startVertex;
 		}
 		const UINT& GetIndexOffset()
 		{
-			return m_currStartIndex;
+			return m_startIndex;
 		}
 		const UINT& GetIndexCount()
 		{
-			return m_indexCount;
+			return m_drawIndexCount;
+		}
+		void SetDrawIndexCount(UINT drawIndexCount)
+		{
+			m_drawIndexCount = drawIndexCount;
+		}
+		void SetVertexOffset(UINT startVertex)
+		{
+			m_startVertex = startVertex;
+		}
+		void SetIndexOffset(UINT startIndex)
+		{
+			m_startIndex = startIndex;
 		}
 
 		// Traverse and process the nodes in assimp in turn
@@ -47,9 +59,9 @@ namespace ElysiaRenderer
 		std::string m_directory;
 		std::vector<DX12Mesh> m_meshs;
 
-		UINT m_currStartVertex = 0;
-		UINT m_currStartIndex = 0;
-		UINT m_indexCount = 0;
+		UINT m_startVertex = 0;
+		UINT m_startIndex = 0;
+		UINT m_drawIndexCount = 0;
 	};
 
 
