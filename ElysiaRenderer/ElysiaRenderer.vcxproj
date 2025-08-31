@@ -211,6 +211,11 @@
       <FileType>Document</FileType>
       <DeploymentContent>true</DeploymentContent>
     </CopyFileToFolders>
+    <None Include="..\x64\Debug\Shaders\private\Light.hlsli" />
+    <None Include="..\x64\Debug\Shaders\private\Macros.hlsli" />
+    <None Include="..\x64\Debug\Shaders\private\Math.hlsli" />
+    <None Include="..\x64\Debug\Shaders\private\SharedCommon.hlsli" />
+    <None Include="..\x64\Debug\Shaders\private\Transform.hlsli" />
     <None Include="DXTex\Shaders\Compiled\BC6HEncode_EncodeBlockCS.inc" />
     <None Include="DXTex\Shaders\Compiled\BC6HEncode_TryModeG10CS.inc" />
     <None Include="DXTex\Shaders\Compiled\BC6HEncode_TryModeLE10CS.inc" />
@@ -352,6 +357,41 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resource\Shaders\public\DrawTriangle.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\x64\Debug\Shaders\private\AreaLightCommon.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\x64\Debug\Shaders\private\BRDF.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\x64\Debug\Shaders\private\Common.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\x64\Debug\Shaders\private\EnergyPreservation.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\x64\Debug\Shaders\private\Light.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\x64\Debug\Shaders\private\LightAccumulator.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\x64\Debug\Shaders\private\LightCommon.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\x64\Debug\Shaders\private\ShadingCommon.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\x64\Debug\Shaders\private\ShadingModel.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\x64\Debug\Shaders\public\DrawTriangle.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\x64\Debug\Shaders\public\Skybox.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>

@@ -1,7 +1,14 @@
-#include <private\ShadingCommon.hlsl>
+#if defined(EDITOR)
+    #include <private\ShadingCommon.hlsl>
 
-#include <private\Light.hlsl>
-#include <private\LightCommon.hlsl>
+    #include <private\Light.hlsl>
+    #include <private\LightCommon.hlsl>
+#else
+    #include "../private\ShadingCommon.hlsl"
+
+    #include "../private\Light.hlsl"
+    #include "../private\LightCommon.hlsl"
+#endif
 
 struct VSInput
 {
@@ -37,12 +44,20 @@ PSInput VS(VSInput i)
     o.positionVS = mul(M_View, o.positionWS);
     o.positionCS = mul(M_Proj, o.positionVS);
     
-    float3 N = normalize(mul(i.normalOS, (float3x3) M_World));
-    float3 T = normalize(mul(i.tangentOS, (float3x3) M_World));
+    bool hasTangent = false;
+    if (hasTangent)
+    {
+        float3 N = normalize(mul(i.normalOS, (float3x3) M_World));
+        float3 T = normalize(mul(i.tangentOS, (float3x3) M_World));
     
-    o.tangentWS = normalize(T - dot(N, T) * N);
-    o.bitTangentWS = cross(o.tangentWS, N);
-    o.normalWS = N;
+        o.tangentWS = T;
+        o.bitTangentWS = normalize(cross(o.tangentWS, N));
+        o.normalWS = N;
+    }
+    else
+    {
+        o.normalWS = normalize(mul(i.normalOS, (float3x3) M_World));
+    }
     
     o.uv = i.uv;
     o.color = i.color;
@@ -70,8 +85,8 @@ PSOutput PS(PSInput i)
     MaterialData materialData = GetMaterialData(inputParam);
     
     o.target0 = GetDynamicLighting(inputParam, materialData, mainLight);
-    //o.target0.rgb = materialData.BaseColor;
+    //o.target0.rgb = materialData.WorldNormal;
+    o.target0.rgb = saturate(dot(mainLight.toLight, i.normalWS));
     
-    //o.target0.rgb = saturate(dot(materialData.WorldNormal, mainLight.toLight));
     return o;
 }

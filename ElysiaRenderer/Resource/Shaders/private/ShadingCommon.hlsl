@@ -103,10 +103,10 @@ MaterialData GetMaterialData(FInputParams inputParams)
     
     float3x3 TBN = float3x3(inputParams.TangentWS, inputParams.BitTangentWS, inputParams.NormalWS);
     
-    float4 baseColorTex = g_albedoTexture.Sample(g_Sampler_ClampU_ClampV_Linear, inputParams.objectUV);
-    float4 normalTS = g_normalTexture.Sample(g_Sampler_ClampU_ClampV_Linear, inputParams.objectUV);
-    float metallic = saturate(g_metallicTexture.Sample(g_Sampler_ClampU_ClampV_Linear, inputParams.objectUV));
-    float roughness = saturate(g_roughnessTexture.Sample(g_Sampler_ClampU_ClampV_Linear, inputParams.objectUV));
+    float4 baseColorTex = g_albedoTexture.Sample(g_Sampler_WarpU_WarpV_Linear, inputParams.objectUV);
+    float4 normalTS = g_normalTexture.Sample(g_Sampler_WarpU_WarpV_Linear, inputParams.objectUV);
+    float metallic = saturate(g_metallicTexture.Sample(g_Sampler_WarpU_WarpV_Linear, inputParams.objectUV));
+    float roughness = saturate(g_roughnessTexture.Sample(g_Sampler_WarpU_WarpV_Linear, inputParams.objectUV));
     //float specular = g_.Sample(g_Sampler_ClampU_ClampV_Linear, inputParams.objectUV);
     //float AO = .Sample(g_Sampler_ClampU_ClampV_Linear, inputParams.objectUV);
 
@@ -115,7 +115,7 @@ MaterialData GetMaterialData(FInputParams inputParams)
     o.AO = 1;
     o.Metallic = metallic;
     o.Roughness = roughness;
-    o.Specular = 0.04;
+    o.Specular = 1;
     
     o.WorldNormal = GetNormal(normalTS.rgb, TBN);
 

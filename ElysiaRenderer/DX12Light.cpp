@@ -5,7 +5,6 @@ namespace ElysiaRenderer
 	DX12Light::DX12Light(XMFLOAT4 lightColor, XMFLOAT4 lightDir, float intensity)
 		: m_lightType(LightType::None), m_lightColor(lightColor), m_lightDir(lightDir), m_lightIntensity(intensity)
 	{
-
 	}
 
 	DX12DirectionLight::DX12DirectionLight(XMFLOAT4 lightColor, XMFLOAT4 lightDir, float intensity)

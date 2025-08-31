@@ -43,6 +43,15 @@
     <Filter Include="Resource Files\Tex">
       <UniqueIdentifier>{a7ed1da8-a8b9-4fdd-b060-c397b456b1fe}</UniqueIdentifier>
     </Filter>
+    <Filter Include="X64">
+      <UniqueIdentifier>{7432b155-6c6b-4459-8cf3-def79fb0f7ab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="X64\private">
+      <UniqueIdentifier>{179c0cd1-3c71-47f8-9c2f-e5807c0b2b3d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="X64\public">
+      <UniqueIdentifier>{ea212747-cc65-40fc-968d-b87999217161}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="imgui\imconfig.h">
@@ -76,9 +85,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DXTex\BCDirectCompute.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="D3D12Lite.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="D3D12MemoryAllocator\D3D12MemAlloc.h">
@@ -223,9 +229,6 @@
       <Filter>Header Files</Filter>
     </None>
     <None Include="packages.config" />
-    <None Include="Resource\Shaders\DrawTriangle.hlsl">
-      <Filter>Resource Files\Shader\Public</Filter>
-    </None>
     <None Include="Resource\Shaders\private\SharedCommon.hlsli">
       <Filter>Resource Files\Shader\Priavte</Filter>
     </None>
@@ -269,6 +272,57 @@
       <Filter>Resource Files\Shader\Priavte</Filter>
     </None>
     <None Include="Resource\Shaders\public\Skybox.hlsl">
+      <Filter>Resource Files\Shader\Public</Filter>
+    </None>
+    <None Include="..\x64\Debug\Shaders\private\Light.hlsli">
+      <Filter>X64\private</Filter>
+    </None>
+    <None Include="..\x64\Debug\Shaders\private\Macros.hlsli">
+      <Filter>X64\private</Filter>
+    </None>
+    <None Include="..\x64\Debug\Shaders\private\Math.hlsli">
+      <Filter>X64\private</Filter>
+    </None>
+    <None Include="..\x64\Debug\Shaders\private\SharedCommon.hlsli">
+      <Filter>X64\private</Filter>
+    </None>
+    <None Include="..\x64\Debug\Shaders\private\Transform.hlsli">
+      <Filter>X64\private</Filter>
+    </None>
+    <None Include="..\x64\Debug\Shaders\public\DrawTriangle.hlsl">
+      <Filter>X64\public</Filter>
+    </None>
+    <None Include="..\x64\Debug\Shaders\public\Skybox.hlsl">
+      <Filter>X64\public</Filter>
+    </None>
+    <None Include="..\x64\Debug\Shaders\private\AreaLightCommon.hlsl">
+      <Filter>X64\private</Filter>
+    </None>
+    <None Include="..\x64\Debug\Shaders\private\BRDF.hlsl">
+      <Filter>X64\private</Filter>
+    </None>
+    <None Include="..\x64\Debug\Shaders\private\Common.hlsl">
+      <Filter>X64\private</Filter>
+    </None>
+    <None Include="..\x64\Debug\Shaders\private\EnergyPreservation.hlsl">
+      <Filter>X64\private</Filter>
+    </None>
+    <None Include="..\x64\Debug\Shaders\private\Light.hlsl">
+      <Filter>X64\private</Filter>
+    </None>
+    <None Include="..\x64\Debug\Shaders\private\LightAccumulator.hlsl">
+      <Filter>X64\private</Filter>
+    </None>
+    <None Include="..\x64\Debug\Shaders\private\LightCommon.hlsl">
+      <Filter>X64\private</Filter>
+    </None>
+    <None Include="..\x64\Debug\Shaders\private\ShadingCommon.hlsl">
+      <Filter>X64\private</Filter>
+    </None>
+    <None Include="..\x64\Debug\Shaders\private\ShadingModel.hlsl">
+      <Filter>X64\private</Filter>
+    </None>
+    <None Include="Resource\Shaders\public\DrawTriangle.hlsl">
       <Filter>Resource Files\Shader\Public</Filter>
     </None>
   </ItemGroup>
@@ -452,5 +506,6 @@
     <Image Include="..\x64\Debug\Tex\Wood.dds">
       <Filter>Resource Files\Tex</Filter>
     </Image>
+    <Image Include="Resource\Tex\cubemap0.dds" />
   </ItemGroup>
 </Project>

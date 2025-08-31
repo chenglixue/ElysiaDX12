@@ -70,7 +70,7 @@ int main()
 	GetLatestWinPixGpuCapturerPath_Cpp17();
 
 	std::wstring applicationName = L"Elysia Renderer";
-	ElysiaHelper::UINT2 windowSize = { static_cast<UINT>(1920 * 0.6), static_cast < UINT>(1080 * 0.6) };
+	ElysiaHelper::UINT2 windowSize = { static_cast<UINT>(1920), static_cast < UINT>(1080) };
 	HINSTANCE moduleHandle = GetModuleHandle(nullptr);
 
 	WNDCLASSEX wc = { 0 };

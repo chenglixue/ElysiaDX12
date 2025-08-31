@@ -15,10 +15,11 @@ FLightAccumulator AccumulateDynamicLighting(FInputParams inputData, MaterialData
     FLightAccumulator o = (FLightAccumulator) 0;
     FShadowTerms Shadow = (FShadowTerms) 0;
     
-    float3 V = inputData.ScreenVector;
+    float3 V = -inputData.ScreenVector;
     float3 N = materialData.WorldNormal;
+    N = inputData.NormalWS;
     float3 L = lightData.toLight;
-    float3 MaskedLightColor = lightData.color;
+    float3 MaskedLightColor = lightData.color * lightData.intensity;
     Shadow.SurfaceShadow = 1;
     
     FDirectLighting directLight = (FDirectLighting) 0;

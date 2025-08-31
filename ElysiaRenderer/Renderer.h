@@ -13,7 +13,7 @@ namespace ElysiaRenderer
 	/// </summary>
 	const std::vector<LPCWSTR> m_modelPaths
 	{
-		L"Mesh\\LOW_WEPON.fbx",
+		//L"Mesh\\LOW_WEPON.fbx",
 		L"Mesh\\Sphere.fbx",
 	};
 	const std::vector<LPCWSTR> m_globalTexPaths
@@ -34,7 +34,7 @@ namespace ElysiaRenderer
 	XMMATRIX m_viewMatrix = XMMatrixIdentity();
 	XMMATRIX m_projMatrix = XMMatrixIdentity();
 	float m_curRotationAngleRad = 0.f;
-	const float m_rotationSpeed = 0.01f;
+	const float m_rotationSpeed = 0.001f;
 
 	class Renderer
 	{
@@ -143,7 +143,7 @@ namespace ElysiaRenderer
 
 		{
 			auto camera = std::make_unique<DX12Camera>();
-			camera->SetCameraPos({ 0.0f, 0.0f, 10.0f, 0.f });
+			camera->SetCameraPos({ 0.0f, 3.0f, -10.0f, 0.f });
 			camera->SetCameraFOV(0.8f);
 			camera->SetCameraNearZ(0.01f);
 			camera->SetCameraFarz(1000.f);
@@ -196,18 +196,96 @@ namespace ElysiaRenderer
 		m_computeShaders.clear();
 		m_graphicsPipelineStates.clear();
 	}
-	inline void Renderer::InitLight()
-	{
-		auto dirLight = std::make_unique<DX12DirectionLight>(XMFLOAT4(1, 1, 1, 1), XMFLOAT4(0, 0, -1, 0), 1);
-		m_passParameter.lights[0] = std::move(dirLight->CreateLightData());
 
-		m_lights.emplace_back(std::move(dirLight));
+	inline void Renderer::InitLight() 
+	{
+		auto dirLight = std::make_unique<DX12DirectionLight>(XMFLOAT4(1, 1, 1, 1), XMFLOAT4(0, 0, 1, 0), 2);
+		m_passParameter.lights[0] = std::move(dirLight->CreateLightData()); 
+
+		m_lights.emplace_back(std::move(dirLight));    
 	}
 	inline void Renderer::LoadModel()
 	{
 		UINT currDrawVertex = 0;
 		UINT currStartVertex = 0;
 		UINT currStartIndex = 0;
+
+		// Define the geometry for a cube.
+		std::vector<DX12Vertex> cubeVertices =
+		{
+			// TOP: normal aims up (positive y-axis) in local space
+			{ XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT3(0.f, 0.f, 0.f), XMFLOAT2(0.f, 0.f), XMFLOAT3(0.f, 1.f, 0.f)},
+			{ XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT3(0.f, 0.f, 0.f), XMFLOAT2(0.f, 0.f),XMFLOAT3(0.0f, 1.0f, 0.0f) },
+			{ XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT3(0.f, 0.f, 0.f), XMFLOAT2(0.f, 0.f),XMFLOAT3(0.0f, 1.0f, 0.0f) },
+			{ XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT3(0.f, 0.f, 0.f), XMFLOAT2(0.f, 0.f),XMFLOAT3(0.0f, 1.0f, 0.0f) },
+
+			// BOTTOM: normal aims down (negative y-axis) in local space
+			{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT3(0.f, 0.f, 0.f), XMFLOAT2(0.f, 0.f),XMFLOAT3(0.0f, -1.0f, 0.0f) },
+			{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT3(0.f, 0.f, 0.f), XMFLOAT2(0.f, 0.f),XMFLOAT3(0.0f, -1.0f, 0.0f) },
+			{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT3(0.f, 0.f, 0.f), XMFLOAT2(0.f, 0.f),XMFLOAT3(0.0f, -1.0f, 0.0f) },
+			{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT3(0.f, 0.f, 0.f), XMFLOAT2(0.f, 0.f),XMFLOAT3(0.0f, -1.0f, 0.0f) },
+
+			// LEFT: normal aims right (negative x-axis) in local space
+			{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT3(0.f, 0.f, 0.f), XMFLOAT2(0.f, 0.f),XMFLOAT3(-1.0f, 0.0f, 0.0f) },
+			{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT3(0.f, 0.f, 0.f), XMFLOAT2(0.f, 0.f),XMFLOAT3(-1.0f, 0.0f, 0.0f) },
+			{ XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT3(0.f, 0.f, 0.f), XMFLOAT2(0.f, 0.f),XMFLOAT3(-1.0f, 0.0f, 0.0f) },
+			{ XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT3(0.f, 0.f, 0.f), XMFLOAT2(0.f, 0.f),XMFLOAT3(-1.0f, 0.0f, 0.0f) },
+
+			// RIGHT: normal aims right (positive x-axis) in local space
+			{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT3(0.f, 0.f, 0.f), XMFLOAT2(0.f, 0.f),XMFLOAT3(1.0f, 0.0f, 0.0f) },
+			{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT3(0.f, 0.f, 0.f), XMFLOAT2(0.f, 0.f),XMFLOAT3(1.0f, 0.0f, 0.0f) },
+			{ XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT3(0.f, 0.f, 0.f), XMFLOAT2(0.f, 0.f),XMFLOAT3(1.0f, 0.0f, 0.0f) },
+			{ XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT3(0.f, 0.f, 0.f), XMFLOAT2(0.f, 0.f),XMFLOAT3(1.0f, 0.0f, 0.0f) },
+			 
+			// FRONT: normal aims forwards (negative z-axis) in local space
+			{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT3(0.f, 0.f, 0.f), XMFLOAT2(0.f, 0.f),XMFLOAT3(0.0f, 0.0f, -1.0f) },
+			{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT3(0.f, 0.f, 0.f), XMFLOAT2(0.f, 0.f),XMFLOAT3(0.0f, 0.0f, -1.0f) },
+			{ XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT3(0.f, 0.f, 0.f), XMFLOAT2(0.f, 0.f),XMFLOAT3(0.0f, 0.0f, -1.0f) },
+			{ XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT3(0.f, 0.f, 0.f), XMFLOAT2(0.f, 0.f),XMFLOAT3(0.0f, 0.0f, -1.0f) },
+
+			// BACK: normal aims backwards (positive z-axis) in local space
+			{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT3(0.f, 0.f, 0.f), XMFLOAT2(0.f, 0.f),XMFLOAT3(0.0f, 0.0f, 1.0f) },
+			{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT3(0.f, 0.f, 0.f), XMFLOAT2(0.f, 0.f),XMFLOAT3(0.0f, 0.0f, 1.0f) },
+			{ XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT3(0.f, 0.f, 0.f), XMFLOAT2(0.f, 0.f),XMFLOAT3(0.0f, 0.0f, 1.0f) },
+			{ XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT3(0.f, 0.f, 0.f), XMFLOAT2(0.f, 0.f),XMFLOAT3(0.0f, 0.0f, 1.0f) },
+		};
+		std::vector<UINT32> indices =
+		{
+			// TOP
+			3,1,0,
+			2,1,3,
+
+			// BOTTOM
+			6,4,5,
+			7,4,6,
+
+			// LEFT
+			11,9,8,
+			10,9,11,
+
+			// RIGHT
+			14,12,13,
+			15,12,14,
+
+			// FRONT
+			19,17,16,
+			18,17,19,
+
+			// BACK
+			22,20,21,
+			23,20,22
+		};
+		m_vertices.insert(m_vertices.end(), cubeVertices.begin(), cubeVertices.end());
+		m_indices.insert(m_indices.end(), indices.begin(), indices.end());
+		auto tempModel = DX12Model();
+		tempModel.SetDrawIndexCount(static_cast<UINT>(indices.size()));
+		tempModel.SetVertexOffset(0);
+		tempModel.SetIndexOffset(0);
+		currDrawVertex += static_cast<UINT>(indices.size());
+		currStartVertex += static_cast<UINT>(m_vertices.size());
+		currStartIndex += static_cast<UINT>(m_indices.size());
+		m_models.emplace_back(std::move(tempModel));
+
 		for (size_t currModelIndex = 0; currModelIndex < m_modelPaths.size(); ++currModelIndex)
 		{
 			auto currModel = DX12Model(m_modelPaths[currModelIndex]);
@@ -309,7 +387,7 @@ namespace ElysiaRenderer
 
 	}
 
-
+	 
 	void Renderer::InitTexTriangle()
 	{
 		// Create Shader
@@ -494,9 +572,9 @@ namespace ElysiaRenderer
 			XMMATRIX scaleMatrix = XMMatrixIdentity();
 			XMMATRIX rotationMatrix = XMMatrixIdentity();
 
-			scaleMatrix = XMMatrixScaling(1.f, 1.f, 1.f);
-			rotationMatrix = XMMatrixRotationZ(XMConvertToRadians(-90)) * XMMatrixRotationX(XMConvertToRadians(-90));
-			translateMatrix = XMMatrixTranslationFromVector(XMVectorSet(0.f, 0.f, 0.f, 0.f));
+			scaleMatrix = XMMatrixScaling(1.f, 1.f, 1.f); 
+			//rotationMatrix = XMMatrixRotationZ(XMConvertToRadians(-90)) * XMMatrixRotationX(XMConvertToRadians(-90));
+			translateMatrix = XMMatrixTranslation(0.f, 0.f, 0.f);
 			XMStoreFloat4x4(&tempCBVObjectParameter.worldMatrix, XMMatrixMultiply(scaleMatrix, XMMatrixMultiply(rotationMatrix, XMMatrixMultiply(translateMatrix, m_worldMatrix))));
 			BindObject(currBackBuffer, objectCBVIndex, ShaderQueue::Opaque, 0, tempCBVObjectParameter);
 			objectCBVIndex++;
@@ -504,7 +582,7 @@ namespace ElysiaRenderer
 			tempCBVObjectParameter = {};
 			scaleMatrix = XMMatrixScaling(10.f, 10.f, 10.f);
 			translateMatrix = XMMatrixTranslation(0.f, 0.0f, 0.0f);
-			XMStoreFloat4x4(&tempCBVObjectParameter.worldMatrix, m_worldMatrix * scaleMatrix * translateMatrix);
+			XMStoreFloat4x4(&tempCBVObjectParameter.worldMatrix, scaleMatrix * translateMatrix);
 			BindObject(currBackBuffer, objectCBVIndex, ShaderQueue::Skybox, 1, tempCBVObjectParameter);
 		}
 
@@ -517,3 +595,4 @@ namespace ElysiaRenderer
 		m_device->Present();
 	}
 }
+
