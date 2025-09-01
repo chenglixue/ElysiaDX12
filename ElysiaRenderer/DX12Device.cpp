@@ -349,7 +349,6 @@ namespace ElysiaRenderer
 
 		D3D12_CONSTANT_BUFFER_VIEW_DESC CBVDesc{};
 		CBVDesc.BufferLocation = resource->GetGPUVirtualAddress();
-		CBVDesc.SizeInBytes = bufferCreationDesc.m_bufferSize;
 		auto CBVDescriptor = m_SRVStagingDescriptorHeap->NewDescriptorHeapHandle();
 		m_device->CreateConstantBufferView(&CBVDesc, CBVDescriptor.GetCPUHandle());
 

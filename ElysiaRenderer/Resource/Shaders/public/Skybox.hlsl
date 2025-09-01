@@ -1,7 +1,14 @@
-#include <private\ShadingCommon.hlsl>
+#if defined(EDITOR)
+    #include <private\ShadingCommon.hlsl>
 
-#include <private\Light.hlsl>
-#include <private\LightCommon.hlsl>
+    #include <private\Light.hlsl>
+    #include <private\LightCommon.hlsl>
+#else
+    #include "../private\ShadingCommon.hlsl"
+
+    #include "../private\Light.hlsl"
+    #include "../private\LightCommon.hlsl"
+#endif
 
 struct VSInput
 {
@@ -33,6 +40,7 @@ struct PSOutput
 PSInput VS(VSInput i)
 {
     PSInput o = (PSInput) 0;
+
 
     o.positionOS = float4(i.positionOS, 1.f);
     o.positionWS = mul(M_World, float4(i.positionOS, 1.f));

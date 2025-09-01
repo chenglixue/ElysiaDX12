@@ -13,7 +13,7 @@ namespace ElysiaRenderer
 	/// </summary>
 	const std::vector<LPCWSTR> m_modelPaths
 	{
-		//L"Mesh\\LOW_WEPON.fbx",
+		L"Mesh\\LOW_WEPON.fbx",
 		L"Mesh\\Sphere.fbx",
 	};
 	const std::vector<LPCWSTR> m_globalTexPaths
@@ -35,6 +35,7 @@ namespace ElysiaRenderer
 	XMMATRIX m_projMatrix = XMMatrixIdentity();
 	float m_curRotationAngleRad = 0.f;
 	const float m_rotationSpeed = 0.001f;
+	int objectNum = 3;
 
 	class Renderer
 	{
@@ -167,9 +168,9 @@ namespace ElysiaRenderer
 	inline void Renderer::Update()
 	{
 		m_curRotationAngleRad += m_rotationSpeed;
-		m_worldMatrix = XMMatrixRotationY(m_curRotationAngleRad);
+		m_worldMatrix = XMMatrixRotationY(0);
 
-		m_passParameter.screenSize = m_device->GetScreenSize();
+		m_passParameter.lights[0].m_lightPos = XMVector4Transform(m_passParameter.lights[0].m_lightPos, XMMatrixTranslation(6.f, 0.f, 0.f) * XMMatrixRotationY(m_curRotationAngleRad));
 		m_pipelineBindResource.m_CBVResource[ElysiaHelper::PER_PASS_SPACE][0]->SetMappedData(&m_passParameter, sizeof(CBVPassParameter));
 	}
 	inline void Renderer::Render()
@@ -199,9 +200,9 @@ namespace ElysiaRenderer
 
 	inline void Renderer::InitLight() 
 	{
-		auto dirLight = std::make_unique<DX12DirectionLight>(XMFLOAT4(1, 1, 1, 1), XMFLOAT4(0, 0, 1, 0), 2);
+		auto dirLight = std::make_unique<DX12DirectionLight>(XMFLOAT4(1, 1, 1, 1), XMVectorSet(1, 0, 0, 0), 2);
 		m_passParameter.lights[0] = std::move(dirLight->CreateLightData()); 
-
+		 
 		m_lights.emplace_back(std::move(dirLight));    
 	}
 	inline void Renderer::LoadModel()
@@ -275,7 +276,7 @@ namespace ElysiaRenderer
 			22,20,21,
 			23,20,22
 		};
-		m_vertices.insert(m_vertices.end(), cubeVertices.begin(), cubeVertices.end());
+		/*m_vertices.insert(m_vertices.end(), cubeVertices.begin(), cubeVertices.end());
 		m_indices.insert(m_indices.end(), indices.begin(), indices.end());
 		auto tempModel = DX12Model();
 		tempModel.SetDrawIndexCount(static_cast<UINT>(indices.size()));
@@ -284,7 +285,7 @@ namespace ElysiaRenderer
 		currDrawVertex += static_cast<UINT>(indices.size());
 		currStartVertex += static_cast<UINT>(m_vertices.size());
 		currStartIndex += static_cast<UINT>(m_indices.size());
-		m_models.emplace_back(std::move(tempModel));
+		m_models.emplace_back(std::move(tempModel));*/
 
 		for (size_t currModelIndex = 0; currModelIndex < m_modelPaths.size(); ++currModelIndex)
 		{
@@ -305,6 +306,7 @@ namespace ElysiaRenderer
 			currStartIndex += static_cast<UINT>(currIndices.size());
 		}
 	}
+
 	inline void Renderer::AddShader(ShaderQueue shaderQueue, const std::wstring& shaderName, const std::wstring& entryPoint, ShaderType shaderType)
 	{
 		ShaderCreateDesc VSShaderCreateDesc{};
@@ -361,14 +363,12 @@ namespace ElysiaRenderer
 	{
 		// get object constant buffer
 		auto objectConstanBuffer = dynamic_cast <DX12ConstantBuffer*>(m_pipelineBindResource.m_CBVResource[ElysiaHelper::PER_OBJECT_SPACE][objectCBVIndex].get());
-		m_objectParameters.emplace_back(CBVObjectParameter());
 
-		// set object constant data in buffer
-		m_objectParameters.back() = tempCBVObjectParameter;
-		objectConstanBuffer->SetMappedData(&m_objectParameters[objectCBVIndex], sizeof(CBVObjectParameter));
+		//// set object constant data in buffer
+		m_objectParameters.emplace_back(tempCBVObjectParameter);
+		objectConstanBuffer->SetMappedData(&m_objectParameters.back(), sizeof(CBVObjectParameter));
 		m_pipelineBindResource.CBVSizes[ElysiaHelper::PER_OBJECT_SPACE] = sizeof(CBVObjectParameter);
 		m_pipelineBindResource.CBVIndexs[ElysiaHelper::PER_OBJECT_SPACE] = objectCBVIndex;
-
 
 		// set pipeline & bind data
 		auto pipelineStateData = CreatePipelineStateData(m_graphicsPipelineStates[pipelineStateQueue].get(),
@@ -384,10 +384,10 @@ namespace ElysiaRenderer
 		auto startIndex = drawModel.GetIndexOffset();
 
 		m_graphicsContext->Draw(drawVertexCount, startVertex, startIndex);
-
+		objectCBVIndex++;
 	}
-
 	 
+	
 	void Renderer::InitTexTriangle()
 	{
 		// Create Shader
@@ -417,13 +417,12 @@ namespace ElysiaRenderer
 			constantBuffer->SetMappedData(&m_passParameter, sizeof(CBVPassParameter));
 			m_pipelineBindResource.m_CBVResource[ElysiaHelper::PER_PASS_SPACE].push_back(std::move(constantBuffer));
 
-			constantBuffer = m_device->CreateConstantBuffer(constantBufferCreationDesc);
-			//constantBuffer->SetMappedData(&m_objectParameters[0], sizeof(CBVObjectParameter));
-			m_pipelineBindResource.m_CBVResource[ElysiaHelper::PER_OBJECT_SPACE].push_back(std::move(constantBuffer));
-
-			constantBuffer = m_device->CreateConstantBuffer(constantBufferCreationDesc);
-			//constantBuffer->SetMappedData(&m_objectParameters[1], sizeof(CBVObjectParameter));
-			m_pipelineBindResource.m_CBVResource[ElysiaHelper::PER_OBJECT_SPACE].push_back(std::move(constantBuffer));
+			m_objectParameters.resize(objectNum); 
+			for (int i = 0; i < objectNum; ++i)
+			{
+				constantBuffer = m_device->CreateConstantBuffer(constantBufferCreationDesc);
+				m_pipelineBindResource.m_CBVResource[ElysiaHelper::PER_OBJECT_SPACE].push_back(std::move(constantBuffer));
+			}
 		}
 
 		// Create Depth Buffer
@@ -537,7 +536,7 @@ namespace ElysiaRenderer
 			pipelineStateCreateDesc.m_rasterDesc.CullMode = D3D12_CULL_MODE_NONE;
 			// let cubemap z = 1 pass z-test, otherwise it'll be failed in z-test because data of zbuffer is 1
 			pipelineStateCreateDesc.m_depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
-
+			 
 			m_graphicsPipelineStates.insert({ ShaderQueue::Skybox, std::move(m_device->CreateGraphicsPipelineState(pipelineStateCreateDesc)) });
 		}
 	}
@@ -552,6 +551,7 @@ namespace ElysiaRenderer
 		size_t objectCBVIndex = 0;
 
 		m_graphicsContext->Reset(m_graphicsPipelineStates[ShaderQueue::Opaque]->GetPipelineState());
+		m_graphicsContext->Reset(m_graphicsPipelineStates[ShaderQueue::Skybox]->GetPipelineState());
 		m_graphicsContext->AddBarrier(currBackBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET);
 		m_graphicsContext->AddBarrier(*m_depthBuffer, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 		m_graphicsContext->FlushBarrier();
@@ -572,12 +572,17 @@ namespace ElysiaRenderer
 			XMMATRIX scaleMatrix = XMMatrixIdentity();
 			XMMATRIX rotationMatrix = XMMatrixIdentity();
 
-			scaleMatrix = XMMatrixScaling(1.f, 1.f, 1.f); 
-			//rotationMatrix = XMMatrixRotationZ(XMConvertToRadians(-90)) * XMMatrixRotationX(XMConvertToRadians(-90));
+			scaleMatrix = XMMatrixScaling(1.f, 1.f, 1.f);
+			rotationMatrix = XMMatrixRotationY(XMConvertToRadians(-90)) * XMMatrixRotationZ(XMConvertToRadians(90));
 			translateMatrix = XMMatrixTranslation(0.f, 0.f, 0.f);
-			XMStoreFloat4x4(&tempCBVObjectParameter.worldMatrix, XMMatrixMultiply(scaleMatrix, XMMatrixMultiply(rotationMatrix, XMMatrixMultiply(translateMatrix, m_worldMatrix))));
+			XMStoreFloat4x4(&tempCBVObjectParameter.worldMatrix, scaleMatrix * rotationMatrix * translateMatrix);
 			BindObject(currBackBuffer, objectCBVIndex, ShaderQueue::Opaque, 0, tempCBVObjectParameter);
-			objectCBVIndex++;
+
+			scaleMatrix = XMMatrixScaling(1.f, 1.f, 1.f);
+			rotationMatrix = XMMatrixRotationAxis(XMVectorSet(0, 1, 0, 0), m_curRotationAngleRad);
+			translateMatrix = XMMatrixTranslation(6.f, 0.f, 0.f);
+			XMStoreFloat4x4(&tempCBVObjectParameter.worldMatrix, scaleMatrix * translateMatrix * rotationMatrix);
+			BindObject(currBackBuffer, objectCBVIndex, ShaderQueue::Opaque, 1, tempCBVObjectParameter);
 
 			tempCBVObjectParameter = {};
 			scaleMatrix = XMMatrixScaling(10.f, 10.f, 10.f);

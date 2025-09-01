@@ -17,10 +17,10 @@ namespace ElysiaRenderer
 		XMFLOAT4	m_lightColor;
 
 		// 16
-		XMFLOAT4	m_lightDir;
+		XMVECTOR	m_lightDir;
 
 		// 16
-		XMFLOAT4	m_lightPos;
+		XMVECTOR	m_lightPos;
 
 		// 16
 		float		m_falloffStart;
@@ -33,7 +33,7 @@ namespace ElysiaRenderer
 	{
 	public:
 		DX12Light() = default;
-		DX12Light(XMFLOAT4 lightColor, XMFLOAT4 lightDir, float intensity);
+		DX12Light(XMFLOAT4 lightColor, XMVECTOR lightDir, float intensity);
 		DX12Light(const DX12Light& rhs) = default;
 		DX12Light& operator=(const DX12Light& rhs) = default;
 		DX12Light(DX12Light&& rhs) = default;
@@ -47,7 +47,7 @@ namespace ElysiaRenderer
 		{
 			return m_lightColor;
 		}
-		const XMFLOAT4& GetLightDir()
+		const XMVECTOR& GetLightDir()
 		{
 			return m_lightDir;
 		}
@@ -60,8 +60,9 @@ namespace ElysiaRenderer
 
 	protected:
 		XMFLOAT4 m_lightColor;
-		XMFLOAT4 m_lightDir;
+		XMVECTOR m_lightDir;
 		float m_lightIntensity;
+		XMVECTOR m_lightPos;
 		LightType m_lightType = LightType::None;
 	};
 
@@ -69,7 +70,7 @@ namespace ElysiaRenderer
 	{
 	public:
 		DX12DirectionLight() = default;
-		DX12DirectionLight(XMFLOAT4 lightColor, XMFLOAT4 lightDir, float intensity);
+		DX12DirectionLight(XMFLOAT4 lightColor, XMVECTOR lightDir, float intensity);
 		DX12DirectionLight(const DX12DirectionLight& rhs) = default;
 		DX12DirectionLight& operator=(const DX12DirectionLight& rhs) = default;
 		DX12DirectionLight(DX12DirectionLight&& rhs) = default;

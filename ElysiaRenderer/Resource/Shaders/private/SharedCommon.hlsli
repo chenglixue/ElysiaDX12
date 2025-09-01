@@ -20,16 +20,18 @@ SamplerState g_Sampler_ClampU_ClampV_Anisotropic : register(s5);
 
 cbuffer PerPassBuffer : register(b0, perPassSpace)
 {
-    float4      CameraPosWS;
-    float4x4    M_View;
-    float4x4    M_Proj;
-    float4      ScreenSize;
+    float4 CameraPosWS;
+    float4x4 M_View;
+    float4x4 M_Proj;
+    float4 ScreenSize;
     
     Light lights[MAIN_LIGHT_NUM];
+    float4 padding0[2];
 }
 cbuffer PerObjectBuffer : register(b0, perObjectSpace)
 {
     float4x4 M_World;
+    float4 padding1[12];
 }
 
 Texture2D g_GGX_E_LUT : register(t0, perPassSpace);

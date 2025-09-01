@@ -17,7 +17,7 @@ namespace ElysiaRenderer
 			// Triangulates all faces of all meshes
 			aiProcess_Triangulate |
 			// Supersedes the aiProcess_MakeLeftHanded and aiProcess_FlipUVs and aiProcess_FlipWindingOrder flags
-			//aiProcess_ConvertToLeftHanded |
+			aiProcess_ConvertToLeftHanded |
 			// This preset enables almost every optimization step to achieve perfectly optimized data. In D3D, need combine with aiProcess_ConvertToLeftHanded
 			aiProcessPreset_TargetRealtime_MaxQuality |
 			// Calculates the tangents and bitangents for the imported meshes
