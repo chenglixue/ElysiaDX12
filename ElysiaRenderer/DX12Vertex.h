@@ -31,10 +31,10 @@ namespace ElysiaRenderer
 		}
 		~DX12Vertex() = default;
 		
-		XMFLOAT3 m_position;
-		XMFLOAT3 m_color;
-		XMFLOAT2 m_uv;
-		XMFLOAT3 m_normal;
-		XMFLOAT3 m_tangent;
+		XMFLOAT3 m_position{};
+		XMFLOAT3 m_color{};
+		XMFLOAT2 m_uv{};
+		XMFLOAT3 m_normal{};
+		XMFLOAT3 m_tangent{};
 	};
 }

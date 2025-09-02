@@ -41,7 +41,6 @@ PSInput VS(VSInput i)
     PSInput o = (PSInput) 0;
 
     o.positionWS = mul(M_World, float4(i.positionOS, 1.f));
-    o.positionWS = float4(i.positionOS, 1.f);
     o.positionVS = mul(M_View, o.positionWS);
     o.positionCS = mul(M_Proj, o.positionVS);
     
@@ -88,7 +87,7 @@ PSOutput PS(PSInput i)
     o.target0 = GetDynamicLighting(inputParam, materialData, mainLight);
     //o.target0.rgb = materialData.WorldNormal;
     o.target0.rgb = max(0, dot(mainLight.direction, inputParam.NormalWS));
-    o.target0.rgb = CameraPosWS.y;
+    o.target0.rgb = CameraPosWS.z;
     
     return o;
 }

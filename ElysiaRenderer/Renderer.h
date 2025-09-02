@@ -81,7 +81,7 @@ namespace ElysiaRenderer
 		/// <summary>
 		/// Constant parameter
 		/// </summary>
-		struct CBVPassParameter
+		struct alignas(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT) CBVPassParameter
 		{
 			XMFLOAT4 cameraPosWS;	// 16
 			XMFLOAT4X4 viewMatrix;	// 64
@@ -97,9 +97,10 @@ namespace ElysiaRenderer
 			
 			XMFLOAT4 padding[12];
 		};
+		
 		static_assert((sizeof(CBVPassParameter) % 256) == 0, "Constant Buffer size must be 256-byte aligned");
 		static_assert((sizeof(CBVObjectParameter) % 256) == 0, "Constant Buffer size must be 256-byte aligned");
-		CBVPassParameter m_passParameter;
+		CBVPassParameter m_passParameter{};
 		std::vector<CBVObjectParameter> m_objectParameters{};
 
 		/// <summary>
@@ -140,7 +141,6 @@ namespace ElysiaRenderer
 
 	inline void Renderer::Init()
 	{
-		m_passParameter = CBVPassParameter();
 
 		{
 			auto camera = std::make_unique<DX12Camera>();
