@@ -77,6 +77,7 @@ namespace ElysiaRenderer
 		std::vector<std::unique_ptr<DX12Camera>> m_cameras;
 		std::vector<std::unique_ptr<DX12Light>> m_lights;
 		PipelineBindResource m_pipelineBindResource;
+		TexCreateDesc m_depthBufferCreateDesc{};
 
 		/// <summary>
 		/// Constant parameter
@@ -97,7 +98,6 @@ namespace ElysiaRenderer
 			
 			XMFLOAT4 padding[12];
 		};
-		
 		static_assert((sizeof(CBVPassParameter) % 256) == 0, "Constant Buffer size must be 256-byte aligned");
 		static_assert((sizeof(CBVObjectParameter) % 256) == 0, "Constant Buffer size must be 256-byte aligned");
 		CBVPassParameter m_passParameter{};
@@ -112,17 +112,24 @@ namespace ElysiaRenderer
 		std::vector<std::unique_ptr<DX12MeshRender>> m_meshRenders{};
 
 		void InitTexTriangle();
-
 		void RenderTexTriangle();
+
+		void LoadShaders();
+		void LoadVertexIndexBuffer();
+		void LoadConstantBuffers();
+		void CreateCreamDepthRT();
+		void LoadAndCreateTexs();
+		void CreateSignatures();
+		void CreatePOS();
 
 		void InitLight();
 		void LoadModel();
 		void BindObject(DX12TextureResource& currBackBuffer, 
-			size_t& objectCBVIndex, UINT pipelineStateQueue, size_t drawMeshIndex,
+			UINT& objectCBVIndex, uint8_t pipelineStateQueue, size_t drawMeshIndex,
 			const CBVObjectParameter& tempCBVObjectParameter);
 		void AddShader(ShaderQueue shaderQueue, const std::wstring& shaderName, const std::wstring& entryPoint, ShaderType shaderType);
-		void AddVertexBuffer(UINT singVertexSize, BufferAccessFlags bufferAccessFlag, bool isRawAccess);
-		void AddIndexBuffer(UINT singIndexSize, DXGI_FORMAT format, BufferAccessFlags bufferAccessFlag);
+		void AddVertexBuffer(UINT singVertexSize, BufferAccessFlags bufferAccessFlag = BufferAccessFlags::HostWritable, bool isRawAccess = false);
+		void AddIndexBuffer(UINT singIndexSize, DXGI_FORMAT format, BufferAccessFlags bufferAccessFlag = BufferAccessFlags::HostWritable);
 	};
 
 	Renderer::Renderer(HWND windowHandle, ElysiaHelper::UINT2 screenSize)
@@ -197,13 +204,233 @@ namespace ElysiaRenderer
 		m_computeShaders.clear();
 		m_graphicsPipelineStates.clear();
 	}
+	
+	inline void Renderer::InitTexTriangle()
+	{
+		LoadShaders();
 
-	inline void Renderer::InitLight() 
+		LoadVertexIndexBuffer();
+
+		LoadConstantBuffers();
+
+		CreateCreamDepthRT();
+
+		LoadAndCreateTexs();
+
+		CreateSignatures();
+
+		CreatePOS();
+	}
+	inline void Renderer::RenderTexTriangle()
+	{
+		m_objectParameters.clear();
+
+		m_device->BeginFrame();
+
+		auto& currBackBuffer = m_device->GetCurrBackBuffer();
+		UINT objectCBVIndex = 0;
+
+		m_graphicsContext->Reset(m_graphicsPipelineStates[ShaderQueue::Opaque]->GetPipelineState());
+		//m_graphicsContext->Reset(m_graphicsPipelineStates[ShaderQueue::Skybox]->GetPipelineState());
+		m_graphicsContext->AddBarrier(currBackBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET);
+		m_graphicsContext->AddBarrier(*m_depthBuffer, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+		m_graphicsContext->FlushBarrier();
+
+		m_graphicsContext->ClearRenderTarget(currBackBuffer, Color(1, 1, 1));
+		m_graphicsContext->ClearDepthStencilTarget(*m_depthBuffer, 1.f, 0);
+
+		m_graphicsContext->SetVertexBuffer(0, 1, m_vertexBuffer->GetVertexBufferView());
+		m_graphicsContext->SetIndexBuffer(m_indexBuffer->GetIndexBufferView());
+
+		m_graphicsContext->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(static_cast<UINT>(m_device->GetScreenSize().x), static_cast<UINT>(m_device->GetScreenSize().y)));
+		m_graphicsContext->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+		{
+			CBVObjectParameter tempCBVObjectParameter{};
+
+			XMMATRIX translateMatrix = XMMatrixIdentity();
+			XMMATRIX scaleMatrix = XMMatrixIdentity();
+			XMMATRIX rotationMatrix = XMMatrixIdentity();
+
+			scaleMatrix = XMMatrixScaling(1.f, 1.f, 1.f);
+			rotationMatrix = XMMatrixRotationY(XMConvertToRadians(-90)) * XMMatrixRotationZ(XMConvertToRadians(90));
+			translateMatrix = XMMatrixTranslation(0.f, 0.f, 0.f);
+			XMStoreFloat4x4(&tempCBVObjectParameter.worldMatrix, scaleMatrix * rotationMatrix * translateMatrix);
+			BindObject(currBackBuffer, objectCBVIndex, ShaderQueue::Opaque, 0, tempCBVObjectParameter);
+
+			scaleMatrix = XMMatrixScaling(1.f, 1.f, 1.f);
+			rotationMatrix = XMMatrixRotationAxis(XMVectorSet(0, 1, 0, 0), m_curRotationAngleRad);
+			translateMatrix = XMMatrixTranslation(6.f, 0.f, 0.f);
+			XMStoreFloat4x4(&tempCBVObjectParameter.worldMatrix, scaleMatrix * translateMatrix * rotationMatrix);
+			BindObject(currBackBuffer, objectCBVIndex, ShaderQueue::Opaque, 1, tempCBVObjectParameter);
+
+			tempCBVObjectParameter = {};
+			scaleMatrix = XMMatrixScaling(10.f, 10.f, 10.f);
+			translateMatrix = XMMatrixTranslation(0.f, 0.0f, 0.0f);
+			XMStoreFloat4x4(&tempCBVObjectParameter.worldMatrix, scaleMatrix * translateMatrix);
+			BindObject(currBackBuffer, objectCBVIndex, ShaderQueue::Skybox, 1, tempCBVObjectParameter);
+		}
+
+		m_graphicsContext->AddBarrier(currBackBuffer, D3D12_RESOURCE_STATE_PRESENT);
+		m_graphicsContext->FlushBarrier();
+
+		m_device->SubmitContextWork(*m_graphicsContext);
+
+		m_device->EndFrame();
+		m_device->Present();
+	}
+
+	inline void Renderer::LoadShaders()
+	{
+		AddShader(ShaderQueue::Opaque, L"Shaders\\public\\DrawTriangle.hlsl", L"VS", ShaderType::Vertex);
+		AddShader(ShaderQueue::Opaque, L"Shaders\\public\\DrawTriangle.hlsl", L"PS", ShaderType::Pixel);
+		AddShader(ShaderQueue::Skybox, L"Shaders\\public\\Skybox.hlsl", L"VS", ShaderType::Vertex);
+		AddShader(ShaderQueue::Skybox, L"Shaders\\public\\Skybox.hlsl", L"PS", ShaderType::Pixel);
+	}
+	inline void Renderer::LoadVertexIndexBuffer()
+	{
+		AddVertexBuffer(sizeof(DX12Vertex));
+		AddIndexBuffer(sizeof(UINT), DXGI_FORMAT_R32_UINT);
+	}
+	inline void Renderer::LoadConstantBuffers()
+	{
+		ConstantBufferCreationDesc constantBufferCreationDesc{};
+		constantBufferCreationDesc.m_bufferSize = sizeof(CBVPassParameter);
+		constantBufferCreationDesc.m_bufferIndex = 0;
+		constantBufferCreationDesc.bufferAccessFlags = BufferAccessFlags::HostWritable;
+		constantBufferCreationDesc.bufferTypeFlags = BufferTypeFlags::CBV;
+		constantBufferCreationDesc.m_isRawAccess = false;
+
+		auto constantBuffer = m_device->CreateConstantBuffer(constantBufferCreationDesc);
+		constantBuffer->SetMappedData(&m_passParameter, sizeof(CBVPassParameter));
+		m_pipelineBindResource.m_CBVResource[ElysiaHelper::PER_PASS_SPACE].push_back(std::move(constantBuffer));
+
+		m_objectParameters.resize(objectNum);
+		for (int i = 0; i < objectNum; ++i)
+		{
+			constantBuffer = m_device->CreateConstantBuffer(constantBufferCreationDesc);
+			m_pipelineBindResource.m_CBVResource[ElysiaHelper::PER_OBJECT_SPACE].push_back(std::move(constantBuffer));
+			constantBuffer = nullptr;
+		}
+	}
+	inline void Renderer::CreateCreamDepthRT()
+	{
+		{
+			m_depthBufferCreateDesc.m_resouceDesc.Format = DXGI_FORMAT_D32_FLOAT;
+			m_depthBufferCreateDesc.m_resouceDesc.Width = m_device->GetScreenSize().x;
+			m_depthBufferCreateDesc.m_resouceDesc.Height = m_device->GetScreenSize().y;
+			m_depthBufferCreateDesc.m_typeFlag = TexTypeFlags::SRV | TexTypeFlags::DSV;
+
+			m_depthBuffer = std::move(m_device->CreateTexture(m_depthBufferCreateDesc));
+		}
+	}
+	inline void Renderer::LoadAndCreateTexs()
+	{
+		auto texPaths = m_globalTexPaths;
+		for (int i = 0; i < texPaths.size(); ++i)
+		{
+			auto strPath = ElysiaHelper::LPCWSTRToString(texPaths[i]);
+
+			TextureCreationDesc texBufferCreateDesc{};
+
+			texBufferCreateDesc.texturePath = texPaths[i];
+			texBufferCreateDesc.isSRGB = false;
+
+			auto newTex = std::move(m_device->CreateTextureFromFile(texBufferCreateDesc));
+			m_pipelineBindResource.m_SRVResources[ElysiaHelper::PER_PASS_SPACE].emplace_back(std::move(newTex));
+		}
+
+		texPaths = m_objectTexPaths;
+		for (int i = 0; i < texPaths.size(); ++i)
+		{
+			auto strPath = ElysiaHelper::LPCWSTRToString(texPaths[i]);
+			bool isSRGB = strPath.find("_BaseColor") == strPath.npos ? false : true;
+
+			TextureCreationDesc texBufferCreateDesc{};
+
+			texBufferCreateDesc.texturePath = texPaths[i];
+			texBufferCreateDesc.isSRGB = isSRGB;
+
+			auto newTex = std::move(m_device->CreateTextureFromFile(texBufferCreateDesc));
+			m_pipelineBindResource.m_SRVResources[ElysiaHelper::PER_OBJECT_SPACE].emplace_back(std::move(newTex));
+		}
+	}
+	inline void Renderer::CreateSignatures()
+	{
+		{
+			auto rootParameter = std::make_unique<DX12RootParameter>();
+			rootParameter->InitAsDescriptorTable(1, D3D12_SHADER_VISIBILITY_PIXEL);
+			rootParameter->SetTableRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, static_cast<UINT>(m_pipelineBindResource.m_SRVResources[ElysiaHelper::PER_PASS_SPACE].size()),
+				0, 0, ElysiaHelper::PER_PASS_SPACE);
+			m_rootParameters.push_back(std::move(rootParameter));
+
+			rootParameter = std::make_unique<DX12RootParameter>();
+			rootParameter->InitAsDescriptorTable(1, D3D12_SHADER_VISIBILITY_PIXEL);
+			rootParameter->SetTableRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, static_cast<UINT>(m_pipelineBindResource.m_SRVResources[ElysiaHelper::PER_OBJECT_SPACE].size()),
+				0, 0, ElysiaHelper::PER_OBJECT_SPACE);
+			m_rootParameters.push_back(std::move(rootParameter));
+
+			rootParameter = std::make_unique<DX12RootParameter>();
+			rootParameter->InitAsConstantBuffer(0, D3D12_SHADER_VISIBILITY_ALL, ElysiaHelper::PER_PASS_SPACE);
+			m_rootParameters.push_back(std::move(rootParameter));
+
+			rootParameter = std::make_unique<DX12RootParameter>();
+			rootParameter->InitAsConstantBuffer(0, D3D12_SHADER_VISIBILITY_ALL, ElysiaHelper::PER_OBJECT_SPACE);
+			m_rootParameters.push_back(std::move(rootParameter));
+		}
+
+		RootSignatureCreatDesc rootSignatureCreatDesc;
+		std::vector<DX12RootParameter*> tempRootParameters{};
+		for (size_t i = 0; i < m_rootParameters.size(); ++i)
+		{
+			tempRootParameters.push_back(m_rootParameters[i].get());
+		}
+		rootSignatureCreatDesc.rootParamters = std::move(tempRootParameters);
+
+		m_rootSignatures.push_back(std::move(m_device->CreateRootSignature(rootSignatureCreatDesc)));
+	}
+	inline void Renderer::CreatePOS()
+	{
+		/// Opaque PSO
+		PipelineStateCreateDesc pipelineStateCreateDesc = std::move(CreateDefaultPipelineStateCreateDesc());
+		pipelineStateCreateDesc.m_vertexShader = m_vertexShaders[ShaderQueue::Opaque][ShaderType::Vertex].get();
+		pipelineStateCreateDesc.m_pixelShader = m_pixelShaders[ShaderQueue::Opaque][ShaderType::Pixel].get();
+		pipelineStateCreateDesc.m_rootSignature = m_rootSignatures.back().get();
+		pipelineStateCreateDesc.m_inputElementDesc = m_inputElementDescs;
+		pipelineStateCreateDesc.m_renderTargetDesc.m_numRenderTargets = 1;
+		pipelineStateCreateDesc.m_renderTargetDesc.m_renderTargetFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+		pipelineStateCreateDesc.m_depthStencilDesc.DepthEnable = TRUE;
+		pipelineStateCreateDesc.m_renderTargetDesc.m_depthStencilFormat = m_depthBufferCreateDesc.m_resouceDesc.Format;
+		pipelineStateCreateDesc.m_depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+
+		m_graphicsPipelineStates.insert({ ShaderQueue::Opaque, std::move(m_device->CreateGraphicsPipelineState(pipelineStateCreateDesc)) });
+
+		/// Skybox PSO
+		pipelineStateCreateDesc = std::move(CreateDefaultPipelineStateCreateDesc());
+		pipelineStateCreateDesc.m_vertexShader = m_vertexShaders[ShaderQueue::Skybox][ShaderType::Vertex].get();
+		pipelineStateCreateDesc.m_pixelShader = m_pixelShaders[ShaderQueue::Skybox][ShaderType::Pixel].get();
+		pipelineStateCreateDesc.m_rootSignature = m_rootSignatures.back().get();
+		pipelineStateCreateDesc.m_inputElementDesc = m_inputElementDescs;
+		pipelineStateCreateDesc.m_renderTargetDesc.m_numRenderTargets = 1;
+		pipelineStateCreateDesc.m_renderTargetDesc.m_renderTargetFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+		pipelineStateCreateDesc.m_depthStencilDesc.DepthEnable = TRUE;
+		pipelineStateCreateDesc.m_renderTargetDesc.m_depthStencilFormat = m_depthBufferCreateDesc.m_resouceDesc.Format;
+		pipelineStateCreateDesc.m_depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+
+		// skybox not cull back and front
+		pipelineStateCreateDesc.m_rasterDesc.CullMode = D3D12_CULL_MODE_NONE;
+		// let cubemap z = 1 pass z-test, otherwise it'll be failed in z-test because data of zbuffer is 1
+		pipelineStateCreateDesc.m_depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+
+		m_graphicsPipelineStates.insert({ ShaderQueue::Skybox, std::move(m_device->CreateGraphicsPipelineState(pipelineStateCreateDesc)) });
+	}
+	
+	inline void Renderer::InitLight()
 	{
 		auto dirLight = std::make_unique<DX12DirectionLight>(XMFLOAT4(1, 1, 1, 1), XMVectorSet(1, 0, 0, 0), 2);
-		m_passParameter.lights[0] = std::move(dirLight->CreateLightData()); 
-		 
-		m_lights.emplace_back(std::move(dirLight));    
+		m_passParameter.lights[0] = std::move(dirLight->CreateLightData());
+
+		m_lights.emplace_back(std::move(dirLight));
 	}
 	inline void Renderer::LoadModel()
 	{
@@ -237,7 +464,7 @@ namespace ElysiaRenderer
 			{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT3(0.f, 0.f, 0.f), XMFLOAT2(0.f, 0.f),XMFLOAT3(1.0f, 0.0f, 0.0f) },
 			{ XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT3(0.f, 0.f, 0.f), XMFLOAT2(0.f, 0.f),XMFLOAT3(1.0f, 0.0f, 0.0f) },
 			{ XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT3(0.f, 0.f, 0.f), XMFLOAT2(0.f, 0.f),XMFLOAT3(1.0f, 0.0f, 0.0f) },
-			 
+
 			// FRONT: normal aims forwards (negative z-axis) in local space
 			{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT3(0.f, 0.f, 0.f), XMFLOAT2(0.f, 0.f),XMFLOAT3(0.0f, 0.0f, -1.0f) },
 			{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT3(0.f, 0.f, 0.f), XMFLOAT2(0.f, 0.f),XMFLOAT3(0.0f, 0.0f, -1.0f) },
@@ -330,9 +557,9 @@ namespace ElysiaRenderer
 			m_pixelShaders[shaderQueue] = std::move(value);
 		}
 		}
-		
+
 	}
-	inline void Renderer::AddVertexBuffer(UINT singVertexSize, BufferAccessFlags bufferAccessFlag = BufferAccessFlags::HostWritable, bool isRawAccess = false)
+	inline void Renderer::AddVertexBuffer(UINT singVertexSize, BufferAccessFlags bufferAccessFlag, bool isRawAccess)
 	{
 		VertexBufferCreationDesc vertexBufferCreationDesc{};
 		vertexBufferCreationDesc.m_stride = singVertexSize;
@@ -344,7 +571,7 @@ namespace ElysiaRenderer
 		m_vertexBuffer = m_device->CreateVertexBuffer(vertexBufferCreationDesc);
 		m_vertexBuffer->SetMappedData(m_vertices.data(), vertexBufferCreationDesc.m_size);
 	}
-	inline void Renderer::AddIndexBuffer(UINT singIndexSize, DXGI_FORMAT format, BufferAccessFlags bufferAccessFlag = BufferAccessFlags::HostWritable)
+	inline void Renderer::AddIndexBuffer(UINT singIndexSize, DXGI_FORMAT format, BufferAccessFlags bufferAccessFlag)
 	{
 		IndexBufferCreateDesc indexBufferCreationDesc{};
 		indexBufferCreationDesc.m_bufferSize = static_cast<UINT>(m_indices.size()) * singIndexSize;
@@ -356,22 +583,22 @@ namespace ElysiaRenderer
 		m_indexBuffer = m_device->CreateIndexBuffer(indexBufferCreationDesc);
 		m_indexBuffer->SetMappedData(m_indices.data(), indexBufferCreationDesc.m_bufferSize);
 	}
-	
+
 	inline void Renderer::BindObject(DX12TextureResource& currBackBuffer,
-		size_t& objectCBVIndex, UINT pipelineStateQueue, size_t drawModelIndex,
+		UINT& objectCBVIndex, uint8_t pipelineStateQueueIndex, size_t drawModelIndex,
 		const CBVObjectParameter& tempCBVObjectParameter)
 	{
 		// get object constant buffer
 		auto objectConstanBuffer = dynamic_cast <DX12ConstantBuffer*>(m_pipelineBindResource.m_CBVResource[ElysiaHelper::PER_OBJECT_SPACE][objectCBVIndex].get());
-
+		 
 		//// set object constant data in buffer
 		m_objectParameters.emplace_back(tempCBVObjectParameter);
 		objectConstanBuffer->SetMappedData(&m_objectParameters.back(), sizeof(CBVObjectParameter));
-		m_pipelineBindResource.CBVSizes[ElysiaHelper::PER_OBJECT_SPACE] = sizeof(CBVObjectParameter);
+		//m_pipelineBindResource.CBVSizes[ElysiaHelper::PER_OBJECT_SPACE] = sizeof(CBVObjectParameter);
 		m_pipelineBindResource.CBVIndexs[ElysiaHelper::PER_OBJECT_SPACE] = objectCBVIndex;
 
 		// set pipeline & bind data
-		auto pipelineStateData = CreatePipelineStateData(m_graphicsPipelineStates[pipelineStateQueue].get(),
+		auto pipelineStateData = CreatePipelineStateData(m_graphicsPipelineStates[pipelineStateQueueIndex].get(),
 			std::move(std::vector<DX12TextureResource*>{ &currBackBuffer }),
 			m_depthBuffer.get());
 		m_graphicsContext->SetPipeline(pipelineStateData, m_pipelineBindResource);
@@ -385,219 +612,6 @@ namespace ElysiaRenderer
 
 		m_graphicsContext->Draw(drawVertexCount, startVertex, startIndex);
 		objectCBVIndex++;
-	}
-	 
-	
-	void Renderer::InitTexTriangle()
-	{
-		// Create Shader
-		{
-			AddShader(ShaderQueue::Opaque, L"Shaders\\public\\DrawTriangle.hlsl", L"VS", ShaderType::Vertex);
-			AddShader(ShaderQueue::Opaque, L"Shaders\\public\\DrawTriangle.hlsl", L"PS", ShaderType::Pixel);
-			AddShader(ShaderQueue::Skybox, L"Shaders\\public\\Skybox.hlsl", L"VS", ShaderType::Vertex);
-			AddShader(ShaderQueue::Skybox, L"Shaders\\public\\Skybox.hlsl", L"PS", ShaderType::Pixel);
-		}
-
-		// Create Vertex & Index Buffer
-		{
-			AddVertexBuffer(sizeof(DX12Vertex));
-			AddIndexBuffer(sizeof(UINT), DXGI_FORMAT_R32_UINT);
-		}
-
-		// Create Constant Buffer
-		{
-			ConstantBufferCreationDesc constantBufferCreationDesc{};
-			constantBufferCreationDesc.m_bufferSize = sizeof(CBVPassParameter);
-			constantBufferCreationDesc.m_bufferIndex = 0;
-			constantBufferCreationDesc.bufferAccessFlags = BufferAccessFlags::HostWritable;
-			constantBufferCreationDesc.bufferTypeFlags = BufferTypeFlags::CBV;
-			constantBufferCreationDesc.m_isRawAccess = false;
-
-			auto constantBuffer = m_device->CreateConstantBuffer(constantBufferCreationDesc);
-			constantBuffer->SetMappedData(&m_passParameter, sizeof(CBVPassParameter));
-			m_pipelineBindResource.m_CBVResource[ElysiaHelper::PER_PASS_SPACE].push_back(std::move(constantBuffer));
-
-			m_objectParameters.resize(objectNum); 
-			for (int i = 0; i < objectNum; ++i)
-			{
-				constantBuffer = m_device->CreateConstantBuffer(constantBufferCreationDesc);
-				m_pipelineBindResource.m_CBVResource[ElysiaHelper::PER_OBJECT_SPACE].push_back(std::move(constantBuffer));
-			}
-		}
-
-		// Create Depth Buffer
-		TexCreateDesc depthBufferCreateDesc{};
-		{
-			depthBufferCreateDesc.m_resouceDesc.Format = DXGI_FORMAT_D32_FLOAT;
-			depthBufferCreateDesc.m_resouceDesc.Width = m_device->GetScreenSize().x;
-			depthBufferCreateDesc.m_resouceDesc.Height = m_device->GetScreenSize().y;
-			depthBufferCreateDesc.m_typeFlag = TexTypeFlags::SRV | TexTypeFlags::DSV;
-
-			m_depthBuffer = std::move(m_device->CreateTexture(depthBufferCreateDesc));
-		}
-
-		// Create Tex & Buffer
-		{
-			auto texPaths = m_globalTexPaths;
-			for (int i = 0; i < texPaths.size(); ++i)
-			{
-				auto strPath = ElysiaHelper::LPCWSTRToString(texPaths[i]);
-
-				TextureCreationDesc texBufferCreateDesc{};
-
-				texBufferCreateDesc.texturePath = texPaths[i];
-				texBufferCreateDesc.isSRGB = false;
-
-				auto newTex = std::move(m_device->CreateTextureFromFile(texBufferCreateDesc));
-				m_pipelineBindResource.m_SRVResources[ElysiaHelper::PER_PASS_SPACE].push_back(std::move(newTex));
-			}
-
-			texPaths = m_objectTexPaths;
-			for (int i = 0; i < texPaths.size(); ++i)
-			{
-				auto strPath = ElysiaHelper::LPCWSTRToString(texPaths[i]);
-				bool isSRGB = strPath.find("_BaseColor") == strPath.npos ? false : true;
-
-				TextureCreationDesc texBufferCreateDesc{};
-
-				texBufferCreateDesc.texturePath = texPaths[i];
-				texBufferCreateDesc.isSRGB = isSRGB;
-
-				auto newTex = std::move(m_device->CreateTextureFromFile(texBufferCreateDesc));
-				m_pipelineBindResource.m_SRVResources[ElysiaHelper::PER_OBJECT_SPACE].push_back(std::move(newTex));
-			}
-			
-		}
-
-		// Create Root Parameter & Sampler & Root Signature
-		{
-			{
-				auto rootParameter = std::make_unique<DX12RootParameter>();
-				rootParameter->InitAsDescriptorTable(1, D3D12_SHADER_VISIBILITY_PIXEL);
-				rootParameter->SetTableRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, static_cast<UINT>(m_pipelineBindResource.m_SRVResources[ElysiaHelper::PER_PASS_SPACE].size()),
-					0, 0, ElysiaHelper::PER_PASS_SPACE);
-				m_rootParameters.push_back(std::move(rootParameter));
-
-				rootParameter = std::make_unique<DX12RootParameter>();
-				rootParameter->InitAsDescriptorTable(1, D3D12_SHADER_VISIBILITY_PIXEL);
-				rootParameter->SetTableRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, static_cast<UINT>(m_pipelineBindResource.m_SRVResources[ElysiaHelper::PER_OBJECT_SPACE].size()),
-					0, 0, ElysiaHelper::PER_OBJECT_SPACE);
-				m_rootParameters.push_back(std::move(rootParameter));
-
-				rootParameter = std::make_unique<DX12RootParameter>();
-				rootParameter->InitAsConstantBuffer(0, D3D12_SHADER_VISIBILITY_ALL, ElysiaHelper::PER_PASS_SPACE);
-				m_rootParameters.push_back(std::move(rootParameter));
-
-				rootParameter = std::make_unique<DX12RootParameter>();
-				rootParameter->InitAsConstantBuffer(0, D3D12_SHADER_VISIBILITY_ALL, ElysiaHelper::PER_OBJECT_SPACE);
-				m_rootParameters.push_back(std::move(rootParameter));
-			}
-
-			RootSignatureCreatDesc rootSignatureCreatDesc;
-			std::vector<DX12RootParameter*> tempRootParameters{};
-			for (size_t i = 0; i < m_rootParameters.size(); ++i)
-			{
-				tempRootParameters.push_back(m_rootParameters[i].get());
-			}
-			rootSignatureCreatDesc.rootParamters = std::move(tempRootParameters);
-
-			m_rootSignatures.push_back(std::move(m_device->CreateRootSignature(rootSignatureCreatDesc)));
-		}
-
-		// Create PSO
-		{
-			/// Opaque PSO
-			PipelineStateCreateDesc pipelineStateCreateDesc = std::move(CreateDefaultPipelineStateCreateDesc());
-			pipelineStateCreateDesc.m_vertexShader = m_vertexShaders[ShaderQueue::Opaque][ShaderType::Vertex].get();
-			pipelineStateCreateDesc.m_pixelShader = m_pixelShaders[ShaderQueue::Opaque][ShaderType::Pixel].get();
-			pipelineStateCreateDesc.m_rootSignature = m_rootSignatures.back().get();
-			pipelineStateCreateDesc.m_inputElementDesc = m_inputElementDescs;
-			pipelineStateCreateDesc.m_renderTargetDesc.m_numRenderTargets = 1;
-			pipelineStateCreateDesc.m_renderTargetDesc.m_renderTargetFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-			pipelineStateCreateDesc.m_depthStencilDesc.DepthEnable = TRUE;
-			pipelineStateCreateDesc.m_renderTargetDesc.m_depthStencilFormat = depthBufferCreateDesc.m_resouceDesc.Format;
-			pipelineStateCreateDesc.m_depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
-
-			m_graphicsPipelineStates.insert({ ShaderQueue::Opaque, std::move(m_device->CreateGraphicsPipelineState(pipelineStateCreateDesc)) });
-
-			/// Skybox PSO
-			pipelineStateCreateDesc = std::move(CreateDefaultPipelineStateCreateDesc());
-			pipelineStateCreateDesc.m_vertexShader = m_vertexShaders[ShaderQueue::Skybox][ShaderType::Vertex].get();
-			pipelineStateCreateDesc.m_pixelShader = m_pixelShaders[ShaderQueue::Skybox][ShaderType::Pixel].get();
-			pipelineStateCreateDesc.m_rootSignature = m_rootSignatures.back().get();
-			pipelineStateCreateDesc.m_inputElementDesc = m_inputElementDescs;
-			pipelineStateCreateDesc.m_renderTargetDesc.m_numRenderTargets = 1;
-			pipelineStateCreateDesc.m_renderTargetDesc.m_renderTargetFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-			pipelineStateCreateDesc.m_depthStencilDesc.DepthEnable = TRUE;
-			pipelineStateCreateDesc.m_renderTargetDesc.m_depthStencilFormat = depthBufferCreateDesc.m_resouceDesc.Format;
-			pipelineStateCreateDesc.m_depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
-
-			// skybox not cull back and front
-			pipelineStateCreateDesc.m_rasterDesc.CullMode = D3D12_CULL_MODE_NONE;
-			// let cubemap z = 1 pass z-test, otherwise it'll be failed in z-test because data of zbuffer is 1
-			pipelineStateCreateDesc.m_depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
-			 
-			m_graphicsPipelineStates.insert({ ShaderQueue::Skybox, std::move(m_device->CreateGraphicsPipelineState(pipelineStateCreateDesc)) });
-		}
-	}
-	void Renderer::RenderTexTriangle()
-	{
-		m_objectParameters.clear();
-
-		m_device->BeginFrame();
-
-		auto& currBackBuffer = m_device->GetCurrBackBuffer();
-		size_t pipelineStateIndex = 0;
-		size_t objectCBVIndex = 0;
-
-		m_graphicsContext->Reset(m_graphicsPipelineStates[ShaderQueue::Opaque]->GetPipelineState());
-		m_graphicsContext->Reset(m_graphicsPipelineStates[ShaderQueue::Skybox]->GetPipelineState());
-		m_graphicsContext->AddBarrier(currBackBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET);
-		m_graphicsContext->AddBarrier(*m_depthBuffer, D3D12_RESOURCE_STATE_DEPTH_WRITE);
-		m_graphicsContext->FlushBarrier();
-
-		m_graphicsContext->ClearRenderTarget(currBackBuffer, Color(1, 1, 1));
-		m_graphicsContext->ClearDepthStencilTarget(*m_depthBuffer, 1.f, 0);
-
-		m_graphicsContext->SetVertexBuffer(0, 1, m_vertexBuffer->GetVertexBufferView());
-		m_graphicsContext->SetIndexBuffer(m_indexBuffer->GetIndexBufferView());
-
-		m_graphicsContext->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(static_cast<UINT>(m_device->GetScreenSize().x), static_cast<UINT>(m_device->GetScreenSize().y)));
-		m_graphicsContext->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-		{
-			CBVObjectParameter tempCBVObjectParameter{};
-
-			XMMATRIX translateMatrix = XMMatrixIdentity();
-			XMMATRIX scaleMatrix = XMMatrixIdentity();
-			XMMATRIX rotationMatrix = XMMatrixIdentity();
-
-			scaleMatrix = XMMatrixScaling(1.f, 1.f, 1.f);
-			rotationMatrix = XMMatrixRotationY(XMConvertToRadians(-90)) * XMMatrixRotationZ(XMConvertToRadians(90));
-			translateMatrix = XMMatrixTranslation(0.f, 0.f, 0.f);
-			XMStoreFloat4x4(&tempCBVObjectParameter.worldMatrix, scaleMatrix * rotationMatrix * translateMatrix);
-			BindObject(currBackBuffer, objectCBVIndex, ShaderQueue::Opaque, 0, tempCBVObjectParameter);
-
-			scaleMatrix = XMMatrixScaling(1.f, 1.f, 1.f);
-			rotationMatrix = XMMatrixRotationAxis(XMVectorSet(0, 1, 0, 0), m_curRotationAngleRad);
-			translateMatrix = XMMatrixTranslation(6.f, 0.f, 0.f);
-			XMStoreFloat4x4(&tempCBVObjectParameter.worldMatrix, scaleMatrix * translateMatrix * rotationMatrix);
-			BindObject(currBackBuffer, objectCBVIndex, ShaderQueue::Opaque, 1, tempCBVObjectParameter);
-
-			tempCBVObjectParameter = {};
-			scaleMatrix = XMMatrixScaling(10.f, 10.f, 10.f);
-			translateMatrix = XMMatrixTranslation(0.f, 0.0f, 0.0f);
-			XMStoreFloat4x4(&tempCBVObjectParameter.worldMatrix, scaleMatrix * translateMatrix);
-			BindObject(currBackBuffer, objectCBVIndex, ShaderQueue::Skybox, 1, tempCBVObjectParameter);
-		}
-
-		m_graphicsContext->AddBarrier(currBackBuffer, D3D12_RESOURCE_STATE_PRESENT);
-		m_graphicsContext->FlushBarrier();
-
-		m_device->SubmitContextWork(*m_graphicsContext);
-
-		m_device->EndFrame();
-		m_device->Present();
 	}
 }
 

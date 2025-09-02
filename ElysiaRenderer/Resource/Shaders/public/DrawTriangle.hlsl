@@ -85,9 +85,10 @@ PSOutput PS(PSInput i)
     MaterialData materialData = GetMaterialData(inputParam);
     
     o.target0 = GetDynamicLighting(inputParam, materialData, mainLight);
+    o.target0.rgb = i.normalWS;
     //o.target0.rgb = materialData.WorldNormal;
-    o.target0.rgb = max(0, dot(mainLight.direction, inputParam.NormalWS));
-    o.target0.rgb = CameraPosWS.z;
+    //o.target0.rgb = max(0, dot(mainLight.direction, inputParam.NormalWS));
+    //o.target0.rgb = CameraPosWS.z;
     
     return o;
 }

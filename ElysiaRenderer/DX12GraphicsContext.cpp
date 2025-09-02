@@ -91,7 +91,6 @@ namespace ElysiaRenderer
 
 					case D3D12_ROOT_PARAMETER_TYPE_CBV:
 					{
-						//auto CBVSize = pipelineBindResource.CBVSizes[spaceID];
 						auto CBVIndex = pipelineBindResource.CBVIndexs[spaceID];
 						if (pipelineBindResource.m_CBVResource[spaceID][CBVIndex])
 						{
@@ -108,7 +107,7 @@ namespace ElysiaRenderer
 				}
 
 				currRootParameterIndex++;
-				currentHandleIndex = 0;
+				//currentHandleIndex = 0;
 			}
 		}
 
