@@ -24,7 +24,7 @@ namespace ElysiaRenderer
 		}
 	}
 
-	void DX12RootParameter::InitAsConstantBuffer(UINT slotIndex, D3D12_SHADER_VISIBILITY shaderVisibility, UINT Space)
+	void DX12RootParameter::InitAsConstantBufferView(UINT slotIndex, D3D12_SHADER_VISIBILITY shaderVisibility, UINT Space)
 	{
 		m_rootParamter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 		m_rootParamter.ShaderVisibility = shaderVisibility;

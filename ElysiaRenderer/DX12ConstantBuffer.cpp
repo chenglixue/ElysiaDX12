@@ -12,7 +12,7 @@ namespace ElysiaRenderer
 		m_constantBufferViewHandle = constantBufferViewHandle;
 
 		m_mappedBuffer = nullptr;
-		m_resource->Map(0, nullptr, reinterpret_cast<void**>(& m_mappedBuffer));
+		m_resource->Map(0, nullptr, &m_mappedBuffer);
 		m_allocation = allocator;
 	}
 
@@ -24,8 +24,8 @@ namespace ElysiaRenderer
 
 	void DX12ConstantBuffer::SetMappedData(const void* bufferData, uint32_t bufferSize)
 	{
-		assert(bufferSize <= m_bufferSize);
+		assert(m_mappedBuffer != nullptr && bufferData != nullptr && bufferSize > 0 && bufferSize <= m_resourceDesc.Width);
 
-		memcpy(m_mappedBuffer, bufferData, bufferSize);
+		memcpy_s(m_mappedBuffer, m_resourceDesc.Width, bufferData, bufferSize);
 	}
 }

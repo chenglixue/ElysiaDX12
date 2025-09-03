@@ -208,6 +208,9 @@
     <ClInclude Include="stdafx.h">
       <Filter>Header Files\Helper</Filter>
     </ClInclude>
+    <ClInclude Include="RenderHelper.h">
+      <Filter>Header Files\Helper</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="DXTex\Shaders\Compiled\BC7Encode_TryMode02CS.inc">

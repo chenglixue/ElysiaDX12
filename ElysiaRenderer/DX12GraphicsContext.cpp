@@ -91,11 +91,19 @@ namespace ElysiaRenderer
 
 					case D3D12_ROOT_PARAMETER_TYPE_CBV:
 					{
-						auto CBVIndex = pipelineBindResource.CBVIndexs[spaceID];
-						if (pipelineBindResource.m_CBVResource[spaceID][CBVIndex])
+						for (auto CBVSpaceIndex : pipelineBindResource.CBVIndexs)
 						{
-							m_commandList->SetGraphicsRootConstantBufferView(currRootParameterIndex, pipelineBindResource.m_CBVResource[spaceID][CBVIndex]->GetGPUAddress());
+							if (spaceID == CBVSpaceIndex.first)
+							{
+								m_commandList->SetGraphicsRootConstantBufferView(currRootParameterIndex, pipelineBindResource.m_CBVResource[spaceID][CBVSpaceIndex.second]->GetGPUAddress());
+
+							}
+							/*if (pipelineBindResource.m_CBVResource[spaceID][CBVSpaceIndex.second])
+							{
+								m_commandList->SetGraphicsRootConstantBufferView(currRootParameterIndex, pipelineBindResource.m_CBVResource[spaceID][CBVSpaceIndex.second]->GetGPUAddress());
+							}*/
 						}
+					
 						break;
 					}
 

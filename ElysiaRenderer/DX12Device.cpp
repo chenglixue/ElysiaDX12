@@ -330,7 +330,7 @@ namespace ElysiaRenderer
 		D3D12_RESOURCE_STATES usageState = isHostViewable ? D3D12_RESOURCE_STATE_GENERIC_READ : D3D12_RESOURCE_STATE_COPY_DEST;
 
 		D3D12_RESOURCE_DESC resourceDesc = {};
-		resourceDesc.Width = ElysiaHelper::AlignU32(static_cast<uint32_t>(bufferCreationDesc.m_bufferSize), D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
+		resourceDesc.Width = ElysiaHelper::AlignU32(bufferCreationDesc.m_bufferSize, D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
 		resourceDesc.Alignment = 0;
 		resourceDesc.Height = 1;
 		resourceDesc.DepthOrArraySize = 1;
@@ -350,10 +350,11 @@ namespace ElysiaRenderer
 		D3D12_CONSTANT_BUFFER_VIEW_DESC CBVDesc{};
 		CBVDesc.BufferLocation = resource->GetGPUVirtualAddress();
 		CBVDesc.SizeInBytes = static_cast<UINT32>(resourceDesc.Width);
+
 		auto CBVDescriptor = m_SRVStagingDescriptorHeap->NewDescriptorHeapHandle();
 		m_device->CreateConstantBufferView(&CBVDesc, CBVDescriptor.GetCPUHandle());
 
-		return std::make_unique<DX12ConstantBuffer>(resource, usageState, bufferCreationDesc.m_bufferSize, std::move(CBVDescriptor), allocation);
+		return std::make_unique<DX12ConstantBuffer>(resource, usageState, bufferCreationDesc.m_bufferSize, CBVDescriptor, allocation);
 	}
 	std::unique_ptr<DX12TextureUploadBuffer>	DX12Device::CreateTextureUploadHeap(const TextureBufferCreationDesc& bufferCreationDesc)
 	{

@@ -35,7 +35,7 @@ namespace ElysiaRenderer
 		}
 
 	private:
-		UINT8* m_mappedBuffer;
+		void* m_mappedBuffer;
 		uint32_t m_bufferSize;
 		DX12DescriptorHeapHandle m_constantBufferViewHandle;
 		BufferType m_bufferType = BufferType::Constant;

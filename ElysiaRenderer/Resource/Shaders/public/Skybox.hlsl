@@ -76,6 +76,7 @@ PSOutput PS(PSInput i)
     inputParam.NormalWS = i.normalWS;
     inputParam.ScreenVector = GetScreenVectorWS(CameraPosWS.xyz, i.positionWS.xyz);
     
-    o.target0 = g_SkyboxTex.Sample(g_Sampler_WarpU_WarpV_Linear, i.positionOS.xyz);
+    //o.target0 = g_SkyboxTex.Sample(g_Sampler_WarpU_WarpV_Linear, i.positionOS.xyz);
+    o.target0.rg = inputParam.PixelPos.xy * ScreenSize.zw;
     return o;
 }

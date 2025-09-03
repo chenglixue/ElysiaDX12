@@ -80,11 +80,11 @@ PSOutput PS(PSInput i)
     inputParam.NormalWS = i.normalWS;
     inputParam.ScreenVector = GetScreenVectorWS(CameraPosWS.xyz, i.positionWS.xyz);
     
-    LightData mainLight = GetMainLight(lights[0]);
+    //LightData mainLight = GetMainLight(lights[0]);
     
     MaterialData materialData = GetMaterialData(inputParam);
     
-    o.target0 = GetDynamicLighting(inputParam, materialData, mainLight);
+    //o.target0 = GetDynamicLighting(inputParam, materialData, mainLight);
     o.target0.rgb = i.normalWS;
     //o.target0.rgb = materialData.WorldNormal;
     //o.target0.rgb = max(0, dot(mainLight.direction, inputParam.NormalWS));

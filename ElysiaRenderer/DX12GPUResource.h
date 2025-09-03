@@ -96,7 +96,7 @@ namespace ElysiaRenderer
 		{
 			//ElysiaHelper::SafeRelease(m_allocation);
 			//ElysiaHelper::SafeRelease(m_resource);
-			m_GPUAddress = 0;
+			//m_GPUAddress = 0;
 		}
 
 	protected:

@@ -199,6 +199,7 @@
     <ClInclude Include="DX12MeshRender.h" />
     <ClInclude Include="Math.h" />
     <ClInclude Include="Renderer.h" />
+    <ClInclude Include="RenderHelper.h" />
     <ClInclude Include="SimpleMath\SimpleMath.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>

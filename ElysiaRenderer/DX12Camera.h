@@ -21,12 +21,12 @@ namespace ElysiaRenderer
 		{
 			return m_FOV;
 		}
-		const XMVECTORF32& GetCameraPos()
+		const XMVECTOR& GetCameraPos()
 		{
 			return m_cameraPos;
 		}
 
-		void SetCameraPos(XMVECTORF32 cameraPos)
+		void SetCameraPos(XMVECTOR cameraPos)
 		{
 			m_cameraPos = cameraPos;
 		}
@@ -47,6 +47,6 @@ namespace ElysiaRenderer
 		float m_nearZ = 0.01f;
 		float m_farZ = 100.f;
 		float m_FOV = 0.8f;
-		XMVECTORF32 m_cameraPos;
+		XMVECTOR m_cameraPos;
 	};
 }
