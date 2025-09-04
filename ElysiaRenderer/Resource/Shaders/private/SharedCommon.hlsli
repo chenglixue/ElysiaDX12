@@ -25,7 +25,7 @@ cbuffer PerPassBuffer : register(b0, perPassSpace)
     float4x4 M_Proj;
     float4 ScreenSize;
     
-    //Light lights[MAIN_LIGHT_NUM];
+    Light lights[MAIN_LIGHT_NUM];
     float4 paddingPass[6];
     
 }

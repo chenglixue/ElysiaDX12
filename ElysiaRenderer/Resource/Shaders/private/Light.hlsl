@@ -10,10 +10,10 @@ LightData GetMainLight(Light light)
 
     o.color = light.m_lightColor;
     o.intensity = light.m_intensity;
-    o.direction = normalize(light.m_lightPos);
-    o.toLight = -o.direction;
+    o.direction = light.m_lightDir;
+    o.toLight = normalize(light.m_lightPos);
     o.lightAttenuation = 1;
-    o.position = FLT_MAX;
+    o.position = light.m_lightPos;
 
 
     return o;

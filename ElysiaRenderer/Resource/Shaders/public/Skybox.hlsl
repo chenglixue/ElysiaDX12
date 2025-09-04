@@ -43,13 +43,13 @@ PSInput VS(VSInput i)
 
 
     o.positionOS = float4(i.positionOS, 1.f);
-    o.positionWS = mul(M_World, float4(i.positionOS, 1.f));
+    o.positionWS = mul(float4(i.positionOS, 1.f), M_World);
     o.positionWS.xyz += CameraPosWS;
-    o.positionVS = mul(M_View, o.positionWS);
-    o.positionCS = mul(M_Proj, o.positionVS).xyww;
+    o.positionVS = mul(o.positionWS, M_View);
+    o.positionCS = mul(o.positionVS, M_Proj).xyww;
     
-    float3 N = normalize(mul(i.normalOS, (float3x3) M_World));
-    float3 T = normalize(mul(i.tangentOS, (float3x3) M_World));
+    float3 N = normalize(mul(i.normalOS, (float3x3)M_World));
+    float3 T = normalize(mul(i.tangentOS, (float3x3)M_World));
     
     o.tangentWS = normalize(T - dot(N, T) * N);
     o.bitTangentWS = cross(o.tangentWS, N);
@@ -76,7 +76,6 @@ PSOutput PS(PSInput i)
     inputParam.NormalWS = i.normalWS;
     inputParam.ScreenVector = GetScreenVectorWS(CameraPosWS.xyz, i.positionWS.xyz);
     
-    //o.target0 = g_SkyboxTex.Sample(g_Sampler_WarpU_WarpV_Linear, i.positionOS.xyz);
-    o.target0.rg = inputParam.PixelPos.xy * ScreenSize.zw;
+    o.target0 = g_SkyboxTex.Sample(g_Sampler_WarpU_WarpV_Linear, i.positionOS.xyz);
     return o;
 }

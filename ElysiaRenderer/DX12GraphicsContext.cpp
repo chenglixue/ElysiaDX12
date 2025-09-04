@@ -115,7 +115,7 @@ namespace ElysiaRenderer
 				}
 
 				currRootParameterIndex++;
-				//currentHandleIndex = 0;
+				currentHandleIndex = 0;
 			}
 		}
 

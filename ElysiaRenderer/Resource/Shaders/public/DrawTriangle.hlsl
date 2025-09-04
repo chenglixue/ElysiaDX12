@@ -40,23 +40,23 @@ PSInput VS(VSInput i)
 {
     PSInput o = (PSInput) 0;
 
-    o.positionWS = mul(M_World, float4(i.positionOS, 1.f));
-    o.positionVS = mul(M_View, o.positionWS);
-    o.positionCS = mul(M_Proj, o.positionVS);
+    o.positionWS = mul(float4(i.positionOS, 1.f), M_World);
+    o.positionVS = mul(o.positionWS, M_View);
+    o.positionCS = mul(o.positionVS, M_Proj);
     
-    bool hasTangent = false;
+    bool hasTangent = true;
     if (hasTangent)
     {
-        float3 N = normalize(mul(i.normalOS, (float3x3) M_World));
-        float3 T = normalize(mul(i.tangentOS, (float3x3) M_World));
-    
-        o.tangentWS = T;
-        o.bitTangentWS = normalize(cross(o.tangentWS, N));
+        float3 N = normalize(mul(i.normalOS, (float3x3)M_World));
+        float3 T = mul(i.tangentOS, (float3x3)M_World);
+        
+        o.tangentWS = normalize(T - dot(N , T) * N);
+        o.bitTangentWS = (cross(o.tangentWS, N));
         o.normalWS = N;
     }
     else
     {
-        o.normalWS = normalize(mul(i.normalOS, (float3x3) M_World));
+        o.normalWS = normalize(mul(i.normalOS, (float3x3)M_World));
     }
     
     o.uv = i.uv;
@@ -80,15 +80,11 @@ PSOutput PS(PSInput i)
     inputParam.NormalWS = i.normalWS;
     inputParam.ScreenVector = GetScreenVectorWS(CameraPosWS.xyz, i.positionWS.xyz);
     
-    //LightData mainLight = GetMainLight(lights[0]);
+    LightData mainLight = GetMainLight(lights[0]);
     
     MaterialData materialData = GetMaterialData(inputParam);
-    
-    //o.target0 = GetDynamicLighting(inputParam, materialData, mainLight);
-    o.target0.rgb = i.normalWS;
-    //o.target0.rgb = materialData.WorldNormal;
-    //o.target0.rgb = max(0, dot(mainLight.direction, inputParam.NormalWS));
-    //o.target0.rgb = CameraPosWS.z;
+     
+    o.target0 = GetDynamicLighting(inputParam, materialData, mainLight);
     
     return o;
 }

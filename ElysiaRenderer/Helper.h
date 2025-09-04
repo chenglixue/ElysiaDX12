@@ -10,6 +10,8 @@
 #include "SimpleMath/SimpleMath.h"
 #include <filesystem>
 
+#include "RenderHelper.h"
+
 namespace ElysiaHelper
 {
     struct UINT2
