@@ -16,6 +16,7 @@ D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Shader.cpp;D:\DX12\ElysiaRenderer\Elys
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12StagingDescriptorHeap.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\DX12StagingDescriptorHeap.obj
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12TextureBuffer.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\DX12TextureBuffer.obj
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12TextureResource.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\DX12TextureResource.obj
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12UI.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\DX12UI.obj
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12UploadContext.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\DX12UploadContext.obj
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12VertexBuffer.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\DX12VertexBuffer.obj
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DXTex\BC.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\BC.obj

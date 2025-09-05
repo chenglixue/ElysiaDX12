@@ -38,30 +38,56 @@ static std::wstring GetLatestWinPixGpuCapturerPath_Cpp17()
 	return pixInstallationPath / newestVersionFound / L"WinPixGpuCapturer.dll";
 }
 
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
 LRESULT CALLBACK WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam)
 {
+	if (ImGui_ImplWin32_WndProcHandler(hwnd, umessage, wparam, lparam))
+	{
+		return true;
+	}
+	const ImGuiIO imio = ImGui::GetIO();	// 当对ui进行操作时，让渲染的其他物体不受其影响(如拖拽ui时，防止移动相机视角)
+
     switch (umessage)
     {
-    case WM_KEYDOWN:
-        if (wparam == VK_ESCAPE)
-        {
-            PostQuitMessage(0);
-            return 0;
-        }
-        else
-        {
-            return DefWindowProc(hwnd, umessage, wparam, lparam);
-        }
+		case WM_KEYDOWN:
+		{
+			if (wparam == VK_ESCAPE)
+			{
+				PostQuitMessage(0);
+				return 0;
+			}
+			else
+			{
+				return DefWindowProc(hwnd, umessage, wparam, lparam);
+			}
+		}
 
-    case WM_DESTROY:
-		PostQuitMessage(0);
-		return 0;
-    case WM_CLOSE:
-        PostQuitMessage(0);
-        return 0;
+		case WM_DESTROY:
+		{
+			PostQuitMessage(0);
+			return 0;
+		}
 
-    default:
-        return DefWindowProc(hwnd, umessage, wparam, lparam);
+		case WM_CLOSE:
+		{
+			PostQuitMessage(0);
+			return 0;
+		}
+
+		case WM_MOUSEMOVE:
+		{
+			if (imio.WantCaptureMouse)
+			{
+				break;
+			}
+			
+		}
+
+		default:
+		{
+			return DefWindowProc(hwnd, umessage, wparam, lparam);
+		}
     }
 }
 
@@ -86,20 +112,20 @@ int main()
 	wc.cbSize = sizeof(WNDCLASSEX);
 	RegisterClassEx(&wc);
 
+	auto pUI = std::make_shared<DX12UI>();
+
 	HWND windowHandle = CreateWindowEx(WS_EX_APPWINDOW, applicationName.c_str(), applicationName.c_str(),
 		WS_OVERLAPPEDWINDOW,
 		(GetSystemMetrics(SM_CXSCREEN) - windowSize.x) / 2, (GetSystemMetrics(SM_CYSCREEN) - windowSize.y) / 2, windowSize.x, windowSize.y,
 		nullptr, nullptr, moduleHandle, nullptr);
 
+	std::unique_ptr<ElysiaRenderer::Renderer> renderer = std::make_unique<ElysiaRenderer::Renderer>(windowHandle, windowSize, pUI);
+	renderer->Init();
+
 	ShowWindow(windowHandle, SW_SHOWNORMAL);
 	SetForegroundWindow(windowHandle);
 	SetFocus(windowHandle);
 	ShowCursor(true);
-
-	
-
-	std::unique_ptr<ElysiaRenderer::Renderer> renderer = std::make_unique<ElysiaRenderer::Renderer>(windowHandle, windowSize);
-	renderer->Init();
 
 	bool shouldExit = false;
 	while (!shouldExit)

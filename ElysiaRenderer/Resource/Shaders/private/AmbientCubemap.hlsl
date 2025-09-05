@@ -107,7 +107,7 @@ float3 GetIBL(FInputParams inputParams, MaterialData materialData)
     const bool bNeedsSeparateSubsurfaceLightAccumulation = false;
     
     // .rgb:AmbientCubemapTint*AmbientCubemapIntensity, a:unused
-    half4 AmbientCubemapColor = 1;
+    half3 AmbientCubemapColor = AmbientCubemapIntensity * AmbientCubemapTint;
     
     LightAccumulator_Add(LightAccumulator, NonSpecularContribution + SpecularContribution, NonSpecularContribution, AmbientCubemapColor.rgb, bNeedsSeparateSubsurfaceLightAccumulation);
     o += GetLightAccumulator_Result(LightAccumulator);

@@ -1,4 +1,74 @@
 ﻿cl : command line  warning D9014: invalid value '18' for '/wd'; assuming '5999'
+  Renderer.cpp
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file 'Renderer.cpp')
+  
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12TextureBuffer.h(32,34): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12TextureResource' when no variable is declared
+  (compiling source file 'Renderer.cpp')
+  
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12PipelineState.h(9,32): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12RootSignature' when no variable is declared
+  (compiling source file 'Renderer.cpp')
+  
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12PipelineState.h(10,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Shader' when no variable is declared
+  (compiling source file 'Renderer.cpp')
+  
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12GraphicsContext.h(9,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
+  (compiling source file 'Renderer.cpp')
+  
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Shader.h(10,3): warning C4309: 'initializing': truncation of constant value
+  (compiling source file 'Renderer.cpp')
+  
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Shader.h(10,3): warning C4369: 'ElysiaRenderer::Opaque':  enumerator value '2000' cannot be represented as 'unsigned char', value is '2000'
+  (compiling source file 'Renderer.cpp')
+  
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Shader.h(11,3): warning C4309: 'initializing': truncation of constant value
+  (compiling source file 'Renderer.cpp')
+  
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Shader.h(11,3): warning C4369: 'ElysiaRenderer::Skybox':  enumerator value '3000' cannot be represented as 'unsigned char', value is '3000'
+  (compiling source file 'Renderer.cpp')
+  
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Shader.h(12,3): warning C4309: 'initializing': truncation of constant value
+  (compiling source file 'Renderer.cpp')
+  
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Shader.h(12,3): warning C4369: 'ElysiaRenderer::Transparent':  enumerator value '4000' cannot be represented as 'unsigned char', value is '4000'
+  (compiling source file 'Renderer.cpp')
+  
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12RootSignature.h(78,22): warning C4018: '<': signed/unsigned mismatch
+  (compiling source file 'Renderer.cpp')
+  
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12UploadContext.h(12,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
+  (compiling source file 'Renderer.cpp')
+  
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.h(60,76): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+  (compiling source file 'Renderer.cpp')
+  
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.h(60,55): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+  (compiling source file 'Renderer.cpp')
+  
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.h(60,48): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
+  (compiling source file 'Renderer.cpp')
+  
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.h(60,32): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
+  (compiling source file 'Renderer.cpp')
+  
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Material.h(9,26): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Texture' when no variable is declared
+  (compiling source file 'Renderer.cpp')
+  
+D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(72,70): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
+D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(227,75): warning C4244: '=': conversion from 'const float' to 'UINT64', possible loss of data
+D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(228,76): warning C4244: '=': conversion from 'const float' to 'UINT', possible loss of data
+D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(359,48): warning C4267: 'argument': conversion from 'size_t' to 'UINT', possible loss of data
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\memory(3465,56): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\memory(3465,56): warning C4244:         with
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\memory(3465,56): warning C4244:         [
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\memory(3465,56): warning C4244:             _Ty=int
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\memory(3465,56): warning C4244:         ]
+  (compiling source file 'Renderer.cpp')
+      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\memory(3465,56):
+      the template instantiation context (the oldest one first) is
+          D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(338,24):
+          see reference to function template instantiation 'std::unique_ptr<ElysiaRenderer::DX12DirectionLight,std::default_delete<ElysiaRenderer::DX12DirectionLight>> std::make_unique<ElysiaRenderer::DX12DirectionLight,DirectX::XMFLOAT4,DirectX::XMVECTOR,int,0>(DirectX::XMFLOAT4 &&,DirectX::XMVECTOR &&,int &&)' being compiled
+  
   main.cpp
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
   (compiling source file 'main.cpp')
@@ -54,29 +124,8 @@ D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.h(60,32): warning C4244: 'argum
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Material.h(9,26): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Texture' when no variable is declared
   (compiling source file 'main.cpp')
   
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.h(195,70): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
-  (compiling source file 'main.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.h(331,75): warning C4244: '=': conversion from 'const float' to 'UINT64', possible loss of data
-  (compiling source file 'main.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.h(332,76): warning C4244: '=': conversion from 'const float' to 'UINT', possible loss of data
-  (compiling source file 'main.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.h(463,48): warning C4267: 'argument': conversion from 'size_t' to 'UINT', possible loss of data
-  (compiling source file 'main.cpp')
-  
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\memory(3465,56): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\memory(3465,56): warning C4244:         with
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\memory(3465,56): warning C4244:         [
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\memory(3465,56): warning C4244:             _Ty=int
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\memory(3465,56): warning C4244:         ]
-  (compiling source file 'main.cpp')
-      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\memory(3465,56):
-      the template instantiation context (the oldest one first) is
-          D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.h(442,24):
-          see reference to function template instantiation 'std::unique_ptr<ElysiaRenderer::DX12DirectionLight,std::default_delete<ElysiaRenderer::DX12DirectionLight>> std::make_unique<ElysiaRenderer::DX12DirectionLight,DirectX::XMFLOAT4,DirectX::XMVECTOR,int,0>(DirectX::XMFLOAT4 &&,DirectX::XMVECTOR &&,int &&)' being compiled
-  
+  Generating Code...
+D:\DX12\ElysiaRenderer\ElysiaRenderer\main.cpp(92): warning C4715: 'WndProc': not all control paths return a value
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.h(60): warning C4172: returning address of local variable or temporary
   ElysiaRenderer.vcxproj -> D:\DX12\ElysiaRenderer\x64\Debug\ElysiaRenderer.exe
   D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Mesh\diablo3_pose.obj

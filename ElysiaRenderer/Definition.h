@@ -14,6 +14,7 @@ namespace ElysiaRenderer
 	constexpr uint32_t INVALID_RESOURCE_TABLE_INDEX = UINT_MAX;
 	constexpr uint32_t NUM_SAMPLER_DESCRIPTORS = 6;
 	constexpr uint32_t MAX_TEXTURE_SUBRESOURCE_COUNT = 32;
+	constexpr uint32_t IMGUI_RESERVED_DESCRIPTOR_INDEX = 0;
 
 	using SubResourceLayouts = std::array<D3D12_PLACED_SUBRESOURCE_FOOTPRINT, MAX_TEXTURE_SUBRESOURCE_COUNT>;
 

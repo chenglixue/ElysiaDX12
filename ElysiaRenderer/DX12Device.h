@@ -71,6 +71,11 @@ namespace ElysiaRenderer
 		{
 			return *m_samplerRenderPassDescriptorHeap;
 		}
+		DX12DescriptorHeapHandle& GetImguiDescriptor(uint32_t index)
+		{ 
+			return m_ImguiDescriptors[index];
+		}
+
 
 		std::unique_ptr<DX12GraphicsContext>		CreateGraphicsContext();
 		std::unique_ptr<DX12VertexBuffer>			CreateVertexBuffer(const VertexBufferCreationDesc& bufferCreationDesc);
@@ -154,6 +159,7 @@ namespace ElysiaRenderer
 		std::unique_ptr<DX12RenderPassDescriptorHeap> m_CBVRenderPassDescriptorHeap;
 		std::unique_ptr<DX12RenderPassDescriptorHeap> m_samplerRenderPassDescriptorHeap;
 		std::unique_ptr<DX12RenderPassDescriptorHeap> m_UAVRenderPassDescriptorHeap;
+		std::array<DX12DescriptorHeapHandle, NUM_FRAMES_IN_FLIGHT> m_ImguiDescriptors;
 		std::vector<UINT> m_freeReservedDescriptorIndices;
 		std::array<std::unique_ptr<DX12UploadContext>, NUM_FRAMES_IN_FLIGHT> m_uploadContexts;
 		std::array<std::unique_ptr<DX12TextureResource>, NUM_BACK_BUFFERS> m_backBuffers;

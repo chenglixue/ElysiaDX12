@@ -95,7 +95,6 @@ FDirectLighting DefaultLitBxDF(MaterialData materialData, float3 N, float3 V, fl
     Lighting.Diffuse *= AreaLight.FalloffColor * Falloff * NoL;
 
     Lighting.Specular = SpecularGGX(materialData.Roughness, materialData.SpecularColor, Context, NoL, AreaLight);
-    //Lighting.Specular += GetSpecularEnergyPreservation(materialData.BaseColor, materialData.Roughness, Context.NoL, Context.NoV);
     Lighting.Specular *= AreaLight.FalloffColor * Falloff * NoL;
     
     FBxDFEnergyTerms energyTerm = ComputeFresnelEnergyTerms(GGXEnergyLookup(materialData.Roughness, NoV), materialData.SpecularColor);

@@ -160,6 +160,8 @@ namespace ElysiaRenderer
 			{
 				m_SRVRenderPassDescriptorHeaps[currFrameIndex] = std::make_unique<DX12RenderPassDescriptorHeap>(m_device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
 					NUM_RESERVED_SRV_DESCRIPTORS, NUM_SRV_RENDER_PASS_USER_DESCRIPTORS);
+
+				m_ImguiDescriptors[currFrameIndex] = m_SRVRenderPassDescriptorHeaps[currFrameIndex]->GetReservedDescriptor(IMGUI_RESERVED_DESCRIPTOR_INDEX);
 			}
 			
 			m_samplerRenderPassDescriptorHeap = std::make_unique<DX12RenderPassDescriptorHeap>(m_device, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER,

@@ -32,7 +32,17 @@ cbuffer PerPassBuffer : register(b0, perPassSpace)
 }
 cbuffer PerObjectBuffer : register(b0, perObjectSpace)
 {
-    float4x4 M_World;
+    float4x4    M_World;
+    
+    float3      BaseColorTint;
+    float       Opacity;
+    
+    float       NormalIntensity;
+    float       MetallicIntensity;
+    float       RoughnessIntensity;
+    float       AmbientCubemapIntensity;
+
+    float3      AmbientCubemapTint;
     
     //float4 paddingObject[12];
 
