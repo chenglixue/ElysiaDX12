@@ -83,7 +83,7 @@ PSOutput PS(PSInput i)
     LightData mainLight = GetMainLight(lights[0]);
     
     MaterialData materialData = GetMaterialData(inputParam);
-     
+    
     o.target0 = GetDynamicLighting(inputParam, materialData, mainLight);
     
     return o;

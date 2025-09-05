@@ -36,4 +36,14 @@ struct FAreaLight
     float3 FalloffColor;
     uint IsRectAndDiffuseMicroReflWeight;
 };
+
+struct FLightAccumulator
+{
+    float3 TotalLight;
+
+    // only used for alpha, which needs to keep specular and alpha separate since specular needs to multiply by 1/opacity to compensate for alpha blending
+    // assumed to be compiled out otherwise
+    float3 TotalLightDiffuse;
+    float3 TotalLightSpecular;
+};
 #endif

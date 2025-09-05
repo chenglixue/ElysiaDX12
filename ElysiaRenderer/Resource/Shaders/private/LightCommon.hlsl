@@ -3,6 +3,7 @@
 #include "SharedCommon.hlsli"
 #include "ShadingModel.hlsl"
 #include "LightAccumulator.hlsl"
+#include "AmbientCubemap.hlsl"
 
 struct FLightingSplit
 {
@@ -65,6 +66,7 @@ float4 GetDynamicLighting(FInputParams inputData, MaterialData materialData, Lig
     
     
     o += lighting.DiffuseLighting + lighting.SpecularLighting;
+    o += float4(GetIBL(inputData, materialData), 1.f);
     
     return o;
 }

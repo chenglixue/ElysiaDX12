@@ -132,6 +132,11 @@
       <Outputs>
       </Outputs>
     </CustomBuildStep>
+    <FxCompile>
+      <ShaderModel>6.0</ShaderModel>
+      <AdditionalIncludeDirectories>
+      </AdditionalIncludeDirectories>
+    </FxCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -305,23 +310,18 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resource\Shaders\private\BRDF.hlsl">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <FileType>Document</FileType>
     </None>
     <None Include="Resource\Shaders\private\Common.hlsl">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <FileType>Document</FileType>
     </None>
     <None Include="Resource\Shaders\private\Light.hlsl">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <FileType>Document</FileType>
     </None>
     <None Include="Resource\Shaders\private\LightCommon.hlsl">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <FileType>Document</FileType>
     </None>
     <None Include="Resource\Shaders\private\ShadingCommon.hlsl">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <FileType>Document</FileType>
     </None>
   </ItemGroup>
@@ -393,6 +393,19 @@
       <FileType>Document</FileType>
     </None>
     <None Include="..\x64\Debug\Shaders\public\Skybox.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resource\Shaders\private\MonteCarlo.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Resource\Shaders\private\Random.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resource\Shaders\private\AmbientCubemap.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>

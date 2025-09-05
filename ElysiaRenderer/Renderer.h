@@ -91,6 +91,8 @@ namespace ElysiaRenderer
 			 
 			LightData lights[1];	// 64
 			//float padd[24];
+
+			UINT frameIndex;
 		};
 		struct alignas(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT) CBVObjectParameter
 		{
@@ -146,7 +148,7 @@ namespace ElysiaRenderer
 
 	inline void Renderer::Init()
 	{
-		{
+		{ 
 			auto camera = std::make_unique<DX12Camera>();
 			camera->SetCameraPos(XMVectorSet(0.0f, 3.0f, -10.0f, 0.f));
 			camera->SetCameraFOV(0.8f);
@@ -155,9 +157,9 @@ namespace ElysiaRenderer
 			static const XMVECTORF32 up{ 0.f, 1.f, 0.f, 0.f };
 			static const XMVECTORF32 at{ 0.f, 0.f, 0.f, 0.f };
 			m_viewMatrix = XMMatrixLookAtLH(camera->GetCameraPos(), at, up);
-
+			  
 			m_projMatrix = XMMatrixPerspectiveFovLH(camera->GetFOV(), m_aspectRatio, camera->GetNearZ(), camera->GetFarZ());
-
+			
 			m_passParameter.viewMatrix = XMMatrixTranspose(m_viewMatrix);
 			m_passParameter.projMatrix = XMMatrixTranspose(m_projMatrix);
 			XMStoreFloat4(&m_passParameter.cameraPosWS, camera->GetCameraPos());
@@ -165,7 +167,7 @@ namespace ElysiaRenderer
 			m_cameras.emplace_back(std::move(camera));
 		}
 
-		LoadModel();
+		LoadModel(); 
 		InitLight();
 		InitTexTriangle();
 	}
@@ -176,6 +178,7 @@ namespace ElysiaRenderer
 
 		//m_passParameter.lights[0].m_lightPos = XMVector4Transform(m_passParameter.lights[0].m_lightPos, XMMatrixTranslation(6.f, 0.f, 0.f) * XMMatrixRotationY(m_curRotationAngleRad));
 		m_passParameter.screenSize = m_device->GetScreenSize();
+		m_passParameter.frameIndex = m_device->GetFrameID();
 		m_pipelineBindResource.m_CBVResource[ElysiaHelper::PER_PASS_SPACE][0]->SetMappedData(&m_passParameter, sizeof(CBVPassParameter));
 	}
 	inline void Renderer::Render()
@@ -221,12 +224,12 @@ namespace ElysiaRenderer
 	}
 	inline void Renderer::RenderTexTriangle()
 	{
-		m_objectParameters.reserve(objectNum);
+		m_objectParameters.reserve(objectNum); 
 
 		m_device->BeginFrame();
-
+		 
 		auto& currBackBuffer = m_device->GetCurrBackBuffer();
-		UINT objectCBVIndex = 0;
+		UINT objectCBVIndex = 0; 
 
 		m_graphicsContext->Reset();
 		//m_graphicsContext->Reset(m_graphicsPipelineStates[ShaderQueue::Skybox]->GetPipelineState());
@@ -253,19 +256,19 @@ namespace ElysiaRenderer
 			
 			scaleMatrix = XMMatrixScaling(1.f, 1.f, 1.f); 
 			rotationMatrix = XMMatrixMultiply(XMMatrixRotationY(XMConvertToRadians(-90)), XMMatrixRotationZ(XMConvertToRadians(90)));
-			rotationMatrix = XMMatrixMultiply(rotationMatrix, XMMatrixRotationAxis(XMVectorSet(0, 1, 0, 0), m_curRotationAngleRad));
+			rotationMatrix = XMMatrixMultiply(rotationMatrix, XMMatrixRotationAxis(XMVectorSet(0, 1, 0, 0), m_curRotationAngleRad / 10));
 			translateMatrix = XMMatrixTranslation(0.f, 0.f, 0.f);
 			MVP = rotationMatrix * scaleMatrix * translateMatrix;
 			tempCBVObjectParameter.worldMatrix = XMMatrixTranspose(MVP); 
 			BindObject(currBackBuffer, objectCBVIndex, ShaderQueue::Opaque, 0, tempCBVObjectParameter);
-			    
+			   
 			tempCBVObjectParameter = {}; 
 			scaleMatrix = XMMatrixScaling(1.f, 1.f, 1.f);
 			rotationMatrix = XMMatrixRotationAxis(XMVectorSet(0, 1, 0, 0), m_curRotationAngleRad);
 			translateMatrix = XMMatrixTranslation(6.f, 0.f, 0.f);
 			MVP = translateMatrix * scaleMatrix * rotationMatrix;
 			tempCBVObjectParameter.worldMatrix = XMMatrixTranspose(MVP);
-			BindObject(currBackBuffer, objectCBVIndex, ShaderQueue::Opaque, 1, tempCBVObjectParameter);
+			//BindObject(currBackBuffer, objectCBVIndex, ShaderQueue::Opaque, 1, tempCBVObjectParameter);
 			
 			tempCBVObjectParameter = {}; 
 			scaleMatrix = XMMatrixScaling(10.f, 10.f, 10.f);

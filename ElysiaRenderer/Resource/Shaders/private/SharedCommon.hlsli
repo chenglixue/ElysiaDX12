@@ -26,14 +26,15 @@ cbuffer PerPassBuffer : register(b0, perPassSpace)
     float4 ScreenSize;
     
     Light lights[MAIN_LIGHT_NUM];
-    float4 paddingPass[6];
+    uint   _FrameIndex;
+    //float4 paddingPass[6];
     
 }
 cbuffer PerObjectBuffer : register(b0, perObjectSpace)
 {
     float4x4 M_World;
     
-    float4 paddingObject[12];
+    //float4 paddingObject[12];
 
 }
 

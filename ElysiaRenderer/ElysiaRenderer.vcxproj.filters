@@ -235,18 +235,6 @@
       <Filter>Header Files</Filter>
     </None>
     <None Include="packages.config" />
-    <None Include="Resource\Shaders\private\SharedCommon.hlsli">
-      <Filter>Resource Files\Shader\Priavte</Filter>
-    </None>
-    <None Include="Resource\Shaders\private\Light.hlsli">
-      <Filter>Resource Files\Shader\Priavte</Filter>
-    </None>
-    <None Include="Resource\Shaders\private\Macros.hlsli">
-      <Filter>Resource Files\Shader\Priavte</Filter>
-    </None>
-    <None Include="Resource\Shaders\private\Math.hlsli">
-      <Filter>Resource Files\Shader\Priavte</Filter>
-    </None>
     <None Include="Resource\Shaders\private\BRDF.hlsl">
       <Filter>Resource Files\Shader\Priavte</Filter>
     </None>
@@ -260,9 +248,6 @@
       <Filter>Resource Files\Shader\Priavte</Filter>
     </None>
     <None Include="Resource\Shaders\private\ShadingCommon.hlsl">
-      <Filter>Resource Files\Shader\Priavte</Filter>
-    </None>
-    <None Include="Resource\Shaders\private\Transform.hlsli">
       <Filter>Resource Files\Shader\Priavte</Filter>
     </None>
     <None Include="Resource\Shaders\private\ShadingModel.hlsl">
@@ -330,6 +315,30 @@
     </None>
     <None Include="Resource\Shaders\public\DrawTriangle.hlsl">
       <Filter>Resource Files\Shader\Public</Filter>
+    </None>
+    <None Include="Resource\Shaders\private\Light.hlsli">
+      <Filter>Resource Files\Shader\Priavte\Header</Filter>
+    </None>
+    <None Include="Resource\Shaders\private\Macros.hlsli">
+      <Filter>Resource Files\Shader\Priavte\Header</Filter>
+    </None>
+    <None Include="Resource\Shaders\private\Math.hlsli">
+      <Filter>Resource Files\Shader\Priavte\Header</Filter>
+    </None>
+    <None Include="Resource\Shaders\private\SharedCommon.hlsli">
+      <Filter>Resource Files\Shader\Priavte\Header</Filter>
+    </None>
+    <None Include="Resource\Shaders\private\Transform.hlsli">
+      <Filter>Resource Files\Shader\Priavte\Header</Filter>
+    </None>
+    <None Include="Resource\Shaders\private\MonteCarlo.hlsl">
+      <Filter>Resource Files\Shader\Priavte</Filter>
+    </None>
+    <None Include="Resource\Shaders\private\Random.hlsl">
+      <Filter>Resource Files\Shader\Priavte</Filter>
+    </None>
+    <None Include="Resource\Shaders\private\AmbientCubemap.hlsl">
+      <Filter>Resource Files\Shader\Priavte</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -485,9 +494,6 @@
     <CopyFileToFolders Include="dxc\bin\x64\dxil.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="Resource\Tex\Wood.dds">
-      <Filter>Resource Files</Filter>
-    </Image>
     <Image Include="..\x64\Debug\Tex\CyborgWeapon_BaseColor.dds">
       <Filter>Resource Files\Tex</Filter>
     </Image>
@@ -512,6 +518,11 @@
     <Image Include="..\x64\Debug\Tex\Wood.dds">
       <Filter>Resource Files\Tex</Filter>
     </Image>
-    <Image Include="Resource\Tex\cubemap0.dds" />
+    <Image Include="Resource\Tex\cubemap0.dds">
+      <Filter>Resource Files\Tex</Filter>
+    </Image>
+    <Image Include="Resource\Tex\Wood.dds">
+      <Filter>Resource Files\Tex</Filter>
+    </Image>
   </ItemGroup>
 </Project>
