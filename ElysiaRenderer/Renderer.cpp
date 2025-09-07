@@ -170,6 +170,14 @@ namespace ElysiaRenderer
 
 	void Renderer::AddUIItems()
 	{
+		if (ImGui::CollapsingHeader("Light"))
+		{
+			ImGui::ColorEdit3("Color", (float*) & m_passParameter.mainLights[0].m_lightColor);
+			ImGui::DragFloat3("Direction", (float*)&m_passParameter.mainLights[0].m_lightDir, 1);
+			
+			ImGui::SliderFloat("Intensity", &m_passParameter.mainLights[0].m_intensity, 0, 5);
+		}
+
 		if (ImGui::CollapsingHeader("PBR Data"))
 		{
 			ImGui::ColorEdit3("Base Color Tint", (float*) & m_objectParameters[0].baseColorTint);
@@ -335,8 +343,8 @@ namespace ElysiaRenderer
 
 	void Renderer::InitLight()
 	{
-		auto dirLight = std::make_unique<DX12DirectionLight>(XMFLOAT4(1, 1, 1, 1), XMVectorSet(1, 0, 1, 0), 1);
-		m_passParameter.lights[0] = std::move(dirLight->CreateLightData());
+		auto dirLight = std::make_unique<DX12DirectionLight>(XMFLOAT4(1, 1, 1, 1), XMVectorSet(0, -360, 0, 0), 1);
+		m_passParameter.mainLights[0] = std::move(dirLight->CreateLightData());
 
 		m_lights.emplace_back(std::move(dirLight));
 	}

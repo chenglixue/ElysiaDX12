@@ -90,9 +90,9 @@ FDirectLighting DefaultLitBxDF(MaterialData materialData, float3 N, float3 V, fl
     //SphereMaxNoH(Context, AreaLight.SphereSinAlpha, true);
     Context.NoV = saturate(abs(Context.NoV) + 1e-5);
 
+    float3 KD = (1 - UE_F_Schlick(materialData.SpecularColor, Context.VoH)) * (1 - materialData.Metallic);
     Lighting.Diffuse = Diffuse_Chan(materialData.DiffuseColor, Pow4(materialData.Roughness), NoV, NoL, VoH, NoH, GetAreaLightDiffuseMicroReflWeight(AreaLight));
-    Lighting.Diffuse = Diffuse_Lambert(materialData.DiffuseColor);
-    Lighting.Diffuse *= AreaLight.FalloffColor * Falloff * NoL;
+    Lighting.Diffuse *= AreaLight.FalloffColor * Falloff * NoL * KD;
 
     Lighting.Specular = SpecularGGX(materialData.Roughness, materialData.SpecularColor, Context, NoL, AreaLight);
     Lighting.Specular *= AreaLight.FalloffColor * Falloff * NoL;

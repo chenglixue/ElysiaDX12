@@ -7,7 +7,7 @@
 #include "DX12UI.h"
 #include <dxgidebug.h>
 
-namespace ElysiaRenderer
+namespace ElysiaRenderer 
 {
 	const std::vector<D3D12_INPUT_ELEMENT_DESC> m_inputElementDescs =
 	{
@@ -19,7 +19,7 @@ namespace ElysiaRenderer
 	};
 	/// <summary>
 	/// user data
-	/// </summary>
+	/// </summary> 
 	const std::vector<LPCWSTR> m_modelPaths
 	{
 		L"Mesh\\LOW_WEPON.fbx",
@@ -42,13 +42,13 @@ namespace ElysiaRenderer
 	static XMMATRIX m_worldMatrix = XMMatrixIdentity();
 	static XMMATRIX m_viewMatrix = XMMatrixIdentity();
 	static XMMATRIX m_projMatrix = XMMatrixIdentity();
-	static float m_curRotationAngleRad = 0.f;
+	static float m_curRotationAngleRad = 0.f; 
 	static const float m_rotationSpeed = 0.001f;
-	static int objectNum = 3;
-
+	static int objectNum = 3;    
+	 
 	/// <summary>
-		/// Constant parameter
-		/// </summary>
+	/// Constant parameter
+	/// </summary>  
 	struct alignas(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT) CBVPassParameter
 	{
 		XMFLOAT4 cameraPosWS;	// 16
@@ -56,7 +56,7 @@ namespace ElysiaRenderer
 		XMMATRIX projMatrix;	// 64
 		XMFLOAT4 screenSize;	// 16
 
-		LightData lights[1];	// 64
+		LightData mainLights[MAX_MAIN_LIGHT_COUNT];	// 64
 		//float padd[24];
 
 		UINT frameIndex;
@@ -78,7 +78,7 @@ namespace ElysiaRenderer
 		//float padding[48];
 	};
 	static CBVPassParameter m_passParameter{};
-	static std::vector<CBVObjectParameter> m_objectParameters{};
+	static std::vector<CBVObjectParameter> m_objectParameters{}; 
 
 	class Renderer
 	{
