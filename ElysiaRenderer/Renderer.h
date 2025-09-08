@@ -40,8 +40,6 @@ namespace ElysiaRenderer
 	};
 
 	static XMMATRIX m_worldMatrix = XMMatrixIdentity();
-	static XMMATRIX m_viewMatrix = XMMatrixIdentity();
-	static XMMATRIX m_projMatrix = XMMatrixIdentity();
 	static float m_curRotationAngleRad = 0.f; 
 	static const float m_rotationSpeed = 0.001f;
 	static int objectNum = 3;    
@@ -90,8 +88,48 @@ namespace ElysiaRenderer
 		void Update();
 		void Render();
 		void Destory();
+		void Resize();
+
+		bool IsStopped() const
+		{
+			return m_isStopped;
+		}
+		void SetIsStopped(bool isStopped)
+		{
+			m_isStopped = isStopped;
+		}
+		bool IsMin() const
+		{
+			return m_isMin;
+		}
+		void SetIsMin(bool isMin)
+		{
+			m_isMin = isMin;
+		}
+		bool IsMax() const
+		{
+			return m_isMax;
+		}
+		void SetIsMax(bool isMax)
+		{
+			m_isMax = isMax;
+		}
+		bool IsResizing() const
+		{
+			return m_isResizing;
+		}
+		void SetIsResizing(bool isResizing)
+		{
+			m_isResizing = isResizing;
+		}
 
 	private:
+		Renderer* m_render = nullptr;
+
+		bool m_isStopped = false;
+		bool m_isMin = false;
+		bool m_isMax = false;
+		bool m_isResizing = false;
 
 		/// <summary>
 		/// pipeline

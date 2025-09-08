@@ -7,6 +7,8 @@
 using namespace ElysiaRenderer;
 using namespace DirectX::SimpleMath;
 
+static std::unique_ptr<ElysiaRenderer::Renderer> renderer = nullptr;
+
 //find path to WinPixGpuCapturer.dll from the most-recently installed version of PIX
 static std::wstring GetLatestWinPixGpuCapturerPath_Cpp17()
 {
@@ -50,6 +52,16 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam)
 
     switch (umessage)
     {
+		// WM_ACTIVATE is sent when the window is activated or deactivated.  
+		// We pause the game when the window is deactivated and unpause it 
+		// when it becomes active.  
+		case WM_ACTIVATE:
+		{
+			LOWORD(wparam) == WA_INACTIVE ? renderer->SetIsStopped(true) : renderer->SetIsStopped(false);
+
+			break;
+		}
+
 		case WM_KEYDOWN:
 		{
 			if (wparam == VK_ESCAPE)
@@ -82,6 +94,70 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam)
 				break;
 			}
 			
+		}
+
+		// WM_SIZE is sent when the user resizes the window.  
+		case WM_SIZE:
+		{
+			switch (wparam)
+			{
+				case SIZE_MINIMIZED:
+				{
+					renderer->SetIsStopped(true);
+					renderer->SetIsMin(true);
+					renderer->SetIsMax(false);
+					break;
+				}
+				case SIZE_MAXIMIZED:
+				{
+					renderer->SetIsStopped(false);
+					renderer->SetIsMin(false);
+					renderer->SetIsMax(true);
+					renderer->Resize();
+					break;
+				}
+				case SIZE_RESTORED:	// change to normal from min or max
+				{
+					if (renderer->IsMin())
+					{
+						renderer->SetIsStopped(false);
+						renderer->SetIsMin(false);
+						renderer->Resize();
+					}
+					else if (renderer->IsMax())
+					{
+						renderer->SetIsStopped(false);
+						renderer->SetIsMax(false);
+						renderer->Resize();
+					}
+					else if (renderer->IsResizing())
+					{
+						// If user is dragging the resize bars, we do not resize 
+						// the buffers here because as the user continuously 
+						// drags the resize bars, a stream of WM_SIZE messages are
+						// sent to the window, and it would be pointless (and slow)
+						// to resize for each WM_SIZE message received from dragging
+						// the resize bars.  So instead, we reset after the user is 
+						// done resizing the window and releases the resize bars, which 
+						// sends a WM_EXITSIZEMOVE message.
+					}
+					else
+					{
+						renderer->Resize();
+					}
+
+					break;
+				}
+			}
+
+			break;
+		}
+
+		case WM_ENTERSIZEMOVE:
+		{
+			mAppPaused = true;
+			mResizing = true;
+			break;
 		}
 
 		default:
@@ -119,7 +195,7 @@ int main()
 		(GetSystemMetrics(SM_CXSCREEN) - windowSize.x) / 2, (GetSystemMetrics(SM_CYSCREEN) - windowSize.y) / 2, windowSize.x, windowSize.y,
 		nullptr, nullptr, moduleHandle, nullptr);
 
-	std::unique_ptr<ElysiaRenderer::Renderer> renderer = std::make_unique<ElysiaRenderer::Renderer>(windowHandle, windowSize, pUI);
+	renderer = std::make_unique<ElysiaRenderer::Renderer>(windowHandle, windowSize, pUI);
 	renderer->Init();
 
 	ShowWindow(windowHandle, SW_SHOWNORMAL);
@@ -136,14 +212,23 @@ int main()
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
+		else
+		{
+			if (!renderer->IsStopped())
+			{
+				renderer->Update();
+				renderer->Render();
+			}
+			else
+			{
+				Sleep(100);
+			}
+		}
 
 		if (msg.message == WM_QUIT)
 		{
 			shouldExit = true;
 		}
-
-		renderer->Update();
-		renderer->Render();
 	}
 
 	DestroyWindow(windowHandle);

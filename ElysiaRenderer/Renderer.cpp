@@ -5,6 +5,8 @@ namespace ElysiaRenderer
 	Renderer::Renderer(HWND windowHandle, ElysiaHelper::UINT2 screenSize, std::shared_ptr<DX12UI> pUI) :
 		m_pUI(pUI)
 	{
+		m_render = this;
+
 		m_aspectRatio = static_cast<float>(screenSize.x) / static_cast<float>(screenSize.y);
 
 		m_device = std::make_unique<DX12Device>(windowHandle, screenSize);
@@ -13,27 +15,28 @@ namespace ElysiaRenderer
 		m_pUI->InitDescriptor(windowHandle, std::move(m_device.get()));
 	}
 
-	 Renderer::~Renderer()
+	Renderer::~Renderer()
 	{
-
 	}
 
 	void Renderer::Init()
 	{
 		{
 			auto camera = std::make_unique<DX12Camera>();
-			camera->SetCameraPos(XMVectorSet(0.0f, 3.0f, -10.0f, 0.f));
-			camera->SetCameraFOV(0.8f);
-			camera->SetCameraNearZ(0.01f);
-			camera->SetCameraFarz(1000.f);
-			static const XMVECTORF32 up{ 0.f, 1.f, 0.f, 0.f };
-			static const XMVECTORF32 at{ 0.f, 0.f, 0.f, 0.f };
-			m_viewMatrix = XMMatrixLookAtLH(camera->GetCameraPos(), at, up);
+			auto cameraPos = XMVectorSet(0.0f, 3.0f, -10.0f, 1.f);
+			auto FOVY = 0.8f;
+			auto aspect = m_aspectRatio;
+			auto nearZ = 1.f;
+			auto farZ = 1000.f;
 
-			m_projMatrix = XMMatrixPerspectiveFovLH(camera->GetFOV(), m_aspectRatio, camera->GetNearZ(), camera->GetFarZ());
+			camera->SetLens(FOVY, aspect, nearZ, farZ);
 
-			m_passParameter.viewMatrix = XMMatrixTranspose(m_viewMatrix);
-			m_passParameter.projMatrix = XMMatrixTranspose(m_projMatrix);
+			static const FXMVECTOR up{ 0.f, 1.f, 0.f, 0.f };
+			static const FXMVECTOR at{ 0.f, 0.f, 0.f, 0.f };
+			camera->LookAt(cameraPos, up, at);
+			
+			m_passParameter.viewMatrix = XMMatrixTranspose(camera->GetViewMat());
+			m_passParameter.projMatrix = XMMatrixTranspose(camera->GetProjMat());
 			XMStoreFloat4(&m_passParameter.cameraPosWS, camera->GetCameraPos());
 
 			m_cameras.emplace_back(std::move(camera));
@@ -81,6 +84,10 @@ namespace ElysiaRenderer
 		m_pixelShaders.clear();
 		m_computeShaders.clear();
 		m_graphicsPipelineStates.clear();
+	}
+	void Renderer::Resize()
+	{
+
 	}
 
 	void Renderer::InitTexTriangle()

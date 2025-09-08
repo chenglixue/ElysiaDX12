@@ -248,6 +248,7 @@
   <ItemGroup>
     <ClCompile Include="D3D12MemoryAllocator\D3D12MemAlloc.cpp" />
     <ClCompile Include="DX12BufferResource.cpp" />
+    <ClCompile Include="DX12Camera.cpp" />
     <ClCompile Include="DX12ConstantBuffer.cpp" />
     <ClCompile Include="DX12Context.cpp" />
     <ClCompile Include="DX12DescriptorHeap.cpp" />
