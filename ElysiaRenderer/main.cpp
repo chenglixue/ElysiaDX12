@@ -190,12 +190,13 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam)
 
 		case WM_MOUSEMOVE:
 		{
-			renderer->OnMouseMove(wparam, GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam));
-
 			if (imio.WantCaptureMouse)
 			{
 				break;
 			}
+
+			renderer->OnMouseMove(wparam, GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam));
+
 			break;
 		}
 
