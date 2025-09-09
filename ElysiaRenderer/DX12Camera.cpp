@@ -119,7 +119,7 @@ namespace ElysiaRenderer
 			XMVECTOR posVec = XMLoadFloat3(&m_cameraPos);
 
 			lookVec = XMVector3Normalize(lookVec);
-			upVec = XMVector3Normalize(XMVector3Cross(rightVec, lookVec));
+			upVec = XMVector3Normalize(XMVector3Cross(lookVec, rightVec));
 			rightVec = XMVector3Cross(upVec, lookVec);
 
 			float x = -XMVectorGetX(XMVector3Dot(posVec, rightVec));

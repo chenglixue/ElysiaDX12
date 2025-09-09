@@ -99,8 +99,8 @@ namespace ElysiaRenderer
 		if ((btnState & MK_LBUTTON) != 0)
 		{
 			// Make each pixel correspond to a quarter of a degree.
-			float dx = XMConvertToRadians(0.25f * static_cast<float>(m_lastMousePos.x - x));
-			float dy = XMConvertToRadians(0.25f * static_cast<float>(m_lastMousePos.y - y));
+			float dx = XMConvertToRadians(0.25f * static_cast<float>(x - m_lastMousePos.x));
+			float dy = XMConvertToRadians(0.25f * static_cast<float>(y - m_lastMousePos.y));
 
 			m_mainCamera->Pitch(dy);
 			m_mainCamera->Yaw(dx);
