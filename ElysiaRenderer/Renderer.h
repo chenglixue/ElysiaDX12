@@ -23,6 +23,7 @@ namespace ElysiaRenderer
 	const std::vector<LPCWSTR> m_modelPaths
 	{
 		L"Mesh\\LOW_WEPON.fbx",
+		L"Mesh\\plane.fbx",
 		L"Mesh\\Sphere.fbx",
 	};
 	const std::vector<LPCWSTR> m_globalTexPaths

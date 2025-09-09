@@ -78,6 +78,7 @@ namespace ElysiaRenderer
 	}
 	void Renderer::Resize()
 	{
+
 	}
 
 	void Renderer::OnMouseDown(WPARAM btnState, int x, int y)
@@ -194,19 +195,19 @@ namespace ElysiaRenderer
 			m_objectParameters[objectCBVIndex].worldMatrix = XMMatrixTranspose(MVP);
 			BindObject(currBackBuffer, objectCBVIndex, ShaderQueue::Opaque, 0);
 
-			scaleMatrix = XMMatrixScaling(1.f, 1.f, 1.f);
-			rotationMatrix = XMMatrixRotationAxis(XMVectorSet(0, 1, 0, 0), m_curRotationAngleRad);
-			translateMatrix = XMMatrixTranslation(6.f, 0.f, 0.f);
+			translateMatrix = XMMatrixTranslation(0.f, -5.f, 0.f);
+			scaleMatrix = XMMatrixIdentity();
+			rotationMatrix = XMMatrixIdentity();
 			MVP = translateMatrix * scaleMatrix * rotationMatrix;
 			m_objectParameters[objectCBVIndex].worldMatrix = XMMatrixTranspose(MVP);
-			//BindObject(currBackBuffer, objectCBVIndex, ShaderQueue::Opaque, 1);
+			BindObject(currBackBuffer, objectCBVIndex, ShaderQueue::Opaque, 1);
 
 			scaleMatrix = XMMatrixScaling(10.f, 10.f, 10.f);
 			rotationMatrix = XMMatrixIdentity();
 			translateMatrix = XMMatrixTranslation(0.f, 0.0f, 0.0f);
 			MVP = ElysiaHelper::GetMVP(translateMatrix, rotationMatrix, scaleMatrix);
 			m_objectParameters[objectCBVIndex].worldMatrix = XMMatrixTranspose(MVP);
-			BindObject(currBackBuffer, objectCBVIndex, ShaderQueue::Skybox, 1);
+			BindObject(currBackBuffer, objectCBVIndex, ShaderQueue::Skybox, 2);
 		}
 		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), m_graphicsContext->GetCommandList());
 
@@ -441,7 +442,6 @@ namespace ElysiaRenderer
 			currStartVertex += static_cast<UINT>(currVertices.size());
 			currStartIndex += static_cast<UINT>(currIndices.size());
 		}
-
 	}
 
 	void Renderer::AddShader(ShaderQueue shaderQueue, const std::wstring& shaderName, const std::wstring& entryPoint, ShaderType shaderType)
