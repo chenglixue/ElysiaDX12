@@ -1,5 +1,6 @@
 #pragma once
 #include <windows.h>
+#include <windowsx.h>
 #include <wrl.h>
 #include <shellapi.h>
 #include <d3d12.h>

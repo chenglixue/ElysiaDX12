@@ -123,13 +123,21 @@ namespace ElysiaRenderer
 			m_isResizing = isResizing;
 		}
 
-	private:
+		virtual void OnMouseDown(WPARAM btnState, int x, int y);
+		virtual void OnMouseUp(WPARAM btnState, int x, int y);
+		virtual void OnMouseMove(WPARAM btnState, int x, int y);
+		virtual void OnKeyboardInput();
+
+	protected:
 		Renderer* m_render = nullptr;
+		HWND m_windowHandle;
 
 		bool m_isStopped = false;
 		bool m_isMin = false;
 		bool m_isMax = false;
 		bool m_isResizing = false;
+
+		XMINT2 m_lastMousePos;
 
 		/// <summary>
 		/// pipeline
@@ -148,10 +156,12 @@ namespace ElysiaRenderer
 		std::unordered_map<UINT, std::unordered_map<ShaderType, std::unique_ptr<DX12Shader>>> m_pixelShaders;
 		std::vector<std::unique_ptr<DX12Shader>> m_computeShaders;
 		std::unordered_map<UINT, std::unique_ptr<DX12GraphicsPipelineState>> m_graphicsPipelineStates;
-		std::vector<std::unique_ptr<DX12Camera>> m_cameras;
+		std::vector<std::shared_ptr<DX12Camera>> m_cameras;
 		std::vector<std::unique_ptr<DX12Light>> m_lights;
 		PipelineBindResource m_pipelineBindResource{};
 		TexCreateDesc m_depthBufferCreateDesc{};
+
+		std::shared_ptr<DX12Camera> m_mainCamera;
 
 		/// <summary>
 		/// Model
@@ -172,6 +182,7 @@ namespace ElysiaRenderer
 		void CreateSignatures();
 		void CreatePOS();
 
+		std::shared_ptr<DX12Camera> InitCamera(XMVECTOR position, float aspect, float FOVY, float nearZ, float farZ);
 		void InitLight();
 		void LoadModel();
 		void BindObject(DX12TextureResource& currBackBuffer, 

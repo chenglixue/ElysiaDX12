@@ -22,30 +22,32 @@ namespace ElysiaRenderer
 	}
 	void DX12Camera::LookAt(const FXMVECTOR& pos, const FXMVECTOR& up, const FXMVECTOR& target)
 	{
-		auto viewMat = XMMatrixLookAtLH(pos, target, up);
-		XMStoreFloat4x4(&m_view, viewMat);
+		/*auto viewMat = XMMatrixLookAtLH(pos, target, up);
+		XMStoreFloat4x4(&m_view, viewMat);*/
 
-		auto lookVec = XMVector4Normalize(XMVectorSubtract(target, pos));
-		auto rightVec = XMVector4Normalize(XMVector3Cross(lookVec, up));
-		auto upVec = XMVector4Normalize(XMVector3Cross(lookVec, rightVec));
+		auto lookUnNor = XMVectorSubtract(target, pos);
+		auto lookVec = XMVector3Normalize(lookUnNor);
+		auto rightVec = XMVector3Normalize(XMVector3Cross(up, lookVec));
+		auto upVec = XMVector3Cross(lookVec, rightVec);
 
-		XMStoreFloat4(&m_up, upVec);
-		XMStoreFloat4(&m_right, rightVec);
-		XMStoreFloat4(&m_look, lookVec);
-		XMStoreFloat4(&m_cameraPos, pos);
+		XMStoreFloat3(&m_lookUnNor, lookUnNor);
+		XMStoreFloat3(&m_up, upVec);
+		XMStoreFloat3(&m_right, rightVec);
+		XMStoreFloat3(&m_look, lookVec);
+		XMStoreFloat3(&m_cameraPos, pos);
 
 		m_viewDirty = true;
 	}
 	void DX12Camera::LookAt(const XMFLOAT3& pos, const XMFLOAT3& up, const XMFLOAT3& target)
 	{
-		auto temp = XMFLOAT4(pos.x, pos.y, pos.z, 1.f);
-		auto posVec = XMLoadFloat4(&temp);
+		auto temp = XMFLOAT3(pos.x, pos.y, pos.z);
+		auto posVec = XMLoadFloat3(&temp);
 
-		temp = XMFLOAT4(up.x, up.y, up.z, 0.f);
-		auto upVec = XMLoadFloat4(&temp);
+		temp = XMFLOAT3(up.x, up.y, up.z);
+		auto upVec = XMLoadFloat3(&temp);
 
-		temp = XMFLOAT4(target.x, target.y, target.z, 1.f);
-		auto targetVec = XMLoadFloat4(&temp);
+		temp = XMFLOAT3(target.x, target.y, target.z);
+		auto targetVec = XMLoadFloat3(&temp);
 
 		LookAt(posVec, upVec, targetVec);
 	}
@@ -53,54 +55,57 @@ namespace ElysiaRenderer
 	void DX12Camera::MoveHorizon(float distance)
 	{
 		FXMVECTOR distanceVec = XMVectorReplicate(distance);
-		FXMVECTOR rightVec = XMLoadFloat4(&m_right);
-		FXMVECTOR posVec = XMLoadFloat4(&m_cameraPos);
+		FXMVECTOR rightVec = XMLoadFloat3(&m_right);
+		FXMVECTOR posVec = XMLoadFloat3(&m_cameraPos);
 
 		XMVECTOR movedPos = XMVectorMultiplyAdd(rightVec, distanceVec, posVec);
-		XMStoreFloat4(&m_cameraPos, movedPos);
+		XMStoreFloat3(&m_cameraPos, movedPos);
 
 		m_viewDirty = true;
 	}
 	void DX12Camera::MoveVertical(float distance)
 	{
 		FXMVECTOR distanceVec = XMVectorReplicate(distance);
-		FXMVECTOR lookVec = XMLoadFloat4(&m_look);
-		FXMVECTOR posVec = XMLoadFloat4(&m_cameraPos);
+		FXMVECTOR lookVec = XMLoadFloat3(&m_look);
+		FXMVECTOR posVec = XMLoadFloat3(&m_cameraPos);
 
 		XMVECTOR movedPos = XMVectorMultiplyAdd(lookVec, distanceVec, posVec);
-		XMStoreFloat4(&m_cameraPos, movedPos);
+		XMStoreFloat3(&m_cameraPos, movedPos);
 
 		m_viewDirty = true;
 	}
 
 	void DX12Camera::Pitch(float angle)
 	{
-		XMVECTOR rightVec = XMLoadFloat4(&m_right);
-		XMVECTOR upVec = XMLoadFloat4(&m_up);
-		XMVECTOR lookVec = XMLoadFloat4(&m_look);
+		XMVECTOR rightVec = XMLoadFloat3(&m_right);
+		XMVECTOR upVec = XMLoadFloat3(&m_up);
+		XMVECTOR lookVec = XMLoadFloat3(&m_look);
 
 		auto rotationMat = XMMatrixRotationAxis(rightVec, angle);
 
-		upVec = XMVector4Transform(upVec, rotationMat);
-		lookVec = XMVector4Transform(lookVec, rotationMat);
+		upVec = XMVector3TransformNormal(upVec, rotationMat);
+		lookVec = XMVector3TransformNormal(lookVec, rotationMat);
 
-		XMStoreFloat4(&m_up, upVec);
-		XMStoreFloat4(&m_look, lookVec);
+		XMStoreFloat3(&m_up, upVec);
+		XMStoreFloat3(&m_look, lookVec);
 
 		m_viewDirty = true;
 	}
 	void DX12Camera::Yaw(float angle)
 	{
-		XMVECTOR rightVec = XMLoadFloat4(&m_right);
-		XMVECTOR lookVec = XMLoadFloat4(&m_look);
+		XMVECTOR rightVec = XMLoadFloat3(&m_right);
+		XMVECTOR lookVec = XMLoadFloat3(&m_look);
+		XMVECTOR upVec = XMLoadFloat3(&m_up);
 
 		auto rotationMat = XMMatrixRotationY(angle);
 
-		rightVec = XMVector4Transform(rightVec, rotationMat);
-		lookVec = XMVector4Transform(lookVec, rotationMat);
+		rightVec = XMVector3TransformNormal(rightVec, rotationMat);
+		lookVec = XMVector3TransformNormal(lookVec, rotationMat);
+		upVec = XMVector3TransformNormal(upVec, rotationMat);
 
-		XMStoreFloat4(&m_right, rightVec);
-		XMStoreFloat4(&m_look, lookVec);
+		XMStoreFloat3(&m_right, rightVec);
+		XMStoreFloat3(&m_look, lookVec);
+		XMStoreFloat3(&m_up, upVec);
 
 		m_viewDirty = true;
 	}
@@ -108,23 +113,27 @@ namespace ElysiaRenderer
 	{
 		if (m_viewDirty)
 		{
-			XMVECTOR rightVec = XMVector4Normalize(XMLoadFloat4(&m_right));
-			XMVECTOR upVec = XMVector4Normalize(XMLoadFloat4(&m_up));
-			XMVECTOR lookVec = XMVector4Normalize(XMLoadFloat4(&m_look));
-			XMVECTOR posVec = XMVector4Normalize(XMLoadFloat4(&m_cameraPos));
+			XMVECTOR rightVec = XMLoadFloat3(&m_right);
+			XMVECTOR upVec = XMLoadFloat3(&m_up);
+			XMVECTOR lookVec = XMLoadFloat3(&m_look);
+			XMVECTOR posVec = XMLoadFloat3(&m_cameraPos);
 
-			upVec = XMVector4Normalize(XMVector3Cross(lookVec, rightVec));
-			rightVec = XMVector4Normalize(XMVector3Cross(upVec, lookVec));
+			lookVec = XMVector3Normalize(lookVec);
+			upVec = XMVector3Normalize(XMVector3Cross(rightVec, lookVec));
+			rightVec = XMVector3Cross(upVec, lookVec);
 
 			float x = -XMVectorGetX(XMVector3Dot(posVec, rightVec));
 			float y = -XMVectorGetX(XMVector3Dot(posVec, upVec));
 			float z = -XMVectorGetX(XMVector3Dot(posVec, lookVec));
 
-			XMStoreFloat4(&m_right, rightVec);
-			XMStoreFloat4(&m_up, upVec);
-			XMStoreFloat4(&m_look, lookVec);
+			XMStoreFloat3(&m_right, rightVec);
+			XMStoreFloat3(&m_up, upVec);
+			XMStoreFloat3(&m_look, lookVec);
 
-			m_view(0, 0) = m_right.x;
+			auto viewMat = XMMatrixLookAtLH(posVec, XMVectorAdd(posVec, lookVec), upVec);
+			XMStoreFloat4x4(&m_view, viewMat);
+
+			/*m_view(0, 0) = m_right.x;
 			m_view(1, 0) = m_right.y;
 			m_view(2, 0) = m_right.z;
 			m_view(3, 0) = x;
@@ -142,9 +151,7 @@ namespace ElysiaRenderer
 			m_view(0, 3) = 0.0f;
 			m_view(1, 3) = 0.0f;
 			m_view(2, 3) = 0.0f;
-			m_view(3, 3) = 1.0f;
-
-			m_viewDirty = false;
+			m_view(3, 3) = 1.0f;*/
 		}
 	}
 }

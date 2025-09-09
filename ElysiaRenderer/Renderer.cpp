@@ -6,6 +6,7 @@ namespace ElysiaRenderer
 		m_pUI(pUI)
 	{
 		m_render = this;
+		m_windowHandle = windowHandle;
 
 		m_aspectRatio = static_cast<float>(screenSize.x) / static_cast<float>(screenSize.y);
 
@@ -22,24 +23,13 @@ namespace ElysiaRenderer
 	void Renderer::Init()
 	{
 		{
-			auto camera = std::make_unique<DX12Camera>();
-			auto cameraPos = XMVectorSet(0.0f, 3.0f, -10.0f, 1.f);
-			auto FOVY = 0.8f;
-			auto aspect = m_aspectRatio;
-			auto nearZ = 1.f;
-			auto farZ = 1000.f;
-
-			camera->SetLens(FOVY, aspect, nearZ, farZ);
-
-			static const FXMVECTOR up{ 0.f, 1.f, 0.f, 0.f };
-			static const FXMVECTOR at{ 0.f, 0.f, 0.f, 0.f };
-			camera->LookAt(cameraPos, up, at);
+			m_mainCamera = InitCamera(XMVectorSet(0.0f, 3.0f, -10.0f, 1.f), m_aspectRatio, 0.8f, 1.f, 1000.f);
 			
-			m_passParameter.viewMatrix = XMMatrixTranspose(camera->GetViewMat());
-			m_passParameter.projMatrix = XMMatrixTranspose(camera->GetProjMat());
-			XMStoreFloat4(&m_passParameter.cameraPosWS, camera->GetCameraPos());
+			m_passParameter.viewMatrix = XMMatrixTranspose(m_mainCamera->GetViewMat());
+			m_passParameter.projMatrix = XMMatrixTranspose(m_mainCamera->GetProjMat());
+			XMStoreFloat4(&m_passParameter.cameraPosWS, m_mainCamera->GetCameraPos());
 
-			m_cameras.emplace_back(std::move(camera));
+			m_cameras.emplace_back(m_mainCamera);
 		}
 
 		LoadModel();
@@ -51,10 +41,11 @@ namespace ElysiaRenderer
 	}
 	void Renderer::Update()
 	{
+		OnKeyboardInput();
+
 		m_curRotationAngleRad += m_rotationSpeed;
 		m_worldMatrix = XMMatrixRotationY(0);
 
-		//m_passParameter.lights[0].m_lightPos = XMVector4Transform(m_passParameter.lights[0].m_lightPos, XMMatrixTranslation(6.f, 0.f, 0.f) * XMMatrixRotationY(m_curRotationAngleRad));
 		m_passParameter.screenSize = m_device->GetScreenSize();
 		m_passParameter.frameIndex = m_device->GetFrameID();
 		m_pipelineBindResource.m_CBVResource[ElysiaHelper::PER_PASS_SPACE][0]->SetMappedData(&m_passParameter, sizeof(CBVPassParameter));
@@ -87,7 +78,61 @@ namespace ElysiaRenderer
 	}
 	void Renderer::Resize()
 	{
+	}
 
+	void Renderer::OnMouseDown(WPARAM btnState, int x, int y)
+	{
+		m_lastMousePos = XMINT2(x, y);
+
+		// Capture mouse input to the specified window. 
+		// This means that even if the mouse pointer moves out of the window, 
+		// all subsequent mouse messages (such as WM_MOUSEMOVE, WM_LBUTTONDOWN, WM_RBUTTONDOWN, etc.) will still be sent to that window 
+		// until the ReleaseCapture function is called to release the capture.
+		SetCapture(m_windowHandle);
+	}
+	void Renderer::OnMouseUp(WPARAM btnState, int x, int y)
+	{
+		ReleaseCapture();
+	}
+	void Renderer::OnMouseMove(WPARAM btnState, int x, int y)
+	{
+		if ((btnState & MK_LBUTTON) != 0)
+		{
+			// Make each pixel correspond to a quarter of a degree.
+			float dx = XMConvertToRadians(0.25f * static_cast<float>(m_lastMousePos.x - x));
+			float dy = XMConvertToRadians(0.25f * static_cast<float>(m_lastMousePos.y - y));
+
+			m_mainCamera->Pitch(dy);
+			m_mainCamera->Yaw(dx);
+		}
+
+		m_lastMousePos.x = x;
+		m_lastMousePos.y = y;
+	}
+	void Renderer::OnKeyboardInput()
+	{
+		if (GetAsyncKeyState('W') & 0x8000)
+			m_mainCamera->MoveVertical(m_mainCamera->GetCameraSpeed() * 0.01);
+
+		if (GetAsyncKeyState('S') & 0x8000)
+			m_mainCamera->MoveVertical(-m_mainCamera->GetCameraSpeed() * 0.01);
+
+		if (GetAsyncKeyState('A') & 0x8000)
+			m_mainCamera->MoveHorizon(-m_mainCamera->GetCameraSpeed() * 0.01);
+
+		if (GetAsyncKeyState('D') & 0x8000)
+			m_mainCamera->MoveHorizon(m_mainCamera->GetCameraSpeed() * 0.01);
+
+		m_mainCamera->UpdateViewMatrix();
+
+		if (m_mainCamera->IsViewDirty())
+		{
+			m_passParameter.viewMatrix = XMMatrixTranspose(m_mainCamera->GetViewMat());
+			m_passParameter.projMatrix = XMMatrixTranspose(m_mainCamera->GetProjMat());
+			XMStoreFloat4(&m_passParameter.cameraPosWS, m_mainCamera->GetCameraPos());
+		}
+
+		m_mainCamera->DisableViewDirty();
 	}
 
 	void Renderer::InitTexTriangle()
@@ -177,6 +222,11 @@ namespace ElysiaRenderer
 
 	void Renderer::AddUIItems()
 	{
+		if (ImGui::CollapsingHeader("Camera"))
+		{
+			ImGui::SliderFloat("Speed", &m_mainCamera->GetCameraSpeed(), 0, 2);
+		}
+
 		if (ImGui::CollapsingHeader("Light"))
 		{
 			ImGui::ColorEdit3("Color", (float*) & m_passParameter.mainLights[0].m_lightColor);
@@ -348,6 +398,18 @@ namespace ElysiaRenderer
 		m_graphicsPipelineStates.insert({ ShaderQueue::Skybox, std::move(m_device->CreateGraphicsPipelineState(pipelineStateCreateDesc)) });
 	}
 
+	std::shared_ptr<DX12Camera> Renderer::InitCamera(XMVECTOR position, float aspect, float FOVY, float nearZ, float farZ)
+	{
+		auto camera = std::make_shared<DX12Camera>();
+
+		camera->SetLens(FOVY, aspect, nearZ, farZ);
+
+		static const FXMVECTOR up{ 0.f, 1.f, 0.f, 0.f };
+		static const FXMVECTOR at{ 0.f, 0.f, 0.f, 0.f };
+		camera->LookAt(position, up, at);
+
+		return camera;
+	}
 	void Renderer::InitLight()
 	{
 		auto dirLight = std::make_unique<DX12DirectionLight>(XMFLOAT4(1, 1, 1, 1), XMVectorSet(0, -360, 0, 0), 1);

@@ -2,10 +2,10 @@
 #include "Renderer.h"
 #include "pix3.h"
 
-//using namespace D3D12Lite;
-
 using namespace ElysiaRenderer;
 using namespace DirectX::SimpleMath;
+using namespace std;
+using Microsoft::WRL::ComPtr;
 
 static std::unique_ptr<ElysiaRenderer::Renderer> renderer = nullptr;
 
@@ -87,15 +87,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam)
 			return 0;
 		}
 
-		case WM_MOUSEMOVE:
-		{
-			if (imio.WantCaptureMouse)
-			{
-				break;
-			}
-			
-		}
-
 		// WM_SIZE is sent when the user resizes the window.  
 		case WM_SIZE:
 		{
@@ -153,10 +144,58 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam)
 			break;
 		}
 
+		// WM_EXITSIZEMOVE is sent when the user releases the resize bars.
+		// Here we reset everything based on the new window dimensions.
 		case WM_ENTERSIZEMOVE:
 		{
-			mAppPaused = true;
-			mResizing = true;
+			renderer->SetIsStopped(false);
+			renderer->SetIsResizing(false);
+			renderer->Resize();
+			
+			break;
+		}
+
+		// The WM_MENUCHAR message is sent when a menu is active and the user presses 
+		// a key that does not correspond to any mnemonic or accelerator key. 
+		case WM_MENUCHAR:
+		{
+			// Don't beep when we alt-enter.
+			MAKELRESULT(0, MNC_CLOSE);
+			break;
+		}
+
+		// Catch this message so to prevent the window becoming too small.
+		case WM_GETMINMAXINFO:
+		{
+			((MINMAXINFO*)lparam)->ptMinTrackSize.x = 200;
+			((MINMAXINFO*)lparam)->ptMinTrackSize.y = 200;
+			break;
+		}
+
+		case WM_LBUTTONDOWN:
+		case WM_MBUTTONDOWN:
+		case WM_RBUTTONDOWN:
+		{
+			renderer->OnMouseDown(wparam, GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam));
+			break;
+		}
+
+		case WM_LBUTTONUP:
+		case WM_MBUTTONUP:
+		case WM_RBUTTONUP:
+		{
+			renderer->OnMouseUp(wparam, GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam));
+			break;
+		}
+
+		case WM_MOUSEMOVE:
+		{
+			renderer->OnMouseMove(wparam, GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam));
+
+			if (imio.WantCaptureMouse)
+			{
+				break;
+			}
 			break;
 		}
 
