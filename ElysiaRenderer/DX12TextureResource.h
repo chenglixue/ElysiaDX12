@@ -38,6 +38,7 @@ namespace ElysiaRenderer
 			m_resouceDesc.Alignment = 0;
 		}
 
+		std::wstring m_name{};
 		D3D12_RESOURCE_DESC m_resouceDesc{};
 		TexTypeFlags m_typeFlag = TexTypeFlags::None;
 	};

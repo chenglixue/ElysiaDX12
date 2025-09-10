@@ -559,6 +559,7 @@ namespace ElysiaRenderer
 		CComPtr<D3D12MA::Allocation> allocation = nullptr;
 		ElysiaHelper::ThrowIfFailed(m_allocator->CreateResource(&allocationDesc, &resourceDesc, usageState, (!hasRTV && !hasDSV) ? nullptr : &clearValue,
 			&allocation, IID_PPV_ARGS(&texResource)));
+		texResource->SetName(desc.m_name.c_str());
 		/// 
 
 		auto newTex = std::make_unique<DX12TextureResource>(texResource, usageState, allocation);
@@ -623,24 +624,6 @@ namespace ElysiaRenderer
 
 		return newTex;
 	}
-	LPCWSTR s2ws(const std::string& s) {
-		int len;
-		int slength = (int)s.length() + 1;
-		len = MultiByteToWideChar(CP_UTF8, 0, s.c_str(), slength, 0, 0);
-		wchar_t* buf = new wchar_t[len];
-		MultiByteToWideChar(CP_UTF8, 0, s.c_str(), slength, buf, len);
-		LPCWSTR wstr = buf;
-
-		// 注意：调用者需要负责释放内存
-		return wstr;
-	}
-
-	void printWString(LPCWSTR wstr) {
-		std::wcout.imbue(std::locale("zh_CN.UTF-8")); // 设置区域以便正确显示 Unicode 字符
-		std::wcout << L"Wide string: " << wstr << std::endl;
-	}
-
-	
 
 	std::unique_ptr<DX12Shader>					DX12Device::CreateShader(ShaderCreateDesc& shaderCreateDesc)
 	{

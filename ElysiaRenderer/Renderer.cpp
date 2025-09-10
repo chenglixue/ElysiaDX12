@@ -25,7 +25,6 @@ namespace ElysiaRenderer
 		{
 			m_mainCamera = InitCamera(XMVectorSet(0.0f, 3.0f, -10.0f, 1.f), m_aspectRatio, 0.8f, 1.f, 1000.f);
 			
-			m_passParameter.viewMatrix = XMMatrixTranspose(m_mainCamera->GetViewMat());
 			m_passParameter.projMatrix = XMMatrixTranspose(m_mainCamera->GetProjMat());
 			XMStoreFloat4(&m_passParameter.cameraPosWS, m_mainCamera->GetCameraPos());
 
@@ -48,6 +47,8 @@ namespace ElysiaRenderer
 
 		m_passParameter.screenSize = m_device->GetScreenSize();
 		m_passParameter.frameIndex = m_device->GetFrameID();
+		m_passParameter.nearZ = m_mainCamera->GetNearZ();
+		m_passParameter.farZ = m_mainCamera->GetFarZ();
 		m_pipelineBindResource.m_CBVResource[ElysiaHelper::PER_PASS_SPACE][0]->SetMappedData(&m_passParameter, sizeof(CBVPassParameter));
 	}
 	void Renderer::Render()
@@ -56,8 +57,6 @@ namespace ElysiaRenderer
 	}
 	void Renderer::Destory()
 	{
-		
-
 		m_device->WaitForIdle();
 		m_device->DestoryContext(std::move(m_graphicsContext));
 		m_device->DestoryBuffer(std::move(m_vertexBuffer));
@@ -128,6 +127,7 @@ namespace ElysiaRenderer
 
 		if (m_mainCamera->IsViewDirty())
 		{
+			XMStoreFloat4(&m_passParameter.cameraPosWS, m_mainCamera->GetCameraPos());
 			m_passParameter.viewMatrix = XMMatrixTranspose(m_mainCamera->GetViewMat());
 			m_passParameter.projMatrix = XMMatrixTranspose(m_mainCamera->GetProjMat());
 			XMStoreFloat4(&m_passParameter.cameraPosWS, m_mainCamera->GetCameraPos());
@@ -135,6 +135,8 @@ namespace ElysiaRenderer
 
 		m_mainCamera->DisableViewDirty();
 	}
+
+
 
 	void Renderer::InitTexTriangle()
 	{
@@ -151,103 +153,6 @@ namespace ElysiaRenderer
 		CreateSignatures();
 
 		CreatePOS();
-	}
-	void Renderer::RenderTexTriangle()
-	{
-		m_device->BeginFrame();
-
-		ImGui_ImplDX12_NewFrame();
-		ImGui_ImplWin32_NewFrame();
-		ImGui::NewFrame();
-
-		AddUIItems();
-		ImGui::Render();
-
-		auto& currBackBuffer = m_device->GetCurrBackBuffer();
-		UINT objectCBVIndex = 0;
-
-		m_graphicsContext->Reset();
-		//m_graphicsContext->Reset(m_graphicsPipelineStates[ShaderQueue::Skybox]->GetPipelineState());
-		m_graphicsContext->AddBarrier(currBackBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET);
-		m_graphicsContext->AddBarrier(*m_depthBuffer, D3D12_RESOURCE_STATE_DEPTH_WRITE);
-		m_graphicsContext->FlushBarrier();
-
-		m_graphicsContext->ClearRenderTarget(currBackBuffer, Color(1, 1, 1));
-		m_graphicsContext->ClearDepthStencilTarget(*m_depthBuffer, 1.f, 0);
-
-		m_graphicsContext->SetVertexBuffer(0, 1, m_vertexBuffer->GetVertexBufferView());
-		m_graphicsContext->SetIndexBuffer(m_indexBuffer->GetIndexBufferView());
-
-		m_graphicsContext->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(static_cast<UINT>(m_device->GetScreenSize().x), static_cast<UINT>(m_device->GetScreenSize().y)));
-		m_graphicsContext->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-		{
-			XMMATRIX translateMatrix = XMMatrixIdentity();
-			XMMATRIX scaleMatrix = XMMatrixIdentity();
-			XMMATRIX rotationMatrix = XMMatrixIdentity();
-			XMMATRIX MVP = XMMatrixIdentity();
-
-			scaleMatrix = XMMatrixScaling(1.f, 1.f, 1.f);
-			rotationMatrix = XMMatrixMultiply(XMMatrixRotationY(XMConvertToRadians(-90)), XMMatrixRotationZ(XMConvertToRadians(90)));
-			//rotationMatrix = XMMatrixMultiply(rotationMatrix, XMMatrixRotationAxis(XMVectorSet(0, 1, 0, 0), m_curRotationAngleRad / 10));
-			translateMatrix = XMMatrixTranslation(0.f, 0.f, 0.f);
-			MVP = rotationMatrix * scaleMatrix * translateMatrix;
-			m_objectParameters[objectCBVIndex].worldMatrix = XMMatrixTranspose(MVP);
-			BindObject(currBackBuffer, objectCBVIndex, ShaderQueue::Opaque, 0);
-
-			translateMatrix = XMMatrixTranslation(0.f, -5.f, 0.f);
-			scaleMatrix = XMMatrixIdentity();
-			rotationMatrix = XMMatrixIdentity();
-			MVP = translateMatrix * scaleMatrix * rotationMatrix;
-			m_objectParameters[objectCBVIndex].worldMatrix = XMMatrixTranspose(MVP);
-			BindObject(currBackBuffer, objectCBVIndex, ShaderQueue::Opaque, 1);
-
-			scaleMatrix = XMMatrixScaling(10.f, 10.f, 10.f);
-			rotationMatrix = XMMatrixIdentity();
-			translateMatrix = XMMatrixTranslation(0.f, 0.0f, 0.0f);
-			MVP = ElysiaHelper::GetMVP(translateMatrix, rotationMatrix, scaleMatrix);
-			m_objectParameters[objectCBVIndex].worldMatrix = XMMatrixTranspose(MVP);
-			BindObject(currBackBuffer, objectCBVIndex, ShaderQueue::Skybox, 2);
-		}
-		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), m_graphicsContext->GetCommandList());
-
-
-		m_graphicsContext->AddBarrier(currBackBuffer, D3D12_RESOURCE_STATE_PRESENT);
-		m_graphicsContext->FlushBarrier();
-
-		m_device->SubmitContextWork(*m_graphicsContext);
-
-		m_device->EndFrame();
-		m_device->Present();
-	}
-
-	void Renderer::AddUIItems()
-	{
-		if (ImGui::CollapsingHeader("Camera"))
-		{
-			ImGui::SliderFloat("Speed", &m_mainCamera->GetCameraSpeed(), 0, 2);
-		}
-
-		if (ImGui::CollapsingHeader("Light"))
-		{
-			ImGui::ColorEdit3("Color", (float*) & m_passParameter.mainLights[0].m_lightColor);
-			ImGui::DragFloat3("Direction", (float*)&m_passParameter.mainLights[0].m_lightDir, 1);
-			
-			ImGui::SliderFloat("Intensity", &m_passParameter.mainLights[0].m_intensity, 0, 5);
-		}
-
-		if (ImGui::CollapsingHeader("PBR Data"))
-		{
-			ImGui::ColorEdit3("Base Color Tint", (float*) & m_objectParameters[0].baseColorTint);
-			ImGui::SliderFloat("Opacity", &m_objectParameters[0].opacity, 0.f, 1.f);
-			ImGui::SliderFloat("Normal Intensity", &m_objectParameters[0].normalIntensity, 0.f, 5.f);
-			ImGui::SliderFloat("Metallic Intensity", &m_objectParameters[0].metallicIntensity, 0.f, 5.f);
-			ImGui::SliderFloat("Roughness Intensity", &m_objectParameters[0].roughnessIntensity, 0.f, 5.f);
-			ImGui::SliderFloat("Ambient Cubemap Intensity", &m_objectParameters[0].ambientCubemapIntensity, 0.f, 2.f);
-			ImGui::ColorEdit3("Ambient Cubemap Tint", (float*)&m_objectParameters[0].ambientCubemapTint);
-		}
-		
-		//ImGui::ShowDemoWindow();
 	}
 
 	void Renderer::LoadShaders()
@@ -289,6 +194,7 @@ namespace ElysiaRenderer
 	void Renderer::CreateCreamDepthRT()
 	{
 		{
+			m_depthBufferCreateDesc.m_name = L"Camera Depth RT";
 			m_depthBufferCreateDesc.m_resouceDesc.Format = DXGI_FORMAT_D32_FLOAT;
 			m_depthBufferCreateDesc.m_resouceDesc.Width = m_device->GetScreenSize().x;
 			m_depthBufferCreateDesc.m_resouceDesc.Height = m_device->GetScreenSize().y;
@@ -296,6 +202,19 @@ namespace ElysiaRenderer
 
 			m_depthBuffer = std::move(m_device->CreateTexture(m_depthBufferCreateDesc));
 		}
+	}
+	void Renderer::CreateShadowRT()
+	{
+		TexCreateDesc shadowCreateDesc{};
+		shadowCreateDesc.m_name = L"Shadowm RT";
+		shadowCreateDesc.m_resouceDesc.Width = 4096;
+		shadowCreateDesc.m_resouceDesc.Height = 4096;
+		shadowCreateDesc.m_resouceDesc.Format = DXGI_FORMAT_D32_FLOAT;
+		shadowCreateDesc.m_typeFlag = TexTypeFlags::SRV | TexTypeFlags::DSV;
+
+		auto shadowTex = std::move(m_device->CreateTexture(m_depthBufferCreateDesc));
+		auto shadowMap = std::make_unique<DX12Shadow>(std::move(shadowTex));
+		m_shadowBuffers.emplace_back(std::move(shadowMap));
 	}
 	void Renderer::LoadAndCreateTexs()
 	{
@@ -413,7 +332,7 @@ namespace ElysiaRenderer
 	}
 	void Renderer::InitLight()
 	{
-		auto dirLight = std::make_unique<DX12DirectionLight>(XMFLOAT4(1, 1, 1, 1), XMVectorSet(0, -360, 0, 0), 1);
+		auto dirLight = std::make_unique<DX12DirectionLight>(XMFLOAT3(1, 1, 1), XMFLOAT3(0, -360, 0), 1);
 		m_passParameter.mainLights[0] = std::move(dirLight->CreateLightData());
 
 		m_lights.emplace_back(std::move(dirLight));
@@ -443,7 +362,6 @@ namespace ElysiaRenderer
 			currStartIndex += static_cast<UINT>(currIndices.size());
 		}
 	}
-
 	void Renderer::AddShader(ShaderQueue shaderQueue, const std::wstring& shaderName, const std::wstring& entryPoint, ShaderType shaderType)
 	{
 		ShaderCreateDesc VSShaderCreateDesc{};
@@ -494,6 +412,196 @@ namespace ElysiaRenderer
 		m_indexBuffer->SetMappedData(m_indices.data(), indexBufferCreationDesc.m_bufferSize);
 	}
 
+
+
+
+	void Renderer::RenderTexTriangle()
+	{
+		m_device->BeginFrame();
+
+		ImGui_ImplDX12_NewFrame();
+		ImGui_ImplWin32_NewFrame();
+		ImGui::NewFrame();
+
+		AddUIItems();
+		ImGui::Render();
+
+		m_objectCBVIndex = 0;
+		//DrawShadow();
+
+		auto& currBackBuffer = m_device->GetCurrBackBuffer();
+
+		m_graphicsContext->Reset();
+		m_graphicsContext->AddBarrier(currBackBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET);
+		m_graphicsContext->AddBarrier(*m_depthBuffer, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+		m_graphicsContext->FlushBarrier();
+
+		m_graphicsContext->ClearRenderTarget(currBackBuffer, Color(1, 1, 1));
+		m_graphicsContext->ClearDepthStencilTarget(*m_depthBuffer, 1.f, 0);
+
+		m_graphicsContext->SetVertexBuffer(0, 1, m_vertexBuffer->GetVertexBufferView());
+		m_graphicsContext->SetIndexBuffer(m_indexBuffer->GetIndexBufferView());
+
+		m_graphicsContext->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(static_cast<UINT>(m_device->GetScreenSize().x), static_cast<UINT>(m_device->GetScreenSize().y)));
+		m_graphicsContext->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+		DrawOpaque();
+		DrawSkybox();
+		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), m_graphicsContext->GetCommandList());
+
+		m_graphicsContext->AddBarrier(currBackBuffer, D3D12_RESOURCE_STATE_PRESENT);
+		m_graphicsContext->FlushBarrier();
+
+		m_device->SubmitContextWork(*m_graphicsContext);
+
+		m_device->EndFrame();
+		m_device->Present();
+	}
+
+	void Renderer::AddUIItems()
+	{
+		if (ImGui::CollapsingHeader("Camera"))
+		{
+			ImGui::SliderFloat("Speed", &m_mainCamera->GetCameraSpeed(), 0, 2);
+			ImGui::SliderFloat("NearZ", &m_mainCamera->GetNearZ(), 0.001, 1000);
+			ImGui::SliderFloat("FarZ", &m_mainCamera->GetFarZ(), 0.001, 1000);
+		}
+
+		if (ImGui::CollapsingHeader("Light"))
+		{
+			ImGui::ColorEdit3("Color", (float*)&m_passParameter.mainLights[0].m_lightColor);
+			ImGui::DragFloat3("Direction", (float*)&m_passParameter.mainLights[0].m_lightDir, 1);
+
+			ImGui::SliderFloat("Intensity", &m_passParameter.mainLights[0].m_intensity, 0, 5);
+		}
+
+		if (ImGui::CollapsingHeader("PBR Data"))
+		{
+			ImGui::ColorEdit3("Base Color Tint", (float*)&m_objectParameters[0].baseColorTint);
+			ImGui::SliderFloat("Opacity", &m_objectParameters[0].opacity, 0.f, 1.f);
+			ImGui::SliderFloat("Normal Intensity", &m_objectParameters[0].normalIntensity, 0.f, 5.f);
+			ImGui::SliderFloat("Metallic Intensity", &m_objectParameters[0].metallicIntensity, 0.f, 5.f);
+			ImGui::SliderFloat("Roughness Intensity", &m_objectParameters[0].roughnessIntensity, 0.f, 5.f);
+			ImGui::SliderFloat("Ambient Cubemap Intensity", &m_objectParameters[0].ambientCubemapIntensity, 0.f, 2.f);
+			ImGui::ColorEdit3("Ambient Cubemap Tint", (float*)&m_objectParameters[0].ambientCubemapTint);
+		}
+
+		//ImGui::ShowDemoWindow();
+	}
+	void Renderer::DrawShadow()
+	{
+		auto shadow = m_shadowBuffers.back().get();
+		auto shadowBuffer = m_shadowBuffers.back()->GetShadowRT();
+		UINT objectCBVIndex = 0;
+
+		m_graphicsContext->Reset();
+		m_graphicsContext->AddBarrier(*shadowBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET);
+		m_graphicsContext->AddBarrier(*m_depthBuffer, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+		m_graphicsContext->FlushBarrier();
+
+		m_graphicsContext->ClearRenderTarget(*shadowBuffer, Color(1, 1, 1));
+		m_graphicsContext->ClearDepthStencilTarget(*m_depthBuffer, 1.f, 0);
+
+		m_graphicsContext->SetVertexBuffer(0, 1, m_vertexBuffer->GetVertexBufferView());
+		m_graphicsContext->SetIndexBuffer(m_indexBuffer->GetIndexBufferView());
+
+		m_graphicsContext->SetViewport(shadow->GetViewport());
+		m_graphicsContext->SetScissorRect(shadow->GetScissorRect());
+		m_graphicsContext->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+		// set pipeline & bind data
+		auto pipelineStateData = CreatePipelineStateData(m_graphicsPipelineStates[ShaderQueue::Shadow].get(),
+			std::vector<DX12TextureResource*>{  },
+			shadowBuffer);
+		m_graphicsContext->SetPipeline(pipelineStateData);
+		m_graphicsContext->SetPipelineResource(m_pipelineBindResource);
+		DrawCommand(0);
+		DrawCommand(1);
+
+		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), m_graphicsContext->GetCommandList());
+
+		m_graphicsContext->AddBarrier(*shadowBuffer, D3D12_RESOURCE_STATE_PRESENT);
+		m_graphicsContext->FlushBarrier();
+	}
+	void Renderer::DrawOpaque()
+	{
+		auto& currBackBuffer = m_device->GetCurrBackBuffer();
+		m_objectCBVIndex = 0;
+
+		auto pipelineStateData = CreatePipelineStateData(m_graphicsPipelineStates[ShaderQueue::Opaque].get(),
+			std::vector<DX12TextureResource*>{ &currBackBuffer },
+			m_depthBuffer.get());
+		m_graphicsContext->SetPipeline(pipelineStateData);
+
+		{
+			XMMATRIX translateMatrix = XMMatrixIdentity();
+			XMMATRIX scaleMatrix = XMMatrixIdentity();
+			XMMATRIX rotationMatrix = XMMatrixIdentity();
+			XMMATRIX MVP = XMMatrixIdentity();
+
+			scaleMatrix = XMMatrixScaling(1.f, 1.f, 1.f);
+			rotationMatrix = XMMatrixMultiply(XMMatrixRotationY(XMConvertToRadians(-90)), XMMatrixRotationZ(XMConvertToRadians(90)));
+			translateMatrix = XMMatrixTranslation(0.f, 0.f, 0.f);
+			MVP = rotationMatrix * scaleMatrix * translateMatrix;
+			m_objectParameters[m_objectCBVIndex].worldMatrix = XMMatrixTranspose(MVP);
+			SetPipelineResource(m_objectCBVIndex);
+			DrawCommand(m_objectCBVIndex++);
+
+			translateMatrix = XMMatrixTranslation(0.f, -5.f, 0.f);
+			scaleMatrix = XMMatrixIdentity();
+			rotationMatrix = XMMatrixIdentity();
+			MVP = translateMatrix * scaleMatrix * rotationMatrix;
+			m_objectParameters[m_objectCBVIndex].worldMatrix = XMMatrixTranspose(MVP);
+			SetPipelineResource(m_objectCBVIndex);
+			DrawCommand(m_objectCBVIndex++);
+		}
+	}
+	void Renderer::DrawSkybox()
+	{
+		auto& currBackBuffer = m_device->GetCurrBackBuffer();
+
+		auto pipelineStateData = CreatePipelineStateData(m_graphicsPipelineStates[ShaderQueue::Skybox].get(),
+			std::vector<DX12TextureResource*>{ &currBackBuffer },
+			m_depthBuffer.get());
+		m_graphicsContext->SetPipeline(pipelineStateData);
+
+		{
+			XMMATRIX translateMatrix = XMMatrixIdentity();
+			XMMATRIX scaleMatrix = XMMatrixIdentity();
+			XMMATRIX rotationMatrix = XMMatrixIdentity();
+			XMMATRIX MVP = XMMatrixIdentity();
+
+			scaleMatrix = XMMatrixScaling(10.f, 10.f, 10.f);
+			rotationMatrix = XMMatrixIdentity();
+			translateMatrix = XMMatrixTranslation(0.f, 0.0f, 0.0f);
+			MVP = ElysiaHelper::GetMVP(translateMatrix, rotationMatrix, scaleMatrix);
+			m_objectParameters[m_objectCBVIndex].worldMatrix = XMMatrixTranspose(MVP);
+			SetPipelineResource(m_objectCBVIndex);
+			DrawCommand(m_objectCBVIndex++);
+		}
+	}
+	void Renderer::SetPipelineResource(UINT objectCBVIndex)
+	{
+		// get object constant buffer
+		auto objectConstanBuffer = m_pipelineBindResource.m_CBVResource[ElysiaHelper::PER_OBJECT_SPACE][static_cast<size_t>(objectCBVIndex)].get();
+
+		//// set object constant data in buffer
+		objectConstanBuffer->SetMappedData(&m_objectParameters[objectCBVIndex], sizeof(CBVObjectParameter));
+		m_pipelineBindResource.CBVIndexs.erase(ElysiaHelper::PER_OBJECT_SPACE);
+		m_pipelineBindResource.CBVIndexs[ElysiaHelper::PER_OBJECT_SPACE] = objectCBVIndex;
+		m_graphicsContext->SetPipelineResource(m_pipelineBindResource);
+	}
+	void Renderer::DrawCommand(size_t drawModelIndex)
+	{
+		assert(drawModelIndex < m_models.size());
+		auto drawModel = m_models[drawModelIndex];
+
+		auto drawVertexCount = drawModel.GetIndexCount();
+		auto startVertex = drawModel.GetVertexOffset();
+		auto startIndex = drawModel.GetIndexOffset();
+
+		m_graphicsContext->Draw(drawVertexCount, startVertex, startIndex);
+	}
 	void Renderer::BindObject(DX12TextureResource& currBackBuffer,
 		UINT& objectCBVIndex, uint8_t pipelineStateQueueIndex, size_t drawModelIndex)
 	{
@@ -509,7 +617,8 @@ namespace ElysiaRenderer
 		auto pipelineStateData = CreatePipelineStateData(m_graphicsPipelineStates[pipelineStateQueueIndex].get(),
 			std::move(std::vector<DX12TextureResource*>{ &currBackBuffer }),
 			m_depthBuffer.get());
-		m_graphicsContext->SetPipeline(pipelineStateData, m_pipelineBindResource);
+		m_graphicsContext->SetPipeline(pipelineStateData);
+		m_graphicsContext->SetPipelineResource(m_pipelineBindResource);
 
 		assert(drawModelIndex < m_models.size());
 		auto drawModel = m_models[drawModelIndex];

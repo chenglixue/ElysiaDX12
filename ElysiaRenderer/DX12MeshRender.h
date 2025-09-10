@@ -21,7 +21,7 @@ namespace ElysiaRenderer
 		DX12MeshRender(const DX12MeshRender& rhs) = delete;
 		DX12MeshRender operator=(const DX12MeshRender& rhs) = delete;
 
-		XMFLOAT4X4	m_worldMatrix = MathHelper::Identity4x4();
+		XMFLOAT4X4	m_worldMatrix = ElysiaHelper::MathHelper::Identity4x4();
 		DX12Mesh*	m_mesh			= nullptr;
 		UINT		m_meshIndex		= 0;
 		UINT		m_startVertex	= 0;

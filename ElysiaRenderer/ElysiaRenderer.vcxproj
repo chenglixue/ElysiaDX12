@@ -175,6 +175,7 @@
     <ClInclude Include="DX12RenderPassDescriptorHeap.h" />
     <ClInclude Include="DX12RootSignature.h" />
     <ClInclude Include="DX12Shader.h" />
+    <ClInclude Include="DX12Shadow.h" />
     <ClInclude Include="DX12StagingDescriptorHeap.h" />
     <ClInclude Include="DX12TextureBuffer.h" />
     <ClInclude Include="DX12TextureResource.h" />
@@ -262,6 +263,7 @@
     <ClCompile Include="DX12RenderPassDescriptorHeap.cpp" />
     <ClCompile Include="DX12RootSignature.cpp" />
     <ClCompile Include="DX12Shader.cpp" />
+    <ClCompile Include="DX12Shadow.cpp" />
     <ClCompile Include="DX12StagingDescriptorHeap.cpp" />
     <ClCompile Include="DX12TextureBuffer.cpp" />
     <ClCompile Include="DX12TextureResource.cpp" />

@@ -45,11 +45,11 @@ namespace ElysiaRenderer
 			m_viewDirty = true;
 		}
 
-		float GetNearZ() const
+		float& GetNearZ() 
 		{
 			return m_nearZ;
 		}
-		float GetFarZ() const
+		float& GetFarZ() 
 		{
 			return m_farZ;
 		}
@@ -230,7 +230,7 @@ namespace ElysiaRenderer
 		XMFLOAT3 m_look = {0.f, 0.f, 1.f};
 		XMFLOAT3 m_lookUnNor = { 0.f, 0.f, 1.f };
 
-		XMFLOAT4X4 m_view = MathHelper::Identity4x4();
-		XMFLOAT4X4 m_proj = MathHelper::Identity4x4();
+		XMFLOAT4X4 m_view = ElysiaHelper::MathHelper::Identity4x4();
+		XMFLOAT4X4 m_proj = ElysiaHelper::MathHelper::Identity4x4();
 	};
 }

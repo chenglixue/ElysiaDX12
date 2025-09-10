@@ -1,7 +1,7 @@
 #pragma once
 #include "stdafx.h"
 
-namespace ElysiaRenderer
+namespace ElysiaHelper
 {
 	class MathHelper
 	{
@@ -81,6 +81,10 @@ namespace ElysiaRenderer
 
 			return I;
 		}
+		static XMFLOAT4 XMFLOAT4Zero()
+		{
+			return XMFLOAT4(0.f, 0.f, 0.f, 0.f);
+		}
 
 		static DirectX::XMVECTOR RandUnitVec3();
 		static DirectX::XMVECTOR RandHemisphereUnitVec3(DirectX::XMVECTOR n);
@@ -88,7 +92,7 @@ namespace ElysiaRenderer
 		static const float Infinity;
 		static const float Pi;
 
-
+		
 	};
 
 }

@@ -173,4 +173,21 @@ namespace ElysiaHelper
 
         return (WCHAR*)address;
     }
+
+    inline LPCWSTR s2ws(const std::string& s) {
+        int len;
+        int slength = (int)s.length() + 1;
+        len = MultiByteToWideChar(CP_UTF8, 0, s.c_str(), slength, 0, 0);
+        wchar_t* buf = new wchar_t[len];
+        MultiByteToWideChar(CP_UTF8, 0, s.c_str(), slength, buf, len);
+        LPCWSTR wstr = buf;
+
+        // 注意：调用者需要负责释放内存
+        return wstr;
+    }
+
+    inline void printWString(LPCWSTR wstr) {
+        std::wcout.imbue(std::locale("zh_CN.UTF-8")); // 设置区域以便正确显示 Unicode 字符
+        std::wcout << L"Wide string: " << wstr << std::endl;
+    }
 }

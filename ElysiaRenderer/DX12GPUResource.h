@@ -30,7 +30,7 @@ namespace ElysiaRenderer
 	class DX12GPUResource
 	{
 	public:
-		DX12GPUResource(ID3D12Resource* resource, D3D12_RESOURCE_STATES usageState);
+		DX12GPUResource(CComPtr<ID3D12Resource> resource, D3D12_RESOURCE_STATES usageState);
 		~DX12GPUResource();
 
 		BufferType GetBufferType()

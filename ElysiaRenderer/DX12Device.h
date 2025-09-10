@@ -76,7 +76,6 @@ namespace ElysiaRenderer
 			return m_ImguiDescriptors[index];
 		}
 
-
 		std::unique_ptr<DX12GraphicsContext>		CreateGraphicsContext();
 		std::unique_ptr<DX12VertexBuffer>			CreateVertexBuffer(const VertexBufferCreationDesc& bufferCreationDesc);
 		std::unique_ptr<DX12IndexBuffer>			CreateIndexBuffer(const IndexBufferCreateDesc& indexBufferCreateDesc);

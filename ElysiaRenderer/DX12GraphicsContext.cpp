@@ -27,11 +27,12 @@ namespace ElysiaRenderer
 			depth, stencil, 0, nullptr);
 	}
 
-	void DX12GraphicsContext::SetPipeline(PipelineStateData& pipelineStateData, PipelineBindResource& pipelineBindResource)
+	void DX12GraphicsContext::SetPipeline(PipelineStateData& pipelineStateData)
 	{
+		m_graphicsPipelineState = static_cast<DX12GraphicsPipelineState*>(pipelineStateData.m_pipelineState);
+
 		auto pipelineState = pipelineStateData.m_pipelineState;
 		auto& renderTargets = pipelineStateData.m_renderTargets;
-		auto& SRVResources = pipelineBindResource.m_SRVResources;
 
 		if (pipelineState->GetPipelineType() != PipleineType::Graphics)
 		{
@@ -44,81 +45,6 @@ namespace ElysiaRenderer
 		m_commandList->SetPipelineState(pipelineState->GetPipelineState());
 		m_commandList->SetGraphicsRootSignature(pipelineState->GetRootSignature()->GetSignature());
 
-		// set root parameters
-		// each parameter has one descriptor table
-		{
-			static const uint32_t maxNumHandlesBinding = 16;
-			static const uint32_t singleDescriptorRangeCopyArray[maxNumHandlesBinding]{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ,1 };
-
-			D3D12_CPU_DESCRIPTOR_HANDLE handles[maxNumHandlesBinding]{};
-			UINT currentHandleIndex = 0;
-
-			auto rootParameters = pipelineState->GetRootSignature()->GetDX12RootParameters();
-			auto currRootParameter = rootParameters;
-			UINT currRootParameterIndex = 0;
-			for (; currRootParameter < rootParameters + pipelineState->GetRootSignature()->GetNumRootParams(); ++currRootParameter)
-			{
-				UINT spaceID = currRootParameter->GetSpaceID();
-
-				switch (currRootParameter->GetType())
-				{
-					case D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE:
-					{
-						for (auto& SRVResource : SRVResources[spaceID])
-						{
-							switch (SRVResource->GetBufferType())
-							{
-							case BufferType::Texture:
-							{
-								handles[currentHandleIndex++] = static_cast<DX12TextureResource*>(SRVResource.get())->GetSRVDescriptor().GetCPUHandle();
-								break;
-							}
-
-							default:
-								ElysiaHelper::ThrowRuntimeError("SRVResource type is none");
-								break;
-							}
-						}
-
-						UINT numTableHandles = static_cast<UINT>(SRVResources[spaceID].size());
-						auto blockStart = m_currSRVHeap->AllocateRenderPassDescriptorBlock(numTableHandles);
-						m_device->CopyDescriptors(1, &blockStart.GetCPUHandle(), &numTableHandles, numTableHandles, handles, singleDescriptorRangeCopyArray, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-
-						m_commandList->SetGraphicsRootDescriptorTable(currRootParameterIndex, blockStart.GetGPUHandle());
-
-						break;
-					}
-
-					case D3D12_ROOT_PARAMETER_TYPE_CBV:
-					{
-						for (auto CBVSpaceIndex : pipelineBindResource.CBVIndexs)
-						{
-							if (spaceID == CBVSpaceIndex.first)
-							{
-								m_commandList->SetGraphicsRootConstantBufferView(currRootParameterIndex, pipelineBindResource.m_CBVResource[spaceID][CBVSpaceIndex.second]->GetGPUAddress());
-
-							}
-							/*if (pipelineBindResource.m_CBVResource[spaceID][CBVSpaceIndex.second])
-							{
-								m_commandList->SetGraphicsRootConstantBufferView(currRootParameterIndex, pipelineBindResource.m_CBVResource[spaceID][CBVSpaceIndex.second]->GetGPUAddress());
-							}*/
-						}
-					
-						break;
-					}
-
-					default:
-					{
-						ElysiaHelper::ThrowRuntimeError("invalid root parameter type");
-						break;
-					}
-				}
-
-				currRootParameterIndex++;
-				currentHandleIndex = 0;
-			}
-		}
-
 		D3D12_CPU_DESCRIPTOR_HANDLE renderTargetHandles[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT]{};
 		D3D12_CPU_DESCRIPTOR_HANDLE depthStencilHandle{ 0 };
 		auto numTarget = renderTargets.size();
@@ -130,7 +56,87 @@ namespace ElysiaRenderer
 		{
 			depthStencilHandle = pipelineStateData.m_depthStencilTarget->GetDSVDescriptor().GetCPUHandle();
 		}
-		SetRenderTargets(static_cast<UINT>(numTarget), renderTargetHandles, depthStencilHandle);
+		SetRenderTargets(static_cast<UINT>(numTarget), numTarget == 0 ? nullptr : renderTargetHandles, depthStencilHandle);
+	}
+	void DX12GraphicsContext::SetPipelineResource(PipelineBindResource& pipelineBindResource)
+	{
+		auto& SRVResources = pipelineBindResource.m_SRVResources;
+
+
+		// set root parameters
+		// each parameter has one descriptor table
+		{
+			static const uint32_t maxNumHandlesBinding = 16;
+			static const uint32_t singleDescriptorRangeCopyArray[maxNumHandlesBinding]{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ,1 };
+
+			D3D12_CPU_DESCRIPTOR_HANDLE handles[maxNumHandlesBinding]{};
+			UINT currentHandleIndex = 0;
+
+			auto rootParameters = m_graphicsPipelineState->GetRootSignature()->GetDX12RootParameters();
+			auto currRootParameter = rootParameters;
+			UINT currRootParameterIndex = 0;
+			for (; currRootParameter < rootParameters + m_graphicsPipelineState->GetRootSignature()->GetNumRootParams(); ++currRootParameter)
+			{
+				UINT spaceID = currRootParameter->GetSpaceID();
+
+				switch (currRootParameter->GetType())
+				{
+				case D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE:
+				{
+					for (auto& SRVResource : SRVResources[spaceID])
+					{
+						switch (SRVResource->GetBufferType())
+						{
+						case BufferType::Texture:
+						{
+							handles[currentHandleIndex++] = static_cast<DX12TextureResource*>(SRVResource.get())->GetSRVDescriptor().GetCPUHandle();
+							break;
+						}
+
+						default:
+							ElysiaHelper::ThrowRuntimeError("SRVResource type is none");
+							break;
+						}
+					}
+
+					UINT numTableHandles = static_cast<UINT>(SRVResources[spaceID].size());
+					auto blockStart = m_currSRVHeap->AllocateRenderPassDescriptorBlock(numTableHandles);
+					m_device->CopyDescriptors(1, &blockStart.GetCPUHandle(), &numTableHandles, numTableHandles, handles, singleDescriptorRangeCopyArray, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+
+					m_commandList->SetGraphicsRootDescriptorTable(currRootParameterIndex, blockStart.GetGPUHandle());
+
+					break;
+				}
+
+				case D3D12_ROOT_PARAMETER_TYPE_CBV:
+				{
+					for (auto CBVSpaceIndex : pipelineBindResource.CBVIndexs)
+					{
+						if (spaceID == CBVSpaceIndex.first)
+						{
+							m_commandList->SetGraphicsRootConstantBufferView(currRootParameterIndex, pipelineBindResource.m_CBVResource[spaceID][CBVSpaceIndex.second]->GetGPUAddress());
+
+						}
+						/*if (pipelineBindResource.m_CBVResource[spaceID][CBVSpaceIndex.second])
+						{
+							m_commandList->SetGraphicsRootConstantBufferView(currRootParameterIndex, pipelineBindResource.m_CBVResource[spaceID][CBVSpaceIndex.second]->GetGPUAddress());
+						}*/
+					}
+
+					break;
+				}
+
+				default:
+				{
+					ElysiaHelper::ThrowRuntimeError("invalid root parameter type");
+					break;
+				}
+				}
+
+				currRootParameterIndex++;
+				currentHandleIndex = 0;
+			}
+		}
 	}
 	void DX12GraphicsContext::SetRenderTargets(UINT numRenderTargets, const D3D12_CPU_DESCRIPTOR_HANDLE renderTargetHandle[],
 		const D3D12_CPU_DESCRIPTOR_HANDLE depthStencilHandle)
