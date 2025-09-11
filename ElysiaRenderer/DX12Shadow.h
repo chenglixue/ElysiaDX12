@@ -5,6 +5,8 @@
 
 namespace ElysiaRenderer
 {
+	using namespace ElysiaHelper;
+
 	class DX12Shadow
 	{
 	public:
@@ -35,14 +37,34 @@ namespace ElysiaRenderer
 		{
 			return m_scissorRect;
 		}
+		float& GetNearZ()
+		{
+			return m_nearZ;
+		}
+		float& GetFarZ()
+		{
+			return m_farZ;
+		}
+		const XMFLOAT4X4& GetView4X4() const
+		{
+			return m_shadowViewMatrix;
+		}
+		const XMFLOAT4X4& GetProj4X4() const
+		{
+			return m_shadowProjMatrix;
+		}
+		const XMFLOAT4X4& GetShadow4X4() const
+		{
+			return m_shadowMatrix;
+		}
 
 		void CreateViewport();
 		void CreateScissorRect();
 
-		XMMATRIX UpdateShadowTransform(DX12Light* light);
+		void InitBoundSphere(float radius, XMFLOAT3 center = MathHelper::XMFLOAT3Zero());
+		void UpdateShadowTransform(DX12Light* light);
 
 	protected:
-		
 
 		UINT m_width;
 		UINT m_height;
@@ -54,5 +76,10 @@ namespace ElysiaRenderer
 		std::unique_ptr<DX12TextureResource> m_buffer;
 		BoundingSphere m_shadowBound;
 		XMFLOAT3 m_lightPos;
+		float m_nearZ;
+		float m_farZ;
+		XMFLOAT4X4 m_shadowMatrix;
+		XMFLOAT4X4 m_shadowViewMatrix;
+		XMFLOAT4X4 m_shadowProjMatrix;
 	};
 }

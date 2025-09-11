@@ -85,6 +85,10 @@ namespace ElysiaHelper
 		{
 			return XMFLOAT4(0.f, 0.f, 0.f, 0.f);
 		}
+		static XMFLOAT3 XMFLOAT3Zero()
+		{
+			return XMFLOAT3(0.f, 0.f, 0.f);
+		}
 
 		static DirectX::XMVECTOR RandUnitVec3();
 		static DirectX::XMVECTOR RandHemisphereUnitVec3(DirectX::XMVECTOR n);

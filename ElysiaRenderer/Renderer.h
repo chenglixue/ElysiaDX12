@@ -44,8 +44,8 @@ namespace ElysiaRenderer
 	static XMMATRIX m_worldMatrix = XMMatrixIdentity();
 	static float m_curRotationAngleRad = 0.f; 
 	static const float m_rotationSpeed = 0.001f;
-	static int objectNum = 3;    
-	 
+	static int objectNum = 3;
+	
 	/// <summary>
 	/// Constant parameter
 	/// </summary>  
@@ -154,7 +154,7 @@ namespace ElysiaRenderer
 		std::unique_ptr<DX12GraphicsContext> m_graphicsContext = nullptr;
 		std::unique_ptr<DX12VertexBuffer> m_vertexBuffer = nullptr;
 		std::unique_ptr<DX12IndexBuffer> m_indexBuffer = nullptr;
-		std::vector<std::unique_ptr<DX12Shadow>> m_shadowBuffers{};
+		std::vector<std::shared_ptr<DX12Shadow>> m_shadowBuffers{};
 		std::vector<std::unique_ptr<DX12RootParameter>> m_rootParameters;
 		std::vector<std::unique_ptr<D3D12_SAMPLER_DESC>> m_samplers;
 		std::vector<std::unique_ptr<DX12RootSignature>> m_rootSignatures;
@@ -165,9 +165,14 @@ namespace ElysiaRenderer
 		std::vector<std::shared_ptr<DX12Camera>> m_cameras;
 		std::vector<std::unique_ptr<DX12Light>> m_lights;
 		PipelineBindResource m_pipelineBindResource{};
-		TexCreateDesc m_depthBufferCreateDesc{};
+		std::unordered_map<std::string, TexCreateDesc> m_depthBufferCreateDesc
+		{
+			{"Camera", {}},
+			{"Shadow", {}},
+		};
 
 		std::shared_ptr<DX12Camera> m_mainCamera;
+		std::shared_ptr<DX12Shadow> m_mainLightShadow;
 
 		/// <summary>
 		/// Model
@@ -177,6 +182,10 @@ namespace ElysiaRenderer
 		std::vector<UINT> m_indices{};
 		std::vector<std::unique_ptr<DX12MeshRender>> m_meshRenders{};
 		UINT m_objectCBVIndex = 0;
+
+		void UpdateCBV();
+		void UpdatePassCBV();
+		void UpdateObjectCBV();
 
 		void InitTexTriangle();
 		void LoadShaders();
