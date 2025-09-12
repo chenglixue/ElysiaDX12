@@ -220,6 +220,9 @@
     <ClInclude Include="DX12Shadow.h">
       <Filter>Header Files\DX12</Filter>
     </ClInclude>
+    <ClInclude Include="CBVPassParameter.h">
+      <Filter>Header Files\DX12</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -301,9 +304,6 @@
     <None Include="..\x64\Debug\Shaders\private\ShadingModel.hlsl">
       <Filter>X64\private</Filter>
     </None>
-    <None Include="Resource\Shaders\public\DrawTriangle.hlsl">
-      <Filter>Resource Files\Shader\Public</Filter>
-    </None>
     <None Include="Resource\Shaders\private\Light.hlsli">
       <Filter>Resource Files\Shader\Priavte\Header</Filter>
     </None>
@@ -348,6 +348,12 @@
     </None>
     <None Include="DXTex\Shaders\Compiled\BC7Encode_TryMode456CS.inc">
       <Filter>Header Files\Lib</Filter>
+    </None>
+    <None Include="Resource\Shaders\public\Shadow.hlsl">
+      <Filter>Resource Files\Shader\Public</Filter>
+    </None>
+    <None Include="Resource\Shaders\public\PBR.hlsl">
+      <Filter>Resource Files\Shader\Public</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

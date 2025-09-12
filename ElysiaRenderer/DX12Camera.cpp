@@ -132,26 +132,6 @@ namespace ElysiaRenderer
 
 			auto viewMat = XMMatrixLookAtLH(posVec, XMVectorAdd(posVec, lookVec), upVec);
 			XMStoreFloat4x4(&m_view, viewMat);
-
-			/*m_view(0, 0) = m_right.x;
-			m_view(1, 0) = m_right.y;
-			m_view(2, 0) = m_right.z;
-			m_view(3, 0) = x;
-
-			m_view(0, 1) = m_up.x;
-			m_view(1, 1) = m_up.y;
-			m_view(2, 1) = m_up.z;
-			m_view(3, 1) = y;
-
-			m_view(0, 2) = m_look.x;
-			m_view(1, 2) = m_look.y;
-			m_view(2, 2) = m_look.z;
-			m_view(3, 2) = z;
-
-			m_view(0, 3) = 0.0f;
-			m_view(1, 3) = 0.0f;
-			m_view(2, 3) = 0.0f;
-			m_view(3, 3) = 1.0f;*/
 		}
 	}
 }

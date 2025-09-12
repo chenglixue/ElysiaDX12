@@ -27,12 +27,22 @@ cbuffer PerPassBuffer : register(b0, perPassSpace)
     
     Light lights[MAIN_LIGHT_NUM];
     
-    float4x4 M_Shadow;
-    
     uint   _FrameIndex;
     float nearZ;
     float farZ;
 }
+
+cbuffer PerShadowPassBuffer : register(b1, perPassSpace)
+{
+    float4x4 M_ShadowView;
+    float4x4 M_ShadowProj;
+    
+    float4x4 M_Shadow;
+    
+    float ShadowNearZ;
+    float ShadowFarZ;
+}
+
 cbuffer PerObjectBuffer : register(b0, perObjectSpace)
 {
     float4x4    M_World;
@@ -46,14 +56,12 @@ cbuffer PerObjectBuffer : register(b0, perObjectSpace)
     float       AmbientCubemapIntensity;
 
     float3      AmbientCubemapTint;
-    
-    //float4 paddingObject[12];
-
 }
 
 Texture2D g_GGX_E_LUT : register(t0, perPassSpace);
 Texture2D g_GGX_EAvg_LUT : register(t1, perPassSpace);
 TextureCube g_SkyboxTex : register(t2, perPassSpace);
+Texture2D g_ShadowTex : register(t3, perPassSpace);
 
 Texture2D g_albedoTexture : register(t0, perObjectSpace);
 Texture2D g_normalTexture : register(t1, perObjectSpace);

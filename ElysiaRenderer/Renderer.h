@@ -7,9 +7,12 @@
 #include "DX12UI.h"
 #include <dxgidebug.h>
 #include "DX12Shadow.h"
+#include "CBVPassParameter.h"
 
 namespace ElysiaRenderer 
 {
+	using namespace ElysiaHelper;
+
 	const std::vector<D3D12_INPUT_ELEMENT_DESC> m_inputElementDescs =
 	{
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
@@ -41,26 +44,34 @@ namespace ElysiaRenderer
 		L"Tex\\CyborgWeapon_Roughness.dds",
 	};
 
-	static XMMATRIX m_worldMatrix = XMMatrixIdentity();
+	static XMMATRIX m_worldMatrix = XMMatrixIdentity(); 
 	static float m_curRotationAngleRad = 0.f; 
 	static const float m_rotationSpeed = 0.001f;
 	static int objectNum = 3;
-	
+	 
 	/// <summary>
 	/// Constant parameter
-	/// </summary>  
-	struct alignas(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT) CBVPassParameter
+	/// </summary>   
+	struct alignas(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT)CBVMainPassParameter
 	{
 		XMFLOAT4 cameraPosWS = ElysiaHelper::MathHelper::XMFLOAT4Zero();	// 16
-		XMMATRIX viewMatrix = XMMatrixIdentity();	// 64
-		XMMATRIX projMatrix = XMMatrixIdentity();	// 64
+		XMFLOAT4X4 viewMatrix = MathHelper::Identity4x4();	// 64
+		XMFLOAT4X4 projMatrix = MathHelper::Identity4x4(); 	// 64
 		XMFLOAT4 screenSize = ElysiaHelper::MathHelper::XMFLOAT4Zero();	// 16
 
 		LightData mainLights[MAX_MAIN_LIGHT_COUNT];	// 64
 
-		XMMATRIX shadowMatrix = XMMatrixIdentity();	// 64
-
 		UINT frameIndex = 0;
+		float nearZ = 1; 
+		float farZ = 1000;
+	};
+	struct alignas(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT)CBVShadowPassParameter
+	{
+		XMFLOAT4X4 viewMatrix = MathHelper::Identity4x4();	// 64
+		XMFLOAT4X4 projMatrix = MathHelper::Identity4x4(); 	// 64
+
+		XMFLOAT4X4 shadowMatrix = MathHelper::Identity4x4();	// 64
+
 		float nearZ = 1;
 		float farZ = 1000;
 	};
@@ -80,7 +91,8 @@ namespace ElysiaRenderer
 
 		//float padding[48];
 	};
-	static CBVPassParameter m_passParameter{};
+	static CBVMainPassParameter m_mainPassParameter{};
+	static CBVShadowPassParameter m_shadowPassParameter{};
 	static std::vector<CBVObjectParameter> m_objectParameters{}; 
 
 	class Renderer
@@ -151,7 +163,7 @@ namespace ElysiaRenderer
 		std::shared_ptr<DX12UI> m_pUI = nullptr;
 		std::unique_ptr<DX12Device> m_device = nullptr;
 		std::unique_ptr<DX12TextureResource> m_depthBuffer = nullptr;
-		std::unique_ptr<DX12GraphicsContext> m_graphicsContext = nullptr;
+		std::unique_ptr<DX12GraphicsContext> m_graphicsContext = nullptr; 
 		std::unique_ptr<DX12VertexBuffer> m_vertexBuffer = nullptr;
 		std::unique_ptr<DX12IndexBuffer> m_indexBuffer = nullptr;
 		std::vector<std::shared_ptr<DX12Shadow>> m_shadowBuffers{};
@@ -163,7 +175,7 @@ namespace ElysiaRenderer
 		std::vector<std::unique_ptr<DX12Shader>> m_computeShaders;
 		std::unordered_map<UINT, std::unique_ptr<DX12GraphicsPipelineState>> m_graphicsPipelineStates;
 		std::vector<std::shared_ptr<DX12Camera>> m_cameras;
-		std::vector<std::unique_ptr<DX12Light>> m_lights;
+		std::vector<std::shared_ptr<DX12Light>> m_lights;
 		PipelineBindResource m_pipelineBindResource{};
 		std::unordered_map<std::string, TexCreateDesc> m_depthBufferCreateDesc
 		{
@@ -173,6 +185,7 @@ namespace ElysiaRenderer
 
 		std::shared_ptr<DX12Camera> m_mainCamera;
 		std::shared_ptr<DX12Shadow> m_mainLightShadow;
+		std::shared_ptr<DX12Light> m_mainLight;
 
 		/// <summary>
 		/// Model
@@ -207,7 +220,7 @@ namespace ElysiaRenderer
 		void RenderTexTriangle();
 
 		void AddUIItems();
-		void SetPipelineResource(UINT objectCBVIndex);
+		void SetPipelineResource(UINT objectCBVIndex, CBVPassParameterType passParameterType);
 		void DrawCommand(size_t drawModelIndex);
 		void BindObject(DX12TextureResource& currBackBuffer,
 			UINT& objectCBVIndex, uint8_t pipelineStateQueue, size_t drawMeshIndex);
@@ -217,3 +230,4 @@ namespace ElysiaRenderer
 };
 }
 
+   

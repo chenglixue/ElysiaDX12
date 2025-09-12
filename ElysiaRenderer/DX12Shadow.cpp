@@ -3,8 +3,8 @@
 namespace ElysiaRenderer
 {
 	using namespace ElysiaHelper;
-	DX12Shadow::DX12Shadow(std::unique_ptr<DX12TextureResource> buffer)
-		: m_buffer(std::move(buffer))
+	DX12Shadow::DX12Shadow(std::shared_ptr<DX12TextureResource> buffer)
+		: m_buffer(buffer)
 	{
 		m_width = m_buffer->GetResourceDesc().Width;
 		m_height = m_buffer->GetResourceDesc().Height;
@@ -71,5 +71,7 @@ namespace ElysiaRenderer
 		auto LS2ProjMat = XMMatrixOrthographicOffCenterLH(l, r, b, t, n, f);
 
 		XMStoreFloat4x4(&m_shadowMatrix, lightViewMat * LS2ProjMat);
+		XMStoreFloat4x4(&m_shadowViewMatrix, lightViewMat);
+		XMStoreFloat4x4(&m_shadowProjMatrix, LS2ProjMat);
 	}
 }

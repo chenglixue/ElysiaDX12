@@ -46,8 +46,8 @@ namespace ElysiaRenderer
 	/// </summary>
 	struct PipelineBindResource
 	{
-		std::unordered_map<UINT, std::vector<std::unique_ptr<DX12GPUResource>>> m_SRVResources{};
-		std::unordered_map<UINT, std::vector<std::unique_ptr<DX12ConstantBuffer>>> m_CBVResource{};
+		std::unordered_map<UINT, std::vector<std::shared_ptr<DX12GPUResource>>> m_SRVResources{};
+		std::unordered_map<UINT, std::vector<std::shared_ptr<DX12ConstantBuffer>>> m_CBVResource{};
 		std::unordered_map<UINT, UINT> CBVSizes{};
 		std::unordered_map<UINT, size_t> CBVIndexs{};
 	};

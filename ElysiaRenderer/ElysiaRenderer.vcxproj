@@ -155,6 +155,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="CBVPassParameter.h" />
     <ClInclude Include="D3D12MemoryAllocator\D3D12MemAlloc.h" />
     <ClInclude Include="Definition.h" />
     <ClInclude Include="DX12BufferResource.h" />
@@ -362,11 +363,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resource\Shaders\public\DrawTriangle.hlsl">
-      <FileType>Document</FileType>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="..\x64\Debug\Shaders\private\AreaLightCommon.hlsl">
       <FileType>Document</FileType>
     </None>
@@ -411,6 +407,16 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resource\Shaders\private\AmbientCubemap.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resource\Shaders\public\Shadow.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resource\Shaders\public\PBR.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>
