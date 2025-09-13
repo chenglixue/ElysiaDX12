@@ -58,7 +58,7 @@ namespace ElysiaRenderer
 		}
 		SetRenderTargets(static_cast<UINT>(numTarget), numTarget == 0 ? nullptr : renderTargetHandles, depthStencilHandle);
 	}
-	void DX12GraphicsContext::SetPipelineResource(PipelineBindResource& pipelineBindResource)
+	void DX12GraphicsContext::SetPipelineResource(PipelineResourceSpace& pipelineBindResource)
 	{
 		auto& SRVResources = pipelineBindResource.m_SRVResources;
 

@@ -147,14 +147,14 @@ namespace ElysiaRenderer
 		XMStoreFloat4x4(&m_mainPassParameter.projMatrix, XMMatrixTranspose(m_mainCamera->GetProjMat()));
 		m_mainPassParameter.nearZ = m_mainCamera->GetNearZ();
 		m_mainPassParameter.farZ = m_mainCamera->GetFarZ();
-		m_pipelineBindResource.m_CBVResource[ElysiaHelper::PER_PASS_SPACE][static_cast<size_t>(CBVPassParameterType::Main)]->SetMappedData(&m_mainPassParameter, sizeof(CBVMainPassParameter));
+		m_perObjectBindResourceSpace.m_CBVResource[ElysiaHelper::PER_PASS_SPACE][static_cast<size_t>(CBVPassParameterType::Main)]->SetMappedData(&m_mainPassParameter, sizeof(CBVMainPassParameter));
 	
 		XMStoreFloat4x4(&m_shadowPassParameter.shadowMatrix, XMMatrixTranspose(m_mainLightShadow->GetShadowMat()));
 		XMStoreFloat4x4(&m_shadowPassParameter.viewMatrix, XMMatrixTranspose(m_mainLightShadow->GetViewMat()));
 		XMStoreFloat4x4(&m_shadowPassParameter.projMatrix, XMMatrixTranspose(m_mainLightShadow->GetProjMat()));
 		m_shadowPassParameter.nearZ = m_mainLightShadow->GetNearZ();
 		m_shadowPassParameter.farZ = m_mainLightShadow->GetFarZ();
-		m_pipelineBindResource.m_CBVResource[ElysiaHelper::PER_PASS_SPACE][static_cast<size_t>(CBVPassParameterType::Shadow)]->SetMappedData(&m_shadowPassParameter, sizeof(CBVShadowPassParameter));
+		m_perObjectBindResourceSpace.m_CBVResource[ElysiaHelper::PER_PASS_SPACE][static_cast<size_t>(CBVPassParameterType::Shadow)]->SetMappedData(&m_shadowPassParameter, sizeof(CBVShadowPassParameter));
 
 	}
 	void Renderer::UpdateObjectCBV()
@@ -233,21 +233,21 @@ namespace ElysiaRenderer
 
 		auto constantBuffer = m_device->CreateConstantBuffer(constantBufferCreationDesc);
 		constantBuffer->SetMappedData(&m_mainPassParameter, sizeof(CBVMainPassParameter));
-		m_pipelineBindResource.m_CBVResource[ElysiaHelper::PER_PASS_SPACE].emplace_back(std::move(constantBuffer));
-		m_pipelineBindResource.CBVIndexs[ElysiaHelper::PER_PASS_SPACE] = static_cast<size_t>(CBVPassParameterType::Main);
+		m_perObjectBindResourceSpace.m_CBVResource[ElysiaHelper::PER_PASS_SPACE].emplace_back(std::move(constantBuffer));
+		m_perObjectBindResourceSpace.CBVIndexs[ElysiaHelper::PER_PASS_SPACE] = static_cast<size_t>(CBVPassParameterType::Main);
 
 		constantBufferCreationDesc.m_bufferSize = sizeof(CBVShadowPassParameter);
 		constantBuffer = m_device->CreateConstantBuffer(constantBufferCreationDesc);
 		constantBuffer->SetMappedData(&m_shadowPassParameter, sizeof(CBVShadowPassParameter));
-		m_pipelineBindResource.m_CBVResource[ElysiaHelper::PER_PASS_SPACE].emplace_back(std::move(constantBuffer));
-		m_pipelineBindResource.CBVIndexs[ElysiaHelper::PER_PASS_SPACE] = static_cast<size_t>(CBVPassParameterType::Shadow);
+		m_perObjectBindResourceSpace.m_CBVResource[ElysiaHelper::PER_PASS_SPACE].emplace_back(std::move(constantBuffer));
+		m_perObjectBindResourceSpace.CBVIndexs[ElysiaHelper::PER_PASS_SPACE] = static_cast<size_t>(CBVPassParameterType::Shadow);
 
 		constantBufferCreationDesc.m_bufferSize = sizeof(CBVObjectParameter);
 		m_objectParameters.reserve(objectNum);
 		for (int i = 0; i < objectNum; ++i)
 		{
 			constantBuffer = m_device->CreateConstantBuffer(constantBufferCreationDesc);
-			m_pipelineBindResource.m_CBVResource[ElysiaHelper::PER_OBJECT_SPACE].emplace_back(std::move(constantBuffer));
+			m_perObjectBindResourceSpace.m_CBVResource[ElysiaHelper::PER_OBJECT_SPACE].emplace_back(std::move(constantBuffer));
 		}
 	}
 	void Renderer::CreateCreamDepthRT()
@@ -275,7 +275,7 @@ namespace ElysiaRenderer
 		shadowMap->InitBoundSphere(20);
 		m_mainLightShadow = shadowMap;
 
-		m_pipelineBindResource.m_SRVResources[ElysiaHelper::PER_PASS_SPACE].emplace_back(shadowTex);
+		m_perObjectBindResourceSpace.m_SRVResources[ElysiaHelper::PER_PASS_SPACE].emplace_back(shadowTex);
 		m_shadowBuffers.emplace_back(std::move(shadowMap));
 	}
 	void Renderer::LoadAndCreateTexs()
@@ -291,7 +291,7 @@ namespace ElysiaRenderer
 			texBufferCreateDesc.isSRGB = false;
 
 			auto newTex = std::move(m_device->CreateTextureFromFile(texBufferCreateDesc));
-			m_pipelineBindResource.m_SRVResources[ElysiaHelper::PER_PASS_SPACE].emplace_back(std::move(newTex));
+			m_perObjectBindResourceSpace.m_SRVResources[ElysiaHelper::PER_PASS_SPACE].emplace_back(std::move(newTex));
 		}
 
 		texPaths = m_objectTexPaths;
@@ -306,7 +306,7 @@ namespace ElysiaRenderer
 			texBufferCreateDesc.isSRGB = isSRGB;
 
 			auto newTex = std::move(m_device->CreateTextureFromFile(texBufferCreateDesc));
-			m_pipelineBindResource.m_SRVResources[ElysiaHelper::PER_OBJECT_SPACE].emplace_back(std::move(newTex));
+			m_perObjectBindResourceSpace.m_SRVResources[ElysiaHelper::PER_OBJECT_SPACE].emplace_back(std::move(newTex));
 		}
 	}
 	void Renderer::CreateSignatures()
@@ -314,13 +314,13 @@ namespace ElysiaRenderer
 		{
 			auto rootParameter = std::make_unique<DX12RootParameter>();
 			rootParameter->InitAsDescriptorTable(1, D3D12_SHADER_VISIBILITY_PIXEL);
-			rootParameter->SetTableRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, static_cast<UINT>(m_pipelineBindResource.m_SRVResources[ElysiaHelper::PER_PASS_SPACE].size()),
+			rootParameter->SetTableRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, static_cast<UINT>(m_perObjectBindResourceSpace.m_SRVResources[ElysiaHelper::PER_PASS_SPACE].size()),
 				0, 0, ElysiaHelper::PER_PASS_SPACE);
 			m_rootParameters.emplace_back(std::move(rootParameter));
 
 			rootParameter = std::make_unique<DX12RootParameter>();
 			rootParameter->InitAsDescriptorTable(1, D3D12_SHADER_VISIBILITY_PIXEL);
-			rootParameter->SetTableRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, static_cast<UINT>(m_pipelineBindResource.m_SRVResources[ElysiaHelper::PER_OBJECT_SPACE].size()),
+			rootParameter->SetTableRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, static_cast<UINT>(m_perObjectBindResourceSpace.m_SRVResources[ElysiaHelper::PER_OBJECT_SPACE].size()),
 				0, 0, ElysiaHelper::PER_OBJECT_SPACE);
 			m_rootParameters.emplace_back(std::move(rootParameter));
 
@@ -635,24 +635,24 @@ namespace ElysiaRenderer
 	}
 	void Renderer::SetPipelineResource(UINT objectCBVIndex, CBVPassParameterType passParameterType)
 	{
-		m_pipelineBindResource.CBVIndexs.erase(ElysiaHelper::PER_OBJECT_SPACE);
-		m_pipelineBindResource.CBVIndexs.emplace(ElysiaHelper::PER_OBJECT_SPACE, objectCBVIndex);
+		m_perObjectBindResourceSpace.CBVIndexs.erase(ElysiaHelper::PER_OBJECT_SPACE);
+		m_perObjectBindResourceSpace.CBVIndexs.emplace(ElysiaHelper::PER_OBJECT_SPACE, objectCBVIndex);
 
-		m_pipelineBindResource.CBVIndexs.erase(ElysiaHelper::PER_PASS_SPACE);
-		m_pipelineBindResource.CBVIndexs.emplace(ElysiaHelper::PER_PASS_SPACE, static_cast<UINT>(passParameterType));
+		m_perObjectBindResourceSpace.CBVIndexs.erase(ElysiaHelper::PER_PASS_SPACE);
+		m_perObjectBindResourceSpace.CBVIndexs.emplace(ElysiaHelper::PER_PASS_SPACE, static_cast<UINT>(passParameterType));
 
 		// get object constant buffer & set object constant data in buffer
-		auto objectConstanBuffer = m_pipelineBindResource.m_CBVResource[ElysiaHelper::PER_OBJECT_SPACE][static_cast<size_t>(objectCBVIndex)].get();
+		auto objectConstanBuffer = m_perObjectBindResourceSpace.m_CBVResource[ElysiaHelper::PER_OBJECT_SPACE][static_cast<size_t>(objectCBVIndex)].get();
 		objectConstanBuffer->SetMappedData(&m_objectParameters[objectCBVIndex], sizeof(CBVObjectParameter));
 
 		switch(passParameterType)
 		{
 			case CBVPassParameterType::Main:
 			{
-				auto mainPassConstantBuffer = m_pipelineBindResource.m_CBVResource[ElysiaHelper::PER_PASS_SPACE][static_cast<size_t>(passParameterType)]; 
+				auto mainPassConstantBuffer = m_perObjectBindResourceSpace.m_CBVResource[ElysiaHelper::PER_PASS_SPACE][static_cast<size_t>(passParameterType)]; 
 				mainPassConstantBuffer->SetMappedData(&m_mainPassParameter, sizeof(CBVMainPassParameter));
 
-				auto shadowPassConstantBuffer = m_pipelineBindResource.m_CBVResource[ElysiaHelper::PER_PASS_SPACE][static_cast<size_t>(passParameterType)];
+				auto shadowPassConstantBuffer = m_perObjectBindResourceSpace.m_CBVResource[ElysiaHelper::PER_PASS_SPACE][static_cast<size_t>(passParameterType)];
 				shadowPassConstantBuffer->SetMappedData(&m_shadowPassParameter, sizeof(CBVShadowPassParameter));
 
 				/*m_pipelineBindResource.CBVIndexs.erase(ElysiaHelper::PER_PASS_SPACE);
@@ -663,7 +663,7 @@ namespace ElysiaRenderer
 
 			case CBVPassParameterType::Shadow:
 			{
-				auto shadowPassConstantBuffer = m_pipelineBindResource.m_CBVResource[ElysiaHelper::PER_PASS_SPACE][static_cast<size_t>(passParameterType)];
+				auto shadowPassConstantBuffer = m_perObjectBindResourceSpace.m_CBVResource[ElysiaHelper::PER_PASS_SPACE][static_cast<size_t>(passParameterType)];
 				shadowPassConstantBuffer->SetMappedData(&m_shadowPassParameter, sizeof(CBVShadowPassParameter));
 
 				/*m_pipelineBindResource.CBVIndexs.erase(ElysiaHelper::PER_PASS_SPACE);
@@ -673,7 +673,7 @@ namespace ElysiaRenderer
 			}
 		}
 
-		m_graphicsContext->SetPipelineResource(m_pipelineBindResource);
+		m_graphicsContext->SetPipelineResource(m_perObjectBindResourceSpace);
 	}
 	void Renderer::DrawCommand(size_t drawModelIndex)
 	{
@@ -690,19 +690,19 @@ namespace ElysiaRenderer
 		UINT& objectCBVIndex, uint8_t pipelineStateQueueIndex, size_t drawModelIndex)
 	{
 		// get object constant buffer
-		auto objectConstanBuffer = m_pipelineBindResource.m_CBVResource[ElysiaHelper::PER_OBJECT_SPACE][static_cast<size_t>(objectCBVIndex)].get();
+		auto objectConstanBuffer = m_perObjectBindResourceSpace.m_CBVResource[ElysiaHelper::PER_OBJECT_SPACE][static_cast<size_t>(objectCBVIndex)].get();
 
 		//// set object constant data in buffer
 		objectConstanBuffer->SetMappedData(&m_objectParameters[objectCBVIndex], sizeof(CBVObjectParameter));
-		m_pipelineBindResource.CBVIndexs.erase(ElysiaHelper::PER_OBJECT_SPACE);
-		m_pipelineBindResource.CBVIndexs[ElysiaHelper::PER_OBJECT_SPACE] = objectCBVIndex;
+		m_perObjectBindResourceSpace.CBVIndexs.erase(ElysiaHelper::PER_OBJECT_SPACE);
+		m_perObjectBindResourceSpace.CBVIndexs[ElysiaHelper::PER_OBJECT_SPACE] = objectCBVIndex;
 
 		// set pipeline & bind data
 		auto pipelineStateData = CreatePipelineStateData(m_graphicsPipelineStates[pipelineStateQueueIndex].get(),
 			std::move(std::vector<DX12TextureResource*>{ &currBackBuffer }),
 			m_depthBuffer.get());
 		m_graphicsContext->SetPipeline(pipelineStateData);
-		m_graphicsContext->SetPipelineResource(m_pipelineBindResource);
+		m_graphicsContext->SetPipelineResource(m_perObjectBindResourceSpace);
 
 		assert(drawModelIndex < m_models.size());
 		auto drawModel = m_models[drawModelIndex];
