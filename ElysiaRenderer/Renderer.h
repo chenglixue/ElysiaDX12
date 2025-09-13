@@ -176,7 +176,8 @@ namespace ElysiaRenderer
 		std::unordered_map<UINT, std::unique_ptr<DX12GraphicsPipelineState>> m_graphicsPipelineStates;
 		std::vector<std::shared_ptr<DX12Camera>> m_cameras;
 		std::vector<std::shared_ptr<DX12Light>> m_lights;
-		PipelineBindResource m_pipelineBindResource{};
+		PipelineResourceSpace m_perObjectBindResourceSpace{};
+		PipelineResourceSpace m_perPassBindResourceSpace{};
 		std::unordered_map<std::string, TexCreateDesc> m_depthBufferCreateDesc
 		{
 			{"Camera", {}},

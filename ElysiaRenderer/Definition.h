@@ -15,6 +15,7 @@ namespace ElysiaRenderer
 	constexpr uint32_t NUM_SAMPLER_DESCRIPTORS = 6;
 	constexpr uint32_t MAX_TEXTURE_SUBRESOURCE_COUNT = 32;
 	constexpr uint32_t IMGUI_RESERVED_DESCRIPTOR_INDEX = 0;
+	constexpr uint8_t NUM_RESOURCE_SPACES = 4;
 
 	constexpr UINT MAX_MAIN_LIGHT_COUNT = 1;
 
