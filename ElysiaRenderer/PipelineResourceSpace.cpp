@@ -7,7 +7,7 @@ namespace ElysiaRenderer
 		const UINT numBinds = static_cast<UINT>(bindResources.size());
 		for (UINT currBindIndex = 0; currBindIndex < numBinds; ++currBindIndex)
 		{
-			if (bindResources.at(currBindIndex).m_bindingIndex == bindingIndex)
+			if (bindResources.at(currBindIndex)->m_bindingIndex == bindingIndex)
 			{
 				return currBindIndex;
 			}
@@ -31,7 +31,7 @@ namespace ElysiaRenderer
 		}
 		else
 		{
-
+			m_CBV = CBVResource;
 		}
 	}
 	void PipelineResourceSpace::SetSRV(std::shared_ptr<PipelineResourceBinding> SRVResource)

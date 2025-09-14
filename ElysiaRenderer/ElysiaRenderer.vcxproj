@@ -160,6 +160,7 @@
     <ClInclude Include="Definition.h" />
     <ClInclude Include="DX12BufferResource.h" />
     <ClInclude Include="DX12Camera.h" />
+    <ClInclude Include="LoadTexData.h" />
     <ClInclude Include="PipelineResourceSpace.h" />
     <ClInclude Include="DX12Context.h" />
     <ClInclude Include="DX12DescriptorHeap.h" />

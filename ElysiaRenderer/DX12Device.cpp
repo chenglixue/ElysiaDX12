@@ -622,6 +622,8 @@ namespace ElysiaRenderer
 			m_device->CreateDepthStencilView(newTex->GetResource(), &dsvDesc, newTex->GetDSVDescriptor().GetCPUHandle());
 		}
 
+		newTex->SetIsReady(hasRTV || hasDSV);
+
 		return newTex;
 	}
 

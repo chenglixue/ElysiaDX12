@@ -223,6 +223,12 @@
     <ClInclude Include="CBVPassParameter.h">
       <Filter>Header Files\DX12</Filter>
     </ClInclude>
+    <ClInclude Include="PipelineResourceSpace.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LoadTexData.h">
+      <Filter>Header Files\Helper</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -511,6 +517,9 @@
     </ClCompile>
     <ClCompile Include="DX12Shadow.cpp">
       <Filter>Source Files\DX12</Filter>
+    </ClCompile>
+    <ClCompile Include="PipelineResourceSpace.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

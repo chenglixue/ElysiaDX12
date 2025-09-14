@@ -8,6 +8,7 @@
 #include <dxgidebug.h>
 #include "DX12Shadow.h"
 #include "CBVPassParameter.h"
+#include "LoadTexData.h"
 
 namespace ElysiaRenderer 
 {
@@ -27,73 +28,26 @@ namespace ElysiaRenderer
 	const std::vector<LPCWSTR> m_modelPaths
 	{
 		L"Mesh\\LOW_WEPON.fbx",
-		L"Mesh\\plane.fbx",
+		//L"Mesh\\plane.fbx",
 		L"Mesh\\Sphere.fbx",
 	};
-	const std::vector<LPCWSTR> m_globalTexPaths
+	const std::vector<TexLoadSetting> m_globalTexLoadSettings
 	{
-		L"Tex\\GGX_E_LUT.dds",
-		L"Tex\\GGX_Eavg_LUT.dds",
-		L"Tex\\cubemap0.dds",
+		{L"Tex\\GGX_E_LUT.dds"},
+		{L"Tex\\GGX_Eavg_LUT.dds"},
+		{L"Tex\\cubemap0.dds", true},
 	};
-	const std::vector<LPCWSTR> m_objectTexPaths
+	const std::vector<TexLoadSetting> m_objectTexLoadSettings
 	{
-		L"Tex\\CyborgWeapon_BaseColor.dds",
-		L"Tex\\CyborgWeapon_Normal.dds",
-		L"Tex\\CyborgWeapon_Metallic.dds",
-		L"Tex\\CyborgWeapon_Roughness.dds",
+		{L"Tex\\CyborgWeapon_BaseColor.dds", true},
+		{L"Tex\\CyborgWeapon_Normal.dds"},
+		{L"Tex\\CyborgWeapon_Metallic.dds", true},
+		{L"Tex\\CyborgWeapon_Roughness.dds", true},
 	};
 
 	static XMMATRIX m_worldMatrix = XMMatrixIdentity(); 
 	static float m_curRotationAngleRad = 0.f; 
 	static const float m_rotationSpeed = 0.001f;
-	static int objectNum = 3;
-	 
-	/// <summary>
-	/// Constant parameter
-	/// </summary>   
-	struct alignas(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT)CBVMainPassParameter
-	{
-		XMFLOAT4 cameraPosWS = ElysiaHelper::MathHelper::XMFLOAT4Zero();	// 16
-		XMFLOAT4X4 viewMatrix = MathHelper::Identity4x4();	// 64
-		XMFLOAT4X4 projMatrix = MathHelper::Identity4x4(); 	// 64
-		XMFLOAT4 screenSize = ElysiaHelper::MathHelper::XMFLOAT4Zero();	// 16
-
-		LightData mainLights[MAX_MAIN_LIGHT_COUNT];	// 64
-
-		UINT frameIndex = 0;
-		float nearZ = 1; 
-		float farZ = 1000;
-	};
-	struct alignas(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT)CBVShadowPassParameter
-	{
-		XMFLOAT4X4 viewMatrix = MathHelper::Identity4x4();	// 64
-		XMFLOAT4X4 projMatrix = MathHelper::Identity4x4(); 	// 64
-
-		XMFLOAT4X4 shadowMatrix = MathHelper::Identity4x4();	// 64
-
-		float nearZ = 1;
-		float farZ = 1000;
-	};
-	struct alignas(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT) CBVObjectParameter
-	{
-		XMMATRIX	worldMatrix = XMMatrixIdentity();
-
-		XMFLOAT3	baseColorTint = XMFLOAT3(1.f, 1.f, 1.f);
-		float		opacity = 1.f;
-
-		float		normalIntensity = 1.f;
-		float		metallicIntensity = 1.f;
-		float		roughnessIntensity = 1.f;
-		float		ambientCubemapIntensity = 1.f;
-
-		XMFLOAT3	ambientCubemapTint = XMFLOAT3(1.f, 1.f, 1.f);
-
-		//float padding[48];
-	};
-	static CBVMainPassParameter m_mainPassParameter{};
-	static CBVShadowPassParameter m_shadowPassParameter{};
-	static std::vector<CBVObjectParameter> m_objectParameters{}; 
 
 	class Renderer
 	{
@@ -176,13 +130,65 @@ namespace ElysiaRenderer
 		std::unordered_map<UINT, std::unique_ptr<DX12GraphicsPipelineState>> m_graphicsPipelineStates;
 		std::vector<std::shared_ptr<DX12Camera>> m_cameras;
 		std::vector<std::shared_ptr<DX12Light>> m_lights;
-		PipelineResourceSpace m_perObjectBindResourceSpace{};
-		PipelineResourceSpace m_perPassBindResourceSpace{};
 		std::unordered_map<std::string, TexCreateDesc> m_depthBufferCreateDesc
 		{
 			{"Camera", {}},
 			{"Shadow", {}},
 		};
+
+		/// <summary>
+		/// Constant parameter
+		/// </summary>   
+		struct alignas(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT)CBVMainPassParameter
+		{
+			XMFLOAT4 cameraPosWS = ElysiaHelper::MathHelper::XMFLOAT4Zero();	// 16
+			XMFLOAT4X4 viewMatrix = MathHelper::Identity4x4();	// 64
+			XMFLOAT4X4 projMatrix = MathHelper::Identity4x4(); 	// 64
+			XMFLOAT4 screenSize = ElysiaHelper::MathHelper::XMFLOAT4Zero();	// 16
+
+			LightData mainLights[MAX_MAIN_LIGHT_COUNT];	// 64
+
+			UINT frameIndex = 0;
+			float nearZ = 1;
+			float farZ = 1000;
+		};
+		struct alignas(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT)CBVShadowPassParameter
+		{
+			XMFLOAT4X4 viewMatrix = MathHelper::Identity4x4();	// 64
+			XMFLOAT4X4 projMatrix = MathHelper::Identity4x4(); 	// 64
+
+			XMFLOAT4X4 shadowMatrix = MathHelper::Identity4x4();	// 64
+
+			float nearZ = 1;
+			float farZ = 1000;
+		};
+		struct alignas(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT) CBVObjectParameter
+		{
+			UINT baseColorTexIndex;
+			UINT normalTexIndex;
+			UINT metallicTexIndex;
+			UINT roughnessTexIndex;
+
+			XMMATRIX	worldMatrix = XMMatrixIdentity();
+
+			XMFLOAT3	baseColorTint = XMFLOAT3(1.f, 1.f, 1.f);
+			float		opacity = 1.f;
+
+			float		normalIntensity = 1.f;
+			float		metallicIntensity = 1.f;
+			float		roughnessIntensity = 1.f;
+			float		ambientCubemapIntensity = 1.f;
+
+			XMFLOAT3	ambientCubemapTint = XMFLOAT3(1.f, 1.f, 1.f);
+
+			//float padding[48];
+		};
+		CBVMainPassParameter m_mainPassParameter{};
+		CBVShadowPassParameter m_shadowPassParameter{};
+		std::array<std::shared_ptr<DX12ConstantBuffer>, NUM_FRAMES_IN_FLIGHT> m_objectConstanBuffers{};
+		std::shared_ptr<PipelineResourceSpace> m_perObjectBindResourceSpace{};
+		//std::shared_ptr<PipelineResourceSpace> m_perShadowBindResourceSpace{};
+		std::shared_ptr<PipelineResourceSpace> m_perMainPassBindResourceSpace{};
 
 		std::shared_ptr<DX12Camera> m_mainCamera;
 		std::shared_ptr<DX12Shadow> m_mainLightShadow;

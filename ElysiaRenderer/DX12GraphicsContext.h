@@ -19,7 +19,7 @@ namespace ElysiaRenderer
 		void ClearDepthStencilTarget(const DX12TextureResource& renderTarget, float depth, uint8_t stencil);
 
 		void SetPipeline(PipelineStateData& pipelineStateData);
-		void SetPipelineResource(PipelineResourceSpace& pipelineBindResource);
+		void SetPipelineResource(uint8_t spaceID, std::shared_ptr<PipelineResourceSpace> pipelineBindResource);
 		void SetRenderTargets(UINT numRenderTargets, const D3D12_CPU_DESCRIPTOR_HANDLE renderTargetHandle[],
 			const D3D12_CPU_DESCRIPTOR_HANDLE depthStencilHandle);
 		void SetDefaultViewportAndScissor(ElysiaHelper::UINT2 screenSize);
@@ -33,6 +33,6 @@ namespace ElysiaRenderer
 		void DrawInstanced(UINT vertexCount, UINT instanceCount, UINT startIndexLocation, UINT vertexStartOffset, UINT startInstanceLocation);
 
 	private:
-		DX12GraphicsPipelineState* m_graphicsPipelineState = nullptr;
+		PipelineStateObject* m_graphicsPipelineStateObject = nullptr;
 	};
 }

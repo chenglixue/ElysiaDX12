@@ -5,9 +5,15 @@
 
 namespace ElysiaRenderer
 {
+	struct PipelineResourceMapping
+	{
+		std::array<std::optional<UINT>, NUM_RESOURCE_SPACES> m_CBVMappings{};
+		std::array<std::optional<UINT>, NUM_RESOURCE_SPACES> m_TableMappings{};
+	};
+
 	struct PipelineResourceBinding
 	{
-		uint32_t m_bindingIndex = 0;
+		UINT m_bindingIndex = 0;
 		DX12GPUResource* m_resource = nullptr;
 	};
 
@@ -27,7 +33,7 @@ namespace ElysiaRenderer
 		{
 			return m_CBV.get();
 		}
-		const std::vector<std::shared_ptr<DX12TextureResource>>& GetSRVs() const
+		const std::vector<std::shared_ptr<PipelineResourceBinding>>& GetSRVs() const
 		{
 			return m_SRVs;
 		}
@@ -43,11 +49,6 @@ namespace ElysiaRenderer
 		{
 			return m_isLocked;
 		}
-		
-		/*std::unordered_map<UINT, std::vector<std::shared_ptr<DX12GPUResource>>> m_SRVResources{};
-		std::unordered_map<UINT, std::vector<std::shared_ptr<DX12ConstantBuffer>>> m_CBVResource{};
-		std::unordered_map<UINT, UINT> CBVSizes{};
-		std::unordered_map<UINT, size_t> CBVIndexs{};*/
 
 	private:
 		UINT GetIndexOfBindingIndex(const std::vector<std::shared_ptr<PipelineResourceBinding>>& bindResources, UINT bindingIndex);
@@ -59,7 +60,7 @@ namespace ElysiaRenderer
 
 	struct PipelineResourceLayout
 	{
-		std::array<std::shared_ptr<PipelineResourceSpace>, NUM_RESOURCE_SPACES> mSpaces{ nullptr };
+		std::array<std::shared_ptr<PipelineResourceSpace>, NUM_RESOURCE_SPACES> m_spaces{ nullptr };
 	};
 }
 

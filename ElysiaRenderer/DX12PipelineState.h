@@ -79,9 +79,15 @@ namespace ElysiaRenderer
 	private:
 	};
 
+	struct PipelineStateObject
+	{
+		DX12PipelineState* m_pipelineState = nullptr;
+		PipelineResourceMapping* m_pipelineResourceMapping = nullptr;
+	};
+
 	struct PipelineStateData
 	{
-		DX12PipelineState* m_pipelineState;
+		PipelineStateObject* m_pipelineStateObject;
 		std::vector<DX12TextureResource*> m_renderTargets;
 		DX12TextureResource* m_depthStencilTarget;
 	};
@@ -151,7 +157,8 @@ namespace ElysiaRenderer
 		DX12TextureResource* depthStencilTarget)
 	{
 		PipelineStateData data{};
-		data.m_pipelineState = pipelineState;
+		data.m_pipelineStateObject->m_pipelineState = pipelineState;
+
 		data.m_renderTargets = renderTargets;
 		data.m_depthStencilTarget = depthStencilTarget;
 		return data;

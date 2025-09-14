@@ -58,19 +58,29 @@ namespace ElysiaRenderer
 		}
 		SetRenderTargets(static_cast<UINT>(numTarget), numTarget == 0 ? nullptr : renderTargetHandles, depthStencilHandle);
 	}
-	void DX12GraphicsContext::SetPipelineResource(PipelineResourceSpace& pipelineBindResource)
+	void DX12GraphicsContext::SetPipelineResource(uint8_t spaceID, std::shared_ptr<PipelineResourceSpace> pipelineBindResourceSpace)
 	{
-		auto& SRVResources = pipelineBindResource.m_SRVResources;
+		assert(pipelineBindResourceSpace->IsLocked());
 
 
 		// set root parameters
 		// each parameter has one descriptor table
 		{
-			static const uint32_t maxNumHandlesBinding = 16;
-			static const uint32_t singleDescriptorRangeCopyArray[maxNumHandlesBinding]{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ,1 };
+			auto SRVResources = pipelineBindResourceSpace->GetSRVs();
+			auto CBVResource = pipelineBindResourceSpace->GetCBV();
 
+			static const uint32_t maxNumHandlesBinding = 16;
+			const UINT numTableHandles = static_cast<UINT>(SRVResources.size());
+			assert(numTableHandles <= maxNumHandlesBinding);
+
+			static const uint32_t singleDescriptorRangeCopyArray[maxNumHandlesBinding]{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ,1 };
 			D3D12_CPU_DESCRIPTOR_HANDLE handles[maxNumHandlesBinding]{};
 			UINT currentHandleIndex = 0;
+
+			if (CBVResource)
+			{
+				auto& CBVMapping = 
+			}
 
 			auto rootParameters = m_graphicsPipelineState->GetRootSignature()->GetDX12RootParameters();
 			auto currRootParameter = rootParameters;
@@ -110,16 +120,16 @@ namespace ElysiaRenderer
 
 				case D3D12_ROOT_PARAMETER_TYPE_CBV:
 				{
-					for (auto CBVSpaceIndex : pipelineBindResource.CBVIndexs)
+					for (auto CBVSpaceIndex : pipelineBindResourceSpace.CBVIndexs)
 					{
 						if (spaceID == CBVSpaceIndex.first)
 						{
-							m_commandList->SetGraphicsRootConstantBufferView(currRootParameterIndex, pipelineBindResource.m_CBVResource[spaceID][CBVSpaceIndex.second]->GetGPUAddress());
+							m_commandList->SetGraphicsRootConstantBufferView(currRootParameterIndex, pipelineBindResourceSpace.m_CBVResource[spaceID][CBVSpaceIndex.second]->GetGPUAddress());
 
 						}
-						/*if (pipelineBindResource.m_CBVResource[spaceID][CBVSpaceIndex.second])
+						/*if (pipelineBindResourceSpace.m_CBVResource[spaceID][CBVSpaceIndex.second])
 						{
-							m_commandList->SetGraphicsRootConstantBufferView(currRootParameterIndex, pipelineBindResource.m_CBVResource[spaceID][CBVSpaceIndex.second]->GetGPUAddress());
+							m_commandList->SetGraphicsRootConstantBufferView(currRootParameterIndex, pipelineBindResourceSpace.m_CBVResource[spaceID][CBVSpaceIndex.second]->GetGPUAddress());
 						}*/
 					}
 
