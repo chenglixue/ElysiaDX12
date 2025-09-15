@@ -121,13 +121,11 @@ namespace ElysiaRenderer
 		std::unique_ptr<DX12VertexBuffer> m_vertexBuffer = nullptr;
 		std::unique_ptr<DX12IndexBuffer> m_indexBuffer = nullptr;
 		std::vector<std::shared_ptr<DX12Shadow>> m_shadowBuffers{};
-		std::vector<std::unique_ptr<DX12RootParameter>> m_rootParameters;
 		std::vector<std::unique_ptr<D3D12_SAMPLER_DESC>> m_samplers;
-		std::vector<std::unique_ptr<DX12RootSignature>> m_rootSignatures;
 		std::unordered_map<UINT, std::unordered_map<ShaderType, std::unique_ptr<DX12Shader>>> m_vertexShaders;
 		std::unordered_map<UINT, std::unordered_map<ShaderType, std::unique_ptr<DX12Shader>>> m_pixelShaders;
 		std::vector<std::unique_ptr<DX12Shader>> m_computeShaders;
-		std::unordered_map<UINT, std::unique_ptr<DX12GraphicsPipelineState>> m_graphicsPipelineStates;
+		std::unordered_map<UINT, std::shared_ptr<PipelineStateObject>> m_graphicsPipelineStates;
 		std::vector<std::shared_ptr<DX12Camera>> m_cameras;
 		std::vector<std::shared_ptr<DX12Light>> m_lights;
 		std::unordered_map<std::string, TexCreateDesc> m_depthBufferCreateDesc
@@ -184,7 +182,7 @@ namespace ElysiaRenderer
 			//float padding[48];
 		};
 		CBVMainPassParameter m_mainPassParameter{};
-		CBVShadowPassParameter m_shadowPassParameter{};
+		std::array<CBVObjectParameter, NUM_FRAMES_IN_FLIGHT> m_objectPassParameters{};
 		std::array<std::shared_ptr<DX12ConstantBuffer>, NUM_FRAMES_IN_FLIGHT> m_objectConstanBuffers{};
 		std::shared_ptr<PipelineResourceSpace> m_perObjectBindResourceSpace{};
 		//std::shared_ptr<PipelineResourceSpace> m_perShadowBindResourceSpace{};
@@ -214,7 +212,6 @@ namespace ElysiaRenderer
 		void CreateCreamDepthRT();
 		void CreateShadowRT();
 		void LoadAndCreateTexs();
-		void CreateSignatures();
 		void CreatePOS();
 
 		std::shared_ptr<DX12Camera> InitCamera(XMVECTOR position, float aspect, float FOVY, float nearZ, float farZ);

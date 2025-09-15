@@ -51,12 +51,12 @@ namespace ElysiaRenderer
 	/// </summary>
 	/// <param name="rangeCount"></param>
 	/// <param name="shaderVisibility"></param>
-	void DX12RootParameter::InitAsDescriptorTable(UINT rangeCount, D3D12_SHADER_VISIBILITY shaderVisibility)
+	void DX12RootParameter::InitAsDescriptorTable(UINT rangeCount, D3D12_SHADER_VISIBILITY shaderVisibility, const D3D12_DESCRIPTOR_RANGE1* descriptorRangeData)
 	{
 		m_rootParamter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 		m_rootParamter.ShaderVisibility = shaderVisibility;
 		m_rootParamter.DescriptorTable.NumDescriptorRanges = rangeCount;
-		m_rootParamter.DescriptorTable.pDescriptorRanges = new D3D12_DESCRIPTOR_RANGE[rangeCount];
+		m_rootParamter.DescriptorTable.pDescriptorRanges = descriptorRangeData;
 	}
 
 	/// <summary>
@@ -69,14 +69,15 @@ namespace ElysiaRenderer
 	/// <param name="space"></param>
 	/// <returns></returns>
 	void DX12RootParameter::SetTableRange(D3D12_DESCRIPTOR_RANGE_TYPE rangeType, UINT numDescriptors,
-		UINT slotIndex, UINT rangeIndex, UINT space)
+		UINT slotIndex, UINT rangeIndex, D3D12_DESCRIPTOR_RANGE_FLAGS flags, UINT space)
 	{
-		D3D12_DESCRIPTOR_RANGE* range = const_cast<D3D12_DESCRIPTOR_RANGE*>(m_rootParamter.DescriptorTable.pDescriptorRanges + rangeIndex);
+		D3D12_DESCRIPTOR_RANGE1* range{};
 		range->RangeType = rangeType;
 		range->NumDescriptors = numDescriptors;
 		range->BaseShaderRegister = slotIndex;
 		range->RegisterSpace = m_spaceID = space;
 		range->OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+		range->Flags = flags;
 	}
 
 
@@ -131,12 +132,13 @@ namespace ElysiaRenderer
 		rootSignatureDesc.Desc_1_0.NumStaticSamplers = m_numSamplers;
 		rootSignatureDesc.Desc_1_0.pStaticSamplers = (const D3D12_STATIC_SAMPLER_DESC*)m_samplerArray.get();
 		rootSignatureDesc.Desc_1_0.Flags = flags;*/
-		D3D12_ROOT_SIGNATURE_DESC rootSignatureDesc{};
-		rootSignatureDesc.NumParameters = m_numRootParameters;
-		rootSignatureDesc.pParameters = GetRootParameters();
-		rootSignatureDesc.NumStaticSamplers = m_numSamplers;
-		rootSignatureDesc.pStaticSamplers = (const D3D12_STATIC_SAMPLER_DESC*)m_samplerArray.get();
-		rootSignatureDesc.Flags = flags;
+		D3D12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDesc{};
+		rootSignatureDesc.Desc_1_1.NumParameters = m_numRootParameters;
+		rootSignatureDesc.Desc_1_1.pParameters = GetRootParameters();
+		rootSignatureDesc.Desc_1_1.NumStaticSamplers = m_numSamplers;
+		rootSignatureDesc.Desc_1_1.pStaticSamplers = (const D3D12_STATIC_SAMPLER_DESC*)m_samplerArray.get();
+		rootSignatureDesc.Desc_1_1.Flags = flags;
+		rootSignatureDesc.Version = D3D_ROOT_SIGNATURE_VERSION_1_1;
 
 		/*for (int i = 0; i < m_numRootParameters; ++i)
 		{
@@ -154,20 +156,11 @@ namespace ElysiaRenderer
 			}
 		}*/
 
-		D3D12_FEATURE_DATA_ROOT_SIGNATURE featureData = {};
-		featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1;
-
-		if (FAILED(device->CheckFeatureSupport(D3D12_FEATURE_ROOT_SIGNATURE, &featureData, sizeof(featureData))))
-		{
-			featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_0;
-		}
-
 		ID3DBlob* signature = nullptr;
 		ID3DBlob* error = nullptr;
 		//ElysiaHelper::ThrowIfFailed(D3D12SerializeVersionedRootSignature(&rootSignatureDesc, &signature, &error));
-		ElysiaHelper::ThrowIfFailed(D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error));
+		ElysiaHelper::ThrowIfFailed(D3D12SerializeVersionedRootSignature(&rootSignatureDesc, &signature, &error));
 
-		//ID3D12RootSignature* rootSignature = nullptr;
 		ElysiaHelper::ThrowIfFailed(device->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&m_rootSignature)));
 	
 		m_isInited = true;

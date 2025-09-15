@@ -27,41 +27,54 @@ namespace ElysiaRenderer
 			depth, stencil, 0, nullptr);
 	}
 
-	void DX12GraphicsContext::SetPipeline(PipelineStateData& pipelineStateData)
+	void DX12GraphicsContext::SetPipeline(PipelineInfo& pipelineBind)
 	{
-		m_graphicsPipelineState = static_cast<DX12GraphicsPipelineState*>(pipelineStateData.m_pipelineState);
+		m_graphicsPipelineStateObject = pipelineBind.m_pipelineStateObject;
+		auto pipelineState = m_graphicsPipelineStateObject->m_pipelineState;
+		auto& renderTargets = pipelineBind.m_renderTargets;
+		const bool pipelineExpectedBoundExternally = !m_graphicsPipelineStateObject; //imgui
 
-		auto pipelineState = pipelineStateData.m_pipelineState;
-		auto& renderTargets = pipelineStateData.m_renderTargets;
+		if (!pipelineExpectedBoundExternally)
+		{
+			if (m_graphicsPipelineStateObject->m_pipelineType == PipelineType::Compute)
+			{
 
-		if (pipelineState->GetPipelineType() != PipleineType::Graphics)
+			}
+			else
+			{
+				m_commandList->SetPipelineState(pipelineState->GetPipelineState());
+				m_commandList->SetGraphicsRootSignature(pipelineState->GetRootSignature()->GetSignature());
+			}
+		}
+
+		if (pipelineState->GetPipelineType() != PipelineType::Graphics)
 		{
 			ElysiaHelper::AssertError("Pipeline not graphics");
 			return;
 		}
 
-		m_graphicsPipelineState = dynamic_cast<DX12GraphicsPipelineState*>(pipelineState);
-
-		m_commandList->SetPipelineState(pipelineState->GetPipelineState());
-		m_commandList->SetGraphicsRootSignature(pipelineState->GetRootSignature()->GetSignature());
-
-		D3D12_CPU_DESCRIPTOR_HANDLE renderTargetHandles[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT]{};
-		D3D12_CPU_DESCRIPTOR_HANDLE depthStencilHandle{ 0 };
-		auto numTarget = renderTargets.size();
-		for (size_t i = 0; i < numTarget; ++i)
+		if (pipelineExpectedBoundExternally)
 		{
-			renderTargetHandles[i] = renderTargets[i]->GetRTVDescriptor().GetCPUHandle();
+			D3D12_CPU_DESCRIPTOR_HANDLE renderTargetHandles[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT]{};
+			D3D12_CPU_DESCRIPTOR_HANDLE depthStencilHandle{ 0 };
+			auto numTarget = renderTargets.size();
+
+			for (size_t i = 0; i < numTarget; ++i)
+			{
+				renderTargetHandles[i] = renderTargets[i]->GetRTVDescriptor().GetCPUHandle();
+			}
+			if (pipelineBind.m_depthStencilTarget != nullptr)
+			{
+				depthStencilHandle = pipelineBind.m_depthStencilTarget->GetDSVDescriptor().GetCPUHandle();
+			}
+			SetRenderTargets(static_cast<UINT>(numTarget), numTarget == 0 ? nullptr : renderTargetHandles, depthStencilHandle);
 		}
-		if (pipelineStateData.m_depthStencilTarget != nullptr)
-		{
-			depthStencilHandle = pipelineStateData.m_depthStencilTarget->GetDSVDescriptor().GetCPUHandle();
-		}
-		SetRenderTargets(static_cast<UINT>(numTarget), numTarget == 0 ? nullptr : renderTargetHandles, depthStencilHandle);
+		
 	}
 	void DX12GraphicsContext::SetPipelineResource(uint8_t spaceID, std::shared_ptr<PipelineResourceSpace> pipelineBindResourceSpace)
 	{
+		assert(m_graphicsPipelineStateObject);
 		assert(pipelineBindResourceSpace->IsLocked());
-
 
 		// set root parameters
 		// each parameter has one descriptor table
@@ -79,72 +92,48 @@ namespace ElysiaRenderer
 
 			if (CBVResource)
 			{
-				auto& CBVMapping = 
+				auto& rootParameterIndex = m_graphicsPipelineStateObject->m_pipelineResourceMapping.m_CBVMappings[spaceID];
+				assert(rootParameterIndex.has_value());
+
+				switch (m_graphicsPipelineStateObject->m_pipelineType)
+				{
+					case PipelineType::Graphics:
+					{
+						m_commandList->SetGraphicsRootConstantBufferView(rootParameterIndex.value(), CBVResource->GetGPUAddress());
+						break;
+					}
+				}
 			}
 
-			auto rootParameters = m_graphicsPipelineState->GetRootSignature()->GetDX12RootParameters();
-			auto currRootParameter = rootParameters;
-			UINT currRootParameterIndex = 0;
-			for (; currRootParameter < rootParameters + m_graphicsPipelineState->GetRootSignature()->GetNumRootParams(); ++currRootParameter)
+			if (numTableHandles == 0)
 			{
-				UINT spaceID = currRootParameter->GetSpaceID();
+				return;
+			}
 
-				switch (currRootParameter->GetType())
+			for (auto& SRV : SRVResources)
+			{
+				if (SRV->m_resource->GetBufferType() == BufferType::Texture)
 				{
-				case D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE:
+					handles[currentHandleIndex++] = static_cast<DX12TextureResource*>(SRV->m_resource)->GetSRVDescriptor().GetCPUHandle();
+				}
+				else
 				{
-					for (auto& SRVResource : SRVResources[spaceID])
-					{
-						switch (SRVResource->GetBufferType())
-						{
-						case BufferType::Texture:
-						{
-							handles[currentHandleIndex++] = static_cast<DX12TextureResource*>(SRVResource.get())->GetSRVDescriptor().GetCPUHandle();
-							break;
-						}
+					//handles[currentHandleIndex++] = static_cast<DX12BufferResource*>(SRV->m_resource)->GetSRVDescriptor().GetCPUHandle();
+				}
+			}
+			DX12DescriptorHeapHandle blockStart = m_currSRVHeap->AllocateRenderPassDescriptorBlock(numTableHandles);
+			m_device->CopyDescriptors(1, &blockStart.GetCPUHandle(), &numTableHandles, numTableHandles, handles, singleDescriptorRangeCopyArray, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
-						default:
-							ElysiaHelper::ThrowRuntimeError("SRVResource type is none");
-							break;
-						}
-					}
+			auto& tableMapping = m_graphicsPipelineStateObject->m_pipelineResourceMapping.m_TableMappings[spaceID];
+			assert(tableMapping.has_value());
 
-					UINT numTableHandles = static_cast<UINT>(SRVResources[spaceID].size());
-					auto blockStart = m_currSRVHeap->AllocateRenderPassDescriptorBlock(numTableHandles);
-					m_device->CopyDescriptors(1, &blockStart.GetCPUHandle(), &numTableHandles, numTableHandles, handles, singleDescriptorRangeCopyArray, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-
-					m_commandList->SetGraphicsRootDescriptorTable(currRootParameterIndex, blockStart.GetGPUHandle());
-
+			switch (m_graphicsPipelineStateObject->m_pipelineType)
+			{
+				case PipelineType::Graphics:
+				{
+					m_commandList->SetGraphicsRootDescriptorTable(tableMapping.value(), blockStart.GetGPUHandle());
 					break;
 				}
-
-				case D3D12_ROOT_PARAMETER_TYPE_CBV:
-				{
-					for (auto CBVSpaceIndex : pipelineBindResourceSpace.CBVIndexs)
-					{
-						if (spaceID == CBVSpaceIndex.first)
-						{
-							m_commandList->SetGraphicsRootConstantBufferView(currRootParameterIndex, pipelineBindResourceSpace.m_CBVResource[spaceID][CBVSpaceIndex.second]->GetGPUAddress());
-
-						}
-						/*if (pipelineBindResourceSpace.m_CBVResource[spaceID][CBVSpaceIndex.second])
-						{
-							m_commandList->SetGraphicsRootConstantBufferView(currRootParameterIndex, pipelineBindResourceSpace.m_CBVResource[spaceID][CBVSpaceIndex.second]->GetGPUAddress());
-						}*/
-					}
-
-					break;
-				}
-
-				default:
-				{
-					ElysiaHelper::ThrowRuntimeError("invalid root parameter type");
-					break;
-				}
-				}
-
-				currRootParameterIndex++;
-				currentHandleIndex = 0;
 			}
 		}
 	}

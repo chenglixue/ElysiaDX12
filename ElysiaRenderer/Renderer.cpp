@@ -24,9 +24,6 @@ namespace ElysiaRenderer
 	{
 		{
 			m_mainCamera = InitCamera(XMVectorSet(0.0f, 3.0f, -10.0f, 1.f), m_aspectRatio, 0.8f, 1.f, 1000.f);
-			
-			XMStoreFloat4x4(&m_mainPassParameter.projMatrix, XMMatrixTranspose(m_mainCamera->GetProjMat()));
-			XMStoreFloat4(&m_mainPassParameter.cameraPosWS, m_mainCamera->GetCameraPos());
 
 			m_cameras.emplace_back(m_mainCamera);
 		}
@@ -34,16 +31,10 @@ namespace ElysiaRenderer
 		LoadModel();
 		InitLight();
 		InitTexTriangle();
-
-		m_objectParameters.reserve(objectNum);
-		m_objectParameters = std::vector<CBVObjectParameter>(m_objectParameters.capacity());
 	}
 	void Renderer::Update()
 	{
 		OnKeyboardInput();
-
-		/*m_curRotationAngleRad += m_rotationSpeed;
-		m_worldMatrix = XMMatrixRotationY(0);*/
 
 		m_mainLightShadow->UpdateShadowTransform(m_mainLight.get());
 		UpdateCBV();
@@ -59,14 +50,12 @@ namespace ElysiaRenderer
 		m_device->DestoryBuffer(std::move(m_vertexBuffer));
 		for (size_t i = 0; i < m_graphicsPipelineStates.size(); ++i)
 		{
-			m_device->DestoryPipelineState(std::move(m_graphicsPipelineStates[i]));
+			//m_device->DestoryPipelineState(std::move(m_graphicsPipelineStates[i]));
 		}
 		m_device = nullptr;
 
-		m_rootParameters.clear();
 		m_graphicsContext.release();
 		m_vertexBuffer.release();
-		m_rootSignatures.clear();
 		m_vertexShaders.clear();
 		m_pixelShaders.clear();
 		m_computeShaders.clear();
@@ -147,19 +136,20 @@ namespace ElysiaRenderer
 		XMStoreFloat4x4(&m_mainPassParameter.projMatrix, XMMatrixTranspose(m_mainCamera->GetProjMat()));
 		m_mainPassParameter.nearZ = m_mainCamera->GetNearZ();
 		m_mainPassParameter.farZ = m_mainCamera->GetFarZ();
-		m_perObjectBindResourceSpace.m_CBVResource[ElysiaHelper::PER_PASS_SPACE][static_cast<size_t>(CBVPassParameterType::Main)]->SetMappedData(&m_mainPassParameter, sizeof(CBVMainPassParameter));
-	
-		XMStoreFloat4x4(&m_shadowPassParameter.shadowMatrix, XMMatrixTranspose(m_mainLightShadow->GetShadowMat()));
+		m_mainPassParameter.mainLights[0] = std::move(m_mainLight->CreateLightData());
+		m_perMainPassBindResourceSpace->GetCBV()->SetMappedData(&m_mainPassParameter, sizeof(CBVMainPassParameter));
+		
+		/*XMStoreFloat4x4(&m_shadowPassParameter.shadowMatrix, XMMatrixTranspose(m_mainLightShadow->GetShadowMat()));
 		XMStoreFloat4x4(&m_shadowPassParameter.viewMatrix, XMMatrixTranspose(m_mainLightShadow->GetViewMat()));
 		XMStoreFloat4x4(&m_shadowPassParameter.projMatrix, XMMatrixTranspose(m_mainLightShadow->GetProjMat()));
 		m_shadowPassParameter.nearZ = m_mainLightShadow->GetNearZ();
 		m_shadowPassParameter.farZ = m_mainLightShadow->GetFarZ();
-		m_perObjectBindResourceSpace.m_CBVResource[ElysiaHelper::PER_PASS_SPACE][static_cast<size_t>(CBVPassParameterType::Shadow)]->SetMappedData(&m_shadowPassParameter, sizeof(CBVShadowPassParameter));
+		m_perObjectBindResourceSpace.m_CBVResource[ElysiaHelper::PER_PASS_SPACE][static_cast<size_t>(CBVPassParameterType::Shadow)]->SetMappedData(&m_shadowPassParameter, sizeof(CBVShadowPassParameter));*/
 
 	}
 	void Renderer::UpdateObjectCBV()
 	{
-		int objectCBVIndex = 0;
+		CBVObjectParameter objectParameter{};
 		XMMATRIX translateMatrix = XMMatrixIdentity();
 		XMMATRIX scaleMatrix = XMMatrixIdentity();
 		XMMATRIX rotationMatrix = XMMatrixIdentity();
@@ -169,10 +159,11 @@ namespace ElysiaRenderer
 		rotationMatrix = XMMatrixMultiply(XMMatrixRotationY(XMConvertToRadians(-90)), XMMatrixRotationZ(XMConvertToRadians(90)));
 		translateMatrix = XMMatrixTranslation(0.f, 0.f, 0.f);
 		MVP = rotationMatrix * scaleMatrix * translateMatrix;
-		m_objectParameters[objectCBVIndex++].worldMatrix = XMMatrixTranspose(MVP);
+		objectParameter.worldMatrix = XMMatrixTranspose(MVP);
+		m_objectConstanBuffers[m_device->GetFrameID()]->SetMappedData(&objectParameter, sizeof(CBVObjectParameter));
 
 
-		translateMatrix = XMMatrixTranslation(0.f, -5.f, 0.f);
+		/*translateMatrix = XMMatrixTranslation(0.f, -5.f, 0.f);
 		scaleMatrix = XMMatrixIdentity();
 		rotationMatrix = XMMatrixIdentity();
 		MVP = translateMatrix * scaleMatrix * rotationMatrix;
@@ -183,7 +174,7 @@ namespace ElysiaRenderer
 		rotationMatrix = XMMatrixIdentity();
 		translateMatrix = XMMatrixTranslation(0.f, 0.0f, 0.0f);
 		MVP = ElysiaHelper::GetMVP(translateMatrix, rotationMatrix, scaleMatrix);
-		m_objectParameters[objectCBVIndex++].worldMatrix = XMMatrixTranspose(MVP);
+		m_objectParameters[objectCBVIndex++].worldMatrix = XMMatrixTranspose(MVP);*/
 	}
 
 	void Renderer::InitTexTriangle()
@@ -198,8 +189,6 @@ namespace ElysiaRenderer
 
 		CreateCreamDepthRT();
 		CreateShadowRT();
-
-		CreateSignatures();
 
 		CreatePOS();
 	}
@@ -230,15 +219,14 @@ namespace ElysiaRenderer
 		constantBufferCreationDesc.m_isRawAccess = false;
 
 		auto constantBuffer = m_device->CreateConstantBuffer(constantBufferCreationDesc);
-		constantBuffer->SetMappedData(&m_mainPassParameter, sizeof(CBVMainPassParameter));
 		m_perMainPassBindResourceSpace->SetCBV(std::move(constantBuffer));
 		m_perMainPassBindResourceSpace->Lock();
 
-		constantBufferCreationDesc.m_bufferSize = sizeof(CBVShadowPassParameter);
+		/*constantBufferCreationDesc.m_bufferSize = sizeof(CBVShadowPassParameter);
 		constantBuffer = m_device->CreateConstantBuffer(constantBufferCreationDesc);
 		constantBuffer->SetMappedData(&m_shadowPassParameter, sizeof(CBVShadowPassParameter));
 		m_perShadowBindResourceSpace->SetCBV(std::move(constantBuffer));
-		m_perShadowBindResourceSpace->Lock();
+		m_perShadowBindResourceSpace->Lock();*/
 
 		constantBufferCreationDesc.m_bufferSize = sizeof(CBVObjectParameter);
 		for (int i = 0; i < m_objectConstanBuffers.size(); ++i)
@@ -273,7 +261,7 @@ namespace ElysiaRenderer
 		shadowMap->InitBoundSphere(20);
 		m_mainLightShadow = shadowMap;
 
-		m_perObjectBindResourceSpace.m_SRVResources[ElysiaHelper::PER_PASS_SPACE].emplace_back(shadowTex);
+		//m_perObjectBindResourceSpace.m_SRVResources[ElysiaHelper::PER_PASS_SPACE].emplace_back(shadowTex);
 		m_shadowBuffers.emplace_back(std::move(shadowMap));
 	}
 	void Renderer::LoadAndCreateTexs()
@@ -286,9 +274,9 @@ namespace ElysiaRenderer
 			TextureCreationDesc texBufferCreateDesc{};
 
 			texBufferCreateDesc.texturePath = texLoadSettings[i].LoadPath;
-			texBufferCreateDesc.isSRGB = false;
+			texBufferCreateDesc.isSRGB = texLoadSettings[i].IsSRGB;
 
-			auto newTex = std::move(m_device->CreateTextureFromFile(texBufferCreateDesc));
+			m_texs.emplace_back(std::move(m_device->CreateTextureFromFile(texBufferCreateDesc)));
 		}
 
 		texLoadSettings = m_objectTexLoadSettings;
@@ -302,94 +290,33 @@ namespace ElysiaRenderer
 			texBufferCreateDesc.isSRGB = texLoadSettings[i].IsSRGB;
 
 			auto newTex = std::move(m_device->CreateTextureFromFile(texBufferCreateDesc));
+			m_texs.emplace_back(std::move(m_device->CreateTextureFromFile(texBufferCreateDesc)));
 		}
-	}
-	void Renderer::CreateSignatures()
-	{
-		PipelineResourceLayout meshResourceLayout{};
-		meshResourceLayout.m_spaces[PER_OBJECT_SPACE] = m_perObjectBindResourceSpace;
-		meshResourceLayout.m_spaces[PER_PASS_SPACE] = m_perMainPassBindResourceSpace;
-
-		for (int currSpaceID = 0; currSpaceID < NUM_RESOURCE_SPACES; ++currSpaceID)
-		{
-			auto currSpace = meshResourceLayout.m_spaces[currSpaceID];
-
-			const auto CBV = currSpace->GetCBV();
-			auto SRVs = currSpace->GetSRVs();
-
-			if (CBV)
-			{
-				auto rootParameter = std::make_unique<DX12RootParameter>();
-				rootParameter->InitAsConstantBufferView(0, D3D12_SHADER_VISIBILITY_ALL, currSpaceID);
-				m_rootParameters.emplace_back(rootParameter);
-			}
-
-			if (SRVs.empty())
-			{
-				continue;
-			}
-
-			for (auto& SRV : SRVs)
-			{
-				auto rootParameter = std::make_unique<DX12RootParameter>();
-				rootParameter->InitAsDescriptorTable(1, D3D12_SHADER_VISIBILITY_ALL);
-				rootParameter->SetTableRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, SRV->m_bindingIndex, )
-			}
-		}
-		{
-			auto rootParameter = std::make_unique<DX12RootParameter>();
-
-			rootParameter = std::make_unique<DX12RootParameter>();
-			rootParameter->InitAsDescriptorTable(1, D3D12_SHADER_VISIBILITY_PIXEL);
-			rootParameter->SetTableRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, static_cast<UINT>(m_perObjectBindResourceSpace.m_SRVResources[ElysiaHelper::PER_OBJECT_SPACE].size()),
-				0, 0, ElysiaHelper::PER_OBJECT_SPACE);
-			m_rootParameters.emplace_back(std::move(rootParameter));
-
-			rootParameter = std::make_unique<DX12RootParameter>();
-			rootParameter->InitAsConstantBufferView(0, D3D12_SHADER_VISIBILITY_ALL, ElysiaHelper::PER_PASS_SPACE);
-			m_rootParameters.emplace_back(std::move(rootParameter));
-
-			rootParameter = std::make_unique<DX12RootParameter>();
-			rootParameter->InitAsConstantBufferView(1, D3D12_SHADER_VISIBILITY_ALL, ElysiaHelper::PER_PASS_SPACE);
-			m_rootParameters.emplace_back(std::move(rootParameter));
-
-			rootParameter = std::make_unique<DX12RootParameter>();
-			rootParameter->InitAsConstantBufferView(0, D3D12_SHADER_VISIBILITY_ALL, ElysiaHelper::PER_OBJECT_SPACE);
-			m_rootParameters.emplace_back(std::move(rootParameter));
-		}
-
-		RootSignatureCreatDesc rootSignatureCreatDesc{};
-		std::vector<DX12RootParameter*> tempRootParameters{};
-		tempRootParameters.reserve(m_rootParameters.size());
-		for (auto& rootParameter : m_rootParameters)
-		{
-			tempRootParameters.emplace_back(rootParameter.get());
-		}
-		rootSignatureCreatDesc.rootParamters = std::move(tempRootParameters);
-
-		m_rootSignatures.emplace_back(std::move(m_device->CreateRootSignature(rootSignatureCreatDesc)));
 	}
 	void Renderer::CreatePOS()
 	{
+		PipelineResourceLayout meshResourceLayout{};
 
 		/// Shadow PSO
+		meshResourceLayout.m_spaces[PER_OBJECT_SPACE] = m_perObjectBindResourceSpace;
+		meshResourceLayout.m_spaces[PER_PASS_SPACE] = m_perMainPassBindResourceSpace;
 		PipelineStateCreateDesc pipelineStateCreateDesc = std::move(CreateDefaultPipelineStateCreateDesc());
 		pipelineStateCreateDesc.m_vertexShader = m_vertexShaders[ShaderQueue::Shadow][ShaderType::Vertex].get();
 		pipelineStateCreateDesc.m_pixelShader = m_pixelShaders[ShaderQueue::Shadow][ShaderType::Pixel].get();
-		pipelineStateCreateDesc.m_rootSignature = m_rootSignatures.back().get();
 		pipelineStateCreateDesc.m_inputElementDesc = m_inputElementDescs;
 		pipelineStateCreateDesc.m_renderTargetDesc.m_numRenderTargets = 0;
 		pipelineStateCreateDesc.m_depthStencilDesc.DepthEnable = TRUE;
 		pipelineStateCreateDesc.m_renderTargetDesc.m_depthStencilFormat = m_depthBufferCreateDesc["Shadow"].m_resouceDesc.Format;
 		pipelineStateCreateDesc.m_depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
-		m_graphicsPipelineStates.insert({ ShaderQueue::Shadow, std::move(m_device->CreateGraphicsPipelineState(pipelineStateCreateDesc)) });
+		m_graphicsPipelineStates.insert({ ShaderQueue::Shadow, std::move(m_device->CreateGraphicsPipelineState(pipelineStateCreateDesc, meshResourceLayout)) });
 
 
 		/// Opaque PSO
+		meshResourceLayout.m_spaces[PER_OBJECT_SPACE] = m_perObjectBindResourceSpace;
+		meshResourceLayout.m_spaces[PER_PASS_SPACE] = m_perMainPassBindResourceSpace;
 		pipelineStateCreateDesc = std::move(CreateDefaultPipelineStateCreateDesc());
 		pipelineStateCreateDesc.m_vertexShader = m_vertexShaders[ShaderQueue::Opaque][ShaderType::Vertex].get();
 		pipelineStateCreateDesc.m_pixelShader = m_pixelShaders[ShaderQueue::Opaque][ShaderType::Pixel].get();
-		pipelineStateCreateDesc.m_rootSignature = m_rootSignatures.back().get();
 		pipelineStateCreateDesc.m_inputElementDesc = m_inputElementDescs;
 		pipelineStateCreateDesc.m_renderTargetDesc.m_numRenderTargets = 1;
 		pipelineStateCreateDesc.m_renderTargetDesc.m_renderTargetFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
@@ -397,13 +324,14 @@ namespace ElysiaRenderer
 		pipelineStateCreateDesc.m_renderTargetDesc.m_depthStencilFormat = m_depthBufferCreateDesc["Camera"].m_resouceDesc.Format;
 		pipelineStateCreateDesc.m_depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
 
-		m_graphicsPipelineStates.insert({ ShaderQueue::Opaque, std::move(m_device->CreateGraphicsPipelineState(pipelineStateCreateDesc)) });
+		m_graphicsPipelineStates.insert({ ShaderQueue::Opaque, std::move(m_device->CreateGraphicsPipelineState(pipelineStateCreateDesc, meshResourceLayout)) });
 
 		/// Skybox PSO
+		meshResourceLayout.m_spaces[PER_OBJECT_SPACE] = m_perObjectBindResourceSpace;
+		meshResourceLayout.m_spaces[PER_PASS_SPACE] = m_perMainPassBindResourceSpace;
 		pipelineStateCreateDesc = std::move(CreateDefaultPipelineStateCreateDesc());
 		pipelineStateCreateDesc.m_vertexShader = m_vertexShaders[ShaderQueue::Skybox][ShaderType::Vertex].get();
 		pipelineStateCreateDesc.m_pixelShader = m_pixelShaders[ShaderQueue::Skybox][ShaderType::Pixel].get();
-		pipelineStateCreateDesc.m_rootSignature = m_rootSignatures.back().get();
 		pipelineStateCreateDesc.m_inputElementDesc = m_inputElementDescs;
 		pipelineStateCreateDesc.m_renderTargetDesc.m_numRenderTargets = 1;
 		pipelineStateCreateDesc.m_renderTargetDesc.m_renderTargetFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
@@ -416,7 +344,7 @@ namespace ElysiaRenderer
 		// let cubemap z = 1 pass z-test, otherwise it'll be failed in z-test because data of zbuffer is 1
 		pipelineStateCreateDesc.m_depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 
-		m_graphicsPipelineStates.insert({ ShaderQueue::Skybox, std::move(m_device->CreateGraphicsPipelineState(pipelineStateCreateDesc)) });
+		m_graphicsPipelineStates.insert({ ShaderQueue::Skybox, std::move(m_device->CreateGraphicsPipelineState(pipelineStateCreateDesc, meshResourceLayout)) });
 	}
 
 	std::shared_ptr<DX12Camera> Renderer::InitCamera(XMVECTOR position, float aspect, float FOVY, float nearZ, float farZ)
@@ -434,7 +362,6 @@ namespace ElysiaRenderer
 	void Renderer::InitLight()
 	{
 		auto dirLight = std::make_unique<DX12DirectionLight>(XMFLOAT3(1, 1, 1), XMFLOAT3( 0.f, 0.f, -1.f), 1);
-		m_mainPassParameter.mainLights[0] = std::move(dirLight->CreateLightData());
 
 		m_mainLight = std::shared_ptr<DX12Light>(std::move(dirLight));
 
@@ -520,7 +447,7 @@ namespace ElysiaRenderer
 	void Renderer::RenderTexTriangle()
 	{
 		m_device->BeginFrame();
-		m_graphicsContext->Reset(m_graphicsPipelineStates[ShaderQueue::Opaque]->GetPipelineState());
+		m_graphicsContext->Reset();
 
 		ImGui_ImplDX12_NewFrame();
 		ImGui_ImplWin32_NewFrame();
@@ -579,13 +506,13 @@ namespace ElysiaRenderer
 
 		if (ImGui::CollapsingHeader("PBR Data"))
 		{
-			ImGui::ColorEdit3("Base Color Tint", (float*)&m_objectParameters[0].baseColorTint);
-			ImGui::SliderFloat("Opacity", &m_objectParameters[0].opacity, 0.f, 1.f);
-			ImGui::SliderFloat("Normal Intensity", &m_objectParameters[0].normalIntensity, 0.f, 5.f);
-			ImGui::SliderFloat("Metallic Intensity", &m_objectParameters[0].metallicIntensity, 0.f, 5.f);
-			ImGui::SliderFloat("Roughness Intensity", &m_objectParameters[0].roughnessIntensity, 0.f, 5.f);
-			ImGui::SliderFloat("Ambient Cubemap Intensity", &m_objectParameters[0].ambientCubemapIntensity, 0.f, 2.f);
-			ImGui::ColorEdit3("Ambient Cubemap Tint", (float*)&m_objectParameters[0].ambientCubemapTint);
+			ImGui::ColorEdit3("Base Color Tint", (float*)&m_objectPassParameters[m_device->GetFrameID()].baseColorTint);
+			ImGui::SliderFloat("Opacity", &m_objectPassParameters[m_device->GetFrameID()].opacity, 0.f, 1.f);
+			ImGui::SliderFloat("Normal Intensity", &m_objectPassParameters[m_device->GetFrameID()].normalIntensity, 0.f, 5.f);
+			ImGui::SliderFloat("Metallic Intensity", &m_objectPassParameters[m_device->GetFrameID()].metallicIntensity, 0.f, 5.f);
+			ImGui::SliderFloat("Roughness Intensity", &m_objectPassParameters[m_device->GetFrameID()].roughnessIntensity, 0.f, 5.f);
+			ImGui::SliderFloat("Ambient Cubemap Intensity", &m_objectPassParameters[m_device->GetFrameID()].ambientCubemapIntensity, 0.f, 2.f);
+			ImGui::ColorEdit3("Ambient Cubemap Tint", (float*)&m_objectPassParameters[m_device->GetFrameID()].ambientCubemapTint);
 		}
 
 		//ImGui::ShowDemoWindow();
@@ -609,16 +536,12 @@ namespace ElysiaRenderer
 		m_graphicsContext->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		// set pipeline & bind data
-		auto pipelineStateData = CreatePipelineStateData(m_graphicsPipelineStates[ShaderQueue::Shadow].get(),
+		auto pipelineStateData = CreatePipelineStateData(m_graphicsPipelineStates[ShaderQueue::Shadow]->m_pipelineState.get(),
 			{},
 			shadowBuffer);
 		m_graphicsContext->SetPipeline(pipelineStateData);
-
-		for (int i = 0; i < objectNum - 1; ++i)
-		{
-			SetPipelineResource(i, CBVPassParameterType::Shadow);
-			DrawCommand(i);
-		}
+		//SetPipelineResource(i, CBVPassParameterType::Shadow);
+		//DrawCommand(i);
 
 		m_graphicsContext->AddBarrier(*shadowBuffer, D3D12_RESOURCE_STATE_GENERIC_READ);
 		m_graphicsContext->FlushBarrier();
@@ -626,24 +549,31 @@ namespace ElysiaRenderer
 	void Renderer::DrawOpaque()
 	{
 		auto& currBackBuffer = m_device->GetCurrBackBuffer();
-		m_objectCBVIndex = 0;
 
-		auto pipelineStateData = CreatePipelineStateData(m_graphicsPipelineStates[ShaderQueue::Opaque].get(),
+		PipelineInfo pipelineStateData{};
+		pipelineStateData.m_pipelineStateObject = m_graphicsPipelineStates[ShaderQueue::Opaque];
+		pipelineStateData.m_renderTargets = std::vector<std::shared_ptr<DX12TextureResource>>{ std::shared_ptr<DX12TextureResource>(&currBackBuffer) };
+		pipelineStateData.m_depthStencilTarget = std::move(m_depthBuffer);
+
+		/*CreatePipelineStateData(m_graphicsPipelineStates[ShaderQueue::Opaque]->m_pipelineState.get(),
 			std::vector<DX12TextureResource*>{ &currBackBuffer },
 			m_depthBuffer.get());
-		m_graphicsContext->SetPipeline(pipelineStateData);
+		m_graphicsContext->SetPipeline(pipelineStateData);*/
 
+		bool isReady = true;
+		for (auto& tex : m_texs)
 		{
-			SetPipelineResource(m_objectCBVIndex, CBVPassParameterType::Main);
-			DrawCommand(m_objectCBVIndex++);
+			isReady = tex->GetIsReady();
+		}
+		if(isReady)
+		{
+			m_graphicsContext->SetPipeline(pipelineStateData);
 			
-			SetPipelineResource(m_objectCBVIndex, CBVPassParameterType::Main);
-			DrawCommand(m_objectCBVIndex++);
 		}
 	}
 	void Renderer::DrawSkybox()
 	{
-		auto& currBackBuffer = m_device->GetCurrBackBuffer();
+		/*auto& currBackBuffer = m_device->GetCurrBackBuffer();
 
 		auto pipelineStateData = CreatePipelineStateData(m_graphicsPipelineStates[ShaderQueue::Skybox].get(),
 			std::vector<DX12TextureResource*>{ &currBackBuffer },
@@ -653,7 +583,7 @@ namespace ElysiaRenderer
 		{
 			SetPipelineResource(m_objectCBVIndex, CBVPassParameterType::Main);
 			DrawCommand(m_objectCBVIndex++);
-		}
+		}*/
 	}
 	//void Renderer::SetPipelineResource(UINT objectCBVIndex, CBVPassParameterType passParameterType)
 	//{

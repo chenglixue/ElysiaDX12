@@ -7,6 +7,7 @@ namespace ElysiaRenderer
 {
 	struct PipelineResourceMapping
 	{
+		// space id : root paramter index
 		std::array<std::optional<UINT>, NUM_RESOURCE_SPACES> m_CBVMappings{};
 		std::array<std::optional<UINT>, NUM_RESOURCE_SPACES> m_TableMappings{};
 	};
@@ -29,7 +30,7 @@ namespace ElysiaRenderer
 		PipelineResourceSpace(PipelineResourceSpace&& rhs) = default;
 		~PipelineResourceSpace() = default;
 
-		const DX12ConstantBuffer* GetCBV() const
+		DX12ConstantBuffer* GetCBV() const
 		{
 			return m_CBV.get();
 		}

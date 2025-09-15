@@ -914,25 +914,67 @@ namespace ElysiaRenderer
 			(*rootSignature)[i] = *rootParamters[i];
 		}
 	}
-	std::unique_ptr<DX12RootSignature>			DX12Device::CreateRootSignature(RootSignatureCreatDesc& rootSignatureCreatDesc)
+	DX12RootSignature*							DX12Device::CreateRootSignature(const PipelineResourceLayout& resourceLayout, PipelineResourceMapping& resourceMapping)
 	{
-		UINT numRootParamter = static_cast<UINT>(rootSignatureCreatDesc.rootParamters.size());
+		std::vector<DX12RootParameter*> rootParameters{};
+		std::array<std::vector<D3D12_DESCRIPTOR_RANGE1>, NUM_RESOURCE_SPACES> desciptorRanges;
+
+		for (UINT currSpaceID = 0; currSpaceID < NUM_RESOURCE_SPACES; ++currSpaceID)
+		{
+			auto currSpace = resourceLayout.m_spaces[currSpaceID];
+			std::vector<D3D12_DESCRIPTOR_RANGE1>& currDescriptorRange = desciptorRanges[currSpaceID];
+
+			const auto CBV = currSpace->GetCBV();
+			auto SRVs = currSpace->GetSRVs();
+
+			if (CBV)
+			{
+				auto rootParameter = std::make_unique<DX12RootParameter>();
+				rootParameter->InitAsConstantBufferView(0, D3D12_SHADER_VISIBILITY_ALL, currSpaceID);
+
+				resourceMapping.m_CBVMappings[currSpaceID] = static_cast<UINT>(rootParameters.size());
+				rootParameters.emplace_back(std::move(rootParameter.get()));
+			}
+
+			if (SRVs.empty())
+			{
+				continue;
+			}
+
+			// all of SRV Resource has one DESCRIPTOR RANGE which only has one descriptor
+			for (auto& SRV : SRVs)
+			{
+				D3D12_DESCRIPTOR_RANGE1 pDescriptorRange{};
+				pDescriptorRange.BaseShaderRegister = SRV->m_bindingIndex;
+				pDescriptorRange.NumDescriptors = 1;
+				pDescriptorRange.OffsetInDescriptorsFromTableStart = static_cast<UINT>(currDescriptorRange.size());
+				pDescriptorRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+				pDescriptorRange.RegisterSpace = currSpaceID;
+				pDescriptorRange.Flags = D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE | D3D12_DESCRIPTOR_RANGE_FLAG_DATA_VOLATILE;
+
+				currDescriptorRange.emplace_back(pDescriptorRange);
+			}
+
+			auto rootParameter = std::make_unique<DX12RootParameter>();
+			rootParameter->InitAsDescriptorTable(static_cast<UINT>(currDescriptorRange.size()), D3D12_SHADER_VISIBILITY_ALL, currDescriptorRange.data());
+
+			resourceMapping.m_TableMappings[currSpaceID] = static_cast<UINT>(rootParameters.size());
+			rootParameters.emplace_back(std::move(rootParameter.get()));
+		}
+
+		UINT numRootParamter = static_cast<UINT>(rootParameters.size());
 		UINT numSampler = NUM_SAMPLER_DESCRIPTORS;
-		auto rootSignature = std::make_unique<DX12RootSignature>(numRootParamter, numSampler);
+		DX12RootSignature* rootSignature = new DX12RootSignature(numRootParamter, numSampler);
 
-		CreateSamplers(rootSignature.get());
+		CreateSamplers(rootSignature);
 
-		CreateRootParameters(rootSignature.get(), rootSignatureCreatDesc.rootParamters);
+		CreateRootParameters(rootSignature, rootParameters);
 
-		rootSignature->Init(m_device, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT /*|
-			D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS |
-			D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS |
-			D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS |
-			D3D12_ROOT_SIGNATURE_FLAG_DENY_PIXEL_SHADER_ROOT_ACCESS*/);
+		rootSignature->Init(m_device, D3D12_ROOT_SIGNATURE_FLAG_CBV_SRV_UAV_HEAP_DIRECTLY_INDEXED | D3D12_ROOT_SIGNATURE_FLAG_SAMPLER_HEAP_DIRECTLY_INDEXED);
 		
 		return rootSignature;
 	}
-	std::unique_ptr<DX12GraphicsPipelineState>	DX12Device::CreateGraphicsPipelineState(PipelineStateCreateDesc& pipelineStateCreateDesc)
+	std::unique_ptr<PipelineStateObject>		DX12Device::CreateGraphicsPipelineState(PipelineStateCreateDesc& pipelineStateCreateDesc, PipelineResourceLayout& resourceLayout)
 	{
 		D3D12_GRAPHICS_PIPELINE_STATE_DESC PSODesc{};
 		if (pipelineStateCreateDesc.m_vertexShader != nullptr)
@@ -949,7 +991,6 @@ namespace ElysiaRenderer
 		
 		PSODesc.InputLayout = { pipelineStateCreateDesc.m_inputElementDesc.data(),
 			static_cast<UINT>(pipelineStateCreateDesc.m_inputElementDesc.size())};
-		PSODesc.pRootSignature = pipelineStateCreateDesc.m_rootSignature->GetSignature();
 		PSODesc.RasterizerState = pipelineStateCreateDesc.m_rasterDesc;
 		PSODesc.BlendState = pipelineStateCreateDesc.m_blendDesc;
 		PSODesc.DepthStencilState = pipelineStateCreateDesc.m_depthStencilDesc;
@@ -964,11 +1005,18 @@ namespace ElysiaRenderer
 		}
 		PSODesc.SampleDesc = pipelineStateCreateDesc.m_sampleDesc;
 
+		std::unique_ptr<PipelineStateObject> pipelineStateObject = std::make_unique<PipelineStateObject>();
+		pipelineStateObject->m_pipelineType = PipelineType::Graphics;
+		pipelineStateObject->m_rootSignature = std::make_shared<DX12RootSignature>(CreateRootSignature(resourceLayout, pipelineStateObject->m_pipelineResourceMapping));
+
+		PSODesc.pRootSignature = pipelineStateObject->m_rootSignature->GetSignature();
 		CComPtr<ID3D12PipelineState> pipelineState = nullptr;
 		ElysiaHelper::ThrowIfFailed(m_device->CreateGraphicsPipelineState(&PSODesc, IID_PPV_ARGS(&pipelineState)));
 
-		auto graphicsPipeline = std::make_unique<DX12GraphicsPipelineState>(pipelineState, pipelineStateCreateDesc.m_rootSignature);
-		return graphicsPipeline;
+		auto graphicsPipeline = std::make_unique<DX12GraphicsPipelineState>(pipelineState, pipelineStateObject->m_rootSignature.get());
+		pipelineStateObject->m_pipelineState = std::make_shared<DX12GraphicsPipelineState>(graphicsPipeline);
+
+		return pipelineStateObject;
 	}
 
 	void DX12Device::CopyDescriptors(uint32_t numDestDescriptorRanges, const D3D12_CPU_DESCRIPTOR_HANDLE* destDescriptorRangeStarts, const uint32_t* destDescriptorRangeSizes,

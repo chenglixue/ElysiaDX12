@@ -11,7 +11,7 @@ namespace ElysiaRenderer
 		DX12RootParameter();
 		~DX12RootParameter();
 		
-		D3D12_ROOT_PARAMETER& GetRootParameter()
+		D3D12_ROOT_PARAMETER1& GetRootParameter()
 		{
 			return m_rootParamter;
 		}
@@ -27,13 +27,13 @@ namespace ElysiaRenderer
 
 		void InitAsConstantBufferView(UINT slotIndex, D3D12_SHADER_VISIBILITY shaderVisibility = D3D12_SHADER_VISIBILITY_ALL, UINT Space = 0);
 		void InitAsDescriptorRange(D3D12_DESCRIPTOR_RANGE_TYPE rangeType, UINT numDescriptors, UINT slotIndex, D3D12_SHADER_VISIBILITY shaderVisibility = D3D12_SHADER_VISIBILITY_ALL);
-		void InitAsDescriptorTable(UINT rangeCount, D3D12_SHADER_VISIBILITY shaderVisibility = D3D12_SHADER_VISIBILITY_ALL);
-		void SetTableRange(D3D12_DESCRIPTOR_RANGE_TYPE rangeType, UINT numDescriptors, UINT slotIndex, UINT rangeIndex, UINT space = 0);
+		void InitAsDescriptorTable(UINT rangeCount, D3D12_SHADER_VISIBILITY shaderVisibility = D3D12_SHADER_VISIBILITY_ALL, const D3D12_DESCRIPTOR_RANGE1* descriptorRangeData);
+		void SetTableRange(D3D12_DESCRIPTOR_RANGE_TYPE rangeType, UINT numDescriptors, UINT slotIndex, UINT rangeIndex, D3D12_DESCRIPTOR_RANGE_FLAGS flags, UINT space = 0);
 
 		void Clear();
 
 	private:
-		D3D12_ROOT_PARAMETER m_rootParamter;
+		D3D12_ROOT_PARAMETER1 m_rootParamter;
 		UINT m_spaceID;
 	};
 
@@ -72,9 +72,9 @@ namespace ElysiaRenderer
 		{
 			return m_rootParametersArray[index];
 		}
-		D3D12_ROOT_PARAMETER* GetRootParameters()
+		D3D12_ROOT_PARAMETER1* GetRootParameters()
 		{
-			D3D12_ROOT_PARAMETER* rootParameters = new D3D12_ROOT_PARAMETER[m_numRootParameters];
+			D3D12_ROOT_PARAMETER1* rootParameters = new D3D12_ROOT_PARAMETER1[m_numRootParameters];
 			for (int i = 0; i < m_numRootParameters; ++i)
 			{
 				rootParameters[i] = m_rootParametersArray[i].GetRootParameter();

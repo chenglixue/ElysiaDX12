@@ -10,7 +10,7 @@ namespace ElysiaRenderer
 	extern class DX12Shader;
 	//extern class DX12TextureResource;
 
-	enum class PipleineType : uint8_t
+	enum class PipelineType : uint8_t
 	{
 		None = 0,
 		Graphics = 1,
@@ -28,7 +28,6 @@ namespace ElysiaRenderer
 	{
 		DX12Shader* m_vertexShader;
 		DX12Shader* m_pixelShader;
-		DX12RootSignature* m_rootSignature;
 		D3D12_RASTERIZER_DESC m_rasterDesc{};
 		D3D12_BLEND_DESC m_blendDesc{};
 		D3D12_DEPTH_STENCIL_DESC m_depthStencilDesc{};
@@ -36,9 +35,7 @@ namespace ElysiaRenderer
 		D3D12_PRIMITIVE_TOPOLOGY_TYPE m_topology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 		RenderTargetDesc m_renderTargetDesc{};
 		std::vector<D3D12_INPUT_ELEMENT_DESC> m_inputElementDesc;
-		PipleineType m_pipelineStateType = PipleineType::Graphics;
-
-		std::vector<DX12GPUResource*> m_SRVResources{};
+		PipelineType m_pipelineStateType = PipelineType::Graphics;
 	};
 
 	class DX12PipelineState
@@ -57,7 +54,7 @@ namespace ElysiaRenderer
 		{
 			return m_rootSignature;
 		}
-		PipleineType GetPipelineType()
+		PipelineType GetPipelineType()
 		{
 			return m_pipelineType;
 		}
@@ -65,7 +62,7 @@ namespace ElysiaRenderer
 	protected:
 		CComPtr<ID3D12PipelineState> m_pipelineState;
 		//ID3D12RootSignature* m_rootSignature;
-		PipleineType m_pipelineType;
+		PipelineType m_pipelineType;
 		DX12RootSignature* m_rootSignature;
 	};
 
@@ -81,15 +78,17 @@ namespace ElysiaRenderer
 
 	struct PipelineStateObject
 	{
-		DX12PipelineState* m_pipelineState = nullptr;
-		PipelineResourceMapping* m_pipelineResourceMapping = nullptr;
+		std::shared_ptr<DX12PipelineState> m_pipelineState = nullptr;
+		PipelineResourceMapping m_pipelineResourceMapping;
+		std::shared_ptr<DX12RootSignature> m_rootSignature = nullptr;
+		PipelineType m_pipelineType = PipelineType::Graphics;
 	};
 
-	struct PipelineStateData
+	struct PipelineInfo
 	{
-		PipelineStateObject* m_pipelineStateObject;
-		std::vector<DX12TextureResource*> m_renderTargets;
-		DX12TextureResource* m_depthStencilTarget;
+		std::shared_ptr<PipelineStateObject> m_pipelineStateObject = nullptr;
+		std::vector<std::shared_ptr<DX12TextureResource>> m_renderTargets{nullptr};
+		std::shared_ptr<DX12TextureResource> m_depthStencilTarget = nullptr;
 	};
 
 	inline static RenderTargetDesc CreateDefaultRenderTargetDesc()
@@ -151,12 +150,12 @@ namespace ElysiaRenderer
 		return desc;
 	}
 
-	inline static PipelineStateData CreatePipelineStateData(
+	inline static PipelineInfo CreatePipelineStateData(
 		DX12PipelineState* pipelineState, 
 		std::vector<DX12TextureResource*> renderTargets,
 		DX12TextureResource* depthStencilTarget)
 	{
-		PipelineStateData data{};
+		PipelineInfo data{};
 		data.m_pipelineStateObject->m_pipelineState = pipelineState;
 
 		data.m_renderTargets = renderTargets;
