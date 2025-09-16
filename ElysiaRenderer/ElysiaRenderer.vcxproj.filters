@@ -361,6 +361,9 @@
     <None Include="Resource\Shaders\public\PBR.hlsl">
       <Filter>Resource Files\Shader\Public</Filter>
     </None>
+    <None Include="SimpleMath\SimpleMath.inl">
+      <Filter>Header Files\Lib</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />

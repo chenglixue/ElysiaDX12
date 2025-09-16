@@ -1,4 +1,5 @@
 #pragma once
+
 #include "stdafx.h"
 #include "DX12Device.h"
 #include "DX12MeshRender.h"
@@ -10,9 +11,11 @@
 #include "CBVPassParameter.h"
 #include "LoadTexData.h"
 
+
 namespace ElysiaRenderer 
 {
 	using namespace ElysiaHelper;
+	using namespace DirectX::SimpleMath;
 
 	const std::vector<D3D12_INPUT_ELEMENT_DESC> m_inputElementDescs =
 	{
@@ -216,7 +219,7 @@ namespace ElysiaRenderer
 		void LoadAndCreateTexs();
 		void CreatePOS();
 
-		std::shared_ptr<DX12Camera> InitCamera(XMVECTOR position, float aspect, float FOVY, float nearZ, float farZ);
+		std::shared_ptr<DX12Camera> InitCamera(Vector3 position, float aspect, float FOVY, float nearZ, float farZ);
 		void InitLight();
 		void LoadModel();
 		void AddShader(ShaderQueue shaderQueue, const std::wstring& shaderName, const std::wstring& entryPoint, ShaderType shaderType);

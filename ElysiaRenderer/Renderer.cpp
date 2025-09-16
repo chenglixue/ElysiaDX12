@@ -1,5 +1,8 @@
 #include "Renderer.h"
 
+extern "C" { __declspec(dllexport) extern const UINT D3D12SDKVersion = 616; }
+extern "C" { __declspec(dllexport) extern const char* D3D12SDKPath = ".\\D3D12\\"; }
+
 namespace ElysiaRenderer
 {
 	Renderer::Renderer(HWND windowHandle, ElysiaHelper::UINT2 screenSize, std::shared_ptr<DX12UI> pUI) :
@@ -337,21 +340,21 @@ namespace ElysiaRenderer
 		//m_graphicsPipelineStates.insert({ ShaderQueue::Skybox, std::move(m_device->CreateGraphicsPipelineState(pipelineStateCreateDesc, meshResourceLayout)) });
 	}
 
-	std::shared_ptr<DX12Camera> Renderer::InitCamera(XMVECTOR position, float aspect, float FOVY, float nearZ, float farZ)
+	std::shared_ptr<DX12Camera> Renderer::InitCamera(Vector3 position, float aspect, float FOVY, float nearZ, float farZ)
 	{
 		auto camera = std::make_shared<DX12Camera>();
 
 		camera->SetLens(FOVY, aspect, nearZ, farZ);
 
-		static const FXMVECTOR up{ 0.f, 1.f, 0.f, 0.f };
-		static const FXMVECTOR at{ 0.f, 0.f, 0.f, 0.f };
+		static const Vector3 up{ 0.f, 1.f, 0.f};
+		static const Vector3 at{ 0.f, 0.f, 0.f};
 		camera->LookAt(position, up, at);
 
 		return camera;
 	}
 	void Renderer::InitLight()
 	{
-		auto dirLight = std::make_unique<DX12DirectionLight>(XMFLOAT3(1, 1, 1), XMFLOAT3( 0.f, 0.f, -1.f), 1);
+		auto dirLight = std::make_unique<DX12DirectionLight>(Vector3(1, 1, 1), Vector3(0.f, 0.f, -1.f), 1);
 
 		m_mainLight = std::shared_ptr<DX12Light>(std::move(dirLight));
 

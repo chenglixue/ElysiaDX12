@@ -7,7 +7,7 @@ namespace ElysiaRenderer
 	{
 	}
 
-	DX12DirectionLight::DX12DirectionLight(XMFLOAT3 lightColor, XMFLOAT3 lightDir, float intensity)
+	DX12DirectionLight::DX12DirectionLight(Vector3 lightColor, Vector3 lightDir, float intensity)
 		: DX12Light(lightColor, lightDir, intensity), m_lightType(LightType::Dir)
 	{
 	}

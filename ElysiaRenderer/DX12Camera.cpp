@@ -28,29 +28,16 @@ namespace ElysiaRenderer
 		auto lookUnNor = target - pos;
 		auto lookNor = lookUnNor;
 		lookNor.Normalize();
-		auto rightVec = XMVector3Normalize(XMVector3Cross(up, lookNor));
+		auto rightVec = up.Cross(lookNor);
 		auto upVec = XMVector3Cross(lookNor, rightVec);
 
-		XMStoreFloat3(&m_lookUnNor, lookUnNor);
-		XMStoreFloat3(&m_up, upVec);
-		XMStoreFloat3(&m_right, rightVec);
-		XMStoreFloat3(&m_look, lookNor);
-		XMStoreFloat3(&m_cameraPos, pos);
+		m_lookUnNor = lookUnNor;
+		m_up = upVec;
+		m_right = rightVec;
+		m_look = lookNor;
+		m_cameraPos = pos;
 
 		m_viewDirty = true;
-	}
-	void DX12Camera::LookAt(const Vector3& pos, const Vector3& up, const Vector3& target)
-	{
-		auto temp = XMFLOAT3(pos.x, pos.y, pos.z);
-		auto posVec = XMLoadFloat3(&temp);
-
-		temp = XMFLOAT3(up.x, up.y, up.z);
-		auto upVec = XMLoadFloat3(&temp);
-
-		temp = XMFLOAT3(target.x, target.y, target.z);
-		auto targetVec = XMLoadFloat3(&temp);
-
-		LookAt(posVec, upVec, targetVec);
 	}
 
 	void DX12Camera::MoveHorizon(float distance)

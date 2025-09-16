@@ -3,6 +3,8 @@
 
 namespace ElysiaRenderer
 {
+	using namespace SimpleMath;
+
 	enum class LightType : uint8_t
 	{
 		None	= 1 << 0,
@@ -70,7 +72,7 @@ namespace ElysiaRenderer
 	{
 	public:
 		DX12DirectionLight() = default;
-		DX12DirectionLight(XMFLOAT3 lightColor, XMFLOAT3 lightDir, float intensity);
+		DX12DirectionLight(Vector3 lightColor, Vector3 lightDir, float intensity);
 		DX12DirectionLight(const DX12DirectionLight& rhs) = default;
 		DX12DirectionLight& operator=(const DX12DirectionLight& rhs) = default;
 		DX12DirectionLight(DX12DirectionLight&& rhs) = default;
