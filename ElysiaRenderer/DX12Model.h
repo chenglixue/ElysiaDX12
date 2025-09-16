@@ -37,6 +37,10 @@ namespace ElysiaRenderer
 		{
 			return m_drawIndexCount;
 		}
+		const UINT& GetVertexCount()
+		{
+			return static_cast<UINT>(GetVertices().size());
+		}
 		void SetDrawIndexCount(UINT drawIndexCount)
 		{
 			m_drawIndexCount = drawIndexCount;

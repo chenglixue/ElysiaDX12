@@ -39,19 +39,19 @@ namespace ElysiaRenderer
 	/// <param name="numDescriptors"></param>
 	/// <param name="slotIndex"></param>
 	/// <param name="shaderVisibility"></param>
-	void DX12RootParameter::InitAsDescriptorRange(D3D12_DESCRIPTOR_RANGE_TYPE rangeType, UINT numDescriptors,
-		UINT slotIndex, D3D12_SHADER_VISIBILITY shaderVisibility)
+	/*void DX12RootParameter::InitAsDescriptorRange(D3D12_DESCRIPTOR_RANGE_TYPE rangeType, UINT numDescriptors,
+		UINT slotIndex, const D3D12_DESCRIPTOR_RANGE1* descriptorRangeData, D3D12_DESCRIPTOR_RANGE_FLAGS flags, D3D12_SHADER_VISIBILITY shaderVisibility)
 	{
-		InitAsDescriptorTable(1, shaderVisibility);
-		SetTableRange(rangeType, numDescriptors, slotIndex, 0);
-	}
+		InitAsDescriptorTable(1, descriptorRangeData, shaderVisibility);
+		SetTableRange(rangeType, numDescriptors, slotIndex, flags, 0);
+	}*/
 
 	/// <summary>
 	/// can init mult ranges
 	/// </summary>
 	/// <param name="rangeCount"></param>
 	/// <param name="shaderVisibility"></param>
-	void DX12RootParameter::InitAsDescriptorTable(UINT rangeCount, D3D12_SHADER_VISIBILITY shaderVisibility, const D3D12_DESCRIPTOR_RANGE1* descriptorRangeData)
+	void DX12RootParameter::InitAsDescriptorTable(UINT rangeCount, const D3D12_DESCRIPTOR_RANGE1* descriptorRangeData, D3D12_SHADER_VISIBILITY shaderVisibility)
 	{
 		m_rootParamter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 		m_rootParamter.ShaderVisibility = shaderVisibility;

@@ -6,7 +6,7 @@ namespace ElysiaRenderer
 	DX12Shadow::DX12Shadow(std::shared_ptr<DX12TextureResource> buffer)
 		: m_buffer(buffer)
 	{
-		m_width = m_buffer->GetResourceDesc().Width;
+		m_width = static_cast<UINT>(m_buffer->GetResourceDesc().Width);
 		m_height = m_buffer->GetResourceDesc().Height;
 		m_format = m_buffer->GetResourceDesc().Format;
 

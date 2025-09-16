@@ -2,7 +2,7 @@
 
 namespace ElysiaRenderer
 {
-	UINT PipelineResourceSpace::GetIndexOfBindingIndex(const std::vector<std::shared_ptr<PipelineResourceBinding>>& bindResources, UINT bindingIndex)
+	UINT PipelineResourceSpace::GetIndexOfBindingIndex(const std::vector<PipelineResourceBinding*>& bindResources, UINT bindingIndex)
 	{
 		const UINT numBinds = static_cast<UINT>(bindResources.size());
 		for (UINT currBindIndex = 0; currBindIndex < numBinds; ++currBindIndex)
@@ -16,7 +16,7 @@ namespace ElysiaRenderer
 		return UINT_MAX;
 	}
 
-	void PipelineResourceSpace::SetCBV(std::shared_ptr<DX12ConstantBuffer> CBVResource)
+	void PipelineResourceSpace::SetCBV(DX12ConstantBuffer* CBVResource)
 	{
 		if (m_isLocked)
 		{
@@ -31,10 +31,10 @@ namespace ElysiaRenderer
 		}
 		else
 		{
-			m_CBV = CBVResource;
+			m_CBV = std::move(CBVResource);
 		}
 	}
-	void PipelineResourceSpace::SetSRV(std::shared_ptr<PipelineResourceBinding> SRVResource)
+	void PipelineResourceSpace::SetSRV(PipelineResourceBinding* SRVResource)
 	{
 		UINT currIndex = GetIndexOfBindingIndex(m_SRVs, SRVResource->m_bindingIndex);
 
@@ -46,7 +46,7 @@ namespace ElysiaRenderer
 			}
 			else
 			{
-				m_SRVs[currIndex] = SRVResource;
+				m_SRVs[currIndex] = std::move(SRVResource);
 			}
 		}
 		else
@@ -54,17 +54,13 @@ namespace ElysiaRenderer
 			if (currIndex == UINT_MAX)
 			{
 				m_SRVs.emplace_back(SRVResource);
-				std::sort(m_SRVs.begin(), m_SRVs.end(), SortPipelineBindings);
+
+				std::sort(m_SRVs.begin(), m_SRVs.end(), &SortPipelineBindings);
 			}
 			else
 			{
-				m_SRVs[currIndex] = SRVResource;
+				m_SRVs[currIndex] = std::move(SRVResource);
 			}
 		}
-	}
-
-	bool SortPipelineBindings(PipelineResourceBinding a, PipelineResourceBinding b)
-	{
-		return a.m_bindingIndex < b.m_bindingIndex;
 	}
 }

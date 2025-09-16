@@ -19,7 +19,7 @@ namespace ElysiaRenderer
 		void ClearDepthStencilTarget(const DX12TextureResource& renderTarget, float depth, uint8_t stencil);
 
 		void SetPipeline(PipelineInfo& pipelineStateData);
-		void SetPipelineResource(uint8_t spaceID, std::shared_ptr<PipelineResourceSpace> pipelineBindResource);
+		void SetPipelineResource(uint8_t spaceID, PipelineResourceSpace* pipelineBindResource);
 		void SetRenderTargets(UINT numRenderTargets, const D3D12_CPU_DESCRIPTOR_HANDLE renderTargetHandle[],
 			const D3D12_CPU_DESCRIPTOR_HANDLE depthStencilHandle);
 		void SetDefaultViewportAndScissor(ElysiaHelper::UINT2 screenSize);
@@ -29,10 +29,12 @@ namespace ElysiaRenderer
 		void SetVertexBuffer(UINT startIndex, UINT numVertexBuffer, D3D12_VERTEX_BUFFER_VIEW& vertexBufferView);
 		void SetIndexBuffer(const D3D12_INDEX_BUFFER_VIEW& indexBufferView);
 
+		void Draw(UINT vertexCount, UINT vertexStartOffset = 0);
 		void Draw(UINT vertexCount, UINT vertexStartOffset, UINT startIndexLocation);
+		void DrawInstanced(UINT vertexCount, UINT instanceCount, UINT vertexStartOffset, UINT startInstanceLocation);
 		void DrawInstanced(UINT vertexCount, UINT instanceCount, UINT startIndexLocation, UINT vertexStartOffset, UINT startInstanceLocation);
 
 	private:
-		std::shared_ptr<PipelineStateObject> m_graphicsPipelineStateObject = nullptr;
+		PipelineStateObject* m_graphicsPipelineStateObject = nullptr;
 	};
 }

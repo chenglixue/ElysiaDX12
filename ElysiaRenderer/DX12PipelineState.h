@@ -86,9 +86,9 @@ namespace ElysiaRenderer
 
 	struct PipelineInfo
 	{
-		std::shared_ptr<PipelineStateObject> m_pipelineStateObject = nullptr;
-		std::vector<std::shared_ptr<DX12TextureResource>> m_renderTargets{nullptr};
-		std::shared_ptr<DX12TextureResource> m_depthStencilTarget = nullptr;
+		PipelineStateObject* m_pipelineStateObject = nullptr;
+		std::vector<DX12TextureResource*> m_renderTargets{};
+		DX12TextureResource* m_depthStencilTarget = nullptr;
 	};
 
 	inline static RenderTargetDesc CreateDefaultRenderTargetDesc()
@@ -150,16 +150,16 @@ namespace ElysiaRenderer
 		return desc;
 	}
 
-	inline static PipelineInfo CreatePipelineStateData(
+	/*inline static PipelineInfo CreatePipelineStateData(
 		DX12PipelineState* pipelineState, 
 		std::vector<DX12TextureResource*> renderTargets,
 		DX12TextureResource* depthStencilTarget)
 	{
 		PipelineInfo data{};
-		data.m_pipelineStateObject->m_pipelineState = pipelineState;
+		data.m_pipelineStateObject->m_pipelineState = std::shared_ptr<DX12PipelineState>(pipelineState);
 
 		data.m_renderTargets = renderTargets;
 		data.m_depthStencilTarget = depthStencilTarget;
 		return data;
-	}
+	}*/
 }

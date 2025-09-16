@@ -52,7 +52,7 @@ namespace ElysiaRenderer
 
 	void DX12StagingDescriptorHeap::FreeDescriptorHeapHandle(DX12DescriptorHeapHandle heapHandle)
 	{
-		m_freeDescriptors.push_back(heapHandle.GetHeapIndex());
+		m_freeDescriptors.emplace_back(heapHandle.GetHeapIndex());
 
 		if (m_activeHandleCount == 0)
 		{

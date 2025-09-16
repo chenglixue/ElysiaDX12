@@ -5,7 +5,7 @@
 
 namespace ElysiaRenderer
 {
-	enum ShaderQueue : uint8_t
+	enum ShaderQueue : UINT
 	{
 		Shadow = 1000,
 		Opaque = 2000,

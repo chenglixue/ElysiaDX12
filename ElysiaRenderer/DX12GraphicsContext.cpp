@@ -53,7 +53,7 @@ namespace ElysiaRenderer
 			return;
 		}
 
-		if (pipelineExpectedBoundExternally)
+		if (pipelineExpectedBoundExternally || pipelineState->GetPipelineType() == PipelineType::Graphics)
 		{
 			D3D12_CPU_DESCRIPTOR_HANDLE renderTargetHandles[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT]{};
 			D3D12_CPU_DESCRIPTOR_HANDLE depthStencilHandle{ 0 };
@@ -71,7 +71,7 @@ namespace ElysiaRenderer
 		}
 		
 	}
-	void DX12GraphicsContext::SetPipelineResource(uint8_t spaceID, std::shared_ptr<PipelineResourceSpace> pipelineBindResourceSpace)
+	void DX12GraphicsContext::SetPipelineResource(uint8_t spaceID, PipelineResourceSpace* pipelineBindResourceSpace)
 	{
 		assert(m_graphicsPipelineStateObject);
 		assert(pipelineBindResourceSpace->IsLocked());
@@ -182,9 +182,18 @@ namespace ElysiaRenderer
 	{
 		m_commandList->IASetIndexBuffer(&indexBufferView);
 	}
+
+	void DX12GraphicsContext::Draw(UINT vertexCount, UINT vertexStartOffset)
+	{
+		DrawInstanced(vertexCount, 1, vertexStartOffset, 0);
+	}
 	void DX12GraphicsContext::Draw(UINT vertexCount, UINT vertexStartOffset, UINT startIndexLocation)
 	{
 		DrawInstanced(vertexCount, 1, startIndexLocation, vertexStartOffset, 0);
+	}
+	void DX12GraphicsContext::DrawInstanced(UINT vertexCount, UINT instanceCount, UINT vertexStartOffset, UINT startInstanceLocation)
+	{
+		m_commandList->DrawInstanced(vertexCount, instanceCount, vertexStartOffset, startInstanceLocation);
 	}
 	void DX12GraphicsContext::DrawInstanced(UINT vertexCount, UINT instanceCount, UINT startIndexLocation, UINT vertexStartOffset, UINT startInstanceLocation)
 	{

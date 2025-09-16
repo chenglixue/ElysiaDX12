@@ -26,7 +26,7 @@ namespace ElysiaRenderer
 	/// user data
 	/// </summary> 
 	const std::vector<LPCWSTR> m_modelPaths
-	{
+	{ 
 		L"Mesh\\LOW_WEPON.fbx",
 		//L"Mesh\\plane.fbx",
 		L"Mesh\\Sphere.fbx",
@@ -44,11 +44,11 @@ namespace ElysiaRenderer
 		{L"Tex\\CyborgWeapon_Metallic.dds", true},
 		{L"Tex\\CyborgWeapon_Roughness.dds", true},
 	};
-
+	 
 	static XMMATRIX m_worldMatrix = XMMatrixIdentity(); 
 	static float m_curRotationAngleRad = 0.f; 
 	static const float m_rotationSpeed = 0.001f;
-
+	 
 	class Renderer
 	{
 	public:
@@ -116,11 +116,12 @@ namespace ElysiaRenderer
 		float m_aspectRatio;
 		std::shared_ptr<DX12UI> m_pUI = nullptr;
 		std::unique_ptr<DX12Device> m_device = nullptr;
-		std::unique_ptr<DX12TextureResource> m_depthBuffer = nullptr;
+		std::shared_ptr<DX12TextureResource> m_depthBuffer = nullptr;
 		std::unique_ptr<DX12GraphicsContext> m_graphicsContext = nullptr; 
 		std::unique_ptr<DX12VertexBuffer> m_vertexBuffer = nullptr;
 		std::unique_ptr<DX12IndexBuffer> m_indexBuffer = nullptr;
 		std::vector<std::shared_ptr<DX12Shadow>> m_shadowBuffers{};
+		std::vector<std::unique_ptr<DX12TextureResource>> m_texs{};
 		std::vector<std::unique_ptr<D3D12_SAMPLER_DESC>> m_samplers;
 		std::unordered_map<UINT, std::unordered_map<ShaderType, std::unique_ptr<DX12Shader>>> m_vertexShaders;
 		std::unordered_map<UINT, std::unordered_map<ShaderType, std::unique_ptr<DX12Shader>>> m_pixelShaders;
@@ -139,10 +140,10 @@ namespace ElysiaRenderer
 		/// </summary>   
 		struct alignas(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT)CBVMainPassParameter
 		{
-			XMFLOAT4 cameraPosWS = ElysiaHelper::MathHelper::XMFLOAT4Zero();	// 16
-			XMFLOAT4X4 viewMatrix = MathHelper::Identity4x4();	// 64
-			XMFLOAT4X4 projMatrix = MathHelper::Identity4x4(); 	// 64
-			XMFLOAT4 screenSize = ElysiaHelper::MathHelper::XMFLOAT4Zero();	// 16
+			Vector4 cameraPosWS = Vector4::Zero;	// 16
+			Matrix viewMatrix = Matrix::Identity;	// 64
+			Matrix projMatrix = Matrix::Identity; 	// 64
+			Vector4 screenSize = Vector4::Zero;	// 16
 
 			LightData mainLights[MAX_MAIN_LIGHT_COUNT];	// 64
 
@@ -167,9 +168,9 @@ namespace ElysiaRenderer
 			UINT metallicTexIndex;
 			UINT roughnessTexIndex;
 
-			XMMATRIX	worldMatrix = XMMatrixIdentity();
+			Matrix	worldMatrix = Matrix::Identity;
 
-			XMFLOAT3	baseColorTint = XMFLOAT3(1.f, 1.f, 1.f);
+			Vector3	baseColorTint = Vector3::One;
 			float		opacity = 1.f;
 
 			float		normalIntensity = 1.f;
@@ -177,21 +178,22 @@ namespace ElysiaRenderer
 			float		roughnessIntensity = 1.f;
 			float		ambientCubemapIntensity = 1.f;
 
-			XMFLOAT3	ambientCubemapTint = XMFLOAT3(1.f, 1.f, 1.f);
+			Vector3	ambientCubemapTint = Vector3::One;
 
 			//float padding[48];
 		};
 		CBVMainPassParameter m_mainPassParameter{};
 		std::array<CBVObjectParameter, NUM_FRAMES_IN_FLIGHT> m_objectPassParameters{};
-		std::array<std::shared_ptr<DX12ConstantBuffer>, NUM_FRAMES_IN_FLIGHT> m_objectConstanBuffers{};
-		std::shared_ptr<PipelineResourceSpace> m_perObjectBindResourceSpace{};
+		std::array<std::unique_ptr<DX12ConstantBuffer>, NUM_FRAMES_IN_FLIGHT> m_objectConstanBuffers{};
+		std::unique_ptr<DX12ConstantBuffer> m_passConstanBuffers = nullptr;
+		std::unique_ptr<PipelineResourceSpace> m_perObjectBindResourceSpace = nullptr;
 		//std::shared_ptr<PipelineResourceSpace> m_perShadowBindResourceSpace{};
-		std::shared_ptr<PipelineResourceSpace> m_perMainPassBindResourceSpace{};
+		std::unique_ptr<PipelineResourceSpace> m_perMainPassBindResourceSpace = nullptr;
 
 		std::shared_ptr<DX12Camera> m_mainCamera;
 		std::shared_ptr<DX12Shadow> m_mainLightShadow;
 		std::shared_ptr<DX12Light> m_mainLight;
-
+		 
 		/// <summary>
 		/// Model
 		/// </summary>
@@ -224,10 +226,7 @@ namespace ElysiaRenderer
 		void RenderTexTriangle();
 
 		void AddUIItems();
-		void SetPipelineResource(UINT objectCBVIndex, CBVPassParameterType passParameterType);
 		void DrawCommand(size_t drawModelIndex);
-		void BindObject(DX12TextureResource& currBackBuffer,
-			UINT& objectCBVIndex, uint8_t pipelineStateQueue, size_t drawMeshIndex);
 		void DrawShadow();
 		void DrawOpaque();
 		void DrawSkybox();

@@ -20,25 +20,26 @@ namespace ElysiaRenderer
 		auto projMat = XMMatrixPerspectiveFovLH(m_FOVY, m_aspect, m_nearZ, m_farZ);
 		XMStoreFloat4x4(&m_proj, projMat);
 	}
-	void DX12Camera::LookAt(const FXMVECTOR& pos, const FXMVECTOR& up, const FXMVECTOR& target)
+	void DX12Camera::LookAt(const Vector3& pos, const Vector3& up, const Vector3& target)
 	{
 		/*auto viewMat = XMMatrixLookAtLH(pos, target, up);
 		XMStoreFloat4x4(&m_view, viewMat);*/
 
-		auto lookUnNor = XMVectorSubtract(target, pos);
-		auto lookVec = XMVector3Normalize(lookUnNor);
-		auto rightVec = XMVector3Normalize(XMVector3Cross(up, lookVec));
-		auto upVec = XMVector3Cross(lookVec, rightVec);
+		auto lookUnNor = target - pos;
+		auto lookNor = lookUnNor;
+		lookNor.Normalize();
+		auto rightVec = XMVector3Normalize(XMVector3Cross(up, lookNor));
+		auto upVec = XMVector3Cross(lookNor, rightVec);
 
 		XMStoreFloat3(&m_lookUnNor, lookUnNor);
 		XMStoreFloat3(&m_up, upVec);
 		XMStoreFloat3(&m_right, rightVec);
-		XMStoreFloat3(&m_look, lookVec);
+		XMStoreFloat3(&m_look, lookNor);
 		XMStoreFloat3(&m_cameraPos, pos);
 
 		m_viewDirty = true;
 	}
-	void DX12Camera::LookAt(const XMFLOAT3& pos, const XMFLOAT3& up, const XMFLOAT3& target)
+	void DX12Camera::LookAt(const Vector3& pos, const Vector3& up, const Vector3& target)
 	{
 		auto temp = XMFLOAT3(pos.x, pos.y, pos.z);
 		auto posVec = XMLoadFloat3(&temp);

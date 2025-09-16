@@ -3,6 +3,8 @@
 
 namespace ElysiaRenderer
 {
+	using namespace SimpleMath;
+
 	class DX12Camera
 	{
 	public:
@@ -21,27 +23,13 @@ namespace ElysiaRenderer
 			m_speed = speed;
 		}
 
-		XMVECTOR GetCameraPos() const
-		{
-			return XMLoadFloat3(&m_cameraPos);
-		}
-		XMFLOAT3 GetCameraPosF() const
+		Vector3 GetCameraPos() const
 		{
 			return m_cameraPos;
 		}
-		void SetCameraPos(const XMFLOAT3& cameraPos)
+		void SetCameraPos(const Vector3& cameraPos)
 		{
 			m_cameraPos = cameraPos;
-			m_viewDirty = true;
-		}
-		void SetCameraPos(float x, float y, float z)
-		{
-			m_cameraPos = XMFLOAT3(x, y, z);
-			m_viewDirty = true;
-		}
-		void SetCameraPos(const XMVECTOR cameraPos)
-		{
-			XMStoreFloat3(&m_cameraPos, cameraPos);
 			m_viewDirty = true;
 		}
 
@@ -100,46 +88,23 @@ namespace ElysiaRenderer
 			return m_farHeight;
 		}
 
-		XMVECTOR GetRight() const
-		{
-			return XMLoadFloat3(&m_right);
-		}
-		XMFLOAT3 GetRightF() const
+		Vector3 GetRight() const
 		{
 			return m_right;
 		}
-		void SetRight(const XMFLOAT3& right)
+		void SetRight(const Vector3& right)
 		{
 			m_right = right;
 			m_viewDirty = true;
 		}
-		void SetRight(const XMVECTOR& right)
-		{
-			XMStoreFloat3(&m_right, right);
-			m_viewDirty = true;
-		}
-		void SetRight(float x, float y, float z)
-		{
-			m_right = XMFLOAT3(x, y, z);
-			m_viewDirty = true;
-		}
 
-		XMVECTOR GetUP() const
-		{
-			return XMLoadFloat3(&m_up);
-		}
-		XMFLOAT3 GetUPF() const
+		Vector3 GetUP() const
 		{
 			return m_up;
 		}
-		void SetUP(const XMFLOAT3& up)
+		void SetUP(const Vector3& up)
 		{
 			m_up = up;
-			m_viewDirty = true;
-		}
-		void SetUP(const XMVECTOR& up)
-		{
-			XMStoreFloat3(&m_up, up);
 			m_viewDirty = true;
 		}
 		void SetUP(float x, float y, float z)
@@ -148,51 +113,28 @@ namespace ElysiaRenderer
 			m_viewDirty = true;
 		}
 
-		XMVECTOR GetLook() const
-		{
-			return XMLoadFloat3(&m_look);
-		}
-		XMFLOAT3 GetLookF() const
+		Vector3 GetLook() const
 		{
 			return m_look;
 		}
-		void SetLook(const XMFLOAT3& look)
+		void SetLook(const Vector3& look)
 		{
 			m_look = look;
 			m_viewDirty = true;
 		}
-		void SetLook(const XMVECTOR& look)
-		{
-			XMStoreFloat3(&m_look, look);
-			m_viewDirty = true;
-		}
-		void SetLook(float x, float y, float z)
-		{
-			m_look = XMFLOAT3(x, y, z);
-			m_viewDirty = true;
-		}
 
-		XMMATRIX GetViewMat() const
-		{
-			return XMLoadFloat4x4(&m_view);
-		}
-		XMFLOAT4X4 GetView4X4F() const
+		Matrix GetViewMat() const
 		{
 			return m_view;
 		}
-		XMMATRIX GetProjMat() const
-		{
-			return XMLoadFloat4x4(&m_proj);
-		}
-		XMFLOAT4X4 GetProj4X4F() const
+		Matrix GetProj() const
 		{
 			return m_proj;
 		}
 
 		// set proj & view matrix
 		void SetLens(float FOVY, float aspect, float nearZ, float farZ);
-		void LookAt(const FXMVECTOR& pos, const FXMVECTOR& up, const FXMVECTOR& target);
-		void LookAt(const XMFLOAT3& pos, const XMFLOAT3& up, const XMFLOAT3& target);
+		void LookAt(const Vector3& pos, const Vector3& up, const Vector3& target);
 
 		// Move Camera
 		void MoveHorizon(float distance);	// move left right
@@ -224,13 +166,13 @@ namespace ElysiaRenderer
 		float m_nearHeight = 0.f;
 		float m_farHeight = 0.f;
 
-		XMFLOAT3 m_cameraPos = {0.f, 0.f, 0.f};
-		XMFLOAT3 m_right = {1.f , 0.f, 0.f};
-		XMFLOAT3 m_up = {0.f , 1.f, 0.f};
-		XMFLOAT3 m_look = {0.f, 0.f, 1.f};
-		XMFLOAT3 m_lookUnNor = { 0.f, 0.f, 1.f };
+		Vector3 m_cameraPos = Vector3::Zero;
+		Vector3 m_right = {1.f, 0.f, 0.f};
+		Vector3 m_up = {0.f , 1.f, 0.f};
+		Vector3 m_look = {0.f, 0.f, 1.f};
+		Vector3 m_lookUnNor = { 0.f, 0.f, 1.f };
 
-		XMFLOAT4X4 m_view = ElysiaHelper::MathHelper::Identity4x4();
-		XMFLOAT4X4 m_proj = ElysiaHelper::MathHelper::Identity4x4();
+		Matrix  m_view = Matrix::Identity;
+		Matrix  m_proj = Matrix::Identity;
 	};
 }

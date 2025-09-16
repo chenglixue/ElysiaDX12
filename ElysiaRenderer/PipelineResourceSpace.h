@@ -30,17 +30,17 @@ namespace ElysiaRenderer
 		PipelineResourceSpace(PipelineResourceSpace&& rhs) = default;
 		~PipelineResourceSpace() = default;
 
-		DX12ConstantBuffer* GetCBV() const
+		DX12ConstantBuffer* GetCBV()
 		{
-			return m_CBV.get();
+			return m_CBV;
 		}
-		const std::vector<std::shared_ptr<PipelineResourceBinding>>& GetSRVs() const
+		std::vector<PipelineResourceBinding*>& GetSRVs()
 		{
 			return m_SRVs;
 		}
 
-		void SetCBV(std::shared_ptr<DX12ConstantBuffer> CBVResource);
-		void SetSRV(std::shared_ptr<PipelineResourceBinding> SRVResource);
+		void SetCBV(DX12ConstantBuffer* CBVResource);
+		void SetSRV(PipelineResourceBinding* SRVResource);
 
 		void Lock()
 		{
@@ -52,16 +52,21 @@ namespace ElysiaRenderer
 		}
 
 	private:
-		UINT GetIndexOfBindingIndex(const std::vector<std::shared_ptr<PipelineResourceBinding>>& bindResources, UINT bindingIndex);
+		UINT GetIndexOfBindingIndex(const std::vector<PipelineResourceBinding*>& bindResources, UINT bindingIndex);
 
-		std::shared_ptr<DX12ConstantBuffer> m_CBV;
-		std::vector<std::shared_ptr<PipelineResourceBinding>> m_SRVs;
+		DX12ConstantBuffer* m_CBV;
+		std::vector<PipelineResourceBinding*> m_SRVs;
 		bool m_isLocked = false;
 	};
 
 	struct PipelineResourceLayout
 	{
-		std::array<std::shared_ptr<PipelineResourceSpace>, NUM_RESOURCE_SPACES> m_spaces{ nullptr };
+		std::array<PipelineResourceSpace*, NUM_RESOURCE_SPACES> m_spaces{  };
 	};
+
+	inline bool SortPipelineBindings(PipelineResourceBinding* a, PipelineResourceBinding* b)
+	{
+		return (*a).m_bindingIndex < (*b).m_bindingIndex;
+	}
 }
 

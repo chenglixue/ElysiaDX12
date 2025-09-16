@@ -57,7 +57,8 @@ namespace ElysiaRenderer
 		}
 		const XMFLOAT4&			GetScreenSize() const
 		{
-			return XMFLOAT4(m_screenSize.x, m_screenSize.y, 1. / m_screenSize.x, 1. / m_screenSize.y);
+			return XMFLOAT4(static_cast<float>(m_screenSize.x), static_cast<float>(m_screenSize.y), 
+				1.f / static_cast<float>(m_screenSize.x), 1.f / static_cast<float>(m_screenSize.y));
 		}
 		DX12TextureResource&	GetCurrBackBuffer()
 		{
