@@ -48,7 +48,7 @@ namespace ElysiaRenderer
 		{L"Tex\\CyborgWeapon_Roughness.dds", true},
 	};
 	 
-	static XMMATRIX m_worldMatrix = XMMatrixIdentity(); 
+	static Matrix m_worldMatrix = Matrix::Identity;
 	static float m_curRotationAngleRad = 0.f; 
 	static const float m_rotationSpeed = 0.001f;
 	 
