@@ -3,13 +3,14 @@
 #include "stdafx.h"
 #include "DX12Device.h"
 #include "DX12MeshRender.h"
-#include "DX12Camera.h"
 #include "DX12Light.h"
 #include "DX12UI.h"
 #include <dxgidebug.h>
 #include "DX12Shadow.h"
 #include "CBVPassParameter.h"
 #include "LoadTexData.h"
+#include "CameraManager.h"
+#include "LightManager.h"
 
 
 namespace ElysiaRenderer 
@@ -130,13 +131,14 @@ namespace ElysiaRenderer
 		std::unordered_map<UINT, std::unordered_map<ShaderType, std::unique_ptr<DX12Shader>>> m_pixelShaders;
 		std::vector<std::unique_ptr<DX12Shader>> m_computeShaders;
 		std::unordered_map<UINT, std::shared_ptr<PipelineStateObject>> m_graphicsPipelineStates;
-		std::vector<std::shared_ptr<DX12Camera>> m_cameras;
-		std::vector<std::shared_ptr<DX12Light>> m_lights;
 		std::unordered_map<std::string, TexCreateDesc> m_depthBufferCreateDesc
 		{
 			{"Camera", {}},
 			{"Shadow", {}},
 		};
+
+		std::unique_ptr<CameraManager> m_cameraManager = nullptr;
+		std::unique_ptr<LightManager> m_lightManager = nullptr;
 
 		/// <summary>
 		/// Constant parameter
@@ -193,9 +195,7 @@ namespace ElysiaRenderer
 		//std::shared_ptr<PipelineResourceSpace> m_perShadowBindResourceSpace{};
 		std::unique_ptr<PipelineResourceSpace> m_perMainPassBindResourceSpace = nullptr;
 
-		std::shared_ptr<DX12Camera> m_mainCamera;
 		std::shared_ptr<DX12Shadow> m_mainLightShadow;
-		std::shared_ptr<DX12Light> m_mainLight;
 		 
 		/// <summary>
 		/// Model

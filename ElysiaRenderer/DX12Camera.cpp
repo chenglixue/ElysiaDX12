@@ -2,124 +2,167 @@
 
 namespace ElysiaRenderer
 {
+	DX12Camera::DX12Camera(const Transform& transform, float aspectRatio, float fovy, float nearZ, float farZ) noexcept
+		: m_transform(transform), 
+		m_aspectRatio(aspectRatio), 
+		m_fovy(fovy), 
+		m_nearZ(nearZ), 
+		m_farZ(farZ)
+	{
+		UpdateViewMatrix();
+		UpdateProjMatrix();
+	}
 	DX12Camera::~DX12Camera()
 	{
 
 	}
 
-	void DX12Camera::SetLens(float FOVY, float aspect, float nearZ, float farZ)
+	Transform	DX12Camera::GetTransform()		const noexcept
 	{
-		m_FOVY = FOVY;
-		m_aspect = aspect;
+		return m_transform;
+	}
+
+	float		DX12Camera::GetCameraSpeed()	const noexcept
+	{
+		return m_speed;
+	}
+
+	Vector3		DX12Camera::GetPosition()		const noexcept
+	{
+		return m_transform.m_position;
+	}
+
+	Quaternion	DX12Camera::GetRotation()		const noexcept
+	{
+		return m_transform.m_rotation;
+	}
+
+	float		DX12Camera::GetNearZ()			const noexcept
+	{
+		return m_nearZ;
+	}
+
+	float		DX12Camera::GetFarZ()			const noexcept
+	{
+		return m_farZ;
+	}
+
+	float		DX12Camera::GetFOVY()			const noexcept
+	{
+		return m_fovy;
+	}
+
+	float		DX12Camera::GetAspect()			const noexcept
+	{
+		return m_aspectRatio;
+	}
+
+	Matrix		DX12Camera::GetViewMat()		const noexcept
+	{
+		return m_viewMatrix;
+	}
+
+	Matrix		DX12Camera::GetProj()			const noexcept
+	{
+		return m_projMatrix;
+	}
+
+	Vector3		DX12Camera::GetForwardDir()		const noexcept
+	{
+		return m_viewMatrix.Forward();
+	}
+
+	Vector3		DX12Camera::GetUpDir()			const noexcept
+	{
+		return m_viewMatrix.Up();
+	}
+
+	Vector3		DX12Camera::GetRightDir()		const noexcept
+	{
+		return m_viewMatrix.Right();
+	}
+
+	void		DX12Camera::SetCameraSpeed(float speed)				noexcept
+	{
+		m_speed = speed;
+	}
+
+	void		DX12Camera::SetPosition(const Vector3& cameraPos)	noexcept
+	{
+		m_transform.m_position = cameraPos;
+		UpdateViewMatrix();
+	}
+
+	void		DX12Camera::SetRotation(const Quaternion& rotation) noexcept
+	{
+		m_transform.m_rotation = rotation;
+		UpdateViewMatrix();
+	}
+
+	void		DX12Camera::SetAspectRatio(float aspectRatio)		noexcept
+	{
+		m_aspectRatio = aspectRatio;
+		UpdateProjMatrix();
+	}
+
+	void		DX12Camera::SetNearZ(float nearZ)					noexcept
+	{
 		m_nearZ = nearZ;
+		UpdateProjMatrix();
+	}
+
+	void		DX12Camera::SetFarz(float farZ)						noexcept
+	{
 		m_farZ = farZ;
-
-		m_nearHeight = 2.f * m_nearZ * tanf(0.5f * m_FOVY);
-		m_farHeight = 2.f * m_farZ * tanf(0.5f * m_FOVY);
-
-		auto projMat = XMMatrixPerspectiveFovLH(m_FOVY, m_aspect, m_nearZ, m_farZ);
-		XMStoreFloat4x4(&m_proj, projMat);
-	}
-	void DX12Camera::LookAt(const Vector3& pos, const Vector3& up, const Vector3& target)
-	{
-		/*auto viewMat = XMMatrixLookAtLH(pos, target, up);
-		XMStoreFloat4x4(&m_view, viewMat);*/
-
-		auto lookUnNor = target - pos;
-		auto lookNor = lookUnNor;
-		lookNor.Normalize();
-		auto rightVec = up.Cross(lookNor);
-		auto upVec = XMVector3Cross(lookNor, rightVec);
-
-		m_lookUnNor = lookUnNor;
-		m_up = upVec;
-		m_right = rightVec;
-		m_look = lookNor;
-		m_cameraPos = pos;
-
-		m_viewDirty = true;
+		UpdateProjMatrix();
 	}
 
-	void DX12Camera::MoveHorizon(float distance)
+	void		DX12Camera::Setfovy(float fovy)						noexcept
 	{
-		FXMVECTOR distanceVec = XMVectorReplicate(distance);
-		FXMVECTOR rightVec = XMLoadFloat3(&m_right);
-		FXMVECTOR posVec = XMLoadFloat3(&m_cameraPos);
-
-		XMVECTOR movedPos = XMVectorMultiplyAdd(rightVec, distanceVec, posVec);
-		XMStoreFloat3(&m_cameraPos, movedPos);
-
-		m_viewDirty = true;
-	}
-	void DX12Camera::MoveVertical(float distance)
-	{
-		FXMVECTOR distanceVec = XMVectorReplicate(distance);
-		FXMVECTOR lookVec = XMLoadFloat3(&m_look);
-		FXMVECTOR posVec = XMLoadFloat3(&m_cameraPos);
-
-		XMVECTOR movedPos = XMVectorMultiplyAdd(lookVec, distanceVec, posVec);
-		XMStoreFloat3(&m_cameraPos, movedPos);
-
-		m_viewDirty = true;
+		m_fovy = fovy;
+		UpdateProjMatrix();
 	}
 
-	void DX12Camera::Pitch(float angle)
+	void		DX12Camera::LookAt(const Vector3& targetPos) noexcept
 	{
-		XMVECTOR rightVec = XMLoadFloat3(&m_right);
-		XMVECTOR upVec = XMLoadFloat3(&m_up);
-		XMVECTOR lookVec = XMLoadFloat3(&m_look);
+		const Vector3 up = Vector3::Up;
 
-		auto rotationMat = XMMatrixRotationAxis(rightVec, angle);
-
-		upVec = XMVector3TransformNormal(upVec, rotationMat);
-		lookVec = XMVector3TransformNormal(lookVec, rotationMat);
-
-		XMStoreFloat3(&m_up, upVec);
-		XMStoreFloat3(&m_look, lookVec);
-
-		m_viewDirty = true;
+		m_viewMatrix = Matrix::CreateLookAt(m_transform.m_position, targetPos, up);
+		auto inverseQuaternion = Quaternion::CreateFromRotationMatrix(m_viewMatrix);
+		m_transform.m_rotation.Inverse(inverseQuaternion);
+		m_transform.m_rotation = inverseQuaternion;
 	}
-	void DX12Camera::Yaw(float angle)
+
+	void		DX12Camera::Rotate(const Vector3& pitchYawRollOffset) noexcept
 	{
-		XMVECTOR rightVec = XMLoadFloat3(&m_right);
-		XMVECTOR lookVec = XMLoadFloat3(&m_look);
-		XMVECTOR upVec = XMLoadFloat3(&m_up);
+		Quaternion temp1 = Quaternion(-pitchYawRollOffset.x, 0.f, 0.f, 1.f);
+		Quaternion temp2 = Quaternion(Quaternion::CreateFromAxisAngle(Vector3::Up, -pitchYawRollOffset.y));
+		m_transform.m_rotation = temp2 * m_transform.m_rotation * temp1;
 
-		auto rotationMat = XMMatrixRotationY(angle);
-
-		rightVec = XMVector3TransformNormal(rightVec, rotationMat);
-		lookVec = XMVector3TransformNormal(lookVec, rotationMat);
-		upVec = XMVector3TransformNormal(upVec, rotationMat);
-
-		XMStoreFloat3(&m_right, rightVec);
-		XMStoreFloat3(&m_look, lookVec);
-		XMStoreFloat3(&m_up, upVec);
-
-		m_viewDirty = true;
+		m_transform.m_rotation.Normalize();
+		UpdateViewMatrix();
 	}
-	void DX12Camera::UpdateViewMatrix()
+
+	void		DX12Camera::Translate(const Vector3& translateOffset) noexcept
 	{
-		if (m_viewDirty)
-		{
-			XMVECTOR rightVec = XMLoadFloat3(&m_right);
-			XMVECTOR upVec = XMLoadFloat3(&m_up);
-			XMVECTOR lookVec = XMLoadFloat3(&m_look);
-			XMVECTOR posVec = XMLoadFloat3(&m_cameraPos);
+		Vector3 right = m_viewMatrix.Right();
+		Vector3 up = m_viewMatrix.Up();
+		Vector3 forward = m_viewMatrix.Forward();
 
-			lookVec = XMVector3Normalize(lookVec);
-			upVec = XMVector3Normalize(XMVector3Cross(lookVec, rightVec));
-			rightVec = XMVector3Cross(upVec, lookVec);
+		m_transform.m_position += translateOffset.z * forward + translateOffset.x * right + translateOffset.y * up;
+		UpdateViewMatrix();
+	}
 
-			float x = -XMVectorGetX(XMVector3Dot(posVec, rightVec));
-			float y = -XMVectorGetX(XMVector3Dot(posVec, upVec));
-			float z = -XMVectorGetX(XMVector3Dot(posVec, lookVec));
+	void		DX12Camera::UpdateViewMatrix() noexcept
+	{
+		Quaternion inverseRotation = Quaternion::Identity;
+		m_transform.m_rotation.Inverse(inverseRotation);
 
-			XMStoreFloat3(&m_right, rightVec);
-			XMStoreFloat3(&m_up, upVec);
-			XMStoreFloat3(&m_look, lookVec);
+		m_viewMatrix = Matrix::CreateFromQuaternion(inverseRotation) * Matrix::CreateTranslation(-m_transform.m_position);
+	}
 
-			auto viewMat = XMMatrixLookAtLH(posVec, XMVectorAdd(posVec, lookVec), upVec);
-			XMStoreFloat4x4(&m_view, viewMat);
-		}
+	void		DX12Camera::UpdateProjMatrix() noexcept
+	{
+		m_projMatrix = Matrix::CreatePerspectiveFieldOfView(m_fovy, m_aspectRatio, m_nearZ, m_farZ);
 	}
 }

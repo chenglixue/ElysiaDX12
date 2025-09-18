@@ -2,7 +2,7 @@
 
 namespace ElysiaRenderer
 {
-	DX12Light::DX12Light(XMFLOAT3 lightColor, XMFLOAT3 lightDir, float intensity)
+	DX12Light::DX12Light(Vector3 lightColor, Vector3 lightDir, float intensity)
 		: m_lightType(LightType::None), m_lightColor(lightColor), m_lightDir(lightDir), m_lightIntensity(intensity)
 	{
 	}
@@ -16,13 +16,13 @@ namespace ElysiaRenderer
 	{
 		LightData o{};
 
-		o.m_lightColor = XMFLOAT4(m_lightColor.x, m_lightColor.y, m_lightColor.z, 1.f);
+		o.m_lightColor = Vector4(m_lightColor.x, m_lightColor.y, m_lightColor.z, 1.f);
 
-		XMFLOAT3 temp;
+		Vector3 temp;
 		XMStoreFloat3(&temp, XMVector3Normalize(XMLoadFloat3(&m_lightDir)));
-		o.m_lightDir = XMFLOAT4(temp.x, temp.y, temp.z, 0.f);
+		o.m_lightDir = Vector4(temp.x, temp.y, temp.z, 0.f);
 		o.m_intensity = m_lightIntensity;
-		o.m_lightPos = XMFLOAT4(FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX);
+		o.m_lightPos = Vector4(FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX);
 		o.m_falloffStart = FLT_MAX;
 		o.m_falloffEnd = FLT_MAX;
 		o.m_spotPower = FLT_MAX;

@@ -155,11 +155,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="CameraManager.h" />
     <ClInclude Include="CBVPassParameter.h" />
     <ClInclude Include="D3D12MemoryAllocator\D3D12MemAlloc.h" />
     <ClInclude Include="Definition.h" />
     <ClInclude Include="DX12BufferResource.h" />
     <ClInclude Include="DX12Camera.h" />
+    <ClInclude Include="IManager.h" />
+    <ClInclude Include="IUpdate.h" />
+    <ClInclude Include="LightManager.h" />
     <ClInclude Include="LoadTexData.h" />
     <ClInclude Include="PipelineResourceSpace.h" />
     <ClInclude Include="DX12Context.h" />
@@ -212,6 +216,8 @@
     <ClInclude Include="RenderHelper.h" />
     <ClInclude Include="SimpleMath\SimpleMath.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="TextureManager.h" />
+    <ClInclude Include="Transform.h" />
   </ItemGroup>
   <ItemGroup>
     <CopyFileToFolders Include="dxc\bin\x64\dxcompiler.dll">
@@ -251,6 +257,7 @@
     <None Include="SimpleMath\SimpleMath.inl" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CameraManager.cpp" />
     <ClCompile Include="D3D12MemoryAllocator\D3D12MemAlloc.cpp" />
     <ClCompile Include="DX12BufferResource.cpp" />
     <ClCompile Include="DX12Camera.cpp" />
@@ -302,9 +309,11 @@
     <ClCompile Include="imgui\imgui_tables.cpp" />
     <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="DX12IndexBuffer.cpp" />
+    <ClCompile Include="LightManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PipelineResourceSpace.cpp" />
     <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="Transform.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\x64\Debug\Tex\CyborgWeapon_BaseColor.dds" />

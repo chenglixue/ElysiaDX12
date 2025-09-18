@@ -58,6 +58,18 @@
     <Filter Include="Header Files\Lib">
       <UniqueIdentifier>{caf42046-1028-4d1c-8c4f-09f10f7b2f48}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Manager">
+      <UniqueIdentifier>{4c058980-c128-4ac8-864a-c0a19c8d94c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Utility">
+      <UniqueIdentifier>{ca603d7b-7f24-4a38-a306-d20ade03798f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Manager">
+      <UniqueIdentifier>{cde27576-2d64-4840-8318-4075adde8c72}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Utility">
+      <UniqueIdentifier>{d653f1dc-fbac-47e5-9a66-d5618ea5157f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DX12Queue.h">
@@ -223,11 +235,29 @@
     <ClInclude Include="CBVPassParameter.h">
       <Filter>Header Files\DX12</Filter>
     </ClInclude>
-    <ClInclude Include="PipelineResourceSpace.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="LoadTexData.h">
       <Filter>Header Files\Helper</Filter>
+    </ClInclude>
+    <ClInclude Include="CameraManager.h">
+      <Filter>Header Files\Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="IManager.h">
+      <Filter>Header Files\Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="PipelineResourceSpace.h">
+      <Filter>Header Files\DX12</Filter>
+    </ClInclude>
+    <ClInclude Include="Transform.h">
+      <Filter>Header Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="IUpdate.h">
+      <Filter>Header Files\Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="LightManager.h">
+      <Filter>Header Files\Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureManager.h">
+      <Filter>Header Files\Manager</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -521,8 +551,17 @@
     <ClCompile Include="DX12Shadow.cpp">
       <Filter>Source Files\DX12</Filter>
     </ClCompile>
+    <ClCompile Include="CameraManager.cpp">
+      <Filter>Source Files\Manager</Filter>
+    </ClCompile>
     <ClCompile Include="PipelineResourceSpace.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\DX12</Filter>
+    </ClCompile>
+    <ClCompile Include="Transform.cpp">
+      <Filter>Source Files\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="LightManager.cpp">
+      <Filter>Source Files\Manager</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

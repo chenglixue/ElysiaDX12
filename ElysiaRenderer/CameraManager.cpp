@@ -2,22 +2,39 @@
 
 namespace ElysiaRenderer
 {
-	CameraManager::CameraManager()
+	CameraManager::~CameraManager()
 	{
-		CreateMainCamera();
+		Destory();
 	}
 
-	void CameraManager::CreateMainCamera()
+	void CameraManager::Init()
 	{
+		CreateMainCamera(Vector3(0.0f, 3.0f, -10.0f), 16.f / 9.f, 0.8, 1.f, 300.f);
+	}
+
+	void CameraManager::Update()
+	{
+
+	}
+
+	void CameraManager::Destory()
+	{
+
+	}
+
+	void CameraManager::CreateMainCamera(Vector3 position, float aspectRatio, float fovy, float nearZ, float farZ)
+	{
+		Transform transform{};
+		transform.m_position = position;
+
 		if (m_mainCamera == nullptr)
 		{
-			m_mainCamera = std::unique_ptr<DX12Camera>();
+			m_mainCamera = std::make_unique<DX12Camera>(transform, aspectRatio, fovy, nearZ, farZ);
 		}
 		else
 		{
 			m_mainCamera.reset();
-			m_mainCamera = std::unique_ptr<DX12Camera>();
+			m_mainCamera = std::make_unique<DX12Camera>(transform, aspectRatio, fovy, nearZ, farZ);
 		}
 	}
-
 }

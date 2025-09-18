@@ -16,13 +16,13 @@ namespace ElysiaRenderer
 	struct LightData
 	{
 		// 16
-		XMFLOAT4	m_lightColor;
+		Vector4	m_lightColor;
 
 		// 16
-		XMFLOAT4	m_lightDir;
+		Vector4	m_lightDir;
 
 		// 16
-		XMFLOAT4	m_lightPos;
+		Vector4	m_lightPos;
 
 		// 16
 		float		m_falloffStart;
@@ -35,25 +35,25 @@ namespace ElysiaRenderer
 	{
 	public:
 		DX12Light() = default;
-		DX12Light(XMFLOAT3 lightColor, XMFLOAT3 lightDir, float intensity);
+		DX12Light(Vector3 lightColor, Vector3 lightDir, float intensity);
 		DX12Light(const DX12Light& rhs) = default;
 		DX12Light& operator=(const DX12Light& rhs) = default;
 		DX12Light(DX12Light&& rhs) = default;
 		~DX12Light() = default;
 
-		const LightType& GetLightType()
+		LightType GetLightType() const noexcept
 		{
 			return m_lightType;
 		}
-		const XMFLOAT3& GetLightColor()
+		Vector3 GetLightColor() const noexcept
 		{
 			return m_lightColor;
 		}
-		XMFLOAT3& GetLightDir()
+		Vector3 GetLightDir() const noexcept
 		{
 			return m_lightDir;
 		}
-		float GetLightIntensity()
+		float GetLightIntensity() const noexcept
 		{
 			return m_lightIntensity;
 		}
@@ -61,10 +61,10 @@ namespace ElysiaRenderer
 		virtual LightData CreateLightData() = 0;
 
 	protected:
-		XMFLOAT3 m_lightColor;
-		XMFLOAT3 m_lightDir;
+		Vector3 m_lightColor;
+		Vector3 m_lightDir;
 		float m_lightIntensity;
-		XMFLOAT3 m_lightPos;
+		Vector3 m_lightPos;
 		LightType m_lightType = LightType::None;
 	};
 

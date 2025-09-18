@@ -17,6 +17,9 @@ namespace ElysiaRenderer
 		m_graphicsContext = m_device->CreateGraphicsContext();
 
 		m_pUI->InitDescriptor(windowHandle, std::move(m_device.get()));
+
+		m_cameraManager = std::make_unique<CameraManager>();
+		m_lightManager = std::make_unique<LightManager>();
 	}
 
 	Renderer::~Renderer()
@@ -25,24 +28,15 @@ namespace ElysiaRenderer
 
 	void Renderer::Init()
 	{
-		{
-			m_mainCamera = InitCamera(XMVectorSet(0.0f, 3.0f, -10.0f, 1.f), m_aspectRatio, 0.8f, 1.f, 1000.f);
-
-			m_cameras.emplace_back(m_mainCamera);
-		}
+		m_cameraManager->Init();
+		m_lightManager->Init();
 
 		LoadModel();
-		InitLight();
 		InitTexTriangle();
 	}
 	void Renderer::Update()
 	{
-		OnKeyboardInput();
-
-		if (m_mainLightShadow)
-		{
-			m_mainLightShadow->UpdateShadowTransform(m_mainLight.get());
-		}
+		//OnKeyboardInput();
 		UpdateCBV();
 	}
 	void Renderer::Render()
@@ -88,44 +82,11 @@ namespace ElysiaRenderer
 	}
 	void Renderer::OnMouseMove(WPARAM btnState, int x, int y)
 	{
-		if ((btnState & MK_LBUTTON) != 0)
-		{
-			// Make each pixel correspond to a quarter of a degree.
-			float dx = XMConvertToRadians(0.25f * m_mainCamera->GetCameraSpeed() * static_cast<float>(x - m_lastMousePos.x));
-			float dy = XMConvertToRadians(0.25f * m_mainCamera->GetCameraSpeed() * static_cast<float>(y - m_lastMousePos.y));
-
-			m_mainCamera->Pitch(dy);
-			m_mainCamera->Yaw(dx);
-		}
-
 		m_lastMousePos.x = x;
 		m_lastMousePos.y = y;
 	}
 	void Renderer::OnKeyboardInput()
 	{
-		if (GetAsyncKeyState('W') & 0x8000)
-			m_mainCamera->MoveVertical(m_mainCamera->GetCameraSpeed() * 0.01f);
-
-		if (GetAsyncKeyState('S') & 0x8000)
-			m_mainCamera->MoveVertical(-m_mainCamera->GetCameraSpeed() * 0.01f);
-
-		if (GetAsyncKeyState('A') & 0x8000)
-			m_mainCamera->MoveHorizon(-m_mainCamera->GetCameraSpeed() * 0.01f);
-
-		if (GetAsyncKeyState('D') & 0x8000)
-			m_mainCamera->MoveHorizon(m_mainCamera->GetCameraSpeed() * 0.01f);
-
-		m_mainCamera->UpdateViewMatrix();
-
-		/*if (m_mainCamera->IsViewDirty())
-		{
-			XMStoreFloat4(&m_mainPassParameter.cameraPosWS, m_mainCamera->GetCameraPos());
-			m_mainPassParameter.viewMatrix = XMMatrixTranspose(m_mainCamera->GetViewMat());
-			m_mainPassParameter.projMatrix = XMMatrixTranspose(m_mainCamera->GetProjMat());
-			XMStoreFloat4(&m_mainPassParameter.cameraPosWS, m_mainCamera->GetCameraPos());
-		}*/
-
-		m_mainCamera->DisableViewDirty();
 	}
 
 	void Renderer::UpdateCBV()
@@ -138,12 +99,12 @@ namespace ElysiaRenderer
 		ZeroMemory(&m_mainPassParameter, sizeof(CBVMainPassParameter));
 		m_mainPassParameter.screenSize = m_device->GetScreenSize();
 		m_mainPassParameter.frameIndex = m_device->GetFrameID();
-		XMStoreFloat4(&m_mainPassParameter.cameraPosWS, m_mainCamera->GetCameraPos());
-		m_mainPassParameter.viewMatrix = m_mainCamera->GetViewMat();
-		m_mainPassParameter.projMatrix = m_mainCamera->GetProj();
-		m_mainPassParameter.nearZ = m_mainCamera->GetNearZ();
-		m_mainPassParameter.farZ = m_mainCamera->GetFarZ();
-		m_mainPassParameter.mainLights[0] = std::move(m_mainLight->CreateLightData());
+		XMStoreFloat4(&m_mainPassParameter.cameraPosWS, m_cameraManager->GetMainCamera()->GetPosition());
+		m_mainPassParameter.viewMatrix = m_cameraManager->GetMainCamera()->GetViewMat();
+		m_mainPassParameter.projMatrix = m_cameraManager->GetMainCamera()->GetProj();
+		m_mainPassParameter.nearZ = m_cameraManager->GetMainCamera()->GetNearZ();
+		m_mainPassParameter.farZ = m_cameraManager->GetMainCamera()->GetFarZ();
+		m_mainPassParameter.mainLights[0] = std::move(m_lightManager->GetMainLight()->CreateLightData());
 		m_perMainPassBindResourceSpace->GetCBV()->SetMappedData(&m_mainPassParameter, sizeof(CBVMainPassParameter));
 		
 		/*XMStoreFloat4x4(&m_shadowPassParameter.shadowMatrix, XMMatrixTranspose(m_mainLightShadow->GetShadowMat()));
@@ -340,26 +301,6 @@ namespace ElysiaRenderer
 		//m_graphicsPipelineStates.insert({ ShaderQueue::Skybox, std::move(m_device->CreateGraphicsPipelineState(pipelineStateCreateDesc, meshResourceLayout)) });
 	}
 
-	std::shared_ptr<DX12Camera> Renderer::InitCamera(Vector3 position, float aspect, float FOVY, float nearZ, float farZ)
-	{
-		auto camera = std::make_shared<DX12Camera>();
-
-		camera->SetLens(FOVY, aspect, nearZ, farZ);
-
-		static const Vector3 up{ 0.f, 1.f, 0.f};
-		static const Vector3 at{ 0.f, 0.f, 0.f};
-		camera->LookAt(position, up, at);
-
-		return camera;
-	}
-	void Renderer::InitLight()
-	{
-		auto dirLight = std::make_unique<DX12DirectionLight>(Vector3(1, 1, 1), Vector3(0.f, 0.f, -1.f), 1);
-
-		m_mainLight = std::shared_ptr<DX12Light>(std::move(dirLight));
-
-		m_lights.emplace_back(std::move(dirLight));
-	}
 	void Renderer::LoadModel()
 	{
 		UINT currDrawVertex = 0;
@@ -486,14 +427,13 @@ namespace ElysiaRenderer
 
 		/*ImGui_ImplDX12_NewFrame();
 		ImGui_ImplWin32_NewFrame();
-		ImGui::NewFrame();*/
+		ImGui::NewFrame();
 
-		//AddUIItems();
-		//ImGui::Render();
+		AddUIItems();
+		ImGui::Render();*/
 
 		auto& currBackBuffer = m_device->GetCurrBackBuffer();
 
-		//DrawShadow();
 		m_graphicsContext->AddBarrier(currBackBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET);
 		m_graphicsContext->AddBarrier(*m_depthBuffer, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 		m_graphicsContext->FlushBarrier();
@@ -502,7 +442,6 @@ namespace ElysiaRenderer
 		m_graphicsContext->ClearDepthStencilTarget(*m_depthBuffer, 1.f, 0);
 
 		m_graphicsContext->SetVertexBuffer(0, 1, m_vertexBuffer->GetVertexBufferView());
-		//m_graphicsContext->SetIndexBuffer(m_indexBuffer->GetIndexBufferView());
 
 		PipelineInfo pipelineStateData{};
 		pipelineStateData.m_pipelineStateObject = m_graphicsPipelineStates[ShaderQueue::Opaque].get();
@@ -510,10 +449,6 @@ namespace ElysiaRenderer
 		pipelineStateData.m_depthStencilTarget = m_depthBuffer.get();
 
 		bool isReady = true;
-		/*for (auto& tex : m_texs)
-		{
-			isReady = tex->GetIsReady();
-		}*/
 		if (isReady)
 		{
 			auto& objectParameter = m_objectPassParameters[m_device->GetFrameID()];
@@ -539,7 +474,6 @@ namespace ElysiaRenderer
 
 			DrawCommand(0);
 		}
-		//DrawSkybox();
 		//ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), m_graphicsContext->GetCommandList());
 
 		m_graphicsContext->AddBarrier(currBackBuffer, D3D12_RESOURCE_STATE_PRESENT);
@@ -553,7 +487,7 @@ namespace ElysiaRenderer
 
 	void Renderer::AddUIItems()
 	{
-		if (ImGui::CollapsingHeader("Camera"))
+		/*if (ImGui::CollapsingHeader("Camera"))
 		{
 			ImGui::SliderFloat("Speed", &m_mainCamera->GetCameraSpeed(), 0, 2);
 			ImGui::SliderFloat("NearZ", &m_mainCamera->GetNearZ(), 0.001f, 1000);
@@ -577,7 +511,7 @@ namespace ElysiaRenderer
 			ImGui::SliderFloat("Roughness Intensity", &m_objectPassParameters[m_device->GetFrameID()].roughnessIntensity, 0.f, 5.f);
 			ImGui::SliderFloat("Ambient Cubemap Intensity", &m_objectPassParameters[m_device->GetFrameID()].ambientCubemapIntensity, 0.f, 2.f);
 			ImGui::ColorEdit3("Ambient Cubemap Tint", (float*)&m_objectPassParameters[m_device->GetFrameID()].ambientCubemapTint);
-		}
+		}*/
 
 		//ImGui::ShowDemoWindow();
 	}

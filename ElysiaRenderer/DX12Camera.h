@@ -1,178 +1,60 @@
 #pragma once
 #include "stdafx.h"
+#include "Transform.h"
 
 namespace ElysiaRenderer
 {
 	using namespace SimpleMath;
+	using namespace ElysiaUtility;
 
 	class DX12Camera
 	{
 	public:
 		DX12Camera() = default;
+		DX12Camera(const Transform& transform, float aspectRatio, float fovY, float nearZ, float farZ) noexcept;
 		DX12Camera(const DX12Camera& rhs) = default;
 		DX12Camera& operator=(const DX12Camera& rhs) = default;
 		DX12Camera(DX12Camera&& rhs) = default;
 		~DX12Camera();
 
-		float& GetCameraSpeed()
-		{
-			return m_speed;
-		}
-		void SetCameraSpeed(float speed)
-		{
-			m_speed = speed;
-		}
+		Transform	GetTransform()		const noexcept;
+		float		GetCameraSpeed()	const noexcept;
+		Vector3		GetPosition()		const noexcept;
+		Quaternion	GetRotation()		const noexcept;
+		float		GetNearZ()			const noexcept;
+		float		GetFarZ()			const noexcept;
+		float		GetFOVY()			const noexcept;
+		float		GetAspect()			const noexcept;
+		Matrix		GetViewMat()		const noexcept;
+		Matrix		GetProj()			const noexcept;
+		Vector3		GetForwardDir()		const noexcept;
+		Vector3		GetUpDir()			const noexcept;
+		Vector3		GetRightDir()		const noexcept;
 
-		Vector3 GetCameraPos() const
-		{
-			return m_cameraPos;
-		}
-		void SetCameraPos(const Vector3& cameraPos)
-		{
-			m_cameraPos = cameraPos;
-			m_viewDirty = true;
-		}
+		void		SetCameraSpeed(float speed)				noexcept;
+		void		SetPosition(const Vector3& cameraPos)	noexcept;
+		void		SetRotation(const Quaternion& rotation) noexcept;
+		void		SetAspectRatio(float aspectRatio)		noexcept;
+		void		SetNearZ(float nearZ)					noexcept;
+		void		SetFarz(float farZ)						noexcept;
+		void		Setfovy(float FOV)						noexcept;
 
-		float& GetNearZ() 
-		{
-			return m_nearZ;
-		}
-		float& GetFarZ() 
-		{
-			return m_farZ;
-		}
-		void SetCameraNearZ(float nearZ)
-		{
-			m_nearZ = nearZ;
-			m_viewDirty = true;
-		}
-		void SetCameraFarz(float farZ)
-		{
-			m_farZ = farZ;
-			m_viewDirty = true;
-		}
+		void		Rotate(const Vector3& pitchYawRollOffset) noexcept;
+		void		Translate(const Vector3& translateOffset) noexcept;
 
-		float GetFOVY() const
-		{
-			return m_FOVY;
-		}
-		float GetFOVX()
-		{
-			float halfNearWidth = 0.5f * GetNearWidth();
-			return 2.f * atan(halfNearWidth / m_nearZ);
-		}
-		void SetCameraFOVY(float FOV)
-		{
-			m_FOVY = FOV;
-			m_viewDirty = true;
-		}
-
-		float GetAspect() const
-		{
-			return m_aspect;
-		}
-		float GetNearWidth() const
-		{
-			return m_aspect * m_nearHeight;
-		}
-		float GetNearHeight() const
-		{
-			return m_nearHeight;
-		}
-		float GetFarWidth() const
-		{
-			return m_aspect * m_farHeight;
-		}
-		float GetFarHeight() const
-		{
-			return m_farHeight;
-		}
-
-		Vector3 GetRight() const
-		{
-			return m_right;
-		}
-		void SetRight(const Vector3& right)
-		{
-			m_right = right;
-			m_viewDirty = true;
-		}
-
-		Vector3 GetUP() const
-		{
-			return m_up;
-		}
-		void SetUP(const Vector3& up)
-		{
-			m_up = up;
-			m_viewDirty = true;
-		}
-		void SetUP(float x, float y, float z)
-		{
-			m_up = XMFLOAT3(x, y, z);
-			m_viewDirty = true;
-		}
-
-		Vector3 GetLook() const
-		{
-			return m_look;
-		}
-		void SetLook(const Vector3& look)
-		{
-			m_look = look;
-			m_viewDirty = true;
-		}
-
-		Matrix GetViewMat() const
-		{
-			return m_view;
-		}
-		Matrix GetProj() const
-		{
-			return m_proj;
-		}
-
-		// set proj & view matrix
-		void SetLens(float FOVY, float aspect, float nearZ, float farZ);
-		void LookAt(const Vector3& pos, const Vector3& up, const Vector3& target);
-
-		// Move Camera
-		void MoveHorizon(float distance);	// move left right
-		void MoveVertical(float distance);	// move forward back
-
-		// Rotate Camera
-		void Pitch(float angle);
-		void Yaw(float angle);
-		void UpdateViewMatrix();	// after roate, three vec in camera would not Non-orthogonal normalized vector 
-
-		bool IsViewDirty() const
-		{
-			return m_viewDirty;
-		}
-		void DisableViewDirty()
-		{
-			m_viewDirty = false;
-		}
+		void LookAt(const Vector3& targetPos) noexcept;
+		void UpdateViewMatrix() noexcept;	// after roate, three vec in camera would not Non-orthogonal normalized vector 
+		void UpdateProjMatrix() noexcept;
 
 	protected:
-		bool m_viewDirty = false;	// view data whether change
+		Transform m_transform;
+		Matrix  m_viewMatrix	= Matrix::Identity;
+		Matrix  m_projMatrix	= Matrix::Identity;
 
-		float m_speed = 1.f;
-
-		float m_aspect;
-		float m_nearZ = 0.01f;
-		float m_farZ = 100.f;
-		float m_FOVY = 0.8f;
-		float m_nearHeight = 0.f;
-		float m_farHeight = 0.f;
-
-		Vector3 m_cameraPos = Vector3::Zero;
-		Vector3 m_right = {1.f, 0.f, 0.f};
-		Vector3 m_up = {0.f , 1.f, 0.f};
-		Vector3 m_look = {0.f, 0.f, 1.f};
-		Vector3 m_lookUnNor = { 0.f, 0.f, 1.f };
-
-		Matrix  m_view = Matrix::Identity;
-		Matrix  m_proj = Matrix::Identity;
+		float m_speed		= 1.f;
+		float m_aspectRatio	= 1.f;
+		float m_fovy		= 0.8f;
+		float m_nearZ		= 0.01f;
+		float m_farZ		= 300.f;
 	};
 }
