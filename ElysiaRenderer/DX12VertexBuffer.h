@@ -10,7 +10,7 @@ namespace ElysiaRenderer
 	{
 		UINT m_size = 0;
 		UINT m_stride = 0;
-		BufferTypeFlags bufferTypeFlags = BufferTypeFlags::None;
+		GPUResourceFlags bufferTypeFlags = GPUResourceFlags::None;
 		BufferAccessFlags bufferAccessFlags = BufferAccessFlags::GPUOnly;
 		bool m_isRawAccess = false;
 	};
@@ -27,19 +27,11 @@ namespace ElysiaRenderer
 		{
 			return m_vertexBufferView;
 		}
-		/*DX12DescriptorHeapHandle& GetSRVDescriptor()
-		{
-			return m_SRVDescriptor;
-		}*/
 		void* GetMappedBuffer()
 		{
 			return m_mappedBuffer;
 		}
 
-		/*void SetSRVDescriptor(DX12DescriptorHeapHandle&& SRVDescriptor)
-		{
-			m_SRVDescriptor = SRVDescriptor;
-		}*/
 		void SetMappedData(const void* bufferData, uint32_t bufferSize);
 
 		void Unmap()
@@ -54,6 +46,5 @@ namespace ElysiaRenderer
 		D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;
 		//DX12DescriptorHeapHandle m_SRVDescriptor;
 		void* m_mappedBuffer;
-		BufferType m_bufferType = BufferType::Vertex;
 	};
 }

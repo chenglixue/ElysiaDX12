@@ -112,7 +112,7 @@ namespace ElysiaRenderer
 
 			for (auto& SRV : SRVResources)
 			{
-				if (SRV->m_resource->GetBufferType() == BufferType::Texture)
+				if (SRV->m_resource->GetBufferType() == GPUResourceType::Texture)
 				{
 					handles[currentHandleIndex++] = static_cast<DX12TextureResource*>(SRV->m_resource)->GetSRVDescriptor().GetCPUHandle();
 				}

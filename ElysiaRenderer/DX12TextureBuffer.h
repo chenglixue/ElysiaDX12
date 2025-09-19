@@ -22,7 +22,7 @@ namespace ElysiaRenderer
 
 	struct TextureBufferCreationDesc
 	{
-		BufferTypeFlags bufferTypeFlags		= BufferTypeFlags::None;
+		GPUResourceFlags bufferTypeFlags		= GPUResourceFlags::None;
 		BufferAccessFlags bufferAccessFlags = BufferAccessFlags::GPUOnly;
 		bool m_isRawAccess					= false;
 		UINT m_size							= 0;
@@ -33,7 +33,7 @@ namespace ElysiaRenderer
 	/// <summary>
 	/// only save texture data, not a heap but save a default heap
 	/// </summary>
-	class DX12TextureBuffer : public DX12BufferResource
+	class DX12TextureBuffer
 	{
 	public:
 		DX12TextureBuffer(DX12TextureResource* texResource, size_t mipLevels, size_t arraySize);
@@ -100,6 +100,6 @@ namespace ElysiaRenderer
 
 	private:
 		uint8_t* m_mappedBuffer;
-		BufferType m_bufferType = BufferType::Texture;
+		GPUResourceType m_bufferType = GPUResourceType::Texture;
 	};
 }

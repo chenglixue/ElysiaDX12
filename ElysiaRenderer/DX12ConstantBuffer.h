@@ -11,7 +11,7 @@ namespace ElysiaRenderer
 	{
 		UINT m_bufferSize = 0;
 		size_t m_bufferIndex = 0;
-		BufferTypeFlags bufferTypeFlags = BufferTypeFlags::CBV;
+		GPUResourceFlags bufferTypeFlags = GPUResourceFlags::CBV;
 		BufferAccessFlags bufferAccessFlags = BufferAccessFlags::GPUOnly;
 		bool m_isRawAccess = false;
 	};
@@ -38,6 +38,6 @@ namespace ElysiaRenderer
 		void* m_mappedBuffer;
 		uint32_t m_bufferSize;
 		DX12DescriptorHeapHandle m_constantBufferViewHandle;
-		BufferType m_bufferType = BufferType::Constant;
+		GPUResourceType m_bufferType = GPUResourceType::Constant;
 	};
 }

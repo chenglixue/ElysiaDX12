@@ -49,7 +49,7 @@ namespace ElysiaRenderer
 	{
 		XMMATRIX o = XMMatrixIdentity();
 
-		auto lightDir = XMLoadFloat3(&light->GetLightDir());
+		auto lightDir = light->GetLightDir();
 		auto lightPos = 2.f * m_shadowBound.Radius * (-lightDir);
 		auto boundPosWS = XMLoadFloat3(&m_shadowBound.Center);
 		auto lightUp = XMVectorSet(0.f, 1.f, 0.f, 0.f);

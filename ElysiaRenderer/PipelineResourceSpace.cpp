@@ -16,7 +16,7 @@ namespace ElysiaRenderer
 		return UINT_MAX;
 	}
 
-	void PipelineResourceSpace::SetCBV(DX12ConstantBuffer* CBVResource)
+	void PipelineResourceSpace::SetCBV(DX12BufferResource* CBVResource)
 	{
 		if (m_isLocked)
 		{

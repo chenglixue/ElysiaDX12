@@ -1,3 +1,4 @@
+D:\DX12\ElysiaRenderer\ElysiaRenderer\CameraManager.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\CameraManager.obj
 D:\DX12\ElysiaRenderer\ElysiaRenderer\D3D12MemoryAllocator\D3D12MemAlloc.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\D3D12MemAlloc.obj
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12BufferResource.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\DX12BufferResource.obj
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Camera.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\DX12Camera.obj
@@ -49,6 +50,10 @@ D:\DX12\ElysiaRenderer\ElysiaRenderer\imgui\imgui_impl_win32.cpp;D:\DX12\ElysiaR
 D:\DX12\ElysiaRenderer\ElysiaRenderer\imgui\imgui_tables.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\imgui_tables.obj
 D:\DX12\ElysiaRenderer\ElysiaRenderer\imgui\imgui_widgets.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\imgui_widgets.obj
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12IndexBuffer.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\DX12IndexBuffer.obj
+D:\DX12\ElysiaRenderer\ElysiaRenderer\LightManager.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\LightManager.obj
 D:\DX12\ElysiaRenderer\ElysiaRenderer\main.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\main.obj
 D:\DX12\ElysiaRenderer\ElysiaRenderer\PipelineResourceSpace.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\PipelineResourceSpace.obj
 D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\Renderer.obj
+D:\DX12\ElysiaRenderer\ElysiaRenderer\ShaderManager.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\ShaderManager.obj
+D:\DX12\ElysiaRenderer\ElysiaRenderer\ShadowManager.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\ShadowManager.obj
+D:\DX12\ElysiaRenderer\ElysiaRenderer\Transform.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\Transform.obj

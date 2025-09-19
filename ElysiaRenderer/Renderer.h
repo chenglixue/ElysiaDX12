@@ -11,6 +11,8 @@
 #include "LoadTexData.h"
 #include "CameraManager.h"
 #include "LightManager.h"
+#include "ShadowManager.h"
+#include "BufferManager.h"
 
 
 namespace ElysiaRenderer 
@@ -121,10 +123,8 @@ namespace ElysiaRenderer
 		std::shared_ptr<DX12UI> m_pUI = nullptr;
 		std::unique_ptr<DX12Device> m_device = nullptr;
 		std::shared_ptr<DX12TextureResource> m_depthBuffer = nullptr;
-		std::unique_ptr<DX12GraphicsContext> m_graphicsContext = nullptr; 
+		std::unique_ptr<DX12GraphicsContext> m_graphicsContext = nullptr;
 		std::unique_ptr<DX12VertexBuffer> m_vertexBuffer = nullptr;
-		std::unique_ptr<DX12IndexBuffer> m_indexBuffer = nullptr;
-		std::vector<std::shared_ptr<DX12Shadow>> m_shadowBuffers{};
 		std::vector<std::unique_ptr<DX12TextureResource>> m_texs{};
 		std::vector<std::unique_ptr<D3D12_SAMPLER_DESC>> m_samplers;
 		std::unordered_map<UINT, std::unordered_map<ShaderType, std::unique_ptr<DX12Shader>>> m_vertexShaders;
@@ -139,6 +139,8 @@ namespace ElysiaRenderer
 
 		std::unique_ptr<CameraManager> m_cameraManager = nullptr;
 		std::unique_ptr<LightManager> m_lightManager = nullptr;
+		std::unique_ptr<ShadowManager> m_shadowManager = nullptr;
+		std::unique_ptr<BufferManager> m_bufferManager = nullptr;
 
 		/// <summary>
 		/// Constant parameter
@@ -150,7 +152,7 @@ namespace ElysiaRenderer
 			Matrix projMatrix = Matrix::Identity; 	// 64
 			Vector4 screenSize = Vector4::Zero;	// 16
 
-			LightData mainLights[MAX_MAIN_LIGHT_COUNT];	// 64
+			LightData mainLight;	// 64
 
 			UINT frameIndex = 0;
 			float nearZ = 1;
@@ -188,14 +190,10 @@ namespace ElysiaRenderer
 			//float padding[48];
 		};
 		CBVMainPassParameter m_mainPassParameter{};
-		std::array<CBVObjectParameter, NUM_FRAMES_IN_FLIGHT> m_objectPassParameters{};
-		std::array<std::unique_ptr<DX12ConstantBuffer>, NUM_FRAMES_IN_FLIGHT> m_objectConstanBuffers{};
 		std::unique_ptr<DX12ConstantBuffer> m_passConstanBuffers = nullptr;
 		std::unique_ptr<PipelineResourceSpace> m_perObjectBindResourceSpace = nullptr;
 		//std::shared_ptr<PipelineResourceSpace> m_perShadowBindResourceSpace{};
 		std::unique_ptr<PipelineResourceSpace> m_perMainPassBindResourceSpace = nullptr;
-
-		std::shared_ptr<DX12Shadow> m_mainLightShadow;
 		 
 		/// <summary>
 		/// Model
@@ -215,16 +213,12 @@ namespace ElysiaRenderer
 		void LoadVertexIndexBuffer();
 		void LoadConstantBuffers();
 		void CreateCreamDepthRT();
-		void CreateShadowRT();
 		void LoadAndCreateTexs();
 		void CreatePOS();
 
-		std::shared_ptr<DX12Camera> InitCamera(Vector3 position, float aspect, float FOVY, float nearZ, float farZ);
-		void InitLight();
 		void LoadModel();
 		void AddShader(ShaderQueue shaderQueue, const std::wstring& shaderName, const std::wstring& entryPoint, ShaderType shaderType);
 		void AddVertexBuffer(UINT singVertexSize, BufferAccessFlags bufferAccessFlag = BufferAccessFlags::HostWritable, bool isRawAccess = false);
-		void AddIndexBuffer(UINT singIndexSize, DXGI_FORMAT format, BufferAccessFlags bufferAccessFlag = BufferAccessFlags::HostWritable);
 	
 		void RenderTexTriangle();
 

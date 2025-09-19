@@ -12,7 +12,7 @@ namespace ElysiaRenderer
 		UINT m_bufferSize = 0;
 		void* m_vertexMappedBuffer = nullptr;
 
-		BufferTypeFlags bufferTypeFlags = BufferTypeFlags::None;
+		GPUResourceFlags bufferTypeFlags = GPUResourceFlags::None;
 		BufferAccessFlags bufferAccessFlags = BufferAccessFlags::GPUOnly;
 	};
 
@@ -44,6 +44,6 @@ namespace ElysiaRenderer
 	private:
 		D3D12_INDEX_BUFFER_VIEW m_indexBufferView;
 		void* m_mappedBuffer;
-		BufferType m_bufferType = BufferType::Vertex;
+		GPUResourceType m_bufferType = GPUResourceType::Vertex;
 	};
 }

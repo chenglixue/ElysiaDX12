@@ -20,6 +20,7 @@ namespace ElysiaRenderer
 		Transform	GetTransform()		const noexcept;
 		float		GetCameraSpeed()	const noexcept;
 		Vector3		GetPosition()		const noexcept;
+		Vector4		GetPosition4()		const noexcept;
 		Quaternion	GetRotation()		const noexcept;
 		float		GetNearZ()			const noexcept;
 		float		GetFarZ()			const noexcept;

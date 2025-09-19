@@ -3,22 +3,19 @@
 
 namespace ElysiaRenderer
 {
-	enum class BufferType : uint8_t
+	enum class GPUResourceType : uint8_t
 	{
 		 None = 0,
-		 Vertex = 1,
-		 Index = 2,
-		 Constant = 3,
-		 Texture = 4
+		 Buffer,
+		 Texture
 	};
 
-	enum class BufferTypeFlags : uint8_t
+	enum class GPUResourceFlags : uint8_t
 	{
 		None = 0,
 		CBV = 1,
 		SRV = 2,
-		UAV = 3,
-		DSV
+		UAV = 4,
 	};
 
 	enum class BufferAccessFlags : uint8_t
@@ -33,7 +30,7 @@ namespace ElysiaRenderer
 		DX12GPUResource(CComPtr<ID3D12Resource> resource, D3D12_RESOURCE_STATES usageState);
 		~DX12GPUResource();
 
-		BufferType GetBufferType()
+		GPUResourceType GetBufferType()
 		{
 			return m_bufferType;
 		}
@@ -49,7 +46,7 @@ namespace ElysiaRenderer
 		{
 			return m_usageState;
 		}
-		D3D12_RESOURCE_DESC& GetResourceDesc()
+		D3D12_RESOURCE_DESC GetResourceDesc()
 		{
 			return m_resourceDesc;
 		}
@@ -57,6 +54,11 @@ namespace ElysiaRenderer
 		{
 			return m_allocation;
 		}
+
+		/// <summary>
+		/// index of SRV Resource in SRV Descriptor heap
+		/// </summary>
+		/// <returns></returns>
 		UINT GetResourceHeapIndex()
 		{
 			return m_descriptorHeapIndex;
@@ -108,6 +110,26 @@ namespace ElysiaRenderer
 		D3D12_RESOURCE_STATES m_usageState = D3D12_RESOURCE_STATE_COMMON;
 		bool m_isReady = false;
 		UINT m_descriptorHeapIndex = INVALID_RESOURCE_TABLE_INDEX;
-		BufferType m_bufferType = BufferType::None;
+		GPUResourceType m_bufferType = GPUResourceType::None;
 	};
+
+	inline BufferAccessFlags operator&(BufferAccessFlags a, BufferAccessFlags b)
+	{
+		return static_cast<BufferAccessFlags>(static_cast<uint8_t>(a) & static_cast<uint8_t>(b));
+	}
+
+	inline BufferAccessFlags operator|(BufferAccessFlags a, BufferAccessFlags b)
+	{
+		return static_cast<BufferAccessFlags>(static_cast<uint8_t>(a) | static_cast<uint8_t>(b));
+	}
+
+	inline GPUResourceFlags operator|(GPUResourceFlags a, GPUResourceFlags b)
+	{
+		return static_cast<BufferViewFlags>(static_cast<uint8_t>(a) | static_cast<uint8_t>(b));
+	}
+
+	inline GPUResourceFlags operator&(GPUResourceFlags a, GPUResourceFlags b)
+	{
+		return static_cast<BufferViewFlags>(static_cast<uint8_t>(a) & static_cast<uint8_t>(b));
+	}
 }

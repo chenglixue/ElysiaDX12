@@ -32,6 +32,11 @@ namespace ElysiaRenderer
 		return m_transform.m_position;
 	}
 
+	Vector4		DX12Camera::GetPosition4()		const noexcept
+	{
+		return Vector4(m_transform.m_position.x, m_transform.m_position.y, m_transform.m_position.z, 1);
+	}
+
 	Quaternion	DX12Camera::GetRotation()		const noexcept
 	{
 		return m_transform.m_rotation;

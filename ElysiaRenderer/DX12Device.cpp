@@ -3,6 +3,8 @@
 
 namespace ElysiaRenderer
 {
+	using namespace ElysiaHelper;
+
 	DX12Device::DX12Device(HWND windowHandle, ElysiaHelper::UINT2 screenSize)
 		: m_screenSize(screenSize)
 	{
@@ -251,109 +253,94 @@ namespace ElysiaRenderer
 
 		return graphicsContext;
 	}
-	std::unique_ptr<DX12VertexBuffer>			DX12Device::CreateVertexBuffer(const VertexBufferCreationDesc& bufferCreationDesc)
+	std::unique_ptr<DX12BufferResource>			DX12Device::CreateBuffer(const BufferCreationDesc& bufferCreationDesc)
 	{
-		/*if (bufferCreationDesc.bufferTypeFlags != BufferTypeFlags::SRV)
+		D3D12_RESOURCE_DESC resourceDesc{};
+		resourceDesc.Width = AlignU32(static_cast<UINT>(bufferCreationDesc.m_size), 256);
+		resourceDesc.Height = 1;
+		resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+		resourceDesc.Alignment = 0;
+		resourceDesc.DepthOrArraySize = 1;
+		resourceDesc.MipLevels = 1;
+		resourceDesc.Format = DXGI_FORMAT_UNKNOWN;
+		resourceDesc.SampleDesc.Count = 1;
+		resourceDesc.SampleDesc.Quality = 0;
+		resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+		resourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+
+		UINT numElements = static_cast<UINT>(bufferCreationDesc.m_stride > 0 ? bufferCreationDesc.m_size / bufferCreationDesc.m_stride : 1);
+		bool isHostVisible = ((bufferCreationDesc.m_accessFlags & BufferAccessFlags::HostWritable) == BufferAccessFlags::HostWritable);
+		bool isHasCBV = ((bufferCreationDesc.m_viewFlags & GPUResourceFlags::CBV) == GPUResourceFlags::CBV);
+		bool isHasSRV = ((bufferCreationDesc.m_viewFlags & GPUResourceFlags::SRV) == GPUResourceFlags::SRV);
+		bool isHasUAV = ((bufferCreationDesc.m_viewFlags & GPUResourceFlags::UAV) == GPUResourceFlags::UAV);
+
+		D3D12_RESOURCE_STATES usageState = isHostVisible ? D3D12_RESOURCE_STATE_GENERIC_READ : D3D12_RESOURCE_STATE_COPY_DEST;
+		
+		D3D12MA::ALLOCATION_DESC allocationDesc{};
+		allocationDesc.HeapType = isHostVisible ? D3D12_HEAP_TYPE_UPLOAD : D3D12_HEAP_TYPE_DEFAULT;
+
+		CComPtr<D3D12MA::Allocation> pAllocation = nullptr;
+		CComPtr<ID3D12Resource> pResource = nullptr;
+		ElysiaHelper::ThrowIfFailed(m_allocator->CreateResource(&allocationDesc, &resourceDesc, usageState, nullptr,
+			&pAllocation, IID_PPV_ARGS(&pResource)));
+		pResource->SetName(bufferCreationDesc.m_name);
+
+		auto pNewBuffer = std::make_unique<DX12BufferResource>(pResource, usageState, pAllocation);
+
+		if (isHasCBV)
 		{
-			ElysiaHelper::AssertError("Vertex BufferµÄ BufferTypeFlags ²»Æ¥Åä");
-		}*/
-		// CPU-writable/GPU-readable memory
-		auto isHostViewable = bufferCreationDesc.bufferAccessFlags == BufferAccessFlags::HostWritable;
+			D3D12_CONSTANT_BUFFER_VIEW_DESC CBVDesc{};
+			CBVDesc.SizeInBytes = static_cast<UINT>(pNewBuffer->GetResourceDesc().Width);
+			CBVDesc.BufferLocation = pNewBuffer->GetGPUAddress();
 
-		D3D12MA::ALLOCATION_DESC allocationDesc{};
-		allocationDesc.HeapType = isHostViewable ? D3D12_HEAP_TYPE_UPLOAD : D3D12_HEAP_TYPE_DEFAULT;
-		D3D12_RESOURCE_STATES usageState = isHostViewable ? D3D12_RESOURCE_STATE_GENERIC_READ : D3D12_RESOURCE_STATE_COPY_DEST;
+			pNewBuffer->SetCBVDescriptor(m_SRVStagingDescriptorHeap->NewDescriptorHeapHandle());
+			m_device->CreateConstantBufferView(&CBVDesc, pNewBuffer->GetCBVDescriptor().GetCPUHandle());
+		}
 
-		// https://learn.microsoft.com/en-us/windows/win32/api/d3d12/ns-d3d12-d3d12_resource_desc
-		D3D12_RESOURCE_DESC resourceDesc = {};
-		//resourceDesc.Width = ElysiaHelper::AlignU32(static_cast<uint32_t>(bufferCreationDesc.m_size), D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
-		resourceDesc.Width = bufferCreationDesc.m_size;
-		resourceDesc.Alignment = 0;
-		resourceDesc.Height = 1;
-		resourceDesc.DepthOrArraySize = 1;
-		resourceDesc.MipLevels = 1;
-		resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-		resourceDesc.Format = DXGI_FORMAT_UNKNOWN;
-		resourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
-		resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-		resourceDesc.SampleDesc = {1, 0};
+		if (isHasSRV)
+		{
+			D3D12_SHADER_RESOURCE_VIEW_DESC SRVDesc{};
+			SRVDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+			SRVDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+			SRVDesc.Format = bufferCreationDesc.m_isRawAccess ? DXGI_FORMAT_R32_TYPELESS : DXGI_FORMAT_UNKNOWN;
+			SRVDesc.Buffer.FirstElement = 0;
+			SRVDesc.Buffer.NumElements = static_cast<UINT>(bufferCreationDesc.m_isRawAccess ? bufferCreationDesc.m_size / 4 : numElements);
+			SRVDesc.Buffer.StructureByteStride = bufferCreationDesc.m_isRawAccess ? 0 : pNewBuffer->GetStride();
+			SRVDesc.Buffer.Flags = bufferCreationDesc.m_isRawAccess ? D3D12_BUFFER_SRV_FLAG_RAW : D3D12_BUFFER_SRV_FLAG_NONE;
 
-		CComPtr<D3D12MA::Allocation> allocation = nullptr;
-		CComPtr<ID3D12Resource> resource = nullptr;
-		ElysiaHelper::ThrowIfFailed(m_allocator->CreateResource(&allocationDesc, &resourceDesc, usageState, nullptr,
-			&allocation, IID_PPV_ARGS(&resource)));
-		resource->SetName(L"Vertex Buffer");
+			pNewBuffer->SetSRVDescriptor(m_SRVStagingDescriptorHeap->NewDescriptorHeapHandle());
+			m_device->CreateShaderResourceView(pNewBuffer->GetResource(), &SRVDesc, pNewBuffer->GetSRVDescriptor().GetCPUHandle());
 
-		auto vertexBuffer = std::make_unique<DX12VertexBuffer>(resource, usageState, bufferCreationDesc.m_stride, bufferCreationDesc.m_size, allocation);
+			pNewBuffer->SetResourceHeapIndex(m_freeReservedDescriptorIndices.back());
+			m_freeReservedDescriptorIndices.pop_back();
 
-		return vertexBuffer;
-	}
-	std::unique_ptr<DX12IndexBuffer>			DX12Device::CreateIndexBuffer(const IndexBufferCreateDesc& indexBufferCreateDesc)
-	{
-		// CPU-writable/GPU-readable memory
-		auto isHostViewable = indexBufferCreateDesc.bufferAccessFlags == BufferAccessFlags::HostWritable;
+			CopyDescriptorFromStageToRenderPass(pNewBuffer->GetSRVDescriptor(), pNewBuffer->GetResourceHeapIndex());
+		}
 
-		D3D12MA::ALLOCATION_DESC allocationDesc{};
-		allocationDesc.HeapType = isHostViewable ? D3D12_HEAP_TYPE_UPLOAD : D3D12_HEAP_TYPE_DEFAULT;
-		D3D12_RESOURCE_STATES usageState = isHostViewable ? D3D12_RESOURCE_STATE_GENERIC_READ : D3D12_RESOURCE_STATE_COPY_DEST;
+		if (isHasUAV)
+		{
+			D3D12_UNORDERED_ACCESS_VIEW_DESC UAVDesc{};
 
-		D3D12_RESOURCE_DESC resourceDesc = {};
-		resourceDesc.Width = indexBufferCreateDesc.m_bufferSize;
-		resourceDesc.Alignment = 0;
-		resourceDesc.Height = 1;
-		resourceDesc.DepthOrArraySize = 1;
-		resourceDesc.MipLevels = 1;
-		resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-		resourceDesc.Format = DXGI_FORMAT_UNKNOWN;
-		resourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
-		resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-		resourceDesc.SampleDesc = { 1, 0 };
+			UAVDesc.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
+			UAVDesc.Format = bufferCreationDesc.m_isRawAccess ? DXGI_FORMAT_R32_TYPELESS : DXGI_FORMAT_UNKNOWN;
+			UAVDesc.Buffer.CounterOffsetInBytes = 0;
+			UAVDesc.Buffer.FirstElement = 0;
+			UAVDesc.Buffer.NumElements = static_cast<UINT>(bufferCreationDesc.m_isRawAccess ? bufferCreationDesc.m_size / 4 : numElements);
+			UAVDesc.Buffer.StructureByteStride = bufferCreationDesc.m_isRawAccess ? 0 : pNewBuffer->GetStride();
+			UAVDesc.Buffer.Flags = bufferCreationDesc.m_isRawAccess ? D3D12_BUFFER_UAV_FLAG_RAW : D3D12_BUFFER_UAV_FLAG_NONE;
 
-		CComPtr<D3D12MA::Allocation> allocation = nullptr;
-		CComPtr<ID3D12Resource> resource = nullptr;
-		ElysiaHelper::ThrowIfFailed(m_allocator->CreateResource(&allocationDesc, &resourceDesc, usageState, nullptr,
-			&allocation, IID_PPV_ARGS(&resource)));
-		resource->SetName(L"Index Buffer");
+			pNewBuffer->SetUAVDescriptor(m_SRVStagingDescriptorHeap->NewDescriptorHeapHandle());
 
-		auto indexBuffer = std::make_unique<DX12IndexBuffer>(resource, usageState, 
-			indexBufferCreateDesc.m_format, indexBufferCreateDesc.m_bufferSize, indexBufferCreateDesc.m_vertexMappedBuffer, allocation);
+			m_device->CreateUnorderedAccessView(pNewBuffer->GetResource(), nullptr, &UAVDesc, pNewBuffer->GetUAVDescriptor().GetCPUHandle());
+		}
 
-		return std::move(indexBuffer);
-	}
-	std::unique_ptr<DX12ConstantBuffer>			DX12Device::CreateConstantBuffer(const ConstantBufferCreationDesc& bufferCreationDesc)
-	{
-		auto isHostViewable = bufferCreationDesc.bufferAccessFlags == BufferAccessFlags::HostWritable;
+		if (isHostVisible)
+		{
+			auto pTempMappedBuffer = pNewBuffer->GetMappedBuffer();
+			pNewBuffer->GetResource()->Map(0, nullptr, &pTempMappedBuffer);
+		}
 
-		D3D12MA::ALLOCATION_DESC allocationDesc{};
-		allocationDesc.HeapType = isHostViewable ? D3D12_HEAP_TYPE_UPLOAD : D3D12_HEAP_TYPE_DEFAULT;
-		D3D12_RESOURCE_STATES usageState = isHostViewable ? D3D12_RESOURCE_STATE_GENERIC_READ : D3D12_RESOURCE_STATE_COPY_DEST;
-
-		D3D12_RESOURCE_DESC resourceDesc = {};
-		resourceDesc.Width = ElysiaHelper::AlignU32(bufferCreationDesc.m_bufferSize, D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
-		resourceDesc.Alignment = 0;
-		resourceDesc.Height = 1;
-		resourceDesc.DepthOrArraySize = 1;
-		resourceDesc.MipLevels = 1;
-		resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-		resourceDesc.Format = DXGI_FORMAT_UNKNOWN;
-		resourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
-		resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-		resourceDesc.SampleDesc = { 1, 0 };
-
-		CComPtr<D3D12MA::Allocation> allocation = nullptr;
-		CComPtr<ID3D12Resource> resource = nullptr;
-		ElysiaHelper::ThrowIfFailed(m_allocator->CreateResource(&allocationDesc, &resourceDesc, usageState, nullptr,
-			&allocation, IID_PPV_ARGS(&resource)));
-		resource->SetName(L"Constant Buffer");
-
-		D3D12_CONSTANT_BUFFER_VIEW_DESC CBVDesc{};
-		CBVDesc.BufferLocation = resource->GetGPUVirtualAddress();
-		CBVDesc.SizeInBytes = static_cast<UINT32>(resourceDesc.Width);
-
-		auto CBVDescriptor = m_SRVStagingDescriptorHeap->NewDescriptorHeapHandle();
-		m_device->CreateConstantBufferView(&CBVDesc, CBVDescriptor.GetCPUHandle());
-
-		return std::make_unique<DX12ConstantBuffer>(resource, usageState, bufferCreationDesc.m_bufferSize, CBVDescriptor, allocation);
+		return pNewBuffer;
 	}
 	std::unique_ptr<DX12TextureUploadBuffer>	DX12Device::CreateTextureUploadHeap(const TextureBufferCreationDesc& bufferCreationDesc)
 	{
@@ -843,6 +830,8 @@ namespace ElysiaRenderer
 			pUtils->CreateReflection(&ReflectionData, IID_PPV_ARGS(&pReflection));
 
 			// Use reflection interface here.
+			D3D12_SHADER_DESC* pShaderDesc = nullptr;
+			pReflection->GetDesc(pShaderDesc);
 
 		}
 
@@ -1095,7 +1084,7 @@ namespace ElysiaRenderer
 		{
 			switch (currBuffer->GetBufferType())
 			{
-				case BufferType::Vertex:
+				case GPUResourceType::Vertex:
 				{
 					auto vertexBuffer = dynamic_cast<DX12VertexBuffer*>(currBuffer.get());
 					/*if (vertexBuffer->GetSRVDescriptor().IsValid())
@@ -1105,7 +1094,7 @@ namespace ElysiaRenderer
 					vertexBuffer->Unmap();
 					break;
 				}
-				case BufferType::Texture:
+				case GPUResourceType::Texture:
 				{
 					auto texUploadHeap = dynamic_cast<DX12TextureUploadBuffer*>(currBuffer.get());
 					texUploadHeap->Unmap();

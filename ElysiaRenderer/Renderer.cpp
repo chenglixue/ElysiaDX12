@@ -20,6 +20,8 @@ namespace ElysiaRenderer
 
 		m_cameraManager = std::make_unique<CameraManager>();
 		m_lightManager = std::make_unique<LightManager>();
+		m_shadowManager = std::make_unique<ShadowManager>(m_device.get());
+		m_bufferManager = std::make_unique<BufferManager>();
 	}
 
 	Renderer::~Renderer()
@@ -30,6 +32,10 @@ namespace ElysiaRenderer
 	{
 		m_cameraManager->Init();
 		m_lightManager->Init();
+		m_shadowManager->Init();
+		m_bufferManager->Init();
+
+		m_shadowManager->CreateMainShadow(4096, 15);
 
 		LoadModel();
 		InitTexTriangle();
@@ -97,14 +103,15 @@ namespace ElysiaRenderer
 	void Renderer::UpdatePassCBV()
 	{
 		ZeroMemory(&m_mainPassParameter, sizeof(CBVMainPassParameter));
+
 		m_mainPassParameter.screenSize = m_device->GetScreenSize();
 		m_mainPassParameter.frameIndex = m_device->GetFrameID();
-		XMStoreFloat4(&m_mainPassParameter.cameraPosWS, m_cameraManager->GetMainCamera()->GetPosition());
+		m_mainPassParameter.cameraPosWS = m_cameraManager->GetMainCamera()->GetPosition4();
 		m_mainPassParameter.viewMatrix = m_cameraManager->GetMainCamera()->GetViewMat();
 		m_mainPassParameter.projMatrix = m_cameraManager->GetMainCamera()->GetProj();
 		m_mainPassParameter.nearZ = m_cameraManager->GetMainCamera()->GetNearZ();
 		m_mainPassParameter.farZ = m_cameraManager->GetMainCamera()->GetFarZ();
-		m_mainPassParameter.mainLights[0] = std::move(m_lightManager->GetMainLight()->CreateLightData());
+		m_mainPassParameter.mainLight = std::move(m_lightManager->GetMainLight()->CreateLightData());
 		m_perMainPassBindResourceSpace->GetCBV()->SetMappedData(&m_mainPassParameter, sizeof(CBVMainPassParameter));
 		
 		/*XMStoreFloat4x4(&m_shadowPassParameter.shadowMatrix, XMMatrixTranspose(m_mainLightShadow->GetShadowMat()));
@@ -169,18 +176,18 @@ namespace ElysiaRenderer
 		m_perMainPassBindResourceSpace	= std::make_unique<PipelineResourceSpace>();
 		m_perObjectBindResourceSpace	= std::make_unique<PipelineResourceSpace>();
 
-		ConstantBufferCreationDesc constantBufferCreationDesc{};
-		constantBufferCreationDesc.m_bufferSize = sizeof(CBVMainPassParameter);
-		constantBufferCreationDesc.m_bufferIndex = 0;
-		constantBufferCreationDesc.bufferAccessFlags = BufferAccessFlags::HostWritable;
-		constantBufferCreationDesc.bufferTypeFlags = BufferTypeFlags::CBV;
-		constantBufferCreationDesc.m_isRawAccess = false;
-		 
-		m_passConstanBuffers = m_device->CreateConstantBuffer(constantBufferCreationDesc);
-		m_perMainPassBindResourceSpace->SetCBV(m_passConstanBuffers.get());
+		BufferCreationDesc desc{};
+		desc.m_size = sizeof(CBVMainPassParameter);
+		desc.m_accessFlags = BufferAccessFlags::HostWritable;
+		desc.m_viewFlags = GPUResourceFlags::CBV;
+		desc.m_isRawAccess = false;
+		
+		auto pTempConstanBuffer = m_device->CreateBuffer(desc);
+		m_bufferManager->AddConstantBuffer(PER_PASS_SPACE, std::move(pTempConstanBuffer));
+		m_perMainPassBindResourceSpace->SetCBV(m_bufferManager->GetConstantBuffer(PER_PASS_SPACE));
 		m_perMainPassBindResourceSpace->Lock();
 
-		constantBufferCreationDesc.m_bufferSize = sizeof(CBVObjectParameter);
+		desc.m_size = sizeof(CBVObjectParameter);
 		for (int i = 0; i < m_objectConstanBuffers.size(); ++i)
 		{
 			m_objectConstanBuffers[i] = std::unique_ptr<DX12ConstantBuffer>(m_device->CreateConstantBuffer(constantBufferCreationDesc));
@@ -198,23 +205,6 @@ namespace ElysiaRenderer
 		depthBufferCreateDesc.m_typeFlag = TexTypeFlags::SRV | TexTypeFlags::DSV;
 
 		m_depthBuffer = std::move(m_device->CreateTexture(depthBufferCreateDesc));
-	}
-	void Renderer::CreateShadowRT()
-	{
-		TexCreateDesc& shadowCreateDesc = m_depthBufferCreateDesc["Shadow"];
-		shadowCreateDesc.m_name = L"Shadowm RT";
-		shadowCreateDesc.m_resouceDesc.Width = 4096;
-		shadowCreateDesc.m_resouceDesc.Height = 4096;
-		shadowCreateDesc.m_resouceDesc.Format = DXGI_FORMAT_D32_FLOAT;
-		shadowCreateDesc.m_typeFlag = TexTypeFlags::SRV | TexTypeFlags::DSV;
-
-		std::shared_ptr<DX12TextureResource> shadowTex = std::move(m_device->CreateTexture(shadowCreateDesc));
-		auto shadowMap = std::make_shared<DX12Shadow>(shadowTex);
-		shadowMap->InitBoundSphere(20);
-		m_mainLightShadow = shadowMap;
-
-		//m_perObjectBindResourceSpace.m_SRVResources[ElysiaHelper::PER_PASS_SPACE].emplace_back(shadowTex);
-		m_shadowBuffers.emplace_back(std::move(shadowMap));
 	}
 	void Renderer::LoadAndCreateTexs()
 	{
@@ -399,26 +389,12 @@ namespace ElysiaRenderer
 		vertexBufferCreationDesc.m_stride = singVertexSize;
 		vertexBufferCreationDesc.m_size = static_cast<UINT>(m_vertices.size()) * vertexBufferCreationDesc.m_stride;
 		vertexBufferCreationDesc.bufferAccessFlags = bufferAccessFlag;
-		vertexBufferCreationDesc.bufferTypeFlags = BufferTypeFlags::None;
+		vertexBufferCreationDesc.bufferTypeFlags = GPUResourceFlags::None;
 		vertexBufferCreationDesc.m_isRawAccess = isRawAccess;
 
 		m_vertexBuffer = m_device->CreateVertexBuffer(vertexBufferCreationDesc);
 		m_vertexBuffer->SetMappedData(m_vertices.data(), vertexBufferCreationDesc.m_size);
 	}
-	void Renderer::AddIndexBuffer(UINT singIndexSize, DXGI_FORMAT format, BufferAccessFlags bufferAccessFlag)
-	{
-		IndexBufferCreateDesc indexBufferCreationDesc{};
-		indexBufferCreationDesc.m_bufferSize = static_cast<UINT>(m_indices.size()) * singIndexSize;
-		indexBufferCreationDesc.m_format = format;
-		indexBufferCreationDesc.m_vertexMappedBuffer = m_vertexBuffer->GetMappedBuffer();
-		indexBufferCreationDesc.bufferTypeFlags = BufferTypeFlags::None;
-		indexBufferCreationDesc.bufferAccessFlags = bufferAccessFlag;
-
-		m_indexBuffer = m_device->CreateIndexBuffer(indexBufferCreationDesc);
-		m_indexBuffer->SetMappedData(m_indices.data(), indexBufferCreationDesc.m_bufferSize);
-	}
-
-
 
 	void Renderer::RenderTexTriangle()
 	{

@@ -1,121 +1,19 @@
 ﻿cl : command line  warning D9014: invalid value '18' for '/wd'; assuming '5999'
-  DX12Shadow.cpp
+  BufferManager.cpp
+  DX12BufferResource.cpp
+  DX12ConstantBuffer.cpp
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12GPUResource.h(128,22): error C2061: syntax error: identifier 'BufferViewFlags'
+  (compiling source file 'DX12BufferResource.cpp')
+  
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12GPUResource.h(133,22): error C2061: syntax error: identifier 'BufferViewFlags'
+  (compiling source file 'DX12BufferResource.cpp')
+  
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file 'DX12Shadow.cpp')
+  (compiling source file 'DX12BufferResource.cpp')
   
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Shadow.cpp(52,51): error C2102: '&' requires l-value
-  DX12StagingDescriptorHeap.cpp
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file 'DX12StagingDescriptorHeap.cpp')
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12BufferResource.h(64,11): warning C4244: 'return': conversion from 'const size_t' to 'float', possible loss of data
+  (compiling source file 'DX12BufferResource.cpp')
   
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\xutility(255,61): warning C4267: 'initializing': conversion from 'size_t' to 'unsigned int', possible loss of data
-  (compiling source file 'DX12StagingDescriptorHeap.cpp')
-      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\xutility(255,61):
-      the template instantiation context (the oldest one first) is
-          D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12StagingDescriptorHeap.cpp(55,20):
-          see reference to function template instantiation '_Ty &std::vector<_Ty,std::allocator<_Ty>>::emplace_back<uint64_t>(uint64_t &&)' being compiled
-          with
-          [
-              _Ty=std::seed_seq::result_type
-          ]
-          C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\vector(862,24):
-          see reference to function template instantiation '_Ty &std::vector<_Ty,std::allocator<_Ty>>::_Emplace_one_at_back<unsigned __int64>(unsigned __int64 &&)' being compiled
-          with
-          [
-              _Ty=std::seed_seq::result_type
-          ]
-          C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\vector(780,20):
-          see reference to function template instantiation '_Ty &std::vector<_Ty,std::allocator<_Ty>>::_Emplace_back_with_unused_capacity<unsigned __int64>(unsigned __int64 &&)' being compiled
-          with
-          [
-              _Ty=std::seed_seq::result_type
-          ]
-          C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\vector(795,13):
-          see reference to function template instantiation 'void std::_Construct_in_place<unsigned int,_Ty>(unsigned int &,_Ty &&) noexcept' being compiled
-          with
-          [
-              _Ty=size_t
-          ]
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12BufferResource.h(85,15): warning C4244: '=': conversion from 'float' to 'size_t', possible loss of data
+  (compiling source file 'DX12BufferResource.cpp')
   
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\xmemory(723,82): warning C4267: 'initializing': conversion from 'size_t' to '_Objty', possible loss of data
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\xmemory(723,82): warning C4267:         with
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\xmemory(723,82): warning C4267:         [
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\xmemory(723,82): warning C4267:             _Objty=unsigned int
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\xmemory(723,82): warning C4267:         ]
-  (compiling source file 'DX12StagingDescriptorHeap.cpp')
-      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\xmemory(723,82):
-      the template instantiation context (the oldest one first) is
-          C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\vector(783,17):
-          see reference to function template instantiation 'unsigned int *std::vector<std::seed_seq::result_type,std::allocator<UINT>>::_Emplace_reallocate<_Ty>(unsigned int *const ,_Ty &&)' being compiled
-          with
-          [
-              _Ty=size_t
-          ]
-          C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\vector(834,23):
-          see reference to function template instantiation 'void std::_Default_allocator_traits<_Alloc>::construct<_Ty,unsigned __int64>(_Alloc &,_Objty *const ,unsigned __int64 &&)' being compiled
-          with
-          [
-              _Alloc=std::allocator<UINT>,
-              _Ty=unsigned int,
-              _Objty=unsigned int
-          ]
-  
-  LightManager.cpp
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\memory(3465,56): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\memory(3465,56): warning C4244:         with
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\memory(3465,56): warning C4244:         [
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\memory(3465,56): warning C4244:             _Ty=int
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\memory(3465,56): warning C4244:         ]
-  (compiling source file 'LightManager.cpp')
-      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\memory(3465,56):
-      the template instantiation context (the oldest one first) is
-          D:\DX12\ElysiaRenderer\ElysiaRenderer\LightManager.cpp(30,23):
-          see reference to function template instantiation 'std::unique_ptr<ElysiaRenderer::DX12DirectionLight,std::default_delete<ElysiaRenderer::DX12DirectionLight>> std::make_unique<ElysiaRenderer::DX12DirectionLight,DirectX::SimpleMath::Vector3,DirectX::SimpleMath::Vector3,int,0>(DirectX::SimpleMath::Vector3 &&,DirectX::SimpleMath::Vector3 &&,int &&)' being compiled
-  
-  main.cpp
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file 'main.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12TextureBuffer.h(32,34): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12TextureResource' when no variable is declared
-  (compiling source file 'main.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12PipelineState.h(9,32): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12RootSignature' when no variable is declared
-  (compiling source file 'main.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12PipelineState.h(10,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Shader' when no variable is declared
-  (compiling source file 'main.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12GraphicsContext.h(9,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
-  (compiling source file 'main.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12UploadContext.h(12,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
-  (compiling source file 'main.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Material.h(9,26): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Texture' when no variable is declared
-  (compiling source file 'main.cpp')
-  
-  Renderer.cpp
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file 'Renderer.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12TextureBuffer.h(32,34): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12TextureResource' when no variable is declared
-  (compiling source file 'Renderer.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12PipelineState.h(9,32): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12RootSignature' when no variable is declared
-  (compiling source file 'Renderer.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12PipelineState.h(10,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Shader' when no variable is declared
-  (compiling source file 'Renderer.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12GraphicsContext.h(9,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
-  (compiling source file 'Renderer.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12UploadContext.h(12,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
-  (compiling source file 'Renderer.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Material.h(9,26): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Texture' when no variable is declared
-  (compiling source file 'Renderer.cpp')
-  
-  Generating Code...
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.h(60): warning C4172: returning address of local variable or temporary
-D:\DX12\ElysiaRenderer\ElysiaRenderer\main.cpp(208): warning C4715: 'WndProc': not all control paths return a value

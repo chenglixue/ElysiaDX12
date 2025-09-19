@@ -1,0 +1,49 @@
+#include "ShadowManager.h"
+#include "DX12Device.h"
+
+namespace ElysiaRenderer
+{
+	ShadowManager::ShadowManager(DX12Device* pDevice)
+		: m_pDevice(std::move(pDevice))
+	{
+
+	}
+
+	ShadowManager::~ShadowManager()
+	{
+
+	}
+
+	void ShadowManager::Init()
+	{
+	}
+
+	void ShadowManager::Destory() 
+	{
+
+	}
+
+	void ShadowManager::CreateMainShadow(float resolution, float boundSphereRadius, DXGI_FORMAT format)
+	{
+		TexCreateDesc shadowCreateDesc{};
+		shadowCreateDesc.m_name = L"Shadowm RT";
+		shadowCreateDesc.m_resouceDesc.Width = resolution;
+		shadowCreateDesc.m_resouceDesc.Height = resolution;
+		shadowCreateDesc.m_resouceDesc.Format = format;
+		shadowCreateDesc.m_typeFlag = TexTypeFlags::SRV | TexTypeFlags::DSV;
+
+		std::shared_ptr<DX12TextureResource> shadowTex = std::move(m_pDevice->CreateTexture(shadowCreateDesc));
+		auto shadowMap = std::make_unique<DX12Shadow>(shadowTex);
+		shadowMap->InitBoundSphere(20);
+
+		if (m_pMainShadow != nullptr)
+		{
+			m_pMainShadow.reset();
+			m_pMainShadow = std::move(shadowMap);
+		}
+		else
+		{
+			m_pMainShadow = std::move(shadowMap);
+		}
+	}
+}

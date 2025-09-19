@@ -7,7 +7,7 @@ namespace ElysiaRenderer
 		CComPtr<D3D12MA::Allocation> allocation)
 		: DX12BufferResource(resource, usageState)
 	{
-		m_bufferType = BufferType::Index;
+		m_bufferType = GPUResourceType::Index;
 
 		m_allocation = allocation;
 		m_GPUAddress = resource->GetGPUVirtualAddress();

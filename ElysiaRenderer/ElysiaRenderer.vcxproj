@@ -155,6 +155,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="BufferManager.h" />
     <ClInclude Include="CameraManager.h" />
     <ClInclude Include="CBVPassParameter.h" />
     <ClInclude Include="D3D12MemoryAllocator\D3D12MemAlloc.h" />
@@ -214,6 +215,8 @@
     <ClInclude Include="Math.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="RenderHelper.h" />
+    <ClInclude Include="ShaderManager.h" />
+    <ClInclude Include="ShadowManager.h" />
     <ClInclude Include="SimpleMath\SimpleMath.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="TextureManager.h" />
@@ -257,6 +260,7 @@
     <None Include="SimpleMath\SimpleMath.inl" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BufferManager.cpp" />
     <ClCompile Include="CameraManager.cpp" />
     <ClCompile Include="D3D12MemoryAllocator\D3D12MemAlloc.cpp" />
     <ClCompile Include="DX12BufferResource.cpp" />
@@ -313,6 +317,8 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PipelineResourceSpace.cpp" />
     <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="ShaderManager.cpp" />
+    <ClCompile Include="ShadowManager.cpp" />
     <ClCompile Include="Transform.cpp" />
   </ItemGroup>
   <ItemGroup>

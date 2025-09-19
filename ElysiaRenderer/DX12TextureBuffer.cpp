@@ -4,11 +4,11 @@
 namespace ElysiaRenderer
 {
 	DX12TextureBuffer::DX12TextureBuffer(DX12TextureResource* texResource, size_t mipLevels, size_t arraySize)
-		: DX12BufferResource(texResource->GetResource(), texResource->GetUsageState())
+		//: DX12BufferResource(texResource->GetResource(), texResource->GetUsageState())
 	{
 		m_tex = texResource;
 		m_numSubResources = static_cast<UINT>(mipLevels * arraySize);
-		m_allocation = m_tex->GetAllocation();
+		//m_allocation = m_tex->GetAllocation();
 	}
 
 	/*DX12TextureBuffer::DX12TextureBuffer(ID3D12Resource* resource, D3D12_RESOURCE_STATES usageState, D3D12MA::Allocation* allocation)

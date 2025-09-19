@@ -30,7 +30,7 @@ namespace ElysiaRenderer
 		PipelineResourceSpace(PipelineResourceSpace&& rhs) = default;
 		~PipelineResourceSpace() = default;
 
-		DX12ConstantBuffer* GetCBV()
+		DX12BufferResource* GetCBV()
 		{
 			return m_CBV;
 		}
@@ -39,7 +39,7 @@ namespace ElysiaRenderer
 			return m_SRVs;
 		}
 
-		void SetCBV(DX12ConstantBuffer* CBVResource);
+		void SetCBV(DX12BufferResource* CBVResource);
 		void SetSRV(PipelineResourceBinding* SRVResource);
 
 		void Lock()
@@ -54,7 +54,7 @@ namespace ElysiaRenderer
 	private:
 		UINT GetIndexOfBindingIndex(const std::vector<PipelineResourceBinding*>& bindResources, UINT bindingIndex);
 
-		DX12ConstantBuffer* m_CBV;
+		DX12BufferResource* m_CBV;
 		std::vector<PipelineResourceBinding*> m_SRVs;
 		bool m_isLocked = false;
 	};

@@ -5,7 +5,7 @@ namespace ElysiaRenderer
 	DX12TextureResource::DX12TextureResource(CComPtr<ID3D12Resource> resource, D3D12_RESOURCE_STATES usageState) :
 		DX12GPUResource(resource, usageState)
 	{
-		m_bufferType = BufferType::Texture;
+		m_bufferType = GPUResourceType::Texture;
 		m_GPUAddress = resource->GetGPUVirtualAddress();
 	}
 
@@ -13,7 +13,7 @@ namespace ElysiaRenderer
 		CComPtr<D3D12MA::Allocation> allocation) :
 		DX12GPUResource(resource, usageState)
 	{
-		m_bufferType = BufferType::Texture;
+		m_bufferType = GPUResourceType::Texture;
 		m_GPUAddress = resource->GetGPUVirtualAddress();
 
 		m_allocation = allocation;
