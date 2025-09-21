@@ -13,6 +13,7 @@
 #include "LightManager.h"
 #include "ShadowManager.h"
 #include "BufferManager.h"
+#include "RenderResource.h"
 
 
 namespace ElysiaRenderer 
@@ -122,79 +123,24 @@ namespace ElysiaRenderer
 		float m_aspectRatio;
 		std::shared_ptr<DX12UI> m_pUI = nullptr;
 		std::unique_ptr<DX12Device> m_device = nullptr;
-		std::shared_ptr<DX12TextureResource> m_depthBuffer = nullptr;
 		std::unique_ptr<DX12GraphicsContext> m_graphicsContext = nullptr;
 		std::unique_ptr<DX12VertexBuffer> m_vertexBuffer = nullptr;
 		std::vector<std::unique_ptr<DX12TextureResource>> m_texs{};
-		std::vector<std::unique_ptr<D3D12_SAMPLER_DESC>> m_samplers;
+		std::vector<std::unique_ptr<D3D12_SAMPLER_DESC>> m_samplers{};
 		std::unordered_map<UINT, std::unordered_map<ShaderType, std::unique_ptr<DX12Shader>>> m_vertexShaders;
 		std::unordered_map<UINT, std::unordered_map<ShaderType, std::unique_ptr<DX12Shader>>> m_pixelShaders;
 		std::vector<std::unique_ptr<DX12Shader>> m_computeShaders;
 		std::unordered_map<UINT, std::shared_ptr<PipelineStateObject>> m_graphicsPipelineStates;
-		std::unordered_map<std::string, TexCreateDesc> m_depthBufferCreateDesc
-		{
-			{"Camera", {}},
-			{"Shadow", {}},
-		};
 
-		std::unique_ptr<CameraManager> m_cameraManager = nullptr;
-		std::unique_ptr<LightManager> m_lightManager = nullptr;
-		std::unique_ptr<ShadowManager> m_shadowManager = nullptr;
-		std::unique_ptr<BufferManager> m_bufferManager = nullptr;
-
-		/// <summary>
-		/// Constant parameter
-		/// </summary>   
-		struct alignas(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT)CBVMainPassParameter
-		{
-			Vector4 cameraPosWS = Vector4::Zero;	// 16
-			Matrix viewMatrix = Matrix::Identity;	// 64
-			Matrix projMatrix = Matrix::Identity; 	// 64
-			Vector4 screenSize = Vector4::Zero;	// 16
-
-			LightData mainLight;	// 64
-
-			UINT frameIndex = 0;
-			float nearZ = 1;
-			float farZ = 1000;
-		};
-		struct alignas(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT)CBVShadowPassParameter
-		{
-			XMFLOAT4X4 viewMatrix = MathHelper::Identity4x4();	// 64
-			XMFLOAT4X4 projMatrix = MathHelper::Identity4x4(); 	// 64
-
-			XMFLOAT4X4 shadowMatrix = MathHelper::Identity4x4();	// 64
-
-			float nearZ = 1;
-			float farZ = 1000;
-		};
-		struct alignas(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT) CBVObjectParameter
-		{
-			UINT baseColorTexIndex;
-			UINT normalTexIndex;
-			UINT metallicTexIndex;
-			UINT roughnessTexIndex;
-
-			Matrix	worldMatrix = Matrix::Identity;
-
-			Vector3	baseColorTint = Vector3::One;
-			float		opacity = 1.f;
-
-			float		normalIntensity = 1.f;
-			float		metallicIntensity = 1.f;
-			float		roughnessIntensity = 1.f;
-			float		ambientCubemapIntensity = 1.f;
-
-			Vector3	ambientCubemapTint = Vector3::One;
-
-			//float padding[48];
-		};
-		CBVMainPassParameter m_mainPassParameter{};
-		std::unique_ptr<DX12ConstantBuffer> m_passConstanBuffers = nullptr;
+		std::unique_ptr<CameraManager> m_pCameraManager = nullptr;
+		std::unique_ptr<LightManager> m_pLightManager = nullptr;
+		std::unique_ptr<ShadowManager> m_pShadowManager = nullptr;
+		std::unique_ptr<BufferManager> m_pBufferManager = nullptr;
+		std::unique_ptr<RenderResource> m_pRenderSource = nullptr;
+		
 		std::unique_ptr<PipelineResourceSpace> m_perObjectBindResourceSpace = nullptr;
-		//std::shared_ptr<PipelineResourceSpace> m_perShadowBindResourceSpace{};
 		std::unique_ptr<PipelineResourceSpace> m_perMainPassBindResourceSpace = nullptr;
-		 
+		
 		/// <summary>
 		/// Model
 		/// </summary>
@@ -202,7 +148,6 @@ namespace ElysiaRenderer
 		std::vector<DX12Vertex> m_vertices{};
 		std::vector<UINT> m_indices{};
 		std::vector<std::unique_ptr<DX12MeshRender>> m_meshRenders{};
-		UINT m_objectCBVIndex = 0;
 
 		void UpdateCBV();
 		void UpdatePassCBV();

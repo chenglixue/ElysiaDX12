@@ -170,7 +170,6 @@
     <ClInclude Include="DX12Context.h" />
     <ClInclude Include="DX12DescriptorHeap.h" />
     <ClInclude Include="DX12DescriptorHeapHandle.h" />
-    <ClInclude Include="DX12ConstantBuffer.h" />
     <ClInclude Include="DX12Device.h" />
     <ClInclude Include="DX12GraphicsContext.h" />
     <ClInclude Include="DX12Light.h" />
@@ -190,7 +189,6 @@
     <ClInclude Include="DX12UI.h" />
     <ClInclude Include="DX12UploadContext.h" />
     <ClInclude Include="DX12Vertex.h" />
-    <ClInclude Include="DX12VertexBuffer.h" />
     <ClInclude Include="dxc\inc\d3d12shader.h" />
     <ClInclude Include="dxc\inc\dxcapi.h" />
     <ClInclude Include="DXTex\BC.h" />
@@ -210,11 +208,11 @@
     <ClInclude Include="imgui\imstb_rectpack.h" />
     <ClInclude Include="imgui\imstb_textedit.h" />
     <ClInclude Include="imgui\imstb_truetype.h" />
-    <ClInclude Include="DX12IndexBuffer.h" />
     <ClInclude Include="DX12MeshRender.h" />
     <ClInclude Include="Math.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="RenderHelper.h" />
+    <ClInclude Include="RenderResource.h" />
     <ClInclude Include="ShaderManager.h" />
     <ClInclude Include="ShadowManager.h" />
     <ClInclude Include="SimpleMath\SimpleMath.h" />
@@ -317,6 +315,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PipelineResourceSpace.cpp" />
     <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="RenderResource.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
     <ClCompile Include="ShadowManager.cpp" />
     <ClCompile Include="Transform.cpp" />

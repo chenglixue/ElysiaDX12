@@ -12,15 +12,15 @@ namespace ElysiaRenderer
 
 		DX12Queue* GetGraphicsQueue()
 		{
-			return m_graphicsQueue;
+			return m_graphicsQueue.get();
 		}
 		DX12Queue* GetComputeQueue()
 		{
-			return m_computeQueue;
+			return m_computeQueue.get();
 		}
 		DX12Queue* GetCopyQueue()
 		{
-			return m_copyQueue;
+			return m_copyQueue.get();
 		}
 
 		DX12Queue* GetQueue(D3D12_COMMAND_LIST_TYPE queueType);
@@ -30,8 +30,8 @@ namespace ElysiaRenderer
 		void WaitForAllIdle();
 	
 	private:
-		DX12Queue* m_graphicsQueue;
-		DX12Queue* m_computeQueue;
-		DX12Queue* m_copyQueue;
+		std::unique_ptr<DX12Queue> m_graphicsQueue;
+		std::unique_ptr<DX12Queue> m_computeQueue;
+		std::unique_ptr<DX12Queue> m_copyQueue;
 	};
 }

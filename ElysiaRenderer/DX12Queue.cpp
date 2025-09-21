@@ -15,16 +15,14 @@ namespace ElysiaRenderer
 
 		D3D12_COMMAND_QUEUE_DESC queueDesc = {};
 		queueDesc.Type = m_queueType;
-		queueDesc.Priority = D3D12_COMMAND_QUEUE_PRIORITY_NORMAL;
 		queueDesc.NodeMask = 0;
-		queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
 		ElysiaHelper::AssertIfFailed(device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&m_commandQueue)));
 
 		ElysiaHelper::AssertIfFailed(device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence)));
 
 		m_fence->Signal(m_lastCompletedFenceValue);
 
-		m_fenceEventHandle = CreateEventEx(nullptr, nullptr, 0, EVENT_ALL_ACCESS);
+		m_fenceEventHandle = CreateEventEx(NULL, false, false, EVENT_ALL_ACCESS);
 
 		assert(m_fenceEventHandle != INVALID_HANDLE_VALUE);
 	}

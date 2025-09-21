@@ -31,7 +31,7 @@ namespace ElysiaRenderer
 		}
 		else
 		{
-			m_CBV = std::move(CBVResource);
+			m_CBV = CBVResource;
 		}
 	}
 	void PipelineResourceSpace::SetSRV(PipelineResourceBinding* SRVResource)
@@ -46,7 +46,7 @@ namespace ElysiaRenderer
 			}
 			else
 			{
-				m_SRVs[currIndex] = std::move(SRVResource);
+				m_SRVs[currIndex] = SRVResource;
 			}
 		}
 		else
@@ -59,7 +59,7 @@ namespace ElysiaRenderer
 			}
 			else
 			{
-				m_SRVs[currIndex] = std::move(SRVResource);
+				m_SRVs[currIndex] = SRVResource;
 			}
 		}
 	}

@@ -2,10 +2,8 @@
 #include "stdafx.h"
 #include "DX12Context.h"
 #include "DX12BufferResource.h"
-#include "DX12VertexBuffer.h"
 #include "DX12TextureBuffer.h"
 #include "DX12TextureResource.h"
-#include "DX12ConstantBuffer.h"
 
 namespace ElysiaRenderer
 {
@@ -38,7 +36,7 @@ namespace ElysiaRenderer
 	private:
 		//std::vector<std::unique_ptr<DX12VertexBuffer>> m_vertexBufferUploads;
 		// these not upload heap.their members have default heap, need upload data from m_textureUploadHeap to members's default heap
-		std::vector<std::unique_ptr<DX12ConstantBuffer>> m_constantBufferUploads;
+		std::vector<std::unique_ptr<DX12BufferResource>> m_constantBufferUploads;
 		std::vector<std::unique_ptr<DX12TextureBuffer>> m_textureUploads;
 		std::vector<DX12TextureResource*> m_textureUploadsInProgress;
 

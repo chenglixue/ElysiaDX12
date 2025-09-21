@@ -125,11 +125,11 @@ namespace ElysiaRenderer
 
 	inline GPUResourceFlags operator|(GPUResourceFlags a, GPUResourceFlags b)
 	{
-		return static_cast<BufferViewFlags>(static_cast<uint8_t>(a) | static_cast<uint8_t>(b));
+		return static_cast<GPUResourceFlags>(static_cast<uint8_t>(a) | static_cast<uint8_t>(b));
 	}
 
 	inline GPUResourceFlags operator&(GPUResourceFlags a, GPUResourceFlags b)
 	{
-		return static_cast<BufferViewFlags>(static_cast<uint8_t>(a) & static_cast<uint8_t>(b));
+		return static_cast<GPUResourceFlags>(static_cast<uint8_t>(a) & static_cast<uint8_t>(b));
 	}
 }

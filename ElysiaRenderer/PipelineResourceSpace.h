@@ -1,7 +1,6 @@
 #pragma once
 #include "stdafx.h"
 #include "DX12TextureResource.h"
-#include "DX12ConstantBuffer.h"
 
 namespace ElysiaRenderer
 {

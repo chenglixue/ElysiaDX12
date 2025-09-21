@@ -6,15 +6,13 @@ namespace ElysiaRenderer
 {
 	DX12QueueManager::DX12QueueManager(ID3D12Device* device)
 	{
-		m_graphicsQueue = new DX12Queue(device, D3D12_COMMAND_LIST_TYPE_DIRECT);
-		m_computeQueue = new DX12Queue(device, D3D12_COMMAND_LIST_TYPE_COMPUTE);
-		m_copyQueue = new DX12Queue(device, D3D12_COMMAND_LIST_TYPE_COPY);
+		m_graphicsQueue = std::make_unique<DX12Queue>(device, D3D12_COMMAND_LIST_TYPE_DIRECT);
+		m_computeQueue = std::make_unique<DX12Queue>(device, D3D12_COMMAND_LIST_TYPE_COMPUTE);
+		m_copyQueue = std::make_unique<DX12Queue>(device, D3D12_COMMAND_LIST_TYPE_COPY);
 	}
 	DX12QueueManager::~DX12QueueManager()
 	{
-		delete m_graphicsQueue;
-		delete m_computeQueue;
-		delete m_copyQueue;
+		
 	}
 
 	DX12Queue* DX12QueueManager::GetQueue(D3D12_COMMAND_LIST_TYPE queueType)
@@ -22,11 +20,11 @@ namespace ElysiaRenderer
 		switch (queueType)
 		{
 		case D3D12_COMMAND_LIST_TYPE_DIRECT:
-			return m_graphicsQueue;
+			return m_graphicsQueue.get();
 		case D3D12_COMMAND_LIST_TYPE_COMPUTE:
-			return m_computeQueue;
+			return m_computeQueue.get();
 		case D3D12_COMMAND_LIST_TYPE_COPY:
-			return m_copyQueue;
+			return m_copyQueue.get();
 
 		default:
 			ElysiaHelper::ThrowRuntimeError("Bad command type lookup in queue manager.");
