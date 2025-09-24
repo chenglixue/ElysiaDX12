@@ -1,8 +1,11 @@
 #pragma once
 #include "stdafx.h"
+#include "DX12Light.h"
 
 namespace ElysiaRenderer
 {
+	using namespace DirectX::SimpleMath;
+
 	enum class CBVPassParameterType : uint8_t
 	{
 		Main = 0,
@@ -25,10 +28,10 @@ namespace ElysiaRenderer
 
 	struct alignas(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT)CBVShadowPassParameter
 	{
-		XMFLOAT4X4 viewMatrix = MathHelper::Identity4x4();	// 64
-		XMFLOAT4X4 projMatrix = MathHelper::Identity4x4(); 	// 64
+		XMFLOAT4X4 viewMatrix = Matrix::Identity;	// 64
+		XMFLOAT4X4 projMatrix = Matrix::Identity; 	// 64
 
-		XMFLOAT4X4 shadowMatrix = MathHelper::Identity4x4();	// 64
+		XMFLOAT4X4 shadowMatrix = Matrix::Identity;	// 64
 
 		float nearZ = 1;
 		float farZ = 1000;
@@ -36,11 +39,6 @@ namespace ElysiaRenderer
 
 	struct alignas(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT) CBVObjectParameter
 	{
-		UINT baseColorTexIndex;
-		UINT normalTexIndex;
-		UINT metallicTexIndex;
-		UINT roughnessTexIndex;
-
 		Matrix	worldMatrix = Matrix::Identity;
 
 		Vector3	baseColorTint = Vector3::One;
@@ -52,6 +50,12 @@ namespace ElysiaRenderer
 		float		ambientCubemapIntensity = 1.f;
 
 		Vector3	ambientCubemapTint = Vector3::One;
+		UINT baseColorTexIndex;
+
+		UINT normalTexIndex;
+		UINT metallicTexIndex;
+		UINT roughnessTexIndex;
+		UINT vertexIndex;
 
 		//float padding[48];
 	};

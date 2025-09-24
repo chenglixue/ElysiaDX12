@@ -21,8 +21,8 @@ namespace ElysiaRenderer
 		m_pCameraManager = std::make_unique<CameraManager>();
 		m_pLightManager = std::make_unique<LightManager>();
 		m_pShadowManager = std::make_unique<ShadowManager>(m_device.get());
-		m_pBufferManager = std::make_unique<BufferManager>();
-		m_pRenderSource = std::make_unique<RenderResource>();
+		m_pBufferManager = std::make_unique<BufferManager>(m_device.get());
+		m_pRenderSource = std::make_unique<RenderResource>(m_device.get());
 	}
 
 	Renderer::~Renderer()
@@ -54,7 +54,6 @@ namespace ElysiaRenderer
 	{
 		m_device->WaitForIdle();
 		m_device->DestoryContext(std::move(m_graphicsContext));
-		m_device->DestoryBuffer(std::move(m_vertexBuffer));
 		for (size_t i = 0; i < m_graphicsPipelineStates.size(); ++i)
 		{
 			//m_device->DestoryPipelineState(std::move(m_graphicsPipelineStates[i]));
@@ -62,7 +61,6 @@ namespace ElysiaRenderer
 		m_device = nullptr;
 
 		m_graphicsContext.release();
-		m_vertexBuffer.release();
 		m_vertexShaders.clear();
 		m_pixelShaders.clear();
 		m_computeShaders.clear();
@@ -103,8 +101,6 @@ namespace ElysiaRenderer
 	}
 	void Renderer::UpdatePassCBV()
 	{
-		ZeroMemory(m_pRenderSource->GetCBVPassParameter(), sizeof(CBVMainPassParameter));
-
 		m_pRenderSource->GetCBVPassParameter()->screenSize = m_device->GetScreenSize();
 		m_pRenderSource->GetCBVPassParameter()->frameIndex = m_device->GetFrameID();
 		m_pRenderSource->GetCBVPassParameter()->cameraPosWS = m_pCameraManager->GetMainCamera()->GetPosition4();
@@ -144,7 +140,7 @@ namespace ElysiaRenderer
 	{
 		LoadShaders();
 
-		LoadVertexIndexBuffer();
+		AddVertexBuffer(sizeof(DX12Vertex));
 
 		LoadConstantBuffers();
 
@@ -167,11 +163,6 @@ namespace ElysiaRenderer
 		//AddShader(ShaderQueue::Skybox, L"Shaders\\public\\Skybox.hlsl", L"VS", ShaderType::Vertex);
 		//AddShader(ShaderQueue::Skybox, L"Shaders\\public\\Skybox.hlsl", L"PS", ShaderType::Pixel);
 	}
-	void Renderer::LoadVertexIndexBuffer()
-	{
-		AddVertexBuffer(sizeof(DX12Vertex));
-		//AddIndexBuffer(sizeof(UINT), DXGI_FORMAT_R32_UINT);
-	}
 	void Renderer::LoadConstantBuffers()
 	{
 		m_perMainPassBindResourceSpace	= std::make_unique<PipelineResourceSpace>();
@@ -183,13 +174,13 @@ namespace ElysiaRenderer
 		desc.m_isRawAccess = false;
 		
 		desc.m_size = sizeof(CBVMainPassParameter);
-		m_pBufferManager->AddConstantBuffer(PER_PASS_SPACE, std::move(m_device->CreateBuffer(desc)));
+		m_pBufferManager->AddConstantBuffer(PER_PASS_SPACE, desc);
 		m_perMainPassBindResourceSpace->SetCBV(m_pBufferManager->GetSingleConstantBuffer(PER_PASS_SPACE));
 		m_perMainPassBindResourceSpace->Lock();
 
 		desc.m_size = sizeof(CBVObjectParameter);
-		m_pBufferManager->AddConstantBuffer(PER_OBJECT_SPACE, std::move(m_device->CreateBuffer(desc)));
-		m_perObjectBindResourceSpace->SetCBV(m_pBufferManager->GetSingleConstantBuffer(PER_PASS_SPACE));
+		m_pBufferManager->AddConstantBuffer(PER_OBJECT_SPACE, desc);
+		m_perObjectBindResourceSpace->SetCBV(m_pBufferManager->GetMutilConstantBuffer(PER_OBJECT_SPACE, 0));
 		m_perObjectBindResourceSpace->Lock();
 	}
 	void Renderer::CreateCreamDepthRT()
@@ -258,7 +249,6 @@ namespace ElysiaRenderer
 		pipelineStateCreateDesc = std::move(CreateDefaultPipelineStateCreateDesc());
 		pipelineStateCreateDesc.m_vertexShader = m_vertexShaders[ShaderQueue::Opaque][ShaderType::Vertex].get();
 		pipelineStateCreateDesc.m_pixelShader = m_pixelShaders[ShaderQueue::Opaque][ShaderType::Pixel].get();
-		pipelineStateCreateDesc.m_inputElementDesc = m_inputElementDescs;
 		pipelineStateCreateDesc.m_renderTargetDesc.m_numRenderTargets = 1;
 		pipelineStateCreateDesc.m_renderTargetDesc.m_renderTargetFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 		pipelineStateCreateDesc.m_depthStencilDesc.DepthEnable = TRUE;
@@ -380,17 +370,25 @@ namespace ElysiaRenderer
 		}
 
 	}
-	void Renderer::AddVertexBuffer(UINT singVertexSize, BufferAccessFlags bufferAccessFlag, bool isRawAccess)
+	void Renderer::AddVertexBuffer(UINT singVertexSize)
 	{
-		VertexBufferCreationDesc vertexBufferCreationDesc{};
+		BufferCreationDesc vertexBufferCreationDesc{};
 		vertexBufferCreationDesc.m_stride = singVertexSize;
-		vertexBufferCreationDesc.m_size = static_cast<UINT>(m_vertices.size()) * vertexBufferCreationDesc.m_stride;
-		vertexBufferCreationDesc.bufferAccessFlags = bufferAccessFlag;
-		vertexBufferCreationDesc.bufferTypeFlags = GPUResourceFlags::None;
-		vertexBufferCreationDesc.m_isRawAccess = isRawAccess;
+		vertexBufferCreationDesc.m_size = static_cast<UINT>(m_vertices.size() * vertexBufferCreationDesc.m_stride);
+		vertexBufferCreationDesc.m_accessFlags = BufferAccessFlags::GPUOnly;
+		vertexBufferCreationDesc.m_viewFlags = GPUResourceFlags::SRV;
+		vertexBufferCreationDesc.m_isRawAccess = true;
 
-		m_vertexBuffer = m_device->CreateVertexBuffer(vertexBufferCreationDesc);
-		m_vertexBuffer->SetMappedData(m_vertices.data(), vertexBufferCreationDesc.m_size);
+		m_pBufferManager->AddVertexBuffer(vertexBufferCreationDesc);
+
+		auto pBufferUpload = std::make_unique<DX12BufferUpload>();
+		pBufferUpload->m_buffer = m_pBufferManager->GetVertexBuffer();
+		pBufferUpload->m_bufferData = std::make_unique<uint8_t[]>(m_vertices.size() * vertexBufferCreationDesc.m_stride);
+		pBufferUpload->m_bufferDataSize = static_cast<UINT>(m_vertices.size() * vertexBufferCreationDesc.m_stride);
+
+		memcpy_s(pBufferUpload->m_bufferData.get(), pBufferUpload->m_bufferDataSize, m_vertices.data(), pBufferUpload->m_bufferDataSize);
+
+		m_device->GetUploadContext()->AddBufferToUploads(std::move(pBufferUpload));
 	}
 
 	void Renderer::RenderTexTriangle()
@@ -414,8 +412,6 @@ namespace ElysiaRenderer
 		m_graphicsContext->ClearRenderTarget(currBackBuffer, Color(1, 1, 1));
 		m_graphicsContext->ClearDepthStencilTarget(*m_pBufferManager->GetCameraDepthBuffer(), 1.f, 0);
 
-		m_graphicsContext->SetVertexBuffer(0, 1, m_vertexBuffer->GetVertexBufferView());
-
 		PipelineInfo pipelineStateData{};
 		pipelineStateData.m_pipelineStateObject = m_graphicsPipelineStates[ShaderQueue::Opaque].get();
 		pipelineStateData.m_renderTargets.emplace_back(&currBackBuffer);
@@ -425,18 +421,10 @@ namespace ElysiaRenderer
 		if (isReady)
 		{
 			auto objectParameter = m_pRenderSource->GetCBVObjectParameter(m_device->GetFrameID());
-			Matrix translateMatrix = Matrix::Identity;
-			Matrix scaleMatrix = Matrix::Identity;
-			Matrix rotationMatrix = Matrix::Identity;
-			Matrix MVP = Matrix::Identity;
-
-			scaleMatrix = Matrix::CreateScale(1);
-			rotationMatrix = Matrix::CreateRotationY(-90) * Matrix::CreateRotationZ(90);
-			MVP = rotationMatrix * scaleMatrix * translateMatrix;
-			objectParameter->worldMatrix = MVP;
-			m_pBufferManager->GetSingleConstantBuffer(m_device->GetFrameID())->SetMappedData(&objectParameter, sizeof(CBVObjectParameter));
-
-			m_perObjectBindResourceSpace->SetCBV(m_pBufferManager->GetSingleConstantBuffer(m_device->GetFrameID()));
+			 
+			objectParameter->vertexIndex = m_pBufferManager->GetVertexBuffer()->GetResourceHeapIndex();
+			m_pBufferManager->GetMutilConstantBuffer(PER_OBJECT_SPACE, m_device->GetFrameID())->SetMappedData(&objectParameter, sizeof(CBVObjectParameter));
+			m_perObjectBindResourceSpace->SetCBV(m_pBufferManager->GetMutilConstantBuffer(PER_OBJECT_SPACE, m_device->GetFrameID()));
 
 			m_graphicsContext->SetPipeline(pipelineStateData);
 			m_graphicsContext->SetPipelineResource(PER_OBJECT_SPACE, m_perObjectBindResourceSpace.get());
@@ -445,7 +433,7 @@ namespace ElysiaRenderer
 			m_graphicsContext->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(static_cast<UINT>(m_device->GetScreenSize().x), static_cast<UINT>(m_device->GetScreenSize().y)));
 			m_graphicsContext->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-			DrawCommand(0);
+			m_graphicsContext->Draw(static_cast<UINT>(m_vertices.size()));
 		}
 		//ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), m_graphicsContext->GetCommandList());
 

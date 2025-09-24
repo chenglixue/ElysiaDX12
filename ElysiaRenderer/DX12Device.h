@@ -7,7 +7,6 @@
 #include "DX12RenderPassDescriptorHeap.h"
 #include "DX12TextureBuffer.h"
 #include "DX12BufferResource.h"
-#include "DX12TextureResource.h"
 #include "Definition.h"
 #include "DX12Context.h"
 #include "DX12GraphicsContext.h"
@@ -73,13 +72,13 @@ namespace ElysiaRenderer
 		{ 
 			return m_ImguiDescriptors[index];
 		}
+		DX12UploadContext* GetUploadContext() const noexcept
+		{
+			return m_uploadContexts[m_frameID].get();
+		}
 
 		std::unique_ptr<DX12GraphicsContext>		CreateGraphicsContext();
 		std::unique_ptr<DX12BufferResource>			CreateBuffer(const BufferCreationDesc& bufferCreationDesc);
-		std::unique_ptr<DX12VertexBuffer>			CreateVertexBuffer(const VertexBufferCreationDesc& bufferCreationDesc);
-		std::unique_ptr<DX12IndexBuffer>			CreateIndexBuffer(const IndexBufferCreateDesc& indexBufferCreateDesc);
-		std::unique_ptr<DX12ConstantBuffer>			CreateConstantBuffer(const ConstantBufferCreationDesc& bufferCreationDesc);
-		std::unique_ptr<DX12TextureUploadBuffer>	CreateTextureUploadHeap(const TextureBufferCreationDesc& textureCreationDesc);
 		std::unique_ptr<DX12TextureResource>		CreateTextureFromFile(const TextureCreationDesc& textureCreationDesc);
 		std::unique_ptr<DX12TextureResource>		CreateTexture(const TexCreateDesc& desc);
 		std::unique_ptr<DX12Shader>					CreateShader(ShaderCreateDesc& shaderCreateDesc);
@@ -98,20 +97,6 @@ namespace ElysiaRenderer
 			uint32_t numSrcDescriptorRanges, const D3D12_CPU_DESCRIPTOR_HANDLE* srcDescriptorRangeStarts, const uint32_t* srcDescriptorRangeSizes, D3D12_DESCRIPTOR_HEAP_TYPE descriptorType);
 		void CopyDescriptorFromStageToRenderPass(DX12DescriptorHeapHandle SRVHandle, UINT index);
 		ContextSubmissionResult SubmitContextWork(DX12Context& context);
-
-		void TranslateTexBarrier(DX12GraphicsContext* graphicsContext)
-		{
-			auto graphicsCMD = graphicsContext->GetCommandList();
-			auto toTranslateTexs = m_uploadContexts[m_frameID]->GetTexUploadsInProgress();
-
-			for(auto toTranslateTex : toTranslateTexs)
-			{
-				auto tran = CD3DX12_RESOURCE_BARRIER::Transition(toTranslateTex->GetResource(),
-					D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-				graphicsCMD->ResourceBarrier(1, &tran);
-			}
-			
-		}
 
 		void WaitForIdle();
 

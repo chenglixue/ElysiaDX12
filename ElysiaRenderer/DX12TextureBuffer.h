@@ -3,103 +3,65 @@
 #include "DX12GPUResource.h"
 #include "DX12DescriptorHeapHandle.h"
 #include "DX12BufferResource.h"
+#include "TextureHelper.h"
 
 namespace ElysiaRenderer
 {
-	enum class TexFileFormat : uint8_t
-	{
-		None = 0,
-		DDS = 1,
-		TGA = 2
-	};
-
-	struct TextureCreationDesc
-	{
-		LPCWSTR texturePath;
-
-		bool isSRGB;
-	};
-
-	struct TextureBufferCreationDesc
-	{
-		GPUResourceFlags bufferTypeFlags		= GPUResourceFlags::None;
-		BufferAccessFlags bufferAccessFlags = BufferAccessFlags::GPUOnly;
-		bool m_isRawAccess					= false;
-		UINT m_size							= 0;
-		UINT m_stride						= 0;
-	};
-
-	extern class DX12TextureResource;
-	/// <summary>
-	/// only save texture data, not a heap but save a default heap
-	/// </summary>
-	class DX12TextureBuffer
+	class DX12TextureResource : public DX12GPUResource
 	{
 	public:
-		DX12TextureBuffer(DX12TextureResource* texResource, size_t mipLevels, size_t arraySize);
-		//DX12TextureBuffer(ID3D12Resource* resource, D3D12_RESOURCE_STATES usageState, D3D12MA::Allocation* allocation);
+		DX12TextureResource(CComPtr<ID3D12Resource> resource, D3D12_RESOURCE_STATES usageState);
+		DX12TextureResource(CComPtr<ID3D12Resource> resource, D3D12_RESOURCE_STATES usageState, CComPtr<D3D12MA::Allocation> allocation);
+		DX12TextureResource(DX12TextureResource&& texResource) = default;
+		DX12TextureResource(DX12TextureResource& a) = delete;
+		DX12TextureResource& operator=(DX12TextureResource& a) = delete;
+		DX12TextureResource(const DX12TextureResource& a) = delete;
+		DX12TextureResource& operator=(const DX12TextureResource& a) = delete;
+		~DX12TextureResource();
 
-		~DX12TextureBuffer();
-
-		DX12DescriptorHeapHandle GetDescriptorHeapHandle() const
+		DX12DescriptorHeapHandle GetRTVDescriptor() const
 		{
-			return m_SRVDescriptorHeapHandle;
+			return m_RTVDescriptor;
 		}
-		DX12TextureResource* GetDefaultHeap() const
+		DX12DescriptorHeapHandle GetDSVDescriptor() const
 		{
-			return m_tex;
+			return m_DSVDescriptor;
 		}
-		UINT GetNumSubResources() const
+		DX12DescriptorHeapHandle GetSRVDescriptor() const
 		{
-			return m_numSubResources;
+			return m_SRVDescriptor;
 		}
-		std::array<D3D12_PLACED_SUBRESOURCE_FOOTPRINT, MAX_TEXTURE_SUBRESOURCE_COUNT>& GetSubResourceLayouts()
+		DX12DescriptorHeapHandle GetUAVDescriptor() const
 		{
-			return m_subResourceLayouts;
-		}
-		size_t& GetTextureDataSize() 
-		{
-			return m_textureDataSize;
-		}
-		std::unique_ptr<uint8_t[]>& GetTexData()
-		{
-			return m_textureData;
+			return m_UAVDescriptor;
 		}
 
-		void InitTexData()
+		void SetRTVDescriptor(DX12DescriptorHeapHandle& handle)
 		{
-			m_textureData = std::make_unique<uint8_t[]>(m_textureDataSize);
+			m_RTVDescriptor = handle;
 		}
+		void SetSRVDescriptor(DX12DescriptorHeapHandle& handle)
+		{
+			m_SRVDescriptor = handle;
+		}
+		void SetDSVDescriptor(DX12DescriptorHeapHandle& handle)
+		{
+			m_DSVDescriptor = handle;
+		}
+
 	private:
-		DX12DescriptorHeapHandle m_SRVDescriptorHeapHandle{};
-		DX12TextureResource* m_tex;	// default heap
-		UINT m_numSubResources = 0;
-		SubResourceLayouts m_subResourceLayouts;
-		std::unique_ptr<uint8_t[]> m_textureData;
+		DX12DescriptorHeapHandle m_RTVDescriptor{};
+		DX12DescriptorHeapHandle m_DSVDescriptor{};
+		DX12DescriptorHeapHandle m_SRVDescriptor{};
+		DX12DescriptorHeapHandle m_UAVDescriptor{};
+	};
+
+	struct DX12TextureUpload
+	{
+		DX12TextureResource* m_textureBuffer;
+		std::unique_ptr<uint8_t[]> m_pTextureData;
 		size_t m_textureDataSize = 0;
-	};
-
-	class DX12TextureUploadBuffer : public DX12BufferResource
-	{
-	public:
-		DX12TextureUploadBuffer(CComPtr<ID3D12Resource> resource, D3D12_RESOURCE_STATES usageState, CComPtr<D3D12MA::Allocation> allocation);
-		~DX12TextureUploadBuffer();
-
-		uint8_t* GetMappedBuffer()
-		{
-			return m_mappedBuffer;
-		}
-		void Unmap()
-		{
-			if (m_mappedBuffer != nullptr)
-			{
-				m_resource->Unmap(0, nullptr);
-
-			}
-		}
-
-	private:
-		uint8_t* m_mappedBuffer;
-		GPUResourceType m_bufferType = GPUResourceType::Texture;
+		UINT m_numSubResources = 0;
+		SubResourceLayouts m_subResourceLayouts{0};
 	};
 }

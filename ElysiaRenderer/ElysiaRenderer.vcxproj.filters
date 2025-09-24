@@ -78,13 +78,7 @@
     <ClInclude Include="Helper.h">
       <Filter>Header Files\Helper</Filter>
     </ClInclude>
-    <ClInclude Include="DX12ConstantBuffer.h">
-      <Filter>Header Files\DX12</Filter>
-    </ClInclude>
     <ClInclude Include="DX12QueueManager.h">
-      <Filter>Header Files\DX12</Filter>
-    </ClInclude>
-    <ClInclude Include="DX12VertexBuffer.h">
       <Filter>Header Files\DX12</Filter>
     </ClInclude>
     <ClInclude Include="DX12DescriptorHeap.h">
@@ -118,9 +112,6 @@
     <ClInclude Include="DX12GraphicsContext.h">
       <Filter>Header Files\DX12</Filter>
     </ClInclude>
-    <ClInclude Include="DX12TextureResource.h">
-      <Filter>Header Files\DX12</Filter>
-    </ClInclude>
     <ClInclude Include="DX12Shader.h">
       <Filter>Header Files\DX12</Filter>
     </ClInclude>
@@ -134,9 +125,6 @@
       <Filter>Header Files\DX12</Filter>
     </ClInclude>
     <ClInclude Include="DX12UploadContext.h">
-      <Filter>Header Files\DX12</Filter>
-    </ClInclude>
-    <ClInclude Include="DX12IndexBuffer.h">
       <Filter>Header Files\DX12</Filter>
     </ClInclude>
     <ClInclude Include="DX12Model.h">
@@ -267,6 +255,12 @@
     </ClInclude>
     <ClInclude Include="BufferManager.h">
       <Filter>Header Files\Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderResource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureHelper.h">
+      <Filter>Header Files\Helper</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -412,12 +406,6 @@
     <ClCompile Include="DX12QueueManager.cpp">
       <Filter>Source Files\DX12</Filter>
     </ClCompile>
-    <ClCompile Include="DX12VertexBuffer.cpp">
-      <Filter>Source Files\DX12</Filter>
-    </ClCompile>
-    <ClCompile Include="DX12ConstantBuffer.cpp">
-      <Filter>Source Files\DX12</Filter>
-    </ClCompile>
     <ClCompile Include="DX12Device.cpp">
       <Filter>Source Files\DX12</Filter>
     </ClCompile>
@@ -449,16 +437,10 @@
     <ClCompile Include="DX12GraphicsContext.cpp">
       <Filter>Source Files\DX12</Filter>
     </ClCompile>
-    <ClCompile Include="DX12TextureResource.cpp">
-      <Filter>Source Files\DX12</Filter>
-    </ClCompile>
     <ClCompile Include="DX12PipelineState.cpp">
       <Filter>Source Files\DX12</Filter>
     </ClCompile>
     <ClCompile Include="DX12UploadContext.cpp">
-      <Filter>Source Files\DX12</Filter>
-    </ClCompile>
-    <ClCompile Include="DX12IndexBuffer.cpp">
       <Filter>Source Files\DX12</Filter>
     </ClCompile>
     <ClCompile Include="DX12Model.cpp">
@@ -580,6 +562,9 @@
     </ClCompile>
     <ClCompile Include="BufferManager.cpp">
       <Filter>Source Files\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderResource.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

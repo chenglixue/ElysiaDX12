@@ -4,6 +4,12 @@
 namespace ElysiaRenderer
 {
 	using namespace ElysiaHelper;
+
+	BufferManager::BufferManager(DX12Device* pDevice)
+		: m_pDevice(pDevice)
+	{
+
+	}
 	BufferManager::~BufferManager()
 	{
 		Destory();
@@ -53,7 +59,12 @@ namespace ElysiaRenderer
 		return m_pCameraDepthBuffer.get();
 	}
 
-	void BufferManager::AddConstantBuffer(uint8_t spaceID, std::unique_ptr<DX12BufferResource> pConstantBuffer)
+	DX12BufferResource* BufferManager::GetVertexBuffer() const noexcept
+	{
+		return m_pVertexBuffer.get();
+	}
+
+	void BufferManager::AddConstantBuffer(uint8_t spaceID, BufferCreationDesc createDesc)
 	{
 		switch (spaceID)
 		{
@@ -64,7 +75,7 @@ namespace ElysiaRenderer
 					m_pPassConstantBuffer.reset();
 				}
 
-				m_pPassConstantBuffer = std::move(pConstantBuffer);
+				m_pPassConstantBuffer = std::move(m_pDevice->CreateBuffer(createDesc));
 			
 				break;
 			}
@@ -78,9 +89,7 @@ namespace ElysiaRenderer
 						m_objectConstantBuffers[i].reset();
 					}
 
-					auto constantBuffer = *pConstantBuffer;
-
-					m_objectConstantBuffers[i] = std::unique_ptr<DX12BufferResource>(&constantBuffer);
+					m_objectConstantBuffers[i] = std::move(m_pDevice->CreateBuffer(createDesc));
 				}
 
 				break;
@@ -95,5 +104,10 @@ namespace ElysiaRenderer
 	void BufferManager::AddDepthBuffer(std::unique_ptr<DX12TextureResource> depthBuffer)
 	{
 		m_pCameraDepthBuffer = std::move(depthBuffer);
+	}
+
+	void BufferManager::AddVertexBuffer(BufferCreationDesc desc)
+	{
+		m_pVertexBuffer = std::move(m_pDevice->CreateBuffer(desc));
 	}
 }

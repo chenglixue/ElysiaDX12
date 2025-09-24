@@ -1,7 +1,6 @@
 #pragma once
 #include "DX12Context.h"
 #include "stdafx.h"
-#include "DX12TextureResource.h"
 #include "DX12PipelineState.h"
 
 namespace ElysiaRenderer

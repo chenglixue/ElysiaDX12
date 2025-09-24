@@ -12,17 +12,8 @@
     #include "../private\SharedCommon.hlsli"
 #endif
 
-//ConstantBuffer<PassConstant> PassConstantBuffer : register(b0, perPassSpace);
-//ConstantBuffer<ObjectConstant> ObjectConstantBuffer : register(b0, perObjectSpace);
-
-struct VSInput
-{
-    float3 positionOS : POSITION;
-    float3 color : COLOR;
-    float2 uv : TEXCOORD0;
-    float3 normalOS : NORMAL;
-    float3 tangentOS : TANGENT;
-};
+ConstantBuffer<PassConstant> PassConstantBuffer : register(b0, perPassSpace);
+ConstantBuffer<ObjectConstant> ObjectConstantBuffer : register(b0, perObjectSpace);
 
 struct PSInput
 {
@@ -41,13 +32,17 @@ struct PSOutput
     float4 target0 : SV_TARGET0;
 };
 
-PSInput VS(VSInput i)
+PSInput VS(uint vertexId : SV_VertexID)
 {
     PSInput o = (PSInput) 0;
+    
+    ByteAddressBuffer vertexBuffer = ResourceDescriptorHeap[ObjectConstantBuffer.vertexBufferIndex];
+    
+    DX12Vertex vertex = vertexBuffer.Load<DX12Vertex>(vertexId * sizeof(DX12Vertex));
 
-    o.positionWS = mul(M_World, float4(i.positionOS, 1.f));
-    o.positionVS = mul(M_View, o.positionWS);
-    o.positionCS = mul(M_Proj, o.positionVS);
+    o.positionWS = mul(ObjectConstantBuffer.worldMatrix, float4(vertex.position, 1.f));
+    o.positionVS = mul(PassConstantBuffer.viewMatrix, o.positionWS);
+    o.positionCS = mul(PassConstantBuffer.projMatrix, o.positionVS);
     
     //bool hasTangent = true;
     //if (hasTangent)
@@ -64,8 +59,8 @@ PSInput VS(VSInput i)
     //    o.normalWS = normalize(mul(i.normalOS, (float3x3) M_World));
     //}
     
-    o.uv = i.uv;
-    o.color = i.color;
+    o.uv = vertex.uv;
+    o.color = vertex.color;
     
     return o;
 }
@@ -79,11 +74,11 @@ PSOutput PS(PSInput i)
     inputParam.PositionVS = i.positionVS;
     inputParam.PixelPos = i.positionCS.xy;
     inputParam.objectUV = i.uv;
-    inputParam.ScreenUV = i.positionCS.xy / ScreenSize.xy;
+    inputParam.ScreenUV = i.positionCS.xy / PassConstantBuffer.screenSize.xy;
     inputParam.TangentWS = i.tangentWS;
     inputParam.BitTangentWS = i.bitTangentWS;
     inputParam.NormalWS = i.normalWS;
-    inputParam.ScreenVector = GetScreenVectorWS(CameraPosWS.xyz, i.positionWS.xyz);
+    inputParam.ScreenVector = GetScreenVectorWS(PassConstantBuffer.cameraPosWS.xyz, i.positionWS.xyz);
     
     //LightData mainLight = GetMainLight(PassConstantBuffer.lights[0]);
     

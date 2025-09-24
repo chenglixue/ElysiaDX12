@@ -29,7 +29,10 @@ namespace ElysiaRenderer
 		void Reset(CComPtr<ID3D12PipelineState> pipelineState);
 		void AddBarrier(DX12GPUResource& resource, D3D12_RESOURCE_STATES newState);
 		void FlushBarrier();
-		void CopyTextureRegion(DX12GPUResource& destination, DX12GPUResource& source, size_t sourceOffset, SubResourceLayouts subResourceLayouts, UINT numSubResources);
+		void CopyTextureRegion(DX12GPUResource& destination, DX12GPUResource& source, size_t sourceOffset, 
+			SubResourceLayouts subResourceLayouts, UINT numSubResources);
+		void CopyBufferRegion(DX12GPUResource& destination, UINT64 destOffset, 
+			DX12GPUResource& source, UINT64 sourceOffset, UINT64 numBytes);
 		void BindDescriptorHeaps(UINT frameIndex);
 
 	protected:

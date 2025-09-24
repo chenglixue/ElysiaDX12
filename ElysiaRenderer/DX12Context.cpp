@@ -112,6 +112,11 @@ namespace ElysiaRenderer
 		}
 	}
 
+	void DX12Context::CopyBufferRegion(DX12GPUResource& destination, UINT64 destOffset,
+		DX12GPUResource& source, UINT64 sourceOffset, UINT64 numBytes)
+	{
+		m_commandList->CopyBufferRegion(destination.GetResource(), destOffset, source.GetResource(), sourceOffset, numBytes);
+	}
 
 	/// <summary>
 	/// bind needed SRV resource and sampler resource for root parameters

@@ -50,7 +50,6 @@ namespace ElysiaRenderer
 			m_bufferType = GPUResourceType::Buffer;
 
 			m_allocation = allocation;
-			m_resource = resource;
 			m_GPUAddress = m_resource->GetGPUVirtualAddress();
 		}
 
@@ -75,7 +74,7 @@ namespace ElysiaRenderer
 		{
 			return m_UAVDescriptor;
 		}
-		void* GetMappedBuffer() const noexcept
+		uint8_t* GetMappedBuffer() const noexcept
 		{
 			return m_mappedBuffer;
 		}
@@ -98,15 +97,22 @@ namespace ElysiaRenderer
 		}
 		void SetMappedData(const void* bufferData, size_t bufferSize)
 		{
-			assert(m_mappedBuffer != nullptr && bufferData != nullptr && bufferSize > 0 && m_resourceDesc.Width < bufferSize);
+			assert(m_mappedBuffer != nullptr && bufferData != nullptr && bufferSize > 0 && bufferSize <= m_resourceDesc.Width);
 			memcpy_s(m_mappedBuffer, m_resourceDesc.Width, bufferData, bufferSize);
 		}
 
+		uint8_t* m_mappedBuffer = nullptr;
 	private:
 		size_t m_stride = 0;
-		void* m_mappedBuffer = nullptr;
 		DX12DescriptorHeapHandle m_CBVDescriptor{};
 		DX12DescriptorHeapHandle m_SRVDescriptor{};
 		DX12DescriptorHeapHandle m_UAVDescriptor{};
+	};
+
+	struct DX12BufferUpload
+	{
+		DX12BufferResource* m_buffer = nullptr;
+		std::unique_ptr<uint8_t[]> m_bufferData = nullptr;
+		size_t m_bufferDataSize = 0;
 	};
 }

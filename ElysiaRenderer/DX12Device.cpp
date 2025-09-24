@@ -18,8 +18,7 @@ namespace ElysiaRenderer
 
 		for (UINT i = 0; i < NUM_FRAMES_IN_FLIGHT; ++i)
 		{
-			DestoryBuffer(std::unique_ptr<DX12TextureUploadBuffer>(std::move(m_uploadContexts[i]->GetTexUploadHeap())));
-
+			DestoryBuffer(std::unique_ptr<DX12BufferResource>(std::move(m_uploadContexts[i]->GetTexUploadHeap())));
 		}
 
 		for (UINT i = 0; i < NUM_FRAMES_IN_FLIGHT; ++i)
@@ -192,20 +191,20 @@ namespace ElysiaRenderer
 
 		// Create Upload Context
 		{
-			VertexBufferCreationDesc vertexBufferCreationDesc{};
-			vertexBufferCreationDesc.bufferAccessFlags = BufferAccessFlags::HostWritable;
-			vertexBufferCreationDesc.m_size = 10 * 1024 * 1024;
+			BufferCreationDesc uploadBufferDesc{};
+			uploadBufferDesc.m_accessFlags = BufferAccessFlags::HostWritable;
+			uploadBufferDesc.m_size = 10 * 1024 * 1024;
 
-			TextureBufferCreationDesc textureBufferCreationDesc{};
-			textureBufferCreationDesc.bufferAccessFlags = BufferAccessFlags::HostWritable;
-			textureBufferCreationDesc.m_size = 40 * 4096 * 4096;
+			BufferCreationDesc uploadTextureDesc{};
+			uploadTextureDesc.m_accessFlags = BufferAccessFlags::HostWritable;
+			uploadTextureDesc.m_size = 40 * 4096 * 4096;
 
 			for (UINT currFrameIndex = 0; currFrameIndex < NUM_FRAMES_IN_FLIGHT; ++currFrameIndex)
 			{
 				m_uploadContexts[currFrameIndex] = std::make_unique<DX12UploadContext>(
 					this, 
-					//CreateVertexBuffer(vertexBufferCreationDesc),
-					CreateTextureUploadHeap(textureBufferCreationDesc));
+					CreateBuffer(uploadBufferDesc),
+					CreateBuffer(uploadTextureDesc));
 			}
 		}
 
@@ -283,8 +282,8 @@ namespace ElysiaRenderer
 		CComPtr<ID3D12Resource> pResource = nullptr;
 		ElysiaHelper::ThrowIfFailed(m_allocator->CreateResource(&allocationDesc, &resourceDesc, usageState, nullptr,
 			&pAllocation, IID_PPV_ARGS(&pResource)));
-		pResource->SetName(bufferCreationDesc.m_name);
-
+		//pResource->SetName(bufferCreationDesc.m_name);
+		 
 		auto pNewBuffer = std::make_unique<DX12BufferResource>(pResource, usageState, pAllocation);
 
 		if (isHasCBV)
@@ -336,42 +335,12 @@ namespace ElysiaRenderer
 
 		if (isHostVisible)
 		{
-			auto pTempMappedBuffer = pNewBuffer->GetMappedBuffer();
-			pNewBuffer->GetResource()->Map(0, nullptr, &pTempMappedBuffer);
+			pNewBuffer->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&pNewBuffer->m_mappedBuffer));
 		}
 
 		return pNewBuffer;
 	}
-	std::unique_ptr<DX12TextureUploadBuffer>	DX12Device::CreateTextureUploadHeap(const TextureBufferCreationDesc& bufferCreationDesc)
-	{
-		auto isHostViewable = bufferCreationDesc.bufferAccessFlags == BufferAccessFlags::HostWritable;
-
-		D3D12MA::ALLOCATION_DESC allocationDesc{};
-		allocationDesc.HeapType = isHostViewable ? D3D12_HEAP_TYPE_UPLOAD : D3D12_HEAP_TYPE_DEFAULT;
-		D3D12_RESOURCE_STATES usageState = isHostViewable ? D3D12_RESOURCE_STATE_GENERIC_READ : D3D12_RESOURCE_STATE_COPY_DEST;
-
-		// https://learn.microsoft.com/en-us/windows/win32/api/d3d12/ns-d3d12-d3d12_resource_desc
-		D3D12_RESOURCE_DESC resourceDesc = {};
-		resourceDesc.Width = ElysiaHelper::AlignU32(static_cast<uint32_t>(bufferCreationDesc.m_size), D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
-		resourceDesc.Alignment = 0;
-		resourceDesc.Height = 1;
-		resourceDesc.DepthOrArraySize = 1;
-		resourceDesc.MipLevels = 1;
-		resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-		resourceDesc.Format = DXGI_FORMAT_UNKNOWN;
-		resourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
-		resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-		resourceDesc.SampleDesc = { 1, 0 };
-
-		CComPtr<D3D12MA::Allocation> allocation = nullptr;
-		CComPtr<ID3D12Resource> resource = nullptr;
-		ElysiaHelper::ThrowIfFailed(m_allocator->CreateResource(&allocationDesc, &resourceDesc, usageState, nullptr,
-			&allocation, IID_PPV_ARGS(&resource)));
-
-		auto texBuffer = std::make_unique<DX12TextureUploadBuffer>(resource, usageState, allocation);
-
-		return texBuffer;
-	}
+	
 	std::unique_ptr<DX12TextureResource>		DX12Device::CreateTextureFromFile(const TextureCreationDesc& textureCreationDesc)
 	{
 		auto& texturePath = textureCreationDesc.texturePath;
@@ -431,14 +400,18 @@ namespace ElysiaRenderer
 		///
 
 		// 每个Mip图相当于一个子资源
-		auto texBuffer = std::make_unique<DX12TextureBuffer>(newTex.get(), texMetaData.mipLevels, texMetaData.arraySize);
+		auto textureUpload = std::make_unique<DX12TextureUpload>();
+		textureUpload->m_textureBuffer = newTex.get();
+		textureUpload->m_numSubResources = static_cast<UINT>(texMetaData.mipLevels * texMetaData.arraySize);
+
 		UINT numRows[MAX_TEXTURE_SUBRESOURCE_COUNT];	// 每个子资源的行数
 		uint64_t rowSizesInBytes[MAX_TEXTURE_SUBRESOURCE_COUNT];
 
-		m_device->GetCopyableFootprints(&texBuffer->GetDefaultHeap()->GetResourceDesc(), 0, texBuffer->GetNumSubResources(), 0,
-			texBuffer->GetSubResourceLayouts().data(), numRows, rowSizesInBytes, &texBuffer->GetTextureDataSize());
+		auto resourceDesc = textureUpload->m_textureBuffer->GetResourceDesc();
+		m_device->GetCopyableFootprints(&resourceDesc, 0, textureUpload->m_numSubResources, 0,
+			textureUpload->m_subResourceLayouts.data(), numRows, rowSizesInBytes, &textureUpload->m_textureDataSize);
 		
-		texBuffer->InitTexData();
+		textureUpload->m_pTextureData = std::make_unique<uint8_t[]>(textureUpload->m_textureDataSize);
 
 		for (size_t arrayIndex = 0; arrayIndex < texMetaData.arraySize; ++arrayIndex)
 		{
@@ -446,12 +419,12 @@ namespace ElysiaRenderer
 			{
 				const uint64_t subResourceIndex = mipIndex + (arrayIndex * texMetaData.mipLevels);
 
-				const D3D12_PLACED_SUBRESOURCE_FOOTPRINT& subResourcelayout = texBuffer->GetSubResourceLayouts()[subResourceIndex];
+				const D3D12_PLACED_SUBRESOURCE_FOOTPRINT& subResourcelayout = textureUpload->m_subResourceLayouts[subResourceIndex];
 				const uint64_t subResourceHeight = numRows[subResourceIndex];
 				// 每行数据的字节数
 				const uint64_t subResourcePitch = ElysiaHelper::AlignU32(subResourcelayout.Footprint.RowPitch, D3D12_TEXTURE_DATA_PITCH_ALIGNMENT);
 				const uint64_t subResourceDepth = subResourcelayout.Footprint.Depth;
-				uint8_t* destSubResourceMemory = texBuffer->GetTexData().get() + subResourcelayout.Offset;
+				uint8_t* destSubResourceMemory = textureUpload->m_pTextureData.get() + subResourcelayout.Offset;
 
 				// sliceIndex是3D纹理的切片索引，2D纹理的切片索引为0
 				for (uint64_t sliceIndex = 0; sliceIndex < subResourceDepth; sliceIndex++)
@@ -469,7 +442,7 @@ namespace ElysiaRenderer
 			}
 		}
 
-		m_uploadContexts[m_frameID]->AddTextureBufferUpload(std::move(texBuffer));
+		m_uploadContexts[m_frameID]->AddTextureToUploads(std::move(textureUpload));
 
 		return newTex;
 	}
@@ -960,8 +933,7 @@ namespace ElysiaRenderer
 		CreateRootParameters(rootSignature, rootParameters);
 
 		rootSignature->Init(m_device, 
-			//D3D12_ROOT_SIGNATURE_FLAG_CBV_SRV_UAV_HEAP_DIRECTLY_INDEXED | D3D12_ROOT_SIGNATURE_FLAG_SAMPLER_HEAP_DIRECTLY_INDEXED | 
-			D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+			D3D12_ROOT_SIGNATURE_FLAG_CBV_SRV_UAV_HEAP_DIRECTLY_INDEXED | D3D12_ROOT_SIGNATURE_FLAG_SAMPLER_HEAP_DIRECTLY_INDEXED);
 		
 		return rootSignature;
 	}
@@ -980,7 +952,6 @@ namespace ElysiaRenderer
 			PSODesc.PS.BytecodeLength = pipelineStateCreateDesc.m_pixelShader->GetShader()->GetBufferSize();
 		}
 		
-		PSODesc.InputLayout = { pipelineStateCreateDesc.m_inputElementDesc.data(), static_cast<UINT>(pipelineStateCreateDesc.m_inputElementDesc.size())};
 		PSODesc.RasterizerState = pipelineStateCreateDesc.m_rasterDesc;
 		PSODesc.BlendState = pipelineStateCreateDesc.m_blendDesc;
 		PSODesc.DepthStencilState = pipelineStateCreateDesc.m_depthStencilDesc;
@@ -1080,30 +1051,30 @@ namespace ElysiaRenderer
 	{
 		auto& currFrameDestrctuionQueue = m_destructionQueues[frameIndex];
 
-		for (auto& currBuffer : m_destructionQueues[frameIndex].m_buffers)
-		{
-			switch (currBuffer->GetBufferType())
-			{
-				case GPUResourceType::Vertex:
-				{
-					auto vertexBuffer = dynamic_cast<DX12VertexBuffer*>(currBuffer.get());
-					/*if (vertexBuffer->GetSRVDescriptor().IsValid())
-					{
-						m_SRVStagingDescriptorHeap->FreeDescriptorHeapHandle(vertexBuffer->GetSRVDescriptor());
-					}*/
-					vertexBuffer->Unmap();
-					break;
-				}
-				case GPUResourceType::Texture:
-				{
-					auto texUploadHeap = dynamic_cast<DX12TextureUploadBuffer*>(currBuffer.get());
-					texUploadHeap->Unmap();
-				}
-				default:
-					ElysiaHelper::AssertError("buffer type none");
-					break;
-			}
-		}
+		//for (auto& currBuffer : m_destructionQueues[frameIndex].m_buffers)
+		//{
+		//	switch (currBuffer->GetBufferType())
+		//	{
+		//		case GPUResourceType::Vertex:
+		//		{
+		//			auto vertexBuffer = dynamic_cast<DX12VertexBuffer*>(currBuffer.get());
+		//			/*if (vertexBuffer->GetSRVDescriptor().IsValid())
+		//			{
+		//				m_SRVStagingDescriptorHeap->FreeDescriptorHeapHandle(vertexBuffer->GetSRVDescriptor());
+		//			}*/
+		//			vertexBuffer->Unmap();
+		//			break;
+		//		}
+		//		case GPUResourceType::Texture:
+		//		{
+		//			auto texUploadHeap = dynamic_cast<DX12TextureUpload*>(currBuffer.get());
+		//			texUploadHeap->Unmap();
+		//		}
+		//		default:
+		//			ElysiaHelper::AssertError("buffer type none");
+		//			break;
+		//	}
+		//}
 
 		for (auto& currTex : m_destructionQueues[frameIndex].m_textures)
 		{

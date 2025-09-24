@@ -21,14 +21,6 @@ namespace ElysiaRenderer
 	using namespace ElysiaHelper;
 	using namespace DirectX::SimpleMath;
 
-	const std::vector<D3D12_INPUT_ELEMENT_DESC> m_inputElementDescs =
-	{
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-		{ "COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 32, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-		{ "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 44, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
-	};
 	/// <summary>
 	/// user data
 	/// </summary> 
@@ -53,8 +45,6 @@ namespace ElysiaRenderer
 	};
 	 
 	static Matrix m_worldMatrix = Matrix::Identity;
-	static float m_curRotationAngleRad = 0.f; 
-	static const float m_rotationSpeed = 0.001f;
 	 
 	class Renderer
 	{
@@ -124,7 +114,6 @@ namespace ElysiaRenderer
 		std::shared_ptr<DX12UI> m_pUI = nullptr;
 		std::unique_ptr<DX12Device> m_device = nullptr;
 		std::unique_ptr<DX12GraphicsContext> m_graphicsContext = nullptr;
-		std::unique_ptr<DX12VertexBuffer> m_vertexBuffer = nullptr;
 		std::vector<std::unique_ptr<DX12TextureResource>> m_texs{};
 		std::vector<std::unique_ptr<D3D12_SAMPLER_DESC>> m_samplers{};
 		std::unordered_map<UINT, std::unordered_map<ShaderType, std::unique_ptr<DX12Shader>>> m_vertexShaders;
@@ -140,10 +129,7 @@ namespace ElysiaRenderer
 		
 		std::unique_ptr<PipelineResourceSpace> m_perObjectBindResourceSpace = nullptr;
 		std::unique_ptr<PipelineResourceSpace> m_perMainPassBindResourceSpace = nullptr;
-		
-		/// <summary>
-		/// Model
-		/// </summary>
+
 		std::vector<DX12Model> m_models{};
 		std::vector<DX12Vertex> m_vertices{};
 		std::vector<UINT> m_indices{};
@@ -155,7 +141,6 @@ namespace ElysiaRenderer
 
 		void InitTexTriangle();
 		void LoadShaders();
-		void LoadVertexIndexBuffer();
 		void LoadConstantBuffers();
 		void CreateCreamDepthRT();
 		void LoadAndCreateTexs();
@@ -163,7 +148,7 @@ namespace ElysiaRenderer
 
 		void LoadModel();
 		void AddShader(ShaderQueue shaderQueue, const std::wstring& shaderName, const std::wstring& entryPoint, ShaderType shaderType);
-		void AddVertexBuffer(UINT singVertexSize, BufferAccessFlags bufferAccessFlag = BufferAccessFlags::HostWritable, bool isRawAccess = false);
+		void AddVertexBuffer(UINT singVertexSize);
 	
 		void RenderTexTriangle();
 

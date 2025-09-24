@@ -11,6 +11,14 @@
 #define perPassSpace     space2
 #define perFrameSpace    space3
 
+#define Vector2  float2
+#define Vector3  float3
+#define Vector4  float4
+#define Matrix   float4x4
+
+#define UINT        uint
+#define int32_t     int
+
 SamplerState g_Sampler_WarpU_WarpV_Point : register(s0);
 SamplerState g_Sampler_ClampU_ClampV_Point : register(s1);
 SamplerState g_Sampler_WarpU_WarpV_Linear : register(s2);
@@ -18,63 +26,48 @@ SamplerState g_Sampler_ClampU_ClampV_Linear : register(s3);
 SamplerState g_Sampler_WarpU_WarpV_Anisotropic : register(s4);
 SamplerState g_Sampler_ClampU_ClampV_Anisotropic : register(s5);
 
-cbuffer PerObjectBuffer : register(b0, perObjectSpace)
+struct DX12Vertex
 {
-    float4x4 M_World;
-    
-    float3 BaseColorTint;
-    float Opacity;
-    
-    float NormalIntensity;
-    float MetallicIntensity;
-    float RoughnessIntensity;
-    float AmbientCubemapIntensity;
-
-    float3 AmbientCubemapTint;
-}
-
-cbuffer PerPassBuffer : register(b0, perPassSpace)
-{
-    float4 CameraPosWS;
-    float4x4 M_View;
-    float4x4 M_Proj;
-    float4 ScreenSize;
-    
-    //Light lights[MAIN_LIGHT_NUM];
-    Light mainLight;
-    
-    uint _FrameIndex;
-    float nearZ;
-    float farZ;
-}
-
-//struct PassConstant
-//{
-//    float4 CameraPosWS;
-//    float4x4 M_View;
-//    float4x4 M_Proj;
-//    float4 ScreenSize;
-    
-//    Light lights[MAIN_LIGHT_NUM];
-    
-//    uint _FrameIndex;
-//    float nearZ;
-//    float farZ;
-//};
+    Vector3 position;
+    Vector3 color;
+    Vector2 uv;
+    Vector3 normal;
+    Vector3 tangent;
+};
 
 struct ObjectConstant
 {
-    float4x4 M_World;
-    
-    float3 BaseColorTint;
-    float Opacity;
-    
-    float NormalIntensity;
-    float MetallicIntensity;
-    float RoughnessIntensity;
-    float AmbientCubemapIntensity;
+    Matrix worldMatrix;
 
-    float3 AmbientCubemapTint;
+	Vector3 baseColorTint;
+    float opacity;
+
+    float normalIntensity;
+    float metallicIntensity;
+    float roughnessIntensity;
+    float ambientCubemapIntensity;
+
+	Vector3 ambientCubemapTint;
+	UINT baseColorTexIndex;
+
+	UINT normalTexIndex;
+	UINT metallicTexIndex;
+	UINT roughnessTexIndex;
+	UINT vertexBufferIndex;
+};
+
+struct PassConstant
+{
+    Vector4 cameraPosWS;
+    Matrix  viewMatrix;
+    Matrix  projMatrix;
+    Vector4 screenSize;
+
+    Light mainLight;
+
+    UINT frameIndex;
+    float nearZ;
+    float farZ;
 };
 
 //cbuffer PerShadowPassBuffer : register(b1, perPassSpace)
