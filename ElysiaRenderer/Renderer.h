@@ -28,7 +28,7 @@ namespace ElysiaRenderer
 	{ 
 		L"Mesh\\LOW_WEPON.fbx",
 		//L"Mesh\\plane.fbx",
-		L"Mesh\\Sphere.fbx",
+		//L"Mesh\\Sphere.fbx",
 	};
 	const std::vector<TexLoadSetting> m_globalTexLoadSettings
 	{

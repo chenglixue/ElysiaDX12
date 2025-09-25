@@ -9,7 +9,7 @@ namespace ElysiaRenderer
 
 	void CameraManager::Init()
 	{
-		CreateMainCamera(Vector3(0.0f, 3.0f, -10.0f), 16.f / 9.f, 0.8, 1.f, 300.f);
+		CreateMainCamera(Vector3(0.0f, 3.0f, -10.0f), 16.f / 9.f, 3.14159f / 4.0f, 1.f, 300.f);
 	}
 
 	void CameraManager::Update()

@@ -101,15 +101,17 @@ namespace ElysiaRenderer
 	}
 	void Renderer::UpdatePassCBV()
 	{
-		m_pRenderSource->GetCBVPassParameter()->screenSize = m_device->GetScreenSize();
-		m_pRenderSource->GetCBVPassParameter()->frameIndex = m_device->GetFrameID();
-		m_pRenderSource->GetCBVPassParameter()->cameraPosWS = m_pCameraManager->GetMainCamera()->GetPosition4();
-		m_pRenderSource->GetCBVPassParameter()->viewMatrix = m_pCameraManager->GetMainCamera()->GetViewMat();
-		m_pRenderSource->GetCBVPassParameter()->projMatrix = m_pCameraManager->GetMainCamera()->GetProj();
-		m_pRenderSource->GetCBVPassParameter()->nearZ = m_pCameraManager->GetMainCamera()->GetNearZ();
-		m_pRenderSource->GetCBVPassParameter()->farZ = m_pCameraManager->GetMainCamera()->GetFarZ();
-		m_pRenderSource->GetCBVPassParameter()->mainLight = std::move(m_pLightManager->GetMainLight()->CreateLightData());
-		m_perMainPassBindResourceSpace->GetCBV()->SetMappedData(m_pRenderSource->GetCBVPassParameter(), sizeof(CBVMainPassParameter));
+		auto passParameter = m_pRenderSource->GetCBVPassParameter();
+		passParameter->screenSize = m_device->GetScreenSize();
+		passParameter->frameIndex = m_device->GetFrameID();
+		passParameter->cameraPosWS = m_pCameraManager->GetMainCamera()->GetPosition4();
+		passParameter->viewMatrix = m_pCameraManager->GetMainCamera()->GetViewMat();
+		passParameter->projMatrix = m_pCameraManager->GetMainCamera()->GetProj();
+		passParameter->nearZ = m_pCameraManager->GetMainCamera()->GetNearZ();
+		passParameter->farZ = m_pCameraManager->GetMainCamera()->GetFarZ();
+		passParameter->mainLight = std::move(m_pLightManager->GetMainLight()->CreateLightData());
+
+		m_pBufferManager->GetSingleConstantBuffer(PER_PASS_SPACE)->SetMappedData(passParameter, sizeof(CBVMainPassParameter));
 		
 		/*XMStoreFloat4x4(&m_shadowPassParameter.shadowMatrix, XMMatrixTranspose(m_mainLightShadow->GetShadowMat()));
 		XMStoreFloat4x4(&m_shadowPassParameter.viewMatrix, XMMatrixTranspose(m_mainLightShadow->GetViewMat()));
@@ -121,19 +123,25 @@ namespace ElysiaRenderer
 	}
 	void Renderer::UpdateObjectCBV()
 	{
-		
-		/*CBVObjectParameter objectParameter{};
-		XMMATRIX translateMatrix = XMMatrixIdentity();
-		XMMATRIX scaleMatrix = XMMatrixIdentity();
-		XMMATRIX rotationMatrix = XMMatrixIdentity();
-		XMMATRIX MVP = XMMatrixIdentity();
+		auto constantParameter = m_pRenderSource->GetCBVObjectParameter();
 
-		scaleMatrix = XMMatrixScaling(1.f, 1.f, 1.f);
-		rotationMatrix = XMMatrixMultiply(XMMatrixRotationY(XMConvertToRadians(-90)), XMMatrixRotationZ(XMConvertToRadians(90)));
-		translateMatrix = XMMatrixTranslation(0.f, 0.f, 0.f);
-		MVP = rotationMatrix * scaleMatrix * translateMatrix;
-		objectParameter.worldMatrix = XMMatrixTranspose(scaleMatrix);
-		m_objectConstanBuffers[m_device->GetFrameID()]->SetMappedData(&objectParameter, sizeof(CBVObjectParameter));*/
+		constantParameter->worldMatrix = Matrix::Identity;
+		constantParameter->baseColorTint = Vector3::One;
+		constantParameter->ambientCubemapTint = Vector3::One;
+
+		constantParameter->opacity = 1;
+		constantParameter->normalIntensity = 1;
+		constantParameter->metallicIntensity = 1;
+		constantParameter->roughnessIntensity = 1;
+		constantParameter->ambientCubemapIntensity = 1;
+
+		constantParameter->vertexIndex = m_pBufferManager->GetVertexBuffer()->GetResourceHeapIndex();
+		constantParameter->baseColorTexIndex = 0;
+		constantParameter->metallicTexIndex = 0;
+		constantParameter->normalTexIndex = 0;
+		constantParameter->baseColorTexIndex = 0;
+
+		m_pBufferManager->GetMutilConstantBuffer(PER_OBJECT_SPACE, m_device->GetFrameID())->SetMappedData(constantParameter, sizeof(CBVObjectParameter));
 	}
 
 	void Renderer::InitTexTriangle()
@@ -175,11 +183,19 @@ namespace ElysiaRenderer
 		
 		desc.m_size = sizeof(CBVMainPassParameter);
 		m_pBufferManager->AddConstantBuffer(PER_PASS_SPACE, desc);
+		m_pBufferManager->GetSingleConstantBuffer(PER_PASS_SPACE)->SetMappedData(m_pRenderSource->GetCBVPassParameter(), sizeof(CBVMainPassParameter));
 		m_perMainPassBindResourceSpace->SetCBV(m_pBufferManager->GetSingleConstantBuffer(PER_PASS_SPACE));
 		m_perMainPassBindResourceSpace->Lock();
 
 		desc.m_size = sizeof(CBVObjectParameter);
 		m_pBufferManager->AddConstantBuffer(PER_OBJECT_SPACE, desc);
+		for (UINT i = 0;i < NUM_FRAMES_IN_FLIGHT; ++i)
+		{
+			auto constantBuffer = m_pBufferManager->GetMutilConstantBuffer(PER_OBJECT_SPACE, i);
+			auto constantParameter = m_pRenderSource->GetCBVObjectParameter();
+
+			constantBuffer->SetMappedData(constantParameter, sizeof(CBVObjectParameter));
+		}
 		m_perObjectBindResourceSpace->SetCBV(m_pBufferManager->GetMutilConstantBuffer(PER_OBJECT_SPACE, 0));
 		m_perObjectBindResourceSpace->Lock();
 	}
@@ -418,13 +434,13 @@ namespace ElysiaRenderer
 		pipelineStateData.m_depthStencilTarget = m_pBufferManager->GetCameraDepthBuffer();
 
 		bool isReady = true;
+		{
+			if (!m_pBufferManager->GetVertexBuffer()->GetIsReady()) isReady = false;
+		}
 		if (isReady)
 		{
-			auto objectParameter = m_pRenderSource->GetCBVObjectParameter(m_device->GetFrameID());
-			 
-			objectParameter->vertexIndex = m_pBufferManager->GetVertexBuffer()->GetResourceHeapIndex();
-			m_pBufferManager->GetMutilConstantBuffer(PER_OBJECT_SPACE, m_device->GetFrameID())->SetMappedData(&objectParameter, sizeof(CBVObjectParameter));
-			m_perObjectBindResourceSpace->SetCBV(m_pBufferManager->GetMutilConstantBuffer(PER_OBJECT_SPACE, m_device->GetFrameID()));
+			auto objectContantBuffer = m_pBufferManager->GetMutilConstantBuffer(PER_OBJECT_SPACE, m_device->GetFrameID());
+			m_perObjectBindResourceSpace->SetCBV(objectContantBuffer);
 
 			m_graphicsContext->SetPipeline(pipelineStateData);
 			m_graphicsContext->SetPipelineResource(PER_OBJECT_SPACE, m_perObjectBindResourceSpace.get());

@@ -160,10 +160,11 @@ namespace ElysiaRenderer
 
 	void		DX12Camera::UpdateViewMatrix() noexcept
 	{
-		Quaternion inverseRotation = Quaternion::Identity;
-		m_transform.m_rotation.Inverse(inverseRotation);
+		//m_viewMatrix = Matrix::CreateTranslation(-m_transform.m_position) * Matrix::CreateFromQuaternion(m_transform.m_rotation);
 
-		m_viewMatrix = Matrix::CreateFromQuaternion(inverseRotation) * Matrix::CreateTranslation(-m_transform.m_position);
+		LookAt(Vector3(0, 0, 0));
+
+		//m_viewMatrix = Matrix::CreateLookAt(m_transform.m_position, Vector3(0, 0, 0), Vector3(0, 1, 0));
 	}
 
 	void		DX12Camera::UpdateProjMatrix() noexcept

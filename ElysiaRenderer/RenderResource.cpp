@@ -7,10 +7,8 @@ namespace ElysiaRenderer
 	{
 		m_pCBVPassParameter = std::make_unique<CBVMainPassParameter>();
 		
-		for (size_t i = 0; i < m_CBVObjectParameters.size(); ++i)
-		{
-			m_CBVObjectParameters[i] = std::move(std::make_unique<CBVObjectParameter>());
-		}
+		m_CBVObjectParameters = std::make_unique<CBVObjectParameter>();
+
 	}
 
 	RenderResource::~RenderResource()
@@ -18,9 +16,9 @@ namespace ElysiaRenderer
 
 	}
 
-	CBVObjectParameter* RenderResource::GetCBVObjectParameter(UINT frameID)
+	CBVObjectParameter* RenderResource::GetCBVObjectParameter()
 	{
-		return m_CBVObjectParameters[frameID].get();
+		return m_CBVObjectParameters.get();
 	}
 
 	CBVMainPassParameter* RenderResource::GetCBVPassParameter()

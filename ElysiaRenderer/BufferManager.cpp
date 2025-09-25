@@ -50,8 +50,11 @@ namespace ElysiaRenderer
 		case PER_OBJECT_SPACE:
 		{
 			return m_objectConstantBuffers[frameID].get();
+			break;
 		}
 		}
+
+		return nullptr;
 	}
 
 	DX12TextureResource* BufferManager::GetCameraDepthBuffer() const noexcept
@@ -70,10 +73,10 @@ namespace ElysiaRenderer
 		{
 			case PER_PASS_SPACE:
 			{
-				if (m_pPassConstantBuffer != nullptr)
+				/*if (m_pPassConstantBuffer != nullptr)
 				{
 					m_pPassConstantBuffer.reset();
-				}
+				}*/
 
 				m_pPassConstantBuffer = std::move(m_pDevice->CreateBuffer(createDesc));
 			
@@ -84,10 +87,10 @@ namespace ElysiaRenderer
 			{
 				for (int i = 0; i < m_objectConstantBuffers.size(); ++i)
 				{
-					if (m_objectConstantBuffers[i] != nullptr)
+					/*if (m_objectConstantBuffers[i] != nullptr)
 					{
 						m_objectConstantBuffers[i].reset();
-					}
+					}*/
 
 					m_objectConstantBuffers[i] = std::move(m_pDevice->CreateBuffer(createDesc));
 				}

@@ -16,12 +16,12 @@ namespace ElysiaRenderer
 		RenderResource(RenderResource&& rhs) = default;
 		~RenderResource();
 
-		CBVObjectParameter* GetCBVObjectParameter(UINT frameID);
+		CBVObjectParameter* GetCBVObjectParameter();
 		CBVMainPassParameter* GetCBVPassParameter();
 
 	private:
 		DX12Device* m_device = nullptr;
-		std::array<std::unique_ptr<CBVObjectParameter>, NUM_FRAMES_IN_FLIGHT> m_CBVObjectParameters{};
+		std::unique_ptr<CBVObjectParameter> m_CBVObjectParameters{};
 		std::unique_ptr<CBVMainPassParameter> m_pCBVPassParameter = nullptr;
 	};
 
