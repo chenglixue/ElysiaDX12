@@ -13,6 +13,7 @@
 #include "LightManager.h"
 #include "ShadowManager.h"
 #include "BufferManager.h"
+#include "MeshManager.h"
 #include "RenderResource.h"
 
 
@@ -24,12 +25,7 @@ namespace ElysiaRenderer
 	/// <summary>
 	/// user data
 	/// </summary> 
-	const std::vector<LPCWSTR> m_modelPaths
-	{ 
-		L"Mesh\\LOW_WEPON.fbx",
-		//L"Mesh\\plane.fbx",
-		//L"Mesh\\Sphere.fbx",
-	};
+	
 	const std::vector<TexLoadSetting> m_globalTexLoadSettings
 	{
 		{L"Tex\\GGX_E_LUT.dds"},
@@ -121,19 +117,20 @@ namespace ElysiaRenderer
 		std::vector<std::unique_ptr<DX12Shader>> m_computeShaders;
 		std::unordered_map<UINT, std::shared_ptr<PipelineStateObject>> m_graphicsPipelineStates;
 
-		std::unique_ptr<CameraManager> m_pCameraManager = nullptr;
-		std::unique_ptr<LightManager> m_pLightManager = nullptr;
-		std::unique_ptr<ShadowManager> m_pShadowManager = nullptr;
-		std::unique_ptr<BufferManager> m_pBufferManager = nullptr;
+		std::unique_ptr<CameraManager>	m_pCameraManager = nullptr;
+		std::unique_ptr<LightManager>	m_pLightManager = nullptr;
+		std::unique_ptr<ShadowManager>	m_pShadowManager = nullptr;
+		std::unique_ptr<BufferManager>	m_pBufferManager = nullptr;
 		std::unique_ptr<RenderResource> m_pRenderSource = nullptr;
+		std::unique_ptr<MeshManager>	m_pMeshManager = nullptr;
 		
 		std::unique_ptr<PipelineResourceSpace> m_perObjectBindResourceSpace = nullptr;
 		std::unique_ptr<PipelineResourceSpace> m_perMainPassBindResourceSpace = nullptr;
 
-		std::vector<DX12Model> m_models{};
+		/*std::vector<DX12Model> m_models{};
 		std::vector<DX12Vertex> m_vertices{};
 		std::vector<UINT> m_indices{};
-		std::vector<std::unique_ptr<DX12MeshRender>> m_meshRenders{};
+		std::vector<std::unique_ptr<DX12MeshRender>> m_meshRenders{};*/
 
 		void UpdateCBV();
 		void UpdatePassCBV();

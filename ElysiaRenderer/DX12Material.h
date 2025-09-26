@@ -6,21 +6,6 @@
 
 namespace ElysiaRenderer
 {
-	extern class DX12Texture;
-	enum class LoadTexType : uint8_t
-	{
-		Albedo,
-		Normal,
-		
-	};
-	struct LoadTexData
-	{
-		std::string m_path;
-		//unsigned int m_ID;
-		// tex type, such as albedo, normal
-		LoadTexType m_texType;
-	};
-
 	struct DX12Material
 	{
 		DX12Material() = default;

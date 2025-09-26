@@ -166,6 +166,7 @@
     <ClInclude Include="IUpdate.h" />
     <ClInclude Include="LightManager.h" />
     <ClInclude Include="LoadTexData.h" />
+    <ClInclude Include="MeshManager.h" />
     <ClInclude Include="PipelineResourceSpace.h" />
     <ClInclude Include="DX12Context.h" />
     <ClInclude Include="DX12DescriptorHeap.h" />
@@ -175,7 +176,7 @@
     <ClInclude Include="DX12Light.h" />
     <ClInclude Include="DX12Material.h" />
     <ClInclude Include="DX12Mesh.h" />
-    <ClInclude Include="DX12Model.h" />
+    <ClInclude Include="ModelImporter.h" />
     <ClInclude Include="DX12PipelineState.h" />
     <ClInclude Include="DX12Queue.h" />
     <ClInclude Include="DX12QueueManager.h" />
@@ -268,7 +269,7 @@
     <ClCompile Include="DX12Device.cpp" />
     <ClCompile Include="DX12GraphicsContext.cpp" />
     <ClCompile Include="DX12Light.cpp" />
-    <ClCompile Include="DX12Model.cpp" />
+    <ClCompile Include="ModelImporter.cpp" />
     <ClCompile Include="DX12PipelineState.cpp" />
     <ClCompile Include="DX12Queue.cpp" />
     <ClCompile Include="DX12QueueManager.cpp" />
@@ -309,6 +310,7 @@
     <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="LightManager.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MeshManager.cpp" />
     <ClCompile Include="PipelineResourceSpace.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="RenderResource.cpp" />

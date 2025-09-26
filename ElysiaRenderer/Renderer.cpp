@@ -23,6 +23,7 @@ namespace ElysiaRenderer
 		m_pShadowManager = std::make_unique<ShadowManager>(m_device.get());
 		m_pBufferManager = std::make_unique<BufferManager>(m_device.get());
 		m_pRenderSource = std::make_unique<RenderResource>(m_device.get());
+		m_pMeshManager = std::make_unique<MeshManager>();
 	}
 
 	Renderer::~Renderer()
@@ -35,6 +36,7 @@ namespace ElysiaRenderer
 		m_pLightManager->Init();
 		m_pShadowManager->Init();
 		m_pBufferManager->Init();
+		m_pMeshManager->Init();
 
 		m_pShadowManager->CreateMainShadow(4096, 15);
 

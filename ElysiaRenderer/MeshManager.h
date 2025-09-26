@@ -1,7 +1,6 @@
 #pragma once
 #include "stdafx.h"
 #include "IManager.h"
-#include "DX12Model.h"
 
 namespace ElysiaRenderer
 {
@@ -17,7 +16,10 @@ namespace ElysiaRenderer
 		virtual void Init() override;
 		virtual void Destory() override;
 
+		void LoadModel(const std::vector<LPCWSTR>& modelPaths);
+
 	private:
-		std::vector<DX12Model> m_models{};
+		std::vector<LPCWSTR>	m_modelPaths;
+		//std::vector<DX12Model>	m_models{};
 	};
 }
