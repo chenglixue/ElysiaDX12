@@ -3,169 +3,8 @@
 
 namespace ElysiaModel
 {
-
-
-	ModelImporter::ModelImporter(const LPCWSTR& path)
-	{
-		Assimp::Importer localImporter;
-
-		WCHAR assetsPath[512];
-		ElysiaHelper::GetAssetsPath(assetsPath, _countof(assetsPath));
-
-		std::wstring modelFullPath = ElysiaHelper::GetAssetFullPath(assetsPath, path).c_str();
-		auto modelPath = std::filesystem::path(modelFullPath).string();
-
-		const aiScene* pLocalScene = localImporter.ReadFile(
-			modelPath,
-			// Triangulates all faces of all meshes
-			aiProcess_Triangulate |
-			// Supersedes the aiProcess_MakeLeftHanded and aiProcess_FlipUVs and aiProcess_FlipWindingOrder flags
-			aiProcess_ConvertToLeftHanded |
-			// This preset enables almost every optimization step to achieve perfectly optimized data. In D3D, need combine with aiProcess_ConvertToLeftHanded
-			aiProcessPreset_TargetRealtime_MaxQuality |
-			// Calculates the tangents and bitangents for the imported meshes
-			aiProcess_CalcTangentSpace |
-			// Splits large meshes into smaller sub-meshes
-			// This is quite useful for real-time rendering, 
-			// where the number of triangles which can be maximally processed in a single draw - call is limited by the video driver / hardware
-			aiProcess_SplitLargeMeshes |
-			// A postprocessing step to reduce the number of meshes
-			aiProcess_OptimizeMeshes |
-			// A postprocessing step to optimize the scene hierarchy
-			aiProcess_OptimizeGraph
-		);
-
-		// "localScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE" is used to check whether value data returned is incomplete
-		if (pLocalScene == nullptr || pLocalScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || pLocalScene->mRootNode == nullptr)
-		{
-			std::stringstream ss;
-			ss << "ERROR::ASSIMP::" << localImporter.GetErrorString();
-			ElysiaHelper::ThrowRuntimeError(ss.str());
-		}
-
-		m_directory = modelPath.substr(0, modelPath.find_last_of('/'));
-
-		TraverseNode(pLocalScene, pLocalScene->mRootNode);
-	}
-
 	ModelImporter::~ModelImporter()
 	{
-		m_meshs.clear();
-	}
-
-	void ModelImporter::TraverseNode(const aiScene* scene, aiNode* node)
-	{
-		// load mesh
-		for (UINT i = 0; i < node->mNumMeshes; ++i)
-		{
-			aiMesh* pLocalMesh = scene->mMeshes[node->mMeshes[i]];
-			LoadMesh(scene, pLocalMesh);
-		}
-
-		// traverse child node
-		for (UINT i = 0; i < node->mNumChildren; ++i)
-		{
-			TraverseNode(scene, node->mChildren[i]);
-		}
-	}
-
-	void ModelImporter::LoadMesh(const aiScene* scene, aiMesh* mesh)
-	{
-		//std::vector<DX12Vertex> localVertices;
-		//std::vector<UINT> localIndices;
-		//std::vector<DX12Material*> m_localMaterials{};
-
-		//// process vertex position, normal, tangent, texture coordinates
-		//for (UINT i = 0; i < mesh->mNumVertices; ++i)
-		//{
-		//	DX12Vertex localVertex = DX12Vertex();
-
-		//	localVertex.m_position.x = mesh->mVertices[i].x;
-		//	localVertex.m_position.y = mesh->mVertices[i].y;
-		//	localVertex.m_position.z = mesh->mVertices[i].z;
-
-		//	localVertex.m_normal.x = mesh->mNormals[i].x;
-		//	localVertex.m_normal.y = mesh->mNormals[i].y;
-		//	localVertex.m_normal.z = mesh->mNormals[i].z;
-
-		//	localVertex.m_tangent.x = mesh->mTangents[i].x;
-		//	localVertex.m_tangent.y = mesh->mTangents[i].y;
-		//	localVertex.m_tangent.z = mesh->mTangents[i].z;
-
-		//	// assimp allow one model have 8 different texture coordinates in one vertex, but we just care first texture coordinates because we will not use so many
-		//	if (mesh->mTextureCoords[0])
-		//	{
-		//		localVertex.m_uv.x = mesh->mTextureCoords[0][i].x;
-		//		localVertex.m_uv.y = mesh->mTextureCoords[0][i].y;
-		//	}
-		//	else
-		//	{
-		//		localVertex.m_uv = XMFLOAT2(0.0f, 0.0f);
-		//	}
-
-		//	localVertices.emplace_back(std::move(localVertex));
-		//}
-
-		//for (UINT i = 0; i < mesh->mNumFaces; ++i)
-		//{
-		//	aiFace localFace = mesh->mFaces[i];
-		//	for (UINT j = 0; j < localFace.mNumIndices; ++j)
-		//	{
-		//		localIndices.emplace_back(std::move(localFace.mIndices[j]));
-		//	}
-		//}
-
-		//for (UINT i = 0; i < mesh->mMaterialIndex; ++i)
-		//{
-		//	auto material = scene->mMaterials[mesh->mMaterialIndex];
-
-		//	auto type = aiTextureType_DIFFUSE;
-		//	for (UINT i = 0; i < material->GetTextureCount(type); ++i)
-		//	{
-		//		aiString path;
-		//		material->GetTexture(type, i, &path);
-
-		//		DX12Material* currMaterial = new DX12Material();
-		//		currMaterial->m_material = material;
-		//		
-		//		auto texData = new LoadTexData();
-		//		texData->m_path = path.C_Str();
-		//		switch (type)
-		//		{
-		//			case aiTextureType_DIFFUSE:
-		//			{
-		//				texData->m_texType = LoadTexType::Albedo;
-		//				break;
-		//			}
-		//			case aiTextureType_NORMALS:
-		//			{
-		//				texData->m_texType = LoadTexType::Normal;
-		//				break;
-		//			}
-		//			default:
-		//			{
-		//				ElysiaHelper::ThrowRuntimeError("Load invalild tex type");
-		//				break;
-		//			}
-		//		}
-		//		currMaterial->m_texData.push_back(std::move(texData));
-
-		//		m_localMaterials.emplace_back(std::move(currMaterial));
-		//	}
-		//}
-
-		//m_drawIndexCount = localIndices.size();
-
-		//DX12Mesh resultMesh(localVertices, localIndices, m_localMaterials);
-		//resultMesh.m_name = mesh->mName.C_Str();
-		//resultMesh.m_indexCount = m_drawIndexCount;
-		//resultMesh.m_currStartIndex = m_startIndex;
-		//resultMesh.m_currStartVertex = m_startVertex;
-
-		//m_startIndex += m_drawIndexCount;
-		//m_startVertex += resultMesh.m_vertices.size();
-
-		//m_meshs.emplace_back(std::move(resultMesh));
 	}
 
 	bool ModelImporter::Load(const LPCWSTR& fileName)
@@ -340,6 +179,7 @@ namespace ElysiaModel
 		{
 			const auto srcMesh = pScene->mMeshes[meshIndex];
 			auto destMesh = m_pMesh + meshIndex;
+			destMesh->name = srcMesh->mName.C_Str();
 
 			float* destPos = (float*)(m_pVertexData + destMesh->vertexDataOffset + destMesh->attrib[attrib_position].offset);
 			float* destTexcoord0 = (float*)(m_pVertexData + destMesh->vertexDataOffset + destMesh->attrib[attrib_texcoord0].offset);
@@ -361,9 +201,71 @@ namespace ElysiaModel
 				}
 				destPos = (float*)((unsigned char*)destPos + destMesh->vertexStride);
 
-				if(srcMesh->)
+				if (srcMesh->mTextureCoords[0])
+				{
+					destTexcoord0[0] = srcMesh->mTextureCoords[0][v].x;
+					destTexcoord0[1] = srcMesh->mTextureCoords[0][v].y;
+				}
+				else
+				{
+					destTexcoord0[0] = 0.f;
+					destTexcoord0[1] = 0.f;
+				}
+				destTexcoord0 = (float*)((unsigned char*)destTexcoord0 + destMesh->vertexStride);
+
+				if (srcMesh->mNormals)
+				{
+					destNormal[0] = srcMesh->mNormals[v].x;
+					destNormal[1] = srcMesh->mNormals[v].y;
+					destNormal[2] = srcMesh->mNormals[v].z;
+				}
+				else
+				{
+					ElysiaHelper::AssertError("No Normal");
+				}
+				destNormal = (float*)((unsigned char*)destNormal + destMesh->vertexStride);
+
+				if (srcMesh->mTangents)
+				{
+					destTangent[0] = srcMesh->mTangents[v].x;
+					destTangent[1] = srcMesh->mTangents[v].y;
+					destTangent[2] = srcMesh->mTangents[v].z;
+				}
+				else
+				{
+					destTangent[0] = 1.f;
+					destTangent[1] = 0.f;
+					destTangent[2] = 0.f;
+				}
+				destTangent = (float*)((unsigned char*)destTangent + destMesh->vertexStride);
+
+				if (srcMesh->mBitangents)
+				{
+					destBitangent[0] = srcMesh->mBitangents[v].x;
+					destBitangent[1] = srcMesh->mBitangents[v].y;
+					destBitangent[2] = srcMesh->mBitangents[v].z;
+				}
+				else
+				{
+					destBitangent[0] = 0.f;
+					destBitangent[1] = 1.f;
+					destBitangent[2] = 0.f;
+				}
+				destBitangent = (float*)((unsigned char*)destBitangent + destMesh->vertexStride);
+			}
+
+			UINT16* destIndex = (UINT16*)(m_pIndexData + destMesh->indexDataOffset);
+			for (UINT f = 0; f < srcMesh->mNumFaces; f++)
+			{
+				assert(srcMesh->mFaces[f].mNumIndices == 3);
+
+				*destIndex++ = srcMesh->mFaces[f].mIndices[0];
+				*destIndex++ = srcMesh->mFaces[f].mIndices[1];
+				*destIndex++ = srcMesh->mFaces[f].mIndices[2];
 			}
 		}
+
+		return true;
 	}
 
 	bool ModelImporter::Load(const std::vector<LPCWSTR>& fileNames)

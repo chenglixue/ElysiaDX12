@@ -24,6 +24,7 @@ namespace ElysiaRenderer
 		m_pBufferManager = std::make_unique<BufferManager>(m_device.get());
 		m_pRenderSource = std::make_unique<RenderResource>(m_device.get());
 		m_pMeshManager = std::make_unique<MeshManager>();
+		m_pModelImporter = std::make_unique<ModelImporter>();
 	}
 
 	Renderer::~Renderer()
@@ -32,6 +33,13 @@ namespace ElysiaRenderer
 
 	void Renderer::Init()
 	{
+		printf("loading...\n");
+		if (!m_pModelImporter->Load(g_ModelPaths))
+		{
+			printf("failed to load model: %s\n");
+		}
+		printf("done\n");
+
 		m_pCameraManager->Init();
 		m_pLightManager->Init();
 		m_pShadowManager->Init();

@@ -15,16 +15,24 @@
 #include "BufferManager.h"
 #include "MeshManager.h"
 #include "RenderResource.h"
+#include "ModelImporter.h"
 
 
 namespace ElysiaRenderer 
 {
 	using namespace ElysiaHelper;
+	using namespace ElysiaModel;
 	using namespace DirectX::SimpleMath;
 
 	/// <summary>
 	/// user data
 	/// </summary> 
+	const std::vector<LPCWSTR> g_ModelPaths
+	{
+		L"Mesh\\LOW_WEPON.fbx",
+			//L"Mesh\\plane.fbx",
+			//L"Mesh\\Sphere.fbx",
+	};
 	
 	const std::vector<TexLoadSetting> m_globalTexLoadSettings
 	{
@@ -116,6 +124,8 @@ namespace ElysiaRenderer
 		std::unordered_map<UINT, std::unordered_map<ShaderType, std::unique_ptr<DX12Shader>>> m_pixelShaders;
 		std::vector<std::unique_ptr<DX12Shader>> m_computeShaders;
 		std::unordered_map<UINT, std::shared_ptr<PipelineStateObject>> m_graphicsPipelineStates;
+
+		std::unique_ptr<ModelImporter> m_pModelImporter = nullptr;
 
 		std::unique_ptr<CameraManager>	m_pCameraManager = nullptr;
 		std::unique_ptr<LightManager>	m_pLightManager = nullptr;

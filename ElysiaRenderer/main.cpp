@@ -16,7 +16,6 @@ const std::vector<LPCWSTR> g_ModelPaths
 	//L"Mesh\\Sphere.fbx",
 };
 static std::unique_ptr<Renderer> g_pRenderer = nullptr;
-static std::unique_ptr<ModelImporter> g_pModelImporter = nullptr;
 
 //find path to WinPixGpuCapturer.dll from the most-recently installed version of PIX
 static std::wstring GetLatestWinPixGpuCapturerPath_Cpp17();
@@ -52,9 +51,6 @@ int main()
 		nullptr, nullptr, moduleHandle, nullptr);
 
 	g_pRenderer = std::make_unique<ElysiaRenderer::Renderer>(windowHandle, windowSize, pUI);
-	g_pModelImporter = std::make_unique<ModelImporter>();
-
-	g_pModelImporter->Load()
 	g_pRenderer->Init();
 
 	
