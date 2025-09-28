@@ -125,9 +125,9 @@ namespace ElysiaModel
 		m_meshData.meshCount = pScene->mNumMeshes;
 		m_pMesh = new Mesh[m_meshData.meshCount];
 		memset(m_pMesh, 0, sizeof(Mesh) * m_meshData.meshCount);
-		for (UINT meshIndex = 0; meshIndex < m_meshData.meshCount; ++meshIndex)
+		for (unsigned int meshIndex = 0; meshIndex < pScene->mNumMeshes; ++meshIndex)
 		{
-			const auto srcMesh = pScene->mMeshes[meshIndex];
+			const aiMesh* srcMesh = pScene->mMeshes[meshIndex];
 			auto destMesh = m_pMesh + meshIndex;
 
 			assert(srcMesh->mPrimitiveTypes & aiPrimitiveType_TRIANGLE);
@@ -176,19 +176,19 @@ namespace ElysiaModel
 			destMesh->indexCount = srcMesh->mNumFaces * 3;
 
 			m_meshData.vertexDataByteSize += destMesh->vertexStride * destMesh->vertexCount;
-			m_meshData.indexDataByteSize += sizeof(UINT16) * destMesh->indexCount;
+			m_meshData.indexDataByteSize += sizeof(uint16_t) * destMesh->indexCount;
 		}
 		if (m_meshData.meshCount > 0)
 		{
 			m_vertexStride = m_pMesh[0].vertexStride;
 		}
 
-		m_pVertexData = new unsigned char[m_meshData.vertexDataByteSize];
-		m_pIndexData = new unsigned char[m_meshData.indexDataByteSize];
+		m_pVertexData = new uint8_t[m_meshData.vertexDataByteSize];
+		m_pIndexData = new uint8_t[m_meshData.indexDataByteSize];
 
-		for (UINT meshIndex = 0; meshIndex < m_meshData.meshCount; ++meshIndex)
+		for (unsigned int meshIndex = 0; meshIndex < pScene->mNumMeshes; ++meshIndex)
 		{
-			const auto srcMesh = pScene->mMeshes[meshIndex];
+			const aiMesh* srcMesh = pScene->mMeshes[meshIndex];
 			auto destMesh = m_pMesh + meshIndex;
 			destMesh->name = srcMesh->mName.C_Str();
 
@@ -198,7 +198,7 @@ namespace ElysiaModel
 			float* destTangent = (float*)(m_pVertexData + destMesh->vertexDataOffset + destMesh->attrib[attrib_tangent].offset);
 			float* destBitangent = (float*)(m_pVertexData + destMesh->vertexDataOffset + destMesh->attrib[attrib_bitangent].offset);
 
-			for (UINT v = 0; v < destMesh->vertexCount; ++v)
+			for (unsigned int v = 0; v < destMesh->vertexCount; ++v)
 			{
 				if (srcMesh->mVertices)
 				{
@@ -210,7 +210,7 @@ namespace ElysiaModel
 				{
 					ElysiaHelper::AssertError("No Vertex");
 				}
-				destPos = (float*)((unsigned char*)destPos + destMesh->vertexStride);
+				destPos = (float*)((uint8_t*)destPos + destMesh->vertexStride);
 
 				if (srcMesh->mTextureCoords[0])
 				{
@@ -222,7 +222,7 @@ namespace ElysiaModel
 					destTexcoord0[0] = 0.f;
 					destTexcoord0[1] = 0.f;
 				}
-				destTexcoord0 = (float*)((unsigned char*)destTexcoord0 + destMesh->vertexStride);
+				destTexcoord0 = (float*)((uint8_t*)destTexcoord0 + destMesh->vertexStride);
 
 				if (srcMesh->mNormals)
 				{
@@ -234,7 +234,7 @@ namespace ElysiaModel
 				{
 					ElysiaHelper::AssertError("No Normal");
 				}
-				destNormal = (float*)((unsigned char*)destNormal + destMesh->vertexStride);
+				destNormal = (float*)((uint8_t*)destNormal + destMesh->vertexStride);
 
 				if (srcMesh->mTangents)
 				{
@@ -248,7 +248,7 @@ namespace ElysiaModel
 					destTangent[1] = 0.f;
 					destTangent[2] = 0.f;
 				}
-				destTangent = (float*)((unsigned char*)destTangent + destMesh->vertexStride);
+				destTangent = (float*)((uint8_t*)destTangent + destMesh->vertexStride);
 
 				if (srcMesh->mBitangents)
 				{
@@ -262,7 +262,7 @@ namespace ElysiaModel
 					destBitangent[1] = 1.f;
 					destBitangent[2] = 0.f;
 				}
-				destBitangent = (float*)((unsigned char*)destBitangent + destMesh->vertexStride);
+				destBitangent = (float*)((uint8_t*)destBitangent + destMesh->vertexStride);
 			}
 
 			UINT16* destIndex = (UINT16*)(m_pIndexData + destMesh->indexDataOffset);
@@ -288,6 +288,8 @@ namespace ElysiaModel
 		{
 			isLoadSuccess &= Load(fileName);
 		}
+
+		PrintModelStats();
 
 		return isLoadSuccess;
 	}
@@ -341,11 +343,69 @@ namespace ElysiaModel
 		ComputeGlobalBoundingBox(m_meshData.boundingBox);
 	}
 
+	void ModelImporter::PrintModelStats()
+	{
+		printf("model stats:\n");
+
+		AxisAlignedBox bbox = GetBoundingBox();
+		printf("bounding box: <%f, %f, %f> <%f, %f, %f>\n",
+			(float)bbox.GetMin().x, (float)bbox.GetMin().y, (float)bbox.GetMin().z,
+			(float)bbox.GetMax().x, (float)bbox.GetMax().y, (float)bbox.GetMax().z);
+
+		printf("vertex data size: %u\n", m_meshData.vertexDataByteSize);
+		printf("index data size: %u\n", m_meshData.indexDataByteSize);
+		printf("\n");
+
+		printf("mesh count: %u\n", m_meshData.meshCount);
+		for (uint32_t meshIndex = 0; meshIndex < m_meshData.meshCount; meshIndex++)
+		{
+			const Mesh* mesh = m_pMesh + meshIndex;
+
+			auto printAttribFormat = [](uint32_t format) -> void
+				{
+					switch (format)
+					{
+					case attrib_format_ubyte:   printf("ubyte");    break;
+					case attrib_format_byte:    printf("byte");     break;
+					case attrib_format_ushort:  printf("ushort");   break;
+					case attrib_format_short:   printf("short");    break;
+					case attrib_format_float:   printf("float");    break;
+					}
+				};
+
+			printf("mesh %u\n", meshIndex);
+			printf("vertices: %u\n", mesh->vertexCount);
+			printf("indices: %u\n", mesh->indexCount);
+			printf("vertex stride: %u\n", mesh->vertexStride);
+			for (int n = 0; n < maxAttribs; n++)
+			{
+				if (mesh->attrib[n].format == attrib_format_none)
+					continue;
+
+				printf("attrib %d: offset %u, normalized %u, components %u, format "
+					, n, mesh->attrib[n].offset, mesh->attrib[n].normalized
+					, mesh->attrib[n].components);
+				printAttribFormat(mesh->attrib[n].format);
+				printf("\n");
+			}
+
+		}
+		printf("\n");
+
+		printf("material count: %u\n", m_meshData.materialCount);
+		for (uint32_t materialIndex = 0; materialIndex < m_meshData.materialCount; materialIndex++)
+		{
+			//const Material* material = m_pMaterial + materialIndex;
+			printf("material %u\n", materialIndex);
+		}
+		printf("\n");
+	}
+
 	bool ModelImporter::CreateVertexBuffer()
 	{
 		BufferCreationDesc vertexBufferCreationDesc{};
 		vertexBufferCreationDesc.m_stride = m_vertexStride;
-		vertexBufferCreationDesc.m_size = static_cast<size_t>(m_meshData.vertexDataByteSize);
+		vertexBufferCreationDesc.m_size = m_meshData.indexDataByteSize;
 		vertexBufferCreationDesc.m_accessFlags = BufferAccessFlags::GPUOnly;
 		vertexBufferCreationDesc.m_viewFlags = GPUResourceFlags::SRV;
 		vertexBufferCreationDesc.m_isRawAccess = true;
@@ -354,10 +414,10 @@ namespace ElysiaModel
 
 		auto pBufferUpload = std::make_unique<DX12BufferUpload>();
 		pBufferUpload->m_buffer = m_pBufferManager->GetVertexBuffer();
-		pBufferUpload->m_bufferData = std::make_unique<uint8_t[]>(m_meshData.vertexDataByteSize);
+		pBufferUpload->m_bufferData = std::make_unique<uint8_t[]>(m_meshData.indexDataByteSize);
 		pBufferUpload->m_bufferDataSize = vertexBufferCreationDesc.m_size;
 
-		memcpy_s(pBufferUpload->m_bufferData.get(), pBufferUpload->m_bufferDataSize, m_pVertexData, pBufferUpload->m_bufferDataSize);
+		memcpy_s(pBufferUpload->m_bufferData.get(), pBufferUpload->m_bufferDataSize, m_pIndexData, pBufferUpload->m_bufferDataSize);
 
 		m_pDevice->GetUploadContext()->AddBufferToUploads(std::move(pBufferUpload));
 

@@ -29,9 +29,9 @@ namespace ElysiaRenderer
 	/// </summary> 
 	const std::vector<LPCWSTR> g_ModelPaths
 	{
-		L"Sponza\\sponza.obj",
+		//L"Sponza\\sponza.obj",
 			//L"Mesh\\plane.fbx",
-			//L"Mesh\\Sphere.fbx",
+			L"Mesh\\Sphere.fbx",
 	};
 	
 	const std::vector<TexLoadSetting> m_globalTexLoadSettings

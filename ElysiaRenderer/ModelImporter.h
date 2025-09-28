@@ -75,6 +75,8 @@ namespace ElysiaModel
 
 		void CreateMeshRenders();
 
+		void PrintModelStats();
+
 	private:
 		DX12Device* m_pDevice = nullptr;
 		BufferManager* m_pBufferManager = nullptr;
@@ -86,8 +88,8 @@ namespace ElysiaModel
 
 		UINT m_vertexStride = 0;
 
-		unsigned char* m_pVertexData;
-		unsigned char* m_pIndexData;
+		uint8_t* m_pVertexData;
+		uint8_t* m_pIndexData;
 	};
 
 

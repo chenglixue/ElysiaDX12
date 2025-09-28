@@ -193,7 +193,7 @@ namespace ElysiaRenderer
 		{
 			BufferCreationDesc uploadBufferDesc{};
 			uploadBufferDesc.m_accessFlags = BufferAccessFlags::HostWritable;
-			uploadBufferDesc.m_size = 10 * 4096 * 4096;
+			uploadBufferDesc.m_size = 40 * 4096 * 4096;
 
 			BufferCreationDesc uploadTextureDesc{};
 			uploadTextureDesc.m_accessFlags = BufferAccessFlags::HostWritable;
