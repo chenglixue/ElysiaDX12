@@ -133,7 +133,7 @@
     <ClInclude Include="DX12Vertex.h">
       <Filter>Header Files\Model</Filter>
     </ClInclude>
-    <ClInclude Include="DX12Mesh.h">
+    <ClInclude Include="Mesh.h">
       <Filter>Header Files\Model</Filter>
     </ClInclude>
     <ClInclude Include="DX12MeshRender.h">
@@ -149,9 +149,6 @@
       <Filter>Header Files\DX12</Filter>
     </ClInclude>
     <ClInclude Include="stdafx.h">
-      <Filter>Header Files\Helper</Filter>
-    </ClInclude>
-    <ClInclude Include="RenderHelper.h">
       <Filter>Header Files\Helper</Filter>
     </ClInclude>
     <ClInclude Include="DXTex\BC.h">
@@ -211,17 +208,11 @@
     <ClInclude Include="SimpleMath\SimpleMath.h">
       <Filter>Header Files\Lib</Filter>
     </ClInclude>
-    <ClInclude Include="DX12Material.h">
-      <Filter>Header Files\DX12</Filter>
-    </ClInclude>
     <ClInclude Include="DX12UI.h">
       <Filter>Header Files\DX12</Filter>
     </ClInclude>
     <ClInclude Include="DX12Shadow.h">
       <Filter>Header Files\DX12</Filter>
-    </ClInclude>
-    <ClInclude Include="LoadTexData.h">
-      <Filter>Header Files\Helper</Filter>
     </ClInclude>
     <ClInclude Include="CameraManager.h">
       <Filter>Header Files\Manager</Filter>
@@ -264,6 +255,12 @@
     </ClInclude>
     <ClInclude Include="CBVPassParameter.h">
       <Filter>Header Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="Material.h">
+      <Filter>Header Files\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="BoundingBox.h">
+      <Filter>Header Files\Lib</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

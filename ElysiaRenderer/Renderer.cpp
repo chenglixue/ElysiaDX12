@@ -24,7 +24,8 @@ namespace ElysiaRenderer
 		m_pBufferManager = std::make_unique<BufferManager>(m_device.get());
 		m_pRenderSource = std::make_unique<RenderResource>(m_device.get());
 		m_pMeshManager = std::make_unique<MeshManager>();
-		m_pModelImporter = std::make_unique<ModelImporter>();
+
+		m_pModelImporter = std::make_unique<ModelImporter>(m_device.get(), m_pBufferManager.get());
 	}
 
 	Renderer::~Renderer()
@@ -36,7 +37,7 @@ namespace ElysiaRenderer
 		printf("loading...\n");
 		if (!m_pModelImporter->Load(g_ModelPaths))
 		{
-			printf("failed to load model: %s\n");
+			AssertError("failed to load model: %s\n");
 		}
 		printf("done\n");
 
@@ -46,9 +47,12 @@ namespace ElysiaRenderer
 		m_pBufferManager->Init();
 		m_pMeshManager->Init();
 
+		float modelRasius = m_pModelImporter->GetBoundingBox().GetDimensions().Length() * 0.5f;
+		m_pCameraManager->CreateMainCamera(m_pModelImporter->GetBoundingBox().GetCenter() + Vector3(modelRasius * 0.5f, 0.f, 0.f),
+			m_aspectRatio, 3.14159f / 4.0f, 1.f, 300.f);
+
 		m_pShadowManager->CreateMainShadow(4096, 15);
 
-		LoadModel();
 		InitTexTriangle();
 	}
 	void Renderer::Update()
@@ -133,32 +137,14 @@ namespace ElysiaRenderer
 	}
 	void Renderer::UpdateObjectCBV()
 	{
-		auto constantParameter = m_pRenderSource->GetCBVObjectParameter();
-
-		constantParameter->worldMatrix = Matrix::Identity;
-		constantParameter->baseColorTint = Vector3::One;
-		constantParameter->ambientCubemapTint = Vector3::One;
-
-		constantParameter->opacity = 1;
-		constantParameter->normalIntensity = 1;
-		constantParameter->metallicIntensity = 1;
-		constantParameter->roughnessIntensity = 1;
-		constantParameter->ambientCubemapIntensity = 1;
-
-		constantParameter->vertexIndex = m_pBufferManager->GetVertexBuffer()->GetResourceHeapIndex();
-		constantParameter->baseColorTexIndex = 0;
-		constantParameter->metallicTexIndex = 0;
-		constantParameter->normalTexIndex = 0;
-		constantParameter->baseColorTexIndex = 0;
-
-		m_pBufferManager->GetMutilConstantBuffer(PER_OBJECT_SPACE, m_device->GetFrameID())->SetMappedData(constantParameter, sizeof(CBVObjectParameter));
 	}
 
 	void Renderer::InitTexTriangle()
 	{
 		LoadShaders();
 
-		AddVertexBuffer(sizeof(DX12Vertex));
+		m_pModelImporter->CreateVertexBuffer();
+		m_pModelImporter->CreateMeshRenders();
 
 		LoadConstantBuffers();
 
@@ -199,13 +185,13 @@ namespace ElysiaRenderer
 
 		desc.m_size = sizeof(CBVObjectParameter);
 		m_pBufferManager->AddConstantBuffer(PER_OBJECT_SPACE, desc);
-		for (UINT i = 0;i < NUM_FRAMES_IN_FLIGHT; ++i)
+		/*for (UINT i = 0;i < NUM_FRAMES_IN_FLIGHT; ++i)
 		{
 			auto constantBuffer = m_pBufferManager->GetMutilConstantBuffer(PER_OBJECT_SPACE, i);
 			auto constantParameter = m_pRenderSource->GetCBVObjectParameter();
 
 			constantBuffer->SetMappedData(constantParameter, sizeof(CBVObjectParameter));
-		}
+		}*/
 		m_perObjectBindResourceSpace->SetCBV(m_pBufferManager->GetMutilConstantBuffer(PER_OBJECT_SPACE, 0));
 		m_perObjectBindResourceSpace->Lock();
 	}
@@ -223,20 +209,6 @@ namespace ElysiaRenderer
 	void Renderer::LoadAndCreateTexs()
 	{
 		auto texLoadSettings = m_globalTexLoadSettings;
-		for (int i = 0; i < texLoadSettings.size(); ++i)
-		{
-			auto strPath = ElysiaHelper::LPCWSTRToString(texLoadSettings[i].LoadPath);
-
-			TextureCreationDesc texBufferCreateDesc{};
-
-			texBufferCreateDesc.texturePath = texLoadSettings[i].LoadPath;
-			texBufferCreateDesc.isSRGB = texLoadSettings[i].IsSRGB;
-
-			auto newTex = std::move(m_device->CreateTextureFromFile(texBufferCreateDesc));
-			//m_texs.emplace_back(std::move(m_device->CreateTextureFromFile(texBufferCreateDesc)));
-		}
-
-		texLoadSettings = m_objectTexLoadSettings;
 		for (int i = 0; i < texLoadSettings.size(); ++i)
 		{
 			auto strPath = ElysiaHelper::LPCWSTRToString(texLoadSettings[i].LoadPath);
@@ -304,73 +276,6 @@ namespace ElysiaRenderer
 		//m_graphicsPipelineStates.insert({ ShaderQueue::Skybox, std::move(m_device->CreateGraphicsPipelineState(pipelineStateCreateDesc, meshResourceLayout)) });
 	}
 
-	void Renderer::LoadModel()
-	{
-		UINT currDrawVertex = 0;
-		UINT currStartVertex = 0;
-		UINT currStartIndex = 0;
-
-		std::vector<DX12Vertex> meshVertices = {
-		{{1.0f, -1.0f, 1.0f}, {0.f, 0.f, 0.f}, { 1.0f, 1.0f }, {0.0f, -1.0f, 0.0f}, {0.f, 0.f, 0.f}},
-		{{1.0f, -1.0f, -1.0f},{0.f, 0.f, 0.f}, {1.0f, 0.0f}, {0.0f, -1.0f, 0.0f}},
-		{{-1.0f, -1.0f, 1.0f},{0.f, 0.f, 0.f}, {0.0f, 1.0f}, {0.0f, -1.0f, 0.0f}},
-		{{-1.0f, -1.0f, 1.0f},{0.f, 0.f, 0.f}, {0.0f, 1.0f}, {0.0f, -1.0f, 0.0f}},
-		{{1.0f, -1.0f, -1.0f},{0.f, 0.f, 0.f}, {1.0f, 0.0f}, {0.0f, -1.0f, 0.0f}},
-		{{-1.0f, -1.0f, -1.0f},{0.f, 0.f, 0.f}, {0.0f, 0.0f}, {0.0f, -1.0f, 0.0f}},
-		{{1.0f, 1.0f, -1.0f},{0.f, 0.f, 0.f}, {1.0f, 1.0f}, {0.0f, 1.0f, 0.0f}},
-		{{1.0f, 1.0f, 1.0f},{0.f, 0.f, 0.f}, {1.0f, 0.0f}, {0.0f, 1.0f, 0.0f}},
-		{{-1.0f, 1.0f, -1.0f},{0.f, 0.f, 0.f}, {0.0f, 1.0f}, {0.0f, 1.0f, 0.0f}},
-		{{-1.0f, 1.0f, -1.0f},{0.f, 0.f, 0.f}, {0.0f, 1.0f}, {0.0f, 1.0f, 0.0f}},
-		{{1.0f, 1.0f, 1.0f},{0.f, 0.f, 0.f}, {1.0f, 0.0f}, {0.0f, 1.0f, 0.0f}},
-		{{-1.0f, 1.0f, 1.0f},{0.f, 0.f, 0.f}, {0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}},
-		{{-1.0f, -1.0f, -1.0f},{0.f, 0.f, 0.f}, {1.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}},
-		{{-1.0f, 1.0f, -1.0f},{0.f, 0.f, 0.f}, {1.0f, 0.0f}, {-1.0f, 0.0f, 0.0f}},
-		{{-1.0f, -1.0f, 1.0f},{0.f, 0.f, 0.f}, {0.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}},
-		{{-1.0f, -1.0f, 1.0f},{0.f, 0.f, 0.f}, {0.0f, 1.0f}, {-1.0f, 0.0f, 0.0f}},
-		{{-1.0f, 1.0f, -1.0f},{0.f, 0.f, 0.f}, {1.0f, 0.0f}, {-1.0f, 0.0f, 0.0f}},
-		{{-1.0f, 1.0f, 1.0f},{0.f, 0.f, 0.f}, {0.0f, 0.0f}, {-1.0f, 0.0f, 0.0f}},
-		{{-1.0f, -1.0f, 1.0f},{0.f, 0.f, 0.f}, {1.0f, 1.0f}, {0.0f, 0.0f, 1.0f}},
-		{{-1.0f, 1.0f, 1.0f},{0.f, 0.f, 0.f}, {1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}},
-		{{1.0f, -1.0f, 1.0f},{0.f, 0.f, 0.f}, {0.0f, 1.0f}, {0.0f, 0.0f, 1.0f}},
-		{{1.0f, -1.0f, 1.0f},{0.f, 0.f, 0.f}, {0.0f, 1.0f}, {0.0f, 0.0f, 1.0f}},
-		{{-1.0f, 1.0f, 1.0f},{0.f, 0.f, 0.f}, {1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}},
-		{{1.0f, 1.0f, 1.0f},{0.f, 0.f, 0.f}, {0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}},
-		{{1.0f, -1.0f, 1.0f},{0.f, 0.f, 0.f}, {1.0f, 1.0f}, {1.0f, 0.0f, 0.0f}},
-		{{1.0f, 1.0f, 1.0f},{0.f, 0.f, 0.f}, {1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}},
-		{{1.0f, -1.0f, -1.0f},{0.f, 0.f, 0.f}, {0.0f, 1.0f}, {1.0f, 0.0f, 0.0f}},
-		{{1.0f, -1.0f, -1.0f},{0.f, 0.f, 0.f}, {0.0f, 1.0f}, {1.0f, 0.0f, 0.0f}},
-		{{1.0f, 1.0f, 1.0f},{0.f, 0.f, 0.f}, {1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}},
-		{{1.0f, 1.0f, -1.0f},{0.f, 0.f, 0.f}, {0.0f, 0.0f}, {1.0f, 0.0f, 0.0f}},
-		{{1.0f, -1.0f, -1.0f},{0.f, 0.f, 0.f}, {1.0f, 1.0f}, {0.0f, 0.0f, -1.0f}},
-		{{1.0f, 1.0f, -1.0f},{0.f, 0.f, 0.f}, {1.0f, 0.0f}, {0.0f, 0.0f, -1.0f}},
-		{{-1.0f, -1.0f, -1.0f},{0.f, 0.f, 0.f}, {0.0f, 1.0f}, {0.0f, 0.0f, -1.0f}},
-		{{-1.0f, -1.0f, -1.0f},{0.f, 0.f, 0.f}, {0.0f, 1.0f}, {0.0f, 0.0f, -1.0f}},
-		{{1.0f, 1.0f, -1.0f},{0.f, 0.f, 0.f}, {1.0f, 0.0f}, {0.0f, 0.0f, -1.0f}},
-		{{-1.0f, 1.0f, -1.0f},{0.f, 0.f, 0.f}, {0.0f, 0.0f}, {0.0f, 0.0f, -1.0f}},
-		};
-
-		m_vertices.insert(m_vertices.begin(), meshVertices.begin(), meshVertices.end());
-		//m_indices.insert(m_indices.end(), currIndices.begin(), currIndices.end());
-
-		/*for (size_t currModelIndex = 0; currModelIndex < m_modelPaths.size(); ++currModelIndex)
-		{
-			auto currModel = DX12Model(m_modelPaths[currModelIndex]);
-			auto currVertices = std::move(currModel.GetVertices());
-			auto currIndices = std::move(currModel.GetIndices());
-
-			m_vertices.insert(m_vertices.end(), currVertices.begin(), currVertices.end());
-			m_indices.insert(m_indices.end(), currIndices.begin(), currIndices.end());
-
-			currDrawVertex += static_cast<UINT>(currIndices.size());
-			currModel.SetDrawIndexCount(static_cast<UINT>(currIndices.size()));
-			currModel.SetVertexOffset(currStartVertex);
-			currModel.SetIndexOffset(currStartIndex);
-			m_models.emplace_back(std::move(currModel));
-
-			currStartVertex += static_cast<UINT>(currVertices.size());
-			currStartIndex += static_cast<UINT>(currIndices.size());
-		}*/
-	}
 	void Renderer::AddShader(ShaderQueue shaderQueue, const std::wstring& shaderName, const std::wstring& entryPoint, ShaderType shaderType)
 	{
 		ShaderCreateDesc VSShaderCreateDesc{};
@@ -395,26 +300,6 @@ namespace ElysiaRenderer
 			}
 		}
 
-	}
-	void Renderer::AddVertexBuffer(UINT singVertexSize)
-	{
-		BufferCreationDesc vertexBufferCreationDesc{};
-		vertexBufferCreationDesc.m_stride = singVertexSize;
-		vertexBufferCreationDesc.m_size = static_cast<UINT>(m_vertices.size() * vertexBufferCreationDesc.m_stride);
-		vertexBufferCreationDesc.m_accessFlags = BufferAccessFlags::GPUOnly;
-		vertexBufferCreationDesc.m_viewFlags = GPUResourceFlags::SRV;
-		vertexBufferCreationDesc.m_isRawAccess = true;
-
-		m_pBufferManager->AddVertexBuffer(vertexBufferCreationDesc);
-
-		auto pBufferUpload = std::make_unique<DX12BufferUpload>();
-		pBufferUpload->m_buffer = m_pBufferManager->GetVertexBuffer();
-		pBufferUpload->m_bufferData = std::make_unique<uint8_t[]>(m_vertices.size() * vertexBufferCreationDesc.m_stride);
-		pBufferUpload->m_bufferDataSize = static_cast<UINT>(m_vertices.size() * vertexBufferCreationDesc.m_stride);
-
-		memcpy_s(pBufferUpload->m_bufferData.get(), pBufferUpload->m_bufferDataSize, m_vertices.data(), pBufferUpload->m_bufferDataSize);
-
-		m_device->GetUploadContext()->AddBufferToUploads(std::move(pBufferUpload));
 	}
 
 	void Renderer::RenderTexTriangle()
@@ -449,17 +334,30 @@ namespace ElysiaRenderer
 		}
 		if (isReady)
 		{
-			auto objectContantBuffer = m_pBufferManager->GetMutilConstantBuffer(PER_OBJECT_SPACE, m_device->GetFrameID());
-			m_perObjectBindResourceSpace->SetCBV(objectContantBuffer);
-
-			m_graphicsContext->SetPipeline(pipelineStateData);
-			m_graphicsContext->SetPipelineResource(PER_OBJECT_SPACE, m_perObjectBindResourceSpace.get());
-			m_graphicsContext->SetPipelineResource(PER_PASS_SPACE, m_perMainPassBindResourceSpace.get());
-
 			m_graphicsContext->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(static_cast<UINT>(m_device->GetScreenSize().x), static_cast<UINT>(m_device->GetScreenSize().y)));
 			m_graphicsContext->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-			m_graphicsContext->Draw(static_cast<UINT>(m_vertices.size()));
+			m_graphicsContext->SetPipeline(pipelineStateData);
+			m_graphicsContext->SetPipelineResource(PER_PASS_SPACE, m_perMainPassBindResourceSpace.get());
+
+			UINT vertexStride = m_pModelImporter->GetVertexStride();
+			auto objectContantBuffer = m_pBufferManager->GetMutilConstantBuffer(PER_OBJECT_SPACE, m_device->GetFrameID());
+
+			for (UINT meshIndex = 0; meshIndex < m_pModelImporter->GetMeshCount(); ++meshIndex)
+			{
+				const auto& meshRenderer = m_pModelImporter->GetMeshRenderer(meshIndex);
+				const auto& mesh = meshRenderer.m_mesh;
+
+				auto objectConstantParameter = *meshRenderer.m_CBVObjectParameter;
+				objectContantBuffer->SetMappedData(&objectConstantParameter, sizeof(CBVObjectParameter));
+				m_perObjectBindResourceSpace->SetCBV(objectContantBuffer);
+				m_graphicsContext->SetPipelineResource(PER_OBJECT_SPACE, m_perObjectBindResourceSpace.get());
+				
+				UINT startVertex = mesh->vertexDataOffset / vertexStride;
+				UINT VertexCount = mesh->vertexCount;
+
+				m_graphicsContext->Draw(VertexCount, startVertex);
+			}
 		}
 		//ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), m_graphicsContext->GetCommandList());
 
@@ -569,16 +467,5 @@ namespace ElysiaRenderer
 			SetPipelineResource(m_objectCBVIndex, CBVPassParameterType::Main);
 			DrawCommand(m_objectCBVIndex++);
 		}*/
-	}
-	void Renderer::DrawCommand(size_t drawModelIndex)
-	{
-		/*assert(drawModelIndex < m_models.size());
-		auto drawModel = m_models[drawModelIndex];
-
-		auto drawVertexCount = drawModel.GetIndexCount();
-		auto startVertex = drawModel.GetVertexOffset();
-		auto startIndex = drawModel.GetIndexOffset();*/
-
-		m_graphicsContext->Draw(static_cast<UINT>(m_vertices.size()));
 	}
 }

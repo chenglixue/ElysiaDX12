@@ -1,10 +1,12 @@
 #pragma once
 #include "stdafx.h"
 #include "DX12Vertex.h"
-#include "DX12Material.h"
+#include "BoundingBox.h"
 
 namespace ElysiaRenderer
 {
+    using namespace ElysiaHelper;
+
     enum
     {
         attrib_0 = 0,
@@ -84,9 +86,6 @@ namespace ElysiaRenderer
 	struct Mesh
 	{
 		std::string name;
-		std::vector<DX12Vertex> vertices{};
-		std::vector<UINT> indices{};
-		std::vector<DX12Material*> materials{};
 
 		UINT materialIndex = 0;
 
@@ -94,6 +93,8 @@ namespace ElysiaRenderer
 		uint32_t vertexStride;
 
         Attrib attrib[maxAttribs];
+
+        AxisAlignedBox boundingBox;
 
 		UINT vertexDataOffset = 0;
         UINT vertexCount = 0;
@@ -107,6 +108,7 @@ namespace ElysiaRenderer
 		uint32_t materialCount;
 		uint32_t vertexDataByteSize;
 		uint32_t indexDataByteSize;
-		uint32_t vertexDataByteSizeDepth;
+
+        AxisAlignedBox boundingBox;
 	};
 }

@@ -9,12 +9,6 @@ using namespace ElysiaModel;
 using namespace std;
 using Microsoft::WRL::ComPtr;
 
-const std::vector<LPCWSTR> g_ModelPaths
-{
-	L"Mesh\\LOW_WEPON.fbx",
-	//L"Mesh\\plane.fbx",
-	//L"Mesh\\Sphere.fbx",
-};
 static std::unique_ptr<Renderer> g_pRenderer = nullptr;
 
 //find path to WinPixGpuCapturer.dll from the most-recently installed version of PIX

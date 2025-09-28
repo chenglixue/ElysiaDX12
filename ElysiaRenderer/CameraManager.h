@@ -23,8 +23,9 @@ namespace ElysiaRenderer
 			return m_mainCamera.get();
 		}
 
-	private:
 		void CreateMainCamera(Vector3 position, float aspectRatio, float fovy, float nearZ, float farZ);
+
+	private:
 
 		std::unique_ptr<DX12Camera> m_mainCamera = nullptr;
 	};

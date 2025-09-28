@@ -1,8 +1,14 @@
 #include "ModelImporter.h"
-#include <string.h>
 
 namespace ElysiaModel
 {
+	ModelImporter::ModelImporter(DX12Device* pDevice, BufferManager* pBufferManager) :
+		m_pDevice(std::move(pDevice)),
+		m_pBufferManager(std::move(pBufferManager))
+	{
+
+	}
+
 	ModelImporter::~ModelImporter()
 	{
 	}
@@ -11,11 +17,11 @@ namespace ElysiaModel
 	{
 		Assimp::Importer importer;
 
-		// remove unused data:color,light,camera
+		// remove unused data
 		importer.SetPropertyInteger(AI_CONFIG_PP_RVC_FLAGS,
 			aiComponent_COLORS | aiComponent_LIGHTS | aiComponent_CAMERAS);
 
-		// set max triangles and vertices per mesh, splits above this threshold
+		// max triangles and vertices per mesh, splits above this threshold
 		importer.SetPropertyInteger(AI_CONFIG_PP_SLM_TRIANGLE_LIMIT, INT_MAX);
 		importer.SetPropertyInteger(AI_CONFIG_PP_SLM_VERTEX_LIMIT, 0xfffe); // avoid the primitive restart index
 
@@ -29,10 +35,11 @@ namespace ElysiaModel
 		auto modelPath = std::filesystem::path(modelFullPath).string();
 
 		const aiScene* pScene = importer.ReadFile(modelPath,
-			aiProcess_CalcTangentSpace	|
+			aiProcess_CalcTangentSpace |
+			//aiProcess_ConvertToLeftHanded |
 			aiProcess_JoinIdenticalVertices |	// Merge same vertices
 			aiProcess_Triangulate |				// translat othrer shape to triangle
-			aiProcess_RemoveComponent |			
+			aiProcess_RemoveComponent |
 			aiProcess_GenSmoothNormals |
 			aiProcess_SplitLargeMeshes |
 			aiProcess_ValidateDataStructure |	// Verify the data structure validity of the imported model. When loading 3D models, you may encounter format errors or data inconsistencies
@@ -123,7 +130,7 @@ namespace ElysiaModel
 			const auto srcMesh = pScene->mMeshes[meshIndex];
 			auto destMesh = m_pMesh + meshIndex;
 
-			assert(srcMesh->mPrimitiveTypes == aiPrimitiveType_TRIANGLE);
+			assert(srcMesh->mPrimitiveTypes & aiPrimitiveType_TRIANGLE);
 
 			destMesh->materialIndex = srcMesh->mMaterialIndex;
 
@@ -170,6 +177,10 @@ namespace ElysiaModel
 
 			m_meshData.vertexDataByteSize += destMesh->vertexStride * destMesh->vertexCount;
 			m_meshData.indexDataByteSize += sizeof(UINT16) * destMesh->indexCount;
+		}
+		if (m_meshData.meshCount > 0)
+		{
+			m_vertexStride = m_pMesh[0].vertexStride;
 		}
 
 		m_pVertexData = new unsigned char[m_meshData.vertexDataByteSize];
@@ -265,6 +276,8 @@ namespace ElysiaModel
 			}
 		}
 
+		ComputeAllBoundingBoxes();
+
 		return true;
 	}
 
@@ -277,5 +290,100 @@ namespace ElysiaModel
 		}
 
 		return isLoadSuccess;
+	}
+
+	void ModelImporter::ComputeMeshBoundingBox(uint32_t meshIndex, AxisAlignedBox& bbox) const
+	{
+		const auto pMesh = m_pMesh + meshIndex;
+		bbox = AxisAlignedBox();
+
+		if (pMesh->vertexCount <= 0) return;
+
+		UINT vertexStride = pMesh->vertexStride;
+		const auto p = (float*)(m_pVertexData + pMesh->vertexDataOffset + pMesh->attrib[attrib_position].offset);
+		const auto pEnd = (float*)(m_pVertexData + pMesh->vertexDataOffset + pMesh->attrib[attrib_position].offset + pMesh->vertexCount * pMesh->vertexStride);
+		
+		while (p < pEnd)
+		{
+			Vector3 pos(*(p + 0), *(p + 1), *(p + 2));
+
+			bbox.AddPoint(pos);
+
+			(*(uint8_t**) & p) += vertexStride;
+		}
+	}
+
+	void ModelImporter::ComputeGlobalBoundingBox(AxisAlignedBox& bbox) const
+	{
+		bbox = AxisAlignedBox();
+
+		if (m_meshData.meshCount <= 0)
+		{
+			AssertError("mesh Count < 0, Compute global bounding box error");
+			return;
+		}
+
+		for (UINT meshIndex = 0; meshIndex < m_meshData.meshCount; ++meshIndex)
+		{
+			const auto pMesh = m_pMesh + meshIndex;
+			bbox.AddBoundingBox(pMesh->boundingBox);
+		}
+	}
+
+	void ModelImporter::ComputeAllBoundingBoxes()
+	{
+		for (UINT meshIndex = 0; meshIndex < m_meshData.meshCount; ++meshIndex)
+		{
+			Mesh* pMesh = m_pMesh + meshIndex;
+			ComputeMeshBoundingBox(meshIndex, pMesh->boundingBox);
+		}
+
+		ComputeGlobalBoundingBox(m_meshData.boundingBox);
+	}
+
+	bool ModelImporter::CreateVertexBuffer()
+	{
+		BufferCreationDesc vertexBufferCreationDesc{};
+		vertexBufferCreationDesc.m_stride = m_vertexStride;
+		vertexBufferCreationDesc.m_size = static_cast<size_t>(m_meshData.vertexDataByteSize);
+		vertexBufferCreationDesc.m_accessFlags = BufferAccessFlags::GPUOnly;
+		vertexBufferCreationDesc.m_viewFlags = GPUResourceFlags::SRV;
+		vertexBufferCreationDesc.m_isRawAccess = true;
+
+		m_pBufferManager->AddVertexBuffer(vertexBufferCreationDesc);
+
+		auto pBufferUpload = std::make_unique<DX12BufferUpload>();
+		pBufferUpload->m_buffer = m_pBufferManager->GetVertexBuffer();
+		pBufferUpload->m_bufferData = std::make_unique<uint8_t[]>(m_meshData.vertexDataByteSize);
+		pBufferUpload->m_bufferDataSize = vertexBufferCreationDesc.m_size;
+
+		memcpy_s(pBufferUpload->m_bufferData.get(), pBufferUpload->m_bufferDataSize, m_pVertexData, pBufferUpload->m_bufferDataSize);
+
+		m_pDevice->GetUploadContext()->AddBufferToUploads(std::move(pBufferUpload));
+
+		return m_pBufferManager->GetVertexBuffer();
+	}
+
+	void ModelImporter::CreateMeshRenders()
+	{
+		m_pMeshRender = new MeshRender[m_meshData.meshCount];
+
+		for (UINT meshIndex = 0; meshIndex < m_meshData.meshCount; ++meshIndex)
+		{
+			auto pCurrMeshRender = m_pMeshRender + meshIndex;
+
+			pCurrMeshRender->m_mesh = m_pMesh + meshIndex;
+
+			pCurrMeshRender->m_CBVObjectParameter = std::make_unique<CBVObjectParameter>();
+			pCurrMeshRender->m_CBVObjectParameter->baseColorTint = Vector3::One;
+			pCurrMeshRender->m_CBVObjectParameter->ambientCubemapTint = Vector3::One;
+			pCurrMeshRender->m_CBVObjectParameter->normalIntensity = 1.f;
+			pCurrMeshRender->m_CBVObjectParameter->ambientCubemapIntensity = 1.f;
+			pCurrMeshRender->m_CBVObjectParameter->metallicIntensity = 1.f;
+			pCurrMeshRender->m_CBVObjectParameter->roughnessIntensity = 1.f;
+			pCurrMeshRender->m_CBVObjectParameter->opacity = 1.f;
+			pCurrMeshRender->m_CBVObjectParameter->worldMatrix = pCurrMeshRender->m_worldMatrix;
+			pCurrMeshRender->m_CBVObjectParameter->vertexIndex = m_pBufferManager->GetVertexBuffer()->GetResourceHeapIndex();
+		}
 	}
 }

@@ -155,6 +155,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="BoundingBox.h" />
     <ClInclude Include="BufferManager.h" />
     <ClInclude Include="CameraManager.h" />
     <ClInclude Include="CBVPassParameter.h" />
@@ -165,7 +166,7 @@
     <ClInclude Include="IManager.h" />
     <ClInclude Include="IUpdate.h" />
     <ClInclude Include="LightManager.h" />
-    <ClInclude Include="LoadTexData.h" />
+    <ClInclude Include="Material.h" />
     <ClInclude Include="MeshManager.h" />
     <ClInclude Include="PipelineResourceSpace.h" />
     <ClInclude Include="DX12Context.h" />
@@ -174,8 +175,7 @@
     <ClInclude Include="DX12Device.h" />
     <ClInclude Include="DX12GraphicsContext.h" />
     <ClInclude Include="DX12Light.h" />
-    <ClInclude Include="DX12Material.h" />
-    <ClInclude Include="DX12Mesh.h" />
+    <ClInclude Include="Mesh.h" />
     <ClInclude Include="ModelImporter.h" />
     <ClInclude Include="DX12PipelineState.h" />
     <ClInclude Include="DX12Queue.h" />
@@ -212,7 +212,6 @@
     <ClInclude Include="DX12MeshRender.h" />
     <ClInclude Include="Math.h" />
     <ClInclude Include="Renderer.h" />
-    <ClInclude Include="RenderHelper.h" />
     <ClInclude Include="RenderResource.h" />
     <ClInclude Include="ShaderManager.h" />
     <ClInclude Include="ShadowManager.h" />

@@ -1,187 +1,309 @@
 ﻿cl : command line  warning D9014: invalid value '18' for '/wd'; assuming '5999'
   ModelImporter.cpp
-  Renderer.cpp
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Material.h(9,26): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Texture' when no variable is declared
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
   (compiling source file 'ModelImporter.cpp')
   
-D:\DX12\ElysiaRenderer\ElysiaRenderer\ModelImporter.cpp(212,2): error C2556: 'void ElysiaModel::ModelImporter::Load(const std::vector<LPCWSTR,std::allocator<LPCWSTR>> &)': overloaded function differs only by return type from 'bool ElysiaModel::ModelImporter::Load(const std::vector<LPCWSTR,std::allocator<LPCWSTR>> &)'
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\ModelImporter.h(34,8):
-      see declaration of 'ElysiaModel::ModelImporter::Load'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\ModelImporter.cpp(211,22): error C2371: 'ElysiaModel::ModelImporter::Load': redefinition; different basic types
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\ModelImporter.h(34,8):
-      see declaration of 'ElysiaModel::ModelImporter::Load'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file 'Renderer.cpp')
-  
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12BufferResource.h(63,11): warning C4244: 'return': conversion from 'const size_t' to 'float', possible loss of data
-  (compiling source file 'Renderer.cpp')
+  (compiling source file 'ModelImporter.cpp')
   
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12BufferResource.h(84,15): warning C4244: '=': conversion from 'float' to 'size_t', possible loss of data
-  (compiling source file 'Renderer.cpp')
+  (compiling source file 'ModelImporter.cpp')
   
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12PipelineState.h(7,32): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12RootSignature' when no variable is declared
-  (compiling source file 'Renderer.cpp')
+  (compiling source file 'ModelImporter.cpp')
   
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12PipelineState.h(8,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Shader' when no variable is declared
-  (compiling source file 'Renderer.cpp')
+  (compiling source file 'ModelImporter.cpp')
   
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12GraphicsContext.h(8,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
-  (compiling source file 'Renderer.cpp')
+  (compiling source file 'ModelImporter.cpp')
   
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12UploadContext.h(9,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
-  (compiling source file 'Renderer.cpp')
+  (compiling source file 'ModelImporter.cpp')
   
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(153,26): error C2065: 'DX12Vertex': undeclared identifier
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(305,15): error C2065: 'DX12Vertex': undeclared identifier
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(305,8): error C2923: 'std::vector': 'DX12Vertex' is not a valid template type argument for parameter '_Ty'
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(305,15):
-      see declaration of 'DX12Vertex'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(305,8): error C2976: 'std::vector': too few template arguments
-      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\vector(436,1):
-      see declaration of 'std::vector'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(305,42): error C2641: cannot deduce template arguments for 'std::vector'
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(305,42): error C2780: 'std::vector<iterator_traits<_Iter>::value_type,_Alloc> std::vector(_Iter,_Iter,_Alloc)': expects 3 arguments - 36 provided
-      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\vector(2212,1):
-      see declaration of 'std::vector'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(305,42): error C2780: 'std::vector<_Ty,_Alloc> std::vector(std::vector<_Ty,_Alloc> &&,const _Identity<_Alloc>::type &) noexcept(<expr>)': expects 2 arguments - 36 provided
-      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\vector(703,5):
-      see declaration of 'std::vector'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(305,42): error C2780: 'std::vector<_Ty,_Alloc> std::vector(std::vector<_Ty,_Alloc> &&) noexcept': expects 1 arguments - 36 provided
-      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\vector(694,5):
-      see declaration of 'std::vector'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(305,42): error C2780: 'std::vector<_Ty,_Alloc> std::vector(const std::vector<_Ty,_Alloc> &,const _Identity<_Alloc>::type &)': expects 2 arguments - 36 provided
-      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\vector(687,5):
-      see declaration of 'std::vector'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(305,42): error C2780: 'std::vector<_Ty,_Alloc> std::vector(const std::vector<_Ty,_Alloc> &)': expects 1 arguments - 36 provided
-      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\vector(680,5):
-      see declaration of 'std::vector'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(305,42): error C2780: 'std::vector<_Ty,_Alloc> std::vector(std::initializer_list<_Elem>,const _Alloc &)': expects 2 arguments - 36 provided
-      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\vector(654,5):
-      see declaration of 'std::vector'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(305,42): error C2780: 'std::vector<_Ty,_Alloc> std::vector(_Iter,_Iter,const _Alloc &)': expects 3 arguments - 36 provided
-      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\vector(627,5):
-      see declaration of 'std::vector'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(305,42): error C2780: 'std::vector<_Ty,_Alloc> std::vector(const allocator_traits<allocator_traits<_Alloc>::rebind_alloc<_Ty>>::size_type,const _Ty &,const _Alloc &)': expects 3 arguments - 36 provided
-      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\vector(621,5):
-      see declaration of 'std::vector'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(305,42): error C2780: 'std::vector<_Ty,_Alloc> std::vector(const allocator_traits<allocator_traits<_Alloc>::rebind_alloc<_Ty>>::size_type,const _Alloc &)': expects 2 arguments - 36 provided
-      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\vector(616,5):
-      see declaration of 'std::vector'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(305,42): error C2780: 'std::vector<_Ty,_Alloc> std::vector(const _Alloc &) noexcept': expects 1 arguments - 36 provided
-      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\vector(612,5):
-      see declaration of 'std::vector'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(305,42): error C2780: 'std::vector<_Ty,_Alloc> std::vector(void) noexcept(<expr>)': expects 0 arguments - 36 provided
-      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\vector(608,5):
-      see declaration of 'std::vector'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(305,42): error C2780: 'std::vector<_Ty,_Alloc> std::vector(std::vector<_Ty,_Alloc>)': expects 1 arguments - 36 provided
-      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\vector(436,1):
-      see declaration of 'std::vector'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(344,3): error C2065: 'm_vertices': undeclared identifier
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(344,21): error C2065: 'm_vertices': undeclared identifier
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(344,53): error C2663: 'std::vector<_Ty,_Alloc>::begin': no overloaded function has valid conversion for 'this' pointer
-      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\vector(1807,44):
-      could be 'std::_Vector_const_iterator<std::_Vector_val<conditional<std::_Is_simple_alloc_v<allocator_traits<_Alloc>::rebind_alloc<_Ty>>,std::_Simple_types<_Value_type>,std::_Vec_iter_types<_Ty,allocator_traits<allocator_traits<_Alloc>::rebind_alloc<_Ty>>::size_type,allocator_traits<allocator_traits<_Alloc>::rebind_alloc<_Ty>>::difference_type,allocator_traits<allocator_traits<_Alloc>::rebind_alloc<_Ty>>::pointer,allocator_traits<allocator_traits<_Alloc>::rebind_alloc<_Ty>>::const_pointer>>::type>> std::vector<_Ty,_Alloc>::begin(void) noexcept const'
-          D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(344,53):
-          'std::_Vector_const_iterator<std::_Vector_val<conditional<std::_Is_simple_alloc_v<allocator_traits<_Alloc>::rebind_alloc<_Ty>>,std::_Simple_types<_Value_type>,std::_Vec_iter_types<_Ty,allocator_traits<allocator_traits<_Alloc>::rebind_alloc<_Ty>>::size_type,allocator_traits<allocator_traits<_Alloc>::rebind_alloc<_Ty>>::difference_type,allocator_traits<allocator_traits<_Alloc>::rebind_alloc<_Ty>>::pointer,allocator_traits<allocator_traits<_Alloc>::rebind_alloc<_Ty>>::const_pointer>>::type>> std::vector<_Ty,_Alloc>::begin(void) noexcept const': cannot convert 'this' pointer from 'std::vector' to 'const std::vector<_Ty,_Alloc> &'
-              D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(344,41):
-              Reason: cannot convert from 'std::vector' to 'const std::vector<_Ty,_Alloc>'
-              D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(344,41):
-              Conversion requires a second user-defined-conversion operator or constructor
-      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\vector(1802,38):
-      or       'std::_Vector_iterator<std::_Vector_val<conditional<std::_Is_simple_alloc_v<allocator_traits<_Alloc>::rebind_alloc<_Ty>>,std::_Simple_types<_Value_type>,std::_Vec_iter_types<_Ty,allocator_traits<allocator_traits<_Alloc>::rebind_alloc<_Ty>>::size_type,allocator_traits<allocator_traits<_Alloc>::rebind_alloc<_Ty>>::difference_type,allocator_traits<allocator_traits<_Alloc>::rebind_alloc<_Ty>>::pointer,allocator_traits<allocator_traits<_Alloc>::rebind_alloc<_Ty>>::const_pointer>>::type>> std::vector<_Ty,_Alloc>::begin(void) noexcept'
-          D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(344,53):
-          'std::_Vector_iterator<std::_Vector_val<conditional<std::_Is_simple_alloc_v<allocator_traits<_Alloc>::rebind_alloc<_Ty>>,std::_Simple_types<_Value_type>,std::_Vec_iter_types<_Ty,allocator_traits<allocator_traits<_Alloc>::rebind_alloc<_Ty>>::size_type,allocator_traits<allocator_traits<_Alloc>::rebind_alloc<_Ty>>::difference_type,allocator_traits<allocator_traits<_Alloc>::rebind_alloc<_Ty>>::pointer,allocator_traits<allocator_traits<_Alloc>::rebind_alloc<_Ty>>::const_pointer>>::type>> std::vector<_Ty,_Alloc>::begin(void) noexcept': cannot convert 'this' pointer from 'std::vector' to 'std::vector<_Ty,_Alloc> &'
-              D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(344,41):
-              Reason: cannot convert from 'std::vector' to 'std::vector<_Ty,_Alloc>'
-              D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(344,41):
-              Conversion requires a second user-defined-conversion operator or constructor
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(344,53):
-      while trying to match the argument list '()'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(344,75): error C2663: 'std::vector<_Ty,_Alloc>::end': no overloaded function has valid conversion for 'this' pointer
-      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\vector(1817,44):
-      could be 'std::_Vector_const_iterator<std::_Vector_val<conditional<std::_Is_simple_alloc_v<allocator_traits<_Alloc>::rebind_alloc<_Ty>>,std::_Simple_types<_Value_type>,std::_Vec_iter_types<_Ty,allocator_traits<allocator_traits<_Alloc>::rebind_alloc<_Ty>>::size_type,allocator_traits<allocator_traits<_Alloc>::rebind_alloc<_Ty>>::difference_type,allocator_traits<allocator_traits<_Alloc>::rebind_alloc<_Ty>>::pointer,allocator_traits<allocator_traits<_Alloc>::rebind_alloc<_Ty>>::const_pointer>>::type>> std::vector<_Ty,_Alloc>::end(void) noexcept const'
-          D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(344,75):
-          'std::_Vector_const_iterator<std::_Vector_val<conditional<std::_Is_simple_alloc_v<allocator_traits<_Alloc>::rebind_alloc<_Ty>>,std::_Simple_types<_Value_type>,std::_Vec_iter_types<_Ty,allocator_traits<allocator_traits<_Alloc>::rebind_alloc<_Ty>>::size_type,allocator_traits<allocator_traits<_Alloc>::rebind_alloc<_Ty>>::difference_type,allocator_traits<allocator_traits<_Alloc>::rebind_alloc<_Ty>>::pointer,allocator_traits<allocator_traits<_Alloc>::rebind_alloc<_Ty>>::const_pointer>>::type>> std::vector<_Ty,_Alloc>::end(void) noexcept const': cannot convert 'this' pointer from 'std::vector' to 'const std::vector<_Ty,_Alloc> &'
-              D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(344,63):
-              Reason: cannot convert from 'std::vector' to 'const std::vector<_Ty,_Alloc>'
-              D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(344,63):
-              Conversion requires a second user-defined-conversion operator or constructor
-      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\vector(1812,38):
-      or       'std::_Vector_iterator<std::_Vector_val<conditional<std::_Is_simple_alloc_v<allocator_traits<_Alloc>::rebind_alloc<_Ty>>,std::_Simple_types<_Value_type>,std::_Vec_iter_types<_Ty,allocator_traits<allocator_traits<_Alloc>::rebind_alloc<_Ty>>::size_type,allocator_traits<allocator_traits<_Alloc>::rebind_alloc<_Ty>>::difference_type,allocator_traits<allocator_traits<_Alloc>::rebind_alloc<_Ty>>::pointer,allocator_traits<allocator_traits<_Alloc>::rebind_alloc<_Ty>>::const_pointer>>::type>> std::vector<_Ty,_Alloc>::end(void) noexcept'
-          D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(344,75):
-          'std::_Vector_iterator<std::_Vector_val<conditional<std::_Is_simple_alloc_v<allocator_traits<_Alloc>::rebind_alloc<_Ty>>,std::_Simple_types<_Value_type>,std::_Vec_iter_types<_Ty,allocator_traits<allocator_traits<_Alloc>::rebind_alloc<_Ty>>::size_type,allocator_traits<allocator_traits<_Alloc>::rebind_alloc<_Ty>>::difference_type,allocator_traits<allocator_traits<_Alloc>::rebind_alloc<_Ty>>::pointer,allocator_traits<allocator_traits<_Alloc>::rebind_alloc<_Ty>>::const_pointer>>::type>> std::vector<_Ty,_Alloc>::end(void) noexcept': cannot convert 'this' pointer from 'std::vector' to 'std::vector<_Ty,_Alloc> &'
-              D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(344,63):
-              Reason: cannot convert from 'std::vector' to 'std::vector<_Ty,_Alloc>'
-              D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(344,63):
-              Conversion requires a second user-defined-conversion operator or constructor
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(344,75):
-      while trying to match the argument list '()'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(395,55): error C2065: 'm_vertices': undeclared identifier
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(404,61): error C2065: 'm_vertices': undeclared identifier
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(404,38): error C2672: 'std::make_unique': no matching overloaded function found
-      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\memory(3475,6):
-      could be 'void std::make_unique(_Types &&...)'
-      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\memory(3469,57):
-      or       'std::unique_ptr<_Ty,std::default_delete<_Ty>> std::make_unique(const size_t)'
-      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\memory(3464,57):
-      or       'std::unique_ptr<_Ty,std::default_delete<_Ty>> std::make_unique(_Types &&...)'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(405,55): error C2065: 'm_vertices': undeclared identifier
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(407,80): error C2065: 'm_vertices': undeclared identifier
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(407,3): error C2660: 'memcpy_s': function does not take 3 arguments
-      C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\ucrt\corecrt_memcpy_s.h(39,44):
-      see declaration of 'memcpy_s'
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(407,3):
-      while trying to match the argument list '(unsigned char *, size_t, size_t)'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(454,46): error C2065: 'm_vertices': undeclared identifier
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(574,45): error C2065: 'm_vertices': undeclared identifier
-  main.cpp
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file 'main.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12BufferResource.h(63,11): warning C4244: 'return': conversion from 'const size_t' to 'float', possible loss of data
-  (compiling source file 'main.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12BufferResource.h(84,15): warning C4244: '=': conversion from 'float' to 'size_t', possible loss of data
-  (compiling source file 'main.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12PipelineState.h(7,32): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12RootSignature' when no variable is declared
-  (compiling source file 'main.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12PipelineState.h(8,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Shader' when no variable is declared
-  (compiling source file 'main.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12GraphicsContext.h(8,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
-  (compiling source file 'main.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12UploadContext.h(9,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
-  (compiling source file 'main.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Material.h(9,26): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Texture' when no variable is declared
-  (compiling source file 'main.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\main.cpp(57,18): error C2661: 'ElysiaModel::ModelImporter::Load': no overloaded function takes 0 arguments
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\main.cpp(57,18):
-      while trying to match the argument list '()'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\main.cpp(58,2): error C2146: syntax error: missing ';' before identifier 'g_pRenderer'
-  Generating Code...
+  ElysiaRenderer.vcxproj -> D:\DX12\ElysiaRenderer\x64\Debug\ElysiaRenderer.exe
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Mesh\diablo3_pose.obj
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Mesh\LOW_WEPON.fbx
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Mesh\plane.fbx
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Mesh\Sphere.fbx
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Mesh\UE.fbx
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\AmbientCubemap.hlsl
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\AreaLightCommon.hlsl
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\BRDF.hlsl
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\Common.hlsl
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\EnergyPreservation.hlsl
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\Light.hlsl
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\Light.hlsli
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\LightAccumulator.hlsl
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\LightCommon.hlsl
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\Macros.hlsli
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\Math.hlsli
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\MonteCarlo.hlsl
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\Random.hlsl
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\ShadingCommon.hlsl
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\ShadingModel.hlsl
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\SharedCommon.hlsli
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\Transform.hlsli
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\public\PBR.hlsl
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\public\Shadow.hlsl
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\public\Skybox.hlsl
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\background.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\background.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\background_normal.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\background_normal.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\chain_texture.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\chain_texture.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\chain_texture_normal.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\chain_texture_normal.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\default.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\default.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\default_normal.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\default_normal.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\default_specular.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\default_specular.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\fire.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\gi_flag.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\gi_flag.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\lion.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\lion.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\lion_normal.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\lion_normal.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\particles.json
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\smoke.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sparkTex.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\spnza_bricks_a.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\spnza_bricks_a.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\spnza_bricks_a_normal.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\spnza_bricks_a_normal.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\spnza_bricks_a_specular.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\spnza_bricks_a_specular.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza.h3d
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza.mtl
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza.obj
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_arch.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_arch.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_arch_normal.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_arch_normal.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_arch_specular.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_arch_specular.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_ceiling_a.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_ceiling_a.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_ceiling_a_specular.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_ceiling_a_specular.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_column_a.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_column_a.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_column_a_normal.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_column_a_normal.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_column_a_specular.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_column_a_specular.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_column_b.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_column_b.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_column_b_normal.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_column_b_normal.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_column_b_specular.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_column_b_specular.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_column_c.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_column_c.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_column_c_normal.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_column_c_normal.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_column_c_specular.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_column_c_specular.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_curtain.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_curtain.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_curtain_blue.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_curtain_blue.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_curtain_green.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_curtain_green.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_details.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_details.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_details_specular.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_details_specular.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_fabric.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_fabric.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_fabric_blue.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_fabric_blue.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_fabric_green.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_fabric_green.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_fabric_specular.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_fabric_specular.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_flagpole.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_flagpole.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_flagpole_specular.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_flagpole_specular.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_floor_a.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_floor_a.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_floor_a_specular.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_floor_a_specular.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_no_curtain.mtl
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_no_curtain.obj
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_roof.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_roof.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_thorn.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_thorn.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_thorn_normal.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_thorn_normal.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_thorn_specular.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\sponza_thorn_specular.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\vase.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\vase.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\vase_hanging.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\vase_hanging.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\vase_normal.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\vase_normal.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\vase_plant.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\vase_plant.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\vase_plant_specular.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\vase_plant_specular.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\vase_round.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\vase_round.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\vase_round_normal.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\vase_round_normal.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\vase_round_specular.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\vase_round_specular.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\white.DDS
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\white.tga
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\background_basecolor.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\background_baseColor.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\background_metallicroughness.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\background_metallicRoughness.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\background_normal.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\background_normal.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\chain_texture_basecolor.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\chain_texture_baseColor.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\chain_texture_metallicroughness.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\chain_texture_metallicRoughness.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\chain_texture_normal.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\chain_texture_normal.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\copyright.txt
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\lion_basecolor.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\lion_baseColor.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\lion_metallicroughness.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\lion_metallicRoughness.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\lion_normal.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\lion_normal.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza.h3d
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza.mini
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza.mtl
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza.obj
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza2.bin
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza2.gltf
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_arch_basecolor.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_arch_baseColor.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_arch_metallicroughness.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_arch_metallicRoughness.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_arch_normal.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_arch_normal.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_bricks_a_basecolor.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_bricks_a_baseColor.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_bricks_a_metallicroughness.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_bricks_a_metallicRoughness.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_bricks_a_normal.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_bricks_a_normal.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_ceiling_a_basecolor.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_ceiling_a_baseColor.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_ceiling_a_metallicroughness.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_ceiling_a_metallicRoughness.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_ceiling_a_normal.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_ceiling_a_normal.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_column_a_basecolor.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_column_a_baseColor.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_column_a_metallicroughness.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_column_a_metallicRoughness.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_column_a_normal.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_column_a_normal.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_column_b_basecolor.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_column_b_baseColor.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_column_b_metallicroughness.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_column_b_metallicRoughness.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_column_b_normal.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_column_b_normal.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_column_c_basecolor.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_column_c_baseColor.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_column_c_metallicroughness.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_column_c_metallicRoughness.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_column_c_normal.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_column_c_normal.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_curtain_basecolor.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_curtain_baseColor.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_curtain_blue_basecolor.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_curtain_blue_baseColor.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_curtain_green_basecolor.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_curtain_green_baseColor.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_curtain_metallicroughness.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_curtain_metallicRoughness.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_curtain_normal.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_curtain_normal.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_details_basecolor.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_details_baseColor.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_details_metallicroughness.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_details_metallicRoughness.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_details_normal.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_details_normal.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_fabric_basecolor.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_fabric_baseColor.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_fabric_blue_basecolor.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_fabric_blue_baseColor.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_fabric_green_basecolor.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_fabric_green_baseColor.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_fabric_metallicroughness.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_fabric_metallicRoughness.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_fabric_normal.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_fabric_normal.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_flagpole_basecolor.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_flagpole_baseColor.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_flagpole_metallicroughness.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_flagpole_metallicRoughness.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_flagpole_normal.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_flagpole_normal.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_floor_a_basecolor.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_floor_a_baseColor.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_floor_a_metallicroughness.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_floor_a_metallicRoughness.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_floor_a_normal.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_floor_a_normal.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_roof_baseColor.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_roof_baseColor.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_roof_metallicRoughness.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_roof_metallicRoughness.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_roof_normal.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_roof_normal.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_thorn_basecolor.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_thorn_baseColor.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_thorn_metallicroughness.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_thorn_metallicRoughness.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_thorn_normal.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\sponza_thorn_normal.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\vase_basecolor.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\vase_baseColor.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\vase_hanging_basecolor.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\vase_hanging_baseColor.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\vase_hanging_metallicroughness.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\vase_hanging_metallicRoughness.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\vase_hanging_normal.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\vase_hanging_normal.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\vase_metallicroughness.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\vase_metallicRoughness.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\vase_normal.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\vase_normal.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\vase_plant_basecolor.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\vase_plant_baseColor.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\vase_plant_metallicroughness.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\vase_plant_metallicRoughness.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\vase_plant_normal.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\vase_plant_normal.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\vase_round_basecolor.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\vase_round_baseColor.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\vase_round_metallicroughness.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\vase_round_metallicRoughness.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\vase_round_normal.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\pbr\vase_round_normal.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Tex\cubemap0.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Tex\CyborgWeapon_BaseColor.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Tex\CyborgWeapon_Metallic.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Tex\CyborgWeapon_Normal.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Tex\CyborgWeapon_Roughness.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Tex\GGX_Eavg_LUT.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Tex\GGX_E_LUT.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Tex\Skybox.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Tex\Wood.dds
+  284 File(s) copied

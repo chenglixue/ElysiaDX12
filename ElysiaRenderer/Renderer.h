@@ -29,7 +29,7 @@ namespace ElysiaRenderer
 	/// </summary> 
 	const std::vector<LPCWSTR> g_ModelPaths
 	{
-		L"Mesh\\LOW_WEPON.fbx",
+		L"Sponza\\sponza.obj",
 			//L"Mesh\\plane.fbx",
 			//L"Mesh\\Sphere.fbx",
 	};
@@ -39,13 +39,6 @@ namespace ElysiaRenderer
 		{L"Tex\\GGX_E_LUT.dds"},
 		{L"Tex\\GGX_Eavg_LUT.dds"},
 		{L"Tex\\cubemap0.dds", true},
-	};
-	const std::vector<TexLoadSetting> m_objectTexLoadSettings
-	{
-		{L"Tex\\CyborgWeapon_BaseColor.dds", true},
-		{L"Tex\\CyborgWeapon_Normal.dds"},
-		{L"Tex\\CyborgWeapon_Metallic.dds", true},
-		{L"Tex\\CyborgWeapon_Roughness.dds", true},
 	};
 	 
 	static Matrix m_worldMatrix = Matrix::Identity;
@@ -153,14 +146,11 @@ namespace ElysiaRenderer
 		void LoadAndCreateTexs();
 		void CreatePOS();
 
-		void LoadModel();
 		void AddShader(ShaderQueue shaderQueue, const std::wstring& shaderName, const std::wstring& entryPoint, ShaderType shaderType);
-		void AddVertexBuffer(UINT singVertexSize);
 	
 		void RenderTexTriangle();
 
 		void AddUIItems();
-		void DrawCommand(size_t drawModelIndex);
 		void DrawShadow();
 		void DrawOpaque();
 		void DrawSkybox();

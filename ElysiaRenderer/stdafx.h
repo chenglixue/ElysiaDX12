@@ -40,3 +40,4 @@
 #include "imgui/imgui_impl_dx12.h"
 
 using namespace DirectX;
+using namespace ElysiaHelper;
