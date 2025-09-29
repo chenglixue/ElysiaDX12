@@ -933,7 +933,9 @@ namespace ElysiaRenderer
 		CreateRootParameters(rootSignature, rootParameters);
 
 		rootSignature->Init(m_device, 
-			D3D12_ROOT_SIGNATURE_FLAG_CBV_SRV_UAV_HEAP_DIRECTLY_INDEXED | D3D12_ROOT_SIGNATURE_FLAG_SAMPLER_HEAP_DIRECTLY_INDEXED);
+			D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT | 
+			D3D12_ROOT_SIGNATURE_FLAG_CBV_SRV_UAV_HEAP_DIRECTLY_INDEXED | 
+			D3D12_ROOT_SIGNATURE_FLAG_SAMPLER_HEAP_DIRECTLY_INDEXED);
 		
 		return rootSignature;
 	}
@@ -952,6 +954,7 @@ namespace ElysiaRenderer
 			PSODesc.PS.BytecodeLength = pipelineStateCreateDesc.m_pixelShader->GetShader()->GetBufferSize();
 		}
 		
+		PSODesc.InputLayout = { pipelineStateCreateDesc.m_inputElementDesc.data(), static_cast<UINT>(pipelineStateCreateDesc.m_inputElementDesc.size()) };
 		PSODesc.RasterizerState = pipelineStateCreateDesc.m_rasterDesc;
 		PSODesc.BlendState = pipelineStateCreateDesc.m_blendDesc;
 		PSODesc.DepthStencilState = pipelineStateCreateDesc.m_depthStencilDesc;

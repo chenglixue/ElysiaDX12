@@ -46,13 +46,13 @@ namespace ElysiaRenderer
 		m_pShadowManager->Init();
 		m_pBufferManager->Init();
 		m_pMeshManager->Init();
-
+		 
 		float modelRasius = m_pModelImporter->GetBoundingBox().GetDimensions().Length() * 0.5f;
-		m_pCameraManager->CreateMainCamera(Vector3(0.f, 0.f, -10.f),//m_pModelImporter->GetBoundingBox().GetCenter() + Vector3(modelRasius * 0.5f, 0.f, 0.f),
-			m_aspectRatio, 3.14159f / 4.0f, 0.1f, 1000.f);
+		m_pCameraManager->CreateMainCamera(m_pModelImporter->GetBoundingBox().GetCenter() + Vector3(modelRasius * 0.5f, 0.f, 0.f),
+			m_aspectRatio, 3.14159f / 4.0f, 0.1f, 5000.f);
 
 		m_pShadowManager->CreateMainShadow(4096, 15);
-
+		 
 		InitTexTriangle();
 	}
 	void Renderer::Update()
@@ -144,6 +144,7 @@ namespace ElysiaRenderer
 		LoadShaders();
 
 		m_pModelImporter->CreateVertexBuffer();
+		m_pModelImporter->CreateIndexBuffer();
 		m_pModelImporter->CreateMeshRenders();
 
 		LoadConstantBuffers();
@@ -245,6 +246,7 @@ namespace ElysiaRenderer
 		meshResourceLayout.m_spaces[PER_OBJECT_SPACE]	= m_perObjectBindResourceSpace.get();
 		meshResourceLayout.m_spaces[PER_PASS_SPACE]		= m_perMainPassBindResourceSpace.get();
 		pipelineStateCreateDesc = std::move(CreateDefaultPipelineStateCreateDesc());
+		pipelineStateCreateDesc.m_inputElementDesc = m_inputElementDescs;
 		pipelineStateCreateDesc.m_vertexShader = m_vertexShaders[ShaderQueue::Opaque][ShaderType::Vertex].get();
 		pipelineStateCreateDesc.m_pixelShader = m_pixelShaders[ShaderQueue::Opaque][ShaderType::Pixel].get();
 		pipelineStateCreateDesc.m_renderTargetDesc.m_numRenderTargets = 1;
@@ -328,8 +330,11 @@ namespace ElysiaRenderer
 		pipelineStateData.m_renderTargets.emplace_back(&currBackBuffer);
 		pipelineStateData.m_depthStencilTarget = m_pBufferManager->GetCameraDepthBuffer();
 
+		m_graphicsContext->SetIndexBuffer(m_pBufferManager->GetIndexBufferView());
+		m_graphicsContext->SetVertexBuffer(0, 1, const_cast<D3D12_VERTEX_BUFFER_VIEW&>(m_pBufferManager->GetVertexBufferView()));
+
 		bool isReady = true;
-		if (!m_pBufferManager->GetVertexBuffer()->GetIsReady()) isReady = false;
+		//if (!m_pBufferManager->GetVertexBuffer()->GetIsReady()) isReady = false;
 		if (isReady)
 		{
 			m_graphicsContext->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(static_cast<UINT>(m_device->GetScreenSize().x), static_cast<UINT>(m_device->GetScreenSize().y)));
@@ -351,11 +356,12 @@ namespace ElysiaRenderer
 				m_perObjectBindResourceSpace->SetCBV(objectContantBuffer);
 				m_graphicsContext->SetPipelineResource(PER_OBJECT_SPACE, m_perObjectBindResourceSpace.get());
 				
-				UINT startVertex = mesh->vertexDataOffset / vertexStride;
-				UINT VertexCount = mesh->vertexCount;
-				UINT indexCount = mesh->indexCount;
+				auto startIndex = mesh->indexDataOffset / sizeof(UINT16);
+				auto startVertex = mesh->vertexDataOffset / vertexStride;
+				auto VertexCount = mesh->vertexCount;
+				auto indexCount = mesh->indexCount;
 
-				m_graphicsContext->Draw(indexCount, startVertex);
+				m_graphicsContext->Draw(indexCount, startVertex, startIndex);
 			}
 		}
 		//ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), m_graphicsContext->GetCommandList());

@@ -15,6 +15,14 @@
 ConstantBuffer<PassConstant> PassConstantBuffer : register(b0, perPassSpace);
 ConstantBuffer<ObjectConstant> ObjectConstantBuffer : register(b0, perObjectSpace);
 
+struct VSInput
+{
+    float3 positionOS : POSITION;
+    float3 uv : TEXCOORD0;
+    float3 normalOS : NORMAL;
+    float3 tangentOS : TANGENT;
+};
+
 struct PSInput
 {
     float4 positionCS : SV_POSITION;
@@ -32,35 +40,34 @@ struct PSOutput
     float4 target0 : SV_TARGET0;
 };
 
-PSInput VS(uint vertexId : SV_VertexID)
+PSInput VS(VSInput i, uint vertexId : SV_VertexID)
 {
     PSInput o = (PSInput) 0;
     
-    ByteAddressBuffer vertexBuffer = ResourceDescriptorHeap[ObjectConstantBuffer.vertexBufferIndex];
+    //ByteAddressBuffer vertexBuffer = ResourceDescriptorHeap[ObjectConstantBuffer.vertexBufferIndex];
     
-    DX12Vertex vertex = vertexBuffer.Load<DX12Vertex>(vertexId * sizeof(DX12Vertex));
+    //DX12Vertex vertex = vertexBuffer.Load<DX12Vertex>(vertexId * sizeof(DX12Vertex));
 
-    o.positionWS = mul(ObjectConstantBuffer.worldMatrix, float4(vertex.position, 1.f));
+    o.positionWS = mul(ObjectConstantBuffer.worldMatrix, float4(i.positionOS, 1.f));
     o.positionVS = mul(PassConstantBuffer.viewMatrix, o.positionWS);
     o.positionCS = mul(PassConstantBuffer.projMatrix, o.positionVS);
     
-    //bool hasTangent = true;
-    //if (hasTangent)
-    //{
-    //    float3 N = normalize(mul(i.normalOS, (float3x3) M_World));
-    //    float3 T = mul(i.tangentOS, (float3x3) M_World);
+    bool hasTangent = false;
+    if (hasTangent)
+    {
+        float3 N = normalize(mul(i.normalOS, (float3x3) ObjectConstantBuffer.worldMatrix));
+        float3 T = mul(i.tangentOS, (float3x3) ObjectConstantBuffer.worldMatrix);
         
-    //    o.tangentWS = normalize(T - dot(N , T) * N);
-    //    o.bitTangentWS = (cross(o.tangentWS, N));
-    //    o.normalWS = N;
-    //}
-    //else
-    //{
-    //    o.normalWS = normalize(mul(i.normalOS, (float3x3) M_World));
-    //}
+        o.tangentWS = normalize(T - dot(N, T) * N);
+        o.bitTangentWS = (cross(o.tangentWS, N));
+        o.normalWS = N;
+    }
+    else
+    {
+        o.normalWS = normalize(mul(i.normalOS, (float3x3) ObjectConstantBuffer.worldMatrix));
+    }
     
-    o.uv = vertex.uv;
-    o.color = vertex.color;
+    o.uv = i.uv;
     
     return o;
 }
@@ -85,7 +92,7 @@ PSOutput PS(PSInput i)
     //MaterialData materialData = GetMaterialData(inputParam);
     
     //o.target0 = GetDynamicLighting(inputParam, materialData, mainLight);
-    o.target0.rgb = 0;
+    o.target0.rgb = i.normalWS;
     
     //float4 shadowPos = mul(float4(inputParam.PositionWS, 1.f), M_Shadow);
     //shadowPos /= shadowPos.w;

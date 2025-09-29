@@ -67,6 +67,21 @@ namespace ElysiaRenderer
 		return m_pVertexBuffer.get();
 	}
 
+	DX12BufferResource* BufferManager::GetIndexBuffer() const noexcept
+	{
+		return m_pIndexBuffer.get();
+	}
+
+	const D3D12_INDEX_BUFFER_VIEW& BufferManager::GetIndexBufferView() const noexcept
+	{
+		return m_indexBufferView;
+	}
+
+	const D3D12_VERTEX_BUFFER_VIEW& BufferManager::GetVertexBufferView() const noexcept
+	{
+		return m_vertexBufferView;
+	}
+
 	void BufferManager::AddConstantBuffer(uint8_t spaceID, BufferCreationDesc createDesc)
 	{
 		switch (spaceID)
@@ -113,4 +128,20 @@ namespace ElysiaRenderer
 	{
 		m_pVertexBuffer = std::move(m_pDevice->CreateBuffer(desc));
 	}
+
+	void BufferManager::AddIndexBuffer(BufferCreationDesc desc)
+	{
+		m_pIndexBuffer = std::move(m_pDevice->CreateBuffer(desc));
+	}
+
+	void BufferManager::SetVertexBufferView(const D3D12_VERTEX_BUFFER_VIEW& view)
+	{
+		m_vertexBufferView = view;
+	}
+
+	void BufferManager::SetIndexBufferView(const D3D12_INDEX_BUFFER_VIEW& view)
+	{
+		m_indexBufferView = view;
+	}
+
 }

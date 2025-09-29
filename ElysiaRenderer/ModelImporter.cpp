@@ -130,7 +130,7 @@ namespace ElysiaModel
 			const aiMesh* srcMesh = pScene->mMeshes[meshIndex];
 			auto destMesh = m_pMesh + meshIndex;
 
-			assert(srcMesh->mPrimitiveTypes & aiPrimitiveType_TRIANGLE);
+			assert((srcMesh->mPrimitiveTypes & aiPrimitiveType_TRIANGLE) == aiPrimitiveType_TRIANGLE);
 
 			destMesh->materialIndex = srcMesh->mMaterialIndex;
 
@@ -162,12 +162,12 @@ namespace ElysiaModel
 			destMesh->attrib[attrib_tangent].format = attrib_format_float;
 			destMesh->vertexStride += sizeof(float) * destMesh->attrib[attrib_tangent].components;
 
-			destMesh->attribsEnabled |= attrib_mask_bitangent;
+			/*destMesh->attribsEnabled |= attrib_mask_bitangent;
 			destMesh->attrib[attrib_bitangent].offset = destMesh->vertexStride;
 			destMesh->attrib[attrib_bitangent].normalized = 0;
 			destMesh->attrib[attrib_bitangent].components = 3;
 			destMesh->attrib[attrib_bitangent].format = attrib_format_float;
-			destMesh->vertexStride += sizeof(float) * destMesh->attrib[attrib_bitangent].components;
+			destMesh->vertexStride += sizeof(float) * destMesh->attrib[attrib_bitangent].components;*/
 
 			destMesh->vertexDataOffset = m_meshData.vertexDataByteSize;
 			destMesh->vertexCount = srcMesh->mNumVertices;
@@ -176,7 +176,7 @@ namespace ElysiaModel
 			destMesh->indexCount = srcMesh->mNumFaces * 3;
 
 			m_meshData.vertexDataByteSize += destMesh->vertexStride * destMesh->vertexCount;
-			m_meshData.indexDataByteSize += sizeof(uint16_t) * destMesh->indexCount;
+			m_meshData.indexDataByteSize += sizeof(UINT16) * destMesh->indexCount;
 		}
 		if (m_meshData.meshCount > 0)
 		{
@@ -196,7 +196,7 @@ namespace ElysiaModel
 			float* destTexcoord0 = (float*)(m_pVertexData + destMesh->vertexDataOffset + destMesh->attrib[attrib_texcoord0].offset);
 			float* destNormal = (float*)(m_pVertexData + destMesh->vertexDataOffset + destMesh->attrib[attrib_normal].offset);
 			float* destTangent = (float*)(m_pVertexData + destMesh->vertexDataOffset + destMesh->attrib[attrib_tangent].offset);
-			float* destBitangent = (float*)(m_pVertexData + destMesh->vertexDataOffset + destMesh->attrib[attrib_bitangent].offset);
+			//float* destBitangent = (float*)(m_pVertexData + destMesh->vertexDataOffset + destMesh->attrib[attrib_bitangent].offset);
 
 			for (unsigned int v = 0; v < destMesh->vertexCount; ++v)
 			{
@@ -250,7 +250,7 @@ namespace ElysiaModel
 				}
 				destTangent = (float*)((uint8_t*)destTangent + destMesh->vertexStride);
 
-				if (srcMesh->mBitangents)
+				/*if (srcMesh->mBitangents)
 				{
 					destBitangent[0] = srcMesh->mBitangents[v].x;
 					destBitangent[1] = srcMesh->mBitangents[v].y;
@@ -262,7 +262,7 @@ namespace ElysiaModel
 					destBitangent[1] = 1.f;
 					destBitangent[2] = 0.f;
 				}
-				destBitangent = (float*)((uint8_t*)destBitangent + destMesh->vertexStride);
+				destBitangent = (float*)((uint8_t*)destBitangent + destMesh->vertexStride);*/
 			}
 
 			UINT16* destIndex = (UINT16*)(m_pIndexData + destMesh->indexDataOffset);
@@ -270,9 +270,9 @@ namespace ElysiaModel
 			{
 				assert(srcMesh->mFaces[f].mNumIndices == 3);
 
-				*destIndex++ = srcMesh->mFaces[f].mIndices[0];
-				*destIndex++ = srcMesh->mFaces[f].mIndices[1];
-				*destIndex++ = srcMesh->mFaces[f].mIndices[2];
+				*(destIndex++) = srcMesh->mFaces[f].mIndices[0];
+				*(destIndex++) = srcMesh->mFaces[f].mIndices[1];
+				*(destIndex++) = srcMesh->mFaces[f].mIndices[2];
 			}
 		}
 
@@ -403,25 +403,59 @@ namespace ElysiaModel
 
 	bool ModelImporter::CreateVertexBuffer()
 	{
-		BufferCreationDesc vertexBufferCreationDesc{};
-		vertexBufferCreationDesc.m_stride = m_vertexStride;
-		vertexBufferCreationDesc.m_size = m_meshData.indexDataByteSize;
-		vertexBufferCreationDesc.m_accessFlags = BufferAccessFlags::GPUOnly;
-		vertexBufferCreationDesc.m_viewFlags = GPUResourceFlags::SRV;
-		vertexBufferCreationDesc.m_isRawAccess = true;
+		BufferCreationDesc bufferCreationDesc{};
+		bufferCreationDesc.m_size = m_meshData.vertexDataByteSize;
+		bufferCreationDesc.m_accessFlags = BufferAccessFlags::HostWritable;
+		bufferCreationDesc.m_viewFlags = GPUResourceFlags::None;
+		bufferCreationDesc.m_isRawAccess = false;
 
-		m_pBufferManager->AddVertexBuffer(vertexBufferCreationDesc);
+		m_pBufferManager->AddVertexBuffer(bufferCreationDesc);
 
-		auto pBufferUpload = std::make_unique<DX12BufferUpload>();
-		pBufferUpload->m_buffer = m_pBufferManager->GetVertexBuffer();
-		pBufferUpload->m_bufferData = std::make_unique<uint8_t[]>(m_meshData.indexDataByteSize);
-		pBufferUpload->m_bufferDataSize = vertexBufferCreationDesc.m_size;
+		if ((bufferCreationDesc.m_viewFlags & GPUResourceFlags::SRV) == GPUResourceFlags::SRV
+			&& (bufferCreationDesc.m_accessFlags & BufferAccessFlags::GPUOnly) == BufferAccessFlags::GPUOnly)
+		{
+			auto pBufferUpload = std::make_unique<DX12BufferUpload>();
+			pBufferUpload->m_buffer = m_pBufferManager->GetVertexBuffer();
+			pBufferUpload->m_bufferData = std::make_unique<uint8_t[]>(m_meshData.vertexDataByteSize);
+			pBufferUpload->m_bufferDataSize = bufferCreationDesc.m_size;
 
-		memcpy_s(pBufferUpload->m_bufferData.get(), pBufferUpload->m_bufferDataSize, m_pIndexData, pBufferUpload->m_bufferDataSize);
+			memcpy_s(pBufferUpload->m_bufferData.get(), pBufferUpload->m_bufferDataSize, m_pIndexData, pBufferUpload->m_bufferDataSize);
 
-		m_pDevice->GetUploadContext()->AddBufferToUploads(std::move(pBufferUpload));
+			m_pDevice->GetUploadContext()->AddBufferToUploads(std::move(pBufferUpload));
+		}
+		else
+		{
+			m_pBufferManager->GetVertexBuffer()->SetMappedData(m_pVertexData, m_meshData.vertexDataByteSize);
+
+			D3D12_VERTEX_BUFFER_VIEW bufferView{};
+			bufferView.BufferLocation = m_pBufferManager->GetVertexBuffer()->GetGPUAddress();
+			bufferView.StrideInBytes = m_vertexStride;
+			bufferView.SizeInBytes = m_meshData.vertexDataByteSize;
+			m_pBufferManager->SetVertexBufferView(bufferView);
+		}
 
 		return m_pBufferManager->GetVertexBuffer();
+	}
+
+	bool ModelImporter::CreateIndexBuffer()
+	{
+		BufferCreationDesc bufferCreationDesc{};
+		bufferCreationDesc.m_size = m_meshData.indexDataByteSize;
+		bufferCreationDesc.m_accessFlags = BufferAccessFlags::HostWritable;
+		bufferCreationDesc.m_viewFlags = GPUResourceFlags::None;
+		bufferCreationDesc.m_isRawAccess = false;
+
+		m_pBufferManager->AddIndexBuffer(bufferCreationDesc);
+
+		m_pBufferManager->GetIndexBuffer()->SetMappedData(m_pIndexData, m_meshData.indexDataByteSize);
+
+		D3D12_INDEX_BUFFER_VIEW bufferView{};
+		bufferView.BufferLocation = m_pBufferManager->GetIndexBuffer()->GetGPUAddress();
+		bufferView.Format = DXGI_FORMAT_R16_UINT;
+		bufferView.SizeInBytes = m_meshData.indexDataByteSize;
+		m_pBufferManager->SetIndexBufferView(bufferView);
+
+		return m_pBufferManager->GetIndexBuffer();
 	}
 
 	void ModelImporter::CreateMeshRenders()

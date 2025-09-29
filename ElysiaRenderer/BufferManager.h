@@ -24,10 +24,16 @@ namespace ElysiaRenderer
 		DX12BufferResource* GetMutilConstantBuffer(uint8_t spaceID, UINT frameID) const noexcept;
 		DX12TextureResource* GetCameraDepthBuffer() const noexcept;
 		DX12BufferResource* GetVertexBuffer() const noexcept;
+		DX12BufferResource* GetIndexBuffer() const noexcept;
+		const D3D12_INDEX_BUFFER_VIEW& GetIndexBufferView() const noexcept;
+		const D3D12_VERTEX_BUFFER_VIEW& GetVertexBufferView() const noexcept;
 
 		void AddConstantBuffer(uint8_t spaceID, BufferCreationDesc createDesc);
 		void AddDepthBuffer(std::unique_ptr<DX12TextureResource> depthBuffer);
 		void AddVertexBuffer(BufferCreationDesc desc);
+		void AddIndexBuffer(BufferCreationDesc desc);
+		void SetVertexBufferView(const D3D12_VERTEX_BUFFER_VIEW& view);
+		void SetIndexBufferView(const D3D12_INDEX_BUFFER_VIEW& view);
 
 	private:
 		DX12Device* m_pDevice = nullptr;
@@ -35,7 +41,10 @@ namespace ElysiaRenderer
 		std::unique_ptr<DX12BufferResource> m_pPassConstantBuffer = nullptr;
 
 		std::unique_ptr<DX12TextureResource> m_pCameraDepthBuffer = nullptr;
-
+		
 		std::unique_ptr<DX12BufferResource> m_pVertexBuffer = nullptr;
+		std::unique_ptr<DX12BufferResource> m_pIndexBuffer = nullptr;
+		D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView{};
+		D3D12_INDEX_BUFFER_VIEW m_indexBufferView{};
 	};
 }

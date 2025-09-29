@@ -41,3 +41,4 @@
 
 using namespace DirectX;
 using namespace ElysiaHelper;
+using namespace DirectX::SimpleMath;

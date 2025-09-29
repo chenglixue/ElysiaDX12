@@ -72,6 +72,7 @@ namespace ElysiaModel
 		void ComputeAllBoundingBoxes();
 
 		bool CreateVertexBuffer();
+		bool CreateIndexBuffer();
 
 		void CreateMeshRenders();
 
@@ -85,7 +86,7 @@ namespace ElysiaModel
 		Material*	m_pMaterial = nullptr;
 		Mesh*		m_pMesh = nullptr;
 		MeshRender* m_pMeshRender = nullptr;
-
+		
 		UINT m_vertexStride = 0;
 
 		uint8_t* m_pVertexData;

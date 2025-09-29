@@ -162,9 +162,9 @@ namespace ElysiaRenderer
 	{
 		//m_viewMatrix = Matrix::CreateTranslation(-m_transform.m_position) * Matrix::CreateFromQuaternion(m_transform.m_rotation);
 
-		//LookAt(Vector3(0, 0, 0));
+		LookAt(Vector3(0.f, 650.f, 0.f));
 
-		m_viewMatrix = Matrix::CreateLookAt(m_transform.m_position, Vector3::Zero, Vector3::Up);
+		//m_viewMatrix = Matrix::CreateLookAt(m_transform.m_position, Vector3::Zero, Vector3::Up);
 	}
 
 	void		DX12Camera::UpdateProjMatrix() noexcept
