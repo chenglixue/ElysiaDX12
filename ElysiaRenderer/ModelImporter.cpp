@@ -36,7 +36,7 @@ namespace ElysiaModel
 
 		const aiScene* pScene = importer.ReadFile(modelPath,
 			aiProcess_CalcTangentSpace |
-			//aiProcess_ConvertToLeftHanded |
+			aiProcess_ConvertToLeftHanded |
 			aiProcess_JoinIdenticalVertices |	// Merge same vertices
 			aiProcess_Triangulate |				// translat othrer shape to triangle
 			aiProcess_RemoveComponent |
@@ -278,6 +278,8 @@ namespace ElysiaModel
 
 		ComputeAllBoundingBoxes();
 
+		LoadTextures(GetBasePath(StringToWstring(modelPath)));
+
 		return true;
 	}
 
@@ -341,6 +343,18 @@ namespace ElysiaModel
 		}
 
 		ComputeGlobalBoundingBox(m_meshData.boundingBox);
+	}
+
+	void ModelImporter::LoadTextures(const std::wstring& basePath)
+	{
+		std::wstring diffusePath = basePath + RemoveExt(m_pMaterial[0].texDiffusePath);
+
+		TextureCreationDesc texBufferCreateDesc{};
+
+		texBufferCreateDesc.texturePath = diffusePath;
+		texBufferCreateDesc.isSRGB = true;
+
+		auto diffuseTex = m_pDevice->CreateTextureFromFile(texBufferCreateDesc);
 	}
 
 	void ModelImporter::PrintModelStats()
@@ -478,6 +492,9 @@ namespace ElysiaModel
 			pCurrMeshRender->m_CBVObjectParameter->opacity = 1.f;
 			pCurrMeshRender->m_CBVObjectParameter->worldMatrix = pCurrMeshRender->m_worldMatrix;
 			pCurrMeshRender->m_CBVObjectParameter->vertexIndex = m_pBufferManager->GetVertexBuffer()->GetResourceHeapIndex();
+
+			auto pCurrmaterial = m_pMaterial[pCurrMeshRender->m_mesh->materialIndex];
+			pCurrmaterial.texDiffusePath;
 		}
 	}
 }

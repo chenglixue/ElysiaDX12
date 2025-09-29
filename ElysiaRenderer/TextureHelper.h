@@ -52,7 +52,7 @@ namespace ElysiaRenderer
 
 	struct TextureCreationDesc
 	{
-		LPCWSTR texturePath;
+		std::wstring texturePath;
 
 		bool isSRGB;
 	};

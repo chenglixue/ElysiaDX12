@@ -49,7 +49,7 @@ namespace ElysiaRenderer
 		 
 		float modelRasius = m_pModelImporter->GetBoundingBox().GetDimensions().Length() * 0.5f;
 		m_pCameraManager->CreateMainCamera(m_pModelImporter->GetBoundingBox().GetCenter() + Vector3(modelRasius * 0.5f, 0.f, 0.f),
-			m_aspectRatio, 3.14159f / 4.0f, 0.1f, 5000.f);
+			m_aspectRatio, 3.14159f / 4.0f, 0.1f, 10000.f);
 
 		m_pShadowManager->CreateMainShadow(4096, 15);
 		 

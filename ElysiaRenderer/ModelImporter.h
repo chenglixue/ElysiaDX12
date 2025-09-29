@@ -71,6 +71,8 @@ namespace ElysiaModel
 		void ComputeGlobalBoundingBox(AxisAlignedBox& bbox) const;
 		void ComputeAllBoundingBoxes();
 
+		void LoadTextures(const std::wstring& filePath);
+
 		bool CreateVertexBuffer();
 		bool CreateIndexBuffer();
 
