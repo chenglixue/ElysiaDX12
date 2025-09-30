@@ -366,8 +366,13 @@ namespace ElysiaRenderer
 			ElysiaHelper::GetAssetsPath(assetsPath, _countof(assetsPath));
 
 			imageData = std::make_unique<DirectX::ScratchImage>();
-			auto loadResult = DirectX::LoadFromDDSFile((textureCreationDesc.texturePath + L".dds").c_str(), DirectX::DDS_FLAGS_NONE, nullptr, *imageData);
-			assert(loadResult == S_OK);
+			auto loadResult = DirectX::LoadFromDDSFile((textureCreationDesc.texturePath).c_str(), DirectX::DDS_FLAGS_NONE, nullptr, *imageData);
+			if (loadResult != S_OK)
+			{
+				std::cout << WstringToString(textureCreationDesc.texturePath) + " not found";
+				return nullptr;
+			}
+			//assert(loadResult == S_OK);
 		}
 		///
 

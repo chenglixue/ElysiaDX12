@@ -15,7 +15,7 @@ namespace ElysiaRenderer
 
 		m_device = std::make_unique<DX12Device>(windowHandle, screenSize);
 		m_graphicsContext = m_device->CreateGraphicsContext();
-
+		  
 		m_pUI->InitDescriptor(windowHandle, std::move(m_device.get()));
 
 		m_pCameraManager = std::make_unique<CameraManager>();
@@ -24,8 +24,9 @@ namespace ElysiaRenderer
 		m_pBufferManager = std::make_unique<BufferManager>(m_device.get());
 		m_pRenderSource = std::make_unique<RenderResource>(m_device.get());
 		m_pMeshManager = std::make_unique<MeshManager>();
-
-		m_pModelImporter = std::make_unique<ModelImporter>(m_device.get(), m_pBufferManager.get());
+		m_pTextureManager = std::make_unique<TextureManager>();
+		
+		m_pModelImporter = std::make_unique<ModelImporter>(m_device.get(), m_pBufferManager.get(), m_pTextureManager.get());
 	}
 
 	Renderer::~Renderer()
@@ -185,15 +186,20 @@ namespace ElysiaRenderer
 		m_perMainPassBindResourceSpace->Lock();
 
 		desc.m_size = sizeof(CBVObjectParameter);
-		m_pBufferManager->AddConstantBuffer(PER_OBJECT_SPACE, desc);
-		/*for (UINT i = 0;i < NUM_FRAMES_IN_FLIGHT; ++i)
+		for (UINT meshIndex = 0; meshIndex < m_pModelImporter->GetMeshCount(); ++meshIndex)
 		{
-			auto constantBuffer = m_pBufferManager->GetMutilConstantBuffer(PER_OBJECT_SPACE, i);
-			auto constantParameter = m_pRenderSource->GetCBVObjectParameter();
+			const auto& meshRenderer = m_pModelImporter->GetMeshRenderer(meshIndex);
 
-			constantBuffer->SetMappedData(constantParameter, sizeof(CBVObjectParameter));
-		}*/
-		m_perObjectBindResourceSpace->SetCBV(m_pBufferManager->GetMutilConstantBuffer(PER_OBJECT_SPACE, 0));
+			m_pBufferManager->AddConstantBuffer(PER_OBJECT_SPACE, desc);
+
+			auto objectConstantParameter = *meshRenderer.m_CBVObjectParameter;
+			for (UINT frameIndex = 0; frameIndex < NUM_FRAMES_IN_FLIGHT; ++frameIndex)
+			{
+				auto objectContantBuffer = m_pBufferManager->GetMutilConstantBuffer(PER_OBJECT_SPACE, frameIndex, meshIndex);
+				objectContantBuffer->SetMappedData(&objectConstantParameter, sizeof(CBVObjectParameter));
+			}
+		}
+		m_perObjectBindResourceSpace->SetCBV(m_pBufferManager->GetMutilConstantBuffer(PER_OBJECT_SPACE, 0, 0));
 		m_perObjectBindResourceSpace->Lock();
 	}
 	void Renderer::CreateCreamDepthRT()
@@ -303,18 +309,18 @@ namespace ElysiaRenderer
 		}
 
 	}
-
+	 
 	void Renderer::RenderTexTriangle()
 	{
 		m_device->BeginFrame();
 		m_graphicsContext->Reset();
 
-		/*ImGui_ImplDX12_NewFrame();
+		ImGui_ImplDX12_NewFrame();
 		ImGui_ImplWin32_NewFrame();
 		ImGui::NewFrame();
 
 		AddUIItems();
-		ImGui::Render();*/
+		ImGui::Render();
 
 		auto& currBackBuffer = m_device->GetCurrBackBuffer();
 
@@ -329,12 +335,22 @@ namespace ElysiaRenderer
 		pipelineStateData.m_pipelineStateObject = m_graphicsPipelineStates[ShaderQueue::Opaque].get();
 		pipelineStateData.m_renderTargets.emplace_back(&currBackBuffer);
 		pipelineStateData.m_depthStencilTarget = m_pBufferManager->GetCameraDepthBuffer();
-
+		 
 		m_graphicsContext->SetIndexBuffer(m_pBufferManager->GetIndexBufferView());
 		m_graphicsContext->SetVertexBuffer(0, 1, const_cast<D3D12_VERTEX_BUFFER_VIEW&>(m_pBufferManager->GetVertexBufferView()));
-
+		 
 		bool isReady = true;
-		//if (!m_pBufferManager->GetVertexBuffer()->GetIsReady()) isReady = false;
+		{
+			auto texResources = m_pTextureManager->GetTextureResources();
+			for (size_t i = 0; i < texResources.size(); ++i)
+			{
+				if (texResources[i] == nullptr)
+				{
+					ThrowRuntimeError("nullptr");;
+				}
+				isReady &= texResources[i]->GetIsReady();
+			}
+		} 
 		if (isReady)
 		{
 			m_graphicsContext->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(static_cast<UINT>(m_device->GetScreenSize().x), static_cast<UINT>(m_device->GetScreenSize().y)));
@@ -344,15 +360,15 @@ namespace ElysiaRenderer
 			m_graphicsContext->SetPipelineResource(PER_PASS_SPACE, m_perMainPassBindResourceSpace.get());
 
 			UINT vertexStride = m_pModelImporter->GetVertexStride();
-			auto objectContantBuffer = m_pBufferManager->GetMutilConstantBuffer(PER_OBJECT_SPACE, m_device->GetFrameID());
 
 			for (UINT meshIndex = 0; meshIndex < m_pModelImporter->GetMeshCount(); ++meshIndex)
 			{
 				const auto& meshRenderer = m_pModelImporter->GetMeshRenderer(meshIndex);
 				const auto& mesh = meshRenderer.m_mesh;
 
-				auto objectConstantParameter = *meshRenderer.m_CBVObjectParameter;
-				objectContantBuffer->SetMappedData(&objectConstantParameter, sizeof(CBVObjectParameter));
+				auto objectContantBuffer = m_pBufferManager->GetMutilConstantBuffer(PER_OBJECT_SPACE, m_device->GetFrameID(), meshIndex);
+				/*auto objectConstantParameter = *meshRenderer.m_CBVObjectParameter;
+				objectContantBuffer->SetMappedData(&objectConstantParameter, sizeof(CBVObjectParameter));*/
 				m_perObjectBindResourceSpace->SetCBV(objectContantBuffer);
 				m_graphicsContext->SetPipelineResource(PER_OBJECT_SPACE, m_perObjectBindResourceSpace.get());
 				
@@ -364,17 +380,17 @@ namespace ElysiaRenderer
 				m_graphicsContext->Draw(indexCount, startVertex, startIndex);
 			}
 		}
-		//ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), m_graphicsContext->GetCommandList());
+		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), m_graphicsContext->GetCommandList());
 
 		m_graphicsContext->AddBarrier(currBackBuffer, D3D12_RESOURCE_STATE_PRESENT);
 		m_graphicsContext->FlushBarrier();
 
 		m_device->SubmitContextWork(*m_graphicsContext);
 
-		m_device->EndFrame();
+		m_device->EndFrame(); 
 		m_device->Present();
 	}
-
+	 
 	void Renderer::AddUIItems()
 	{
 		/*if (ImGui::CollapsingHeader("Camera"))
@@ -403,7 +419,7 @@ namespace ElysiaRenderer
 			ImGui::ColorEdit3("Ambient Cubemap Tint", (float*)&m_objectPassParameters[m_device->GetFrameID()].ambientCubemapTint);
 		}*/
 
-		//ImGui::ShowDemoWindow();
+		ImGui::ShowDemoWindow();
 	}
 	void Renderer::DrawShadow()
 	{

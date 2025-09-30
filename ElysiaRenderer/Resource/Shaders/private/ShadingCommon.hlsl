@@ -103,21 +103,51 @@ MaterialData GetMaterialData(FInputParams inputParams)
     
     float3x3 TBN = float3x3(inputParams.TangentWS, inputParams.BitTangentWS, inputParams.NormalWS);
     
-    float4 baseColorTex = g_albedoTexture.Sample(g_Sampler_WarpU_WarpV_Linear, inputParams.objectUV) * float4(BaseColorTint, Opacity);
-    float4 normalTS = g_normalTexture.Sample(g_Sampler_WarpU_WarpV_Linear, inputParams.objectUV);
-    float metallic = saturate(g_metallicTexture.Sample(g_Sampler_WarpU_WarpV_Linear, inputParams.objectUV) * MetallicIntensity);
-    float roughness = saturate(g_roughnessTexture.Sample(g_Sampler_WarpU_WarpV_Linear, inputParams.objectUV) * RoughnessIntensity);
-    //float specular = g_.Sample(g_Sampler_ClampU_ClampV_Linear, inputParams.objectUV);
-    //float AO = .Sample(g_Sampler_ClampU_ClampV_Linear, inputParams.objectUV);
+    Texture2D<half4> baseColorTex;
+    float4 baseColor;
+    Texture2D<half4> normalTex;
+    float4 normalTS;
+    Texture2D<half4> MRSOTex;
+    float4 MRSO;
+    float metallic;
+    float roughness;
+    if (baseColorTexIndex != -1)
+    {
+        baseColorTex = ResourceDescriptorHeap[baseColorTexIndex];
+        baseColor = baseColorTex.Sample(g_Sampler_WarpU_WarpV_Linear, inputParams.objectUV)
+            * float4(baseColorTint, opacity);
+    }
+    else
+    {
+        baseColor = float4(baseColorTint, opacity);
+    }
+    if (normalTexIndex != -1)
+    {
+        normalTex = ResourceDescriptorHeap[normalTexIndex];
+        normalTS = normalTex.Sample(g_Sampler_WarpU_WarpV_Linear, inputParams.objectUV);
+    }
 
-    o.BaseColor = baseColorTex.rgb;
-    o.Opacity = baseColorTex.a;
+    if (specularTexIndex != -1)
+    {
+        MRSOTex = ResourceDescriptorHeap[specularTexIndex];
+        MRSO = MRSOTex.Sample(g_Sampler_WarpU_WarpV_Linear, inputParams.objectUV);
+        metallic = MRSO.r * metallicIntensity;
+        roughness = MRSO.g * roughnessIntensity;
+    }
+    else
+    {
+        metallic = metallicIntensity;
+        roughness = roughnessIntensity;
+    }
+
+    o.BaseColor = baseColor.rgb;
+    o.Opacity = baseColor.a;
     o.AO = 1;
     o.Metallic = metallic;
     o.Roughness = roughness;
-    o.Specular = 1;
+    o.Specular = 0.5;
     
-    o.WorldNormal = GetNormal(normalTS.rgb, TBN, NormalIntensity);
+    o.WorldNormal = GetNormal(normalTS.rgb, TBN, normalIntensity);
     o.WorldNormal.xy *= 0.5;
 
     o.Anisotropy = 0;
@@ -131,12 +161,15 @@ FDecodeGBufferData GetDecodeGBufferData(float2 uv, float3x3 TBN, bool bGetNormal
 {
     FDecodeGBufferData o = (FDecodeGBufferData) 0;
     
-    float4 temp = g_albedoTexture.Sample(g_Sampler_WarpU_WarpV_Linear, uv);
+    Texture2D<half4> baseColorTex = ResourceDescriptorHeap[baseColorTexIndex];
+    Texture2D<half4> normalTex = ResourceDescriptorHeap[normalTexIndex];
+    
+    float4 temp = baseColorTex.Sample(g_Sampler_WarpU_WarpV_Linear, uv);
     
     o.BaseColor = temp.rgb;
     o.Opacity = temp.a;
     
-    float3 normalTS = g_normalTexture.Sample(g_Sampler_WarpU_WarpV_Linear, uv);
+    float3 normalTS = normalTex.Sample(g_Sampler_WarpU_WarpV_Linear, uv);
 
     return o;
 }

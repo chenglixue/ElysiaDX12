@@ -10,6 +10,7 @@
 #include "DX12Device.h"
 #include "BufferManager.h"
 #include "DX12MeshRender.h"
+#include "TextureManager.h"
 
 
 namespace ElysiaModel
@@ -21,7 +22,7 @@ namespace ElysiaModel
 	{
 	public:
 		ModelImporter() = default;
-		ModelImporter(DX12Device* pDevice, BufferManager* pBufferManager);
+		ModelImporter(DX12Device* pDevice, BufferManager* pBufferManager, TextureManager* pTextureManager);
 		ModelImporter(const ModelImporter& rhs) = delete;
 		ModelImporter& operator=(const ModelImporter& rhs) = delete;
 		ModelImporter(ModelImporter&& rhs) = default;
@@ -83,6 +84,7 @@ namespace ElysiaModel
 	private:
 		DX12Device* m_pDevice = nullptr;
 		BufferManager* m_pBufferManager = nullptr;
+		TextureManager* m_pTextureManager = nullptr;
 
 		MeshData	m_meshData{};
 		Material*	m_pMaterial = nullptr;

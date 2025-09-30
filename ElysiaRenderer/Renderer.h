@@ -14,6 +14,7 @@
 #include "ShadowManager.h"
 #include "BufferManager.h"
 #include "MeshManager.h"
+#include "TextureManager.h"
 #include "RenderResource.h"
 #include "ModelImporter.h"
 
@@ -36,7 +37,7 @@ namespace ElysiaRenderer
 	/// </summary> 
 	const std::vector<LPCWSTR> g_ModelPaths
 	{
-		L"Sponza\\sponza.obj",
+		L"Sponza\\pbr\\sponza.obj",
 			//L"Mesh\\plane.fbx",
 			//L"Mesh\\Sphere.fbx",
 	};
@@ -133,6 +134,7 @@ namespace ElysiaRenderer
 		std::unique_ptr<BufferManager>	m_pBufferManager = nullptr;
 		std::unique_ptr<RenderResource> m_pRenderSource = nullptr;
 		std::unique_ptr<MeshManager>	m_pMeshManager = nullptr;
+		std::unique_ptr<TextureManager>	m_pTextureManager = nullptr;
 		
 		std::unique_ptr<PipelineResourceSpace> m_perObjectBindResourceSpace = nullptr;
 		std::unique_ptr<PipelineResourceSpace> m_perMainPassBindResourceSpace = nullptr;

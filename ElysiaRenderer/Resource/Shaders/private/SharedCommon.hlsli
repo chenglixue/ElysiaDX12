@@ -35,7 +35,7 @@ struct DX12Vertex
     Vector3 tangent;
 };
 
-struct ObjectConstant
+cbuffer ObjectConstant : register(b0, perObjectSpace)
 {
     Matrix worldMatrix;
 
@@ -48,15 +48,16 @@ struct ObjectConstant
     float ambientCubemapIntensity;
 
 	Vector3 ambientCubemapTint;
-	UINT baseColorTexIndex;
+    int baseColorTexIndex;
 
-	UINT normalTexIndex;
-	UINT metallicTexIndex;
-	UINT roughnessTexIndex;
-	UINT vertexBufferIndex;
+	int normalTexIndex;
+    int metallicTexIndex;
+    int roughnessTexIndex;
+    int vertexBufferIndex;
+    int specularTexIndex;
 };
 
-struct PassConstant
+cbuffer PassConstant : register(b0, perPassSpace)
 {
     Vector4 cameraPosWS;
     Matrix  viewMatrix;
@@ -64,7 +65,7 @@ struct PassConstant
     Vector4 screenSize;
 
     Light mainLight;
-
+     
     UINT frameIndex;
     float nearZ;
     float farZ;

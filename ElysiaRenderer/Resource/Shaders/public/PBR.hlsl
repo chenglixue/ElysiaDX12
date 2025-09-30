@@ -1,19 +1,16 @@
 #if defined(EDITOR)
-    //#include <private\ShadingCommon.hlsl>
+    #include <private\ShadingCommon.hlsl>
 
-    //#include <private\Light.hlsl>
-    //#include <private\LightCommon.hlsl>
+    #include <private\Light.hlsl>
+    #include <private\LightCommon.hlsl>
       #include <private\SharedCommon.hlsli>
 #else
-    //#include "../private\ShadingCommon.hlsl"
+    #include "../private\ShadingCommon.hlsl"
 
-    //#include "../private\Light.hlsl"
-    //#include "../private\LightCommon.hlsl"
+    #include "../private\Light.hlsl"
+    #include "../private\LightCommon.hlsl"
     #include "../private\SharedCommon.hlsli"
 #endif
-
-ConstantBuffer<PassConstant> PassConstantBuffer : register(b0, perPassSpace);
-ConstantBuffer<ObjectConstant> ObjectConstantBuffer : register(b0, perObjectSpace);
 
 struct VSInput
 {
@@ -32,7 +29,6 @@ struct PSInput
     float3 tangentWS : TANGENT;
     float3 bitTangentWS : BITTANGENT;
     float2 uv : TEXCOORD;
-    float3 color : COLOR;
 };
 
 struct PSOutput
@@ -40,7 +36,7 @@ struct PSOutput
     float4 target0 : SV_TARGET0;
 };
 
-PSInput VS(VSInput i, uint vertexId : SV_VertexID)
+PSInput VS(VSInput i)
 {
     PSInput o = (PSInput) 0;
     
@@ -48,15 +44,15 @@ PSInput VS(VSInput i, uint vertexId : SV_VertexID)
     
     //DX12Vertex vertex = vertexBuffer.Load<DX12Vertex>(vertexId * sizeof(DX12Vertex));
 
-    o.positionWS = mul(ObjectConstantBuffer.worldMatrix, float4(i.positionOS, 1.f));
-    o.positionVS = mul(PassConstantBuffer.viewMatrix, o.positionWS);
-    o.positionCS = mul(PassConstantBuffer.projMatrix, o.positionVS);
+    o.positionWS = mul(worldMatrix, float4(i.positionOS, 1.f));
+    o.positionVS = mul(viewMatrix, o.positionWS);
+    o.positionCS = mul(projMatrix, o.positionVS);
     
-    bool hasTangent = false;
+    bool hasTangent = true;
     if (hasTangent)
     {
-        float3 N = normalize(mul(i.normalOS, (float3x3) ObjectConstantBuffer.worldMatrix));
-        float3 T = mul(i.tangentOS, (float3x3) ObjectConstantBuffer.worldMatrix);
+        float3 N = normalize(mul((float3x3) worldMatrix, i.normalOS));
+        float3 T = mul((float3x3) worldMatrix, i.tangentOS);
         
         o.tangentWS = normalize(T - dot(N, T) * N);
         o.bitTangentWS = (cross(o.tangentWS, N));
@@ -64,7 +60,7 @@ PSInput VS(VSInput i, uint vertexId : SV_VertexID)
     }
     else
     {
-        o.normalWS = normalize(mul(i.normalOS, (float3x3) ObjectConstantBuffer.worldMatrix));
+        o.normalWS = normalize(mul((float3x3) worldMatrix, i.normalOS));
     }
     
     o.uv = i.uv;
@@ -81,18 +77,18 @@ PSOutput PS(PSInput i)
     inputParam.PositionVS = i.positionVS;
     inputParam.PixelPos = i.positionCS.xy;
     inputParam.objectUV = i.uv;
-    inputParam.ScreenUV = i.positionCS.xy / PassConstantBuffer.screenSize.xy;
+    inputParam.ScreenUV = i.positionCS.xy / screenSize.xy;
     inputParam.TangentWS = i.tangentWS;
     inputParam.BitTangentWS = i.bitTangentWS;
     inputParam.NormalWS = i.normalWS;
-    inputParam.ScreenVector = GetScreenVectorWS(PassConstantBuffer.cameraPosWS.xyz, i.positionWS.xyz);
+    inputParam.ScreenVector = GetScreenVectorWS(cameraPosWS.xyz, i.positionWS.xyz);
     
-    //LightData mainLight = GetMainLight(PassConstantBuffer.lights[0]);
+    LightData mainLightData = GetMainLight(mainLight);
     
-    //MaterialData materialData = GetMaterialData(inputParam);
+    MaterialData materialData = GetMaterialData(inputParam);
     
-    //o.target0 = GetDynamicLighting(inputParam, materialData, mainLight);
-    o.target0.rgb = i.normalWS;
+    o.target0 = GetDynamicLighting(inputParam, materialData, mainLightData);
+    //o.target0.rgb = materialData.BaseColor;
     
     //float4 shadowPos = mul(float4(inputParam.PositionWS, 1.f), M_Shadow);
     //shadowPos /= shadowPos.w;

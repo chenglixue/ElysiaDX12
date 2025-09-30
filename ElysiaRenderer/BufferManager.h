@@ -21,7 +21,7 @@ namespace ElysiaRenderer
 		virtual void Destory() override;
 
 		DX12BufferResource* GetSingleConstantBuffer(uint8_t spaceID) const noexcept;
-		DX12BufferResource* GetMutilConstantBuffer(uint8_t spaceID, UINT frameID) const noexcept;
+		DX12BufferResource* GetMutilConstantBuffer(uint8_t spaceID, UINT frameID, UINT objectIndex) const noexcept;
 		DX12TextureResource* GetCameraDepthBuffer() const noexcept;
 		DX12BufferResource* GetVertexBuffer() const noexcept;
 		DX12BufferResource* GetIndexBuffer() const noexcept;
@@ -37,7 +37,7 @@ namespace ElysiaRenderer
 
 	private:
 		DX12Device* m_pDevice = nullptr;
-		std::array<std::unique_ptr<DX12BufferResource>, NUM_FRAMES_IN_FLIGHT> m_objectConstantBuffers{};
+		std::vector<std::unique_ptr<DX12BufferResource>> m_objectConstantBuffers{};
 		std::unique_ptr<DX12BufferResource> m_pPassConstantBuffer = nullptr;
 
 		std::unique_ptr<DX12TextureResource> m_pCameraDepthBuffer = nullptr;

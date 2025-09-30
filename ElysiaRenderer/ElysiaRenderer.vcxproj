@@ -315,6 +315,7 @@
     <ClCompile Include="RenderResource.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
     <ClCompile Include="ShadowManager.cpp" />
+    <ClCompile Include="TextureManager.cpp" />
     <ClCompile Include="Transform.cpp" />
   </ItemGroup>
   <ItemGroup>

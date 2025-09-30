@@ -26,5 +26,12 @@ namespace ElysiaRenderer
 
 		enum { maxMaterialName = 128 };
 		char name[maxMaterialName];
+
+		UINT diffuseTexIndex = 0;
+		UINT specularTexIndex = 0;
+		UINT emissionTexIndex = 0;
+		UINT normalTexIndex = 0;
+		UINT lightmapIndex = 0;
+		UINT reflectTexIndex = 0;
 	};
 }

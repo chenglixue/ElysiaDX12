@@ -43,13 +43,13 @@ namespace ElysiaRenderer
 
 	}
 
-	DX12BufferResource* BufferManager::GetMutilConstantBuffer(uint8_t spaceID, UINT frameID) const noexcept
+	DX12BufferResource* BufferManager::GetMutilConstantBuffer(uint8_t spaceID, UINT frameID, UINT objectIndex) const noexcept
 	{
 		switch (spaceID)
 		{
 		case PER_OBJECT_SPACE:
 		{
-			return m_objectConstantBuffers[frameID].get();
+			return m_objectConstantBuffers[objectIndex * 2 + frameID].get();
 			break;
 		}
 		}
@@ -100,14 +100,9 @@ namespace ElysiaRenderer
 
 			case PER_OBJECT_SPACE:
 			{
-				for (int i = 0; i < m_objectConstantBuffers.size(); ++i)
+				for (int i = 0; i < NUM_FRAMES_IN_FLIGHT; ++i)
 				{
-					/*if (m_objectConstantBuffers[i] != nullptr)
-					{
-						m_objectConstantBuffers[i].reset();
-					}*/
-
-					m_objectConstantBuffers[i] = std::move(m_pDevice->CreateBuffer(createDesc));
+					m_objectConstantBuffers.emplace_back(std::move(m_pDevice->CreateBuffer(createDesc)));
 				}
 
 				break;

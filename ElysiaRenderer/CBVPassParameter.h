@@ -50,12 +50,15 @@ namespace ElysiaRenderer
 		float		ambientCubemapIntensity = 1.f;
 
 		Vector3	ambientCubemapTint = Vector3::One;
-		UINT baseColorTexIndex;
 
-		UINT normalTexIndex;
-		UINT metallicTexIndex;
-		UINT roughnessTexIndex;
-		UINT vertexIndex;
+		int baseColorTexIndex;
+		int normalTexIndex = -1;
+		int metallicTexIndex = -1;
+		int roughnessTexIndex = -1;
+		int vertexIndex = -1;
+
+		int specularTexIndex = -1;
+		Vector3 padding;
 
 		//float padding[48];
 	};

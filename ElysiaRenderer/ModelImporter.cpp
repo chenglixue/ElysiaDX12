@@ -2,9 +2,10 @@
 
 namespace ElysiaModel
 {
-	ModelImporter::ModelImporter(DX12Device* pDevice, BufferManager* pBufferManager) :
+	ModelImporter::ModelImporter(DX12Device* pDevice, BufferManager* pBufferManager, TextureManager* pTextureManager) :
 		m_pDevice(std::move(pDevice)),
-		m_pBufferManager(std::move(pBufferManager))
+		m_pBufferManager(std::move(pBufferManager)),
+		m_pTextureManager(std::move(pTextureManager))
 	{
 
 	}
@@ -36,7 +37,7 @@ namespace ElysiaModel
 
 		const aiScene* pScene = importer.ReadFile(modelPath,
 			aiProcess_CalcTangentSpace |
-			aiProcess_ConvertToLeftHanded |
+			//aiProcess_ConvertToLeftHanded |
 			aiProcess_JoinIdenticalVertices |	// Merge same vertices
 			aiProcess_Triangulate |				// translat othrer shape to triangle
 			aiProcess_RemoveComponent |
@@ -347,14 +348,53 @@ namespace ElysiaModel
 
 	void ModelImporter::LoadTextures(const std::wstring& basePath)
 	{
-		std::wstring diffusePath = basePath + RemoveExt(m_pMaterial[0].texDiffusePath);
-
 		TextureCreationDesc texBufferCreateDesc{};
 
-		texBufferCreateDesc.texturePath = diffusePath;
-		texBufferCreateDesc.isSRGB = true;
+		for (UINT materialIndex = 0; materialIndex < m_meshData.materialCount; ++materialIndex)
+		{
+			std::wstring diffusePath = basePath + RemoveExt(m_pMaterial[materialIndex].texDiffusePath);
+			texBufferCreateDesc.texturePath = diffusePath + L".dds";
+			texBufferCreateDesc.isSRGB = true;
+			auto diffuseTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
+			if (diffuseTex != nullptr)
+			{
+				m_pMaterial[materialIndex].diffuseTexIndex = diffuseTex->GetResourceHeapIndex();
+			}
+			m_pTextureManager->AddTextureResource(std::move(diffuseTex));
 
-		auto diffuseTex = m_pDevice->CreateTextureFromFile(texBufferCreateDesc);
+			std::wstring specularPath = basePath + RemoveExt(m_pMaterial[materialIndex].texSpecularPath);
+			texBufferCreateDesc.texturePath = specularPath + L".dds";
+			texBufferCreateDesc.isSRGB = true;
+			auto specularTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
+			if (specularTex == nullptr)
+			{
+				texBufferCreateDesc.texturePath = diffusePath + L"_specular.dds";
+				specularTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
+			}
+			if (specularTex != nullptr)
+			{
+				m_pMaterial[materialIndex].specularTexIndex = specularTex->GetResourceHeapIndex();
+			}
+			m_pTextureManager->AddTextureResource(std::move(specularTex));
+
+
+			std::wstring normalPath = basePath + RemoveExt(m_pMaterial[materialIndex].texNormalPath);
+			texBufferCreateDesc.texturePath = normalPath + L".dds";
+			texBufferCreateDesc.isSRGB = false;
+			auto normalTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
+			if (normalTex == nullptr)
+			{
+				texBufferCreateDesc.texturePath = diffusePath + L"_normal.dds";
+				normalTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
+			}
+			if (normalTex != nullptr)
+			{
+				m_pMaterial[materialIndex].normalTexIndex = normalTex->GetResourceHeapIndex();
+			}
+			m_pTextureManager->AddTextureResource(std::move(normalTex));
+
+
+		}
 	}
 
 	void ModelImporter::PrintModelStats()
@@ -491,10 +531,11 @@ namespace ElysiaModel
 			pCurrMeshRender->m_CBVObjectParameter->roughnessIntensity = 1.f;
 			pCurrMeshRender->m_CBVObjectParameter->opacity = 1.f;
 			pCurrMeshRender->m_CBVObjectParameter->worldMatrix = pCurrMeshRender->m_worldMatrix;
-			pCurrMeshRender->m_CBVObjectParameter->vertexIndex = m_pBufferManager->GetVertexBuffer()->GetResourceHeapIndex();
 
-			auto pCurrmaterial = m_pMaterial[pCurrMeshRender->m_mesh->materialIndex];
-			pCurrmaterial.texDiffusePath;
+			pCurrMeshRender->m_CBVObjectParameter->baseColorTexIndex = m_pMaterial[meshIndex].diffuseTexIndex;
+			pCurrMeshRender->m_CBVObjectParameter->specularTexIndex = m_pMaterial[meshIndex].specularTexIndex;
+			pCurrMeshRender->m_CBVObjectParameter->normalTexIndex = m_pMaterial[meshIndex].normalTexIndex;
+			pCurrMeshRender->m_CBVObjectParameter->vertexIndex = m_pBufferManager->GetVertexBuffer()->GetResourceHeapIndex();
 		}
 	}
 }
