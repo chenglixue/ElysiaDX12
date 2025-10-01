@@ -18,11 +18,12 @@ namespace ElysiaRenderer
 		enum { maxTexPath = 128 };
 		enum { texCount = 6 };
 		char texDiffusePath[maxTexPath];
-		char texSpecularPath[maxTexPath];
+		char texRoughnessPath[maxTexPath];
+		char texMetallicPath[maxTexPath];
 		char texEmissionPath[maxTexPath];
 		char texNormalPath[maxTexPath];
 		char texLightmapPath[maxTexPath];
-		char texReflectionPath[maxTexPath];
+		char texReflectionPath[maxTexPath]; 
 
 		enum { maxMaterialName = 128 };
 		char name[maxMaterialName];

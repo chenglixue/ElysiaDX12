@@ -105,7 +105,7 @@ MaterialData GetMaterialData(FInputParams inputParams)
     
     Texture2D<half4> baseColorTex;
     float4 baseColor;
-    Texture2D<half4> normalTex;
+    Texture2D<float4> normalTex;
     float4 normalTS;
     Texture2D<half4> MRSOTex;
     float4 MRSO;
@@ -114,7 +114,7 @@ MaterialData GetMaterialData(FInputParams inputParams)
     if (baseColorTexIndex != -1)
     {
         baseColorTex = ResourceDescriptorHeap[baseColorTexIndex];
-        baseColor = baseColorTex.Sample(g_Sampler_WarpU_WarpV_Linear, inputParams.objectUV)
+        baseColor = baseColorTex.Sample(g_Sampler_WarpU_WarpV_Anisotropic, inputParams.objectUV)
             * float4(baseColorTint, opacity);
     }
     else
@@ -124,13 +124,13 @@ MaterialData GetMaterialData(FInputParams inputParams)
     if (normalTexIndex != -1)
     {
         normalTex = ResourceDescriptorHeap[normalTexIndex];
-        normalTS = normalTex.Sample(g_Sampler_WarpU_WarpV_Linear, inputParams.objectUV);
+        normalTS = normalTex.Sample(g_Sampler_WarpU_WarpV_Anisotropic, inputParams.objectUV);
     }
 
     if (specularTexIndex != -1)
     {
         MRSOTex = ResourceDescriptorHeap[specularTexIndex];
-        MRSO = MRSOTex.Sample(g_Sampler_WarpU_WarpV_Linear, inputParams.objectUV);
+        MRSO = MRSOTex.Sample(g_Sampler_WarpU_WarpV_Anisotropic, inputParams.objectUV);
         metallic = MRSO.r * metallicIntensity;
         roughness = MRSO.g * roughnessIntensity;
     }
@@ -148,7 +148,7 @@ MaterialData GetMaterialData(FInputParams inputParams)
     o.Specular = 0.5;
     
     o.WorldNormal = GetNormal(normalTS.rgb, TBN, normalIntensity);
-    o.WorldNormal.xy *= 0.5;
+    //o.WorldNormal.xy *= 0.5;
 
     o.Anisotropy = 0;
     o.DiffuseColor = o.BaseColor - o.BaseColor * o.Metallic;

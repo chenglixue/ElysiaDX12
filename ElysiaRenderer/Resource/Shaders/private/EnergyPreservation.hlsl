@@ -34,16 +34,18 @@ float GetSpecularEnergyPreservation(float3 alebdo, float roughness, float NoL, f
     NoL = saturate(NoL);
     NoV = saturate(NoV);
     
-    float3 E_o = g_GGX_E_LUT.SampleLevel(g_Sampler_ClampU_ClampV_Linear, float2(NoL, roughness), 0);
-    float3 E_i = g_GGX_E_LUT.SampleLevel(g_Sampler_ClampU_ClampV_Linear, float2(NoV, roughness), 0);
-    float3 E_avg = g_GGX_EAvg_LUT.SampleLevel(g_Sampler_ClampU_ClampV_Linear, float2(0, roughness), 0);
+    //float3 E_o = g_GGX_E_LUT.SampleLevel(g_Sampler_ClampU_ClampV_Linear, float2(NoL, roughness), 0);
+    //float3 E_i = g_GGX_E_LUT.SampleLevel(g_Sampler_ClampU_ClampV_Linear, float2(NoV, roughness), 0);
+    //float3 E_avg = g_GGX_EAvg_LUT.SampleLevel(g_Sampler_ClampU_ClampV_Linear, float2(0, roughness), 0);
 
-    float3 edgetint = float3(0.827, 0.792, 0.678);
-    float3 F_avg = AverageFresnel(alebdo, edgetint);
-    float3 F_ms = (1.f - E_o) * (1.f - E_i) / (PI * (1.f - E_avg));
-    float3 F_add = F_avg * E_avg / (1.f - F_avg * (1.f - E_avg));
+    //float3 edgetint = float3(0.827, 0.792, 0.678);
+    //float3 F_avg = AverageFresnel(alebdo, edgetint);
+    //float3 F_ms = (1.f - E_o) * (1.f - E_i) / (PI * (1.f - E_avg));
+    //float3 F_add = F_avg * E_avg / (1.f - F_avg * (1.f - E_avg));
 
-    return F_add * F_ms;
+    //return F_add * F_ms;
+    
+    return 0;
 }
 
 FBxDFEnergyTerms ComputeFresnelEnergyTerms(float2 E, float3 InF0)

@@ -1,6 +1,5 @@
 #include "DX12Device.h"
 
-
 namespace ElysiaRenderer
 {
 	using namespace ElysiaHelper;
@@ -346,8 +345,10 @@ namespace ElysiaRenderer
 		auto& texturePath = textureCreationDesc.texturePath;
 		bool isSRGB = textureCreationDesc.isSRGB;
 
+		const std::wstring extension = GetFileExtension(texturePath.c_str());
 		/// Load DDS
-		std::unique_ptr<DirectX::ScratchImage> imageData = nullptr;
+		std::unique_ptr<DirectX::ScratchImage> imageData = std::make_unique<DirectX::ScratchImage>();
+		if(extension == L"DDS" || extension == L"dds")
 		{
 			auto s2ws = [](const std::string& s)
 			{
@@ -366,7 +367,7 @@ namespace ElysiaRenderer
 			ElysiaHelper::GetAssetsPath(assetsPath, _countof(assetsPath));
 
 			imageData = std::make_unique<DirectX::ScratchImage>();
-			auto loadResult = DirectX::LoadFromDDSFile((textureCreationDesc.texturePath).c_str(), DirectX::DDS_FLAGS_NONE, nullptr, *imageData);
+			auto loadResult = DirectX::LoadFromDDSFile(texturePath.c_str(), DirectX::DDS_FLAGS_NONE, nullptr, *imageData);
 			if (loadResult != S_OK)
 			{
 				std::cout << WstringToString(textureCreationDesc.texturePath) + " not found";
@@ -374,11 +375,22 @@ namespace ElysiaRenderer
 			}
 			//assert(loadResult == S_OK);
 		}
+		else
+		{
+			DirectX::ScratchImage tempImage;
+			auto loadResult = DirectX::LoadFromWICFile(texturePath.c_str(), DirectX::WIC_FLAGS_NONE, nullptr, tempImage);
+			if (loadResult != S_OK)
+			{
+				std::cout << WstringToString(textureCreationDesc.texturePath) + " not found";
+				return nullptr;
+			}
+			ThrowIfFailed(DirectX::GenerateMipMaps(*tempImage.GetImage(0, 0, 0), DirectX::TEX_FILTER_DEFAULT, 0, *imageData, false));
+		}
 		///
 
 		/// grad tex data
 		///
-		const DirectX::TexMetadata& texMetaData = imageData->GetMetadata();
+		const auto& texMetaData = imageData->GetMetadata();
 		auto texFormat = isSRGB ? DirectX::MakeSRGB(texMetaData.format) : texMetaData.format;
 		bool is3DTex = texMetaData.dimension == DirectX::TEX_DIMENSION_TEXTURE3D;
 		///

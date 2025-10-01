@@ -7,4 +7,4 @@ float3 GetNormal(float3 normalTS, float3x3 TBN, float normalIntensity = 1.f, boo
     float3 WorldNormal = isNormalized ? normalize(mul(normalTS, TBN)) : mul(normalTS, TBN);
     
     return WorldNormal;
-}
+} 

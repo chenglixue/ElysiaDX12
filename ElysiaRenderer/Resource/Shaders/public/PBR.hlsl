@@ -88,7 +88,7 @@ PSOutput PS(PSInput i)
     MaterialData materialData = GetMaterialData(inputParam);
     
     o.target0 = GetDynamicLighting(inputParam, materialData, mainLightData);
-    //o.target0.rgb = materialData.BaseColor;
+    o.target0.rgb = materialData.WorldNormal;
     
     //float4 shadowPos = mul(float4(inputParam.PositionWS, 1.f), M_Shadow);
     //shadowPos /= shadowPos.w;

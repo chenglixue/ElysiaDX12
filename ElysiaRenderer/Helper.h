@@ -12,6 +12,7 @@
 
 #include "Definition.h"
 #include "RenderHelper.h"
+#include <comdef.h> // For _com_error
 
 namespace ElysiaHelper
 {
@@ -66,6 +67,13 @@ namespace ElysiaHelper
     {
         if (FAILED(hr))
         {
+            _com_error err(hr);
+            // 修改 InitD3D 函数中的加载图像部分
+            if (FAILED(hr)) {
+                std::cerr << "Failed to load image: " << hr << std::endl;
+                _com_error err(hr);
+                std::cerr << "Error description: " << err.ErrorMessage() << std::endl;
+            }
             throw HrException(hr);
         }
     }
@@ -253,5 +261,28 @@ namespace ElysiaHelper
             return filePath.substr(0, lastSlash + 1);
         else
             return L"";
+    }
+
+    inline static std::wstring GetFileExtension(const WCHAR* filePath_)
+    {
+        assert(filePath_);
+
+        std::wstring filePath(filePath_);
+        size_t idx = filePath.rfind(L'.');
+        if (idx != std::wstring::npos)
+            return filePath.substr(idx + 1, filePath.length() - idx - 1);
+        else
+            return std::wstring(L"");
+    }
+
+    inline static std::wstring removeLastUnderscoreAndAfter(std::wstring str) 
+    {
+        // 查找最后一个下划线的位置
+        size_t lastUnderscorePos = str.rfind(L'_');
+        if (lastUnderscorePos != std::wstring::npos) {
+            // 去除最后一个下划线及其后面的内容
+            str.erase(lastUnderscorePos);
+        }
+        return str;
     }
 }

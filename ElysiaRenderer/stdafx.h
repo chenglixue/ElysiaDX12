@@ -27,6 +27,7 @@
 #include <sstream>
 #include <locale>
 #include <codecvt>
+#include <fstream>
 
 #include "SimpleMath/SimpleMath.h"
 #include "Helper.h"
@@ -38,7 +39,11 @@
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_win32.h"
 #include "imgui/imgui_impl_dx12.h"
+#include <WICTextureLoader.h>
 
 using namespace DirectX;
 using namespace ElysiaHelper;
 using namespace DirectX::SimpleMath;
+
+#pragma comment(lib, "Windowscodecs.lib")
+#pragma comment(lib, "RuntimeObject.lib")

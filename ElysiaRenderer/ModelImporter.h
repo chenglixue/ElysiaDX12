@@ -81,6 +81,10 @@ namespace ElysiaModel
 
 		void PrintModelStats();
 
+		void Optimize();
+		void OptimizeRemoveDuplicateVertices();
+		void OptimizePreTransform();
+
 	private:
 		DX12Device* m_pDevice = nullptr;
 		BufferManager* m_pBufferManager = nullptr;
@@ -93,8 +97,8 @@ namespace ElysiaModel
 		
 		UINT m_vertexStride = 0;
 
-		uint8_t* m_pVertexData;
-		uint8_t* m_pIndexData;
+		uint8_t* m_pVertexData = nullptr;
+		uint8_t* m_pIndexData = nullptr;
 	};
 
 

@@ -92,15 +92,15 @@ FDirectLighting DefaultLitBxDF(MaterialData materialData, float3 N, float3 V, fl
 
     float3 KD = (1 - UE_F_Schlick(materialData.SpecularColor, Context.VoH)) * (1 - materialData.Metallic);
     Lighting.Diffuse = Diffuse_Chan(materialData.DiffuseColor, Pow4(materialData.Roughness), NoV, NoL, VoH, NoH, GetAreaLightDiffuseMicroReflWeight(AreaLight));
-    Lighting.Diffuse *= AreaLight.FalloffColor * Falloff * NoL * KD;
+    Lighting.Diffuse *= AreaLight.FalloffColor * Falloff  * KD;
 
     Lighting.Specular = SpecularGGX(materialData.Roughness, materialData.SpecularColor, Context, NoL, AreaLight);
-    Lighting.Specular *= AreaLight.FalloffColor * Falloff * NoL;
+    Lighting.Specular *= AreaLight.FalloffColor * Falloff ;
     
     FBxDFEnergyTerms energyTerm = ComputeFresnelEnergyTerms(GGXEnergyLookup(materialData.Roughness, NoV), materialData.SpecularColor);
-    
-    Lighting.Diffuse *= ComputeEnergyPreservation(energyTerm);
-    Lighting.Specular *= ComputeEnergyConservation(energyTerm);
+     
+    //Lighting.Diffuse *= ComputeEnergyPreservation(energyTerm);
+    //Lighting.Specular *= ComputeEnergyConservation(energyTerm);
 
     return Lighting;
 }

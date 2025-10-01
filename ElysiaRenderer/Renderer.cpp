@@ -35,6 +35,16 @@ namespace ElysiaRenderer
 
 	void Renderer::Init()
 	{
+#if (_WIN32_WINNT >= 0x0A00 /*_WIN32_WINNT_WIN10*/)
+		Microsoft::WRL::Wrappers::RoInitializeWrapper initialize(RO_INIT_MULTITHREADED);
+		if (FAILED(initialize))
+			// error
+#else
+		HRESULT hr = ThrowIfFailed(CoInitializeEx(nullptr, COINIT_MULTITHREADED));
+		if (FAILED(hr))
+			// error
+#endif
+
 		printf("loading...\n");
 		if (!m_pModelImporter->Load(g_ModelPaths))
 		{
@@ -42,14 +52,14 @@ namespace ElysiaRenderer
 		}
 		printf("done\n");
 
-		m_pCameraManager->Init();
-		m_pLightManager->Init();
+		m_pCameraManager->Init(); 
+		m_pLightManager->Init();  
 		m_pShadowManager->Init();
 		m_pBufferManager->Init();
-		m_pMeshManager->Init();
+		m_pMeshManager->Init();    
 		 
-		float modelRasius = m_pModelImporter->GetBoundingBox().GetDimensions().Length() * 0.5f;
-		m_pCameraManager->CreateMainCamera(m_pModelImporter->GetBoundingBox().GetCenter() + Vector3(modelRasius * 0.5f, 0.f, 0.f),
+		float modelRasius = m_pModelImporter->GetBoundingBox().GetDimensions().Length() * 0.5f; 
+		m_pCameraManager->CreateMainCamera(m_pModelImporter->GetBoundingBox().GetCenter() + Vector3(modelRasius * 0.5f - 350.f, -250.f, 0.f),
 			m_aspectRatio, 3.14159f / 4.0f, 0.1f, 10000.f);
 
 		m_pShadowManager->CreateMainShadow(4096, 15);
@@ -148,9 +158,9 @@ namespace ElysiaRenderer
 		m_pModelImporter->CreateIndexBuffer();
 		m_pModelImporter->CreateMeshRenders();
 
-		LoadConstantBuffers();
+ 		LoadConstantBuffers();
 
-		//LoadAndCreateTexs();
+		//LoadAndCreateTexs(); 
 
 		CreateCreamDepthRT();
 		//CreateShadowRT();
@@ -310,13 +320,13 @@ namespace ElysiaRenderer
 
 	}
 	 
-	void Renderer::RenderTexTriangle()
+	void Renderer::RenderTexTriangle() 
 	{
 		m_device->BeginFrame();
 		m_graphicsContext->Reset();
 
 		ImGui_ImplDX12_NewFrame();
-		ImGui_ImplWin32_NewFrame();
+		ImGui_ImplWin32_NewFrame(); 
 		ImGui::NewFrame();
 
 		AddUIItems();
@@ -389,7 +399,7 @@ namespace ElysiaRenderer
 
 		m_device->EndFrame(); 
 		m_device->Present();
-	}
+	} 
 	 
 	void Renderer::AddUIItems()
 	{

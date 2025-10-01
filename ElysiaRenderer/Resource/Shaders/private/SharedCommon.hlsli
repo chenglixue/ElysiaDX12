@@ -53,7 +53,7 @@ cbuffer ObjectConstant : register(b0, perObjectSpace)
 	int normalTexIndex;
     int metallicTexIndex;
     int roughnessTexIndex;
-    int vertexBufferIndex;
+    //int vertexBufferIndex;
     int specularTexIndex;
 };
 

@@ -1,7 +1,10 @@
 #include "ModelImporter.h"
+#include "iosfwd"
 
 namespace ElysiaModel
 {
+	using namespace std;
+
 	ModelImporter::ModelImporter(DX12Device* pDevice, BufferManager* pBufferManager, TextureManager* pTextureManager) :
 		m_pDevice(std::move(pDevice)),
 		m_pBufferManager(std::move(pBufferManager)),
@@ -37,21 +40,14 @@ namespace ElysiaModel
 
 		const aiScene* pScene = importer.ReadFile(modelPath,
 			aiProcess_CalcTangentSpace |
-			//aiProcess_ConvertToLeftHanded |
-			aiProcess_JoinIdenticalVertices |	// Merge same vertices
-			aiProcess_Triangulate |				// translat othrer shape to triangle
-			aiProcess_RemoveComponent |
-			aiProcess_GenSmoothNormals |
-			aiProcess_SplitLargeMeshes |
-			aiProcess_ValidateDataStructure |	// Verify the data structure validity of the imported model. When loading 3D models, you may encounter format errors or data inconsistencies
-			//aiProcess_ImproveCacheLocality |	// handled by optimizePostTransform()
+			aiProcess_Triangulate |
+			aiProcess_JoinIdenticalVertices |
+			//aiProcess_MakeLeftHanded |
 			aiProcess_RemoveRedundantMaterials |
-			aiProcess_SortByPType |				// Sort the meshes in the scene by their geometric primitive types (such as points, lines, triangles, etc.)
-			aiProcess_FindInvalidData |
-			aiProcess_GenUVCoords |
-			aiProcess_TransformUVCoords |
-			aiProcess_OptimizeMeshes |
-			aiProcess_OptimizeGraph);
+			aiProcess_FlipUVs |
+			aiProcess_FlipWindingOrder | 
+			aiProcess_PreTransformVertices | 
+			aiProcess_OptimizeMeshes);
 
 		if (pScene == nullptr) return false;
 
@@ -82,7 +78,7 @@ namespace ElysiaModel
 			float shininess = 0.0f;
 			float specularIntensity = 1.0f;
 			aiString texDiffusePath;
-			aiString texSpecularPath;
+			aiString texMetallicPath;
 			aiString texEmissionPath;
 			aiString texNormalPath;
 			aiString texLightmapPath;
@@ -95,10 +91,20 @@ namespace ElysiaModel
 			srcMaterial->Get(AI_MATKEY_OPACITY, opacity);
 			srcMaterial->Get(AI_MATKEY_SHININESS, shininess);
 			srcMaterial->Get(AI_MATKEY_SHININESS_STRENGTH, specularIntensity);
-			srcMaterial->Get(AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, 0), texDiffusePath);
-			srcMaterial->Get(AI_MATKEY_TEXTURE(aiTextureType_SPECULAR, 0), texSpecularPath);
+			if (srcMaterial->GetTexture(aiTextureType_DIFFUSE, 0, &texDiffusePath) == aiReturn_SUCCESS)
+			{
+				strncpy_s(destMaterial->texDiffusePath, texDiffusePath.C_Str(), Material::maxTexPath - 1);
+			}
+			if (srcMaterial->GetTexture(aiTextureType_AMBIENT, 0, &texMetallicPath) == aiReturn_SUCCESS)
+			{
+				strncpy_s(destMaterial->texMetallicPath, texMetallicPath.C_Str(), Material::maxTexPath - 1);
+			}
+			if (srcMaterial->GetTexture(aiTextureType_NORMALS, 0, &texNormalPath) == aiReturn_SUCCESS ||
+				srcMaterial->GetTexture(aiTextureType_HEIGHT, 0, &texNormalPath) == aiReturn_SUCCESS)
+			{
+				strncpy_s(destMaterial->texNormalPath, texNormalPath.C_Str(), Material::maxTexPath - 1);
+			}
 			srcMaterial->Get(AI_MATKEY_TEXTURE(aiTextureType_EMISSIVE, 0), texEmissionPath);
-			srcMaterial->Get(AI_MATKEY_TEXTURE(aiTextureType_AMBIENT, 0), texNormalPath);
 			srcMaterial->Get(AI_MATKEY_TEXTURE(aiTextureType_LIGHTMAP, 0), texLightmapPath);
 			srcMaterial->Get(AI_MATKEY_TEXTURE(aiTextureType_REFLECTION, 0), texReflectionPath);
 
@@ -110,10 +116,7 @@ namespace ElysiaModel
 			destMaterial->shininess = shininess;
 			destMaterial->specularIntensity = specularIntensity;
 
-			strncpy_s(destMaterial->texDiffusePath, texDiffusePath.C_Str(), Material::maxTexPath - 1);
-			strncpy_s(destMaterial->texSpecularPath, texSpecularPath.C_Str(), Material::maxTexPath - 1);
 			strncpy_s(destMaterial->texEmissionPath, texEmissionPath.C_Str(), Material::maxTexPath - 1);
-			strncpy_s(destMaterial->texNormalPath, texNormalPath.C_Str(), Material::maxTexPath - 1);
 			strncpy_s(destMaterial->texLightmapPath, texLightmapPath.C_Str(), Material::maxTexPath - 1);
 			strncpy_s(destMaterial->texReflectionPath, texReflectionPath.C_Str(), Material::maxTexPath - 1);
 
@@ -186,7 +189,6 @@ namespace ElysiaModel
 
 		m_pVertexData = new uint8_t[m_meshData.vertexDataByteSize];
 		m_pIndexData = new uint8_t[m_meshData.indexDataByteSize];
-
 		for (unsigned int meshIndex = 0; meshIndex < pScene->mNumMeshes; ++meshIndex)
 		{
 			const aiMesh* srcMesh = pScene->mMeshes[meshIndex];
@@ -271,9 +273,9 @@ namespace ElysiaModel
 			{
 				assert(srcMesh->mFaces[f].mNumIndices == 3);
 
-				*(destIndex++) = srcMesh->mFaces[f].mIndices[0];
-				*(destIndex++) = srcMesh->mFaces[f].mIndices[1];
-				*(destIndex++) = srcMesh->mFaces[f].mIndices[2];
+				*destIndex++ = srcMesh->mFaces[f].mIndices[0];
+				*destIndex++ = srcMesh->mFaces[f].mIndices[1];
+				*destIndex++ = srcMesh->mFaces[f].mIndices[2];
 			}
 		}
 
@@ -346,6 +348,133 @@ namespace ElysiaModel
 		ComputeGlobalBoundingBox(m_meshData.boundingBox);
 	}
 
+	void ModelImporter::Optimize()
+	{
+		// TODO: quantize/compress vertex data
+
+		//OptimizeRemoveDuplicateVertices();
+
+		// re-order indices for post transform cache
+		//OptimizePostTransform();
+
+		// re-order vertices for linear memory access
+		//OptimizePreTransform();
+	}
+
+	void ModelImporter::OptimizePreTransform()
+	{
+		unsigned char* reorderedVertexData = new unsigned char[m_meshData.vertexDataByteSize];
+
+		for (unsigned int meshIndex = 0; meshIndex < m_meshData.meshCount; meshIndex++)
+		{
+			Mesh* mesh = m_pMesh + meshIndex;
+			unsigned int indexCount = mesh->indexCount;
+			unsigned int vertexStride = mesh->vertexStride;
+			unsigned char* meshVertexData = (m_pVertexData + mesh->vertexDataOffset);
+
+			unsigned char* meshReorderedVertexData = reorderedVertexData + mesh->vertexDataOffset;
+			unsigned int reorderedCount = 0;
+
+			unsigned int vertexCount = mesh->vertexCount;
+			uint32_t* vertexRemap = new uint32_t[vertexCount];
+			memset(vertexRemap, (uint32_t)-1, sizeof(uint32_t) * vertexCount);
+			assert(vertexCount <= (uint32_t)-1);
+
+			uint16_t* indexArray = (uint16_t*)(m_pIndexData + mesh->indexDataOffset);
+			for (unsigned int n = 0; n < indexCount; n++)
+			{
+				uint16_t index = indexArray[n];
+				if (vertexRemap[index] == (uint32_t)-1)
+				{
+					// not relocated yet
+					const unsigned char* vSrc = meshVertexData + index * vertexStride;
+					unsigned char* vDst = meshReorderedVertexData + reorderedCount * vertexStride;
+					memcpy(vDst, vSrc, vertexStride);
+
+					vertexRemap[index] = reorderedCount;
+					reorderedCount++;
+				}
+				indexArray[n] = vertexRemap[index];
+			}
+
+			delete[] vertexRemap;
+		}
+
+		{
+			delete[] m_pVertexData;
+			m_pVertexData = reorderedVertexData;
+		}
+	}
+
+	void ModelImporter::OptimizeRemoveDuplicateVertices()
+	{
+		unsigned char* deduplicatedVertexData = new unsigned char[m_meshData.vertexDataByteSize];
+		uint32_t deduplicatedVertexDataSize = 0;
+
+		for (unsigned int meshIndex = 0; meshIndex < m_meshData.meshCount; meshIndex++)
+		{
+			Mesh* mesh = m_pMesh + meshIndex;
+			unsigned int vertexStride = mesh->vertexStride;
+			unsigned char* meshVertexData = (m_pVertexData + mesh->vertexDataOffset);
+
+			unsigned char* meshDeduplicatedVertexData = deduplicatedVertexData + deduplicatedVertexDataSize;
+			unsigned int deduplicatedCount = 0;
+
+			unsigned int vertexCount = mesh->vertexCount;
+			uint32_t* vertexRemap = new uint32_t[vertexCount];
+			memset(vertexRemap, (uint32_t)-1, sizeof(uint32_t) * vertexCount);
+			assert(vertexCount <= (uint32_t)-1);
+
+			for (unsigned int v1 = 0; v1 < vertexCount; v1++)
+			{
+				if (vertexRemap[v1] != (uint32_t)-1)
+					continue; // this was already found to be a duplicate
+
+				const unsigned char* v1Data = meshVertexData + v1 * vertexStride;
+
+				// this is a new unique vertex
+				uint32_t remappedSlot = deduplicatedCount++;
+				vertexRemap[v1] = remappedSlot;
+				memcpy(meshDeduplicatedVertexData + remappedSlot * vertexStride, v1Data, vertexStride);
+
+				// scan for duplicates
+				for (unsigned int v2 = v1 + 1; v2 < vertexCount; v2++)
+				{
+					if (vertexRemap[v2] != (uint32_t)-1)
+						continue; // this was already found to be a duplicate of another vertex
+
+					const unsigned char* v2Data = meshVertexData + v2 * vertexStride;
+
+					if (0 == memcmp(v1Data, v2Data, vertexStride))
+					{
+						vertexRemap[v2] = remappedSlot;
+					}
+				}
+			}
+
+			unsigned int indexCount = mesh->indexCount;
+			uint16_t* indexArray = (uint16_t*)((m_pIndexData)+mesh->indexDataOffset);
+			for (unsigned int n = 0; n < indexCount; n++)
+			{
+				indexArray[n] = vertexRemap[indexArray[n]];
+			}
+
+			delete[] vertexRemap;
+
+			{
+				mesh->vertexCount = deduplicatedCount;
+				mesh->vertexDataOffset = deduplicatedVertexDataSize;
+			}
+			deduplicatedVertexDataSize += deduplicatedCount * vertexStride;
+		}
+
+		{
+			delete[] m_pVertexData;
+			m_pVertexData = deduplicatedVertexData;
+			m_meshData.vertexDataByteSize = deduplicatedVertexDataSize;
+		}
+	}
+
 	void ModelImporter::LoadTextures(const std::wstring& basePath)
 	{
 		TextureCreationDesc texBufferCreateDesc{};
@@ -353,7 +482,7 @@ namespace ElysiaModel
 		for (UINT materialIndex = 0; materialIndex < m_meshData.materialCount; ++materialIndex)
 		{
 			std::wstring diffusePath = basePath + RemoveExt(m_pMaterial[materialIndex].texDiffusePath);
-			texBufferCreateDesc.texturePath = diffusePath + L".dds";
+			texBufferCreateDesc.texturePath = diffusePath + L".png";
 			texBufferCreateDesc.isSRGB = true;
 			auto diffuseTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
 			if (diffuseTex != nullptr)
@@ -362,29 +491,29 @@ namespace ElysiaModel
 			}
 			m_pTextureManager->AddTextureResource(std::move(diffuseTex));
 
-			std::wstring specularPath = basePath + RemoveExt(m_pMaterial[materialIndex].texSpecularPath);
-			texBufferCreateDesc.texturePath = specularPath + L".dds";
+			std::wstring metallicPath = basePath + RemoveExt(m_pMaterial[materialIndex].texMetallicPath);
+			texBufferCreateDesc.texturePath = metallicPath + L".png";
 			texBufferCreateDesc.isSRGB = true;
-			auto specularTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
-			if (specularTex == nullptr)
+			auto metallicTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
+			if (metallicTex == nullptr)
 			{
-				texBufferCreateDesc.texturePath = diffusePath + L"_specular.dds";
-				specularTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
+				texBufferCreateDesc.texturePath = removeLastUnderscoreAndAfter(diffusePath) + L"_Metallic.dds";
+				metallicTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
 			}
-			if (specularTex != nullptr)
+			if (metallicTex != nullptr)
 			{
-				m_pMaterial[materialIndex].specularTexIndex = specularTex->GetResourceHeapIndex();
+				m_pMaterial[materialIndex].specularTexIndex = metallicTex->GetResourceHeapIndex();
 			}
-			m_pTextureManager->AddTextureResource(std::move(specularTex));
+			m_pTextureManager->AddTextureResource(std::move(metallicTex));
 
 
 			std::wstring normalPath = basePath + RemoveExt(m_pMaterial[materialIndex].texNormalPath);
-			texBufferCreateDesc.texturePath = normalPath + L".dds";
+			texBufferCreateDesc.texturePath = normalPath + L".png";
 			texBufferCreateDesc.isSRGB = false;
 			auto normalTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
 			if (normalTex == nullptr)
 			{
-				texBufferCreateDesc.texturePath = diffusePath + L"_normal.dds";
+				texBufferCreateDesc.texturePath = removeLastUnderscoreAndAfter(diffusePath) + L"_Normal.dds";
 				normalTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
 			}
 			if (normalTex != nullptr)
@@ -535,7 +664,8 @@ namespace ElysiaModel
 			pCurrMeshRender->m_CBVObjectParameter->baseColorTexIndex = m_pMaterial[meshIndex].diffuseTexIndex;
 			pCurrMeshRender->m_CBVObjectParameter->specularTexIndex = m_pMaterial[meshIndex].specularTexIndex;
 			pCurrMeshRender->m_CBVObjectParameter->normalTexIndex = m_pMaterial[meshIndex].normalTexIndex;
-			pCurrMeshRender->m_CBVObjectParameter->vertexIndex = m_pBufferManager->GetVertexBuffer()->GetResourceHeapIndex();
+			//pCurrMeshRender->m_CBVObjectParameter->vertexIndex = m_pBufferManager->GetVertexBuffer()->GetResourceHeapIndex();
 		}
 	}
+
 }
