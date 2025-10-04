@@ -7,7 +7,7 @@
 #include "DX12UI.h"
 #include <dxgidebug.h>
 #include "DX12Shadow.h"
-#include "CBVPassParameter.h"
+#include "CBVParameter.h"
 #include "LoadTexData.h"
 #include "CameraManager.h"
 #include "LightManager.h"
@@ -25,25 +25,9 @@ namespace ElysiaRenderer
 	using namespace ElysiaModel;
 	using namespace DirectX::SimpleMath;
 
-	const std::vector<D3D12_INPUT_ELEMENT_DESC> m_inputElementDescs =
-	{
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-		{ "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
-	};
 	const std::vector<LPCWSTR> g_ModelPaths
 	{
-		L"Sponza\\Sponza.fbx",
-			//L"Mesh\\plane.fbx",
-			//L"Mesh\\Sphere.fbx",
-	};
-	
-	const std::vector<TexLoadSetting> m_globalTexLoadSettings
-	{
-		{L"Tex\\GGX_E_LUT.dds"},
-		{L"Tex\\GGX_Eavg_LUT.dds"},
-		{L"Tex\\cubemap0.dds", true},
+		L"Sponza\\Sponza.fbx"
 	};
 	 
 	static Matrix m_worldMatrix = Matrix::Identity;
@@ -56,7 +40,7 @@ namespace ElysiaRenderer
 
 		void Init();
 		void Update();
-		void Render();
+		void Render(); 
 		void Destory();
 		void Resize();
 
@@ -125,7 +109,7 @@ namespace ElysiaRenderer
 
 		std::unique_ptr<ModelImporter> m_pModelImporter = nullptr;
 
-		std::unique_ptr<CameraManager>	m_pCameraManager = nullptr;
+		std::unique_ptr<CameraManager>	m_pCameraManager = nullptr;  
 		std::unique_ptr<LightManager>	m_pLightManager = nullptr;
 		std::unique_ptr<ShadowManager>	m_pShadowManager = nullptr;
 		std::unique_ptr<BufferManager>	m_pBufferManager = nullptr;
@@ -149,7 +133,7 @@ namespace ElysiaRenderer
 		void LoadShaders();
 		void LoadConstantBuffers();
 		void CreateCreamDepthRT();
-		void LoadAndCreateTexs();
+		void LoadTextures(); 
 		void CreatePOS();
 
 		void AddShader(ShaderQueue shaderQueue, const std::wstring& shaderName, const std::wstring& entryPoint, ShaderType shaderType);
@@ -158,9 +142,9 @@ namespace ElysiaRenderer
 
 		void AddUIItems();
 		void DrawShadow();
-		void DrawOpaque();
+		void DrawOpaque(); 
 		void DrawSkybox();
-};
+	};
 }
 
-   
+                    

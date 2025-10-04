@@ -24,6 +24,10 @@ namespace ElysiaRenderer
 		UINT frameIndex = 0;
 		float nearZ = 1;
 		float farZ = 1000;
+		int GGX_E_LUT_Index = -1;
+
+		int GGX_Eavg_LUT_Index = -1;
+		int SkyboxTexIndex = -1;
 	};
 
 	struct alignas(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT)CBVShadowPassParameter

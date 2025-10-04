@@ -130,11 +130,11 @@ namespace ElysiaRenderer
 
 	void		DX12Camera::LookAt(const Vector3& targetPos) noexcept
 	{
-		const Vector3 up = Vector3::Up;
-
+		Vector3 up = Vector3::Up;
+		
 		m_viewMatrix = Matrix::CreateLookAt(m_transform.m_position, targetPos, up);
-		auto inverseQuaternion = Quaternion::CreateFromRotationMatrix(m_viewMatrix);
-		m_transform.m_rotation.Inverse(inverseQuaternion);
+		auto inverseQuaternion = Quaternion::CreateFromRotationMatrix(m_viewMatrix.Invert());
+		//m_transform.m_rotation.Inverse(inverseQuaternion);
 		m_transform.m_rotation = inverseQuaternion;
 	}
 
@@ -162,7 +162,7 @@ namespace ElysiaRenderer
 	{
 		//m_viewMatrix = Matrix::CreateTranslation(-m_transform.m_position) * Matrix::CreateFromQuaternion(m_transform.m_rotation);
 
-		LookAt(Vector3(0.f, 250.f, 0.f));
+		LookAt(m_transform.m_position + Vector3(300.f, 0.f, 0.f));
 
 		//m_viewMatrix = Matrix::CreateLookAt(m_transform.m_position, Vector3::Zero, Vector3::Up);
 	}

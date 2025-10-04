@@ -53,7 +53,6 @@ cbuffer ObjectConstant : register(b0, perObjectSpace)
 	int normalTexIndex;
     int metallicTexIndex;
     int roughnessTexIndex;
-    //int vertexBufferIndex;
     int specularTexIndex;
 };
 
@@ -69,6 +68,10 @@ cbuffer PassConstant : register(b0, perPassSpace)
     UINT frameIndex;
     float nearZ;
     float farZ;
+    int GGX_E_LUT_Index = 0;
+    
+    int GGX_Eavg_LUT_Index = 0;
+    int SkyboxTexIndex = 0;
 };
 
 //cbuffer PerShadowPassBuffer : register(b1, perPassSpace)

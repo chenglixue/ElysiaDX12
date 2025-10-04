@@ -56,11 +56,13 @@ namespace ElysiaRenderer
 		m_pLightManager->Init();  
 		m_pShadowManager->Init();
 		m_pBufferManager->Init();
-		m_pMeshManager->Init();    
+		m_pMeshManager->Init();							
 		 
-		float modelRasius = m_pModelImporter->GetBoundingBox().GetDimensions().Length() * 0.5f; 
-		m_pCameraManager->CreateMainCamera(m_pModelImporter->GetBoundingBox().GetCenter() + Vector3(modelRasius * 0.5f - 350.f, -250.f, 0.f),
-			m_aspectRatio, 3.14159f / 4.0f, 0.1f, 10000.f);
+		m_pCameraManager->CreateMainCamera(Vector3(-11.5f, 200.85f, -0.45f) ,
+			m_aspectRatio, 3.14159f / 4.0f, 0.1f, 2000.f);
+
+		auto passParameter = m_pRenderSource->GetCBVPassParameter();
+		passParameter->mainLight = std::move(m_pLightManager->GetMainLight()->CreateLightData());
 
 		m_pShadowManager->CreateMainShadow(4096, 15);
 		 
@@ -134,7 +136,6 @@ namespace ElysiaRenderer
 		passParameter->projMatrix = m_pCameraManager->GetMainCamera()->GetProj();
 		passParameter->nearZ = m_pCameraManager->GetMainCamera()->GetNearZ();
 		passParameter->farZ = m_pCameraManager->GetMainCamera()->GetFarZ();
-		passParameter->mainLight = std::move(m_pLightManager->GetMainLight()->CreateLightData());
 
 		m_pBufferManager->GetSingleConstantBuffer(PER_PASS_SPACE)->SetMappedData(passParameter, sizeof(CBVMainPassParameter));
 		
@@ -160,7 +161,7 @@ namespace ElysiaRenderer
 
  		LoadConstantBuffers();
 
-		//LoadAndCreateTexs(); 
+		LoadTextures(); 
 
 		CreateCreamDepthRT();
 		//CreateShadowRT();
@@ -223,20 +224,39 @@ namespace ElysiaRenderer
 
 		m_pBufferManager->AddDepthBuffer(std::move(m_device->CreateTexture(depthBufferCreateDesc)));
 	}
-	void Renderer::LoadAndCreateTexs()
+	void Renderer::LoadTextures()
 	{
-		auto texLoadSettings = m_globalTexLoadSettings;
-		for (int i = 0; i < texLoadSettings.size(); ++i)
+		TextureCreationDesc texBufferCreateDesc{};
+
 		{
-			auto strPath = ElysiaHelper::LPCWSTRToString(texLoadSettings[i].LoadPath);
-
-			TextureCreationDesc texBufferCreateDesc{};
-
-			texBufferCreateDesc.texturePath = texLoadSettings[i].LoadPath;
-			texBufferCreateDesc.isSRGB = texLoadSettings[i].IsSRGB;
-
+			texBufferCreateDesc.texturePath = L"Tex\\GGX_E_LUT.dds";
+			texBufferCreateDesc.isSRGB = false;
 			auto newTex = std::move(m_device->CreateTextureFromFile(texBufferCreateDesc));
-			//m_texs.emplace_back(std::move(m_device->CreateTextureFromFile(texBufferCreateDesc)));
+			 
+			m_pRenderSource->GetCBVPassParameter()->GGX_E_LUT_Index = newTex->GetResourceHeapIndex();
+
+			m_pTextureManager->AddTextureResource(std::move(newTex));
+		}
+
+		{
+			texBufferCreateDesc.texturePath = L"Tex\\GGX_Eavg_LUT.dds";
+			texBufferCreateDesc.isSRGB = false;
+			auto newTex = std::move(m_device->CreateTextureFromFile(texBufferCreateDesc));
+
+			m_pRenderSource->GetCBVPassParameter()->GGX_Eavg_LUT_Index = newTex->GetResourceHeapIndex();
+
+			m_pTextureManager->AddTextureResource(std::move(newTex));
+
+		}
+		  
+		{
+			texBufferCreateDesc.texturePath = L"Tex\\cubemap0.dds";
+			texBufferCreateDesc.isSRGB = false;
+			auto newTex = std::move(m_device->CreateTextureFromFile(texBufferCreateDesc));
+			 
+			m_pRenderSource->GetCBVPassParameter()->SkyboxTexIndex = newTex->GetResourceHeapIndex();
+
+			m_pTextureManager->AddTextureResource(std::move(newTex));
 		}
 	}
 	void Renderer::CreatePOS()
@@ -377,8 +397,6 @@ namespace ElysiaRenderer
 				const auto& mesh = meshRenderer.m_mesh;
 
 				auto objectContantBuffer = m_pBufferManager->GetMutilConstantBuffer(PER_OBJECT_SPACE, m_device->GetFrameID(), meshIndex);
-				/*auto objectConstantParameter = *meshRenderer.m_CBVObjectParameter;
-				objectContantBuffer->SetMappedData(&objectConstantParameter, sizeof(CBVObjectParameter));*/
 				m_perObjectBindResourceSpace->SetCBV(objectContantBuffer);
 				m_graphicsContext->SetPipelineResource(PER_OBJECT_SPACE, m_perObjectBindResourceSpace.get());
 				
@@ -402,34 +420,34 @@ namespace ElysiaRenderer
 	} 
 	 
 	void Renderer::AddUIItems()
-	{
-		/*if (ImGui::CollapsingHeader("Camera"))
-		{
-			ImGui::SliderFloat("Speed", &m_mainCamera->GetCameraSpeed(), 0, 2);
-			ImGui::SliderFloat("NearZ", &m_mainCamera->GetNearZ(), 0.001f, 1000);
-			ImGui::SliderFloat("FarZ", &m_mainCamera->GetFarZ(), 0.001f, 1000);
-		}
-
+	{ 
 		if (ImGui::CollapsingHeader("Light"))
 		{
-			ImGui::ColorEdit3("Color", (float*)&m_mainPassParameter.mainLights[0].m_lightColor);
-			ImGui::DragFloat3("Direction", (float*)&m_mainPassParameter.mainLights[0].m_lightDir, 1);
+			auto mainLight = m_pRenderSource->GetCBVPassParameter();
+			ImGui::ColorEdit3("Color", (float*)&mainLight->mainLight.m_lightColor);
+			ImGui::DragFloat3("Direction", (float*)&mainLight->mainLight.m_lightDir, 1, -1, 1);
 
-			ImGui::SliderFloat("Intensity", &m_mainPassParameter.mainLights[0].m_intensity, 0, 5);
+			ImGui::SliderFloat("Intensity", &mainLight->mainLight.m_intensity, 0, 5);
 		}
 
 		if (ImGui::CollapsingHeader("PBR Data"))
 		{
+			/*Vector3 BaseColorTint = Vector3::One;
+			float Opacity = 1;
+			float NormalIntensity = 1;
+			float MetallicIntensity = 1;
+			float RoughnessIntensity = 1;
+			float AmbientCubemapIntensity = 1;
+			Vector3 AmbientCubemapTint = Vector3::One;
+			
 			ImGui::ColorEdit3("Base Color Tint", (float*)&m_objectPassParameters[m_device->GetFrameID()].baseColorTint);
 			ImGui::SliderFloat("Opacity", &m_objectPassParameters[m_device->GetFrameID()].opacity, 0.f, 1.f);
 			ImGui::SliderFloat("Normal Intensity", &m_objectPassParameters[m_device->GetFrameID()].normalIntensity, 0.f, 5.f);
 			ImGui::SliderFloat("Metallic Intensity", &m_objectPassParameters[m_device->GetFrameID()].metallicIntensity, 0.f, 5.f);
 			ImGui::SliderFloat("Roughness Intensity", &m_objectPassParameters[m_device->GetFrameID()].roughnessIntensity, 0.f, 5.f);
 			ImGui::SliderFloat("Ambient Cubemap Intensity", &m_objectPassParameters[m_device->GetFrameID()].ambientCubemapIntensity, 0.f, 2.f);
-			ImGui::ColorEdit3("Ambient Cubemap Tint", (float*)&m_objectPassParameters[m_device->GetFrameID()].ambientCubemapTint);
-		}*/
-
-		ImGui::ShowDemoWindow();
+			ImGui::ColorEdit3("Ambient Cubemap Tint", (float*)&m_objectPassParameters[m_device->GetFrameID()].ambientCubemapTint);*/
+		}
 	}
 	void Renderer::DrawShadow()
 	{

@@ -367,13 +367,12 @@ namespace ElysiaRenderer
 			ElysiaHelper::GetAssetsPath(assetsPath, _countof(assetsPath));
 
 			imageData = std::make_unique<DirectX::ScratchImage>();
-			auto loadResult = DirectX::LoadFromDDSFile(texturePath.c_str(), DirectX::DDS_FLAGS_NONE, nullptr, *imageData);
+			auto loadResult = DirectX::LoadFromDDSFile((assetsPath + texturePath).c_str(), DirectX::DDS_FLAGS_NONE, nullptr, *imageData);
 			if (loadResult != S_OK)
 			{
-				std::cout << WstringToString(textureCreationDesc.texturePath) + " not found";
+				std::cout << WstringToString(textureCreationDesc.texturePath) + " not found" << std::endl;
 				return nullptr;
 			}
-			//assert(loadResult == S_OK);
 		}
 		else
 		{
@@ -381,7 +380,7 @@ namespace ElysiaRenderer
 			auto loadResult = DirectX::LoadFromWICFile(texturePath.c_str(), DirectX::WIC_FLAGS_NONE, nullptr, tempImage);
 			if (loadResult != S_OK)
 			{
-				std::cout << WstringToString(textureCreationDesc.texturePath) + " not found";
+				std::cout << WstringToString(textureCreationDesc.texturePath) + " not found" << std::endl;
 				return nullptr;
 			}
 			ThrowIfFailed(DirectX::GenerateMipMaps(*tempImage.GetImage(0, 0, 0), DirectX::TEX_FILTER_DEFAULT, 0, *imageData, false));

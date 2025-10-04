@@ -17,10 +17,7 @@ namespace ElysiaRenderer
 		LightData o{};
 
 		o.m_lightColor = Vector4(m_lightColor.x, m_lightColor.y, m_lightColor.z, 1.f);
-
-		Vector3 temp;
-		XMStoreFloat3(&temp, XMVector3Normalize(XMLoadFloat3(&m_lightDir)));
-		o.m_lightDir = Vector4(temp.x, temp.y, temp.z, 0.f);
+		o.m_lightDir = Vector4(m_lightDir.x, m_lightDir.y, m_lightDir.z, 0.f);
 		o.m_intensity = m_lightIntensity;
 		o.m_lightPos = Vector4(FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX);
 		o.m_falloffStart = FLT_MAX;

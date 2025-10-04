@@ -159,7 +159,7 @@
     <ClInclude Include="BoundingBox.h" />
     <ClInclude Include="BufferManager.h" />
     <ClInclude Include="CameraManager.h" />
-    <ClInclude Include="CBVPassParameter.h" />
+    <ClInclude Include="CBVParameter.h" />
     <ClInclude Include="D3D12MemoryAllocator\D3D12MemAlloc.h" />
     <ClInclude Include="Definition.h" />
     <ClInclude Include="DX12BufferResource.h" />

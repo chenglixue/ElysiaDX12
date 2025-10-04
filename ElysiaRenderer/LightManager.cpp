@@ -27,11 +27,11 @@ namespace ElysiaRenderer
 		if (m_mainLight != nullptr)
 		{
 			m_mainLight.reset();
-			m_mainLight = std::make_unique<DX12DirectionLight>(Vector3(1.f, 1.f, 1.f), Vector3(1.0f, 1.0f, 1.0f), 1);
+			m_mainLight = std::make_unique<DX12DirectionLight>(Vector3(1.f, 1.f, 1.f), Vector3(1, 1, 1), 1);
 		}
 		else
 		{
-			m_mainLight = std::make_unique<DX12DirectionLight>(Vector3(1.f, 1.f, 1.f), Vector3(1.0f, 1.0f, 1.0f), 1);
+			m_mainLight = std::make_unique<DX12DirectionLight>(Vector3(1.f, 1.f, 1.f), Vector3(1, 1, 1), 1);
 		}
 	}
 }

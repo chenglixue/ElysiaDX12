@@ -32,6 +32,8 @@ namespace ElysiaRenderer
 		UINT specularTexIndex = 0;
 		UINT emissionTexIndex = 0;
 		UINT normalTexIndex = 0;
+		UINT metallicTexIndex = 0;
+		UINT roughnessTexIndex = 0;
 		UINT lightmapIndex = 0;
 		UINT reflectTexIndex = 0;
 	};

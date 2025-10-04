@@ -103,41 +103,41 @@ MaterialData GetMaterialData(FInputParams inputParams)
     
     float3x3 TBN = float3x3(inputParams.TangentWS, inputParams.BitTangentWS, inputParams.NormalWS);
     
-    Texture2D<half4> baseColorTex;
-    float4 baseColor;
+    Texture2D<float4> baseColorTex;
+    float4 baseColor = float4(baseColorTint, opacity);
     Texture2D<float4> normalTex;
     float4 normalTS;
-    Texture2D<half4> MRSOTex;
-    float4 MRSO;
-    float metallic;
-    float roughness;
+    Texture2D<float> metallicTex;
+    Texture2D<float> roughnessTex;
+    float metallic = metallicIntensity;
+    float roughness = roughnessIntensity;
     if (baseColorTexIndex != -1)
     {
         baseColorTex = ResourceDescriptorHeap[baseColorTexIndex];
         baseColor = baseColorTex.Sample(g_Sampler_WarpU_WarpV_Anisotropic, inputParams.objectUV)
             * float4(baseColorTint, opacity);
+        clip(baseColor.a - 0.5);
+
     }
-    else
-    {
-        baseColor = float4(baseColorTint, opacity);
-    }
+
     if (normalTexIndex != -1)
     {
         normalTex = ResourceDescriptorHeap[normalTexIndex];
         normalTS = normalTex.Sample(g_Sampler_WarpU_WarpV_Anisotropic, inputParams.objectUV);
     }
 
-    if (specularTexIndex != -1)
+    if (metallicTexIndex != -1)
     {
-        MRSOTex = ResourceDescriptorHeap[specularTexIndex];
-        MRSO = MRSOTex.Sample(g_Sampler_WarpU_WarpV_Anisotropic, inputParams.objectUV);
-        metallic = MRSO.r * metallicIntensity;
-        roughness = MRSO.g * roughnessIntensity;
+        metallicTex = ResourceDescriptorHeap[metallicTexIndex];
+        metallic = metallicTex.Sample(g_Sampler_WarpU_WarpV_Anisotropic, inputParams.objectUV);
+        metallic = metallic * metallicIntensity;
     }
-    else
+    
+    if (roughnessTexIndex != -1)
     {
-        metallic = metallicIntensity;
-        roughness = roughnessIntensity;
+        roughnessTex = ResourceDescriptorHeap[roughnessTexIndex];
+        roughness = roughnessTex.Sample(g_Sampler_WarpU_WarpV_Anisotropic, inputParams.objectUV);
+        roughness = roughness * roughnessIntensity;
     }
 
     o.BaseColor = baseColor.rgb;

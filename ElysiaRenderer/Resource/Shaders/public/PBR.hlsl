@@ -39,10 +39,6 @@ struct PSOutput
 PSInput VS(VSInput i)
 {
     PSInput o = (PSInput) 0;
-    
-    //ByteAddressBuffer vertexBuffer = ResourceDescriptorHeap[ObjectConstantBuffer.vertexBufferIndex];
-    
-    //DX12Vertex vertex = vertexBuffer.Load<DX12Vertex>(vertexId * sizeof(DX12Vertex));
 
     o.positionWS = mul(worldMatrix, float4(i.positionOS, 1.f));
     o.positionVS = mul(viewMatrix, o.positionWS);
@@ -88,7 +84,6 @@ PSOutput PS(PSInput i)
     MaterialData materialData = GetMaterialData(inputParam);
     
     o.target0 = GetDynamicLighting(inputParam, materialData, mainLightData);
-    o.target0.rgb = materialData.WorldNormal;
     
     //float4 shadowPos = mul(float4(inputParam.PositionWS, 1.f), M_Shadow);
     //shadowPos /= shadowPos.w;

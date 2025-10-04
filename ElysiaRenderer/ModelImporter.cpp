@@ -42,7 +42,7 @@ namespace ElysiaModel
 			aiProcess_CalcTangentSpace |
 			aiProcess_Triangulate |
 			aiProcess_JoinIdenticalVertices |
-			//aiProcess_MakeLeftHanded |
+			aiProcess_MakeLeftHanded |
 			aiProcess_RemoveRedundantMaterials |
 			aiProcess_FlipUVs |
 			aiProcess_FlipWindingOrder | 
@@ -352,7 +352,7 @@ namespace ElysiaModel
 	{
 		// TODO: quantize/compress vertex data
 
-		//OptimizeRemoveDuplicateVertices();
+		OptimizeRemoveDuplicateVertices();
 
 		// re-order indices for post transform cache
 		//OptimizePostTransform();
@@ -478,7 +478,7 @@ namespace ElysiaModel
 	void ModelImporter::LoadTextures(const std::wstring& basePath)
 	{
 		TextureCreationDesc texBufferCreateDesc{};
-
+		 
 		for (UINT materialIndex = 0; materialIndex < m_meshData.materialCount; ++materialIndex)
 		{
 			std::wstring diffusePath = basePath + RemoveExt(m_pMaterial[materialIndex].texDiffusePath);
@@ -497,15 +497,29 @@ namespace ElysiaModel
 			auto metallicTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
 			if (metallicTex == nullptr)
 			{
-				texBufferCreateDesc.texturePath = removeLastUnderscoreAndAfter(diffusePath) + L"_Metallic.dds";
+				texBufferCreateDesc.texturePath = removeLastUnderscoreAndAfter(diffusePath) + L"_Metallic.png";
 				metallicTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
 			}
 			if (metallicTex != nullptr)
 			{
-				m_pMaterial[materialIndex].specularTexIndex = metallicTex->GetResourceHeapIndex();
+				m_pMaterial[materialIndex].metallicTexIndex = metallicTex->GetResourceHeapIndex();
 			}
 			m_pTextureManager->AddTextureResource(std::move(metallicTex));
 
+			std::wstring roughnessPath = basePath + RemoveExt(m_pMaterial[materialIndex].texRoughnessPath);
+			texBufferCreateDesc.texturePath = roughnessPath + L".png";
+			texBufferCreateDesc.isSRGB = true;
+			auto roughnessTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
+			if (roughnessTex == nullptr)
+			{
+				texBufferCreateDesc.texturePath = removeLastUnderscoreAndAfter(diffusePath) + L"_Roughness.png";
+				roughnessTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
+			}
+			if (roughnessTex != nullptr)
+			{
+				m_pMaterial[materialIndex].roughnessTexIndex = roughnessTex->GetResourceHeapIndex();
+			}
+			m_pTextureManager->AddTextureResource(std::move(roughnessTex));
 
 			std::wstring normalPath = basePath + RemoveExt(m_pMaterial[materialIndex].texNormalPath);
 			texBufferCreateDesc.texturePath = normalPath + L".png";
@@ -513,7 +527,7 @@ namespace ElysiaModel
 			auto normalTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
 			if (normalTex == nullptr)
 			{
-				texBufferCreateDesc.texturePath = removeLastUnderscoreAndAfter(diffusePath) + L"_Normal.dds";
+				texBufferCreateDesc.texturePath = removeLastUnderscoreAndAfter(diffusePath) + L"_Normal.png";
 				normalTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
 			}
 			if (normalTex != nullptr)
@@ -521,8 +535,6 @@ namespace ElysiaModel
 				m_pMaterial[materialIndex].normalTexIndex = normalTex->GetResourceHeapIndex();
 			}
 			m_pTextureManager->AddTextureResource(std::move(normalTex));
-
-
 		}
 	}
 
@@ -664,6 +676,8 @@ namespace ElysiaModel
 			pCurrMeshRender->m_CBVObjectParameter->baseColorTexIndex = m_pMaterial[meshIndex].diffuseTexIndex;
 			pCurrMeshRender->m_CBVObjectParameter->specularTexIndex = m_pMaterial[meshIndex].specularTexIndex;
 			pCurrMeshRender->m_CBVObjectParameter->normalTexIndex = m_pMaterial[meshIndex].normalTexIndex;
+			pCurrMeshRender->m_CBVObjectParameter->metallicTexIndex = m_pMaterial[meshIndex].metallicTexIndex;
+			pCurrMeshRender->m_CBVObjectParameter->roughnessTexIndex = m_pMaterial[meshIndex].roughnessTexIndex;
 			//pCurrMeshRender->m_CBVObjectParameter->vertexIndex = m_pBufferManager->GetVertexBuffer()->GetResourceHeapIndex();
 		}
 	}

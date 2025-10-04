@@ -1,34 +1,5 @@
 ﻿  Skipping vcpkg. (no packages)
 cl : command line  warning D9014: invalid value '18' for '/wd'; assuming '5999'
-  DX12Camera.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\Helper.h(244,19): warning C4141: 'inline': used more than once
-  (compiling source file 'DX12Camera.cpp')
-  
-  ModelImporter.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\Helper.h(244,19): warning C4141: 'inline': used more than once
-  (compiling source file 'ModelImporter.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file 'ModelImporter.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\DX12BufferResource.h(63,11): warning C4244: 'return': conversion from 'const size_t' to 'float', possible loss of data
-  (compiling source file 'ModelImporter.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\DX12BufferResource.h(84,15): warning C4244: '=': conversion from 'float' to 'size_t', possible loss of data
-  (compiling source file 'ModelImporter.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\DX12PipelineState.h(7,32): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12RootSignature' when no variable is declared
-  (compiling source file 'ModelImporter.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\DX12PipelineState.h(8,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Shader' when no variable is declared
-  (compiling source file 'ModelImporter.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\DX12GraphicsContext.h(8,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
-  (compiling source file 'ModelImporter.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\DX12UploadContext.h(9,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
-  (compiling source file 'ModelImporter.cpp')
-  
   Renderer.cpp
 D:\DX12\ElysiaDX12\ElysiaRenderer\Helper.h(244,19): warning C4141: 'inline': used more than once
   (compiling source file 'Renderer.cpp')
@@ -54,8 +25,34 @@ D:\DX12\ElysiaDX12\ElysiaRenderer\DX12GraphicsContext.h(8,25): warning C4091: 'e
 D:\DX12\ElysiaDX12\ElysiaRenderer\DX12UploadContext.h(9,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
   (compiling source file 'Renderer.cpp')
   
-D:\DX12\ElysiaDX12\ElysiaRenderer\Renderer.cpp(390,54): warning C4267: 'argument': conversion from 'size_t' to 'UINT', possible loss of data
+D:\DX12\ElysiaDX12\ElysiaRenderer\Renderer.cpp(408,54): warning C4267: 'argument': conversion from 'size_t' to 'UINT', possible loss of data
+  main.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\Helper.h(244,19): warning C4141: 'inline': used more than once
+  (compiling source file 'main.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file 'main.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\DX12BufferResource.h(63,11): warning C4244: 'return': conversion from 'const size_t' to 'float', possible loss of data
+  (compiling source file 'main.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\DX12BufferResource.h(84,15): warning C4244: '=': conversion from 'float' to 'size_t', possible loss of data
+  (compiling source file 'main.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\DX12PipelineState.h(7,32): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12RootSignature' when no variable is declared
+  (compiling source file 'main.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\DX12PipelineState.h(8,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Shader' when no variable is declared
+  (compiling source file 'main.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\DX12GraphicsContext.h(8,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
+  (compiling source file 'main.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\DX12UploadContext.h(9,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
+  (compiling source file 'main.cpp')
+  
   Generating Code...
+D:\DX12\ElysiaDX12\ElysiaRenderer\main.cpp(293): warning C4715: 'WndProc': not all control paths return a value
 D:\DX12\ElysiaDX12\ElysiaRenderer\DX12Device.h(56): warning C4172: returning address of local variable or temporary
   ElysiaRenderer.vcxproj -> D:\DX12\ElysiaDX12\x64\Debug\ElysiaRenderer.exe
   D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Mesh\diablo3_pose.obj

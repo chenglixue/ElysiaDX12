@@ -253,7 +253,7 @@
     <ClInclude Include="MeshManager.h">
       <Filter>Header Files\Manager</Filter>
     </ClInclude>
-    <ClInclude Include="CBVPassParameter.h">
+    <ClInclude Include="CBVParameter.h">
       <Filter>Header Files\Utility</Filter>
     </ClInclude>
     <ClInclude Include="Material.h">

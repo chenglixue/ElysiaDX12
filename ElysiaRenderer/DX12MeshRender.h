@@ -1,7 +1,7 @@
 #pragma once
 #include "stdafx.h"
 #include "Mesh.h"
-#include "CBVPassParameter.h"
+#include "CBVParameter.h"
 
 namespace ElysiaRenderer
 {
