@@ -67,6 +67,9 @@ namespace ElysiaModel
 
 		bool Load(const LPCWSTR& fileName);
 		bool Load(const std::vector<LPCWSTR>& fileNames);
+		bool LoadAssimp(const std::string& fileName);
+		bool LoadSerialize(const std::string& fileName);
+		bool Save(const std::string& fileName);
 
 		void ComputeMeshBoundingBox(uint32_t meshIndex, AxisAlignedBox& bbox) const;
 		void ComputeGlobalBoundingBox(AxisAlignedBox& bbox) const;
@@ -96,6 +99,8 @@ namespace ElysiaModel
 		MeshRender* m_pMeshRender = nullptr;
 		
 		UINT m_vertexStride = 0;
+		UINT m_vertexCount = 0;
+		UINT m_indexCount = 0;
 
 		uint8_t* m_pVertexData = nullptr;
 		uint8_t* m_pIndexData = nullptr;

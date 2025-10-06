@@ -5,7 +5,6 @@
 namespace ElysiaRenderer
 {
 	using namespace SimpleMath;
-	using namespace ElysiaUtility;
 
 	class DX12Camera
 	{

@@ -164,6 +164,8 @@
     <ClInclude Include="Definition.h" />
     <ClInclude Include="DX12BufferResource.h" />
     <ClInclude Include="DX12Camera.h" />
+    <ClInclude Include="File.h" />
+    <ClInclude Include="Serialization.h" />
     <ClInclude Include="IManager.h" />
     <ClInclude Include="IUpdate.h" />
     <ClInclude Include="LightManager.h" />
@@ -269,6 +271,7 @@
     <ClCompile Include="DX12Device.cpp" />
     <ClCompile Include="DX12GraphicsContext.cpp" />
     <ClCompile Include="DX12Light.cpp" />
+    <ClCompile Include="File.cpp" />
     <ClCompile Include="ModelImporter.cpp" />
     <ClCompile Include="DX12PipelineState.cpp" />
     <ClCompile Include="DX12Queue.cpp" />

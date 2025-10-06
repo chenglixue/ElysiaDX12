@@ -35,6 +35,13 @@ namespace ElysiaHelper
         Vector3 GetCenter() const { return (m_min + m_max) * 0.5f; }
         Vector3 GetDimensions() const { return Vector3::Max(m_max - m_min, Vector3(kZero)); }
 
+        template<typename TSerializer>
+        void Serialize(TSerializer& serializer)
+        {
+            SerializeItem(serializer, m_min);
+            SerializeItem(serializer, m_max);
+        }
+
     private:
         Vector3 m_min = Vector3::Zero;
         Vector3 m_max = Vector3::Zero;

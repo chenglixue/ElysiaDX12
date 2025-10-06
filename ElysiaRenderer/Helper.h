@@ -54,6 +54,22 @@ namespace ElysiaHelper
         return std::string(s_str);
     }
 
+    inline std::string GetWin32ErrorStringAnsi(DWORD errorCode)
+    {
+        char errorString[MAX_PATH];
+        ::FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM,
+            0,
+            errorCode,
+            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+            errorString,
+            MAX_PATH,
+            NULL);
+
+        std::string message = "Win32 Error: ";
+        message += errorString;
+        return message;
+    }
+
     class HrException : public std::runtime_error
     {
     public:
@@ -75,6 +91,14 @@ namespace ElysiaHelper
                 std::cerr << "Error description: " << err.ErrorMessage() << std::endl;
             }
             throw HrException(hr);
+        }
+    }
+
+    inline static void ThrowIfFailed(BOOL hr)
+    {
+        if (hr == 0)
+        {
+            std::cerr << GetWin32ErrorStringAnsi(GetLastError()).c_str();
         }
     }
 
@@ -263,7 +287,83 @@ namespace ElysiaHelper
             return L"";
     }
 
-    inline static std::wstring GetFileExtension(const WCHAR* filePath_)
+    // Returns true if a file exits
+    inline static bool FileExists(const wchar_t* filePath)
+    {
+        if (filePath == NULL)
+            return false;
+
+        DWORD fileAttr = GetFileAttributes(filePath);
+        if (fileAttr == INVALID_FILE_ATTRIBUTES)
+            return false;
+
+        return true;
+    }
+
+    // Retursn true if a directory exists
+    inline static bool DirectoryExists(const wchar_t* dirPath)
+    {
+        if (dirPath == NULL)
+            return false;
+
+        DWORD fileAttr = GetFileAttributes(dirPath);
+        return (fileAttr != INVALID_FILE_ATTRIBUTES && (fileAttr & FILE_ATTRIBUTE_DIRECTORY));
+    }
+
+    // Returns the directory containing a file
+    inline static std::wstring GetDirectoryFromFilePath(const wchar_t* filePath_)
+    {
+        assert(filePath_);
+
+        std::wstring filePath(filePath_);
+        size_t idx = filePath.rfind(L'\\');
+        if (idx != std::wstring::npos)
+            return filePath.substr(0, idx + 1);
+        else
+            return std::wstring(L"");
+    }
+
+    // Returns the name of the file given the path (extension included)
+    inline static std::wstring GetFileName(const wchar_t* filePath_)
+    {
+        assert(filePath_);
+
+        std::wstring filePath(filePath_);
+        size_t idx = filePath.rfind(L'\\');
+        if (idx != std::wstring::npos && idx < filePath.length() - 1)
+            return filePath.substr(idx + 1);
+        else
+        {
+            idx = filePath.rfind(L'/');
+            if (idx != std::wstring::npos && idx < filePath.length() - 1)
+                return filePath.substr(idx + 1);
+            else
+                return filePath;
+        }
+    }
+
+    // Returns the given file path, minus the extension
+    inline static std::wstring GetFilePathWithoutExtension(const wchar_t* filePath_)
+    {
+        assert(filePath_);
+
+        std::wstring filePath(filePath_);
+        size_t idx = filePath.rfind(L'.');
+        if (idx != std::wstring::npos)
+            return filePath.substr(0, idx);
+        else
+            return std::wstring(L"");
+    }
+
+    // Returns the name of the file given the path, minus the extension
+    inline static std::wstring GetFileNameWithoutExtension(const wchar_t* filePath)
+    {
+        std::wstring fileName = GetFileName(filePath);
+        return GetFilePathWithoutExtension(fileName.c_str());
+    }
+
+    // Returns the extension of the file path
+    inline static std::wstring GetFileExtension(const wchar_t* filePath_)
     {
         assert(filePath_);
 
@@ -275,10 +375,32 @@ namespace ElysiaHelper
             return std::wstring(L"");
     }
 
-    inline static std::wstring removeLastUnderscoreAndAfter(std::wstring str) 
+    // Gets the last written timestamp of the file
+    inline static UINT64 GetFileTimestamp(const wchar_t* filePath)
+    {
+        assert(filePath);
+
+        WIN32_FILE_ATTRIBUTE_DATA attributes;
+        ThrowIfFailed(GetFileAttributesEx(filePath, GetFileExInfoStandard, &attributes));
+        return attributes.ftLastWriteTime.dwLowDateTime | (UINT64(attributes.ftLastWriteTime.dwHighDateTime) << 32);
+    }
+
+
+    inline static std::wstring RemoveLastUnderscoreAndAfter(std::wstring str) 
     {
         // 查找最后一个下划线的位置
         size_t lastUnderscorePos = str.rfind(L'_');
+        if (lastUnderscorePos != std::wstring::npos) {
+            // 去除最后一个下划线及其后面的内容
+            str.erase(lastUnderscorePos);
+        }
+        return str;
+    }
+
+    inline static std::wstring RemoveLastAnythingAndAfter(std::wstring str, const wchar_t* target)
+    {
+        // 查找最后一个下划线的位置
+        size_t lastUnderscorePos = str.rfind(target);
         if (lastUnderscorePos != std::wstring::npos) {
             // 去除最后一个下划线及其后面的内容
             str.erase(lastUnderscorePos);

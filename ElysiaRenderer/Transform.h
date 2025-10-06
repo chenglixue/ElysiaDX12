@@ -1,7 +1,7 @@
 #pragma once
 #include "stdafx.h"
 
-namespace ElysiaUtility
+namespace ElysiaHelper
 {
 	using namespace ElysiaHelper;
 	using namespace DirectX::SimpleMath;

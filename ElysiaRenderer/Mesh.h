@@ -110,5 +110,15 @@ namespace ElysiaRenderer
 		uint32_t indexDataByteSize;
 
         AxisAlignedBox boundingBox;
+
+        template<typename TSerializer> 
+        void Serialize(TSerializer& serializer)
+        {
+            SerializeItem(serializer, meshCount);
+            SerializeItem(serializer, materialCount);
+            SerializeItem(serializer, vertexDataByteSize);
+            SerializeItem(serializer, indexDataByteSize);
+            SerializeItem(serializer, boundingBox);
+        }
 	};
 }

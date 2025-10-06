@@ -8,6 +8,7 @@ D:\DX12\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeap.cpp;D:\DX12\ElysiaDX12\Elys
 D:\DX12\ElysiaDX12\ElysiaRenderer\DX12Device.cpp;D:\DX12\ElysiaDX12\ElysiaRenderer\x64\Debug\DX12Device.obj
 D:\DX12\ElysiaDX12\ElysiaRenderer\DX12GraphicsContext.cpp;D:\DX12\ElysiaDX12\ElysiaRenderer\x64\Debug\DX12GraphicsContext.obj
 D:\DX12\ElysiaDX12\ElysiaRenderer\DX12Light.cpp;D:\DX12\ElysiaDX12\ElysiaRenderer\x64\Debug\DX12Light.obj
+D:\DX12\ElysiaDX12\ElysiaRenderer\File.cpp;D:\DX12\ElysiaDX12\ElysiaRenderer\x64\Debug\File.obj
 D:\DX12\ElysiaDX12\ElysiaRenderer\ModelImporter.cpp;D:\DX12\ElysiaDX12\ElysiaRenderer\x64\Debug\ModelImporter.obj
 D:\DX12\ElysiaDX12\ElysiaRenderer\DX12PipelineState.cpp;D:\DX12\ElysiaDX12\ElysiaRenderer\x64\Debug\DX12PipelineState.obj
 D:\DX12\ElysiaDX12\ElysiaRenderer\DX12Queue.cpp;D:\DX12\ElysiaDX12\ElysiaRenderer\x64\Debug\DX12Queue.obj

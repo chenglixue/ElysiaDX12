@@ -1,5 +1,6 @@
 #include "ModelImporter.h"
 #include "iosfwd"
+#include "Serialization.h"
 
 namespace ElysiaModel
 {
@@ -19,6 +20,54 @@ namespace ElysiaModel
 
 	bool ModelImporter::Load(const LPCWSTR& fileName)
 	{
+		// get model resource in x64
+		WCHAR assetsPath[512];
+		ElysiaHelper::GetAssetsPath(assetsPath, _countof(assetsPath));
+		std::wstring modelFullPath = ElysiaHelper::GetAssetFullPath(assetsPath, fileName).c_str();
+		auto modelAssimpPath = std::filesystem::path(modelFullPath).string();
+		auto modelH3DPath = WstringToString(RemoveLastAnythingAndAfter(StringToWstring(modelAssimpPath), L".") + L".elysia");
+
+		std::string modelPath;
+		modelPath = modelAssimpPath;
+		LoadAssimp(modelPath);
+		/*if (!FileExists(stringToLPCWSTR(modelH3DPath)))
+		{
+			std::cout << "no seralized model" << std::endl;
+			if (!FileExists(stringToLPCWSTR(modelAssimpPath)))
+			{
+				ThrowRuntimeError("invalid assimp model path");
+				return false;
+			}
+			else
+			{
+				modelPath = modelAssimpPath;
+				LoadAssimp(modelPath);
+			}
+		}
+		else
+		{
+			modelPath = modelH3DPath;
+			LoadSerialize(modelPath);
+		}*/
+
+		return true;
+	}
+
+	bool ModelImporter::Load(const std::vector<LPCWSTR>& fileNames)
+	{
+		bool isLoadSuccess = true;
+		for (auto fileName : fileNames)
+		{
+			isLoadSuccess &= Load(fileName);
+		}
+
+		PrintModelStats();
+
+		return isLoadSuccess;
+	}
+
+	bool ModelImporter::LoadAssimp(const std::string& fileName)
+	{
 		Assimp::Importer importer;
 
 		// remove unused data
@@ -32,21 +81,15 @@ namespace ElysiaModel
 		// remove points and lines
 		importer.SetPropertyInteger(AI_CONFIG_PP_SBP_REMOVE, aiPrimitiveType_POINT | aiPrimitiveType_LINE);
 
-		// get model resource in x64
-		WCHAR assetsPath[512];
-		ElysiaHelper::GetAssetsPath(assetsPath, _countof(assetsPath));
-		std::wstring modelFullPath = ElysiaHelper::GetAssetFullPath(assetsPath, fileName).c_str();
-		auto modelPath = std::filesystem::path(modelFullPath).string();
-
-		const aiScene* pScene = importer.ReadFile(modelPath,
+		const aiScene* pScene = importer.ReadFile(fileName,
 			aiProcess_CalcTangentSpace |
 			aiProcess_Triangulate |
 			aiProcess_JoinIdenticalVertices |
 			aiProcess_MakeLeftHanded |
 			aiProcess_RemoveRedundantMaterials |
 			aiProcess_FlipUVs |
-			aiProcess_FlipWindingOrder | 
-			aiProcess_PreTransformVertices | 
+			aiProcess_FlipWindingOrder |
+			aiProcess_PreTransformVertices |
 			aiProcess_OptimizeMeshes);
 
 		if (pScene == nullptr) return false;
@@ -203,6 +246,8 @@ namespace ElysiaModel
 
 			for (unsigned int v = 0; v < destMesh->vertexCount; ++v)
 			{
+				m_vertexCount++;
+
 				if (srcMesh->mVertices)
 				{
 					destPos[0] = srcMesh->mVertices[v].x;
@@ -271,6 +316,8 @@ namespace ElysiaModel
 			UINT16* destIndex = (UINT16*)(m_pIndexData + destMesh->indexDataOffset);
 			for (UINT f = 0; f < srcMesh->mNumFaces; f++)
 			{
+				m_indexCount++;
+
 				assert(srcMesh->mFaces[f].mNumIndices == 3);
 
 				*destIndex++ = srcMesh->mFaces[f].mIndices[0];
@@ -281,22 +328,46 @@ namespace ElysiaModel
 
 		ComputeAllBoundingBoxes();
 
-		LoadTextures(GetBasePath(StringToWstring(modelPath)));
+		LoadTextures(GetBasePath(StringToWstring(fileName)));
+
+		Save(fileName);
+	}
+
+	bool ModelImporter::LoadSerialize(const std::string& fileName)
+	{
+		FileReadSerializer serializer(stringToLPCWSTR(fileName));
+
+		SerializeData(serializer, m_meshData);
+		SerializeData(serializer, m_vertexStride);
+
+		m_pMesh = new Mesh[m_meshData.meshCount];
+		m_pMaterial = new Material[m_meshData.materialCount];
+		m_pVertexData = new uint8_t[m_meshData.vertexDataByteSize];
+		m_pIndexData = new uint8_t[m_meshData.indexDataByteSize];
+
+		BulkSerializeArray(serializer, m_pMesh, static_cast<UINT64>(m_meshData.meshCount));
+		BulkSerializeArray(serializer, m_pMaterial, static_cast<UINT64>(m_meshData.materialCount));
+		BulkSerializeArray(serializer, m_pVertexData, static_cast<UINT64>(m_meshData.vertexDataByteSize));
+		BulkSerializeArray(serializer, m_pIndexData, static_cast<UINT64> (m_meshData.vertexDataByteSize));
 
 		return true;
 	}
 
-	bool ModelImporter::Load(const std::vector<LPCWSTR>& fileNames)
+	bool ModelImporter::Save(const std::string& fileName)
 	{
-		bool isLoadSuccess = true;
-		for (auto fileName : fileNames)
-		{
-			isLoadSuccess &= Load(fileName);
-		}
+		auto modelH3DPath = WstringToString(RemoveLastAnythingAndAfter(StringToWstring(fileName), L".") + L".elysia");
 
-		PrintModelStats();
+		FileWriteSerializer serializer(stringToLPCWSTR(modelH3DPath));
 
-		return isLoadSuccess;
+		SerializeData(serializer, m_meshData);
+		SerializeData(serializer, m_vertexStride);
+
+		BulkSerializeArray(serializer, m_pMesh, static_cast<UINT64>(m_meshData.meshCount));
+		BulkSerializeArray(serializer, m_pMaterial, static_cast<UINT64>(m_meshData.materialCount));
+		BulkSerializeArray(serializer, m_pVertexData, static_cast<UINT64>(m_meshData.vertexDataByteSize));
+		BulkSerializeArray(serializer, m_pIndexData, static_cast<UINT64>(m_meshData.vertexDataByteSize));
+
+		return true;
 	}
 
 	void ModelImporter::ComputeMeshBoundingBox(uint32_t meshIndex, AxisAlignedBox& bbox) const
@@ -497,7 +568,7 @@ namespace ElysiaModel
 			auto metallicTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
 			if (metallicTex == nullptr)
 			{
-				texBufferCreateDesc.texturePath = removeLastUnderscoreAndAfter(diffusePath) + L"_Metallic.png";
+				texBufferCreateDesc.texturePath = RemoveLastUnderscoreAndAfter(diffusePath) + L"_Metallic.png";
 				metallicTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
 			}
 			if (metallicTex != nullptr)
@@ -512,7 +583,7 @@ namespace ElysiaModel
 			auto roughnessTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
 			if (roughnessTex == nullptr)
 			{
-				texBufferCreateDesc.texturePath = removeLastUnderscoreAndAfter(diffusePath) + L"_Roughness.png";
+				texBufferCreateDesc.texturePath = RemoveLastUnderscoreAndAfter(diffusePath) + L"_Roughness.png";
 				roughnessTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
 			}
 			if (roughnessTex != nullptr)
@@ -527,7 +598,7 @@ namespace ElysiaModel
 			auto normalTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
 			if (normalTex == nullptr)
 			{
-				texBufferCreateDesc.texturePath = removeLastUnderscoreAndAfter(diffusePath) + L"_Normal.png";
+				texBufferCreateDesc.texturePath = RemoveLastUnderscoreAndAfter(diffusePath) + L"_Normal.png";
 				normalTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
 			}
 			if (normalTex != nullptr)
