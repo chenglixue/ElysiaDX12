@@ -56,8 +56,10 @@ namespace ElysiaRenderer
 		m_pLightManager->Init();  
 		m_pShadowManager->Init();
 		m_pBufferManager->Init();
-		m_pMeshManager->Init();							
-		 
+		m_pMeshManager->Init();	
+
+		DeSerializeUserData();
+		
 		m_pCameraManager->CreateMainCamera(Vector3(-11.5f, 200.85f, -0.45f) ,
 			m_aspectRatio, 3.14159f / 4.0f, 0.1f, 2000.f);
 
@@ -72,6 +74,8 @@ namespace ElysiaRenderer
 	{
 		//OnKeyboardInput();
 		UpdateCBV();
+		SerializeUserData();
+
 	}
 	void Renderer::Render()
 	{
@@ -86,6 +90,7 @@ namespace ElysiaRenderer
 			//m_device->DestoryPipelineState(std::move(m_graphicsPipelineStates[i]));
 		}
 		m_device = nullptr;
+
 
 		m_graphicsContext.release();
 		m_vertexShaders.clear();
@@ -136,6 +141,9 @@ namespace ElysiaRenderer
 		passParameter->projMatrix = m_pCameraManager->GetMainCamera()->GetProj();
 		passParameter->nearZ = m_pCameraManager->GetMainCamera()->GetNearZ();
 		passParameter->farZ = m_pCameraManager->GetMainCamera()->GetFarZ();
+		passParameter->mainLight.m_lightColor = Vector4(g_userData.lightColor.x, g_userData.lightColor.y, g_userData.lightColor.z, 1.f);
+		passParameter->mainLight.m_lightDir = Vector4(g_userData.lightDir.x, g_userData.lightDir.y, g_userData.lightDir.z, 0.f);
+		passParameter->mainLight.m_intensity = g_userData.lightIntensity;
 
 		m_pBufferManager->GetSingleConstantBuffer(PER_PASS_SPACE)->SetMappedData(passParameter, sizeof(CBVMainPassParameter));
 		
@@ -150,6 +158,7 @@ namespace ElysiaRenderer
 	void Renderer::UpdateObjectCBV()
 	{
 	}
+
 
 	void Renderer::InitTexTriangle()
 	{
@@ -424,30 +433,22 @@ namespace ElysiaRenderer
 		if (ImGui::CollapsingHeader("Light"))
 		{
 			auto mainLight = m_pRenderSource->GetCBVPassParameter();
-			ImGui::ColorEdit3("Color", (float*)&mainLight->mainLight.m_lightColor);
-			ImGui::DragFloat3("Direction", (float*)&mainLight->mainLight.m_lightDir, 1, -1, 1);
+			ImGui::ColorEdit3("Color", (float*)&g_userData.lightColor);
+			ImGui::DragFloat3("Direction", (float*)&g_userData.lightDir, 1, -1, 1);
 
-			ImGui::SliderFloat("Intensity", &mainLight->mainLight.m_intensity, 0, 5);
+			ImGui::SliderFloat("Intensity", &g_userData.lightIntensity, 0, 5);
 		}
 
-		if (ImGui::CollapsingHeader("PBR Data"))
-		{
-			/*Vector3 BaseColorTint = Vector3::One;
-			float Opacity = 1;
-			float NormalIntensity = 1;
-			float MetallicIntensity = 1;
-			float RoughnessIntensity = 1;
-			float AmbientCubemapIntensity = 1;
-			Vector3 AmbientCubemapTint = Vector3::One;
-			
+		/*if (ImGui::CollapsingHeader("PBR Data"))
+		{	
 			ImGui::ColorEdit3("Base Color Tint", (float*)&m_objectPassParameters[m_device->GetFrameID()].baseColorTint);
 			ImGui::SliderFloat("Opacity", &m_objectPassParameters[m_device->GetFrameID()].opacity, 0.f, 1.f);
 			ImGui::SliderFloat("Normal Intensity", &m_objectPassParameters[m_device->GetFrameID()].normalIntensity, 0.f, 5.f);
 			ImGui::SliderFloat("Metallic Intensity", &m_objectPassParameters[m_device->GetFrameID()].metallicIntensity, 0.f, 5.f);
 			ImGui::SliderFloat("Roughness Intensity", &m_objectPassParameters[m_device->GetFrameID()].roughnessIntensity, 0.f, 5.f);
 			ImGui::SliderFloat("Ambient Cubemap Intensity", &m_objectPassParameters[m_device->GetFrameID()].ambientCubemapIntensity, 0.f, 2.f);
-			ImGui::ColorEdit3("Ambient Cubemap Tint", (float*)&m_objectPassParameters[m_device->GetFrameID()].ambientCubemapTint);*/
-		}
+			ImGui::ColorEdit3("Ambient Cubemap Tint", (float*)&m_objectPassParameters[m_device->GetFrameID()].ambientCubemapTint);
+		}*/
 	}
 	void Renderer::DrawShadow()
 	{

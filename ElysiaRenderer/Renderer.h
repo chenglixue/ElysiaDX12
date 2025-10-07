@@ -17,21 +17,14 @@
 #include "TextureManager.h"
 #include "RenderResource.h"
 #include "ModelImporter.h"
-
+#include "UserData.h"
 
 namespace ElysiaRenderer 
 {
 	using namespace ElysiaHelper;
 	using namespace ElysiaModel;
 	using namespace DirectX::SimpleMath;
-
-	const std::vector<LPCWSTR> g_ModelPaths
-	{
-		L"Sponza\\Sponza.fbx"
-	};
-	 
-	static Matrix m_worldMatrix = Matrix::Identity;
-	 
+	
 	class Renderer
 	{
 	public:

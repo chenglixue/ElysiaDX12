@@ -5,6 +5,9 @@
 
 namespace ElysiaHelper
 {
+	using namespace DirectX::SimpleMath;
+
+
 	class FileReadSerializer
 	{
 	public:
@@ -60,80 +63,80 @@ namespace ElysiaHelper
 	// Specialized serializers
 	// Trampoline functions
 	template<typename TSerializer, typename TData>
-	void SerializeData(TSerializer& serializer, TData& data)
+	static inline void SerializeData(TSerializer& serializer, TData& data)
 	{
 		serializer.SerializeData(sizeof(TData), &data);
 	}
 
 	template<typename TSerializer>
-	void SerializeItem(TSerializer& serializer, UINT8& val)
+	static inline void SerializeItem(TSerializer& serializer, UINT8& val)
 	{
 		serializer.SerializeItem(val);
 	}
 
 	template<typename TSerializer>
-	void SerializeItem(TSerializer& serializer, INT8& val)
+	static inline void SerializeItem(TSerializer& serializer, INT8& val)
 	{
 		serializer.SerializeItem(val);
 	}
 
 	template<typename TSerializer>
-	void SerializeItem(TSerializer& serializer, UINT16& val)
+	static inline void SerializeItem(TSerializer& serializer, UINT16& val)
 	{
 		serializer.SerializeItem(val);
 	}
 
 	template<typename TSerializer>
-	void SerializeItem(TSerializer& serializer, INT16& val)
+	static inline void SerializeItem(TSerializer& serializer, INT16& val)
 	{
 		serializer.SerializeItem(val);
 	}
 
 	template<typename TSerializer>
-	void SerializeItem(TSerializer& serializer, UINT32& val)
+	static inline void SerializeItem(TSerializer& serializer, UINT32& val)
 	{
 		serializer.SerializeItem(val);
 	}
 
 	template<typename TSerializer>
-	void SerializeItem(TSerializer& serializer, INT32& val)
+	static inline void SerializeItem(TSerializer& serializer, INT32& val)
 	{
 		serializer.SerializeItem(val);
 	}
 
 	template<typename TSerializer>
-	void SerializeItem(TSerializer& serializer, UINT64& val)
+	static inline void SerializeItem(TSerializer& serializer, UINT64& val)
 	{
 		serializer.SerializeItem(val);
 	}
 
 	template<typename TSerializer>
-	void SerializeItem(TSerializer& serializer, INT64& val)
+	static inline void SerializeItem(TSerializer& serializer, INT64& val)
 	{
 		serializer.SerializeItem(val);
 	}
 
 	template<typename TSerializer>
-	void SerializeItem(TSerializer& serializer, float& val)
+	static inline void SerializeItem(TSerializer& serializer, float& val)
 	{
 		serializer.SerializeItem(val);
 	}
 
 	template<typename TSerializer>
-	void SerializeItem(TSerializer& serializer, double& val)
+	static inline void SerializeItem(TSerializer& serializer, double& val)
 	{
 		serializer.SerializeItem(val);
 	}
 
 	template<typename TSerializer>
-	void SerializeItem(TSerializer& serializer, Vector2& val)
+	static inline void SerializeItem(TSerializer& serializer, Vector2& val)
 	{
 		serializer.SerializeItem(val.x);
 		serializer.SerializeItem(val.y);
 	}
 
 	template<typename TSerializer>
-	void SerializeItem(TSerializer& serializer, Vector3& val)
+	static inline void SerializeItem(TSerializer& serializer, Vector3& val)
 	{
 		serializer.SerializeItem(val.x);
 		serializer.SerializeItem(val.y);
@@ -141,7 +144,7 @@ namespace ElysiaHelper
 	}
 
 	template<typename TSerializer>
-	void SerializeItem(TSerializer& serializer, Vector4& val)
+	static inline void SerializeItem(TSerializer& serializer, Vector4& val)
 	{
 		serializer.SerializeItem(val.x);
 		serializer.SerializeItem(val.y);
@@ -149,33 +152,33 @@ namespace ElysiaHelper
 		serializer.SerializeItem(val.w);
 	}
 	template<typename TSerializer>
-	void SerializeData(TSerializer& serializer, void* data, UINT64 size)
+	static inline void SerializeData(TSerializer& serializer, void* data, UINT64 size)
 	{
 		serializer.SerializeData(size, data);
 	}
 
 	template<typename TSerializer, typename TValue>
-	void SerializeArray(TSerializer& serializer, TValue* array, UINT64 numElements)
+	static inline void SerializeArray(TSerializer& serializer, TValue* array, UINT64 numElements)
 	{
 		for (UINT64 i = 0; i < numElements; ++i)
 			SerializeData(serializer, array[i]);
 	}
 
 	template<typename TSerializer, typename TValue>
-	void BulkSerializeArray(TSerializer& serializer, TValue* array, UINT64 numElements)
+	static inline void BulkSerializeArray(TSerializer& serializer, TValue* array, UINT64 numElements)
 	{
 		
 		SerializeData(serializer, array, sizeof(TValue) * numElements);
 	}
 
 	template<typename T>
-	void SerializeToFile(const wchar_t* filePath, const T& item)
+	static inline void SerializeToFile(const wchar_t* filePath, const T& item)
 	{
 		FileWriteSerializer serializer(filePath);
 		SerializeData(serializer, item);
 	}
 
-	void SerializeDataToFile(const wchar_t* filePath, void* data, UINT64 size)
+	static inline void SerializeDataToFile(const wchar_t* filePath, void* data, UINT64 size)
 	{
 		FileWriteSerializer serializer(filePath);
 
