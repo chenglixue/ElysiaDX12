@@ -45,29 +45,17 @@ namespace ElysiaRenderer
 		{
 			return m_farZ;
 		}
-		XMFLOAT4X4& GetView4X4()
+		Matrix& GetView()
 		{
 			return m_shadowViewMatrix;
 		}
-		XMMATRIX GetViewMat()
-		{
-			return XMLoadFloat4x4(&m_shadowViewMatrix);
-		}
-		XMFLOAT4X4& GetProj4X4()
+		Matrix& GetProj()
 		{
 			return m_shadowProjMatrix;
 		}
-		XMMATRIX GetProjMat()
-		{
-			return XMLoadFloat4x4(&m_shadowProjMatrix);
-		}
-		XMFLOAT4X4& GetShadow4X4()
+		Matrix& GetShadowMat()
 		{
 			return m_shadowMatrix;
-		}
-		XMMATRIX GetShadowMat()
-		{
-			return XMLoadFloat4x4(&m_shadowMatrix);
 		}
 
 		void CreateViewport();

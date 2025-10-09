@@ -47,18 +47,16 @@ namespace ElysiaRenderer
 
 	void DX12Shadow::UpdateShadowTransform(DX12Light* light)
 	{
-		XMMATRIX o = XMMatrixIdentity();
+		XMMATRIX o = XMMatrixIdentity(); 
 
-		auto lightDir = light->GetLightDir();
-		auto lightPos = 2.f * m_shadowBound.Radius * (-lightDir);
-		auto boundPosWS = XMLoadFloat3(&m_shadowBound.Center);
-		auto lightUp = XMVectorSet(0.f, 1.f, 0.f, 0.f);
-		auto lightViewMat = XMMatrixLookAtLH(lightPos, boundPosWS, lightUp);
+		Vector3 lightDir = light->GetLightDir();
+		m_lightPos = -lightDir * 2.f * m_shadowBound.Radius;
+		Vector3 boundPosWS = m_shadowBound.Center;
+		Vector3 lightUp = Vector3::Up;
+		Matrix lightViewMat = Matrix::CreateLookAt(m_lightPos, boundPosWS, lightUp); //XMMatrixLookAtLH(m_lightPos, boundPosWS, lightUp);
 
-		XMStoreFloat3(&m_lightPos, lightPos);
-
-		XMFLOAT3 boundPosLS = MathHelper::XMFLOAT3Zero();
-		XMStoreFloat3(&boundPosLS, XMVector3TransformCoord(boundPosWS, lightViewMat));
+		Vector3 boundPosLS = Vector3::Zero;
+		Vector3::Transform(boundPosWS, lightViewMat, boundPosLS);
 
 		float l = boundPosLS.x - m_shadowBound.Radius;
 		float r = boundPosLS.x + m_shadowBound.Radius;
@@ -68,10 +66,10 @@ namespace ElysiaRenderer
 		float f = boundPosLS.z + m_shadowBound.Radius;
 		m_nearZ = n;
 		m_farZ = f;
-		auto LS2ProjMat = XMMatrixOrthographicOffCenterLH(l, r, b, t, n, f);
+		auto LS2ProjMat = Matrix::CreateOrthographicOffCenter(l, r, b, t, n, f);
 
-		XMStoreFloat4x4(&m_shadowMatrix, lightViewMat * LS2ProjMat);
-		XMStoreFloat4x4(&m_shadowViewMatrix, lightViewMat);
-		XMStoreFloat4x4(&m_shadowProjMatrix, LS2ProjMat);
+		m_shadowMatrix = lightViewMat * LS2ProjMat;
+		m_shadowViewMatrix = lightViewMat;
+		m_shadowProjMatrix = LS2ProjMat;
 	}
 }

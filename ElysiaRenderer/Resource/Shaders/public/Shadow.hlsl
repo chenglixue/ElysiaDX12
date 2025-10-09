@@ -13,8 +13,7 @@
 struct VSInput
 {
     float3 positionOS : POSITION;
-    float3 color : COLOR;
-    float2 uv : TEXCOORD0;
+    float3 uv : TEXCOORD0;
     float3 normalOS : NORMAL;
     float3 tangentOS : TANGENT;
 };
@@ -40,27 +39,10 @@ PSInput VS(VSInput i)
 {
     PSInput o = (PSInput) 0;
 
-    o.positionWS = mul(float4(i.positionOS, 1.f), M_World);
-    o.positionVS = mul(o.positionWS, M_ShadowView);
-    o.positionCS = mul(o.positionVS, M_ShadowProj);
-    
-    bool hasTangent = true;
-    if (hasTangent)
-    {
-        float3 N = normalize(mul(i.normalOS, (float3x3) M_World));
-        float3 T = mul(i.tangentOS, (float3x3) M_World);
-        
-        o.tangentWS = normalize(T - dot(N, T) * N);
-        o.bitTangentWS = (cross(o.tangentWS, N));
-        o.normalWS = N;
-    }
-    else
-    {
-        o.normalWS = normalize(mul(i.normalOS, (float3x3) M_World));
-    }
+    o.positionWS = mul(worldMatrix, float4(i.positionOS, 1.f));
+    o.positionCS = mul(shadowMatrix, o.positionWS);
     
     o.uv = i.uv;
-    o.color = i.color;
     
     return o;
 }

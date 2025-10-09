@@ -66,6 +66,7 @@ namespace ElysiaRenderer
 		auto passParameter = m_pRenderSource->GetCBVPassParameter();
 		passParameter->mainLight = std::move(m_pLightManager->GetMainLight()->CreateLightData());
 
+		m_pShadowManager->SetMainLight(m_pLightManager->GetMainLight());
 		m_pShadowManager->CreateMainShadow(4096, 15);
 		 
 		InitTexTriangle();
@@ -73,7 +74,7 @@ namespace ElysiaRenderer
 	void Renderer::Update()
 	{
 		//OnKeyboardInput();
-		m_pShadowManager->Update();
+		m_pShadowManager->Update(); 
 		UpdateCBV();
 		SerializeUserData();
 	}
@@ -144,6 +145,8 @@ namespace ElysiaRenderer
 		passParameter->mainLight.m_lightColor = Vector4(g_userData.lightColor.x, g_userData.lightColor.y, g_userData.lightColor.z, 1.f);
 		passParameter->mainLight.m_lightDir = Vector4(g_userData.lightDir.x, g_userData.lightDir.y, g_userData.lightDir.z, 0.f);
 		passParameter->mainLight.m_intensity = g_userData.lightIntensity;
+		
+		passParameter->shadowMatrix = m_pShadowManager->GetMainShadow()->GetShadowMat();
 
 		m_pBufferManager->GetSingleConstantBuffer(PER_PASS_SPACE)->SetMappedData(passParameter, sizeof(CBVMainPassParameter));
 		
@@ -178,9 +181,9 @@ namespace ElysiaRenderer
 	}
 
 	void Renderer::LoadShaders()
-	{ 
-		//AddShader(ShaderQueue::Shadow, L"Shaders\\public\\Shadow.hlsl", L"VS", ShaderType::Vertex);
-		//AddShader(ShaderQueue::Shadow, L"Shaders\\public\\Shadow.hlsl", L"PS", ShaderType::Pixel);
+	{
+		AddShader(ShaderQueue::Shadow, L"Shaders\\public\\Shadow.hlsl", L"VS", ShaderType::Vertex);
+		AddShader(ShaderQueue::Shadow, L"Shaders\\public\\Shadow.hlsl", L"PS", ShaderType::Pixel);
 
 		AddShader(ShaderQueue::Opaque, L"Shaders\\public\\PBR.hlsl", L"VS", ShaderType::Vertex);
 		AddShader(ShaderQueue::Opaque, L"Shaders\\public\\PBR.hlsl", L"PS", ShaderType::Pixel);
@@ -271,24 +274,23 @@ namespace ElysiaRenderer
 	{
 		PipelineResourceLayout meshResourceLayout{};
 		PipelineStateCreateDesc pipelineStateCreateDesc{};
+		  
+		meshResourceLayout.m_spaces[PER_OBJECT_SPACE] = m_perObjectBindResourceSpace.get();
+		meshResourceLayout.m_spaces[PER_PASS_SPACE] = m_perMainPassBindResourceSpace.get();
 
 		/// Shadow PSO
-		/*meshResourceLayout.m_spaces[PER_OBJECT_SPACE] = m_perObjectBindResourceSpace;
-		meshResourceLayout.m_spaces[PER_PASS_SPACE] = m_perMainPassBindResourceSpace;
-		PipelineStateCreateDesc pipelineStateCreateDesc = std::move(CreateDefaultPipelineStateCreateDesc());
+		pipelineStateCreateDesc = std::move(CreateDefaultPipelineStateCreateDesc());
 		pipelineStateCreateDesc.m_vertexShader = m_vertexShaders[ShaderQueue::Shadow][ShaderType::Vertex].get();
 		pipelineStateCreateDesc.m_pixelShader = m_pixelShaders[ShaderQueue::Shadow][ShaderType::Pixel].get();
 		pipelineStateCreateDesc.m_inputElementDesc = m_inputElementDescs;
 		pipelineStateCreateDesc.m_renderTargetDesc.m_numRenderTargets = 0;
 		pipelineStateCreateDesc.m_depthStencilDesc.DepthEnable = TRUE;
-		pipelineStateCreateDesc.m_renderTargetDesc.m_depthStencilFormat = m_depthBufferCreateDesc["Shadow"].m_resouceDesc.Format;
+		pipelineStateCreateDesc.m_renderTargetDesc.m_depthStencilFormat = m_pShadowManager->GetMainShadow()->GetShadowRT()->GetResourceDesc().Format;
 		pipelineStateCreateDesc.m_depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
-		m_graphicsPipelineStates.insert({ ShaderQueue::Shadow, std::move(m_device->CreateGraphicsPipelineState(pipelineStateCreateDesc, meshResourceLayout)) });*/
+		m_graphicsPipelineStates.insert({ ShaderQueue::Shadow, std::move(m_device->CreateGraphicsPipelineState(pipelineStateCreateDesc, meshResourceLayout)) });
 
 
 		/// Opaque PSO
-		meshResourceLayout.m_spaces[PER_OBJECT_SPACE]	= m_perObjectBindResourceSpace.get();
-		meshResourceLayout.m_spaces[PER_PASS_SPACE]		= m_perMainPassBindResourceSpace.get();
 		pipelineStateCreateDesc = std::move(CreateDefaultPipelineStateCreateDesc());
 		pipelineStateCreateDesc.m_inputElementDesc = m_inputElementDescs;
 		pipelineStateCreateDesc.m_vertexShader = m_vertexShaders[ShaderQueue::Opaque][ShaderType::Vertex].get();
@@ -353,71 +355,19 @@ namespace ElysiaRenderer
 		m_device->BeginFrame();
 		m_graphicsContext->Reset();
 
-		ImGui_ImplDX12_NewFrame();
-		ImGui_ImplWin32_NewFrame(); 
-		ImGui::NewFrame();
+		{
+			ImGui_ImplDX12_NewFrame();
+			ImGui_ImplWin32_NewFrame();
+			ImGui::NewFrame();
+			AddUIItems();
+			ImGui::Render();
+		}
 
-		AddUIItems();
-		ImGui::Render();
+		DrawShadow();
+		DrawOpaque();
+		DrawUI();
 
 		auto& currBackBuffer = m_device->GetCurrBackBuffer();
-
-		m_graphicsContext->AddBarrier(currBackBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET);
-		m_graphicsContext->AddBarrier(*m_pBufferManager->GetCameraDepthBuffer(), D3D12_RESOURCE_STATE_DEPTH_WRITE);
-		m_graphicsContext->FlushBarrier();
-
-		m_graphicsContext->ClearRenderTarget(currBackBuffer, Color(1, 1, 1));
-		m_graphicsContext->ClearDepthStencilTarget(*m_pBufferManager->GetCameraDepthBuffer(), 1.f, 0);
-		 
-		m_graphicsContext->SetIndexBuffer(m_pBufferManager->GetIndexBufferView());
-		m_graphicsContext->SetVertexBuffer(0, 1, const_cast<D3D12_VERTEX_BUFFER_VIEW&>(m_pBufferManager->GetVertexBufferView()));
-
-		m_graphicsContext->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(static_cast<UINT>(m_device->GetScreenSize().x), static_cast<UINT>(m_device->GetScreenSize().y)));
-		m_graphicsContext->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-		PipelineInfo pipelineStateData{};
-		pipelineStateData.m_pipelineStateObject = m_graphicsPipelineStates[ShaderQueue::Opaque].get();
-		pipelineStateData.m_renderTargets.emplace_back(&currBackBuffer);
-		pipelineStateData.m_depthStencilTarget = m_pBufferManager->GetCameraDepthBuffer();
-		
-		bool isReady = true;
-		{
-			auto texResources = m_pTextureManager->GetTextureResources();
-			for (size_t i = 0; i < texResources.size(); ++i)
-			{
-				if (texResources[i] == nullptr)
-				{
-					ThrowRuntimeError("nullptr");;
-				}
-				isReady &= texResources[i]->GetIsReady();
-			}
-		} 
-		if (isReady)
-		{
-			m_graphicsContext->SetPipeline(pipelineStateData);
-			m_graphicsContext->SetPipelineResource(PER_PASS_SPACE, m_perMainPassBindResourceSpace.get());
-
-			UINT vertexStride = m_pModelImporter->GetVertexStride();
-
-			for (UINT meshIndex = 0; meshIndex < m_pModelImporter->GetMeshCount(); ++meshIndex)
-			{
-				const auto& meshRenderer = m_pModelImporter->GetMeshRenderer(meshIndex);
-				const auto& mesh = meshRenderer.m_mesh;
-
-				auto objectContantBuffer = m_pBufferManager->GetMutilConstantBuffer(PER_OBJECT_SPACE, m_device->GetFrameID(), meshIndex);
-				m_perObjectBindResourceSpace->SetCBV(objectContantBuffer);
-				m_graphicsContext->SetPipelineResource(PER_OBJECT_SPACE, m_perObjectBindResourceSpace.get());
-				
-				auto startIndex = mesh->indexDataOffset / sizeof(UINT16);
-				auto startVertex = mesh->vertexDataOffset / vertexStride;
-				auto VertexCount = mesh->vertexCount;
-				auto indexCount = mesh->indexCount;
-
-				m_graphicsContext->Draw(indexCount, startVertex, startIndex);
-			}
-		}
-		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), m_graphicsContext->GetCommandList());
-
 		m_graphicsContext->AddBarrier(currBackBuffer, D3D12_RESOURCE_STATE_PRESENT);
 		m_graphicsContext->FlushBarrier();
 
@@ -426,7 +376,7 @@ namespace ElysiaRenderer
 		m_device->EndFrame(); 
 		m_device->Present();
 	} 
-	 
+	
 	void Renderer::AddUIItems()
 	{ 
 		if (ImGui::CollapsingHeader("Light"))
@@ -482,36 +432,90 @@ namespace ElysiaRenderer
 		}
 		if (isReady)
 		{
+			m_graphicsContext->SetPipeline(pipelineStateData);
+			m_graphicsContext->SetPipelineResource(PER_PASS_SPACE, m_perMainPassBindResourceSpace.get());
 
+			UINT vertexStride = m_pModelImporter->GetVertexStride();
+
+			for (UINT meshIndex = 0; meshIndex < m_pModelImporter->GetMeshCount(); ++meshIndex)
+			{
+				const auto& meshRenderer = m_pModelImporter->GetMeshRenderer(meshIndex);
+				const auto& mesh = meshRenderer.m_mesh;
+
+				auto objectContantBuffer = m_pBufferManager->GetMutilConstantBuffer(PER_OBJECT_SPACE, m_device->GetFrameID(), meshIndex);
+				m_perObjectBindResourceSpace->SetCBV(objectContantBuffer);
+				m_graphicsContext->SetPipelineResource(PER_OBJECT_SPACE, m_perObjectBindResourceSpace.get());
+
+				auto startIndex = mesh->indexDataOffset / sizeof(UINT16);
+				auto startVertex = mesh->vertexDataOffset / vertexStride;
+				auto VertexCount = mesh->vertexCount;
+				auto indexCount = mesh->indexCount;
+
+				m_graphicsContext->Draw(indexCount, startVertex, startIndex);
+			}
 		}
 
-		m_graphicsContext->AddBarrier(*shadowBuffer, D3D12_RESOURCE_STATE_GENERIC_READ);
+		m_graphicsContext->AddBarrier(*shadowTexResource, D3D12_RESOURCE_STATE_GENERIC_READ);
 		m_graphicsContext->FlushBarrier();
 	}
 	void Renderer::DrawOpaque()
 	{
-		//auto& currBackBuffer = m_device->GetCurrBackBuffer();
+		auto& currBackBuffer = m_device->GetCurrBackBuffer();
 
-		//PipelineInfo pipelineStateData{};
-		//pipelineStateData.m_pipelineStateObject = m_graphicsPipelineStates[ShaderQueue::Opaque].get();
-		//pipelineStateData.m_renderTargets.emplace_back(currBackBuffer);
-		//pipelineStateData.m_depthStencilTarget = m_pCameraDepthBuffer.get();
+		m_graphicsContext->AddBarrier(currBackBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET);
+		m_graphicsContext->AddBarrier(*m_pBufferManager->GetCameraDepthBuffer(), D3D12_RESOURCE_STATE_DEPTH_WRITE);
+		m_graphicsContext->FlushBarrier();
 
-		//bool isReady = true;
-		///*for (auto& tex : m_texs)
-		//{
-		//	isReady = tex->GetIsReady();
-		//}*/
-		//if(isReady)
-		//{
-		//	m_perObjectBindResourceSpace->SetCBV(m_objectConstanBuffers[m_device->GetFrameID()].get());
+		m_graphicsContext->ClearRenderTarget(currBackBuffer, Color(1, 1, 1));
+		m_graphicsContext->ClearDepthStencilTarget(*m_pBufferManager->GetCameraDepthBuffer(), 1.f, 0);
 
-		//	m_graphicsContext->SetPipeline(pipelineStateData);
-		//	m_graphicsContext->SetPipelineResource(PER_OBJECT_SPACE, m_perObjectBindResourceSpace.get());
-		//	m_graphicsContext->SetPipelineResource(PER_PASS_SPACE, m_perMainPassBindResourceSpace.get());
+		m_graphicsContext->SetIndexBuffer(m_pBufferManager->GetIndexBufferView());
+		m_graphicsContext->SetVertexBuffer(0, 1, const_cast<D3D12_VERTEX_BUFFER_VIEW&>(m_pBufferManager->GetVertexBufferView()));
 
-		//	DrawCommand(0);
-		//}
+		m_graphicsContext->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(static_cast<UINT>(m_device->GetScreenSize().x), static_cast<UINT>(m_device->GetScreenSize().y)));
+		m_graphicsContext->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+		PipelineInfo pipelineStateData{};
+		pipelineStateData.m_pipelineStateObject = m_graphicsPipelineStates[ShaderQueue::Opaque].get();
+		pipelineStateData.m_renderTargets.emplace_back(&currBackBuffer);
+		pipelineStateData.m_depthStencilTarget = m_pBufferManager->GetCameraDepthBuffer();
+
+		bool isReady = true;
+		{
+			auto texResources = m_pTextureManager->GetTextureResources();
+			for (size_t i = 0; i < texResources.size(); ++i)
+			{
+				if (texResources[i] == nullptr)
+				{
+					ThrowRuntimeError("nullptr");;
+				}
+				isReady &= texResources[i]->GetIsReady();
+			}
+		}
+		if (isReady)
+		{
+			m_graphicsContext->SetPipeline(pipelineStateData);
+			m_graphicsContext->SetPipelineResource(PER_PASS_SPACE, m_perMainPassBindResourceSpace.get());
+
+			UINT vertexStride = m_pModelImporter->GetVertexStride();
+
+			for (UINT meshIndex = 0; meshIndex < m_pModelImporter->GetMeshCount(); ++meshIndex)
+			{
+				const auto& meshRenderer = m_pModelImporter->GetMeshRenderer(meshIndex);
+				const auto& mesh = meshRenderer.m_mesh;
+
+				auto objectContantBuffer = m_pBufferManager->GetMutilConstantBuffer(PER_OBJECT_SPACE, m_device->GetFrameID(), meshIndex);
+				m_perObjectBindResourceSpace->SetCBV(objectContantBuffer);
+				m_graphicsContext->SetPipelineResource(PER_OBJECT_SPACE, m_perObjectBindResourceSpace.get());
+
+				auto startIndex = mesh->indexDataOffset / sizeof(UINT16);
+				auto startVertex = mesh->vertexDataOffset / vertexStride;
+				auto VertexCount = mesh->vertexCount;
+				auto indexCount = mesh->indexCount;
+
+				m_graphicsContext->Draw(indexCount, startVertex, startIndex);
+			}
+		}
 	}
 	void Renderer::DrawSkybox()
 	{
@@ -526,5 +530,9 @@ namespace ElysiaRenderer
 			SetPipelineResource(m_objectCBVIndex, CBVPassParameterType::Main);
 			DrawCommand(m_objectCBVIndex++);
 		}*/
+	}
+	void Renderer::DrawUI()
+	{
+		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), m_graphicsContext->GetCommandList());
 	}
 }

@@ -2598,7 +2598,7 @@ inline Matrix Matrix::CreateOrthographicOffCenter(float left, float right, float
 {
     using namespace DirectX;
     Matrix R;
-    XMStoreFloat4x4(&R, XMMatrixOrthographicOffCenterRH(left, right, bottom, top, zNearPlane, zFarPlane));
+    XMStoreFloat4x4(&R, XMMatrixOrthographicOffCenterLH(left, right, bottom, top, zNearPlane, zFarPlane));
     return R;
 }
 
