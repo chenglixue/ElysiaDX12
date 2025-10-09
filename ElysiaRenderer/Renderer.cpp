@@ -1,6 +1,6 @@
 #include "Renderer.h"
 
-extern "C" { __declspec(dllexport) extern const UINT D3D12SDKVersion = 616; }
+extern "C" { __declspec(dllexport) extern const UINT D3D12SDKVersion = 618; }
 extern "C" { __declspec(dllexport) extern const char* D3D12SDKPath = ".\\D3D12\\"; }
 
 namespace ElysiaRenderer
@@ -73,9 +73,9 @@ namespace ElysiaRenderer
 	void Renderer::Update()
 	{
 		//OnKeyboardInput();
+		m_pShadowManager->Update();
 		UpdateCBV();
 		SerializeUserData();
-
 	}
 	void Renderer::Render()
 	{
@@ -158,7 +158,6 @@ namespace ElysiaRenderer
 	void Renderer::UpdateObjectCBV()
 	{
 	}
-
 
 	void Renderer::InitTexTriangle()
 	{
@@ -369,15 +368,18 @@ namespace ElysiaRenderer
 
 		m_graphicsContext->ClearRenderTarget(currBackBuffer, Color(1, 1, 1));
 		m_graphicsContext->ClearDepthStencilTarget(*m_pBufferManager->GetCameraDepthBuffer(), 1.f, 0);
+		 
+		m_graphicsContext->SetIndexBuffer(m_pBufferManager->GetIndexBufferView());
+		m_graphicsContext->SetVertexBuffer(0, 1, const_cast<D3D12_VERTEX_BUFFER_VIEW&>(m_pBufferManager->GetVertexBufferView()));
+
+		m_graphicsContext->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(static_cast<UINT>(m_device->GetScreenSize().x), static_cast<UINT>(m_device->GetScreenSize().y)));
+		m_graphicsContext->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		PipelineInfo pipelineStateData{};
 		pipelineStateData.m_pipelineStateObject = m_graphicsPipelineStates[ShaderQueue::Opaque].get();
 		pipelineStateData.m_renderTargets.emplace_back(&currBackBuffer);
 		pipelineStateData.m_depthStencilTarget = m_pBufferManager->GetCameraDepthBuffer();
-		 
-		m_graphicsContext->SetIndexBuffer(m_pBufferManager->GetIndexBufferView());
-		m_graphicsContext->SetVertexBuffer(0, 1, const_cast<D3D12_VERTEX_BUFFER_VIEW&>(m_pBufferManager->GetVertexBufferView()));
-		 
+		
 		bool isReady = true;
 		{
 			auto texResources = m_pTextureManager->GetTextureResources();
@@ -392,9 +394,6 @@ namespace ElysiaRenderer
 		} 
 		if (isReady)
 		{
-			m_graphicsContext->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(static_cast<UINT>(m_device->GetScreenSize().x), static_cast<UINT>(m_device->GetScreenSize().y)));
-			m_graphicsContext->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
 			m_graphicsContext->SetPipeline(pipelineStateData);
 			m_graphicsContext->SetPipelineResource(PER_PASS_SPACE, m_perMainPassBindResourceSpace.get());
 
@@ -452,32 +451,42 @@ namespace ElysiaRenderer
 	}
 	void Renderer::DrawShadow()
 	{
-		//auto shadow = m_shadowBuffers.back().get();
-		//auto shadowBuffer = m_shadowBuffers.back()->GetShadowRT();
-		//m_objectCBVIndex = 0;
+		auto mainShadow = m_pShadowManager->GetMainShadow();
+		auto shadowTexResource = mainShadow->GetShadowRT();
 
-		//m_graphicsContext->AddBarrier(*shadowBuffer, D3D12_RESOURCE_STATE_DEPTH_WRITE);
-		//m_graphicsContext->FlushBarrier();
+		m_graphicsContext->AddBarrier(*shadowTexResource, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+		m_graphicsContext->FlushBarrier();
 
-		//m_graphicsContext->ClearDepthStencilTarget(*shadowBuffer, 1.f, 0);
+		m_graphicsContext->ClearDepthStencilTarget(*shadowTexResource, 1.f, 0);
 
-		//m_graphicsContext->SetVertexBuffer(0, 1, m_vertexBuffer->GetVertexBufferView());
-		//m_graphicsContext->SetIndexBuffer(m_indexBuffer->GetIndexBufferView());
+		m_graphicsContext->SetIndexBuffer(m_pBufferManager->GetIndexBufferView());
+		m_graphicsContext->SetVertexBuffer(0, 1, const_cast<D3D12_VERTEX_BUFFER_VIEW&>(m_pBufferManager->GetVertexBufferView()));
 
-		//m_graphicsContext->SetViewport(shadow->GetViewport());
-		//m_graphicsContext->SetScissorRect(shadow->GetScissorRect());
-		//m_graphicsContext->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		m_graphicsContext->SetViewport(mainShadow->GetViewport());
+		m_graphicsContext->SetScissorRect(mainShadow->GetScissorRect());
+		m_graphicsContext->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-		//// set pipeline & bind data
-		//auto pipelineStateData = CreatePipelineStateData(m_graphicsPipelineStates[ShaderQueue::Shadow]->m_pipelineState.get(),
-		//	{},
-		//	shadowBuffer);
-		//m_graphicsContext->SetPipeline(pipelineStateData);
-		////SetPipelineResource(i, CBVPassParameterType::Shadow);
-		////DrawCommand(i);
+		// shadow don't need write color so don't set render target
+		// only write depth, so need set depthStencil target
+		PipelineInfo pipelineStateData{};
+		pipelineStateData.m_pipelineStateObject = m_graphicsPipelineStates[ShaderQueue::Shadow].get();
+		pipelineStateData.m_depthStencilTarget = shadowTexResource;
 
-		//m_graphicsContext->AddBarrier(*shadowBuffer, D3D12_RESOURCE_STATE_GENERIC_READ);
-		//m_graphicsContext->FlushBarrier();
+		bool isReady = true;
+		{
+			if (shadowTexResource == nullptr)
+			{
+				ThrowRuntimeError("null tex resource");;
+			}
+			isReady &= shadowTexResource->GetIsReady();
+		}
+		if (isReady)
+		{
+
+		}
+
+		m_graphicsContext->AddBarrier(*shadowBuffer, D3D12_RESOURCE_STATE_GENERIC_READ);
+		m_graphicsContext->FlushBarrier();
 	}
 	void Renderer::DrawOpaque()
 	{

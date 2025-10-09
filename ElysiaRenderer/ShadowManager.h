@@ -1,13 +1,15 @@
 #pragma once
 #include "IManager.h"
+#include "IUpdate.h"
 #include "DX12Shadow.h"
+#include "DX12Light.h"
 #include "stdafx.h"
 
 namespace ElysiaRenderer
 {
 	class DX12Device;
 
-	class ShadowManager : public IManager
+	class ShadowManager : public IManager, IUpdate
 	{
 	public:
 		ShadowManager() = default;
@@ -19,6 +21,11 @@ namespace ElysiaRenderer
 
 		virtual void Init() override;
 		virtual void Destory() override;
+		virtual void Update() override;
+
+		DX12Shadow* GetMainShadow();
+
+		void SetMainLight(DX12Light* mainLight);
 
 		void CreateMainShadow(float resolution, float boundSphereRadius, DXGI_FORMAT format = DXGI_FORMAT_D32_FLOAT);
 
@@ -26,6 +33,6 @@ namespace ElysiaRenderer
 
 		DX12Device* m_pDevice = nullptr;
 		std::unique_ptr<DX12Shadow> m_pMainShadow = nullptr;
-
+		DX12Light* m_pMainLight = nullptr;
 	};
 }

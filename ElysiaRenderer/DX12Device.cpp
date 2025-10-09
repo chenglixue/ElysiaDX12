@@ -518,11 +518,13 @@ namespace ElysiaRenderer
 
 		resourceDesc.Format = resourceFormat;
 
+
 		D3D12_CLEAR_VALUE clearValue = {};
 		clearValue.Format = desc.m_resouceDesc.Format;
 		if (hasDSV)
 		{
 			clearValue.DepthStencil.Depth = 1.0f;
+			clearValue.DepthStencil.Stencil = 0;
 		}
 
 		/// Create default heap for tex

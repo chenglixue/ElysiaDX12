@@ -39,7 +39,7 @@ namespace ElysiaRenderer
 		m_scissorRect.top = 0;
 	}
 
-	void DX12Shadow::InitBoundSphere(float radius, XMFLOAT3 center)
+	void DX12Shadow::InitBoundSphere(float radius, Vector3 center)
 	{
 		m_shadowBound.Center = center;
 		m_shadowBound.Radius = radius;

@@ -113,11 +113,6 @@ namespace ElysiaRenderer
 		std::unique_ptr<PipelineResourceSpace> m_perObjectBindResourceSpace = nullptr;
 		std::unique_ptr<PipelineResourceSpace> m_perMainPassBindResourceSpace = nullptr;
 
-		/*std::vector<DX12Model> m_models{};
-		std::vector<DX12Vertex> m_vertices{};
-		std::vector<UINT> m_indices{};
-		std::vector<std::unique_ptr<DX12MeshRender>> m_meshRenders{};*/
-
 		void UpdateCBV();
 		void UpdatePassCBV();
 		void UpdateObjectCBV();

@@ -23,6 +23,23 @@ namespace ElysiaRenderer
 
 	}
 
+	void ShadowManager::Update()
+	{
+		m_pMainShadow->UpdateShadowTransform(m_pMainLight);
+	}
+
+	DX12Shadow* ShadowManager::GetMainShadow()
+	{
+		return m_pMainShadow.get();
+	}
+
+	void ShadowManager::SetMainLight(DX12Light* mainLight)
+	{
+		assert(mainLight != nullptr);
+
+		m_pMainLight = mainLight;
+	}
+
 	void ShadowManager::CreateMainShadow(float resolution, float boundSphereRadius, DXGI_FORMAT format)
 	{
 		TexCreateDesc shadowCreateDesc{};

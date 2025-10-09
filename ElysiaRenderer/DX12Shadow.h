@@ -73,7 +73,7 @@ namespace ElysiaRenderer
 		void CreateViewport();
 		void CreateScissorRect();
 
-		void InitBoundSphere(float radius, XMFLOAT3 center = MathHelper::XMFLOAT3Zero());
+		void InitBoundSphere(float radius, Vector3 center = MathHelper::XMFLOAT3Zero());
 		void UpdateShadowTransform(DX12Light* light);
 
 	protected:
@@ -87,11 +87,11 @@ namespace ElysiaRenderer
 
 		std::shared_ptr<DX12TextureResource> m_buffer;
 		BoundingSphere m_shadowBound;
-		XMFLOAT3 m_lightPos;
+		Vector3 m_lightPos;
 		float m_nearZ;
 		float m_farZ;
-		XMFLOAT4X4 m_shadowMatrix = MathHelper::Identity4x4();
-		XMFLOAT4X4 m_shadowViewMatrix = MathHelper::Identity4x4();
-		XMFLOAT4X4 m_shadowProjMatrix = MathHelper::Identity4x4();
+		Matrix m_shadowMatrix = Matrix::Identity;
+		Matrix m_shadowViewMatrix = Matrix::Identity;
+		Matrix m_shadowProjMatrix = Matrix::Identity;
 	};
 }

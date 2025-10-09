@@ -148,7 +148,6 @@ MaterialData GetMaterialData(FInputParams inputParams)
     o.Specular = 0.5;
     
     o.WorldNormal = GetNormal(normalTS.rgb, TBN, normalIntensity);
-    //o.WorldNormal.xy *= 0.5;
 
     o.Anisotropy = 0;
     o.DiffuseColor = o.BaseColor - o.BaseColor * o.Metallic;

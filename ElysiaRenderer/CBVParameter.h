@@ -14,10 +14,11 @@ namespace ElysiaRenderer
 
 	struct alignas(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT)CBVMainPassParameter
 	{
-		Vector4 cameraPosWS = Vector4::Zero;	// 16
-		Matrix viewMatrix = Matrix::Identity;	// 64
-		Matrix projMatrix = Matrix::Identity; 	// 64
-		Vector4 screenSize = Vector4::Zero;	// 16
+		Vector4 cameraPosWS		= Vector4::Zero;	// 16
+		Matrix	viewMatrix		= Matrix::Identity;	// 64
+		Matrix	projMatrix		= Matrix::Identity; 	// 64
+		Matrix	shadowMatrix	= Matrix::Identity;	// 64
+		Vector4 screenSize		= Vector4::Zero;	// 16
 
 		LightData mainLight;	// 64
 
@@ -28,17 +29,6 @@ namespace ElysiaRenderer
 
 		int GGX_Eavg_LUT_Index = -1;
 		int SkyboxTexIndex = -1;
-	};
-
-	struct alignas(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT)CBVShadowPassParameter
-	{
-		XMFLOAT4X4 viewMatrix = Matrix::Identity;	// 64
-		XMFLOAT4X4 projMatrix = Matrix::Identity; 	// 64
-
-		XMFLOAT4X4 shadowMatrix = Matrix::Identity;	// 64
-
-		float nearZ = 1;
-		float farZ = 1000;
 	};
 
 	struct alignas(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT) CBVObjectParameter
