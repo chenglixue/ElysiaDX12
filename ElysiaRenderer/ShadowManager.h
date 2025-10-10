@@ -27,7 +27,7 @@ namespace ElysiaRenderer
 
 		void SetMainLight(DX12Light* mainLight);
 
-		void CreateMainShadow(float resolution, float boundSphereRadius, DXGI_FORMAT format = DXGI_FORMAT_D32_FLOAT);
+		void CreateMainShadow(float resolution, float boundSphereRadius, DXGI_FORMAT format = DXGI_FORMAT_D24_UNORM_S8_UINT);
 
 	private:
 

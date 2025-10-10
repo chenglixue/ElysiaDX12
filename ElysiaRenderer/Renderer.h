@@ -6,7 +6,7 @@
 #include "DX12Light.h"
 #include "DX12UI.h"
 #include <dxgidebug.h>
-#include "DX12Shadow.h"
+#include "DX12Shadow.h"  
 #include "CBVParameter.h"
 #include "LoadTexData.h"
 #include "CameraManager.h"
@@ -18,6 +18,7 @@
 #include "RenderResource.h"
 #include "ModelImporter.h"
 #include "UserData.h"
+#include "Common.h" 
 
 namespace ElysiaRenderer 
 {
@@ -115,8 +116,8 @@ namespace ElysiaRenderer
 
 		void UpdateCBV();
 		void UpdatePassCBV();
-		void UpdateObjectCBV();
-
+		void UpdateObjectCBV(); 
+		    
 		void InitTexTriangle();
 		void LoadShaders();
 		void LoadConstantBuffers();
@@ -127,7 +128,7 @@ namespace ElysiaRenderer
 		void AddShader(ShaderQueue shaderQueue, const std::wstring& shaderName, const std::wstring& entryPoint, ShaderType shaderType);
 	
 		void RenderTexTriangle();
-
+		
 		void AddUIItems();
 		void DrawShadow();
 		void DrawOpaque(); 
@@ -135,5 +136,5 @@ namespace ElysiaRenderer
 		void DrawUI();
 	};
 }
-
-                   
+  
+                          

@@ -25,6 +25,8 @@ SamplerState g_Sampler_WarpU_WarpV_Linear : register(s2);
 SamplerState g_Sampler_ClampU_ClampV_Linear : register(s3);
 SamplerState g_Sampler_WarpU_WarpV_Anisotropic : register(s4);
 SamplerState g_Sampler_ClampU_ClampV_Anisotropic : register(s5);
+SamplerState g_Sampler_ClampU_ClampV_Linear_Compare : register(s6);
+SamplerState g_Sampler_WarpU_WarpV_Linear_Compare : register(s7);
 
 struct DX12Vertex
 {
@@ -63,16 +65,21 @@ cbuffer PassConstant : register(b0, perPassSpace)
     Matrix  projMatrix;
     Matrix  shadowMatrix;
     Vector4 screenSize;
+	Vector4 shadowSize;
+    
 
     Light mainLight;
      
     UINT frameIndex;
     float nearZ;
     float farZ;
-    int GGX_E_LUT_Index = 0;
+    float shadowNearZ;
+    float shadowFarZ;
+    int GGX_E_LUT_Index;
     
-    int GGX_Eavg_LUT_Index = 0;
-    int SkyboxTexIndex = 0;
+    int GGX_Eavg_LUT_Index;
+    int SkyboxTexIndex;
+    int ShadowTexIndex;
 };
 
 //cbuffer PerShadowPassBuffer : register(b1, perPassSpace)

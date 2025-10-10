@@ -207,6 +207,9 @@ namespace ElysiaRenderer
 			}
 		}
 
+		CreateSamplers();
+
+
 		/*for (UINT i = 0; i < NUM_FRAMES_IN_FLIGHT; ++i)
 		{
 			m_destructionQueues[i].m_buffers = std::make_unique<std::vector<DX12BufferResource>>();
@@ -518,13 +521,12 @@ namespace ElysiaRenderer
 
 		resourceDesc.Format = resourceFormat;
 
-
 		D3D12_CLEAR_VALUE clearValue = {};
 		clearValue.Format = desc.m_resouceDesc.Format;
 		if (hasDSV)
 		{
 			clearValue.DepthStencil.Depth = 1.0f;
-			clearValue.DepthStencil.Stencil = 0;
+			//clearValue.DepthStencil.Stencil = 0;
 		}
 
 		/// Create default heap for tex
@@ -829,7 +831,7 @@ namespace ElysiaRenderer
 		auto o = std::make_unique<DX12Shader>(pShader);
 		return o;
 	}
-	void										DX12Device::CreateSamplers(DX12RootSignature* rootSignature, D3D12_SHADER_VISIBILITY shaderVisibility)
+	void										DX12Device::CreateSamplers(D3D12_SHADER_VISIBILITY shaderVisibility)
 	{
 		D3D12_SAMPLER_DESC samplerDescs[NUM_SAMPLER_DESCRIPTORS]{};
 		for (size_t i = 0; i < NUM_SAMPLER_DESCRIPTORS; ++i)
@@ -846,43 +848,68 @@ namespace ElysiaRenderer
 		samplerDescs[samplerIndex].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 		samplerDescs[samplerIndex].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 		samplerDescs[samplerIndex].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-		rootSignature->InitStaticSamplers(samplerIndex, samplerDescs[samplerIndex], shaderVisibility);
+		//rootSignature->InitStaticSamplers(samplerIndex, samplerDescs[samplerIndex], shaderVisibility);
 		samplerIndex++;
 
 		samplerDescs[samplerIndex].Filter = D3D12_FILTER_MIN_MAG_MIP_POINT;
 		samplerDescs[samplerIndex].AddressU = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
 		samplerDescs[samplerIndex].AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
 		samplerDescs[samplerIndex].AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
-		rootSignature->InitStaticSamplers(samplerIndex, samplerDescs[samplerIndex], shaderVisibility);
+		//rootSignature->InitStaticSamplers(samplerIndex, samplerDescs[samplerIndex], shaderVisibility);
 		samplerIndex++;
 
 		samplerDescs[samplerIndex].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
 		samplerDescs[samplerIndex].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 		samplerDescs[samplerIndex].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 		samplerDescs[samplerIndex].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-		rootSignature->InitStaticSamplers(samplerIndex, samplerDescs[samplerIndex], shaderVisibility);
+		//rootSignature->InitStaticSamplers(samplerIndex, samplerDescs[samplerIndex], shaderVisibility);
 		samplerIndex++;
 
 		samplerDescs[samplerIndex].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
 		samplerDescs[samplerIndex].AddressU = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
 		samplerDescs[samplerIndex].AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
 		samplerDescs[samplerIndex].AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
-		rootSignature->InitStaticSamplers(samplerIndex, samplerDescs[samplerIndex], shaderVisibility);
+		//rootSignature->InitStaticSamplers(samplerIndex, samplerDescs[samplerIndex], shaderVisibility);
 		samplerIndex++;
 
 		samplerDescs[samplerIndex].Filter = D3D12_FILTER_ANISOTROPIC;
 		samplerDescs[samplerIndex].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 		samplerDescs[samplerIndex].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 		samplerDescs[samplerIndex].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-		rootSignature->InitStaticSamplers(samplerIndex, samplerDescs[samplerIndex], shaderVisibility);
+		//rootSignature->InitStaticSamplers(samplerIndex, samplerDescs[samplerIndex], shaderVisibility);
 		samplerIndex++;
 
 		samplerDescs[samplerIndex].Filter = D3D12_FILTER_ANISOTROPIC;
 		samplerDescs[samplerIndex].AddressU = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
 		samplerDescs[samplerIndex].AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
 		samplerDescs[samplerIndex].AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
-		rootSignature->InitStaticSamplers(samplerIndex, samplerDescs[samplerIndex], shaderVisibility);
+		samplerDescs[samplerIndex].ComparisonFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+		//rootSignature->InitStaticSamplers(samplerIndex, samplerDescs[samplerIndex], shaderVisibility);
 		samplerIndex++;
+
+		samplerDescs[samplerIndex].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+		samplerDescs[samplerIndex].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+		samplerDescs[samplerIndex].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+		samplerDescs[samplerIndex].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+		samplerDescs[samplerIndex].ComparisonFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+		//rootSignature->InitStaticSamplers(samplerIndex, samplerDescs[samplerIndex], shaderVisibility);
+		samplerIndex++;
+
+		samplerDescs[samplerIndex].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+		samplerDescs[samplerIndex].AddressU = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+		samplerDescs[samplerIndex].AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+		samplerDescs[samplerIndex].AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+		//rootSignature->InitStaticSamplers(samplerIndex, samplerDescs[samplerIndex], shaderVisibility);
+		samplerIndex++;
+
+		auto samplerDescriptorBlock = m_samplerRenderPassDescriptorHeap->AllocateRenderPassDescriptorBlock(NUM_SAMPLER_DESCRIPTORS);
+		D3D12_CPU_DESCRIPTOR_HANDLE currentSamplerDescriptor = samplerDescriptorBlock.GetCPUHandle();
+
+		for (uint32_t samplerIndex = 0; samplerIndex < NUM_SAMPLER_DESCRIPTORS; samplerIndex++)
+		{
+			m_device->CreateSampler(&samplerDescs[samplerIndex], currentSamplerDescriptor);
+			currentSamplerDescriptor.ptr += m_samplerRenderPassDescriptorHeap->GetDescriptorSingleSize();
+		}
 	}
 	void										DX12Device::CreateRootParameters(DX12RootSignature* rootSignature, std::vector<DX12RootParameter*>& rootParamters)
 	{
@@ -946,7 +973,6 @@ namespace ElysiaRenderer
 		UINT numSampler = NUM_SAMPLER_DESCRIPTORS;
 		DX12RootSignature* rootSignature = new DX12RootSignature(numRootParamter, numSampler);
 
-		CreateSamplers(rootSignature);
 
 		CreateRootParameters(rootSignature, rootParameters);
 

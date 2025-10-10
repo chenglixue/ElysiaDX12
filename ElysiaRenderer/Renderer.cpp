@@ -61,14 +61,11 @@ namespace ElysiaRenderer
 		DeSerializeUserData();
 		
 		m_pCameraManager->CreateMainCamera(Vector3(-11.5f, 200.85f, -0.45f) ,
-			m_aspectRatio, 3.14159f / 4.0f, 0.1f, 2000.f);
+			m_aspectRatio, 3.14159f / 4.0f, 0.1f, 1000.f);
 
 		auto passParameter = m_pRenderSource->GetCBVPassParameter();
 		passParameter->mainLight = std::move(m_pLightManager->GetMainLight()->CreateLightData());
 
-		m_pShadowManager->SetMainLight(m_pLightManager->GetMainLight());
-		m_pShadowManager->CreateMainShadow(4096, 15);
-		 
 		InitTexTriangle();
 	}
 	void Renderer::Update()
@@ -135,6 +132,7 @@ namespace ElysiaRenderer
 	void Renderer::UpdatePassCBV()
 	{
 		auto passParameter = m_pRenderSource->GetCBVPassParameter();
+
 		passParameter->screenSize = m_device->GetScreenSize();
 		passParameter->frameIndex = m_device->GetFrameID();
 		passParameter->cameraPosWS = m_pCameraManager->GetMainCamera()->GetPosition4();
@@ -142,11 +140,16 @@ namespace ElysiaRenderer
 		passParameter->projMatrix = m_pCameraManager->GetMainCamera()->GetProj();
 		passParameter->nearZ = m_pCameraManager->GetMainCamera()->GetNearZ();
 		passParameter->farZ = m_pCameraManager->GetMainCamera()->GetFarZ();
+
 		passParameter->mainLight.m_lightColor = Vector4(g_userData.lightColor.x, g_userData.lightColor.y, g_userData.lightColor.z, 1.f);
 		passParameter->mainLight.m_lightDir = Vector4(g_userData.lightDir.x, g_userData.lightDir.y, g_userData.lightDir.z, 0.f);
 		passParameter->mainLight.m_intensity = g_userData.lightIntensity;
 		
 		passParameter->shadowMatrix = m_pShadowManager->GetMainShadow()->GetShadowMat();
+		passParameter->shadowSize = GetScreenSize(Vector2(m_pShadowManager->GetMainShadow()->GetWidth(),
+			m_pShadowManager->GetMainShadow()->GetHeight()));
+		passParameter->shadowNearZ = m_pShadowManager->GetMainShadow()->GetNearZ();
+		passParameter->shadowFarZ = m_pShadowManager->GetMainShadow()->GetFarZ();
 
 		m_pBufferManager->GetSingleConstantBuffer(PER_PASS_SPACE)->SetMappedData(passParameter, sizeof(CBVMainPassParameter));
 		
@@ -175,7 +178,9 @@ namespace ElysiaRenderer
 		LoadTextures(); 
 
 		CreateCreamDepthRT();
-		//CreateShadowRT();
+		m_pShadowManager->SetMainLight(m_pLightManager->GetMainLight());
+		m_pShadowManager->CreateMainShadow(4096, 15);
+		m_pRenderSource->GetCBVPassParameter()->ShadowTexIndex = m_pShadowManager->GetMainShadow()->GetShadowRT()->GetResourceHeapIndex();
 
 		CreatePOS();
 	}
@@ -228,7 +233,7 @@ namespace ElysiaRenderer
 	{
 		TexCreateDesc depthBufferCreateDesc{};
 		depthBufferCreateDesc.m_name = L"Camera Depth RT";
-		depthBufferCreateDesc.m_resouceDesc.Format = DXGI_FORMAT_D32_FLOAT;
+		depthBufferCreateDesc.m_resouceDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 		depthBufferCreateDesc.m_resouceDesc.Width = static_cast<UINT64>(m_device->GetScreenSize().x);
 		depthBufferCreateDesc.m_resouceDesc.Height = static_cast<UINT>(m_device->GetScreenSize().y);
 		depthBufferCreateDesc.m_typeFlag = TexTypeFlags::SRV | TexTypeFlags::DSV;
@@ -287,10 +292,11 @@ namespace ElysiaRenderer
 		pipelineStateCreateDesc.m_depthStencilDesc.DepthEnable = TRUE;
 		pipelineStateCreateDesc.m_renderTargetDesc.m_depthStencilFormat = m_pShadowManager->GetMainShadow()->GetShadowRT()->GetResourceDesc().Format;
 		pipelineStateCreateDesc.m_depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
-		m_graphicsPipelineStates.insert({ ShaderQueue::Shadow, std::move(m_device->CreateGraphicsPipelineState(pipelineStateCreateDesc, meshResourceLayout)) });
-
+		m_graphicsPipelineStates[ShaderQueue::Shadow] = std::move(m_device->CreateGraphicsPipelineState(pipelineStateCreateDesc, meshResourceLayout));
 
 		/// Opaque PSO
+		meshResourceLayout.m_spaces[PER_OBJECT_SPACE] = m_perObjectBindResourceSpace.get();
+		meshResourceLayout.m_spaces[PER_PASS_SPACE] = m_perMainPassBindResourceSpace.get();
 		pipelineStateCreateDesc = std::move(CreateDefaultPipelineStateCreateDesc());
 		pipelineStateCreateDesc.m_inputElementDesc = m_inputElementDescs;
 		pipelineStateCreateDesc.m_vertexShader = m_vertexShaders[ShaderQueue::Opaque][ShaderType::Vertex].get();
@@ -315,12 +321,10 @@ namespace ElysiaRenderer
 		//pipelineStateCreateDesc.m_depthStencilDesc.DepthEnable = TRUE;
 		//pipelineStateCreateDesc.m_renderTargetDesc.m_depthStencilFormat = m_depthBufferCreateDesc["Camera"].m_resouceDesc.Format;
 		//pipelineStateCreateDesc.m_depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
-
 		//// skybox not cull back and front
 		//pipelineStateCreateDesc.m_rasterDesc.CullMode = D3D12_CULL_MODE_NONE;
 		//// let cubemap z = 1 pass z-test, otherwise it'll be failed in z-test because data of zbuffer is 1
 		//pipelineStateCreateDesc.m_depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
-
 		//m_graphicsPipelineStates.insert({ ShaderQueue::Skybox, std::move(m_device->CreateGraphicsPipelineState(pipelineStateCreateDesc, meshResourceLayout)) });
 	}
 
@@ -349,36 +353,8 @@ namespace ElysiaRenderer
 		}
 
 	}
-	 
-	void Renderer::RenderTexTriangle() 
-	{
-		m_device->BeginFrame();
-		m_graphicsContext->Reset();
-
-		{
-			ImGui_ImplDX12_NewFrame();
-			ImGui_ImplWin32_NewFrame();
-			ImGui::NewFrame();
-			AddUIItems();
-			ImGui::Render();
-		}
-
-		DrawShadow();
-		DrawOpaque();
-		DrawUI();
-
-		auto& currBackBuffer = m_device->GetCurrBackBuffer();
-		m_graphicsContext->AddBarrier(currBackBuffer, D3D12_RESOURCE_STATE_PRESENT);
-		m_graphicsContext->FlushBarrier();
-
-		m_device->SubmitContextWork(*m_graphicsContext);
-
-		m_device->EndFrame(); 
-		m_device->Present();
-	} 
-	
 	void Renderer::AddUIItems()
-	{ 
+	{
 		if (ImGui::CollapsingHeader("Light"))
 		{
 			auto mainLight = m_pRenderSource->GetCBVPassParameter();
@@ -389,7 +365,7 @@ namespace ElysiaRenderer
 		}
 
 		/*if (ImGui::CollapsingHeader("PBR Data"))
-		{	
+		{
 			ImGui::ColorEdit3("Base Color Tint", (float*)&m_objectPassParameters[m_device->GetFrameID()].baseColorTint);
 			ImGui::SliderFloat("Opacity", &m_objectPassParameters[m_device->GetFrameID()].opacity, 0.f, 1.f);
 			ImGui::SliderFloat("Normal Intensity", &m_objectPassParameters[m_device->GetFrameID()].normalIntensity, 0.f, 5.f);
@@ -399,6 +375,44 @@ namespace ElysiaRenderer
 			ImGui::ColorEdit3("Ambient Cubemap Tint", (float*)&m_objectPassParameters[m_device->GetFrameID()].ambientCubemapTint);
 		}*/
 	}
+
+	void Renderer::RenderTexTriangle() 
+	{
+		m_device->BeginFrame();
+		m_graphicsContext->Reset(m_graphicsPipelineStates[ShaderQueue::Opaque]->m_pipelineState->GetPipelineState());
+
+		auto& currBackBuffer = m_device->GetCurrBackBuffer();
+
+		{
+			ImGui_ImplDX12_NewFrame();
+			ImGui_ImplWin32_NewFrame();
+			ImGui::NewFrame();
+			AddUIItems();
+			ImGui::Render();
+
+			m_graphicsContext->AddBarrier(currBackBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET);
+			m_graphicsContext->AddBarrier(*m_pBufferManager->GetCameraDepthBuffer(), D3D12_RESOURCE_STATE_DEPTH_WRITE);
+			m_graphicsContext->FlushBarrier();
+			m_graphicsContext->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			m_graphicsContext->SetIndexBuffer(m_pBufferManager->GetIndexBufferView());
+			m_graphicsContext->SetVertexBuffer(0, 1, const_cast<D3D12_VERTEX_BUFFER_VIEW&>(m_pBufferManager->GetVertexBufferView()));
+		}
+
+		DrawShadow();
+		DrawOpaque();
+		DrawUI();
+
+		{
+			m_graphicsContext->AddBarrier(currBackBuffer, D3D12_RESOURCE_STATE_PRESENT);
+			m_graphicsContext->FlushBarrier();
+
+			m_device->SubmitContextWork(*m_graphicsContext);
+
+			m_device->EndFrame();
+			m_device->Present();
+		}
+	} 
+	
 	void Renderer::DrawShadow()
 	{
 		auto mainShadow = m_pShadowManager->GetMainShadow();
@@ -409,12 +423,8 @@ namespace ElysiaRenderer
 
 		m_graphicsContext->ClearDepthStencilTarget(*shadowTexResource, 1.f, 0);
 
-		m_graphicsContext->SetIndexBuffer(m_pBufferManager->GetIndexBufferView());
-		m_graphicsContext->SetVertexBuffer(0, 1, const_cast<D3D12_VERTEX_BUFFER_VIEW&>(m_pBufferManager->GetVertexBufferView()));
-
 		m_graphicsContext->SetViewport(mainShadow->GetViewport());
 		m_graphicsContext->SetScissorRect(mainShadow->GetScissorRect());
-		m_graphicsContext->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		// shadow don't need write color so don't set render target
 		// only write depth, so need set depthStencil target
@@ -462,18 +472,10 @@ namespace ElysiaRenderer
 	{
 		auto& currBackBuffer = m_device->GetCurrBackBuffer();
 
-		m_graphicsContext->AddBarrier(currBackBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET);
-		m_graphicsContext->AddBarrier(*m_pBufferManager->GetCameraDepthBuffer(), D3D12_RESOURCE_STATE_DEPTH_WRITE);
-		m_graphicsContext->FlushBarrier();
-
 		m_graphicsContext->ClearRenderTarget(currBackBuffer, Color(1, 1, 1));
 		m_graphicsContext->ClearDepthStencilTarget(*m_pBufferManager->GetCameraDepthBuffer(), 1.f, 0);
 
-		m_graphicsContext->SetIndexBuffer(m_pBufferManager->GetIndexBufferView());
-		m_graphicsContext->SetVertexBuffer(0, 1, const_cast<D3D12_VERTEX_BUFFER_VIEW&>(m_pBufferManager->GetVertexBufferView()));
-
 		m_graphicsContext->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(static_cast<UINT>(m_device->GetScreenSize().x), static_cast<UINT>(m_device->GetScreenSize().y)));
-		m_graphicsContext->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		PipelineInfo pipelineStateData{};
 		pipelineStateData.m_pipelineStateObject = m_graphicsPipelineStates[ShaderQueue::Opaque].get();

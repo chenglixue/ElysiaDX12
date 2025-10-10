@@ -51,7 +51,7 @@ namespace ElysiaRenderer
 
 		std::shared_ptr<DX12TextureResource> shadowTex = std::move(m_pDevice->CreateTexture(shadowCreateDesc));
 		auto shadowMap = std::make_unique<DX12Shadow>(shadowTex);
-		shadowMap->InitBoundSphere(20);
+		shadowMap->InitBoundSphere(500);
 
 		if (m_pMainShadow != nullptr)
 		{

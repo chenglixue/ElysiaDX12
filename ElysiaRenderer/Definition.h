@@ -10,7 +10,7 @@ namespace ElysiaHelper
     constexpr uint32_t NUM_RTV_STAGING_DESCRIPTORS = 256;
     constexpr uint32_t NUM_DSV_STAGING_DESCRIPTORS = 32;
     constexpr uint32_t NUM_SRV_STAGING_DESCRIPTORS = 4096;
-    constexpr uint32_t NUM_SAMPLER_DESCRIPTORS = 6;
+    constexpr uint32_t NUM_SAMPLER_DESCRIPTORS = 8;
     constexpr uint32_t MAX_QUEUED_BARRIERS = 16;
     constexpr uint8_t PER_OBJECT_SPACE = 0;
     constexpr uint8_t PER_MATERIAL_SPACE = 1;
