@@ -50,5 +50,17 @@ PSInput VS(VSInput i)
 PSOutput PS(PSInput i)
 {
     PSOutput o = (PSOutput) 0;
+    
+    if (baseColorTexIndex != -1)
+    {
+        SamplerState warpLinearSampler = SamplerDescriptorHeap[WarpLinearSampler];
+        Texture2D<float4> baseColorTex = ResourceDescriptorHeap[baseColorTexIndex];
+        
+        float4 baseColor = baseColorTex.Sample(warpLinearSampler, i.uv)
+            * float4(baseColorTint, opacity);
+        clip(baseColor.a - cutoff);
+
+    }
+    
     return o;
 }

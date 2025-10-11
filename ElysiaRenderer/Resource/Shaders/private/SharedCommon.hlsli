@@ -56,6 +56,8 @@ cbuffer ObjectConstant : register(b0, perObjectSpace)
     int metallicTexIndex;
     int roughnessTexIndex;
     int specularTexIndex;
+    
+    UINT cutoff;
 };
 
 cbuffer PassConstant : register(b0, perPassSpace)

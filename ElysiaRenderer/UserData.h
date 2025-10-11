@@ -19,6 +19,7 @@ namespace ElysiaRenderer
 
 		Vector3 BaseColorTint = Vector3::One;
 		float Opacity = 1;
+		float Cutoff = 0.5;
 		float NormalIntensity = 1;
 		float MetallicIntensity = 1;
 		float RoughnessIntensity = 1;

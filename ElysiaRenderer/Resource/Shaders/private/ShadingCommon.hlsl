@@ -117,7 +117,7 @@ MaterialData GetMaterialData(FInputParams inputParams)
         baseColorTex = ResourceDescriptorHeap[baseColorTexIndex];
         baseColor = baseColorTex.Sample(warpLinearSampler, inputParams.objectUV)
             * float4(baseColorTint, opacity);
-        clip(baseColor.a - 0.5);
+        clip(baseColor.a - cutoff);
 
     }
 

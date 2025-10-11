@@ -158,6 +158,25 @@ namespace ElysiaRenderer
 	}
 	void Renderer::UpdateObjectCBV()
 	{
+		for (UINT meshIndex = 0; meshIndex < m_pModelImporter->GetMeshCount(); ++meshIndex)
+		{
+			const auto& meshRenderer = m_pModelImporter->GetMeshRenderer(meshIndex);
+			auto objectConstantParameter = *meshRenderer.m_CBVObjectParameter;
+			for (UINT frameIndex = 0; frameIndex < NUM_FRAMES_IN_FLIGHT; ++frameIndex)
+			{
+				objectConstantParameter.baseColorTint = g_userData.BaseColorTint;
+				objectConstantParameter.opacity = g_userData.Opacity;
+				objectConstantParameter.cutoff = g_userData.Cutoff;
+				objectConstantParameter.normalIntensity = g_userData.NormalIntensity;
+				objectConstantParameter.metallicIntensity = g_userData.MetallicIntensity;
+				objectConstantParameter.roughnessIntensity = g_userData.RoughnessIntensity;
+				objectConstantParameter.ambientCubemapIntensity = g_userData.AmbientCubemapIntensity;
+				objectConstantParameter.ambientCubemapTint = g_userData.AmbientCubemapTint;
+
+				auto objectContantBuffer = m_pBufferManager->GetMutilConstantBuffer(PER_OBJECT_SPACE, frameIndex, meshIndex);
+				objectContantBuffer->SetMappedData(&objectConstantParameter, sizeof(CBVObjectParameter));
+			}
+		}
 	}
 
 	void Renderer::InitTexTriangle()
@@ -359,16 +378,17 @@ namespace ElysiaRenderer
 			ImGui::SliderFloat("Intensity", &g_userData.lightIntensity, 0, 5);
 		}
 
-		/*if (ImGui::CollapsingHeader("PBR Data"))
+		if (ImGui::CollapsingHeader("PBR Data"))
 		{
-			ImGui::ColorEdit3("Base Color Tint", (float*)&m_objectPassParameters[m_device->GetFrameID()].baseColorTint);
-			ImGui::SliderFloat("Opacity", &m_objectPassParameters[m_device->GetFrameID()].opacity, 0.f, 1.f);
-			ImGui::SliderFloat("Normal Intensity", &m_objectPassParameters[m_device->GetFrameID()].normalIntensity, 0.f, 5.f);
-			ImGui::SliderFloat("Metallic Intensity", &m_objectPassParameters[m_device->GetFrameID()].metallicIntensity, 0.f, 5.f);
-			ImGui::SliderFloat("Roughness Intensity", &m_objectPassParameters[m_device->GetFrameID()].roughnessIntensity, 0.f, 5.f);
-			ImGui::SliderFloat("Ambient Cubemap Intensity", &m_objectPassParameters[m_device->GetFrameID()].ambientCubemapIntensity, 0.f, 2.f);
-			ImGui::ColorEdit3("Ambient Cubemap Tint", (float*)&m_objectPassParameters[m_device->GetFrameID()].ambientCubemapTint);
-		}*/
+			ImGui::ColorEdit3("Base Color Tint", (float*)&g_userData.BaseColorTint);
+			ImGui::SliderFloat("Opacity", &g_userData.Opacity, 0.f, 1.f);
+			ImGui::SliderFloat("Cutoff", &g_userData.Cutoff, 0.f, 1.f);
+			ImGui::SliderFloat("Normal Intensity", &g_userData.NormalIntensity, 0.f, 5.f);
+			ImGui::SliderFloat("Metallic Intensity", &g_userData.MetallicIntensity, 0.f, 5.f);
+			ImGui::SliderFloat("Roughness Intensity", &g_userData.RoughnessIntensity, 0.f, 5.f);
+			ImGui::SliderFloat("Ambient Cubemap Intensity", &g_userData.AmbientCubemapIntensity, 0.f, 2.f);
+			ImGui::ColorEdit3("Ambient Cubemap Tint", (float*)&g_userData.AmbientCubemapTint);
+		}
 	}
 
 	void Renderer::RenderTexTriangle() 
