@@ -49,9 +49,9 @@ namespace ElysiaRenderer
 		shadowCreateDesc.m_resouceDesc.Format = format;
 		shadowCreateDesc.m_typeFlag = TexTypeFlags::SRV | TexTypeFlags::DSV;
 
-		std::shared_ptr<DX12TextureResource> shadowTex = std::move(m_pDevice->CreateTexture(shadowCreateDesc));
-		auto shadowMap = std::make_unique<DX12Shadow>(shadowTex);
-		shadowMap->InitBoundSphere(500);
+		std::unique_ptr<DX12TextureResource> shadowTex = std::move(m_pDevice->CreateTexture(shadowCreateDesc));
+		auto shadowMap = std::make_unique<DX12Shadow>(std::move(shadowTex));
+		shadowMap->InitBoundSphere(1000);
 
 		if (m_pMainShadow != nullptr)
 		{

@@ -83,15 +83,17 @@ PSOutput PS(PSInput i)
     
     MaterialData materialData = GetMaterialData(inputParam);
     
-    o.target0 = GetDynamicLighting(inputParam, materialData, mainLightData);
+    half4 lighting = GetDynamicLighting(inputParam, materialData, mainLightData);
     
     float4 shadowPos = mul(shadowMatrix, float4(inputParam.PositionWS, 1.f));
     shadowPos /= shadowPos.w;
-    shadowPos.xy = shadowPos.xy * float2(0.5f, 0.5f) + 0.5f;
+    shadowPos.xy = shadowPos.xy * float2(0.5f, -0.5f) + 0.5f;
     
     Texture2D<float> shadowTex = ResourceDescriptorHeap[ShadowTexIndex];
-    float shadowDepth = shadowTex.SampleCmpLevelZero(g_Sampler_ClampU_ClampV_Linear_Compare, shadowPos.xy, shadowPos.z);
-    o.target0 = shadowDepth;
+    SamplerComparisonState shadowClampSampler = SamplerDescriptorHeap[ShadowClampLinearSampler];
+    float shadow = shadowTex.SampleCmpLevelZero(shadowClampSampler, shadowPos.xy, shadowPos.z);
+    
+    o.target0 = shadow;
     
     return o;
 }

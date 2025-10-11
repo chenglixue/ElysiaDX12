@@ -34,12 +34,14 @@ float GetSpecularEnergyPreservation(float3 alebdo, float roughness, float NoL, f
     NoL = saturate(NoL);
     NoV = saturate(NoV);
     
+    SamplerState warpLinearSampler = SamplerDescriptorHeap[WarpLinearSampler];
+    
     Texture2D<float> GGX_E_LUT = ResourceDescriptorHeap[GGX_E_LUT_Index];
     Texture2D<float> GGX_EAVG_LUT = ResourceDescriptorHeap[GGX_Eavg_LUT_Index];
     
-    float3 E_o = GGX_E_LUT.SampleLevel(g_Sampler_ClampU_ClampV_Linear, float2(NoL, roughness), 0);
-    float3 E_i = GGX_E_LUT.SampleLevel(g_Sampler_ClampU_ClampV_Linear, float2(NoV, roughness), 0);
-    float3 E_avg = GGX_EAVG_LUT.SampleLevel(g_Sampler_ClampU_ClampV_Linear, float2(0, roughness), 0);
+    float3 E_o = GGX_E_LUT.SampleLevel(warpLinearSampler, float2(NoL, roughness), 0);
+    float3 E_i = GGX_E_LUT.SampleLevel(warpLinearSampler, float2(NoV, roughness), 0);
+    float3 E_avg = GGX_EAVG_LUT.SampleLevel(warpLinearSampler, float2(0, roughness), 0);
 
     float3 edgetint = float3(0.827, 0.792, 0.678);
     float3 F_avg = AverageFresnel(alebdo, edgetint);

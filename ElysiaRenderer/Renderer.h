@@ -134,7 +134,7 @@ namespace ElysiaRenderer
 		void DrawOpaque(); 
 		void DrawSkybox();
 		void DrawUI();
-	};
+	}; 
 }
-  
-                          
+    
+                               

@@ -10,14 +10,12 @@ namespace ElysiaRenderer
 	{
 		m_render = this;
 		m_windowHandle = windowHandle;
-
 		m_aspectRatio = static_cast<float>(screenSize.x) / static_cast<float>(screenSize.y);
-
 		m_device = std::make_unique<DX12Device>(windowHandle, screenSize);
 		m_graphicsContext = m_device->CreateGraphicsContext();
-		  
-		m_pUI->InitDescriptor(windowHandle, std::move(m_device.get()));
+		
 
+		m_pUI->InitDescriptor(windowHandle, std::move(m_device.get()));
 		m_pCameraManager = std::make_unique<CameraManager>();
 		m_pLightManager = std::make_unique<LightManager>();
 		m_pShadowManager = std::make_unique<ShadowManager>(m_device.get());
@@ -52,26 +50,25 @@ namespace ElysiaRenderer
 		}
 		printf("done\n");
 
+		DeSerializeUserData();
+
 		m_pCameraManager->Init(); 
 		m_pLightManager->Init();  
 		m_pShadowManager->Init();
 		m_pBufferManager->Init();
-		m_pMeshManager->Init();	
-
-		DeSerializeUserData();
+		m_pMeshManager->Init();
 		
 		m_pCameraManager->CreateMainCamera(Vector3(-11.5f, 200.85f, -0.45f) ,
-			m_aspectRatio, 3.14159f / 4.0f, 0.1f, 1000.f);
-
-		auto passParameter = m_pRenderSource->GetCBVPassParameter();
-		passParameter->mainLight = std::move(m_pLightManager->GetMainLight()->CreateLightData());
+			m_aspectRatio, 3.14159f / 4.0f, 0.1f, 2000.f);
 
 		InitTexTriangle();
 	}
 	void Renderer::Update()
 	{
 		//OnKeyboardInput();
-		m_pShadowManager->Update(); 
+		m_pLightManager->GetMainLight()->m_lightDir = g_userData.lightDir;
+		m_pLightManager->Update();
+		m_pShadowManager->Update();
 		UpdateCBV();
 		SerializeUserData();
 	}
@@ -141,9 +138,7 @@ namespace ElysiaRenderer
 		passParameter->nearZ = m_pCameraManager->GetMainCamera()->GetNearZ();
 		passParameter->farZ = m_pCameraManager->GetMainCamera()->GetFarZ();
 
-		passParameter->mainLight.m_lightColor = Vector4(g_userData.lightColor.x, g_userData.lightColor.y, g_userData.lightColor.z, 1.f);
-		passParameter->mainLight.m_lightDir = Vector4(g_userData.lightDir.x, g_userData.lightDir.y, g_userData.lightDir.z, 0.f);
-		passParameter->mainLight.m_intensity = g_userData.lightIntensity;
+		passParameter->mainLight = std::move(m_pLightManager->GetMainLight()->CreateLightData());
 		
 		passParameter->shadowMatrix = m_pShadowManager->GetMainShadow()->GetShadowMat();
 		passParameter->shadowSize = GetScreenSize(Vector2(m_pShadowManager->GetMainShadow()->GetWidth(),
@@ -537,4 +532,4 @@ namespace ElysiaRenderer
 	{
 		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), m_graphicsContext->GetCommandList());
 	}
-}
+} 

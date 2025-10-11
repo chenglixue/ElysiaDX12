@@ -58,13 +58,27 @@ namespace ElysiaRenderer
 			return m_lightIntensity;
 		}
 
+		void SetLightColor(const Vector3& lightColor)
+		{
+			m_lightColor = lightColor;
+		}
+		void SetLightDir(const Vector3& lightDir)
+		{
+			m_lightDir = lightDir;
+		}
+		void SetLightIntensity(float lightIntensity)
+		{
+			m_lightIntensity = lightIntensity;
+		}
+
 		virtual LightData CreateLightData() = 0;
 
-	protected:
+	
 		Vector3 m_lightColor;
 		Vector3 m_lightDir;
 		float m_lightIntensity;
 		Vector3 m_lightPos;
+	protected:
 		LightType m_lightType = LightType::None;
 	};
 

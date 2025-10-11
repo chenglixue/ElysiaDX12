@@ -11,6 +11,15 @@
 #define perPassSpace     space2
 #define perFrameSpace    space3
 
+#define WarpPointSampler 0
+#define ClampPointSampler 1
+#define WarpLinearSampler 2
+#define ClampLinearSampler 3
+#define WarpAnisotropicSampler 4
+#define ClampAnisotropicSampler 5
+#define ShadowWarpLinearSampler 6
+#define ShadowClampLinearSampler 7
+
 #define Vector2  float2
 #define Vector3  float3
 #define Vector4  float4
@@ -18,15 +27,6 @@
 
 #define UINT        uint
 #define int32_t     int
-
-SamplerState g_Sampler_WarpU_WarpV_Point : register(s0);
-SamplerState g_Sampler_ClampU_ClampV_Point : register(s1);
-SamplerState g_Sampler_WarpU_WarpV_Linear : register(s2);
-SamplerState g_Sampler_ClampU_ClampV_Linear : register(s3);
-SamplerState g_Sampler_WarpU_WarpV_Anisotropic : register(s4);
-SamplerState g_Sampler_ClampU_ClampV_Anisotropic : register(s5);
-SamplerState g_Sampler_ClampU_ClampV_Linear_Compare : register(s6);
-SamplerState g_Sampler_WarpU_WarpV_Linear_Compare : register(s7);
 
 struct DX12Vertex
 {

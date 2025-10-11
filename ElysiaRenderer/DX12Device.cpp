@@ -887,7 +887,7 @@ namespace ElysiaRenderer
 		//rootSignature->InitStaticSamplers(samplerIndex, samplerDescs[samplerIndex], shaderVisibility);
 		samplerIndex++;
 
-		samplerDescs[samplerIndex].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+		samplerDescs[samplerIndex].Filter = D3D12_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
 		samplerDescs[samplerIndex].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 		samplerDescs[samplerIndex].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 		samplerDescs[samplerIndex].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
@@ -895,10 +895,11 @@ namespace ElysiaRenderer
 		//rootSignature->InitStaticSamplers(samplerIndex, samplerDescs[samplerIndex], shaderVisibility);
 		samplerIndex++;
 
-		samplerDescs[samplerIndex].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+		samplerDescs[samplerIndex].Filter = D3D12_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
 		samplerDescs[samplerIndex].AddressU = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
 		samplerDescs[samplerIndex].AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
 		samplerDescs[samplerIndex].AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+		samplerDescs[samplerIndex].ComparisonFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 		//rootSignature->InitStaticSamplers(samplerIndex, samplerDescs[samplerIndex], shaderVisibility);
 		samplerIndex++;
 
@@ -970,7 +971,8 @@ namespace ElysiaRenderer
 		}
 
 		UINT numRootParamter = static_cast<UINT>(rootParameters.size());
-		UINT numSampler = NUM_SAMPLER_DESCRIPTORS;
+		//UINT numSampler = NUM_SAMPLER_DESCRIPTORS;
+		UINT numSampler = 0;
 		DX12RootSignature* rootSignature = new DX12RootSignature(numRootParamter, numSampler);
 
 

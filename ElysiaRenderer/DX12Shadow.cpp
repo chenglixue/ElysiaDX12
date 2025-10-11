@@ -47,8 +47,6 @@ namespace ElysiaRenderer
 
 	void DX12Shadow::UpdateShadowTransform(DX12Light* light)
 	{
-		XMMATRIX o = XMMatrixIdentity(); 
-
 		Vector3 lightDir = light->GetLightDir();
 		m_lightPos = -lightDir * 2.f * m_shadowBound.Radius;
 		Vector3 boundPosWS = m_shadowBound.Center;
