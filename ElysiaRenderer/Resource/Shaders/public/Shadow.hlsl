@@ -3,11 +3,14 @@
 
     #include <private\Light.hlsl>
     #include <private\LightCommon.hlsl>
+    #include <private\ShadowCommon.hlsl>
 #else
     #include "../private\ShadingCommon.hlsl"
 
     #include "../private\Light.hlsl"
     #include "../private\LightCommon.hlsl"
+    #include "../private\ShadowCommon.hlsl"
+
 #endif
 
 struct VSInput
@@ -38,8 +41,17 @@ struct PSOutput
 PSInput VS(VSInput i)
 {
     PSInput o = (PSInput) 0;
+    
+    o.normalWS = normalize(mul((float3x3) worldMatrix, i.normalOS));
 
     o.positionWS = mul(worldMatrix, float4(i.positionOS, 1.f));
+    
+    LightData mainLightData = GetMainLight(mainLight);
+    
+    float3 lightDirWS = mainLightData.toLight;
+    float NoL = saturate(dot(o.normalWS, lightDirWS));
+    
+    o.positionWS.rgb += GetShadowPosOffset(NoL, o.normalWS, shadowSize.x);
     o.positionCS = mul(shadowMatrix, o.positionWS);
     
     o.uv = i.uv;
