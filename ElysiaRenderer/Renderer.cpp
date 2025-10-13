@@ -380,7 +380,8 @@ namespace ElysiaRenderer
 			ImGui::DragFloat3("Direction", (float*)&g_userData.lightDir, 1, -1, 1);
 			ImGui::SliderFloat("Intensity", &g_userData.lightIntensity, 0, 5);
 
-			ImGui::Combo("Shadow Quality", &g_userData.shadowQuality);
+			static int item = -1;
+			ImGui::Combo("Shadow Quality", &item, EnumToString<ShadowQuality>(), detail::EnumTraits<ShadowQuality>::count);
 			ImGui::SliderFloat("Shadow Depth Bias", &g_userData.shadowDepthBias, 0, 10);
 			ImGui::SliderFloat("Shadow Slope Depth Bias", &g_userData.shadowSlopeDepthBias, 0, 10);
 			ImGui::SliderFloat("Shadow Max Slope Depth Bias", &g_userData.shadowMaxSlopeDepthBias, 0, 10);

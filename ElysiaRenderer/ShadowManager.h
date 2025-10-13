@@ -9,14 +9,11 @@ namespace ElysiaRenderer
 {
 	class DX12Device;
 
-	BEGIN_ENUM(ShadowQuality)
-	{
-		DECL_ENUM_ELEMENT(Low),
-		DECL_ENUM_ELEMENT(Middle),
-		DECL_ENUM_ELEMENT(High),
-		DECL_ENUM_ELEMENT(VeryHigh)
-	}
-	END_ENUM(ShadowQuality)
+	DEFINE_ENUM_WITH_STRING_CONVERSIONS(ShadowQuality,
+		(Low)
+		(Middle)
+		(High)
+	)
 	
 	class ShadowManager : public IManager, IUpdate
 	{
@@ -44,4 +41,5 @@ namespace ElysiaRenderer
 		std::unique_ptr<DX12Shadow> m_pMainShadow = nullptr;
 		DX12Light* m_pMainLight = nullptr;
 	};
+	
 }

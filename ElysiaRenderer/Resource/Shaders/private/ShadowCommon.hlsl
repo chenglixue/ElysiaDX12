@@ -40,6 +40,8 @@ float SampleShadowPCF(in Texture2D shadowMap, in SamplerComparisonState pcfSampl
     Texture2D<float> shadowTex = ResourceDescriptorHeap[ShadowTexIndex];
     SamplerComparisonState shadowClampSampler = SamplerDescriptorHeap[ShadowClampLinearSampler];
     
+    float lightDepth = shadowPos.z - 0.001f;
+    
     float2 uv = shadowPos.xy * shadowSize.xy;
     float2 shadowMapSizeInv = shadowSize.zw;
     
@@ -52,7 +54,7 @@ float SampleShadowPCF(in Texture2D shadowMap, in SamplerComparisonState pcfSampl
     baseUV *= shadowMapSizeInv;
     
     #if SHADOW_QUALITY_LOW 
-    o = SampleShadow();
+    o = shadowTex.SampleCmpLevelZero(shadowClampSampler, shadowPos.xy, lightDepth);
     #endif
     
     
