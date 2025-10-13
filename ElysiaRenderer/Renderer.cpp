@@ -145,6 +145,9 @@ namespace ElysiaRenderer
 			m_pShadowManager->GetMainShadow()->GetHeight()));
 		passParameter->shadowNearZ = m_pShadowManager->GetMainShadow()->GetNearZ();
 		passParameter->shadowFarZ = m_pShadowManager->GetMainShadow()->GetFarZ();
+		passParameter->shadowDepthBias = g_userData.shadowDepthBias / 100;
+		passParameter->shadowSlopeDepthBias = g_userData.shadowSlopeDepthBias / 100;
+		passParameter->shadowMaxSlopeDepthBias = g_userData.shadowMaxSlopeDepthBias / 100;
 
 		m_pBufferManager->GetSingleConstantBuffer(PER_PASS_SPACE)->SetMappedData(passParameter, sizeof(CBVMainPassParameter));
 		
@@ -369,13 +372,18 @@ namespace ElysiaRenderer
 	}
 	void Renderer::AddUIItems()
 	{
+		ImGui::ShowDemoWindow();
 		if (ImGui::CollapsingHeader("Light"))
 		{
 			auto mainLight = m_pRenderSource->GetCBVPassParameter();
 			ImGui::ColorEdit3("Color", (float*)&g_userData.lightColor);
 			ImGui::DragFloat3("Direction", (float*)&g_userData.lightDir, 1, -1, 1);
-
 			ImGui::SliderFloat("Intensity", &g_userData.lightIntensity, 0, 5);
+
+			ImGui::Combo("Shadow Quality", &g_userData.shadowQuality);
+			ImGui::SliderFloat("Shadow Depth Bias", &g_userData.shadowDepthBias, 0, 10);
+			ImGui::SliderFloat("Shadow Slope Depth Bias", &g_userData.shadowSlopeDepthBias, 0, 10);
+			ImGui::SliderFloat("Shadow Max Slope Depth Bias", &g_userData.shadowMaxSlopeDepthBias, 0, 10);
 		}
 
 		if (ImGui::CollapsingHeader("PBR Data"))

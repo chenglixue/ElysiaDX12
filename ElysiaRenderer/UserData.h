@@ -1,6 +1,7 @@
 #pragma once
 #include "stdafx.h"
 #include "Serialization.h"
+#include "ShadowManager.h"
 
 namespace ElysiaRenderer
 {
@@ -25,6 +26,11 @@ namespace ElysiaRenderer
 		float RoughnessIntensity = 1;
 		float AmbientCubemapIntensity = 1;
 		Vector3 AmbientCubemapTint = Vector3::One;
+
+		ShadowQuality shadowQuality = ShadowQuality::VeryHigh;
+		float shadowDepthBias = 0;
+		float shadowSlopeDepthBias = 0;
+		float shadowMaxSlopeDepthBias = 0;
 	};
 
 	static UserData g_userData;

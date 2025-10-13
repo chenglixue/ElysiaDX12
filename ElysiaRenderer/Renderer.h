@@ -110,7 +110,7 @@ namespace ElysiaRenderer
 		std::unique_ptr<RenderResource> m_pRenderSource = nullptr;
 		std::unique_ptr<MeshManager>	m_pMeshManager = nullptr;
 		std::unique_ptr<TextureManager>	m_pTextureManager = nullptr;
-		
+		 
 		std::unique_ptr<PipelineResourceSpace> m_perObjectBindResourceSpace = nullptr;
 		std::unique_ptr<PipelineResourceSpace> m_perMainPassBindResourceSpace = nullptr;
 
@@ -137,4 +137,4 @@ namespace ElysiaRenderer
 	}; 
 }
     
-                                
+                                       

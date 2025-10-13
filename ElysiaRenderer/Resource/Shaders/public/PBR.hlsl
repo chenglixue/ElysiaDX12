@@ -44,20 +44,11 @@ PSInput VS(VSInput i)
     o.positionVS = mul(viewMatrix, o.positionWS);
     o.positionCS = mul(projMatrix, o.positionVS);
     
-    bool hasTangent = true;
-    if (hasTangent)
-    {
-        float3 N = normalize(mul((float3x3) worldMatrix, i.normalOS));
-        float3 T = mul((float3x3) worldMatrix, i.tangentOS);
-        
-        o.tangentWS = normalize(T - dot(N, T) * N);
-        o.bitTangentWS = (cross(o.tangentWS, N));
-        o.normalWS = N;
-    }
-    else
-    {
-        o.normalWS = normalize(mul((float3x3) worldMatrix, i.normalOS));
-    }
+    float3 N = normalize(mul((float3x3) worldMatrix, i.normalOS));
+    float3 T = mul((float3x3) worldMatrix, i.tangentOS);
+    o.tangentWS = normalize(T - dot(N, T) * N);
+    o.bitTangentWS = (cross(o.tangentWS, N));
+    o.normalWS = N;
     
     o.uv = i.uv;
     
@@ -80,20 +71,19 @@ PSOutput PS(PSInput i)
     inputParam.ScreenVector = GetScreenVectorWS(cameraPosWS.xyz, i.positionWS.xyz);
     
     LightData mainLightData = GetMainLight(mainLight);
-    
     MaterialData materialData = GetMaterialData(inputParam);
-    
-    half4 lighting = GetDynamicLighting(inputParam, materialData, mainLightData);
     
     float4 shadowPos = mul(shadowMatrix, float4(inputParam.PositionWS, 1.f));
     shadowPos /= shadowPos.w;
     shadowPos.xy = shadowPos.xy * float2(0.5f, -0.5f) + 0.5f;
-    
     Texture2D<float> shadowTex = ResourceDescriptorHeap[ShadowTexIndex];
     SamplerComparisonState shadowClampSampler = SamplerDescriptorHeap[ShadowClampLinearSampler];
     float shadow = shadowTex.SampleCmpLevelZero(shadowClampSampler, shadowPos.xy, shadowPos.z);
     
-    o.target0 = shadow;
+    float4 lighting = GetDynamicLighting(inputParam, materialData, mainLightData) * shadow;
+    lighting += float4(GetIBL(inputParam, materialData, mainLightData.toLight), 1.f);
+    
+    o.target0 = lighting;
     
     return o;
 }
