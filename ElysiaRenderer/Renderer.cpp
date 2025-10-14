@@ -372,7 +372,6 @@ namespace ElysiaRenderer
 	}
 	void Renderer::AddUIItems()
 	{
-		ImGui::ShowDemoWindow();
 		if (ImGui::CollapsingHeader("Light"))
 		{
 			auto mainLight = m_pRenderSource->GetCBVPassParameter();
@@ -380,8 +379,12 @@ namespace ElysiaRenderer
 			ImGui::DragFloat3("Direction", (float*)&g_userData.lightDir, 1, -1, 1);
 			ImGui::SliderFloat("Intensity", &g_userData.lightIntensity, 0, 5);
 
-			static int item = -1;
-			ImGui::Combo("Shadow Quality", &item, EnumToString<ShadowQuality>(), detail::EnumTraits<ShadowQuality>::count);
+			static int shadowQualityIndex = (int)g_userData.shadowQuality;
+			ImGui::Combo("Shadow Quality", &shadowQualityIndex, 
+				StringViewToChar(magic_enum::enum_names<ShadowQuality>().data(), magic_enum::enum_count<ShadowQuality>()).data(),
+				(int)magic_enum::enum_count<ShadowQuality>());
+			g_userData.shadowQuality = (ShadowQuality)shadowQualityIndex;
+
 			ImGui::SliderFloat("Shadow Depth Bias", &g_userData.shadowDepthBias, 0, 10);
 			ImGui::SliderFloat("Shadow Slope Depth Bias", &g_userData.shadowSlopeDepthBias, 0, 10);
 			ImGui::SliderFloat("Shadow Max Slope Depth Bias", &g_userData.shadowMaxSlopeDepthBias, 0, 10);

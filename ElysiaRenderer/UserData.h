@@ -27,7 +27,7 @@ namespace ElysiaRenderer
 		float AmbientCubemapIntensity = 1;
 		Vector3 AmbientCubemapTint = Vector3::One;
 
-		ShadowQuality shadowQuality = ShadowQuality::VeryHigh;
+		ShadowQuality shadowQuality;
 		float shadowDepthBias = 0;
 		float shadowSlopeDepthBias = 0;
 		float shadowMaxSlopeDepthBias = 0;

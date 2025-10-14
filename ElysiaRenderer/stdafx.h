@@ -40,7 +40,6 @@
 #include "imgui/imgui_impl_win32.h"
 #include "imgui/imgui_impl_dx12.h"
 #include <WICTextureLoader.h>
-#include <enum.h>
 
 using namespace DirectX;
 using namespace ElysiaHelper;

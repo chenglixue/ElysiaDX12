@@ -9,11 +9,13 @@ namespace ElysiaRenderer
 {
 	class DX12Device;
 
-	DEFINE_ENUM_WITH_STRING_CONVERSIONS(ShadowQuality,
-		(Low)
-		(Middle)
-		(High)
-	)
+	enum class ShadowQuality :uint8_t
+	{
+		Low = 0, 
+		Middle = 1,
+		High = 2,
+		VeryHigh = 3
+	};
 	
 	class ShadowManager : public IManager, IUpdate
 	{

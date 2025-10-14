@@ -37,9 +37,6 @@ float SampleShadowPCF(in Texture2D shadowMap, in SamplerComparisonState pcfSampl
 {
     float o = 0.f;
     
-    Texture2D<float> shadowTex = ResourceDescriptorHeap[ShadowTexIndex];
-    SamplerComparisonState shadowClampSampler = SamplerDescriptorHeap[ShadowClampLinearSampler];
-    
     float lightDepth = shadowPos.z - 0.001f;
     
     float2 uv = shadowPos.xy * shadowSize.xy;
@@ -53,8 +50,8 @@ float SampleShadowPCF(in Texture2D shadowMap, in SamplerComparisonState pcfSampl
     baseUV -= float2(0.5f, 0.5f);
     baseUV *= shadowMapSizeInv;
     
-    #if SHADOW_QUALITY_LOW 
-    o = shadowTex.SampleCmpLevelZero(shadowClampSampler, shadowPos.xy, lightDepth);
+    #if defined (SHADOW_QUALITY_LOW)
+    o = shadowMap.SampleCmpLevelZero(pcfSampler, shadowPos.xy, lightDepth);
     #endif
     
     
@@ -64,7 +61,7 @@ float SampleShadowPCF(in Texture2D shadowMap, in SamplerComparisonState pcfSampl
 
 float SunShadowVisibility(in float3 positionWS, in float2 uvOffset)
 {
-    Texture2D<float> shadowTex = ResourceDescriptorHeap[ShadowTexIndex];
+    Texture2D shadowTex = ResourceDescriptorHeap[ShadowTexIndex];
     SamplerComparisonState shadowClampSampler = SamplerDescriptorHeap[ShadowClampLinearSampler];
     
     float4 shadowPos = mul(shadowMatrix, float4(positionWS, 1.f));
@@ -72,7 +69,6 @@ float SunShadowVisibility(in float3 positionWS, in float2 uvOffset)
     shadowPos.xy = shadowPos.xy * float2(0.5f, -0.5f) + 0.5f;
     
     return SampleShadowPCF(shadowTex, shadowClampSampler, shadowPos, 0);
-
 }
 
 #endif

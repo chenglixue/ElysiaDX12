@@ -13,7 +13,7 @@
 #include "Definition.h"
 #include "RenderHelper.h"
 #include <comdef.h> // For _com_error
-#include <boost/preprocessor.hpp>
+#include "magic_enum/magic_enum.hpp"
 
 namespace ElysiaHelper
 {
@@ -266,7 +266,7 @@ namespace ElysiaHelper
         return wstr;
     }
 
-    inline static inline std::wstring RemoveExt(const char* filename)
+    inline static std::wstring RemoveExt(const char* filename)
     {
         return RemoveExtension(UTF8ToWideString(std::string(filename)));
     }
@@ -409,71 +409,12 @@ namespace ElysiaHelper
         return str;
     }
 
-    //debug macro, keep it defined or undefine
-#define DEBUG
-//#undef DEBUG
-
-#ifndef DEBUG
-#define DECL_ENUM_ELEMENT( element ) element
-#define BEGIN_ENUM( ENUM_NAME ) typedef enum
-#define END_ENUM( ENUM_NAME )  ENUM_NAME;
-#else
-#define DECL_ENUM_ELEMENT( element ) #element
-#define BEGIN_ENUM( ENUM_NAME ) const char* gs_##ENUM_NAME [] =
-#define END_ENUM( ENUM_NAME ); \
-                                int gs_##ENUM_NAME##size = sizeof(gs_##ENUM_NAME)/sizeof(gs_##ENUM_NAME[0]); \
-                                const char* MatchEnumToString##ENUM_NAME(int  index) { \
-                                if (index > (gs_##ENUM_NAME##size - 1) || index < 0) \
-                                { \
-                                       return "ERR: invalid"; \
-                                }  \
-                                else \
-                                       return gs_##ENUM_NAME [index]; \
-                                }
-#endif
-
-// Macro to generate case statements for ToString function
-#define X_DEFINE_ENUM_WITH_STRING_CONVERSIONS_TOSTRING_CASE(r, data, elem) \
-    case elem: return BOOST_PP_STRINGIZE(elem);
-
-// Main macro to define enum and ToString function
-#define DEFINE_ENUM_WITH_STRING_CONVERSIONS(name, enumerators)                \
-    enum name {                                                               \
-        BOOST_PP_SEQ_ENUM(enumerators)                                        \
-        , COUNT_##name = BOOST_PP_SEQ_SIZE(enumerators)                       \
-    };                                                                        \
-                                                                              \
-    namespace detail {                                                        \
-        template<typename T>                                                  \
-        struct EnumTraits;                                                    \
-                                                                              \
-        template<>                                                            \
-        struct EnumTraits<name> {                                             \
-            static constexpr size_t count = BOOST_PP_SEQ_SIZE(enumerators);     \
-        };                                                                    \
-    }                                                                         \
-                                                                              \
-    inline const char* ToString(name v)                                       \
-    {                                                                         \
-        switch (v)                                                            \
-        {                                                                     \
-            BOOST_PP_SEQ_FOR_EACH(                                            \
-                X_DEFINE_ENUM_WITH_STRING_CONVERSIONS_TOSTRING_CASE,          \
-                бл,                                                            \
-                enumerators                                                   \
-            )                                                                 \
-            default: return "Unknown";                                         \
-        }                                                                     \
-    }
-
-    template<typename T>
-    inline const char* EnumToString()
+    inline static std::vector<const char*> StringViewToChar(const std::string_view* stringViewArray, size_t count)
     {
-        const char* o[detail::EnumTraits<T>::count];
-
-        for (int i = 0; i < detail::EnumTraits<T>::count; ++i)
+        std::vector<const char*> o{ count };
+        for (size_t i = 0; i < count; i++)
         {
-            o[i] = ToString((ShadowQuality)i);
+            o[i] = stringViewArray[i].data();
         }
 
         return o;
