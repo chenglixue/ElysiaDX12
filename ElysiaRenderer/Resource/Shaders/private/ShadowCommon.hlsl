@@ -37,7 +37,7 @@ float SampleShadowPCF(in Texture2D shadowMap, in SamplerComparisonState pcfSampl
 {
     float o = 0.f;
     
-    float lightDepth = shadowPos.z - 0.001f;
+    float lightDepth = shadowPos.z;
     
     float2 uv = shadowPos.xy * shadowSize.xy;
     float2 shadowMapSizeInv = shadowSize.zw;
@@ -51,10 +51,30 @@ float SampleShadowPCF(in Texture2D shadowMap, in SamplerComparisonState pcfSampl
     baseUV *= shadowMapSizeInv;
     
     #if defined (SHADOW_QUALITY_LOW)
-    o = shadowMap.SampleCmpLevelZero(pcfSampler, shadowPos.xy, lightDepth);
+    //o = shadowMap.SampleCmpLevelZero(pcfSampler, shadowPos.xy, lightDepth);
+    #elif defined (SHADOW_QUALITY_MIDDLE)
+    #elif defined (SHADOW_QUALITY_HIGH)
+    #elif defined (SHADOW_QUALITY_VERYHIGH)
     #endif
     
+    float uw0 = (3 - 2 * s);
+    float uw1 = (1 + 2 * s);
     
+    float u0 = (2 - s) / uw0 - 1;
+    float u1 = s / uw1 + 1;
+    
+    float vw0 = (3 - 2 * t);
+    float vw1 = (1 + 2 * t);
+    
+    float v0 = (2 - t) / vw0 - 1;
+    float v1 = t / vw1 + 1;
+    
+    o += uw0 * vw0 * SampleShadow(baseUV, u0, v0, shadowMapSizeInv, arrayIndex, lightDepth, shadowMap, pcfSampler);
+    o += uw1 * vw0 * SampleShadow(baseUV, u1, v0, shadowMapSizeInv, arrayIndex, lightDepth, shadowMap, pcfSampler);
+    o += uw0 * vw1 * SampleShadow(baseUV, u0, v1, shadowMapSizeInv, arrayIndex, lightDepth, shadowMap, pcfSampler);
+    o += uw1 * vw1 * SampleShadow(baseUV, u1, v1, shadowMapSizeInv, arrayIndex, lightDepth, shadowMap, pcfSampler);
+    
+    o /= 16.f;
     
     return o;
 }

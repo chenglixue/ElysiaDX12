@@ -9,12 +9,12 @@ namespace ElysiaRenderer
 {
 	class DX12Device;
 
-	enum class ShadowQuality :uint8_t
+	enum class ShadowQuality : int
 	{
-		Low = 0, 
-		Middle = 1,
-		High = 2,
-		VeryHigh = 3
+		Low			= 0,
+		Middle		= 1,
+		High		= 2,
+		VeryHigh	= 3
 	};
 	
 	class ShadowManager : public IManager, IUpdate

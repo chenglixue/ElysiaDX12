@@ -12,8 +12,26 @@ namespace ElysiaRenderer
 		L"Sponza\\Sponza.fbx"
 	};
 
-	struct UserData
+	static std::once_flag singletonFlag;
+	class UserData
 	{
+	public:
+		UserData() = default;
+		UserData(const UserData&) = delete;
+		UserData& operator=(const UserData&) = delete;
+		UserData(UserData&&) = delete;
+		UserData& operator=(UserData&&) = delete;
+
+		static std::shared_ptr<UserData> GetInstance()
+		{
+			std::call_once(singletonFlag, [&] 
+				{
+					g_pUserData = std::shared_ptr<UserData>(new UserData());
+				});
+
+			return g_pUserData;
+		}
+
 		Vector3 lightColor = Vector3::One;
 		Vector3 lightDir = Vector3::One;
 		float lightIntensity = 1.f;
@@ -31,9 +49,10 @@ namespace ElysiaRenderer
 		float shadowDepthBias = 0;
 		float shadowSlopeDepthBias = 0;
 		float shadowMaxSlopeDepthBias = 0;
-	};
 
-	static UserData g_userData;
+	private:
+		static std::shared_ptr<UserData> g_pUserData;
+	};
 
 	inline static void DeSerializeUserData()
 	{
@@ -47,11 +66,11 @@ namespace ElysiaRenderer
 		{
 			FileReadSerializer readSerializer(stringToLPCWSTR(userDataFullPath));
 
-			SerializeData(readSerializer, g_userData);
+			SerializeData(readSerializer, *UserData::GetInstance());
 		}
 		else
 		{
-			g_userData = UserData();
+			UserData::GetInstance();
 		}
 	}
 
@@ -63,6 +82,6 @@ namespace ElysiaRenderer
 		auto userDataFullPath = std::filesystem::path(ElysiaHelper::GetAssetFullPath(assetsPath, filePath).c_str()).string();
 
 		FileWriteSerializer serializer(stringToLPCWSTR(userDataFullPath));
-		SerializeData(serializer, g_userData);
+		SerializeData(serializer, *UserData::GetInstance());
 	}
 }

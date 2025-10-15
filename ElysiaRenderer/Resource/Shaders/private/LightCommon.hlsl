@@ -4,6 +4,7 @@
 #include "ShadingModel.hlsl"
 #include "LightAccumulator.hlsl"
 #include "AmbientCubemap.hlsl"
+#include "ShadowCommon.hlsl"
 
 struct FLightingSplit
 {

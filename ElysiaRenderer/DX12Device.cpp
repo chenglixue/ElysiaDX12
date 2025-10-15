@@ -688,7 +688,7 @@ namespace ElysiaRenderer
 		pszArgs.emplace_back(L"EDITOR");
 
 		pszArgs.emplace_back(L"-D");
-		switch (g_userData.shadowQuality)
+		switch (UserData::GetInstance()->shadowQuality)
 		{
 			case ShadowQuality::Low:
 			{
@@ -710,13 +710,11 @@ namespace ElysiaRenderer
 				pszArgs.emplace_back(L"SHADOW_QUALITY_VERYHIGH");
 				break;
 			}
-			default :
+			default:
 			{
-				ThrowRuntimeError("Invalid shadow quality type");
 				break;
 			}
 		}
-
 		//
 		// Open source file.  
 		//

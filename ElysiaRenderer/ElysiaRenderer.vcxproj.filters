@@ -409,6 +409,10 @@
     <None Include="SimpleMath\SimpleMath.inl">
       <Filter>Header Files\Lib</Filter>
     </None>
+    <None Include="ShadowCommon.hlsl" />
+    <None Include="Resource\Shaders\private\ShadowCommon.hlsl">
+      <Filter>Resource Files\Shader\Priavte</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
