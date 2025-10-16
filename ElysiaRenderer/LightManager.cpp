@@ -1,4 +1,5 @@
 #include "LightManager.h"
+#include "UserData.h"
 
 namespace ElysiaRenderer
 {
@@ -19,9 +20,11 @@ namespace ElysiaRenderer
 
 	void LightManager::Update()
 	{
-		/*m_mainLight->m_lightColor = g_userData.lightColor;
-		m_mainLight->m_lightDir = g_userData.lightDir;
-		m_mainLight->m_lightIntensity = g_userData.lightIntensity;*/
+		auto& pUsetData = UserData::GetInstance();
+
+		m_mainLight->m_lightColor = pUsetData.lightColor;
+		m_mainLight->m_lightDir = pUsetData.lightDir;
+		m_mainLight->m_lightIntensity = pUsetData.lightIntensity;
 	}
 
 	DX12Light* LightManager::GetMainLight()
@@ -31,14 +34,15 @@ namespace ElysiaRenderer
 
 	void LightManager::CreatMainLight()
 	{
+		auto& pUserData = UserData::GetInstance();
 		if (m_mainLight != nullptr)
 		{
 			m_mainLight.reset();
-			m_mainLight = std::make_unique<DX12DirectionLight>(g_userData.lightColor, g_userData.lightDir, g_userData.lightIntensity);
+			m_mainLight = std::make_unique<DX12DirectionLight>(pUserData.lightColor, pUserData.lightDir, pUserData.lightIntensity);
 		}
 		else
 		{
-			m_mainLight = std::make_unique<DX12DirectionLight>(g_userData.lightColor, g_userData.lightDir, g_userData.lightIntensity);
+			m_mainLight = std::make_unique<DX12DirectionLight>(pUserData.lightColor, pUserData.lightDir, pUserData.lightIntensity);
 		}
 	}
 }

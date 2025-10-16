@@ -7,6 +7,20 @@ namespace ElysiaRenderer
 {
 	using namespace ElysiaHelper;
 
+	enum class ShadowQuality : uint8_t
+	{
+		Low = 0,
+		Middle = 1 << 0,
+		High = 1 << 1,
+		VeryHigh = 1 << 2
+	};
+
+	enum class ShadowType : uint8_t
+	{
+		Hard = 0,
+		Soft = 1 << 0
+	};
+
 	class DX12Shadow
 	{
 	public:

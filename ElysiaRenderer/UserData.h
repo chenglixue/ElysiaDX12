@@ -1,7 +1,10 @@
 #pragma once
 #include "stdafx.h"
 #include "Serialization.h"
-#include "ShadowManager.h"
+#include "DX12Shadow.h"
+#include <iostream>
+#include <mutex>
+#include <memory>
 
 namespace ElysiaRenderer
 {
@@ -12,24 +15,25 @@ namespace ElysiaRenderer
 		L"Sponza\\Sponza.fbx"
 	};
 
-	static std::once_flag singletonFlag;
 	class UserData
 	{
 	public:
-		UserData() = default;
+		UserData()
+		{
+			
+		}
 		UserData(const UserData&) = delete;
 		UserData& operator=(const UserData&) = delete;
 		UserData(UserData&&) = delete;
 		UserData& operator=(UserData&&) = delete;
 
-		static std::shared_ptr<UserData> GetInstance()
+		static UserData& GetInstance()
 		{
-			std::call_once(singletonFlag, [&] 
-				{
-					g_pUserData = std::shared_ptr<UserData>(new UserData());
+			std::call_once(m_initInstanceFlag, []() {
+				m_instance.reset(new UserData());
 				});
 
-			return g_pUserData;
+			return *m_instance;
 		}
 
 		Vector3 lightColor = Vector3::One;
@@ -45,14 +49,17 @@ namespace ElysiaRenderer
 		float AmbientCubemapIntensity = 1;
 		Vector3 AmbientCubemapTint = Vector3::One;
 
-		ShadowQuality shadowQuality;
+		ShadowType shadowType = ShadowType::Soft;
+		ShadowQuality shadowQuality = ShadowQuality::VeryHigh;
 		float shadowDepthBias = 0;
 		float shadowSlopeDepthBias = 0;
 		float shadowMaxSlopeDepthBias = 0;
 
 	private:
-		static std::shared_ptr<UserData> g_pUserData;
+		static std::unique_ptr<UserData> m_instance;
+		static std::once_flag m_initInstanceFlag;
 	};
+	
 
 	inline static void DeSerializeUserData()
 	{
@@ -66,7 +73,7 @@ namespace ElysiaRenderer
 		{
 			FileReadSerializer readSerializer(stringToLPCWSTR(userDataFullPath));
 
-			SerializeData(readSerializer, *UserData::GetInstance());
+			SerializeData(readSerializer, UserData::GetInstance());
 		}
 		else
 		{
@@ -82,6 +89,6 @@ namespace ElysiaRenderer
 		auto userDataFullPath = std::filesystem::path(ElysiaHelper::GetAssetFullPath(assetsPath, filePath).c_str()).string();
 
 		FileWriteSerializer serializer(stringToLPCWSTR(userDataFullPath));
-		SerializeData(serializer, *UserData::GetInstance());
+		SerializeData(serializer, UserData::GetInstance());
 	}
 }

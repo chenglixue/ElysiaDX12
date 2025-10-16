@@ -688,7 +688,7 @@ namespace ElysiaRenderer
 		pszArgs.emplace_back(L"EDITOR");
 
 		pszArgs.emplace_back(L"-D");
-		switch (UserData::GetInstance()->shadowQuality)
+		switch (UserData::GetInstance().shadowQuality)
 		{
 			case ShadowQuality::Low:
 			{
@@ -712,9 +712,31 @@ namespace ElysiaRenderer
 			}
 			default:
 			{
+				ThrowRuntimeError("inivalid shadow quality");
 				break;
 			}
 		}
+
+		pszArgs.emplace_back(L"-D");
+		switch (UserData::GetInstance().shadowType)
+		{
+			case ShadowType::Hard:
+			{
+				pszArgs.emplace_back(L"HARD_SHADOW");
+				break;
+			}
+			case ShadowType::Soft:
+			{
+				pszArgs.emplace_back(L"SOFT_SHADOW");
+				break;
+			}
+			default:
+			{
+				ThrowRuntimeError("inivalid shadow type");
+				break;
+			}
+		}
+
 		//
 		// Open source file.  
 		//

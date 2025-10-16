@@ -66,7 +66,6 @@ namespace ElysiaRenderer
 	void Renderer::Update()
 	{
 		//OnKeyboardInput();
-		m_pLightManager->GetMainLight()->m_lightDir = g_userData.lightDir;
 		m_pLightManager->Update();
 		m_pShadowManager->Update();
 		UpdateCBV();
@@ -128,6 +127,7 @@ namespace ElysiaRenderer
 	}
 	void Renderer::UpdatePassCBV()
 	{
+		auto& pUserData = UserData::GetInstance();
 		auto passParameter = m_pRenderSource->GetCBVPassParameter();
 
 		passParameter->screenSize = m_device->GetScreenSize();
@@ -145,9 +145,9 @@ namespace ElysiaRenderer
 			m_pShadowManager->GetMainShadow()->GetHeight()));
 		passParameter->shadowNearZ = m_pShadowManager->GetMainShadow()->GetNearZ();
 		passParameter->shadowFarZ = m_pShadowManager->GetMainShadow()->GetFarZ();
-		passParameter->shadowDepthBias = g_userData.shadowDepthBias / 100;
-		passParameter->shadowSlopeDepthBias = g_userData.shadowSlopeDepthBias / 100;
-		passParameter->shadowMaxSlopeDepthBias = g_userData.shadowMaxSlopeDepthBias / 100;
+		passParameter->shadowDepthBias = pUserData.shadowDepthBias / 100;
+		passParameter->shadowSlopeDepthBias = pUserData.shadowSlopeDepthBias / 100;
+		passParameter->shadowMaxSlopeDepthBias = pUserData.shadowMaxSlopeDepthBias / 100;
 
 		m_pBufferManager->GetSingleConstantBuffer(PER_PASS_SPACE)->SetMappedData(passParameter, sizeof(CBVMainPassParameter));
 		
@@ -161,20 +161,22 @@ namespace ElysiaRenderer
 	}
 	void Renderer::UpdateObjectCBV()
 	{
+		auto& pUserData = UserData::GetInstance();
+
 		for (UINT meshIndex = 0; meshIndex < m_pModelImporter->GetMeshCount(); ++meshIndex)
 		{
 			const auto& meshRenderer = m_pModelImporter->GetMeshRenderer(meshIndex);
 			auto objectConstantParameter = *meshRenderer.m_CBVObjectParameter;
 			for (UINT frameIndex = 0; frameIndex < NUM_FRAMES_IN_FLIGHT; ++frameIndex)
 			{
-				objectConstantParameter.baseColorTint = g_userData.BaseColorTint;
-				objectConstantParameter.opacity = g_userData.Opacity;
-				objectConstantParameter.cutoff = g_userData.Cutoff;
-				objectConstantParameter.normalIntensity = g_userData.NormalIntensity;
-				objectConstantParameter.metallicIntensity = g_userData.MetallicIntensity;
-				objectConstantParameter.roughnessIntensity = g_userData.RoughnessIntensity;
-				objectConstantParameter.ambientCubemapIntensity = g_userData.AmbientCubemapIntensity;
-				objectConstantParameter.ambientCubemapTint = g_userData.AmbientCubemapTint;
+				objectConstantParameter.baseColorTint = pUserData.BaseColorTint;
+				objectConstantParameter.opacity = pUserData.Opacity;
+				objectConstantParameter.cutoff = pUserData.Cutoff;
+				objectConstantParameter.normalIntensity = pUserData.NormalIntensity;
+				objectConstantParameter.metallicIntensity = pUserData.MetallicIntensity;
+				objectConstantParameter.roughnessIntensity = pUserData.RoughnessIntensity;
+				objectConstantParameter.ambientCubemapIntensity = pUserData.AmbientCubemapIntensity;
+				objectConstantParameter.ambientCubemapTint = pUserData.AmbientCubemapTint;
 
 				auto objectContantBuffer = m_pBufferManager->GetMutilConstantBuffer(PER_OBJECT_SPACE, frameIndex, meshIndex);
 				objectContantBuffer->SetMappedData(&objectConstantParameter, sizeof(CBVObjectParameter));
@@ -372,34 +374,43 @@ namespace ElysiaRenderer
 	}
 	void Renderer::AddUIItems()
 	{
+		auto& pUserData = UserData::GetInstance();
+
 		if (ImGui::CollapsingHeader("Light"))
 		{
 			auto mainLight = m_pRenderSource->GetCBVPassParameter();
-			ImGui::ColorEdit3("Color", (float*)&g_userData.lightColor);
-			ImGui::DragFloat3("Direction", (float*)&g_userData.lightDir, 1, -1, 1);
-			ImGui::SliderFloat("Intensity", &g_userData.lightIntensity, 0, 5);
+			ImGui::ColorEdit3("Color", (float*)&pUserData.lightColor);
+			ImGui::DragFloat3("Direction", (float*)&pUserData.lightDir, 1, -1, 1);
+			ImGui::SliderFloat("Intensity", &pUserData.lightIntensity, 0, 5);
 
-			static int shadowQualityIndex = (int)g_userData.shadowQuality;
+			int shadowTypeIndex = (int)pUserData.shadowType;
+			ImGui::Combo("Shadow Type", &shadowTypeIndex,
+				StringViewToChar(magic_enum::enum_names<ShadowType>().data(), magic_enum::enum_count<ShadowType>()).data(),
+				(int)magic_enum::enum_count<ShadowType>());
+			pUserData.shadowType = (ShadowType)shadowTypeIndex;
+
+
+			int shadowQualityIndex = (int)pUserData.shadowQuality;
 			ImGui::Combo("Shadow Quality", &shadowQualityIndex, 
 				StringViewToChar(magic_enum::enum_names<ShadowQuality>().data(), magic_enum::enum_count<ShadowQuality>()).data(),
 				(int)magic_enum::enum_count<ShadowQuality>());
-			g_userData.shadowQuality = (ShadowQuality)shadowQualityIndex;
+			pUserData.shadowQuality = (ShadowQuality)shadowQualityIndex;
 
-			ImGui::SliderFloat("Shadow Depth Bias", &g_userData.shadowDepthBias, 0, 10);
-			ImGui::SliderFloat("Shadow Slope Depth Bias", &g_userData.shadowSlopeDepthBias, 0, 10);
-			ImGui::SliderFloat("Shadow Max Slope Depth Bias", &g_userData.shadowMaxSlopeDepthBias, 0, 10);
+			ImGui::SliderFloat("Shadow Depth Bias", &pUserData.shadowDepthBias, 0, 10);
+			ImGui::SliderFloat("Shadow Slope Depth Bias", &pUserData.shadowSlopeDepthBias, 0, 10);
+			ImGui::SliderFloat("Shadow Max Slope Depth Bias", &pUserData.shadowMaxSlopeDepthBias, 0, 10);
 		}
 
 		if (ImGui::CollapsingHeader("PBR Data"))
 		{
-			ImGui::ColorEdit3("Base Color Tint", (float*)&g_userData.BaseColorTint);
-			ImGui::SliderFloat("Opacity", &g_userData.Opacity, 0.f, 1.f);
-			ImGui::SliderFloat("Cutoff", &g_userData.Cutoff, 0.f, 1.f);
-			ImGui::SliderFloat("Normal Intensity", &g_userData.NormalIntensity, 0.f, 5.f);
-			ImGui::SliderFloat("Metallic Intensity", &g_userData.MetallicIntensity, 0.f, 5.f);
-			ImGui::SliderFloat("Roughness Intensity", &g_userData.RoughnessIntensity, 0.f, 5.f);
-			ImGui::SliderFloat("Ambient Cubemap Intensity", &g_userData.AmbientCubemapIntensity, 0.f, 2.f);
-			ImGui::ColorEdit3("Ambient Cubemap Tint", (float*)&g_userData.AmbientCubemapTint);
+			ImGui::ColorEdit3("Base Color Tint", (float*)&pUserData.BaseColorTint);
+			ImGui::SliderFloat("Opacity", &pUserData.Opacity, 0.f, 1.f);
+			ImGui::SliderFloat("Cutoff", &pUserData.Cutoff, 0.f, 1.f);
+			ImGui::SliderFloat("Normal Intensity", &pUserData.NormalIntensity, 0.f, 5.f);
+			ImGui::SliderFloat("Metallic Intensity", &pUserData.MetallicIntensity, 0.f, 5.f);
+			ImGui::SliderFloat("Roughness Intensity", &pUserData.RoughnessIntensity, 0.f, 5.f);
+			ImGui::SliderFloat("Ambient Cubemap Intensity", &pUserData.AmbientCubemapIntensity, 0.f, 2.f);
+			ImGui::ColorEdit3("Ambient Cubemap Tint", (float*)&pUserData.AmbientCubemapTint);
 		}
 	}
 

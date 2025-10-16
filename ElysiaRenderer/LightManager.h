@@ -3,7 +3,6 @@
 #include "IManager.h"
 #include "IUpdate.h"
 #include "DX12Light.h"
-#include "UserData.h"
 
 namespace ElysiaRenderer
 {

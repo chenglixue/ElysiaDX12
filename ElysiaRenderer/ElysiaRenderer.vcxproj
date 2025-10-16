@@ -323,6 +323,7 @@
     <ClCompile Include="ShadowManager.cpp" />
     <ClCompile Include="TextureManager.cpp" />
     <ClCompile Include="Transform.cpp" />
+    <ClCompile Include="UserData.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\x64\Debug\Tex\CyborgWeapon_BaseColor.dds" />
