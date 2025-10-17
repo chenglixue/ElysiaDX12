@@ -131,7 +131,7 @@ namespace ElysiaRenderer
 		auto passParameter = m_pRenderSource->GetCBVPassParameter();
 
 		passParameter->screenSize = m_device->GetScreenSize();
-		passParameter->frameIndex = m_device->GetFrameID();
+		passParameter->frameIndex = m_device->GetFrameIndex();
 		passParameter->cameraPosWS = m_pCameraManager->GetMainCamera()->GetPosition4();
 		passParameter->viewMatrix = m_pCameraManager->GetMainCamera()->GetViewMat();
 		passParameter->projMatrix = m_pCameraManager->GetMainCamera()->GetProj();
@@ -148,6 +148,9 @@ namespace ElysiaRenderer
 		passParameter->shadowDepthBias = pUserData.shadowDepthBias / 100;
 		passParameter->shadowSlopeDepthBias = pUserData.shadowSlopeDepthBias / 100;
 		passParameter->shadowMaxSlopeDepthBias = pUserData.shadowMaxSlopeDepthBias / 100;
+
+		auto sobolSequence = Create2DSobolSqeuence(64);
+		memcpy(passParameter->sobolSequence.data(), sobolSequence.data(), sobolSequence.size() * sizeof(Vector2));
 
 		m_pBufferManager->GetSingleConstantBuffer(PER_PASS_SPACE)->SetMappedData(passParameter, sizeof(CBVMainPassParameter));
 		
@@ -198,7 +201,7 @@ namespace ElysiaRenderer
 
 		CreateCreamDepthRT();
 		m_pShadowManager->SetMainLight(m_pLightManager->GetMainLight());
-		m_pShadowManager->CreateMainShadow(4096, 15);
+		m_pShadowManager->CreateMainShadow(15);
 		m_pRenderSource->GetCBVPassParameter()->ShadowTexIndex = m_pShadowManager->GetMainShadow()->GetShadowRT()->GetResourceHeapIndex();
 
 		CreatePOS();
@@ -290,6 +293,19 @@ namespace ElysiaRenderer
 			auto newTex = std::move(m_device->CreateTextureFromFile(texBufferCreateDesc));
 			 
 			m_pRenderSource->GetCBVPassParameter()->SkyboxTexIndex = newTex->GetResourceHeapIndex();
+
+			m_pTextureManager->AddTextureResource(std::move(newTex));
+		}
+
+		{
+			WCHAR assetsPath[512];
+			ElysiaHelper::GetAssetsPath(assetsPath, _countof(assetsPath));
+			texBufferCreateDesc.texturePath = StringToWstring(std::filesystem::path(assetsPath).string() + "Tex\\bluenoise_frd_1024x1024.png");
+			texBufferCreateDesc.isSRGB = false;
+
+			auto newTex = std::move(m_device->CreateTextureFromFile(texBufferCreateDesc));
+
+			m_pRenderSource->GetCBVPassParameter()->BlueNoiseTexIndex = newTex->GetResourceHeapIndex();
 
 			m_pTextureManager->AddTextureResource(std::move(newTex));
 		}

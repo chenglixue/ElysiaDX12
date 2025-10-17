@@ -219,6 +219,7 @@ namespace ElysiaRenderer
 			m_destructionQueues[i].m_pipelineStates = std::make_unique<std::vector<DX12PipelineState>>();
 		}*/
 		m_frameID = 0;
+		m_frameIndex = 0;
 		m_freeReservedDescriptorIndices.resize(NUM_RESERVED_SRV_DESCRIPTORS - 1);
 		std::iota(m_freeReservedDescriptorIndices.begin(), m_freeReservedDescriptorIndices.end(), 1);
 	}
@@ -688,7 +689,8 @@ namespace ElysiaRenderer
 		pszArgs.emplace_back(L"EDITOR");
 
 		pszArgs.emplace_back(L"-D");
-		switch (UserData::GetInstance().shadowQuality)
+		auto& usetData = UserData::GetInstance();
+		switch (usetData.shadowQuality)
 		{
 			case ShadowQuality::Low:
 			{
@@ -712,6 +714,7 @@ namespace ElysiaRenderer
 			}
 			default:
 			{
+				pszArgs.emplace_back(L"SHADOW_QUALITY_VERYHIGH");
 				ThrowRuntimeError("inivalid shadow quality");
 				break;
 			}
@@ -1197,6 +1200,7 @@ namespace ElysiaRenderer
 
 	void DX12Device::BeginFrame()
 	{
+		m_frameIndex++;
 		m_frameID = (m_frameID + 1) % NUM_FRAMES_IN_FLIGHT;
 
 		// wait on fences from 2 frames ago

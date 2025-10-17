@@ -1,50 +1,5 @@
 ﻿  Skipping vcpkg. (no packages)
 cl : command line  warning D9014: invalid value '18' for '/wd'; assuming '5999'
-  DX12Device.cpp
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file 'DX12Device.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12BufferResource.h(63,11): warning C4244: 'return': conversion from 'const size_t' to 'float', possible loss of data
-  (compiling source file 'DX12Device.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12BufferResource.h(84,15): warning C4244: '=': conversion from 'float' to 'size_t', possible loss of data
-  (compiling source file 'DX12Device.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12PipelineState.h(7,32): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12RootSignature' when no variable is declared
-  (compiling source file 'DX12Device.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12PipelineState.h(8,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Shader' when no variable is declared
-  (compiling source file 'DX12Device.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12GraphicsContext.h(8,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
-  (compiling source file 'DX12Device.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12UploadContext.h(9,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
-  (compiling source file 'DX12Device.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.cpp(310,59): warning C4244: '=': conversion from 'float' to 'UINT', possible loss of data
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.cpp(331,59): warning C4244: '=': conversion from 'float' to 'UINT', possible loss of data
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.cpp(667,11): warning C4129: 'S': unrecognized character escape sequence
-  DX12Shadow.cpp
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file 'DX12Shadow.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12BufferResource.h(63,11): warning C4244: 'return': conversion from 'const size_t' to 'float', possible loss of data
-  (compiling source file 'DX12Shadow.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12BufferResource.h(84,15): warning C4244: '=': conversion from 'float' to 'size_t', possible loss of data
-  (compiling source file 'DX12Shadow.cpp')
-  
-  LightManager.cpp
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file 'LightManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12BufferResource.h(63,11): warning C4244: 'return': conversion from 'const size_t' to 'float', possible loss of data
-  (compiling source file 'LightManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12BufferResource.h(84,15): warning C4244: '=': conversion from 'float' to 'size_t', possible loss of data
-  (compiling source file 'LightManager.cpp')
-  
   Renderer.cpp
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
   (compiling source file 'Renderer.cpp')
@@ -67,48 +22,31 @@ D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12GraphicsContext.h(8,25): warning C4091
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12UploadContext.h(9,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
   (compiling source file 'Renderer.cpp')
   
-D:\DX12\ElysiaRenderer\ElysiaRenderer\CBVParameter.h(62,17): warning C4244: 'initializing': conversion from 'float' to 'UINT', possible loss of data
+D:\DX12\ElysiaRenderer\ElysiaRenderer\CBVParameter.h(65,17): warning C4244: 'initializing': conversion from 'float' to 'UINT', possible loss of data
+  (compiling source file 'Renderer.cpp')
+  
+D:\DX12\ElysiaRenderer\ElysiaRenderer\SobolSequenceGenerator.h(155,27): warning C4018: '<': signed/unsigned mismatch
+  (compiling source file 'Renderer.cpp')
+  
+D:\DX12\ElysiaRenderer\ElysiaRenderer\SobolSequenceGenerator.h(163,29): warning C4244: '=': conversion from '_Ty' to 'float', possible loss of data
+D:\DX12\ElysiaRenderer\ElysiaRenderer\SobolSequenceGenerator.h(163,29): warning C4244:         with
+D:\DX12\ElysiaRenderer\ElysiaRenderer\SobolSequenceGenerator.h(163,29): warning C4244:         [
+D:\DX12\ElysiaRenderer\ElysiaRenderer\SobolSequenceGenerator.h(163,29): warning C4244:             _Ty=double
+D:\DX12\ElysiaRenderer\ElysiaRenderer\SobolSequenceGenerator.h(163,29): warning C4244:         ]
+  (compiling source file 'Renderer.cpp')
+  
+D:\DX12\ElysiaRenderer\ElysiaRenderer\SobolSequenceGenerator.h(164,29): warning C4244: '=': conversion from '_Ty' to 'float', possible loss of data
+D:\DX12\ElysiaRenderer\ElysiaRenderer\SobolSequenceGenerator.h(164,29): warning C4244:         with
+D:\DX12\ElysiaRenderer\ElysiaRenderer\SobolSequenceGenerator.h(164,29): warning C4244:         [
+D:\DX12\ElysiaRenderer\ElysiaRenderer\SobolSequenceGenerator.h(164,29): warning C4244:             _Ty=double
+D:\DX12\ElysiaRenderer\ElysiaRenderer\SobolSequenceGenerator.h(164,29): warning C4244:         ]
   (compiling source file 'Renderer.cpp')
   
 D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(145,48): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
 D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(144,96): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(174,47): warning C4244: '=': conversion from 'float' to 'UINT', possible loss of data
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(502,54): warning C4267: 'argument': conversion from 'size_t' to 'UINT', possible loss of data
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(556,54): warning C4267: 'argument': conversion from 'size_t' to 'UINT', possible loss of data
-  ShadowManager.cpp
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file 'ShadowManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12BufferResource.h(63,11): warning C4244: 'return': conversion from 'const size_t' to 'float', possible loss of data
-  (compiling source file 'ShadowManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12BufferResource.h(84,15): warning C4244: '=': conversion from 'float' to 'size_t', possible loss of data
-  (compiling source file 'ShadowManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12PipelineState.h(7,32): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12RootSignature' when no variable is declared
-  (compiling source file 'ShadowManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12PipelineState.h(8,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Shader' when no variable is declared
-  (compiling source file 'ShadowManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12GraphicsContext.h(8,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
-  (compiling source file 'ShadowManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12UploadContext.h(9,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
-  (compiling source file 'ShadowManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\ShadowManager.cpp(47,42): warning C4244: '=': conversion from 'float' to 'UINT64', possible loss of data
-D:\DX12\ElysiaRenderer\ElysiaRenderer\ShadowManager.cpp(48,43): warning C4244: '=': conversion from 'float' to 'UINT', possible loss of data
-  UserData.cpp
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file 'UserData.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12BufferResource.h(63,11): warning C4244: 'return': conversion from 'const size_t' to 'float', possible loss of data
-  (compiling source file 'UserData.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12BufferResource.h(84,15): warning C4244: '=': conversion from 'float' to 'size_t', possible loss of data
-  (compiling source file 'UserData.cpp')
-  
+D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(177,47): warning C4244: '=': conversion from 'float' to 'UINT', possible loss of data
+D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(518,54): warning C4267: 'argument': conversion from 'size_t' to 'UINT', possible loss of data
+D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(572,54): warning C4267: 'argument': conversion from 'size_t' to 'UINT', possible loss of data
   main.cpp
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
   (compiling source file 'main.cpp')
@@ -131,12 +69,29 @@ D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12GraphicsContext.h(8,25): warning C4091
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12UploadContext.h(9,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
   (compiling source file 'main.cpp')
   
-D:\DX12\ElysiaRenderer\ElysiaRenderer\CBVParameter.h(62,17): warning C4244: 'initializing': conversion from 'float' to 'UINT', possible loss of data
+D:\DX12\ElysiaRenderer\ElysiaRenderer\CBVParameter.h(65,17): warning C4244: 'initializing': conversion from 'float' to 'UINT', possible loss of data
+  (compiling source file 'main.cpp')
+  
+D:\DX12\ElysiaRenderer\ElysiaRenderer\SobolSequenceGenerator.h(155,27): warning C4018: '<': signed/unsigned mismatch
+  (compiling source file 'main.cpp')
+  
+D:\DX12\ElysiaRenderer\ElysiaRenderer\SobolSequenceGenerator.h(163,29): warning C4244: '=': conversion from '_Ty' to 'float', possible loss of data
+D:\DX12\ElysiaRenderer\ElysiaRenderer\SobolSequenceGenerator.h(163,29): warning C4244:         with
+D:\DX12\ElysiaRenderer\ElysiaRenderer\SobolSequenceGenerator.h(163,29): warning C4244:         [
+D:\DX12\ElysiaRenderer\ElysiaRenderer\SobolSequenceGenerator.h(163,29): warning C4244:             _Ty=double
+D:\DX12\ElysiaRenderer\ElysiaRenderer\SobolSequenceGenerator.h(163,29): warning C4244:         ]
+  (compiling source file 'main.cpp')
+  
+D:\DX12\ElysiaRenderer\ElysiaRenderer\SobolSequenceGenerator.h(164,29): warning C4244: '=': conversion from '_Ty' to 'float', possible loss of data
+D:\DX12\ElysiaRenderer\ElysiaRenderer\SobolSequenceGenerator.h(164,29): warning C4244:         with
+D:\DX12\ElysiaRenderer\ElysiaRenderer\SobolSequenceGenerator.h(164,29): warning C4244:         [
+D:\DX12\ElysiaRenderer\ElysiaRenderer\SobolSequenceGenerator.h(164,29): warning C4244:             _Ty=double
+D:\DX12\ElysiaRenderer\ElysiaRenderer\SobolSequenceGenerator.h(164,29): warning C4244:         ]
   (compiling source file 'main.cpp')
   
   Generating Code...
 D:\DX12\ElysiaRenderer\ElysiaRenderer\main.cpp(293): warning C4715: 'WndProc': not all control paths return a value
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.h(56): warning C4172: returning address of local variable or temporary
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.h(60): warning C4172: returning address of local variable or temporary
   ElysiaRenderer.vcxproj -> D:\DX12\ElysiaRenderer\x64\Debug\ElysiaRenderer.exe
   D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Mesh\diablo3_pose.obj
   D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Mesh\LOW_WEPON.fbx
@@ -240,6 +195,7 @@ D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.h(56): warning C4172: returning
   D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Vase_diffuse.png
   D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Vase_normal.png
   D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Vase_roughness.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Tex\bluenoise_frd_1024x1024.png
   D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Tex\cubemap0.dds
   D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Tex\CyborgWeapon_BaseColor.dds
   D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Tex\CyborgWeapon_Metallic.dds
@@ -249,4 +205,4 @@ D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.h(56): warning C4172: returning
   D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Tex\GGX_E_LUT.dds
   D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Tex\Skybox.dds
   D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Tex\Wood.dds
-  111 File(s) copied
+  112 File(s) copied

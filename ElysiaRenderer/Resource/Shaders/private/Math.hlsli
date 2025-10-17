@@ -897,4 +897,11 @@ float3 GetScreenVectorWS(float3 cameraPosWS, float3 targetPosWS)
     return normalize(targetPosWS - cameraPosWS);
 }
 
+float2 RotateVec2(float2 v, float angle)
+{
+    float s = sin(angle);
+    float c = cos(angle);
+
+    return float2(v.x * c + v.y * s, -v.x * s + v.y * c);
+}
 #endif

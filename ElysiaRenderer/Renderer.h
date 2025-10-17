@@ -18,6 +18,7 @@
 #include "RenderResource.h"
 #include "ModelImporter.h"
 #include "UserData.h"
+#include "SobolSequenceGenerator.h"
 #include "Common.h"  
 
 namespace ElysiaRenderer 
@@ -134,6 +135,7 @@ namespace ElysiaRenderer
 		void DrawOpaque(); 
 		void DrawSkybox();
 		void DrawUI();
-	}; 
+	};  
 }
-     
+
+      

@@ -33,10 +33,13 @@ namespace ElysiaRenderer
 		int GGX_Eavg_LUT_Index = -1;
 		int SkyboxTexIndex = -1;
 		int ShadowTexIndex = -1;
+		int BlueNoiseTexIndex = -1;
 
 		float shadowDepthBias = 0;
 		float shadowSlopeDepthBias = 0;
 		float shadowMaxSlopeDepthBias = 0;
+
+		std::array<Vector2,64> sobolSequence;
 	};
 
 	struct alignas(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT) CBVObjectParameter

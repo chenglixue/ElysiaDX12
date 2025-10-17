@@ -82,10 +82,13 @@ cbuffer PassConstant : register(b0, perPassSpace)
     int GGX_Eavg_LUT_Index;
     int SkyboxTexIndex;
     int ShadowTexIndex;
+    int BlueNoiseTexIndex;
     
     float shadowDepthBias;
     float shadowSlopeDepthBias;
     float shadowMaxSlopeDepthBias;
+    
+    Vector2 g_sobolSequence[64];
 };
 
 //cbuffer PerShadowPassBuffer : register(b1, perPassSpace)

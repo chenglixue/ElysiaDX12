@@ -3,7 +3,7 @@
 
     #include <private\Light.hlsl>
     #include <private\LightCommon.hlsl>
-      #include <private\SharedCommon.hlsli>
+    #include <private\SharedCommon.hlsli>
 #else
     #include "../private\ShadingCommon.hlsl"
 
@@ -73,7 +73,7 @@ PSOutput PS(PSInput i)
     LightData mainLightData = GetMainLight(mainLight);
     MaterialData materialData = GetMaterialData(inputParam);
     
-    float shadow = SunShadowVisibility(inputParam.PositionWS, 0);
+    float shadow = SunShadowVisibility(inputParam.PositionWS, inputParam.ScreenUV, 0);
     
     float4 lighting = GetDynamicLighting(inputParam, materialData, mainLightData) * shadow;
     lighting += float4(GetIBL(inputParam, materialData, mainLightData.toLight), 1.f);

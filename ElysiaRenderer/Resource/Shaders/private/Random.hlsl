@@ -1,3 +1,5 @@
+#ifndef RANDOM_H
+#define RANDOM_H
 #pragma once
 #include "SharedCommon.hlsli"
 
@@ -41,6 +43,29 @@ float RandFast(uint2 PixelPos, float Magic = 3571.0)
     float Random = frac(dot(Random2 * Random2, Magic));
     Random = frac(Random * Random * (2 * Magic));
     return Random;
+}
+
+uint ElysiaRandomSeed(float2 uv, float2 screenWH)
+{
+    return uint(
+        uint(uv.x * screenWH.x) * uint(1973) +
+        uint(uv.y * screenWH.y) * uint(9277) +
+        uint(114514) * uint(26699)) | uint(1);
+}
+
+uint wang_hash(inout uint seed)
+{
+    seed = uint(seed ^ uint(61)) ^ uint(seed >> uint(16));
+    seed *= uint(9);
+    seed = seed ^ (seed >> 4);
+    seed *= uint(0x27d4eb2d);
+    seed = seed ^ (seed >> 15);
+    return seed;
+}
+
+float ElysiaRand(inout uint seed)
+{
+    return float(wang_hash(seed)) / 4294967296.0;
 }
 
 // This is the largest prime < 2^12 so s*s will fit in a 24-bit floating point mantissa
@@ -701,4 +726,56 @@ float3 UnSkewSimplex(float3 In)
     return In - dot(In, 1.0 / 6.0f);
 }
 
+inline uint3 hash_int(uint3 x)
+{
+    const uint k = 1103515245;
+    x = ((x >> 8) ^ x.yzx) * k;
+    x = ((x >> 8) ^ x.yzx) * k;
+    x = ((x >> 8) ^ x.yzx) * k;
+    return (x);
+}
+inline uint4 hash_int(uint4 x)
+{
+    const uint k = 1103515245;
+    x = ((x >> 8) ^ x.yzwx) * k;
+    x = ((x >> 8) ^ x.yzwx) * k;
+    x = ((x >> 8) ^ x.yzwx) * k;
+    return (x);
+}
+inline uint2 hash_int(uint2 x)
+{
+    const uint k = 1103515245;
+    x = ((x >> 8) ^ x.yx) * k;
+    x = ((x >> 8) ^ x.yx) * k;
+    x = ((x >> 8) ^ x.yx) * k;
+    return (x);
+}
 
+inline float4 GetSobolNumber(float4 sobol, const float4 rng)
+{
+    uint4 tmp_rng = hash_int(asuint(rng));
+    float4 shift = tmp_rng * (1.0 / (float) 0xFFFFFFFF);
+    return frac(sobol + shift);
+}
+
+// Linear Congruential Generator (LCG) to generate random numbers
+uint LCG(inout uint seed)
+{
+    uint a = 1664525u;
+    uint c = 1013904223u;
+    seed = (a * seed + c) & 0xFFFFFFFFu;
+    return seed;
+}
+
+// Function to initialize and update rng
+float4 GenerateRNG(in uint seed)
+{
+    uint4 rng_seed;
+    rng_seed.x = LCG(seed);
+    rng_seed.y = LCG(seed);
+    rng_seed.z = LCG(seed);
+    rng_seed.w = LCG(seed);
+    return asfloat(rng_seed);
+}
+
+#endif

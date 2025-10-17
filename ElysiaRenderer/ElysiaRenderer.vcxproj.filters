@@ -274,6 +274,9 @@
     <ClInclude Include="Common.h">
       <Filter>Header Files\Utility</Filter>
     </ClInclude>
+    <ClInclude Include="SobolSequenceGenerator.h">
+      <Filter>Header Files\Utility</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -373,9 +376,6 @@
     <None Include="Resource\Shaders\private\MonteCarlo.hlsl">
       <Filter>Resource Files\Shader\Priavte</Filter>
     </None>
-    <None Include="Resource\Shaders\private\Random.hlsl">
-      <Filter>Resource Files\Shader\Priavte</Filter>
-    </None>
     <None Include="Resource\Shaders\private\AmbientCubemap.hlsl">
       <Filter>Resource Files\Shader\Priavte</Filter>
     </None>
@@ -411,6 +411,9 @@
     </None>
     <None Include="ShadowCommon.hlsl" />
     <None Include="Resource\Shaders\private\ShadowCommon.hlsl">
+      <Filter>Resource Files\Shader\Priavte</Filter>
+    </None>
+    <None Include="Resource\Shaders\private\Random.hlsl">
       <Filter>Resource Files\Shader\Priavte</Filter>
     </None>
   </ItemGroup>
@@ -592,6 +595,9 @@
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
     <ClCompile Include="UserData.cpp">
+      <Filter>Source Files\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="SobolSequenceGenerator.cpp">
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
   </ItemGroup>

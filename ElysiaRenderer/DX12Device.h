@@ -51,6 +51,10 @@ namespace ElysiaRenderer
 		{
 			return m_frameID;
 		}
+		UINT					GetFrameIndex() const
+		{
+			return m_frameIndex;
+		}
 		const XMFLOAT4&			GetScreenSize() const
 		{
 			return XMFLOAT4(static_cast<float>(m_screenSize.x), static_cast<float>(m_screenSize.y), 
@@ -126,6 +130,7 @@ namespace ElysiaRenderer
 		void ProcessDestruction(UINT frameIndex);
 
 		ElysiaHelper::UINT2 m_screenSize;
+		UINT m_frameIndex;
 		UINT m_frameID;
 
 		ID3D12Device5* m_device = nullptr;
