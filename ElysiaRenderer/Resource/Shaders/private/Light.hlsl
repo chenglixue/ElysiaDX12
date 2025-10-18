@@ -1,3 +1,6 @@
+#ifndef LIGHT
+#define LIGHT
+
 #pragma once
 
 #include "SharedCommon.hlsli"
@@ -18,3 +21,5 @@ LightData GetMainLight(Light light)
 
     return o;
 }
+
+#endif

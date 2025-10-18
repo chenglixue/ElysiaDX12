@@ -4,7 +4,7 @@
 #include "SharedCommon.hlsli"
 #include "Random.hlsl"
 
-#define N_SAMPLE 6
+#define N_SAMPLE 60
 static float2 g_PoissonDisk[] =
 {
     float2(-0.5119625f, -0.4827938f),
@@ -258,15 +258,16 @@ inline float ManualSobelPCF(float2 screenUV, float2 shadowPos, float lightDepth,
     
     float radius = 0.001;
     
+    
+    
     for (int i = 0; i < N_SAMPLE; ++i)
     {
-        float2 offset = g_sobolSequence[i];
+        float2 offset = g_PoissonDisk[i];
         offset = RotateVec2(offset, rotateAngle);
         float2 uvo = shadowPos + offset * radius;
         
         float shadowValue = shadowTex.SampleCmpLevelZero(pointShadowSampler, uvo, lightDepth).r;
         o += shadowValue;
-
     }
     o /= N_SAMPLE;
     
@@ -280,6 +281,8 @@ float SampleShadowPCF(in Texture2D shadowMap,
     
     SamplerComparisonState compShadowSampler = SamplerDescriptorHeap[ShadowClampLinearSampler];
     SamplerState pointShadowSampler = SamplerDescriptorHeap[ClampPointSampler];
+    
+    float4 rng = GenerateRNG(frameIndex);
     
 #if defined(HARD_SHADOW)
     o = shadowMap.SampleCmpLevelZero(compShadowSampler, shadowPos.xy, shadowPos.z);

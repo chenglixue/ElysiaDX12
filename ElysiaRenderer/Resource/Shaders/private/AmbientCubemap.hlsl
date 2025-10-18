@@ -1,3 +1,6 @@
+#ifndef AMBIENTCUBEMAP
+#define AMBIENTCUBEMAP
+
 #pragma once
 
 #include "SharedCommon.hlsli"
@@ -229,3 +232,5 @@ float3 GetIBL(FInputParams inputParams, MaterialData materialData, float3 toLigh
     
     return o;
 }
+
+#endif

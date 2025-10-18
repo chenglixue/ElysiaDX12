@@ -1,3 +1,6 @@
+#ifndef LIGHT_ACCUMULATOR_H
+#define LIGHT_ACCUMULATOR_H
+
 #pragma once
 
 #include "SharedCommon.hlsli"
@@ -26,3 +29,5 @@ float3 GetLightAccumulator_Result(FLightAccumulator LightAccumulator)
     
     return o;
 }
+
+#endif

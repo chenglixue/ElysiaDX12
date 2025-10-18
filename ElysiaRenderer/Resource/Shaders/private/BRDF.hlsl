@@ -1,3 +1,6 @@
+#ifndef BRDF_H
+#define BRDF_H
+
 #pragma once
 
 #include "SharedCommon.hlsli"
@@ -410,3 +413,5 @@ float EnvBRDFApproxNonMetal(float Roughness, float NoV)
     float2 r = Roughness * c0 + c1;
     return min(r.x * r.x, exp2(-9.28 * NoV)) * r.x + r.y;
 }
+
+#endif

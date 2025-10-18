@@ -1,3 +1,6 @@
+#ifndef MONTE_CARLO_H
+#define MONTE_CARLO_H
+
 #pragma once
 
 #include "SharedCommon.hlsli"
@@ -564,3 +567,5 @@ void poissonDiskSamples(float2 randomSeed)
 		angle += ANGLE_STEP;
 	}
 }
+
+#endif

@@ -1,3 +1,6 @@
+#ifndef SHADING_COMMON_H
+#define SHADING_COMMON_H
+
 #pragma once
 
 #include "SharedCommon.hlsli"
@@ -174,3 +177,5 @@ FDecodeGBufferData GetDecodeGBufferData(float2 uv, float3x3 TBN, bool bGetNormal
 
     return o;
 }
+
+#endif

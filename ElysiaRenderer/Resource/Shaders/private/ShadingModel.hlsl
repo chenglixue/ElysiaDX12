@@ -1,3 +1,6 @@
+#ifndef SHADING_MODEL_H
+#define SHADING_MODEL_H
+
 #pragma once
 
 #include "SharedCommon.hlsli"
@@ -128,3 +131,5 @@ FDirectLighting EvaluateBxDF(MaterialData materialData, float3 N, float3 V, floa
     
     return IntegrateBxDF(materialData, N, V, L, 1, NoL, AreaLight, Shadow);
 }
+
+#endif

@@ -1,3 +1,6 @@
+#ifndef LIGHT_COMMON_H
+#define LIGHT_COMMON_H
+
 #pragma once
 
 #include "SharedCommon.hlsli"
@@ -72,3 +75,5 @@ float4 GetDynamicLighting(FInputParams inputData, MaterialData materialData, Lig
     
     return o;
 }
+
+#endif

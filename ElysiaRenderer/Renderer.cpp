@@ -61,6 +61,9 @@ namespace ElysiaRenderer
 		m_pCameraManager->CreateMainCamera(Vector3(-11.5f, 200.85f, -0.45f) ,
 			m_aspectRatio, 3.14159f / 4.0f, 0.1f, 2000.f);
 
+		auto sobolSequence = Create2DSobolSqeuence(64);
+		memcpy(m_pRenderSource->GetCBVPassParameter()->sobolSequence.data(), sobolSequence.data(), sobolSequence.size() * sizeof(Vector2));
+
 		InitTexTriangle();
 	}
 	void Renderer::Update()
@@ -148,9 +151,6 @@ namespace ElysiaRenderer
 		passParameter->shadowDepthBias = pUserData.shadowDepthBias / 100;
 		passParameter->shadowSlopeDepthBias = pUserData.shadowSlopeDepthBias / 100;
 		passParameter->shadowMaxSlopeDepthBias = pUserData.shadowMaxSlopeDepthBias / 100;
-
-		auto sobolSequence = Create2DSobolSqeuence(64);
-		memcpy(passParameter->sobolSequence.data(), sobolSequence.data(), sobolSequence.size() * sizeof(Vector2));
 
 		m_pBufferManager->GetSingleConstantBuffer(PER_PASS_SPACE)->SetMappedData(passParameter, sizeof(CBVMainPassParameter));
 		

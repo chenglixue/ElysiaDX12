@@ -1,17 +1,7 @@
-#if defined(EDITOR)
-    #include <private\ShadingCommon.hlsl>
-
-    #include <private\Light.hlsl>
-    #include <private\LightCommon.hlsl>
-    #include <private\ShadowCommon.hlsl>
-#else
-    #include "../private\ShadingCommon.hlsl"
-
-    #include "../private\Light.hlsl"
-    #include "../private\LightCommon.hlsl"
-    #include "../private\ShadowCommon.hlsl"
-
-#endif
+#include <private\ShadingCommon.hlsl>
+#include <private\Light.hlsl>
+#include <private\LightCommon.hlsl>
+#include <private\ShadowCommon.hlsl>
 
 struct VSInput
 {

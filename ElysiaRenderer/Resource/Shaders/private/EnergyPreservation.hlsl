@@ -1,3 +1,6 @@
+#ifndef ENERGY_PRESERVATION_H
+#define ENERGY_PRESERVATION_H
+
 #pragma once
 
 #include "SharedCommon.hlsli"
@@ -84,3 +87,5 @@ float3 ComputeEnergyConservation(FBxDFEnergyTerms EnergyTerms)
 {
 	return EnergyTerms.W;
 }
+
+#endif
