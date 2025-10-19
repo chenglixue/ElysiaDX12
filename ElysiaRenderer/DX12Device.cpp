@@ -482,6 +482,12 @@ namespace ElysiaRenderer
 		DXGI_FORMAT shaderResourceViewFormat = resourceDesc.Format;
 		D3D12_RESOURCE_STATES usageState = D3D12_RESOURCE_STATE_COPY_DEST;
 
+		if (hasRTV)
+		{
+			resourceDesc.Flags |= D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
+			usageState = D3D12_RESOURCE_STATE_RENDER_TARGET;
+		}
+
 		if (hasDSV)
 		{
 			switch(desc.m_resouceDesc.Format)
@@ -543,7 +549,6 @@ namespace ElysiaRenderer
 
 		auto newTex = std::make_unique<DX12TextureResource>(texResource, usageState, allocation);
 
-		/// Create SRV
 		if (hasSRV)
 		{
 			auto SRVHandle = m_SRVStagingDescriptorHeap->NewDescriptorHeapHandle();
@@ -588,6 +593,14 @@ namespace ElysiaRenderer
 			CopyDescriptorFromStageToRenderPass(newTex->GetSRVDescriptor(), newTex->GetResourceHeapIndex());
 		}
 
+		if (hasRTV)
+		{
+			auto RTVHandle = m_RTVStagingDescriptorHeap->NewDescriptorHeapHandle();
+
+			newTex->SetSRVDescriptor(RTVHandle);
+			m_device->CreateRenderTargetView(newTex->GetResource(), nullptr, newTex->GetRTVDescriptor().GetCPUHandle());
+		}
+
 		if (hasDSV)
 		{
 			D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
@@ -600,6 +613,8 @@ namespace ElysiaRenderer
 			newTex->SetDSVDescriptor(newDSVHandle);
 			m_device->CreateDepthStencilView(newTex->GetResource(), &dsvDesc, newTex->GetDSVDescriptor().GetCPUHandle());
 		}
+
+
 
 		newTex->SetIsReady(hasRTV || hasDSV);
 

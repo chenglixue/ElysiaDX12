@@ -119,19 +119,21 @@ namespace ElysiaRenderer
 		void UpdatePassCBV();
 		void UpdateObjectCBV(); 
 		    
-		void InitTexTriangle();
+		void Setup();
+		void CreateGBuffer();
 		void LoadShaders();
-		void LoadConstantBuffers();
+		void CreateConstantBuffers();
 		void CreateCreamDepthRT();
 		void LoadTextures(); 
 		void CreatePOS();
 
 		void AddShader(ShaderQueue shaderQueue, const std::wstring& shaderName, const std::wstring& entryPoint, ShaderType shaderType);
 	
-		void RenderTexTriangle();
+		void Render();
 		
 		void AddUIItems();
 		void DrawShadow();
+		void DrawGBuffer();
 		void DrawOpaque(); 
 		void DrawSkybox();
 		void DrawUI();

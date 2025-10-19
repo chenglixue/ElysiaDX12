@@ -64,7 +64,7 @@ namespace ElysiaRenderer
 		auto sobolSequence = Create2DSobolSqeuence(64);
 		memcpy(m_pRenderSource->GetCBVPassParameter()->sobolSequence.data(), sobolSequence.data(), sobolSequence.size() * sizeof(Vector2));
 
-		InitTexTriangle();
+		Setup();
 	}
 	void Renderer::Update()
 	{
@@ -76,7 +76,7 @@ namespace ElysiaRenderer
 	}
 	void Renderer::Render()
 	{
-		RenderTexTriangle();
+		Render();
 	}
 	void Renderer::Destory()
 	{
@@ -187,7 +187,7 @@ namespace ElysiaRenderer
 		}
 	}
 
-	void Renderer::InitTexTriangle()
+	void Renderer::Setup()
 	{
 		LoadShaders();
 
@@ -195,7 +195,7 @@ namespace ElysiaRenderer
 		m_pModelImporter->CreateIndexBuffer();
 		m_pModelImporter->CreateMeshRenders();
 
- 		LoadConstantBuffers();
+ 		CreateConstantBuffers();
 
 		LoadTextures(); 
 
@@ -203,6 +203,7 @@ namespace ElysiaRenderer
 		m_pShadowManager->SetMainLight(m_pLightManager->GetMainLight());
 		m_pShadowManager->CreateMainShadow(15);
 		m_pRenderSource->GetCBVPassParameter()->ShadowTexIndex = m_pShadowManager->GetMainShadow()->GetShadowRT()->GetResourceHeapIndex();
+		CreateGBuffer();
 
 		CreatePOS();
 	}
@@ -218,7 +219,7 @@ namespace ElysiaRenderer
 		//AddShader(ShaderQueue::Skybox, L"Shaders\\public\\Skybox.hlsl", L"VS", ShaderType::Vertex);
 		//AddShader(ShaderQueue::Skybox, L"Shaders\\public\\Skybox.hlsl", L"PS", ShaderType::Pixel);
 	}
-	void Renderer::LoadConstantBuffers()
+	void Renderer::CreateConstantBuffers()
 	{
 		m_perMainPassBindResourceSpace	= std::make_unique<PipelineResourceSpace>();
 		m_perObjectBindResourceSpace	= std::make_unique<PipelineResourceSpace>();
@@ -251,6 +252,77 @@ namespace ElysiaRenderer
 		m_perObjectBindResourceSpace->SetCBV(m_pBufferManager->GetMutilConstantBuffer(PER_OBJECT_SPACE, 0, 0));
 		m_perObjectBindResourceSpace->Lock();
 	}
+	void Renderer::CreateGBuffer()
+	{
+		TexCreateDesc GBufferCreateDesc{};
+
+		// Base Color , ShadingModel
+		{
+			GBufferCreateDesc.m_name = L"GBuffer_0";
+			GBufferCreateDesc.m_resouceDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+			GBufferCreateDesc.m_resouceDesc.Width = static_cast<UINT64>(m_device->GetScreenSize().x);
+			GBufferCreateDesc.m_resouceDesc.Height = static_cast<UINT>(m_device->GetScreenSize().y);
+			GBufferCreateDesc.m_typeFlag = TexTypeFlags::RTV | TexTypeFlags::SRV;
+
+			m_pBufferManager->AddGBuffer(GBufferCreateDesc);
+		}
+		
+		// Metallic, Specular, Roughness, AO
+		{
+			GBufferCreateDesc.m_name = L"GBuffer_1";
+			GBufferCreateDesc.m_resouceDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+			GBufferCreateDesc.m_resouceDesc.Width = static_cast<UINT64>(m_device->GetScreenSize().x);
+			GBufferCreateDesc.m_resouceDesc.Height = static_cast<UINT>(m_device->GetScreenSize().y);
+			GBufferCreateDesc.m_typeFlag = TexTypeFlags::RTV | TexTypeFlags::SRV;
+
+			m_pBufferManager->AddGBuffer(GBufferCreateDesc);
+		}
+
+		// Encode World Tangent, Anisotropy
+		{
+			GBufferCreateDesc.m_name = L"GBuffer_2";
+			GBufferCreateDesc.m_resouceDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+			GBufferCreateDesc.m_resouceDesc.Width = static_cast<UINT64>(m_device->GetScreenSize().x);
+			GBufferCreateDesc.m_resouceDesc.Height = static_cast<UINT>(m_device->GetScreenSize().y);
+			GBufferCreateDesc.m_typeFlag = TexTypeFlags::RTV | TexTypeFlags::SRV;
+
+			m_pBufferManager->AddGBuffer(GBufferCreateDesc);
+		}
+
+		// Encode World Normal, per object data
+		{
+			GBufferCreateDesc.m_name = L"GBuffer_3";
+			GBufferCreateDesc.m_resouceDesc.Format = DXGI_FORMAT_R10G10B10A2_UNORM;
+			GBufferCreateDesc.m_resouceDesc.Width = static_cast<UINT64>(m_device->GetScreenSize().x);
+			GBufferCreateDesc.m_resouceDesc.Height = static_cast<UINT>(m_device->GetScreenSize().y);
+			GBufferCreateDesc.m_typeFlag = TexTypeFlags::RTV | TexTypeFlags::SRV;
+
+			m_pBufferManager->AddGBuffer(GBufferCreateDesc);
+		}
+
+		// Emission, opacity
+		{
+			GBufferCreateDesc.m_name = L"GBuffer_4";
+			GBufferCreateDesc.m_resouceDesc.Format = DXGI_FORMAT_R10G10B10A2_UNORM;
+			GBufferCreateDesc.m_resouceDesc.Width = static_cast<UINT64>(m_device->GetScreenSize().x);
+			GBufferCreateDesc.m_resouceDesc.Height = static_cast<UINT>(m_device->GetScreenSize().y);
+			GBufferCreateDesc.m_typeFlag = TexTypeFlags::RTV | TexTypeFlags::SRV;
+
+			m_pBufferManager->AddGBuffer(GBufferCreateDesc);
+		}
+
+		// Velocity
+		{
+			GBufferCreateDesc.m_name = L"GBuffer_4";
+			GBufferCreateDesc.m_resouceDesc.Format = DXGI_FORMAT_R16G16B16A16_SNORM;
+			GBufferCreateDesc.m_resouceDesc.Width = static_cast<UINT64>(m_device->GetScreenSize().x);
+			GBufferCreateDesc.m_resouceDesc.Height = static_cast<UINT>(m_device->GetScreenSize().y);
+			GBufferCreateDesc.m_typeFlag = TexTypeFlags::RTV | TexTypeFlags::SRV;
+
+			m_pBufferManager->AddGBuffer(GBufferCreateDesc);
+		}
+	}
+
 	void Renderer::CreateCreamDepthRT()
 	{
 		TexCreateDesc depthBufferCreateDesc{};
@@ -430,7 +502,7 @@ namespace ElysiaRenderer
 		}
 	}
 
-	void Renderer::RenderTexTriangle() 
+	void Renderer::Render() 
 	{
 		m_device->BeginFrame();
 		m_graphicsContext->Reset(m_graphicsPipelineStates[ShaderQueue::Opaque]->m_pipelineState->GetPipelineState());
@@ -521,6 +593,10 @@ namespace ElysiaRenderer
 
 		m_graphicsContext->AddBarrier(*shadowTexResource, D3D12_RESOURCE_STATE_GENERIC_READ);
 		m_graphicsContext->FlushBarrier();
+	}
+	void Renderer::DrawGBuffer()
+	{
+
 	}
 	void Renderer::DrawOpaque()
 	{

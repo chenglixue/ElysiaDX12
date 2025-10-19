@@ -166,6 +166,7 @@
     <ClInclude Include="DX12BufferResource.h" />
     <ClInclude Include="DX12Camera.h" />
     <ClInclude Include="File.h" />
+    <ClInclude Include="GBuffer.h" />
     <ClInclude Include="Serialization.h" />
     <ClInclude Include="IManager.h" />
     <ClInclude Include="IUpdate.h" />

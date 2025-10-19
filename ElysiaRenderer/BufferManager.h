@@ -29,6 +29,7 @@ namespace ElysiaRenderer
 		const D3D12_VERTEX_BUFFER_VIEW& GetVertexBufferView() const noexcept;
 
 		void AddConstantBuffer(uint8_t spaceID, BufferCreationDesc createDesc);
+		void AddGBuffer(TexCreateDesc desc);
 		void AddDepthBuffer(std::unique_ptr<DX12TextureResource> depthBuffer);
 		void AddVertexBuffer(BufferCreationDesc desc);
 		void AddIndexBuffer(BufferCreationDesc desc);
@@ -38,6 +39,7 @@ namespace ElysiaRenderer
 	private:
 		DX12Device* m_pDevice = nullptr;
 		std::vector<std::unique_ptr<DX12BufferResource>> m_objectConstantBuffers{};
+		std::vector<std::unique_ptr<DX12BufferResource>> m_GBuffers{};
 		std::unique_ptr<DX12BufferResource> m_pPassConstantBuffer = nullptr;
 
 		std::unique_ptr<DX12TextureResource> m_pCameraDepthBuffer = nullptr;
