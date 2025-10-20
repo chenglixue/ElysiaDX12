@@ -36,17 +36,21 @@ namespace ElysiaRenderer
 			return m_UAVDescriptor;
 		}
 
-		void SetRTVDescriptor(DX12DescriptorHeapHandle& handle)
+		void SetRTVDescriptor(const DX12DescriptorHeapHandle& handle)
 		{
 			m_RTVDescriptor = handle;
 		}
-		void SetSRVDescriptor(DX12DescriptorHeapHandle& handle)
+		void SetSRVDescriptor(const DX12DescriptorHeapHandle& handle)
 		{
 			m_SRVDescriptor = handle;
 		}
-		void SetDSVDescriptor(DX12DescriptorHeapHandle& handle)
+		void SetDSVDescriptor(const DX12DescriptorHeapHandle& handle)
 		{
 			m_DSVDescriptor = handle;
+		}
+		void SetUAVDescriptor(const DX12DescriptorHeapHandle& handle)
+		{
+			m_UAVDescriptor = handle;
 		}
 
 	private:

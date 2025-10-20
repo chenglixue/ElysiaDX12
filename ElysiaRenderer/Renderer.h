@@ -77,8 +77,14 @@ namespace ElysiaRenderer
 			m_isResizing = isResizing;
 		}
 
+		static DX12Device* GetDevice()
+		{
+			assert(m_device != nullptr);
+
+			return m_device.get();
+		}
+
 	protected:
-		Renderer* m_render = nullptr;
 		HWND m_windowHandle;
 
 		bool m_isStopped = false;
@@ -93,7 +99,7 @@ namespace ElysiaRenderer
 		/// </summary>
 		float m_aspectRatio;
 		std::shared_ptr<DX12UI> m_pUI = nullptr;
-		std::unique_ptr<DX12Device> m_device = nullptr;
+		static std::unique_ptr<DX12Device> m_device;
 		std::unique_ptr<DX12GraphicsContext> m_graphicsContext = nullptr;
 		std::vector<std::unique_ptr<DX12TextureResource>> m_texs{};
 		std::vector<std::unique_ptr<D3D12_SAMPLER_DESC>> m_samplers{};
@@ -118,9 +124,8 @@ namespace ElysiaRenderer
 		void UpdateCBV();
 		void UpdatePassCBV();
 		void UpdateObjectCBV(); 
-		    
+		
 		void Setup();
-		void CreateGBuffer();
 		void LoadShaders();
 		void CreateConstantBuffers();
 		void CreateCreamDepthRT();
@@ -129,7 +134,7 @@ namespace ElysiaRenderer
 
 		void AddShader(ShaderQueue shaderQueue, const std::wstring& shaderName, const std::wstring& entryPoint, ShaderType shaderType);
 	
-		void Render();
+		void Execute();
 		
 		void AddUIItems();
 		void DrawShadow();

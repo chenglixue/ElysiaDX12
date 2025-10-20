@@ -3,6 +3,9 @@
 
 namespace ElysiaRenderer
 {
+	std::unique_ptr<LightManager> LightManager::m_instance;
+	std::once_flag LightManager::m_initInstanceFlag;
+
 	LightManager::~LightManager()
 	{
 		Destory();

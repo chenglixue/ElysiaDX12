@@ -5,10 +5,11 @@ extern "C" { __declspec(dllexport) extern const char* D3D12SDKPath = ".\\D3D12\\
 
 namespace ElysiaRenderer
 {
+	std::unique_ptr<DX12Device> Renderer::m_device = nullptr;
+
 	Renderer::Renderer(HWND windowHandle, ElysiaHelper::UINT2 screenSize, std::shared_ptr<DX12UI> pUI) :
 		m_pUI(pUI)
 	{
-		m_render = this;
 		m_windowHandle = windowHandle;
 		m_aspectRatio = static_cast<float>(screenSize.x) / static_cast<float>(screenSize.y);
 		m_device = std::make_unique<DX12Device>(windowHandle, screenSize);
@@ -76,7 +77,7 @@ namespace ElysiaRenderer
 	}
 	void Renderer::Render()
 	{
-		Render();
+		Execute();
 	}
 	void Renderer::Destory()
 	{
@@ -203,7 +204,6 @@ namespace ElysiaRenderer
 		m_pShadowManager->SetMainLight(m_pLightManager->GetMainLight());
 		m_pShadowManager->CreateMainShadow(15);
 		m_pRenderSource->GetCBVPassParameter()->ShadowTexIndex = m_pShadowManager->GetMainShadow()->GetShadowRT()->GetResourceHeapIndex();
-		CreateGBuffer();
 
 		CreatePOS();
 	}
@@ -251,76 +251,6 @@ namespace ElysiaRenderer
 		}
 		m_perObjectBindResourceSpace->SetCBV(m_pBufferManager->GetMutilConstantBuffer(PER_OBJECT_SPACE, 0, 0));
 		m_perObjectBindResourceSpace->Lock();
-	}
-	void Renderer::CreateGBuffer()
-	{
-		TexCreateDesc GBufferCreateDesc{};
-
-		// Base Color , ShadingModel
-		{
-			GBufferCreateDesc.m_name = L"GBuffer_0";
-			GBufferCreateDesc.m_resouceDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-			GBufferCreateDesc.m_resouceDesc.Width = static_cast<UINT64>(m_device->GetScreenSize().x);
-			GBufferCreateDesc.m_resouceDesc.Height = static_cast<UINT>(m_device->GetScreenSize().y);
-			GBufferCreateDesc.m_typeFlag = TexTypeFlags::RTV | TexTypeFlags::SRV;
-
-			m_pBufferManager->AddGBuffer(GBufferCreateDesc);
-		}
-		
-		// Metallic, Specular, Roughness, AO
-		{
-			GBufferCreateDesc.m_name = L"GBuffer_1";
-			GBufferCreateDesc.m_resouceDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-			GBufferCreateDesc.m_resouceDesc.Width = static_cast<UINT64>(m_device->GetScreenSize().x);
-			GBufferCreateDesc.m_resouceDesc.Height = static_cast<UINT>(m_device->GetScreenSize().y);
-			GBufferCreateDesc.m_typeFlag = TexTypeFlags::RTV | TexTypeFlags::SRV;
-
-			m_pBufferManager->AddGBuffer(GBufferCreateDesc);
-		}
-
-		// Encode World Tangent, Anisotropy
-		{
-			GBufferCreateDesc.m_name = L"GBuffer_2";
-			GBufferCreateDesc.m_resouceDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-			GBufferCreateDesc.m_resouceDesc.Width = static_cast<UINT64>(m_device->GetScreenSize().x);
-			GBufferCreateDesc.m_resouceDesc.Height = static_cast<UINT>(m_device->GetScreenSize().y);
-			GBufferCreateDesc.m_typeFlag = TexTypeFlags::RTV | TexTypeFlags::SRV;
-
-			m_pBufferManager->AddGBuffer(GBufferCreateDesc);
-		}
-
-		// Encode World Normal, per object data
-		{
-			GBufferCreateDesc.m_name = L"GBuffer_3";
-			GBufferCreateDesc.m_resouceDesc.Format = DXGI_FORMAT_R10G10B10A2_UNORM;
-			GBufferCreateDesc.m_resouceDesc.Width = static_cast<UINT64>(m_device->GetScreenSize().x);
-			GBufferCreateDesc.m_resouceDesc.Height = static_cast<UINT>(m_device->GetScreenSize().y);
-			GBufferCreateDesc.m_typeFlag = TexTypeFlags::RTV | TexTypeFlags::SRV;
-
-			m_pBufferManager->AddGBuffer(GBufferCreateDesc);
-		}
-
-		// Emission, opacity
-		{
-			GBufferCreateDesc.m_name = L"GBuffer_4";
-			GBufferCreateDesc.m_resouceDesc.Format = DXGI_FORMAT_R10G10B10A2_UNORM;
-			GBufferCreateDesc.m_resouceDesc.Width = static_cast<UINT64>(m_device->GetScreenSize().x);
-			GBufferCreateDesc.m_resouceDesc.Height = static_cast<UINT>(m_device->GetScreenSize().y);
-			GBufferCreateDesc.m_typeFlag = TexTypeFlags::RTV | TexTypeFlags::SRV;
-
-			m_pBufferManager->AddGBuffer(GBufferCreateDesc);
-		}
-
-		// Velocity
-		{
-			GBufferCreateDesc.m_name = L"GBuffer_4";
-			GBufferCreateDesc.m_resouceDesc.Format = DXGI_FORMAT_R16G16B16A16_SNORM;
-			GBufferCreateDesc.m_resouceDesc.Width = static_cast<UINT64>(m_device->GetScreenSize().x);
-			GBufferCreateDesc.m_resouceDesc.Height = static_cast<UINT>(m_device->GetScreenSize().y);
-			GBufferCreateDesc.m_typeFlag = TexTypeFlags::RTV | TexTypeFlags::SRV;
-
-			m_pBufferManager->AddGBuffer(GBufferCreateDesc);
-		}
 	}
 
 	void Renderer::CreateCreamDepthRT()
@@ -502,7 +432,7 @@ namespace ElysiaRenderer
 		}
 	}
 
-	void Renderer::Render() 
+	void Renderer::Execute()
 	{
 		m_device->BeginFrame();
 		m_graphicsContext->Reset(m_graphicsPipelineStates[ShaderQueue::Opaque]->m_pipelineState->GetPipelineState());

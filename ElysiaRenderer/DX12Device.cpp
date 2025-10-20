@@ -527,6 +527,12 @@ namespace ElysiaRenderer
 			usageState = D3D12_RESOURCE_STATE_DEPTH_WRITE;
 		}
 
+		if (hasUAV)
+		{
+			resourceDesc.Flags |= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
+			usageState = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+		}
+
 		resourceDesc.Format = resourceFormat;
 
 		D3D12_CLEAR_VALUE clearValue = {};
@@ -614,7 +620,12 @@ namespace ElysiaRenderer
 			m_device->CreateDepthStencilView(newTex->GetResource(), &dsvDesc, newTex->GetDSVDescriptor().GetCPUHandle());
 		}
 
-
+		if (hasUAV)
+		{
+			auto newUAVHandle = m_SRVStagingDescriptorHeap->NewDescriptorHeapHandle();
+			newTex->SetUAVDescriptor(newUAVHandle);
+			m_device->CreateUnorderedAccessView(newTex->GetResource(), nullptr, nullptr, newTex->GetUAVDescriptor().GetCPUHandle());
+		}
 
 		newTex->SetIsReady(hasRTV || hasDSV);
 

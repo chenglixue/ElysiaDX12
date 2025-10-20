@@ -114,12 +114,6 @@ namespace ElysiaRenderer
 		}
 	}
 
-	void BufferManager::AddGBuffer(TexCreateDesc desc)
-	{
-		auto pGbuffer = std::move(m_pDevice->CreateTexture(desc));
-		m_GBuffers.emplace_back(std::move(pGbuffer));
-	}
-
 	void BufferManager::AddDepthBuffer(std::unique_ptr<DX12TextureResource> depthBuffer)
 	{
 		m_pCameraDepthBuffer = std::move(depthBuffer);

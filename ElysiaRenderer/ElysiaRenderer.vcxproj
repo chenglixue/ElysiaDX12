@@ -156,6 +156,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="BasePass.h" />
     <ClInclude Include="BoundingBox.h" />
     <ClInclude Include="BufferManager.h" />
     <ClInclude Include="CameraManager.h" />
@@ -166,7 +167,9 @@
     <ClInclude Include="DX12BufferResource.h" />
     <ClInclude Include="DX12Camera.h" />
     <ClInclude Include="File.h" />
-    <ClInclude Include="GBuffer.h" />
+    <ClInclude Include="GBufferPass.h" />
+    <ClInclude Include="RenderPassData.h" />
+    <ClInclude Include="RenderTexture.h" />
     <ClInclude Include="Serialization.h" />
     <ClInclude Include="IManager.h" />
     <ClInclude Include="IUpdate.h" />
@@ -191,6 +194,7 @@
     <ClInclude Include="DX12Shadow.h" />
     <ClInclude Include="DX12StagingDescriptorHeap.h" />
     <ClInclude Include="DX12TextureBuffer.h" />
+    <ClInclude Include="ShadowPass.h" />
     <ClInclude Include="SobolSequenceGenerator.h" />
     <ClInclude Include="TextureHelper.h" />
     <ClInclude Include="DX12UI.h" />
@@ -276,6 +280,7 @@
     <ClCompile Include="DX12GraphicsContext.cpp" />
     <ClCompile Include="DX12Light.cpp" />
     <ClCompile Include="File.cpp" />
+    <ClCompile Include="GBufferPass.cpp" />
     <ClCompile Include="ModelImporter.cpp" />
     <ClCompile Include="DX12PipelineState.cpp" />
     <ClCompile Include="DX12Queue.cpp" />
@@ -321,8 +326,10 @@
     <ClCompile Include="PipelineResourceSpace.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="RenderResource.cpp" />
+    <ClCompile Include="RenderTexture.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
     <ClCompile Include="ShadowManager.cpp" />
+    <ClCompile Include="ShadowPass.cpp" />
     <ClCompile Include="SobolSequenceGenerator.cpp" />
     <ClCompile Include="TextureManager.cpp" />
     <ClCompile Include="Transform.cpp" />

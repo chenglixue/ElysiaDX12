@@ -22,6 +22,7 @@ namespace ElysiaHelper
     constexpr uint32_t NUM_SRV_RENDER_PASS_USER_DESCRIPTORS = 65536;
     constexpr uint32_t INVALID_RESOURCE_TABLE_INDEX = UINT_MAX;
     constexpr uint32_t MAX_TEXTURE_SUBRESOURCE_COUNT = 32;
+    constexpr uint32_t StandardMSAAPattern = 0xFFFFFFFF;
 
 	constexpr UINT MAX_MAIN_LIGHT_COUNT = 1;
 
