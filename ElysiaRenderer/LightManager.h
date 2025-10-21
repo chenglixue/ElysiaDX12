@@ -39,4 +39,9 @@ namespace ElysiaRenderer
 		std::unique_ptr<DX12DirectionLight> m_mainLight = nullptr;
 
 	};
+
+	inline static DX12DirectionLight* GetMainLight()
+	{
+		return dynamic_cast<DX12DirectionLight*>(LightManager::GetInstance().GetMainLight());
+	}
 }

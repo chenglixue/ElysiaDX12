@@ -29,6 +29,7 @@ namespace ElysiaHelper
 		void Init(RenderTextureDesc desc);
 		void ShutDowm();
 
+		DX12TextureResource* GetTexture() const;
 		UINT64 GetSRVIndex() const;
 		UINT64 GetWidth() const;
 		UINT64 GetHeight() const;

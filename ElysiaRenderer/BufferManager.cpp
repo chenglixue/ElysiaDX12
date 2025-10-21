@@ -5,11 +5,6 @@ namespace ElysiaRenderer
 {
 	using namespace ElysiaHelper;
 
-	BufferManager::BufferManager(DX12Device* pDevice)
-		: m_pDevice(pDevice)
-	{
-
-	}
 	BufferManager::~BufferManager()
 	{
 		Destory();
@@ -88,12 +83,7 @@ namespace ElysiaRenderer
 		{
 			case PER_PASS_SPACE:
 			{
-				/*if (m_pPassConstantBuffer != nullptr)
-				{
-					m_pPassConstantBuffer.reset();
-				}*/
-
-				m_pPassConstantBuffer = std::move(m_pDevice->CreateBuffer(createDesc));
+				m_pPassConstantBuffer = std::move(GetDevice()->CreateBuffer(createDesc));
 			
 				break;
 			}
@@ -102,7 +92,7 @@ namespace ElysiaRenderer
 			{
 				for (int i = 0; i < NUM_FRAMES_IN_FLIGHT; ++i)
 				{
-					m_objectConstantBuffers.emplace_back(std::move(m_pDevice->CreateBuffer(createDesc)));
+					m_objectConstantBuffers.emplace_back(std::move(GetDevice()->CreateBuffer(createDesc)));
 				}
 
 				break;
@@ -121,12 +111,12 @@ namespace ElysiaRenderer
 
 	void BufferManager::AddVertexBuffer(BufferCreationDesc desc)
 	{
-		m_pVertexBuffer = std::move(m_pDevice->CreateBuffer(desc));
+		m_pVertexBuffer = std::move(GetDevice()->CreateBuffer(desc));
 	}
 
 	void BufferManager::AddIndexBuffer(BufferCreationDesc desc)
 	{
-		m_pIndexBuffer = std::move(m_pDevice->CreateBuffer(desc));
+		m_pIndexBuffer = std::move(GetDevice()->CreateBuffer(desc));
 	}
 
 	void BufferManager::SetVertexBufferView(const D3D12_VERTEX_BUFFER_VIEW& view)

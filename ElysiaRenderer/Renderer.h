@@ -20,6 +20,7 @@
 #include "UserData.h"
 #include "SobolSequenceGenerator.h"
 #include "Common.h"  
+#include "ShadowPass.h"
 
 namespace ElysiaRenderer 
 {
@@ -77,13 +78,6 @@ namespace ElysiaRenderer
 			m_isResizing = isResizing;
 		}
 
-		static DX12Device* GetDevice()
-		{
-			assert(m_device != nullptr);
-
-			return m_device.get();
-		}
-
 	protected:
 		HWND m_windowHandle;
 
@@ -99,27 +93,22 @@ namespace ElysiaRenderer
 		/// </summary>
 		float m_aspectRatio;
 		std::shared_ptr<DX12UI> m_pUI = nullptr;
-		static std::unique_ptr<DX12Device> m_device;
 		std::unique_ptr<DX12GraphicsContext> m_graphicsContext = nullptr;
 		std::vector<std::unique_ptr<DX12TextureResource>> m_texs{};
 		std::vector<std::unique_ptr<D3D12_SAMPLER_DESC>> m_samplers{};
 		std::unordered_map<UINT, std::unordered_map<ShaderType, std::unique_ptr<DX12Shader>>> m_vertexShaders;
 		std::unordered_map<UINT, std::unordered_map<ShaderType, std::unique_ptr<DX12Shader>>> m_pixelShaders;
 		std::vector<std::unique_ptr<DX12Shader>> m_computeShaders;
-		std::unordered_map<UINT, std::shared_ptr<PipelineStateObject>> m_graphicsPipelineStates;
+		std::unordered_map<UINT, std::shared_ptr<PipelineStateObject>> m_graphicsPipelineStates{};
 
 		std::unique_ptr<ModelImporter> m_pModelImporter = nullptr;
 
 		std::unique_ptr<CameraManager>	m_pCameraManager = nullptr;  
 		std::unique_ptr<LightManager>	m_pLightManager = nullptr;
-		std::unique_ptr<ShadowManager>	m_pShadowManager = nullptr;
 		std::unique_ptr<BufferManager>	m_pBufferManager = nullptr;
 		std::unique_ptr<RenderResource> m_pRenderSource = nullptr;
 		std::unique_ptr<MeshManager>	m_pMeshManager = nullptr;
 		std::unique_ptr<TextureManager>	m_pTextureManager = nullptr;
-		
-		std::unique_ptr<PipelineResourceSpace> m_perObjectBindResourceSpace = nullptr;
-		std::unique_ptr<PipelineResourceSpace> m_perMainPassBindResourceSpace = nullptr;
 
 		void UpdateCBV();
 		void UpdatePassCBV();
@@ -137,8 +126,6 @@ namespace ElysiaRenderer
 		void Execute();
 		
 		void AddUIItems();
-		void DrawShadow();
-		void DrawGBuffer();
 		void DrawOpaque(); 
 		void DrawSkybox();
 		void DrawUI();

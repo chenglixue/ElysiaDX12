@@ -75,6 +75,10 @@ namespace ElysiaHelper
 		}
 	}
 
+	DX12TextureResource* RenderTexture::GetTexture() const
+	{
+		return m_pTexture.get();
+	}
 	UINT64 RenderTexture::GetSRVIndex() const
 	{
 		return m_pTexture->GetSRVDescriptor().GetHeapIndex();

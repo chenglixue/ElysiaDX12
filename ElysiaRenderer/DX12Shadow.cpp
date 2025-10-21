@@ -3,7 +3,7 @@
 namespace ElysiaRenderer
 {
 	using namespace ElysiaHelper;
-	DX12Shadow::DX12Shadow(std::shared_ptr<DX12TextureResource> buffer)
+	DX12Shadow::DX12Shadow(DX12TextureResource* buffer)
 		: m_buffer(buffer)
 	{
 		m_width = static_cast<UINT>(m_buffer->GetResourceDesc().Width);

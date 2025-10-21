@@ -6,8 +6,7 @@ namespace ElysiaModel
 {
 	using namespace std;
 
-	ModelImporter::ModelImporter(DX12Device* pDevice, BufferManager* pBufferManager, TextureManager* pTextureManager) :
-		m_pDevice(std::move(pDevice)),
+	ModelImporter::ModelImporter(BufferManager* pBufferManager, TextureManager* pTextureManager) :
 		m_pBufferManager(std::move(pBufferManager)),
 		m_pTextureManager(std::move(pTextureManager))
 	{

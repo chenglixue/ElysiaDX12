@@ -22,7 +22,7 @@ namespace ElysiaModel
 	{
 	public:
 		ModelImporter() = default;
-		ModelImporter(DX12Device* pDevice, BufferManager* pBufferManager, TextureManager* pTextureManager);
+		ModelImporter(BufferManager* pBufferManager, TextureManager* pTextureManager);
 		ModelImporter(const ModelImporter& rhs) = delete;
 		ModelImporter& operator=(const ModelImporter& rhs) = delete;
 		ModelImporter(ModelImporter&& rhs) = default;
@@ -89,7 +89,6 @@ namespace ElysiaModel
 		void OptimizePreTransform();
 
 	private:
-		DX12Device* m_pDevice = nullptr;
 		BufferManager* m_pBufferManager = nullptr;
 		TextureManager* m_pTextureManager = nullptr;
 

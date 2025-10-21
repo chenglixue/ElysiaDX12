@@ -25,7 +25,7 @@ namespace ElysiaRenderer
 	{
 	public:
 		DX12Shadow() = default;
-		DX12Shadow(std::shared_ptr<DX12TextureResource> buffer);
+		DX12Shadow(DX12TextureResource* buffer);
 		DX12Shadow(const DX12Shadow& rhs) = delete;
 		DX12Shadow& operator=(const DX12Shadow& rhs) = delete;
 		DX12Shadow(DX12Shadow&& rhs) = default;
@@ -87,7 +87,7 @@ namespace ElysiaRenderer
 		D3D12_VIEWPORT m_viewPort{};
 		D3D12_RECT m_scissorRect{};
 
-		std::shared_ptr<DX12TextureResource> m_buffer;
+		DX12TextureResource* m_buffer = nullptr;
 		BoundingSphere m_shadowBound;
 		Vector3 m_lightPos;
 		float m_nearZ;

@@ -2,8 +2,13 @@
 
 namespace ElysiaRenderer
 {
-	RenderResource::RenderResource(DX12Device* device)
-		: m_device(device)
+	std::unique_ptr<RenderResource> m_instance;
+	std::once_flag m_initInstanceFlag;
+
+	std::unique_ptr<PipelineResourceSpace> RenderResource::m_perObjectBindResourceSpace = nullptr;
+	std::unique_ptr<PipelineResourceSpace> RenderResource::m_perMainPassBindResourceSpace = nullptr;
+
+	RenderResource::RenderResource()
 	{
 		m_pCBVPassParameter = std::make_unique<CBVMainPassParameter>();
 		

@@ -55,9 +55,9 @@ namespace ElysiaRenderer
 		{
 			return m_frameIndex;
 		}
-		const XMFLOAT4&			GetScreenSize() const
+		const Vector4&			GetScreenSize() const
 		{
-			return XMFLOAT4(static_cast<float>(m_screenSize.x), static_cast<float>(m_screenSize.y), 
+			return Vector4(static_cast<float>(m_screenSize.x), static_cast<float>(m_screenSize.y),
 				1.f / static_cast<float>(m_screenSize.x), 1.f / static_cast<float>(m_screenSize.y));
 		}
 		DX12TextureResource&	GetCurrBackBuffer()
@@ -155,4 +155,15 @@ namespace ElysiaRenderer
 		std::array<std::vector<std::pair<uint64_t, D3D12_COMMAND_LIST_TYPE>>, NUM_FRAMES_IN_FLIGHT> m_contextSubmissions;
 		std::array<DestructionQueue, NUM_FRAMES_IN_FLIGHT> m_destructionQueues;
 	};
+
+	std::unique_ptr<DX12Device> g_device = nullptr;
+
+	inline static DX12Device* GetDevice()
+	{
+		if (g_device == nullptr)
+		{
+			ThrowRuntimeError("null device");
+		}
+		return g_device.get();
+	}
 }

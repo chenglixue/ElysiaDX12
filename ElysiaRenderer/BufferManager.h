@@ -11,7 +11,6 @@ namespace ElysiaRenderer
 	{
 	public:
 		BufferManager() = default;
-		BufferManager(DX12Device* pDevice);
 		BufferManager(const BufferManager& rhs) = delete;
 		BufferManager& operator=(BufferManager& rhs) = delete;
 		BufferManager(BufferManager&& rhs) = default;
@@ -36,7 +35,6 @@ namespace ElysiaRenderer
 		void SetIndexBufferView(const D3D12_INDEX_BUFFER_VIEW& view);
 
 	private:
-		DX12Device* m_pDevice = nullptr;
 		std::vector<std::unique_ptr<DX12BufferResource>> m_objectConstantBuffers{};
 		std::unique_ptr<DX12BufferResource> m_pPassConstantBuffer = nullptr;
 

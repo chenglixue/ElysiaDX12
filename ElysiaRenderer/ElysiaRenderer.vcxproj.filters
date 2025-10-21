@@ -603,9 +603,6 @@
     <ClCompile Include="BufferManager.cpp">
       <Filter>Source Files\Manager</Filter>
     </ClCompile>
-    <ClCompile Include="RenderResource.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="MeshManager.cpp">
       <Filter>Source Files\Manager</Filter>
     </ClCompile>
@@ -628,6 +625,9 @@
       <Filter>Source Files\Render</Filter>
     </ClCompile>
     <ClCompile Include="ShadowPass.cpp">
+      <Filter>Source Files\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderResource.cpp">
       <Filter>Source Files\Render</Filter>
     </ClCompile>
   </ItemGroup>
