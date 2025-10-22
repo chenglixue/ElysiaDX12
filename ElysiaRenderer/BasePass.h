@@ -32,11 +32,13 @@ namespace ElysiaRenderer
 			Execute();
 		}
 
-		virtual void Dispose() = 0;
+		virtual void Dispose()
+		{
+		};
 
 	protected:
 		UINT2 m_renderSize;
 		DX12GraphicsContext* m_pCommand = nullptr;
-		std::unordered_map<UINT, std::shared_ptr<PipelineStateObject>>* m_pGraphicsPipelineStates = nullptr;
+		std::unordered_map<UINT, std::unique_ptr<PipelineStateObject>>* m_pGraphicsPipelineStates = nullptr;
 	};
 }

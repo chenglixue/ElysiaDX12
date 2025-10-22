@@ -5,6 +5,8 @@ namespace ElysiaRenderer
 {
 	using namespace ElysiaHelper;
 
+	std::unique_ptr<BufferManager> g_pBufferManager = nullptr;
+
 	BufferManager::~BufferManager()
 	{
 		Destory();

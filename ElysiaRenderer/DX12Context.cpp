@@ -105,10 +105,6 @@ namespace ElysiaRenderer
 			sourceLocation.PlacedFootprint.Offset += sourceOffset;
 
 			m_commandList->CopyTextureRegion(&destLocation, 0, 0, 0, &sourceLocation, nullptr);
-			auto tran = CD3DX12_RESOURCE_BARRIER::Transition(dest.GetResource(),
-				D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-			//m_commandList->ResourceBarrier(1, &tran);
-			//AddBarrier(dest, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		}
 	}
 

@@ -8,7 +8,7 @@ namespace ElysiaRenderer
 	{
 	public:
 		GBufferPass() = default;
-		~GBufferPass() override;
+		virtual ~GBufferPass() override;
 
 		//virtual void Setup(const RenderPassData& renderPassData) override;
 		virtual void Configure() override;

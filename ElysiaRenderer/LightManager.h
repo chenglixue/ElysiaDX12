@@ -15,15 +15,6 @@ namespace ElysiaRenderer
 		LightManager(LightManager&& rhs) = default;
 		~LightManager();
 
-		static LightManager& GetInstance()
-		{
-			std::call_once(m_initInstanceFlag, []() {
-				m_instance.reset(new LightManager());
-				});
-
-			return *m_instance;
-		}
-
 		virtual void Init() override;
 		virtual void Destory() override;
 		virtual void Update() override;
@@ -40,8 +31,15 @@ namespace ElysiaRenderer
 
 	};
 
-	inline static DX12DirectionLight* GetMainLight()
+	extern std::unique_ptr<LightManager> g_pLightManager;
+
+	inline LightManager* GetLightManager()
 	{
-		return dynamic_cast<DX12DirectionLight*>(LightManager::GetInstance().GetMainLight());
+		return g_pLightManager.get();
+	}
+
+	inline DX12DirectionLight* GetMainLight()
+	{
+		return dynamic_cast<DX12DirectionLight*>(g_pLightManager->GetMainLight());
 	}
 }

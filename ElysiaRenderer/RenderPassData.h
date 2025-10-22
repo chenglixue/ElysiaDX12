@@ -8,6 +8,6 @@ namespace ElysiaRenderer
 	{
 		UINT2 RenderSize = UINT2(0, 0);
 		DX12GraphicsContext* pCommand;
-		std::unordered_map<UINT, std::shared_ptr<PipelineStateObject>> *pGraphicsPipelineStates = nullptr;
+		std::unordered_map<UINT, std::unique_ptr<PipelineStateObject>> *pGraphicsPipelineStates = nullptr;
 	};
 }

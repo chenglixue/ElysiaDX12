@@ -9,6 +9,7 @@ D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.cpp;D:\DX12\ElysiaRenderer\Elys
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12GraphicsContext.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\DX12GraphicsContext.obj
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Light.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\DX12Light.obj
 D:\DX12\ElysiaRenderer\ElysiaRenderer\File.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\File.obj
+D:\DX12\ElysiaRenderer\ElysiaRenderer\GBufferPass.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\GBufferPass.obj
 D:\DX12\ElysiaRenderer\ElysiaRenderer\ModelImporter.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\ModelImporter.obj
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12PipelineState.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\DX12PipelineState.obj
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Queue.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\DX12Queue.obj
@@ -56,7 +57,7 @@ D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp;D:\DX12\ElysiaRenderer\Elysia
 D:\DX12\ElysiaRenderer\ElysiaRenderer\RenderResource.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\RenderResource.obj
 D:\DX12\ElysiaRenderer\ElysiaRenderer\RenderTexture.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\RenderTexture.obj
 D:\DX12\ElysiaRenderer\ElysiaRenderer\ShaderManager.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\ShaderManager.obj
-D:\DX12\ElysiaRenderer\ElysiaRenderer\ShadowManager.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\ShadowManager.obj
+D:\DX12\ElysiaRenderer\ElysiaRenderer\ShadowPass.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\ShadowPass.obj
 D:\DX12\ElysiaRenderer\ElysiaRenderer\SobolSequenceGenerator.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\SobolSequenceGenerator.obj
 D:\DX12\ElysiaRenderer\ElysiaRenderer\TextureManager.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\TextureManager.obj
 D:\DX12\ElysiaRenderer\ElysiaRenderer\Transform.cpp;D:\DX12\ElysiaRenderer\ElysiaRenderer\x64\Debug\Transform.obj

@@ -224,7 +224,6 @@
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="RenderResource.h" />
     <ClInclude Include="ShaderManager.h" />
-    <ClInclude Include="ShadowManager.h" />
     <ClInclude Include="SimpleMath\SimpleMath.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="TextureManager.h" />
@@ -328,7 +327,6 @@
     <ClCompile Include="RenderResource.cpp" />
     <ClCompile Include="RenderTexture.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
-    <ClCompile Include="ShadowManager.cpp" />
     <ClCompile Include="ShadowPass.cpp" />
     <ClCompile Include="SobolSequenceGenerator.cpp" />
     <ClCompile Include="TextureManager.cpp" />

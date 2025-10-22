@@ -8,7 +8,7 @@ namespace ElysiaRenderer
 	class RenderResource
 	{
 	public:
-		RenderResource() = default;
+		RenderResource();
 		RenderResource(const RenderResource& rhs) = delete;
 		RenderResource& operator=(RenderResource& rhs) = delete;
 		RenderResource(RenderResource&& rhs) = default;

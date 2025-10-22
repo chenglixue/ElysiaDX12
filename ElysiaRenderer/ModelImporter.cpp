@@ -1,10 +1,13 @@
 #include "ModelImporter.h"
 #include "iosfwd"
 #include "Serialization.h"
+#include "DX12Device.h"
 
 namespace ElysiaModel
 {
 	using namespace std;
+
+	std::unique_ptr<ModelImporter> g_pModelImporter = nullptr;
 
 	ModelImporter::ModelImporter(BufferManager* pBufferManager, TextureManager* pTextureManager) :
 		m_pBufferManager(std::move(pBufferManager)),
@@ -554,7 +557,7 @@ namespace ElysiaModel
 			std::wstring diffusePath = basePath + RemoveExt(m_pMaterial[materialIndex].texDiffusePath);
 			texBufferCreateDesc.texturePath = diffusePath + L".png";
 			texBufferCreateDesc.isSRGB = true;
-			auto diffuseTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
+			auto diffuseTex = std::move(GetDevice()->CreateTextureFromFile(texBufferCreateDesc));
 			if (diffuseTex != nullptr)
 			{
 				m_pMaterial[materialIndex].diffuseTexIndex = diffuseTex->GetResourceHeapIndex();
@@ -564,11 +567,11 @@ namespace ElysiaModel
 			std::wstring metallicPath = basePath + RemoveExt(m_pMaterial[materialIndex].texMetallicPath);
 			texBufferCreateDesc.texturePath = metallicPath + L".png";
 			texBufferCreateDesc.isSRGB = true;
-			auto metallicTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
+			auto metallicTex = std::move(GetDevice()->CreateTextureFromFile(texBufferCreateDesc));
 			if (metallicTex == nullptr)
 			{
 				texBufferCreateDesc.texturePath = RemoveLastUnderscoreAndAfter(diffusePath) + L"_Metallic.png";
-				metallicTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
+				metallicTex = std::move(GetDevice()->CreateTextureFromFile(texBufferCreateDesc));
 			}
 			if (metallicTex != nullptr)
 			{
@@ -579,11 +582,11 @@ namespace ElysiaModel
 			std::wstring roughnessPath = basePath + RemoveExt(m_pMaterial[materialIndex].texRoughnessPath);
 			texBufferCreateDesc.texturePath = roughnessPath + L".png";
 			texBufferCreateDesc.isSRGB = true;
-			auto roughnessTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
+			auto roughnessTex = std::move(GetDevice()->CreateTextureFromFile(texBufferCreateDesc));
 			if (roughnessTex == nullptr)
 			{
 				texBufferCreateDesc.texturePath = RemoveLastUnderscoreAndAfter(diffusePath) + L"_Roughness.png";
-				roughnessTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
+				roughnessTex = std::move(GetDevice()->CreateTextureFromFile(texBufferCreateDesc));
 			}
 			if (roughnessTex != nullptr)
 			{
@@ -594,11 +597,11 @@ namespace ElysiaModel
 			std::wstring normalPath = basePath + RemoveExt(m_pMaterial[materialIndex].texNormalPath);
 			texBufferCreateDesc.texturePath = normalPath + L".png";
 			texBufferCreateDesc.isSRGB = false;
-			auto normalTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
+			auto normalTex = std::move(GetDevice()->CreateTextureFromFile(texBufferCreateDesc));
 			if (normalTex == nullptr)
 			{
 				texBufferCreateDesc.texturePath = RemoveLastUnderscoreAndAfter(diffusePath) + L"_Normal.png";
-				normalTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
+				normalTex = std::move(GetDevice()->CreateTextureFromFile(texBufferCreateDesc));
 			}
 			if (normalTex != nullptr)
 			{
@@ -686,7 +689,7 @@ namespace ElysiaModel
 
 			memcpy_s(pBufferUpload->m_bufferData.get(), pBufferUpload->m_bufferDataSize, m_pIndexData, pBufferUpload->m_bufferDataSize);
 
-			m_pDevice->GetUploadContext()->AddBufferToUploads(std::move(pBufferUpload));
+			GetDevice()->GetUploadContext()->AddBufferToUploads(std::move(pBufferUpload));
 		}
 		else
 		{

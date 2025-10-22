@@ -1,4 +1,5 @@
 #include "RenderTexture.h"
+#include "DX12Device.h"
 
 namespace ElysiaHelper
 {
@@ -20,7 +21,7 @@ namespace ElysiaHelper
 		textureCreateDesc.m_resouceDesc.Width = desc.Width;
 		textureCreateDesc.m_resouceDesc.Height = static_cast<UINT>(desc.Height);
 		textureCreateDesc.m_resouceDesc.MipLevels = desc.MipmapLevels;
-		switch (textureCreateDesc.m_resouceDesc.Dimension)
+		switch (desc.Dimension)
 		{
 			case TextureDimension::Tex2D :
 			{
@@ -51,20 +52,19 @@ namespace ElysiaHelper
 			}
 		}
 		textureCreateDesc.m_resouceDesc.Format = desc.Format;
-		textureCreateDesc.m_resouceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
-		textureCreateDesc.m_resouceDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-		textureCreateDesc.m_resouceDesc.Alignment = 0;
 		textureCreateDesc.m_resouceDesc.SampleDesc.Count = static_cast<UINT>(desc.MSAASamples);
 		textureCreateDesc.m_resouceDesc.SampleDesc.Quality = desc.MSAASamples > 1 ? StandardMSAAPattern : 0;
 
 		textureCreateDesc.m_name = desc.Name;
-		textureCreateDesc.m_typeFlag = TexTypeFlags::SRV | TexTypeFlags::RTV;
+		textureCreateDesc.m_typeFlag = TexTypeFlags::SRV;
+		textureCreateDesc.m_typeFlag = desc.IsDepth ? 
+			textureCreateDesc.m_typeFlag | TexTypeFlags::DSV : textureCreateDesc.m_typeFlag | TexTypeFlags::RTV;
 		if (desc.EnableRandomWrite)
 		{
 			textureCreateDesc.m_typeFlag = textureCreateDesc.m_typeFlag | TexTypeFlags::UAV;
 		}
 
-		m_pTexture = std::move(Renderer::GetDevice()->CreateTexture(textureCreateDesc));
+		m_pTexture = std::move(GetDevice()->CreateTexture(textureCreateDesc));
 	}
 
 	void RenderTexture::ShutDowm()

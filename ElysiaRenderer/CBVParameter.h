@@ -62,7 +62,7 @@ namespace ElysiaRenderer
 		int roughnessTexIndex = -1;
 		int specularTexIndex = -1;
 
-		UINT cutoff = 0.5f;
+		float cutoff = 0.5;
 
 		//float padding[48];
 	};

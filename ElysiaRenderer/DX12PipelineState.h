@@ -76,9 +76,9 @@ namespace ElysiaRenderer
 
 	struct PipelineStateObject
 	{
-		std::shared_ptr<DX12PipelineState> m_pipelineState = nullptr;
+		std::unique_ptr<DX12PipelineState> m_pipelineState = nullptr;
 		PipelineResourceMapping m_pipelineResourceMapping;
-		std::shared_ptr<DX12RootSignature> m_rootSignature = nullptr;
+		std::unique_ptr<DX12RootSignature> m_rootSignature = nullptr;
 		PipelineType m_pipelineType = PipelineType::Graphics;
 	};
 

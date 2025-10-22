@@ -21,11 +21,11 @@ namespace ElysiaRenderer
 
 	DX12PipelineState::~DX12PipelineState()
 	{
-		//ElysiaHelper::SafeRelease(m_pipelineState);
-		if (m_rootSignature != nullptr)
+		/*if (m_rootSignature != nullptr)
 		{
 			delete m_rootSignature;
-		}
+			m_rootSignature = nullptr;
+		}*/
 	}
 
 
@@ -44,7 +44,5 @@ namespace ElysiaRenderer
 	}
 	DX12GraphicsPipelineState::~DX12GraphicsPipelineState()
 	{
-		//ElysiaHelper::SafeRelease(m_pipelineState);
-		//ElysiaHelper::SafeRelease(m_depthStencilRT);
 	}
 }

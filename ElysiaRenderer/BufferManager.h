@@ -45,4 +45,15 @@ namespace ElysiaRenderer
 		D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView{};
 		D3D12_INDEX_BUFFER_VIEW m_indexBufferView{};
 	};
+
+	extern std::unique_ptr<BufferManager> g_pBufferManager;
+
+	inline static BufferManager* GetBufferManager()
+	{
+		if (g_pBufferManager == nullptr)
+		{
+			ThrowRuntimeError("null buffer manager");
+		}
+		return g_pBufferManager.get();
+	}
 }

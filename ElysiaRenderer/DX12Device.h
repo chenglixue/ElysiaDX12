@@ -156,14 +156,42 @@ namespace ElysiaRenderer
 		std::array<DestructionQueue, NUM_FRAMES_IN_FLIGHT> m_destructionQueues;
 	};
 
-	std::unique_ptr<DX12Device> g_device = nullptr;
+	extern std::unique_ptr<DX12Device> g_device;
 
-	inline static DX12Device* GetDevice()
+	inline DX12Device* GetDevice()
 	{
 		if (g_device == nullptr)
 		{
 			ThrowRuntimeError("null device");
 		}
 		return g_device.get();
+	}
+
+	inline void AddShader(ShaderQueue shaderQueue, const std::wstring& shaderName, const std::wstring& entryPoint, ShaderType shaderType)
+	{
+		ShaderCreateDesc VSShaderCreateDesc{};
+		VSShaderCreateDesc.shaderName = shaderName;
+		VSShaderCreateDesc.entryPoint = entryPoint;
+		VSShaderCreateDesc.shaderType = shaderType;
+
+		std::unique_ptr<DX12Shader> shader = std::move(GetDevice()->CreateShader(VSShaderCreateDesc));
+		std::unordered_map<ShaderType, std::unique_ptr<DX12Shader>> value{};
+		value[shaderType] = std::move(shader);
+
+		switch (shaderType)
+		{
+			case ShaderType::Vertex:
+			{
+				GetVertexShaders()[shaderQueue] = std::move(value);
+				break;
+			}
+			
+			case ShaderType::Pixel:
+			{
+				GetPixelShaders()[shaderQueue] = std::move(value);
+				break;
+			}
+		}
+
 	}
 }

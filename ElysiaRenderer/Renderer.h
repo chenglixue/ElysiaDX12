@@ -11,7 +11,6 @@
 #include "LoadTexData.h"
 #include "CameraManager.h"
 #include "LightManager.h"
-#include "ShadowManager.h"
 #include "BufferManager.h"
 #include "MeshManager.h"
 #include "TextureManager.h"
@@ -96,17 +95,10 @@ namespace ElysiaRenderer
 		std::unique_ptr<DX12GraphicsContext> m_graphicsContext = nullptr;
 		std::vector<std::unique_ptr<DX12TextureResource>> m_texs{};
 		std::vector<std::unique_ptr<D3D12_SAMPLER_DESC>> m_samplers{};
-		std::unordered_map<UINT, std::unordered_map<ShaderType, std::unique_ptr<DX12Shader>>> m_vertexShaders;
-		std::unordered_map<UINT, std::unordered_map<ShaderType, std::unique_ptr<DX12Shader>>> m_pixelShaders;
-		std::vector<std::unique_ptr<DX12Shader>> m_computeShaders;
-		std::unordered_map<UINT, std::shared_ptr<PipelineStateObject>> m_graphicsPipelineStates{};
-
-		std::unique_ptr<ModelImporter> m_pModelImporter = nullptr;
+		std::unordered_map<UINT, std::unique_ptr<PipelineStateObject>> m_graphicsPipelineStates{};
+		std::vector<std::unique_ptr<BasePass>> m_passes{};
 
 		std::unique_ptr<CameraManager>	m_pCameraManager = nullptr;  
-		std::unique_ptr<LightManager>	m_pLightManager = nullptr;
-		std::unique_ptr<BufferManager>	m_pBufferManager = nullptr;
-		std::unique_ptr<RenderResource> m_pRenderSource = nullptr;
 		std::unique_ptr<MeshManager>	m_pMeshManager = nullptr;
 		std::unique_ptr<TextureManager>	m_pTextureManager = nullptr;
 
@@ -120,8 +112,6 @@ namespace ElysiaRenderer
 		void CreateCreamDepthRT();
 		void LoadTextures(); 
 		void CreatePOS();
-
-		void AddShader(ShaderQueue shaderQueue, const std::wstring& shaderName, const std::wstring& entryPoint, ShaderType shaderType);
 	
 		void Execute();
 		

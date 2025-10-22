@@ -12,17 +12,19 @@ namespace ElysiaRenderer
 		m_aspectRatio = static_cast<float>(screenSize.x) / static_cast<float>(screenSize.y);
 		g_device = std::make_unique<DX12Device>(windowHandle, screenSize);
 		m_graphicsContext = GetDevice()->CreateGraphicsContext();
-		
 
 		m_pUI->InitDescriptor(windowHandle, std::move(GetDevice()));
 		m_pCameraManager = std::make_unique<CameraManager>();
-		m_pLightManager = std::make_unique<LightManager>();
-		m_pBufferManager = std::make_unique<BufferManager>();
-		m_pRenderSource = std::make_unique<RenderResource>();
+		g_pLightManager = std::make_unique<LightManager>();
+		g_pBufferManager = std::make_unique<BufferManager>();
 		m_pMeshManager = std::make_unique<MeshManager>();
 		m_pTextureManager = std::make_unique<TextureManager>();
+
+		g_vertexShaders = std::unordered_map<UINT, std::unordered_map<ShaderType, std::unique_ptr<DX12Shader>>>();
+		g_pixelShaders = std::unordered_map<UINT, std::unordered_map<ShaderType, std::unique_ptr<DX12Shader>>>();
+		g_computeShaders = std::unordered_map<UINT, std::unordered_map<ShaderType, std::unique_ptr<DX12Shader>>>();
 		
-		m_pModelImporter = std::make_unique<ModelImporter>(m_pBufferManager.get(), m_pTextureManager.get());
+		g_pModelImporter = std::make_unique<ModelImporter>(GetBufferManager(), m_pTextureManager.get());
 	}
 
 	Renderer::~Renderer()
@@ -42,7 +44,7 @@ namespace ElysiaRenderer
 #endif
 
 		printf("loading...\n");
-		if (!m_pModelImporter->Load(g_ModelPaths))
+		if (!GetModelImporter()->Load(g_ModelPaths))
 		{
 			AssertError("failed to load model: %s\n");
 		}
@@ -51,22 +53,24 @@ namespace ElysiaRenderer
 		DeSerializeUserData();
 
 		m_pCameraManager->Init(); 
-		m_pLightManager->Init();  
-		m_pBufferManager->Init();
+		GetLightManager()->Init();
+		GetBufferManager()->Init();
 		m_pMeshManager->Init();
 		
 		m_pCameraManager->CreateMainCamera(Vector3(-11.5f, 200.85f, -0.45f) ,
 			m_aspectRatio, 3.14159f / 4.0f, 0.1f, 2000.f);
 
 		auto sobolSequence = Create2DSobolSqeuence(64);
-		memcpy(m_pRenderSource->GetCBVPassParameter()->sobolSequence.data(), sobolSequence.data(), sobolSequence.size() * sizeof(Vector2));
+		memcpy(RenderResource::GetInstance().GetCBVPassParameter()->sobolSequence.data(), sobolSequence.data(), sobolSequence.size() * sizeof(Vector2));
+
+		m_passes.emplace_back(std::move(std::make_unique<ShadowPass>()));
 
 		Setup();
 	}
 	void Renderer::Update()
 	{
 		//OnKeyboardInput();
-		m_pLightManager->Update();
+		GetLightManager()->Update();
 		UpdateCBV();
 		SerializeUserData();
 	}
@@ -78,15 +82,12 @@ namespace ElysiaRenderer
 	{
 		GetDevice()->WaitForIdle();
 		GetDevice()->DestoryContext(std::move(m_graphicsContext));
-		for (size_t i = 0; i < m_graphicsPipelineStates.size(); ++i)
-		{
-			//m_device->DestoryPipelineState(std::move(m_graphicsPipelineStates[i]));
-		}
 
+		m_passes.clear();
 		m_graphicsContext.release();
-		m_vertexShaders.clear();
-		m_pixelShaders.clear();
-		m_computeShaders.clear();
+		GetVertexShaders().clear();
+		GetPixelShaders().clear();
+		GetComputeShaders().clear();
 		m_graphicsPipelineStates.clear();
 	}
 	void Renderer::Resize()
@@ -125,7 +126,7 @@ namespace ElysiaRenderer
 	void Renderer::UpdatePassCBV()
 	{
 		auto& pUserData = UserData::GetInstance();
-		auto passParameter = m_pRenderSource->GetCBVPassParameter();
+		auto passParameter = RenderResource::GetInstance().GetCBVPassParameter();
 
 		passParameter->screenSize = GetDevice()->GetScreenSize();
 		passParameter->frameIndex = GetDevice()->GetFrameIndex();
@@ -135,25 +136,17 @@ namespace ElysiaRenderer
 		passParameter->nearZ = m_pCameraManager->GetMainCamera()->GetNearZ();
 		passParameter->farZ = m_pCameraManager->GetMainCamera()->GetFarZ();
 
-		passParameter->mainLight = std::move(m_pLightManager->GetMainLight()->CreateLightData());
+		passParameter->mainLight = std::move(GetLightManager()->GetMainLight()->CreateLightData());
 
-		m_pBufferManager->GetSingleConstantBuffer(PER_PASS_SPACE)->SetMappedData(passParameter, sizeof(CBVMainPassParameter));
-		
-		/*XMStoreFloat4x4(&m_shadowPassParameter.shadowMatrix, XMMatrixTranspose(m_mainLightShadow->GetShadowMat()));
-		XMStoreFloat4x4(&m_shadowPassParameter.viewMatrix, XMMatrixTranspose(m_mainLightShadow->GetViewMat()));
-		XMStoreFloat4x4(&m_shadowPassParameter.projMatrix, XMMatrixTranspose(m_mainLightShadow->GetProjMat()));
-		m_shadowPassParameter.nearZ = m_mainLightShadow->GetNearZ();
-		m_shadowPassParameter.farZ = m_mainLightShadow->GetFarZ();
-		m_perObjectBindResourceSpace.m_CBVResource[ElysiaHelper::PER_PASS_SPACE][static_cast<size_t>(CBVPassParameterType::Shadow)]->SetMappedData(&m_shadowPassParameter, sizeof(CBVShadowPassParameter));*/
-
+		GetBufferManager()->GetSingleConstantBuffer(PER_PASS_SPACE)->SetMappedData(passParameter, sizeof(CBVMainPassParameter));
 	}
 	void Renderer::UpdateObjectCBV()
 	{
 		auto& pUserData = UserData::GetInstance();
 
-		for (UINT meshIndex = 0; meshIndex < m_pModelImporter->GetMeshCount(); ++meshIndex)
+		for (UINT meshIndex = 0; meshIndex < GetModelImporter()->GetMeshCount(); ++meshIndex)
 		{
-			const auto& meshRenderer = m_pModelImporter->GetMeshRenderer(meshIndex);
+			const auto& meshRenderer = GetModelImporter()->GetMeshRenderer(meshIndex);
 			auto objectConstantParameter = *meshRenderer.m_CBVObjectParameter;
 			for (UINT frameIndex = 0; frameIndex < NUM_FRAMES_IN_FLIGHT; ++frameIndex)
 			{
@@ -166,7 +159,7 @@ namespace ElysiaRenderer
 				objectConstantParameter.ambientCubemapIntensity = pUserData.AmbientCubemapIntensity;
 				objectConstantParameter.ambientCubemapTint = pUserData.AmbientCubemapTint;
 
-				auto objectContantBuffer = m_pBufferManager->GetMutilConstantBuffer(PER_OBJECT_SPACE, frameIndex, meshIndex);
+				auto objectContantBuffer = GetBufferManager()->GetMutilConstantBuffer(PER_OBJECT_SPACE, frameIndex, meshIndex);
 				objectContantBuffer->SetMappedData(&objectConstantParameter, sizeof(CBVObjectParameter));
 			}
 		}
@@ -179,13 +172,16 @@ namespace ElysiaRenderer
 		passData.pCommand = m_graphicsContext.get();
 		passData.pGraphicsPipelineStates = &m_graphicsPipelineStates;
 
-		m_pModelImporter->CreateVertexBuffer();
-		m_pModelImporter->CreateIndexBuffer();
-		m_pModelImporter->CreateMeshRenders();
+		GetModelImporter()->CreateVertexBuffer();
+		GetModelImporter()->CreateIndexBuffer();
+		GetModelImporter()->CreateMeshRenders();
 
  		CreateConstantBuffers();
 		CreateCreamDepthRT();
-		ShadowPass::GetInstance().Setup(passData);
+		for (auto& pass : m_passes)
+		{
+			pass->Setup(passData);
+		}
 
 		LoadTextures();
 		LoadShaders();
@@ -194,9 +190,6 @@ namespace ElysiaRenderer
 
 	void Renderer::LoadShaders()
 	{
-		AddShader(ShaderQueue::Shadow, L"Shaders\\public\\Shadow.hlsl", L"VS", ShaderType::Vertex);
-		AddShader(ShaderQueue::Shadow, L"Shaders\\public\\Shadow.hlsl", L"PS", ShaderType::Pixel);
-
 		AddShader(ShaderQueue::Opaque, L"Shaders\\public\\PBR.hlsl", L"VS", ShaderType::Vertex);
 		AddShader(ShaderQueue::Opaque, L"Shaders\\public\\PBR.hlsl", L"PS", ShaderType::Pixel);
 		 
@@ -211,26 +204,26 @@ namespace ElysiaRenderer
 		desc.m_isRawAccess = false;
 		
 		desc.m_size = sizeof(CBVMainPassParameter);
-		m_pBufferManager->AddConstantBuffer(PER_PASS_SPACE, desc);
-		m_pBufferManager->GetSingleConstantBuffer(PER_PASS_SPACE)->SetMappedData(m_pRenderSource->GetCBVPassParameter(), sizeof(CBVMainPassParameter));
-		RenderResource::GetPerMainBindResourceSpace()->SetCBV(m_pBufferManager->GetSingleConstantBuffer(PER_PASS_SPACE));
+		GetBufferManager()->AddConstantBuffer(PER_PASS_SPACE, desc);
+		GetBufferManager()->GetSingleConstantBuffer(PER_PASS_SPACE)->SetMappedData(RenderResource::GetInstance().GetCBVPassParameter(), sizeof(CBVMainPassParameter));
+		RenderResource::GetPerMainBindResourceSpace()->SetCBV(GetBufferManager()->GetSingleConstantBuffer(PER_PASS_SPACE));
 		RenderResource::GetPerMainBindResourceSpace()->Lock();
 
 		desc.m_size = sizeof(CBVObjectParameter);
-		for (UINT meshIndex = 0; meshIndex < m_pModelImporter->GetMeshCount(); ++meshIndex)
+		for (UINT meshIndex = 0; meshIndex < GetModelImporter()->GetMeshCount(); ++meshIndex)
 		{
-			const auto& meshRenderer = m_pModelImporter->GetMeshRenderer(meshIndex);
+			const auto& meshRenderer = GetModelImporter()->GetMeshRenderer(meshIndex);
 
-			m_pBufferManager->AddConstantBuffer(PER_OBJECT_SPACE, desc);
+			GetBufferManager()->AddConstantBuffer(PER_OBJECT_SPACE, desc);
 
 			auto objectConstantParameter = *meshRenderer.m_CBVObjectParameter;
 			for (UINT frameIndex = 0; frameIndex < NUM_FRAMES_IN_FLIGHT; ++frameIndex)
 			{
-				auto objectContantBuffer = m_pBufferManager->GetMutilConstantBuffer(PER_OBJECT_SPACE, frameIndex, meshIndex);
+				auto objectContantBuffer = GetBufferManager()->GetMutilConstantBuffer(PER_OBJECT_SPACE, frameIndex, meshIndex);
 				objectContantBuffer->SetMappedData(&objectConstantParameter, sizeof(CBVObjectParameter));
 			}
 		}
-		RenderResource::GetPerObjectBindResourceSpace()->SetCBV(m_pBufferManager->GetMutilConstantBuffer(PER_OBJECT_SPACE, 0, 0));
+		RenderResource::GetPerObjectBindResourceSpace()->SetCBV(GetBufferManager()->GetMutilConstantBuffer(PER_OBJECT_SPACE, 0, 0));
 		RenderResource::GetPerObjectBindResourceSpace()->Lock();
 	}
 
@@ -243,7 +236,7 @@ namespace ElysiaRenderer
 		depthBufferCreateDesc.m_resouceDesc.Height = static_cast<UINT>(GetDevice()->GetScreenSize().y);
 		depthBufferCreateDesc.m_typeFlag = TexTypeFlags::SRV | TexTypeFlags::DSV;
 
-		m_pBufferManager->AddDepthBuffer(std::move(GetDevice()->CreateTexture(depthBufferCreateDesc)));
+		GetBufferManager()->AddDepthBuffer(std::move(GetDevice()->CreateTexture(depthBufferCreateDesc)));
 	}
 	void Renderer::LoadTextures()
 	{
@@ -254,7 +247,7 @@ namespace ElysiaRenderer
 			texBufferCreateDesc.isSRGB = false;
 			auto newTex = std::move(GetDevice()->CreateTextureFromFile(texBufferCreateDesc));
 			 
-			m_pRenderSource->GetCBVPassParameter()->GGX_E_LUT_Index = newTex->GetResourceHeapIndex();
+			RenderResource::GetInstance().GetCBVPassParameter()->GGX_E_LUT_Index = newTex->GetResourceHeapIndex();
 
 			m_pTextureManager->AddTextureResource(std::move(newTex));
 		}
@@ -264,7 +257,7 @@ namespace ElysiaRenderer
 			texBufferCreateDesc.isSRGB = false;
 			auto newTex = std::move(GetDevice()->CreateTextureFromFile(texBufferCreateDesc));
 
-			m_pRenderSource->GetCBVPassParameter()->GGX_Eavg_LUT_Index = newTex->GetResourceHeapIndex();
+			RenderResource::GetInstance().GetCBVPassParameter()->GGX_Eavg_LUT_Index = newTex->GetResourceHeapIndex();
 
 			m_pTextureManager->AddTextureResource(std::move(newTex));
 
@@ -275,7 +268,7 @@ namespace ElysiaRenderer
 			texBufferCreateDesc.isSRGB = false;
 			auto newTex = std::move(GetDevice()->CreateTextureFromFile(texBufferCreateDesc));
 			 
-			m_pRenderSource->GetCBVPassParameter()->SkyboxTexIndex = newTex->GetResourceHeapIndex();
+			RenderResource::GetInstance().GetCBVPassParameter()->SkyboxTexIndex = newTex->GetResourceHeapIndex();
 
 			m_pTextureManager->AddTextureResource(std::move(newTex));
 		}
@@ -288,7 +281,7 @@ namespace ElysiaRenderer
 
 			auto newTex = std::move(GetDevice()->CreateTextureFromFile(texBufferCreateDesc));
 
-			m_pRenderSource->GetCBVPassParameter()->BlueNoiseTexIndex = newTex->GetResourceHeapIndex();
+			RenderResource::GetInstance().GetCBVPassParameter()->BlueNoiseTexIndex = newTex->GetResourceHeapIndex();
 
 			m_pTextureManager->AddTextureResource(std::move(newTex));
 		}
@@ -301,26 +294,15 @@ namespace ElysiaRenderer
 		meshResourceLayout.m_spaces[PER_OBJECT_SPACE] = RenderResource::GetPerObjectBindResourceSpace();
 		meshResourceLayout.m_spaces[PER_PASS_SPACE] = RenderResource::GetPerMainBindResourceSpace();
 
-		/// Shadow PSO
-		pipelineStateCreateDesc = std::move(CreateDefaultPipelineStateCreateDesc());
-		pipelineStateCreateDesc.m_vertexShader = m_vertexShaders[ShaderQueue::Shadow][ShaderType::Vertex].get();
-		pipelineStateCreateDesc.m_pixelShader = m_pixelShaders[ShaderQueue::Shadow][ShaderType::Pixel].get();
-		pipelineStateCreateDesc.m_inputElementDesc = m_inputElementDescs;
-		pipelineStateCreateDesc.m_renderTargetDesc.m_numRenderTargets = 0;
-		pipelineStateCreateDesc.m_depthStencilDesc.DepthEnable = TRUE;
-		pipelineStateCreateDesc.m_renderTargetDesc.m_depthStencilFormat = ShadowPass::GetInstance().GetShadowRT()->GetFormat();
-		pipelineStateCreateDesc.m_depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
-		m_graphicsPipelineStates[ShaderQueue::Shadow] = std::move(GetDevice()->CreateGraphicsPipelineState(pipelineStateCreateDesc, meshResourceLayout));
-
 		/// Opaque PSO
 		pipelineStateCreateDesc = std::move(CreateDefaultPipelineStateCreateDesc());
-		pipelineStateCreateDesc.m_inputElementDesc = m_inputElementDescs;
-		pipelineStateCreateDesc.m_vertexShader = m_vertexShaders[ShaderQueue::Opaque][ShaderType::Vertex].get();
-		pipelineStateCreateDesc.m_pixelShader = m_pixelShaders[ShaderQueue::Opaque][ShaderType::Pixel].get();
+		pipelineStateCreateDesc.m_inputElementDesc = g_inputElementDescs;
+		pipelineStateCreateDesc.m_vertexShader = GetVertexShaders()[ShaderQueue::Opaque][ShaderType::Vertex].get();
+		pipelineStateCreateDesc.m_pixelShader = GetPixelShaders()[ShaderQueue::Opaque][ShaderType::Pixel].get();
 		pipelineStateCreateDesc.m_renderTargetDesc.m_numRenderTargets = 1;
 		pipelineStateCreateDesc.m_renderTargetDesc.m_renderTargetFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 		pipelineStateCreateDesc.m_depthStencilDesc.DepthEnable = TRUE;
-		pipelineStateCreateDesc.m_renderTargetDesc.m_depthStencilFormat = m_pBufferManager->GetCameraDepthBuffer()->GetResourceDesc().Format;
+		pipelineStateCreateDesc.m_renderTargetDesc.m_depthStencilFormat = GetBufferManager()->GetCameraDepthBuffer()->GetResourceDesc().Format;
 		pipelineStateCreateDesc.m_depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
 
 		m_graphicsPipelineStates[ShaderQueue::Opaque] = std::move(GetDevice()->CreateGraphicsPipelineState(pipelineStateCreateDesc, meshResourceLayout));
@@ -344,38 +326,13 @@ namespace ElysiaRenderer
 		//m_graphicsPipelineStates.insert({ ShaderQueue::Skybox, std::move(m_device->CreateGraphicsPipelineState(pipelineStateCreateDesc, meshResourceLayout)) });
 	}
 
-	void Renderer::AddShader(ShaderQueue shaderQueue, const std::wstring& shaderName, const std::wstring& entryPoint, ShaderType shaderType)
-	{
-		ShaderCreateDesc VSShaderCreateDesc{};
-		VSShaderCreateDesc.shaderName = shaderName;
-		VSShaderCreateDesc.entryPoint = entryPoint;
-		VSShaderCreateDesc.shaderType = shaderType;
-
-		std::unique_ptr<DX12Shader> shader = std::move(GetDevice()->CreateShader(VSShaderCreateDesc));
-		std::unordered_map<ShaderType, std::unique_ptr<DX12Shader>> value{};
-		value[shaderType] = std::move(shader);
-
-		switch (shaderType)
-		{
-			case ShaderType::Vertex:
-			{
-				m_vertexShaders[shaderQueue] = std::move(value);
-				break;
-			}
-			{
-			case ShaderType::Pixel:
-				m_pixelShaders[shaderQueue] = std::move(value);
-			}
-		}
-
-	}
 	void Renderer::AddUIItems()
 	{
 		auto& pUserData = UserData::GetInstance();
 
 		if (ImGui::CollapsingHeader("Light"))
 		{
-			auto mainLight = m_pRenderSource->GetCBVPassParameter();
+			auto mainLight = RenderResource::GetInstance().GetCBVPassParameter();
 			ImGui::ColorEdit3("Color", (float*)&pUserData.lightColor);
 			ImGui::DragFloat3("Direction", (float*)&pUserData.lightDir, 1, -1, 1);
 			ImGui::SliderFloat("Intensity", &pUserData.lightIntensity, 0, 5);
@@ -414,7 +371,7 @@ namespace ElysiaRenderer
 	void Renderer::Execute()
 	{
 		GetDevice()->BeginFrame();
-		m_graphicsContext->Reset(m_graphicsPipelineStates[ShaderQueue::Opaque]->m_pipelineState->GetPipelineState());
+		m_graphicsContext->Reset();
 
 		auto& currBackBuffer = GetDevice()->GetCurrBackBuffer();
 
@@ -426,14 +383,17 @@ namespace ElysiaRenderer
 			ImGui::Render();
 
 			m_graphicsContext->AddBarrier(currBackBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET);
-			m_graphicsContext->AddBarrier(*m_pBufferManager->GetCameraDepthBuffer(), D3D12_RESOURCE_STATE_DEPTH_WRITE);
+			m_graphicsContext->AddBarrier(*GetBufferManager()->GetCameraDepthBuffer(), D3D12_RESOURCE_STATE_DEPTH_WRITE);
 			m_graphicsContext->FlushBarrier();
 			m_graphicsContext->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-			m_graphicsContext->SetIndexBuffer(m_pBufferManager->GetIndexBufferView());
-			m_graphicsContext->SetVertexBuffer(0, 1, const_cast<D3D12_VERTEX_BUFFER_VIEW&>(m_pBufferManager->GetVertexBufferView()));
+			m_graphicsContext->SetIndexBuffer(GetBufferManager()->GetIndexBufferView());
+			m_graphicsContext->SetVertexBuffer(0, 1, const_cast<D3D12_VERTEX_BUFFER_VIEW&>(GetBufferManager()->GetVertexBufferView()));
 		}
 
-		ShadowPass::GetInstance().Render();
+		for (auto& pass : m_passes)
+		{
+			pass->Render();
+		}
 		DrawOpaque();
 		DrawUI();
 
@@ -453,14 +413,14 @@ namespace ElysiaRenderer
 		auto& currBackBuffer = GetDevice()->GetCurrBackBuffer();
 
 		m_graphicsContext->ClearRenderTarget(currBackBuffer, Color(1, 1, 1));
-		m_graphicsContext->ClearDepthStencilTarget(*m_pBufferManager->GetCameraDepthBuffer(), 1.f, 0);
+		m_graphicsContext->ClearDepthStencilTarget(*GetBufferManager()->GetCameraDepthBuffer(), 1.f, 0);
 
 		m_graphicsContext->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(static_cast<UINT>(GetDevice()->GetScreenSize().x), static_cast<UINT>(GetDevice()->GetScreenSize().y)));
 
 		PipelineInfo pipelineStateData{};
 		pipelineStateData.m_pipelineStateObject = m_graphicsPipelineStates[ShaderQueue::Opaque].get();
 		pipelineStateData.m_renderTargets.emplace_back(&currBackBuffer);
-		pipelineStateData.m_depthStencilTarget = m_pBufferManager->GetCameraDepthBuffer();
+		pipelineStateData.m_depthStencilTarget = GetBufferManager()->GetCameraDepthBuffer();
 
 		bool isReady = true;
 		{
@@ -479,14 +439,14 @@ namespace ElysiaRenderer
 			m_graphicsContext->SetPipeline(pipelineStateData);
 			m_graphicsContext->SetPipelineResource(PER_PASS_SPACE, RenderResource::GetPerMainBindResourceSpace());
 
-			UINT vertexStride = m_pModelImporter->GetVertexStride();
+			UINT vertexStride = GetModelImporter()->GetVertexStride();
 
-			for (UINT meshIndex = 0; meshIndex < m_pModelImporter->GetMeshCount(); ++meshIndex)
+			for (UINT meshIndex = 0; meshIndex < GetModelImporter()->GetMeshCount(); ++meshIndex)
 			{
-				const auto& meshRenderer = m_pModelImporter->GetMeshRenderer(meshIndex);
+				const auto& meshRenderer = GetModelImporter()->GetMeshRenderer(meshIndex);
 				const auto& mesh = meshRenderer.m_mesh;
 
-				auto objectContantBuffer = m_pBufferManager->GetMutilConstantBuffer(PER_OBJECT_SPACE, GetDevice()->GetFrameID(), meshIndex);
+				auto objectContantBuffer = GetBufferManager()->GetMutilConstantBuffer(PER_OBJECT_SPACE, GetDevice()->GetFrameID(), meshIndex);
 				RenderResource::GetPerObjectBindResourceSpace()->SetCBV(objectContantBuffer);
 				m_graphicsContext->SetPipelineResource(PER_OBJECT_SPACE, RenderResource::GetPerObjectBindResourceSpace());
 

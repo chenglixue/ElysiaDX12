@@ -41,7 +41,7 @@ namespace ElysiaRenderer
 		}
 		DX12TextureResource* GetShadowRT() const
 		{
-			return m_buffer.get();
+			return m_buffer;
 		}
 		D3D12_VIEWPORT& GetViewport()
 		{

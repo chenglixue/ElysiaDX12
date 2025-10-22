@@ -4,9 +4,6 @@
 
 namespace ElysiaRenderer
 {
-	std::unique_ptr<ShadowPass> ShadowPass::m_instance;
-	std::once_flag ShadowPass::m_initInstanceFlag;
-
 	ShadowPass::~ShadowPass()
 	{
 		Dispose();
@@ -14,9 +11,28 @@ namespace ElysiaRenderer
 
 	void ShadowPass::Configure()
 	{
+		AddShader(ShaderQueue::Shadow, L"Shaders\\public\\Shadow.hlsl", L"VS", ShaderType::Vertex);
+		AddShader(ShaderQueue::Shadow, L"Shaders\\public\\Shadow.hlsl", L"PS", ShaderType::Pixel);
+
 		m_pMainLight = GetMainLight();
-		CreateMainShadow(15, DXGI_FORMAT_D24_UNORM_S8_UINT);
+		CreateMainShadow(1000, DXGI_FORMAT_D24_UNORM_S8_UINT);
 		RenderResource::GetInstance().GetCBVPassParameter()->ShadowTexIndex = m_pShadowRT->GetSRVIndex();
+
+		PipelineStateCreateDesc pipelineStateCreateDesc{};
+		PipelineResourceLayout meshResourceLayout{};
+
+		meshResourceLayout.m_spaces[PER_OBJECT_SPACE] = RenderResource::GetPerObjectBindResourceSpace();
+		meshResourceLayout.m_spaces[PER_PASS_SPACE] = RenderResource::GetPerMainBindResourceSpace();
+
+		pipelineStateCreateDesc = std::move(CreateDefaultPipelineStateCreateDesc());
+		pipelineStateCreateDesc.m_vertexShader = GetVertexShaders()[ShaderQueue::Shadow][ShaderType::Vertex].get();
+		pipelineStateCreateDesc.m_pixelShader = GetPixelShaders()[ShaderQueue::Shadow][ShaderType::Pixel].get();
+		pipelineStateCreateDesc.m_inputElementDesc = g_inputElementDescs;
+		pipelineStateCreateDesc.m_renderTargetDesc.m_numRenderTargets = 0;
+		pipelineStateCreateDesc.m_depthStencilDesc.DepthEnable = TRUE;
+		pipelineStateCreateDesc.m_renderTargetDesc.m_depthStencilFormat = GetShadowRT()->GetFormat();
+		pipelineStateCreateDesc.m_depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+		(*m_pGraphicsPipelineStates)[ShaderQueue::Shadow] = std::move(GetDevice()->CreateGraphicsPipelineState(pipelineStateCreateDesc, meshResourceLayout));
 	}
 	void ShadowPass::Execute()
 	{
@@ -33,6 +49,8 @@ namespace ElysiaRenderer
 		passParameter->shadowDepthBias = pUserData.shadowDepthBias / 100;
 		passParameter->shadowSlopeDepthBias = pUserData.shadowSlopeDepthBias / 100;
 		passParameter->shadowMaxSlopeDepthBias = pUserData.shadowMaxSlopeDepthBias / 100;
+
+		GetBufferManager()->GetSingleConstantBuffer(PER_PASS_SPACE)->SetMappedData(passParameter, sizeof(CBVMainPassParameter));
 	}
 	void ShadowPass::Render()
 	{
@@ -63,16 +81,16 @@ namespace ElysiaRenderer
 			m_pCommand->SetPipeline(pipelineStateData);
 			m_pCommand->SetPipelineResource(PER_PASS_SPACE, RenderResource::GetPerMainBindResourceSpace());
 
-			UINT vertexStride = m_pModelImporter->GetVertexStride();
+			UINT vertexStride = GetModelImporter()->GetVertexStride();
 
-			for (UINT meshIndex = 0; meshIndex < m_pModelImporter->GetMeshCount(); ++meshIndex)
+			for (UINT meshIndex = 0; meshIndex < GetModelImporter()->GetMeshCount(); ++meshIndex)
 			{
-				const auto& meshRenderer = m_pModelImporter->GetMeshRenderer(meshIndex);
+				const auto& meshRenderer = GetModelImporter()->GetMeshRenderer(meshIndex);
 				const auto& mesh = meshRenderer.m_mesh;
 
-				auto objectContantBuffer = m_pBufferManager->GetMutilConstantBuffer(PER_OBJECT_SPACE, m_device->GetFrameID(), meshIndex);
-				m_perObjectBindResourceSpace->SetCBV(objectContantBuffer);
-				m_pCommand->SetPipelineResource(PER_OBJECT_SPACE, m_perObjectBindResourceSpace.get());
+				auto objectContantBuffer = GetBufferManager()->GetMutilConstantBuffer(PER_OBJECT_SPACE, GetDevice()->GetFrameID(), meshIndex);
+				RenderResource::GetPerObjectBindResourceSpace()->SetCBV(objectContantBuffer);
+				m_pCommand->SetPipelineResource(PER_OBJECT_SPACE, RenderResource::GetPerObjectBindResourceSpace());
 
 				auto startIndex = mesh->indexDataOffset / sizeof(UINT16);
 				auto startVertex = mesh->vertexDataOffset / vertexStride;
@@ -134,11 +152,12 @@ namespace ElysiaRenderer
 		shadowRTDesc.EnableRandomWrite = false;
 		shadowRTDesc.MipmapLevels = 1;
 		shadowRTDesc.MSAASamples = 1;
+		shadowRTDesc.IsDepth = true;
 
 		m_pShadowRT = std::make_unique<RenderTexture>();
 		m_pShadowRT->Init(shadowRTDesc);
 
-		auto shadowMap = std::make_unique<DX12Shadow>(m_pShadowRT->GetResource());
+		auto shadowMap = std::make_unique<DX12Shadow>(m_pShadowRT->GetTexture());
 		shadowMap->InitBoundSphere(boundSphereRadius);
 
 		if (m_pMainShadow != nullptr)

@@ -42,4 +42,21 @@ namespace ElysiaRenderer
 	private:
 		CComPtr<IDxcBlob> m_shader;
 	};
+
+	extern std::unordered_map<UINT, std::unordered_map<ShaderType, std::unique_ptr<DX12Shader>>> g_vertexShaders;
+	extern std::unordered_map<UINT, std::unordered_map<ShaderType, std::unique_ptr<DX12Shader>>> g_pixelShaders;
+	extern std::unordered_map<UINT, std::unordered_map<ShaderType, std::unique_ptr<DX12Shader>>>  g_computeShaders;
+
+	inline std::unordered_map<UINT, std::unordered_map<ShaderType, std::unique_ptr<DX12Shader>>>& GetVertexShaders()
+	{
+		return g_vertexShaders;
+	}
+	inline std::unordered_map<UINT, std::unordered_map<ShaderType, std::unique_ptr<DX12Shader>>>& GetPixelShaders()
+	{
+		return g_pixelShaders;
+	}
+	inline std::unordered_map<UINT, std::unordered_map<ShaderType, std::unique_ptr<DX12Shader>>>& GetComputeShaders()
+	{
+		return g_computeShaders;
+	}
 }

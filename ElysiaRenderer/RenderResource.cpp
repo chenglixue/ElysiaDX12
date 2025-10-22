@@ -2,11 +2,11 @@
 
 namespace ElysiaRenderer
 {
-	std::unique_ptr<RenderResource> m_instance;
-	std::once_flag m_initInstanceFlag;
+	std::unique_ptr<RenderResource> RenderResource::m_instance;
+	std::once_flag RenderResource::m_initInstanceFlag;
 
-	std::unique_ptr<PipelineResourceSpace> RenderResource::m_perObjectBindResourceSpace = nullptr;
-	std::unique_ptr<PipelineResourceSpace> RenderResource::m_perMainPassBindResourceSpace = nullptr;
+	std::unique_ptr<PipelineResourceSpace> RenderResource::m_perObjectBindResourceSpace = std::make_unique<PipelineResourceSpace>();
+	std::unique_ptr<PipelineResourceSpace> RenderResource::m_perMainPassBindResourceSpace = std::make_unique<PipelineResourceSpace>();
 
 	RenderResource::RenderResource()
 	{

@@ -244,9 +244,6 @@
     <ClInclude Include="ShaderManager.h">
       <Filter>Header Files\Manager</Filter>
     </ClInclude>
-    <ClInclude Include="ShadowManager.h">
-      <Filter>Header Files\Manager</Filter>
-    </ClInclude>
     <ClInclude Include="BufferManager.h">
       <Filter>Header Files\Manager</Filter>
     </ClInclude>
@@ -283,9 +280,6 @@
     <ClInclude Include="GBufferPass.h">
       <Filter>Header Files\Render</Filter>
     </ClInclude>
-    <ClInclude Include="RenderResource.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="RenderTexture.h">
       <Filter>Header Files\Utility</Filter>
     </ClInclude>
@@ -296,6 +290,9 @@
       <Filter>Header Files\Render</Filter>
     </ClInclude>
     <ClInclude Include="ShadowPass.h">
+      <Filter>Header Files\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderResource.h">
       <Filter>Header Files\Render</Filter>
     </ClInclude>
   </ItemGroup>
@@ -595,9 +592,6 @@
       <Filter>Source Files\Manager</Filter>
     </ClCompile>
     <ClCompile Include="ShaderManager.cpp">
-      <Filter>Source Files\Manager</Filter>
-    </ClCompile>
-    <ClCompile Include="ShadowManager.cpp">
       <Filter>Source Files\Manager</Filter>
     </ClCompile>
     <ClCompile Include="BufferManager.cpp">

@@ -30,7 +30,7 @@ namespace ElysiaRenderer
 	void DX12GraphicsContext::SetPipeline(PipelineInfo& pipelineBind)
 	{
 		m_graphicsPipelineStateObject = pipelineBind.m_pipelineStateObject;
-		auto pipelineState = m_graphicsPipelineStateObject->m_pipelineState;
+		auto pipelineState = m_graphicsPipelineStateObject->m_pipelineState.get();
 		auto& renderTargets = pipelineBind.m_renderTargets;
 		const bool pipelineExpectedBoundExternally = !m_graphicsPipelineStateObject; //imgui
 

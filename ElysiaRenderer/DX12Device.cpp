@@ -5,6 +5,8 @@ namespace ElysiaRenderer
 {
 	using namespace ElysiaHelper;
 
+	std::unique_ptr<DX12Device> g_device = nullptr;
+
 	DX12Device::DX12Device(HWND windowHandle, ElysiaHelper::UINT2 screenSize)
 		: m_screenSize(screenSize)
 	{
@@ -481,6 +483,7 @@ namespace ElysiaRenderer
 		DXGI_FORMAT resourceFormat = resourceDesc.Format;
 		DXGI_FORMAT shaderResourceViewFormat = resourceDesc.Format;
 		D3D12_RESOURCE_STATES usageState = D3D12_RESOURCE_STATE_COPY_DEST;
+		//D3D12_RESOURCE_STATES usageState = D3D12_RESOURCE_STATE_COMMON; // D3D12_RESOURCE_STATE_COPY_DEST;
 
 		if (hasRTV)
 		{
@@ -540,7 +543,7 @@ namespace ElysiaRenderer
 		if (hasDSV)
 		{
 			clearValue.DepthStencil.Depth = 1.0f;
-			//clearValue.DepthStencil.Stencil = 0;
+			clearValue.DepthStencil.Stencil = 0;
 		}
 
 		/// Create default heap for tex
@@ -1098,7 +1101,7 @@ namespace ElysiaRenderer
 
 		std::unique_ptr<PipelineStateObject> pipelineStateObject = std::make_unique<PipelineStateObject>();
 		pipelineStateObject->m_pipelineType = PipelineType::Graphics;
-		pipelineStateObject->m_rootSignature = std::shared_ptr<DX12RootSignature>(CreateRootSignature(resourceLayout, pipelineStateObject->m_pipelineResourceMapping));
+		pipelineStateObject->m_rootSignature = std::unique_ptr<DX12RootSignature>(CreateRootSignature(resourceLayout, pipelineStateObject->m_pipelineResourceMapping));
 
 		PSODesc.pRootSignature = pipelineStateObject->m_rootSignature->GetSignature();
 		CComPtr<ID3D12PipelineState> pipelineState = nullptr;
@@ -1180,43 +1183,6 @@ namespace ElysiaRenderer
 	void DX12Device::ProcessDestruction(UINT frameIndex)
 	{
 		auto& currFrameDestrctuionQueue = m_destructionQueues[frameIndex];
-
-		//for (auto& currBuffer : m_destructionQueues[frameIndex].m_buffers)
-		//{
-		//	switch (currBuffer->GetBufferType())
-		//	{
-		//		case GPUResourceType::Vertex:
-		//		{
-		//			auto vertexBuffer = dynamic_cast<DX12VertexBuffer*>(currBuffer.get());
-		//			/*if (vertexBuffer->GetSRVDescriptor().IsValid())
-		//			{
-		//				m_SRVStagingDescriptorHeap->FreeDescriptorHeapHandle(vertexBuffer->GetSRVDescriptor());
-		//			}*/
-		//			vertexBuffer->Unmap();
-		//			break;
-		//		}
-		//		case GPUResourceType::Texture:
-		//		{
-		//			auto texUploadHeap = dynamic_cast<DX12TextureUpload*>(currBuffer.get());
-		//			texUploadHeap->Unmap();
-		//		}
-		//		default:
-		//			ElysiaHelper::AssertError("buffer type none");
-		//			break;
-		//	}
-		//}
-
-		for (auto& currTex : m_destructionQueues[frameIndex].m_textures)
-		{
-			/*ElysiaHelper::SafeRelease(currTex.GetAllocation());
-			ElysiaHelper::SafeRelease(currTex.GetResource());*/
-		}
-
-		for (auto& currPipelineState : m_destructionQueues[frameIndex].m_pipelineStates)
-		{
-			/*ElysiaHelper::SafeRelease(currPipelineState.GetRootSignature());
-			ElysiaHelper::SafeRelease(currPipelineState.GetPipelineState());*/
-		}
 
 		(currFrameDestrctuionQueue.m_contexts).clear();
 		(currFrameDestrctuionQueue.m_buffers).clear();

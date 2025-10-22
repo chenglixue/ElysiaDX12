@@ -22,7 +22,7 @@ namespace ElysiaRenderer
 		return static_cast<TexTypeFlags>(static_cast<uint8_t>(a) & static_cast<uint8_t>(b));
 	}
 
-	enum TextureDimension : uint8_t
+	enum TextureDimension : INT8
 	{
 		/// <summary>
 		///   <para>Texture type is not initialized or unknown.</para>

@@ -105,5 +105,14 @@ namespace ElysiaModel
 		uint8_t* m_pIndexData = nullptr;
 	};
 
+	extern std::unique_ptr<ModelImporter> g_pModelImporter;
 
+	inline static ModelImporter* GetModelImporter()
+	{
+		if (g_pModelImporter == nullptr)
+		{
+			ThrowRuntimeError("null model importer");
+		}
+		return g_pModelImporter.get();
+	}
 }
