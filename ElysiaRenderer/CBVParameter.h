@@ -27,19 +27,28 @@ namespace ElysiaRenderer
 		float nearZ = 1;
 		float farZ = 1000;
 		float shadowNearZ = 1;
-		float shadowFarZ = 1000;
 
-		int GGX_E_LUT_Index = -1;
-		int GGX_Eavg_LUT_Index = -1;
-		int SkyboxTexIndex = -1;
-		int ShadowTexIndex = -1;
-		int BlueNoiseTexIndex = -1;
+		float shadowFarZ = 1000;
+		UINT GGX_E_LUT_Index = 0;
+		UINT GGX_Eavg_LUT_Index = 0;
+		UINT SkyboxTexIndex = 0;
+
+		UINT ShadowTexIndex = 0;
+		UINT BlueNoiseTexIndex = 0;
+		UINT GBuffer0Index = 0;
+		UINT GBuffer1Index = 0;
+
+		UINT GBuffer2Index = 0;
+		UINT GBuffer3Index = 0;
+		UINT GBuffer4Index = 0;
+		UINT GBuffer5Index = 0;
 
 		float shadowDepthBias = 0;
 		float shadowSlopeDepthBias = 0;
 		float shadowMaxSlopeDepthBias = 0;
+		float pad;
 
-		std::array<Vector2,64> sobolSequence;
+		std::array<Vector2, 64> sobolSequence;
 	};
 
 	struct alignas(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT) CBVObjectParameter
@@ -63,6 +72,8 @@ namespace ElysiaRenderer
 		int specularTexIndex = -1;
 
 		float cutoff = 0.5;
+
+		bool hasNormalTex = false;
 
 		//float padding[48];
 	};

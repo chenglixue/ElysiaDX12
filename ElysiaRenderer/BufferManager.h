@@ -4,6 +4,7 @@
 #include "DX12Device.h"
 #include "DX12BufferResource.h"
 #include "DX12TextureBuffer.h"
+#include "RenderTexture.h"
 
 namespace ElysiaRenderer
 {
@@ -21,14 +22,14 @@ namespace ElysiaRenderer
 
 		DX12BufferResource* GetSingleConstantBuffer(uint8_t spaceID) const noexcept;
 		DX12BufferResource* GetMutilConstantBuffer(uint8_t spaceID, UINT frameID, UINT objectIndex) const noexcept;
-		DX12TextureResource* GetCameraDepthBuffer() const noexcept;
+		RenderTexture* GetCameraDepthRT() const noexcept;
 		DX12BufferResource* GetVertexBuffer() const noexcept;
 		DX12BufferResource* GetIndexBuffer() const noexcept;
 		const D3D12_INDEX_BUFFER_VIEW& GetIndexBufferView() const noexcept;
 		const D3D12_VERTEX_BUFFER_VIEW& GetVertexBufferView() const noexcept;
 
 		void AddConstantBuffer(uint8_t spaceID, BufferCreationDesc createDesc);
-		void AddDepthBuffer(std::unique_ptr<DX12TextureResource> depthBuffer);
+		void AddDepthBuffer(std::unique_ptr<RenderTexture> depthBuffer);
 		void AddVertexBuffer(BufferCreationDesc desc);
 		void AddIndexBuffer(BufferCreationDesc desc);
 		void SetVertexBufferView(const D3D12_VERTEX_BUFFER_VIEW& view);
@@ -38,7 +39,7 @@ namespace ElysiaRenderer
 		std::vector<std::unique_ptr<DX12BufferResource>> m_objectConstantBuffers{};
 		std::unique_ptr<DX12BufferResource> m_pPassConstantBuffer = nullptr;
 
-		std::unique_ptr<DX12TextureResource> m_pCameraDepthBuffer = nullptr;
+		std::unique_ptr<RenderTexture> m_pCameraDepthBuffer = nullptr;
 		
 		std::unique_ptr<DX12BufferResource> m_pVertexBuffer = nullptr;
 		std::unique_ptr<DX12BufferResource> m_pIndexBuffer = nullptr;

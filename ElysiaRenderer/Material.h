@@ -36,5 +36,6 @@ namespace ElysiaRenderer
 		UINT roughnessTexIndex = 0;
 		UINT lightmapIndex = 0;
 		UINT reflectTexIndex = 0;
+		bool hasNormal = false;
 	};
 }

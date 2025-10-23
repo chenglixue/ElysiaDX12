@@ -1,5 +1,4 @@
 #include "ShadowPass.h"
-#include "Renderer.h"
 #include "RenderResource.h"
 
 namespace ElysiaRenderer
@@ -16,7 +15,7 @@ namespace ElysiaRenderer
 
 		m_pMainLight = GetMainLight();
 		CreateMainShadow(1000, DXGI_FORMAT_D24_UNORM_S8_UINT);
-		RenderResource::GetInstance().GetCBVPassParameter()->ShadowTexIndex = m_pShadowRT->GetSRVIndex();
+		RenderResource::GetInstance().GetCBVPassParameter()->ShadowTexIndex = m_pShadowRT->GetTexture()->GetResourceHeapIndex();
 
 		PipelineStateCreateDesc pipelineStateCreateDesc{};
 		PipelineResourceLayout meshResourceLayout{};
@@ -59,7 +58,7 @@ namespace ElysiaRenderer
 		m_pCommand->AddBarrier(*m_pShadowRT->GetTexture(), D3D12_RESOURCE_STATE_DEPTH_WRITE);
 		m_pCommand->FlushBarrier();
 
-		m_pCommand->ClearDepthStencilTarget(*m_pShadowRT->GetTexture(), 1.f, 0);
+		m_pCommand->ClearDepthStencilTarget(*m_pShadowRT, 1.f, 0);
 
 		m_pCommand->SetViewport(m_pMainShadow->GetViewport());
 		m_pCommand->SetScissorRect(m_pMainShadow->GetScissorRect());

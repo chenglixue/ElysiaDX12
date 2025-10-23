@@ -54,7 +54,7 @@ namespace ElysiaRenderer
 		return nullptr;
 	}
 
-	DX12TextureResource* BufferManager::GetCameraDepthBuffer() const noexcept
+	RenderTexture* BufferManager::GetCameraDepthRT() const noexcept
 	{
 		return m_pCameraDepthBuffer.get();
 	}
@@ -106,7 +106,7 @@ namespace ElysiaRenderer
 		}
 	}
 
-	void BufferManager::AddDepthBuffer(std::unique_ptr<DX12TextureResource> depthBuffer)
+	void BufferManager::AddDepthBuffer(std::unique_ptr<RenderTexture> depthBuffer)
 	{
 		m_pCameraDepthBuffer = std::move(depthBuffer);
 	}

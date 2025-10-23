@@ -1,9 +1,16 @@
 #pragma once
 #include "stdafx.h"
+#include "Common.h"
 #include "RenderPassData.h"
+#include "TextureManager.h"
+#include "ModelImporter.h"
+#include "RenderResource.h"
+#include "UserData.h"
 
 namespace ElysiaRenderer
 {
+	using namespace ElysiaModel;
+
 	class BasePass
 	{
 	public:

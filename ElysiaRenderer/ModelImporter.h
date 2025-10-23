@@ -107,7 +107,7 @@ namespace ElysiaModel
 
 	extern std::unique_ptr<ModelImporter> g_pModelImporter;
 
-	inline static ModelImporter* GetModelImporter()
+	inline ModelImporter* GetModelImporter()
 	{
 		if (g_pModelImporter == nullptr)
 		{

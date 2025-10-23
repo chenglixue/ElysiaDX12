@@ -32,6 +32,11 @@ struct PSInput
 struct PSOutput
 {
     float4 target0 : SV_TARGET0;
+    float4 target1 : SV_TARGET1;
+    float4 target2 : SV_TARGET2;
+    float4 target3 : SV_TARGET3;
+    float4 target4 : SV_TARGET4;
+    float4 target5 : SV_TARGET5;
 };
 
 PSInput VS(VSInput i)

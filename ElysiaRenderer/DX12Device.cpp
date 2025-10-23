@@ -1,5 +1,6 @@
 #include "DX12Device.h"
 #include "UserData.h"
+#include "RenderTexture.h"
 
 namespace ElysiaRenderer
 {

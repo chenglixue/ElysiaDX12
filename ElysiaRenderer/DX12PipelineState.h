@@ -1,6 +1,7 @@
 #pragma once
 #include "stdafx.h"
 #include "PipelineResourceSpace.h"
+#include "RenderTexture.h"
 
 namespace ElysiaRenderer
 {

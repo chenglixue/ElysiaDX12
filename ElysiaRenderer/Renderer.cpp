@@ -147,20 +147,21 @@ namespace ElysiaRenderer
 		for (UINT meshIndex = 0; meshIndex < GetModelImporter()->GetMeshCount(); ++meshIndex)
 		{
 			const auto& meshRenderer = GetModelImporter()->GetMeshRenderer(meshIndex);
-			auto objectConstantParameter = *meshRenderer.m_CBVObjectParameter;
+			auto objectConstantParameter = meshRenderer.m_CBVObjectParameter.get();
 			for (UINT frameIndex = 0; frameIndex < NUM_FRAMES_IN_FLIGHT; ++frameIndex)
 			{
-				objectConstantParameter.baseColorTint = pUserData.BaseColorTint;
-				objectConstantParameter.opacity = pUserData.Opacity;
-				objectConstantParameter.cutoff = pUserData.Cutoff;
-				objectConstantParameter.normalIntensity = pUserData.NormalIntensity;
-				objectConstantParameter.metallicIntensity = pUserData.MetallicIntensity;
-				objectConstantParameter.roughnessIntensity = pUserData.RoughnessIntensity;
-				objectConstantParameter.ambientCubemapIntensity = pUserData.AmbientCubemapIntensity;
-				objectConstantParameter.ambientCubemapTint = pUserData.AmbientCubemapTint;
+				objectConstantParameter->hasNormalTex = g_pModelImporter->GetMaterial(meshRenderer.m_mesh->materialIndex).hasNormal;
+				objectConstantParameter->baseColorTint = pUserData.BaseColorTint;
+				objectConstantParameter->opacity = pUserData.Opacity;
+				objectConstantParameter->cutoff = pUserData.Cutoff;
+				objectConstantParameter->normalIntensity = pUserData.NormalIntensity;
+				objectConstantParameter->metallicIntensity = pUserData.MetallicIntensity;
+				objectConstantParameter->roughnessIntensity = pUserData.RoughnessIntensity;
+				objectConstantParameter->ambientCubemapIntensity = pUserData.AmbientCubemapIntensity;
+				objectConstantParameter->ambientCubemapTint = pUserData.AmbientCubemapTint;
 
 				auto objectContantBuffer = GetBufferManager()->GetMutilConstantBuffer(PER_OBJECT_SPACE, frameIndex, meshIndex);
-				objectContantBuffer->SetMappedData(&objectConstantParameter, sizeof(CBVObjectParameter));
+				objectContantBuffer->SetMappedData(objectConstantParameter, sizeof(CBVObjectParameter));
 			}
 		}
 	}
@@ -229,14 +230,12 @@ namespace ElysiaRenderer
 
 	void Renderer::CreateCreamDepthRT()
 	{
-		TexCreateDesc depthBufferCreateDesc{};
-		depthBufferCreateDesc.m_name = L"Camera Depth RT";
-		depthBufferCreateDesc.m_resouceDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-		depthBufferCreateDesc.m_resouceDesc.Width = static_cast<UINT64>(GetDevice()->GetScreenSize().x);
-		depthBufferCreateDesc.m_resouceDesc.Height = static_cast<UINT>(GetDevice()->GetScreenSize().y);
-		depthBufferCreateDesc.m_typeFlag = TexTypeFlags::SRV | TexTypeFlags::DSV;
-
-		GetBufferManager()->AddDepthBuffer(std::move(GetDevice()->CreateTexture(depthBufferCreateDesc)));
+		auto cameraDepthRT = CreateRenderTexture(static_cast<UINT64>(GetDevice()->GetScreenSize().x), 
+			static_cast<UINT>(GetDevice()->GetScreenSize().y),
+			DXGI_FORMAT_D24_UNORM_S8_UINT,
+			true,
+			L"Camera Depth RT");
+		GetBufferManager()->AddDepthBuffer(std::move(cameraDepthRT));
 	}
 	void Renderer::LoadTextures()
 	{
@@ -302,7 +301,7 @@ namespace ElysiaRenderer
 		pipelineStateCreateDesc.m_renderTargetDesc.m_numRenderTargets = 1;
 		pipelineStateCreateDesc.m_renderTargetDesc.m_renderTargetFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 		pipelineStateCreateDesc.m_depthStencilDesc.DepthEnable = TRUE;
-		pipelineStateCreateDesc.m_renderTargetDesc.m_depthStencilFormat = GetBufferManager()->GetCameraDepthBuffer()->GetResourceDesc().Format;
+		pipelineStateCreateDesc.m_renderTargetDesc.m_depthStencilFormat = GetBufferManager()->GetCameraDepthRT()->GetTexture()->GetResourceDesc().Format;
 		pipelineStateCreateDesc.m_depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
 
 		m_graphicsPipelineStates[ShaderQueue::Opaque] = std::move(GetDevice()->CreateGraphicsPipelineState(pipelineStateCreateDesc, meshResourceLayout));
@@ -383,7 +382,7 @@ namespace ElysiaRenderer
 			ImGui::Render();
 
 			m_graphicsContext->AddBarrier(currBackBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET);
-			m_graphicsContext->AddBarrier(*GetBufferManager()->GetCameraDepthBuffer(), D3D12_RESOURCE_STATE_DEPTH_WRITE);
+			m_graphicsContext->AddBarrier(*GetBufferManager()->GetCameraDepthRT()->GetTexture(), D3D12_RESOURCE_STATE_DEPTH_WRITE);
 			m_graphicsContext->FlushBarrier();
 			m_graphicsContext->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			m_graphicsContext->SetIndexBuffer(GetBufferManager()->GetIndexBufferView());
@@ -413,14 +412,14 @@ namespace ElysiaRenderer
 		auto& currBackBuffer = GetDevice()->GetCurrBackBuffer();
 
 		m_graphicsContext->ClearRenderTarget(currBackBuffer, Color(1, 1, 1));
-		m_graphicsContext->ClearDepthStencilTarget(*GetBufferManager()->GetCameraDepthBuffer(), 1.f, 0);
+		m_graphicsContext->ClearDepthStencilTarget(*GetBufferManager()->GetCameraDepthRT(), 1.f, 0);
 
 		m_graphicsContext->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(static_cast<UINT>(GetDevice()->GetScreenSize().x), static_cast<UINT>(GetDevice()->GetScreenSize().y)));
 
 		PipelineInfo pipelineStateData{};
 		pipelineStateData.m_pipelineStateObject = m_graphicsPipelineStates[ShaderQueue::Opaque].get();
 		pipelineStateData.m_renderTargets.emplace_back(&currBackBuffer);
-		pipelineStateData.m_depthStencilTarget = GetBufferManager()->GetCameraDepthBuffer();
+		pipelineStateData.m_depthStencilTarget = GetBufferManager()->GetCameraDepthRT()->GetTexture();
 
 		bool isReady = true;
 		{

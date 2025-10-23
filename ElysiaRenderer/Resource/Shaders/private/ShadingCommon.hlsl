@@ -107,42 +107,21 @@ MaterialData GetMaterialData(FInputParams inputParams)
     float3x3 TBN = float3x3(inputParams.TangentWS, inputParams.BitTangentWS, inputParams.NormalWS);
     SamplerState warpLinearSampler = SamplerDescriptorHeap[WarpLinearSampler];
     
-    Texture2D<float4> baseColorTex;
-    float4 baseColor = float4(baseColorTint, opacity);
-    Texture2D<float4> normalTex;
-    float4 normalTS;
-    Texture2D<float> metallicTex;
-    Texture2D<float> roughnessTex;
-    float metallic = metallicIntensity;
-    float roughness = roughnessIntensity;
-    if (baseColorTexIndex != -1)
-    {
-        baseColorTex = ResourceDescriptorHeap[baseColorTexIndex];
-        baseColor = baseColorTex.Sample(warpLinearSampler, inputParams.objectUV)
+    Texture2D<float4> baseColorTex = ResourceDescriptorHeap[baseColorTexIndex];
+    float4 baseColor = baseColorTex.Sample(warpLinearSampler, inputParams.objectUV)
             * float4(baseColorTint, opacity);
-        clip(baseColor.a - cutoff);
+    clip(baseColor.a - cutoff);
 
-    }
+    Texture2D<float4>  normalTex = ResourceDescriptorHeap[normalTexIndex];
+    float4 normalTS = normalTex.Sample(warpLinearSampler, inputParams.objectUV);
 
-    if (normalTexIndex != -1)
-    {
-        normalTex = ResourceDescriptorHeap[normalTexIndex];
-        normalTS = normalTex.Sample(warpLinearSampler, inputParams.objectUV);
-    }
-
-    if (metallicTexIndex != -1)
-    {
-        metallicTex = ResourceDescriptorHeap[metallicTexIndex];
-        metallic = metallicTex.Sample(warpLinearSampler, inputParams.objectUV);
-        metallic = metallic * metallicIntensity;
-    }
+    Texture2D<float>  metallicTex = ResourceDescriptorHeap[metallicTexIndex];
+    float metallic = metallicTex.Sample(warpLinearSampler, inputParams.objectUV);
+    metallic = metallic * metallicIntensity;
     
-    if (roughnessTexIndex != -1)
-    {
-        roughnessTex = ResourceDescriptorHeap[roughnessTexIndex];
-        roughness = roughnessTex.Sample(warpLinearSampler, inputParams.objectUV);
-        roughness = roughness * roughnessIntensity;
-    }
+    Texture2D<float>  roughnessTex = ResourceDescriptorHeap[roughnessTexIndex];
+    float roughness = roughnessTex.Sample(warpLinearSampler, inputParams.objectUV);
+    roughness = roughness * roughnessIntensity;
 
     o.BaseColor = baseColor.rgb;
     o.Opacity = baseColor.a;
@@ -151,6 +130,7 @@ MaterialData GetMaterialData(FInputParams inputParams)
     o.Roughness = roughness;
     o.Specular = 0.5;
     
+    //o.WorldNormal = g_hasNormalTex ? GetNormal(normalTS.rgb, TBN, normalIntensity) : inputParams.NormalWS;
     o.WorldNormal = GetNormal(normalTS.rgb, TBN, normalIntensity);
 
     o.Anisotropy = 0;
@@ -163,17 +143,27 @@ MaterialData GetMaterialData(FInputParams inputParams)
 FDecodeGBufferData GetDecodeGBufferData(float2 uv, float3x3 TBN, bool bGetNormalizedNormal = true)
 {
     FDecodeGBufferData o = (FDecodeGBufferData) 0;
+    
+    float3x3 TBN = float3x3(inputParams.TangentWS, inputParams.BitTangentWS, inputParams.NormalWS);
     SamplerState warpLinearSampler = SamplerDescriptorHeap[WarpLinearSampler];
     
-    Texture2D<half4> baseColorTex = ResourceDescriptorHeap[baseColorTexIndex];
-    Texture2D<half4> normalTex = ResourceDescriptorHeap[normalTexIndex];
+    Texture2D<float4> baseColorTex = ResourceDescriptorHeap[baseColorTexIndex];
+    float4 baseColor = baseColorTex.Sample(warpLinearSampler, inputParams.objectUV)
+            * float4(baseColorTint, opacity);
+    clip(baseColor.a - cutoff);
+
+    Texture2D<float4> normalTex = ResourceDescriptorHeap[normalTexIndex];
+    float4 normalTS = normalTex.Sample(warpLinearSampler, inputParams.objectUV);
+
+    Texture2D<float> metallicTex = ResourceDescriptorHeap[metallicTexIndex];
+    float metallic = metallicTex.Sample(warpLinearSampler, inputParams.objectUV);
+    metallic = metallic * metallicIntensity;
     
-    float4 temp = baseColorTex.Sample(warpLinearSampler, uv);
+    Texture2D<float> roughnessTex = ResourceDescriptorHeap[roughnessTexIndex];
+    float roughness = roughnessTex.Sample(warpLinearSampler, inputParams.objectUV);
+    roughness = roughness * roughnessIntensity;
     
-    o.BaseColor = temp.rgb;
-    o.Opacity = temp.a;
-    
-    float3 normalTS = normalTex.Sample(warpLinearSampler, uv);
+    o.BaseColor = baseColorTex
 
     return o;
 }

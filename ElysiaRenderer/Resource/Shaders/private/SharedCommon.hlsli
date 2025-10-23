@@ -58,6 +58,8 @@ cbuffer ObjectConstant : register(b0, perObjectSpace)
     int specularTexIndex;
     
     float cutoff;
+    
+    bool g_hasNormalTex;
 };
 
 cbuffer PassConstant : register(b0, perPassSpace)
@@ -76,41 +78,29 @@ cbuffer PassConstant : register(b0, perPassSpace)
     float nearZ;
     float farZ;
     float shadowNearZ;
-    float shadowFarZ;
-    int GGX_E_LUT_Index;
     
-    int GGX_Eavg_LUT_Index;
-    int SkyboxTexIndex;
-    int ShadowTexIndex;
-    int BlueNoiseTexIndex;
+    float shadowFarZ;
+    UINT GGX_E_LUT_Index;
+    UINT GGX_Eavg_LUT_Index;
+    UINT SkyboxTexIndex;
+    
+    UINT ShadowTexIndex;
+    UINT BlueNoiseTexIndex;
+    UINT GBuffer0Index;
+	UINT GBuffer1Index;
+
+	UINT GBuffer2Index;
+	UINT GBuffer3Index;
+	UINT GBuffer4Index;
+	UINT GBuffer5Index;
     
     float shadowDepthBias;
     float shadowSlopeDepthBias;
     float shadowMaxSlopeDepthBias;
+    float pad;
     
     Vector2 g_sobolSequence[64];
 };
-
-//cbuffer PerShadowPassBuffer : register(b1, perPassSpace)
-//{
-//    float4x4 M_ShadowView;
-//    float4x4 M_ShadowProj;
-    
-//    float4x4 M_Shadow;
-    
-//    float ShadowNearZ;
-//    float ShadowFarZ;
-//}
-
-//Texture2D g_GGX_E_LUT : register(t0, perPassSpace);
-//Texture2D g_GGX_EAvg_LUT : register(t1, perPassSpace);
-//TextureCube g_SkyboxTex : register(t2, perPassSpace);
-//Texture2D g_ShadowTex : register(t3, perPassSpace);
-
-//Texture2D g_albedoTexture : register(t0, perObjectSpace);
-//Texture2D g_normalTexture : register(t1, perObjectSpace);
-//Texture2D g_metallicTexture : register(t2, perObjectSpace);
-//Texture2D g_roughnessTexture : register(t3, perObjectSpace);
 
 struct FInputParams
 {

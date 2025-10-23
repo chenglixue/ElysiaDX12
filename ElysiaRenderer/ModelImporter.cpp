@@ -551,6 +551,9 @@ namespace ElysiaModel
 	void ModelImporter::LoadTextures(const std::wstring& basePath)
 	{
 		TextureCreationDesc texBufferCreateDesc{};
+
+		WCHAR assetsPath[512];
+		ElysiaHelper::GetAssetsPath(assetsPath, _countof(assetsPath));
 		 
 		for (UINT materialIndex = 0; materialIndex < m_meshData.materialCount; ++materialIndex)
 		{
@@ -560,6 +563,13 @@ namespace ElysiaModel
 			auto diffuseTex = std::move(GetDevice()->CreateTextureFromFile(texBufferCreateDesc));
 			if (diffuseTex != nullptr)
 			{
+				m_pMaterial[materialIndex].diffuseTexIndex = diffuseTex->GetResourceHeapIndex();
+			}
+			else
+			{
+				texBufferCreateDesc.texturePath = assetsPath + DefaultWhiteTexturePath;
+				diffuseTex = std::move(GetDevice()->CreateTextureFromFile(texBufferCreateDesc));
+				assert(diffuseTex != nullptr);
 				m_pMaterial[materialIndex].diffuseTexIndex = diffuseTex->GetResourceHeapIndex();
 			}
 			m_pTextureManager->AddTextureResource(std::move(diffuseTex));
@@ -577,6 +587,13 @@ namespace ElysiaModel
 			{
 				m_pMaterial[materialIndex].metallicTexIndex = metallicTex->GetResourceHeapIndex();
 			}
+			else
+			{
+				texBufferCreateDesc.texturePath = assetsPath + DefaultBlackTexturePath;
+				metallicTex = std::move(GetDevice()->CreateTextureFromFile(texBufferCreateDesc));
+				assert(metallicTex != nullptr);
+				m_pMaterial[materialIndex].metallicTexIndex = metallicTex->GetResourceHeapIndex();
+			}
 			m_pTextureManager->AddTextureResource(std::move(metallicTex));
 
 			std::wstring roughnessPath = basePath + RemoveExt(m_pMaterial[materialIndex].texRoughnessPath);
@@ -590,6 +607,13 @@ namespace ElysiaModel
 			}
 			if (roughnessTex != nullptr)
 			{
+				m_pMaterial[materialIndex].roughnessTexIndex = roughnessTex->GetResourceHeapIndex();
+			}
+			else
+			{
+				texBufferCreateDesc.texturePath = assetsPath + DefaultWhiteTexturePath;
+				roughnessTex = std::move(GetDevice()->CreateTextureFromFile(texBufferCreateDesc));
+				assert(roughnessTex != nullptr);
 				m_pMaterial[materialIndex].roughnessTexIndex = roughnessTex->GetResourceHeapIndex();
 			}
 			m_pTextureManager->AddTextureResource(std::move(roughnessTex));
@@ -606,6 +630,11 @@ namespace ElysiaModel
 			if (normalTex != nullptr)
 			{
 				m_pMaterial[materialIndex].normalTexIndex = normalTex->GetResourceHeapIndex();
+				m_pMaterial[materialIndex].hasNormal = true;
+			}
+			else
+			{
+				m_pMaterial[materialIndex].hasNormal = false;
 			}
 			m_pTextureManager->AddTextureResource(std::move(normalTex));
 		}

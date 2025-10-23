@@ -2,6 +2,9 @@
 
 namespace ElysiaRenderer
 {
+	std::unique_ptr<TextureManager> TextureManager::m_instance;
+	std::once_flag TextureManager::m_initInstanceFlag;
+
 	TextureManager::~TextureManager()
 	{
 		Destory();

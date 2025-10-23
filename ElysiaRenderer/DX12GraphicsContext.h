@@ -14,8 +14,9 @@ namespace ElysiaRenderer
 		DX12GraphicsContext(DX12Device* device);
 		~DX12GraphicsContext() override;
 
+		void ClearRenderTarget(const RenderTexture& renderTarget, Color color);
 		void ClearRenderTarget(const DX12TextureResource& renderTarget, Color color);
-		void ClearDepthStencilTarget(const DX12TextureResource& renderTarget, float depth, uint8_t stencil);
+		void ClearDepthStencilTarget(const RenderTexture& renderTarget, float depth, uint8_t stencil);
 
 		void SetPipeline(PipelineInfo& pipelineStateData);
 		void SetPipelineResource(uint8_t spaceID, PipelineResourceSpace* pipelineBindResource);

@@ -13,7 +13,7 @@ namespace ElysiaHelper
 		DXGI_FORMAT Format = DXGI_FORMAT_UNKNOWN;
 		bool IsDepth = false;
 		bool EnableRandomWrite = false;
-		TextureDimension Dimension;
+		TextureDimension Dimension = TextureDimension::Tex2D;
 		UINT64 MSAASamples = 1;
 		UINT64 ArraySize = 1;
 		UINT16 MipmapLevels = 1;
@@ -42,4 +42,42 @@ namespace ElysiaHelper
 		UINT m_MSAASamples = 0;
 		UINT m_MSAAQuality = 0;
 	};
+
+	inline std::unique_ptr<RenderTexture> CreateRenderTexture(
+		UINT64 width, 
+		UINT64 height,
+		DXGI_FORMAT format,
+		const wchar_t* name = L"")
+	{
+		RenderTextureDesc desc{};
+		desc.Width = width;
+		desc.Height = height;
+		desc.Format = format;
+		desc.Name = name;
+
+		auto cameraDepthRT = std::make_unique<RenderTexture>();
+		cameraDepthRT->Init(desc);
+
+		return cameraDepthRT;
+	}
+
+	inline std::unique_ptr<RenderTexture> CreateRenderTexture(
+		UINT64 width,
+		UINT64 height,
+		DXGI_FORMAT format,
+		bool isDepth,
+		const wchar_t* name = L"")
+	{
+		RenderTextureDesc desc{};
+		desc.Width = width;
+		desc.Height = height;
+		desc.Format = format;
+		desc.Name = name;
+		desc.IsDepth = isDepth;
+
+		auto cameraDepthRT = std::make_unique<RenderTexture>();
+		cameraDepthRT->Init(desc);
+
+		return cameraDepthRT;
+	}
 }

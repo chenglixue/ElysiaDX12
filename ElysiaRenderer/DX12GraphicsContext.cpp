@@ -1,6 +1,7 @@
 #include "DX12GraphicsContext.h"
 #include "DX12RootSignature.h"
 #include "DX12Device.h"
+#include "RenderTexture.h"
 
 namespace ElysiaRenderer
 {
@@ -16,14 +17,20 @@ namespace ElysiaRenderer
 	{
 	}
 
+	void DX12GraphicsContext::ClearRenderTarget(const RenderTexture& renderTarget, Color color)
+	{
+		m_commandList->ClearRenderTargetView(renderTarget.GetTexture()->GetRTVDescriptor().GetCPUHandle(),
+			color, 0, nullptr);
+	}
+
 	void DX12GraphicsContext::ClearRenderTarget(const DX12TextureResource& renderTarget, Color color)
 	{
 		m_commandList->ClearRenderTargetView(renderTarget.GetRTVDescriptor().GetCPUHandle(),
 			color, 0, nullptr);
 	}
-	void DX12GraphicsContext::ClearDepthStencilTarget(const DX12TextureResource& renderTarget, float depth, uint8_t stencil)
+	void DX12GraphicsContext::ClearDepthStencilTarget(const RenderTexture& renderTarget, float depth, uint8_t stencil)
 	{
-		m_commandList->ClearDepthStencilView(renderTarget.GetDSVDescriptor().GetCPUHandle(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL,
+		m_commandList->ClearDepthStencilView(renderTarget.GetTexture()->GetDSVDescriptor().GetCPUHandle(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL,
 			depth, stencil, 0, nullptr);
 	}
 

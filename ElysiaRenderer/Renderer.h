@@ -13,12 +13,7 @@
 #include "LightManager.h"
 #include "BufferManager.h"
 #include "MeshManager.h"
-#include "TextureManager.h"
-#include "RenderResource.h"
-#include "ModelImporter.h"
-#include "UserData.h"
 #include "SobolSequenceGenerator.h"
-#include "Common.h"  
 #include "ShadowPass.h"
 
 namespace ElysiaRenderer 
@@ -78,7 +73,7 @@ namespace ElysiaRenderer
 		}
 
 	protected:
-		HWND m_windowHandle;
+		HWND m_windowHandle; 
 
 		bool m_isStopped = false;
 		bool m_isMin = false;
@@ -121,5 +116,5 @@ namespace ElysiaRenderer
 		void DrawUI();
 	};  
 }
-  
-                             
+     
+                                    
