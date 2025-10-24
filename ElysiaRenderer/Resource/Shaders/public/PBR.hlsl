@@ -76,6 +76,9 @@ PSOutput PS(PSInput i)
     float4 lighting = GetDynamicLighting(inputParam, materialData, mainLightData) * shadow;
     lighting += float4(GetIBL(inputParam, materialData, mainLightData.toLight), 1.f);
     
+    SamplerState warpLinearSampler = SamplerDescriptorHeap[WarpLinearSampler];
+    Texture2D temp = ResourceDescriptorHeap[GBuffer0Index];
+    o.target0 = temp.Sample(warpLinearSampler, i.uv);
     o.target0 = lighting;
     
     return o;

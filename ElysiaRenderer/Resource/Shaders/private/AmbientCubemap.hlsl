@@ -233,4 +233,42 @@ float3 GetIBL(FInputParams inputParams, MaterialData materialData, float3 toLigh
     return o;
 }
 
+float3 GetIBL(FInputParams inputParams, FDecodeGBufferData GBufferData, float3 toLight)
+{
+    float3 o = 0.f;
+    
+    float3 N = GBufferData.WorldNormal;
+    float3 V = -inputParams.ScreenVector;
+    float3 L = toLight;
+    
+    float3 R0 = 2 * dot(V, N) * N - V;
+    float NoV = saturate(dot(N, V));
+    float VoL = dot(V, L);
+    float InvLenH = rsqrt(2 + 2 * VoL);
+    float VoH = saturate(InvLenH + InvLenH * VoL);
+    
+    // Point lobe in off-specular peak direction
+    float a = Square(GBufferData.Roughness);
+    float3 R = lerp(N, R0, (1 - a) * (sqrt(1 - a) + a));
+    uint2 Random = Rand3DPCG16(uint3(inputParams.PixelPos, frameIndex % 8)).xy;
+    float3 KD = (1 - UE_F_Schlick(GBufferData.SpecularColor, VoH)) * (1 - GBufferData.Metallic);
+    float3 NonSpecularContribution = 0;
+    float3 SpecularContribution = 0;
+    
+    //NonSpecularContribution += DiffuseIBL(Random, materialData.DiffuseColor, materialData.Roughness, N, KD);
+    NonSpecularContribution += DiffuseIBLMul(Random, GBufferData.DiffuseColor, GBufferData.Roughness, N, V);
+    SpecularContribution += ApproximateSpecularIBL(Random, GBufferData.SpecularColor, GBufferData.Roughness, N, V);
+
+    FLightAccumulator LightAccumulator = (FLightAccumulator) 0;
+    const bool bNeedsSeparateSubsurfaceLightAccumulation = false;
+    
+    // .rgb:AmbientCubemapTint*AmbientCubemapIntensity, a:unused
+    half3 AmbientCubemapColor = ambientCubemapIntensity * ambientCubemapTint;
+    
+    LightAccumulator_Add(LightAccumulator, NonSpecularContribution + SpecularContribution, NonSpecularContribution, AmbientCubemapColor.rgb, bNeedsSeparateSubsurfaceLightAccumulation);
+    o += GetLightAccumulator_Result(LightAccumulator);
+    
+    return o;
+}
+
 #endif

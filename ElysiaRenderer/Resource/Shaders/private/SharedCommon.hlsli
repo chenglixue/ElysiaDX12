@@ -20,6 +20,17 @@
 #define ShadowWarpLinearSampler 6
 #define ShadowClampLinearSampler 7
 
+#define Shading_Model_ID_Unlit 0
+#define Shading_Model_ID_Default_Lit 1
+#define Shading_Model_ID_Subsurface 2
+#define Shading_Model_ID_Preintegrated_Skin 3
+#define Shading_Model_ID_Subsurface_Profile 4
+#define Shading_Model_ID_Hair 5
+#define Shading_Model_ID_Eye 6
+#define Shading_Model_ID_Cloth 7
+#define Shading_Model_ID_Clear_Coat 8
+#define Shading_Model_ID_Two_Sided_Foliage 9
+
 #define Vector2  float2
 #define Vector3  float3
 #define Vector4  float4
@@ -174,10 +185,13 @@ struct FDecodeGBufferData
     // 0..1
     float4 CustomData;
     float Depth;
-    float4 Velocity;
+    float2 Velocity;
 
     float3 SceneColor;
     float Opacity;
+    float PerObjectData;
+    float PerComputedShadow;
+    float3 IBL;
 };
 
 struct BxDFContext

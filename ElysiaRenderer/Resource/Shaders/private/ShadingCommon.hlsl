@@ -4,6 +4,7 @@
 #pragma once
 
 #include "SharedCommon.hlsli"
+#include "AmbientCubemap.hlsl"
 
 ///////////////////////////////////////////////////////////////////////////////
 // Shading parameterisation
@@ -100,6 +101,27 @@ float F0RGBToMetallic(float3 F0)
     return F0ToMetallic(max(F0.r, max(F0.g, F0.b)));
 }
 
+float3 EncodeNormal(float3 N)
+{
+    return N * 0.5f + 0.5f;
+}
+
+float3 DecodeNormal(float3 N)
+{
+    return N * 2.f - 1.f;
+    //return OctahedronToUnitVector( Pack888To1212( N ) * 2 - 1 );
+}
+
+float EncodeMaterialFlags(uint materialFlags)
+{
+    return materialFlags * (1.0h / 255.0h);
+}
+
+uint DecodeMaterialFlags(float packedMaterialFlags)
+{
+    return uint((packedMaterialFlags * 255.0h) + 0.5h);
+}
+
 MaterialData GetMaterialData(FInputParams inputParams)
 {
     MaterialData o = (MaterialData) 0;
@@ -140,7 +162,7 @@ MaterialData GetMaterialData(FInputParams inputParams)
     return o;
 }
 
-FDecodeGBufferData GetDecodeGBufferData(float2 uv, float3x3 TBN, bool bGetNormalizedNormal = true)
+FDecodeGBufferData GetDecodeGBufferData(FInputParams inputParams, float3 toLight)
 {
     FDecodeGBufferData o = (FDecodeGBufferData) 0;
     
@@ -163,7 +185,27 @@ FDecodeGBufferData GetDecodeGBufferData(float2 uv, float3x3 TBN, bool bGetNormal
     float roughness = roughnessTex.Sample(warpLinearSampler, inputParams.objectUV);
     roughness = roughness * roughnessIntensity;
     
-    o.BaseColor = baseColorTex
+    o.BaseColor = baseColor.rgb;
+    o.ShadingModelID = FLT_MAX;
+    o.ShadingModelID = Shading_Model_ID_Default_Lit;
+    o.Opacity = baseColor.a;
+    
+    o.AO = 1;
+    o.Metallic = metallic;
+    o.Roughness = roughness;
+    o.Specular = 0.5;
+    
+    o.WorldNormal = GetNormal(normalTS.rgb, TBN, normalIntensity);
+    o.WorldTangent = TBN[0];
+    o.PerObjectData = 0.f;
+    o.PerComputedShadow = 1.f;
+    
+    o.Velocity = 0.f;
+    
+    o.Anisotropy = 0;
+    o.DiffuseColor = o.BaseColor - o.BaseColor * o.Metallic;
+    o.SpecularColor = ComputeF0(o.Specular, o.BaseColor, o.Metallic);
+    o.IBL = GetIBL(inputParams, o, toLight);
 
     return o;
 }

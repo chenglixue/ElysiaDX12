@@ -8,6 +8,7 @@ namespace ElysiaRenderer
 	enum ShaderQueue : UINT
 	{
 		Shadow = 1000,
+		GBuffer = 1500,
 		Opaque = 2000,
 		Skybox = 3000,
 		Transparent = 4000

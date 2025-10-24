@@ -64,7 +64,7 @@ PSOutput PS(PSInput i)
     Texture2D<float4> baseColorTex = ResourceDescriptorHeap[baseColorTexIndex];
         
     float4 baseColor = baseColorTex.Sample(warpLinearSampler, i.uv) * float4(baseColorTint, opacity);
-    //clip(baseColor.a - cutoff);
+    clip(baseColor.a - cutoff);
     
     return o;
 }

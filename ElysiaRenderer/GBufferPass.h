@@ -20,17 +20,11 @@ namespace ElysiaRenderer
 
 	private:
 		std::vector<std::unique_ptr<RenderTexture>> m_GBufferRTs{};
-		std::unique_ptr<RenderTexture> m_depthRT = nullptr;
+		std::unique_ptr<RenderTexture> m_pDepthRT = nullptr;
 
-		std::vector<DX12TextureResource*> GetGBuffers()
-		{
-			std::vector<DX12TextureResource*> temp{ m_GBufferRTs.size()};
-			for (auto& RT : m_GBufferRTs)
-			{
-				temp.emplace_back(RT->GetTexture());
-			}
-
-			return temp;
-		}
+		std::vector<DX12TextureResource*> GetGBuffers();
+		void CreateRTs();
+		void BindToShader();
+		void CreatePSO();
 	};
 }

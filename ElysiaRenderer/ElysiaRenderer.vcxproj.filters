@@ -434,6 +434,9 @@
     <None Include="Resource\Shaders\private\Random.hlsl">
       <Filter>Resource Files\Shader\Priavte</Filter>
     </None>
+    <None Include="Resource\Shaders\public\GBuffer.hlsl">
+      <Filter>Resource Files\Shader\Public</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />

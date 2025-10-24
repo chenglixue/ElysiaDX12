@@ -64,6 +64,7 @@ namespace ElysiaRenderer
 		memcpy(RenderResource::GetInstance().GetCBVPassParameter()->sobolSequence.data(), sobolSequence.data(), sobolSequence.size() * sizeof(Vector2));
 
 		m_passes.emplace_back(std::move(std::make_unique<ShadowPass>()));
+		m_passes.emplace_back(std::move(std::make_unique<GBufferPass>()));
 
 		Setup();
 	}

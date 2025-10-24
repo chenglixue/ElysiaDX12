@@ -15,6 +15,7 @@
 #include "MeshManager.h"
 #include "SobolSequenceGenerator.h"
 #include "ShadowPass.h"
+#include "GBufferPass.h"
 
 namespace ElysiaRenderer 
 {
@@ -117,4 +118,4 @@ namespace ElysiaRenderer
 	};  
 }
      
-                                    
+                                     

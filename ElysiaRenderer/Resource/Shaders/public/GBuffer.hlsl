@@ -76,12 +76,15 @@ PSOutput PS(PSInput i)
     LightData mainLightData = GetMainLight(mainLight);
     MaterialData materialData = GetMaterialData(inputParam);
     
-    float shadow = SunShadowVisibility(inputParam.PositionWS, inputParam.ScreenUV, 0);
+    FDecodeGBufferData decodeGBufferData = GetDecodeGBufferData(inputParam, mainLightData.toLight);
     
-    float4 lighting = GetDynamicLighting(inputParam, materialData, mainLightData) * shadow;
-    lighting += float4(GetIBL(inputParam, materialData, mainLightData.toLight), 1.f);
-    
-    o.target0 = lighting;
+    o.target0 = float4(decodeGBufferData.BaseColor, EncodeMaterialFlags(decodeGBufferData.ShadingModelID));
+    o.target1 = float4(decodeGBufferData.Metallic, decodeGBufferData.Specular, decodeGBufferData.Roughness, decodeGBufferData.AO);
+    o.target2 = float4(EncodeNormal(decodeGBufferData.WorldTangent), decodeGBufferData.Anisotropy);
+    o.target3 = float4(EncodeNormal(decodeGBufferData.WorldNormal), decodeGBufferData.PerObjectData);
+    o.target4 = float4(decodeGBufferData.IBL * decodeGBufferData.AO, decodeGBufferData.Opacity);
+    o.target5 = float4(decodeGBufferData.Velocity, 0.f, 0.f);
+
     
     return o;
 }

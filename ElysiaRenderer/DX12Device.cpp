@@ -607,8 +607,9 @@ namespace ElysiaRenderer
 		{
 			auto RTVHandle = m_RTVStagingDescriptorHeap->NewDescriptorHeapHandle();
 
-			newTex->SetSRVDescriptor(RTVHandle);
+			newTex->SetRTVDescriptor(RTVHandle);
 			m_device->CreateRenderTargetView(newTex->GetResource(), nullptr, newTex->GetRTVDescriptor().GetCPUHandle());
+
 		}
 
 		if (hasDSV)
