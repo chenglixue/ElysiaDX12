@@ -12,7 +12,7 @@ namespace ElysiaRenderer
 		Shadow = 1
 	};
 
-	struct alignas(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT)CBVMainPassParameter
+	struct alignas(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT) CBVMainPassParameter
 	{
 		Vector4 cameraPosWS		= Vector4::Zero;	// 16
 		Matrix	viewMatrix		= Matrix::Identity;	// 64
@@ -43,10 +43,10 @@ namespace ElysiaRenderer
 		UINT GBuffer4Index = 0;
 		UINT GBuffer5Index = 0;
 
+		UINT OpaqueDepthIndex = 0;
 		float shadowDepthBias = 0;
 		float shadowSlopeDepthBias = 0;
 		float shadowMaxSlopeDepthBias = 0;
-		float pad;
 
 		std::array<Vector2, 64> sobolSequence;
 	};

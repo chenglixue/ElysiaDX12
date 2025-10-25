@@ -29,8 +29,10 @@ namespace ElysiaRenderer
 		for (auto& RT : m_GBufferRTs)
 		{
 			m_pCommand->AddBarrier(*RT->GetTexture(), D3D12_RESOURCE_STATE_RENDER_TARGET);
-			m_pCommand->ClearRenderTarget(*RT->GetTexture(), Color(1, 1, 1));
+			m_pCommand->ClearRenderTarget(*RT->GetTexture(), Color(0, 0, 0));
 		}
+		m_pCommand->AddBarrier(*m_pDepthRT->GetTexture(), D3D12_RESOURCE_STATE_DEPTH_WRITE);
+		m_pCommand->ClearDepthStencilTarget(*m_pDepthRT, 1.f, 0);
 		m_pCommand->FlushBarrier();
 
 		m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(static_cast<UINT>(GetDevice()->GetScreenSize().x), static_cast<UINT>(GetDevice()->GetScreenSize().y)));
@@ -42,15 +44,6 @@ namespace ElysiaRenderer
 
 		bool isReady = true;
 		{
-			auto texResources = TextureManager::GetInstance().GetTextureResources();
-			for (size_t i = 0; i < texResources.size(); ++i)
-			{
-				if (texResources[i] == nullptr)
-				{
-					ThrowRuntimeError("nullptr");
-				}
-				isReady &= texResources[i]->GetIsReady();
-			}
 			for (auto& RT : m_GBufferRTs)
 			{
 				if (RT->GetTexture() == nullptr)
@@ -87,8 +80,9 @@ namespace ElysiaRenderer
 
 		for (auto& RT : m_GBufferRTs)
 		{
-			m_pCommand->AddBarrier(*RT->GetTexture(), D3D12_RESOURCE_STATE_GENERIC_READ);
+			m_pCommand->AddBarrier(*RT->GetTexture(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		}
+		m_pCommand->AddBarrier(*m_pDepthRT->GetTexture(), D3D12_RESOURCE_STATE_GENERIC_READ);
 		m_pCommand->FlushBarrier();
 	}
 
@@ -193,6 +187,7 @@ namespace ElysiaRenderer
 		RenderResource::GetInstance().GetCBVPassParameter()->GBuffer3Index = m_GBufferRTs[GBufferIndex++]->GetTexture()->GetResourceHeapIndex();
 		RenderResource::GetInstance().GetCBVPassParameter()->GBuffer4Index = m_GBufferRTs[GBufferIndex++]->GetTexture()->GetResourceHeapIndex();
 		RenderResource::GetInstance().GetCBVPassParameter()->GBuffer5Index = m_GBufferRTs[GBufferIndex++]->GetTexture()->GetResourceHeapIndex();
+		RenderResource::GetInstance().GetCBVPassParameter()->OpaqueDepthIndex = m_pDepthRT->GetTexture()->GetResourceHeapIndex();
 	}
 
 	void GBufferPass::CreatePSO()

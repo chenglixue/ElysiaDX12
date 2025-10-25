@@ -105,6 +105,7 @@ cbuffer PassConstant : register(b0, perPassSpace)
 	UINT GBuffer4Index;
 	UINT GBuffer5Index;
     
+    UINT  OpaqueDepthIndex;
     float shadowDepthBias;
     float shadowSlopeDepthBias;
     float shadowMaxSlopeDepthBias;

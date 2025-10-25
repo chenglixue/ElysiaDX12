@@ -544,7 +544,7 @@ namespace ElysiaRenderer
 		if (hasDSV)
 		{
 			clearValue.DepthStencil.Depth = 1.0f;
-			clearValue.DepthStencil.Stencil = 0;
+			//clearValue.DepthStencil.Stencil = 0;
 		}
 
 		/// Create default heap for tex
@@ -592,7 +592,7 @@ namespace ElysiaRenderer
 					srvDescPointer = &SRV;
 				}
 
-				m_device->CreateShaderResourceView(newTex->GetResource(), isCubeMap ? srvDescPointer : nullptr, SRVHandle.GetCPUHandle());
+				m_device->CreateShaderResourceView(newTex->GetResource(), srvDescPointer, SRVHandle.GetCPUHandle());
 			}
 			
 			///
