@@ -49,7 +49,7 @@ PSInput VS(VSInput i)
     float3 lightDirWS = mainLightData.toLight;
     const float NoL = dot(o.normalWS, lightDirWS);
     
-    o.positionWS.rgb += GetShadowDepthOffset(NoL, o.positionCS, shadowSize.x);
+    //o.positionWS.rgb += GetShadowDepthOffset(NoL, o.positionCS, shadowSize.x);
     
     o.uv = i.uv;
     

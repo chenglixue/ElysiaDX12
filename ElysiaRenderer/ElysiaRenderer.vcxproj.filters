@@ -295,6 +295,9 @@
     <ClInclude Include="RenderResource.h">
       <Filter>Header Files\Render</Filter>
     </ClInclude>
+    <ClInclude Include="PSOHelper.h">
+      <Filter>Header Files\Helper</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

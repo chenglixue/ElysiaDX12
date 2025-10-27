@@ -29,13 +29,14 @@ namespace ElysiaRenderer
 		for (auto& RT : m_GBufferRTs)
 		{
 			m_pCommand->AddBarrier(*RT->GetTexture(), D3D12_RESOURCE_STATE_RENDER_TARGET);
+			m_pCommand->FlushBarrier();
 			m_pCommand->ClearRenderTarget(*RT->GetTexture(), Color(0, 0, 0));
 		}
 		m_pCommand->AddBarrier(*m_pDepthRT->GetTexture(), D3D12_RESOURCE_STATE_DEPTH_WRITE);
-		m_pCommand->ClearDepthStencilTarget(*m_pDepthRT, 1.f, 0);
 		m_pCommand->FlushBarrier();
+		m_pCommand->ClearDepthStencilTarget(*m_pDepthRT, 1.f, 0);
 
-		m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(static_cast<UINT>(GetDevice()->GetScreenSize().x), static_cast<UINT>(GetDevice()->GetScreenSize().y)));
+		m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_renderSize.x, m_renderSize.y));
 
 		PipelineInfo pipelineStateData{};
 		pipelineStateData.m_pipelineStateObject = (*m_pGraphicsPipelineStates)[ShaderQueue::GBuffer].get();
@@ -52,6 +53,12 @@ namespace ElysiaRenderer
 				}
 				isReady &= RT->GetTexture()->GetIsReady();
 			}
+
+			if (m_pDepthRT->GetTexture() == nullptr)
+			{
+				ThrowRuntimeError("null texture resource");
+			}
+			isReady &= m_pDepthRT->GetTexture()->GetIsReady();
 		}
 		if (isReady)
 		{
@@ -207,9 +214,10 @@ namespace ElysiaRenderer
 		{
 			pipelineStateCreateDesc.m_renderTargetDesc.m_renderTargetFormats[i] = m_GBufferRTs[i]->GetFormat();
 		}
-		pipelineStateCreateDesc.m_depthStencilDesc.DepthEnable = TRUE;
+		pipelineStateCreateDesc.m_depthStencilDesc = GetDepthState(DepthState::WritesEnabled);
+		pipelineStateCreateDesc.m_blendDesc = GetBlendState(BlendState::Disabled);
+		pipelineStateCreateDesc.m_rasterDesc = GetRasterizerState(RasterizerState::BackFaceCull);
 		pipelineStateCreateDesc.m_renderTargetDesc.m_depthStencilFormat = m_pDepthRT->GetFormat();
-		pipelineStateCreateDesc.m_depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
 		(*m_pGraphicsPipelineStates)[ShaderQueue::GBuffer] = std::move(GetDevice()->CreateGraphicsPipelineState(pipelineStateCreateDesc, meshResourceLayout));
 	}
 }

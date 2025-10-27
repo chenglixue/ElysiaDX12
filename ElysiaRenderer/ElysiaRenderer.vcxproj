@@ -168,6 +168,7 @@
     <ClInclude Include="DX12Camera.h" />
     <ClInclude Include="File.h" />
     <ClInclude Include="GBufferPass.h" />
+    <ClInclude Include="PSOHelper.h" />
     <ClInclude Include="RenderPassData.h" />
     <ClInclude Include="RenderTexture.h" />
     <ClInclude Include="Serialization.h" />

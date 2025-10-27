@@ -372,7 +372,6 @@ namespace ElysiaRenderer
 	{
 		GetDevice()->BeginFrame();
 		m_graphicsContext->Reset();
-
 		auto& currBackBuffer = GetDevice()->GetCurrBackBuffer();
 
 		{

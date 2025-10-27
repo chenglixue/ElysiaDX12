@@ -14,6 +14,7 @@
 #include "RenderHelper.h"
 #include <comdef.h> // For _com_error
 #include "magic_enum/magic_enum.hpp"
+#include "PSOHelper.h"
 
 namespace ElysiaHelper
 {
@@ -32,6 +33,11 @@ namespace ElysiaHelper
         float x = 0;
         float y = 0;
     };
+
+    inline void InitHelpers()
+    {
+
+    }
 
     inline void AssertIfFailed(HRESULT hr)
     {

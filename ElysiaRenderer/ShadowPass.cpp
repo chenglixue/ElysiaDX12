@@ -28,9 +28,10 @@ namespace ElysiaRenderer
 		pipelineStateCreateDesc.m_pixelShader = GetPixelShaders()[ShaderQueue::Shadow][ShaderType::Pixel].get();
 		pipelineStateCreateDesc.m_inputElementDesc = g_inputElementDescs;
 		pipelineStateCreateDesc.m_renderTargetDesc.m_numRenderTargets = 0;
-		pipelineStateCreateDesc.m_depthStencilDesc.DepthEnable = TRUE;
+		pipelineStateCreateDesc.m_rasterDesc = GetRasterizerState(RasterizerState::BackFaceCullNoZClip);
+		pipelineStateCreateDesc.m_blendDesc = GetBlendState(BlendState::Disabled);
+		pipelineStateCreateDesc.m_depthStencilDesc = GetDepthState(DepthState::WritesEnabled);
 		pipelineStateCreateDesc.m_renderTargetDesc.m_depthStencilFormat = GetShadowRT()->GetFormat();
-		pipelineStateCreateDesc.m_depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
 		(*m_pGraphicsPipelineStates)[ShaderQueue::Shadow] = std::move(GetDevice()->CreateGraphicsPipelineState(pipelineStateCreateDesc, meshResourceLayout));
 	}
 	void ShadowPass::Execute()

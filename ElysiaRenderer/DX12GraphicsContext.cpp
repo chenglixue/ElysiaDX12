@@ -74,7 +74,7 @@ namespace ElysiaRenderer
 			{
 				depthStencilHandle = pipelineBind.m_depthStencilTarget->GetDSVDescriptor().GetCPUHandle();
 			}
-			SetRenderTargets(static_cast<UINT>(numTarget), numTarget == 0 ? nullptr : renderTargetHandles, depthStencilHandle);
+			SetRenderTargets(static_cast<UINT>(numTarget), renderTargetHandles, depthStencilHandle);
 		}
 		
 	}
@@ -147,7 +147,7 @@ namespace ElysiaRenderer
 	void DX12GraphicsContext::SetRenderTargets(UINT numRenderTargets, const D3D12_CPU_DESCRIPTOR_HANDLE renderTargetHandle[],
 		const D3D12_CPU_DESCRIPTOR_HANDLE depthStencilHandle)
 	{
-		m_commandList->OMSetRenderTargets(numRenderTargets, renderTargetHandle, FALSE, 
+		m_commandList->OMSetRenderTargets(numRenderTargets, renderTargetHandle, false,
 			depthStencilHandle.ptr != 0 ? &depthStencilHandle : nullptr);
 	}
 	void DX12GraphicsContext::SetDefaultViewportAndScissor(ElysiaHelper::UINT2 screenSize)
