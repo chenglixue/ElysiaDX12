@@ -102,7 +102,7 @@ namespace ElysiaRenderer
 	inline static PipelineStateCreateDesc CreateDefaultPipelineStateCreateDesc()
 	{
 		PipelineStateCreateDesc desc{};
-		desc.m_rasterDesc.CullMode = D3D12_CULL_MODE_BACK;
+		/*desc.m_rasterDesc.CullMode = D3D12_CULL_MODE_BACK;
 		desc.m_rasterDesc.FillMode = D3D12_FILL_MODE_SOLID;
 		desc.m_rasterDesc.FrontCounterClockwise = FALSE;
 		desc.m_rasterDesc.DepthBias = D3D12_DEFAULT_DEPTH_BIAS;
@@ -112,9 +112,9 @@ namespace ElysiaRenderer
 		desc.m_rasterDesc.MultisampleEnable = FALSE;
 		desc.m_rasterDesc.AntialiasedLineEnable = FALSE;
 		desc.m_rasterDesc.ForcedSampleCount = 0;
-		desc.m_rasterDesc.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
+		desc.m_rasterDesc.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;*/
 
-		desc.m_blendDesc.AlphaToCoverageEnable = false;
+		/*desc.m_blendDesc.AlphaToCoverageEnable = false;
 		desc.m_blendDesc.IndependentBlendEnable = false;
 		const D3D12_RENDER_TARGET_BLEND_DESC defaultRenderTargetBlendDesc =
 		{
@@ -127,9 +127,9 @@ namespace ElysiaRenderer
 		for (UINT i = 0; i < D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT; ++i)
 		{
 			desc.m_blendDesc.RenderTarget[i] = defaultRenderTargetBlendDesc;
-		}
+		}*/
 
-		desc.m_depthStencilDesc.DepthEnable = false;
+		/*desc.m_depthStencilDesc.DepthEnable = false;
 		desc.m_depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
 		desc.m_depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
 		desc.m_depthStencilDesc.StencilEnable = false;
@@ -139,7 +139,7 @@ namespace ElysiaRenderer
 		const D3D12_DEPTH_STENCILOP_DESC defaultStencilOp =
 		{ D3D12_STENCIL_OP_KEEP, D3D12_STENCIL_OP_KEEP, D3D12_STENCIL_OP_KEEP, D3D12_COMPARISON_FUNC_ALWAYS };
 		desc.m_depthStencilDesc.FrontFace = defaultStencilOp;
-		desc.m_depthStencilDesc.BackFace = defaultStencilOp;
+		desc.m_depthStencilDesc.BackFace = defaultStencilOp;*/
 
 		desc.m_sampleDesc.Count = 1;
 		desc.m_sampleDesc.Quality = 0;

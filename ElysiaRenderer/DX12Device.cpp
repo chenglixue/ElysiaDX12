@@ -498,25 +498,25 @@ namespace ElysiaRenderer
 			{
 				case DXGI_FORMAT_D16_UNORM:
 				{
-					//resourceFormat = DXGI_FORMAT_R16_TYPELESS;
+					resourceFormat = DXGI_FORMAT_R16_TYPELESS;
 					shaderResourceViewFormat = DXGI_FORMAT_R16_UNORM;
 					break;
 				}
 				case DXGI_FORMAT_D24_UNORM_S8_UINT:
 				{
-					//resourceFormat = DXGI_FORMAT_R24G8_TYPELESS;
+					resourceFormat = DXGI_FORMAT_R24G8_TYPELESS;
 					shaderResourceViewFormat = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
 					break;
 				}
 				case DXGI_FORMAT_D32_FLOAT:
 				{
-					//resourceFormat = DXGI_FORMAT_R32_TYPELESS;
+					resourceFormat = DXGI_FORMAT_R32_TYPELESS;
 					shaderResourceViewFormat = DXGI_FORMAT_R32_FLOAT;
 					break;
 				}
 				case DXGI_FORMAT_D32_FLOAT_S8X24_UINT:
 				{
-					//resourceFormat = DXGI_FORMAT_R32G8X24_TYPELESS;
+					resourceFormat = DXGI_FORMAT_R32G8X24_TYPELESS;
 					shaderResourceViewFormat = DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS;
 					break;
 				}
@@ -528,7 +528,8 @@ namespace ElysiaRenderer
 			}
 
 			resourceDesc.Flags |= D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
-			usageState = D3D12_RESOURCE_STATE_DEPTH_WRITE;
+			//usageState = D3D12_RESOURCE_STATE_DEPTH_WRITE;
+			usageState = D3D12_RESOURCE_STATE_DEPTH_READ | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE;
 		}
 
 		if (hasUAV)
@@ -544,7 +545,7 @@ namespace ElysiaRenderer
 		if (hasDSV)
 		{
 			clearValue.DepthStencil.Depth = 1.0f;
-			//clearValue.DepthStencil.Stencil = 0;
+			clearValue.DepthStencil.Stencil = 0;
 		}
 
 		/// Create default heap for tex
@@ -1091,8 +1092,7 @@ namespace ElysiaRenderer
 		PSODesc.BlendState = pipelineStateCreateDesc.m_blendDesc;
 		PSODesc.DepthStencilState = pipelineStateCreateDesc.m_depthStencilDesc;
 		PSODesc.DSVFormat = pipelineStateCreateDesc.m_renderTargetDesc.m_depthStencilFormat;
-		PSODesc.NodeMask = 0;
-		PSODesc.SampleMask = 0xFFFFFFFF;
+		PSODesc.SampleMask = UINT_MAX;
 		PSODesc.PrimitiveTopologyType = pipelineStateCreateDesc.m_topology;
 		PSODesc.NumRenderTargets = pipelineStateCreateDesc.m_renderTargetDesc.m_numRenderTargets;
 		for (UINT i = 0; i < pipelineStateCreateDesc.m_renderTargetDesc.m_numRenderTargets; ++i)

@@ -109,7 +109,6 @@ cbuffer PassConstant : register(b0, perPassSpace)
     float shadowDepthBias;
     float shadowSlopeDepthBias;
     float shadowMaxSlopeDepthBias;
-    float pad;
     
     Vector2 g_sobolSequence[64];
 };

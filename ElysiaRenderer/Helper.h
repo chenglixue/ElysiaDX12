@@ -34,11 +34,6 @@ namespace ElysiaHelper
         float y = 0;
     };
 
-    inline void InitHelpers()
-    {
-
-    }
-
     inline void AssertIfFailed(HRESULT hr)
     {
         assert(SUCCEEDED(hr));

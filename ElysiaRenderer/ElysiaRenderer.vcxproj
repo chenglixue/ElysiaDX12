@@ -324,6 +324,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MeshManager.cpp" />
     <ClCompile Include="PipelineResourceSpace.cpp" />
+    <ClCompile Include="PSOHelper.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="RenderResource.cpp" />
     <ClCompile Include="RenderTexture.cpp" />

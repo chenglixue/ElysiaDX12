@@ -89,7 +89,7 @@ namespace ElysiaRenderer
 		{
 			m_pCommand->AddBarrier(*RT->GetTexture(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		}
-		m_pCommand->AddBarrier(*m_pDepthRT->GetTexture(), D3D12_RESOURCE_STATE_GENERIC_READ);
+		m_pCommand->AddBarrier(*m_pDepthRT->GetTexture(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_DEPTH_READ);
 		m_pCommand->FlushBarrier();
 	}
 
@@ -167,9 +167,11 @@ namespace ElysiaRenderer
 			m_pDepthRT = CreateRenderTexture(
 				static_cast<UINT64>(m_renderSize.x),
 				static_cast<UINT64>(m_renderSize.y),
-				DXGI_FORMAT_D24_UNORM_S8_UINT,
+				DXGI_FORMAT_D32_FLOAT,
 				true,
 				L"GBuffer Depth RT");
+
+			GetBufferManager()->AddDepthBuffer(m_pDepthRT.get());
 		}
 	}
 
@@ -214,10 +216,11 @@ namespace ElysiaRenderer
 		{
 			pipelineStateCreateDesc.m_renderTargetDesc.m_renderTargetFormats[i] = m_GBufferRTs[i]->GetFormat();
 		}
+		pipelineStateCreateDesc.m_renderTargetDesc.m_depthStencilFormat = m_pDepthRT->GetFormat();
 		pipelineStateCreateDesc.m_depthStencilDesc = GetDepthState(DepthState::WritesEnabled);
 		pipelineStateCreateDesc.m_blendDesc = GetBlendState(BlendState::Disabled);
 		pipelineStateCreateDesc.m_rasterDesc = GetRasterizerState(RasterizerState::BackFaceCull);
-		pipelineStateCreateDesc.m_renderTargetDesc.m_depthStencilFormat = m_pDepthRT->GetFormat();
+		pipelineStateCreateDesc.m_topology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 		(*m_pGraphicsPipelineStates)[ShaderQueue::GBuffer] = std::move(GetDevice()->CreateGraphicsPipelineState(pipelineStateCreateDesc, meshResourceLayout));
 	}
 }

@@ -28,10 +28,11 @@ namespace ElysiaRenderer
 		pipelineStateCreateDesc.m_pixelShader = GetPixelShaders()[ShaderQueue::Shadow][ShaderType::Pixel].get();
 		pipelineStateCreateDesc.m_inputElementDesc = g_inputElementDescs;
 		pipelineStateCreateDesc.m_renderTargetDesc.m_numRenderTargets = 0;
-		pipelineStateCreateDesc.m_rasterDesc = GetRasterizerState(RasterizerState::BackFaceCullNoZClip);
+		pipelineStateCreateDesc.m_renderTargetDesc.m_depthStencilFormat = GetShadowRT()->GetFormat();
+		pipelineStateCreateDesc.m_rasterDesc = GetRasterizerState(RasterizerState::BackFaceCull);
 		pipelineStateCreateDesc.m_blendDesc = GetBlendState(BlendState::Disabled);
 		pipelineStateCreateDesc.m_depthStencilDesc = GetDepthState(DepthState::WritesEnabled);
-		pipelineStateCreateDesc.m_renderTargetDesc.m_depthStencilFormat = GetShadowRT()->GetFormat();
+		pipelineStateCreateDesc.m_topology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 		(*m_pGraphicsPipelineStates)[ShaderQueue::Shadow] = std::move(GetDevice()->CreateGraphicsPipelineState(pipelineStateCreateDesc, meshResourceLayout));
 	}
 	void ShadowPass::Execute()
@@ -101,7 +102,7 @@ namespace ElysiaRenderer
 			}
 		}
 
-		m_pCommand->AddBarrier(*m_pShadowRT->GetTexture(), D3D12_RESOURCE_STATE_GENERIC_READ);
+		m_pCommand->AddBarrier(*m_pShadowRT->GetTexture(), D3D12_RESOURCE_STATE_DEPTH_READ);
 		m_pCommand->FlushBarrier();
 	}
 

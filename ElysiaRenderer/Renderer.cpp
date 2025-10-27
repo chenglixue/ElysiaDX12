@@ -52,6 +52,8 @@ namespace ElysiaRenderer
 
 		DeSerializeUserData();
 
+		InitPSOHelpers();
+
 		m_pCameraManager->Init(); 
 		GetLightManager()->Init();
 		GetBufferManager()->Init();
@@ -179,7 +181,6 @@ namespace ElysiaRenderer
 		GetModelImporter()->CreateMeshRenders();
 
  		CreateConstantBuffers();
-		CreateCreamDepthRT();
 		for (auto& pass : m_passes)
 		{
 			pass->Setup(passData);
@@ -229,15 +230,6 @@ namespace ElysiaRenderer
 		RenderResource::GetPerObjectBindResourceSpace()->Lock();
 	}
 
-	void Renderer::CreateCreamDepthRT()
-	{
-		auto cameraDepthRT = CreateRenderTexture(static_cast<UINT64>(GetDevice()->GetScreenSize().x), 
-			static_cast<UINT>(GetDevice()->GetScreenSize().y),
-			DXGI_FORMAT_D24_UNORM_S8_UINT,
-			true,
-			L"Camera Depth RT");
-		GetBufferManager()->AddDepthBuffer(std::move(cameraDepthRT));
-	}
 	void Renderer::LoadTextures()
 	{
 		TextureCreationDesc texBufferCreateDesc{};
@@ -301,9 +293,11 @@ namespace ElysiaRenderer
 		pipelineStateCreateDesc.m_pixelShader = GetPixelShaders()[ShaderQueue::Opaque][ShaderType::Pixel].get();
 		pipelineStateCreateDesc.m_renderTargetDesc.m_numRenderTargets = 1;
 		pipelineStateCreateDesc.m_renderTargetDesc.m_renderTargetFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-		pipelineStateCreateDesc.m_depthStencilDesc.DepthEnable = TRUE;
 		pipelineStateCreateDesc.m_renderTargetDesc.m_depthStencilFormat = GetBufferManager()->GetCameraDepthRT()->GetTexture()->GetResourceDesc().Format;
-		pipelineStateCreateDesc.m_depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+		pipelineStateCreateDesc.m_depthStencilDesc = GetDepthState(DepthState::Enabled);
+		pipelineStateCreateDesc.m_blendDesc = GetBlendState(BlendState::Disabled);
+		pipelineStateCreateDesc.m_rasterDesc = GetRasterizerState(RasterizerState::BackFaceCull);
+		pipelineStateCreateDesc.m_topology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 
 		m_graphicsPipelineStates[ShaderQueue::Opaque] = std::move(GetDevice()->CreateGraphicsPipelineState(pipelineStateCreateDesc, meshResourceLayout));
 
@@ -382,7 +376,7 @@ namespace ElysiaRenderer
 			ImGui::Render();
 
 			m_graphicsContext->AddBarrier(currBackBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET);
-			m_graphicsContext->AddBarrier(*GetBufferManager()->GetCameraDepthRT()->GetTexture(), D3D12_RESOURCE_STATE_DEPTH_WRITE);
+			//m_graphicsContext->AddBarrier(*GetBufferManager()->GetCameraDepthRT()->GetTexture(), D3D12_RESOURCE_STATE_DEPTH_WRITE);
 			m_graphicsContext->FlushBarrier();
 			m_graphicsContext->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			m_graphicsContext->SetIndexBuffer(GetBufferManager()->GetIndexBufferView());
@@ -412,7 +406,7 @@ namespace ElysiaRenderer
 		auto& currBackBuffer = GetDevice()->GetCurrBackBuffer();
 
 		m_graphicsContext->ClearRenderTarget(currBackBuffer, Color(1, 1, 1));
-		m_graphicsContext->ClearDepthStencilTarget(*GetBufferManager()->GetCameraDepthRT(), 1.f, 0);
+		//m_graphicsContext->ClearDepthStencilTarget(*GetBufferManager()->GetCameraDepthRT(), 1.f, 0);
 
 		m_graphicsContext->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(static_cast<UINT>(GetDevice()->GetScreenSize().x), static_cast<UINT>(GetDevice()->GetScreenSize().y)));
 

@@ -4,7 +4,7 @@
 
 namespace ElysiaRenderer
 {
-	using namespace DirectX::SimpleMath;
+	using namespace SimpleMath;
 
 	enum class CBVPassParameterType : uint8_t
 	{
