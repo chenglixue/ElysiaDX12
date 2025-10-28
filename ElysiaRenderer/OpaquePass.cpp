@@ -84,7 +84,6 @@ namespace ElysiaRenderer
 		m_pOpaqueRT = CreateRenderTexture(static_cast<UINT64>(m_renderSize.x), 
 			static_cast<UINT64>(m_renderSize.y),
 			DXGI_FORMAT_R8G8B8A8_UNORM,
-			false,
 			L"Opaque Lighting RT");
 	}
 	void OpaquePass::BindToShader()

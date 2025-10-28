@@ -157,7 +157,7 @@ namespace ElysiaRenderer
 			auto pGBufferRT = CreateRenderTexture(static_cast<UINT64>(m_renderSize.x),
 				static_cast<UINT64>(m_renderSize.y),
 				DXGI_FORMAT_R16G16B16A16_SNORM,
-				L"GBuffer_4");
+				L"GBuffer_5");
 
 			m_GBufferRTs.emplace_back(std::move(pGBufferRT));
 		}
@@ -167,7 +167,7 @@ namespace ElysiaRenderer
 			m_pDepthRT = CreateRenderTexture(
 				static_cast<UINT64>(m_renderSize.x),
 				static_cast<UINT64>(m_renderSize.y),
-				DXGI_FORMAT_D32_FLOAT,
+				DXGI_FORMAT_D24_UNORM_S8_UINT,
 				true,
 				L"GBuffer Depth RT");
 

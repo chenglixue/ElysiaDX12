@@ -83,7 +83,7 @@ namespace ElysiaRenderer
 		bool m_isResizing = false;
 
 		XMINT2 m_lastMousePos{};
-
+		 
 		/// <summary>
 		/// pipeline
 		/// </summary>
@@ -117,4 +117,4 @@ namespace ElysiaRenderer
 		void DrawUI();
 	};   
 } 
-             
+              

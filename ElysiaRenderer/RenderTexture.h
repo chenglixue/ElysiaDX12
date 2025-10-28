@@ -39,6 +39,8 @@ namespace ElysiaHelper
 
 	private:
 		std::unique_ptr<DX12TextureResource> m_pTexture;
+		bool m_isDepth = false;
+		DXGI_FORMAT m_depthFormat;
 		UINT m_MSAASamples = 0;
 		UINT m_MSAAQuality = 0;
 	};

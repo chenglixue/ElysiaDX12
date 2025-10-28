@@ -133,7 +133,7 @@ namespace ElysiaRenderer
 		passParameter->cameraPosWS = m_pCameraManager->GetMainCamera()->GetPosition4();
 		passParameter->viewMatrix = m_pCameraManager->GetMainCamera()->GetViewMat();
 		passParameter->projMatrix = m_pCameraManager->GetMainCamera()->GetProj();
-		passParameter->viewProjMatrix = passParameter->projMatrix *= passParameter->viewMatrix;
+		passParameter->viewProjMatrix = passParameter->projMatrix * passParameter->viewMatrix;
 		passParameter->viewProjMatrix_I = passParameter->viewProjMatrix.Invert();
 		passParameter->nearZ = m_pCameraManager->GetMainCamera()->GetNearZ();
 		passParameter->farZ = m_pCameraManager->GetMainCamera()->GetFarZ();

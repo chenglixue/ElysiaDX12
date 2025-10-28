@@ -64,6 +64,12 @@ namespace ElysiaHelper
 			textureCreateDesc.m_typeFlag = textureCreateDesc.m_typeFlag | TexTypeFlags::UAV;
 		}
 
+		if (desc.IsDepth)
+		{
+			m_depthFormat = desc.Format;
+			m_isDepth = true;
+		}
+
 		m_pTexture = std::move(GetDevice()->CreateTexture(textureCreateDesc));
 	}
 
@@ -93,7 +99,7 @@ namespace ElysiaHelper
 	}
 	DXGI_FORMAT RenderTexture::GetFormat() const
 	{
-		return m_pTexture->GetResourceDesc().Format;
+		return m_isDepth ? m_depthFormat : m_pTexture->GetResourceDesc().Format;
 	}
 	ID3D12Resource* RenderTexture::GetResource() const
 	{
