@@ -16,7 +16,9 @@ namespace ElysiaRenderer
 	{
 		Vector4 cameraPosWS			= Vector4::Zero;	// 16
 		Matrix	viewMatrix			= Matrix::Identity;	// 64
+		Matrix	viewMatrix_I		= Matrix::Identity;	// 64
 		Matrix	projMatrix			= Matrix::Identity; // 64
+		Matrix	projMatrix_I		= Matrix::Identity; // 64
 		Matrix  viewProjMatrix		= Matrix::Identity;
 		Matrix  viewProjMatrix_I	= Matrix::Identity;
 		Matrix	shadowMatrix		= Matrix::Identity;	// 64

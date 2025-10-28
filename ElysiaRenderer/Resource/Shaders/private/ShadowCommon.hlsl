@@ -307,7 +307,7 @@ float SunShadowVisibility(in float3 positionWS, in float2 screenUV, in float2 uv
     Texture2D shadowTex = ResourceDescriptorHeap[ShadowTexIndex];
     SamplerState shadowClampSampler = SamplerDescriptorHeap[ClampPointSampler];
     
-    float4 shadowPos = mul(shadowMatrix, float4(positionWS, 1.f));
+    float4 shadowPos = mul(float4(positionWS, 1.f), shadowMatrix);
     shadowPos /= shadowPos.w;
     shadowPos.xy = shadowPos.xy * float2(0.5f, -0.5f) + 0.5f;
     

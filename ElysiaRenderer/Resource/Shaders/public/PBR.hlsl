@@ -38,12 +38,12 @@ PSInput VS(VSInput i)
 {
     PSInput o = (PSInput) 0;
 
-    o.positionWS = mul(worldMatrix, float4(i.positionOS, 1.f));
-    o.positionVS = mul(viewMatrix, o.positionWS);
-    o.positionCS = mul(projMatrix, o.positionVS);
+    o.positionWS = mul(float4(i.positionOS, 1.f), worldMatrix);
+    o.positionVS = mul(o.positionWS, viewMatrix);
+    o.positionCS = mul(o.positionVS, projMatrix);
     
-    float3 N = normalize(mul((float3x3) worldMatrix, i.normalOS));
-    float3 T = mul((float3x3) worldMatrix, i.tangentOS);
+    float3 N = normalize(mul(i.normalOS, (float3x3) worldMatrix));
+    float3 T = mul(i.tangentOS, (float3x3) worldMatrix);
     o.tangentWS = normalize(T - dot(N, T) * N);
     o.bitTangentWS = (cross(o.tangentWS, N));
     o.normalWS = N;
@@ -78,9 +78,11 @@ PSOutput PS(PSInput i)
     
     SamplerState warpLinearSampler = SamplerDescriptorHeap[WarpPointSampler];
     Texture2D temp = ResourceDescriptorHeap[OpaqueDepthIndex];
-    float depthMap = temp.Sample(warpLinearSampler, inputParam.ScreenUV) / i.positionCS.w;
-    o.target0.rgb = depthMap;
-    o.target0.a = 1;
+    float depthMap = temp.SampleLevel(warpLinearSampler, inputParam.ScreenUV, 0);
+    o.target0.rgb = ComputeWorldSpacePosition(inputParam.ScreenUV, depthMap, viewProjMatrix_I);
+    o.target0.rgb = lighting;
+    //o.target0.rgb = PositionFromDepth(depthMap, inputParam.ScreenUV);
+    //o.target0.rgb = ComputeClipSpacePosition(inputParam.ScreenUV, 1 - depthMap);
     //o.target0 = lighting;
     
     return o;

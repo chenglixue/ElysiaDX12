@@ -106,7 +106,7 @@ namespace ElysiaRenderer
 		void Setup();
 		void LoadShaders();
 		void CreateConstantBuffers();
-		void LoadTextures(); 
+		void LoadTextures();  
 		void CreatePOS();
 		
 		void Execute();
@@ -115,6 +115,6 @@ namespace ElysiaRenderer
 		void DrawOpaque(); 
 		void DrawSkybox();
 		void DrawUI();
-	};   
+	};     
 } 
-              
+                                   

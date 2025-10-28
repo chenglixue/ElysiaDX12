@@ -129,11 +129,13 @@ namespace ElysiaRenderer
 		auto passParameter = RenderResource::GetInstance().GetCBVPassParameter();
 
 		passParameter->screenSize = GetDevice()->GetScreenSize();
-		passParameter->frameIndex = GetDevice()->GetFrameIndex();
+		passParameter->frameIndex = GetDevice()->GetFrameIndex(); 
 		passParameter->cameraPosWS = m_pCameraManager->GetMainCamera()->GetPosition4();
 		passParameter->viewMatrix = m_pCameraManager->GetMainCamera()->GetViewMat();
+		passParameter->viewMatrix_I = passParameter->viewMatrix.Invert();
 		passParameter->projMatrix = m_pCameraManager->GetMainCamera()->GetProj();
-		passParameter->viewProjMatrix = passParameter->projMatrix * passParameter->viewMatrix;
+		passParameter->projMatrix_I = passParameter->projMatrix.Invert();
+		passParameter->viewProjMatrix = passParameter->viewMatrix * passParameter->projMatrix;
 		passParameter->viewProjMatrix_I = passParameter->viewProjMatrix.Invert();
 		passParameter->nearZ = m_pCameraManager->GetMainCamera()->GetNearZ();
 		passParameter->farZ = m_pCameraManager->GetMainCamera()->GetFarZ();
@@ -297,7 +299,7 @@ namespace ElysiaRenderer
 		pipelineStateCreateDesc.m_pixelShader = GetPixelShaders()[ShaderQueue::Opaque][ShaderType::Pixel].get();
 		pipelineStateCreateDesc.m_renderTargetDesc.m_numRenderTargets = 1;
 		pipelineStateCreateDesc.m_renderTargetDesc.m_renderTargetFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-		pipelineStateCreateDesc.m_renderTargetDesc.m_depthStencilFormat = GetBufferManager()->GetCameraDepthRT()->GetTexture()->GetResourceDesc().Format;
+		pipelineStateCreateDesc.m_renderTargetDesc.m_depthStencilFormat = GetBufferManager()->GetCameraDepthRT()->GetFormat();
 		pipelineStateCreateDesc.m_depthStencilDesc = GetDepthState(DepthState::Enabled);
 		pipelineStateCreateDesc.m_blendDesc = GetBlendState(BlendState::Disabled);
 		pipelineStateCreateDesc.m_rasterDesc = GetRasterizerState(RasterizerState::BackFaceCull);

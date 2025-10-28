@@ -77,7 +77,9 @@ cbuffer PassConstant : register(b0, perPassSpace)
 {
     Vector4 cameraPosWS;
     Matrix  viewMatrix;
+    Matrix  viewMatrix_I;
     Matrix  projMatrix;
+    Matrix  projMatrix_I;
     Matrix  viewProjMatrix;
     Matrix  viewProjMatrix_I;
     Matrix  shadowMatrix;

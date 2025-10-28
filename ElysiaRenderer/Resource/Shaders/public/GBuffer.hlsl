@@ -43,12 +43,12 @@ PSInput VS(VSInput i)
 {
     PSInput o = (PSInput) 0;
 
-    o.positionWS = mul(worldMatrix, float4(i.positionOS, 1.f));
-    o.positionVS = mul(viewMatrix, o.positionWS);
-    o.positionCS = mul(projMatrix, o.positionVS);
+    o.positionWS = mul(float4(i.positionOS, 1.f), worldMatrix);
+    o.positionVS = mul(o.positionWS, viewMatrix);
+    o.positionCS = mul(o.positionVS, projMatrix);
     
-    float3 N = normalize(mul((float3x3) worldMatrix, i.normalOS));
-    float3 T = mul((float3x3) worldMatrix, i.tangentOS);
+    float3 N = normalize(mul(i.normalOS, (float3x3) worldMatrix));
+    float3 T = mul(i.tangentOS, (float3x3) worldMatrix);
     o.tangentWS = normalize(T - dot(N, T) * N);
     o.bitTangentWS = (cross(o.tangentWS, N));
     o.normalWS = N;
@@ -74,7 +74,6 @@ PSOutput PS(PSInput i)
     inputParam.ScreenVector = GetScreenVectorWS(cameraPosWS.xyz, i.positionWS.xyz);
     
     LightData mainLightData = GetMainLight(mainLight);
-    MaterialData materialData = GetMaterialData(inputParam);
     
     FDecodeGBufferData decodeGBufferData = GetDecodeGBufferData(inputParam, mainLightData.toLight);
     

@@ -39,10 +39,10 @@ PSInput VS(VSInput i)
 {
     PSInput o = (PSInput) 0;
     
-    o.normalWS = normalize(mul((float3x3) worldMatrix, i.normalOS));
+    o.normalWS = normalize(mul(i.normalOS, (float3x3) worldMatrix));
 
-    o.positionWS = mul(worldMatrix, float4(i.positionOS, 1.f));
-    o.positionCS = mul(shadowMatrix, o.positionWS);
+    o.positionWS = mul(float4(i.positionOS, 1.f), worldMatrix);
+    o.positionCS = mul(o.positionWS, shadowMatrix);
     
     LightData mainLightData = GetMainLight(mainLight);
     

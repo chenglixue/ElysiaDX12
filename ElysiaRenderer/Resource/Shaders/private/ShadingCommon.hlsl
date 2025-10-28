@@ -219,4 +219,20 @@ float3 PositionFromDepth(in float zw, in float2 uv)
     float4 positionWS = mul(positionCS, viewProjMatrix_I);
     return positionWS.xyz / positionWS.w;
 }
+
+float4 ComputeClipSpacePosition(float2 screenUV, float rawDepth)
+{
+    float4 positionCS = float4(screenUV * 2.0 - 1.0, rawDepth, 1.0);
+
+    positionCS.y = -positionCS.y;
+
+    return positionCS;
+}
+
+float3 ComputeWorldSpacePosition(float2 screenUV, float rawDepth, Matrix invViewProjMatrix)
+{
+    float4 positionCS = ComputeClipSpacePosition(screenUV, rawDepth);
+    float4 positionWS = mul(positionCS, invViewProjMatrix);
+    return positionWS.xyz / positionWS.w;
+}
 #endif

@@ -713,7 +713,8 @@ namespace ElysiaRenderer
 			L"-Qstrip_reflect",								// Strip reflection into a separate blob. 
 			L"-I", temp.c_str(),
 			L"-Qstrip_debug",
-			DXC_ARG_PACK_MATRIX_COLUMN_MAJOR,
+			DXC_ARG_PACK_MATRIX_ROW_MAJOR,
+			//DXC_ARG_PACK_MATRIX_COLUMN_MAJOR,
 			DXC_ARG_DEBUG,
 			DXC_ARG_SKIP_OPTIMIZATIONS,
 		};
