@@ -78,8 +78,10 @@ PSOutput PS(PSInput i)
     
     SamplerState warpLinearSampler = SamplerDescriptorHeap[WarpPointSampler];
     Texture2D temp = ResourceDescriptorHeap[OpaqueDepthIndex];
-    o.target0 = temp.Sample(warpLinearSampler, i.uv);
-    o.target0 = lighting;
+    float depthMap = temp.Sample(warpLinearSampler, inputParam.ScreenUV) / i.positionCS.w;
+    o.target0.rgb = PositionFromDepth(depthMap, inputParam.ScreenUV);
+    o.target0.a = 1;
+    //o.target0 = lighting;
     
     return o;
 }

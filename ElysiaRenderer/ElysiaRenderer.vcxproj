@@ -168,6 +168,7 @@
     <ClInclude Include="DX12Camera.h" />
     <ClInclude Include="File.h" />
     <ClInclude Include="GBufferPass.h" />
+    <ClInclude Include="OpaquePass.h" />
     <ClInclude Include="PSOHelper.h" />
     <ClInclude Include="RenderPassData.h" />
     <ClInclude Include="RenderTexture.h" />
@@ -323,6 +324,7 @@
     <ClCompile Include="LightManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MeshManager.cpp" />
+    <ClCompile Include="OpaquePass.cpp" />
     <ClCompile Include="PipelineResourceSpace.cpp" />
     <ClCompile Include="PSOHelper.cpp" />
     <ClCompile Include="Renderer.cpp" />

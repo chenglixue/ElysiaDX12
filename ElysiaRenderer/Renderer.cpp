@@ -65,9 +65,6 @@ namespace ElysiaRenderer
 		auto sobolSequence = Create2DSobolSqeuence(64);
 		memcpy(RenderResource::GetInstance().GetCBVPassParameter()->sobolSequence.data(), sobolSequence.data(), sobolSequence.size() * sizeof(Vector2));
 
-		m_passes.emplace_back(std::move(std::make_unique<ShadowPass>()));
-		m_passes.emplace_back(std::move(std::make_unique<GBufferPass>()));
-
 		Setup();
 	}
 	void Renderer::Update()
@@ -136,6 +133,8 @@ namespace ElysiaRenderer
 		passParameter->cameraPosWS = m_pCameraManager->GetMainCamera()->GetPosition4();
 		passParameter->viewMatrix = m_pCameraManager->GetMainCamera()->GetViewMat();
 		passParameter->projMatrix = m_pCameraManager->GetMainCamera()->GetProj();
+		passParameter->viewProjMatrix = passParameter->projMatrix *= passParameter->viewMatrix;
+		passParameter->viewProjMatrix_I = passParameter->viewProjMatrix.Invert();
 		passParameter->nearZ = m_pCameraManager->GetMainCamera()->GetNearZ();
 		passParameter->farZ = m_pCameraManager->GetMainCamera()->GetFarZ();
 
@@ -175,6 +174,11 @@ namespace ElysiaRenderer
 		passData.RenderSize = UINT2(GetDevice()->GetScreenSize().x, GetDevice()->GetScreenSize().y);
 		passData.pCommand = m_graphicsContext.get();
 		passData.pGraphicsPipelineStates = &m_graphicsPipelineStates;
+
+		m_passes.emplace_back(std::move(std::make_unique<ShadowPass>()));
+		m_passes.emplace_back(std::move(std::make_unique<GBufferPass>()));
+		//m_passes.emplace_back(std::move(std::make_unique<OpaquePass>()));
+
 
 		GetModelImporter()->CreateVertexBuffer();
 		GetModelImporter()->CreateIndexBuffer();

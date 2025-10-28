@@ -78,6 +78,8 @@ cbuffer PassConstant : register(b0, perPassSpace)
     Vector4 cameraPosWS;
     Matrix  viewMatrix;
     Matrix  projMatrix;
+    Matrix  viewProjMatrix;
+    Matrix  viewProjMatrix_I;
     Matrix  shadowMatrix;
     Vector4 screenSize;
 	Vector4 shadowSize;

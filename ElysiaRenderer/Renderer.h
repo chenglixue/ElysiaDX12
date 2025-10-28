@@ -16,6 +16,7 @@
 #include "SobolSequenceGenerator.h"
 #include "ShadowPass.h"
 #include "GBufferPass.h"
+#include "OpaquePass.h"
 
 namespace ElysiaRenderer 
 {
@@ -115,5 +116,5 @@ namespace ElysiaRenderer
 		void DrawSkybox();
 		void DrawUI();
 	};   
-}
-           
+} 
+             

@@ -113,8 +113,6 @@ namespace ElysiaRenderer
 
 	void ShadowPass::CreateMainShadow(float boundSphereRadius, DXGI_FORMAT format)
 	{
-		RenderTextureDesc shadowRTDesc{};
-		shadowRTDesc.Name = L"Shadowm RT";
 		float resolution;
 		switch (UserData::GetInstance().shadowQuality)
 		{
@@ -145,18 +143,12 @@ namespace ElysiaRenderer
 			break;
 		}
 		}
-		shadowRTDesc.Width = static_cast<UINT64>(resolution);
-		shadowRTDesc.Height = static_cast<UINT64>(resolution);
-		shadowRTDesc.Format = format;
-		shadowRTDesc.ArraySize = 1;
-		shadowRTDesc.Dimension = TextureDimension::Tex2D;
-		shadowRTDesc.EnableRandomWrite = false;
-		shadowRTDesc.MipmapLevels = 1;
-		shadowRTDesc.MSAASamples = 1;
-		shadowRTDesc.IsDepth = true;
-
-		m_pShadowRT = std::make_unique<RenderTexture>();
-		m_pShadowRT->Init(shadowRTDesc);
+		m_pShadowRT = CreateRenderTexture(
+			static_cast<UINT64>(resolution),
+			static_cast<UINT64>(resolution),
+			format,
+			true,
+			L"Shadow RT");
 
 		auto shadowMap = std::make_unique<DX12Shadow>(m_pShadowRT->GetTexture());
 		shadowMap->InitBoundSphere(boundSphereRadius);

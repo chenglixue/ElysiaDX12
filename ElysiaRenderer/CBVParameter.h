@@ -14,12 +14,14 @@ namespace ElysiaRenderer
 
 	struct alignas(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT) CBVMainPassParameter
 	{
-		Vector4 cameraPosWS		= Vector4::Zero;	// 16
-		Matrix	viewMatrix		= Matrix::Identity;	// 64
-		Matrix	projMatrix		= Matrix::Identity; 	// 64
-		Matrix	shadowMatrix	= Matrix::Identity;	// 64
-		Vector4 screenSize		= Vector4::Zero;	// 16
-		Vector4 shadowSize		= Vector4::Zero;	// 16
+		Vector4 cameraPosWS			= Vector4::Zero;	// 16
+		Matrix	viewMatrix			= Matrix::Identity;	// 64
+		Matrix	projMatrix			= Matrix::Identity; // 64
+		Matrix  viewProjMatrix		= Matrix::Identity;
+		Matrix  viewProjMatrix_I	= Matrix::Identity;
+		Matrix	shadowMatrix		= Matrix::Identity;	// 64
+		Vector4 screenSize			= Vector4::Zero;	// 16
+		Vector4 shadowSize			= Vector4::Zero;	// 16
 
 		LightData mainLight;	// 64
 
@@ -75,7 +77,6 @@ namespace ElysiaRenderer
 
 		bool hasNormalTex = false;
 
-		//float padding[48];
 	};
 
 	

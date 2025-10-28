@@ -298,6 +298,9 @@
     <ClInclude Include="PSOHelper.h">
       <Filter>Header Files\Helper</Filter>
     </ClInclude>
+    <ClInclude Include="OpaquePass.h">
+      <Filter>Header Files\Render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -628,6 +631,12 @@
       <Filter>Source Files\Render</Filter>
     </ClCompile>
     <ClCompile Include="RenderResource.cpp">
+      <Filter>Source Files\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="PSOHelper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OpaquePass.cpp">
       <Filter>Source Files\Render</Filter>
     </ClCompile>
   </ItemGroup>
