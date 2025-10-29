@@ -5,16 +5,6 @@
 
 namespace ElysiaRenderer
 {
-	struct BufferCreationDesc
-	{
-		LPCWSTR m_name;
-		size_t m_size = 0;
-		size_t m_stride = 0;
-		GPUResourceFlags m_viewFlags = GPUResourceFlags::None;
-		BufferAccessFlags m_accessFlags = BufferAccessFlags::GPUOnly;
-		bool m_isRawAccess = false;
-	};
-
 	class DX12BufferResource : public DX12GPUResource
 	{
 	public:
@@ -41,12 +31,5 @@ namespace ElysiaRenderer
 		DX12DescriptorHeapHandle m_CBVDescriptor;
 		DX12DescriptorHeapHandle m_SRVDescriptor;
 		DX12DescriptorHeapHandle m_UAVDescriptor;
-	};
-
-	struct DX12BufferUpload
-	{
-		DX12BufferResource* m_buffer = nullptr;
-		std::unique_ptr<uint8_t[]> m_bufferData = nullptr;
-		size_t m_bufferDataSize = 0;
 	};
 }

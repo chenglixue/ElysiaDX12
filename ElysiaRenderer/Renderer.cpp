@@ -189,7 +189,7 @@ namespace ElysiaRenderer
 	void Renderer::Setup()
 	{
 		RenderPassData passData{};
-		passData.RenderSize = UINT2(GetDevice()->GetScreenSize().x, GetDevice()->GetScreenSize().y);
+		passData.RenderSize = UINT2(static_cast<UINT>(GetDevice()->GetScreenSize().x), static_cast<UINT>(GetDevice()->GetScreenSize().y));
 		passData.pCommand = m_graphicsContext.get();
 		passData.pGraphicsPipelineStates = &m_graphicsPipelineStates;
 

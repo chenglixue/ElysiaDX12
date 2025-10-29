@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "CameraManager.h"
 
 namespace ElysiaRenderer

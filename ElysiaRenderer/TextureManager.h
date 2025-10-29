@@ -1,10 +1,10 @@
 #pragma once
-#include "stdafx.h"
 #include "IManager.h"
-#include "DX12TextureBuffer.h"
 
 namespace ElysiaRenderer
 {
+	class DX12TextureResource;
+
 	class TextureManager : public IManager
 	{
 	public:

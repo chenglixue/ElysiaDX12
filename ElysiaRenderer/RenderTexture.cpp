@@ -2,7 +2,7 @@
 #include "RenderTexture.h"
 #include "DX12Device.h"
 
-namespace ElysiaHelper
+namespace ElysiaRenderer
 {
 	RenderTexture::~RenderTexture()
 	{

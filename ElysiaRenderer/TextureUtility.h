@@ -1,10 +1,12 @@
 #pragma once
 #include "stdafx.h"
-#include "DX12GPUResource.h"
-#include "DX12DescriptorHeapHandle.h"
+#include "BufferUtility.h"
+
 
 namespace ElysiaRenderer
 {
+	class DX12TextureResource;
+
 	const std::wstring DefaultBlackTexturePath = L"Tex\\Black.png";
 	const std::wstring DefaultWhiteTexturePath = L"Tex\\White.png";
 
@@ -100,5 +102,14 @@ namespace ElysiaRenderer
 		bool m_isRawAccess = false;
 		UINT m_size = 0;
 		UINT m_stride = 0;
+	};
+
+	struct DX12TextureUpload
+	{
+		DX12TextureResource* m_textureBuffer;
+		std::unique_ptr<uint8_t[]> m_pTextureData;
+		size_t m_textureDataSize = 0;
+		UINT m_numSubResources = 0;
+		SubResourceLayouts m_subResourceLayouts{ 0 };
 	};
 }

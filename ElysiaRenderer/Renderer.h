@@ -13,7 +13,7 @@ namespace ElysiaRenderer
 	class CameraManager;
 	class DX12UI;
 	class DX12GraphicsContext;
-	class PipelineStateObject;
+	struct PipelineStateObject;
 	class DX12TextureResource;
 	
 	class Renderer

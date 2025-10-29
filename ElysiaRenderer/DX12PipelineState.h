@@ -3,8 +3,8 @@
 
 namespace ElysiaRenderer
 {
-	extern class DX12RootSignature;
-	extern class DX12Shader;
+	class DX12RootSignature;
+	class DX12Shader;
 
 	class DX12PipelineState
 	{

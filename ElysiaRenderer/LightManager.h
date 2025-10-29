@@ -19,7 +19,7 @@ namespace ElysiaRenderer
 		virtual void Destory() override;
 		virtual void Update() override;
 
-		DX12Light* GetMainLight();
+		DX12DirectionLight* GetMainLight();
 
 	private:
 		void CreatMainLight();
@@ -33,13 +33,5 @@ namespace ElysiaRenderer
 
 	extern std::unique_ptr<LightManager> g_pLightManager;
 
-	inline LightManager* GetLightManager()
-	{
-		return g_pLightManager.get();
-	}
-
-	inline DX12DirectionLight* GetMainLight()
-	{
-		return dynamic_cast<DX12DirectionLight*>(g_pLightManager->GetMainLight());
-	}
+	LightManager* GetLightManager();
 }

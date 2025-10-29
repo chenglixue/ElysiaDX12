@@ -1,4 +1,8 @@
+#include "stdafx.h"
 #include "OpaquePass.h"
+#include "DX12Device.h"
+#include "RenderTexture.h"
+
 
 namespace ElysiaRenderer
 {

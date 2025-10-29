@@ -7,6 +7,7 @@ namespace ElysiaRenderer
 	class DX12Shader;
 	class DX12PipelineState;
 	class DX12RootSignature;
+	class DX12TextureResource;
 
 	enum class PipelineType : uint8_t
 	{

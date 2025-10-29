@@ -1,341 +1,251 @@
 ﻿  Skipping vcpkg. (no packages)
 cl : command line  warning D9014: invalid value '18' for '/wd'; assuming '5999'
+  BufferManager.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file '/BufferManager.cpp')
+  
+  DX12Context.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file '/DX12Context.cpp')
+  
+  DX12Device.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file '/DX12Device.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\DX12Device.cpp(327,59): warning C4244: '=': conversion from 'float' to 'UINT', possible loss of data
+  (compiling source file '/DX12Device.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\DX12Device.cpp(348,59): warning C4244: '=': conversion from 'float' to 'UINT', possible loss of data
+  (compiling source file '/DX12Device.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\DX12Device.cpp(561,38): warning C4244: '=': conversion from 'float' to 'UINT8', possible loss of data
+  (compiling source file '/DX12Device.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\DX12Device.cpp(718,11): warning C4129: 'S': unrecognized character escape sequence
+  (compiling source file '/DX12Device.cpp')
+  
+  DX12GraphicsContext.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file '/DX12GraphicsContext.cpp')
+  
+  DX12Light.cpp
   GBufferPass.cpp
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+D:\DX12\ElysiaDX12\ElysiaRenderer\DX12MeshRender.h(9,8): warning C4099: 'ElysiaRenderer::Mesh': type name first seen using 'struct' now seen using 'class'
+  (compiling source file '/GBufferPass.cpp')
+      D:\DX12\ElysiaDX12\ElysiaRenderer\Mesh.h(86,9):
+      see declaration of 'ElysiaRenderer::Mesh'
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
   (compiling source file '/GBufferPass.cpp')
   
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12PipelineState.h(6,32): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12RootSignature' when no variable is declared
+D:\DX12\ElysiaDX12\ElysiaRenderer\GBufferPass.cpp(39,57): warning C4244: 'argument': conversion from 'float' to 'uint8_t', possible loss of data
   (compiling source file '/GBufferPass.cpp')
   
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12PipelineState.h(7,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Shader' when no variable is declared
+D:\DX12\ElysiaDX12\ElysiaRenderer\GBufferPass.cpp(86,47): warning C4267: 'argument': conversion from 'size_t' to 'UINT', possible loss of data
   (compiling source file '/GBufferPass.cpp')
   
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12GraphicsContext.h(7,28): warning C4091: 'extern ': ignored on left of 'ElysiaHelper::RenderTexture' when no variable is declared
-  (compiling source file '/GBufferPass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12GraphicsContext.h(12,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
-  (compiling source file '/GBufferPass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.h(8,34): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12TextureResource' when no variable is declared
-  (compiling source file '/GBufferPass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.h(9,43): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12RenderPassDescriptorHeap' when no variable is declared
-  (compiling source file '/GBufferPass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.h(10,39): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12DescriptorHeapHandle' when no variable is declared
-  (compiling source file '/GBufferPass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.h(11,26): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Context' when no variable is declared
-  (compiling source file '/GBufferPass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.h(12,32): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12UploadContext' when no variable is declared
-  (compiling source file '/GBufferPass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.h(13,34): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12GraphicsContext' when no variable is declared
-  (compiling source file '/GBufferPass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.h(14,33): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12BufferResource' when no variable is declared
-  (compiling source file '/GBufferPass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.h(15,40): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12StagingDescriptorHeap' when no variable is declared
-  (compiling source file '/GBufferPass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.h(16,24): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Queue' when no variable is declared
-  (compiling source file '/GBufferPass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\GBufferPass.cpp(38,57): warning C4244: 'argument': conversion from 'float' to 'uint8_t', possible loss of data
-  (compiling source file '/GBufferPass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\GBufferPass.cpp(85,47): warning C4267: 'argument': conversion from 'size_t' to 'UINT', possible loss of data
-  (compiling source file '/GBufferPass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\GBufferPass.cpp(215,84): warning C4267: '=': conversion from 'size_t' to 'uint8_t', possible loss of data
+D:\DX12\ElysiaDX12\ElysiaRenderer\GBufferPass.cpp(216,84): warning C4267: '=': conversion from 'size_t' to 'uint8_t', possible loss of data
   (compiling source file '/GBufferPass.cpp')
   
   ModelImporter.cpp
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+D:\DX12\ElysiaDX12\ElysiaRenderer\DX12MeshRender.h(9,8): warning C4099: 'ElysiaRenderer::Mesh': type name first seen using 'struct' now seen using 'class'
+  (compiling source file '/ModelImporter.cpp')
+      D:\DX12\ElysiaDX12\ElysiaRenderer\Mesh.h(86,9):
+      see declaration of 'ElysiaRenderer::Mesh'
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
   (compiling source file '/ModelImporter.cpp')
   
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12PipelineState.h(6,32): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12RootSignature' when no variable is declared
-  (compiling source file '/ModelImporter.cpp')
+  DX12UI.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file '/DX12UI.cpp')
   
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12PipelineState.h(7,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Shader' when no variable is declared
-  (compiling source file '/ModelImporter.cpp')
+  DX12UploadContext.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file '/DX12UploadContext.cpp')
   
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.h(8,34): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12TextureResource' when no variable is declared
-  (compiling source file '/ModelImporter.cpp')
+  LightManager.cpp
+  OpaquePass.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\DX12MeshRender.h(9,8): warning C4099: 'ElysiaRenderer::Mesh': type name first seen using 'struct' now seen using 'class'
+  (compiling source file '/OpaquePass.cpp')
+      D:\DX12\ElysiaDX12\ElysiaRenderer\Mesh.h(86,9):
+      see declaration of 'ElysiaRenderer::Mesh'
   
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.h(9,43): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12RenderPassDescriptorHeap' when no variable is declared
-  (compiling source file '/ModelImporter.cpp')
+D:\DX12\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file '/OpaquePass.cpp')
   
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.h(10,39): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12DescriptorHeapHandle' when no variable is declared
-  (compiling source file '/ModelImporter.cpp')
+D:\DX12\ElysiaDX12\ElysiaRenderer\OpaquePass.cpp(78,47): warning C4267: 'argument': conversion from 'size_t' to 'UINT', possible loss of data
+  (compiling source file '/OpaquePass.cpp')
   
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.h(11,26): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Context' when no variable is declared
-  (compiling source file '/ModelImporter.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.h(12,32): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12UploadContext' when no variable is declared
-  (compiling source file '/ModelImporter.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.h(13,34): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12GraphicsContext' when no variable is declared
-  (compiling source file '/ModelImporter.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.h(14,33): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12BufferResource' when no variable is declared
-  (compiling source file '/ModelImporter.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.h(15,40): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12StagingDescriptorHeap' when no variable is declared
-  (compiling source file '/ModelImporter.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.h(16,24): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Queue' when no variable is declared
-  (compiling source file '/ModelImporter.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12UploadContext.h(6,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
-  (compiling source file '/ModelImporter.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\ModelImporter.cpp(29,22): error C2382: 'ElysiaModel::ModelImporter::GetMeshCount': redefinition; different exception specifications
-  (compiling source file '/ModelImporter.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\ModelImporter.h(31,8):
-      see declaration of 'ElysiaModel::ModelImporter::GetMeshCount'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\ModelImporter.cpp(39,22): error C2382: 'ElysiaModel::ModelImporter::GetMaterialCount': redefinition; different exception specifications
-  (compiling source file '/ModelImporter.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\ModelImporter.h(34,8):
-      see declaration of 'ElysiaModel::ModelImporter::GetMaterialCount'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\ModelImporter.cpp(49,22): error C2382: 'ElysiaModel::ModelImporter::GetVertexStride': redefinition; different exception specifications
-  (compiling source file '/ModelImporter.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\ModelImporter.h(37,8):
-      see declaration of 'ElysiaModel::ModelImporter::GetVertexStride'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\ModelImporter.cpp(54,39): error C2382: 'ElysiaModel::ModelImporter::GetBoundingBox': redefinition; different exception specifications
-  (compiling source file '/ModelImporter.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\ModelImporter.h(39,25):
-      see declaration of 'ElysiaModel::ModelImporter::GetBoundingBox'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\ModelImporter.cpp(618,4): error C2027: use of undefined type 'ElysiaModel::TextureManager'
-  (compiling source file '/ModelImporter.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\ModelImporter.h(19,8):
-      see declaration of 'ElysiaModel::TextureManager'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\ModelImporter.cpp(640,4): error C2027: use of undefined type 'ElysiaModel::TextureManager'
-  (compiling source file '/ModelImporter.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\ModelImporter.h(19,8):
-      see declaration of 'ElysiaModel::TextureManager'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\ModelImporter.cpp(662,4): error C2027: use of undefined type 'ElysiaModel::TextureManager'
-  (compiling source file '/ModelImporter.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\ModelImporter.h(19,8):
-      see declaration of 'ElysiaModel::TextureManager'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\ModelImporter.cpp(682,4): error C2027: use of undefined type 'ElysiaModel::TextureManager'
-  (compiling source file '/ModelImporter.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\ModelImporter.h(19,8):
-      see declaration of 'ElysiaModel::TextureManager'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\ModelImporter.cpp(746,3): error C2872: 'BufferCreationDesc': ambiguous symbol
-  (compiling source file '/ModelImporter.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\BufferUtility.h(29,9):
-      could be 'ElysiaHelper::BufferCreationDesc'
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12BufferResource.h(8,9):
-      or       'ElysiaRenderer::BufferCreationDesc'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\ModelImporter.cpp(752,19): error C2664: 'void ElysiaRenderer::BufferManager::AddVertexBuffer(ElysiaRenderer::BufferCreationDesc)': cannot convert argument 1 from 'ElysiaHelper::BufferCreationDesc' to 'ElysiaRenderer::BufferCreationDesc'
-  (compiling source file '/ModelImporter.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\ModelImporter.cpp(752,37):
-      No user-defined-conversion operator available that can perform this conversion, or the operator cannot be called
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\BufferManager.h(39,8):
-      see declaration of 'ElysiaRenderer::BufferManager::AddVertexBuffer'
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\ModelImporter.cpp(752,19):
-      while trying to match the argument list '(ElysiaHelper::BufferCreationDesc)'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\ModelImporter.cpp(757,42): error C2872: 'DX12BufferUpload': ambiguous symbol
-  (compiling source file '/ModelImporter.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\BufferUtility.h(39,9):
-      could be 'ElysiaHelper::DX12BufferUpload'
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12BufferResource.h(46,9):
-      or       'ElysiaRenderer::DX12BufferUpload'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\ModelImporter.cpp(758,63): error C2440: '=': cannot convert from 'ElysiaRenderer::DX12BufferResource *' to 'ElysiaHelper::DX12BufferResource *'
-  (compiling source file '/ModelImporter.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\ModelImporter.cpp(758,63):
-      Types pointed to are unrelated; conversion requires reinterpret_cast, C-style cast or parenthesized function-style cast
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\ModelImporter.cpp(764,35): error C2664: 'void ElysiaRenderer::DX12UploadContext::AddBufferToUploads(std::unique_ptr<ElysiaRenderer::DX12BufferUpload,std::default_delete<ElysiaRenderer::DX12BufferUpload>>)': cannot convert argument 1 from 'std::unique_ptr<ElysiaHelper::DX12BufferUpload,std::default_delete<ElysiaHelper::DX12BufferUpload>>' to 'std::unique_ptr<ElysiaRenderer::DX12BufferUpload,std::default_delete<ElysiaRenderer::DX12BufferUpload>>'
-  (compiling source file '/ModelImporter.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\ModelImporter.cpp(764,65):
-      No user-defined-conversion operator available that can perform this conversion, or the operator cannot be called
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12UploadContext.h(20,8):
-      see declaration of 'ElysiaRenderer::DX12UploadContext::AddBufferToUploads'
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\ModelImporter.cpp(764,35):
-      while trying to match the argument list '(std::unique_ptr<ElysiaHelper::DX12BufferUpload,std::default_delete<ElysiaHelper::DX12BufferUpload>>)'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\ModelImporter.cpp(782,3): error C2872: 'BufferCreationDesc': ambiguous symbol
-  (compiling source file '/ModelImporter.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\BufferUtility.h(29,9):
-      could be 'ElysiaHelper::BufferCreationDesc'
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12BufferResource.h(8,9):
-      or       'ElysiaRenderer::BufferCreationDesc'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\ModelImporter.cpp(788,19): error C2664: 'void ElysiaRenderer::BufferManager::AddIndexBuffer(ElysiaRenderer::BufferCreationDesc)': cannot convert argument 1 from 'ElysiaHelper::BufferCreationDesc' to 'ElysiaRenderer::BufferCreationDesc'
-  (compiling source file '/ModelImporter.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\ModelImporter.cpp(788,36):
-      No user-defined-conversion operator available that can perform this conversion, or the operator cannot be called
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\BufferManager.h(40,8):
-      see declaration of 'ElysiaRenderer::BufferManager::AddIndexBuffer'
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\ModelImporter.cpp(788,19):
-      while trying to match the argument list '(ElysiaHelper::BufferCreationDesc)'
+  PipelineResourceSpace.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file '/PipelineResourceSpace.cpp')
   
   Renderer.cpp
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+D:\DX12\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
   (compiling source file '/Renderer.cpp')
   
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12PipelineState.h(6,32): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12RootSignature' when no variable is declared
+D:\DX12\ElysiaDX12\ElysiaRenderer\DX12MeshRender.h(9,8): warning C4099: 'ElysiaRenderer::Mesh': type name first seen using 'struct' now seen using 'class'
+  (compiling source file '/Renderer.cpp')
+      D:\DX12\ElysiaDX12\ElysiaRenderer\Mesh.h(86,9):
+      see declaration of 'ElysiaRenderer::Mesh'
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\SobolSequenceGenerator.h(155,27): warning C4018: '<': signed/unsigned mismatch
   (compiling source file '/Renderer.cpp')
   
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12PipelineState.h(7,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Shader' when no variable is declared
+D:\DX12\ElysiaDX12\ElysiaRenderer\SobolSequenceGenerator.h(163,29): warning C4244: '=': conversion from '_Ty' to 'float', possible loss of data
+D:\DX12\ElysiaDX12\ElysiaRenderer\SobolSequenceGenerator.h(163,29): warning C4244:         with
+D:\DX12\ElysiaDX12\ElysiaRenderer\SobolSequenceGenerator.h(163,29): warning C4244:         [
+D:\DX12\ElysiaDX12\ElysiaRenderer\SobolSequenceGenerator.h(163,29): warning C4244:             _Ty=double
+D:\DX12\ElysiaDX12\ElysiaRenderer\SobolSequenceGenerator.h(163,29): warning C4244:         ]
   (compiling source file '/Renderer.cpp')
   
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.h(8,34): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12TextureResource' when no variable is declared
+D:\DX12\ElysiaDX12\ElysiaRenderer\SobolSequenceGenerator.h(164,29): warning C4244: '=': conversion from '_Ty' to 'float', possible loss of data
+D:\DX12\ElysiaDX12\ElysiaRenderer\SobolSequenceGenerator.h(164,29): warning C4244:         with
+D:\DX12\ElysiaDX12\ElysiaRenderer\SobolSequenceGenerator.h(164,29): warning C4244:         [
+D:\DX12\ElysiaDX12\ElysiaRenderer\SobolSequenceGenerator.h(164,29): warning C4244:             _Ty=double
+D:\DX12\ElysiaDX12\ElysiaRenderer\SobolSequenceGenerator.h(164,29): warning C4244:         ]
   (compiling source file '/Renderer.cpp')
   
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.h(9,43): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12RenderPassDescriptorHeap' when no variable is declared
+D:\DX12\ElysiaDX12\ElysiaRenderer\Renderer.cpp(472,54): warning C4267: 'argument': conversion from 'size_t' to 'UINT', possible loss of data
   (compiling source file '/Renderer.cpp')
   
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.h(10,39): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12DescriptorHeapHandle' when no variable is declared
-  (compiling source file '/Renderer.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.h(11,26): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Context' when no variable is declared
-  (compiling source file '/Renderer.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.h(12,32): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12UploadContext' when no variable is declared
-  (compiling source file '/Renderer.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.h(13,34): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12GraphicsContext' when no variable is declared
-  (compiling source file '/Renderer.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.h(14,33): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12BufferResource' when no variable is declared
-  (compiling source file '/Renderer.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.h(15,40): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12StagingDescriptorHeap' when no variable is declared
-  (compiling source file '/Renderer.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.h(16,24): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Queue' when no variable is declared
-  (compiling source file '/Renderer.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.h(16,8): warning C4099: 'ElysiaRenderer::PipelineStateObject': type name first seen using 'struct' now seen using 'class'
-  (compiling source file '/Renderer.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\PipelineStateUtility.h(39,9):
-      see declaration of 'ElysiaRenderer::PipelineStateObject'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12GraphicsContext.h(7,28): warning C4091: 'extern ': ignored on left of 'ElysiaHelper::RenderTexture' when no variable is declared
-  (compiling source file '/Renderer.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12GraphicsContext.h(12,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
-  (compiling source file '/Renderer.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\SobolSequenceGenerator.h(155,27): warning C4018: '<': signed/unsigned mismatch
-  (compiling source file '/Renderer.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\SobolSequenceGenerator.h(163,29): warning C4244: '=': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaRenderer\ElysiaRenderer\SobolSequenceGenerator.h(163,29): warning C4244:         with
-D:\DX12\ElysiaRenderer\ElysiaRenderer\SobolSequenceGenerator.h(163,29): warning C4244:         [
-D:\DX12\ElysiaRenderer\ElysiaRenderer\SobolSequenceGenerator.h(163,29): warning C4244:             _Ty=double
-D:\DX12\ElysiaRenderer\ElysiaRenderer\SobolSequenceGenerator.h(163,29): warning C4244:         ]
-  (compiling source file '/Renderer.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\SobolSequenceGenerator.h(164,29): warning C4244: '=': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaRenderer\ElysiaRenderer\SobolSequenceGenerator.h(164,29): warning C4244:         with
-D:\DX12\ElysiaRenderer\ElysiaRenderer\SobolSequenceGenerator.h(164,29): warning C4244:         [
-D:\DX12\ElysiaRenderer\ElysiaRenderer\SobolSequenceGenerator.h(164,29): warning C4244:             _Ty=double
-D:\DX12\ElysiaRenderer\ElysiaRenderer\SobolSequenceGenerator.h(164,29): warning C4244:         ]
-  (compiling source file '/Renderer.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(192,91): warning C4244: 'argument': conversion from 'const float' to 'UINT', possible loss of data
-  (compiling source file '/Renderer.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(192,59): warning C4244: 'argument': conversion from 'const float' to 'UINT', possible loss of data
-  (compiling source file '/Renderer.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(472,54): warning C4267: 'argument': conversion from 'size_t' to 'UINT', possible loss of data
-  (compiling source file '/Renderer.cpp')
-  
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\memory(3465,35): error C2665: 'ElysiaModel::ModelImporter::ModelImporter': no overloaded function could convert all the argument types
-  (compiling source file '/Renderer.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\ModelImporter.h(25,3):
-      could be 'ElysiaModel::ModelImporter::ModelImporter(ElysiaRenderer::BufferManager *,ElysiaModel::TextureManager *)'
-          C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\memory(3465,35):
-          'ElysiaModel::ModelImporter::ModelImporter(ElysiaRenderer::BufferManager *,ElysiaModel::TextureManager *)': cannot convert argument 2 from '_Ty' to 'ElysiaModel::TextureManager *'
-          with
-          [
-              _Ty=ElysiaRenderer::TextureManager *
-          ]
-              C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\memory(3465,56):
-              Types pointed to are unrelated; conversion requires reinterpret_cast, C-style cast or parenthesized function-style cast
-      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\memory(3465,35):
-      while trying to match the argument list '(_Ty, _Ty)'
-          with
-          [
-              _Ty=ElysiaRenderer::BufferManager *
-          ]
-          and
-          [
-              _Ty=ElysiaRenderer::TextureManager *
-          ]
-      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\memory(3465,35):
-      the template instantiation context (the oldest one first) is
-          D:\DX12\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(44,27):
-          see reference to function template instantiation 'std::unique_ptr<ElysiaModel::ModelImporter,std::default_delete<ElysiaModel::ModelImporter>> std::make_unique<ElysiaModel::ModelImporter,ElysiaRenderer::BufferManager*,ElysiaRenderer::TextureManager*,0>(ElysiaRenderer::BufferManager *&&,ElysiaRenderer::TextureManager *&&)' being compiled
+  RenderTexture.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file '/RenderTexture.cpp')
   
   ShadowPass.cpp
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+D:\DX12\ElysiaDX12\ElysiaRenderer\DX12MeshRender.h(9,8): warning C4099: 'ElysiaRenderer::Mesh': type name first seen using 'struct' now seen using 'class'
+  (compiling source file '/ShadowPass.cpp')
+      D:\DX12\ElysiaDX12\ElysiaRenderer\Mesh.h(86,9):
+      see declaration of 'ElysiaRenderer::Mesh'
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
   (compiling source file '/ShadowPass.cpp')
   
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12PipelineState.h(6,32): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12RootSignature' when no variable is declared
+D:\DX12\ElysiaDX12\ElysiaRenderer\ShadowPass.cpp(47,104): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
   (compiling source file '/ShadowPass.cpp')
   
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12PipelineState.h(7,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Shader' when no variable is declared
+D:\DX12\ElysiaDX12\ElysiaRenderer\ShadowPass.cpp(47,76): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
   (compiling source file '/ShadowPass.cpp')
   
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12GraphicsContext.h(7,28): warning C4091: 'extern ': ignored on left of 'ElysiaHelper::RenderTexture' when no variable is declared
+D:\DX12\ElysiaDX12\ElysiaRenderer\ShadowPass.cpp(102,47): warning C4267: 'argument': conversion from 'size_t' to 'UINT', possible loss of data
   (compiling source file '/ShadowPass.cpp')
   
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12GraphicsContext.h(12,25): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Device' when no variable is declared
-  (compiling source file '/ShadowPass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.h(8,34): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12TextureResource' when no variable is declared
-  (compiling source file '/ShadowPass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.h(9,43): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12RenderPassDescriptorHeap' when no variable is declared
-  (compiling source file '/ShadowPass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.h(10,39): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12DescriptorHeapHandle' when no variable is declared
-  (compiling source file '/ShadowPass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.h(11,26): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Context' when no variable is declared
-  (compiling source file '/ShadowPass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.h(12,32): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12UploadContext' when no variable is declared
-  (compiling source file '/ShadowPass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.h(13,34): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12GraphicsContext' when no variable is declared
-  (compiling source file '/ShadowPass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.h(14,33): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12BufferResource' when no variable is declared
-  (compiling source file '/ShadowPass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.h(15,40): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12StagingDescriptorHeap' when no variable is declared
-  (compiling source file '/ShadowPass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.h(16,24): warning C4091: 'extern ': ignored on left of 'ElysiaRenderer::DX12Queue' when no variable is declared
-  (compiling source file '/ShadowPass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\ShadowPass.cpp(47,104): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/ShadowPass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\ShadowPass.cpp(47,76): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/ShadowPass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\ShadowPass.cpp(102,47): warning C4267: 'argument': conversion from 'size_t' to 'UINT', possible loss of data
-  (compiling source file '/ShadowPass.cpp')
-  
+  UserData.cpp
   Generating Code...
+D:\DX12\ElysiaDX12\ElysiaRenderer\DX12Device.h(58): warning C4172: returning address of local variable or temporary
+D:\DX12\ElysiaDX12\ElysiaRenderer\ModelImporter.cpp(385): warning C4715: 'ElysiaModel::ModelImporter::LoadAssimp': not all control paths return a value
+  ElysiaRenderer.vcxproj -> D:\DX12\ElysiaDX12\x64\Debug\ElysiaRenderer.exe
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Mesh\diablo3_pose.obj
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Mesh\LOW_WEPON.fbx
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Mesh\plane.fbx
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Mesh\Sphere.fbx
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Mesh\UE.fbx
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\private\AmbientCubemap.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\private\AreaLightCommon.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\private\BRDF.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\private\Common.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\private\EnergyPreservation.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\private\Light.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\private\Light.hlsli
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\private\LightAccumulator.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\private\LightCommon.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\private\Macros.hlsli
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\private\Math.hlsli
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\private\MonteCarlo.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\private\Random.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\private\ShadingCommon.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\private\ShadingModel.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\private\ShadowCommon.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\private\SharedCommon.hlsli
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\private\Transform.hlsli
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\public\GBuffer.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\public\Opaque.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\public\PBR.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\public\Shadow.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\public\Skybox.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Background_Albedo.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Background_Normal.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Background_Roughness.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\ChainTexture_Albedo.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\ChainTexture_Metallic.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\ChainTexture_Normal.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\ChainTexture_Roughness.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Dielectric_metallic.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\gi_flag.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Lion_Albedo.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Lion_Normal.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Lion_Roughness.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Metallic_metallic.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza.fbx
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Arch_diffuse.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Arch_normal.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Arch_roughness.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Bricks_a_Albedo.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Bricks_a_Normal.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Bricks_a_Roughness.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Ceiling_diffuse.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Ceiling_normal.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Ceiling_roughness.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Column_a_diffuse.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Column_a_normal.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Column_a_roughness.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Column_b_diffuse.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Column_b_normal.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Column_b_roughness.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Column_c_diffuse.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Column_c_normal.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Column_c_roughness.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Curtain_Blue_diffuse.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Curtain_Blue_normal.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Curtain_Green_diffuse.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Curtain_Green_normal.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Curtain_metallic.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Curtain_Red_diffuse.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Curtain_Red_normal.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Curtain_roughness.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Details_diffuse.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Details_metallic.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Details_normal.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Details_roughness.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Fabric_Blue_diffuse.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Fabric_Blue_normal.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Fabric_Green_diffuse.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Fabric_Green_normal.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Fabric_metallic.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Fabric_Red_diffuse.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Fabric_Red_normal.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Fabric_roughness.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_FlagPole_diffuse.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_FlagPole_normal.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_FlagPole_roughness.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Floor_diffuse.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Floor_normal.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Floor_roughness.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Roof_diffuse.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Roof_normal.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Roof_roughness.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Thorn_diffuse.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Thorn_normal.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Thorn_roughness.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\VaseHanging_diffuse.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\VaseHanging_normal.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\VaseHanging_roughness.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\VasePlant_diffuse.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\VasePlant_normal.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\VasePlant_roughness.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\VaseRound_diffuse.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\VaseRound_normal.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\VaseRound_roughness.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Vase_diffuse.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Vase_normal.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Vase_roughness.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Tex\Black.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Tex\bluenoise_frd_1024x1024.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Tex\cubemap0.dds
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Tex\GGX_Eavg_LUT.dds
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Tex\GGX_E_LUT.dds
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Tex\White.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Tex\Wood.dds
+  复制了 111 个文件

@@ -1,14 +1,10 @@
 #pragma once
-#include "stdafx.h"
 #include "Serialization.h"
-#include "DX12Shadow.h"
-#include <iostream>
-#include <mutex>
-#include <memory>
+#include "ShadowUtility.h"
 
 namespace ElysiaRenderer
 {
-	using namespace DirectX::SimpleMath;
+	using namespace ElysiaHelper;
 
 	const std::vector<LPCWSTR> g_ModelPaths
 	{
@@ -61,34 +57,7 @@ namespace ElysiaRenderer
 	};
 	
 
-	inline static void DeSerializeUserData()
-	{
-		const LPCWSTR filePath = L"D3D12\\UserData.elysia";
+	void DeSerializeUserData();
 
-		WCHAR assetsPath[512];
-		ElysiaHelper::GetAssetsPath(assetsPath, _countof(assetsPath));
-		auto userDataFullPath = std::filesystem::path(ElysiaHelper::GetAssetFullPath(assetsPath, filePath).c_str()).string();
-
-		if (FileExists(stringToLPCWSTR(userDataFullPath)))
-		{
-			FileReadSerializer readSerializer(stringToLPCWSTR(userDataFullPath));
-
-			SerializeData(readSerializer, UserData::GetInstance());
-		}
-		else
-		{
-			UserData::GetInstance();
-		}
-	}
-
-	inline static void SerializeUserData()
-	{
-		const LPCWSTR filePath = L"D3D12\\UserData.elysia";
-		WCHAR assetsPath[512];
-		ElysiaHelper::GetAssetsPath(assetsPath, _countof(assetsPath));
-		auto userDataFullPath = std::filesystem::path(ElysiaHelper::GetAssetFullPath(assetsPath, filePath).c_str()).string();
-
-		FileWriteSerializer serializer(stringToLPCWSTR(userDataFullPath));
-		SerializeData(serializer, UserData::GetInstance());
-	}
+	void SerializeUserData();
 }

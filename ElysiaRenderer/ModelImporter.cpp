@@ -1,17 +1,23 @@
 #include "stdafx.h"
 #include "Helper.h"
-#include "ModelImporter.h"
+
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 #include "iosfwd"
 #include "Serialization.h"
+
+#include "ModelImporter.h"
 #include "DX12Device.h"
 #include "DX12UploadContext.h"
-
-#include "TextureManager.h"
-
+#include "DX12TextureBuffer.h"
+#include "BufferUtility.h"
+#include "CBVParameter.h"
 
 namespace ElysiaModel
 {
 	using namespace std;
+	using namespace ElysiaHelper;
 
 	std::unique_ptr<ModelImporter> g_pModelImporter = nullptr;
 

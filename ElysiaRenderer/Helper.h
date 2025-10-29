@@ -3,7 +3,6 @@
 
 #include "PSOHelper.h"
 #include "RenderHelper.h"
-#include "Math.h"
 
 namespace ElysiaHelper
 {

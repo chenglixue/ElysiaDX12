@@ -1,22 +1,15 @@
 #pragma once
 #include "Mesh.h"
 #include "Material.h"
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
-#include "BoundingBox.h"
-#include "DX12Device.h"
-#include "BufferManager.h"
-
 #include "DX12MeshRender.h"
-
+#include "BoundingBox.h"
+#include "TextureManager.h"
+#include "BufferManager.h"
 
 namespace ElysiaModel
 {
 	using namespace ElysiaRenderer;
 	using namespace ElysiaHelper;
-
-	class TextureManager;
 
 	class ModelImporter
 	{
@@ -28,15 +21,15 @@ namespace ElysiaModel
 		ModelImporter(ModelImporter&& rhs) = default;
 		~ModelImporter();
 
-		UINT GetMeshCount() const;
+		UINT GetMeshCount() const noexcept;
 		const Mesh& GetMesh(UINT meshIndex) const;
 
-		UINT GetMaterialCount() const;
+		UINT GetMaterialCount() const noexcept;
 		const Material& GetMaterial(UINT materialIndex) const;
 
-		UINT GetVertexStride() const;
+		UINT GetVertexStride() const noexcept;
 
-		const AxisAlignedBox& GetBoundingBox() const;
+		const AxisAlignedBox& GetBoundingBox() const noexcept;
 
 		const MeshRender& GetMeshRenderer(UINT meshRendererIndex) const;
 

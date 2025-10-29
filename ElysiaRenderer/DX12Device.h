@@ -2,18 +2,20 @@
 #include "DX12Shader.h"
 #include "DX12PipelineState.h"
 #include "DX12RootSignature.h"
+#include "TextureUtility.h"
+#include "DX12DescriptorHeapHandle.h"
 
 namespace ElysiaRenderer
 {
-	extern class DX12TextureResource;
-	extern class DX12RenderPassDescriptorHeap;
-	extern class DX12DescriptorHeapHandle;
-	extern class DX12Context;
-	extern class DX12UploadContext;
-	extern class DX12GraphicsContext;
-	extern class DX12BufferResource;
-	extern class DX12StagingDescriptorHeap;
-	extern class DX12Queue;
+	class DX12TextureResource;
+	class DX12RenderPassDescriptorHeap;
+	class DX12DescriptorHeapHandle;
+	class DX12Context;
+	class DX12UploadContext;
+	class DX12GraphicsContext;
+	class DX12BufferResource;
+	class DX12StagingDescriptorHeap;
+	class DX12Queue;
 
 	struct ContextSubmissionResult
 	{

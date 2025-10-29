@@ -171,10 +171,12 @@
     <ClInclude Include="GBufferPass.h" />
     <ClInclude Include="LightUtility.h" />
     <ClInclude Include="OpaquePass.h" />
+    <ClInclude Include="PipelineResourceUtility.h" />
     <ClInclude Include="PipelineStateUtility.h" />
     <ClInclude Include="PSOHelper.h" />
     <ClInclude Include="RenderPassData.h" />
     <ClInclude Include="RenderTexture.h" />
+    <ClInclude Include="RenderTextureUtility.h" />
     <ClInclude Include="Serialization.h" />
     <ClInclude Include="IManager.h" />
     <ClInclude Include="IUpdate.h" />

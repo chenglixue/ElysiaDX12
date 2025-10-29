@@ -1,6 +1,6 @@
 #pragma once
 #include "stdafx.h"
-#include "DX12Light.h"
+#include "LightUtility.h"
 
 namespace ElysiaRenderer
 {

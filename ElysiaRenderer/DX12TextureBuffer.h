@@ -58,13 +58,4 @@ namespace ElysiaRenderer
 		DX12DescriptorHeapHandle m_SRVDescriptor{};
 		DX12DescriptorHeapHandle m_UAVDescriptor{};
 	};
-
-	struct DX12TextureUpload
-	{
-		DX12TextureResource* m_textureBuffer;
-		std::unique_ptr<uint8_t[]> m_pTextureData;
-		size_t m_textureDataSize = 0;
-		UINT m_numSubResources = 0;
-		SubResourceLayouts m_subResourceLayouts{0};
-	};
 }

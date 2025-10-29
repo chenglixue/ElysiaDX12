@@ -1,10 +1,13 @@
 #include "stdafx.h"
 #include "BufferManager.h"
+
+#include "DX12Device.h"
+#include "DX12TextureBuffer.h"
+#include "DX12BufferResource.h"
 #include "RenderTexture.h"
 
 namespace ElysiaRenderer
 {
-
 	std::unique_ptr<BufferManager> g_pBufferManager = nullptr;
 
 	BufferManager::~BufferManager()

@@ -1,12 +1,13 @@
 #pragma once
 #include "stdafx.h"
-#include "Mesh.h"
-#include "CBVParameter.h"
 
 namespace ElysiaRenderer
 {
 	using namespace DirectX;
 	using namespace DirectX::SimpleMath;
+
+	class Mesh;
+	struct CBVObjectParameter;
 
 	struct MeshRender
 	{

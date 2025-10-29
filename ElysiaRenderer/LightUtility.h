@@ -1,7 +1,7 @@
 #pragma once
 #include "Helper.h"
 
-namespace ElysiaHelper
+namespace ElysiaRenderer
 {
 	enum class LightType : uint8_t
 	{

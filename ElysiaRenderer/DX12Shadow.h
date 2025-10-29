@@ -32,7 +32,7 @@ namespace ElysiaRenderer
 		void CreateViewport();
 		void CreateScissorRect();
 
-		void InitBoundSphere(float radius, Vector3 center = MathHelper::XMFLOAT3Zero());
+		void InitBoundSphere(float radius, Vector3 center = Vector3::Zero);
 		void UpdateShadowTransform(DX12Light* light);
 
 	protected:

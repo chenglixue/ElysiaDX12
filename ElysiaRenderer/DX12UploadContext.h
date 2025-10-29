@@ -1,9 +1,11 @@
 #pragma once
 #include "DX12Context.h"
+#include "TextureUtility.h"
+#include "BufferUtility.h"
 
 namespace ElysiaRenderer
 {
-	extern class DX12Device;
+	class DX12Device;
 
 	class DX12UploadContext : public DX12Context
 	{

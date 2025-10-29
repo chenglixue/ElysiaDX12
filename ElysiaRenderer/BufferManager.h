@@ -1,18 +1,15 @@
 #pragma once
 #include "IManager.h"
-#include "DX12Device.h"
-#include "DX12BufferResource.h"
-#include "DX12TextureBuffer.h"
 #include "Helper.h"
-
-namespace ElysiaHelper
-{
-	class RenderTexture;
-}
 
 namespace ElysiaRenderer
 {
 	using namespace ElysiaHelper;
+
+	class DX12Device;
+	class DX12BufferResource;
+	class RenderTexture;
+	struct BufferCreationDesc;
 
 	class BufferManager : public IManager
 	{

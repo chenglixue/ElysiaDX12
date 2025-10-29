@@ -1,4 +1,6 @@
+#include "stdafx.h"
 #include "LightManager.h"
+
 #include "UserData.h"
 
 namespace ElysiaRenderer
@@ -29,7 +31,7 @@ namespace ElysiaRenderer
 		m_mainLight->m_lightIntensity = pUsetData.lightIntensity;
 	}
 
-	DX12Light* LightManager::GetMainLight()
+	DX12DirectionLight* LightManager::GetMainLight()
 	{
 		return m_mainLight.get();
 	}
@@ -46,5 +48,10 @@ namespace ElysiaRenderer
 		{
 			m_mainLight = std::make_unique<DX12DirectionLight>(pUserData.lightColor, pUserData.lightDir, pUserData.lightIntensity);
 		}
+	}
+
+	LightManager* GetLightManager()
+	{
+		return g_pLightManager.get();
 	}
 }

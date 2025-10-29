@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "DX12GraphicsContext.h"
 #include "DX12Device.h"
 #include "DX12RootSignature.h"
@@ -6,7 +7,6 @@
 
 namespace ElysiaRenderer
 {
-	using namespace ElysiaHelper;
 
 	DX12GraphicsContext::DX12GraphicsContext(DX12Device* device) : 
 		DX12Context(device, D3D12_COMMAND_LIST_TYPE_DIRECT)

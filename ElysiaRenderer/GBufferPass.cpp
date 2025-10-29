@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "GBufferPass.h"
+#include "BufferManager.h"
 
 namespace ElysiaRenderer
 {

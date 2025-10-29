@@ -1,4 +1,9 @@
+#include "stdafx.h"
+
 #include "PipelineResourceSpace.h"
+#include "DX12BufferResource.h"
+#include "DX12TextureBuffer.h"
+
 
 namespace ElysiaRenderer
 {
@@ -14,6 +19,15 @@ namespace ElysiaRenderer
 		}
 
 		return UINT_MAX;
+	}
+
+	DX12BufferResource* PipelineResourceSpace::GetCBV()
+	{
+		return m_CBV;
+	}
+	std::vector<PipelineResourceBinding*>& PipelineResourceSpace::GetSRVs()
+	{
+		return m_SRVs;
 	}
 
 	void PipelineResourceSpace::SetCBV(DX12BufferResource* CBVResource)
@@ -62,5 +76,14 @@ namespace ElysiaRenderer
 				m_SRVs[currIndex] = SRVResource;
 			}
 		}
+	}
+
+	void PipelineResourceSpace::Lock()
+	{
+		m_isLocked = true;
+	}
+	bool PipelineResourceSpace::IsLocked() const
+	{
+		return m_isLocked;
 	}
 }

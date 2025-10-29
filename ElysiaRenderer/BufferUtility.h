@@ -1,7 +1,7 @@
 #pragma once
 #include "Helper.h"
 
-namespace ElysiaHelper
+namespace ElysiaRenderer
 {
 	class DX12BufferResource;
 

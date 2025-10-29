@@ -1,10 +1,10 @@
 #pragma once
 #include "BasePass.h"
-#include "RenderTexture.h"
-#include "DX12Device.h"
 
 namespace ElysiaRenderer
 {
+	class RenderTexture;
+
 	class OpaquePass : public BasePass
 	{
 	public:

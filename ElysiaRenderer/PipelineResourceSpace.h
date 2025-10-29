@@ -1,22 +1,9 @@
 #pragma once
-#include "stdafx.h"
-#include "DX12TextureBuffer.h"
-#include "DX12BufferResource.h"
+#include "PipelineResourceUtility.h"
 
 namespace ElysiaRenderer
 {
-	struct PipelineResourceMapping
-	{
-		// space id : root paramter index
-		std::array<std::optional<UINT>, NUM_RESOURCE_SPACES> m_CBVMappings{};
-		std::array<std::optional<UINT>, NUM_RESOURCE_SPACES> m_TableMappings{};
-	};
-
-	struct PipelineResourceBinding
-	{
-		UINT m_bindingIndex = 0;
-		DX12GPUResource* m_resource = nullptr;
-	};
+	class DX12BufferResource;
 
 	/// <summary>
 	/// save all resource in root parameters
@@ -30,26 +17,14 @@ namespace ElysiaRenderer
 		PipelineResourceSpace(PipelineResourceSpace&& rhs) = default;
 		~PipelineResourceSpace() = default;
 
-		DX12BufferResource* GetCBV()
-		{
-			return m_CBV;
-		}
-		std::vector<PipelineResourceBinding*>& GetSRVs()
-		{
-			return m_SRVs;
-		}
+		DX12BufferResource* GetCBV();
+		std::vector<PipelineResourceBinding*>& GetSRVs();
 
 		void SetCBV(DX12BufferResource* CBVResource);
 		void SetSRV(PipelineResourceBinding* SRVResource);
 
-		void Lock()
-		{
-			m_isLocked = true;
-		}
-		bool IsLocked() const
-		{
-			return m_isLocked;
-		}
+		void Lock();
+		bool IsLocked() const;
 
 	private:
 		UINT GetIndexOfBindingIndex(const std::vector<PipelineResourceBinding*>& bindResources, UINT bindingIndex);
@@ -58,15 +33,5 @@ namespace ElysiaRenderer
 		std::vector<PipelineResourceBinding*> m_SRVs;
 		bool m_isLocked = false;
 	};
-
-	struct PipelineResourceLayout
-	{
-		std::array<PipelineResourceSpace*, NUM_RESOURCE_SPACES> m_spaces{  };
-	};
-
-	inline bool SortPipelineBindings(PipelineResourceBinding* a, PipelineResourceBinding* b)
-	{
-		return (*a).m_bindingIndex < (*b).m_bindingIndex;
-	}
 }
 

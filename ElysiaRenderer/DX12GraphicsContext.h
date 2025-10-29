@@ -2,14 +2,10 @@
 #include "DX12Context.h"
 #include "DX12PipelineState.h"
 
-namespace ElysiaHelper
-{
-	extern class RenderTexture;
-}
-
 namespace ElysiaRenderer
 {
-	extern class DX12Device;
+	class DX12Device;
+	class RenderTexture;
 
 	class DX12GraphicsContext : public DX12Context
 	{
