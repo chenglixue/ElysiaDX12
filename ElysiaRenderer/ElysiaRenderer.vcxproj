@@ -113,6 +113,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalIncludeDirectories>D:\DX12\ElysiaRenderer\x64\Debug\Shaders;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc\include;D:\DX12\ElysiaDX12\x64\Debug\Assimp\include\assimp;DirectXTK12\Inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>0018;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <PrecompiledHeader>Use</PrecompiledHeader>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -159,16 +160,18 @@
     <ClInclude Include="BasePass.h" />
     <ClInclude Include="BoundingBox.h" />
     <ClInclude Include="BufferManager.h" />
+    <ClInclude Include="BufferUtility.h" />
     <ClInclude Include="CameraManager.h" />
     <ClInclude Include="CBVParameter.h" />
     <ClInclude Include="Common.h" />
     <ClInclude Include="D3D12MemoryAllocator\D3D12MemAlloc.h" />
-    <ClInclude Include="Definition.h" />
     <ClInclude Include="DX12BufferResource.h" />
     <ClInclude Include="DX12Camera.h" />
     <ClInclude Include="File.h" />
     <ClInclude Include="GBufferPass.h" />
+    <ClInclude Include="LightUtility.h" />
     <ClInclude Include="OpaquePass.h" />
+    <ClInclude Include="PipelineStateUtility.h" />
     <ClInclude Include="PSOHelper.h" />
     <ClInclude Include="RenderPassData.h" />
     <ClInclude Include="RenderTexture.h" />
@@ -197,8 +200,9 @@
     <ClInclude Include="DX12StagingDescriptorHeap.h" />
     <ClInclude Include="DX12TextureBuffer.h" />
     <ClInclude Include="ShadowPass.h" />
+    <ClInclude Include="ShadowUtility.h" />
     <ClInclude Include="SobolSequenceGenerator.h" />
-    <ClInclude Include="TextureHelper.h" />
+    <ClInclude Include="TextureUtility.h" />
     <ClInclude Include="DX12UI.h" />
     <ClInclude Include="DX12UploadContext.h" />
     <ClInclude Include="DX12Vertex.h" />
@@ -333,6 +337,9 @@
     <ClCompile Include="ShaderManager.cpp" />
     <ClCompile Include="ShadowPass.cpp" />
     <ClCompile Include="SobolSequenceGenerator.cpp" />
+    <ClCompile Include="stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="TextureManager.cpp" />
     <ClCompile Include="Transform.cpp" />
     <ClCompile Include="UserData.cpp" />
@@ -456,17 +463,17 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="ShadowCommon.hlsl">
-      <FileType>Document</FileType>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resource\Shaders\private\ShadowCommon.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resource\Shaders\public\GBuffer.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resource\Shaders\public\Opaque.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>

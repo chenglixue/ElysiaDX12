@@ -1,6 +1,5 @@
 #include "DX12QueueManager.h"
-#include "Helper.h"
-#include <iostream>
+#include "DX12Queue.h"
 
 namespace ElysiaRenderer
 {
@@ -13,6 +12,19 @@ namespace ElysiaRenderer
 	DX12QueueManager::~DX12QueueManager()
 	{
 		
+	}
+
+	DX12Queue* DX12QueueManager::GetGraphicsQueue()
+	{
+		return m_graphicsQueue.get();
+	}
+	DX12Queue* DX12QueueManager::GetComputeQueue()
+	{
+		return m_computeQueue.get();
+	}
+	DX12Queue* DX12QueueManager::GetCopyQueue()
+	{
+		return m_copyQueue.get();
 	}
 
 	DX12Queue* DX12QueueManager::GetQueue(D3D12_COMMAND_LIST_TYPE queueType)

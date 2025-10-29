@@ -1,10 +1,10 @@
 #pragma once
-#include "stdafx.h"
 #include "Transform.h"
 
 namespace ElysiaRenderer
 {
 	using namespace SimpleMath;
+	using namespace ElysiaHelper;
 
 	class DX12Camera
 	{

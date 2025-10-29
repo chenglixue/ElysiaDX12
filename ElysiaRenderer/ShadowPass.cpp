@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "ShadowPass.h"
 #include "RenderResource.h"
 

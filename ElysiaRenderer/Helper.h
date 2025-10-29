@@ -1,20 +1,9 @@
 #pragma once
-#include <d3d12.h>
-#include <dxgi1_6.h>
-#include <cstdint>
-#include <array>
-#include <string>
-#include <vector>
-#include <mutex>
-#include <optional>
-#include "SimpleMath/SimpleMath.h"
-#include <filesystem>
+#include "stdafx.h"
 
-#include "Definition.h"
-#include "RenderHelper.h"
-#include <comdef.h> // For _com_error
-#include "magic_enum/magic_enum.hpp"
 #include "PSOHelper.h"
+#include "RenderHelper.h"
+#include "Math.h"
 
 namespace ElysiaHelper
 {
@@ -33,6 +22,37 @@ namespace ElysiaHelper
         float x = 0;
         float y = 0;
     };
+
+    enum EZeroTag { kZero, kOrigin };
+
+    constexpr UINT32 NUM_FRAMES_IN_FLIGHT = 2;
+    constexpr UINT32 NUM_BACK_BUFFERS = 3;
+    constexpr UINT32 NUM_RTV_STAGING_DESCRIPTORS = 256;
+    constexpr UINT32 NUM_DSV_STAGING_DESCRIPTORS = 32;
+    constexpr UINT32 NUM_SRV_STAGING_DESCRIPTORS = 4096;
+    constexpr UINT32 NUM_SAMPLER_DESCRIPTORS = 8;
+    constexpr UINT32 MAX_QUEUED_BARRIERS = 16;
+    constexpr UINT8 PER_OBJECT_SPACE = 0;
+    constexpr UINT8 PER_MATERIAL_SPACE = 1;
+    constexpr UINT8 PER_PASS_SPACE = 2;
+    constexpr UINT8 PER_FRAME_SPACE = 3;
+    constexpr UINT8 NUM_RESOURCE_SPACES = 4;
+    constexpr UINT32 NUM_RESERVED_SRV_DESCRIPTORS = 8192;
+    constexpr UINT32 IMGUI_RESERVED_DESCRIPTOR_INDEX = 0;
+    constexpr UINT32 NUM_SRV_RENDER_PASS_USER_DESCRIPTORS = 65536;
+    constexpr UINT32 INVALID_RESOURCE_TABLE_INDEX = UINT_MAX;
+    constexpr UINT32 MAX_TEXTURE_SUBRESOURCE_COUNT = 32;
+    constexpr UINT32 StandardMSAAPattern = 0xFFFFFFFF;
+
+    constexpr UINT MAX_MAIN_LIGHT_COUNT = 1;
+
+    using SubResourceLayouts = std::array<D3D12_PLACED_SUBRESOURCE_FOOTPRINT, MAX_TEXTURE_SUBRESOURCE_COUNT>;
+
+    static const wchar_t* SHADER_SOURCE_PATH = L"Shaders/";
+    static const wchar_t* SHADER_OUTPUT_PATH = L"Shaders/Complied/";
+
+#define D3D_COMPILE_STANDARD_FILE_INCLUDE ((ID3DInclude*)(UINT_PTR)1)
+
 
     inline void AssertIfFailed(HRESULT hr)
     {

@@ -1,28 +1,20 @@
 #pragma once
 
-#include "stdafx.h"
 #include "DX12Device.h"
-#include "DX12MeshRender.h"
-#include "DX12Light.h"
-#include "DX12UI.h"
-#include <dxgidebug.h>
-#include "DX12Shadow.h"  
-#include "CBVParameter.h"
-#include "LoadTexData.h"
-#include "CameraManager.h"
-#include "LightManager.h"
-#include "BufferManager.h"
-#include "MeshManager.h"
-#include "SobolSequenceGenerator.h"
-#include "ShadowPass.h"
-#include "GBufferPass.h"
-#include "OpaquePass.h"
+#include "Helper.h"
 
 namespace ElysiaRenderer 
 {
 	using namespace ElysiaHelper;
-	using namespace ElysiaModel;
-	using namespace DirectX::SimpleMath;
+
+	class BasePass;
+	class MeshManager;
+	class TextureManager;
+	class CameraManager;
+	class DX12UI;
+	class DX12GraphicsContext;
+	class PipelineStateObject;
+	class DX12TextureResource;
 	
 	class Renderer
 	{
@@ -83,11 +75,8 @@ namespace ElysiaRenderer
 		bool m_isResizing = false;
 
 		XMINT2 m_lastMousePos{};
-		 
-		/// <summary>
-		/// pipeline
-		/// </summary>
 		float m_aspectRatio;
+
 		std::shared_ptr<DX12UI> m_pUI = nullptr;
 		std::unique_ptr<DX12GraphicsContext> m_graphicsContext = nullptr;
 		std::vector<std::unique_ptr<DX12TextureResource>> m_texs{};
@@ -96,7 +85,6 @@ namespace ElysiaRenderer
 		std::vector<std::unique_ptr<BasePass>> m_passes{};
 
 		std::unique_ptr<CameraManager>	m_pCameraManager = nullptr;  
-		std::unique_ptr<MeshManager>	m_pMeshManager = nullptr;
 		std::unique_ptr<TextureManager>	m_pTextureManager = nullptr;
 
 		void UpdateCBV();
@@ -117,4 +105,4 @@ namespace ElysiaRenderer
 		void DrawUI();
 	};     
 } 
-                                   
+                                    

@@ -1,4 +1,7 @@
+#include "stdafx.h"
 #include "DX12UI.h"
+#include "DX12Device.h"
+
 
 namespace ElysiaRenderer
 {

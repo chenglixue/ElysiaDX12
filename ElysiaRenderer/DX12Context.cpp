@@ -1,5 +1,8 @@
+#include "stdafx.h"
 #include "DX12Context.h"
 #include "DX12Device.h"
+#include "DX12GPUResource.h"
+#include "DX12RenderPassDescriptorHeap.h"
 
 namespace ElysiaRenderer
 {
@@ -31,6 +34,15 @@ namespace ElysiaRenderer
 		{
 			ElysiaHelper::SafeRelease(m_bundleAllocators[i]);
 		}*/
+	}
+
+	D3D12_COMMAND_LIST_TYPE DX12Context::GetContextType() const
+	{
+		return m_contextType;
+	}
+	ID3D12GraphicsCommandList4* DX12Context::GetCommandList() const
+	{
+		return m_commandList;
 	}
 
 	void DX12Context::Reset()
@@ -129,20 +141,4 @@ namespace ElysiaRenderer
 		
 		m_commandList->SetDescriptorHeaps(2, heapsToBind);
 	}
-
-	/*ID3D12GraphicsCommandList4* DX12Context::CreateBundle()
-	{
-		ID3D12CommandAllocator* newBundleAllocator = nullptr;
-		ElysiaHelper::AssertIfFailed(m_device->GetDevice()->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_BUNDLE,
-			IID_PPV_ARGS(&newBundleAllocator)));
-
-		ID3D12GraphicsCommandList4* newBundle = nullptr;
-		ElysiaHelper::AssertIfFailed(m_device->GetDevice()->CreateCommandList1(0, D3D12_COMMAND_LIST_TYPE_BUNDLE, D3D12_COMMAND_LIST_FLAG_NONE,
-			IID_PPV_ARGS(&newBundle)));
-		m_bundleAllocators.push_back(std::move(newBundleAllocator));
-		m_bundles.push_back(std::move(newBundle));
-
-		return m_bundles.back();
-	}*/
-
 }

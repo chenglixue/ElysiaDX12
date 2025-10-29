@@ -1,4 +1,6 @@
+#include "stdafx.h"
 #include "DX12Shader.h"
+#include <d3d12shader.h>    // Shader reflection.
 
 namespace ElysiaRenderer
 {

@@ -1,4 +1,6 @@
+#include "stdafx.h"
 #include "DX12TextureBuffer.h"
+
 
 namespace ElysiaRenderer
 {

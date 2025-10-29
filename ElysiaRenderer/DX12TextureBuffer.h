@@ -1,9 +1,8 @@
 #pragma once
-#include "stdafx.h"
 #include "DX12GPUResource.h"
 #include "DX12DescriptorHeapHandle.h"
 #include "DX12BufferResource.h"
-#include "TextureHelper.h"
+#include "TextureUtility.h"
 
 namespace ElysiaRenderer
 {

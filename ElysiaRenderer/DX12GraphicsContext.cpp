@@ -1,11 +1,12 @@
 #include "DX12GraphicsContext.h"
-#include "DX12RootSignature.h"
 #include "DX12Device.h"
+#include "DX12RootSignature.h"
+#include "DX12RenderPassDescriptorHeap.h"
 #include "RenderTexture.h"
 
 namespace ElysiaRenderer
 {
-	extern class DX12Device;
+	using namespace ElysiaHelper;
 
 	DX12GraphicsContext::DX12GraphicsContext(DX12Device* device) : 
 		DX12Context(device, D3D12_COMMAND_LIST_TYPE_DIRECT)

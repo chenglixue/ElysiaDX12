@@ -1,4 +1,9 @@
+#include "stdafx.h"
+#include "Helper.h"
 #include "DX12Shadow.h"
+#include "DX12Light.h"
+#include "DX12TextureBuffer.h"
+
 
 namespace ElysiaRenderer
 {
@@ -20,6 +25,47 @@ namespace ElysiaRenderer
 	DX12Shadow::~DX12Shadow()
 	{
 
+	}
+
+	UINT DX12Shadow::GetWidth() const
+	{
+		return m_width;
+	}
+	UINT DX12Shadow::GetHeight() const
+	{
+		return m_height;
+	}
+	DX12TextureResource* DX12Shadow::GetShadowRT() const
+	{
+		return m_buffer;
+	}
+	D3D12_VIEWPORT& DX12Shadow::GetViewport()
+	{
+		return m_viewPort;
+	}
+	D3D12_RECT& DX12Shadow::GetScissorRect()
+	{
+		return m_scissorRect;
+	}
+	float& DX12Shadow::GetNearZ()
+	{
+		return m_nearZ;
+	}
+	float& DX12Shadow::GetFarZ()
+	{
+		return m_farZ;
+	}
+	Matrix& DX12Shadow::GetView()
+	{
+		return m_shadowViewMatrix;
+	}
+	Matrix& DX12Shadow::GetProj()
+	{
+		return m_shadowProjMatrix;
+	}
+	Matrix& DX12Shadow::GetShadowMat()
+	{
+		return m_shadowMatrix;
 	}
 
 	void DX12Shadow::CreateViewport()

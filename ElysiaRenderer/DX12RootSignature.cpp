@@ -1,7 +1,11 @@
+#include "stdafx.h"
+#include "Helper.h"
 #include"DX12RootSignature.h"
 
 namespace ElysiaRenderer
 {
+	using namespace ElysiaHelper;
+
 	DX12RootParameter::DX12RootParameter()
 	{
 		m_rootParamter.ParameterType = (D3D12_ROOT_PARAMETER_TYPE)0xFFFFFFFF;

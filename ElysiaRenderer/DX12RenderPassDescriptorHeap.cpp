@@ -1,7 +1,12 @@
+#include "stdafx.h"
+#include "Helper.h"
 #include "DX12RenderPassDescriptorHeap.h"
+#include "DX12DescriptorHeapHandle.h"
 
 namespace ElysiaRenderer
 {
+	using namespace ElysiaHelper;
+
 	DX12RenderPassDescriptorHeap::DX12RenderPassDescriptorHeap(ID3D12Device* device, D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT reservedCount, UINT userCount)
 		: DX12DescriptorHeap(device, heapType, reservedCount + userCount, true)
 	{

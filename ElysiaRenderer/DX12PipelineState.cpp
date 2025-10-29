@@ -1,4 +1,6 @@
+#include "stdafx.h"
 #include "DX12PipelineState.h"
+#include "RenderTexture.h"
 
 namespace ElysiaRenderer
 {
@@ -21,14 +23,21 @@ namespace ElysiaRenderer
 
 	DX12PipelineState::~DX12PipelineState()
 	{
-		/*if (m_rootSignature != nullptr)
-		{
-			delete m_rootSignature;
-			m_rootSignature = nullptr;
-		}*/
+
 	}
 
-
+	CComPtr<ID3D12PipelineState> DX12PipelineState::GetPipelineState()
+	{
+		return m_pipelineState;
+	}
+	DX12RootSignature*& DX12PipelineState::GetRootSignature()
+	{
+		return m_rootSignature;
+	}
+	PipelineType DX12PipelineState::GetPipelineType()
+	{
+		return m_pipelineType;
+	}
 
 
 

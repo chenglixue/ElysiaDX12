@@ -1,11 +1,29 @@
+#include "stdafx.h"
 #include "Renderer.h"
+
+#include <dxgidebug.h>
+
+#include "DX12UI.h"
+#include "BufferManager.h"
+#include "LightManager.h"
+#include "CameraManager.h"
+
+#include "GBufferPass.h"
+#include "OpaquePass.h"
+#include "ShadowPass.h"
+
+#include "SobolSequenceGenerator.h"
+#include "CBVParameter.h"
+
 
 extern "C" { __declspec(dllexport) extern const UINT D3D12SDKVersion = 618; }
 extern "C" { __declspec(dllexport) extern const char* D3D12SDKPath = ".\\D3D12\\"; }
 
 namespace ElysiaRenderer
 {
-	Renderer::Renderer(HWND windowHandle, ElysiaHelper::UINT2 screenSize, std::shared_ptr<DX12UI> pUI) :
+	using namespace ElysiaModel;
+
+	Renderer::Renderer(HWND windowHandle, UINT2 screenSize, std::shared_ptr<DX12UI> pUI) :
 		m_pUI(pUI)
 	{
 		m_windowHandle = windowHandle;
@@ -17,7 +35,6 @@ namespace ElysiaRenderer
 		m_pCameraManager = std::make_unique<CameraManager>();
 		g_pLightManager = std::make_unique<LightManager>();
 		g_pBufferManager = std::make_unique<BufferManager>();
-		m_pMeshManager = std::make_unique<MeshManager>();
 		m_pTextureManager = std::make_unique<TextureManager>();
 
 		g_vertexShaders = std::unordered_map<UINT, std::unordered_map<ShaderType, std::unique_ptr<DX12Shader>>>();
@@ -57,7 +74,6 @@ namespace ElysiaRenderer
 		m_pCameraManager->Init(); 
 		GetLightManager()->Init();
 		GetBufferManager()->Init();
-		m_pMeshManager->Init();
 		
 		m_pCameraManager->CreateMainCamera(Vector3(-11.5f, 200.85f, -0.45f) ,
 			m_aspectRatio, 3.14159f / 4.0f, 0.1f, 2000.f);
@@ -292,7 +308,6 @@ namespace ElysiaRenderer
 		meshResourceLayout.m_spaces[PER_OBJECT_SPACE] = RenderResource::GetPerObjectBindResourceSpace();
 		meshResourceLayout.m_spaces[PER_PASS_SPACE] = RenderResource::GetPerMainBindResourceSpace();
 
-		/// Opaque PSO
 		pipelineStateCreateDesc = std::move(CreateDefaultPipelineStateCreateDesc());
 		pipelineStateCreateDesc.m_inputElementDesc = g_inputElementDescs;
 		pipelineStateCreateDesc.m_vertexShader = GetVertexShaders()[ShaderQueue::Opaque][ShaderType::Vertex].get();
@@ -411,7 +426,7 @@ namespace ElysiaRenderer
 	{
 		auto& currBackBuffer = GetDevice()->GetCurrBackBuffer();
 
-		m_graphicsContext->ClearRenderTarget(currBackBuffer, Color(1, 1, 1));
+		m_graphicsContext->ClearRenderTarget(currBackBuffer, Color(0, 0, 0, 0));
 		//m_graphicsContext->ClearDepthStencilTarget(*GetBufferManager()->GetCameraDepthRT(), 1.f, 0);
 
 		m_graphicsContext->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(static_cast<UINT>(GetDevice()->GetScreenSize().x), static_cast<UINT>(GetDevice()->GetScreenSize().y)));

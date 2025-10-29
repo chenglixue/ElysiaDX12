@@ -1,23 +1,19 @@
 #pragma once
-#include "stdafx.h"
-#include "D3D12MemoryAllocator/D3D12MemAlloc.h"
-#include "DX12Queue.h"
-#include "DX12QueueManager.h"
-#include "DX12StagingDescriptorHeap.h"
-#include "DX12RenderPassDescriptorHeap.h"
-#include "DX12TextureBuffer.h"
-#include "DX12BufferResource.h"
-#include "Definition.h"
-#include "DX12Context.h"
-#include "DX12GraphicsContext.h"
 #include "DX12Shader.h"
-#include "DX12RootSignature.h"
 #include "DX12PipelineState.h"
-#include "DX12UploadContext.h"
+#include "DX12RootSignature.h"
 
 namespace ElysiaRenderer
 {
-	using namespace DirectX::SimpleMath;
+	extern class DX12TextureResource;
+	extern class DX12RenderPassDescriptorHeap;
+	extern class DX12DescriptorHeapHandle;
+	extern class DX12Context;
+	extern class DX12UploadContext;
+	extern class DX12GraphicsContext;
+	extern class DX12BufferResource;
+	extern class DX12StagingDescriptorHeap;
+	extern class DX12Queue;
 
 	struct ContextSubmissionResult
 	{

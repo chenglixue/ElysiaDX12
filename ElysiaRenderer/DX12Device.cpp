@@ -1,10 +1,24 @@
+#include "stdafx.h"
 #include "DX12Device.h"
+
+#include "D3D12MemoryAllocator/D3D12MemAlloc.h"
+#include "DX12RenderPassDescriptorHeap.h"
+#include "DX12GraphicsContext.h"
+#include "DX12UploadContext.h"
+#include "DX12BufferResource.h"
+#include "DX12TextureBuffer.h"
+#include "DX12Context.h"
+#include "DX12StagingDescriptorHeap.h"
+#include "DX12Queue.h"
+
+
 #include "UserData.h"
+
 #include "RenderTexture.h"
+
 
 namespace ElysiaRenderer
 {
-	using namespace ElysiaHelper;
 
 	std::unique_ptr<DX12Device> g_device = nullptr;
 
@@ -483,8 +497,8 @@ namespace ElysiaRenderer
 
 		DXGI_FORMAT resourceFormat = resourceDesc.Format;
 		DXGI_FORMAT shaderResourceViewFormat = resourceDesc.Format;
-		D3D12_RESOURCE_STATES usageState = D3D12_RESOURCE_STATE_COPY_DEST;
-		//D3D12_RESOURCE_STATES usageState = D3D12_RESOURCE_STATE_COMMON; // D3D12_RESOURCE_STATE_COPY_DEST;
+		//D3D12_RESOURCE_STATES usageState = D3D12_RESOURCE_STATE_COPY_DEST;
+		D3D12_RESOURCE_STATES usageState = D3D12_RESOURCE_STATE_COMMON;
 
 		if (hasRTV)
 		{
@@ -545,7 +559,12 @@ namespace ElysiaRenderer
 		if (hasDSV)
 		{
 			clearValue.DepthStencil.Depth = 1.0f;
-			clearValue.DepthStencil.Stencil = 0;
+			clearValue.DepthStencil.Stencil = 0.f;
+		}
+		if (hasRTV)
+		{
+			float clearColor[4] = { 0.f, 0.f, 0.f, 0.f };
+			memcpy(clearValue.Color, clearColor, sizeof(clearValue.Color));
 		}
 
 		/// Create default heap for tex

@@ -1,25 +1,12 @@
 #pragma once
-#include "stdafx.h"
-#include "DX12TextureBuffer.h"
-#include "DX12Light.h"
+#include "ShadowUtility.h"
 
 namespace ElysiaRenderer
 {
 	using namespace ElysiaHelper;
 
-	enum class ShadowQuality : uint8_t
-	{
-		Low = 0,
-		Middle = 1,
-		High = 2,
-		VeryHigh = 3
-	};
-
-	enum class ShadowType : uint8_t
-	{
-		Hard = 0,
-		Soft = 1
-	};
+	class DX12Light;
+	class DX12TextureResource;
 
 	class DX12Shadow
 	{
@@ -31,46 +18,16 @@ namespace ElysiaRenderer
 		DX12Shadow(DX12Shadow&& rhs) = default;
 		~DX12Shadow();
 
-		UINT GetWidth() const
-		{
-			return m_width;
-		}
-		UINT GetHeight() const
-		{
-			return m_height;
-		}
-		DX12TextureResource* GetShadowRT() const
-		{
-			return m_buffer;
-		}
-		D3D12_VIEWPORT& GetViewport()
-		{
-			return m_viewPort;
-		}
-		D3D12_RECT& GetScissorRect()
-		{
-			return m_scissorRect;
-		}
-		float& GetNearZ()
-		{
-			return m_nearZ;
-		}
-		float& GetFarZ()
-		{
-			return m_farZ;
-		}
-		Matrix& GetView()
-		{
-			return m_shadowViewMatrix;
-		}
-		Matrix& GetProj()
-		{
-			return m_shadowProjMatrix;
-		}
-		Matrix& GetShadowMat()
-		{
-			return m_shadowMatrix;
-		}
+		UINT GetWidth() const;
+		UINT GetHeight() const;
+		DX12TextureResource* GetShadowRT() const;
+		D3D12_VIEWPORT& GetViewport();
+		D3D12_RECT& GetScissorRect();
+		float& GetNearZ();
+		float& GetFarZ();
+		Matrix& GetView();
+		Matrix& GetProj();
+		Matrix& GetShadowMat();
 
 		void CreateViewport();
 		void CreateScissorRect();

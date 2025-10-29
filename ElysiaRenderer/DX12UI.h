@@ -1,10 +1,9 @@
 #pragma once
 
-#include "stdafx.h"
-#include "DX12Device.h"
-
 namespace ElysiaRenderer
 {
+	class DX12Device;
+
 	class DX12UI
 	{
 	public:

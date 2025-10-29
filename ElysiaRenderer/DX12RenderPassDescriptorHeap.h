@@ -1,10 +1,10 @@
 #pragma once
-#include "stdafx.h"
-#include "DX12DescriptorHeapHandle.h"
 #include "DX12DescriptorHeap.h"
 
 namespace ElysiaRenderer
 {
+	class DX12DescriptorHeapHandle;
+
 	class DX12RenderPassDescriptorHeap final : public DX12DescriptorHeap
 	{
 	public:

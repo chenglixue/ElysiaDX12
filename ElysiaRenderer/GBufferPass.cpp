@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "GBufferPass.h"
 
 namespace ElysiaRenderer
@@ -30,11 +31,11 @@ namespace ElysiaRenderer
 		{
 			m_pCommand->AddBarrier(*RT->GetTexture(), D3D12_RESOURCE_STATE_RENDER_TARGET);
 			m_pCommand->FlushBarrier();
-			m_pCommand->ClearRenderTarget(*RT->GetTexture(), Color(0, 0, 0));
+			m_pCommand->ClearRenderTarget(*RT->GetTexture(), Color(0.f, 0.f, 0.f, 0.f));
 		}
 		m_pCommand->AddBarrier(*m_pDepthRT->GetTexture(), D3D12_RESOURCE_STATE_DEPTH_WRITE);
 		m_pCommand->FlushBarrier();
-		m_pCommand->ClearDepthStencilTarget(*m_pDepthRT, 1.f, 0);
+		m_pCommand->ClearDepthStencilTarget(*m_pDepthRT, 1.f, 0.f);
 
 		m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_renderSize.x, m_renderSize.y));
 

@@ -1,7 +1,13 @@
+#include "stdafx.h"
+#include "Helper.h"
 #include "ModelImporter.h"
 #include "iosfwd"
 #include "Serialization.h"
 #include "DX12Device.h"
+#include "DX12UploadContext.h"
+
+#include "TextureManager.h"
+
 
 namespace ElysiaModel
 {
@@ -18,6 +24,43 @@ namespace ElysiaModel
 
 	ModelImporter::~ModelImporter()
 	{
+	}
+
+	UINT ModelImporter::GetMeshCount() const noexcept
+	{
+		return m_meshData.meshCount;
+	}
+	const Mesh& ModelImporter::GetMesh(UINT meshIndex) const
+	{
+		assert(meshIndex < m_meshData.meshCount);
+		return m_pMesh[meshIndex];
+	}
+
+	UINT ModelImporter::GetMaterialCount() const noexcept
+	{
+		return m_meshData.materialCount;
+	}
+	const Material& ModelImporter::GetMaterial(UINT materialIndex) const
+	{
+		assert(materialIndex < m_meshData.materialCount);
+		return m_pMaterial[materialIndex];
+	}
+
+	UINT ModelImporter::GetVertexStride() const noexcept
+	{
+		return m_vertexStride;
+	}
+
+	const AxisAlignedBox& ModelImporter::GetBoundingBox() const noexcept
+	{
+		return m_meshData.boundingBox;
+	}
+
+	const MeshRender& ModelImporter::GetMeshRenderer(UINT meshRendererIndex) const
+	{
+		assert(meshRendererIndex < m_meshData.meshCount);
+
+		return m_pMeshRender[meshRendererIndex];
 	}
 
 	bool ModelImporter::Load(const LPCWSTR& fileName)

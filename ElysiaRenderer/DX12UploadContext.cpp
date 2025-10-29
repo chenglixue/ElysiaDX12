@@ -1,3 +1,6 @@
+#include "stdafx.h"
+#include "DX12BufferResource.h"
+#include "DX12TextureBuffer.h"
 #include"DX12UploadContext.h"
 
 namespace ElysiaRenderer
@@ -15,6 +18,28 @@ namespace ElysiaRenderer
 	DX12UploadContext::~DX12UploadContext()
 	{
 		m_textureUploads.clear();
+	}
+
+	DX12BufferResource* DX12UploadContext::GetTexUploadHeap()
+	{
+		return m_textureUploadHeap.get();
+	}
+	DX12BufferResource* DX12UploadContext::GetBufferUploadHeap()
+	{
+		return m_bufferUploadHeap.get();
+	}
+
+	void DX12UploadContext::AddTextureToUploads(std::unique_ptr<DX12TextureUpload> textureUpload)
+	{
+		assert(textureUpload->m_textureDataSize <= m_textureUploadHeap->GetResourceDesc().Width);
+
+		m_textureUploads.emplace_back(std::move(textureUpload));
+	}
+	void DX12UploadContext::AddBufferToUploads(std::unique_ptr<DX12BufferUpload> bufferUpload)
+	{
+		assert(bufferUpload->m_bufferDataSize < m_bufferUploadHeap->GetResourceDesc().Width);
+
+		m_bufferUploads.emplace_back(std::move(bufferUpload));
 	}
 
 	void DX12UploadContext::ProcessUploads()

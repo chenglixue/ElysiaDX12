@@ -28,11 +28,11 @@
 #include <locale>
 #include <codecvt>
 #include <fstream>
+#include <filesystem>
+#include <comdef.h> // For _com_error
 
+#include "magic_enum/magic_enum.hpp"
 #include "SimpleMath/SimpleMath.h"
-#include "Helper.h"
-#include "Math.h"
-#include "Definition.h"
 #include "dxcapi.h"
 #include <atlbase.h>        // Common COM helpers.
 
@@ -42,7 +42,6 @@
 #include <WICTextureLoader.h>
 
 using namespace DirectX;
-using namespace ElysiaHelper;
 using namespace DirectX::SimpleMath;
 
 #pragma comment(lib, "Windowscodecs.lib")

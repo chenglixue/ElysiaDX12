@@ -1,28 +1,10 @@
 #pragma once
-#include "stdafx.h"
+#include "Helper.h"
+#include "BufferUtility.h"
 
 namespace ElysiaRenderer
 {
-	enum class GPUResourceType : uint8_t
-	{
-		 None = 0,
-		 Buffer,
-		 Texture
-	};
-
-	enum class GPUResourceFlags : uint8_t
-	{
-		None = 0,
-		CBV = 1,
-		SRV = 2,
-		UAV = 4,
-	};
-
-	enum class BufferAccessFlags : uint8_t
-	{
-		GPUOnly = 0,
-		HostWritable = 1
-	};
+	using namespace ElysiaHelper;
 
 	class DX12GPUResource
 	{
@@ -112,24 +94,4 @@ namespace ElysiaRenderer
 		UINT m_descriptorHeapIndex = INVALID_RESOURCE_TABLE_INDEX;
 		GPUResourceType m_bufferType = GPUResourceType::None;
 	};
-
-	inline BufferAccessFlags operator&(BufferAccessFlags a, BufferAccessFlags b)
-	{
-		return static_cast<BufferAccessFlags>(static_cast<uint8_t>(a) & static_cast<uint8_t>(b));
-	}
-
-	inline BufferAccessFlags operator|(BufferAccessFlags a, BufferAccessFlags b)
-	{
-		return static_cast<BufferAccessFlags>(static_cast<uint8_t>(a) | static_cast<uint8_t>(b));
-	}
-
-	inline GPUResourceFlags operator|(GPUResourceFlags a, GPUResourceFlags b)
-	{
-		return static_cast<GPUResourceFlags>(static_cast<uint8_t>(a) | static_cast<uint8_t>(b));
-	}
-
-	inline GPUResourceFlags operator&(GPUResourceFlags a, GPUResourceFlags b)
-	{
-		return static_cast<GPUResourceFlags>(static_cast<uint8_t>(a) & static_cast<uint8_t>(b));
-	}
 }

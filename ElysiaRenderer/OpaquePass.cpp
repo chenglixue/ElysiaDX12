@@ -9,8 +9,8 @@ namespace ElysiaRenderer
 
 	void OpaquePass::Configure()
 	{
-		AddShader(ShaderQueue::Opaque, L"Shaders\\public\\PBR.hlsl", L"VS", ShaderType::Vertex);
-		AddShader(ShaderQueue::Opaque, L"Shaders\\public\\PBR.hlsl", L"PS", ShaderType::Pixel);
+		AddShader(ShaderQueue::Opaque, L"Shaders\\public\\Opaque.hlsl", L"VS", ShaderType::Vertex);
+		AddShader(ShaderQueue::Opaque, L"Shaders\\public\\Opaque.hlsl", L"PS", ShaderType::Pixel);
 
 		CreateRTs();
 		BindToShader();
@@ -92,7 +92,7 @@ namespace ElysiaRenderer
 	}
 	void OpaquePass::CreatePSO()
 	{
-		/*PipelineStateCreateDesc pipelineStateCreateDesc{};
+		PipelineStateCreateDesc pipelineStateCreateDesc{};
 		PipelineResourceLayout meshResourceLayout{};
 
 		meshResourceLayout.m_spaces[PER_OBJECT_SPACE] = RenderResource::GetPerObjectBindResourceSpace();
@@ -109,6 +109,6 @@ namespace ElysiaRenderer
 		pipelineStateCreateDesc.m_blendDesc = GetBlendState(BlendState::Disabled);
 		pipelineStateCreateDesc.m_rasterDesc = GetRasterizerState(RasterizerState::NoCullNoMS);
 		pipelineStateCreateDesc.m_topology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-		(*m_pGraphicsPipelineStates)[ShaderQueue::Opaque] = std::move(GetDevice()->CreateGraphicsPipelineState(pipelineStateCreateDesc, meshResourceLayout));*/
+		(*m_pGraphicsPipelineStates)[ShaderQueue::Opaque] = std::move(GetDevice()->CreateGraphicsPipelineState(pipelineStateCreateDesc, meshResourceLayout));
 	}
 }

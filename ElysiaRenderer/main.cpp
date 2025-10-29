@@ -1,11 +1,10 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include "Renderer.h"
 #include "ModelImporter.h"
+#include "DX12UI.h"
 #include "pix3.h"
 
 using namespace ElysiaRenderer;
-using namespace DirectX::SimpleMath;
-using namespace ElysiaModel;
 using namespace std;
 using Microsoft::WRL::ComPtr;
 

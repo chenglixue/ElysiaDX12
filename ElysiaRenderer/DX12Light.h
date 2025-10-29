@@ -1,35 +1,10 @@
 #pragma once
-#include "stdafx.h"
+#include "LightUtility.h"
 
 namespace ElysiaRenderer
 {
 	using namespace SimpleMath;
-
-	enum class LightType : uint8_t
-	{
-		None	= 1 << 0,
-		Dir		= 1 << 1,
-		Spot	= 1 << 2,
-		Point	= 1 << 3
-	};
-
-	struct LightData
-	{
-		// 16
-		Vector4	m_lightColor;
-
-		// 16
-		Vector4	m_lightDir;
-
-		// 16
-		Vector4	m_lightPos;
-
-		// 16
-		float		m_falloffStart;
-		float		m_falloffEnd;
-		float		m_spotPower;
-		float		m_intensity;
-	};
+	using namespace ElysiaHelper;
 
 	class DX12Light
 	{
@@ -41,35 +16,14 @@ namespace ElysiaRenderer
 		DX12Light(DX12Light&& rhs) = default;
 		~DX12Light() = default;
 
-		LightType GetLightType() const noexcept
-		{
-			return m_lightType;
-		}
-		Vector3 GetLightColor() const noexcept
-		{
-			return m_lightColor;
-		}
-		Vector3 GetLightDir() const noexcept
-		{
-			return m_lightDir;
-		}
-		float GetLightIntensity() const noexcept
-		{
-			return m_lightIntensity;
-		}
+		LightType GetLightType() const;
+		Vector3 GetLightColor() const;
+		Vector3 GetLightDir() const;
+		float GetLightIntensity() const;
 
-		void SetLightColor(const Vector3& lightColor)
-		{
-			m_lightColor = lightColor;
-		}
-		void SetLightDir(const Vector3& lightDir)
-		{
-			m_lightDir = lightDir;
-		}
-		void SetLightIntensity(float lightIntensity)
-		{
-			m_lightIntensity = lightIntensity;
-		}
+		void SetLightColor(const Vector3& lightColor);
+		void SetLightDir(const Vector3& lightDir);
+		void SetLightIntensity(float lightIntensity);
 
 		virtual LightData CreateLightData() = 0;
 

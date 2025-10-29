@@ -76,6 +76,9 @@
     <Filter Include="Source Files\Render">
       <UniqueIdentifier>{5da19277-92fd-4940-906b-51d7a28d2132}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Helper">
+      <UniqueIdentifier>{957948f9-5b26-4523-b2e2-6a27dd3271a4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DX12Queue.h">
@@ -107,9 +110,6 @@
     </ClInclude>
     <ClInclude Include="DX12Context.h">
       <Filter>Header Files\DX12</Filter>
-    </ClInclude>
-    <ClInclude Include="Definition.h">
-      <Filter>Header Files\Helper</Filter>
     </ClInclude>
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="DX12BufferResource.h">
@@ -247,9 +247,6 @@
     <ClInclude Include="BufferManager.h">
       <Filter>Header Files\Manager</Filter>
     </ClInclude>
-    <ClInclude Include="TextureHelper.h">
-      <Filter>Header Files\Helper</Filter>
-    </ClInclude>
     <ClInclude Include="MeshManager.h">
       <Filter>Header Files\Manager</Filter>
     </ClInclude>
@@ -300,6 +297,21 @@
     </ClInclude>
     <ClInclude Include="OpaquePass.h">
       <Filter>Header Files\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="ShadowUtility.h">
+      <Filter>Header Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="LightUtility.h">
+      <Filter>Header Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="PipelineStateUtility.h">
+      <Filter>Header Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureUtility.h">
+      <Filter>Header Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="BufferUtility.h">
+      <Filter>Header Files\Utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -433,7 +445,6 @@
     <None Include="SimpleMath\SimpleMath.inl">
       <Filter>Header Files\Lib</Filter>
     </None>
-    <None Include="ShadowCommon.hlsl" />
     <None Include="Resource\Shaders\private\ShadowCommon.hlsl">
       <Filter>Resource Files\Shader\Priavte</Filter>
     </None>
@@ -441,6 +452,9 @@
       <Filter>Resource Files\Shader\Priavte</Filter>
     </None>
     <None Include="Resource\Shaders\public\GBuffer.hlsl">
+      <Filter>Resource Files\Shader\Public</Filter>
+    </None>
+    <None Include="Resource\Shaders\public\Opaque.hlsl">
       <Filter>Resource Files\Shader\Public</Filter>
     </None>
   </ItemGroup>
@@ -633,11 +647,14 @@
     <ClCompile Include="RenderResource.cpp">
       <Filter>Source Files\Render</Filter>
     </ClCompile>
-    <ClCompile Include="PSOHelper.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="OpaquePass.cpp">
       <Filter>Source Files\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Source Files\Helper</Filter>
+    </ClCompile>
+    <ClCompile Include="PSOHelper.cpp">
+      <Filter>Source Files\Helper</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -1,22 +1,22 @@
 #pragma once
-#include "stdafx.h"
 #include "Mesh.h"
 #include "Material.h"
-#include "DX12MeshRender.h"
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include "BoundingBox.h"
 #include "DX12Device.h"
 #include "BufferManager.h"
+
 #include "DX12MeshRender.h"
-#include "TextureManager.h"
 
 
 namespace ElysiaModel
 {
 	using namespace ElysiaRenderer;
 	using namespace ElysiaHelper;
+
+	class TextureManager;
 
 	class ModelImporter
 	{
@@ -28,42 +28,17 @@ namespace ElysiaModel
 		ModelImporter(ModelImporter&& rhs) = default;
 		~ModelImporter();
 
-		UINT GetMeshCount() const noexcept
-		{
-			return m_meshData.meshCount;
-		}
-		const Mesh& GetMesh(UINT meshIndex) const 
-		{
-			assert(meshIndex < m_meshData.meshCount);
-			return m_pMesh[meshIndex];
-		}
+		UINT GetMeshCount() const;
+		const Mesh& GetMesh(UINT meshIndex) const;
 
-		UINT GetMaterialCount() const noexcept
-		{
-			return m_meshData.materialCount;
-		}
-		const Material& GetMaterial(UINT materialIndex) const
-		{
-			assert(materialIndex < m_meshData.materialCount);
-			return m_pMaterial[materialIndex];
-		}
+		UINT GetMaterialCount() const;
+		const Material& GetMaterial(UINT materialIndex) const;
 
-		UINT GetVertexStride() const noexcept
-		{
-			return m_vertexStride;
-		}
+		UINT GetVertexStride() const;
 
-		const AxisAlignedBox& GetBoundingBox() const noexcept
-		{
-			return m_meshData.boundingBox;
-		}
+		const AxisAlignedBox& GetBoundingBox() const;
 
-		const MeshRender& GetMeshRenderer(UINT meshRendererIndex) const
-		{
-			assert(meshRendererIndex < m_meshData.meshCount);
-
-			return m_pMeshRender[meshRendererIndex];
-		}
+		const MeshRender& GetMeshRenderer(UINT meshRendererIndex) const;
 
 		bool Load(const LPCWSTR& fileName);
 		bool Load(const std::vector<LPCWSTR>& fileNames);

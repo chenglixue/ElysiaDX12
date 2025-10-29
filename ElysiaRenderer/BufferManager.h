@@ -1,13 +1,19 @@
 #pragma once
-#include "stdafx.h"
 #include "IManager.h"
 #include "DX12Device.h"
 #include "DX12BufferResource.h"
 #include "DX12TextureBuffer.h"
-#include "RenderTexture.h"
+#include "Helper.h"
+
+namespace ElysiaHelper
+{
+	class RenderTexture;
+}
 
 namespace ElysiaRenderer
 {
+	using namespace ElysiaHelper;
+
 	class BufferManager : public IManager
 	{
 	public:

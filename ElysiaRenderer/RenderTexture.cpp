@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "RenderTexture.h"
 #include "DX12Device.h"
 

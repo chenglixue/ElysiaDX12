@@ -1,9 +1,9 @@
-#include "BufferManager.h"
 #include "stdafx.h"
+#include "BufferManager.h"
+#include "RenderTexture.h"
 
 namespace ElysiaRenderer
 {
-	using namespace ElysiaHelper;
 
 	std::unique_ptr<BufferManager> g_pBufferManager = nullptr;
 
