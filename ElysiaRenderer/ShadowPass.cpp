@@ -65,6 +65,8 @@ namespace ElysiaRenderer
 
 		m_pCommand->SetViewport(m_pMainShadow->GetViewport());
 		m_pCommand->SetScissorRect(m_pMainShadow->GetScissorRect());
+		m_pCommand->SetIndexBuffer(GetBufferManager()->GetIndexBufferView());
+		m_pCommand->SetVertexBuffer(0, 1, const_cast<D3D12_VERTEX_BUFFER_VIEW&>(GetBufferManager()->GetVertexBufferView()));
 
 		PipelineInfo pipelineStateData{};
 		pipelineStateData.m_pipelineStateObject = (*m_pGraphicsPipelineStates)[ShaderQueue::Shadow].get();

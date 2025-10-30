@@ -319,6 +319,15 @@
     <ClInclude Include="PipelineResourceUtility.h">
       <Filter>Header Files\Utility</Filter>
     </ClInclude>
+    <ClInclude Include="FinalBlitPass.h">
+      <Filter>Header Files\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="SkyboxPass.h">
+      <Filter>Header Files\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="UIPass.h">
+      <Filter>Header Files\Render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -463,6 +472,9 @@
     <None Include="Resource\Shaders\public\Opaque.hlsl">
       <Filter>Resource Files\Shader\Public</Filter>
     </None>
+    <None Include="Resource\Shaders\public\Blit.hlsl">
+      <Filter>Resource Files\Shader\Public</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -566,9 +578,6 @@
     <ClCompile Include="DXTex\DirectXTexPMAlpha.cpp">
       <Filter>Source Files\Lib</Filter>
     </ClCompile>
-    <ClCompile Include="DXTex\DirectXTexResize.cpp">
-      <Filter>Source Files\Lib</Filter>
-    </ClCompile>
     <ClCompile Include="DXTex\DirectXTexTGA.cpp">
       <Filter>Source Files\Lib</Filter>
     </ClCompile>
@@ -661,6 +670,15 @@
     </ClCompile>
     <ClCompile Include="PSOHelper.cpp">
       <Filter>Source Files\Helper</Filter>
+    </ClCompile>
+    <ClCompile Include="FinalBlitPass.cpp">
+      <Filter>Source Files\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="SkyboxPass.cpp">
+      <Filter>Source Files\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="UIPass.cpp">
+      <Filter>Source Files\Render</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

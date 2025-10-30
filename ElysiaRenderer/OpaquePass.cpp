@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "OpaquePass.h"
+
 #include "DX12Device.h"
 #include "RenderTexture.h"
 
@@ -13,7 +14,7 @@ namespace ElysiaRenderer
 
 	void OpaquePass::Configure()
 	{
-		AddShader(ShaderQueue::Opaque, L"Shaders\\public\\Opaque.hlsl", L"VS", ShaderType::Vertex);
+		AddShader(ShaderQueue::Blit, L"Shaders\\public\\FullScreenTriangle.hlsl", L"VS", ShaderType::Vertex);
 		AddShader(ShaderQueue::Opaque, L"Shaders\\public\\Opaque.hlsl", L"PS", ShaderType::Pixel);
 
 		CreateRTs();
@@ -28,7 +29,7 @@ namespace ElysiaRenderer
 
 	void OpaquePass::Execute()
 	{
-
+		BindToShader();
 	}
 	void OpaquePass::Render()
 	{
@@ -59,24 +60,7 @@ namespace ElysiaRenderer
 			m_pCommand->SetPipeline(pipelineStateData);
 			m_pCommand->SetPipelineResource(PER_PASS_SPACE, RenderResource::GetPerMainBindResourceSpace());
 
-			UINT vertexStride = GetModelImporter()->GetVertexStride();
-
-			for (UINT meshIndex = 0; meshIndex < GetModelImporter()->GetMeshCount(); ++meshIndex)
-			{
-				const auto& meshRenderer = GetModelImporter()->GetMeshRenderer(meshIndex);
-				const auto& mesh = meshRenderer.m_mesh;
-
-				auto objectContantBuffer = GetBufferManager()->GetMutilConstantBuffer(PER_OBJECT_SPACE, GetDevice()->GetFrameID(), meshIndex);
-				RenderResource::GetPerObjectBindResourceSpace()->SetCBV(objectContantBuffer);
-				m_pCommand->SetPipelineResource(PER_OBJECT_SPACE, RenderResource::GetPerObjectBindResourceSpace());
-
-				auto startIndex = mesh->indexDataOffset / sizeof(UINT16);
-				auto startVertex = mesh->vertexDataOffset / vertexStride;
-				auto VertexCount = mesh->vertexCount;
-				auto indexCount = mesh->indexCount;
-
-				m_pCommand->Draw(indexCount, startVertex, startIndex);
-			}
+			m_pCommand->Draw(3, 0);
 		}
 
 		m_pCommand->AddBarrier(*m_pOpaqueRT->GetTexture(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
@@ -92,7 +76,7 @@ namespace ElysiaRenderer
 	}
 	void OpaquePass::BindToShader()
 	{
-
+		RenderResource::GetInstance().GetCBVPassParameter()->blitterTextureIndex = m_pOpaqueRT->GetTexture()->GetResourceHeapIndex();
 	}
 	void OpaquePass::CreatePSO()
 	{
@@ -103,13 +87,12 @@ namespace ElysiaRenderer
 		meshResourceLayout.m_spaces[PER_PASS_SPACE] = RenderResource::GetPerMainBindResourceSpace();
 
 		pipelineStateCreateDesc = std::move(CreateDefaultPipelineStateCreateDesc());
-		pipelineStateCreateDesc.m_vertexShader = GetVertexShaders()[ShaderQueue::GBuffer][ShaderType::Vertex].get();
-		pipelineStateCreateDesc.m_pixelShader = GetPixelShaders()[ShaderQueue::GBuffer][ShaderType::Pixel].get();
-		pipelineStateCreateDesc.m_inputElementDesc = g_inputElementDescs;
+		pipelineStateCreateDesc.m_vertexShader = GetVertexShaders()[ShaderQueue::Blit][ShaderType::Vertex].get();
+		pipelineStateCreateDesc.m_pixelShader = GetPixelShaders()[ShaderQueue::Opaque][ShaderType::Pixel].get();
 		pipelineStateCreateDesc.m_renderTargetDesc.m_numRenderTargets = 1;
 		pipelineStateCreateDesc.m_renderTargetDesc.m_renderTargetFormats[0] = m_pOpaqueRT->GetFormat();
 		pipelineStateCreateDesc.m_renderTargetDesc.m_depthStencilFormat = GetBufferManager()->GetCameraDepthRT()->GetFormat();
-		pipelineStateCreateDesc.m_depthStencilDesc = GetDepthState(DepthState::Enabled);
+		pipelineStateCreateDesc.m_depthStencilDesc = GetDepthState(DepthState::Disabled);
 		pipelineStateCreateDesc.m_blendDesc = GetBlendState(BlendState::Disabled);
 		pipelineStateCreateDesc.m_rasterDesc = GetRasterizerState(RasterizerState::NoCullNoMS);
 		pipelineStateCreateDesc.m_topology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;

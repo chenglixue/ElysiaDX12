@@ -92,17 +92,9 @@ namespace ElysiaRenderer
 		void UpdateObjectCBV(); 
 		
 		void Setup();
-		void LoadShaders();
 		void CreateConstantBuffers();
-		void LoadTextures();  
-		void CreatePOS();
 		
 		void Execute();
-		
-		void AddUIItems();
-		void DrawOpaque(); 
-		void DrawSkybox();
-		void DrawUI();
 	};     
 } 
                                     

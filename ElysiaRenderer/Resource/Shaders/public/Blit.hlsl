@@ -12,8 +12,8 @@
 
 struct PSInput
 {
-    float4  positionCS   : SV_POSITION;
-    float2  uv           : TEXCOORD0;
+    float4 positionCS : SV_POSITION;
+    float2 uv : TEXCOORD0;
 };
 
 struct PSOutput
@@ -25,7 +25,12 @@ PSOutput PS(PSInput i)
 {
     PSOutput o = (PSOutput) 0;
     
-    o.target0.rg = i.uv;
+    Texture2D blitterTex = ResourceDescriptorHeap[blitterTextureIndex];
+    SamplerState linearSampler = SamplerDescriptorHeap[ClampLinearSampler];
+    
+    half4 blitterValue = blitterTex.SampleLevel(linearSampler, i.uv, 0);
+    
+    o.target0 = blitterValue;
     
     return o;
 }

@@ -2,7 +2,8 @@
 #include "TextureManager.h"
 
 #include "DX12TextureBuffer.h"
-
+#include "DX12Device.h"
+#include "RenderResource.h"
 
 namespace ElysiaRenderer
 {
@@ -16,7 +17,7 @@ namespace ElysiaRenderer
 
 	void TextureManager::Init()
 	{
-
+		LoadGlobalTextures();
 	}
 	void TextureManager::Destory()
 	{
@@ -40,5 +41,54 @@ namespace ElysiaRenderer
 		}
 
 		return o;
+	}
+
+	void TextureManager::LoadGlobalTextures()
+	{
+		TextureCreationDesc texBufferCreateDesc{};
+
+		{
+			texBufferCreateDesc.texturePath = L"Tex\\GGX_E_LUT.dds";
+			texBufferCreateDesc.isSRGB = false;
+			auto newTex = std::move(GetDevice()->CreateTextureFromFile(texBufferCreateDesc));
+
+			RenderResource::GetInstance().GetCBVPassParameter()->GGX_E_LUT_Index = newTex->GetResourceHeapIndex();
+
+			this->AddTextureResource(std::move(newTex));
+		}
+
+		{
+			texBufferCreateDesc.texturePath = L"Tex\\GGX_Eavg_LUT.dds";
+			texBufferCreateDesc.isSRGB = false;
+			auto newTex = std::move(GetDevice()->CreateTextureFromFile(texBufferCreateDesc));
+
+			RenderResource::GetInstance().GetCBVPassParameter()->GGX_Eavg_LUT_Index = newTex->GetResourceHeapIndex();
+
+			this->AddTextureResource(std::move(newTex));
+
+		}
+
+		{
+			texBufferCreateDesc.texturePath = L"Tex\\cubemap0.dds";
+			texBufferCreateDesc.isSRGB = false;
+			auto newTex = std::move(GetDevice()->CreateTextureFromFile(texBufferCreateDesc));
+
+			RenderResource::GetInstance().GetCBVPassParameter()->SkyboxTexIndex = newTex->GetResourceHeapIndex();
+
+			this->AddTextureResource(std::move(newTex));
+		}
+
+		{
+			WCHAR assetsPath[512];
+			ElysiaHelper::GetAssetsPath(assetsPath, _countof(assetsPath));
+			texBufferCreateDesc.texturePath = StringToWstring(std::filesystem::path(assetsPath).string() + "Tex\\bluenoise_frd_1024x1024.png");
+			texBufferCreateDesc.isSRGB = false;
+
+			auto newTex = std::move(GetDevice()->CreateTextureFromFile(texBufferCreateDesc));
+
+			RenderResource::GetInstance().GetCBVPassParameter()->BlueNoiseTexIndex = newTex->GetResourceHeapIndex();
+
+			this->AddTextureResource(std::move(newTex));
+		}
 	}
 }

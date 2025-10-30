@@ -26,6 +26,8 @@ namespace ElysiaRenderer
 		virtual void Init() override;
 		virtual void Destory() override;
 
+		void LoadGlobalTextures();
+
 		void AddTextureResource(std::unique_ptr<DX12TextureResource> pTextureResource);
 
 		const std::vector<DX12TextureResource*> GetTextureResources() const noexcept;

@@ -114,6 +114,9 @@ cbuffer PassConstant : register(b0, perPassSpace)
     float shadowSlopeDepthBias;
     float shadowMaxSlopeDepthBias;
     
+    UINT blitterTextureIndex = 0;
+	Vector3 padding;
+    
     Vector2 g_sobolSequence[64];
 };
 
