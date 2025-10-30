@@ -17,7 +17,18 @@ namespace ElysiaRenderer
 
 	void BufferManager::Init()
 	{
+		m_pCameraDepthRT = CreateRenderTexture(
+			static_cast<UINT64>(GetDevice()->GetScreenSize().x),
+			static_cast<UINT64>(GetDevice()->GetScreenSize().y),
+			DXGI_FORMAT_D24_UNORM_S8_UINT,
+			true,
+			L"GBuffer Depth RT");
 
+		m_pCameraColorRT = CreateRenderTexture(
+			static_cast<UINT64>(GetDevice()->GetScreenSize().x),
+			static_cast<UINT64>(GetDevice()->GetScreenSize().y),
+			DXGI_FORMAT_R8G8B8A8_UNORM,
+			L"Opaque Lighting RT");
 	}
 
 	void BufferManager::Destory()
@@ -59,7 +70,12 @@ namespace ElysiaRenderer
 
 	RenderTexture* BufferManager::GetCameraDepthRT() const noexcept
 	{
-		return m_pCameraDepthBuffer;
+		return m_pCameraDepthRT.get();
+	}
+
+	RenderTexture* BufferManager::GetCameraColorRT() const noexcept
+	{
+		return m_pCameraColorRT.get();
 	}
 
 	DX12BufferResource* BufferManager::GetVertexBuffer() const noexcept
@@ -107,11 +123,6 @@ namespace ElysiaRenderer
 				break;
 			}
 		}
-	}
-
-	void BufferManager::AddDepthBuffer(RenderTexture* depthBuffer)
-	{
-		m_pCameraDepthBuffer = depthBuffer;
 	}
 
 	void BufferManager::AddVertexBuffer(BufferCreationDesc desc)

@@ -19,9 +19,7 @@ namespace ElysiaRenderer
 		virtual void Dispose() override;
 
 	private:
-		std::unique_ptr<RenderTexture> m_pOpaqueRT = nullptr;
 
-		void CreateRTs();
 		void BindToShader();
 		void CreatePSO();
 	};

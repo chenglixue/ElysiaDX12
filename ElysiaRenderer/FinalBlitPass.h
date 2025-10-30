@@ -19,6 +19,7 @@ namespace ElysiaRenderer
 		virtual void Dispose() override;
 
 	private:
+		void BindToShader();
 		void CreatePSO();
 	};
 }

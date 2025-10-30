@@ -20,11 +20,12 @@ namespace ElysiaRenderer
 	{
 		AddShader(ShaderQueue::Blit, L"Shaders\\public\\Blit.hlsl", L"PS", ShaderType::Pixel);
 
+		BindToShader();
 		CreatePSO();
 	}
 	void FinalBlitPass::Execute()
 	{
-
+		BindToShader();
 	}
 	void FinalBlitPass::Render()
 	{
@@ -64,6 +65,10 @@ namespace ElysiaRenderer
 		m_pCommand->FlushBarrier();
 	}
 
+	void FinalBlitPass::BindToShader()
+	{
+		RenderResource::GetInstance().GetCBVPassParameter()->blitterTextureIndex = GetBufferManager()->GetCameraColorRT()->GetTexture()->GetResourceHeapIndex();
+	}
 	void FinalBlitPass::CreatePSO()
 	{
 		PipelineResourceLayout meshResourceLayout{};

@@ -17,7 +17,6 @@ namespace ElysiaRenderer
 		AddShader(ShaderQueue::Blit, L"Shaders\\public\\FullScreenTriangle.hlsl", L"VS", ShaderType::Vertex);
 		AddShader(ShaderQueue::Opaque, L"Shaders\\public\\Opaque.hlsl", L"PS", ShaderType::Pixel);
 
-		CreateRTs();
 		BindToShader();
 		CreatePSO();
 	}
@@ -35,24 +34,26 @@ namespace ElysiaRenderer
 	{
 		Execute();
 
-		m_pCommand->AddBarrier(*m_pOpaqueRT->GetTexture(), D3D12_RESOURCE_STATE_RENDER_TARGET);
+		auto cameraColorRT = GetBufferManager()->GetCameraColorRT();
+
+		m_pCommand->AddBarrier(*cameraColorRT->GetTexture(), D3D12_RESOURCE_STATE_RENDER_TARGET);
 		m_pCommand->FlushBarrier();
-		m_pCommand->ClearRenderTarget(*m_pOpaqueRT->GetTexture(), Color(0, 0, 0));
+		m_pCommand->ClearRenderTarget(*cameraColorRT->GetTexture(), Color(0, 0, 0));
 
 		m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_renderSize.x, m_renderSize.y));
 
 		PipelineInfo pipelineStateData{};
 		pipelineStateData.m_pipelineStateObject = (*m_pGraphicsPipelineStates)[ShaderQueue::Opaque].get();
-		pipelineStateData.m_renderTargets = { m_pOpaqueRT->GetTexture()};
+		pipelineStateData.m_renderTargets = { cameraColorRT->GetTexture() };
 		pipelineStateData.m_depthStencilTarget = GetBufferManager()->GetCameraDepthRT()->GetTexture();
 
 		bool isReady = true;
 		{
-			if (m_pOpaqueRT->GetTexture() == nullptr || GetBufferManager()->GetCameraDepthRT()->GetTexture() == nullptr)
+			if (cameraColorRT->GetTexture() == nullptr || GetBufferManager()->GetCameraDepthRT()->GetTexture() == nullptr)
 			{
 				ThrowRuntimeError("null texture resource");
 			}
-			isReady &= m_pOpaqueRT->GetTexture()->GetIsReady();
+			isReady &= cameraColorRT->GetTexture()->GetIsReady();
 			isReady &= GetBufferManager()->GetCameraDepthRT()->GetTexture()->GetIsReady();
 		}
 		if (isReady)
@@ -63,20 +64,12 @@ namespace ElysiaRenderer
 			m_pCommand->Draw(3, 0);
 		}
 
-		m_pCommand->AddBarrier(*m_pOpaqueRT->GetTexture(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		m_pCommand->AddBarrier(*cameraColorRT->GetTexture(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		m_pCommand->FlushBarrier();
 	}
 
-	void OpaquePass::CreateRTs()
-	{
-		m_pOpaqueRT = CreateRenderTexture(static_cast<UINT64>(m_renderSize.x), 
-			static_cast<UINT64>(m_renderSize.y),
-			DXGI_FORMAT_R8G8B8A8_UNORM,
-			L"Opaque Lighting RT");
-	}
 	void OpaquePass::BindToShader()
 	{
-		RenderResource::GetInstance().GetCBVPassParameter()->blitterTextureIndex = m_pOpaqueRT->GetTexture()->GetResourceHeapIndex();
 	}
 	void OpaquePass::CreatePSO()
 	{
@@ -90,7 +83,7 @@ namespace ElysiaRenderer
 		pipelineStateCreateDesc.m_vertexShader = GetVertexShaders()[ShaderQueue::Blit][ShaderType::Vertex].get();
 		pipelineStateCreateDesc.m_pixelShader = GetPixelShaders()[ShaderQueue::Opaque][ShaderType::Pixel].get();
 		pipelineStateCreateDesc.m_renderTargetDesc.m_numRenderTargets = 1;
-		pipelineStateCreateDesc.m_renderTargetDesc.m_renderTargetFormats[0] = m_pOpaqueRT->GetFormat();
+		pipelineStateCreateDesc.m_renderTargetDesc.m_renderTargetFormats[0] = GetBufferManager()->GetCameraColorRT()->GetFormat();
 		pipelineStateCreateDesc.m_renderTargetDesc.m_depthStencilFormat = GetBufferManager()->GetCameraDepthRT()->GetFormat();
 		pipelineStateCreateDesc.m_depthStencilDesc = GetDepthState(DepthState::Disabled);
 		pipelineStateCreateDesc.m_blendDesc = GetBlendState(BlendState::Disabled);

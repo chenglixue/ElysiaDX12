@@ -28,22 +28,26 @@ namespace ElysiaRenderer
 	{
 		Execute();
 
+		auto cameraDepthRT = GetBufferManager()->GetCameraDepthRT();
+
 		for (auto& RT : m_GBufferRTs)
 		{
 			m_pCommand->AddBarrier(*RT->GetTexture(), D3D12_RESOURCE_STATE_RENDER_TARGET);
 			m_pCommand->FlushBarrier();
 			m_pCommand->ClearRenderTarget(*RT->GetTexture(), Color(0.f, 0.f, 0.f, 0.f));
 		}
-		m_pCommand->AddBarrier(*m_pDepthRT->GetTexture(), D3D12_RESOURCE_STATE_DEPTH_WRITE);
+		m_pCommand->AddBarrier(*cameraDepthRT->GetTexture(), D3D12_RESOURCE_STATE_DEPTH_WRITE);
 		m_pCommand->FlushBarrier();
-		m_pCommand->ClearDepthStencilTarget(*m_pDepthRT, 1.f, 0.f);
+		m_pCommand->ClearDepthStencilTarget(*cameraDepthRT, 1.f, 0.f);
 
 		m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_renderSize.x, m_renderSize.y));
+		m_pCommand->SetIndexBuffer(GetBufferManager()->GetIndexBufferView());
+		m_pCommand->SetVertexBuffer(0, 1, const_cast<D3D12_VERTEX_BUFFER_VIEW&>(GetBufferManager()->GetVertexBufferView()));
 
 		PipelineInfo pipelineStateData{};
 		pipelineStateData.m_pipelineStateObject = (*m_pGraphicsPipelineStates)[ShaderQueue::GBuffer].get();
 		pipelineStateData.m_renderTargets = std::move(GetGBuffers());
-		pipelineStateData.m_depthStencilTarget = m_pDepthRT->GetTexture();
+		pipelineStateData.m_depthStencilTarget = cameraDepthRT->GetTexture();
 
 		bool isReady = true;
 		{
@@ -56,11 +60,11 @@ namespace ElysiaRenderer
 				isReady &= RT->GetTexture()->GetIsReady();
 			}
 
-			if (m_pDepthRT->GetTexture() == nullptr)
+			if (cameraDepthRT->GetTexture() == nullptr)
 			{
 				ThrowRuntimeError("null texture resource");
 			}
-			isReady &= m_pDepthRT->GetTexture()->GetIsReady();
+			isReady &= cameraDepthRT->GetTexture()->GetIsReady();
 		}
 		if (isReady)
 		{
@@ -91,7 +95,7 @@ namespace ElysiaRenderer
 		{
 			m_pCommand->AddBarrier(*RT->GetTexture(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		}
-		m_pCommand->AddBarrier(*m_pDepthRT->GetTexture(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_DEPTH_READ);
+		m_pCommand->AddBarrier(*cameraDepthRT->GetTexture(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_DEPTH_READ);
 		m_pCommand->FlushBarrier();
 	}
 
@@ -163,18 +167,6 @@ namespace ElysiaRenderer
 
 			m_GBufferRTs.emplace_back(std::move(pGBufferRT));
 		}
-
-		// Depth
-		{
-			m_pDepthRT = CreateRenderTexture(
-				static_cast<UINT64>(m_renderSize.x),
-				static_cast<UINT64>(m_renderSize.y),
-				DXGI_FORMAT_D24_UNORM_S8_UINT,
-				true,
-				L"GBuffer Depth RT");
-
-			GetBufferManager()->AddDepthBuffer(m_pDepthRT.get());
-		}
 	}
 
 	std::vector<DX12TextureResource*> GBufferPass::GetGBuffers()
@@ -198,7 +190,7 @@ namespace ElysiaRenderer
 		RenderResource::GetInstance().GetCBVPassParameter()->GBuffer3Index = m_GBufferRTs[GBufferIndex++]->GetTexture()->GetResourceHeapIndex();
 		RenderResource::GetInstance().GetCBVPassParameter()->GBuffer4Index = m_GBufferRTs[GBufferIndex++]->GetTexture()->GetResourceHeapIndex();
 		RenderResource::GetInstance().GetCBVPassParameter()->GBuffer5Index = m_GBufferRTs[GBufferIndex++]->GetTexture()->GetResourceHeapIndex();
-		RenderResource::GetInstance().GetCBVPassParameter()->OpaqueDepthIndex = m_pDepthRT->GetTexture()->GetResourceHeapIndex();
+		RenderResource::GetInstance().GetCBVPassParameter()->OpaqueDepthIndex = GetBufferManager()->GetCameraDepthRT()->GetTexture()->GetResourceHeapIndex();
 	}
 
 	void GBufferPass::CreatePSO()
@@ -218,7 +210,7 @@ namespace ElysiaRenderer
 		{
 			pipelineStateCreateDesc.m_renderTargetDesc.m_renderTargetFormats[i] = m_GBufferRTs[i]->GetFormat();
 		}
-		pipelineStateCreateDesc.m_renderTargetDesc.m_depthStencilFormat = m_pDepthRT->GetFormat();
+		pipelineStateCreateDesc.m_renderTargetDesc.m_depthStencilFormat = GetBufferManager()->GetCameraDepthRT()->GetFormat();
 		pipelineStateCreateDesc.m_depthStencilDesc = GetDepthState(DepthState::WritesEnabled);
 		pipelineStateCreateDesc.m_blendDesc = GetBlendState(BlendState::Disabled);
 		pipelineStateCreateDesc.m_rasterDesc = GetRasterizerState(RasterizerState::BackFaceCull);
