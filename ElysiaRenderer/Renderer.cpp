@@ -245,9 +245,11 @@ namespace ElysiaRenderer
 
 	void Renderer::Execute()
 	{
+
 		GetDevice()->BeginFrame();
 		m_graphicsContext->Reset();
 
+		PIXHelper pix(m_graphicsContext->GetCommandList(), "Deferred Render");
 		for (auto& pass : m_passes)
 		{
 			pass->Render();

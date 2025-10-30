@@ -17,7 +17,7 @@
 
 namespace DirectX
 {
-
+    
 static HRESULT _PremultiplyAlpha( _In_ const Image& srcImage, _In_ const Image& destImage )
 {
     assert( srcImage.width == destImage.width );

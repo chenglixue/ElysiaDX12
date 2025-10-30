@@ -6,6 +6,7 @@
 #include "ModelImporter.h"
 #include "RenderResource.h"
 #include "UserData.h"
+#include "PIXHelper.h"
 
 namespace ElysiaRenderer
 {

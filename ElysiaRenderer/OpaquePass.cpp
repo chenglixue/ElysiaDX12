@@ -32,15 +32,18 @@ namespace ElysiaRenderer
 	}
 	void OpaquePass::Render()
 	{
+		PIXHelper pix(m_pCommand->GetCommandList(), "Opaque Light Pass");
+
 		Execute();
 
 		auto cameraColorRT = GetBufferManager()->GetCameraColorRT();
 
 		m_pCommand->AddBarrier(*cameraColorRT->GetTexture(), D3D12_RESOURCE_STATE_RENDER_TARGET);
 		m_pCommand->FlushBarrier();
-		m_pCommand->ClearRenderTarget(*cameraColorRT->GetTexture(), Color(0, 0, 0));
+		m_pCommand->ClearRenderTarget(*cameraColorRT->GetTexture(), Color(0, 0, 0, 0));
 
 		m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_renderSize.x, m_renderSize.y));
+		m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		PipelineInfo pipelineStateData{};
 		pipelineStateData.m_pipelineStateObject = (*m_pGraphicsPipelineStates)[ShaderQueue::Opaque].get();

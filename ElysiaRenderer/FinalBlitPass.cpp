@@ -29,6 +29,8 @@ namespace ElysiaRenderer
 	}
 	void FinalBlitPass::Render()
 	{
+		PIXHelper pix(m_pCommand->GetCommandList(), "Final Blit Pass");
+
 		Execute();
 		auto& cameraColorRT = GetDevice()->GetCurrBackBuffer();
 

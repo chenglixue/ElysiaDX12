@@ -26,6 +26,8 @@ namespace ElysiaRenderer
 
 	void GBufferPass::Render()
 	{
+		PIXHelper pix(m_pCommand->GetCommandList(), "GBuffer Pass");
+
 		Execute();
 
 		auto cameraDepthRT = GetBufferManager()->GetCameraDepthRT();
@@ -40,6 +42,7 @@ namespace ElysiaRenderer
 		m_pCommand->FlushBarrier();
 		m_pCommand->ClearDepthStencilTarget(*cameraDepthRT, 1.f, 0.f);
 
+		m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_renderSize.x, m_renderSize.y));
 		m_pCommand->SetIndexBuffer(GetBufferManager()->GetIndexBufferView());
 		m_pCommand->SetVertexBuffer(0, 1, const_cast<D3D12_VERTEX_BUFFER_VIEW&>(GetBufferManager()->GetVertexBufferView()));

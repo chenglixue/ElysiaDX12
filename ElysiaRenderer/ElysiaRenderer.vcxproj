@@ -174,6 +174,7 @@
     <ClInclude Include="OpaquePass.h" />
     <ClInclude Include="PipelineResourceUtility.h" />
     <ClInclude Include="PipelineStateUtility.h" />
+    <ClInclude Include="PIXHelper.h" />
     <ClInclude Include="PSOHelper.h" />
     <ClInclude Include="RenderPassData.h" />
     <ClInclude Include="RenderTexture.h" />
@@ -318,7 +319,6 @@
     <ClCompile Include="DXTex\DirectXTexMipmaps.cpp" />
     <ClCompile Include="DXTex\DirectXTexMisc.cpp" />
     <ClCompile Include="DXTex\DirectXTexNormalMaps.cpp" />
-    <ClCompile Include="DXTex\DirectXTexPMAlpha.cpp" />
     <ClCompile Include="DXTex\DirectXTexTGA.cpp" />
     <ClCompile Include="DXTex\DirectXTexUtil.cpp" />
     <ClCompile Include="DXTex\DirectXTexWIC.cpp" />
@@ -335,6 +335,7 @@
     <ClCompile Include="MeshManager.cpp" />
     <ClCompile Include="OpaquePass.cpp" />
     <ClCompile Include="PipelineResourceSpace.cpp" />
+    <ClCompile Include="PIXHelper.cpp" />
     <ClCompile Include="PSOHelper.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="RenderResource.cpp" />

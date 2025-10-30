@@ -25,6 +25,8 @@ namespace ElysiaRenderer
 	}
 	void UIPass::Render()
 	{
+		PIXHelper pix(m_pCommand->GetCommandList(), "UI Pass");
+
 		Execute();
 
 		auto cameraColorRT = GetBufferManager()->GetCameraColorRT();
@@ -32,6 +34,7 @@ namespace ElysiaRenderer
 		m_pCommand->AddBarrier(*cameraColorRT->GetTexture(), D3D12_RESOURCE_STATE_RENDER_TARGET);
 		m_pCommand->FlushBarrier();
 
+		m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_renderSize.x, m_renderSize.y));
 
 		ImGui::Render();

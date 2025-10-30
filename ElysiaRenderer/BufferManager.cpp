@@ -27,7 +27,7 @@ namespace ElysiaRenderer
 		m_pCameraColorRT = CreateRenderTexture(
 			static_cast<UINT64>(GetDevice()->GetScreenSize().x),
 			static_cast<UINT64>(GetDevice()->GetScreenSize().y),
-			DXGI_FORMAT_R8G8B8A8_UNORM,
+			DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
 			L"Opaque Lighting RT");
 	}
 
