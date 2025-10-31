@@ -122,6 +122,22 @@ uint DecodeMaterialFlags(float packedMaterialFlags)
     return uint((packedMaterialFlags * 255.0h) + 0.5h);
 }
 
+SamplerData GetSamplerData()
+{
+    SamplerData o = (SamplerData) 0;
+    
+    o.clampPointSampler = SamplerDescriptorHeap[ClampPointSampler];
+    o.clampLinearSampler = SamplerDescriptorHeap[ClampLinearSampler];
+    o.clampAnisotropicSampler = SamplerDescriptorHeap[ClampAnisotropicSampler];
+    o.warpPointSampler = SamplerDescriptorHeap[WarpPointSampler];
+    o.warpLinearSampler = SamplerDescriptorHeap[WarpLinearSampler];
+    o.warpAnisotropicSampler = SamplerDescriptorHeap[WarpAnisotropicSampler];
+    o.shadowClampLinearSampler = SamplerDescriptorHeap[ShadowClampLinearSampler];
+    o.shadowWarpLinearSampler = SamplerDescriptorHeap[ShadowWarpLinearSampler];
+    
+    return o;
+}
+
 MaterialData GetMaterialData(FInputParams inputParams)
 {
     MaterialData o = (MaterialData) 0;
@@ -153,7 +169,7 @@ MaterialData GetMaterialData(FInputParams inputParams)
     o.Specular = 0.5;
     
     //o.WorldNormal = g_hasNormalTex ? GetNormal(normalTS.rgb, TBN, normalIntensity) : inputParams.NormalWS;
-    o.WorldNormal = GetNormal(normalTS.rgb, TBN, normalIntensity);
+    o.WorldNormal = GetNormal(normalTS.rgb, TBN, normalIntensity, true);
 
     o.Anisotropy = 0;
     o.DiffuseColor = o.BaseColor - o.BaseColor * o.Metallic;
@@ -162,9 +178,9 @@ MaterialData GetMaterialData(FInputParams inputParams)
     return o;
 }
 
-FDecodeGBufferData GetDecodeGBufferData(FInputParams inputParams, float3 toLight)
+FEncodeGBufferData GetEncodeGBufferData(FInputParams inputParams, float3 toLight)
 {
-    FDecodeGBufferData o = (FDecodeGBufferData) 0;
+    FEncodeGBufferData o = (FEncodeGBufferData) 0;
     
     float3x3 TBN = float3x3(inputParams.TangentWS, inputParams.BitTangentWS, inputParams.NormalWS);
     SamplerState warpLinearSampler = SamplerDescriptorHeap[WarpLinearSampler];
@@ -206,6 +222,72 @@ FDecodeGBufferData GetDecodeGBufferData(FInputParams inputParams, float3 toLight
     o.DiffuseColor = o.BaseColor - o.BaseColor * o.Metallic;
     o.SpecularColor = ComputeF0(o.Specular, o.BaseColor, o.Metallic);
     o.IBL = GetIBL(inputParams, o, toLight);
+
+    return o;
+}
+
+FDecodeGBufferData DecodeGBufferData(float4 InGBuffer0,
+    float4 InGBuffer1,
+    float4 InGBuffer2,
+    float4 InGBuffer3,
+    float4 InGBuffer4,
+    float4 InGBufferVelocity,
+    float SceneDepth)
+{
+    FDecodeGBufferData o = (FDecodeGBufferData) 0;
+
+    o.BaseColor = InGBuffer0.rgb;
+    o.ShadingModelID = DecodeMaterialFlags(InGBuffer0.a);
+
+    o.Metallic = InGBuffer1.r;
+    o.Specular = InGBuffer1.g;
+    o.Roughness = InGBuffer1.b;
+    o.AO = InGBuffer1.a;
+
+    o.WorldTangent = DecodeNormal(InGBuffer2.rgb);
+    o.Anisotropy = InGBuffer2.a;
+
+    o.WorldNormal = DecodeNormal(InGBuffer3.rgb);
+
+    o.SceneColor = InGBuffer4.rgb;
+    o.Opacity = InGBuffer4.a;
+
+    o.Velocity = InGBufferVelocity.rg;
+
+    o.CustomData = 0;
+
+    o.Depth = SceneDepth;
+
+    o.DiffuseColor = o.BaseColor - o.BaseColor * o.Metallic;
+    o.SpecularColor = ComputeF0(o.Specular, o.BaseColor, o.Metallic);
+    
+    return o;
+}
+
+FDecodeGBufferData GetDecodeGBufferData(float2 uv)
+{
+    FDecodeGBufferData o = (FDecodeGBufferData) 0;
+    
+    SamplerState warpLinearSampler = SamplerDescriptorHeap[WarpLinearSampler];
+    
+    Texture2D _GBuffer0 = ResourceDescriptorHeap[GBuffer0Index];
+    Texture2D _GBuffer1 = ResourceDescriptorHeap[GBuffer1Index];
+    Texture2D _GBuffer2 = ResourceDescriptorHeap[GBuffer2Index];
+    Texture2D _GBuffer3 = ResourceDescriptorHeap[GBuffer3Index];
+    Texture2D _GBuffer4 = ResourceDescriptorHeap[GBuffer4Index];
+    Texture2D _GBuffer5 = ResourceDescriptorHeap[GBuffer5Index];
+    Texture2D _OpaqueDepthRT = ResourceDescriptorHeap[OpaqueDepthIndex];
+    
+    float4 GBuffer0 = _GBuffer0.SampleLevel(warpLinearSampler, uv, 0);
+    float4 GBuffer1 = _GBuffer1.SampleLevel(warpLinearSampler, uv, 0);
+    float4 GBuffer2 = _GBuffer2.SampleLevel(warpLinearSampler, uv, 0);
+    float4 GBuffer3 = _GBuffer3.SampleLevel(warpLinearSampler, uv, 0);
+    float4 GBuffer4 = _GBuffer4.SampleLevel(warpLinearSampler, uv, 0);
+    float4 GBuffer5 = _GBuffer5.SampleLevel(warpLinearSampler, uv, 0);
+    float sceneDepth = _OpaqueDepthRT.SampleLevel(warpLinearSampler, uv, 0);
+
+    o = DecodeGBufferData(GBuffer0, GBuffer1, GBuffer2, GBuffer3,
+        GBuffer4, GBuffer5, sceneDepth);
 
     return o;
 }

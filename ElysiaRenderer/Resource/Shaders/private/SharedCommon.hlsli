@@ -120,6 +120,18 @@ cbuffer PassConstant : register(b0, perPassSpace)
     Vector2 g_sobolSequence[64];
 };
 
+struct SamplerData
+{
+    SamplerState warpPointSampler;
+    SamplerState clampPointSampler;
+    SamplerState warpLinearSampler;
+    SamplerState clampLinearSampler;
+    SamplerState warpAnisotropicSampler;
+    SamplerState clampAnisotropicSampler;
+    SamplerComparisonState shadowWarpLinearSampler;
+    SamplerComparisonState shadowClampLinearSampler;
+};
+
 struct FInputParams
 {
     float3 PositionWS;
@@ -164,6 +176,30 @@ struct MaterialData
     // 0..1 (derived from BaseColor, Metalness, Specular)
     float Anisotropy;
     
+};
+
+struct FEncodeGBufferData
+{
+    float3 WorldNormal;
+    float3 WorldTangent;
+    float Anisotropy;
+    float3 DiffuseColor;
+    float3 SpecularColor;
+    float3 BaseColor;
+    float Metallic;
+    float Specular;
+    float Roughness;
+    float AO;
+    uint ShadingModelID;
+    float4 CustomData;
+    float Depth;
+    float2 Velocity;
+
+    float3 SceneColor;
+    float Opacity;
+    float PerObjectData;
+    float PerComputedShadow;
+    float3 IBL;
 };
 
 struct FDecodeGBufferData

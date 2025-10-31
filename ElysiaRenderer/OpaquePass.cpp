@@ -14,8 +14,13 @@ namespace ElysiaRenderer
 
 	void OpaquePass::Configure()
 	{
+		ShaderCreateDesc shaderCreateDesc{};
+		shaderCreateDesc.shaderName = L"Shaders\\public\\Opaque.hlsl";
+		shaderCreateDesc.entryPoint = L"PS";
+		shaderCreateDesc.shaderType = ShaderType::Pixel;
+		m_pixelShader = std::move(GetDevice()->CreateShader(shaderCreateDesc));
+
 		AddShader(ShaderQueue::Blit, L"Shaders\\public\\FullScreenTriangle.hlsl", L"VS", ShaderType::Vertex);
-		AddShader(ShaderQueue::Opaque, L"Shaders\\public\\Opaque.hlsl", L"PS", ShaderType::Pixel);
 
 		BindToShader();
 		CreatePSO();
@@ -46,7 +51,7 @@ namespace ElysiaRenderer
 		m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		PipelineInfo pipelineStateData{};
-		pipelineStateData.m_pipelineStateObject = (*m_pGraphicsPipelineStates)[ShaderQueue::Opaque].get();
+		pipelineStateData.m_pipelineStateObject = m_PSO.get();
 		pipelineStateData.m_renderTargets = { cameraColorRT->GetTexture() };
 		pipelineStateData.m_depthStencilTarget = GetBufferManager()->GetCameraDepthRT()->GetTexture();
 
@@ -84,7 +89,7 @@ namespace ElysiaRenderer
 
 		pipelineStateCreateDesc = std::move(CreateDefaultPipelineStateCreateDesc());
 		pipelineStateCreateDesc.m_vertexShader = GetVertexShaders()[ShaderQueue::Blit][ShaderType::Vertex].get();
-		pipelineStateCreateDesc.m_pixelShader = GetPixelShaders()[ShaderQueue::Opaque][ShaderType::Pixel].get();
+		pipelineStateCreateDesc.m_pixelShader = m_pixelShader.get();
 		pipelineStateCreateDesc.m_renderTargetDesc.m_numRenderTargets = 1;
 		pipelineStateCreateDesc.m_renderTargetDesc.m_renderTargetFormats[0] = GetBufferManager()->GetCameraColorRT()->GetFormat();
 		pipelineStateCreateDesc.m_renderTargetDesc.m_depthStencilFormat = GetBufferManager()->GetCameraDepthRT()->GetFormat();
@@ -92,6 +97,6 @@ namespace ElysiaRenderer
 		pipelineStateCreateDesc.m_blendDesc = GetBlendState(BlendState::Disabled);
 		pipelineStateCreateDesc.m_rasterDesc = GetRasterizerState(RasterizerState::NoCullNoMS);
 		pipelineStateCreateDesc.m_topology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-		(*m_pGraphicsPipelineStates)[ShaderQueue::Opaque] = std::move(GetDevice()->CreateGraphicsPipelineState(pipelineStateCreateDesc, meshResourceLayout));
+		m_PSO = std::move(GetDevice()->CreateGraphicsPipelineState(pipelineStateCreateDesc, meshResourceLayout));
 	}
 }

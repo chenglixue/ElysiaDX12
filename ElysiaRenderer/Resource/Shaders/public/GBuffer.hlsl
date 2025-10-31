@@ -75,14 +75,14 @@ PSOutput PS(PSInput i)
     
     LightData mainLightData = GetMainLight(mainLight);
     
-    FDecodeGBufferData decodeGBufferData = GetDecodeGBufferData(inputParam, mainLightData.toLight);
+    FEncodeGBufferData encodeGBufferData = GetEncodeGBufferData(inputParam, mainLightData.toLight);
     
-    o.target0 = float4(decodeGBufferData.BaseColor, EncodeMaterialFlags(decodeGBufferData.ShadingModelID));
-    o.target1 = float4(decodeGBufferData.Metallic, decodeGBufferData.Specular, decodeGBufferData.Roughness, decodeGBufferData.AO);
-    o.target2 = float4(EncodeNormal(decodeGBufferData.WorldTangent), decodeGBufferData.Anisotropy);
-    o.target3 = float4(EncodeNormal(decodeGBufferData.WorldNormal), decodeGBufferData.PerObjectData);
-    o.target4 = float4(decodeGBufferData.IBL * decodeGBufferData.AO, decodeGBufferData.Opacity);
-    o.target5 = float4(decodeGBufferData.Velocity, 0.f, 0.f);
+    o.target0 = float4(encodeGBufferData.BaseColor, EncodeMaterialFlags(encodeGBufferData.ShadingModelID));
+    o.target1 = float4(encodeGBufferData.Metallic, encodeGBufferData.Specular, encodeGBufferData.Roughness, encodeGBufferData.AO);
+    o.target2 = float4(EncodeNormal(encodeGBufferData.WorldTangent), encodeGBufferData.Anisotropy);
+    o.target3 = float4(EncodeNormal(encodeGBufferData.WorldNormal), encodeGBufferData.PerObjectData);
+    o.target4 = float4(encodeGBufferData.IBL * encodeGBufferData.AO, encodeGBufferData.Opacity);
+    o.target5 = float4(encodeGBufferData.Velocity, 0.f, 0.f);
 
     
     return o;

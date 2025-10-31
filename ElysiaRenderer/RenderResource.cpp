@@ -1,3 +1,5 @@
+#include "stdafx.h"
+
 #include "RenderResource.h"
 
 namespace ElysiaRenderer

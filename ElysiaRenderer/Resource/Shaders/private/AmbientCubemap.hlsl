@@ -233,7 +233,7 @@ float3 GetIBL(FInputParams inputParams, MaterialData materialData, float3 toLigh
     return o;
 }
 
-float3 GetIBL(FInputParams inputParams, FDecodeGBufferData GBufferData, float3 toLight)
+float3 GetIBL(FInputParams inputParams, FEncodeGBufferData GBufferData, float3 toLight)
 {
     float3 o = 0.f;
     

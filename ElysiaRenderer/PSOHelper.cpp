@@ -1,3 +1,5 @@
+#include "stdafx.h"
+
 #include "PSOHelper.h"
 
 namespace ElysiaHelper

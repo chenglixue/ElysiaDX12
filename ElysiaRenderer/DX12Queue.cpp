@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "DX12Queue.h"
 #include "Helper.h"
 

@@ -1,8 +1,10 @@
 #pragma once
-#include "stdafx.h"
+#include "Helper.h"
 
 namespace ElysiaRenderer
 {
+	using namespace ElysiaHelper;
+
 	class DX12Queue;
 
 	class DX12QueueManager

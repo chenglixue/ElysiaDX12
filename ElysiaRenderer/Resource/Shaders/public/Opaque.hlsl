@@ -25,7 +25,31 @@ PSOutput PS(PSInput i)
 {
     PSOutput o = (PSOutput) 0;
     
-    o.target0.rg = i.uv;
+    float2 screenUV = i.positionCS.xy / screenSize.xy;
     
+    //SamplerData samplerData = GetSamplerData();
+    
+    FDecodeGBufferData GBufferData = GetDecodeGBufferData(screenUV);
+    
+    float3 positionWS = ComputeWorldSpacePosition(screenUV, GBufferData.Depth, viewProjMatrix_I);
+    
+    FInputParams inputParam = (FInputParams) 0;
+    inputParam.PositionWS = positionWS;
+    inputParam.PositionVS = mul(float4(positionWS, 1.f), viewMatrix);
+    inputParam.PixelPos = i.positionCS.xy;
+    inputParam.objectUV = i.uv;
+    inputParam.ScreenUV = i.positionCS.xy / screenSize.xy;
+    inputParam.TangentWS = GBufferData.WorldTangent;
+    inputParam.NormalWS = GBufferData.WorldNormal;
+    inputParam.BitTangentWS = cross(inputParam.TangentWS, inputParam.NormalWS);
+    inputParam.ScreenVector = GetScreenVectorWS(cameraPosWS.xyz, positionWS);
+    
+    LightData mainLightData = GetMainLight(mainLight);
+    float shadow = SunShadowVisibility(inputParam.PositionWS, inputParam.ScreenUV, 0);
+    
+    float4 lighting = GetDynamicLighting(inputParam, GBufferData, mainLightData) * shadow;
+    lighting += float4(GetIBL(inputParam, GBufferData, mainLightData.toLight), 1.f);
+    
+    o.target0 = lighting;
     return o;
 }

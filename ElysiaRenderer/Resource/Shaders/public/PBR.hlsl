@@ -81,9 +81,6 @@ PSOutput PS(PSInput i)
     float depthMap = temp.SampleLevel(warpLinearSampler, inputParam.ScreenUV, 0);
     o.target0.rgb = ComputeWorldSpacePosition(inputParam.ScreenUV, depthMap, viewProjMatrix_I);
     o.target0.rgb = lighting;
-    //o.target0.rgb = PositionFromDepth(depthMap, inputParam.ScreenUV);
-    //o.target0.rgb = ComputeClipSpacePosition(inputParam.ScreenUV, 1 - depthMap);
-    //o.target0 = lighting;
     
     return o;
 }

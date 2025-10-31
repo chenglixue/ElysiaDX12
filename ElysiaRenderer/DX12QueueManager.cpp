@@ -1,3 +1,5 @@
+#include "stdafx.h"
+
 #include "DX12QueueManager.h"
 #include "DX12Queue.h"
 
@@ -39,7 +41,7 @@ namespace ElysiaRenderer
 			return m_copyQueue.get();
 
 		default:
-			ElysiaHelper::ThrowRuntimeError("Bad command type lookup in queue manager.");
+			ThrowRuntimeError("Bad command type lookup in queue manager.");
 		}
 
 		return nullptr;

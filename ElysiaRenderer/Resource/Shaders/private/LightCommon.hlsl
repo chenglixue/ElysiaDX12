@@ -36,6 +36,27 @@ FLightAccumulator AccumulateDynamicLighting(FInputParams inputData, MaterialData
     return o;
 }
 
+FLightAccumulator AccumulateDynamicLighting(FInputParams inputData, FDecodeGBufferData GBufferData, LightData lightData)
+{
+    FLightAccumulator o = (FLightAccumulator) 0;
+    FShadowTerms Shadow = (FShadowTerms) 0;
+    
+    float3 V = -inputData.ScreenVector;
+    float3 N = GBufferData.WorldNormal;
+    N = inputData.NormalWS;
+    float3 L = lightData.toLight;
+    float3 MaskedLightColor = lightData.color * lightData.intensity;
+    Shadow.SurfaceShadow = 1;
+    
+    FDirectLighting directLight = (FDirectLighting) 0;
+    float NoL = saturate(dot(N, L));
+    directLight = EvaluateBxDF(GBufferData, N, V, L, NoL, Shadow);
+
+    LightAccumulator_AddSplit(o, directLight.Diffuse, directLight.Specular, directLight.Diffuse, Shadow.SurfaceShadow * MaskedLightColor * PI);
+    
+    return o;
+}
+
 FLightingSplit GetLightAccumulator_ResultSplit(FLightAccumulator LightAccumulator)
 {
     float4 RetDiffuse = 0.f;
@@ -61,6 +82,16 @@ FLightingSplit GetDynamicLightingSplit(FInputParams inputData, MaterialData mate
     return o;
 }
 
+FLightingSplit GetDynamicLightingSplit(FInputParams inputData, FDecodeGBufferData GBufferData, LightData lightData)
+{
+    FLightingSplit o = (FLightingSplit) 0;
+    
+    FLightAccumulator lightAccumulator = AccumulateDynamicLighting(inputData, GBufferData, lightData);
+    o = GetLightAccumulator_ResultSplit(lightAccumulator);
+    
+    return o;
+}
+
 float4 GetDynamicLighting(FInputParams inputData, MaterialData materialData, LightData lightData)
 {
     float4 o = 0.f;
@@ -72,6 +103,21 @@ float4 GetDynamicLighting(FInputParams inputData, MaterialData materialData, Lig
     o += lighting.DiffuseLighting;
     o += lighting.SpecularLighting;
     o.a = materialData.Opacity;
+    
+    return o;
+}
+
+float4 GetDynamicLighting(FInputParams inputData, FDecodeGBufferData GBufferData, LightData lightData)
+{
+    float4 o = 0.f;
+    
+    FLightingSplit lighting = (FLightingSplit) 0;
+    lighting = GetDynamicLightingSplit(inputData, GBufferData, lightData);
+    
+    
+    o += lighting.DiffuseLighting;
+    o += lighting.SpecularLighting;
+    o.a = GBufferData.Opacity;
     
     return o;
 }

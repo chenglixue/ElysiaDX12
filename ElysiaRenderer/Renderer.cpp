@@ -71,11 +71,12 @@ namespace ElysiaRenderer
 
 		DeSerializeUserData();
 
-		InitPSOHelpers();
+		InitPSOHelpers();  
 
 		m_pCameraManager->Init(); 
 		GetLightManager()->Init();
 		GetBufferManager()->Init();
+		m_pTextureManager->Init();
 		
 		m_pCameraManager->CreateMainCamera(Vector3(-11.5f, 200.85f, -0.45f) ,
 			m_aspectRatio, 3.14159f / 4.0f, 0.1f, 2000.f);
@@ -249,7 +250,7 @@ namespace ElysiaRenderer
 		GetDevice()->BeginFrame();
 		m_graphicsContext->Reset();
 
-		PIXHelper pix(m_graphicsContext->GetCommandList(), "Deferred Render");
+		//PIXHelper pix(m_graphicsContext->GetCommandList(), "Deferred Render");
 		for (auto& pass : m_passes)
 		{
 			pass->Render();
