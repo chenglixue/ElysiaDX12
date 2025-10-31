@@ -23,10 +23,10 @@ struct PSInput
     float4 positionCS : SV_POSITION;
     float4 positionVS : VIEW_POSITION;
     float4 positionWS : WORLD_POSITION;
-    float3 normalWS : NORMAL;
-    float3 tangentWS : TANGENT;
-    float3 bitTangentWS : BITTANGENT;
-    float2 uv : TEXCOORD;
+    float3 normalWS : NORMALWS;
+    float3 tangentWS : TANGENTWS;
+    float3 bitTangentWS : BITANGENTWS;
+    float2 uv : TEXCOORD0;
 };
 
 struct PSOutput
@@ -48,10 +48,13 @@ PSInput VS(VSInput i)
     o.positionCS = mul(o.positionVS, projMatrix);
     
     float3 N = normalize(mul(i.normalOS, (float3x3) worldMatrix));
-    float3 T = mul(i.tangentOS, (float3x3) worldMatrix);
+    float3 T = normalize(mul(i.tangentOS, (float3x3) worldMatrix));
     o.tangentWS = normalize(T - dot(N, T) * N);
     o.bitTangentWS = (cross(o.tangentWS, N));
     o.normalWS = N;
+    
+    float handedness = dot(o.bitTangentWS, cross(o.normalWS, o.tangentWS)) > 0.0f ? 1.0f : -1.0f;
+    o.bitTangentWS *= handedness;
     
     o.uv = i.uv;
     

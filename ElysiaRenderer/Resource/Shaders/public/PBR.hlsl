@@ -80,7 +80,7 @@ PSOutput PS(PSInput i)
     Texture2D temp = ResourceDescriptorHeap[OpaqueDepthIndex];
     float depthMap = temp.SampleLevel(warpLinearSampler, inputParam.ScreenUV, 0);
     o.target0.rgb = ComputeWorldSpacePosition(inputParam.ScreenUV, depthMap, viewProjMatrix_I);
-    o.target0.rgb = lighting;
+    o.target0.rgb = materialData.WorldNormal;
     
     return o;
 }

@@ -168,8 +168,8 @@ MaterialData GetMaterialData(FInputParams inputParams)
     o.Roughness = roughness;
     o.Specular = 0.5;
     
-    //o.WorldNormal = g_hasNormalTex ? GetNormal(normalTS.rgb, TBN, normalIntensity) : inputParams.NormalWS;
-    o.WorldNormal = GetNormal(normalTS.rgb, TBN, normalIntensity, true);
+    o.WorldNormal = g_hasNormalTex ? GetNormal(normalTS.rgb, TBN, normalIntensity) : inputParams.NormalWS;
+    //o.WorldNormal = GetNormal(normalTS.rgb, TBN, normalIntensity, true);
 
     o.Anisotropy = 0;
     o.DiffuseColor = o.BaseColor - o.BaseColor * o.Metallic;
@@ -211,6 +211,7 @@ FEncodeGBufferData GetEncodeGBufferData(FInputParams inputParams, float3 toLight
     o.Roughness = roughness;
     o.Specular = 0.5;
     
+    o.WorldNormal = g_hasNormalTex ? GetNormal(normalTS.rgb, TBN, normalIntensity) : inputParams.NormalWS;
     o.WorldNormal = GetNormal(normalTS.rgb, TBN, normalIntensity);
     o.WorldTangent = TBN[0];
     o.PerObjectData = 0.f;
@@ -248,6 +249,7 @@ FDecodeGBufferData DecodeGBufferData(float4 InGBuffer0,
     o.Anisotropy = InGBuffer2.a;
 
     o.WorldNormal = DecodeNormal(InGBuffer3.rgb);
+    o.WorldNormal = normalize(o.WorldNormal);
 
     o.SceneColor = InGBuffer4.rgb;
     o.Opacity = InGBuffer4.a;

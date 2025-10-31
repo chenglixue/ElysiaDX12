@@ -48,8 +48,8 @@ PSOutput PS(PSInput i)
     float shadow = SunShadowVisibility(inputParam.PositionWS, inputParam.ScreenUV, 0);
     
     float4 lighting = GetDynamicLighting(inputParam, GBufferData, mainLightData) * shadow;
-    lighting += float4(GetIBL(inputParam, GBufferData, mainLightData.toLight), 1.f);
+    //lighting += float4(GBufferData.IBL, 1.f);
     
-    o.target0 = lighting;
+    o.target0.rgb = GBufferData.WorldNormal;
     return o;
 }
