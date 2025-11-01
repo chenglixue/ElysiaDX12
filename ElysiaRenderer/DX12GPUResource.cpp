@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "DX12GPUResource.h"
 
 namespace ElysiaRenderer

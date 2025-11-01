@@ -122,26 +122,28 @@ namespace ElysiaModel
 		Assimp::Importer importer;
 
 		// remove unused data
-		importer.SetPropertyInteger(AI_CONFIG_PP_RVC_FLAGS,
-			aiComponent_COLORS | aiComponent_LIGHTS | aiComponent_CAMERAS);
+		//importer.SetPropertyInteger(AI_CONFIG_PP_RVC_FLAGS,
+		//	aiComponent_COLORS | aiComponent_LIGHTS | aiComponent_CAMERAS);
 
-		// max triangles and vertices per mesh, splits above this threshold
-		importer.SetPropertyInteger(AI_CONFIG_PP_SLM_TRIANGLE_LIMIT, INT_MAX);
-		importer.SetPropertyInteger(AI_CONFIG_PP_SLM_VERTEX_LIMIT, 0xfffe); // avoid the primitive restart index
+		//// max triangles and vertices per mesh, splits above this threshold
+		//importer.SetPropertyInteger(AI_CONFIG_PP_SLM_TRIANGLE_LIMIT, INT_MAX);
+		//importer.SetPropertyInteger(AI_CONFIG_PP_SLM_VERTEX_LIMIT, 0xfffe); // avoid the primitive restart index
 
-		// remove points and lines
-		importer.SetPropertyInteger(AI_CONFIG_PP_SBP_REMOVE, aiPrimitiveType_POINT | aiPrimitiveType_LINE);
+		//// remove points and lines
+		//importer.SetPropertyInteger(AI_CONFIG_PP_SBP_REMOVE, aiPrimitiveType_POINT | aiPrimitiveType_LINE);
 
-		const aiScene* pScene = importer.ReadFile(fileName,
-			aiProcess_CalcTangentSpace |
+		const aiScene* pScene = importer.ReadFile(fileName, 0);
+
+		UINT32 flags = aiProcess_CalcTangentSpace |
 			aiProcess_Triangulate |
 			aiProcess_JoinIdenticalVertices |
 			aiProcess_MakeLeftHanded |
 			aiProcess_RemoveRedundantMaterials |
 			aiProcess_FlipUVs |
 			aiProcess_FlipWindingOrder |
-			aiProcess_PreTransformVertices |
-			aiProcess_OptimizeMeshes);
+			aiProcess_PreTransformVertices | aiProcess_OptimizeMeshes;
+
+		pScene = importer.ApplyPostProcessing(flags);
 
 		if (pScene == nullptr) return false;
 
@@ -304,7 +306,7 @@ namespace ElysiaModel
 					destPos[0] = srcMesh->mVertices[v].x;
 					destPos[1] = srcMesh->mVertices[v].y;
 					destPos[2] = srcMesh->mVertices[v].z;
-				}
+				} 
 				else
 				{
 					ElysiaHelper::AssertError("No Vertex");

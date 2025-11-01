@@ -50,6 +50,6 @@ PSOutput PS(PSInput i)
     float4 lighting = GetDynamicLighting(inputParam, GBufferData, mainLightData) * shadow;
     //lighting += float4(GBufferData.IBL, 1.f);
     
-    o.target0.rgb = GBufferData.WorldNormal;
+    o.target0.rgb = lighting;
     return o;
 }

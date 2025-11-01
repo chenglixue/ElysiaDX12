@@ -212,8 +212,7 @@ FEncodeGBufferData GetEncodeGBufferData(FInputParams inputParams, float3 toLight
     o.Specular = 0.5;
     
     o.WorldNormal = g_hasNormalTex ? GetNormal(normalTS.rgb, TBN, normalIntensity) : inputParams.NormalWS;
-    o.WorldNormal = GetNormal(normalTS.rgb, TBN, normalIntensity);
-    o.WorldTangent = TBN[0];
+    o.WorldTangent = TBN._m00_m01_m02;
     o.PerObjectData = 0.f;
     o.PerComputedShadow = 1.f;
     
