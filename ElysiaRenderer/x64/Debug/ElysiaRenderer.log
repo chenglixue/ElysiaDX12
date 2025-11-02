@@ -1,5 +1,6 @@
 ﻿  Skipping vcpkg. (no packages)
 cl : command line  warning D9014: invalid value '18' for '/wd'; assuming '5999'
+  LightManager.cpp
   Renderer.cpp
 D:\DX12\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
   (compiling source file '/Renderer.cpp')
@@ -26,6 +27,29 @@ D:\DX12\ElysiaDX12\ElysiaRenderer\SobolSequenceGenerator.h(164,29): warning C424
 D:\DX12\ElysiaDX12\ElysiaRenderer\SobolSequenceGenerator.h(164,29): warning C4244:         ]
   (compiling source file '/Renderer.cpp')
   
+  ShaderManager.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file '/ShaderManager.cpp')
+  
+  ShadowPass.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\DX12MeshRender.h(9,8): warning C4099: 'ElysiaRenderer::Mesh': type name first seen using 'struct' now seen using 'class'
+  (compiling source file '/ShadowPass.cpp')
+      D:\DX12\ElysiaDX12\ElysiaRenderer\Mesh.h(86,9):
+      see declaration of 'ElysiaRenderer::Mesh'
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file '/ShadowPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\ShadowPass.cpp(47,104): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/ShadowPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\ShadowPass.cpp(47,76): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/ShadowPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\ShadowPass.cpp(107,47): warning C4267: 'argument': conversion from 'size_t' to 'UINT', possible loss of data
+  (compiling source file '/ShadowPass.cpp')
+  
+  Generating Code...
 D:\DX12\ElysiaDX12\ElysiaRenderer\DX12Device.h(58): warning C4172: returning address of local variable or temporary
   ElysiaRenderer.vcxproj -> D:\DX12\ElysiaDX12\x64\Debug\ElysiaRenderer.exe
   D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Mesh\diablo3_pose.obj
@@ -36,6 +60,7 @@ D:\DX12\ElysiaDX12\ElysiaRenderer\DX12Device.h(58): warning C4172: returning add
   D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\private\AmbientCubemap.hlsl
   D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\private\AreaLightCommon.hlsl
   D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\private\BRDF.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\private\Color.hlsl
   D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\private\Common.hlsl
   D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\private\EnergyPreservation.hlsl
   D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\private\Light.hlsl
@@ -141,4 +166,4 @@ D:\DX12\ElysiaDX12\ElysiaRenderer\DX12Device.h(58): warning C4172: returning add
   D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Tex\GGX_E_LUT.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Tex\White.png
   D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Tex\Wood.dds
-  复制了 113 个文件
+  复制了 114 个文件

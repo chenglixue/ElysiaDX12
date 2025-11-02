@@ -5,6 +5,7 @@
 
 #include "SharedCommon.hlsli"
 #include "AmbientCubemap.hlsl"
+#include "Color.hlsl"
 
 ///////////////////////////////////////////////////////////////////////////////
 // Shading parameterisation

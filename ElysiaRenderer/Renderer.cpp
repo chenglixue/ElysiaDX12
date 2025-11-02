@@ -7,6 +7,7 @@
 #include "BufferManager.h"
 #include "LightManager.h"
 #include "CameraManager.h"
+#include "ShaderManager.h"
 
 #include "ShadowPass.h"
 #include "GBufferPass.h"
@@ -38,6 +39,7 @@ namespace ElysiaRenderer
 		g_pLightManager = std::make_unique<LightManager>();
 		g_pBufferManager = std::make_unique<BufferManager>();
 		m_pTextureManager = std::make_unique<TextureManager>();
+		g_pShaderManager = std::make_unique<ShaderManager>();
 
 		g_vertexShaders = std::unordered_map<UINT, std::unordered_map<ShaderType, std::unique_ptr<DX12Shader>>>();
 		g_pixelShaders = std::unordered_map<UINT, std::unordered_map<ShaderType, std::unique_ptr<DX12Shader>>>();
@@ -77,6 +79,7 @@ namespace ElysiaRenderer
 		GetLightManager()->Init();
 		GetBufferManager()->Init();
 		m_pTextureManager->Init();
+		GetShaderManager()->Init();
 		
 		m_pCameraManager->CreateMainCamera(Vector3(-11.5f, 200.85f, -0.45f) ,
 			m_aspectRatio, 3.14159f / 4.0f, 0.1f, 2000.f);

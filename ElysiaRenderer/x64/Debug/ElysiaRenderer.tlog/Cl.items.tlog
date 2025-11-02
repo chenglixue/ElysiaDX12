@@ -64,6 +64,7 @@ D:\DX12\ElysiaDX12\ElysiaRenderer\SkyboxPass.cpp;D:\DX12\ElysiaDX12\ElysiaRender
 D:\DX12\ElysiaDX12\ElysiaRenderer\SobolSequenceGenerator.cpp;D:\DX12\ElysiaDX12\ElysiaRenderer\x64\Debug\SobolSequenceGenerator.obj
 D:\DX12\ElysiaDX12\ElysiaRenderer\stdafx.cpp;D:\DX12\ElysiaDX12\ElysiaRenderer\x64\Debug\stdafx.obj
 D:\DX12\ElysiaDX12\ElysiaRenderer\TextureManager.cpp;D:\DX12\ElysiaDX12\ElysiaRenderer\x64\Debug\TextureManager.obj
+D:\DX12\ElysiaDX12\ElysiaRenderer\TonemapPass.cpp;D:\DX12\ElysiaDX12\ElysiaRenderer\x64\Debug\TonemapPass.obj
 D:\DX12\ElysiaDX12\ElysiaRenderer\Transform.cpp;D:\DX12\ElysiaDX12\ElysiaRenderer\x64\Debug\Transform.obj
 D:\DX12\ElysiaDX12\ElysiaRenderer\UIPass.cpp;D:\DX12\ElysiaDX12\ElysiaRenderer\x64\Debug\UIPass.obj
 D:\DX12\ElysiaDX12\ElysiaRenderer\UserData.cpp;D:\DX12\ElysiaDX12\ElysiaRenderer\x64\Debug\UserData.obj

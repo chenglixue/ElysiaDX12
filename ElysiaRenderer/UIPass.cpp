@@ -58,7 +58,7 @@ namespace ElysiaRenderer
 			auto mainLight = RenderResource::GetInstance().GetCBVPassParameter();
 			ImGui::ColorEdit3("Color", (float*)&pUserData.lightColor);
 			ImGui::DragFloat3("Direction", (float*)&pUserData.lightDir, 1, -1, 1);
-			ImGui::SliderFloat("Intensity", &pUserData.lightIntensity, 0, 5);
+			ImGui::SliderFloat("Intensity", &pUserData.lightIntensity, 0, 100);
 
 			int shadowTypeIndex = (int)pUserData.shadowType;
 			ImGui::Combo("Shadow Type", &shadowTypeIndex,

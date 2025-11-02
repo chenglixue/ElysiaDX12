@@ -234,7 +234,6 @@ struct FDecodeGBufferData
     float Opacity;
     float PerObjectData;
     float PerComputedShadow;
-    float3 IBL;
 };
 
 struct BxDFContext

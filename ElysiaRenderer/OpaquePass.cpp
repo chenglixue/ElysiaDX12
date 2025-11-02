@@ -20,8 +20,6 @@ namespace ElysiaRenderer
 		shaderCreateDesc.shaderType = ShaderType::Pixel;
 		m_pixelShader = std::move(GetDevice()->CreateShader(shaderCreateDesc));
 
-		AddShader(ShaderQueue::Blit, L"Shaders\\public\\FullScreenTriangle.hlsl", L"VS", ShaderType::Vertex);
-
 		BindToShader();
 		CreatePSO();
 	}

@@ -331,6 +331,9 @@
     <ClInclude Include="PIXHelper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="TonemapPass.h">
+      <Filter>Header Files\Render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -480,6 +483,9 @@
     </None>
     <None Include="..\x64\Debug\Shaders\public\FullScreenTriangle.hlsl">
       <Filter>Resource Files\Shader\Public</Filter>
+    </None>
+    <None Include="Resource\Shaders\private\Color.hlsl">
+      <Filter>Resource Files\Shader\Priavte</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -686,6 +692,9 @@
     <ClCompile Include="PIXHelper.cpp">
       <Filter>Source Files\Helper</Filter>
     </ClCompile>
+    <ClCompile Include="TonemapPass.cpp">
+      <Filter>Source Files\Render</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CopyFileToFolders Include="dxc\bin\x64\dxcompiler.dll" />
@@ -722,5 +731,10 @@
     <Image Include="Resource\Tex\Wood.dds">
       <Filter>Resource Files\Tex</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Resource\Shaders\public\TonemapPass.hlsl">
+      <Filter>Resource Files\Shader\Public</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

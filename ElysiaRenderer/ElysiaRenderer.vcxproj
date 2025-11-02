@@ -238,6 +238,7 @@
     <ClInclude Include="SimpleMath\SimpleMath.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="TextureManager.h" />
+    <ClInclude Include="TonemapPass.h" />
     <ClInclude Include="Transform.h" />
     <ClInclude Include="UIPass.h" />
     <ClInclude Include="UserData.h" />
@@ -348,6 +349,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="TextureManager.cpp" />
+    <ClCompile Include="TonemapPass.cpp" />
     <ClCompile Include="Transform.cpp" />
     <ClCompile Include="UIPass.cpp" />
     <ClCompile Include="UserData.cpp" />
@@ -494,6 +496,14 @@
     <None Include="..\x64\Debug\Shaders\public\FullScreenTriangle.hlsl">
       <FileType>Document</FileType>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resource\Shaders\private\Color.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Resource\Shaders\public\TonemapPass.hlsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
