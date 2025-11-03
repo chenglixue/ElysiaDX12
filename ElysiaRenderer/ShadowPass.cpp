@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include "ShadowPass.h"
+
+#include "DX12Material.h"
 #include "RenderResource.h"
 
 namespace ElysiaRenderer
@@ -11,6 +13,8 @@ namespace ElysiaRenderer
 
 	void ShadowPass::Configure()
 	{
+
+
 		AddShader(ShaderQueue::Shadow, L"Shaders\\public\\Shadow.hlsl", L"VS", ShaderType::Vertex);
 		AddShader(ShaderQueue::Shadow, L"Shaders\\public\\Shadow.hlsl", L"PS", ShaderType::Pixel);
 

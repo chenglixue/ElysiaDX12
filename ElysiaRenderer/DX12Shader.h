@@ -2,29 +2,8 @@
 
 namespace ElysiaRenderer
 {
-	enum ShaderQueue : UINT
-	{
-		Shadow = 1000,
-		GBuffer = 1500,
-		Opaque = 2000,
-		Skybox = 3000,
-		Transparent = 4000,
-		Blit = 5000
-	};
-
-	enum class ShaderType : uint8_t
-	{
-		Vertex = 0,
-		Pixel = 1,
-		Compute = 2
-	};
-
-	struct ShaderCreateDesc
-	{
-		std::wstring shaderName;	// include file type(such as ".hlsl")
-		std::wstring entryPoint;
-		ShaderType shaderType;
-	};
+	class ShaderType;
+	class ShaderVariable;
 
 	class DX12Shader
 	{
@@ -38,8 +17,12 @@ namespace ElysiaRenderer
 			return m_shader;
 		}
 
+		void SetVariable(const std::vector<ShaderVariable>& shaderVariables);
+		const std::vector<ShaderVariable>& GetVariable() const noexcept;
+
 	private:
 		CComPtr<IDxcBlob> m_shader;
+		std::vector<ShaderVariable> m_variables;
 	};
 
 	extern std::unordered_map<UINT, std::unordered_map<ShaderType, std::unique_ptr<DX12Shader>>> g_vertexShaders;

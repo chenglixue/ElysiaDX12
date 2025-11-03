@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include "DX12Shader.h"
+
+#include "ShaderUtility.h"
 #include <d3d12shader.h>    // Shader reflection.
 
 namespace ElysiaRenderer
@@ -21,5 +23,15 @@ namespace ElysiaRenderer
 	DX12Shader::~DX12Shader()
 	{
 		//ElysiaHelper::SafeRelease(m_shader);
+	}
+
+	void DX12Shader::SetVariable(const std::vector<ShaderVariable>& shaderVariables)
+	{
+		m_variables = shaderVariables;
+	}
+
+	const std::vector<ShaderVariable>& DX12Shader::GetVariable() const noexcept
+	{
+		return m_variables;
 	}
 }
