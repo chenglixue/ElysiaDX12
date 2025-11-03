@@ -904,4 +904,10 @@ float2 RotateVec2(float2 v, float angle)
 
     return float2(v.x * c + v.y * s, -v.x * s + v.y * c);
 }
+
+float PositivePow(float base, float power)
+{
+    return pow(abs(base), power);
+
+}
 #endif

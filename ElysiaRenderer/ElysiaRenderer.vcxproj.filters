@@ -487,6 +487,9 @@
     <None Include="Resource\Shaders\private\Color.hlsl">
       <Filter>Resource Files\Shader\Priavte</Filter>
     </None>
+    <None Include="Resource\Shaders\public\TonemapPass.hlsl">
+      <Filter>Resource Files\Shader\Public</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -731,10 +734,5 @@
     <Image Include="Resource\Tex\Wood.dds">
       <Filter>Resource Files\Tex</Filter>
     </Image>
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="Resource\Shaders\public\TonemapPass.hlsl">
-      <Filter>Resource Files\Shader\Public</Filter>
-    </FxCompile>
   </ItemGroup>
 </Project>

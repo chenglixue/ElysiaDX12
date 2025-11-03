@@ -42,6 +42,7 @@ namespace ElysiaRenderer
 		Execute();
 		{
 			RenderResource::GetInstance().GetCBVPassParameter()->blitterTextureIndex = GetBufferManager()->GetCameraColorRT()->GetTexture()->GetResourceHeapIndex();
+			GetBufferManager()->GetSingleConstantBuffer(PER_PASS_SPACE)->SetMappedData(RenderResource::GetInstance().GetCBVPassParameter(), sizeof(CBVMainPassParameter));
 
 			m_pCommand->AddBarrier(*m_pTempRT->GetTexture(), D3D12_RESOURCE_STATE_RENDER_TARGET);
 			m_pCommand->FlushBarrier();
@@ -78,6 +79,7 @@ namespace ElysiaRenderer
 
 		{
 			RenderResource::GetInstance().GetCBVPassParameter()->blitterTextureIndex = m_pTempRT->GetTexture()->GetResourceHeapIndex();
+			GetBufferManager()->GetSingleConstantBuffer(PER_PASS_SPACE)->SetMappedData(RenderResource::GetInstance().GetCBVPassParameter(), sizeof(CBVMainPassParameter));
 
 			auto cameraColorRT = GetBufferManager()->GetCameraColorRT();
 
@@ -89,7 +91,7 @@ namespace ElysiaRenderer
 			m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 			PipelineInfo pipelineStateData{};
-			pipelineStateData.m_pipelineStateObject = m_PSO.get();
+			pipelineStateData.m_pipelineStateObject = m_TonemapPSO.get();
 			pipelineStateData.m_renderTargets = { cameraColorRT->GetTexture() };
 			pipelineStateData.m_depthStencilTarget = GetBufferManager()->GetCameraDepthRT()->GetTexture();
 
@@ -122,22 +124,24 @@ namespace ElysiaRenderer
 
 	void TonemapPass::CreatePSO()
 	{
-		PipelineStateCreateDesc pipelineStateCreateDesc{};
-		PipelineResourceLayout meshResourceLayout{};
+		{
+			PipelineStateCreateDesc pipelineStateCreateDesc{};
+			PipelineResourceLayout meshResourceLayout{};
 
-		meshResourceLayout.m_spaces[PER_OBJECT_SPACE] = RenderResource::GetPerObjectBindResourceSpace();
-		meshResourceLayout.m_spaces[PER_PASS_SPACE] = RenderResource::GetPerMainBindResourceSpace();
+			meshResourceLayout.m_spaces[PER_OBJECT_SPACE] = RenderResource::GetPerObjectBindResourceSpace();
+			meshResourceLayout.m_spaces[PER_PASS_SPACE] = RenderResource::GetPerMainBindResourceSpace();
 
-		pipelineStateCreateDesc = std::move(CreateDefaultPipelineStateCreateDesc());
-		pipelineStateCreateDesc.m_vertexShader = GetVertexShaders()[ShaderQueue::Blit][ShaderType::Vertex].get();
-		pipelineStateCreateDesc.m_pixelShader = m_pixelShader.get();
-		pipelineStateCreateDesc.m_renderTargetDesc.m_numRenderTargets = 1;
-		pipelineStateCreateDesc.m_renderTargetDesc.m_renderTargetFormats[0] = m_pTempRT->GetFormat();
-		pipelineStateCreateDesc.m_renderTargetDesc.m_depthStencilFormat = GetBufferManager()->GetCameraDepthRT()->GetFormat();
-		pipelineStateCreateDesc.m_depthStencilDesc = GetDepthState(DepthState::Disabled);
-		pipelineStateCreateDesc.m_blendDesc = GetBlendState(BlendState::Disabled);
-		pipelineStateCreateDesc.m_rasterDesc = GetRasterizerState(RasterizerState::NoCullNoMS);
-		pipelineStateCreateDesc.m_topology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-		m_PSO = std::move(GetDevice()->CreateGraphicsPipelineState(pipelineStateCreateDesc, meshResourceLayout));
+			pipelineStateCreateDesc = std::move(CreateDefaultPipelineStateCreateDesc());
+			pipelineStateCreateDesc.m_vertexShader = GetVertexShaders()[ShaderQueue::Blit][ShaderType::Vertex].get();
+			pipelineStateCreateDesc.m_pixelShader = m_pixelShader.get();
+			pipelineStateCreateDesc.m_renderTargetDesc.m_numRenderTargets = 1;
+			pipelineStateCreateDesc.m_renderTargetDesc.m_renderTargetFormats[0] = GetBufferManager()->GetCameraColorRT()->GetFormat();
+			pipelineStateCreateDesc.m_renderTargetDesc.m_depthStencilFormat = GetBufferManager()->GetCameraDepthRT()->GetFormat();
+			pipelineStateCreateDesc.m_depthStencilDesc = GetDepthState(DepthState::Disabled);
+			pipelineStateCreateDesc.m_blendDesc = GetBlendState(BlendState::Disabled);
+			pipelineStateCreateDesc.m_rasterDesc = GetRasterizerState(RasterizerState::NoCullNoMS);
+			pipelineStateCreateDesc.m_topology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+			m_TonemapPSO = std::move(GetDevice()->CreateGraphicsPipelineState(pipelineStateCreateDesc, meshResourceLayout));
+		}
 	}
 }

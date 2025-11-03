@@ -194,6 +194,7 @@ namespace ElysiaRenderer
 		RenderResource::GetInstance().GetCBVPassParameter()->GBuffer4Index = m_GBufferRTs[GBufferIndex++]->GetTexture()->GetResourceHeapIndex();
 		RenderResource::GetInstance().GetCBVPassParameter()->GBuffer5Index = m_GBufferRTs[GBufferIndex++]->GetTexture()->GetResourceHeapIndex();
 		RenderResource::GetInstance().GetCBVPassParameter()->OpaqueDepthIndex = GetBufferManager()->GetCameraDepthRT()->GetTexture()->GetResourceHeapIndex();
+		GetBufferManager()->GetSingleConstantBuffer(PER_PASS_SPACE)->SetMappedData(RenderResource::GetInstance().GetCBVPassParameter(), sizeof(CBVMainPassParameter));
 	}
 
 	void GBufferPass::CreatePSO()

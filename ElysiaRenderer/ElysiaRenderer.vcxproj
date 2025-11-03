@@ -503,7 +503,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Resource\Shaders\public\TonemapPass.hlsl" />
+    <None Include="Resource\Shaders\public\TonemapPass.hlsl">
+      <FileType>Document</FileType>
+    </None>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

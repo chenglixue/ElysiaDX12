@@ -12,6 +12,7 @@
 #include "ShadowPass.h"
 #include "GBufferPass.h"
 #include "OpaquePass.h"
+#include "TonemapPass.h"
 #include "UIPass.h"
 #include "FinalBlitPass.h"
 
@@ -194,6 +195,12 @@ namespace ElysiaRenderer
 
 	void Renderer::Setup()
 	{
+		GetModelImporter()->CreateVertexBuffer();
+		GetModelImporter()->CreateIndexBuffer();
+		GetModelImporter()->CreateMeshRenders();
+
+ 		CreateConstantBuffers();
+
 		RenderPassData passData{};
 		passData.RenderSize = UINT2(static_cast<UINT>(GetDevice()->GetScreenSize().x), static_cast<UINT>(GetDevice()->GetScreenSize().y));
 		passData.pCommand = m_graphicsContext.get();
@@ -202,15 +209,9 @@ namespace ElysiaRenderer
 		m_passes.emplace_back(std::move(std::make_unique<ShadowPass>()));
 		m_passes.emplace_back(std::move(std::make_unique<GBufferPass>()));
 		m_passes.emplace_back(std::move(std::make_unique<OpaquePass>()));
+		m_passes.emplace_back(std::move(std::make_unique<TonemapPass>()));
 		m_passes.emplace_back(std::move(std::make_unique<UIPass>()));
 		m_passes.emplace_back(std::move(std::make_unique<FinalBlitPass>()));
-
-
-		GetModelImporter()->CreateVertexBuffer();
-		GetModelImporter()->CreateIndexBuffer();
-		GetModelImporter()->CreateMeshRenders();
-
- 		CreateConstantBuffers();
 		for (auto& pass : m_passes)
 		{
 			pass->Setup(passData);

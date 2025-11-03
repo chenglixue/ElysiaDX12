@@ -69,6 +69,7 @@ namespace ElysiaRenderer
 	void FinalBlitPass::BindToShader()
 	{
 		RenderResource::GetInstance().GetCBVPassParameter()->blitterTextureIndex = GetBufferManager()->GetCameraColorRT()->GetTexture()->GetResourceHeapIndex();
+		GetBufferManager()->GetSingleConstantBuffer(PER_PASS_SPACE)->SetMappedData(RenderResource::GetInstance().GetCBVPassParameter(), sizeof(CBVMainPassParameter));
 	}
 	void FinalBlitPass::CreatePSO()
 	{

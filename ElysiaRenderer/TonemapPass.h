@@ -18,8 +18,10 @@ namespace ElysiaRenderer
 		virtual void Dispose() override;
 
 	private:
+		std::unique_ptr<DX12BufferResource> m_pBlitPassBuffer = nullptr;
 		std::unique_ptr<RenderTexture> m_pTempRT = nullptr;
-		std::unique_ptr<PipelineStateObject> m_PSO = nullptr;
+		std::unique_ptr<PipelineStateObject> m_BlitPSO = nullptr;
+		std::unique_ptr<PipelineStateObject> m_TonemapPSO = nullptr;
 		std::unique_ptr<DX12Shader> m_pixelShader = nullptr;
 		void BindToShader();
 		void CreatePSO();

@@ -28,7 +28,14 @@ PSOutput PS(PSInput i)
     Texture2D blitterTex = ResourceDescriptorHeap[blitterTextureIndex];
     SamplerState linearSampler = SamplerDescriptorHeap[ClampLinearSampler];
     
-    half4 blitterValue = blitterTex.SampleLevel(linearSampler, i.uv, 0);
+    float4 blitterValue = blitterTex.SampleLevel(linearSampler, i.uv, 0);
+    
+    float4 linearColor = GetSRGBToLinear(blitterValue);
+    
+    float3 tonemapColor = NeutralTonemap(linearColor.rgb);
+    tonemapColor = GetLinearToSRGB(tonemapColor);
+    
+    o.target0 = float4(tonemapColor, 1.f);
     
     return o;
 }
