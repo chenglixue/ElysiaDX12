@@ -110,7 +110,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;USE_PIX;PROFILE;PROFILE_BUILD;DBG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>D:\DX12\ElysiaRenderer\x64\Debug\Shaders;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc\include;D:\DX12\ElysiaDX12\x64\Debug\Assimp\include\assimp;DirectXTK12\Inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>0018;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -167,10 +167,12 @@
     <ClInclude Include="D3D12MemoryAllocator\D3D12MemAlloc.h" />
     <ClInclude Include="DX12BufferResource.h" />
     <ClInclude Include="DX12Camera.h" />
+    <ClInclude Include="DX12Material.h" />
     <ClInclude Include="File.h" />
     <ClInclude Include="FinalBlitPass.h" />
     <ClInclude Include="GBufferPass.h" />
     <ClInclude Include="LightUtility.h" />
+    <ClInclude Include="MObject.h" />
     <ClInclude Include="OpaquePass.h" />
     <ClInclude Include="PipelineResourceUtility.h" />
     <ClInclude Include="PipelineStateUtility.h" />
@@ -203,6 +205,7 @@
     <ClInclude Include="DX12Shadow.h" />
     <ClInclude Include="DX12StagingDescriptorHeap.h" />
     <ClInclude Include="DX12TextureBuffer.h" />
+    <ClInclude Include="ShaderUtility.h" />
     <ClInclude Include="ShadowPass.h" />
     <ClInclude Include="ShadowUtility.h" />
     <ClInclude Include="SkyboxPass.h" />
@@ -291,6 +294,7 @@
     <ClCompile Include="DX12Device.cpp" />
     <ClCompile Include="DX12GraphicsContext.cpp" />
     <ClCompile Include="DX12Light.cpp" />
+    <ClCompile Include="DX12Material.cpp" />
     <ClCompile Include="File.cpp" />
     <ClCompile Include="FinalBlitPass.cpp" />
     <ClCompile Include="GBufferPass.cpp" />
@@ -342,6 +346,7 @@
     <ClCompile Include="RenderResource.cpp" />
     <ClCompile Include="RenderTexture.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
+    <ClCompile Include="ShaderUtility.cpp" />
     <ClCompile Include="ShadowPass.cpp" />
     <ClCompile Include="SkyboxPass.cpp" />
     <ClCompile Include="SobolSequenceGenerator.cpp" />

@@ -328,11 +328,20 @@
     <ClInclude Include="UIPass.h">
       <Filter>Header Files\Render</Filter>
     </ClInclude>
-    <ClInclude Include="PIXHelper.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="TonemapPass.h">
       <Filter>Header Files\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="DX12Material.h">
+      <Filter>Header Files\DX12</Filter>
+    </ClInclude>
+    <ClInclude Include="MObject.h">
+      <Filter>Source Files\DX12</Filter>
+    </ClInclude>
+    <ClInclude Include="PIXHelper.h">
+      <Filter>Header Files\Helper</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderUtility.h">
+      <Filter>Header Files\Utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -697,6 +706,12 @@
     </ClCompile>
     <ClCompile Include="TonemapPass.cpp">
       <Filter>Source Files\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="DX12Material.cpp">
+      <Filter>Source Files\DX12</Filter>
+    </ClCompile>
+    <ClCompile Include="ShaderUtility.cpp">
+      <Filter>Source Files\Utility</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
