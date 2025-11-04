@@ -40,5 +40,6 @@ namespace ElysiaRenderer
 		Type type;
 		UINT registerPos = 0;
 		UINT spaceID = 0;
+		std::string name;
 	};
 }

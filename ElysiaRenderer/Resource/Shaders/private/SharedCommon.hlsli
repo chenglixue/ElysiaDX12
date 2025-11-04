@@ -39,6 +39,26 @@
 #define UINT        uint
 #define int32_t     int
 
+#define DepthDisable                0
+#define DepthEnabled                1
+#define DepthReversed               2
+#define DepthWritesEnabled          3
+#define DepthReversedWritesEnabled  4
+
+#define BlendDisable                0
+#define BlendAdditive               1
+#define BlendAlphaBlend             2
+#define BlendAlphaPreMultiplied     3
+#define BlendAlphaNoColorWrites     4
+#define BlendAlphaPreMultipliedRGB  5
+
+#define RasterizerNoCull                0
+#define RasterizerBackFaceCull          1
+#define RasterizerBackFaceCullNoZClip   2
+#define RasterizerFrontFaceCull         3
+#define RasterizerNoCullNoMS            4
+#define RasterizerWireframe             5
+
 struct DX12Vertex
 {
     Vector3 position;
@@ -46,78 +66,6 @@ struct DX12Vertex
     Vector2 uv;
     Vector3 normal;
     Vector3 tangent;
-};
-
-cbuffer ObjectConstant : register(b0, perObjectSpace)
-{
-    Matrix worldMatrix;
-
-	Vector3 baseColorTint;
-    float opacity;
-
-    float normalIntensity;
-    float metallicIntensity;
-    float roughnessIntensity;
-    float ambientCubemapIntensity;
-
-	Vector3 ambientCubemapTint;
-    int baseColorTexIndex;
-
-	int normalTexIndex;
-    int metallicTexIndex;
-    int roughnessTexIndex;
-    int specularTexIndex;
-    
-    float cutoff;
-    
-    bool g_hasNormalTex;
-};
-
-cbuffer PassConstant : register(b0, perPassSpace)
-{
-    Vector4 cameraPosWS;
-    Matrix  viewMatrix;
-    Matrix  viewMatrix_I;
-    Matrix  projMatrix;
-    Matrix  projMatrix_I;
-    Matrix  viewProjMatrix;
-    Matrix  viewProjMatrix_I;
-    Matrix  shadowMatrix;
-    Vector4 screenSize;
-	Vector4 shadowSize;
-    
-
-    Light mainLight;
-     
-    UINT frameIndex;
-    float nearZ;
-    float farZ;
-    float shadowNearZ;
-    
-    float shadowFarZ;
-    UINT GGX_E_LUT_Index;
-    UINT GGX_Eavg_LUT_Index;
-    UINT SkyboxTexIndex;
-    
-    UINT ShadowTexIndex;
-    UINT BlueNoiseTexIndex;
-    UINT GBuffer0Index;
-	UINT GBuffer1Index;
-
-	UINT GBuffer2Index;
-	UINT GBuffer3Index;
-	UINT GBuffer4Index;
-	UINT GBuffer5Index;
-    
-    UINT  OpaqueDepthIndex;
-    float shadowDepthBias;
-    float shadowSlopeDepthBias;
-    float shadowMaxSlopeDepthBias;
-    
-    UINT blitterTextureIndex = 0;
-	Vector3 padding;
-    
-    Vector2 g_sobolSequence[64];
 };
 
 struct SamplerData

@@ -10,6 +10,7 @@
 #include "DX12Context.h"
 #include "DX12StagingDescriptorHeap.h"
 #include "DX12Queue.h"
+#include "DX12Shader.h"
 
 
 #include "UserData.h"
@@ -732,7 +733,6 @@ namespace ElysiaRenderer
 			L"-I", temp.c_str(),
 			L"-Qstrip_debug",
 			DXC_ARG_PACK_MATRIX_ROW_MAJOR,
-			//DXC_ARG_PACK_MATRIX_COLUMN_MAJOR,
 			DXC_ARG_DEBUG,
 			DXC_ARG_SKIP_OPTIMIZATIONS,
 		};
@@ -913,6 +913,7 @@ namespace ElysiaRenderer
 		//
 		// Get separate reflection.
 		//
+		std::vector<ShaderVariable> shaderVariables{};
 		CComPtr<IDxcBlob> pReflectionData;
 		pResults->GetOutput(DXC_OUT_REFLECTION, IID_PPV_ARGS(&pReflectionData), nullptr);
 		if (pReflectionData != nullptr)
@@ -932,9 +933,67 @@ namespace ElysiaRenderer
 			D3D12_SHADER_DESC* pShaderDesc = nullptr;
 			pReflection->GetDesc(pShaderDesc);
 
+			shaderVariables.reserve(pShaderDesc->BoundResources);
+			for (int i = 0;i < pShaderDesc->BoundResources; ++i)
+			{
+				D3D12_SHADER_INPUT_BIND_DESC resourceDesc{};
+				pReflection->GetResourceBindingDesc(i, &resourceDesc);
+
+				auto variableName = resourceDesc.Name;
+				D3D_SHADER_INPUT_TYPE resourceType = resourceDesc.Type;
+				auto spaceID = resourceDesc.Space;
+				auto registerPos = resourceDesc.BindPoint;
+
+#ifdef DEBUG
+				std::cout << "variable name is " << variableName << std::endl;
+				std::cout << "Resource type is " << resourceType << std::endl;
+				std::cout << "Register space is " << spaceID << std::endl;
+				std::cout << "bind point is " << registerPos << std::endl;
+#endif // DEBUG
+
+				shaderVariables[i].name = variableName;
+				switch (resourceType)
+				{
+				case D3D_SIT_CBUFFER:
+				{
+					shaderVariables[i].type = ShaderVariable::Type::ConstantBuffer;
+					break;
+				}
+				default:
+				{
+					ThrowRuntimeError("Invalid shader resource type");
+					break;
+				}
+				}
+				shaderVariables[i].registerPos = registerPos;
+				shaderVariables[i].spaceID = spaceID;
+			}
+
+			if (shaderCreateDesc.shaderType == ShaderType::Vertex)
+			{
+				std::vector<std::string> inputElementSemanticNames(pShaderDesc->InputParameters);
+				std::vector<D3D12_INPUT_ELEMENT_DESC> inputElementDesc(pShaderDesc->InputParameters);
+
+				for (UINT32 parameterIndex = 0; parameterIndex < pShaderDesc->InputParameters; ++parameterIndex)
+				{
+					D3D12_SIGNATURE_PARAMETER_DESC signatureParameterDesc{};
+					pReflection->GetInputParameterDesc(parameterIndex, &signatureParameterDesc);
+
+					inputElementSemanticNames.emplace_back(signatureParameterDesc.SemanticName);
+
+					inputElementDesc.emplace_back(D3D12_INPUT_ELEMENT_DESC
+					{
+							.SemanticName = signatureParameterDesc.SemanticName,
+							.SemanticIndex = signatureParameterDesc.SemanticIndex,
+							.Format = maskToFormat(signatureParameterDesc.Mask),
+
+					});
+				}
+			}
 		}
 
 		auto o = std::make_unique<DX12Shader>(pShader);
+		o->SetVariable(shaderVariables);
 		return o;
 	}
 	void										DX12Device::CreateSamplers(D3D12_SHADER_VISIBILITY shaderVisibility)

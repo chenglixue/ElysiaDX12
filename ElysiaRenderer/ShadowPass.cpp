@@ -13,10 +13,17 @@ namespace ElysiaRenderer
 
 	void ShadowPass::Configure()
 	{
+		ShaderCreateDesc shaderCreateDesc{};
+		shaderCreateDesc.shaderName = L"Shaders\\public\\Shadow.hlsl";
+		shaderCreateDesc.entryPoint = L"VS";
+		shaderCreateDesc.shaderType = ShaderType::Vertex;
+		auto shadowVSShader = std::move(GetDevice()->CreateShader(shaderCreateDesc));
 
-
-		AddShader(ShaderQueue::Shadow, L"Shaders\\public\\Shadow.hlsl", L"VS", ShaderType::Vertex);
-		AddShader(ShaderQueue::Shadow, L"Shaders\\public\\Shadow.hlsl", L"PS", ShaderType::Pixel);
+		ShaderCreateDesc shaderCreateDesc{};
+		shaderCreateDesc.shaderName = L"Shaders\\public\\Shadow.hlsl";
+		shaderCreateDesc.entryPoint = L"PS";
+		shaderCreateDesc.shaderType = ShaderType::Pixel;
+		auto shadowVSShader = std::move(GetDevice()->CreateShader(shaderCreateDesc));
 
 		m_pMainLight = GetLightManager()->GetMainLight();
 		CreateMainShadow(1000, DXGI_FORMAT_D24_UNORM_S8_UINT);
