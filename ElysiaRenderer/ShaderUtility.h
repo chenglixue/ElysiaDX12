@@ -41,5 +41,8 @@ namespace ElysiaRenderer
 		UINT registerPos = 0;
 		UINT spaceID = 0;
 		std::string name;
+		UINT size = 0;
 	};
+
+	DXGI_FORMAT MaskToFormat(const uint32_t Mask);
 }

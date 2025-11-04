@@ -33,14 +33,19 @@ namespace ElysiaRenderer
 	{
 		m_variables = shaderVariables;
 	}
-
 	const std::vector<ShaderVariable>& DX12Shader::GetVariable() const noexcept
 	{
 		return m_variables;
 	}
 
-	void DX12Shader::SetInputElementSemanticNames(const std::vector<std::string>& inputElementSemanticNames)
+	void DX12Shader::SetInputLayoutDesc(const D3D12_INPUT_LAYOUT_DESC& inputLayoutDesc)
 	{
-		m_inputElementSemanticNames = inputElementSemanticNames;
+		m_inputLayoutDesc = inputLayoutDesc;
 	}
+	const D3D12_INPUT_LAYOUT_DESC& DX12Shader::GetInputElementDesc() const noexcept
+	{
+		return m_inputLayoutDesc;
+	}
+
+
 }

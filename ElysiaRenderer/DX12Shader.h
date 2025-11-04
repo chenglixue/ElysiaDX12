@@ -1,5 +1,6 @@
 #pragma once
 #include "MObject.h"
+#include "PipelineResourceUtility.h"
 #include "ShaderUtility.h"
 
 namespace ElysiaRenderer
@@ -18,12 +19,14 @@ namespace ElysiaRenderer
 		void SetVariable(const std::vector<ShaderVariable>& shaderVariables);
 		const std::vector<ShaderVariable>& GetVariable() const noexcept;
 
-		void SetInputElementSemanticNames(const std::vector<std::string>& inputElementSemanticNames);
+		void SetInputLayoutDesc(const D3D12_INPUT_LAYOUT_DESC& inputLayoutDesc);
+		const D3D12_INPUT_LAYOUT_DESC& GetInputElementDesc() const noexcept;
 
 	private:
 		CComPtr<IDxcBlob> m_shader;
-		std::vector<std::string> m_inputElementSemanticNames;
+		D3D12_INPUT_LAYOUT_DESC m_inputLayoutDesc;
 		std::vector<ShaderVariable> m_variables;
+		PipelineResourceLayout m_pipelineResourceLayout{};
 		std::unique_ptr<PipelineStateObject> m_pPipelineStateObject = nullptr;
 	};
 
