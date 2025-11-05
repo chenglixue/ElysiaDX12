@@ -22,11 +22,13 @@ namespace ElysiaRenderer
 		void SetInputLayoutDesc(const D3D12_INPUT_LAYOUT_DESC& inputLayoutDesc);
 		const D3D12_INPUT_LAYOUT_DESC& GetInputElementDesc() const noexcept;
 
+		void SetConstantBufferVariable(const std::string& name, const ShaderConstantVariableDesc& desc);
+		const std::unordered_map<std::string, ShaderConstantVariableDesc>& GetConstantBufferVariables() const noexcept;
 	private:
 		CComPtr<IDxcBlob> m_shader;
 		D3D12_INPUT_LAYOUT_DESC m_inputLayoutDesc;
 		std::vector<ShaderVariable> m_variables;
-		PipelineResourceLayout m_pipelineResourceLayout{};
+		std::unordered_map<std::string, ShaderConstantVariableDesc> m_constantBufferVariables;
 		std::unique_ptr<PipelineStateObject> m_pPipelineStateObject = nullptr;
 	};
 

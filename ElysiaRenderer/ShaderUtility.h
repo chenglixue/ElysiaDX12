@@ -44,5 +44,12 @@ namespace ElysiaRenderer
 		UINT size = 0;
 	};
 
+	struct ShaderConstantVariableDesc
+	{
+		UINT					SpaceID = 0;
+		UINT                    StartOffset;    // Offset in constant buffer's backing store
+		UINT                    Size;           // Size of variable (in bytes)
+	};
+
 	DXGI_FORMAT MaskToFormat(const uint32_t Mask);
 }

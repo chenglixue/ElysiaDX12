@@ -19,7 +19,8 @@ namespace ElysiaRenderer
 	{
 	public:
 		BasePass() : 
-			m_renderSize(0, 0)
+			m_renderSize(0, 0),
+			m_pGraphicsPipelineStates(std::unordered_map<UINT, std::unique_ptr<PipelineStateObject>>())
 		{
 			
 		}
@@ -73,6 +74,6 @@ namespace ElysiaRenderer
 	protected:
 		UINT2 m_renderSize;
 		DX12GraphicsContext* m_pCommand = nullptr;
-		std::unordered_map<UINT, std::unique_ptr<PipelineStateObject>>* m_pGraphicsPipelineStates = nullptr;
+		std::unordered_map<UINT, std::unique_ptr<PipelineStateObject>> m_pGraphicsPipelineStates;
 	};
 }

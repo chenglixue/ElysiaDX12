@@ -720,7 +720,7 @@ namespace ElysiaRenderer
 
 		LPCWSTR pdbName = std::wstring(shaderCreateDesc.shaderName + shaderCreateDesc.entryPoint + std::wstring(L".pdb")).c_str();
 		LPCWSTR binName = std::wstring(shaderCreateDesc.shaderName + shaderCreateDesc.entryPoint + std::wstring(L".bin")).c_str();
-		 
+		
 		std::vector<LPCWSTR> pszArgs =
 		{
 			shaderCreateDesc.shaderName.c_str(),            // Optional shader source file name for error reporting and for PIX shader source view.  
@@ -936,10 +936,9 @@ namespace ElysiaRenderer
 			D3D12_SHADER_DESC* pShaderDesc = nullptr;
 			pReflection->GetDesc(pShaderDesc);
 
-			// Get ConstantBuffer layout
+			// Set ConstantBuffer layout & constant buffer member
 			{
 				std::vector<ShaderVariable> shaderVariables{};
-				shaderVariables.reserve(pShaderDesc->BoundResources);
 				for (int i = 0; i < pShaderDesc->BoundResources; ++i)
 				{
 					D3D12_SHADER_INPUT_BIND_DESC resourceDesc{};
@@ -963,11 +962,32 @@ namespace ElysiaRenderer
 						std::cout << "bind point is " << registerPos << std::endl;
 #endif // DEBUG
 
-						shaderVariables[i].name = variableName;
-						shaderVariables[i].type = ShaderVariable::Type::ConstantBuffer;
-						shaderVariables[i].registerPos = registerPos;
-						shaderVariables[i].spaceID = spaceID;
-						shaderVariables[i].size = constantBufferDesc.Size;
+						ShaderVariable temp
+						{
+							.type = ShaderVariable::Type::ConstantBuffer,
+							.registerPos = registerPos,
+							.spaceID = spaceID,
+							.name = variableName,
+							.size = constantBufferDesc.Size
+						};
+						shaderVariables.emplace_back(temp);
+
+						for (UINT memberIndex = 0; memberIndex < constantBufferDesc.Variables; ++memberIndex)
+						{
+							auto memberVariable = pConstantBuffer->GetVariableByIndex(memberIndex);
+							D3D12_SHADER_VARIABLE_DESC variableDesc;
+							ZeroMemory(&variableDesc, sizeof(D3D12_SHADER_VARIABLE_DESC));
+							memberVariable->GetDesc(&variableDesc);
+
+							ShaderConstantVariableDesc constantVariableDesc
+							{
+								.SpaceID = spaceID,
+								.StartOffset = variableDesc.StartOffset,
+								.Size = variableDesc.Size
+							};
+
+							o->SetConstantBufferVariable(variableDesc.Name, std::move(constantVariableDesc));
+						}
 					}
 				}
 				o->SetVariable(std::move(shaderVariables));

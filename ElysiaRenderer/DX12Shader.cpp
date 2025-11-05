@@ -10,9 +10,10 @@ namespace ElysiaRenderer
 	std::unordered_map<UINT, std::unordered_map<ShaderType, std::unique_ptr<DX12Shader>>>  g_computeShaders{};
 
 	DX12Shader::DX12Shader() : 
-		m_shader(nullptr)
+		m_shader(nullptr),
+		m_constantBufferVariables(std::unordered_map<std::string, ShaderConstantVariableDesc>()),
+		m_pipelineResourceLayout(PipelineResourceLayout())
 	{
-
 	}
 	DX12Shader::DX12Shader(CComPtr<IDxcBlob> shader)
 	{
@@ -47,5 +48,12 @@ namespace ElysiaRenderer
 		return m_inputLayoutDesc;
 	}
 
-
+	void DX12Shader::SetConstantBufferVariable(const std::string& name, const ShaderConstantVariableDesc& desc)
+	{
+		m_constantBufferVariables[name] = desc;
+	}
+	const std::unordered_map<std::string, ShaderConstantVariableDesc>& DX12Shader::GetConstantBufferVariables() const noexcept
+	{
+		return m_constantBufferVariables;
+	}
 }
