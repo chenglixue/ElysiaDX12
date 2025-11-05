@@ -50,10 +50,6 @@ namespace ElysiaRenderer
 			m_constantVariableDescs.insert(std::move(PSConstantVariableDesc));
 		}
 
-		m_pMainLight = GetLightManager()->GetMainLight();
-		CreateMainShadow(1000, DXGI_FORMAT_D24_UNORM_S8_UINT);
-		RenderResource::GetInstance().GetCBVPassParameter()->ShadowTexIndex = m_pShadowRT->GetTexture()->GetResourceHeapIndex();
-
 		for (auto& shaderVariable : m_shaderVariables)
 		{
 			auto currVariable = shaderVariable.second;
@@ -85,6 +81,11 @@ namespace ElysiaRenderer
 
 		}
 
+		auto desc = m_constantVariableDescs["shadowMatrix"];
+		auto buffer = m_meshResourceLayout.m_spaces[desc.SpaceID]->GetCBV()->GetMappedBuffer();
+		buffer += desc.StartOffset;
+		memcpy(buffer, (void*) (&m_pShadowRT->GetTexture()->GetResourceHeapIndex()), sizeof(UINT));
+
 		PipelineStateCreateDesc pipelineStateCreateDesc{};
 		pipelineStateCreateDesc = std::move(CreateDefaultPipelineStateCreateDesc());
 		pipelineStateCreateDesc.m_vertexShader = shadowVSShader.release();
@@ -96,6 +97,10 @@ namespace ElysiaRenderer
 		pipelineStateCreateDesc.m_depthStencilDesc = GetDepthState(DepthState::WritesEnabled);
 		pipelineStateCreateDesc.m_topology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 		m_pGraphicsPipelineStates[ShaderQueue::Shadow] = std::move(GetDevice()->CreateGraphicsPipelineState(pipelineStateCreateDesc, m_meshResourceLayout));
+
+		m_pMainLight = GetLightManager()->GetMainLight();
+		CreateMainShadow(1000, DXGI_FORMAT_D24_UNORM_S8_UINT);
+		RenderResource::GetInstance().GetCBVPassParameter()->ShadowTexIndex = m_pShadowRT->GetTexture()->GetResourceHeapIndex();
 	}
 	void ShadowPass::Execute()
 	{

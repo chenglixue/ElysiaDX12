@@ -41,7 +41,7 @@ namespace ElysiaRenderer
 		/// index of SRV Resource in SRV Descriptor heap
 		/// </summary>
 		/// <returns></returns>
-		UINT GetResourceHeapIndex()
+		const UINT& GetResourceHeapIndex()
 		{
 			return m_descriptorHeapIndex;
 		}
