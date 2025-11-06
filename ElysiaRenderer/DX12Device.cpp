@@ -983,7 +983,8 @@ namespace ElysiaRenderer
 							{
 								.SpaceID = spaceID,
 								.StartOffset = variableDesc.StartOffset,
-								.Size = variableDesc.Size
+								.Size = variableDesc.Size,
+								.pData = new char[variableDesc.Size]
 							};
 
 							o->SetConstantBufferVariable(variableDesc.Name, std::move(constantVariableDesc));

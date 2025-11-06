@@ -27,43 +27,43 @@ namespace ElysiaRenderer
 
 	}
 
-	UINT DX12Shadow::GetWidth() const
+	const UINT& DX12Shadow::GetWidth() const noexcept
 	{
 		return m_width;
 	}
-	UINT DX12Shadow::GetHeight() const
+	const UINT& DX12Shadow::GetHeight() const noexcept
 	{
 		return m_height;
 	}
-	DX12TextureResource* DX12Shadow::GetShadowRT() const
+	const DX12TextureResource* DX12Shadow::GetShadowRT() const noexcept
 	{
 		return m_buffer;
 	}
-	D3D12_VIEWPORT& DX12Shadow::GetViewport()
+	const D3D12_VIEWPORT& DX12Shadow::GetViewport() const noexcept
 	{
 		return m_viewPort;
 	}
-	D3D12_RECT& DX12Shadow::GetScissorRect()
+	const D3D12_RECT& DX12Shadow::GetScissorRect() const noexcept
 	{
 		return m_scissorRect;
 	}
-	float& DX12Shadow::GetNearZ()
+	const float& DX12Shadow::GetNearZ() const noexcept
 	{
 		return m_nearZ;
 	}
-	float& DX12Shadow::GetFarZ()
+	const float& DX12Shadow::GetFarZ() const noexcept
 	{
 		return m_farZ;
 	}
-	Matrix& DX12Shadow::GetView()
+	const Matrix& DX12Shadow::GetView() const noexcept
 	{
 		return m_shadowViewMatrix;
 	}
-	Matrix& DX12Shadow::GetProj()
+	const Matrix& DX12Shadow::GetProj() const noexcept
 	{
 		return m_shadowProjMatrix;
 	}
-	Matrix& DX12Shadow::GetShadowMat()
+	const Matrix& DX12Shadow::GetShadowMat() const noexcept
 	{
 		return m_shadowMatrix;
 	}

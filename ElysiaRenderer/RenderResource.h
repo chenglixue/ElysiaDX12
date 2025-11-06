@@ -14,20 +14,11 @@ namespace ElysiaRenderer
 		RenderResource(RenderResource&& rhs) = default;
 		~RenderResource();
 
-		static RenderResource& GetInstance()
-		{
-			std::call_once(m_initInstanceFlag, []() {
-				m_instance.reset(new RenderResource());
-				});
-
-			return *m_instance;
-		}
-
-		static PipelineResourceSpace* GetPerObjectBindResourceSpace()
+		PipelineResourceSpace* GetPerObjectBindResourceSpace()
 		{
 			return m_perObjectBindResourceSpace.get();
 		}
-		static PipelineResourceSpace* GetPerMainBindResourceSpace()
+		PipelineResourceSpace* GetPerMainBindResourceSpace()
 		{
 			return m_perMainPassBindResourceSpace.get();
 		}
@@ -35,14 +26,22 @@ namespace ElysiaRenderer
 		CBVMainPassParameter* GetCBVPassParameter();
 
 	private:
-		static std::unique_ptr<RenderResource> m_instance;
-		static std::once_flag m_initInstanceFlag;
 
-		static std::unique_ptr<PipelineResourceSpace> m_perObjectBindResourceSpace;
-		static std::unique_ptr<PipelineResourceSpace> m_perMainPassBindResourceSpace;
+		std::unique_ptr<PipelineResourceSpace> m_perObjectBindResourceSpace;
+		std::unique_ptr<PipelineResourceSpace> m_perMainPassBindResourceSpace;
 
 		DX12Device* m_device = nullptr;
 		std::unique_ptr<CBVMainPassParameter> m_pCBVPassParameter = nullptr;
 	};
 
+
+	extern std::unique_ptr<RenderResource> g_pRenderResource;
+	inline RenderResource* GetRenderResource()
+	{
+		if (g_pRenderResource == nullptr)
+		{
+			ThrowRuntimeError("Null Render Resource");
+		}
+		return g_pRenderResource.get();
+	}
 }

@@ -18,6 +18,7 @@
 
 #include "SobolSequenceGenerator.h"
 #include "CBVParameter.h"
+#include "RenderResource.h"
 
 
 extern "C" { __declspec(dllexport) extern const UINT D3D12SDKVersion = 618; }
@@ -204,7 +205,6 @@ namespace ElysiaRenderer
 		RenderPassData passData{};
 		passData.RenderSize = UINT2(static_cast<UINT>(GetDevice()->GetScreenSize().x), static_cast<UINT>(GetDevice()->GetScreenSize().y));
 		passData.pCommand = m_graphicsContext.get();
-		passData.pGraphicsPipelineStates = &m_graphicsPipelineStates;
 
 		m_passes.emplace_back(std::move(std::make_unique<ShadowPass>()));
 		m_passes.emplace_back(std::move(std::make_unique<GBufferPass>()));
@@ -224,12 +224,6 @@ namespace ElysiaRenderer
 		desc.m_viewFlags = GPUResourceFlags::CBV;
 		desc.m_isRawAccess = false;
 		
-		desc.m_size = sizeof(CBVMainPassParameter);
-		GetBufferManager()->AddConstantBuffer(PER_PASS_SPACE, desc);
-		GetBufferManager()->GetSingleConstantBuffer(PER_PASS_SPACE)->SetMappedData(RenderResource::GetInstance().GetCBVPassParameter(), sizeof(CBVMainPassParameter));
-		RenderResource::GetPerMainBindResourceSpace()->SetCBV(GetBufferManager()->GetSingleConstantBuffer(PER_PASS_SPACE));
-		RenderResource::GetPerMainBindResourceSpace()->Lock();
-
 		desc.m_size = sizeof(CBVObjectParameter);
 		for (UINT meshIndex = 0; meshIndex < GetModelImporter()->GetMeshCount(); ++meshIndex)
 		{
@@ -244,8 +238,6 @@ namespace ElysiaRenderer
 				objectContantBuffer->SetMappedData(&objectConstantParameter, sizeof(CBVObjectParameter));
 			}
 		}
-		RenderResource::GetPerObjectBindResourceSpace()->SetCBV(GetBufferManager()->GetMutilConstantBuffer(PER_OBJECT_SPACE, 0, 0));
-		RenderResource::GetPerObjectBindResourceSpace()->Lock();
 	}
 
 	void Renderer::Execute()

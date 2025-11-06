@@ -11,8 +11,7 @@ namespace ElysiaRenderer
 
 	DX12Shader::DX12Shader() : 
 		m_shader(nullptr),
-		m_constantBufferVariables(std::unordered_map<std::string, ShaderConstantVariableDesc>()),
-		m_pipelineResourceLayout(PipelineResourceLayout())
+		m_constantBufferVariables(std::unordered_map<std::string, ShaderConstantVariableDesc>())
 	{
 	}
 	DX12Shader::DX12Shader(CComPtr<IDxcBlob> shader)

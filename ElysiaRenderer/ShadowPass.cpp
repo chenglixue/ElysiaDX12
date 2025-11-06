@@ -3,6 +3,7 @@
 
 #include "DX12Material.h"
 #include "RenderResource.h"
+#include "PIXHelper.h"
 
 namespace ElysiaRenderer
 {
@@ -13,83 +14,10 @@ namespace ElysiaRenderer
 
 	void ShadowPass::Configure()
 	{
-		ShaderCreateDesc shaderCreateDesc{};
-		ZeroMemory(&shaderCreateDesc, sizeof(ShaderCreateDesc));
-		shaderCreateDesc.shaderName = L"Shaders\\public\\Shadow.hlsl";
-		shaderCreateDesc.entryPoint = L"VS";
-		shaderCreateDesc.shaderType = ShaderType::Vertex;
-		auto shadowVSShader = std::move(GetDevice()->CreateShader(shaderCreateDesc));
-
-		ZeroMemory(&shaderCreateDesc, sizeof(ShaderCreateDesc));
-		shaderCreateDesc.shaderName = L"Shaders\\public\\Shadow.hlsl";
-		shaderCreateDesc.entryPoint = L"PS";
-		shaderCreateDesc.shaderType = ShaderType::Pixel;
-		auto shadowPSShader = std::move(GetDevice()->CreateShader(shaderCreateDesc));
-
-		auto VSShaderVariables = shadowVSShader->GetVariable();
-		auto PSShaderVariables = shadowPSShader->GetVariable();
-		for (auto& VSShaderVariable : VSShaderVariables)
-		{
-			m_shaderVariables[VSShaderVariable.name] = VSShaderVariable;
-		}
-		for (auto& PSShaderVariable : PSShaderVariables)
-		{
-			if (m_shaderVariables.find(PSShaderVariable.name) != m_shaderVariables.end()) continue;
-			m_shaderVariables[PSShaderVariable.name] = PSShaderVariable;
-		}
-
-		auto VSConstantVariableDescs = shadowVSShader->GetConstantBufferVariables();
-		auto PSConstantVariableDescs = shadowPSShader->GetConstantBufferVariables();
-		for (auto& VSConstantVariableDesc : VSConstantVariableDescs)
-		{
-			m_constantVariableDescs.insert(std::move(VSConstantVariableDesc));
-		}
-		for (auto& PSConstantVariableDesc : PSConstantVariableDescs)
-		{
-			if (m_constantVariableDescs.find(PSConstantVariableDesc.first) != m_constantVariableDescs.end()) continue;
-			m_constantVariableDescs.insert(std::move(PSConstantVariableDesc));
-		}
-
-		for (auto& shaderVariable : m_shaderVariables)
-		{
-			auto currVariable = shaderVariable.second;
-			switch (currVariable.type)
-			{
-				case ShaderVariable::Type::ConstantBuffer:
-				{
-					BufferCreationDesc bufferDesc
-					{
-						.m_name = stringToLPCWSTR(currVariable.name),
-						.m_size = currVariable.size,
-						.m_viewFlags = GPUResourceFlags::CBV,
-						.m_accessFlags = BufferAccessFlags::HostWritable,
-						.m_isRawAccess = false,
-					};
-
-					auto pNewBuffer = std::move(GetDevice()->CreateBuffer(bufferDesc));
-
-					std::unique_ptr<PipelineResourceSpace> pPipelineResourceSpace = std::make_unique<PipelineResourceSpace>();
-					pPipelineResourceSpace->SetCBV(pNewBuffer.release());
-					pPipelineResourceSpace->Lock();
-
-					m_meshResourceLayout.m_spaces[currVariable.spaceID] = pPipelineResourceSpace.release();
-
-					break;
-				}
-			}
-
-
-		}
-
-		auto desc = m_constantVariableDescs["shadowMatrix"];
-		auto buffer = m_meshResourceLayout.m_spaces[desc.SpaceID]->GetCBV()->GetMappedBuffer();
-		buffer += desc.StartOffset;
-		memcpy(buffer, (void*) (&m_pShadowRT->GetTexture()->GetResourceHeapIndex()), sizeof(UINT));
-
 		PipelineStateCreateDesc pipelineStateCreateDesc{};
 		pipelineStateCreateDesc = std::move(CreateDefaultPipelineStateCreateDesc());
-		pipelineStateCreateDesc.m_vertexShader = shadowVSShader.release();
-		pipelineStateCreateDesc.m_pixelShader = shadowPSShader.release();
+		pipelineStateCreateDesc.m_vertexShader = m_pShadowVS.get();
+		pipelineStateCreateDesc.m_pixelShader = m_pShadowPS.release();
 		pipelineStateCreateDesc.m_renderTargetDesc.m_numRenderTargets = 0;
 		pipelineStateCreateDesc.m_renderTargetDesc.m_depthStencilFormat = GetShadowRT()->GetFormat();
 		pipelineStateCreateDesc.m_rasterDesc = GetRasterizerState(RasterizerState::BackFaceCull);
@@ -107,18 +35,20 @@ namespace ElysiaRenderer
 		m_pMainShadow->UpdateShadowTransform(m_pMainLight);
 
 		auto& pUserData = UserData::GetInstance();
-		auto passParameter = RenderResource::GetInstance().GetCBVPassParameter();
 
-		passParameter->shadowMatrix = m_pMainShadow->GetShadowMat();
-		passParameter->shadowSize = GetScreenSize(Vector2(m_pMainShadow->GetWidth(), m_pMainShadow->GetHeight()));
-		passParameter->shadowNearZ = m_pMainShadow->GetNearZ();
-		passParameter->shadowFarZ = m_pMainShadow->GetFarZ();
+		auto shadowDepthBias = pUserData.shadowDepthBias / 100;
+		auto shadowSlopeDepthBias = pUserData.shadowSlopeDepthBias / 100;
+		auto shadowMaxSlopeDepthBias = pUserData.shadowMaxSlopeDepthBias / 100;
 
-		passParameter->shadowDepthBias = pUserData.shadowDepthBias / 100;
-		passParameter->shadowSlopeDepthBias = pUserData.shadowSlopeDepthBias / 100;
-		passParameter->shadowMaxSlopeDepthBias = pUserData.shadowMaxSlopeDepthBias / 100;
+		SetConstantData("shadowMatrix", &m_pMainShadow->GetShadowMat());
+		SetConstantData("shadowSize", &GetScreenSize(Vector2(m_pMainShadow->GetWidth(), m_pMainShadow->GetHeight())));
+		SetConstantData("shadowNearZ", &m_pMainShadow->GetNearZ());
+		SetConstantData("shadowFarZ", &m_pMainShadow->GetFarZ());
+		SetConstantData("shadowDepthBias", &shadowDepthBias);
+		SetConstantData("shadowSlopeDepthBias", &shadowSlopeDepthBias);
+		SetConstantData("shadowMaxSlopeDepthBias", &shadowMaxSlopeDepthBias);
 
-		GetBufferManager()->GetSingleConstantBuffer(PER_PASS_SPACE)->SetMappedData(passParameter, sizeof(CBVMainPassParameter));
+		ApplyConstantData();
 	}
 	void ShadowPass::Render()
 	{
@@ -181,6 +111,77 @@ namespace ElysiaRenderer
 	void ShadowPass::Dispose()
 	{
 
+	}
+
+	void ShadowPass::SetupShaderData()
+	{
+		ShaderCreateDesc shaderCreateDesc{};
+		ZeroMemory(&shaderCreateDesc, sizeof(ShaderCreateDesc));
+		shaderCreateDesc.shaderName = L"Shaders\\public\\Shadow.hlsl";
+		shaderCreateDesc.entryPoint = L"VS";
+		shaderCreateDesc.shaderType = ShaderType::Vertex;
+		m_pShadowVS = std::move(GetDevice()->CreateShader(shaderCreateDesc));
+
+		ZeroMemory(&shaderCreateDesc, sizeof(ShaderCreateDesc));
+		shaderCreateDesc.shaderName = L"Shaders\\public\\Shadow.hlsl";
+		shaderCreateDesc.entryPoint = L"PS";
+		shaderCreateDesc.shaderType = ShaderType::Pixel;
+		m_pShadowPS = std::move(GetDevice()->CreateShader(shaderCreateDesc));
+
+		auto VSShaderVariables = m_pShadowVS->GetVariable();
+		auto PSShaderVariables = m_pShadowPS->GetVariable();
+		for (auto& VSShaderVariable : VSShaderVariables)
+		{
+			m_shaderVariables[VSShaderVariable.name] = VSShaderVariable;
+		}
+		for (auto& PSShaderVariable : PSShaderVariables)
+		{
+			if (m_shaderVariables.find(PSShaderVariable.name) != m_shaderVariables.end()) continue;
+			m_shaderVariables[PSShaderVariable.name] = PSShaderVariable;
+		}
+
+		auto VSConstantVariableDescs = m_pShadowVS->GetConstantBufferVariables();
+		auto PSConstantVariableDescs = m_pShadowPS->GetConstantBufferVariables();
+		for (auto& VSConstantVariableDesc : VSConstantVariableDescs)
+		{
+			m_constantVariableDescs.insert(std::move(VSConstantVariableDesc));
+		}
+		for (auto& PSConstantVariableDesc : PSConstantVariableDescs)
+		{
+			if (m_constantVariableDescs.find(PSConstantVariableDesc.first) != m_constantVariableDescs.end()) continue;
+			m_constantVariableDescs.insert(std::move(PSConstantVariableDesc));
+		}
+
+		for (auto& shaderVariable : m_shaderVariables)
+		{
+			auto currVariable = shaderVariable.second;
+			switch (currVariable.type)
+			{
+			case ShaderVariable::Type::ConstantBuffer:
+			{
+				BufferCreationDesc bufferDesc
+				{
+					.m_name = stringToLPCWSTR(currVariable.name),
+					.m_size = currVariable.size,
+					.m_viewFlags = GPUResourceFlags::CBV,
+					.m_accessFlags = BufferAccessFlags::HostWritable,
+					.m_isRawAccess = false,
+				};
+
+				auto pNewBuffer = std::move(GetDevice()->CreateBuffer(bufferDesc));
+
+				std::unique_ptr<PipelineResourceSpace> pPipelineResourceSpace = std::make_unique<PipelineResourceSpace>();
+				pPipelineResourceSpace->SetCBV(pNewBuffer.release());
+				pPipelineResourceSpace->Lock();
+
+				m_meshResourceLayout.m_spaces[currVariable.spaceID] = pPipelineResourceSpace.release();
+
+				break;
+			}
+			}
+
+
+		}
 	}
 
 	void ShadowPass::CreateMainShadow(float boundSphereRadius, DXGI_FORMAT format)

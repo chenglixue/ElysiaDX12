@@ -18,15 +18,18 @@ namespace ElysiaRenderer
 		DX12DescriptorHeapHandle GetSRVDescriptor() const noexcept;
 		DX12DescriptorHeapHandle GetUAVDescriptor() const noexcept;
 		uint8_t* GetMappedBuffer() const noexcept;
+		bool GetIsDirty() const noexcept;
 
 		void SetStride(float stride);
 		void SetCBVDescriptor(const DX12DescriptorHeapHandle& CBVDescriptor);
 		void SetSRVDescriptor(const DX12DescriptorHeapHandle& SRVDescriptor);
 		void SetUAVDescriptor(const DX12DescriptorHeapHandle& UAVDescriptor);
 		void SetMappedData(const void* bufferData, size_t bufferSize);
+		void SetDirty(bool isDirty);
 
 		uint8_t* m_mappedBuffer = nullptr;
 	protected:
+		bool m_isDirty = false;
 		size_t m_stride = 0;
 		DX12DescriptorHeapHandle m_CBVDescriptor;
 		DX12DescriptorHeapHandle m_SRVDescriptor;

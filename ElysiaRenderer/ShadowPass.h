@@ -13,9 +13,7 @@ namespace ElysiaRenderer
 	{
 	public:
 		ShadowPass() : 
-			m_shaderVariables(std::unordered_map<std::string, ShaderVariable>()),
-			m_meshResourceLayout(PipelineResourceLayout()),
-			m_constantVariableDescs(std::unordered_map<std::string, ShaderConstantVariableDesc>())
+			BasePass()
 		{
 
 		};
@@ -30,14 +28,15 @@ namespace ElysiaRenderer
 
 		RenderTexture* GetShadowRT() const;
 
+		void SetupShaderData();
+
 	private:
 		std::unique_ptr<RenderTexture> m_pShadowRT = nullptr;
 		std::unique_ptr<DX12Shadow> m_pMainShadow = nullptr;
 		DX12DirectionLight* m_pMainLight = nullptr;
 
-		std::unordered_map<std::string, ShaderVariable> m_shaderVariables;
-		std::unordered_map<std::string, ShaderConstantVariableDesc> m_constantVariableDescs;
-		PipelineResourceLayout m_meshResourceLayout;
+		std::unique_ptr<DX12Shader> m_pShadowVS = nullptr;
+		std::unique_ptr<DX12Shader> m_pShadowPS = nullptr;
 
 		void CreateMainShadow(float boundSphereRadius, DXGI_FORMAT format);
 	};

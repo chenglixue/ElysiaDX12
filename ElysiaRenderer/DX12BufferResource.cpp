@@ -4,12 +4,14 @@
 namespace ElysiaRenderer
 {
 	DX12BufferResource::DX12BufferResource(CComPtr<ID3D12Resource> resource, D3D12_RESOURCE_STATES usageState)
-		: DX12GPUResource(resource, usageState)
+		: DX12GPUResource(resource, usageState),
+		m_isDirty(false)
 	{
 
 	}
 	DX12BufferResource::DX12BufferResource(CComPtr<ID3D12Resource> resource, D3D12_RESOURCE_STATES usageState, CComPtr<D3D12MA::Allocation> allocation)
-		: DX12GPUResource(resource, usageState)
+		: DX12GPUResource(resource, usageState),
+		m_isDirty(false)
 	{
 		m_bufferType = GPUResourceType::Buffer;
 
@@ -19,7 +21,10 @@ namespace ElysiaRenderer
 
 	DX12BufferResource::~DX12BufferResource()
 	{
-		Destory();
+		if (m_resource != nullptr)
+		{
+			m_resource->Unmap(0, nullptr);
+		}
 	}
 
 	float DX12BufferResource::GetStride() const noexcept
@@ -42,6 +47,11 @@ namespace ElysiaRenderer
 	{
 		return m_mappedBuffer;
 	}
+	bool DX12BufferResource::GetIsDirty() const noexcept
+	{
+		return m_isDirty;
+	}
+
 
 	void DX12BufferResource::SetStride(float stride)
 	{
@@ -63,5 +73,9 @@ namespace ElysiaRenderer
 	{
 		assert(m_mappedBuffer != nullptr && bufferData != nullptr && bufferSize > 0 && bufferSize <= m_resourceDesc.Width);
 		memcpy_s(m_mappedBuffer, m_resourceDesc.Width, bufferData, bufferSize);
+	}
+	void DX12BufferResource::SetDirty(bool isDirty)
+	{
+		m_isDirty = isDirty;
 	}
 }

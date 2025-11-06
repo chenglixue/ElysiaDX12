@@ -18,16 +18,16 @@ namespace ElysiaRenderer
 		DX12Shadow(DX12Shadow&& rhs) = default;
 		~DX12Shadow();
 
-		UINT GetWidth() const;
-		UINT GetHeight() const;
-		DX12TextureResource* GetShadowRT() const;
-		D3D12_VIEWPORT& GetViewport();
-		D3D12_RECT& GetScissorRect();
-		float& GetNearZ();
-		float& GetFarZ();
-		Matrix& GetView();
-		Matrix& GetProj();
-		Matrix& GetShadowMat();
+		const UINT& GetWidth() const noexcept;
+		const UINT& GetHeight() const noexcept;
+		const DX12TextureResource* GetShadowRT() const noexcept;
+		const D3D12_VIEWPORT& GetViewport() const noexcept;
+		const D3D12_RECT& GetScissorRect() const noexcept;
+		const float& GetNearZ() const noexcept;
+		const float& GetFarZ() const noexcept;
+		const Matrix& GetView() const noexcept;
+		const Matrix& GetProj() const noexcept;
+		const Matrix& GetShadowMat() const noexcept;
 
 		void CreateViewport();
 		void CreateScissorRect();

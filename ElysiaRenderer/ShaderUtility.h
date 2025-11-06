@@ -46,9 +46,18 @@ namespace ElysiaRenderer
 
 	struct ShaderConstantVariableDesc
 	{
+		~ShaderConstantVariableDesc()
+		{
+			if (!pData)
+				return;
+			delete[] pData;
+			pData = NULL;
+		}
+
 		UINT					SpaceID = 0;
 		UINT                    StartOffset;    // Offset in constant buffer's backing store
 		UINT                    Size;           // Size of variable (in bytes)
+		void*					pData;
 	};
 
 	DXGI_FORMAT MaskToFormat(const uint32_t Mask);

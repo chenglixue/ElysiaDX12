@@ -14,25 +14,11 @@ cbuffer ObjectConstant : register(b0, perObjectSpace)
 {
     Matrix worldMatrix;
 
-	Vector3 baseColorTint;
     float opacity;
 
-    float normalIntensity;
-    float metallicIntensity;
-    float roughnessIntensity;
-    float ambientCubemapIntensity;
-
-	Vector3 ambientCubemapTint;
     int baseColorTexIndex;
-
-    int normalTexIndex;
-    int metallicTexIndex;
-    int roughnessTexIndex;
-    int specularTexIndex;
     
     float cutoff;
-    
-    bool g_hasNormalTex;
 };
 
 cbuffer PassConstant : register(b0, perPassSpace)
@@ -45,39 +31,22 @@ cbuffer PassConstant : register(b0, perPassSpace)
     Matrix viewProjMatrix;
     Matrix viewProjMatrix_I;
     Matrix shadowMatrix;
-    Vector4 screenSize;
 	Vector4 shadowSize;
     
 
     Light mainLight;
-     
+    
     UINT frameIndex;
-    float nearZ;
-    float farZ;
     float shadowNearZ;
     
     float shadowFarZ;
-    UINT GGX_E_LUT_Index;
-    UINT GGX_Eavg_LUT_Index;
-    UINT SkyboxTexIndex;
     
     UINT ShadowTexIndex;
     UINT BlueNoiseTexIndex;
-    UINT GBuffer0Index;
-	UINT GBuffer1Index;
-
-	UINT GBuffer2Index;
-	UINT GBuffer3Index;
-	UINT GBuffer4Index;
-	UINT GBuffer5Index;
     
-    UINT OpaqueDepthIndex;
     float shadowDepthBias;
     float shadowSlopeDepthBias;
     float shadowMaxSlopeDepthBias;
-    
-    UINT blitterTextureIndex = 0;
-	Vector3 padding;
     
     Vector2 g_sobolSequence[64];
 };
@@ -139,7 +108,7 @@ PSOutput PS(PSInput i)
     SamplerState warpLinearSampler = SamplerDescriptorHeap[WarpLinearSampler];
     Texture2D<float4> baseColorTex = ResourceDescriptorHeap[baseColorTexIndex];
         
-    float4 baseColor = baseColorTex.Sample(warpLinearSampler, i.uv) * float4(baseColorTint, opacity);
+    float4 baseColor = baseColorTex.Sample(warpLinearSampler, i.uv) * opacity;
     clip(baseColor.a - cutoff);
     
     return o;
