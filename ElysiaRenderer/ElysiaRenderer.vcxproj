@@ -284,6 +284,7 @@
     <None Include="SimpleMath\SimpleMath.inl" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BasePass.cpp" />
     <ClCompile Include="BufferManager.cpp" />
     <ClCompile Include="CameraManager.cpp" />
     <ClCompile Include="D3D12MemoryAllocator\D3D12MemAlloc.cpp" />
