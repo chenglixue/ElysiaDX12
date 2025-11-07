@@ -82,23 +82,7 @@ namespace ElysiaRenderer
 						break;
 					}
 				}
-
-
 			}
-
-			// create PSO
-			auto pPipelineStateObject = std::make_unique<PipelineStateObject>();
-
-			PipelineStateCreateDesc pipelineStateCreateDesc{};
-			pipelineStateCreateDesc = std::move(CreateDefaultPipelineStateCreateDesc());
-			pipelineStateCreateDesc.m_vertexShader = shaderPasses[passID].pVSShader.get();
-			pipelineStateCreateDesc.m_pixelShader = shaderPasses[passID].pPSShader.release();
-			pipelineStateCreateDesc.m_renderTargetDesc.m_numRenderTargets = 0;
-			pipelineStateCreateDesc.m_renderTargetDesc.m_depthStencilFormat = GetShadowRT()->GetFormat();
-			pipelineStateCreateDesc.m_rasterDesc = shaderPasses[passID].RasterizerDesc;
-			pipelineStateCreateDesc.m_blendDesc = shaderPasses[passID].BlendDesc;
-			pipelineStateCreateDesc.m_depthStencilDesc = shaderPasses[passID].DepthStencilDesc;
-			pipelineStateCreateDesc.m_topology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 		}
 
 	}

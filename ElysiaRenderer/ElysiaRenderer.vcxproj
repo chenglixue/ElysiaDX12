@@ -178,6 +178,7 @@
     <ClInclude Include="PipelineStateUtility.h" />
     <ClInclude Include="PIXHelper.h" />
     <ClInclude Include="PSOHelper.h" />
+    <ClInclude Include="PSOManager.h" />
     <ClInclude Include="RenderMaterial.h" />
     <ClInclude Include="RenderPassData.h" />
     <ClInclude Include="RenderTexture.h" />
@@ -345,6 +346,7 @@
     <ClCompile Include="PipelineResourceSpace.cpp" />
     <ClCompile Include="PIXHelper.cpp" />
     <ClCompile Include="PSOHelper.cpp" />
+    <ClCompile Include="PSOManager.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="RenderMaterial.cpp" />
     <ClCompile Include="RenderResource.cpp" />

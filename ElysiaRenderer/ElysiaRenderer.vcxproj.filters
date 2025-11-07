@@ -349,6 +349,9 @@
     <ClInclude Include="Shader.h">
       <Filter>Header Files\Render</Filter>
     </ClInclude>
+    <ClInclude Include="PSOManager.h">
+      <Filter>Header Files\Manager</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -727,6 +730,9 @@
     </ClCompile>
     <ClCompile Include="Shader.cpp">
       <Filter>Source Files\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="PSOManager.cpp">
+      <Filter>Source Files\Manager</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

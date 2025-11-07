@@ -21,6 +21,5 @@ namespace ElysiaRenderer
 		std::unordered_map<std::string, ShaderVariable> m_shaderVariables;
 		std::unordered_map<std::string, ShaderConstantVariableDesc> m_constantVariableDescs;
 		std::unordered_map<std::string, std::unique_ptr<PipelineResourceLayout>> m_meshResourceLayouts;
-		std::unordered_map<std::string, std::unique_ptr<PipelineStateObject>> m_pipelineStates;
 	};
 }
