@@ -1,7 +1,7 @@
 #pragma once
 #include "stdafx.h"
 
-namespace ElysiaRenderer
+namespace ElysiaModel
 {
 	using namespace SimpleMath;
 

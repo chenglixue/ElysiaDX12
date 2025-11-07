@@ -1,8 +1,11 @@
 #pragma once
 #include "Helper.h"
 
+
 namespace ElysiaRenderer
 {
+	class DX12Shader;
+
 	enum ShaderQueue : UINT
 	{
 		Shadow = 1000,
@@ -58,6 +61,19 @@ namespace ElysiaRenderer
 		UINT                    StartOffset;    // Offset in constant buffer's backing store
 		UINT                    Size;           // Size of variable (in bytes)
 		void*					pData;
+	};
+
+	struct ShaderPass
+	{
+		std::string					Name;
+		std::wstring				FilePath;
+		std::wstring				VertexEntryPoint;
+		std::wstring				FragmentEntryPoint;
+		D3D12_RASTERIZER_DESC		RasterizerDesc;
+		D3D12_BLEND_DESC			BlendDesc;
+		D3D12_DEPTH_STENCIL_DESC	DepthStencilDesc;
+		std::unique_ptr<DX12Shader> pVSShader = nullptr;
+		std::unique_ptr<DX12Shader>	pPSShader = nullptr;
 	};
 
 	DXGI_FORMAT MaskToFormat(const uint32_t Mask);

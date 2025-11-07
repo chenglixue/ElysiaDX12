@@ -15,7 +15,8 @@ namespace ElysiaRenderer
 		m_pGraphicsPipelineStates(std::unordered_map<UINT, std::unique_ptr<PipelineStateObject>>()),
 		m_shaderVariables(std::unordered_map<std::string, ShaderVariable>()),
 		m_meshResourceLayout(PipelineResourceLayout()),
-		m_constantVariableDescs(std::unordered_map<std::string, ShaderConstantVariableDesc>())
+		m_constantVariableDescs(std::unordered_map<std::string, ShaderConstantVariableDesc>()),
+		shaderPasses(std::vector<ShaderPass>())
 	{
 
 	}

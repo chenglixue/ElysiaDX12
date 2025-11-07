@@ -9,6 +9,8 @@ namespace ElysiaRenderer
 {
 	using namespace ElysiaHelper;
 
+	class RenderMaterial;
+
 	class ShadowPass : public BasePass
 	{
 	public:
@@ -35,8 +37,7 @@ namespace ElysiaRenderer
 		std::unique_ptr<DX12Shadow> m_pMainShadow = nullptr;
 		DX12DirectionLight* m_pMainLight = nullptr;
 
-		std::unique_ptr<DX12Shader> m_pShadowVS = nullptr;
-		std::unique_ptr<DX12Shader> m_pShadowPS = nullptr;
+		std::unique_ptr<ElysiaRenderer::RenderMaterial> m_pMaterial = nullptr;
 
 		void CreateMainShadow(float boundSphereRadius, DXGI_FORMAT format);
 	};

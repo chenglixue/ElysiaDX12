@@ -4,6 +4,7 @@
 #include "DX12Material.h"
 #include "RenderResource.h"
 #include "PIXHelper.h"
+#include "RenderMaterial.h"
 
 namespace ElysiaRenderer
 {
@@ -14,6 +15,19 @@ namespace ElysiaRenderer
 
 	void ShadowPass::Configure()
 	{
+		shaderPasses.emplace_back(ShaderPass
+			{
+				.Name = "Shadow Cast Pass",
+				.FilePath = L"Shaders\\public\\Shadow.hlsl",
+				.VertexEntryPoint = L"VS",
+				.FragmentEntryPoint = L"PS",
+				.RasterizerDesc = GetRasterizerState(RasterizerState::BackFaceCull),
+				.BlendDesc = GetBlendState(BlendState::Disabled),
+				.DepthStencilDesc = GetDepthState(DepthState::WritesEnabled)
+			});
+
+		m_pMaterial = std::move(std::make_unique<RenderMaterial>(shaderPasses));
+
 		PipelineStateCreateDesc pipelineStateCreateDesc{};
 		pipelineStateCreateDesc = std::move(CreateDefaultPipelineStateCreateDesc());
 		pipelineStateCreateDesc.m_vertexShader = m_pShadowVS.get();
@@ -28,7 +42,7 @@ namespace ElysiaRenderer
 
 		m_pMainLight = GetLightManager()->GetMainLight();
 		CreateMainShadow(1000, DXGI_FORMAT_D24_UNORM_S8_UINT);
-		RenderResource::GetInstance().GetCBVPassParameter()->ShadowTexIndex = m_pShadowRT->GetTexture()->GetResourceHeapIndex();
+		GetRenderResource()->GetCBVPassParameter()->ShadowTexIndex = m_pShadowRT->GetTexture()->GetResourceHeapIndex();
 	}
 	void ShadowPass::Execute()
 	{
@@ -115,73 +129,18 @@ namespace ElysiaRenderer
 
 	void ShadowPass::SetupShaderData()
 	{
-		ShaderCreateDesc shaderCreateDesc{};
-		ZeroMemory(&shaderCreateDesc, sizeof(ShaderCreateDesc));
-		shaderCreateDesc.shaderName = L"Shaders\\public\\Shadow.hlsl";
-		shaderCreateDesc.entryPoint = L"VS";
-		shaderCreateDesc.shaderType = ShaderType::Vertex;
-		m_pShadowVS = std::move(GetDevice()->CreateShader(shaderCreateDesc));
-
-		ZeroMemory(&shaderCreateDesc, sizeof(ShaderCreateDesc));
-		shaderCreateDesc.shaderName = L"Shaders\\public\\Shadow.hlsl";
-		shaderCreateDesc.entryPoint = L"PS";
-		shaderCreateDesc.shaderType = ShaderType::Pixel;
-		m_pShadowPS = std::move(GetDevice()->CreateShader(shaderCreateDesc));
-
-		auto VSShaderVariables = m_pShadowVS->GetVariable();
-		auto PSShaderVariables = m_pShadowPS->GetVariable();
-		for (auto& VSShaderVariable : VSShaderVariables)
-		{
-			m_shaderVariables[VSShaderVariable.name] = VSShaderVariable;
-		}
-		for (auto& PSShaderVariable : PSShaderVariables)
-		{
-			if (m_shaderVariables.find(PSShaderVariable.name) != m_shaderVariables.end()) continue;
-			m_shaderVariables[PSShaderVariable.name] = PSShaderVariable;
-		}
-
-		auto VSConstantVariableDescs = m_pShadowVS->GetConstantBufferVariables();
-		auto PSConstantVariableDescs = m_pShadowPS->GetConstantBufferVariables();
-		for (auto& VSConstantVariableDesc : VSConstantVariableDescs)
-		{
-			m_constantVariableDescs.insert(std::move(VSConstantVariableDesc));
-		}
-		for (auto& PSConstantVariableDesc : PSConstantVariableDescs)
-		{
-			if (m_constantVariableDescs.find(PSConstantVariableDesc.first) != m_constantVariableDescs.end()) continue;
-			m_constantVariableDescs.insert(std::move(PSConstantVariableDesc));
-		}
-
-		for (auto& shaderVariable : m_shaderVariables)
-		{
-			auto currVariable = shaderVariable.second;
-			switch (currVariable.type)
+		shaderPasses.emplace_back(ShaderPass
 			{
-			case ShaderVariable::Type::ConstantBuffer:
-			{
-				BufferCreationDesc bufferDesc
-				{
-					.m_name = stringToLPCWSTR(currVariable.name),
-					.m_size = currVariable.size,
-					.m_viewFlags = GPUResourceFlags::CBV,
-					.m_accessFlags = BufferAccessFlags::HostWritable,
-					.m_isRawAccess = false,
-				};
+				.Name = "Shadow Cast Pass",
+				.FilePath = L"Shaders\\public\\Shadow.hlsl",
+				.VertexEntryPoint = L"VS",
+				.FragmentEntryPoint = L"PS",
+				.RasterizerDesc = GetRasterizerState(RasterizerState::BackFaceCull),
+				.BlendDesc = GetBlendState(BlendState::Disabled),
+				.DepthStencilDesc = GetDepthState(DepthState::WritesEnabled)
+			});
 
-				auto pNewBuffer = std::move(GetDevice()->CreateBuffer(bufferDesc));
-
-				std::unique_ptr<PipelineResourceSpace> pPipelineResourceSpace = std::make_unique<PipelineResourceSpace>();
-				pPipelineResourceSpace->SetCBV(pNewBuffer.release());
-				pPipelineResourceSpace->Lock();
-
-				m_meshResourceLayout.m_spaces[currVariable.spaceID] = pPipelineResourceSpace.release();
-
-				break;
-			}
-			}
-
-
-		}
+		
 	}
 
 	void ShadowPass::CreateMainShadow(float boundSphereRadius, DXGI_FORMAT format)

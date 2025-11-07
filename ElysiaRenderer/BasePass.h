@@ -35,5 +35,7 @@ namespace ElysiaRenderer
 		std::unordered_map<std::string, ShaderVariable> m_shaderVariables;
 		std::unordered_map<std::string, ShaderConstantVariableDesc> m_constantVariableDescs;
 		PipelineResourceLayout m_meshResourceLayout;
+
+		std::vector<ShaderPass> shaderPasses;
 	};
 }
