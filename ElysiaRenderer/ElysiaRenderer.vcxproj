@@ -178,6 +178,7 @@
     <ClInclude Include="PipelineStateUtility.h" />
     <ClInclude Include="PIXHelper.h" />
     <ClInclude Include="PSOHelper.h" />
+    <ClInclude Include="RenderMaterial.h" />
     <ClInclude Include="RenderPassData.h" />
     <ClInclude Include="RenderTexture.h" />
     <ClInclude Include="RenderTextureUtility.h" />
@@ -205,6 +206,7 @@
     <ClInclude Include="DX12Shadow.h" />
     <ClInclude Include="DX12StagingDescriptorHeap.h" />
     <ClInclude Include="DX12TextureBuffer.h" />
+    <ClInclude Include="Shader.h" />
     <ClInclude Include="ShaderUtility.h" />
     <ClInclude Include="ShadowPass.h" />
     <ClInclude Include="ShadowUtility.h" />
@@ -344,8 +346,10 @@
     <ClCompile Include="PIXHelper.cpp" />
     <ClCompile Include="PSOHelper.cpp" />
     <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="RenderMaterial.cpp" />
     <ClCompile Include="RenderResource.cpp" />
     <ClCompile Include="RenderTexture.cpp" />
+    <ClCompile Include="Shader.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
     <ClCompile Include="ShaderUtility.cpp" />
     <ClCompile Include="ShadowPass.cpp" />
