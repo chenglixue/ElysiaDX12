@@ -21,10 +21,10 @@ namespace ElysiaRenderer
 		void SetPipelineResource(uint8_t spaceID, PipelineResourceSpace* pipelineBindResource);
 		void SetRenderTargets(UINT numRenderTargets, const D3D12_CPU_DESCRIPTOR_HANDLE renderTargetHandle[],
 			const D3D12_CPU_DESCRIPTOR_HANDLE depthStencilHandle);
-		void SetDefaultViewportAndScissor(ElysiaHelper::UINT2 screenSize);
-		void SetViewport(D3D12_VIEWPORT& viewPort);
-		void SetScissorRect(D3D12_RECT& rect);
-		void SetPrimitiveTopology(D3D12_PRIMITIVE_TOPOLOGY topology);
+		void SetDefaultViewportAndScissor(const ElysiaHelper::UINT2 screenSize);
+		void SetViewport(const D3D12_VIEWPORT& viewPort);
+		void SetScissorRect(const D3D12_RECT& rect);
+		void SetPrimitiveTopology(const D3D12_PRIMITIVE_TOPOLOGY topology);
 		void SetVertexBuffer(UINT startIndex, UINT numVertexBuffer, D3D12_VERTEX_BUFFER_VIEW& vertexBufferView);
 		void SetIndexBuffer(const D3D12_INDEX_BUFFER_VIEW& indexBufferView);
 

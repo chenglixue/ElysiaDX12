@@ -5,6 +5,7 @@
 #include "RenderResource.h"
 #include "PIXHelper.h"
 #include "RenderMaterial.h"
+#include "PSOManager.h"
 
 namespace ElysiaRenderer
 {
@@ -15,6 +16,9 @@ namespace ElysiaRenderer
 
 	void ShadowPass::Configure()
 	{
+		m_pMainLight = GetLightManager()->GetMainLight();
+		CreateMainShadow(1000, DXGI_FORMAT_D24_UNORM_S8_UINT);
+
 		shaderPasses.emplace_back(ShaderPass
 			{
 				.Name = "Shadow Cast Pass",
@@ -27,21 +31,13 @@ namespace ElysiaRenderer
 			});
 
 		m_pMaterial = std::move(std::make_unique<RenderMaterial>(shaderPasses));
+		ShaderPasses::ShadowCast = m_pMaterial->FindPassIndex("Shadow Cast Pass");
 
-		PipelineStateCreateDesc pipelineStateCreateDesc{};
-		pipelineStateCreateDesc = std::move(CreateDefaultPipelineStateCreateDesc());
-		pipelineStateCreateDesc.m_vertexShader = m_pShadowVS.get();
-		pipelineStateCreateDesc.m_pixelShader = m_pShadowPS.release();
-		pipelineStateCreateDesc.m_renderTargetDesc.m_numRenderTargets = 0;
-		pipelineStateCreateDesc.m_renderTargetDesc.m_depthStencilFormat = GetShadowRT()->GetFormat();
-		pipelineStateCreateDesc.m_rasterDesc = GetRasterizerState(RasterizerState::BackFaceCull);
-		pipelineStateCreateDesc.m_blendDesc = GetBlendState(BlendState::Disabled);
-		pipelineStateCreateDesc.m_depthStencilDesc = GetDepthState(DepthState::WritesEnabled);
-		pipelineStateCreateDesc.m_topology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-		m_pGraphicsPipelineStates[ShaderQueue::Shadow] = std::move(GetDevice()->CreateGraphicsPipelineState(pipelineStateCreateDesc, m_meshResourceLayout));
+		RenderTargetDesc RTDesc = CreateDefaultRenderTargetDesc();
+		RTDesc.m_numRenderTargets = 0;
+		RTDesc.m_depthStencilFormat = GetShadowRT()->GetFormat();
+		GetPSOManager()->GetGraphicsPipelineState(m_pMaterial.get(), ShaderPasses::ShadowCast, RTDesc);
 
-		m_pMainLight = GetLightManager()->GetMainLight();
-		CreateMainShadow(1000, DXGI_FORMAT_D24_UNORM_S8_UINT);
 		GetRenderResource()->GetCBVPassParameter()->ShadowTexIndex = m_pShadowRT->GetTexture()->GetResourceHeapIndex();
 	}
 	void ShadowPass::Execute()
@@ -54,13 +50,13 @@ namespace ElysiaRenderer
 		auto shadowSlopeDepthBias = pUserData.shadowSlopeDepthBias / 100;
 		auto shadowMaxSlopeDepthBias = pUserData.shadowMaxSlopeDepthBias / 100;
 
-		SetConstantData("shadowMatrix", &m_pMainShadow->GetShadowMat());
-		SetConstantData("shadowSize", &GetScreenSize(Vector2(m_pMainShadow->GetWidth(), m_pMainShadow->GetHeight())));
-		SetConstantData("shadowNearZ", &m_pMainShadow->GetNearZ());
-		SetConstantData("shadowFarZ", &m_pMainShadow->GetFarZ());
-		SetConstantData("shadowDepthBias", &shadowDepthBias);
-		SetConstantData("shadowSlopeDepthBias", &shadowSlopeDepthBias);
-		SetConstantData("shadowMaxSlopeDepthBias", &shadowMaxSlopeDepthBias);
+		m_pMaterial->SetConstantVariable<Matrix>("shadowMatrix", m_pMainShadow->GetShadowMat());
+		m_pMaterial->SetConstantVariable<Vector4>("shadowSize", GetScreenSize(Vector2(m_pMainShadow->GetWidth(), m_pMainShadow->GetHeight())));
+		m_pMaterial->SetConstantVariable<float>("shadowNearZ", m_pMainShadow->GetNearZ());
+		m_pMaterial->SetConstantVariable<float>("shadowFarZ", m_pMainShadow->GetFarZ());
+		m_pMaterial->SetConstantVariable<float>("shadowDepthBias", shadowDepthBias);
+		m_pMaterial->SetConstantVariable<float>("shadowSlopeDepthBias", shadowSlopeDepthBias);
+		m_pMaterial->SetConstantVariable<float>("shadowMaxSlopeDepthBias", shadowMaxSlopeDepthBias);
 
 		ApplyConstantData();
 	}

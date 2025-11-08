@@ -4,6 +4,8 @@
 
 namespace ElysiaRenderer
 {
+	class PipelineResourceLayout;
+
 	class DX12Shader;
 
 	enum ShaderQueue : UINT
@@ -74,6 +76,17 @@ namespace ElysiaRenderer
 		D3D12_DEPTH_STENCIL_DESC	DepthStencilDesc;
 		std::unique_ptr<DX12Shader> pVSShader = nullptr;
 		std::unique_ptr<DX12Shader>	pPSShader = nullptr;
+	};
+
+	struct PassData
+	{
+		UINT PassIndex;
+		std::unique_ptr<DX12Shader> pVSShader = nullptr;
+		std::unique_ptr<DX12Shader>	pPSShader = nullptr;
+		D3D12_RASTERIZER_DESC		RasterizerDesc;
+		D3D12_BLEND_DESC			BlendDesc;
+		D3D12_DEPTH_STENCIL_DESC	DepthStencilDesc;
+		std::unique_ptr<PipelineResourceLayout> MeshResourceLayouts{};
 	};
 
 	DXGI_FORMAT MaskToFormat(const uint32_t Mask);

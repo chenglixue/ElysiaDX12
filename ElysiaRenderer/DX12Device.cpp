@@ -1230,7 +1230,6 @@ namespace ElysiaRenderer
 			PSODesc.VS.pShaderBytecode = pipelineStateCreateDesc.m_vertexShader->GetShader()->GetBufferPointer();
 			PSODesc.VS.BytecodeLength = pipelineStateCreateDesc.m_vertexShader->GetShader()->GetBufferSize();
 		}
-
 		if (pipelineStateCreateDesc.m_pixelShader != nullptr)
 		{
 			PSODesc.PS.pShaderBytecode = pipelineStateCreateDesc.m_pixelShader->GetShader()->GetBufferPointer();

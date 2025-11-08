@@ -2,19 +2,21 @@
 #include "Shader.h"
 
 #include "DX12Device.h"
-#include "DX12Shader.h"
+#include "DX12BufferResource.h"
 #include "PipelineResourceUtility.h"
-#include "DX12Device.h"
 
 namespace ElysiaRenderer
 {
 	Shader::Shader(std::vector<ShaderPass>& shaderPasses) : 
-		m_shaderPassIDs(std::unordered_map<std::string, UINT>())
+		m_passDatas(std::unordered_map<std::string, PassData>())
 	{
 		for (UINT passID = 0; passID < shaderPasses.size(); ++passID)
 		{
+			auto newPassData = PassData();
+			ZeroMemory(&newPassData, sizeof(PassData));
+
 			// set shader pass
-			m_shaderPassIDs[shaderPasses[passID].Name] = passID;
+			newPassData.PassIndex = passID;
 
 			// create dx12 shader
 			ShaderCreateDesc vertexShaderCreateDesc{};
@@ -22,34 +24,48 @@ namespace ElysiaRenderer
 			vertexShaderCreateDesc.shaderName = shaderPasses[passID].FilePath;
 			vertexShaderCreateDesc.entryPoint = shaderPasses[passID].VertexEntryPoint;
 			vertexShaderCreateDesc.shaderType = ShaderType::Vertex;
-			shaderPasses[passID].pVSShader = std::move(GetDevice()->CreateShader(vertexShaderCreateDesc));
+			newPassData.pVSShader = std::move(GetDevice()->CreateShader(vertexShaderCreateDesc));
 
 			ShaderCreateDesc fragmentShaderCreateDesc{};
 			ZeroMemory(&fragmentShaderCreateDesc, sizeof(ShaderCreateDesc));
 			fragmentShaderCreateDesc.shaderName = shaderPasses[passID].FilePath;
 			fragmentShaderCreateDesc.entryPoint = shaderPasses[passID].FragmentEntryPoint;
 			fragmentShaderCreateDesc.shaderType = ShaderType::Pixel;
-			shaderPasses[passID].pPSShader = std::move(GetDevice()->CreateShader(fragmentShaderCreateDesc));
+			newPassData.pPSShader = std::move(GetDevice()->CreateShader(fragmentShaderCreateDesc));
 
 			// shader reflect
-			for (auto& VSShaderVariable : shaderPasses[passID].pVSShader->GetVariable())
+			for (auto& VSShaderVariable : newPassData.pVSShader->GetVariable())
 			{
-				m_shaderVariables[VSShaderVariable.name] = VSShaderVariable;
+				auto emplaceResult = m_shaderVariables.try_emplace(VSShaderVariable.name);
+				if (emplaceResult.second)
+				{
+					emplaceResult.first->second = VSShaderVariable;
+				}
 			}
-			for (auto& PSShaderVariable : shaderPasses[passID].pPSShader->GetVariable())
+			for (auto& PSShaderVariable : newPassData.pPSShader->GetVariable())
 			{
-				if (m_shaderVariables.find(PSShaderVariable.name) != m_shaderVariables.end()) continue;
-				m_shaderVariables[PSShaderVariable.name] = PSShaderVariable;
+				auto emplaceResult = m_shaderVariables.try_emplace(PSShaderVariable.name);
+				if (emplaceResult.second)
+				{
+					emplaceResult.first->second = PSShaderVariable;
+				}
 			}
 
-			for (auto& VSConstantVariableDesc : shaderPasses[passID].pVSShader->GetConstantBufferVariables())
+			for (auto& VSConstantVariableDesc : newPassData.pVSShader->GetConstantBufferVariables())
 			{
-				m_constantVariableDescs.insert(std::move(VSConstantVariableDesc));
+				auto emplaceResult = m_constantVariableDescs.try_emplace(VSConstantVariableDesc.first);
+				if (emplaceResult.second)
+				{
+					emplaceResult.first->second = VSConstantVariableDesc.second;
+				}
 			}
-			for (auto& PSConstantVariableDesc : shaderPasses[passID].pPSShader->GetConstantBufferVariables())
+			for (auto& PSConstantVariableDesc : newPassData.pPSShader->GetConstantBufferVariables())
 			{
-				if (m_constantVariableDescs.find(PSConstantVariableDesc.first) != m_constantVariableDescs.end()) continue;
-				m_constantVariableDescs.insert(std::move(PSConstantVariableDesc));
+				auto emplaceResult = m_constantVariableDescs.try_emplace(PSConstantVariableDesc.first);
+				if (emplaceResult.second)
+				{
+					emplaceResult.first->second = PSConstantVariableDesc.second;
+				}
 			}
 
 			// set bind resource for rootsignature
@@ -77,13 +93,87 @@ namespace ElysiaRenderer
 
 						auto pPipelineResourceLayout = std::make_unique<PipelineResourceLayout>();
 						pPipelineResourceLayout->m_spaces[currVariable.spaceID] = pPipelineResourceSpace.release();
-						m_meshResourceLayouts[shaderPasses[passID].Name] = std::move(pPipelineResourceLayout);
+						newPassData.MeshResourceLayouts = std::move(pPipelineResourceLayout);
 
 						break;
 					}
 				}
 			}
+
+			m_passDatas[shaderPasses[passID].Name] = std::move(newPassData);
 		}
 
+	}
+
+	const PassData& Shader::GetPassData(UINT passIndex) const noexcept
+	{
+		for (auto& passData : m_passDatas)
+		{
+			if (passData.second.PassIndex == passIndex)
+			{
+				return m_passDatas.at(passData.first);
+			}
+		}
+		
+		ThrowRuntimeError("No suitable passData");
+
+		return PassData();
+	}
+
+	const PassData& Shader::GetPassData(std::string passName) const noexcept
+	{
+		if (m_passDatas.contains(passName))
+		{
+			return m_passDatas.at(passName);
+		}
+
+		ThrowRuntimeError("Null Pass Data");
+
+		return PassData();
+	}
+
+	UINT Shader::FindPassIndex(std::string passName) const noexcept
+	{
+		if (m_passDatas.contains(passName))
+		{
+			return m_passDatas.at(passName).PassIndex;
+		}
+
+		ThrowRuntimeError("Invalid Pass Index");
+
+		return -1;
+	}
+
+	template<typename T>
+	void Shader::SetConstantVariable(const std::string& name, T data)
+	{
+		auto desc = m_constantVariableDescs[name];
+		memcpy(desc[name].pData, &data, desc.Size);
+
+		for (auto& passData : m_passDatas)
+		{
+			passData.second.MeshResourceLayouts->m_spaces[desc.SpaceID]->GetCBV()->SetDirty(true);
+		}
+	}
+
+	void Shader::ApplyConstantData()
+	{
+		for (auto& constantVariableDesc : m_constantVariableDescs)
+		{
+			auto desc = constantVariableDesc.second;
+
+			for (auto& passData : m_passDatas)
+			{
+				auto meshResourceLayouts = passData.second.MeshResourceLayouts.get();
+				if(!(meshResourceLayouts->m_spaces[desc.SpaceID]->GetCBV()->GetIsDirty()))
+				{
+					break;
+				}
+
+				auto buffer = reinterpret_cast<char*>(meshResourceLayouts->m_spaces[desc.SpaceID]->GetCBV()->GetMappedBuffer());
+				buffer += desc.StartOffset;
+				memcpy(buffer, desc.pData, desc.Size);
+			}
+		}
 	}
 }

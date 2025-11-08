@@ -30,12 +30,5 @@ namespace ElysiaRenderer
 	protected:
 		UINT2 m_renderSize;
 		DX12GraphicsContext* m_pCommand = nullptr;
-		std::unordered_map<UINT, std::unique_ptr<PipelineStateObject>> m_pGraphicsPipelineStates;
-
-		std::unordered_map<std::string, ShaderVariable> m_shaderVariables;
-		std::unordered_map<std::string, ShaderConstantVariableDesc> m_constantVariableDescs;
-		PipelineResourceLayout m_meshResourceLayout;
-
-		std::vector<ShaderPass> shaderPasses;
 	};
 }

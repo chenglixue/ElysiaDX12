@@ -14,6 +14,14 @@ namespace ElysiaRenderer
 		RenderMaterial() = default;
 		RenderMaterial(std::vector<ShaderPass>& shaderPasses);
 
+		const PassData& GetPassData(UINT passIndex) const noexcept;
+		const PassData& GetPassData(std::string passName) const noexcept;
+		UINT FindPassIndex(std::string passName) const noexcept;
+
+		template<typename T>
+		void SetConstantVariable(const std::string& name, T data);
+		void ApplyConstantData();
+
 	private:
 		std::unique_ptr<Shader> m_pShader = nullptr;
 	};

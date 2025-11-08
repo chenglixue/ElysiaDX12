@@ -171,7 +171,9 @@
     <ClInclude Include="File.h" />
     <ClInclude Include="FinalBlitPass.h" />
     <ClInclude Include="GBufferPass.h" />
+    <ClInclude Include="Hash.h" />
     <ClInclude Include="LightUtility.h" />
+    <ClInclude Include="Metalib.h" />
     <ClInclude Include="MObject.h" />
     <ClInclude Include="OpaquePass.h" />
     <ClInclude Include="PipelineResourceUtility.h" />
@@ -365,6 +367,7 @@
     <ClCompile Include="Transform.cpp" />
     <ClCompile Include="UIPass.cpp" />
     <ClCompile Include="UserData.cpp" />
+    <ClCompile Include="xxhash.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\x64\Debug\Tex\CyborgWeapon_BaseColor.dds" />

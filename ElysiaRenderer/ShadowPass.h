@@ -38,6 +38,10 @@ namespace ElysiaRenderer
 		DX12DirectionLight* m_pMainLight = nullptr;
 
 		std::unique_ptr<ElysiaRenderer::RenderMaterial> m_pMaterial = nullptr;
+		struct ShaderPasses
+		{
+			static int ShadowCast;
+		};
 
 		void CreateMainShadow(float boundSphereRadius, DXGI_FORMAT format);
 	};

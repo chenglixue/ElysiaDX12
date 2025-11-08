@@ -151,7 +151,7 @@ namespace ElysiaRenderer
 		m_commandList->OMSetRenderTargets(numRenderTargets, renderTargetHandle, false,
 			depthStencilHandle.ptr != 0 ? &depthStencilHandle : nullptr);
 	}
-	void DX12GraphicsContext::SetDefaultViewportAndScissor(ElysiaHelper::UINT2 screenSize)
+	void DX12GraphicsContext::SetDefaultViewportAndScissor(const ElysiaHelper::UINT2 screenSize)
 	{
 		D3D12_VIEWPORT viewport = {};
 		viewport.Width			= static_cast<float>(screenSize.x);
@@ -170,15 +170,15 @@ namespace ElysiaRenderer
 		SetViewport(viewport);
 		SetScissorRect(scissorRect);
 	}
-	void DX12GraphicsContext::SetViewport(D3D12_VIEWPORT& viewPort)
+	void DX12GraphicsContext::SetViewport(const D3D12_VIEWPORT& viewPort)
 	{
 		m_commandList->RSSetViewports(1, &viewPort);
 	}
-	void DX12GraphicsContext::SetScissorRect(D3D12_RECT& rect)
+	void DX12GraphicsContext::SetScissorRect(const D3D12_RECT& rect)
 	{
 		m_commandList->RSSetScissorRects(1, &rect);
 	}
-	void DX12GraphicsContext::SetPrimitiveTopology(D3D12_PRIMITIVE_TOPOLOGY topology)
+	void DX12GraphicsContext::SetPrimitiveTopology(const D3D12_PRIMITIVE_TOPOLOGY topology)
 	{
 		m_commandList->IASetPrimitiveTopology(topology);
 	}

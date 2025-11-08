@@ -13,11 +13,8 @@
 cbuffer ObjectConstant : register(b0, perObjectSpace)
 {
     Matrix worldMatrix;
-
     float opacity;
-
     int baseColorTexIndex;
-    
     float cutoff;
 };
 

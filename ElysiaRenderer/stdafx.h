@@ -30,6 +30,7 @@
 #include <fstream>
 #include <filesystem>
 #include <comdef.h> // For _com_error
+#include "Metalib.h"
 
 #include "magic_enum/magic_enum.hpp"
 #include "SimpleMath/SimpleMath.h"

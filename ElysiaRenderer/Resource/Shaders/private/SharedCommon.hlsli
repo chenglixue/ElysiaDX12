@@ -59,6 +59,14 @@
 #define RasterizerNoCullNoMS            4
 #define RasterizerWireframe             5
 
+cbuffer ObjectConstant : register(b0, perFrameSpace)
+{
+    Matrix worldMatrix;
+    float opacity;
+    int baseColorTexIndex;
+    float cutoff;
+};
+
 struct DX12Vertex
 {
     Vector3 position;
