@@ -13,34 +13,23 @@
 cbuffer ObjectConstant : register(b0, perObjectSpace)
 {
     Matrix worldMatrix;
+};
+
+cbuffer MaterialConstant : register(b0, perMaterialSpace)
+{
+    UINT baseColorTexIndex;
+    
     float opacity;
-    int baseColorTexIndex;
     float cutoff;
 };
 
 cbuffer PassConstant : register(b0, perPassSpace)
 {
-    Vector4 cameraPosWS;
-    Matrix viewMatrix;
-    Matrix viewMatrix_I;
-    Matrix projMatrix;
-    Matrix projMatrix_I;
-    Matrix viewProjMatrix;
-    Matrix viewProjMatrix_I;
     Matrix shadowMatrix;
 	Vector4 shadowSize;
-    
 
-    Light mainLight;
-    
-    UINT frameIndex;
     float shadowNearZ;
-    
     float shadowFarZ;
-    
-    UINT ShadowTexIndex;
-    UINT BlueNoiseTexIndex;
-    
     float shadowDepthBias;
     float shadowSlopeDepthBias;
     float shadowMaxSlopeDepthBias;
@@ -91,7 +80,7 @@ PSInput VS(VSInput i)
     float3 lightDirWS = mainLightData.toLight;
     const float NoL = dot(o.normalWS, lightDirWS);
     
-    o.positionWS.rgb += GetShadowDepthOffset(NoL, o.positionCS, shadowSize.x);
+    o.positionWS.rgb += GetShadowDepthOffset(NoL, o.positionCS, shadowSize.x, shadowDepthBias, shadowSlopeDepthBias, shadowMaxSlopeDepthBias);
     
     o.uv = i.uv;
     

@@ -179,54 +179,6 @@ MaterialData GetMaterialData(FInputParams inputParams)
     return o;
 }
 
-FEncodeGBufferData GetEncodeGBufferData(FInputParams inputParams, float3 toLight)
-{
-    FEncodeGBufferData o = (FEncodeGBufferData) 0;
-    
-    float3x3 TBN = float3x3(inputParams.TangentWS, inputParams.BitTangentWS, inputParams.NormalWS);
-    SamplerState warpLinearSampler = SamplerDescriptorHeap[WarpLinearSampler];
-    
-    Texture2D<float4> baseColorTex = ResourceDescriptorHeap[baseColorTexIndex];
-    float4 baseColor = baseColorTex.Sample(warpLinearSampler, inputParams.objectUV)
-            * float4(baseColorTint, opacity);
-    clip(baseColor.a - cutoff);
-
-    Texture2D<float4> normalTex = ResourceDescriptorHeap[normalTexIndex];
-    float4 normalTS = normalTex.Sample(warpLinearSampler, inputParams.objectUV);
-
-    Texture2D<float> metallicTex = ResourceDescriptorHeap[metallicTexIndex];
-    float metallic = metallicTex.Sample(warpLinearSampler, inputParams.objectUV);
-    metallic = metallic * metallicIntensity;
-    
-    Texture2D<float> roughnessTex = ResourceDescriptorHeap[roughnessTexIndex];
-    float roughness = roughnessTex.Sample(warpLinearSampler, inputParams.objectUV);
-    roughness = roughness * roughnessIntensity;
-    
-    o.BaseColor = baseColor.rgb;
-    o.ShadingModelID = FLT_MAX;
-    o.ShadingModelID = Shading_Model_ID_Default_Lit;
-    o.Opacity = baseColor.a;
-    
-    o.AO = 1;
-    o.Metallic = metallic;
-    o.Roughness = roughness;
-    o.Specular = 0.5;
-    
-    o.WorldNormal = g_hasNormalTex ? GetNormal(normalTS.rgb, TBN, normalIntensity) : inputParams.NormalWS;
-    o.WorldTangent = TBN._m00_m01_m02;
-    o.PerObjectData = 0.f;
-    o.PerComputedShadow = 1.f;
-    
-    o.Velocity = 0.f;
-    
-    o.Anisotropy = 0;
-    o.DiffuseColor = o.BaseColor - o.BaseColor * o.Metallic;
-    o.SpecularColor = ComputeF0(o.Specular, o.BaseColor, o.Metallic);
-    o.IBL = GetIBL(inputParams, o, toLight);
-
-    return o;
-}
-
 FDecodeGBufferData DecodeGBufferData(float4 InGBuffer0,
     float4 InGBuffer1,
     float4 InGBuffer2,

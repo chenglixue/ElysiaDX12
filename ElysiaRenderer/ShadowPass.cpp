@@ -19,7 +19,7 @@ namespace ElysiaRenderer
 		m_pMainLight = GetLightManager()->GetMainLight();
 		CreateMainShadow(1000, DXGI_FORMAT_D24_UNORM_S8_UINT);
 
-		shaderPasses.emplace_back(ShaderPass
+		m_shaderPasses.emplace_back(ShaderPass
 			{
 				.Name = "Shadow Cast Pass",
 				.FilePath = L"Shaders\\public\\Shadow.hlsl",
@@ -30,15 +30,13 @@ namespace ElysiaRenderer
 				.DepthStencilDesc = GetDepthState(DepthState::WritesEnabled)
 			});
 
-		m_pMaterial = std::move(std::make_unique<RenderMaterial>(shaderPasses));
-		ShaderPasses::ShadowCast = m_pMaterial->FindPassIndex("Shadow Cast Pass");
+		m_pMaterial = std::move(std::make_unique<RenderMaterial>(m_shaderPasses));
+		ShaderPasseIDs::ShadowCast = m_pMaterial->FindPassIndex("Shadow Cast Pass");
 
 		RenderTargetDesc RTDesc = CreateDefaultRenderTargetDesc();
 		RTDesc.m_numRenderTargets = 0;
 		RTDesc.m_depthStencilFormat = GetShadowRT()->GetFormat();
-		GetPSOManager()->GetGraphicsPipelineState(m_pMaterial.get(), ShaderPasses::ShadowCast, RTDesc);
-
-		GetRenderResource()->GetCBVPassParameter()->ShadowTexIndex = m_pShadowRT->GetTexture()->GetResourceHeapIndex();
+		GetPSOManager()->GetGraphicsPipelineState(m_pMaterial.get(), ShaderPasseIDs::ShadowCast, RTDesc);
 	}
 	void ShadowPass::Execute()
 	{
@@ -67,7 +65,7 @@ namespace ElysiaRenderer
 		Execute();
 
 		m_pCommand->AddBarrier(*m_pShadowRT->GetTexture(), D3D12_RESOURCE_STATE_DEPTH_WRITE);
-		m_pCommand->FlushBarrier();
+		m_pCommand->FlushBarrier(); 
 
 		m_pCommand->ClearDepthStencilTarget(*m_pShadowRT, 1.f, 0);
 

@@ -15,7 +15,8 @@ namespace ElysiaRenderer
 	{
 	public:
 		ShadowPass() : 
-			BasePass()
+			BasePass(),
+			m_shaderPasses(std::vector<ShaderPass>())
 		{
 
 		};
@@ -37,8 +38,9 @@ namespace ElysiaRenderer
 		std::unique_ptr<DX12Shadow> m_pMainShadow = nullptr;
 		DX12DirectionLight* m_pMainLight = nullptr;
 
+		std::vector<ShaderPass> m_shaderPasses;
 		std::unique_ptr<ElysiaRenderer::RenderMaterial> m_pMaterial = nullptr;
-		struct ShaderPasses
+		struct ShaderPasseIDs
 		{
 			static int ShadowCast;
 		};

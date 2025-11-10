@@ -10,6 +10,38 @@
 #include "../private\SharedCommon.hlsli"
 #endif
 
+cbuffer ObjectConstant : register(b0, perObjectSpace)
+{
+    Matrix worldMatrix;
+};
+
+cbuffer MaterialConstant : register(b0, perMaterialSpace)
+{   
+    float opacity;
+    float cutoff;
+    
+    UINT baseColorTexIndex;
+    UINT normalTexIndex;
+    UINT metallicTexIndex;
+    UINT roughnessTexIndex;
+    UINT specularTexIndex;
+    
+    Vector3 baseColorTint;
+    Vector3 ambientCubemapTint;
+    
+    float normalIntensity;
+    float metallicIntensity;
+    float roughnessIntensity;
+    float ambientCubemapIntensity;
+    
+    bool g_hasNormalTex;
+};
+
+cbuffer PassConstant : register(b0, perPassSpace)
+{
+    
+}
+
 struct VSInput
 {
     float3 positionOS : POSITION;
@@ -61,6 +93,8 @@ PSInput VS(VSInput i)
     return o;
 }
 
+FEncodeGBufferData GetEncodeGBufferData(FInputParams inputParams, float3 toLight);
+
 PSOutput PS(PSInput i)
 {
     PSOutput o = (PSOutput) 0;
@@ -88,5 +122,54 @@ PSOutput PS(PSInput i)
     o.target5 = float4(encodeGBufferData.Velocity, 0.f, 0.f);
 
     
+    return o;
+}
+
+FEncodeGBufferData GetEncodeGBufferData(FInputParams inputParams, float3 toLight)
+{
+    FEncodeGBufferData o = (FEncodeGBufferData) 0;
+    
+    float3x3 TBN = float3x3(inputParams.TangentWS, inputParams.BitTangentWS, inputParams.NormalWS);
+    SamplerState warpLinearSampler = SamplerDescriptorHeap[WarpLinearSampler];
+    
+    Texture2D<float4> baseColorTex = ResourceDescriptorHeap[baseColorTexIndex];
+    float4 baseColor = baseColorTex.Sample(warpLinearSampler, inputParams.objectUV)
+            * float4(baseColorTint, opacity);
+    clip(baseColor.a - cutoff);
+
+    Texture2D<float4> normalTex = ResourceDescriptorHeap[normalTexIndex];
+    float4 normalTS = normalTex.Sample(warpLinearSampler, inputParams.objectUV);
+
+    Texture2D<float> metallicTex = ResourceDescriptorHeap[metallicTexIndex];
+    float metallic = metallicTex.Sample(warpLinearSampler, inputParams.objectUV);
+    metallic = metallic * metallicIntensity;
+    
+    Texture2D<float> roughnessTex = ResourceDescriptorHeap[roughnessTexIndex];
+    float roughness = roughnessTex.Sample(warpLinearSampler, inputParams.objectUV);
+    roughness = roughness * roughnessIntensity;
+    
+    o.BaseColor = baseColor.rgb;
+    o.ShadingModelID = FLT_MAX;
+    o.ShadingModelID = Shading_Model_ID_Default_Lit;
+    o.Opacity = baseColor.a;
+    
+    o.AO = 1;
+    o.Metallic = metallic;
+    o.Roughness = roughness;
+    o.Specular = 0.5;
+    
+    o.WorldNormal = g_hasNormalTex ? GetNormal(normalTS.rgb, TBN, normalIntensity) : inputParams.NormalWS;
+    o.WorldTangent = TBN._m00_m01_m02;
+    o.PerObjectData = 0.f;
+    o.PerComputedShadow = 1.f;
+    
+    o.Velocity = 0.f;
+    
+    o.Anisotropy = 0;
+    o.DiffuseColor = o.BaseColor - o.BaseColor * o.Metallic;
+    o.SpecularColor = ComputeF0(o.Specular, o.BaseColor, o.Metallic);
+    o.IBL = GetIBL(inputParams, o, toLight, ambientCubemapIntensity, ambientCubemapTint);
+
+ 
     return o;
 }

@@ -62,7 +62,6 @@ namespace ElysiaRenderer
 	};
 
 	extern std::unique_ptr<PSOManager> g_pPSOManager;
-
 	inline static PSOManager* GetPSOManager()
 	{
 		if (g_pPSOManager == nullptr)

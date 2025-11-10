@@ -10,6 +10,23 @@
 #include "../private\SharedCommon.hlsli"
 #endif
 
+cbuffer ObjectConstant : register(b0, perObjectSpace)
+{
+    Matrix worldMatrix;
+};
+
+cbuffer MaterialConstant : register(b0, perMaterialSpace)
+{
+    
+    
+};
+
+cbuffer PassConstant : register(b0, perPassSpace)
+{
+    Matrix shadowMatrix;
+    Vector4 shadowSize;
+}
+
 struct PSInput
 {
     float4  positionCS   : SV_POSITION;
@@ -27,8 +44,6 @@ PSOutput PS(PSInput i)
     
     float2 screenUV = i.positionCS.xy / screenSize.xy;
     
-    //SamplerData samplerData = GetSamplerData();
-    
     FDecodeGBufferData GBufferData = GetDecodeGBufferData(screenUV);
     
     float3 positionWS = ComputeWorldSpacePosition(screenUV, GBufferData.Depth, viewProjMatrix_I);
@@ -45,7 +60,7 @@ PSOutput PS(PSInput i)
     inputParam.ScreenVector = GetScreenVectorWS(cameraPosWS.xyz, positionWS);
     
     LightData mainLightData = GetMainLight(mainLight);
-    float shadow = SunShadowVisibility(inputParam.PositionWS, inputParam.ScreenUV, 0);
+    float shadow = SunShadowVisibility(inputParam.PositionWS, inputParam.ScreenUV, shadowSize, shadowMatrix);
     
     float4 lighting = GetDynamicLighting(inputParam, GBufferData, mainLightData) * shadow;
     lighting += float4(GBufferData.SceneColor, 1.f);

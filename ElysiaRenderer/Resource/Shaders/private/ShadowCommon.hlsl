@@ -76,7 +76,8 @@ static float2 g_PoissonDisk[] =
 //-------------------------------------------------------------------------------------------------
 // Calculates the offset to use for sampling the shadow map, based on the surface normal
 //-------------------------------------------------------------------------------------------------
-float GetShadowDepthOffset(in float NoL, inout float4 positionCS, in float shadowMapSize)
+float GetShadowDepthOffset(in float NoL, inout float4 positionCS, in float4 shadowMapSize, 
+    in float shadowDepthBias, in float shadowSlopeDepthBias, in float shadowMaxSlopeDepthBias)
 {
     const float slope = clamp(abs(NoL) > 0 ? sqrt(saturate(1.f - Pow2(NoL))) / NoL : shadowMaxSlopeDepthBias, 0, shadowMaxSlopeDepthBias);
     
@@ -158,28 +159,28 @@ float2 HorizontalPCF5x2(float2 Fraction, float4 Values00, float4 Values20, float
     return float2(Results0, Results1);
 }
 
-inline float Manual1x1PCF(float2 shadowPos, float lightDepth, Texture2D shadowTex, in SamplerState pcfSampler, uint CSMIndex = 0)
+inline float Manual1x1PCF(float2 shadowPos, float lightDepth, Texture2D shadowTex, in SamplerState pcfSampler, in float4 shadowMapSize, uint CSMIndex = 0)
 {
-    float2 texelPos = shadowPos.xy * shadowSize.xy;
+    float2 texelPos = shadowPos.xy * shadowMapSize.xy;
     texelPos -= 0.5f;
     
     float2 fraction = frac(texelPos);
     float2 quadCenter = floor(texelPos) + 1.f;
-    float2 samplePos = quadCenter * shadowSize.zw;
+    float2 samplePos = quadCenter * shadowMapSize.zw;
     
     int4 isShadow = SampleShadowPCF(samplePos, lightDepth, shadowTex, pcfSampler);
     
     return PCF1x1(fraction, isShadow);
 }
 
-inline float Manual3x3PCF(float2 shadowPos, float lightDepth, Texture2D shadowTex, in SamplerState pcfSampler, uint CSMIndex = 0)
+inline float Manual3x3PCF(float2 shadowPos, float lightDepth, Texture2D shadowTex, in SamplerState pcfSampler, in float4 shadowMapSize, uint uintCSMIndex = 0)
 {
-    float2 texelPos = shadowPos.xy * shadowSize.xy;
+    float2 texelPos = shadowPos.xy * shadowMapSize.xy;
     texelPos -= 0.5f;
     
     float2 fraction = frac(texelPos);
     float2 quadCenter = floor(texelPos) + 1.f;
-    float2 samplePos = quadCenter * shadowSize.zw;
+    float2 samplePos = quadCenter * shadowMapSize.zw;
     
     int4 isShadow0 = SampleShadowPCF(samplePos, lightDepth, shadowTex, pcfSampler, 0, int2(-1, -1));
     int4 isShadow1 = SampleShadowPCF(samplePos, lightDepth, shadowTex, pcfSampler, 0, int2(1, -1));
@@ -190,14 +191,14 @@ inline float Manual3x3PCF(float2 shadowPos, float lightDepth, Texture2D shadowTe
 
 }
 
-inline float Manual5x5PCF(float2 shadowPos, float lightDepth, Texture2D shadowTex, in SamplerState pcfSampler, uint CSMIndex = 0)
+inline float Manual5x5PCF(float2 shadowPos, float lightDepth, Texture2D shadowTex, in SamplerState pcfSampler, in float4 shadowMapSize, uint CSMIndex = 0)
 {
-    float2 texelPos = shadowPos.xy * shadowSize.xy;
+    float2 texelPos = shadowPos.xy * shadowMapSize.xy;
     texelPos -= 0.5f;
     
     float2 fraction = frac(texelPos);
     float2 quadCenter = floor(texelPos) + 1.f;
-    float2 samplePos = quadCenter * shadowSize.zw;
+    float2 samplePos = quadCenter * shadowMapSize.zw;
     int step = 2;
     
     int4 isShadow00 = SampleShadowPCF(samplePos, lightDepth, shadowTex, pcfSampler, CSMIndex, int2(-step, -step));
@@ -258,8 +259,6 @@ inline float ManualSobelPCF(float2 screenUV, float2 shadowPos, float lightDepth,
     
     float radius = 0.001;
     
-    
-    
     for (int i = 0; i < N_SAMPLE; ++i)
     {
         float2 offset = g_PoissonDisk[i];
@@ -275,7 +274,7 @@ inline float ManualSobelPCF(float2 screenUV, float2 shadowPos, float lightDepth,
 }
 
 float SampleShadowPCF(in Texture2D shadowMap,
-                      in float4 shadowPos, in float2 screenUV, in UINT arrayIndex)
+                      in float4 shadowPos, in float2 screenUV, in float4 shadowMapSize, in UINT arrayIndex = 0)
 {
     float o = 0.f;
     
@@ -288,11 +287,11 @@ float SampleShadowPCF(in Texture2D shadowMap,
     o = shadowMap.SampleCmpLevelZero(compShadowSampler, shadowPos.xy, shadowPos.z);
 #else
     #if defined (SHADOW_QUALITY_LOW)
-    o = Manual1x1PCF(shadowPos.xy, shadowPos.z, shadowMap, pointShadowSampler);
+    o = Manual1x1PCF(shadowPos.xy, shadowPos.z, shadowMap, pointShadowSampler, shadowMapSize);
     #elif defined (SHADOW_QUALITY_MIDDLE)
-    o = Manual3x3PCF(shadowPos.xy, shadowPos.z, shadowMap, pointShadowSampler);
+    o = Manual3x3PCF(shadowPos.xy, shadowPos.z, shadowMap, pointShadowSampler, shadowMapSize);
     #elif defined (SHADOW_QUALITY_HIGH)
-    o = Manual5x5PCF(shadowPos.xy, shadowPos.z, shadowMap, pointShadowSampler);
+    o = Manual5x5PCF(shadowPos.xy, shadowPos.z, shadowMap, pointShadowSampler, shadowMapSize);
     #elif defined (SHADOW_QUALITY_VERYHIGH)
     o = ManualSobelPCF(screenUV, shadowPos.xy, shadowPos.z, shadowMap, pointShadowSampler);
     #endif
@@ -302,7 +301,9 @@ float SampleShadowPCF(in Texture2D shadowMap,
     return o;
 }
 
-float SunShadowVisibility(in float3 positionWS, in float2 screenUV, in float2 uvOffset)
+float SunShadowVisibility(in float3 positionWS, in float2 screenUV, 
+    in float4 shadowMapSize, in float4x4 shadowMatrix, 
+    in float2 uvOffset = 0)
 {
     Texture2D shadowTex = ResourceDescriptorHeap[ShadowTexIndex];
     SamplerState shadowClampSampler = SamplerDescriptorHeap[ClampPointSampler];
@@ -311,7 +312,7 @@ float SunShadowVisibility(in float3 positionWS, in float2 screenUV, in float2 uv
     shadowPos /= shadowPos.w;
     shadowPos.xy = shadowPos.xy * float2(0.5f, -0.5f) + 0.5f;
     
-    return SampleShadowPCF(shadowTex, shadowPos, screenUV, 0);
+    return SampleShadowPCF(shadowTex, shadowPos, screenUV, shadowMapSize);
 }
 
 #endif

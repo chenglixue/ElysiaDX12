@@ -195,7 +195,7 @@ float3 ApproximateSpecularIBL(uint2 Random, float3 SpecularColor, float Roughnes
     return PrefilteredColor * (SpecularColor * AB.x + AB.y);
 }
 
-float3 GetIBL(FInputParams inputParams, MaterialData materialData, float3 toLight)
+float3 GetIBL(FInputParams inputParams, MaterialData materialData, float3 toLight, float ambientCubemapIntensity, float3 ambientCubemapTint)
 {
     float3 o = 0.f;
     
@@ -233,7 +233,7 @@ float3 GetIBL(FInputParams inputParams, MaterialData materialData, float3 toLigh
     return o;
 }
 
-float3 GetIBL(FInputParams inputParams, FEncodeGBufferData GBufferData, float3 toLight)
+float3 GetIBL(FInputParams inputParams, FEncodeGBufferData GBufferData, float3 toLight, float ambientCubemapIntensity, float3 ambientCubemapTint)
 {
     float3 o = 0.f;
     

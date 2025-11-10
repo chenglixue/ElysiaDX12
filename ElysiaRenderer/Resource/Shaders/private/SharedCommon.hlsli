@@ -59,12 +59,26 @@
 #define RasterizerNoCullNoMS            4
 #define RasterizerWireframe             5
 
-cbuffer ObjectConstant : register(b0, perFrameSpace)
+cbuffer GlobalConstant : register(b0, perFrameSpace)
 {
-    Matrix worldMatrix;
-    float opacity;
-    int baseColorTexIndex;
-    float cutoff;
+    Vector4 cameraPosWS;
+    UINT    frameIndex;
+    Vector4 screenSize;
+    
+    Matrix viewMatrix;
+    Matrix viewMatrix_I;
+    Matrix projMatrix;
+    Matrix projMatrix_I;
+    Matrix viewProjMatrix;
+    Matrix viewProjMatrix_I;
+    
+    UINT ShadowTexIndex;
+    UINT BlueNoiseTexIndex;
+    UINT GGX_E_LUT_Index;
+    UINT GGX_Eavg_LUT_Index;
+    UINT SkyboxTexIndex;
+    
+    Light mainLight;
 };
 
 struct DX12Vertex
