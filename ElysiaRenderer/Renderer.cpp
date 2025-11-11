@@ -86,9 +86,6 @@ namespace ElysiaRenderer
 		m_pCameraManager->CreateMainCamera(Vector3(-11.5f, 200.85f, -0.45f) ,
 			m_aspectRatio, 3.14159f / 4.0f, 0.1f, 2000.f);
 
-		auto sobolSequence = Create2DSobolSqeuence(64);
-		memcpy(RenderResource::GetInstance().GetCBVPassParameter()->sobolSequence.data(), sobolSequence.data(), sobolSequence.size() * sizeof(Vector2));
-
 		Setup();
 	}
 	void Renderer::Update()
@@ -146,12 +143,17 @@ namespace ElysiaRenderer
 	{
 		UpdatePassCBV();
 		UpdateObjectCBV();
+
+		auto passParameter = GetRenderResource()->GetCBVFrameVariable();
+		passParameter->frameIndex = GetDevice()->GetFrameIndex();
+		passParameter->cameraPosWS = m_pCameraManager->GetMainCamera()->GetPosition4();
+		passParameter->nearZ = m_pCameraManager->GetMainCamera()->GetNearZ();
+		passParameter->farZ = m_pCameraManager->GetMainCamera()->GetFarZ();
+		passParameter->lightData = GetLightManager()->GetMainLight()->CreateLightData();
+		GetBufferManager()->GetSingleConstantBuffer(PER_FRAME_SPACE)->SetMappedData(GetRenderResource()->GetCBVFrameVariable(), sizeof(CBVFrameVariable));
 	}
 	void Renderer::UpdatePassCBV()
 	{
-		auto& pUserData = UserData::GetInstance();
-		auto passParameter = RenderResource::GetInstance().GetCBVPassParameter();
-
 		passParameter->screenSize = GetDevice()->GetScreenSize();
 		passParameter->frameIndex = GetDevice()->GetFrameIndex(); 
 		passParameter->cameraPosWS = m_pCameraManager->GetMainCamera()->GetPosition4();
@@ -238,11 +240,13 @@ namespace ElysiaRenderer
 				objectContantBuffer->SetMappedData(&objectConstantParameter, sizeof(CBVObjectParameter));
 			}
 		}
+
+		desc.m_size = sizeof(CBVFrameVariable);
+		GetBufferManager()->AddConstantBuffer(PER_FRAME_SPACE, desc);
 	}
 
 	void Renderer::Execute()
 	{
-
 		GetDevice()->BeginFrame();
 		m_graphicsContext->Reset();
 

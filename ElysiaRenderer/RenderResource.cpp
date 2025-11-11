@@ -6,11 +6,10 @@ namespace ElysiaRenderer
 {
 	std::unique_ptr<RenderResource> g_pRenderResource = nullptr;
 
-	RenderResource::RenderResource()
+	RenderResource::RenderResource() :
+		m_perObjectBindResourceSpace(std::make_unique<PipelineResourceSpace>()),
+		m_pCBVFrameVariable(std::make_unique<CBVFrameVariable>())
 	{
-		m_pCBVPassParameter = std::make_unique<CBVMainPassParameter>();
-		m_perObjectBindResourceSpace = std::make_unique<PipelineResourceSpace>();
-		m_perMainPassBindResourceSpace = std::make_unique<PipelineResourceSpace>();
 	}
 
 	RenderResource::~RenderResource()
@@ -18,9 +17,9 @@ namespace ElysiaRenderer
 
 	}
 
-	CBVMainPassParameter* RenderResource::GetCBVPassParameter()
+	CBVFrameVariable* RenderResource::GetCBVFrameVariable()
 	{
-		return m_pCBVPassParameter.get();
+		return m_pCBVFrameVariable.get();
 	}
 
 }

@@ -6,6 +6,7 @@
 #include "PIXHelper.h"
 #include "RenderMaterial.h"
 #include "PSOManager.h"
+#include "SobolSequenceGenerator.h"
 
 namespace ElysiaRenderer
 {
@@ -29,18 +30,24 @@ namespace ElysiaRenderer
 				.BlendDesc = GetBlendState(BlendState::Disabled),
 				.DepthStencilDesc = GetDepthState(DepthState::WritesEnabled)
 			});
-
 		m_pMaterial = std::move(std::make_unique<RenderMaterial>(m_shaderPasses));
 		ShaderPasseIDs::ShadowCast = m_pMaterial->FindPassIndex("Shadow Cast Pass");
 
-		RenderTargetDesc RTDesc = CreateDefaultRenderTargetDesc();
-		RTDesc.m_numRenderTargets = 0;
-		RTDesc.m_depthStencilFormat = GetShadowRT()->GetFormat();
-		GetPSOManager()->GetGraphicsPipelineState(m_pMaterial.get(), ShaderPasseIDs::ShadowCast, RTDesc);
+		{
+			RenderTargetDesc RTDesc = CreateDefaultRenderTargetDesc();
+			RTDesc.m_numRenderTargets = 0;
+			RTDesc.m_depthStencilFormat = GetShadowRT()->GetFormat();
+			auto emplaceResult = m_PipelineStateObjects.try_emplace(ShaderPasseIDs::ShadowCast);
+			if (emplaceResult.second)
+			{
+				emplaceResult.first->second = GetPSOManager()->GetGraphicsPipelineState(m_pMaterial.get(), ShaderPasseIDs::ShadowCast, RTDesc);
+			}
+		}
 	}
 	void ShadowPass::Execute()
 	{
 		m_pMainShadow->UpdateShadowTransform(m_pMainLight);
+		GetRenderResource()->GetCBVFrameVariable()->ShadowTexIndex = m_pShadowRT->GetFormat();
 
 		auto& pUserData = UserData::GetInstance();
 
@@ -56,7 +63,10 @@ namespace ElysiaRenderer
 		m_pMaterial->SetConstantVariable<float>("shadowSlopeDepthBias", shadowSlopeDepthBias);
 		m_pMaterial->SetConstantVariable<float>("shadowMaxSlopeDepthBias", shadowMaxSlopeDepthBias);
 
-		ApplyConstantData();
+		auto sobolSequence = Create2DSobolSqeuence(64);
+		m_pMaterial->SetConstantVariable<std::vector<Vector2>>("g_sobolSequence", sobolSequence);
+
+		m_pMaterial->ApplyConstantData();
 	}
 	void ShadowPass::Render()
 	{
@@ -70,13 +80,11 @@ namespace ElysiaRenderer
 		m_pCommand->ClearDepthStencilTarget(*m_pShadowRT, 1.f, 0);
 
 		m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		m_pCommand->SetViewport(m_pMainShadow->GetViewport());
-		m_pCommand->SetScissorRect(m_pMainShadow->GetScissorRect());
 		m_pCommand->SetIndexBuffer(GetBufferManager()->GetIndexBufferView());
 		m_pCommand->SetVertexBuffer(0, 1, const_cast<D3D12_VERTEX_BUFFER_VIEW&>(GetBufferManager()->GetVertexBufferView()));
 
 		PipelineInfo pipelineStateData{};
-		pipelineStateData.m_pipelineStateObject = m_pGraphicsPipelineStates[ShaderQueue::Shadow].get();
+		pipelineStateData.m_pipelineStateObject = m_PipelineStateObjects[ShaderPasseIDs::ShadowCast];
 		pipelineStateData.m_depthStencilTarget = m_pShadowRT->GetTexture();
 
 		bool isReady = true;
@@ -89,6 +97,8 @@ namespace ElysiaRenderer
 		}
 		if (isReady)
 		{
+			m_pCommand->SetViewport(m_pMainShadow->GetViewport());
+			m_pCommand->SetScissorRect(m_pMainShadow->GetScissorRect());
 			m_pCommand->SetPipeline(pipelineStateData);
 			m_pCommand->SetPipelineResource(PER_PASS_SPACE, RenderResource::GetPerMainBindResourceSpace());
 

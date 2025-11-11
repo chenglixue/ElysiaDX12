@@ -53,30 +53,29 @@ namespace ElysiaRenderer
 
 	};
 
-	struct CBVFrameVariable
+	struct alignas(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT) CBVFrameVariable
 	{
-		UINT		frameIndex = 0;
-
 		Vector4		cameraPosWS = Vector4::Zero;
+
+		LightData   lightData;
+
+		UINT		frameIndex = 0;
 		float		nearZ = 1;
 		float		farZ = 1000;
-
 		UINT		GGX_E_LUT_Index = 0;
+
 		UINT		GGX_Eavg_LUT_Index = 0;
-
 		UINT		SkyboxTexIndex = 0;
-
 		UINT		ShadowTexIndex = 0;
-
 		UINT		BlueNoiseTexIndex = 0;
 
 		UINT		GBuffer0Index = 0;
 		UINT		GBuffer1Index = 0;
 		UINT		GBuffer2Index = 0;
 		UINT		GBuffer3Index = 0;
+
 		UINT		GBuffer4Index = 0;
 		UINT		GBuffer5Index = 0;
-
 		UINT		OpaqueDepthIndex = 0;
 	};
 }

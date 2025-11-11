@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "GBufferPass.h"
 #include "BufferManager.h"
+#include "RenderResource.h"
 
 namespace ElysiaRenderer
 {
@@ -187,14 +188,13 @@ namespace ElysiaRenderer
 	void GBufferPass::BindToShader()
 	{
 		int GBufferIndex = 0;
-		RenderResource::GetInstance().GetCBVPassParameter()->GBuffer0Index = m_GBufferRTs[GBufferIndex++]->GetTexture()->GetResourceHeapIndex();
-		RenderResource::GetInstance().GetCBVPassParameter()->GBuffer1Index = m_GBufferRTs[GBufferIndex++]->GetTexture()->GetResourceHeapIndex();
-		RenderResource::GetInstance().GetCBVPassParameter()->GBuffer2Index = m_GBufferRTs[GBufferIndex++]->GetTexture()->GetResourceHeapIndex();
-		RenderResource::GetInstance().GetCBVPassParameter()->GBuffer3Index = m_GBufferRTs[GBufferIndex++]->GetTexture()->GetResourceHeapIndex();
-		RenderResource::GetInstance().GetCBVPassParameter()->GBuffer4Index = m_GBufferRTs[GBufferIndex++]->GetTexture()->GetResourceHeapIndex();
-		RenderResource::GetInstance().GetCBVPassParameter()->GBuffer5Index = m_GBufferRTs[GBufferIndex++]->GetTexture()->GetResourceHeapIndex();
-		RenderResource::GetInstance().GetCBVPassParameter()->OpaqueDepthIndex = GetBufferManager()->GetCameraDepthRT()->GetTexture()->GetResourceHeapIndex();
-		GetBufferManager()->GetSingleConstantBuffer(PER_PASS_SPACE)->SetMappedData(RenderResource::GetInstance().GetCBVPassParameter(), sizeof(CBVMainPassParameter));
+		GetRenderResource()->GetCBVFrameVariable()->GBuffer0Index = m_GBufferRTs[GBufferIndex++]->GetTexture()->GetResourceHeapIndex();
+		GetRenderResource()->GetCBVFrameVariable()->GBuffer1Index = m_GBufferRTs[GBufferIndex++]->GetTexture()->GetResourceHeapIndex();
+		GetRenderResource()->GetCBVFrameVariable()->GBuffer2Index = m_GBufferRTs[GBufferIndex++]->GetTexture()->GetResourceHeapIndex();
+		GetRenderResource()->GetCBVFrameVariable()->GBuffer3Index = m_GBufferRTs[GBufferIndex++]->GetTexture()->GetResourceHeapIndex();
+		GetRenderResource()->GetCBVFrameVariable()->GBuffer4Index = m_GBufferRTs[GBufferIndex++]->GetTexture()->GetResourceHeapIndex();
+		GetRenderResource()->GetCBVFrameVariable()->GBuffer5Index = m_GBufferRTs[GBufferIndex++]->GetTexture()->GetResourceHeapIndex();
+		GetRenderResource()->GetCBVFrameVariable()->OpaqueDepthIndex = GetBufferManager()->GetCameraDepthRT()->GetTexture()->GetResourceHeapIndex();
 	}
 
 	void GBufferPass::CreatePSO()

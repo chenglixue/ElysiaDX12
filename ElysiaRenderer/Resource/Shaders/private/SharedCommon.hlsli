@@ -62,23 +62,26 @@
 cbuffer GlobalConstant : register(b0, perFrameSpace)
 {
     Vector4 cameraPosWS;
-    UINT    frameIndex;
-    Vector4 screenSize;
-    
-    Matrix viewMatrix;
-    Matrix viewMatrix_I;
-    Matrix projMatrix;
-    Matrix projMatrix_I;
-    Matrix viewProjMatrix;
-    Matrix viewProjMatrix_I;
-    
-    UINT ShadowTexIndex;
-    UINT BlueNoiseTexIndex;
-    UINT GGX_E_LUT_Index;
-    UINT GGX_Eavg_LUT_Index;
-    UINT SkyboxTexIndex;
-    
-    Light mainLight;
+    LightData lightData;
+
+	UINT frameIndex;
+    float nearZ;
+    float farZ;
+	UINT GGX_E_LUT_Index;
+
+	UINT GGX_Eavg_LUT_Index;
+	UINT SkyboxTexIndex;
+	UINT ShadowTexIndex;
+	UINT BlueNoiseTexIndex;
+
+	UINT GBuffer0Index;
+	UINT GBuffer1Index;
+	UINT GBuffer2Index;
+	UINT GBuffer3Index;
+
+	UINT GBuffer4Index;
+	UINT GBuffer5Index;
+	UINT OpaqueDepthIndex;
 };
 
 struct DX12Vertex

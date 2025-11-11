@@ -52,7 +52,7 @@ namespace ElysiaRenderer
 			texBufferCreateDesc.isSRGB = false;
 			auto newTex = std::move(GetDevice()->CreateTextureFromFile(texBufferCreateDesc));
 
-			RenderResource::GetInstance().GetCBVPassParameter()->GGX_E_LUT_Index = newTex->GetResourceHeapIndex();
+			GetRenderResource()->GetCBVFrameVariable()->GGX_E_LUT_Index = newTex->GetResourceHeapIndex();
 
 			this->AddTextureResource(std::move(newTex));
 		}
@@ -62,7 +62,7 @@ namespace ElysiaRenderer
 			texBufferCreateDesc.isSRGB = false;
 			auto newTex = std::move(GetDevice()->CreateTextureFromFile(texBufferCreateDesc));
 
-			RenderResource::GetInstance().GetCBVPassParameter()->GGX_Eavg_LUT_Index = newTex->GetResourceHeapIndex();
+			GetRenderResource()->GetCBVFrameVariable()->GGX_Eavg_LUT_Index = newTex->GetResourceHeapIndex();
 
 			this->AddTextureResource(std::move(newTex));
 
@@ -73,7 +73,7 @@ namespace ElysiaRenderer
 			texBufferCreateDesc.isSRGB = false;
 			auto newTex = std::move(GetDevice()->CreateTextureFromFile(texBufferCreateDesc));
 
-			RenderResource::GetInstance().GetCBVPassParameter()->SkyboxTexIndex = newTex->GetResourceHeapIndex();
+			GetRenderResource()->GetCBVFrameVariable()->SkyboxTexIndex = newTex->GetResourceHeapIndex();
 
 			this->AddTextureResource(std::move(newTex));
 		}
@@ -86,7 +86,7 @@ namespace ElysiaRenderer
 
 			auto newTex = std::move(GetDevice()->CreateTextureFromFile(texBufferCreateDesc));
 
-			RenderResource::GetInstance().GetCBVPassParameter()->BlueNoiseTexIndex = newTex->GetResourceHeapIndex();
+			GetRenderResource()->GetCBVFrameVariable()->BlueNoiseTexIndex = newTex->GetResourceHeapIndex();
 
 			this->AddTextureResource(std::move(newTex));
 		}

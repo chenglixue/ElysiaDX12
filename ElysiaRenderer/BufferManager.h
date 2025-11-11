@@ -41,6 +41,7 @@ namespace ElysiaRenderer
 	private:
 		std::vector<std::unique_ptr<DX12BufferResource>> m_objectConstantBuffers{};
 		std::unique_ptr<DX12BufferResource> m_pPassConstantBuffer = nullptr;
+		std::unique_ptr<DX12BufferResource> m_pFrameConstantBuffer = nullptr;
 
 		std::unique_ptr<RenderTexture> m_pCameraColorRT = nullptr;
 		std::unique_ptr<RenderTexture> m_pCameraDepthRT = nullptr;

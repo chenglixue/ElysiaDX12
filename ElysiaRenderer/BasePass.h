@@ -24,11 +24,12 @@ namespace ElysiaRenderer
 
 		virtual void Dispose();
 
-		void SetConstantData(const std::string& name, const void* pData);
-		void ApplyConstantData();
-
 	protected:
 		UINT2 m_renderSize;
 		DX12GraphicsContext* m_pCommand = nullptr;
+
+		std::vector<ShaderPass> m_shaderPasses;
+		std::unique_ptr<ElysiaRenderer::RenderMaterial> m_pMaterial = nullptr;
+		std::unordered_map<UINT, PipelineStateObject*> m_PipelineStateObjects;
 	};
 }

@@ -41,9 +41,16 @@ namespace ElysiaRenderer
 		switch (spaceID)
 		{
 		case PER_PASS_SPACE:
+		{
 			return m_pPassConstantBuffer.get();
 			break;
+		}
 
+		case PER_FRAME_SPACE:
+		{
+			return m_pFrameConstantBuffer.get();
+			break;
+		}
 		default:
 		{
 			AssertError("Invalid constant buffer space ID");
@@ -116,6 +123,12 @@ namespace ElysiaRenderer
 					m_objectConstantBuffers.emplace_back(std::move(GetDevice()->CreateBuffer(createDesc)));
 				}
 
+				break;
+			}
+
+			case PER_FRAME_SPACE:
+			{
+				m_pFrameConstantBuffer = std::move(GetDevice()->CreateBuffer(createDesc));
 				break;
 			}
 			default:

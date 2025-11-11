@@ -38,10 +38,10 @@ namespace ElysiaRenderer
 			pipelineStateObject->m_pipelineType = PipelineType::Graphics;
 			pipelineStateObject->m_pipelineState = std::move(graphicsPipeline);
 
-			return pipelineStateObject.get();
+			emplaceResult.first->second = std::move(pipelineStateObject);
 		}
 
-		return nullptr;
+		return emplaceResult.first->second.get();
 	}
 
 	PipelineStateObject* PSOManager::GetGraphicsPipelineState(RenderMaterial* pMaterial, UINT passIndex,

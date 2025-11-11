@@ -1222,47 +1222,6 @@ namespace ElysiaRenderer
 		
 		return rootSignature;
 	}
-	std::unique_ptr<PipelineStateObject>		DX12Device::CreateGraphicsPipelineState(PipelineStateCreateDesc& pipelineStateCreateDesc, PipelineResourceLayout& resourceLayout)
-	{
-		D3D12_GRAPHICS_PIPELINE_STATE_DESC PSODesc{};
-		if (pipelineStateCreateDesc.m_vertexShader != nullptr)
-		{
-			PSODesc.VS.pShaderBytecode = pipelineStateCreateDesc.m_vertexShader->GetShader()->GetBufferPointer();
-			PSODesc.VS.BytecodeLength = pipelineStateCreateDesc.m_vertexShader->GetShader()->GetBufferSize();
-		}
-		if (pipelineStateCreateDesc.m_pixelShader != nullptr)
-		{
-			PSODesc.PS.pShaderBytecode = pipelineStateCreateDesc.m_pixelShader->GetShader()->GetBufferPointer();
-			PSODesc.PS.BytecodeLength = pipelineStateCreateDesc.m_pixelShader->GetShader()->GetBufferSize();
-		}
-		
-		PSODesc.InputLayout = pipelineStateCreateDesc.m_vertexShader->GetInputElementDesc();
-		PSODesc.RasterizerState = pipelineStateCreateDesc.m_rasterDesc;
-		PSODesc.BlendState = pipelineStateCreateDesc.m_blendDesc;
-		PSODesc.DepthStencilState = pipelineStateCreateDesc.m_depthStencilDesc;
-		PSODesc.DSVFormat = pipelineStateCreateDesc.m_renderTargetDesc.m_depthStencilFormat;
-		PSODesc.SampleMask = UINT_MAX;
-		PSODesc.PrimitiveTopologyType = pipelineStateCreateDesc.m_topology;
-		PSODesc.NumRenderTargets = pipelineStateCreateDesc.m_renderTargetDesc.m_numRenderTargets;
-		for (UINT i = 0; i < pipelineStateCreateDesc.m_renderTargetDesc.m_numRenderTargets; ++i)
-		{
-			PSODesc.RTVFormats[i] = pipelineStateCreateDesc.m_renderTargetDesc.m_renderTargetFormats[i];
-		}
-		PSODesc.SampleDesc = pipelineStateCreateDesc.m_sampleDesc;
-
-		std::unique_ptr<PipelineStateObject> pipelineStateObject = std::make_unique<PipelineStateObject>();
-		pipelineStateObject->m_pipelineType = PipelineType::Graphics;
-		pipelineStateObject->m_rootSignature = std::unique_ptr<DX12RootSignature>(CreateRootSignature(resourceLayout, pipelineStateObject->m_pipelineResourceMapping));
-
-		PSODesc.pRootSignature = pipelineStateObject->m_rootSignature->GetSignature();
-		CComPtr<ID3D12PipelineState> pipelineState = nullptr;
-		ElysiaHelper::ThrowIfFailed(m_device->CreateGraphicsPipelineState(&PSODesc, IID_PPV_ARGS(&pipelineState)));
-
-		auto graphicsPipeline = std::make_unique<DX12GraphicsPipelineState>(pipelineState, pipelineStateObject->m_rootSignature.get());
-		pipelineStateObject->m_pipelineState = std::move(graphicsPipeline);
-
-		return pipelineStateObject;
-	}
 
 	void DX12Device::CopyDescriptors(uint32_t numDestDescriptorRanges, const D3D12_CPU_DESCRIPTOR_HANDLE* destDescriptorRangeStarts, const uint32_t* destDescriptorRangeSizes,
 		uint32_t numSrcDescriptorRanges, const D3D12_CPU_DESCRIPTOR_HANDLE* srcDescriptorRangeStarts, const uint32_t* srcDescriptorRangeSizes, D3D12_DESCRIPTOR_HEAP_TYPE descriptorType)

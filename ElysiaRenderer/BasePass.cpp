@@ -11,7 +11,10 @@
 namespace ElysiaRenderer
 {
 	BasePass::BasePass() :
-		m_renderSize(0, 0)
+		m_renderSize(0, 0),
+		m_shaderPasses(std::vector<ShaderPass>()),
+		m_pMaterial(std::unique_ptr<ElysiaRenderer::RenderMaterial>()),
+		m_PipelineStateObjects(std::unordered_map<UINT, PipelineStateObject*>())
 	{
 
 	}
