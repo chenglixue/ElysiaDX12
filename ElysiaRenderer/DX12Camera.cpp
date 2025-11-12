@@ -68,7 +68,7 @@ namespace ElysiaRenderer
 		return m_viewMatrix;
 	}
 
-	Matrix		DX12Camera::GetProj()			const noexcept
+	Matrix		DX12Camera::GetProjMat()			const noexcept
 	{
 		return m_projMatrix;
 	}

@@ -10,21 +10,16 @@
 #include "../private\SharedCommon.hlsli"
 #endif
 
-cbuffer ObjectConstant : register(b0, perObjectSpace)
-{
-    Matrix worldMatrix;
-};
-
-cbuffer MaterialConstant : register(b0, perMaterialSpace)
-{
-    
-    
-};
-
 cbuffer PassConstant : register(b0, perPassSpace)
 {
-    Matrix shadowMatrix;
-    Vector4 shadowSize;
+    Vector4 screenSize;
+    
+    Matrix viewMatrix;
+    Matrix viewMatrix_I;
+    Matrix projMatrix;
+    Matrix projMatrix_I;
+    Matrix viewProjMatrix;
+    Matrix viewProjMatrix_I;
 }
 
 struct PSInput
@@ -37,6 +32,29 @@ struct PSOutput
 {
     float4 target0 : SV_TARGET0;
 };
+
+PSInput VS(UINT vertexID : SV_VertexID)
+{
+    PSInput o = (PSInput) 0;
+    
+    if (vertexID == 0)
+    {
+        o.positionCS = float4(-1.0f, 1.0f, 1.0f, 1.0f);
+        o.uv = float2(0.0f, 0.0f);
+    }
+    else if (vertexID == 1)
+    {
+        o.positionCS = float4(3.0f, 1.0f, 1.0f, 1.0f);
+        o.uv = float2(2.0f, 0.0f);
+    }
+    else
+    {
+        o.positionCS = float4(-1.0f, -3.0f, 1.0f, 1.0f);
+        o.uv = float2(0.0f, 2.0f);
+    }
+    
+    return o;
+}
 
 PSOutput PS(PSInput i)
 {

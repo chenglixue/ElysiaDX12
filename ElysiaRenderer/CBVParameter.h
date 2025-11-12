@@ -50,14 +50,15 @@ namespace ElysiaRenderer
 		float cutoff = 0.5;
 
 		bool hasNormalTex = false;
-
 	};
 
 	struct alignas(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT) CBVFrameVariable
 	{
 		Vector4		cameraPosWS = Vector4::Zero;
-
 		LightData   lightData;
+
+		Matrix		shadowMatrix;
+		Vector4		shadowSize;
 
 		UINT		frameIndex = 0;
 		float		nearZ = 1;

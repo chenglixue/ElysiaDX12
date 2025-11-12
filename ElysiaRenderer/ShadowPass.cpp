@@ -10,6 +10,11 @@
 
 namespace ElysiaRenderer
 {
+	ShadowPass::ShadowPass(DX12Camera* pCamera) :
+		BasePass(pCamera)
+	{
+
+	};
 	ShadowPass::~ShadowPass()
 	{
 		Dispose();
@@ -19,6 +24,7 @@ namespace ElysiaRenderer
 	{
 		m_pMainLight = GetLightManager()->GetMainLight();
 		CreateMainShadow(1000, DXGI_FORMAT_D24_UNORM_S8_UINT);
+		GetRenderResource()->GetCBVFrameVariable()->ShadowTexIndex = m_pShadowRT->GetTexture()->GetResourceHeapIndex();
 
 		m_shaderPasses.emplace_back(ShaderPass
 			{
@@ -48,20 +54,14 @@ namespace ElysiaRenderer
 	{
 		m_pMainShadow->UpdateShadowTransform(m_pMainLight);
 		GetRenderResource()->GetCBVFrameVariable()->ShadowTexIndex = m_pShadowRT->GetFormat();
+		GetRenderResource()->GetCBVFrameVariable()->shadowMatrix = m_pMainShadow->GetShadowMat();
+		GetRenderResource()->GetCBVFrameVariable()->shadowSize = GetScreenSize(Vector2(m_pMainShadow->GetWidth(), m_pMainShadow->GetHeight()));
 
-		auto& pUserData = UserData::GetInstance();
-
-		auto shadowDepthBias = pUserData.shadowDepthBias / 100;
-		auto shadowSlopeDepthBias = pUserData.shadowSlopeDepthBias / 100;
-		auto shadowMaxSlopeDepthBias = pUserData.shadowMaxSlopeDepthBias / 100;
-
-		m_pMaterial->SetConstantVariable<Matrix>("shadowMatrix", m_pMainShadow->GetShadowMat());
-		m_pMaterial->SetConstantVariable<Vector4>("shadowSize", GetScreenSize(Vector2(m_pMainShadow->GetWidth(), m_pMainShadow->GetHeight())));
 		m_pMaterial->SetConstantVariable<float>("shadowNearZ", m_pMainShadow->GetNearZ());
 		m_pMaterial->SetConstantVariable<float>("shadowFarZ", m_pMainShadow->GetFarZ());
-		m_pMaterial->SetConstantVariable<float>("shadowDepthBias", shadowDepthBias);
-		m_pMaterial->SetConstantVariable<float>("shadowSlopeDepthBias", shadowSlopeDepthBias);
-		m_pMaterial->SetConstantVariable<float>("shadowMaxSlopeDepthBias", shadowMaxSlopeDepthBias);
+		m_pMaterial->SetConstantVariable<float>("shadowDepthBias", UserData::GetInstance().shadowDepthBias / 100);
+		m_pMaterial->SetConstantVariable<float>("shadowSlopeDepthBias", UserData::GetInstance().shadowSlopeDepthBias / 100);
+		m_pMaterial->SetConstantVariable<float>("shadowMaxSlopeDepthBias", UserData::GetInstance().shadowMaxSlopeDepthBias / 100);
 
 		auto sobolSequence = Create2DSobolSqeuence(64);
 		m_pMaterial->SetConstantVariable<std::vector<Vector2>>("g_sobolSequence", sobolSequence);
@@ -100,7 +100,7 @@ namespace ElysiaRenderer
 			m_pCommand->SetViewport(m_pMainShadow->GetViewport());
 			m_pCommand->SetScissorRect(m_pMainShadow->GetScissorRect());
 			m_pCommand->SetPipeline(pipelineStateData);
-			m_pCommand->SetPipelineResource(PER_PASS_SPACE, RenderResource::GetPerMainBindResourceSpace());
+			m_pCommand->SetPipelineResource(PER_PASS_SPACE, m_pMaterial->GetPassData(ShaderPasseIDs::ShadowCast).MeshResourceLayouts->m_spaces[PER_PASS_SPACE]);
 
 			UINT vertexStride = GetModelImporter()->GetVertexStride();
 
@@ -109,9 +109,19 @@ namespace ElysiaRenderer
 				const auto& meshRenderer = GetModelImporter()->GetMeshRenderer(meshIndex);
 				const auto& mesh = meshRenderer.m_mesh;
 
-				auto objectContantBuffer = GetBufferManager()->GetMutilConstantBuffer(PER_OBJECT_SPACE, GetDevice()->GetFrameID(), meshIndex);
-				RenderResource::GetPerObjectBindResourceSpace()->SetCBV(objectContantBuffer);
-				m_pCommand->SetPipelineResource(PER_OBJECT_SPACE, RenderResource::GetPerObjectBindResourceSpace());
+				{
+					m_pMaterial->SetConstantVariable<Matrix>("worldMatrix", meshRenderer.m_CBVObjectParameter->worldMatrix);
+					m_pMaterial->ApplyConstantData();
+					m_pCommand->SetPipelineResource(PER_OBJECT_SPACE, m_pMaterial->GetPassData(ShaderPasseIDs::ShadowCast).MeshResourceLayouts->m_spaces[PER_OBJECT_SPACE]);
+				}
+
+				{
+					m_pMaterial->SetConstantVariable<UINT>("baseColorTexIndex", meshRenderer.m_CBVObjectParameter->baseColorTexIndex);
+					m_pMaterial->SetConstantVariable<float>("opacity", meshRenderer.m_CBVObjectParameter->opacity);
+					m_pMaterial->SetConstantVariable<float>("cutoff", meshRenderer.m_CBVObjectParameter->cutoff);
+					m_pMaterial->ApplyConstantData();
+					m_pCommand->SetPipelineResource(PER_MATERIAL_SPACE, m_pMaterial->GetPassData(ShaderPasseIDs::ShadowCast).MeshResourceLayouts->m_spaces[PER_MATERIAL_SPACE]);
+				}
 
 				auto startIndex = mesh->indexDataOffset / sizeof(UINT16);
 				auto startVertex = mesh->vertexDataOffset / vertexStride;

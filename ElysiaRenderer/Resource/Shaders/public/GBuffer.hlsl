@@ -39,7 +39,14 @@ cbuffer MaterialConstant : register(b0, perMaterialSpace)
 
 cbuffer PassConstant : register(b0, perPassSpace)
 {
+    Vector4 screenSize;
     
+    Matrix viewMatrix;
+    Matrix viewMatrix_I;
+    Matrix projMatrix;
+    Matrix projMatrix_I;
+    Matrix viewProjMatrix;
+    Matrix viewProjMatrix_I;
 }
 
 struct VSInput

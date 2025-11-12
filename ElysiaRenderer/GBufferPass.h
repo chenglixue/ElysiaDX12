@@ -8,7 +8,7 @@ namespace ElysiaRenderer
 	class GBufferPass : public BasePass
 	{
 	public:
-		GBufferPass() = default;
+		GBufferPass(DX12Camera* pCamera);
 		virtual ~GBufferPass() override;
 
 		//virtual void Setup(const RenderPassData& renderPassData) override;
@@ -19,6 +19,10 @@ namespace ElysiaRenderer
 		virtual void Dispose() override;
 
 	private:
+		struct ShaderPasseIDs
+		{
+			static int GBufferPassID;
+		};
 		std::vector<std::unique_ptr<RenderTexture>> m_GBufferRTs{};
 
 		std::vector<DX12TextureResource*> GetGBuffers();

@@ -5,6 +5,11 @@
 
 namespace ElysiaRenderer
 {
+	GBufferPass::GBufferPass(DX12Camera* pCamera) :
+		BasePass(pCamera)
+	{
+
+	}
 	GBufferPass::~GBufferPass()
 	{
 		Dispose();
@@ -12,17 +17,50 @@ namespace ElysiaRenderer
 
 	void GBufferPass::Configure()
 	{
-		AddShader(ShaderQueue::GBuffer, L"Shaders\\public\\GBuffer.hlsl", L"VS", ShaderType::Vertex);
-		AddShader(ShaderQueue::GBuffer, L"Shaders\\public\\GBuffer.hlsl", L"PS", ShaderType::Pixel);
-
 		CreateRTs();
 		BindToShader();
-		CreatePSO();
+
+		m_shaderPasses.emplace_back(ShaderPass
+			{
+				.Name = "GBuffer Pass",
+				.FilePath = L"Shaders\\public\\GBuffer.hlsl",
+				.RasterizerDesc = GetRasterizerState(RasterizerState::BackFaceCull),
+				.BlendDesc = GetBlendState(BlendState::Disabled),
+				.DepthStencilDesc = GetDepthState(DepthState::WritesEnabled)
+			});
+
+		m_pMaterial = std::move(std::make_unique<RenderMaterial>(m_shaderPasses));
+		ShaderPasseIDs::GBufferPassID = m_pMaterial->FindPassIndex("GBuffer Pass");
+
+		{
+			RenderTargetDesc RTDesc = RenderTargetDesc
+			{
+				.m_numRenderTargets = static_cast<UINT8>(m_GBufferRTs.size()),
+				.m_depthStencilFormat = GetBufferManager()->GetCameraDepthRT()->GetFormat()
+			};
+			for (int i = 0; i < m_GBufferRTs.size(); ++i)
+			{
+				RTDesc.m_renderTargetFormats[i] = m_GBufferRTs[i]->GetFormat();
+			}
+
+			auto emplaceResult = m_PipelineStateObjects.try_emplace(ShaderPasseIDs::GBufferPassID);
+			if (emplaceResult.second)
+			{
+				emplaceResult.first->second = GetPSOManager()->GetGraphicsPipelineState(m_pMaterial.get(), ShaderPasseIDs::GBufferPassID, RTDesc);
+			}
+		}
 	}
 
 	void GBufferPass::Execute()
 	{
-		GetBufferManager()->GetSingleConstantBuffer(PER_PASS_SPACE)->SetMappedData(RenderResource::GetInstance().GetCBVPassParameter(), sizeof(CBVMainPassParameter));
+		m_pMaterial->SetConstantVariable<Vector4>("screenSize", GetScreenSize(m_renderSize));
+		m_pMaterial->SetConstantVariable<Matrix>("viewMatrix", m_pCamera->GetViewMat());
+		m_pMaterial->SetConstantVariable<Matrix>("viewMatrix_I", m_pCamera->GetViewMat().Invert());
+		m_pMaterial->SetConstantVariable<Matrix>("projMatrix", m_pCamera->GetProjMat());
+		m_pMaterial->SetConstantVariable<Matrix>("projMatrix_I", m_pCamera->GetProjMat().Invert());
+		m_pMaterial->SetConstantVariable<Matrix>("viewProjMatrix", m_pCamera->GetViewMat() * m_pCamera->GetProjMat());
+		m_pMaterial->SetConstantVariable<Matrix>("viewProjMatrix_I", (m_pCamera->GetViewMat() * m_pCamera->GetProjMat()).Invert());
+		m_pMaterial->ApplyConstantData();
 	}
 
 	void GBufferPass::Render()
@@ -49,7 +87,7 @@ namespace ElysiaRenderer
 		m_pCommand->SetVertexBuffer(0, 1, const_cast<D3D12_VERTEX_BUFFER_VIEW&>(GetBufferManager()->GetVertexBufferView()));
 
 		PipelineInfo pipelineStateData{};
-		pipelineStateData.m_pipelineStateObject = (*m_pGraphicsPipelineStates)[ShaderQueue::GBuffer].get();
+		pipelineStateData.m_pipelineStateObject = m_PipelineStateObjects[ShaderPasseIDs::GBufferPassID];
 		pipelineStateData.m_renderTargets = std::move(GetGBuffers());
 		pipelineStateData.m_depthStencilTarget = cameraDepthRT->GetTexture();
 
@@ -73,7 +111,7 @@ namespace ElysiaRenderer
 		if (isReady)
 		{
 			m_pCommand->SetPipeline(pipelineStateData);
-			m_pCommand->SetPipelineResource(PER_PASS_SPACE, RenderResource::GetPerMainBindResourceSpace());
+			m_pCommand->SetPipelineResource(PER_PASS_SPACE, m_pMaterial->GetPassData(ShaderPasseIDs::GBufferPassID).MeshResourceLayouts->m_spaces[PER_PASS_SPACE]);
 
 			UINT vertexStride = GetModelImporter()->GetVertexStride();
 
@@ -82,9 +120,31 @@ namespace ElysiaRenderer
 				const auto& meshRenderer = GetModelImporter()->GetMeshRenderer(meshIndex);
 				const auto& mesh = meshRenderer.m_mesh;
 
-				auto objectContantBuffer = GetBufferManager()->GetMutilConstantBuffer(PER_OBJECT_SPACE, GetDevice()->GetFrameID(), meshIndex);
-				RenderResource::GetPerObjectBindResourceSpace()->SetCBV(objectContantBuffer);
-				m_pCommand->SetPipelineResource(PER_OBJECT_SPACE, RenderResource::GetPerObjectBindResourceSpace());
+				{
+					m_pMaterial->SetConstantVariable<Matrix>("worldMatrix", meshRenderer.m_CBVObjectParameter->worldMatrix);
+					m_pMaterial->ApplyConstantData();
+				}
+
+				{
+					m_pMaterial->SetConstantVariable<float>("opacity", meshRenderer.m_CBVObjectParameter->opacity);
+					m_pMaterial->SetConstantVariable<float>("cutoff", meshRenderer.m_CBVObjectParameter->cutoff);
+					m_pMaterial->SetConstantVariable<UINT>("baseColorTexIndex", meshRenderer.m_CBVObjectParameter->baseColorTexIndex);
+					m_pMaterial->SetConstantVariable<UINT>("normalTexIndex", meshRenderer.m_CBVObjectParameter->normalTexIndex);
+					m_pMaterial->SetConstantVariable<UINT>("metallicTexIndex", meshRenderer.m_CBVObjectParameter->metallicTexIndex);
+					m_pMaterial->SetConstantVariable<UINT>("roughnessTexIndex", meshRenderer.m_CBVObjectParameter->roughnessTexIndex);
+					m_pMaterial->SetConstantVariable<UINT>("specularTexIndex", meshRenderer.m_CBVObjectParameter->specularTexIndex);
+					m_pMaterial->SetConstantVariable<Vector3>("baseColorTint", meshRenderer.m_CBVObjectParameter->baseColorTint);
+					m_pMaterial->SetConstantVariable<Vector3>("ambientCubemapTint", meshRenderer.m_CBVObjectParameter->ambientCubemapTint);
+					m_pMaterial->SetConstantVariable<float>("normalIntensity", meshRenderer.m_CBVObjectParameter->normalIntensity);
+					m_pMaterial->SetConstantVariable<float>("metallicIntensity", meshRenderer.m_CBVObjectParameter->metallicIntensity);
+					m_pMaterial->SetConstantVariable<float>("roughnessIntensity", meshRenderer.m_CBVObjectParameter->roughnessIntensity);
+					m_pMaterial->SetConstantVariable<float>("ambientCubemapIntensity", meshRenderer.m_CBVObjectParameter->ambientCubemapIntensity);
+					m_pMaterial->SetConstantVariable<bool>("g_hasNormalTex", meshRenderer.m_CBVObjectParameter->hasNormalTex);
+					m_pMaterial->ApplyConstantData();
+				}
+
+				m_pCommand->SetPipelineResource(PER_MATERIAL_SPACE, m_pMaterial->GetPassData(ShaderPasseIDs::GBufferPassID).MeshResourceLayouts->m_spaces[PER_MATERIAL_SPACE]);
+				m_pCommand->SetPipelineResource(PER_OBJECT_SPACE, m_pMaterial->GetPassData(ShaderPasseIDs::GBufferPassID).MeshResourceLayouts->m_spaces[PER_OBJECT_SPACE]);
 
 				auto startIndex = mesh->indexDataOffset / sizeof(UINT16);
 				auto startVertex = mesh->vertexDataOffset / vertexStride;
@@ -195,30 +255,5 @@ namespace ElysiaRenderer
 		GetRenderResource()->GetCBVFrameVariable()->GBuffer4Index = m_GBufferRTs[GBufferIndex++]->GetTexture()->GetResourceHeapIndex();
 		GetRenderResource()->GetCBVFrameVariable()->GBuffer5Index = m_GBufferRTs[GBufferIndex++]->GetTexture()->GetResourceHeapIndex();
 		GetRenderResource()->GetCBVFrameVariable()->OpaqueDepthIndex = GetBufferManager()->GetCameraDepthRT()->GetTexture()->GetResourceHeapIndex();
-	}
-
-	void GBufferPass::CreatePSO()
-	{
-		PipelineStateCreateDesc pipelineStateCreateDesc{};
-		PipelineResourceLayout meshResourceLayout{};
-
-		meshResourceLayout.m_spaces[PER_OBJECT_SPACE] = RenderResource::GetPerObjectBindResourceSpace();
-		meshResourceLayout.m_spaces[PER_PASS_SPACE] = RenderResource::GetPerMainBindResourceSpace();
-
-		pipelineStateCreateDesc = std::move(CreateDefaultPipelineStateCreateDesc());
-		pipelineStateCreateDesc.m_vertexShader = GetVertexShaders()[ShaderQueue::GBuffer][ShaderType::Vertex].get();
-		pipelineStateCreateDesc.m_pixelShader = GetPixelShaders()[ShaderQueue::GBuffer][ShaderType::Pixel].get();
-		pipelineStateCreateDesc.m_inputElementDesc = g_inputElementDescs;
-		pipelineStateCreateDesc.m_renderTargetDesc.m_numRenderTargets = m_GBufferRTs.size();
-		for (int i = 0; i < m_GBufferRTs.size(); ++i)
-		{
-			pipelineStateCreateDesc.m_renderTargetDesc.m_renderTargetFormats[i] = m_GBufferRTs[i]->GetFormat();
-		}
-		pipelineStateCreateDesc.m_renderTargetDesc.m_depthStencilFormat = GetBufferManager()->GetCameraDepthRT()->GetFormat();
-		pipelineStateCreateDesc.m_depthStencilDesc = GetDepthState(DepthState::WritesEnabled);
-		pipelineStateCreateDesc.m_blendDesc = GetBlendState(BlendState::Disabled);
-		pipelineStateCreateDesc.m_rasterDesc = GetRasterizerState(RasterizerState::BackFaceCull);
-		pipelineStateCreateDesc.m_topology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-		(*m_pGraphicsPipelineStates)[ShaderQueue::GBuffer] = std::move(GetDevice()->CreateGraphicsPipelineState(pipelineStateCreateDesc, meshResourceLayout));
 	}
 }

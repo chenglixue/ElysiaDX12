@@ -7,11 +7,11 @@
 #include "TextureManager.h"
 #include "Common.h"
 
-
 namespace ElysiaRenderer
 {
-	BasePass::BasePass() :
+	BasePass::BasePass(DX12Camera* pCamera) :
 		m_renderSize(0, 0),
+		m_pCamera(pCamera),
 		m_shaderPasses(std::vector<ShaderPass>()),
 		m_pMaterial(std::unique_ptr<ElysiaRenderer::RenderMaterial>()),
 		m_PipelineStateObjects(std::unordered_map<UINT, PipelineStateObject*>())

@@ -1,8 +1,11 @@
 #pragma once
 #include "ModelImporter.h"
-#include "DX12Shader.h"
+#include "RenderMaterial.h"
 #include "RenderPassData.h"
 #include "UserData.h"
+#include "PSOManager.h"
+#include "DX12Camera.h"
+#include "PIXHelper.h"
 
 namespace ElysiaRenderer
 {
@@ -14,7 +17,7 @@ namespace ElysiaRenderer
 	class BasePass
 	{
 	public:
-		BasePass();
+		BasePass(DX12Camera* pCamera);
 		virtual ~BasePass();
 
 		virtual void Setup(const RenderPassData& renderPassData);
@@ -27,6 +30,7 @@ namespace ElysiaRenderer
 	protected:
 		UINT2 m_renderSize;
 		DX12GraphicsContext* m_pCommand = nullptr;
+		DX12Camera* m_pCamera = nullptr;
 
 		std::vector<ShaderPass> m_shaderPasses;
 		std::unique_ptr<ElysiaRenderer::RenderMaterial> m_pMaterial = nullptr;

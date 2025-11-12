@@ -6,6 +6,11 @@
 
 namespace ElysiaRenderer
 {
+	TonemapPass::TonemapPass(DX12Camera* pCamera) : 
+		BasePass(pCamera)
+	{
+
+	}
 	TonemapPass::~TonemapPass()
 	{
 		Dispose();
@@ -22,18 +27,56 @@ namespace ElysiaRenderer
 			DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
 			L"Temp RT");
 
-		ShaderCreateDesc shaderCreateDesc{};
-		shaderCreateDesc.shaderName = L"Shaders\\public\\TonemapPass.hlsl";
-		shaderCreateDesc.entryPoint = L"PS";
-		shaderCreateDesc.shaderType = ShaderType::Pixel;
-		m_pixelShader = std::move(GetDevice()->CreateShader(shaderCreateDesc));
+		m_shaderPasses.emplace_back(ShaderPass
+			{
+				.Name = "Blit Pass",
+				.FilePath = L"Shaders\\public\\Blit.hlsl",
+				.RasterizerDesc = GetRasterizerState(RasterizerState::NoCullNoMS),
+				.BlendDesc = GetBlendState(BlendState::Disabled),
+				.DepthStencilDesc = GetDepthState(DepthState::Disabled)
+			});
+		m_shaderPasses.emplace_back(ShaderPass
+			{
+				.Name = "Tonemap Pass",
+				.FilePath = L"Shaders\\public\\TonemapPass.hlsl",
+				.RasterizerDesc = GetRasterizerState(RasterizerState::NoCullNoMS),
+				.BlendDesc = GetBlendState(BlendState::Disabled),
+				.DepthStencilDesc = GetDepthState(DepthState::Disabled)
+			});
+		m_pMaterial = std::make_unique<RenderMaterial>(m_shaderPasses);
+		ShaderPasseIDs::BlitPassID = m_pMaterial->FindPassIndex("Blit Pass");
+		ShaderPasseIDs::TonemapPassID = m_pMaterial->FindPassIndex("Tonemap Pass");
 
-		BindToShader();
-		CreatePSO();
+		{
+			RenderTargetDesc RTDesc = RenderTargetDesc
+			{
+				.m_renderTargetFormats = m_pTempRT->GetFormat(),
+				.m_numRenderTargets = 1,
+				.m_depthStencilFormat = GetBufferManager()->GetCameraDepthRT()->GetFormat()
+			};
+
+			auto emplaceResult = m_PipelineStateObjects.try_emplace(ShaderPasseIDs::BlitPassID);
+			if (emplaceResult.second)
+			{
+				emplaceResult.first->second = GetPSOManager()->GetGraphicsPipelineState(m_pMaterial.get(), ShaderPasseIDs::BlitPassID, RTDesc);
+			}
+		}
+		{
+			RenderTargetDesc RTDesc = RenderTargetDesc
+			{
+				.m_renderTargetFormats = GetBufferManager()->GetCameraColorRT()->GetFormat(),
+				.m_numRenderTargets = 1,
+				.m_depthStencilFormat = GetBufferManager()->GetCameraDepthRT()->GetFormat()
+			};
+			auto emplaceResult = m_PipelineStateObjects.try_emplace(ShaderPasseIDs::TonemapPassID);
+			if (emplaceResult.second)
+			{
+				emplaceResult.first->second = GetPSOManager()->GetGraphicsPipelineState(m_pMaterial.get(), ShaderPasseIDs::TonemapPassID, RTDesc);
+			}
+		}
 	}
 	void TonemapPass::Execute()
 	{
-		BindToShader();
 	}
 	void TonemapPass::Render()
 	{
@@ -41,9 +84,6 @@ namespace ElysiaRenderer
 
 		Execute();
 		{
-			RenderResource::GetInstance().GetCBVPassParameter()->blitterTextureIndex = GetBufferManager()->GetCameraColorRT()->GetTexture()->GetResourceHeapIndex();
-			GetBufferManager()->GetSingleConstantBuffer(PER_PASS_SPACE)->SetMappedData(RenderResource::GetInstance().GetCBVPassParameter(), sizeof(CBVMainPassParameter));
-
 			m_pCommand->AddBarrier(*m_pTempRT->GetTexture(), D3D12_RESOURCE_STATE_RENDER_TARGET);
 			m_pCommand->FlushBarrier();
 			m_pCommand->ClearRenderTarget(*m_pTempRT->GetTexture(), Color(0, 0, 0, 0));
@@ -52,7 +92,7 @@ namespace ElysiaRenderer
 			m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 			PipelineInfo pipelineStateData{};
-			pipelineStateData.m_pipelineStateObject = (*m_pGraphicsPipelineStates)[ShaderQueue::Blit].get();
+			pipelineStateData.m_pipelineStateObject = m_PipelineStateObjects[ShaderPasseIDs::BlitPassID];
 			pipelineStateData.m_renderTargets = { m_pTempRT->GetTexture() };
 			pipelineStateData.m_depthStencilTarget = GetBufferManager()->GetCameraDepthRT()->GetTexture();
 
@@ -68,7 +108,8 @@ namespace ElysiaRenderer
 			if (isReady)
 			{
 				m_pCommand->SetPipeline(pipelineStateData);
-				m_pCommand->SetPipelineResource(PER_PASS_SPACE, RenderResource::GetPerMainBindResourceSpace());
+				m_pMaterial->SetConstantVariable<UINT>("blitterTextureIndex", GetBufferManager()->GetCameraColorRT()->GetTexture()->GetResourceHeapIndex());
+				m_pCommand->SetPipelineResource(PER_PASS_SPACE, m_pMaterial->GetPassData(ShaderPasseIDs::BlitPassID).MeshResourceLayouts->m_spaces[PER_PASS_SPACE]);
 
 				m_pCommand->Draw(3, 0);
 			}
@@ -78,9 +119,6 @@ namespace ElysiaRenderer
 		}
 
 		{
-			RenderResource::GetInstance().GetCBVPassParameter()->blitterTextureIndex = m_pTempRT->GetTexture()->GetResourceHeapIndex();
-			GetBufferManager()->GetSingleConstantBuffer(PER_PASS_SPACE)->SetMappedData(RenderResource::GetInstance().GetCBVPassParameter(), sizeof(CBVMainPassParameter));
-
 			auto cameraColorRT = GetBufferManager()->GetCameraColorRT();
 
 			m_pCommand->AddBarrier(*cameraColorRT->GetTexture(), D3D12_RESOURCE_STATE_RENDER_TARGET);
@@ -114,34 +152,6 @@ namespace ElysiaRenderer
 
 			m_pCommand->AddBarrier(*cameraColorRT->GetTexture(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 			m_pCommand->FlushBarrier();
-		}
-	}
-
-	void TonemapPass::BindToShader()
-	{
-
-	}
-
-	void TonemapPass::CreatePSO()
-	{
-		{
-			PipelineStateCreateDesc pipelineStateCreateDesc{};
-			PipelineResourceLayout meshResourceLayout{};
-
-			meshResourceLayout.m_spaces[PER_OBJECT_SPACE] = RenderResource::GetPerObjectBindResourceSpace();
-			meshResourceLayout.m_spaces[PER_PASS_SPACE] = RenderResource::GetPerMainBindResourceSpace();
-
-			pipelineStateCreateDesc = std::move(CreateDefaultPipelineStateCreateDesc());
-			pipelineStateCreateDesc.m_vertexShader = GetVertexShaders()[ShaderQueue::Blit][ShaderType::Vertex].get();
-			pipelineStateCreateDesc.m_pixelShader = m_pixelShader.get();
-			pipelineStateCreateDesc.m_renderTargetDesc.m_numRenderTargets = 1;
-			pipelineStateCreateDesc.m_renderTargetDesc.m_renderTargetFormats[0] = GetBufferManager()->GetCameraColorRT()->GetFormat();
-			pipelineStateCreateDesc.m_renderTargetDesc.m_depthStencilFormat = GetBufferManager()->GetCameraDepthRT()->GetFormat();
-			pipelineStateCreateDesc.m_depthStencilDesc = GetDepthState(DepthState::Disabled);
-			pipelineStateCreateDesc.m_blendDesc = GetBlendState(BlendState::Disabled);
-			pipelineStateCreateDesc.m_rasterDesc = GetRasterizerState(RasterizerState::NoCullNoMS);
-			pipelineStateCreateDesc.m_topology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-			m_TonemapPSO = std::move(GetDevice()->CreateGraphicsPipelineState(pipelineStateCreateDesc, meshResourceLayout));
 		}
 	}
 }

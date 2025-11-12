@@ -141,34 +141,15 @@ namespace ElysiaRenderer
 
 	void Renderer::UpdateCBV()
 	{
-		UpdatePassCBV();
-		UpdateObjectCBV();
+		//UpdateObjectCBV();
 
 		auto passParameter = GetRenderResource()->GetCBVFrameVariable();
+		passParameter->cameraPosWS = m_pCameraManager->GetMainCamera()->GetPosition4();
+		passParameter->lightData = std::move(GetLightManager()->GetMainLight()->CreateLightData());
 		passParameter->frameIndex = GetDevice()->GetFrameIndex();
-		passParameter->cameraPosWS = m_pCameraManager->GetMainCamera()->GetPosition4();
 		passParameter->nearZ = m_pCameraManager->GetMainCamera()->GetNearZ();
 		passParameter->farZ = m_pCameraManager->GetMainCamera()->GetFarZ();
-		passParameter->lightData = GetLightManager()->GetMainLight()->CreateLightData();
 		GetBufferManager()->GetSingleConstantBuffer(PER_FRAME_SPACE)->SetMappedData(GetRenderResource()->GetCBVFrameVariable(), sizeof(CBVFrameVariable));
-	}
-	void Renderer::UpdatePassCBV()
-	{
-		passParameter->screenSize = GetDevice()->GetScreenSize();
-		passParameter->frameIndex = GetDevice()->GetFrameIndex(); 
-		passParameter->cameraPosWS = m_pCameraManager->GetMainCamera()->GetPosition4();
-		passParameter->viewMatrix = m_pCameraManager->GetMainCamera()->GetViewMat();
-		passParameter->viewMatrix_I = passParameter->viewMatrix.Invert();
-		passParameter->projMatrix = m_pCameraManager->GetMainCamera()->GetProj();
-		passParameter->projMatrix_I = passParameter->projMatrix.Invert();
-		passParameter->viewProjMatrix = passParameter->viewMatrix * passParameter->projMatrix;
-		passParameter->viewProjMatrix_I = passParameter->viewProjMatrix.Invert();
-		passParameter->nearZ = m_pCameraManager->GetMainCamera()->GetNearZ();
-		passParameter->farZ = m_pCameraManager->GetMainCamera()->GetFarZ();
-
-		passParameter->mainLight = std::move(GetLightManager()->GetMainLight()->CreateLightData());
-
-		GetBufferManager()->GetSingleConstantBuffer(PER_PASS_SPACE)->SetMappedData(passParameter, sizeof(CBVMainPassParameter));
 	}
 	void Renderer::UpdateObjectCBV()
 	{

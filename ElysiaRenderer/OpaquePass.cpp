@@ -7,31 +7,62 @@
 
 namespace ElysiaRenderer
 {
+	OpaquePass::OpaquePass(DX12Camera* pCamera):
+		BasePass(pCamera)
+	{
+
+	}
+
 	OpaquePass::~OpaquePass()
 	{
 		Dispose();
 	}
-
-	void OpaquePass::Configure()
-	{
-		ShaderCreateDesc shaderCreateDesc{};
-		shaderCreateDesc.shaderName = L"Shaders\\public\\Opaque.hlsl";
-		shaderCreateDesc.entryPoint = L"PS";
-		shaderCreateDesc.shaderType = ShaderType::Pixel;
-		m_pixelShader = std::move(GetDevice()->CreateShader(shaderCreateDesc));
-
-		BindToShader();
-		CreatePSO();
-	}
-
 	void OpaquePass::Dispose()
 	{
 
 	}
 
+	void OpaquePass::Configure()
+	{
+		m_shaderPasses.emplace_back(ShaderPass
+			{
+				.Name = "Opaque Light Pass",
+				.FilePath = L"Shaders\\public\\Opaque.hlsl",
+				.RasterizerDesc = GetRasterizerState(RasterizerState::NoCullNoMS),
+				.BlendDesc = GetBlendState(BlendState::Disabled),
+				.DepthStencilDesc = GetDepthState(DepthState::Disabled)
+			});
+		m_pMaterial = std::make_unique<RenderMaterial>(m_shaderPasses);
+		ShaderPasseIDs::OpaqueLightPassID = m_pMaterial->FindPassIndex("Opaque Light Pass");
+
+		{
+			RenderTargetDesc RTDesc = RenderTargetDesc
+			{
+				.m_renderTargetFormats = GetBufferManager()->GetCameraColorRT()->GetFormat(),
+				.m_numRenderTargets = 1,
+				.m_depthStencilFormat = GetBufferManager()->GetCameraDepthRT()->GetFormat()
+			};
+			auto emplaceResult = m_PipelineStateObjects.try_emplace(ShaderPasseIDs::OpaqueLightPassID);
+			if (emplaceResult.second)
+			{
+				emplaceResult.first->second = GetPSOManager()->GetGraphicsPipelineState(
+					m_pMaterial.get(), ShaderPasseIDs::OpaqueLightPassID, RTDesc);
+			}
+		}
+	}
+
 	void OpaquePass::Execute()
 	{
-		BindToShader();
+		m_pMaterial->SetConstantVariable<Vector4>("screenSize", GetScreenSize(m_renderSize));
+
+		m_pMaterial->SetConstantVariable<Matrix>("viewMatrix", m_pCamera->GetViewMat());
+		m_pMaterial->SetConstantVariable<Matrix>("viewMatrix_I", m_pCamera->GetViewMat().Invert());
+		m_pMaterial->SetConstantVariable<Matrix>("projMatrix", m_pCamera->GetProjMat());
+		m_pMaterial->SetConstantVariable<Matrix>("projMatrix_I", m_pCamera->GetProjMat().Invert());
+		m_pMaterial->SetConstantVariable<Matrix>("viewProjMatrix", m_pCamera->GetViewMat() * m_pCamera->GetProjMat());
+		m_pMaterial->SetConstantVariable<Matrix>("viewProjMatrix_I", (m_pCamera->GetViewMat() * m_pCamera->GetProjMat()).Invert());
+
+		m_pMaterial->ApplyConstantData();
 	}
 	void OpaquePass::Render()
 	{
@@ -48,10 +79,12 @@ namespace ElysiaRenderer
 		m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_renderSize.x, m_renderSize.y));
 		m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-		PipelineInfo pipelineStateData{};
-		pipelineStateData.m_pipelineStateObject = m_PSO.get();
-		pipelineStateData.m_renderTargets = { cameraColorRT->GetTexture() };
-		pipelineStateData.m_depthStencilTarget = GetBufferManager()->GetCameraDepthRT()->GetTexture();
+		PipelineInfo pipelineStateData
+		{
+			.m_pipelineStateObject = m_PipelineStateObjects[ShaderPasseIDs::OpaqueLightPassID],
+			.m_renderTargets = { cameraColorRT->GetTexture() },
+			.m_depthStencilTarget = GetBufferManager()->GetCameraDepthRT()->GetTexture()
+		};
 
 		bool isReady = true;
 		{
@@ -65,36 +98,13 @@ namespace ElysiaRenderer
 		if (isReady)
 		{
 			m_pCommand->SetPipeline(pipelineStateData);
-			m_pCommand->SetPipelineResource(PER_PASS_SPACE, RenderResource::GetPerMainBindResourceSpace());
+
+			m_pCommand->SetPipelineResource(PER_PASS_SPACE, m_pMaterial->GetPassData(ShaderPasseIDs::OpaqueLightPassID).MeshResourceLayouts->m_spaces[PER_PASS_SPACE]);
 
 			m_pCommand->Draw(3, 0);
 		}
 
 		m_pCommand->AddBarrier(*cameraColorRT->GetTexture(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		m_pCommand->FlushBarrier();
-	}
-
-	void OpaquePass::BindToShader()
-	{
-	}
-	void OpaquePass::CreatePSO()
-	{
-		PipelineStateCreateDesc pipelineStateCreateDesc{};
-		PipelineResourceLayout meshResourceLayout{};
-
-		meshResourceLayout.m_spaces[PER_OBJECT_SPACE] = RenderResource::GetPerObjectBindResourceSpace();
-		meshResourceLayout.m_spaces[PER_PASS_SPACE] = RenderResource::GetPerMainBindResourceSpace();
-
-		pipelineStateCreateDesc = std::move(CreateDefaultPipelineStateCreateDesc());
-		pipelineStateCreateDesc.m_vertexShader = GetVertexShaders()[ShaderQueue::Blit][ShaderType::Vertex].get();
-		pipelineStateCreateDesc.m_pixelShader = m_pixelShader.get();
-		pipelineStateCreateDesc.m_renderTargetDesc.m_numRenderTargets = 1;
-		pipelineStateCreateDesc.m_renderTargetDesc.m_renderTargetFormats[0] = GetBufferManager()->GetCameraColorRT()->GetFormat();
-		pipelineStateCreateDesc.m_renderTargetDesc.m_depthStencilFormat = GetBufferManager()->GetCameraDepthRT()->GetFormat();
-		pipelineStateCreateDesc.m_depthStencilDesc = GetDepthState(DepthState::Disabled);
-		pipelineStateCreateDesc.m_blendDesc = GetBlendState(BlendState::Disabled);
-		pipelineStateCreateDesc.m_rasterDesc = GetRasterizerState(RasterizerState::NoCullNoMS);
-		pipelineStateCreateDesc.m_topology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-		m_PSO = std::move(GetDevice()->CreateGraphicsPipelineState(pipelineStateCreateDesc, meshResourceLayout));
 	}
 }

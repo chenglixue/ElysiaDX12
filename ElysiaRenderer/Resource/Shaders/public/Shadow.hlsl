@@ -25,9 +25,6 @@ cbuffer MaterialConstant : register(b0, perMaterialSpace)
 
 cbuffer PassConstant : register(b0, perPassSpace)
 {
-    Matrix shadowMatrix;
-	Vector4 shadowSize;
-
     float shadowNearZ;
     float shadowFarZ;
     float shadowDepthBias;
@@ -92,7 +89,7 @@ PSOutput PS(PSInput i)
     PSOutput o = (PSOutput) 0;
     
     SamplerState warpLinearSampler = SamplerDescriptorHeap[WarpLinearSampler];
-    Texture2D<float4> baseColorTex = ResourceDescriptorHeap[baseColorTexIndex];
+    Texture2D<float4> baseColorTex = ResourceDescriptorHeap[GBuffer4Index];
         
     float4 baseColor = baseColorTex.Sample(warpLinearSampler, i.uv) * opacity;
     clip(baseColor.a - cutoff);

@@ -69,13 +69,11 @@ namespace ElysiaRenderer
 	{
 		std::string					Name;
 		std::wstring				FilePath;
-		std::wstring				VertexEntryPoint;
-		std::wstring				FragmentEntryPoint;
+		std::wstring				VertexEntryPoint = L"VS";
+		std::wstring				FragmentEntryPoint = L"PS";
 		D3D12_RASTERIZER_DESC		RasterizerDesc;
 		D3D12_BLEND_DESC			BlendDesc;
 		D3D12_DEPTH_STENCIL_DESC	DepthStencilDesc;
-		std::unique_ptr<DX12Shader> pVSShader = nullptr;
-		std::unique_ptr<DX12Shader>	pPSShader = nullptr;
 	};
 
 	struct PassData

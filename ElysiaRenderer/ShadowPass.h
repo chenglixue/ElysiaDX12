@@ -14,11 +14,7 @@ namespace ElysiaRenderer
 	class ShadowPass : public BasePass
 	{
 	public:
-		ShadowPass() : 
-			BasePass()
-		{
-
-		};
+		ShadowPass(DX12Camera* pCamera);
 		virtual ~ShadowPass() override;
 
 		//virtual void Setup(const RenderPassData& renderPasssData) override;

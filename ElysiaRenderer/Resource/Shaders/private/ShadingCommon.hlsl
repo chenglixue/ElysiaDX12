@@ -247,14 +247,14 @@ FDecodeGBufferData GetDecodeGBufferData(float2 uv)
 }
 
 // Computes world-space position from post-projection depth
-float3 PositionFromDepth(in float zw, in float2 uv)
-{
-    float linearDepth = projMatrix._43 / (zw - projMatrix._33);
-    float4 positionCS = float4(uv * 2.0f - 1.0f, zw, 1.0f);
-    positionCS.y *= -1.0f;
-    float4 positionWS = mul(positionCS, viewProjMatrix_I);
-    return positionWS.xyz / positionWS.w;
-}
+//float3 PositionFromDepth(in float zw, in float2 uv)
+//{
+//    float linearDepth = projMatrix._43 / (zw - projMatrix._33);
+//    float4 positionCS = float4(uv * 2.0f - 1.0f, zw, 1.0f);
+//    positionCS.y *= -1.0f;
+//    float4 positionWS = mul(positionCS, viewProjMatrix_I);
+//    return positionWS.xyz / positionWS.w;
+//}
 
 float4 ComputeClipSpacePosition(float2 screenUV, float rawDepth)
 {

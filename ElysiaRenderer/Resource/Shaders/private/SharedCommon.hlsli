@@ -62,11 +62,15 @@
 cbuffer GlobalConstant : register(b0, perFrameSpace)
 {
     Vector4 cameraPosWS;
-    LightData lightData;
+    Light mainLight;
+    
+    Matrix shadowMatrix;
+	Vector4 shadowSize;
 
 	UINT frameIndex;
     float nearZ;
     float farZ;
+    
 	UINT GGX_E_LUT_Index;
 
 	UINT GGX_Eavg_LUT_Index;
