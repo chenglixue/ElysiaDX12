@@ -3,6 +3,7 @@
 
 #include "ShaderUtility.h"
 #include "MObject.h"
+#include "Shader.h"
 
 namespace ElysiaRenderer
 {

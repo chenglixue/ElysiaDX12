@@ -6,11 +6,16 @@
 
 namespace ElysiaRenderer
 {
+	FinalBlitPass::FinalBlitPass(DX12Camera* pCamera) :
+		BasePass(pCamera)
+	{
+
+	}
+
 	FinalBlitPass::~FinalBlitPass()
 	{
 		Dispose();
 	}
-
 	void FinalBlitPass::Dispose()
 	{
 
@@ -18,13 +23,37 @@ namespace ElysiaRenderer
 
 	void FinalBlitPass::Configure()
 	{
+		m_shaderPasses = std::vector<ShaderPass>
+		{
+			ShaderPass
+			{
+				.Name = "Blit Pass",
+				.FilePath = L"Shaders\\public\\Blit.hlsl",
+				.VertexEntryPoint = L"BlitVS",
+				.FragmentEntryPoint = L"BlitPS",
+				.RasterizerDesc = GetRasterizerState(RasterizerState::NoCullNoMS),
+				.BlendDesc = GetBlendState(BlendState::Disabled),
+				.DepthStencilDesc = GetDepthState(DepthState::Disabled)
+			},
+		};
 
-		BindToShader();
-		CreatePSO();
+		m_pMaterial = std::make_unique<RenderMaterial>(m_shaderPasses);
+		ShaderPassIDs::BlitPassID = m_pMaterial->FindPassIndex("Blit Pass");
+
+		RenderTargetDesc RTDesc = RenderTargetDesc
+		{
+			.m_renderTargetFormats = GetDevice()->GetCurrBackBuffer().GetResourceDesc().Format,
+			.m_numRenderTargets = 1,
+			.m_depthStencilFormat = GetBufferManager()->GetCameraDepthRT()->GetFormat()
+		};
+		auto emplaceResult = m_PipelineStateObjects.try_emplace(ShaderPassIDs::BlitPassID);
+		if (emplaceResult.second)
+		{
+			emplaceResult.first->second = GetPSOManager()->GetGraphicsPipelineState(m_pMaterial.get(), ShaderPassIDs::BlitPassID, RTDesc);
+		}
 	}
 	void FinalBlitPass::Execute()
 	{
-		BindToShader();
 	}
 	void FinalBlitPass::Render()
 	{
@@ -38,11 +67,10 @@ namespace ElysiaRenderer
 		m_pCommand->ClearRenderTarget(cameraColorRT, Color(0, 0, 0, 0));
 
 		m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
 		m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(static_cast<UINT>(m_renderSize.x), static_cast<UINT>(m_renderSize.y)));
 
 		PipelineInfo pipelineStateData{};
-		pipelineStateData.m_pipelineStateObject = (*m_pGraphicsPipelineStates)[ShaderQueue::Blit].get();
+		pipelineStateData.m_pipelineStateObject = m_PipelineStateObjects[ShaderPassIDs::BlitPassID];
 		pipelineStateData.m_renderTargets.emplace_back(&cameraColorRT);
 		pipelineStateData.m_depthStencilTarget = GetBufferManager()->GetCameraDepthRT()->GetTexture();
 
@@ -56,23 +84,15 @@ namespace ElysiaRenderer
 		}
 		if (isReady)
 		{
+			m_pMaterial->SetConstantVariable<UINT>("blitterTextureIndex", GetBufferManager()->GetCameraColorRT()->GetTexture()->GetResourceHeapIndex());
+			m_pMaterial->ApplyConstantData();
 			m_pCommand->SetPipeline(pipelineStateData);
-			m_pCommand->SetPipelineResource(PER_PASS_SPACE, RenderResource::GetPerMainBindResourceSpace());
+			m_pCommand->SetPipelineResource(PER_OBJECT_SPACE, m_pMaterial->GetPassData(ShaderPassIDs::BlitPassID).MeshResourceLayouts->m_spaces[PER_OBJECT_SPACE]);
 
 			m_pCommand->Draw(3, 0);
 		}
 
 		m_pCommand->AddBarrier(GetDevice()->GetCurrBackBuffer(), D3D12_RESOURCE_STATE_PRESENT);
 		m_pCommand->FlushBarrier();
-	}
-
-	void FinalBlitPass::BindToShader()
-	{
-		RenderResource::GetInstance().GetCBVPassParameter()->blitterTextureIndex = GetBufferManager()->GetCameraColorRT()->GetTexture()->GetResourceHeapIndex();
-		GetBufferManager()->GetSingleConstantBuffer(PER_PASS_SPACE)->SetMappedData(RenderResource::GetInstance().GetCBVPassParameter(), sizeof(CBVMainPassParameter));
-	}
-	void FinalBlitPass::CreatePSO()
-	{
-
 	}
 }

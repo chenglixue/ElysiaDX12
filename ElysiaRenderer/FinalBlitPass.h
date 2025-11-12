@@ -9,6 +9,7 @@ namespace ElysiaRenderer
 	{
 	public:
 		FinalBlitPass() = default;
+		FinalBlitPass(DX12Camera* pCamera);
 		virtual ~FinalBlitPass() override;
 
 		//virtual void Setup(const RenderPassData& renderPassData) override;
@@ -19,7 +20,9 @@ namespace ElysiaRenderer
 		virtual void Dispose() override;
 
 	private:
-		void BindToShader();
-		void CreatePSO();
+		struct ShaderPassIDs
+		{
+			static UINT BlitPassID;
+		};
 	};
 }

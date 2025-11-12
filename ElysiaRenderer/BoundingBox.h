@@ -1,6 +1,6 @@
 #pragma once
-
 #include "stdafx.h"
+#include "Helper.h"
 
 namespace ElysiaHelper
 {
@@ -8,6 +8,10 @@ namespace ElysiaHelper
 
     class AxisAlignedBox
     {
+    private:
+        Vector3 m_min = Vector3::Zero;
+        Vector3 m_max = Vector3::Zero;
+
     public:
         AxisAlignedBox() : m_min(FLT_MAX, FLT_MAX, FLT_MAX), m_max(-FLT_MAX, -FLT_MAX, -FLT_MAX) {}
         AxisAlignedBox(EZeroTag) : m_min(FLT_MAX, FLT_MAX, FLT_MAX), m_max(-FLT_MAX, -FLT_MAX, -FLT_MAX) {}
@@ -42,8 +46,6 @@ namespace ElysiaHelper
             SerializeItem(serializer, m_max);
         }
 
-    private:
-        Vector3 m_min = Vector3::Zero;
-        Vector3 m_max = Vector3::Zero;
+    
     };
 }

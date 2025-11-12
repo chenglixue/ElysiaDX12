@@ -106,10 +106,10 @@ namespace ElysiaHelper
         {
             _com_error err(hr);
             // 修改 InitD3D 函数中的加载图像部分
-            if (FAILED(hr)) {
+            if (FAILED(hr)) 
+            {
                 std::cerr << "Failed to load image: " << hr << std::endl;
                 _com_error err(hr);
-                std::cerr << "Error description: " << err.ErrorMessage() << std::endl;
             }
             throw HrException(hr);
         }

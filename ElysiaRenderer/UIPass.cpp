@@ -3,6 +3,7 @@
 
 #include "DX12Device.h"
 #include "RenderTexture.h"
+#include "RenderResource.h"
 
 namespace ElysiaRenderer
 {
@@ -55,7 +56,6 @@ namespace ElysiaRenderer
 
 		if (ImGui::CollapsingHeader("Light"))
 		{
-			auto mainLight = RenderResource::GetInstance().GetCBVPassParameter();
 			ImGui::ColorEdit3("Color", (float*)&pUserData.lightColor);
 			ImGui::DragFloat3("Direction", (float*)&pUserData.lightDir, 1, -1, 1);
 			ImGui::SliderFloat("Intensity", &pUserData.lightIntensity, 0, 100);

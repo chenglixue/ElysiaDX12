@@ -6,8 +6,8 @@
 
 namespace ElysiaRenderer
 {
-	class PipelineResourceLayout;
-	class PipelineStateObject;
+	struct PipelineResourceLayout;
+	struct PipelineStateObject;
 
 	class Shader : public MObject
 	{

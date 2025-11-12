@@ -11,10 +11,5 @@ namespace ElysiaHelper
 		return Vector4(screenSize.x, screenSize.y, 1.f / screenSize.x, 1.f / screenSize.y);
 	}
 
-	inline Vector4 GetScreenSize(UINT2 screenSize)
-	{
-		return Vector4(screenSize.x, screenSize.y, 1.f / screenSize.x, 1.f / screenSize.y);
-	}
-
 	#define ArraySize_(x) ((sizeof(x) / sizeof(0[x])) / ((size_t)(!(sizeof(x) % sizeof(0[x])))))
 }

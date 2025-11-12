@@ -4,7 +4,7 @@
 
 namespace ElysiaRenderer
 {
-	class PipelineResourceLayout;
+	struct PipelineResourceLayout;
 
 	class DX12Shader;
 

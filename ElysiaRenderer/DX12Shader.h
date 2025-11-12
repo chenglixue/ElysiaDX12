@@ -5,7 +5,7 @@
 
 namespace ElysiaRenderer
 {
-	class PipelineStateObject;
+	struct PipelineStateObject;
 	
 	class DX12Shader : MObject
 	{

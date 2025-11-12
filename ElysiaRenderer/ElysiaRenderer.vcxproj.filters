@@ -520,6 +520,9 @@
     <None Include="Resource\Shaders\public\TonemapPass.hlsl">
       <Filter>Resource Files\Shader\Public</Filter>
     </None>
+    <None Include="Resource\Shaders\private\DeferredCommon.hlsl">
+      <Filter>Resource Files\Shader\Priavte</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -749,6 +752,9 @@
     <ClCompile Include="UIPass.cpp">
       <Filter>Source Files\Render\Pass</Filter>
     </ClCompile>
+    <ClCompile Include="PipelineStateUtility.cpp">
+      <Filter>Source Files\Utility</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CopyFileToFolders Include="dxc\bin\x64\dxcompiler.dll" />
@@ -785,10 +791,5 @@
     <Image Include="Resource\Tex\Wood.dds">
       <Filter>Resource Files\Tex</Filter>
     </Image>
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="Resource\Shaders\private\DeferredCommon.hlsl">
-      <Filter>Resource Files\Shader\Priavte</Filter>
-    </FxCompile>
   </ItemGroup>
 </Project>

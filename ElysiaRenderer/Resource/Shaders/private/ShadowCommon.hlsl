@@ -241,7 +241,7 @@ float sobolNoise(float2 uv, int index)
     return float(result) / float(0xFFFFFFFFu);
 }
 
-inline float ManualSobelPCF(float2 screenUV, float2 shadowPos, float lightDepth, Texture2D shadowTex, in SamplerState pcfSampler, uint CSMIndex = 0)
+inline float ManualSobelPCF(float4 screenSize, float2 screenUV, float2 shadowPos, float lightDepth, Texture2D shadowTex, in SamplerState pcfSampler, uint CSMIndex = 0)
 {
     float o = 0.f;
     
@@ -293,7 +293,7 @@ float SampleShadowPCF(in Texture2D shadowMap,
     #elif defined (SHADOW_QUALITY_HIGH)
     o = Manual5x5PCF(shadowPos.xy, shadowPos.z, shadowMap, pointShadowSampler, shadowMapSize);
     #elif defined (SHADOW_QUALITY_VERYHIGH)
-    o = ManualSobelPCF(screenUV, shadowPos.xy, shadowPos.z, shadowMap, pointShadowSampler);
+    o = Manual5x5PCF(shadowPos.xy, shadowPos.z, shadowMap, pointShadowSampler, shadowMapSize);
     #endif
 
 #endif

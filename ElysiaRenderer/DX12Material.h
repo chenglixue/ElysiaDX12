@@ -1,6 +1,6 @@
 #pragma once
 #include "Helper.h"
-
+#include "MObject.h"
 
 namespace ElysiaRenderer
 {

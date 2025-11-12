@@ -2,6 +2,7 @@
 #include "Helper.h"
 #include "PipelineResourceSpace.h"
 #include "PipelineResourceUtility.h"
+#include "DX12RootSignature.h"
 #include "Hash.h"
 #include <iostream>
 #include <functional>

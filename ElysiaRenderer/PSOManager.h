@@ -37,7 +37,7 @@ namespace ElysiaRenderer
 {
 
 	class RenderMaterial;
-	class PipelineStateObject;
+	struct PipelineStateObject;
 
 	class PSOManager : IManager
 	{

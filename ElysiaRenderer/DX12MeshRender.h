@@ -6,7 +6,7 @@ namespace ElysiaRenderer
 	using namespace DirectX;
 	using namespace DirectX::SimpleMath;
 
-	class Mesh;
+	struct Mesh;
 	struct CBVObjectParameter;
 
 	struct MeshRender

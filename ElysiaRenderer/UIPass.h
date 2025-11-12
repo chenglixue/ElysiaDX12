@@ -22,9 +22,5 @@ namespace ElysiaRenderer
 		std::unique_ptr<RenderTexture> m_pOpaqueRT = nullptr;
 
 		void AddUIItems();
-
-		void CreateRTs();
-		void BindToShader();
-		void CreatePSO();
 	};
 }

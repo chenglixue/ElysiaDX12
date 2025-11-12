@@ -346,6 +346,7 @@
     <ClCompile Include="MeshManager.cpp" />
     <ClCompile Include="OpaquePass.cpp" />
     <ClCompile Include="PipelineResourceSpace.cpp" />
+    <ClCompile Include="PipelineStateUtility.cpp" />
     <ClCompile Include="PIXHelper.cpp" />
     <ClCompile Include="PSOHelper.cpp" />
     <ClCompile Include="PSOManager.cpp" />
@@ -523,7 +524,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Resource\Shaders\private\DeferredCommon.hlsl" />
+    <None Include="Resource\Shaders\private\DeferredCommon.hlsl">
+      <FileType>Document</FileType>
+    </None>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

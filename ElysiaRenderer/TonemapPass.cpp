@@ -27,22 +27,28 @@ namespace ElysiaRenderer
 			DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
 			L"Temp RT");
 
-		m_shaderPasses.emplace_back(ShaderPass
+		m_shaderPasses = std::vector<ShaderPass>
+		{
+			ShaderPass
 			{
 				.Name = "Blit Pass",
 				.FilePath = L"Shaders\\public\\Blit.hlsl",
+				.VertexEntryPoint = L"BlitVS",
+				.FragmentEntryPoint = L"BlitPS",
 				.RasterizerDesc = GetRasterizerState(RasterizerState::NoCullNoMS),
 				.BlendDesc = GetBlendState(BlendState::Disabled),
 				.DepthStencilDesc = GetDepthState(DepthState::Disabled)
-			});
-		m_shaderPasses.emplace_back(ShaderPass
+			},
+			ShaderPass
 			{
 				.Name = "Tonemap Pass",
 				.FilePath = L"Shaders\\public\\TonemapPass.hlsl",
 				.RasterizerDesc = GetRasterizerState(RasterizerState::NoCullNoMS),
 				.BlendDesc = GetBlendState(BlendState::Disabled),
 				.DepthStencilDesc = GetDepthState(DepthState::Disabled)
-			});
+			}
+		};
+
 		m_pMaterial = std::make_unique<RenderMaterial>(m_shaderPasses);
 		ShaderPasseIDs::BlitPassID = m_pMaterial->FindPassIndex("Blit Pass");
 		ShaderPasseIDs::TonemapPassID = m_pMaterial->FindPassIndex("Tonemap Pass");
@@ -109,7 +115,8 @@ namespace ElysiaRenderer
 			{
 				m_pCommand->SetPipeline(pipelineStateData);
 				m_pMaterial->SetConstantVariable<UINT>("blitterTextureIndex", GetBufferManager()->GetCameraColorRT()->GetTexture()->GetResourceHeapIndex());
-				m_pCommand->SetPipelineResource(PER_PASS_SPACE, m_pMaterial->GetPassData(ShaderPasseIDs::BlitPassID).MeshResourceLayouts->m_spaces[PER_PASS_SPACE]);
+				m_pMaterial->ApplyConstantData();
+				m_pCommand->SetPipelineResource(PER_OBJECT_SPACE, m_pMaterial->GetPassData(ShaderPasseIDs::BlitPassID).MeshResourceLayouts->m_spaces[PER_OBJECT_SPACE]);
 
 				m_pCommand->Draw(3, 0);
 			}
@@ -129,7 +136,7 @@ namespace ElysiaRenderer
 			m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 			PipelineInfo pipelineStateData{};
-			pipelineStateData.m_pipelineStateObject = m_TonemapPSO.get();
+			pipelineStateData.m_pipelineStateObject = m_PipelineStateObjects[ShaderPasseIDs::TonemapPassID];
 			pipelineStateData.m_renderTargets = { cameraColorRT->GetTexture() };
 			pipelineStateData.m_depthStencilTarget = GetBufferManager()->GetCameraDepthRT()->GetTexture();
 
@@ -145,7 +152,10 @@ namespace ElysiaRenderer
 			if (isReady)
 			{
 				m_pCommand->SetPipeline(pipelineStateData);
-				m_pCommand->SetPipelineResource(PER_PASS_SPACE, RenderResource::GetPerMainBindResourceSpace());
+				m_pMaterial->SetConstantVariable<UINT>("blitterTextureIndex", m_pTempRT->GetTexture()->GetResourceHeapIndex());
+				m_pMaterial->ApplyConstantData();
+				m_pCommand->SetPipelineResource(PER_OBJECT_SPACE, m_pMaterial->GetPassData(ShaderPasseIDs::BlitPassID).MeshResourceLayouts->m_spaces[PER_OBJECT_SPACE]);
+				//m_pCommand->SetPipelineResource(PER_PASS_SPACE, RenderResource::GetPerMainBindResourceSpace());
 
 				m_pCommand->Draw(3, 0);
 			}

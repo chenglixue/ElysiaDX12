@@ -17,6 +17,7 @@ namespace ElysiaRenderer
 	class BasePass
 	{
 	public:
+		BasePass() = default;
 		BasePass(DX12Camera* pCamera);
 		virtual ~BasePass();
 

@@ -189,12 +189,12 @@ namespace ElysiaRenderer
 		passData.RenderSize = UINT2(static_cast<UINT>(GetDevice()->GetScreenSize().x), static_cast<UINT>(GetDevice()->GetScreenSize().y));
 		passData.pCommand = m_graphicsContext.get();
 
-		m_passes.emplace_back(std::move(std::make_unique<ShadowPass>()));
-		m_passes.emplace_back(std::move(std::make_unique<GBufferPass>()));
-		m_passes.emplace_back(std::move(std::make_unique<OpaquePass>()));
-		m_passes.emplace_back(std::move(std::make_unique<TonemapPass>()));
+		m_passes.emplace_back(std::move(std::make_unique<ShadowPass>(m_pCameraManager->GetMainCamera())));
+		m_passes.emplace_back(std::move(std::make_unique<GBufferPass>(m_pCameraManager->GetMainCamera())));
+		m_passes.emplace_back(std::move(std::make_unique<OpaquePass>(m_pCameraManager->GetMainCamera())));
+		m_passes.emplace_back(std::move(std::make_unique<TonemapPass>(m_pCameraManager->GetMainCamera())));
 		m_passes.emplace_back(std::move(std::make_unique<UIPass>()));
-		m_passes.emplace_back(std::move(std::make_unique<FinalBlitPass>()));
+		m_passes.emplace_back(std::move(std::make_unique<FinalBlitPass>(m_pCameraManager->GetMainCamera())));
 		for (auto& pass : m_passes)
 		{
 			pass->Setup(passData);

@@ -29,7 +29,7 @@ namespace ElysiaRenderer
 	}
 	void SkyboxPass::Render()
 	{
-		Execute();
+		/*Execute();
 
 		auto cameraColorRT = GetBufferManager()->GetCameraColorRT();
 		auto cameraDepthRT = GetBufferManager()->GetCameraDepthRT();
@@ -79,7 +79,7 @@ namespace ElysiaRenderer
 
 				m_pCommand->Draw(indexCount, startVertex, startIndex);
 			}
-		}
+		}*/
 
 		/*auto& currBackBuffer = m_device->GetCurrBackBuffer();
 
@@ -97,23 +97,23 @@ namespace ElysiaRenderer
 	void SkyboxPass::CreatePSO()
 	{
 		/// Skybox PSO
-		PipelineResourceLayout meshResourceLayout{};
-		PipelineStateCreateDesc pipelineStateCreateDesc{};
+		//PipelineResourceLayout meshResourceLayout{};
+		//PipelineStateCreateDesc pipelineStateCreateDesc{};
 
-		meshResourceLayout.m_spaces[PER_OBJECT_SPACE] = RenderResource::GetPerObjectBindResourceSpace();
-		meshResourceLayout.m_spaces[PER_PASS_SPACE] = RenderResource::GetPerMainBindResourceSpace();
+		//meshResourceLayout.m_spaces[PER_OBJECT_SPACE] = RenderResource::GetPerObjectBindResourceSpace();
+		//meshResourceLayout.m_spaces[PER_PASS_SPACE] = RenderResource::GetPerMainBindResourceSpace();
 
-		pipelineStateCreateDesc = std::move(CreateDefaultPipelineStateCreateDesc());
-		pipelineStateCreateDesc.m_vertexShader = GetVertexShaders()[ShaderQueue::Skybox][ShaderType::Vertex].get();;
-		pipelineStateCreateDesc.m_pixelShader = GetPixelShaders()[ShaderQueue::Skybox][ShaderType::Pixel].get();
-		pipelineStateCreateDesc.m_inputElementDesc = g_inputElementDescs;
-		pipelineStateCreateDesc.m_renderTargetDesc.m_numRenderTargets = 1;
-		pipelineStateCreateDesc.m_renderTargetDesc.m_renderTargetFormats[0] = GetBufferManager()->GetCameraColorRT()->GetFormat();
-		pipelineStateCreateDesc.m_depthStencilDesc = GetDepthState(DepthState::Enabled);
-		pipelineStateCreateDesc.m_rasterDesc = GetRasterizerState(RasterizerState::NoCullNoMS);
-		pipelineStateCreateDesc.m_blendDesc = GetBlendState(BlendState::Disabled);
-		// let cubemap z = 1 pass z-test, otherwise it'll be failed in z-test because data of zbuffer is 1
-		//pipelineStateCreateDesc.m_depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
-		(*m_pGraphicsPipelineStates)[ShaderQueue::Skybox] = std::move(GetDevice()->CreateGraphicsPipelineState(pipelineStateCreateDesc, meshResourceLayout));
+		//pipelineStateCreateDesc = std::move(CreateDefaultPipelineStateCreateDesc());
+		//pipelineStateCreateDesc.m_vertexShader = GetVertexShaders()[ShaderQueue::Skybox][ShaderType::Vertex].get();;
+		//pipelineStateCreateDesc.m_pixelShader = GetPixelShaders()[ShaderQueue::Skybox][ShaderType::Pixel].get();
+		//pipelineStateCreateDesc.m_inputElementDesc = g_inputElementDescs;
+		//pipelineStateCreateDesc.m_renderTargetDesc.m_numRenderTargets = 1;
+		//pipelineStateCreateDesc.m_renderTargetDesc.m_renderTargetFormats[0] = GetBufferManager()->GetCameraColorRT()->GetFormat();
+		//pipelineStateCreateDesc.m_depthStencilDesc = GetDepthState(DepthState::Enabled);
+		//pipelineStateCreateDesc.m_rasterDesc = GetRasterizerState(RasterizerState::NoCullNoMS);
+		//pipelineStateCreateDesc.m_blendDesc = GetBlendState(BlendState::Disabled);
+		//// let cubemap z = 1 pass z-test, otherwise it'll be failed in z-test because data of zbuffer is 1
+		////pipelineStateCreateDesc.m_depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+		//(*m_pGraphicsPipelineStates)[ShaderQueue::Skybox] = std::move(GetDevice()->CreateGraphicsPipelineState(pipelineStateCreateDesc, meshResourceLayout));
 	}
 }

@@ -53,7 +53,7 @@ namespace ElysiaRenderer
 
 	void GBufferPass::Execute()
 	{
-		m_pMaterial->SetConstantVariable<Vector4>("screenSize", GetScreenSize(m_renderSize));
+		m_pMaterial->SetConstantVariable<Vector4>("screenSize", GetScreenSize(Vector2(m_renderSize.x, m_renderSize.y)));
 		m_pMaterial->SetConstantVariable<Matrix>("viewMatrix", m_pCamera->GetViewMat());
 		m_pMaterial->SetConstantVariable<Matrix>("viewMatrix_I", m_pCamera->GetViewMat().Invert());
 		m_pMaterial->SetConstantVariable<Matrix>("projMatrix", m_pCamera->GetProjMat());

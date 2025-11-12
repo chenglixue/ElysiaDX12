@@ -3,6 +3,7 @@
 #include <private\Light.hlsl>
 #include <private\LightCommon.hlsl>
 #include <private\SharedCommon.hlsli>
+#include <Blit.hlsli>
 #else
 #include "../private\ShadingCommon.hlsl"
 #include "../private\Light.hlsl"
@@ -10,7 +11,7 @@
 #include "../private\SharedCommon.hlsli"
 #endif
 
-cbuffer PassConstant : register(b0, perPassSpace)
+cbuffer PassConstant : register(b0, perObjectSpace)
 {
     UINT blitterTextureIndex;
 }
@@ -21,12 +22,7 @@ struct PSInput
     float2 uv : TEXCOORD0;
 };
 
-struct PSOutput
-{
-    float4 target0 : SV_TARGET0;
-};
-
-PSInput VS(UINT vertexID : SV_VertexID)
+PSInput BlitVS(UINT vertexID : SV_VertexID)
 {
     PSInput o = (PSInput) 0;
     
@@ -49,16 +45,12 @@ PSInput VS(UINT vertexID : SV_VertexID)
     return o;
 }
 
-PSOutput PS(PSInput i)
+void BlitPS(PSInput i, float4 target0 : SV_TARGET0)
 {
-    PSOutput o = (PSOutput) 0;
-    
     Texture2D blitterTex = ResourceDescriptorHeap[blitterTextureIndex];
     SamplerState linearSampler = SamplerDescriptorHeap[ClampLinearSampler];
     
     half4 blitterValue = blitterTex.SampleLevel(linearSampler, i.uv, 0);
     
-    o.target0 = blitterValue;
-    
-    return o;
+    target0 = blitterValue;
 }
