@@ -26,7 +26,7 @@ namespace ElysiaRenderer
 		float		GetFOVY()			const noexcept;
 		float		GetAspect()			const noexcept;
 		Matrix		GetViewMat()		const noexcept;
-		Matrix		GetProj()			const noexcept;
+		Matrix		GetProjMat()			const noexcept;
 		Vector3		GetForwardDir()		const noexcept;
 		Vector3		GetUpDir()			const noexcept;
 		Vector3		GetRightDir()		const noexcept;
