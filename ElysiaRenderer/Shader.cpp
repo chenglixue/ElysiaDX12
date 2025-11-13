@@ -117,7 +117,7 @@ namespace ElysiaRenderer
 		
 		ThrowRuntimeError("No suitable passData");
 
-		return PassData();
+		return std::move(PassData());
 	}
 
 	const PassData& Shader::GetPassData(std::string passName) const noexcept
@@ -129,7 +129,7 @@ namespace ElysiaRenderer
 
 		ThrowRuntimeError("Null Pass Data");
 
-		return PassData();
+		return std::move(PassData());
 	}
 
 	UINT Shader::FindPassIndex(std::string passName) const noexcept
@@ -147,8 +147,8 @@ namespace ElysiaRenderer
 	template<typename T>
 	void Shader::SetConstantVariable(const std::string& name, T data)
 	{
-		auto desc = m_constantVariableDescs[name];
-		memcpy(desc[name].pData, &data, desc.Size);
+		auto desc = m_constantVariableDescs.at(name);
+		memcpy(desc.pData, &data, desc.Size);
 
 		for (auto& passData : m_passDatas)
 		{
@@ -176,4 +176,13 @@ namespace ElysiaRenderer
 			}
 		}
 	}
+
+	template void Shader::SetConstantVariable<UINT>(const std::string&, UINT);
+	template void Shader::SetConstantVariable<float>(const std::string&, float);
+	template void Shader::SetConstantVariable<Vector2>(const std::string&, Vector2);
+	template void Shader::SetConstantVariable<Vector3>(const std::string&, Vector3);
+	template void Shader::SetConstantVariable<Vector4>(const std::string&, Vector4);
+	template void Shader::SetConstantVariable<Matrix>(const std::string&, Matrix);
+	template void Shader::SetConstantVariable<bool>(const std::string&, bool);
+	template void Shader::SetConstantVariable<std::vector<Vector2>>(const std::string&, std::vector<Vector2>);
 }

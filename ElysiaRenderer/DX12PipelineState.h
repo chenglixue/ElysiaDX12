@@ -1,10 +1,10 @@
 #pragma once
 #include "PipelineStateUtility.h"
+#include "PipelineResourceUtility.h"
 
 namespace ElysiaRenderer
 {
 	class DX12RootSignature;
-	class DX12Shader;
 
 	class DX12PipelineState
 	{
@@ -34,5 +34,18 @@ namespace ElysiaRenderer
 	private:
 	};
 
-	
+	struct PipelineStateObject
+	{
+		std::unique_ptr<DX12PipelineState> m_pipelineState = nullptr;
+		PipelineResourceMapping m_pipelineResourceMapping;
+		std::unique_ptr<DX12RootSignature> m_rootSignature = nullptr;
+		PipelineType m_pipelineType = PipelineType::Graphics;
+	};
+
+	struct PipelineInfo
+	{
+		PipelineStateObject* m_pipelineStateObject = nullptr;
+		std::vector<DX12TextureResource*> m_renderTargets{};
+		DX12TextureResource* m_depthStencilTarget = nullptr;
+	};
 }

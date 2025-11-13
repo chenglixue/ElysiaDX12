@@ -58,7 +58,7 @@ namespace ElysiaRenderer
 	private:
 		std::unordered_map<D3D12_GRAPHICS_PIPELINE_STATE_DESC, std::unique_ptr<PipelineStateObject>> m_pipelineStates;
 
-		PipelineStateObject* GetGraphicsPipelineState(const D3D12_GRAPHICS_PIPELINE_STATE_DESC& PSODesc);
+		PipelineStateObject* GetGraphicsPipelineState(const D3D12_GRAPHICS_PIPELINE_STATE_DESC& PSODesc, DX12RootSignature* pRootSignature);
 	};
 
 	extern std::unique_ptr<PSOManager> g_pPSOManager;

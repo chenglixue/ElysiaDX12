@@ -29,7 +29,7 @@ namespace ElysiaRenderer
 		virtual void Dispose();
 
 	protected:
-		UINT2 m_renderSize;
+		Vector2 m_renderSize;
 		DX12GraphicsContext* m_pCommand = nullptr;
 		DX12Camera* m_pCamera = nullptr;
 

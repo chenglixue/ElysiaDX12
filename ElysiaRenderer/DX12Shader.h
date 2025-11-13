@@ -48,4 +48,15 @@ namespace ElysiaRenderer
 	{
 		return g_computeShaders;
 	}
+
+	struct PassData
+	{
+		UINT PassIndex;
+		std::unique_ptr<DX12Shader> pVSShader = nullptr;
+		std::unique_ptr<DX12Shader>	pPSShader = nullptr;
+		D3D12_RASTERIZER_DESC		RasterizerDesc;
+		D3D12_BLEND_DESC			BlendDesc;
+		D3D12_DEPTH_STENCIL_DESC	DepthStencilDesc;
+		std::unique_ptr<PipelineResourceLayout> MeshResourceLayouts{};
+	};
 }

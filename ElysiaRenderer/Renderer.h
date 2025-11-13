@@ -2,12 +2,12 @@
 
 #include "DX12Device.h"
 #include "Helper.h"
+#include "BasePass.h"
 
 namespace ElysiaRenderer 
 {
 	using namespace ElysiaHelper;
 
-	class BasePass;
 	class MeshManager;
 	class TextureManager;
 	class CameraManager;

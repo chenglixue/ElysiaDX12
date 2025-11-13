@@ -7,6 +7,8 @@
 
 namespace ElysiaRenderer
 {
+	int OpaquePass::ShaderPasseIDs::OpaqueLightPassID = -1;
+
 	OpaquePass::OpaquePass(DX12Camera* pCamera):
 		BasePass(pCamera)
 	{
@@ -76,7 +78,7 @@ namespace ElysiaRenderer
 		m_pCommand->FlushBarrier();
 		m_pCommand->ClearRenderTarget(*cameraColorRT->GetTexture(), Color(0, 0, 0, 0));
 
-		m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_renderSize.x, m_renderSize.y));
+		m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_renderSize));
 		m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		PipelineInfo pipelineStateData

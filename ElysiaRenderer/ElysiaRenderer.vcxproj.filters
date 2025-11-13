@@ -511,9 +511,6 @@
     <None Include="Resource\Shaders\public\Blit.hlsl">
       <Filter>Resource Files\Shader\Public</Filter>
     </None>
-    <None Include="..\x64\Debug\Shaders\public\FullScreenTriangle.hlsl">
-      <Filter>Resource Files\Shader\Public</Filter>
-    </None>
     <None Include="Resource\Shaders\private\Color.hlsl">
       <Filter>Resource Files\Shader\Priavte</Filter>
     </None>
@@ -522,6 +519,9 @@
     </None>
     <None Include="Resource\Shaders\private\DeferredCommon.hlsl">
       <Filter>Resource Files\Shader\Priavte</Filter>
+    </None>
+    <None Include="Resource\Shaders\public\FullScreenTriangle.hlsl">
+      <Filter>Resource Files\Shader\Public</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

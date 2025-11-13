@@ -13,6 +13,11 @@ namespace ElysiaHelper
             this->x = x;
             this->y = y;
         }
+        UINT2(const Vector2& rhs)
+        {
+            this->x = static_cast<UINT>(x);
+            this->y = static_cast<UINT>(y);
+        }
         uint32_t x = 0;
         uint32_t y = 0;
     };
@@ -438,5 +443,24 @@ namespace ElysiaHelper
         }
 
         return o;
+    }
+
+    // https://gist.github.com/danzek/d6a0e4a48a5439e7f808ed1497f6268e
+    inline std::wstring S2W(const std::string& Str)
+    {
+        std::vector<wchar_t> buf(Str.size());
+        std::use_facet<std::ctype<wchar_t>>(std::locale()).widen(Str.data(),
+            Str.data() + Str.size(),
+            buf.data());
+        return std::wstring(buf.data(), buf.size());
+    }
+    inline std::string W2S(const std::wstring& wstr)
+    {
+        std::string Result;
+        std::vector<char> Bufer(wstr.size());
+        std::use_facet<std::ctype<wchar_t>>(std::locale()).narrow(wstr.data(), wstr.data() + wstr.size(), '?', Bufer.data());
+        Result = std::string(Bufer.data(), Bufer.size());
+
+        return Result;
     }
 }

@@ -10,7 +10,6 @@
 namespace ElysiaRenderer
 {
 	class DX12Shader;
-	class DX12PipelineState;
 	class DX12RootSignature;
 	class DX12TextureResource;
 	class RenderMaterial;
@@ -27,21 +26,6 @@ namespace ElysiaRenderer
 		std::array<DXGI_FORMAT, D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT> m_renderTargetFormats{ DXGI_FORMAT_UNKNOWN };
 		uint8_t m_numRenderTargets = 0;
 		DXGI_FORMAT m_depthStencilFormat = DXGI_FORMAT_UNKNOWN;
-	};
-
-	struct PipelineStateObject
-	{
-		std::unique_ptr<DX12PipelineState> m_pipelineState = nullptr;
-		PipelineResourceMapping m_pipelineResourceMapping;
-		std::unique_ptr<DX12RootSignature> m_rootSignature = nullptr;
-		PipelineType m_pipelineType = PipelineType::Graphics;
-	};
-
-	struct PipelineInfo
-	{
-		PipelineStateObject* m_pipelineStateObject = nullptr;
-		std::vector<DX12TextureResource*> m_renderTargets{};
-		DX12TextureResource* m_depthStencilTarget = nullptr;
 	};
 
 	struct PSODescriptor

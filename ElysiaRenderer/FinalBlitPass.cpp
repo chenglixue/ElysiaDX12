@@ -6,6 +6,8 @@
 
 namespace ElysiaRenderer
 {
+	int FinalBlitPass::ShaderPassIDs::BlitPassID = -1;
+
 	FinalBlitPass::FinalBlitPass(DX12Camera* pCamera) :
 		BasePass(pCamera)
 	{
@@ -84,7 +86,7 @@ namespace ElysiaRenderer
 		}
 		if (isReady)
 		{
-			m_pMaterial->SetConstantVariable<UINT>("blitterTextureIndex", GetBufferManager()->GetCameraColorRT()->GetTexture()->GetResourceHeapIndex());
+			m_pMaterial->SetConstantVariable("blitterTextureIndex", GetBufferManager()->GetCameraColorRT()->GetTexture()->GetResourceHeapIndex());
 			m_pMaterial->ApplyConstantData();
 			m_pCommand->SetPipeline(pipelineStateData);
 			m_pCommand->SetPipelineResource(PER_OBJECT_SPACE, m_pMaterial->GetPassData(ShaderPassIDs::BlitPassID).MeshResourceLayouts->m_spaces[PER_OBJECT_SPACE]);

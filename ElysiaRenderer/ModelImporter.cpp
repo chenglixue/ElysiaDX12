@@ -384,6 +384,8 @@ namespace ElysiaModel
 		LoadTextures(GetBasePath(StringToWstring(fileName)));
 
 		Save(fileName);
+
+		return true;
 	}
 
 	bool ModelImporter::LoadSerialize(const std::string& fileName)

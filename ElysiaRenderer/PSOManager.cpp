@@ -23,7 +23,7 @@ namespace ElysiaRenderer
 
 	}
 
-	PipelineStateObject* PSOManager::GetGraphicsPipelineState(const D3D12_GRAPHICS_PIPELINE_STATE_DESC& PSODesc)
+	PipelineStateObject* PSOManager::GetGraphicsPipelineState(const D3D12_GRAPHICS_PIPELINE_STATE_DESC& PSODesc, DX12RootSignature* pRootSignature)
 	{
 		auto emplaceResult = m_pipelineStates.try_emplace(PSODesc);
 
@@ -32,7 +32,7 @@ namespace ElysiaRenderer
 			CComPtr<ID3D12PipelineState> pipelineState = nullptr;
 			ElysiaHelper::ThrowIfFailed(GetDevice()->GetDevice()->CreateGraphicsPipelineState(&PSODesc, IID_PPV_ARGS(&pipelineState)));
 
-			auto graphicsPipeline = std::make_unique<DX12GraphicsPipelineState>(pipelineState, PSODesc.pRootSignature);
+			auto graphicsPipeline = std::make_unique<DX12GraphicsPipelineState>(pipelineState, pRootSignature);
 
 			std::unique_ptr<PipelineStateObject> pipelineStateObject = std::make_unique<PipelineStateObject>();
 			pipelineStateObject->m_pipelineType = PipelineType::Graphics;
@@ -46,12 +46,12 @@ namespace ElysiaRenderer
 
 	PipelineStateObject* PSOManager::GetGraphicsPipelineState(RenderMaterial* pMaterial, UINT passIndex,
 		const RenderTargetDesc& renderTargetDesc,
-		D3D12_PRIMITIVE_TOPOLOGY_TYPE topology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE)
+		D3D12_PRIMITIVE_TOPOLOGY_TYPE topology)
 	{
 		auto& passData = pMaterial->GetPassData(passIndex);
 
 		auto resourceMapping = PipelineResourceMapping();
-		auto pDX12RootSignature = std::make_unique<DX12RootSignature>(GetDevice()->CreateRootSignature(*passData.MeshResourceLayouts, resourceMapping));
+		auto pDX12RootSignature = std::unique_ptr<DX12RootSignature>(GetDevice()->CreateRootSignature(*passData.MeshResourceLayouts, resourceMapping));
 
 		D3D12_GRAPHICS_PIPELINE_STATE_DESC PSODesc
 		{
@@ -88,7 +88,7 @@ namespace ElysiaRenderer
 			PSODesc.RTVFormats[i] = renderTargetDesc.m_renderTargetFormats[i];
 		}
 
-		auto pipelineStateObject = GetGraphicsPipelineState(PSODesc);
+		auto pipelineStateObject = GetGraphicsPipelineState(PSODesc, pDX12RootSignature.get());
 		if (pipelineStateObject != nullptr)
 		{
 			pipelineStateObject->m_pipelineResourceMapping = resourceMapping;

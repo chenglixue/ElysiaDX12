@@ -53,10 +53,10 @@ namespace ElysiaRenderer
 		{
 			return m_frameIndex;
 		}
-		const Vector4&			GetScreenSize() const
+		const Vector4			GetScreenSize() const
 		{
-			return Vector4(static_cast<float>(m_screenSize.x), static_cast<float>(m_screenSize.y),
-				1.f / static_cast<float>(m_screenSize.x), 1.f / static_cast<float>(m_screenSize.y));
+			return std::move(Vector4(static_cast<float>(m_screenSize.x), static_cast<float>(m_screenSize.y),
+				1.f / static_cast<float>(m_screenSize.x), 1.f / static_cast<float>(m_screenSize.y)));
 		}
 		DX12TextureResource&	GetCurrBackBuffer()
 		{

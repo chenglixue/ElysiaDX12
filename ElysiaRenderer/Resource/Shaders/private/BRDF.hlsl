@@ -374,7 +374,7 @@ float3 IndirF_Function(float NdotV, float3 F0, float roughness)
 float3 EnvBRDF(Texture2D BRDFLUT, SamplerState sample, float3 SpecularColor, float Roughness, float NoV)
 {
 	// Importance sampled preintegrated G * F
-    float2 AB = BRDFLUT.SampleLevel(sample, float2(NoV, Roughness), 0);
+    float2 AB = BRDFLUT.SampleLevel(sample, float2(NoV, Roughness), 0).rg;
 
 	// Anything less than 2% is physically impossible and is instead considered to be shadowing 
     float3 GF = SpecularColor * AB.x + saturate(50.0 * SpecularColor.g) * AB.y;

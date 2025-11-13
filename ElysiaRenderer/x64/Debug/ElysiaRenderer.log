@@ -1,201 +1,156 @@
 ﻿  Skipping vcpkg. (no packages)
 cl : command line  warning D9014: invalid value '18' for '/wd'; assuming '5999'
-  BasePass.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file '/BasePass.cpp')
-  
-  BufferManager.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file '/BufferManager.cpp')
-  
-  D3D12MemAlloc.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\D3D12MemoryAllocator\D3D12MemAlloc.cpp(389,1): warning C4005: 'D3D12MA_DEBUG_GLOBAL_MUTEX_LOCK': macro redefinition
-      D:\DX12\ElysiaDX12\ElysiaRenderer\D3D12MemoryAllocator\D3D12MemAlloc.cpp(387,1):
-      see previous definition of 'D3D12MA_DEBUG_GLOBAL_MUTEX_LOCK'
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\D3D12MemoryAllocator\D3D12MemAlloc.cpp(6531,1): error C1010: unexpected end of file while looking for precompiled header. Did you forget to add '#include "stdafx.h"' to your source?
-  DX12Context.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file '/DX12Context.cpp')
-  
   DX12Device.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file '/DX12Device.cpp')
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file 'DX12Device.cpp')
   
-D:\DX12\ElysiaDX12\ElysiaRenderer\DX12Device.cpp(328,59): warning C4244: '=': conversion from 'float' to 'UINT', possible loss of data
-  (compiling source file '/DX12Device.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\DX12Device.cpp(349,59): warning C4244: '=': conversion from 'float' to 'UINT', possible loss of data
-  (compiling source file '/DX12Device.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\DX12Device.cpp(562,38): warning C4244: '=': conversion from 'float' to 'UINT8', possible loss of data
-  (compiling source file '/DX12Device.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\DX12Device.cpp(719,11): warning C4129: 'S': unrecognized character escape sequence
-  (compiling source file '/DX12Device.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\DX12Device.cpp(942,23): warning C4018: '<': signed/unsigned mismatch
-  (compiling source file '/DX12Device.cpp')
-  
-  DX12GraphicsContext.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file '/DX12GraphicsContext.cpp')
-  
-  DX12Material.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file '/DX12Material.cpp')
-  
-  DX12PipelineState.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file '/DX12PipelineState.cpp')
-  
-  DX12Shader.cpp
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\memory(3169,27): error C2027: use of undefined type 'ElysiaRenderer::DX12PipelineState'
-  (compiling source file '/DX12Shader.cpp')
-      D:\DX12\ElysiaDX12\ElysiaRenderer\PipelineStateUtility.h(13,8):
-      see declaration of 'ElysiaRenderer::DX12PipelineState'
-      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\memory(3169,27):
+D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.cpp(719,11): warning C4129: 'S': unrecognized character escape sequence
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\xstring(2749,53): warning C4244: 'argument': conversion from 'wchar_t' to 'const _Elem', possible loss of data
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\xstring(2749,53): warning C4244:         with
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\xstring(2749,53): warning C4244:         [
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\xstring(2749,53): warning C4244:             _Elem=char
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\xstring(2749,53): warning C4244:         ]
+  (compiling source file 'DX12Device.cpp')
+      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\xstring(2749,53):
       the template instantiation context (the oldest one first) is
-          D:\DX12\ElysiaDX12\ElysiaRenderer\PipelineStateUtility.h(34,38):
-          see reference to class template instantiation 'std::unique_ptr<ElysiaRenderer::DX12PipelineState,std::default_delete<ElysiaRenderer::DX12PipelineState>>' being compiled
-          C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\memory(3205,66):
-          see reference to class template instantiation 'std::default_delete<ElysiaRenderer::DX12PipelineState>' being compiled
-          C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\memory(3168,23):
-          while compiling class template member function 'void std::default_delete<ElysiaRenderer::DX12PipelineState>::operator ()(_Ty *) noexcept const'
+          D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.cpp(716,27):
+          see reference to function template instantiation 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string<std::_String_iterator<std::_String_val<std::_Simple_types<_Elem>>>,0>(_Iter,_Iter,const _Alloc &)' being compiled
           with
           [
-              _Ty=ElysiaRenderer::DX12PipelineState
+              _Elem=wchar_t,
+              _Iter=std::_String_iterator<std::_String_val<std::_Simple_types<wchar_t>>>,
+              _Alloc=std::allocator<char>
           ]
-              C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\memory(3280,33):
-              see the first reference to 'std::default_delete<ElysiaRenderer::DX12PipelineState>::operator ()' in 'std::unique_ptr<ElysiaRenderer::DX12PipelineState,std::default_delete<ElysiaRenderer::DX12PipelineState>>::~unique_ptr'
-              D:\DX12\ElysiaDX12\ElysiaRenderer\PipelineStateUtility.h(38,2):
-              see the first reference to 'std::unique_ptr<ElysiaRenderer::DX12PipelineState,std::default_delete<ElysiaRenderer::DX12PipelineState>>::~unique_ptr' in 'ElysiaRenderer::PipelineStateObject::~PipelineStateObject'
-  
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\memory(3169,25): error C2338: static_assert failed: 'can't delete an incomplete type'
-  (compiling source file '/DX12Shader.cpp')
-  
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\memory(3170,9): warning C4150: deletion of pointer to incomplete type 'ElysiaRenderer::DX12PipelineState'; no destructor called
-  (compiling source file '/DX12Shader.cpp')
-      D:\DX12\ElysiaDX12\ElysiaRenderer\PipelineStateUtility.h(13,8):
-      see declaration of 'ElysiaRenderer::DX12PipelineState'
-  
-  DX12UI.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file '/DX12UI.cpp')
-  
-  BC.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\DXTex\BC.cpp(1142,1): error C1010: unexpected end of file while looking for precompiled header. Did you forget to add '#include "stdafx.h"' to your source?
-  BC4BC5.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\DXTex\BC4BC5.cpp(548,1): error C1010: unexpected end of file while looking for precompiled header. Did you forget to add '#include "stdafx.h"' to your source?
-  BC6HBC7.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\DXTex\BC6HBC7.cpp(2874,1): error C1010: unexpected end of file while looking for precompiled header. Did you forget to add '#include "stdafx.h"' to your source?
-  BCDirectCompute.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\DXTex\BCDirectCompute.cpp(616,1): error C1010: unexpected end of file while looking for precompiled header. Did you forget to add '#include "stdafx.h"' to your source?
-  DirectXTexCompress.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\DXTex\DirectXTexCompress.cpp(829,1): error C1010: unexpected end of file while looking for precompiled header. Did you forget to add '#include "stdafx.h"' to your source?
-  DirectXTexCompressGPU.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\DXTex\DirectXTexCompressGPU.cpp(402,1): error C1010: unexpected end of file while looking for precompiled header. Did you forget to add '#include "stdafx.h"' to your source?
-  DirectXTexConvert.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\DXTex\DirectXTexConvert.cpp(3523,1): warning C4005: 'STORE_SCANLINE': macro redefinition
-      D:\DX12\ElysiaDX12\ElysiaRenderer\DXTex\DirectXTexConvert.cpp(1549,1):
-      see previous definition of 'STORE_SCANLINE'
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\DXTex\DirectXTexConvert.cpp(4802,1): error C1010: unexpected end of file while looking for precompiled header. Did you forget to add '#include "stdafx.h"' to your source?
-  DirectXTexD3D11.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\DXTex\DirectXTexD3D11.cpp(907,1): error C1010: unexpected end of file while looking for precompiled header. Did you forget to add '#include "stdafx.h"' to your source?
-  DirectXTexDDS.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\DXTex\DirectXTexDDS.cpp(2040,1): error C1010: unexpected end of file while looking for precompiled header. Did you forget to add '#include "stdafx.h"' to your source?
-  DirectXTexFlipRotate.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\DXTex\DirectXTexFlipRotate.cpp(333,1): error C1010: unexpected end of file while looking for precompiled header. Did you forget to add '#include "stdafx.h"' to your source?
-  Generating Code...
-D:\DX12\ElysiaDX12\ElysiaRenderer\DX12Device.h(58): warning C4172: returning address of local variable or temporary
-  Compiling...
-  DirectXTexImage.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\DXTex\DirectXTexImage.cpp(795,1): error C1010: unexpected end of file while looking for precompiled header. Did you forget to add '#include "stdafx.h"' to your source?
-  DirectXTexMipmaps.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\DXTex\DirectXTexMipmaps.cpp(3099,1): error C1010: unexpected end of file while looking for precompiled header. Did you forget to add '#include "stdafx.h"' to your source?
-  DirectXTexMisc.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\DXTex\DirectXTexMisc.cpp(355,1): error C1010: unexpected end of file while looking for precompiled header. Did you forget to add '#include "stdafx.h"' to your source?
-  DirectXTexNormalMaps.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\DXTex\DirectXTexNormalMaps.cpp(384,1): error C1010: unexpected end of file while looking for precompiled header. Did you forget to add '#include "stdafx.h"' to your source?
-  DirectXTexTGA.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\DXTex\DirectXTexTGA.cpp(1392,1): error C1010: unexpected end of file while looking for precompiled header. Did you forget to add '#include "stdafx.h"' to your source?
-  DirectXTexUtil.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\DXTex\DirectXTexUtil.cpp(1451,1): error C1010: unexpected end of file while looking for precompiled header. Did you forget to add '#include "stdafx.h"' to your source?
-  DirectXTexWIC.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\DXTex\DirectXTexWIC.cpp(1244,1): error C1010: unexpected end of file while looking for precompiled header. Did you forget to add '#include "stdafx.h"' to your source?
-  FinalBlitPass.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file '/FinalBlitPass.cpp')
-  
-  GBufferPass.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file '/GBufferPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\GBufferPass.cpp(56,109): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
-  (compiling source file '/GBufferPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\GBufferPass.cpp(56,93): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
-  (compiling source file '/GBufferPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\GBufferPass.cpp(82,60): warning C4244: 'argument': conversion from 'float' to 'uint8_t', possible loss of data
-  (compiling source file '/GBufferPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\GBufferPass.cpp(154,47): warning C4267: 'argument': conversion from 'size_t' to 'UINT', possible loss of data
-  (compiling source file '/GBufferPass.cpp')
-  
-  ModelImporter.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file '/ModelImporter.cpp')
-  
-  OpaquePass.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file '/OpaquePass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\OpaquePass.cpp(56,109): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
-  (compiling source file '/OpaquePass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\OpaquePass.cpp(56,93): warning C4244: 'argument': conversion from 'uint32_t' to 'float', possible loss of data
-  (compiling source file '/OpaquePass.cpp')
-  
-  PSOManager.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file '/PSOManager.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\PSOManager.cpp(49,44): error C2572: 'ElysiaRenderer::PSOManager::GetGraphicsPipelineState': redefinition of default argument: parameter 1
-  (compiling source file '/PSOManager.cpp')
-      D:\DX12\ElysiaDX12\ElysiaRenderer\PSOManager.h(54,24):
-      see declaration of 'ElysiaRenderer::PSOManager::GetGraphicsPipelineState'
-  
-  PipelineStateUtility.cpp
-  RenderMaterial.cpp
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\memory(3169,27): error C2027: use of undefined type 'ElysiaRenderer::PipelineResourceLayout'
-  (compiling source file '/RenderMaterial.cpp')
-      D:\DX12\ElysiaDX12\ElysiaRenderer\Shader.h(9,9):
-      see declaration of 'ElysiaRenderer::PipelineResourceLayout'
-      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\memory(3169,27):
-      the template instantiation context (the oldest one first) is
-          D:\DX12\ElysiaDX12\ElysiaRenderer\ShaderUtility.h(87,43):
-          see reference to class template instantiation 'std::unique_ptr<ElysiaRenderer::PipelineResourceLayout,std::default_delete<ElysiaRenderer::PipelineResourceLayout>>' being compiled
-          C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\memory(3205,66):
-          see reference to class template instantiation 'std::default_delete<ElysiaRenderer::PipelineResourceLayout>' being compiled
-          C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\memory(3168,23):
-          while compiling class template member function 'void std::default_delete<ElysiaRenderer::PipelineResourceLayout>::operator ()(_Ty *) noexcept const'
+              D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.cpp(716,100):
+              see the first reference to 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string' in 'ElysiaRenderer::DX12Device::CreateShader'
+          C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\xstring(2590,17):
+          see reference to function template instantiation 'void std::basic_string<char,std::char_traits<char>,std::allocator<char>>::_Construct_from_iter<wchar_t*,wchar_t*,_Size_type>(_Iter,const _Sent,_Size)' being compiled
           with
           [
-              _Ty=ElysiaRenderer::PipelineResourceLayout
+              _Size_type=unsigned __int64,
+              _Iter=wchar_t *,
+              _Sent=wchar_t *,
+              _Size=unsigned __int64
           ]
-              C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\memory(3280,33):
-              see the first reference to 'std::default_delete<ElysiaRenderer::PipelineResourceLayout>::operator ()' in 'std::unique_ptr<ElysiaRenderer::PipelineResourceLayout,std::default_delete<ElysiaRenderer::PipelineResourceLayout>>::~unique_ptr'
-              D:\DX12\ElysiaDX12\ElysiaRenderer\ShaderUtility.h(88,2):
-              see the first reference to 'std::unique_ptr<ElysiaRenderer::PipelineResourceLayout,std::default_delete<ElysiaRenderer::PipelineResourceLayout>>::~unique_ptr' in 'ElysiaRenderer::PassData::~PassData'
   
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\memory(3169,25): error C2338: static_assert failed: 'can't delete an incomplete type'
-  (compiling source file '/RenderMaterial.cpp')
-  
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\memory(3170,9): warning C4150: deletion of pointer to incomplete type 'ElysiaRenderer::PipelineResourceLayout'; no destructor called
-  (compiling source file '/RenderMaterial.cpp')
-      D:\DX12\ElysiaDX12\ElysiaRenderer\Shader.h(9,9):
-      see declaration of 'ElysiaRenderer::PipelineResourceLayout'
-  
-  RenderResource.cpp
+DirectXTK12.lib(SimpleMath.obj) : warning LNK4099: PDB '' was not found with 'DirectXTK12.lib(SimpleMath.obj)' or at ''; linking object as if no debug info
+DirectXTK12.lib(pch.obj) : warning LNK4099: PDB '' was not found with 'DirectXTK12.lib(pch.obj)' or at ''; linking object as if no debug info
+     Creating library D:\DX12\ElysiaRenderer\x64\Debug\ElysiaRenderer.lib and object D:\DX12\ElysiaRenderer\x64\Debug\ElysiaRenderer.exp
+  ElysiaRenderer.vcxproj -> D:\DX12\ElysiaRenderer\x64\Debug\ElysiaRenderer.exe
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Mesh\diablo3_pose.obj
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Mesh\LOW_WEPON.fbx
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Mesh\plane.fbx
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Mesh\Sphere.fbx
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Mesh\UE.fbx
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\AmbientCubemap.hlsl
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\AreaLightCommon.hlsl
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\BRDF.hlsl
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\Color.hlsl
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\Common.hlsl
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\DeferredCommon.hlsl
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\EnergyPreservation.hlsl
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\Light.hlsl
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\Light.hlsli
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\LightAccumulator.hlsl
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\LightCommon.hlsl
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\Macros.hlsli
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\Math.hlsli
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\MonteCarlo.hlsl
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\Random.hlsl
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\ShadingCommon.hlsl
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\ShadingModel.hlsl
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\ShadowCommon.hlsl
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\SharedCommon.hlsli
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\Transform.hlsli
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\public\Blit.hlsl
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\public\FullScreenTriangle.hlsl
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\public\GBuffer.hlsl
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\public\Opaque.hlsl
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\public\PBR.hlsl
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\public\Shadow.hlsl
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\public\Skybox.hlsl
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\public\TonemapPass.hlsl
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Background_Albedo.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Background_Normal.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Background_Roughness.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\ChainTexture_Albedo.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\ChainTexture_Metallic.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\ChainTexture_Normal.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\ChainTexture_Roughness.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Dielectric_metallic.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\gi_flag.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Lion_Albedo.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Lion_Normal.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Lion_Roughness.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Metallic_metallic.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza.fbx
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Arch_diffuse.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Arch_normal.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Arch_roughness.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Bricks_a_Albedo.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Bricks_a_Normal.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Bricks_a_Roughness.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Ceiling_diffuse.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Ceiling_normal.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Ceiling_roughness.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Column_a_diffuse.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Column_a_normal.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Column_a_roughness.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Column_b_diffuse.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Column_b_normal.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Column_b_roughness.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Column_c_diffuse.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Column_c_normal.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Column_c_roughness.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Curtain_Blue_diffuse.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Curtain_Blue_normal.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Curtain_Green_diffuse.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Curtain_Green_normal.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Curtain_metallic.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Curtain_Red_diffuse.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Curtain_Red_normal.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Curtain_roughness.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Details_diffuse.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Details_metallic.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Details_normal.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Details_roughness.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Fabric_Blue_diffuse.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Fabric_Blue_normal.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Fabric_Green_diffuse.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Fabric_Green_normal.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Fabric_metallic.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Fabric_Red_diffuse.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Fabric_Red_normal.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Fabric_roughness.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_FlagPole_diffuse.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_FlagPole_normal.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_FlagPole_roughness.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Floor_diffuse.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Floor_normal.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Floor_roughness.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Roof_diffuse.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Roof_normal.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Roof_roughness.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Thorn_diffuse.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Thorn_normal.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Thorn_roughness.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\VaseHanging_diffuse.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\VaseHanging_normal.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\VaseHanging_roughness.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\VasePlant_diffuse.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\VasePlant_normal.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\VasePlant_roughness.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\VaseRound_diffuse.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\VaseRound_normal.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\VaseRound_roughness.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Vase_diffuse.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Vase_normal.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Vase_roughness.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Tex\Black.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Tex\bluenoise_frd_1024x1024.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Tex\cubemap0.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Tex\GGX_Eavg_LUT.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Tex\GGX_E_LUT.dds
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Tex\White.png
+  D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Tex\Wood.dds
+  116 File(s) copied

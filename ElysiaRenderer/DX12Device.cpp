@@ -325,7 +325,7 @@ namespace ElysiaRenderer
 			SRVDesc.Format = bufferCreationDesc.m_isRawAccess ? DXGI_FORMAT_R32_TYPELESS : DXGI_FORMAT_UNKNOWN;
 			SRVDesc.Buffer.FirstElement = 0;
 			SRVDesc.Buffer.NumElements = static_cast<UINT>(bufferCreationDesc.m_isRawAccess ? bufferCreationDesc.m_size / 4 : numElements);
-			SRVDesc.Buffer.StructureByteStride = bufferCreationDesc.m_isRawAccess ? 0 : pNewBuffer->GetStride();
+			SRVDesc.Buffer.StructureByteStride = bufferCreationDesc.m_isRawAccess ? 0 : static_cast<UINT>(pNewBuffer->GetStride());
 			SRVDesc.Buffer.Flags = bufferCreationDesc.m_isRawAccess ? D3D12_BUFFER_SRV_FLAG_RAW : D3D12_BUFFER_SRV_FLAG_NONE;
 
 			pNewBuffer->SetSRVDescriptor(m_SRVStagingDescriptorHeap->NewDescriptorHeapHandle());
@@ -346,7 +346,7 @@ namespace ElysiaRenderer
 			UAVDesc.Buffer.CounterOffsetInBytes = 0;
 			UAVDesc.Buffer.FirstElement = 0;
 			UAVDesc.Buffer.NumElements = static_cast<UINT>(bufferCreationDesc.m_isRawAccess ? bufferCreationDesc.m_size / 4 : numElements);
-			UAVDesc.Buffer.StructureByteStride = bufferCreationDesc.m_isRawAccess ? 0 : pNewBuffer->GetStride();
+			UAVDesc.Buffer.StructureByteStride = bufferCreationDesc.m_isRawAccess ? 0 : static_cast<UINT>(pNewBuffer->GetStride());
 			UAVDesc.Buffer.Flags = bufferCreationDesc.m_isRawAccess ? D3D12_BUFFER_UAV_FLAG_RAW : D3D12_BUFFER_UAV_FLAG_NONE;
 
 			pNewBuffer->SetUAVDescriptor(m_SRVStagingDescriptorHeap->NewDescriptorHeapHandle());
@@ -559,7 +559,7 @@ namespace ElysiaRenderer
 		if (hasDSV)
 		{
 			clearValue.DepthStencil.Depth = 1.0f;
-			clearValue.DepthStencil.Stencil = 0.f;
+			clearValue.DepthStencil.Stencil = 0;
 		}
 		if (hasRTV)
 		{
@@ -710,11 +710,11 @@ namespace ElysiaRenderer
 		// Create default include handler
 		//
 		CComPtr<IDxcIncludeHandler> pIncludeHandler;
-		pUtils->CreateDefaultIncludeHandler(&pIncludeHandler);
+		pUtils->CreateDefaultIncludeHandler(&pIncludeHandler);  
 
-		std::cout << std::filesystem::path(shaderCreateDesc.shaderName).string() << std::endl;
-		std::cout << std::filesystem::path(shaderCreateDesc.entryPoint).string() << std::endl;
-		std::cout << std::filesystem::path(target).string() << std::endl;
+		std::cout << WstringToString(shaderCreateDesc.shaderName) << std::endl;
+		std::cout << std::string(shaderCreateDesc.entryPoint.begin(), shaderCreateDesc.entryPoint.end()) << std::endl;
+		std::cout << WstringToString(target) << std::endl;
 		auto temp = std::filesystem::path(assetsPath).wstring();
 		temp += L"\Shaders";
 
@@ -939,7 +939,7 @@ namespace ElysiaRenderer
 			// Set ConstantBuffer layout & constant buffer member
 			{
 				std::vector<ShaderVariable> shaderVariables{};
-				for (int i = 0; i < pShaderDesc->BoundResources; ++i)
+				for (UINT i = 0; i < pShaderDesc->BoundResources; ++i)
 				{
 					D3D12_SHADER_INPUT_BIND_DESC resourceDesc{};
 					pReflection->GetResourceBindingDesc(i, &resourceDesc);

@@ -6,6 +6,9 @@
 
 namespace ElysiaRenderer
 {
+	int TonemapPass::ShaderPasseIDs::BlitPassID = -1;
+	int TonemapPass::ShaderPasseIDs::TonemapPassID = -1;
+
 	TonemapPass::TonemapPass(DX12Camera* pCamera) : 
 		BasePass(pCamera)
 	{
@@ -94,7 +97,7 @@ namespace ElysiaRenderer
 			m_pCommand->FlushBarrier();
 			m_pCommand->ClearRenderTarget(*m_pTempRT->GetTexture(), Color(0, 0, 0, 0));
 
-			m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_renderSize.x, m_renderSize.y));
+			m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_renderSize));
 			m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 			PipelineInfo pipelineStateData{};
@@ -132,7 +135,7 @@ namespace ElysiaRenderer
 			m_pCommand->FlushBarrier();
 			m_pCommand->ClearRenderTarget(*cameraColorRT->GetTexture(), Color(0, 0, 0, 0));
 
-			m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_renderSize.x, m_renderSize.y));
+			m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_renderSize));
 			m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 			PipelineInfo pipelineStateData{};

@@ -27,34 +27,32 @@ float3 AverageFresnel(float3 r, float3 g)
            + 0.19744 * g * r + 0.0360605 * g * g * r - 0.2586 * g * r * r;
 }
 
-float GetDiffuseEnergyPreservation(float F)
-{
-    return 1.f - F;
-}
+//float GetDiffuseEnergyPreservation(float F)
+//{
+//    return 1.f - F;
+//}
 
-float GetSpecularEnergyPreservation(float3 alebdo, float roughness, float NoL, float NoV)
-{
-    NoL = saturate(NoL);
-    NoV = saturate(NoV);
+//float GetSpecularEnergyPreservation(float3 alebdo, float roughness, float NoL, float NoV)
+//{
+//    NoL = saturate(NoL);
+//    NoV = saturate(NoV);
     
-    SamplerState warpLinearSampler = SamplerDescriptorHeap[WarpLinearSampler];
+//    SamplerState warpLinearSampler = SamplerDescriptorHeap[WarpLinearSampler];
     
-    Texture2D<float> GGX_E_LUT = ResourceDescriptorHeap[GGX_E_LUT_Index];
-    Texture2D<float> GGX_EAVG_LUT = ResourceDescriptorHeap[GGX_Eavg_LUT_Index];
+//    Texture2D<float> GGX_E_LUT = ResourceDescriptorHeap[GGX_E_LUT_Index];
+//    Texture2D<float> GGX_EAVG_LUT = ResourceDescriptorHeap[GGX_Eavg_LUT_Index];
     
-    float3 E_o = GGX_E_LUT.SampleLevel(warpLinearSampler, float2(NoL, roughness), 0);
-    float3 E_i = GGX_E_LUT.SampleLevel(warpLinearSampler, float2(NoV, roughness), 0);
-    float3 E_avg = GGX_EAVG_LUT.SampleLevel(warpLinearSampler, float2(0, roughness), 0);
+//    float3 E_o = GGX_E_LUT.SampleLevel(warpLinearSampler, float2(NoL, roughness), 0);
+//    float3 E_i = GGX_E_LUT.SampleLevel(warpLinearSampler, float2(NoV, roughness), 0);
+//    float3 E_avg = GGX_EAVG_LUT.SampleLevel(warpLinearSampler, float2(0, roughness), 0);
 
-    float3 edgetint = float3(0.827, 0.792, 0.678);
-    float3 F_avg = AverageFresnel(alebdo, edgetint);
-    float3 F_ms = (1.f - E_o) * (1.f - E_i) / (PI * (1.f - E_avg));
-    float3 F_add = F_avg * E_avg / (1.f - F_avg * (1.f - E_avg));
+//    float3 edgetint = float3(0.827, 0.792, 0.678);
+//    float3 F_avg = AverageFresnel(alebdo, edgetint);
+//    float3 F_ms = (1.f - E_o) * (1.f - E_i) / (PI * (1.f - E_avg));
+//    float3 F_add = F_avg * E_avg / (1.f - F_avg * (1.f - E_avg));
 
-    return F_add * F_ms;
-    
-    return 0;
-}
+//    return F_add * F_ms;
+//}
 
 FBxDFEnergyTerms ComputeFresnelEnergyTerms(float2 E, float3 InF0)
 {

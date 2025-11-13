@@ -33,4 +33,13 @@ namespace ElysiaRenderer
 	{
 		m_pShader->ApplyConstantData();
 	}
+
+	template void RenderMaterial::SetConstantVariable<UINT>(const std::string&, UINT);
+	template void RenderMaterial::SetConstantVariable<float>(const std::string&, float);
+	template void RenderMaterial::SetConstantVariable<Vector2>(const std::string&, Vector2);
+	template void RenderMaterial::SetConstantVariable<Vector3>(const std::string&, Vector3);
+	template void RenderMaterial::SetConstantVariable<Vector4>(const std::string&, Vector4);
+	template void RenderMaterial::SetConstantVariable<Matrix>(const std::string&, Matrix);
+	template void RenderMaterial::SetConstantVariable<bool>(const std::string&, bool);
+	template void RenderMaterial::SetConstantVariable<std::vector<Vector2>>(const std::string&, std::vector<Vector2>);
 }

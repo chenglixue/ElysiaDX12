@@ -38,7 +38,7 @@ float3 SpecularGGX(float Roughness, float3 SpecularColor, BxDFContext Context, h
 
     float NDF = D_GGX(a2, Context.NoH);
     float Vis = Vis_SmithJointApprox(a2, Context.NoV, NoL);
-    float F = UE_F_Schlick(SpecularColor, Context.VoH);
+    float3 F = UE_F_Schlick(SpecularColor, Context.VoH);
 
     o = NDF * F * Vis;
 
@@ -103,8 +103,8 @@ FDirectLighting DefaultLitBxDF(MaterialData materialData, float3 N, float3 V, fl
     
     FBxDFEnergyTerms energyTerm = ComputeFresnelEnergyTerms(GGXEnergyLookup(materialData.Roughness, NoV), materialData.SpecularColor);
      
-    //Lighting.Diffuse *= ComputeEnergyPreservation(energyTerm);
-    //Lighting.Specular *= ComputeEnergyConservation(energyTerm);
+    Lighting.Diffuse *= ComputeEnergyPreservation(energyTerm);
+    Lighting.Specular *= ComputeEnergyConservation(energyTerm);
 
     return Lighting;
 }

@@ -113,6 +113,7 @@ namespace DirectX
             Vector2() noexcept : XMFLOAT2(0.f, 0.f) {}
             constexpr explicit Vector2(float ix) noexcept : XMFLOAT2(ix, ix) {}
             constexpr Vector2(float ix, float iy) noexcept : XMFLOAT2(ix, iy) {}
+            constexpr Vector2(UINT ix, UINT iy) noexcept : XMFLOAT2(static_cast<float>(ix), static_cast<float>(iy)) {}
             explicit Vector2(_In_reads_(2) const float* pArray) noexcept : XMFLOAT2(pArray) {}
             Vector2(FXMVECTOR V) noexcept { XMStoreFloat2(this, V); }
             Vector2(const XMFLOAT2& V) noexcept { this->x = V.x; this->y = V.y; }
@@ -374,6 +375,11 @@ namespace DirectX
             // Unary operators
             Vector4 operator+ () const noexcept { return *this; }
             Vector4 operator- () const noexcept;
+
+            Vector2 xy() const noexcept
+            {
+                return std::move(Vector2(x, y));
+            }
 
             // Vector operations
             bool InBounds(const Vector4& Bounds) const noexcept;

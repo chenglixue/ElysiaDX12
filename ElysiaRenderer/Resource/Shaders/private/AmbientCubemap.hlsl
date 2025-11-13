@@ -51,7 +51,7 @@ float3 DiffuseIBL(uint2 Random, float3 DiffuseColor, float Roughness, float3 N, 
 	
     SamplerState warpLinearSampler = SamplerDescriptorHeap[WarpLinearSampler];
     TextureCube<float4> skyboxTex = ResourceDescriptorHeap[SkyboxTexIndex];
-    DiffuseLighting += skyboxTex.SampleLevel(warpLinearSampler, N, 10) * KD;
+    DiffuseLighting += skyboxTex.SampleLevel(warpLinearSampler, N, 10).rgb * KD;
     
     return DiffuseLighting;
 }
@@ -109,7 +109,7 @@ float3 SpecularIBL(uint2 Random, float3 SpecularColor, float Roughness, float3 N
     float3 R = 2 * dot(V, N) * N - V;
     TextureCube<float4> skyboxTex = ResourceDescriptorHeap[SkyboxTexIndex];
     SamplerState warpLinearSampler = SamplerDescriptorHeap[WarpLinearSampler];
-    float3 PrefilteredColor = skyboxTex.SampleLevel(warpLinearSampler, R, mipmapLevel);
+    float3 PrefilteredColor = skyboxTex.SampleLevel(warpLinearSampler, R, mipmapLevel).rgb;
     
     float NoV = saturate(dot(N, V));
     float2 EnvBRDF = EnvBRDFApprox(SpecularColor, Roughness, NoV).xy;

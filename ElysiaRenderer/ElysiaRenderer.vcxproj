@@ -113,7 +113,7 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>D:\DX12\ElysiaRenderer\x64\Debug\Shaders;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc\include;D:\DX12\ElysiaDX12\x64\Debug\Assimp\include\assimp;DirectXTK12\Inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>0018;%(DisableSpecificWarnings)</DisableSpecificWarnings>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -509,11 +509,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\x64\Debug\Shaders\public\FullScreenTriangle.hlsl">
-      <FileType>Document</FileType>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resource\Shaders\private\Color.hlsl">
       <FileType>Document</FileType>
     </None>
@@ -525,6 +520,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resource\Shaders\private\DeferredCommon.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resource\Shaders\public\FullScreenTriangle.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>

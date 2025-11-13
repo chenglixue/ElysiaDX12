@@ -1,13 +1,6 @@
 #if EDITOR
-#include <private\ShadingCommon.hlsl>
-#include <private\Light.hlsl>
-#include <private\LightCommon.hlsl>
 #include <private\SharedCommon.hlsli>
-#include <Blit.hlsli>
 #else
-#include "../private\ShadingCommon.hlsl"
-#include "../private\Light.hlsl"
-#include "../private\LightCommon.hlsl"
 #include "../private\SharedCommon.hlsli"
 #endif
 

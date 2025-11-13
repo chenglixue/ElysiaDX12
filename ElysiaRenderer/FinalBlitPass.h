@@ -22,7 +22,7 @@ namespace ElysiaRenderer
 	private:
 		struct ShaderPassIDs
 		{
-			static UINT BlitPassID;
+			static int BlitPassID;
 		};
 	};
 }

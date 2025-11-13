@@ -42,6 +42,7 @@ namespace ElysiaRenderer
 		g_pBufferManager = std::make_unique<BufferManager>();
 		m_pTextureManager = std::make_unique<TextureManager>();
 		g_pShaderManager = std::make_unique<ShaderManager>();
+		g_pRenderResource = std::make_unique<RenderResource>();
 
 		g_vertexShaders = std::unordered_map<UINT, std::unordered_map<ShaderType, std::unique_ptr<DX12Shader>>>();
 		g_pixelShaders = std::unordered_map<UINT, std::unordered_map<ShaderType, std::unique_ptr<DX12Shader>>>();
@@ -186,7 +187,7 @@ namespace ElysiaRenderer
  		CreateConstantBuffers();
 
 		RenderPassData passData{};
-		passData.RenderSize = UINT2(static_cast<UINT>(GetDevice()->GetScreenSize().x), static_cast<UINT>(GetDevice()->GetScreenSize().y));
+		passData.RenderSize = GetDevice()->GetScreenSize().xy();
 		passData.pCommand = m_graphicsContext.get();
 
 		m_passes.emplace_back(std::move(std::make_unique<ShadowPass>(m_pCameraManager->GetMainCamera())));

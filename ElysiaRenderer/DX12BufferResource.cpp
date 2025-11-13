@@ -29,7 +29,7 @@ namespace ElysiaRenderer
 
 	float DX12BufferResource::GetStride() const noexcept
 	{
-		return m_stride;
+		return static_cast<float>(m_stride);
 	}
 	DX12DescriptorHeapHandle DX12BufferResource::GetCBVDescriptor() const noexcept
 	{
@@ -55,7 +55,7 @@ namespace ElysiaRenderer
 
 	void DX12BufferResource::SetStride(float stride)
 	{
-		m_stride = stride;
+		m_stride = static_cast<size_t>(stride);
 	}
 	void DX12BufferResource::SetCBVDescriptor(const DX12DescriptorHeapHandle& CBVDescriptor)
 	{

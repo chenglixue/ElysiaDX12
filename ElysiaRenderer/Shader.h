@@ -2,12 +2,10 @@
 #include "Helper.h"
 #include "MObject.h"
 
-#include "ShaderUtility.h"
+#include "DX12Shader.h"
 
 namespace ElysiaRenderer
 {
-	struct PipelineResourceLayout;
-	struct PipelineStateObject;
 
 	class Shader : public MObject
 	{

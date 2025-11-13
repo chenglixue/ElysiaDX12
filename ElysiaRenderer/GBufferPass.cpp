@@ -5,6 +5,8 @@
 
 namespace ElysiaRenderer
 {
+	int GBufferPass::ShaderPasseIDs::GBufferPassID = -1;
+
 	GBufferPass::GBufferPass(DX12Camera* pCamera) :
 		BasePass(pCamera)
 	{
@@ -79,10 +81,10 @@ namespace ElysiaRenderer
 		}
 		m_pCommand->AddBarrier(*cameraDepthRT->GetTexture(), D3D12_RESOURCE_STATE_DEPTH_WRITE);
 		m_pCommand->FlushBarrier();
-		m_pCommand->ClearDepthStencilTarget(*cameraDepthRT, 1.f, 0.f);
+		m_pCommand->ClearDepthStencilTarget(*cameraDepthRT, 1.f, 0);
 
 		m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_renderSize.x, m_renderSize.y));
+		m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_renderSize));
 		m_pCommand->SetIndexBuffer(GetBufferManager()->GetIndexBufferView());
 		m_pCommand->SetVertexBuffer(0, 1, const_cast<D3D12_VERTEX_BUFFER_VIEW&>(GetBufferManager()->GetVertexBufferView()));
 
@@ -151,7 +153,7 @@ namespace ElysiaRenderer
 				auto VertexCount = mesh->vertexCount;
 				auto indexCount = mesh->indexCount;
 
-				m_pCommand->Draw(indexCount, startVertex, startIndex);
+				m_pCommand->Draw(indexCount, startVertex, static_cast<UINT>(startIndex));
 			}
 		}
 

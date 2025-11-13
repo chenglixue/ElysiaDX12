@@ -152,7 +152,7 @@ namespace ElysiaHelper
 #endif
 
         uint32_t* C = sobol.rightmostZeroBit(count);
-        for (int i = 0; i < count; ++i)
+        for (UINT i = 0; i < count; ++i)
         {
             auto point = sobol.nextPoint(C[i]);
 
@@ -160,8 +160,8 @@ namespace ElysiaHelper
             std::cout << i << "\t" << std::fixed << std::setprecision(6)
                 << point[0] << "\t" << point[1] << std::endl;
 #endif
-            o[i].x = point[0];
-            o[i].y = point[1];
+            o[i].x = static_cast<float>(point[0]);
+            o[i].y = static_cast<float>(point[1]);
         }
 
         return o;
