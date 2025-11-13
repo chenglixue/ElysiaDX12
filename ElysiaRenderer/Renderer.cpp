@@ -43,6 +43,7 @@ namespace ElysiaRenderer
 		m_pTextureManager = std::make_unique<TextureManager>();
 		g_pShaderManager = std::make_unique<ShaderManager>();
 		g_pRenderResource = std::make_unique<RenderResource>();
+		g_pPSOManager = std::make_unique<PSOManager>();
 
 		g_vertexShaders = std::unordered_map<UINT, std::unordered_map<ShaderType, std::unique_ptr<DX12Shader>>>();
 		g_pixelShaders = std::unordered_map<UINT, std::unordered_map<ShaderType, std::unique_ptr<DX12Shader>>>();

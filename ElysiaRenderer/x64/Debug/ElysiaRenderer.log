@@ -5,34 +5,12 @@ D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning
   (compiling source file 'DX12Device.cpp')
   
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.cpp(719,11): warning C4129: 'S': unrecognized character escape sequence
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\xstring(2749,53): warning C4244: 'argument': conversion from 'wchar_t' to 'const _Elem', possible loss of data
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\xstring(2749,53): warning C4244:         with
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\xstring(2749,53): warning C4244:         [
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\xstring(2749,53): warning C4244:             _Elem=char
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\xstring(2749,53): warning C4244:         ]
-  (compiling source file 'DX12Device.cpp')
-      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\xstring(2749,53):
-      the template instantiation context (the oldest one first) is
-          D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.cpp(716,27):
-          see reference to function template instantiation 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string<std::_String_iterator<std::_String_val<std::_Simple_types<_Elem>>>,0>(_Iter,_Iter,const _Alloc &)' being compiled
-          with
-          [
-              _Elem=wchar_t,
-              _Iter=std::_String_iterator<std::_String_val<std::_Simple_types<wchar_t>>>,
-              _Alloc=std::allocator<char>
-          ]
-              D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12Device.cpp(716,100):
-              see the first reference to 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string' in 'ElysiaRenderer::DX12Device::CreateShader'
-          C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\xstring(2590,17):
-          see reference to function template instantiation 'void std::basic_string<char,std::char_traits<char>,std::allocator<char>>::_Construct_from_iter<wchar_t*,wchar_t*,_Size_type>(_Iter,const _Sent,_Size)' being compiled
-          with
-          [
-              _Size_type=unsigned __int64,
-              _Iter=wchar_t *,
-              _Sent=wchar_t *,
-              _Size=unsigned __int64
-          ]
-  
+CameraManager.obj : warning LNK4099: PDB '' was not found with 'CameraManager.obj' or at ''; linking object as if no debug info
+DX12Camera.obj : warning LNK4099: PDB '' was not found with 'DX12Camera.obj' or at ''; linking object as if no debug info
+DX12Light.obj : warning LNK4099: PDB '' was not found with 'DX12Light.obj' or at ''; linking object as if no debug info
+MeshManager.obj : warning LNK4099: PDB '' was not found with 'MeshManager.obj' or at ''; linking object as if no debug info
+SobolSequenceGenerator.obj : warning LNK4099: PDB '' was not found with 'SobolSequenceGenerator.obj' or at ''; linking object as if no debug info
+Transform.obj : warning LNK4099: PDB '' was not found with 'Transform.obj' or at ''; linking object as if no debug info
 DirectXTK12.lib(SimpleMath.obj) : warning LNK4099: PDB '' was not found with 'DirectXTK12.lib(SimpleMath.obj)' or at ''; linking object as if no debug info
 DirectXTK12.lib(pch.obj) : warning LNK4099: PDB '' was not found with 'DirectXTK12.lib(pch.obj)' or at ''; linking object as if no debug info
      Creating library D:\DX12\ElysiaRenderer\x64\Debug\ElysiaRenderer.lib and object D:\DX12\ElysiaRenderer\x64\Debug\ElysiaRenderer.exp

@@ -703,18 +703,18 @@ namespace ElysiaRenderer
 		//
 		CComPtr<IDxcUtils> pUtils;
 		CComPtr<IDxcCompiler3> pCompiler;
-		DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&pUtils));
-		DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&pCompiler));
+		ThrowIfFailed(DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&pUtils)));
+		ThrowIfFailed(DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&pCompiler)));
 
 		//
 		// Create default include handler
 		//
 		CComPtr<IDxcIncludeHandler> pIncludeHandler;
-		pUtils->CreateDefaultIncludeHandler(&pIncludeHandler);  
+		ThrowIfFailed(pUtils->CreateDefaultIncludeHandler(&pIncludeHandler));
 
-		std::cout << WstringToString(shaderCreateDesc.shaderName) << std::endl;
-		std::cout << std::string(shaderCreateDesc.entryPoint.begin(), shaderCreateDesc.entryPoint.end()) << std::endl;
-		std::cout << WstringToString(target) << std::endl;
+		std::cout << std::filesystem::path(shaderCreateDesc.shaderName).string() << std::endl;
+		std::cout << std::filesystem::path(shaderCreateDesc.entryPoint).string() << std::endl;
+		std::cout << std::filesystem::path(target).string() << std::endl;
 		auto temp = std::filesystem::path(assetsPath).wstring();
 		temp += L"\Shaders";
 
@@ -734,7 +734,7 @@ namespace ElysiaRenderer
 			DXC_ARG_PACK_MATRIX_ROW_MAJOR,
 			DXC_ARG_DEBUG,
 			DXC_ARG_SKIP_OPTIMIZATIONS,
-			DXC_ARG_WARNINGS_ARE_ERRORS
+			DXC_ARG_ALL_RESOURCES_BOUND
 		};
 		pszArgs.emplace_back(L"-D");
 		pszArgs.emplace_back(L"EDITOR");
@@ -796,7 +796,7 @@ namespace ElysiaRenderer
 		//
 		CComPtr<IDxcBlobEncoding> pSource;
 		auto path = ElysiaHelper::GetAssetFullPath(assetsPath, shaderCreateDesc.shaderName.c_str());
-		pUtils->LoadFile(ElysiaHelper::GetAssetFullPath(assetsPath, shaderCreateDesc.shaderName.c_str()).c_str(), nullptr, &pSource);
+		ThrowIfFailed(pUtils->LoadFile(ElysiaHelper::GetAssetFullPath(assetsPath, shaderCreateDesc.shaderName.c_str()).c_str(), nullptr, &pSource));
 		DxcBuffer Source
 		{
 			.Ptr = pSource->GetBufferPointer(),
@@ -808,13 +808,17 @@ namespace ElysiaRenderer
 		// Compile it with specified arguments.
 		//
 		CComPtr<IDxcResult> pResults;
-		pCompiler->Compile(
+		auto hr = pCompiler->Compile(
 			&Source,                // Source buffer.
 			pszArgs.data(),         // Array of pointers to arguments.
 			(UINT)pszArgs.size(),      // Number of arguments.
 			pIncludeHandler,        // User-provided interface to handle #include directives (optional).
 			IID_PPV_ARGS(&pResults) // Compiler output status, buffer, and errors.
 		);
+		if (FAILED(hr))
+		{
+			ThrowRuntimeError(std::string("Failed to compile shader with path : ") + WstringToString(shaderCreateDesc.shaderName));
+		}
 
 		//
 		// Print errors if present.
@@ -918,28 +922,30 @@ namespace ElysiaRenderer
 		// Get separate reflection.
 		//
 		CComPtr<IDxcBlob> pReflectionData;
-		pResults->GetOutput(DXC_OUT_REFLECTION, IID_PPV_ARGS(&pReflectionData), nullptr);
+		CComPtr< ID3D12ShaderReflection > pReflection;
+		ThrowIfFailed(pResults->GetOutput(DXC_OUT_REFLECTION, IID_PPV_ARGS(&pReflectionData), nullptr));
 		if (pReflectionData != nullptr)
 		{
 			// Optionally, save reflection blob for later here.
 
 			// Create reflection interface.
-			DxcBuffer ReflectionData;
-			ReflectionData.Encoding = DXC_CP_ACP;
-			ReflectionData.Ptr = pReflectionData->GetBufferPointer();
-			ReflectionData.Size = pReflectionData->GetBufferSize();
+			const DxcBuffer ReflectionData
+			{
+				.Ptr = pReflectionData->GetBufferPointer(),
+				.Size = pReflectionData->GetBufferSize(),
+				.Encoding = DXC_CP_ACP,
+			};
 
-			CComPtr< ID3D12ShaderReflection > pReflection;
 			pUtils->CreateReflection(&ReflectionData, IID_PPV_ARGS(&pReflection));
 
 			// Use reflection interface here.
-			D3D12_SHADER_DESC* pShaderDesc = nullptr;
-			pReflection->GetDesc(pShaderDesc);
+			D3D12_SHADER_DESC pShaderDesc{};
+			pReflection->GetDesc(&pShaderDesc);
 
 			// Set ConstantBuffer layout & constant buffer member
 			{
 				std::vector<ShaderVariable> shaderVariables{};
-				for (UINT i = 0; i < pShaderDesc->BoundResources; ++i)
+				for (UINT i = 0; i < pShaderDesc.BoundResources; ++i)
 				{
 					D3D12_SHADER_INPUT_BIND_DESC resourceDesc{};
 					pReflection->GetResourceBindingDesc(i, &resourceDesc);
@@ -960,6 +966,7 @@ namespace ElysiaRenderer
 						std::cout << "Resource type is " << resourceType << std::endl;
 						std::cout << "Register space is " << spaceID << std::endl;
 						std::cout << "bind point is " << registerPos << std::endl;
+						std::cout << std::endl;
 #endif // DEBUG
 
 						ShaderVariable temp
@@ -987,6 +994,15 @@ namespace ElysiaRenderer
 								.pData = new char[variableDesc.Size]
 							};
 
+#ifdef DEBUG
+							std::cout << "Constant variable name is " << variableDesc.Name << std::endl;
+							std::cout << "Space ID is " << constantVariableDesc.SpaceID << std::endl;
+							std::cout << "Start Offset is " << constantVariableDesc.StartOffset << std::endl;
+							std::cout << "Size is " << constantVariableDesc.Size << std::endl;
+							std::cout << "Address is " << constantVariableDesc.pData << std::endl;
+							std::cout << std::endl;
+#endif // DEBUG
+
 							o->SetConstantBufferVariable(variableDesc.Name, std::move(constantVariableDesc));
 						}
 					}
@@ -998,21 +1014,21 @@ namespace ElysiaRenderer
 			{
 				if (shaderCreateDesc.shaderType == ShaderType::Vertex)
 				{
-					std::vector<std::string> inputElementSemanticNames(pShaderDesc->InputParameters);
-					std::vector<D3D12_INPUT_ELEMENT_DESC> inputElementDesc(pShaderDesc->InputParameters);
+					std::vector<std::string> inputElementSemanticNames(pShaderDesc.InputParameters);
+					std::vector<D3D12_INPUT_ELEMENT_DESC> inputElementDesc(pShaderDesc.InputParameters);
 
-					for (UINT32 parameterIndex = 0; parameterIndex < pShaderDesc->InputParameters; ++parameterIndex)
+					for (UINT32 parameterIndex = 0; parameterIndex < pShaderDesc.InputParameters; ++parameterIndex)
 					{
 						D3D12_SIGNATURE_PARAMETER_DESC signatureParameterDesc{};
 						pReflection->GetInputParameterDesc(parameterIndex, &signatureParameterDesc);
 
 						// Using the semantic name provided by the signatureParameterDesc directly to the input element desc will cause the SemanticName field to have garbage values.
 						// This is because the SemanticName filed is a const wchar_t*. I am using a separate std::vector<std::string> for simplicity.
-						inputElementSemanticNames.emplace_back(signatureParameterDesc.SemanticName);
+						inputElementSemanticNames[parameterIndex] = signatureParameterDesc.SemanticName;
 
-						inputElementDesc.emplace_back(D3D12_INPUT_ELEMENT_DESC
+						inputElementDesc[parameterIndex] = D3D12_INPUT_ELEMENT_DESC
 							{
-									.SemanticName = inputElementSemanticNames.back().c_str(),
+									.SemanticName = inputElementSemanticNames[parameterIndex].c_str(),
 									.SemanticIndex = signatureParameterDesc.SemanticIndex,
 									.Format = MaskToFormat(signatureParameterDesc.Mask),
 									.InputSlot = 0u,
@@ -1021,7 +1037,14 @@ namespace ElysiaRenderer
 									// There doesn't seem to be a obvious way to 
 									// automate this currently, which might be a issue when instanced rendering is used
 									.InstanceDataStepRate = 0u
-							});
+							};
+
+#ifdef DEBUG
+						std::cout << "Input Element name is " << inputElementDesc[parameterIndex].SemanticName << std::endl;
+						std::cout << "Input Element Index is " << inputElementDesc[parameterIndex].SemanticIndex << std::endl;
+						std::cout << "Input Element Format is " << DXGIFormatToString(inputElementDesc[parameterIndex].Format) << std::endl;
+						std::cout << std::endl;
+#endif // DEBUG
 					}
 
 					D3D12_INPUT_LAYOUT_DESC shaderVertexLayoutDesc

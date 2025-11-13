@@ -20,14 +20,12 @@ namespace ElysiaRenderer
 
 			// create dx12 shader
 			ShaderCreateDesc vertexShaderCreateDesc{};
-			ZeroMemory(&vertexShaderCreateDesc, sizeof(ShaderCreateDesc));
 			vertexShaderCreateDesc.shaderName = shaderPasses[passID].FilePath;
 			vertexShaderCreateDesc.entryPoint = shaderPasses[passID].VertexEntryPoint;
 			vertexShaderCreateDesc.shaderType = ShaderType::Vertex;
 			newPassData.pVSShader = std::move(GetDevice()->CreateShader(vertexShaderCreateDesc));
 
 			ShaderCreateDesc fragmentShaderCreateDesc{};
-			ZeroMemory(&fragmentShaderCreateDesc, sizeof(ShaderCreateDesc));
 			fragmentShaderCreateDesc.shaderName = shaderPasses[passID].FilePath;
 			fragmentShaderCreateDesc.entryPoint = shaderPasses[passID].FragmentEntryPoint;
 			fragmentShaderCreateDesc.shaderType = ShaderType::Pixel;

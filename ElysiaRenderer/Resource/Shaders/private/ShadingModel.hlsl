@@ -38,7 +38,7 @@ float3 SpecularGGX(float Roughness, float3 SpecularColor, BxDFContext Context, h
 
     float NDF = D_GGX(a2, Context.NoH);
     float Vis = Vis_SmithJointApprox(a2, Context.NoV, NoL);
-    float3 F = UE_F_Schlick(SpecularColor, Context.VoH);
+    float F = UE_F_Schlick(SpecularColor, Context.VoH);
 
     o = NDF * F * Vis;
 
