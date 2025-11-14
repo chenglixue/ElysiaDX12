@@ -49,16 +49,16 @@ namespace ElysiaRenderer
 	{
 		~ShaderConstantVariableDesc()
 		{
-			if (!pData)
+			if (pData == nullptr)
 				return;
-			delete[] pData;
-			pData = NULL;
+			delete []pData;
+			pData = nullptr;
 		}
 
 		UINT					SpaceID = 0;
 		UINT                    StartOffset;    // Offset in constant buffer's backing store
 		UINT                    Size;           // Size of variable (in bytes)
-		void*					pData;
+		void*	pData = nullptr;
 	};
 
 	struct ShaderPass

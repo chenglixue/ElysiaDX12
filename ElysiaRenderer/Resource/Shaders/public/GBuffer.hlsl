@@ -52,7 +52,7 @@ cbuffer PassConstant : register(b0, perPassSpace)
 struct VSInput
 {
     float3 positionOS : POSITION;
-    float3 uv : TEXCOORD0;
+    float2 uv : TEXCOORD0;
     float3 normalOS : NORMAL;
     float3 tangentOS : TANGENT;
 };
@@ -92,8 +92,8 @@ PSInput VS(VSInput i)
     o.bitTangentWS = (cross(o.tangentWS, N));
     o.normalWS = N;
     
-    float handedness = dot(o.bitTangentWS, cross(o.normalWS, o.tangentWS)) > 0.0f ? 1.0f : -1.0f;
-    o.bitTangentWS *= handedness;
+    //float handedness = dot(o.bitTangentWS, cross(o.normalWS, o.tangentWS)) > 0.0f ? 1.0f : -1.0f;
+    //o.bitTangentWS *= handedness;
     
     o.uv = i.uv;
     

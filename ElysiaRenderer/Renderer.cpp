@@ -44,10 +44,6 @@ namespace ElysiaRenderer
 		g_pShaderManager = std::make_unique<ShaderManager>();
 		g_pRenderResource = std::make_unique<RenderResource>();
 		g_pPSOManager = std::make_unique<PSOManager>();
-
-		g_vertexShaders = std::unordered_map<UINT, std::unordered_map<ShaderType, std::unique_ptr<DX12Shader>>>();
-		g_pixelShaders = std::unordered_map<UINT, std::unordered_map<ShaderType, std::unique_ptr<DX12Shader>>>();
-		g_computeShaders = std::unordered_map<UINT, std::unordered_map<ShaderType, std::unique_ptr<DX12Shader>>>();
 		
 		g_pModelImporter = std::make_unique<ModelImporter>(GetBufferManager(), m_pTextureManager.get());
 	}
@@ -106,12 +102,7 @@ namespace ElysiaRenderer
 		GetDevice()->WaitForIdle();
 		GetDevice()->DestoryContext(std::move(m_graphicsContext));
 
-		m_passes.clear();
 		m_graphicsContext.release();
-		GetVertexShaders().clear();
-		GetPixelShaders().clear();
-		GetComputeShaders().clear();
-		m_graphicsPipelineStates.clear();
 	}
 	void Renderer::Resize()
 	{
@@ -193,8 +184,8 @@ namespace ElysiaRenderer
 
 		m_passes.emplace_back(std::move(std::make_unique<ShadowPass>(m_pCameraManager->GetMainCamera())));
 		m_passes.emplace_back(std::move(std::make_unique<GBufferPass>(m_pCameraManager->GetMainCamera())));
-		m_passes.emplace_back(std::move(std::make_unique<OpaquePass>(m_pCameraManager->GetMainCamera())));
-		m_passes.emplace_back(std::move(std::make_unique<TonemapPass>(m_pCameraManager->GetMainCamera())));
+		/*m_passes.emplace_back(std::move(std::make_unique<OpaquePass>(m_pCameraManager->GetMainCamera())));
+		m_passes.emplace_back(std::move(std::make_unique<TonemapPass>(m_pCameraManager->GetMainCamera())));*/
 		m_passes.emplace_back(std::move(std::make_unique<UIPass>()));
 		m_passes.emplace_back(std::move(std::make_unique<FinalBlitPass>(m_pCameraManager->GetMainCamera())));
 		for (auto& pass : m_passes)
@@ -226,6 +217,8 @@ namespace ElysiaRenderer
 
 		desc.m_size = sizeof(CBVFrameVariable);
 		GetBufferManager()->AddConstantBuffer(PER_FRAME_SPACE, desc);
+		GetRenderResource()->GetPerFrameBindResourceSpace()->SetCBV(GetBufferManager()->GetSingleConstantBuffer(PER_FRAME_SPACE));
+		GetRenderResource()->GetPerFrameBindResourceSpace()->Lock();
 	}
 
 	void Renderer::Execute()

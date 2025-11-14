@@ -982,8 +982,7 @@ namespace ElysiaRenderer
 						for (UINT memberIndex = 0; memberIndex < constantBufferDesc.Variables; ++memberIndex)
 						{
 							auto memberVariable = pConstantBuffer->GetVariableByIndex(memberIndex);
-							D3D12_SHADER_VARIABLE_DESC variableDesc;
-							ZeroMemory(&variableDesc, sizeof(D3D12_SHADER_VARIABLE_DESC));
+							D3D12_SHADER_VARIABLE_DESC variableDesc{};
 							memberVariable->GetDesc(&variableDesc);
 
 							ShaderConstantVariableDesc constantVariableDesc
@@ -1014,21 +1013,26 @@ namespace ElysiaRenderer
 			{
 				if (shaderCreateDesc.shaderType == ShaderType::Vertex)
 				{
-					std::vector<std::string> inputElementSemanticNames(pShaderDesc.InputParameters);
 					std::vector<D3D12_INPUT_ELEMENT_DESC> inputElementDesc(pShaderDesc.InputParameters);
+					std::vector <std::string > inputElementSemanticNames{ pShaderDesc.InputParameters };
 
 					for (UINT32 parameterIndex = 0; parameterIndex < pShaderDesc.InputParameters; ++parameterIndex)
 					{
 						D3D12_SIGNATURE_PARAMETER_DESC signatureParameterDesc{};
 						pReflection->GetInputParameterDesc(parameterIndex, &signatureParameterDesc);
 
-						// Using the semantic name provided by the signatureParameterDesc directly to the input element desc will cause the SemanticName field to have garbage values.
-						// This is because the SemanticName filed is a const wchar_t*. I am using a separate std::vector<std::string> for simplicity.
 						inputElementSemanticNames[parameterIndex] = signatureParameterDesc.SemanticName;
+					}
+					o->SetInputElementSemanticNames(std::move(inputElementSemanticNames));
+
+					for (UINT32 parameterIndex = 0; parameterIndex < pShaderDesc.InputParameters; ++parameterIndex)
+					{
+						D3D12_SIGNATURE_PARAMETER_DESC signatureParameterDesc{};
+						pReflection->GetInputParameterDesc(parameterIndex, &signatureParameterDesc);
 
 						inputElementDesc[parameterIndex] = D3D12_INPUT_ELEMENT_DESC
 							{
-									.SemanticName = inputElementSemanticNames[parameterIndex].c_str(),
+									.SemanticName = o->GetInputElementSemanticNames()[parameterIndex].c_str(),
 									.SemanticIndex = signatureParameterDesc.SemanticIndex,
 									.Format = MaskToFormat(signatureParameterDesc.Mask),
 									.InputSlot = 0u,
@@ -1047,46 +1051,9 @@ namespace ElysiaRenderer
 #endif // DEBUG
 					}
 
-					D3D12_INPUT_LAYOUT_DESC shaderVertexLayoutDesc
-					{
-						.pInputElementDescs = inputElementDesc.data(),
-						.NumElements = static_cast<UINT32>(inputElementDesc.size()),
-					};
-
-					o->SetInputLayoutDesc(std::move(shaderVertexLayoutDesc));
+					o->SetInputElementData(std::move(inputElementDesc));
 				}
 			}
-		}
-
-		PipelineResourceLayout pipelineResourceLayout{};
-		for (size_t variableIndex = 0; variableIndex < o->GetVariable().size(); ++variableIndex)
-		{
-			auto& currVariable = o->GetVariable()[variableIndex];
-			switch (currVariable.type)
-			{
-				case ShaderVariable::Type::ConstantBuffer:
-				{
-					BufferCreationDesc bufferDesc
-					{
-						.m_name = stringToLPCWSTR(currVariable.name),
-						.m_size = currVariable.size,
-						.m_viewFlags = GPUResourceFlags::CBV,
-						.m_accessFlags = BufferAccessFlags::HostWritable,
-						.m_isRawAccess = false,
-					};
-
-					auto pNewBuffer = std::move(this->CreateBuffer(bufferDesc));
-
-					std::unique_ptr<PipelineResourceSpace> pPipelineResourceSpace = std::make_unique<PipelineResourceSpace>();
-					pPipelineResourceSpace->SetCBV(pNewBuffer.release());
-					pPipelineResourceSpace->Lock();
-
-					pipelineResourceLayout.m_spaces[currVariable.spaceID] = pPipelineResourceSpace.release();
-
-					break;
-				}
-			}
-			
 		}
 
 		return o;

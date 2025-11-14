@@ -79,9 +79,7 @@ namespace ElysiaRenderer
 
 		std::shared_ptr<DX12UI> m_pUI = nullptr;
 		std::unique_ptr<DX12GraphicsContext> m_graphicsContext = nullptr;
-		std::vector<std::unique_ptr<DX12TextureResource>> m_texs{};
 		std::vector<std::unique_ptr<D3D12_SAMPLER_DESC>> m_samplers{};
-		std::unordered_map<UINT, std::unique_ptr<PipelineStateObject>> m_graphicsPipelineStates{};
 		std::vector<std::unique_ptr<BasePass>> m_passes{};
 
 		std::unique_ptr<CameraManager>	m_pCameraManager = nullptr;  
@@ -96,4 +94,4 @@ namespace ElysiaRenderer
 		void Execute();
 	};     
 }
-  
+      

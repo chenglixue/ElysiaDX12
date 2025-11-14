@@ -18,8 +18,6 @@ namespace ElysiaRenderer
 
 	void SkyboxPass::Configure()
 	{
-		AddShader(ShaderQueue::Skybox, L"Shaders\\public\\Skybox.hlsl", L"VS", ShaderType::Vertex);
-		AddShader(ShaderQueue::Skybox, L"Shaders\\public\\Skybox.hlsl", L"PS", ShaderType::Pixel);
 
 		CreatePSO();
 	}

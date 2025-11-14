@@ -38,12 +38,12 @@ PSInput BlitVS(UINT vertexID : SV_VertexID)
     return o;
 }
 
-void BlitPS(PSInput i, float4 target0 : SV_TARGET0)
+float4 BlitPS(PSInput i) : SV_TARGET
 {
     Texture2D blitterTex = ResourceDescriptorHeap[blitterTextureIndex];
     SamplerState linearSampler = SamplerDescriptorHeap[ClampLinearSampler];
     
     half4 blitterValue = blitterTex.SampleLevel(linearSampler, i.uv, 0);
     
-    target0 = blitterValue;
+    return blitterValue;
 }

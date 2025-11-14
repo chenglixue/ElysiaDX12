@@ -8,6 +8,7 @@ namespace ElysiaRenderer
 
 	RenderResource::RenderResource() :
 		m_perObjectBindResourceSpace(std::make_unique<PipelineResourceSpace>()),
+		m_perFrameBindResourceSpace(std::make_unique<PipelineResourceSpace>()),
 		m_pCBVFrameVariable(std::make_unique<CBVFrameVariable>())
 	{
 	}

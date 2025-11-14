@@ -1,7 +1,9 @@
 #if EDITOR
-#include <Blit.hlsl>
+#include <public\Blit.hlsl>
+#include <private\Color.hlsl>
 #else
 #include "Blit.hlsl"
+#include "../private\Color.hlsl"
 #endif
 
 cbuffer PassConstant : register(b0, perPassSpace)

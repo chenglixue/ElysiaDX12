@@ -7,13 +7,14 @@
 
 namespace ElysiaRenderer
 {
-	Shader::Shader(std::vector<ShaderPass>& shaderPasses) : 
+	Shader::Shader(std::vector<ShaderPass>& shaderPasses) :
+		m_shaderVariables(std::unordered_map<std::string, ShaderVariable>()),
+		m_constantVariableDescs(std::unordered_map<std::string, ShaderConstantVariableDesc>()),
 		m_passDatas(std::unordered_map<std::string, PassData>())
 	{
 		for (UINT passID = 0; passID < shaderPasses.size(); ++passID)
 		{
 			auto newPassData = PassData();
-			ZeroMemory(&newPassData, sizeof(PassData));
 
 			// set shader pass
 			newPassData.PassIndex = passID;
@@ -66,6 +67,7 @@ namespace ElysiaRenderer
 				}
 			}
 
+			newPassData.MeshResourceLayouts = std::make_unique<PipelineResourceLayout>();
 			// set bind resource for rootsignature
 			for (auto& shaderVariable : m_shaderVariables)
 			{
@@ -89,16 +91,18 @@ namespace ElysiaRenderer
 						pPipelineResourceSpace->SetCBV(pNewBuffer.release());
 						pPipelineResourceSpace->Lock();
 
-						auto pPipelineResourceLayout = std::make_unique<PipelineResourceLayout>();
-						pPipelineResourceLayout->m_spaces[currVariable.spaceID] = pPipelineResourceSpace.release();
-						newPassData.MeshResourceLayouts = std::move(pPipelineResourceLayout);
+						newPassData.MeshResourceLayouts->m_spaces[currVariable.spaceID] = pPipelineResourceSpace.release();
 
 						break;
 					}
 				}
 			}
 
-			m_passDatas[shaderPasses[passID].Name] = std::move(newPassData);
+			newPassData.BlendDesc = shaderPasses[passID].BlendDesc;
+			newPassData.RasterizerDesc = shaderPasses[passID].RasterizerDesc;
+			newPassData.DepthStencilDesc = shaderPasses[passID].DepthStencilDesc;
+
+			m_passDatas.insert({shaderPasses[passID].Name, std::move(newPassData)});
 		}
 
 	}
@@ -143,9 +147,9 @@ namespace ElysiaRenderer
 	}
 
 	template<typename T>
-	void Shader::SetConstantVariable(const std::string& name, T data)
+	void Shader::SetConstantVariable(const std::string name, T data)
 	{
-		auto desc = m_constantVariableDescs.at(name);
+		auto& desc = m_constantVariableDescs[name];
 		memcpy(desc.pData, &data, desc.Size);
 
 		for (auto& passData : m_passDatas)
@@ -158,7 +162,7 @@ namespace ElysiaRenderer
 	{
 		for (auto& constantVariableDesc : m_constantVariableDescs)
 		{
-			auto desc = constantVariableDesc.second;
+			auto& desc = constantVariableDesc.second;
 
 			for (auto& passData : m_passDatas)
 			{
@@ -175,12 +179,13 @@ namespace ElysiaRenderer
 		}
 	}
 
-	template void Shader::SetConstantVariable<UINT>(const std::string&, UINT);
-	template void Shader::SetConstantVariable<float>(const std::string&, float);
-	template void Shader::SetConstantVariable<Vector2>(const std::string&, Vector2);
-	template void Shader::SetConstantVariable<Vector3>(const std::string&, Vector3);
-	template void Shader::SetConstantVariable<Vector4>(const std::string&, Vector4);
-	template void Shader::SetConstantVariable<Matrix>(const std::string&, Matrix);
-	template void Shader::SetConstantVariable<bool>(const std::string&, bool);
-	template void Shader::SetConstantVariable<std::vector<Vector2>>(const std::string&, std::vector<Vector2>);
+	template void Shader::SetConstantVariable<UINT>(const std::string, UINT);
+	template void Shader::SetConstantVariable<int>(const std::string, int);
+	template void Shader::SetConstantVariable<float>(const std::string, float);
+	template void Shader::SetConstantVariable<Vector2>(const std::string, Vector2);
+	template void Shader::SetConstantVariable<Vector3>(const std::string, Vector3);
+	template void Shader::SetConstantVariable<Vector4>(const std::string, Vector4);
+	template void Shader::SetConstantVariable<Matrix>(const std::string, Matrix);
+	template void Shader::SetConstantVariable<bool>(const std::string, bool);
+	template void Shader::SetConstantVariable<std::vector<Vector2>>(const std::string, std::vector<Vector2>);
 }

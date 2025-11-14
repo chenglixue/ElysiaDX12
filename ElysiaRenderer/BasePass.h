@@ -34,7 +34,7 @@ namespace ElysiaRenderer
 		DX12Camera* m_pCamera = nullptr;
 
 		std::vector<ShaderPass> m_shaderPasses;
-		std::unique_ptr<ElysiaRenderer::RenderMaterial> m_pMaterial = nullptr;
+		std::unique_ptr<RenderMaterial> m_pMaterial = nullptr;
 		std::unordered_map<UINT, PipelineStateObject*> m_PipelineStateObjects;
 	};
 }

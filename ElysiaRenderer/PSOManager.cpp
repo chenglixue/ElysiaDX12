@@ -53,35 +53,31 @@ namespace ElysiaRenderer
 		auto resourceMapping = PipelineResourceMapping();
 		auto pDX12RootSignature = std::unique_ptr<DX12RootSignature>(GetDevice()->CreateRootSignature(*passData.MeshResourceLayouts, resourceMapping));
 
-		D3D12_GRAPHICS_PIPELINE_STATE_DESC PSODesc
+		D3D12_GRAPHICS_PIPELINE_STATE_DESC PSODesc{};
+		PSODesc.pRootSignature = pDX12RootSignature->GetSignature();
+		PSODesc.VS = D3D12_SHADER_BYTECODE
 		{
-			.pRootSignature = pDX12RootSignature->GetSignature(),
-			.VS = D3D12_SHADER_BYTECODE
-			{
-				.pShaderBytecode = passData.pVSShader->GetShader()->GetBufferPointer(),
-				.BytecodeLength = passData.pVSShader->GetShader()->GetBufferSize(),
-			},
-			.PS = D3D12_SHADER_BYTECODE
-			{
-				.pShaderBytecode = passData.pPSShader->GetShader()->GetBufferPointer(),
-				.BytecodeLength = passData.pPSShader->GetShader()->GetBufferSize(),
-			},
+			.pShaderBytecode = passData.pVSShader->GetShader()->GetBufferPointer(),
+			.BytecodeLength = passData.pVSShader->GetShader()->GetBufferSize(),
+		};
+		PSODesc.PS = D3D12_SHADER_BYTECODE
+		{
+			.pShaderBytecode = passData.pPSShader->GetShader()->GetBufferPointer(),
+			.BytecodeLength = passData.pPSShader->GetShader()->GetBufferSize(),
+		};
 
-			.BlendState = passData.BlendDesc,
-			.SampleMask = UINT_MAX,
-			.RasterizerState = passData.RasterizerDesc,
-			.DepthStencilState = passData.DepthStencilDesc,
-			.InputLayout = passData.pVSShader->GetInputElementDesc(),
-			.PrimitiveTopologyType = topology,
-			.NumRenderTargets = renderTargetDesc.m_numRenderTargets,
-			.DSVFormat = renderTargetDesc.m_depthStencilFormat,
-			.SampleDesc = DXGI_SAMPLE_DESC
-			{
-				.Count = 1,
-				.Quality = 0
-			},
-
-			
+		PSODesc.BlendState = passData.BlendDesc;
+		PSODesc.SampleMask = UINT_MAX;
+		PSODesc.RasterizerState = passData.RasterizerDesc;
+		PSODesc.DepthStencilState = passData.DepthStencilDesc;
+		PSODesc.InputLayout = passData.pVSShader->GetInputElementDesc();
+		PSODesc.PrimitiveTopologyType = topology;
+		PSODesc.NumRenderTargets = renderTargetDesc.m_numRenderTargets;
+		PSODesc.DSVFormat = renderTargetDesc.m_depthStencilFormat;
+		PSODesc.SampleDesc = DXGI_SAMPLE_DESC
+		{
+			.Count = 1,
+			.Quality = 0
 		};
 		for (UINT i = 0; i < renderTargetDesc.m_numRenderTargets; ++i)
 		{

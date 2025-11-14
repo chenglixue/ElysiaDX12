@@ -44,7 +44,7 @@ namespace ElysiaRenderer
 
 		RenderTargetDesc RTDesc = RenderTargetDesc
 		{
-			.m_renderTargetFormats = GetDevice()->GetCurrBackBuffer().GetResourceDesc().Format,
+			.m_renderTargetFormats = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
 			.m_numRenderTargets = 1,
 			.m_depthStencilFormat = GetBufferManager()->GetCameraDepthRT()->GetFormat()
 		};

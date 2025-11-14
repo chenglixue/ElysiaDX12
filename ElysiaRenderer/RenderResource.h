@@ -18,11 +18,16 @@ namespace ElysiaRenderer
 		{
 			return m_perObjectBindResourceSpace.get();
 		}
+		PipelineResourceSpace* GetPerFrameBindResourceSpace()
+		{
+			return m_perFrameBindResourceSpace.get();
+		}
 		CBVFrameVariable* GetCBVFrameVariable();
 
 	private:
 
 		std::unique_ptr<PipelineResourceSpace> m_perObjectBindResourceSpace;
+		std::unique_ptr<PipelineResourceSpace> m_perFrameBindResourceSpace;
 
 		DX12Device* m_device = nullptr;
 		std::unique_ptr<CBVFrameVariable> m_pCBVFrameVariable = nullptr;
