@@ -25,17 +25,21 @@ namespace ElysiaRenderer
 		return m_pShader->FindPassIndex(passName);
 	}
 
-	template<typename T>
-	void RenderMaterial::SetConstantVariable(const std::string name, T data)
+	void RenderMaterial::SetConstantVariable(const std::string& name, const void* data)
 	{
 		m_pShader->SetConstantVariable(name, data);
 	}
+	/*template<typename T>
+	void RenderMaterial::SetConstantVariable(const std::string name, T data)
+	{
+		m_pShader->SetConstantVariable(name, data);
+	}*/
 	void RenderMaterial::ApplyConstantData()
 	{
 		m_pShader->ApplyConstantData();
 	}
 
-	template void RenderMaterial::SetConstantVariable<UINT>(const std::string, UINT);
+	/*template void RenderMaterial::SetConstantVariable<UINT>(const std::string, UINT);
 	template void RenderMaterial::SetConstantVariable<int>(const std::string, int);
 	template void RenderMaterial::SetConstantVariable<float>(const std::string, float);
 	template void RenderMaterial::SetConstantVariable<Vector2>(const std::string, Vector2);
@@ -43,5 +47,5 @@ namespace ElysiaRenderer
 	template void RenderMaterial::SetConstantVariable<Vector4>(const std::string, Vector4);
 	template void RenderMaterial::SetConstantVariable<Matrix>(const std::string, Matrix);
 	template void RenderMaterial::SetConstantVariable<bool>(const std::string, bool);
-	template void RenderMaterial::SetConstantVariable<std::vector<Vector2>>(const std::string, std::vector<Vector2>);
+	template void RenderMaterial::SetConstantVariable<std::vector<Vector2>>(const std::string, std::vector<Vector2>);*/
 }

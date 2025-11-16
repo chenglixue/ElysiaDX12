@@ -990,7 +990,7 @@ namespace ElysiaRenderer
 								.SpaceID = spaceID,
 								.StartOffset = variableDesc.StartOffset,
 								.Size = variableDesc.Size,
-								.pData = new char[variableDesc.Size]
+								.pData = new uint8_t[variableDesc.Size]
 							};
 
 #ifdef DEBUG

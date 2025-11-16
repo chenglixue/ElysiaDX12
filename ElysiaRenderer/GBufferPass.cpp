@@ -38,7 +38,7 @@ namespace ElysiaRenderer
 			RenderTargetDesc RTDesc = RenderTargetDesc
 			{
 				.m_numRenderTargets = static_cast<UINT8>(m_GBufferRTs.size()),
-				.m_depthStencilFormat = GetBufferManager()->GetCameraDepthRT()->GetFormat()
+				.m_depthStencilFormat = GetBufferManager()->GetCameraDepthRT()->GetFormat(),
 			};
 			for (int i = 0; i < m_GBufferRTs.size(); ++i)
 			{
@@ -55,14 +55,22 @@ namespace ElysiaRenderer
 
 	void GBufferPass::Execute() 
 	{
-		m_pMaterial->SetConstantVariable("screenSize", GetScreenSize(Vector2(m_renderSize.x, m_renderSize.y)));
-		m_pMaterial->SetConstantVariable("viewMatrix", m_pCamera->GetViewMat());
-		m_pMaterial->SetConstantVariable("viewMatrix_I", m_pCamera->GetViewMat().Invert());
-		m_pMaterial->SetConstantVariable("projMatrix", m_pCamera->GetProjMat());
-		m_pMaterial->SetConstantVariable("projMatrix_I", m_pCamera->GetProjMat().Invert());
-		m_pMaterial->SetConstantVariable("viewProjMatrix", m_pCamera->GetViewMat() * m_pCamera->GetProjMat());
-		m_pMaterial->SetConstantVariable("viewProjMatrix_I", (m_pCamera->GetViewMat() * m_pCamera->GetProjMat()).Invert());
-		m_pMaterial->ApplyConstantData();
+		auto t1 = GetScreenSize(Vector2(m_renderSize.x, m_renderSize.y));
+		auto t2 = m_pCamera->GetViewMat();
+		auto t3 = m_pCamera->GetViewMat().Invert();
+		auto t4 = m_pCamera->GetProjMat();
+		auto t5 = m_pCamera->GetProjMat().Invert();
+		auto t6 = m_pCamera->GetViewMat() * m_pCamera->GetProjMat();
+		auto t7 = (m_pCamera->GetViewMat() * m_pCamera->GetProjMat()).Invert();
+
+		m_pMaterial->SetConstantVariable("screenSize", &t1);
+		m_pMaterial->SetConstantVariable("viewMatrix", &t2);
+		m_pMaterial->SetConstantVariable("viewMatrix_I", &t3);
+		m_pMaterial->SetConstantVariable("projMatrix", &t4);
+		m_pMaterial->SetConstantVariable("projMatrix_I", &t5);
+		m_pMaterial->SetConstantVariable("viewProjMatrix", &t6);
+		m_pMaterial->SetConstantVariable("viewProjMatrix_I", &t7);
+		//m_pMaterial->ApplyConstantData();
 	}
 
 	void GBufferPass::Render()
@@ -81,7 +89,7 @@ namespace ElysiaRenderer
 		}
 		m_pCommand->AddBarrier(*cameraDepthRT->GetTexture(), D3D12_RESOURCE_STATE_DEPTH_WRITE);
 		m_pCommand->FlushBarrier();
-		m_pCommand->ClearDepthStencilTarget(*cameraDepthRT, 1.f, 0);
+		m_pCommand->ClearDepthStencilTarget(*cameraDepthRT, 1.f, 0.f);
 
 		m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_renderSize));
@@ -124,26 +132,26 @@ namespace ElysiaRenderer
 				const auto& mesh = meshRenderer.m_mesh;
 
 				{
-					m_pMaterial->SetConstantVariable("worldMatrix", meshRenderer.m_CBVObjectParameter->worldMatrix);
-					m_pMaterial->ApplyConstantData();
+					m_pMaterial->SetConstantVariable("worldMatrix", &meshRenderer.m_CBVObjectParameter->worldMatrix);
+					//m_pMaterial->ApplyConstantData();
 				}
 
 				{
-					m_pMaterial->SetConstantVariable("opacity", meshRenderer.m_CBVObjectParameter->opacity);
-					m_pMaterial->SetConstantVariable("cutoff", meshRenderer.m_CBVObjectParameter->cutoff);
-					m_pMaterial->SetConstantVariable("baseColorTexIndex", meshRenderer.m_CBVObjectParameter->baseColorTexIndex);
-					m_pMaterial->SetConstantVariable("normalTexIndex", meshRenderer.m_CBVObjectParameter->normalTexIndex);
-					m_pMaterial->SetConstantVariable("metallicTexIndex", meshRenderer.m_CBVObjectParameter->metallicTexIndex);
-					m_pMaterial->SetConstantVariable("roughnessTexIndex", meshRenderer.m_CBVObjectParameter->roughnessTexIndex);
-					m_pMaterial->SetConstantVariable("specularTexIndex", meshRenderer.m_CBVObjectParameter->specularTexIndex);
-					m_pMaterial->SetConstantVariable("baseColorTint", meshRenderer.m_CBVObjectParameter->baseColorTint);
-					m_pMaterial->SetConstantVariable("ambientCubemapTint", meshRenderer.m_CBVObjectParameter->ambientCubemapTint);
-					m_pMaterial->SetConstantVariable("normalIntensity", meshRenderer.m_CBVObjectParameter->normalIntensity);
-					m_pMaterial->SetConstantVariable("metallicIntensity", meshRenderer.m_CBVObjectParameter->metallicIntensity);
-					m_pMaterial->SetConstantVariable("roughnessIntensity", meshRenderer.m_CBVObjectParameter->roughnessIntensity);
-					m_pMaterial->SetConstantVariable("ambientCubemapIntensity", meshRenderer.m_CBVObjectParameter->ambientCubemapIntensity);
-					m_pMaterial->SetConstantVariable("g_hasNormalTex", meshRenderer.m_CBVObjectParameter->hasNormalTex);
-					m_pMaterial->ApplyConstantData();
+					m_pMaterial->SetConstantVariable("opacity", &meshRenderer.m_CBVObjectParameter->opacity);
+					m_pMaterial->SetConstantVariable("cutoff", &meshRenderer.m_CBVObjectParameter->cutoff);
+					m_pMaterial->SetConstantVariable("baseColorTexIndex", &meshRenderer.m_CBVObjectParameter->baseColorTexIndex);
+					m_pMaterial->SetConstantVariable("normalTexIndex", &meshRenderer.m_CBVObjectParameter->normalTexIndex);
+					m_pMaterial->SetConstantVariable("metallicTexIndex", &meshRenderer.m_CBVObjectParameter->metallicTexIndex);
+					m_pMaterial->SetConstantVariable("roughnessTexIndex", &meshRenderer.m_CBVObjectParameter->roughnessTexIndex);
+					m_pMaterial->SetConstantVariable("specularTexIndex", &meshRenderer.m_CBVObjectParameter->specularTexIndex);
+					m_pMaterial->SetConstantVariable("baseColorTint", &meshRenderer.m_CBVObjectParameter->baseColorTint);
+					m_pMaterial->SetConstantVariable("ambientCubemapTint", &meshRenderer.m_CBVObjectParameter->ambientCubemapTint);
+					m_pMaterial->SetConstantVariable("normalIntensity", &meshRenderer.m_CBVObjectParameter->normalIntensity);
+					m_pMaterial->SetConstantVariable("metallicIntensity", &meshRenderer.m_CBVObjectParameter->metallicIntensity);
+					m_pMaterial->SetConstantVariable("roughnessIntensity", &meshRenderer.m_CBVObjectParameter->roughnessIntensity);
+					m_pMaterial->SetConstantVariable("ambientCubemapIntensity", &meshRenderer.m_CBVObjectParameter->ambientCubemapIntensity);
+					m_pMaterial->SetConstantVariable("g_hasNormalTex", &meshRenderer.m_CBVObjectParameter->hasNormalTex);
+					//m_pMaterial->ApplyConstantData();
 				}
 
 				m_pCommand->SetPipelineResource(PER_MATERIAL_SPACE, m_pMaterial->GetPassData(ShaderPasseIDs::GBufferPassID).MeshResourceLayouts->m_spaces[PER_MATERIAL_SPACE]);
@@ -154,7 +162,7 @@ namespace ElysiaRenderer
 				auto VertexCount = mesh->vertexCount;
 				auto indexCount = mesh->indexCount;
 
-				m_pCommand->Draw(indexCount, startVertex, static_cast<UINT>(startIndex));
+				m_pCommand->Draw(indexCount, startVertex, startIndex);
 			}
 		}
 

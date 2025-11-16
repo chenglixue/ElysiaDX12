@@ -15,8 +15,8 @@ namespace ElysiaHelper
         }
         UINT2(const Vector2& rhs)
         {
-            this->x = static_cast<UINT>(x);
-            this->y = static_cast<UINT>(y);
+            this->x = static_cast<UINT>(rhs.x);
+            this->y = static_cast<UINT>(rhs.y);
         }
         uint32_t x = 0;
         uint32_t y = 0;

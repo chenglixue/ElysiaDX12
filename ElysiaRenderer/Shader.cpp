@@ -146,23 +146,58 @@ namespace ElysiaRenderer
 		return -1;
 	}
 
-	template<typename T>
-	void Shader::SetConstantVariable(const std::string name, T data)
+	void Shader::SetConstantVariable(const std::string& name, const void* data)
 	{
+		std::lock_guard<std::mutex> lockGuard(m_setDataMutex);
+
 		auto& desc = m_constantVariableDescs[name];
-		memcpy(desc.pData, &data, desc.Size);
+		//assert(desc.pData != nullptr && data != nullptr && desc.Size > 0);
+		//memcpy(desc.pData, data, desc.Size);
+
+		/*for (auto& passData : m_passDatas)
+		{
+			passData.second.MeshResourceLayouts->m_spaces[desc.SpaceID]->GetCBV()->SetDirty(true);
+		}*/
+
+		for (auto& passData : m_passDatas)
+		{
+			auto meshResourceLayouts = passData.second.MeshResourceLayouts.get();
+			/*if (!(meshResourceLayouts->m_spaces[desc.SpaceID]->GetCBV()->GetIsDirty()))
+			{
+				break;
+			}*/
+
+			auto buffer = (meshResourceLayouts->m_spaces[desc.SpaceID]->GetCBV()->GetMappedBuffer());
+			buffer += desc.StartOffset;
+			assert(buffer != nullptr && data != nullptr && desc.Size > 0);
+			memcpy(buffer, data, desc.Size);
+		}
+	}
+
+	/*template<typename T>
+	void Shader::SetConstantVariable(const std::string& name, const T data)
+	{
+		std::lock_guard<std::mutex> lockGuard(m_setDataMutex);
+
+		auto& desc = m_constantVariableDescs[name];
+		const void* sourceData = &data;
+		assert(desc.pData != nullptr && sourceData != nullptr && desc.Size > 0);
+		memcpy(desc.pData, sourceData, desc.Size);
 
 		for (auto& passData : m_passDatas)
 		{
 			passData.second.MeshResourceLayouts->m_spaces[desc.SpaceID]->GetCBV()->SetDirty(true);
 		}
-	}
+	}*/
 
 	void Shader::ApplyConstantData()
 	{
+		std::lock_guard<std::mutex> lockGuard(m_setDataMutex);
+
 		for (auto& constantVariableDesc : m_constantVariableDescs)
 		{
 			auto& desc = constantVariableDesc.second;
+
 
 			for (auto& passData : m_passDatas)
 			{
@@ -172,20 +207,21 @@ namespace ElysiaRenderer
 					break;
 				}
 
-				auto buffer = reinterpret_cast<char*>(meshResourceLayouts->m_spaces[desc.SpaceID]->GetCBV()->GetMappedBuffer());
+				auto buffer = (meshResourceLayouts->m_spaces[desc.SpaceID]->GetCBV()->GetMappedBuffer());
 				buffer += desc.StartOffset;
+				assert(buffer != nullptr && desc.pData != nullptr && desc.Size > 0);
 				memcpy(buffer, desc.pData, desc.Size);
 			}
 		}
 	}
 
-	template void Shader::SetConstantVariable<UINT>(const std::string, UINT);
-	template void Shader::SetConstantVariable<int>(const std::string, int);
-	template void Shader::SetConstantVariable<float>(const std::string, float);
-	template void Shader::SetConstantVariable<Vector2>(const std::string, Vector2);
-	template void Shader::SetConstantVariable<Vector3>(const std::string, Vector3);
-	template void Shader::SetConstantVariable<Vector4>(const std::string, Vector4);
-	template void Shader::SetConstantVariable<Matrix>(const std::string, Matrix);
-	template void Shader::SetConstantVariable<bool>(const std::string, bool);
-	template void Shader::SetConstantVariable<std::vector<Vector2>>(const std::string, std::vector<Vector2>);
+	//template void Shader::SetConstantVariable<UINT>(const std::string&, const UINT);
+	//template void Shader::SetConstantVariable<int>(const std::string&, const int);
+	//template void Shader::SetConstantVariable<float>(const std::string&, const float);
+	//template void Shader::SetConstantVariable<Vector2>(const std::string&, const Vector2);
+	//template void Shader::SetConstantVariable<Vector3>(const std::string&, const Vector3);
+	//template void Shader::SetConstantVariable<Vector4>(const std::string&, const Vector4);
+	//template void Shader::SetConstantVariable<Matrix>(const std::string&, const Matrix);
+	//template void Shader::SetConstantVariable<bool>(const std::string&, const bool);
+	//template void Shader::SetConstantVariable<std::vector<Vector2>>(const std::string&, const std::vector<Vector2>);
 }

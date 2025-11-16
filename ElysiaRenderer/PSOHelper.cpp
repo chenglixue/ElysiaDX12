@@ -23,14 +23,17 @@ namespace ElysiaHelper
     {
         {
             D3D12_BLEND_DESC& blendDesc = BlendStateDescs[UINT64(BlendState::Disabled)];
-            blendDesc.RenderTarget[0].BlendEnable = false;
+            blendDesc.RenderTarget[0].BlendEnable = FALSE;
+            blendDesc.RenderTarget[0].LogicOpEnable = FALSE;
             blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
             blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
-            blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
-            blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ONE;
-            blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
-            blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
+            blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_ZERO;
+            blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
+            blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_ONE;
             blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
+            blendDesc.RenderTarget[0].LogicOp = D3D12_LOGIC_OP_NOOP;
+            blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+
         }
 
         {
@@ -115,7 +118,7 @@ namespace ElysiaHelper
         {
             D3D12_RASTERIZER_DESC& rastDesc = RasterizerStateDescs[UINT64(RasterizerState::BackFaceCull)];
             rastDesc.CullMode = D3D12_CULL_MODE_BACK;
-            rastDesc.DepthClipEnable = true;
+            rastDesc.DepthClipEnable = TRUE;
             rastDesc.FillMode = D3D12_FILL_MODE_SOLID;
             rastDesc.MultisampleEnable = true;
         }
@@ -176,10 +179,10 @@ namespace ElysiaHelper
         }
 
         {
-            D3D12_DEPTH_STENCIL_DESC& dsDesc = DepthStateDescs[UINT64(DepthState::WritesEnabled)];
+            D3D12_DEPTH_STENCIL_DESC& dsDesc = DepthStateDescs[UINT64(DepthState::ReversedWritesEnabled)];
             dsDesc.DepthEnable = true;
             dsDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
-            dsDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+            dsDesc.DepthFunc = D3D12_COMPARISON_FUNC_GREATER_EQUAL;
         }
     }
 

@@ -20,8 +20,9 @@ namespace ElysiaRenderer
 		const PassData& GetPassData(std::string passName) const noexcept;
 		UINT FindPassIndex(std::string passName) const noexcept;
 
-		template<typename T>
-		void SetConstantVariable(const std::string name, T data);
+		void SetConstantVariable(const std::string& name, const void* data);
+		/*template<typename T>
+		void SetConstantVariable(const std::string name, T data);*/
 		void ApplyConstantData();
 
 	private:

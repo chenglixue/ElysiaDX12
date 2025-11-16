@@ -54,6 +54,7 @@ namespace ElysiaRenderer
 		auto pDX12RootSignature = std::unique_ptr<DX12RootSignature>(GetDevice()->CreateRootSignature(*passData.MeshResourceLayouts, resourceMapping));
 
 		D3D12_GRAPHICS_PIPELINE_STATE_DESC PSODesc{};
+
 		PSODesc.pRootSignature = pDX12RootSignature->GetSignature();
 		PSODesc.VS = D3D12_SHADER_BYTECODE
 		{
@@ -67,22 +68,31 @@ namespace ElysiaRenderer
 		};
 
 		PSODesc.BlendState = passData.BlendDesc;
-		PSODesc.SampleMask = UINT_MAX;
 		PSODesc.RasterizerState = passData.RasterizerDesc;
 		PSODesc.DepthStencilState = passData.DepthStencilDesc;
+		PSODesc.SampleMask = UINT_MAX;
 		PSODesc.InputLayout = passData.pVSShader->GetInputElementDesc();
 		PSODesc.PrimitiveTopologyType = topology;
-		PSODesc.NumRenderTargets = renderTargetDesc.m_numRenderTargets;
-		PSODesc.DSVFormat = renderTargetDesc.m_depthStencilFormat;
 		PSODesc.SampleDesc = DXGI_SAMPLE_DESC
 		{
 			.Count = 1,
 			.Quality = 0
 		};
+		
+		auto desc = CreateDefaultRenderTargetDesc();
+		for (UINT i = 0; i < renderTargetDesc.m_numRenderTargets; ++i)
+		{
+			PSODesc.RTVFormats[i] = desc.m_renderTargetFormats[i];
+		}
+		PSODesc.NumRenderTargets = desc.m_numRenderTargets;
+		PSODesc.DSVFormat = desc.m_depthStencilFormat;
+
 		for (UINT i = 0; i < renderTargetDesc.m_numRenderTargets; ++i)
 		{
 			PSODesc.RTVFormats[i] = renderTargetDesc.m_renderTargetFormats[i];
 		}
+		PSODesc.DSVFormat = renderTargetDesc.m_depthStencilFormat;
+		PSODesc.NumRenderTargets = renderTargetDesc.m_numRenderTargets;
 
 		auto pipelineStateObject = GetGraphicsPipelineState(PSODesc, pDX12RootSignature.get());
 		if (pipelineStateObject != nullptr)

@@ -117,8 +117,8 @@ namespace ElysiaRenderer
 			if (isReady)
 			{
 				m_pCommand->SetPipeline(pipelineStateData);
-				m_pMaterial->SetConstantVariable<UINT>("blitterTextureIndex", GetBufferManager()->GetCameraColorRT()->GetTexture()->GetResourceHeapIndex());
-				m_pMaterial->ApplyConstantData();
+				m_pMaterial->SetConstantVariable("blitterTextureIndex", &GetBufferManager()->GetCameraColorRT()->GetTexture()->GetResourceHeapIndex());
+				//m_pMaterial->ApplyConstantData();
 				m_pCommand->SetPipelineResource(PER_OBJECT_SPACE, m_pMaterial->GetPassData(ShaderPasseIDs::BlitPassID).MeshResourceLayouts->m_spaces[PER_OBJECT_SPACE]);
 
 				m_pCommand->Draw(3, 0);
@@ -155,8 +155,8 @@ namespace ElysiaRenderer
 			if (isReady)
 			{
 				m_pCommand->SetPipeline(pipelineStateData);
-				m_pMaterial->SetConstantVariable<UINT>("blitterTextureIndex", m_pTempRT->GetTexture()->GetResourceHeapIndex());
-				m_pMaterial->ApplyConstantData();
+				m_pMaterial->SetConstantVariable("blitterTextureIndex", &m_pTempRT->GetTexture()->GetResourceHeapIndex());
+				//m_pMaterial->ApplyConstantData();
 				m_pCommand->SetPipelineResource(PER_OBJECT_SPACE, m_pMaterial->GetPassData(ShaderPasseIDs::BlitPassID).MeshResourceLayouts->m_spaces[PER_OBJECT_SPACE]);
 				//m_pCommand->SetPipelineResource(PER_PASS_SPACE, RenderResource::GetPerMainBindResourceSpace());
 

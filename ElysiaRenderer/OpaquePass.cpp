@@ -32,7 +32,7 @@ namespace ElysiaRenderer
 				.FilePath = L"Shaders\\public\\Opaque.hlsl",
 				.RasterizerDesc = GetRasterizerState(RasterizerState::NoCullNoMS),
 				.BlendDesc = GetBlendState(BlendState::Disabled),
-				.DepthStencilDesc = GetDepthState(DepthState::Disabled)
+				.DepthStencilDesc = GetDepthState(DepthState::Disabled) 
 			});
 		m_pMaterial = std::make_unique<RenderMaterial>(m_shaderPasses);
 		ShaderPasseIDs::OpaqueLightPassID = m_pMaterial->FindPassIndex("Opaque Light Pass");
@@ -55,16 +55,24 @@ namespace ElysiaRenderer
 
 	void OpaquePass::Execute()
 	{
-		m_pMaterial->SetConstantVariable<Vector4>("screenSize", GetScreenSize(Vector2(m_renderSize.x, m_renderSize.y)));
+		auto t1 = GetScreenSize(Vector2(m_renderSize.x, m_renderSize.y));
+		auto t2 = m_pCamera->GetViewMat();
+		auto t3 = m_pCamera->GetViewMat().Invert();
+		auto t4 = m_pCamera->GetProjMat();
+		auto t5 = m_pCamera->GetProjMat().Invert();
+		auto t6 = m_pCamera->GetViewMat() * m_pCamera->GetProjMat();
+		auto t7 = (m_pCamera->GetViewMat() * m_pCamera->GetProjMat()).Invert();
 
-		m_pMaterial->SetConstantVariable<Matrix>("viewMatrix", m_pCamera->GetViewMat());
-		m_pMaterial->SetConstantVariable<Matrix>("viewMatrix_I", m_pCamera->GetViewMat().Invert());
-		m_pMaterial->SetConstantVariable<Matrix>("projMatrix", m_pCamera->GetProjMat());
-		m_pMaterial->SetConstantVariable<Matrix>("projMatrix_I", m_pCamera->GetProjMat().Invert());
-		m_pMaterial->SetConstantVariable<Matrix>("viewProjMatrix", m_pCamera->GetViewMat() * m_pCamera->GetProjMat());
-		m_pMaterial->SetConstantVariable<Matrix>("viewProjMatrix_I", (m_pCamera->GetViewMat() * m_pCamera->GetProjMat()).Invert());
+		m_pMaterial->SetConstantVariable("screenSize", &t1);
 
-		m_pMaterial->ApplyConstantData();
+		m_pMaterial->SetConstantVariable("viewMatrix", &t2);
+		m_pMaterial->SetConstantVariable("viewMatrix_I", &t3);
+		m_pMaterial->SetConstantVariable("projMatrix", &t4);
+		m_pMaterial->SetConstantVariable("projMatrix_I", &t5);
+		m_pMaterial->SetConstantVariable("viewProjMatrix", &t6);
+		m_pMaterial->SetConstantVariable("viewProjMatrix_I", &t7);
+
+		//m_pMaterial->ApplyConstantData();
 	}
 	void OpaquePass::Render()
 	{
