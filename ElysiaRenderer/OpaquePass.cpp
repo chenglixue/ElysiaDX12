@@ -55,22 +55,13 @@ namespace ElysiaRenderer
 
 	void OpaquePass::Execute()
 	{
-		auto t1 = GetScreenSize(Vector2(m_renderSize.x, m_renderSize.y));
-		auto t2 = m_pCamera->GetViewMat();
-		auto t3 = m_pCamera->GetViewMat().Invert();
-		auto t4 = m_pCamera->GetProjMat();
-		auto t5 = m_pCamera->GetProjMat().Invert();
-		auto t6 = m_pCamera->GetViewMat() * m_pCamera->GetProjMat();
-		auto t7 = (m_pCamera->GetViewMat() * m_pCamera->GetProjMat()).Invert();
-
-		m_pMaterial->SetConstantVariable("screenSize", &t1);
-
-		m_pMaterial->SetConstantVariable("viewMatrix", &t2);
-		m_pMaterial->SetConstantVariable("viewMatrix_I", &t3);
-		m_pMaterial->SetConstantVariable("projMatrix", &t4);
-		m_pMaterial->SetConstantVariable("projMatrix_I", &t5);
-		m_pMaterial->SetConstantVariable("viewProjMatrix", &t6);
-		m_pMaterial->SetConstantVariable("viewProjMatrix_I", &t7);
+		m_pMaterial->SetConstantVariable("screenSize", GetScreenSize(Vector2(m_renderSize.x, m_renderSize.y)));
+		m_pMaterial->SetConstantVariable("viewMatrix", m_pCamera->GetViewMat());
+		m_pMaterial->SetConstantVariable("viewMatrix_I", m_pCamera->GetViewMat().Invert());
+		m_pMaterial->SetConstantVariable("projMatrix", m_pCamera->GetProjMat());
+		m_pMaterial->SetConstantVariable("projMatrix_I", m_pCamera->GetProjMat().Invert());
+		m_pMaterial->SetConstantVariable("viewProjMatrix", m_pCamera->GetViewMat() * m_pCamera->GetProjMat());
+		m_pMaterial->SetConstantVariable("viewProjMatrix_I", (m_pCamera->GetViewMat() * m_pCamera->GetProjMat()).Invert());
 
 		//m_pMaterial->ApplyConstantData();
 	}

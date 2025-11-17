@@ -151,38 +151,11 @@ namespace ElysiaRenderer
 		return -1;
 	}
 
-	void Shader::SetConstantVariable(const std::string& name, const void* data)
+	template<typename T>
+	void Shader::SetConstantVariable(const std::string& name, const T data, UINT passID)
 	{
 		std::lock_guard<std::mutex> lockGuard(m_setDataMutex);
-
-		auto itr = m_constantVariableDescs.equal_range(name);
-		auto desc = itr.first->second;
-		//assert(desc.pData != nullptr && data != nullptr && desc.Size > 0);
-		//memcpy(desc.pData, data, desc.Size);
-
-		/*for (auto& passData : m_passDatas)
-		{
-			passData.second.MeshResourceLayouts->m_spaces[desc.SpaceID]->GetCBV()->SetDirty(true);
-		}*/
-
-		for (auto& passData : m_passDatas)
-		{
-			auto meshResourceLayouts = passData.second.MeshResourceLayouts.get();
-			/*if (!(meshResourceLayouts->m_spaces[desc.SpaceID]->GetCBV()->GetIsDirty()))
-			{
-				break;
-			}*/
-
-			auto buffer = (meshResourceLayouts->m_spaces[desc.SpaceID]->GetCBV()->GetMappedBuffer());
-			buffer += desc.StartOffset;
-			assert(buffer != nullptr && data != nullptr && desc.Size > 0);
-			memcpy(buffer, data, desc.Size);
-		}
-	}
-
-	void Shader::SetConstantVariable(const std::string& name, const void* data, UINT passID)
-	{
-		std::lock_guard<std::mutex> lockGuard(m_setDataMutex);
+		const void* pData = &data;
 
 		auto itr = m_constantVariableDescs.equal_range(name);
 		for (auto currItr = itr.first; currItr != itr.second; ++currItr)
@@ -197,28 +170,12 @@ namespace ElysiaRenderer
 
 					auto buffer = (meshResourceLayouts->m_spaces[currItr->second.SpaceID]->GetCBV()->GetMappedBuffer());
 					buffer += currItr->second.StartOffset;
-					assert(buffer != nullptr && data != nullptr && currItr->second.Size > 0);
-					memcpy(buffer, data, currItr->second.Size);
+					assert(buffer != nullptr && pData != nullptr && currItr->second.Size > 0);
+					memcpy(buffer, pData, currItr->second.Size);
 				}
 			}
 		}
 	}
-
-	/*template<typename T>
-	void Shader::SetConstantVariable(const std::string& name, const T data)
-	{
-		std::lock_guard<std::mutex> lockGuard(m_setDataMutex);
-
-		auto& desc = m_constantVariableDescs[name];
-		const void* sourceData = &data;
-		assert(desc.pData != nullptr && sourceData != nullptr && desc.Size > 0);
-		memcpy(desc.pData, sourceData, desc.Size);
-
-		for (auto& passData : m_passDatas)
-		{
-			passData.second.MeshResourceLayouts->m_spaces[desc.SpaceID]->GetCBV()->SetDirty(true);
-		}
-	}*/
 
 	void Shader::ApplyConstantData()
 	{
@@ -245,13 +202,13 @@ namespace ElysiaRenderer
 		}
 	}
 
-	//template void Shader::SetConstantVariable<UINT>(const std::string&, const UINT);
-	//template void Shader::SetConstantVariable<int>(const std::string&, const int);
-	//template void Shader::SetConstantVariable<float>(const std::string&, const float);
-	//template void Shader::SetConstantVariable<Vector2>(const std::string&, const Vector2);
-	//template void Shader::SetConstantVariable<Vector3>(const std::string&, const Vector3);
-	//template void Shader::SetConstantVariable<Vector4>(const std::string&, const Vector4);
-	//template void Shader::SetConstantVariable<Matrix>(const std::string&, const Matrix);
-	//template void Shader::SetConstantVariable<bool>(const std::string&, const bool);
-	//template void Shader::SetConstantVariable<std::vector<Vector2>>(const std::string&, const std::vector<Vector2>);
+	template void Shader::SetConstantVariable<UINT>(const std::string&, const UINT, UINT);
+	template void Shader::SetConstantVariable<int>(const std::string&, const int, UINT);
+	template void Shader::SetConstantVariable<float>(const std::string&, const float, UINT);
+	template void Shader::SetConstantVariable<Vector2>(const std::string&, const Vector2, UINT);
+	template void Shader::SetConstantVariable<Vector3>(const std::string&, const Vector3, UINT);
+	template void Shader::SetConstantVariable<Vector4>(const std::string&, const Vector4, UINT);
+	template void Shader::SetConstantVariable<Matrix>(const std::string&, const Matrix, UINT);
+	template void Shader::SetConstantVariable<bool>(const std::string&, const bool, UINT);
+	template void Shader::SetConstantVariable<std::vector<Vector2>>(const std::string&, const std::vector<Vector2>, UINT);
 }
