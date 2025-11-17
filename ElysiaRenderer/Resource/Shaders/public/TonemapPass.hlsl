@@ -6,10 +6,6 @@
 #include "../private\Color.hlsl"
 #endif
 
-cbuffer PassConstant : register(b0, perPassSpace)
-{
-}
-
 struct PSOutput
 {
     float4 target0 : SV_TARGET0;
@@ -52,7 +48,8 @@ PSOutput PS(PSInput i)
     float3 tonemapColor = NeutralTonemap(linearColor.rgb);
     tonemapColor = GetLinearToSRGB(tonemapColor);
     
-    o.target0 = float4(tonemapColor, 1.f);
+    //o.target0 = float4(tonemapColor, 1.f);
+    o.target0 = blitterValue;
     
     return o;
 }

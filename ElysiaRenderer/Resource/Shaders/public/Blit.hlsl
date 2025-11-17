@@ -4,7 +4,7 @@
 #include "../private\SharedCommon.hlsli"
 #endif
 
-cbuffer PassConstant : register(b0, perObjectSpace)
+cbuffer PassConstant : register(b0, perPassSpace)
 {
     UINT blitterTextureIndex;
 }

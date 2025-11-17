@@ -3,7 +3,7 @@
 
 #include "DX12Device.h"
 #include "RenderTexture.h"
-
+#include "RenderResource.h"
 
 namespace ElysiaRenderer
 {
@@ -110,6 +110,7 @@ namespace ElysiaRenderer
 			m_pCommand->SetPipeline(pipelineStateData);
 
 			m_pCommand->SetPipelineResource(PER_PASS_SPACE, m_pMaterial->GetPassData(ShaderPasseIDs::OpaqueLightPassID).MeshResourceLayouts->m_spaces[PER_PASS_SPACE]);
+			m_pCommand->SetPipelineResource(PER_FRAME_SPACE, GetRenderResource()->GetPerFrameBindResourceSpace());
 
 			m_pCommand->Draw(3, 0);
 		}

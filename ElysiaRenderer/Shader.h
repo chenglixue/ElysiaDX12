@@ -17,14 +17,20 @@ namespace ElysiaRenderer
 		UINT FindPassIndex(std::string passName) const noexcept;
 
 		void SetConstantVariable(const std::string& name, const void* data);
-		/*template<typename T>
+		void SetConstantVariable(const std::string& name, const void* data, UINT passID);
+		/*template<typename T> 
 		void SetConstantVariable(const std::string& name, const T data);*/
-		void ApplyConstantData();
+		void ApplyConstantData(); 
+
+		const std::unordered_map<std::string, ShaderVariable>& GetShaderVariables() const noexcept
+		{
+			return m_shaderVariables;
+		}
 
 	private:
 		std::mutex m_setDataMutex;
 		std::unordered_map<std::string, ShaderVariable> m_shaderVariables;
-		std::unordered_map<std::string, ShaderConstantVariableDesc> m_constantVariableDescs;
+		std::unordered_multimap<std::string, ShaderConstantVariableDesc> m_constantVariableDescs;
 		std::unordered_map<std::string, PassData> m_passDatas;
 	};
 }

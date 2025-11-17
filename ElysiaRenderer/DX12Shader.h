@@ -2,6 +2,7 @@
 #include "MObject.h"
 #include "PipelineResourceUtility.h"
 #include "ShaderUtility.h"
+#include "BufferUtility.h"
 
 namespace ElysiaRenderer
 {
@@ -25,7 +26,7 @@ namespace ElysiaRenderer
 		const D3D12_INPUT_LAYOUT_DESC& GetInputElementDesc() const noexcept;
 
 		void SetConstantBufferVariable(const std::string name, const ShaderConstantVariableDesc&& desc);
-		const std::unordered_map<std::string, ShaderConstantVariableDesc>& GetConstantBufferVariables() const noexcept;
+		std::unordered_map<std::string, ShaderConstantVariableDesc>& GetConstantBufferVariables() noexcept;
 	private:
 		CComPtr<IDxcBlob> m_shader;
 		D3D12_INPUT_LAYOUT_DESC m_inputLayoutDesc;
@@ -44,5 +45,7 @@ namespace ElysiaRenderer
 		D3D12_BLEND_DESC			BlendDesc;
 		D3D12_DEPTH_STENCIL_DESC	DepthStencilDesc;
 		std::unique_ptr<PipelineResourceLayout> MeshResourceLayouts;
+		BufferCreationDesc			ObjectBufferDesc;
+		BufferCreationDesc			MaterialBufferDesc;
 	};
 }

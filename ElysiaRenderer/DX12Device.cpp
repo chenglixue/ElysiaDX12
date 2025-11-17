@@ -167,7 +167,7 @@ namespace ElysiaRenderer
 			m_RTVStagingDescriptorHeap = std::make_unique<DX12StagingDescriptorHeap>(m_device, D3D12_DESCRIPTOR_HEAP_TYPE_RTV,
 				NUM_RTV_STAGING_DESCRIPTORS);
 			m_SRVStagingDescriptorHeap = std::make_unique<DX12StagingDescriptorHeap>(m_device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
-				NUM_RTV_STAGING_DESCRIPTORS);
+				NUM_SRV_STAGING_DESCRIPTORS);
 			m_DSVStagingDescriptorHeap = std::make_unique<DX12StagingDescriptorHeap>(m_device, D3D12_DESCRIPTOR_HEAP_TYPE_DSV,
 				NUM_DSV_STAGING_DESCRIPTORS);
 

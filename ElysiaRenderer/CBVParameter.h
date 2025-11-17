@@ -12,7 +12,7 @@ namespace ElysiaRenderer
 		Shadow = 1
 	};
 
-	struct alignas(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT) CBVMainPassParameter
+	struct CBVMainPassParameter
 	{
 		Matrix		viewMatrix			= Matrix::Identity;	// 64
 		Matrix		viewMatrix_I		= Matrix::Identity;	// 64
@@ -27,7 +27,7 @@ namespace ElysiaRenderer
 		std::array<Vector2, 64> sobolSequence;
 	};
 
-	struct alignas(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT) CBVObjectParameter
+	struct CBVObjectParameter
 	{
 		Matrix	worldMatrix = Matrix::Identity;
 
@@ -52,7 +52,7 @@ namespace ElysiaRenderer
 		bool hasNormalTex = false;
 	};
 
-	struct alignas(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT) CBVFrameVariable
+	struct CBVFrameVariable
 	{
 		Vector4		cameraPosWS = Vector4::Zero;
 		LightData   lightData;

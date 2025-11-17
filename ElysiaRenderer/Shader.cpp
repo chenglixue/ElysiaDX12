@@ -9,7 +9,7 @@ namespace ElysiaRenderer
 {
 	Shader::Shader(std::vector<ShaderPass>& shaderPasses) :
 		m_shaderVariables(std::unordered_map<std::string, ShaderVariable>()),
-		m_constantVariableDescs(std::unordered_map<std::string, ShaderConstantVariableDesc>()),
+		m_constantVariableDescs(std::unordered_multimap<std::string, ShaderConstantVariableDesc>()),
 		m_passDatas(std::unordered_map<std::string, PassData>())
 	{
 		for (UINT passID = 0; passID < shaderPasses.size(); ++passID)
@@ -52,19 +52,13 @@ namespace ElysiaRenderer
 
 			for (auto& VSConstantVariableDesc : newPassData.pVSShader->GetConstantBufferVariables())
 			{
-				auto emplaceResult = m_constantVariableDescs.try_emplace(VSConstantVariableDesc.first);
-				if (emplaceResult.second)
-				{
-					emplaceResult.first->second = VSConstantVariableDesc.second;
-				}
+				VSConstantVariableDesc.second.PassID = passID;
+				m_constantVariableDescs.insert({ VSConstantVariableDesc.first, VSConstantVariableDesc.second});
 			}
 			for (auto& PSConstantVariableDesc : newPassData.pPSShader->GetConstantBufferVariables())
 			{
-				auto emplaceResult = m_constantVariableDescs.try_emplace(PSConstantVariableDesc.first);
-				if (emplaceResult.second)
-				{
-					emplaceResult.first->second = PSConstantVariableDesc.second;
-				}
+				PSConstantVariableDesc.second.PassID = passID;
+				m_constantVariableDescs.insert({ PSConstantVariableDesc.first, PSConstantVariableDesc.second });
 			}
 
 			newPassData.MeshResourceLayouts = std::make_unique<PipelineResourceLayout>();
@@ -85,13 +79,24 @@ namespace ElysiaRenderer
 							.m_isRawAccess = false,
 						};
 
-						auto pNewBuffer = std::move(GetDevice()->CreateBuffer(bufferDesc));
+						if (currVariable.spaceID == PER_OBJECT_SPACE)
+						{
+							newPassData.ObjectBufferDesc = bufferDesc;
+						}
+						else if (currVariable.spaceID == PER_MATERIAL_SPACE)
+						{
+							newPassData.MaterialBufferDesc = bufferDesc;
+						}
+						
+						{
+							auto pNewBuffer = std::move(GetDevice()->CreateBuffer(bufferDesc));
 
-						std::unique_ptr<PipelineResourceSpace> pPipelineResourceSpace = std::make_unique<PipelineResourceSpace>();
-						pPipelineResourceSpace->SetCBV(pNewBuffer.release());
-						pPipelineResourceSpace->Lock();
+							std::unique_ptr<PipelineResourceSpace> pPipelineResourceSpace = std::make_unique<PipelineResourceSpace>();
+							pPipelineResourceSpace->SetCBV(pNewBuffer.release());
+							pPipelineResourceSpace->Lock();
 
-						newPassData.MeshResourceLayouts->m_spaces[currVariable.spaceID] = pPipelineResourceSpace.release();
+							newPassData.MeshResourceLayouts->m_spaces[currVariable.spaceID] = pPipelineResourceSpace.release();
+						}
 
 						break;
 					}
@@ -150,7 +155,8 @@ namespace ElysiaRenderer
 	{
 		std::lock_guard<std::mutex> lockGuard(m_setDataMutex);
 
-		auto& desc = m_constantVariableDescs[name];
+		auto itr = m_constantVariableDescs.equal_range(name);
+		auto desc = itr.first->second;
 		//assert(desc.pData != nullptr && data != nullptr && desc.Size > 0);
 		//memcpy(desc.pData, data, desc.Size);
 
@@ -171,6 +177,30 @@ namespace ElysiaRenderer
 			buffer += desc.StartOffset;
 			assert(buffer != nullptr && data != nullptr && desc.Size > 0);
 			memcpy(buffer, data, desc.Size);
+		}
+	}
+
+	void Shader::SetConstantVariable(const std::string& name, const void* data, UINT passID)
+	{
+		std::lock_guard<std::mutex> lockGuard(m_setDataMutex);
+
+		auto itr = m_constantVariableDescs.equal_range(name);
+		for (auto currItr = itr.first; currItr != itr.second; ++currItr)
+		{
+			if (currItr->second.PassID == passID)
+			{
+				for (auto& passData : m_passDatas)
+				{
+					if (passData.second.PassIndex != passID) continue;
+
+					auto meshResourceLayouts = passData.second.MeshResourceLayouts.get();
+
+					auto buffer = (meshResourceLayouts->m_spaces[currItr->second.SpaceID]->GetCBV()->GetMappedBuffer());
+					buffer += currItr->second.StartOffset;
+					assert(buffer != nullptr && data != nullptr && currItr->second.Size > 0);
+					memcpy(buffer, data, currItr->second.Size);
+				}
+			}
 		}
 	}
 

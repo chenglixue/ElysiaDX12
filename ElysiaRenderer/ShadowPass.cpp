@@ -27,15 +27,13 @@ namespace ElysiaRenderer
 		m_pMainLight = GetLightManager()->GetMainLight();
 		CreateMainShadow(1000, DXGI_FORMAT_D24_UNORM_S8_UINT);
 		GetRenderResource()->GetCBVFrameVariable()->ShadowTexIndex = m_pShadowRT->GetTexture()->GetResourceHeapIndex();
-		 
+		
 		m_shaderPasses = std::vector<ShaderPass>
 		{ 
 			ShaderPass
 			{
 				.Name = "Shadow Cast Pass",
 				.FilePath = L"Shaders\\public\\Shadow.hlsl",
-				.VertexEntryPoint = L"VS",
-				.FragmentEntryPoint = L"PS",
 				.RasterizerDesc = GetRasterizerState(RasterizerState::BackFaceCull),
 				.BlendDesc = GetBlendState(BlendState::Disabled),
 				.DepthStencilDesc = GetDepthState(DepthState::WritesEnabled)
@@ -43,6 +41,22 @@ namespace ElysiaRenderer
 		};
 		m_pMaterial = std::move(std::make_unique<RenderMaterial>(m_shaderPasses));
 		ShaderPasseIDs::ShadowCastPassID = m_pMaterial->FindPassIndex("Shadow Cast Pass");
+
+		for (UINT meshIndex = 0; meshIndex < GetModelImporter()->GetMeshCount(); ++meshIndex)
+		{
+			auto& meshRenderer = GetModelImporter()->GetMeshRenderer(meshIndex);
+
+			for (UINT frameIndex = 0; frameIndex < NUM_FRAMES_IN_FLIGHT; ++frameIndex)
+			{
+				auto objectBufferDesc = m_pMaterial->GetPassData(ShaderPasseIDs::ShadowCastPassID).ObjectBufferDesc;
+				meshRenderer.m_objectBuffers[0] = std::move(GetDevice()->CreateBuffer(objectBufferDesc));
+				meshRenderer.m_objectBuffers[1] = std::move(GetDevice()->CreateBuffer(objectBufferDesc));
+
+				auto materialBufferDesc = m_pMaterial->GetPassData(ShaderPasseIDs::ShadowCastPassID).MaterialBufferDesc;
+				meshRenderer.m_materialBuffers[0] = std::move(GetDevice()->CreateBuffer(materialBufferDesc));
+				meshRenderer.m_materialBuffers[1] = std::move(GetDevice()->CreateBuffer(materialBufferDesc));
+			}
+		}
 
 		{
 			RenderTargetDesc RTDesc = CreateDefaultRenderTargetDesc();
@@ -54,7 +68,6 @@ namespace ElysiaRenderer
 				emplaceResult.first->second = GetPSOManager()->GetGraphicsPipelineState(m_pMaterial.get(), ShaderPasseIDs::ShadowCastPassID, RTDesc);
 			}
 		}
-
 	}
 	void ShadowPass::Execute()
 	{
@@ -63,9 +76,9 @@ namespace ElysiaRenderer
 		GetRenderResource()->GetCBVFrameVariable()->shadowMatrix = m_pMainShadow->GetShadowMat();
 		GetRenderResource()->GetCBVFrameVariable()->shadowSize = GetScreenSize(Vector2(m_pMainShadow->GetWidth(), m_pMainShadow->GetHeight()));
 
-		auto t1 = UserData::GetInstance().shadowDepthBias /= 100;
-		auto t2 = UserData::GetInstance().shadowSlopeDepthBias /= 100;
-		auto t3 = UserData::GetInstance().shadowMaxSlopeDepthBias /= 100;
+		auto t1 = UserData::GetInstance().shadowDepthBias / 100;
+		auto t2 = UserData::GetInstance().shadowSlopeDepthBias / 100;
+		auto t3 = UserData::GetInstance().shadowMaxSlopeDepthBias / 100;
 
 		m_pMaterial->SetConstantVariable("shadowNearZ", &m_pMainShadow->GetNearZ());
 		m_pMaterial->SetConstantVariable("shadowFarZ", &m_pMainShadow->GetFarZ());
@@ -122,12 +135,32 @@ namespace ElysiaRenderer
 				const auto& mesh = meshRenderer.m_mesh;
 
 				{
-					m_pMaterial->SetConstantVariable("worldMatrix", &meshRenderer.m_CBVObjectParameter->worldMatrix);
+					std::unique_ptr<PipelineResourceSpace> pPipelineResourceSpace = std::make_unique<PipelineResourceSpace>();
+					pPipelineResourceSpace->SetCBV(meshRenderer.m_objectBuffers[GetDevice()->GetFrameID()].get());
+					pPipelineResourceSpace->Lock();
+					if (m_pMaterial->GetPassData(ShaderPasseIDs::ShadowCastPassID).MeshResourceLayouts->m_spaces[PER_OBJECT_SPACE] != nullptr)
+					{
+						delete m_pMaterial->GetPassData(ShaderPasseIDs::ShadowCastPassID).MeshResourceLayouts->m_spaces[PER_OBJECT_SPACE];
+						m_pMaterial->GetPassData(ShaderPasseIDs::ShadowCastPassID).MeshResourceLayouts->m_spaces[PER_OBJECT_SPACE] = nullptr;
+					}
+					m_pMaterial->GetPassData(ShaderPasseIDs::ShadowCastPassID).MeshResourceLayouts->m_spaces[PER_OBJECT_SPACE] = pPipelineResourceSpace.release();
+					m_pMaterial->SetConstantVariable("worldMatrix", &meshRenderer.m_CBVObjectParameter->worldMatrix, ShaderPasseIDs::ShadowCastPassID);
 					//m_pMaterial->ApplyConstantData();
 					m_pCommand->SetPipelineResource(PER_OBJECT_SPACE, m_pMaterial->GetPassData(ShaderPasseIDs::ShadowCastPassID).MeshResourceLayouts->m_spaces[PER_OBJECT_SPACE]);
 				}
 
 				{
+					std::unique_ptr<PipelineResourceSpace> pPipelineResourceSpace = std::make_unique<PipelineResourceSpace>();
+					pPipelineResourceSpace->SetCBV(meshRenderer.m_materialBuffers[GetDevice()->GetFrameID()].get());
+					pPipelineResourceSpace->Lock();
+					if (m_pMaterial->GetPassData(ShaderPasseIDs::ShadowCastPassID).MeshResourceLayouts->m_spaces[PER_MATERIAL_SPACE] != nullptr)
+					{
+						delete m_pMaterial->GetPassData(ShaderPasseIDs::ShadowCastPassID).MeshResourceLayouts->m_spaces[PER_MATERIAL_SPACE];
+						m_pMaterial->GetPassData(ShaderPasseIDs::ShadowCastPassID).MeshResourceLayouts->m_spaces[PER_MATERIAL_SPACE] = nullptr;
+					}
+					m_pMaterial->GetPassData(ShaderPasseIDs::ShadowCastPassID).MeshResourceLayouts->m_spaces[PER_MATERIAL_SPACE] = pPipelineResourceSpace.release();
+
+
 					m_pMaterial->SetConstantVariable("baseColorTexIndex", &meshRenderer.m_CBVObjectParameter->baseColorTexIndex);
 					m_pMaterial->SetConstantVariable("opacity", &meshRenderer.m_CBVObjectParameter->opacity);
 					m_pMaterial->SetConstantVariable("cutoff", &meshRenderer.m_CBVObjectParameter->cutoff);

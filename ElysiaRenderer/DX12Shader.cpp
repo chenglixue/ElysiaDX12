@@ -62,7 +62,7 @@ namespace ElysiaRenderer
 	{
 		m_constantBufferVariables[name] = desc;
 	}
-	const std::unordered_map<std::string, ShaderConstantVariableDesc>& DX12Shader::GetConstantBufferVariables() const noexcept
+	std::unordered_map<std::string, ShaderConstantVariableDesc>& DX12Shader::GetConstantBufferVariables() noexcept
 	{
 		return m_constantBufferVariables;
 	}

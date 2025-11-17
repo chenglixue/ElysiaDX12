@@ -55,9 +55,10 @@ namespace ElysiaRenderer
 			pData = nullptr;*/
 		}
 
-		UINT					SpaceID = 0;
-		UINT                    StartOffset;    // Offset in constant buffer's backing store
-		UINT                    Size;           // Size of variable (in bytes)
+		UINT		PassID = 0;
+		UINT		SpaceID = 0;
+		UINT        StartOffset;    // Offset in constant buffer's backing store
+		UINT        Size;           // Size of variable (in bytes)
 		uint8_t*	pData = nullptr;
 	};
 

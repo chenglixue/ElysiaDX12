@@ -1,5 +1,6 @@
 #pragma once
 #include "stdafx.h"
+//#include "DX12BufferResource.h"
 
 namespace ElysiaRenderer
 {
@@ -8,6 +9,7 @@ namespace ElysiaRenderer
 
 	struct Mesh;
 	struct CBVObjectParameter;
+	class DX12BufferResource;
 
 	struct MeshRender
 	{
@@ -15,5 +17,7 @@ namespace ElysiaRenderer
 		Mesh*	m_mesh			= nullptr;
 
 		std::unique_ptr<CBVObjectParameter> m_CBVObjectParameter = nullptr;
+		std::array<std::unique_ptr<DX12BufferResource>, 2> m_objectBuffers{};
+		std::array< std::unique_ptr<DX12BufferResource>, 2> m_materialBuffers{};
 	};
 }

@@ -29,6 +29,10 @@ namespace ElysiaRenderer
 	{
 		m_pShader->SetConstantVariable(name, data);
 	}
+	void RenderMaterial::SetConstantVariable(const std::string& name, const void* data, UINT passID)
+	{
+		m_pShader->SetConstantVariable(name, data, passID);
+	}
 	/*template<typename T>
 	void RenderMaterial::SetConstantVariable(const std::string name, T data)
 	{

@@ -31,7 +31,7 @@ namespace ElysiaModel
 
 		const AxisAlignedBox& GetBoundingBox() const noexcept;
 
-		const MeshRender& GetMeshRenderer(UINT meshRendererIndex) const;
+		MeshRender& GetMeshRenderer(UINT meshRendererIndex) const;
 
 		bool Load(const LPCWSTR& fileName);
 		bool Load(const std::vector<LPCWSTR>& fileNames);

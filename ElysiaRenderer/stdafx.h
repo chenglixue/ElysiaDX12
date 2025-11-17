@@ -21,6 +21,7 @@
 #include <pix3.h>
 #include <unordered_set>
 #include <set>
+#include <map>
 #include "DirectXMath.h"
 #include <random>
 #include <iostream>

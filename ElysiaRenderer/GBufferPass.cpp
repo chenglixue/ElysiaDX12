@@ -34,6 +34,22 @@ namespace ElysiaRenderer
 		m_pMaterial = std::move(std::make_unique<RenderMaterial>(m_shaderPasses));
 		ShaderPasseIDs::GBufferPassID = m_pMaterial->FindPassIndex("GBuffer Pass");
 
+		for (UINT meshIndex = 0; meshIndex < GetModelImporter()->GetMeshCount(); ++meshIndex)
+		{
+			auto& meshRenderer = GetModelImporter()->GetMeshRenderer(meshIndex);
+
+			for (UINT frameIndex = 0; frameIndex < NUM_FRAMES_IN_FLIGHT; ++frameIndex)
+			{
+				auto objectBufferDesc = m_pMaterial->GetPassData(ShaderPasseIDs::GBufferPassID).ObjectBufferDesc;
+				meshRenderer.m_objectBuffers[0] = std::move(GetDevice()->CreateBuffer(objectBufferDesc));
+				meshRenderer.m_objectBuffers[1] = std::move(GetDevice()->CreateBuffer(objectBufferDesc));
+
+				auto materialBufferDesc = m_pMaterial->GetPassData(ShaderPasseIDs::GBufferPassID).MaterialBufferDesc;
+				meshRenderer.m_materialBuffers[0] = std::move(GetDevice()->CreateBuffer(materialBufferDesc));
+				meshRenderer.m_materialBuffers[1] = std::move(GetDevice()->CreateBuffer(materialBufferDesc));
+			}
+		}
+
 		{
 			RenderTargetDesc RTDesc = RenderTargetDesc
 			{
@@ -51,6 +67,8 @@ namespace ElysiaRenderer
 				emplaceResult.first->second = GetPSOManager()->GetGraphicsPipelineState(m_pMaterial.get(), ShaderPasseIDs::GBufferPassID, RTDesc);
 			}
 		}
+
+		
 	}
 
 	void GBufferPass::Execute() 
@@ -89,7 +107,7 @@ namespace ElysiaRenderer
 		}
 		m_pCommand->AddBarrier(*cameraDepthRT->GetTexture(), D3D12_RESOURCE_STATE_DEPTH_WRITE);
 		m_pCommand->FlushBarrier();
-		m_pCommand->ClearDepthStencilTarget(*cameraDepthRT, 1.f, 0.f);
+		m_pCommand->ClearDepthStencilTarget(*cameraDepthRT, 1.f, 0);
 
 		m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_renderSize));
@@ -128,29 +146,50 @@ namespace ElysiaRenderer
 
 			for (UINT meshIndex = 0; meshIndex < GetModelImporter()->GetMeshCount(); ++meshIndex)
 			{
-				const auto& meshRenderer = GetModelImporter()->GetMeshRenderer(meshIndex);
+				auto& meshRenderer = GetModelImporter()->GetMeshRenderer(meshIndex);
 				const auto& mesh = meshRenderer.m_mesh;
 
 				{
+					std::unique_ptr<PipelineResourceSpace> pPipelineResourceSpace = std::make_unique<PipelineResourceSpace>();
+					pPipelineResourceSpace->SetCBV(meshRenderer.m_objectBuffers[GetDevice()->GetFrameID()].get());
+					pPipelineResourceSpace->Lock();
+					if (m_pMaterial->GetPassData(ShaderPasseIDs::GBufferPassID).MeshResourceLayouts->m_spaces[PER_OBJECT_SPACE] != nullptr)
+					{
+						delete m_pMaterial->GetPassData(ShaderPasseIDs::GBufferPassID).MeshResourceLayouts->m_spaces[PER_OBJECT_SPACE];
+						m_pMaterial->GetPassData(ShaderPasseIDs::GBufferPassID).MeshResourceLayouts->m_spaces[PER_OBJECT_SPACE] = nullptr;
+					}
+					m_pMaterial->GetPassData(ShaderPasseIDs::GBufferPassID).MeshResourceLayouts->m_spaces[PER_OBJECT_SPACE] = pPipelineResourceSpace.release();
 					m_pMaterial->SetConstantVariable("worldMatrix", &meshRenderer.m_CBVObjectParameter->worldMatrix);
 					//m_pMaterial->ApplyConstantData();
 				}
 
 				{
-					m_pMaterial->SetConstantVariable("opacity", &meshRenderer.m_CBVObjectParameter->opacity);
-					m_pMaterial->SetConstantVariable("cutoff", &meshRenderer.m_CBVObjectParameter->cutoff);
+					auto& pUserData = UserData::GetInstance();
+
+					std::unique_ptr<PipelineResourceSpace> pPipelineResourceSpace = std::make_unique<PipelineResourceSpace>();
+					pPipelineResourceSpace->SetCBV(meshRenderer.m_objectBuffers[GetDevice()->GetFrameID()].get());
+					pPipelineResourceSpace->Lock();
+					if (m_pMaterial->GetPassData(ShaderPasseIDs::GBufferPassID).MeshResourceLayouts->m_spaces[PER_MATERIAL_SPACE] != nullptr)
+					{
+						delete m_pMaterial->GetPassData(ShaderPasseIDs::GBufferPassID).MeshResourceLayouts->m_spaces[PER_MATERIAL_SPACE];
+					}
+					m_pMaterial->GetPassData(ShaderPasseIDs::GBufferPassID).MeshResourceLayouts->m_spaces[PER_MATERIAL_SPACE] = pPipelineResourceSpace.release();
+
+					m_pMaterial->SetConstantVariable("opacity", &pUserData.Opacity);
+					m_pMaterial->SetConstantVariable("cutoff", &pUserData.Cutoff);
 					m_pMaterial->SetConstantVariable("baseColorTexIndex", &meshRenderer.m_CBVObjectParameter->baseColorTexIndex);
 					m_pMaterial->SetConstantVariable("normalTexIndex", &meshRenderer.m_CBVObjectParameter->normalTexIndex);
 					m_pMaterial->SetConstantVariable("metallicTexIndex", &meshRenderer.m_CBVObjectParameter->metallicTexIndex);
 					m_pMaterial->SetConstantVariable("roughnessTexIndex", &meshRenderer.m_CBVObjectParameter->roughnessTexIndex);
 					m_pMaterial->SetConstantVariable("specularTexIndex", &meshRenderer.m_CBVObjectParameter->specularTexIndex);
-					m_pMaterial->SetConstantVariable("baseColorTint", &meshRenderer.m_CBVObjectParameter->baseColorTint);
-					m_pMaterial->SetConstantVariable("ambientCubemapTint", &meshRenderer.m_CBVObjectParameter->ambientCubemapTint);
-					m_pMaterial->SetConstantVariable("normalIntensity", &meshRenderer.m_CBVObjectParameter->normalIntensity);
-					m_pMaterial->SetConstantVariable("metallicIntensity", &meshRenderer.m_CBVObjectParameter->metallicIntensity);
-					m_pMaterial->SetConstantVariable("roughnessIntensity", &meshRenderer.m_CBVObjectParameter->roughnessIntensity);
-					m_pMaterial->SetConstantVariable("ambientCubemapIntensity", &meshRenderer.m_CBVObjectParameter->ambientCubemapIntensity);
-					m_pMaterial->SetConstantVariable("g_hasNormalTex", &meshRenderer.m_CBVObjectParameter->hasNormalTex);
+
+					m_pMaterial->SetConstantVariable("baseColorTint", &pUserData.BaseColorTint);
+					m_pMaterial->SetConstantVariable("ambientCubemapTint", &pUserData.AmbientCubemapTint);
+					m_pMaterial->SetConstantVariable("normalIntensity", &pUserData.NormalIntensity);
+					m_pMaterial->SetConstantVariable("metallicIntensity", &pUserData.MetallicIntensity);
+					m_pMaterial->SetConstantVariable("roughnessIntensity", &pUserData.RoughnessIntensity);
+					m_pMaterial->SetConstantVariable("ambientCubemapIntensity", &pUserData.AmbientCubemapIntensity);
+					m_pMaterial->SetConstantVariable("g_hasNormalTex", &g_pModelImporter->GetMaterial(meshRenderer.m_mesh->materialIndex).hasNormal);
 					//m_pMaterial->ApplyConstantData();
 				}
 
@@ -266,5 +305,7 @@ namespace ElysiaRenderer
 		GetRenderResource()->GetCBVFrameVariable()->GBuffer4Index = m_GBufferRTs[GBufferIndex++]->GetTexture()->GetResourceHeapIndex();
 		GetRenderResource()->GetCBVFrameVariable()->GBuffer5Index = m_GBufferRTs[GBufferIndex++]->GetTexture()->GetResourceHeapIndex();
 		GetRenderResource()->GetCBVFrameVariable()->OpaqueDepthIndex = GetBufferManager()->GetCameraDepthRT()->GetTexture()->GetResourceHeapIndex();
+
+
 	}
 }

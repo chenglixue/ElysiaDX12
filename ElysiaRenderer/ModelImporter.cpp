@@ -62,7 +62,7 @@ namespace ElysiaModel
 		return m_meshData.boundingBox;
 	}
 
-	const MeshRender& ModelImporter::GetMeshRenderer(UINT meshRendererIndex) const
+	MeshRender& ModelImporter::GetMeshRenderer(UINT meshRendererIndex) const
 	{
 		assert(meshRendererIndex < m_meshData.meshCount);
 
@@ -833,6 +833,7 @@ namespace ElysiaModel
 			pCurrMeshRender->m_CBVObjectParameter->normalTexIndex = m_pMaterial[meshIndex].normalTexIndex;
 			pCurrMeshRender->m_CBVObjectParameter->metallicTexIndex = m_pMaterial[meshIndex].metallicTexIndex;
 			pCurrMeshRender->m_CBVObjectParameter->roughnessTexIndex = m_pMaterial[meshIndex].roughnessTexIndex;
+
 			//pCurrMeshRender->m_CBVObjectParameter->vertexIndex = m_pBufferManager->GetVertexBuffer()->GetResourceHeapIndex();
 		}
 	}
