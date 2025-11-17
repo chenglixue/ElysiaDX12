@@ -17,7 +17,7 @@ namespace ElysiaRenderer
 		Mesh*	m_mesh			= nullptr;
 
 		std::unique_ptr<CBVObjectParameter> m_CBVObjectParameter = nullptr;
-		std::array<std::unique_ptr<DX12BufferResource>, 2> m_objectBuffers{};
-		std::array< std::unique_ptr<DX12BufferResource>, 2> m_materialBuffers{};
+		std::array<std::unique_ptr<DX12BufferResource>, NUM_FRAMES_IN_FLIGHT> m_objectBuffers{};
+		std::array< std::unique_ptr<DX12BufferResource>, NUM_FRAMES_IN_FLIGHT> m_materialBuffers{};
 	};
 }

@@ -49,12 +49,10 @@ namespace ElysiaRenderer
 			for (UINT frameIndex = 0; frameIndex < NUM_FRAMES_IN_FLIGHT; ++frameIndex)
 			{
 				auto objectBufferDesc = m_pMaterial->GetPassData(ShaderPasseIDs::ShadowCastPassID).ObjectBufferDesc;
-				meshRenderer.m_objectBuffers[0] = std::move(GetDevice()->CreateBuffer(objectBufferDesc));
-				meshRenderer.m_objectBuffers[1] = std::move(GetDevice()->CreateBuffer(objectBufferDesc));
+				meshRenderer.m_objectBuffers[frameIndex] = std::move(GetDevice()->CreateBuffer(objectBufferDesc));
 
 				auto materialBufferDesc = m_pMaterial->GetPassData(ShaderPasseIDs::ShadowCastPassID).MaterialBufferDesc;
-				meshRenderer.m_materialBuffers[0] = std::move(GetDevice()->CreateBuffer(materialBufferDesc));
-				meshRenderer.m_materialBuffers[1] = std::move(GetDevice()->CreateBuffer(materialBufferDesc));
+				meshRenderer.m_materialBuffers[frameIndex] = std::move(GetDevice()->CreateBuffer(materialBufferDesc));
 			}
 		}
 
@@ -72,7 +70,7 @@ namespace ElysiaRenderer
 	void ShadowPass::Execute()
 	{
 		m_pMainShadow->UpdateShadowTransform(m_pMainLight);
-		GetRenderResource()->GetCBVFrameVariable()->ShadowTexIndex = m_pShadowRT->GetFormat();
+		GetRenderResource()->GetCBVFrameVariable()->ShadowTexIndex = m_pShadowRT->GetTexture()->GetResourceHeapIndex();
 		GetRenderResource()->GetCBVFrameVariable()->shadowMatrix = m_pMainShadow->GetShadowMat();
 		GetRenderResource()->GetCBVFrameVariable()->shadowSize = GetScreenSize(Vector2(m_pMainShadow->GetWidth(), m_pMainShadow->GetHeight()));
 
@@ -86,8 +84,8 @@ namespace ElysiaRenderer
 		m_pMaterial->SetConstantVariable("shadowSlopeDepthBias", &t2);
 		m_pMaterial->SetConstantVariable("shadowMaxSlopeDepthBias", &t3);
 
-		auto sobolSequence = Create2DSobolSqeuence(64);
-		m_pMaterial->SetConstantVariable("g_sobolSequence", &sobolSequence);
+		/*auto sobolSequence = Create2DSobolSqeuence(64);
+		m_pMaterial->SetConstantVariable("g_sobolSequence", &sobolSequence);*/
 
 		//m_pMaterial->ApplyConstantData();
 	}
