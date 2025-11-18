@@ -248,6 +248,7 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="TextureManager.h" />
     <ClInclude Include="TonemapPass.h" />
+    <ClInclude Include="TonemapUtility.h" />
     <ClInclude Include="Transform.h" />
     <ClInclude Include="UIPass.h" />
     <ClInclude Include="UserData.h" />

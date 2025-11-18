@@ -364,6 +364,9 @@
     <ClInclude Include="D3D12MemoryAllocator\D3D12MemAlloc.h">
       <Filter>Header Files\Lib</Filter>
     </ClInclude>
+    <ClInclude Include="TonemapUtility.h">
+      <Filter>Header Files\Utility</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -722,9 +725,6 @@
     <ClCompile Include="PSOManager.cpp">
       <Filter>Source Files\Manager</Filter>
     </ClCompile>
-    <ClCompile Include="xxhash.cpp">
-      <Filter>Header Files\Utility</Filter>
-    </ClCompile>
     <ClCompile Include="BasePass.cpp">
       <Filter>Source Files\Render\Pass</Filter>
     </ClCompile>
@@ -754,6 +754,9 @@
     </ClCompile>
     <ClCompile Include="D3D12MemoryAllocator\D3D12MemAlloc.cpp">
       <Filter>Source Files\Lib</Filter>
+    </ClCompile>
+    <ClCompile Include="xxhash.cpp">
+      <Filter>Source Files\Utility</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
