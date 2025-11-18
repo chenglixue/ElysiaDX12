@@ -51,6 +51,9 @@ namespace ElysiaRenderer
 		float shadowSlopeDepthBias = 0;
 		float shadowMaxSlopeDepthBias = 0;
 
+		bool IsUseHDR = true;
+		
+
 	private:
 		static std::unique_ptr<UserData> m_instance;
 		static std::once_flag m_initInstanceFlag;

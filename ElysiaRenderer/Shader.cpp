@@ -170,10 +170,6 @@ namespace ElysiaRenderer
 
 					auto meshResourceLayouts = passData.second.MeshResourceLayouts.get();
 					currItr->second.IsDirty = true;
-					/*auto buffer = (meshResourceLayouts->m_spaces[currItr->second.SpaceID]->GetCBV()->GetMappedBuffer());
-					buffer += currItr->second.StartOffset;
-					assert(buffer != nullptr && currItr->second.pData.data() != nullptr && currItr->second.Size > 0);
-					memcpy(buffer, currItr->second.pData.data(), currItr->second.Size);*/
 				}
 			}
 		}

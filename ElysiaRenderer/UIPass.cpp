@@ -89,5 +89,11 @@ namespace ElysiaRenderer
 			ImGui::SliderFloat("Ambient Cubemap Intensity", &pUserData.AmbientCubemapIntensity, 0.f, 2.f);
 			ImGui::ColorEdit3("Ambient Cubemap Tint", (float*)&pUserData.AmbientCubemapTint);
 		}
+
+		if (ImGui::CollapsingHeader("HDR"))
+		{
+			ImGui::Checkbox("Is Enable HDR", &pUserData.IsUseHDR);
+
+		}
 	}
 }
