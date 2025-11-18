@@ -47,11 +47,6 @@ namespace ElysiaRenderer
 	{
 		return m_mappedBuffer;
 	}
-	bool DX12BufferResource::GetIsDirty() const noexcept
-	{
-		return m_isDirty;
-	}
-
 
 	void DX12BufferResource::SetStride(float stride)
 	{
@@ -73,9 +68,5 @@ namespace ElysiaRenderer
 	{
 		assert(m_mappedBuffer != nullptr && bufferData != nullptr && bufferSize > 0 && bufferSize <= m_resourceDesc.Width);
 		memcpy_s(m_mappedBuffer, m_resourceDesc.Width, bufferData, bufferSize);
-	}
-	void DX12BufferResource::SetDirty(bool isDirty)
-	{
-		m_isDirty = isDirty;
 	}
 }

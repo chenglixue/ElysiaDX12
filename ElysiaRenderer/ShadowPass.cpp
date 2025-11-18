@@ -83,7 +83,7 @@ namespace ElysiaRenderer
 		/*auto sobolSequence = Create2DSobolSqeuence(64);
 		m_pMaterial->SetConstantVariable("g_sobolSequence", &sobolSequence);*/
 
-		//m_pMaterial->ApplyConstantData();
+		m_pMaterial->ApplyConstantData();
 	}
 	void ShadowPass::Render()
 	{
@@ -139,7 +139,7 @@ namespace ElysiaRenderer
 					}
 					m_pMaterial->GetPassData(ShaderPasseIDs::ShadowCastPassID).MeshResourceLayouts->m_spaces[PER_OBJECT_SPACE] = pPipelineResourceSpace.release();
 					m_pMaterial->SetConstantVariable("worldMatrix", meshRenderer.m_CBVObjectParameter->worldMatrix);
-					//m_pMaterial->ApplyConstantData();
+					m_pMaterial->ApplyConstantData();
 					m_pCommand->SetPipelineResource(PER_OBJECT_SPACE, m_pMaterial->GetPassData(ShaderPasseIDs::ShadowCastPassID).MeshResourceLayouts->m_spaces[PER_OBJECT_SPACE]);
 				}
 
@@ -157,7 +157,7 @@ namespace ElysiaRenderer
 					m_pMaterial->SetConstantVariable("baseColorTexIndex", meshRenderer.m_CBVObjectParameter->baseColorTexIndex);
 					m_pMaterial->SetConstantVariable("opacity", meshRenderer.m_CBVObjectParameter->opacity);
 					m_pMaterial->SetConstantVariable("cutoff", meshRenderer.m_CBVObjectParameter->cutoff);
-					//m_pMaterial->ApplyConstantData();
+					m_pMaterial->ApplyConstantData();
 					m_pCommand->SetPipelineResource(PER_MATERIAL_SPACE, m_pMaterial->GetPassData(ShaderPasseIDs::ShadowCastPassID).MeshResourceLayouts->m_spaces[PER_MATERIAL_SPACE]);
 				}
 

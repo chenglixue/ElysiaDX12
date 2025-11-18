@@ -76,7 +76,7 @@ namespace ElysiaRenderer
 		m_pMaterial->SetConstantVariable("projMatrix_I", m_pCamera->GetProjMat().Invert());
 		m_pMaterial->SetConstantVariable("viewProjMatrix", m_pCamera->GetViewMat() * m_pCamera->GetProjMat());
 		m_pMaterial->SetConstantVariable("viewProjMatrix_I", (m_pCamera->GetViewMat() * m_pCamera->GetProjMat()).Invert());
-		//m_pMaterial->ApplyConstantData();
+		m_pMaterial->ApplyConstantData();
 	}
 
 	void GBufferPass::Render()
@@ -149,7 +149,7 @@ namespace ElysiaRenderer
 					m_pMaterial->GetPassData(ShaderPasseIDs::GBufferPassID).MeshResourceLayouts->m_spaces[PER_OBJECT_SPACE] = pPipelineResourceSpace.release();
 
 					m_pMaterial->SetConstantVariable("worldMatrix", meshRenderer.m_CBVObjectParameter->worldMatrix);
-					//m_pMaterial->ApplyConstantData();
+					m_pMaterial->ApplyConstantData();
 				}
 
 				{
@@ -179,7 +179,7 @@ namespace ElysiaRenderer
 					m_pMaterial->SetConstantVariable("roughnessIntensity", pUserData.RoughnessIntensity);
 					m_pMaterial->SetConstantVariable("ambientCubemapIntensity", pUserData.AmbientCubemapIntensity);
 					m_pMaterial->SetConstantVariable("g_hasNormalTex", g_pModelImporter->GetMaterial(meshRenderer.m_mesh->materialIndex).hasNormal);
-					//m_pMaterial->ApplyConstantData();
+					m_pMaterial->ApplyConstantData();
 				}
 
 				m_pCommand->SetPipelineResource(PER_MATERIAL_SPACE, m_pMaterial->GetPassData(ShaderPasseIDs::GBufferPassID).MeshResourceLayouts->m_spaces[PER_MATERIAL_SPACE]);

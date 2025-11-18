@@ -118,7 +118,7 @@ namespace ElysiaRenderer
 			{
 				m_pCommand->SetPipeline(pipelineStateData);
 				m_pMaterial->SetConstantVariable("blitterTextureIndex", GetBufferManager()->GetCameraColorRT()->GetTexture()->GetResourceHeapIndex(), ShaderPasseIDs::BlitPassID);
-				//m_pMaterial->ApplyConstantData();
+				m_pMaterial->ApplyConstantData();
 				m_pCommand->SetPipelineResource(PER_PASS_SPACE, m_pMaterial->GetPassData(ShaderPasseIDs::BlitPassID).MeshResourceLayouts->m_spaces[PER_PASS_SPACE]);
 
 				m_pCommand->Draw(3, 0);
@@ -156,7 +156,7 @@ namespace ElysiaRenderer
 			{
 				m_pCommand->SetPipeline(pipelineStateData);
 				m_pMaterial->SetConstantVariable("blitterTextureIndex", m_pTempRT->GetTexture()->GetResourceHeapIndex(), ShaderPasseIDs::TonemapPassID);
-				//m_pMaterial->ApplyConstantData();
+				m_pMaterial->ApplyConstantData();
 				m_pCommand->SetPipelineResource(PER_PASS_SPACE, m_pMaterial->GetPassData(ShaderPasseIDs::TonemapPassID).MeshResourceLayouts->m_spaces[PER_PASS_SPACE]);
 
 				m_pCommand->Draw(3, 0);

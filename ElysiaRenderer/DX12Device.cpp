@@ -985,20 +985,19 @@ namespace ElysiaRenderer
 							D3D12_SHADER_VARIABLE_DESC variableDesc{};
 							memberVariable->GetDesc(&variableDesc);
 
-							ShaderConstantVariableDesc constantVariableDesc
-							{
-								.SpaceID = spaceID,
-								.StartOffset = variableDesc.StartOffset,
-								.Size = variableDesc.Size,
-								.pData = new uint8_t[variableDesc.Size]
-							};
+							ShaderConstantVariableDesc constantVariableDesc{};
+							constantVariableDesc.SpaceID = spaceID;
+							constantVariableDesc.StartOffset = variableDesc.StartOffset;
+							constantVariableDesc.Size = variableDesc.Size;
+							//constantVariableDesc.pData = new char[constantVariableDesc.Size];
+							constantVariableDesc.pData = std::vector<char>(constantVariableDesc.Size);
 
 #ifdef DEBUG
 							std::cout << "Constant variable name is " << variableDesc.Name << std::endl;
 							std::cout << "Space ID is " << constantVariableDesc.SpaceID << std::endl;
 							std::cout << "Start Offset is " << constantVariableDesc.StartOffset << std::endl;
 							std::cout << "Size is " << constantVariableDesc.Size << std::endl;
-							std::cout << "Address is " << constantVariableDesc.pData << std::endl;
+							std::cout << "Address is " << constantVariableDesc.pData.data() << std::endl;
 							std::cout << std::endl;
 #endif // DEBUG
 

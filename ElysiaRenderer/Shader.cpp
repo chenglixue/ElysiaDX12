@@ -155,23 +155,25 @@ namespace ElysiaRenderer
 	void Shader::SetConstantVariable(const std::string& name, const T data, UINT passID)
 	{
 		std::lock_guard<std::mutex> lockGuard(m_setDataMutex);
-		const void* pData = &data;
+		const void* pSourceData = &data;
 
 		auto itr = m_constantVariableDescs.equal_range(name);
 		for (auto currItr = itr.first; currItr != itr.second; ++currItr)
 		{
 			if (currItr->second.PassID == passID)
 			{
+				memcpy(currItr->second.pData.data(), pSourceData, currItr->second.Size);
+
 				for (auto& passData : m_passDatas)
 				{
 					if (passData.second.PassIndex != passID) continue;
 
 					auto meshResourceLayouts = passData.second.MeshResourceLayouts.get();
-
-					auto buffer = (meshResourceLayouts->m_spaces[currItr->second.SpaceID]->GetCBV()->GetMappedBuffer());
+					currItr->second.IsDirty = true;
+					/*auto buffer = (meshResourceLayouts->m_spaces[currItr->second.SpaceID]->GetCBV()->GetMappedBuffer());
 					buffer += currItr->second.StartOffset;
-					assert(buffer != nullptr && pData != nullptr && currItr->second.Size > 0);
-					memcpy(buffer, pData, currItr->second.Size);
+					assert(buffer != nullptr && currItr->second.pData.data() != nullptr && currItr->second.Size > 0);
+					memcpy(buffer, currItr->second.pData.data(), currItr->second.Size);*/
 				}
 			}
 		}
@@ -185,20 +187,20 @@ namespace ElysiaRenderer
 		{
 			auto& desc = constantVariableDesc.second;
 
-
 			for (auto& passData : m_passDatas)
 			{
-				auto meshResourceLayouts = passData.second.MeshResourceLayouts.get();
-				if(!(meshResourceLayouts->m_spaces[desc.SpaceID]->GetCBV()->GetIsDirty()))
-				{
-					break;
-				}
+				if (passData.second.PassIndex != desc.PassID) continue;
+				if (!desc.IsDirty) continue;
 
-				auto buffer = (meshResourceLayouts->m_spaces[desc.SpaceID]->GetCBV()->GetMappedBuffer());
+				auto meshResourceLayouts = passData.second.MeshResourceLayouts.get();
+
+				auto buffer = meshResourceLayouts->m_spaces[desc.SpaceID]->GetCBV()->GetMappedBuffer();
 				buffer += desc.StartOffset;
-				assert(buffer != nullptr && desc.pData != nullptr && desc.Size > 0);
-				memcpy(buffer, desc.pData, desc.Size);
+				assert(buffer != nullptr && desc.pData.data() != nullptr && desc.Size > 0);
+				memcpy(buffer, desc.pData.data(), desc.Size);
+
 			}
+			desc.IsDirty = true;
 		}
 	}
 

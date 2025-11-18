@@ -63,7 +63,7 @@ namespace ElysiaRenderer
 		m_pMaterial->SetConstantVariable("viewProjMatrix", m_pCamera->GetViewMat() * m_pCamera->GetProjMat());
 		m_pMaterial->SetConstantVariable("viewProjMatrix_I", (m_pCamera->GetViewMat() * m_pCamera->GetProjMat()).Invert());
 
-		//m_pMaterial->ApplyConstantData();
+		m_pMaterial->ApplyConstantData();
 	}
 	void OpaquePass::Render()
 	{

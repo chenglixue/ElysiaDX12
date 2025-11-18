@@ -169,9 +169,6 @@
     <ClInclude Include="DXTex\BCDirectCompute.h">
       <Filter>Header Files\Lib</Filter>
     </ClInclude>
-    <ClInclude Include="D3D12MemoryAllocator\D3D12MemAlloc.h">
-      <Filter>Header Files\Lib</Filter>
-    </ClInclude>
     <ClInclude Include="dxc\inc\d3d12shader.h">
       <Filter>Header Files\Lib</Filter>
     </ClInclude>
@@ -363,6 +360,9 @@
     </ClInclude>
     <ClInclude Include="UIPass.h">
       <Filter>Header Files\Render\Pass</Filter>
+    </ClInclude>
+    <ClInclude Include="D3D12MemoryAllocator\D3D12MemAlloc.h">
+      <Filter>Header Files\Lib</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -590,9 +590,6 @@
     <ClCompile Include="DXTex\BCDirectCompute.cpp">
       <Filter>Source Files\Lib</Filter>
     </ClCompile>
-    <ClCompile Include="D3D12MemoryAllocator\D3D12MemAlloc.cpp">
-      <Filter>Source Files\Lib</Filter>
-    </ClCompile>
     <ClCompile Include="DXTex\DirectXTexCompress.cpp">
       <Filter>Source Files\Lib</Filter>
     </ClCompile>
@@ -754,6 +751,9 @@
     </ClCompile>
     <ClCompile Include="PipelineStateUtility.cpp">
       <Filter>Source Files\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="D3D12MemoryAllocator\D3D12MemAlloc.cpp">
+      <Filter>Source Files\Lib</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
