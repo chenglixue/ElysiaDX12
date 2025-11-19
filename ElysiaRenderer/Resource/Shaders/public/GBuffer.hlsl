@@ -142,6 +142,7 @@ FEncodeGBufferData GetEncodeGBufferData(FInputParams inputParams, float3 toLight
     Texture2D<float4> baseColorTex = ResourceDescriptorHeap[baseColorTexIndex];
     float4 baseColor = baseColorTex.Sample(warpLinearSampler, inputParams.objectUV)
             * float4(baseColorTint, opacity);
+    baseColor.rgb = AMDTonemapInvert(baseColor);
     //clip(baseColor.a - cutoff);
 
     Texture2D<float4> normalTex = ResourceDescriptorHeap[normalTexIndex];
@@ -176,7 +177,6 @@ FEncodeGBufferData GetEncodeGBufferData(FInputParams inputParams, float3 toLight
     o.DiffuseColor = o.BaseColor - o.BaseColor * o.Metallic;
     o.SpecularColor = ComputeF0(o.Specular, o.BaseColor, o.Metallic);
     o.IBL = GetIBL(inputParams, o, toLight, ambientCubemapIntensity, ambientCubemapTint);
-
  
     return o;
 }

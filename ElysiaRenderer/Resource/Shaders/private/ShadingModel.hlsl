@@ -103,7 +103,7 @@ FDirectLighting DefaultLitBxDF(MaterialData materialData, float3 N, float3 V, fl
     
     FBxDFEnergyTerms energyTerm = ComputeFresnelEnergyTerms(GGXEnergyLookup(materialData.Roughness, NoV), materialData.SpecularColor);
      
-    Lighting.Diffuse *= ComputeEnergyPreservation(energyTerm);
+    Lighting.Diffuse += ComputeEnergyPreservation(energyTerm);
     Lighting.Specular *= ComputeEnergyConservation(energyTerm);
 
     return Lighting;
@@ -134,7 +134,7 @@ FDirectLighting DefaultLitBxDF(FDecodeGBufferData GBufferData, float3 N, float3 
     FBxDFEnergyTerms energyTerm = ComputeFresnelEnergyTerms(GGXEnergyLookup(GBufferData.Roughness, NoV), GBufferData.SpecularColor);
      
     //Lighting.Diffuse *= ComputeEnergyPreservation(energyTerm);
-    //Lighting.Specular *= ComputeEnergyConservation(energyTerm);
+    Lighting.Specular *= ComputeEnergyConservation(energyTerm);
 
     return Lighting;
 }

@@ -11,7 +11,7 @@ void LightAccumulator_AddSplit(inout FLightAccumulator In, float3 DiffuseTotalLi
     In.TotalLight += (DiffuseTotalLight + SpecularTotalLight) * CommonMultiplier;
     In.TotalLightDiffuse += DiffuseTotalLight * CommonMultiplier;
     In.TotalLightSpecular += SpecularTotalLight * CommonMultiplier;
-}
+} 
 
 void LightAccumulator_Add(inout FLightAccumulator In, float3 TotalLight, float3 ScatterableLight, float3 CommonMultiplier, const bool bNeedsSeparateSubsurfaceLightAccumulation)
 {

@@ -1,6 +1,7 @@
 #pragma once
 #include "Serialization.h"
 #include "ShadowUtility.h"
+#include "TonemapUtility.h"
 
 namespace ElysiaRenderer
 {
@@ -52,7 +53,8 @@ namespace ElysiaRenderer
 		float shadowMaxSlopeDepthBias = 0;
 
 		bool IsUseHDR = true;
-		
+		HDRQuality HDRLevel = HDRQuality::High; 
+		TonemapMode tonemapMode = TonemapMode::None;
 
 	private:
 		static std::unique_ptr<UserData> m_instance;

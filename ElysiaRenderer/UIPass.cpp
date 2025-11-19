@@ -58,14 +58,13 @@ namespace ElysiaRenderer
 		{
 			ImGui::ColorEdit3("Color", (float*)&pUserData.lightColor);
 			ImGui::DragFloat3("Direction", (float*)&pUserData.lightDir, 1, -1, 1);
-			ImGui::SliderFloat("Intensity", &pUserData.lightIntensity, 0, 100);
+			ImGui::SliderFloat("Intensity", &pUserData.lightIntensity, 0, 10);
 
 			int shadowTypeIndex = (int)pUserData.shadowType;
 			ImGui::Combo("Shadow Type", &shadowTypeIndex,
 				StringViewToChar(magic_enum::enum_names<ShadowType>().data(), magic_enum::enum_count<ShadowType>()).data(),
 				(int)magic_enum::enum_count<ShadowType>());
 			pUserData.shadowType = (ShadowType)shadowTypeIndex;
-
 
 			int shadowQualityIndex = (int)pUserData.shadowQuality;
 			ImGui::Combo("Shadow Quality", &shadowQualityIndex,
@@ -94,6 +93,15 @@ namespace ElysiaRenderer
 		{
 			ImGui::Checkbox("Is Enable HDR", &pUserData.IsUseHDR);
 
+			int HDRQualityIndex = (int)pUserData.HDRLevel;
+			ImGui::Combo("HDR Quality", &HDRQualityIndex,
+				StringViewToChar(magic_enum::enum_names<HDRQuality>().data(), magic_enum::enum_count<HDRQuality>()).data(), (int)magic_enum::enum_count<HDRQuality>());
+			pUserData.HDRLevel = (HDRQuality)HDRQualityIndex;
+
+			int tonemapModeIndex = (int)pUserData.tonemapMode;
+			ImGui::Combo("Tonemap Mode", &tonemapModeIndex,
+				StringViewToChar(magic_enum::enum_names<TonemapMode>().data(), magic_enum::enum_count<TonemapMode>()).data(), (int)magic_enum::enum_count<TonemapMode>());
+			pUserData.tonemapMode = (TonemapMode)tonemapModeIndex;
 		}
 	}
 }

@@ -25,10 +25,41 @@ namespace ElysiaRenderer
 
 	void TonemapPass::Configure()
 	{
-		m_pTempRT = CreateRenderTexture(static_cast<UINT64>(m_renderSize.x),
-			static_cast<UINT64>(m_renderSize.y),
-			DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
-			L"Temp RT");
+		if (!UserData::GetInstance().IsUseHDR)
+		{
+			m_pTempRT = CreateRenderTexture(static_cast<UINT64>(m_renderSize.x),
+				static_cast<UINT64>(m_renderSize.y),
+				DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
+				L"Temp RT");
+		}
+		else
+		{
+			switch (UserData::GetInstance().HDRLevel)
+			{
+				case HDRQuality::Low:
+				{
+					m_pTempRT = CreateRenderTexture(static_cast<UINT64>(m_renderSize.x),
+						static_cast<UINT64>(m_renderSize.y),
+						DXGI_FORMAT_R11G11B10_FLOAT,
+						L"Temp RT");
+					break;
+				}
+				case HDRQuality::High:
+				{
+					m_pTempRT = CreateRenderTexture(static_cast<UINT64>(m_renderSize.x),
+						static_cast<UINT64>(m_renderSize.y),
+						DXGI_FORMAT_R16G16B16A16_FLOAT,
+						L"Temp RT");
+					break;
+				}
+				default:
+				{
+					ThrowRuntimeError("Invalid choose");
+					break;
+				}
+			}
+		}
+		
 
 		m_shaderPasses = std::vector<ShaderPass>
 		{

@@ -271,4 +271,6 @@ float3 ComputeWorldSpacePosition(float2 screenUV, float rawDepth, Matrix invView
     float4 positionWS = mul(positionCS, invViewProjMatrix);
     return positionWS.xyz / positionWS.w;
 }
+
+
 #endif

@@ -103,5 +103,28 @@ float3 NeutralTonemap(float3 x)
     return x;
 }
 
+float Max3(float x, float y, float z)
+{
+    return max(x, max(y, z));
+}
+
+float3 TonemapWithWeight(float3 c, float w)
+{
+    return c * (w * rcp(Max3(c.r, c.g, c.b) + 1.0));
+}
+
+float3 TonemapInvert(float3 c)
+{
+    return c * rcp(1.0 - Max3(c.r, c.g, c.b));
+}
+ 
+float3 AMDTonemapInvert(float3 c)
+{
+    return TonemapInvert(TonemapWithWeight(c, 0.25) +
+      TonemapWithWeight(c, 0.25) +
+      TonemapWithWeight(c, 0.25) +
+      TonemapWithWeight(c, 0.25));
+}
+
 
 #endif

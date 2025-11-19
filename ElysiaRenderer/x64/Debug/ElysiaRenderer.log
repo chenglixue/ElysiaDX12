@@ -1,35 +1,9 @@
 ﻿  Skipping vcpkg. (no packages)
 cl : command line  warning D9014: invalid value '18' for '/wd'; assuming '5999'
-  BasePass.cpp
+  TonemapPass.cpp
 D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file '/BasePass.cpp')
+  (compiling source file '/TonemapPass.cpp')
   
-  DX12BufferResource.cpp
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file '/DX12BufferResource.cpp')
-  
-  DX12Context.cpp
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file '/DX12Context.cpp')
-  
-  RenderMaterial.cpp
-  Shader.cpp
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file '/Shader.cpp')
-  
-  UIPass.cpp
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file '/UIPass.cpp')
-  
-  Generating Code...
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Shader.cpp(139): warning C4172: returning address of local variable or temporary
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Shader.cpp(127): warning C4172: returning address of local variable or temporary
-cl : command line  warning D9014: invalid value '18' for '/wd'; assuming '5999'
-  main.cpp
-D:\DX12\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file 'main.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\main.cpp(292): warning C4715: 'WndProc': not all control paths return a value
   ElysiaRenderer.vcxproj -> D:\DX12\ElysiaRenderer\x64\Debug\ElysiaRenderer.exe
   D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Mesh\diablo3_pose.obj
   D:\DX12\ElysiaRenderer\ElysiaRenderer\Resource\Mesh\LOW_WEPON.fbx

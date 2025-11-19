@@ -8,6 +8,7 @@
 #include "BRDF.hlsl"
 #include "Random.hlsl"
 #include "LightAccumulator.hlsl"
+#include "Color.hlsl"
 
 #define IBLNumSamples 12
 
@@ -257,6 +258,7 @@ float3 GetIBL(FInputParams inputParams, FEncodeGBufferData GBufferData, float3 t
     
     //NonSpecularContribution += DiffuseIBL(Random, materialData.DiffuseColor, materialData.Roughness, N, KD);
     NonSpecularContribution += DiffuseIBLMul(Random, GBufferData.DiffuseColor, GBufferData.Roughness, N, V);
+    NonSpecularContribution = AMDTonemapInvert(NonSpecularContribution);
     SpecularContribution += ApproximateSpecularIBL(Random, GBufferData.SpecularColor, GBufferData.Roughness, N, V);
 
     FLightAccumulator LightAccumulator = (FLightAccumulator) 0;

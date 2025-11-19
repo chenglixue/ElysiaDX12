@@ -5,6 +5,7 @@
 #include "DX12TextureBuffer.h"
 #include "DX12BufferResource.h"
 #include "RenderTexture.h"
+#include "UserData.h"
 
 namespace ElysiaRenderer
 {
@@ -17,18 +18,46 @@ namespace ElysiaRenderer
 
 	void BufferManager::Init()
 	{
+		if (!UserData::GetInstance().IsUseHDR)
+		{
+			m_pCameraColorRT = CreateRenderTexture(static_cast<UINT64>(GetDevice()->GetScreenSize().x),
+				static_cast<UINT64>(GetDevice()->GetScreenSize().y),
+				DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
+				L"Camera Color RT");
+		}
+		else
+		{
+			switch (UserData::GetInstance().HDRLevel)
+			{ 
+			case HDRQuality::Low: 
+			{
+				m_pCameraColorRT = CreateRenderTexture(static_cast<UINT64>(GetDevice()->GetScreenSize().x),
+					static_cast<UINT64>(GetDevice()->GetScreenSize().y),
+					DXGI_FORMAT_R11G11B10_FLOAT,
+					L"Camera Color RT"); 
+				break;  
+			} 
+			case HDRQuality::High:
+			{ 
+				m_pCameraColorRT = CreateRenderTexture(static_cast<UINT64>(GetDevice()->GetScreenSize().x),
+					static_cast<UINT64>(GetDevice()->GetScreenSize().y),
+					DXGI_FORMAT_R16G16B16A16_FLOAT,
+					L"Camera Color RT");
+				break;
+			}
+			default:
+			{ 
+				ThrowRuntimeError("Invalid choose");
+				break;
+			}
+			}
+		}
 		m_pCameraDepthRT = CreateRenderTexture(
 			static_cast<UINT64>(GetDevice()->GetScreenSize().x),
 			static_cast<UINT64>(GetDevice()->GetScreenSize().y),
 			DXGI_FORMAT_D24_UNORM_S8_UINT,
 			true,
 			L"Camera Depth RT");
-
-		m_pCameraColorRT = CreateRenderTexture(
-			static_cast<UINT64>(GetDevice()->GetScreenSize().x),
-			static_cast<UINT64>(GetDevice()->GetScreenSize().y),
-			DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
-			L"Camera Color RT");
 	}
 
 	void BufferManager::Destory()
