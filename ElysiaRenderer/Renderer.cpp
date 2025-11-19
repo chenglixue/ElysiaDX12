@@ -142,6 +142,10 @@ namespace ElysiaRenderer
 		passParameter->frameIndex = GetDevice()->GetFrameIndex();
 		passParameter->nearZ = m_pCameraManager->GetMainCamera()->GetNearZ();
 		passParameter->farZ = m_pCameraManager->GetMainCamera()->GetFarZ();
+		passParameter->ZBufferParams = Vector4(1 - m_pCameraManager->GetMainCamera()->GetFarZ() / m_pCameraManager->GetMainCamera()->GetNearZ(),
+			m_pCameraManager->GetMainCamera()->GetFarZ() / m_pCameraManager->GetMainCamera()->GetNearZ(),
+			(1 - m_pCameraManager->GetMainCamera()->GetFarZ() / m_pCameraManager->GetMainCamera()->GetNearZ()) / m_pCameraManager->GetMainCamera()->GetFarZ(),
+			(m_pCameraManager->GetMainCamera()->GetFarZ() / m_pCameraManager->GetMainCamera()->GetNearZ()) / m_pCameraManager->GetMainCamera()->GetFarZ());
 		GetBufferManager()->GetSingleConstantBuffer(PER_FRAME_SPACE)->SetMappedData(GetRenderResource()->GetCBVFrameVariable(), sizeof(CBVFrameVariable));
 	}
 	void Renderer::UpdateObjectCBV()
@@ -189,7 +193,7 @@ namespace ElysiaRenderer
 		m_passes.emplace_back(std::move(std::make_unique<UIPass>()));
 		m_passes.emplace_back(std::move(std::make_unique<FinalBlitPass>(m_pCameraManager->GetMainCamera())));
 		for (auto& pass : m_passes)
-		{
+		{ 
 			pass->Setup(passData);
 		}
 	}

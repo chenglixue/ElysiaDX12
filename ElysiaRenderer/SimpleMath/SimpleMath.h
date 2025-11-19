@@ -832,6 +832,9 @@ namespace DirectX
 
             static void Lerp(const Color& c1, const Color& c2, float t, Color& result) noexcept;
             static Color Lerp(const Color& c1, const Color& c2, float t) noexcept;
+
+            static Color White;
+            static Color Black;
         };
 
         // Binary operators

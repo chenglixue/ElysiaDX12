@@ -209,4 +209,6 @@ namespace ElysiaRenderer
 	template void Shader::SetConstantVariable<Matrix>(const std::string&, const Matrix, UINT);
 	template void Shader::SetConstantVariable<bool>(const std::string&, const bool, UINT);
 	template void Shader::SetConstantVariable<std::vector<Vector2>>(const std::string&, const std::vector<Vector2>, UINT);
+	template void Shader::SetConstantVariable<std::vector<Vector3>>(const std::string&, const std::vector<Vector3>, UINT);
+	template void Shader::SetConstantVariable<std::vector<Vector4>>(const std::string&, const std::vector<Vector4>, UINT);
 }

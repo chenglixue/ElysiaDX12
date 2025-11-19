@@ -3538,6 +3538,9 @@ inline Color Color::Lerp(const Color& c1, const Color& c2, float t) noexcept
     return result;
 }
 
+Color Color::White = Color(1, 1, 1, 1);
+Color Color::Black = Color(0, 0, 0, 0);
+
 
 /****************************************************************************
  *

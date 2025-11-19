@@ -66,6 +66,13 @@ cbuffer GlobalConstant : register(b0, perFrameSpace)
     
     Matrix shadowMatrix;
 	Vector4 shadowSize;
+    
+    // Values used to linearize the Z buffer (http://www.humus.name/temp/Linearize%20depth.txt)
+    // x = 1-far/near
+    // y = far/near
+    // z = x/far
+    // w = y/far
+    float4 g_ZBufferParams;
 
 	UINT frameIndex;
     float nearZ;
@@ -86,6 +93,8 @@ cbuffer GlobalConstant : register(b0, perFrameSpace)
 	UINT GBuffer4Index;
 	UINT GBuffer5Index;
 	UINT OpaqueDepthIndex;
+    
+    
 };
 
 struct DX12Vertex
@@ -122,6 +131,9 @@ struct FInputParams
     float3 BitTangentWS;
     float3 NormalWS;
     float3 ScreenVector;
+    
+    float Linear01Depth;
+    float LinearEyeDepth;
 };
 
 struct MaterialData

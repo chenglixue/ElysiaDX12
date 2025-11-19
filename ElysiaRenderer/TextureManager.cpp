@@ -53,9 +53,9 @@ namespace ElysiaRenderer
 			auto newTex = std::move(GetDevice()->CreateTextureFromFile(texBufferCreateDesc));
 
 			GetRenderResource()->GetCBVFrameVariable()->GGX_E_LUT_Index = newTex->GetResourceHeapIndex();
-
-			this->AddTextureResource(std::move(newTex));
-		}
+			 
+			this->AddTextureResource(std::move(newTex)); 
+		} 
 
 		{
 			texBufferCreateDesc.texturePath = L"Tex\\GGX_Eavg_LUT.dds";

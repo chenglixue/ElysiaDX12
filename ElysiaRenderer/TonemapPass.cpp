@@ -117,6 +117,9 @@ namespace ElysiaRenderer
 	}
 	void TonemapPass::Execute()
 	{
+		
+
+
 	}
 	void TonemapPass::Render()
 	{

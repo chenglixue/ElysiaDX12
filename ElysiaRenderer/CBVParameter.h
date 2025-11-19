@@ -60,6 +60,8 @@ namespace ElysiaRenderer
 		Matrix		shadowMatrix;
 		Vector4		shadowSize;
 
+		Vector4		ZBufferParams;
+
 		UINT		frameIndex = 0;
 		float		nearZ = 1;
 		float		farZ = 1000;

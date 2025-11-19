@@ -44,10 +44,10 @@ PSOutput PS(PSInput i)
     float4 blitterValue = blitterTex.SampleLevel(linearSampler, i.uv, 0);
     
     float4 linearColor = GetSRGBToLinear(blitterValue);
-    //linearColor = blitterValue;
+    linearColor = blitterValue;
     
     float3 tonemapColor = NeutralTonemap(linearColor.rgb);
-    tonemapColor = GetLinearToSRGB(tonemapColor);
+    //tonemapColor = GetLinearToSRGB(tonemapColor);
     
     o.target0 = float4(tonemapColor, 1.f);
     //o.target0 = blitterValue;

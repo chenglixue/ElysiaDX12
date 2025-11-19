@@ -80,7 +80,7 @@ namespace ElysiaRenderer
 		{
 			if (GetBufferManager()->GetCameraDepthRT() == nullptr)
 			{
-				ThrowRuntimeError("nullptr");;
+				ThrowRuntimeError("nullptr");
 			}
 			isReady &= GetBufferManager()->GetCameraDepthRT()->GetTexture()->GetIsReady();
 		}
@@ -93,6 +93,8 @@ namespace ElysiaRenderer
 
 			m_pCommand->Draw(3, 0);
 		}
+		
+		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), m_pCommand->GetCommandList());
 
 		m_pCommand->AddBarrier(GetDevice()->GetCurrBackBuffer(), D3D12_RESOURCE_STATE_PRESENT);
 		m_pCommand->FlushBarrier();

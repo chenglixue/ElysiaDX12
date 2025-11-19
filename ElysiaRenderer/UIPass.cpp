@@ -30,19 +30,7 @@ namespace ElysiaRenderer
 
 		Execute();
 
-		auto cameraColorRT = GetBufferManager()->GetCameraColorRT();
-
-		m_pCommand->AddBarrier(*cameraColorRT->GetTexture(), D3D12_RESOURCE_STATE_RENDER_TARGET);
-		m_pCommand->FlushBarrier();
-
-		m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_renderSize));
-
 		ImGui::Render();
-		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), m_pCommand->GetCommandList());
-
-		m_pCommand->AddBarrier(*cameraColorRT->GetTexture(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-		m_pCommand->FlushBarrier();
 	}
 
 	void UIPass::Dispose()
@@ -102,6 +90,11 @@ namespace ElysiaRenderer
 			ImGui::Combo("Tonemap Mode", &tonemapModeIndex,
 				StringViewToChar(magic_enum::enum_names<TonemapMode>().data(), magic_enum::enum_count<TonemapMode>()).data(), (int)magic_enum::enum_count<TonemapMode>());
 			pUserData.tonemapMode = (TonemapMode)tonemapModeIndex;
+		}
+
+		if (ImGui::CollapsingHeader("AO"))
+		{
+
 		}
 	}
 }

@@ -367,6 +367,9 @@
     <ClInclude Include="TonemapUtility.h">
       <Filter>Header Files\Utility</Filter>
     </ClInclude>
+    <ClInclude Include="AOPass.h">
+      <Filter>Header Files\Render\Pass</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -524,6 +527,9 @@
       <Filter>Resource Files\Shader\Priavte</Filter>
     </None>
     <None Include="Resource\Shaders\public\FullScreenTriangle.hlsl">
+      <Filter>Resource Files\Shader\Public</Filter>
+    </None>
+    <None Include="Resource\Shaders\public\SSAO.hlsl">
       <Filter>Resource Files\Shader\Public</Filter>
     </None>
   </ItemGroup>
@@ -757,6 +763,9 @@
     </ClCompile>
     <ClCompile Include="xxhash.cpp">
       <Filter>Source Files\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="AOPass.cpp">
+      <Filter>Source Files\Render\Pass</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

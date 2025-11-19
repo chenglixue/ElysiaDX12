@@ -272,5 +272,24 @@ float3 ComputeWorldSpacePosition(float2 screenUV, float rawDepth, Matrix invView
     return positionWS.xyz / positionWS.w;
 }
 
+// Z buffer to linear 0..1 depth (0 at camera position, 1 at far plane).
+// Does NOT work with orthographic projections.
+// Does NOT correctly handle oblique view frustums.
+// zBufferParam (UNITY_REVERSED_Z) = { f/n - 1,   1, (1/n - 1/f), 1/f }
+// zBufferParam                    = { 1 - f/n, f/n, (1/f - 1/n), 1/n }
+float Linear01Depth(float depth, float4 zBufferParam)
+{
+    return 1.0 / (zBufferParam.x * depth + zBufferParam.y);
+}
+
+// Z buffer to linear view space (eye) depth.
+// Does NOT correctly handle oblique view frustums.
+// Does NOT work with orthographic projection.
+// zBufferParam (UNITY_REVERSED_Z) = { f/n - 1,   1, (1/n - 1/f), 1/f }
+// zBufferParam                    = { 1 - f/n, f/n, (1/f - 1/n), 1/n }
+float LinearEyeDepth(float depth, float4 zBufferParam)
+{
+    return 1.0 / (zBufferParam.z * depth + zBufferParam.w);
+}
 
 #endif

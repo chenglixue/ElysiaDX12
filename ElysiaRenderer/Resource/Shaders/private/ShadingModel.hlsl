@@ -125,15 +125,14 @@ FDirectLighting DefaultLitBxDF(FDecodeGBufferData GBufferData, float3 N, float3 
 
     float3 KD = (1 - UE_F_Schlick(GBufferData.SpecularColor, Context.VoH)) * (1 - GBufferData.Metallic);
     Lighting.Diffuse = Diffuse_Chan(GBufferData.DiffuseColor, Pow4(GBufferData.Roughness), NoV, NoL, VoH, NoH, GetAreaLightDiffuseMicroReflWeight(AreaLight));
-    Lighting.Diffuse = Diffuse_Lambert(GBufferData.DiffuseColor);
     Lighting.Diffuse *= AreaLight.FalloffColor * Falloff * NoL * KD;
 
     Lighting.Specular = SpecularGGX(GBufferData.Roughness, GBufferData.SpecularColor, Context, NoL, AreaLight);
     Lighting.Specular *= AreaLight.FalloffColor * Falloff * NoL;
     
-    FBxDFEnergyTerms energyTerm = ComputeFresnelEnergyTerms(GGXEnergyLookup(GBufferData.Roughness, NoV), GBufferData.SpecularColor);
-     
-    //Lighting.Diffuse *= ComputeEnergyPreservation(energyTerm);
+    FBxDFEnergyTerms energyTerm = ComputeFresnelEnergyTerms(GGXEnergyLookup(GBufferData.Roughness, Context.NoV), GBufferData.SpecularColor);
+    
+    Lighting.Diffuse *= ComputeEnergyPreservation(energyTerm);
     Lighting.Specular *= ComputeEnergyConservation(energyTerm);
 
     return Lighting;

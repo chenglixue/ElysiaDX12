@@ -44,4 +44,6 @@ namespace ElysiaRenderer
 	template void RenderMaterial::SetConstantVariable<Matrix>(const std::string&, Matrix, UINT passID);
 	template void RenderMaterial::SetConstantVariable<bool>(const std::string&, bool, UINT passID);
 	template void RenderMaterial::SetConstantVariable<std::vector<Vector2>>(const std::string&, std::vector<Vector2>, UINT passID);
+	template void RenderMaterial::SetConstantVariable<std::vector<Vector3>>(const std::string&, std::vector<Vector3>, UINT passID);
+	template void RenderMaterial::SetConstantVariable<std::vector<Vector4>>(const std::string&, std::vector<Vector4>, UINT passID);
 }
