@@ -107,4 +107,4 @@ namespace ElysiaRenderer
 			ImGui::SliderFloat("AO Pow", &pUserData.aoParameter.IntensityPow, 0, 2);
 		}
 	}
-} 
+}  

@@ -135,8 +135,6 @@ namespace ElysiaRenderer
 
 	void Renderer::UpdateCBV()
 	{
-		//UpdateObjectCBV();
-
 		auto passParameter = GetRenderResource()->GetCBVFrameVariable();
 		passParameter->cameraPosWS = m_pCameraManager->GetMainCamera()->GetPosition4();
 		passParameter->lightData = std::move(GetLightManager()->GetMainLight()->CreateLightData());
@@ -148,31 +146,6 @@ namespace ElysiaRenderer
 			(1 - m_pCameraManager->GetMainCamera()->GetFarZ() / m_pCameraManager->GetMainCamera()->GetNearZ()) / m_pCameraManager->GetMainCamera()->GetFarZ(),
 			(m_pCameraManager->GetMainCamera()->GetFarZ() / m_pCameraManager->GetMainCamera()->GetNearZ()) / m_pCameraManager->GetMainCamera()->GetFarZ());
 		GetBufferManager()->GetSingleConstantBuffer(PER_FRAME_SPACE)->SetMappedData(GetRenderResource()->GetCBVFrameVariable(), sizeof(CBVFrameVariable));
-	}
-	void Renderer::UpdateObjectCBV()
-	{
-		auto& pUserData = UserData::GetInstance();
-
-		for (UINT meshIndex = 0; meshIndex < GetModelImporter()->GetMeshCount(); ++meshIndex)
-		{
-			const auto& meshRenderer = GetModelImporter()->GetMeshRenderer(meshIndex);
-			auto objectConstantParameter = meshRenderer.m_CBVObjectParameter.get();
-			for (UINT frameIndex = 0; frameIndex < NUM_FRAMES_IN_FLIGHT; ++frameIndex)
-			{
-				objectConstantParameter->hasNormalTex = g_pModelImporter->GetMaterial(meshRenderer.m_mesh->materialIndex).hasNormal;
-				objectConstantParameter->baseColorTint = pUserData.BaseColorTint;
-				objectConstantParameter->opacity = pUserData.Opacity;
-				objectConstantParameter->cutoff = pUserData.Cutoff;
-				objectConstantParameter->normalIntensity = pUserData.NormalIntensity;
-				objectConstantParameter->metallicIntensity = pUserData.MetallicIntensity;
-				objectConstantParameter->roughnessIntensity = pUserData.RoughnessIntensity;
-				objectConstantParameter->ambientCubemapIntensity = pUserData.AmbientCubemapIntensity;
-				objectConstantParameter->ambientCubemapTint = pUserData.AmbientCubemapTint;
-
-				auto objectContantBuffer = GetBufferManager()->GetMutilConstantBuffer(PER_OBJECT_SPACE, frameIndex, meshIndex);
-				objectContantBuffer->SetMappedData(objectConstantParameter, sizeof(CBVObjectParameter));
-			}
-		}
 	}
 
 	void Renderer::Setup()

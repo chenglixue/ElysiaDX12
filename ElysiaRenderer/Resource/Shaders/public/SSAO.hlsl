@@ -111,7 +111,7 @@ PSOutput PS(PSInput i)
         float4 randomPosWS = float4(randomVec, 0.f) + float4(positionWS, 1.f);
         float4 randomPosVS = mul(viewMatrix, randomPosWS);
         float4 randomPosCS = mul(projMatrix, randomPosVS);
-        float2 randomPosUV = randomPosCS.xy / randomPosCS.w * 0.5f + 0.5f;
+        float2 randomPosUV = randomPosCS.xy / randomPosCS.w * 0.5f * float2(1.f, -1.f) + 0.5f;
         
         Texture2D<float> OpaqueDepth = ResourceDescriptorHeap[OpaqueDepthIndex];
         float randomDepth = OpaqueDepth.SampleLevel(warpLinearSampler, randomPosUV, 0);

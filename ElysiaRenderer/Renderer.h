@@ -86,12 +86,11 @@ namespace ElysiaRenderer
 		std::unique_ptr<TextureManager>	m_pTextureManager = nullptr;
 
 		void UpdateCBV();
-		void UpdateObjectCBV(); 
-		
+		  
 		void Setup();
 		void CreateConstantBuffers();
 		
 		void Execute();
 	};     
-}  
-      
+}   
+       

@@ -210,5 +210,26 @@ namespace ElysiaRenderer
 	template void Shader::SetConstantVariable<bool>(const std::string&, const bool, UINT);
 	template void Shader::SetConstantVariable<std::vector<Vector2>>(const std::string&, const std::vector<Vector2>, UINT);
 	template void Shader::SetConstantVariable<std::vector<Vector3>>(const std::string&, const std::vector<Vector3>, UINT);
-	template void Shader::SetConstantVariable<std::vector<Vector4>>(const std::string&, const std::vector<Vector4>, UINT);
+	template<> void Shader::SetConstantVariable<std::vector<Vector4>>(const std::string& name, const std::vector<Vector4> data, UINT passID)
+	{
+		std::lock_guard<std::mutex> lockGuard(m_setDataMutex);
+		const void* pSourceData = data.data();
+
+		auto itr = m_constantVariableDescs.equal_range(name);
+		for (auto currItr = itr.first; currItr != itr.second; ++currItr)
+		{
+			if (currItr->second.PassID == passID)
+			{
+				memcpy(currItr->second.pData.data(), pSourceData, currItr->second.Size);
+
+				for (auto& passData : m_passDatas)
+				{
+					if (passData.second.PassIndex != passID) continue;
+
+					auto meshResourceLayouts = passData.second.MeshResourceLayouts.get();
+					currItr->second.IsDirty = true;
+				}
+			}
+		}
+	}
 }

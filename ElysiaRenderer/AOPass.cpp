@@ -181,7 +181,7 @@ namespace ElysiaRenderer
 		if (isReady)
 		{
 			m_pCommand->SetPipeline(pipelineStateData);
-			m_pMaterial->SetConstantVariable("blitterTextureIndex", GetBufferManager()->GetCameraColorRT()->GetTexture()->GetResourceHeapIndex(), ShaderPasseIDs::BlitPassID);
+			m_pMaterial->SetConstantVariable("blitterTextureIndex", m_pAORT->GetTexture()->GetResourceHeapIndex(), ShaderPasseIDs::BlitPassID);
 			m_pMaterial->ApplyConstantData();
 			m_pCommand->SetPipelineResource(PER_PASS_SPACE, m_pMaterial->GetPassData(ShaderPasseIDs::BlitPassID).MeshResourceLayouts->m_spaces[PER_PASS_SPACE]);
 
@@ -200,14 +200,11 @@ namespace ElysiaRenderer
 		for (UINT i = 0; i < UserData::GetInstance().aoParameter.SampleCount; i++)
 		{
 			auto randomVec = Vector4(MathHelper::RandF(-1.f, 1.f), MathHelper::RandF(-1.f, 1.f), MathHelper::RandF(0.f, 1.f), 1.f);
-			//randomVec.Normalize();
+			randomVec.Normalize();
 
 			auto scale = (float)i / UserData::GetInstance().aoParameter.SampleCount;
 			scale = MathHelper::Lerp(0.01f, 1.f, scale * scale);   // 二次函数分布
 			randomVec = randomVec * scale;
-
-			std::cout << "SSAOSampleKernel: " 
-				<< randomVec.x << " " << randomVec.y << " " << randomVec.z << " " << randomVec.w << std::endl;
 
 			o.emplace_back(std::move(randomVec));
 		}
