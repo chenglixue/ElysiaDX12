@@ -23,22 +23,47 @@ cbuffer PassConstant : register(b0, perPassSpace)
     
     UINT g_AOSampleCount;
     float g_AORadius;
-    float g_AOThreshold;
-    float g_AODepthBias;
+    float g_AOIntensityMul;
+    float g_AOIntensityPow;
     
     float4 g_AOSampleKernelArray[_AO_MAX_SAMPLE_COUNT];
 
 }
 
+
+
 struct PSOutput
 {
-    float target0 : SV_TARGET0;
+    float4 target0 : SV_TARGET0;
 };
 
 float3 GetRandomVec(float2 p);
 float3 GetRandomVecHalf(float2 p);
 
-PSOutput SSAOPS(PSInput i)
+PSInput VS(UINT vertexID : SV_VertexID)
+{
+    PSInput o = (PSInput) 0;
+    
+    if (vertexID == 0)
+    {
+        o.positionCS = float4(-1.0f, 1.0f, 1.0f, 1.0f);
+        o.uv = float2(0.0f, 0.0f);
+    }
+    else if (vertexID == 1)
+    {
+        o.positionCS = float4(3.0f, 1.0f, 1.0f, 1.0f);
+        o.uv = float2(2.0f, 0.0f);
+    }
+    else
+    {
+        o.positionCS = float4(-1.0f, -3.0f, 1.0f, 1.0f);
+        o.uv = float2(0.0f, 2.0f);
+    }
+    
+    return o;
+}
+
+PSOutput PS(PSInput i)
 {
     PSOutput o = (PSOutput) 0;
     
@@ -72,18 +97,18 @@ PSOutput SSAOPS(PSInput i)
     float3x3 TBN = float3x3(tangentWS, bitangentWS, GBufferData.WorldNormal);
     
     [unroll(256)]
-    for (UINT i = 0; i < g_AOSampleCount; ++i)
+    for (UINT sampleIndex = 0; sampleIndex < g_AOSampleCount; ++sampleIndex)
     {
         // 法线半球的随机向量
-        float3 randomVec = mul(g_AOSampleKernelArray[i].xyz, TBN);
-        randomVec = GetRandomVecHalf(i * inputParam.ScreenUV);
-        float scale = i / g_AOSampleCount;
+        float3 randomVec = mul(g_AOSampleKernelArray[sampleIndex].xyz, TBN);
+        randomVec = GetRandomVecHalf(sampleIndex * inputParam.ScreenUV);
+        float scale = sampleIndex / g_AOSampleCount;
         scale = lerp(0.01f, 1.f, Pow2(scale));
         randomVec *= g_AORadius * scale;
         float AOWeight = smoothstep(0.f, 0.2f, length(randomVec));
         randomVec = mul(randomVec, TBN);
         
-        float4 randomPosWS = float4(randomVec, 0.f) + positionWS;
+        float4 randomPosWS = float4(randomVec, 0.f) + float4(positionWS, 1.f);
         float4 randomPosVS = mul(viewMatrix, randomPosWS);
         float4 randomPosCS = mul(projMatrix, randomPosVS);
         float2 randomPosUV = randomPosCS.xy / randomPosCS.w * 0.5f + 0.5f;
@@ -95,12 +120,18 @@ PSOutput SSAOPS(PSInput i)
         float randomZ = randomPosCS.w;
         
         //float range = step(InputParams.Linear01Depth, randomLinear01Depth + _AODepthBias);
-        float range = step(g_AOThreshold, (randomLinear01Depth + g_AODepthBias - inputParam.Linear01Depth));
-        range = step(randomEyeDepth, randomZ);
+        float range = step(randomEyeDepth, randomZ);
         float rangeCheck = smoothstep(0.f, 1.f, g_AORadius / abs(randomZ - randomEyeDepth));
         
         AO += range * AOWeight * rangeCheck;
     }
+    
+    AO * rcp((float) g_AOSampleCount);
+    AO *= g_AOIntensityMul;
+    
+    AO = saturate(pow(AO, g_AOIntensityPow));
+    
+    o.target0 = 1 - AO;
     
     return o;
 }

@@ -6,7 +6,7 @@ namespace ElysiaRenderer
 {
 	class RenderTexture;
 
-	class AOPass : BasePass
+	class AOPass : public BasePass
 	{
 	public:
 		AOPass() = default;
@@ -25,8 +25,11 @@ namespace ElysiaRenderer
 		struct ShaderPasseIDs
 		{
 			static int AOPassID;
+			static int BlitPassID;
 		};
 
 		void DoCalcAO();
+		void DoBlitToBackBuffer();
+		std::vector<Vector4> GenerateSSAOSampleKernel();
 	};
 }

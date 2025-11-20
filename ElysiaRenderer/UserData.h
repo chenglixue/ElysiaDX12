@@ -2,6 +2,7 @@
 #include "Serialization.h"
 #include "ShadowUtility.h"
 #include "TonemapUtility.h"
+#include "AOUtility.h"
 
 namespace ElysiaRenderer
 {
@@ -55,6 +56,8 @@ namespace ElysiaRenderer
 		bool IsUseHDR = true;
 		HDRQuality HDRLevel = HDRQuality::High; 
 		TonemapMode tonemapMode = TonemapMode::None;
+
+		AOParameter aoParameter{};
 
 	private:
 		static std::unique_ptr<UserData> m_instance;

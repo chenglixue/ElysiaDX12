@@ -94,7 +94,17 @@ namespace ElysiaRenderer
 
 		if (ImGui::CollapsingHeader("AO"))
 		{
+			ImGui::Checkbox("Is Enable AO", &pUserData.aoParameter.IsEnableAO);
 
+			auto t1 = (int)pUserData.aoParameter.SampleCount;
+			ImGui::SliderInt("AO Sample Count", &t1, 0, 256);
+			pUserData.aoParameter.SampleCount = (UINT)t1;
+
+			ImGui::SliderFloat("AO Radius", &pUserData.aoParameter.Radius, 0, 10);
+
+			ImGui::SliderFloat("AO Intensity", &pUserData.aoParameter.IntensityMul, 0, 2);
+
+			ImGui::SliderFloat("AO Pow", &pUserData.aoParameter.IntensityPow, 0, 2);
 		}
 	}
-}
+} 

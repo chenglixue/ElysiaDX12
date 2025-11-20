@@ -94,7 +94,7 @@ namespace ElysiaRenderer
 		m_pCommand->AddBarrier(*m_pShadowRT->GetTexture(), D3D12_RESOURCE_STATE_DEPTH_WRITE);
 		m_pCommand->FlushBarrier(); 
 
-		m_pCommand->ClearDepthStencilTarget(*m_pShadowRT, 1.f, 0.);
+		m_pCommand->ClearDepthStencilTarget(*m_pShadowRT, 1.f, 0);
 
 		m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		m_pCommand->SetIndexBuffer(GetBufferManager()->GetIndexBufferView()); 

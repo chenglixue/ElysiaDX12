@@ -159,6 +159,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="AOPass.h" />
+    <ClInclude Include="AOUtility.h" />
     <ClInclude Include="BasePass.h" />
     <ClInclude Include="BoundingBox.h" />
     <ClInclude Include="BufferManager.h" />

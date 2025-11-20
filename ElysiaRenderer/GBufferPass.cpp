@@ -190,7 +190,7 @@ namespace ElysiaRenderer
 				auto VertexCount = mesh->vertexCount;
 				auto indexCount = mesh->indexCount;
 
-				m_pCommand->Draw(indexCount, startVertex, startIndex);
+				m_pCommand->Draw(indexCount, startVertex, static_cast<UINT>(startIndex));
 			}
 		}
 
