@@ -51,6 +51,8 @@ namespace ElysiaRenderer
 					m_pMaterial.get(), ShaderPasseIDs::OpaqueLightPassID, RTDesc);
 			}
 		}
+
+		m_pMaterial->SetConstantVariable("g_AOIndex", TextureManager::GetInstance().GetGlobalRT("g_AOIndex"));
 	}
 
 	void OpaquePass::Execute()

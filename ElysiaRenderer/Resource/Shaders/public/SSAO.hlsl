@@ -67,7 +67,7 @@ PSOutput PS(PSInput i)
 {
     PSOutput o = (PSOutput) 0;
     
-    SamplerState warpLinearSampler = SamplerDescriptorHeap[WarpLinearSampler];
+    SamplerState warpLinearSampler = SamplerDescriptorHeap[ClampPointSampler];
     
     float2 screenUV = i.positionCS.xy / g_ScreenSize.xy;
     
@@ -102,15 +102,15 @@ PSOutput PS(PSInput i)
         // 法线半球的随机向量
         float3 randomVec = mul(g_AOSampleKernelArray[sampleIndex].xyz, TBN);
         randomVec = GetRandomVecHalf(sampleIndex * inputParam.ScreenUV);
-        float scale = sampleIndex / g_AOSampleCount;
+        float scale = (float) sampleIndex / (float) g_AOSampleCount;
         scale = lerp(0.01f, 1.f, Pow2(scale));
         randomVec *= g_AORadius * scale;
         float AOWeight = smoothstep(0.f, 0.2f, length(randomVec));
         randomVec = mul(randomVec, TBN);
         
         float4 randomPosWS = float4(randomVec, 0.f) + float4(positionWS, 1.f);
-        float4 randomPosVS = mul(viewMatrix, randomPosWS);
-        float4 randomPosCS = mul(projMatrix, randomPosVS);
+        float4 randomPosVS = mul(randomPosWS, viewMatrix);
+        float4 randomPosCS = mul(randomPosVS, projMatrix);
         float2 randomPosUV = randomPosCS.xy / randomPosCS.w * 0.5f * float2(1.f, -1.f) + 0.5f;
         
         Texture2D<float> OpaqueDepth = ResourceDescriptorHeap[OpaqueDepthIndex];
@@ -126,7 +126,7 @@ PSOutput PS(PSInput i)
         AO += range * AOWeight * rangeCheck;
     }
     
-    AO * rcp((float) g_AOSampleCount);
+    AO *= rcp((float) g_AOSampleCount);
     AO *= g_AOIntensityMul;
     
     AO = saturate(pow(AO, g_AOIntensityPow));

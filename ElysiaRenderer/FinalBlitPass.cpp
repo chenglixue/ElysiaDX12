@@ -81,12 +81,27 @@ namespace ElysiaRenderer
 			if (GetBufferManager()->GetCameraDepthRT() == nullptr)
 			{
 				ThrowRuntimeError("nullptr");
-			}
+			} 
 			isReady &= GetBufferManager()->GetCameraDepthRT()->GetTexture()->GetIsReady();
 		}
-		if (isReady)
-		{
-			m_pMaterial->SetConstantVariable("blitterTextureIndex", GetBufferManager()->GetCameraColorRT()->GetTexture()->GetResourceHeapIndex());
+		if (isReady) 
+		{ 
+			switch (UserData::GetInstance().debugMode)
+			{
+				case DebugMode::None:
+				{
+					m_pMaterial->SetConstantVariable("blitterTextureIndex", GetBufferManager()->GetCameraColorRT()->GetTexture()->GetResourceHeapIndex());
+
+					break;
+				}
+				case DebugMode::AO:
+				{
+					m_pMaterial->SetConstantVariable("blitterTextureIndex", TextureManager::GetInstance().GetGlobalRT("g_AOIndex"));
+
+
+					break;
+				}
+			}
 			m_pMaterial->ApplyConstantData();
 			m_pCommand->SetPipeline(pipelineStateData);
 			m_pCommand->SetPipelineResource(PER_PASS_SPACE, m_pMaterial->GetPassData(ShaderPassIDs::BlitPassID).MeshResourceLayouts->m_spaces[PER_PASS_SPACE]);

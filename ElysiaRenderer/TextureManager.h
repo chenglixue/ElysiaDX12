@@ -29,6 +29,8 @@ namespace ElysiaRenderer
 		void LoadGlobalTextures();
 
 		void AddTextureResource(std::unique_ptr<DX12TextureResource> pTextureResource);
+		void AddGlobalRT(const std::string& name, UINT RTIndex);
+		UINT GetGlobalRT(const std::string& name);
 
 		const std::vector<DX12TextureResource*> GetTextureResources() const noexcept;
 
@@ -37,5 +39,6 @@ namespace ElysiaRenderer
 		static std::once_flag m_initInstanceFlag;
 
 		std::vector<std::unique_ptr<DX12TextureResource>> m_textureResources{};
+		std::unordered_map<std::string, UINT> m_globalRTIndexs{};
 	};
 }

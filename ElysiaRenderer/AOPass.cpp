@@ -89,6 +89,7 @@ namespace ElysiaRenderer
 		} 
 
 		m_pMaterial->SetConstantVariable("g_AOSampleKernelArray", GenerateSSAOSampleKernel());
+		TextureManager::GetInstance().AddGlobalRT("g_AOIndex", m_pAORT->GetTexture()->GetResourceHeapIndex());
 	}
 
 	void AOPass::Execute()
@@ -133,7 +134,7 @@ namespace ElysiaRenderer
 		pipelineStateData.m_renderTargets = { m_pAORT->GetTexture() };
 		pipelineStateData.m_depthStencilTarget = GetBufferManager()->GetCameraDepthRT()->GetTexture();
 
-		bool isReady = true;
+		bool isReady = true; 
 		{
 			if (m_pAORT->GetTexture() == nullptr || GetBufferManager()->GetCameraDepthRT()->GetTexture() == nullptr)
 			{
@@ -200,7 +201,7 @@ namespace ElysiaRenderer
 		for (UINT i = 0; i < UserData::GetInstance().aoParameter.SampleCount; i++)
 		{
 			auto randomVec = Vector4(MathHelper::RandF(-1.f, 1.f), MathHelper::RandF(-1.f, 1.f), MathHelper::RandF(0.f, 1.f), 1.f);
-			randomVec.Normalize();
+			//randomVec.Normalize();
 
 			auto scale = (float)i / UserData::GetInstance().aoParameter.SampleCount;
 			scale = MathHelper::Lerp(0.01f, 1.f, scale * scale);   // 二次函数分布

@@ -8,6 +8,7 @@
 #include "LightAccumulator.hlsl"
 #include "AmbientCubemap.hlsl"
 #include "ShadowCommon.hlsl"
+#include "Light.hlsl"
 
 struct FLightingSplit
 {
@@ -36,7 +37,7 @@ FLightAccumulator AccumulateDynamicLighting(FInputParams inputData, MaterialData
     return o;
 }
 
-FLightAccumulator AccumulateDynamicLighting(FInputParams inputData, FDecodeGBufferData GBufferData, LightData lightData)
+FLightAccumulator AccumulateDynamicLighting(FInputParams inputData, FDecodeGBufferData GBufferData, LightData lightData, float AO)
 {
     FLightAccumulator o = (FLightAccumulator) 0;
     FShadowTerms Shadow = (FShadowTerms) 0;
@@ -46,7 +47,9 @@ FLightAccumulator AccumulateDynamicLighting(FInputParams inputData, FDecodeGBuff
     N = inputData.NormalWS;
     float3 L = lightData.toLight;
     float3 MaskedLightColor = lightData.color * lightData.intensity;
-    Shadow.SurfaceShadow = 1;
+    
+    float shadow = SunShadowVisibility(inputData.PositionWS, inputData.ScreenUV, shadowSize, shadowMatrix);
+    Shadow.SurfaceShadow = AO * shadow;
     
     FDirectLighting directLight = (FDirectLighting) 0;
     float NoL = saturate(dot(N, L));
@@ -82,11 +85,11 @@ FLightingSplit GetDynamicLightingSplit(FInputParams inputData, MaterialData mate
     return o;
 }
 
-FLightingSplit GetDynamicLightingSplit(FInputParams inputData, FDecodeGBufferData GBufferData, LightData lightData)
+FLightingSplit GetDynamicLightingSplit(FInputParams inputData, FDecodeGBufferData GBufferData, LightData lightData, float AO)
 {
     FLightingSplit o = (FLightingSplit) 0;
     
-    FLightAccumulator lightAccumulator = AccumulateDynamicLighting(inputData, GBufferData, lightData);
+    FLightAccumulator lightAccumulator = AccumulateDynamicLighting(inputData, GBufferData, lightData, AO);
     o = GetLightAccumulator_ResultSplit(lightAccumulator);
     
     return o;
@@ -107,12 +110,12 @@ float4 GetDynamicLighting(FInputParams inputData, MaterialData materialData, Lig
     return o;
 }
 
-float4 GetDynamicLighting(FInputParams inputData, FDecodeGBufferData GBufferData, LightData lightData)
+float4 GetDynamicLighting(FInputParams inputData, FDecodeGBufferData GBufferData, LightData lightData, float AO)
 {
     float4 o = 0.f;
     
     FLightingSplit lighting = (FLightingSplit) 0;
-    lighting = GetDynamicLightingSplit(inputData, GBufferData, lightData);
+    lighting = GetDynamicLightingSplit(inputData, GBufferData, lightData, AO);
     
     
     o += float4(AMDTonemapInvert(lighting.DiffuseLighting), lighting.DiffuseLighting.a);

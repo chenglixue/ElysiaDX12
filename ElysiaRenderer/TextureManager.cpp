@@ -31,6 +31,26 @@ namespace ElysiaRenderer
 		m_textureResources.emplace_back(std::move(pTextureResource));
 	}
 
+	void TextureManager::AddGlobalRT(const std::string& name, UINT RTIndex)
+	{
+		auto tryEmplace = m_globalRTIndexs.try_emplace(name);
+		if (tryEmplace.second)
+		{
+			tryEmplace.first->second = RTIndex;
+		}
+	}
+
+	UINT TextureManager::GetGlobalRT(const std::string& name)
+	{
+		if (!m_globalRTIndexs.contains(name))
+		{
+			ThrowRuntimeError("Null RT Index");
+		}
+
+		return m_globalRTIndexs.at(name);
+	}
+
+
 	const std::vector<DX12TextureResource*> TextureManager::GetTextureResources() const noexcept
 	{
 		std::vector<DX12TextureResource*> o{ m_textureResources.size()};

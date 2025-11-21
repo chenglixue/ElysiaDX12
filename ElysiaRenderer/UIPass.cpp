@@ -42,6 +42,15 @@ namespace ElysiaRenderer
 	{
 		auto& pUserData = UserData::GetInstance();
 
+		if (ImGui::CollapsingHeader("Debug"))
+		{
+			int debugModeIndex = (int)pUserData.debugMode;
+			ImGui::Combo("Debug Mode", &debugModeIndex,
+				StringViewToChar(magic_enum::enum_names<DebugMode>().data(), magic_enum::enum_count<DebugMode>()).data(),
+				(int)magic_enum::enum_count<DebugMode>());
+			pUserData.debugMode = (DebugMode)debugModeIndex;
+		}
+
 		if (ImGui::CollapsingHeader("Light"))
 		{
 			ImGui::ColorEdit3("Color", (float*)&pUserData.lightColor);
@@ -94,6 +103,7 @@ namespace ElysiaRenderer
 
 		if (ImGui::CollapsingHeader("AO"))
 		{
+
 			ImGui::Checkbox("Is Enable AO", &pUserData.aoParameter.IsEnableAO);
 
 			auto t1 = (int)pUserData.aoParameter.SampleCount;
@@ -107,4 +117,4 @@ namespace ElysiaRenderer
 			ImGui::SliderFloat("AO Pow", &pUserData.aoParameter.IntensityPow, 0, 2);
 		}
 	}
-}  
+}   

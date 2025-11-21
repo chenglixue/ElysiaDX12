@@ -118,12 +118,12 @@ namespace ElysiaHelper
             return;
         }
 
-        std::cout << "Direction numbers for dimension " << dim << ":" << std::endl;
+        /*std::cout << "Direction numbers for dimension " << dim << ":" << std::endl;
         for (uint32_t i = 0; i < std::fmin(count, MAX_BITS); ++i) 
         {
             std::cout << "v[" << i << "] = " << std::hex << std::setw(8) << std::setfill('0')
                 << direction_numbers_[dim][i] << std::dec << std::endl;
-        }
+        }*/
     }
 
     // Static member definition - primitive polynomials for dimensions 2-11

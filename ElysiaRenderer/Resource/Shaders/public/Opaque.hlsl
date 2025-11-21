@@ -20,6 +20,9 @@ cbuffer PassConstant : register(b0, perPassSpace)
     Matrix projMatrix_I;
     Matrix viewProjMatrix;
     Matrix viewProjMatrix_I;
+    
+    UINT g_AOIndex;
+
 }
 
 struct PSInput
@@ -80,8 +83,12 @@ PSOutput PS(PSInput i)
     LightData mainLightData = GetMainLight(mainLight);
     float shadow = SunShadowVisibility(inputParam.PositionWS, inputParam.ScreenUV, shadowSize, shadowMatrix);
     
-    float4 lighting = GetDynamicLighting(inputParam, GBufferData, mainLightData) * shadow;
-    lighting += float4(GBufferData.SceneColor, 1.f);
+    Texture2D<float> AOTex = ResourceDescriptorHeap[g_AOIndex];
+    SamplerState warpLinearSampler = SamplerDescriptorHeap[WarpLinearSampler];
+    float AO = AOTex.Sample(warpLinearSampler, inputParam.ScreenUV);
+    
+    float4 lighting = GetDynamicLighting(inputParam, GBufferData, mainLightData, AO);
+    lighting += float4(GBufferData.SceneColor, 1.f) * AO;
     
     o.target0.rgb = lighting;
     return o;

@@ -3,6 +3,7 @@
 #include "ShadowUtility.h"
 #include "TonemapUtility.h"
 #include "AOUtility.h"
+#include "DebugUtility.h"
 
 namespace ElysiaRenderer
 {
@@ -58,6 +59,8 @@ namespace ElysiaRenderer
 		TonemapMode tonemapMode = TonemapMode::None;
 
 		AOParameter aoParameter{};
+
+		DebugMode debugMode = DebugMode::None;
 
 	private:
 		static std::unique_ptr<UserData> m_instance;

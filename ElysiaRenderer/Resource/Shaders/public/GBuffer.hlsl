@@ -143,7 +143,7 @@ FEncodeGBufferData GetEncodeGBufferData(FInputParams inputParams, float3 toLight
     float4 baseColor = baseColorTex.Sample(warpLinearSampler, inputParams.objectUV)
             * float4(baseColorTint, opacity);
     baseColor.rgb = AMDTonemapInvert(baseColor);
-    //clip(baseColor.a - cutoff);
+    clip(baseColor.a - cutoff);
 
     Texture2D<float4> normalTex = ResourceDescriptorHeap[normalTexIndex];
     float4 normalTS = normalTex.Sample(warpLinearSampler, inputParams.objectUV);
