@@ -19,9 +19,11 @@ namespace ElysiaRenderer
 
 		DX12BufferResource* GetCBV();
 		std::vector<PipelineResourceBinding*>& GetSRVs();
+		std::vector<PipelineResourceBinding*>& GetUAVs();
 
 		void SetCBV(DX12BufferResource* CBVResource);
 		void SetSRV(PipelineResourceBinding* SRVResource);
+		void SetUAV(PipelineResourceBinding* UAVResource);
 
 		void Lock();
 		bool IsLocked() const;
@@ -31,6 +33,7 @@ namespace ElysiaRenderer
 
 		DX12BufferResource* m_CBV;
 		std::vector<PipelineResourceBinding*> m_SRVs;
+		std::vector<PipelineResourceBinding*> m_UAVs;
 		bool m_isLocked = false;
 	};
 }

@@ -376,6 +376,12 @@
     <ClInclude Include="DebugUtility.h">
       <Filter>Header Files\Utility</Filter>
     </ClInclude>
+    <ClInclude Include="DX12ComputeContext.h">
+      <Filter>Header Files\DX12</Filter>
+    </ClInclude>
+    <ClInclude Include="ContextUtility.h">
+      <Filter>Header Files\Utility</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -772,6 +778,9 @@
     </ClCompile>
     <ClCompile Include="AOPass.cpp">
       <Filter>Source Files\Render\Pass</Filter>
+    </ClCompile>
+    <ClCompile Include="DX12ComputeContext.cpp">
+      <Filter>Source Files\DX12</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -29,6 +29,11 @@ namespace ElysiaRenderer
 	{
 		return m_SRVs;
 	}
+	std::vector<PipelineResourceBinding*>& PipelineResourceSpace::GetUAVs()
+	{
+		return m_UAVs;
+	}
+
 
 	void PipelineResourceSpace::SetCBV(DX12BufferResource* CBVResource)
 	{
@@ -74,6 +79,35 @@ namespace ElysiaRenderer
 			else
 			{
 				m_SRVs[currIndex] = SRVResource;
+			}
+		}
+	}
+	void PipelineResourceSpace::SetUAV(PipelineResourceBinding* UAVResource)
+	{
+		UINT currIndex = GetIndexOfBindingIndex(m_UAVs, UAVResource->m_bindingIndex);
+
+		if (m_isLocked)
+		{
+			if (currIndex == UINT_MAX)
+			{
+				ElysiaHelper::AssertError("Setting unused binding in a locked resource space");
+			}
+			else
+			{
+				m_UAVs[currIndex] = UAVResource;
+			}
+		}
+		else
+		{
+			if (currIndex == UINT_MAX)
+			{
+				m_UAVs.emplace_back(UAVResource);
+
+				std::sort(m_UAVs.begin(), m_UAVs.end(), &SortPipelineBindings);
+			}
+			else
+			{
+				m_UAVs[currIndex] = UAVResource;
 			}
 		}
 	}

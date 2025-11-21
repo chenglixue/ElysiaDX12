@@ -167,10 +167,12 @@
     <ClInclude Include="CameraManager.h" />
     <ClInclude Include="CBVParameter.h" />
     <ClInclude Include="Common.h" />
+    <ClInclude Include="ContextUtility.h" />
     <ClInclude Include="D3D12MemoryAllocator\D3D12MemAlloc.h" />
     <ClInclude Include="DebugUtility.h" />
     <ClInclude Include="DX12BufferResource.h" />
     <ClInclude Include="DX12Camera.h" />
+    <ClInclude Include="DX12ComputeContext.h" />
     <ClInclude Include="DX12Material.h" />
     <ClInclude Include="File.h" />
     <ClInclude Include="FinalBlitPass.h" />
@@ -303,6 +305,7 @@
     </ClCompile>
     <ClCompile Include="DX12BufferResource.cpp" />
     <ClCompile Include="DX12Camera.cpp" />
+    <ClCompile Include="DX12ComputeContext.cpp" />
     <ClCompile Include="DX12Context.cpp" />
     <ClCompile Include="DX12DescriptorHeap.cpp" />
     <ClCompile Include="DX12Device.cpp" />

@@ -4,6 +4,8 @@
 #include "DX12RootSignature.h"
 #include "DX12RenderPassDescriptorHeap.h"
 #include "RenderTexture.h"
+#include "ContextUtility.h"
+
 
 namespace ElysiaRenderer
 {
@@ -44,21 +46,15 @@ namespace ElysiaRenderer
 
 		if (!pipelineExpectedBoundExternally)
 		{
+			m_commandList->SetPipelineState(pipelineState->GetPipelineState());
 			if (m_graphicsPipelineStateObject->m_pipelineType == PipelineType::Compute)
 			{
-
+				m_commandList->SetComputeRootSignature(pipelineState->GetRootSignature()->GetSignature());
 			}
 			else
 			{
-				m_commandList->SetPipelineState(pipelineState->GetPipelineState());
 				m_commandList->SetGraphicsRootSignature(pipelineState->GetRootSignature()->GetSignature());
 			}
-		}
-
-		if (pipelineState->GetPipelineType() != PipelineType::Graphics)
-		{
-			ElysiaHelper::AssertError("Pipeline not graphics");
-			return;
 		}
 
 		if (pipelineExpectedBoundExternally || pipelineState->GetPipelineType() == PipelineType::Graphics)
@@ -87,6 +83,7 @@ namespace ElysiaRenderer
 		// set root parameters
 		// each parameter has one descriptor table
 		{
+			auto UAVResources = pipelineBindResourceSpace->GetUAVs();
 			auto SRVResources = pipelineBindResourceSpace->GetSRVs();
 			auto CBVResource = pipelineBindResourceSpace->GetCBV();
 
@@ -98,6 +95,8 @@ namespace ElysiaRenderer
 			D3D12_CPU_DESCRIPTOR_HANDLE handles[maxNumHandlesBinding]{};
 			UINT currentHandleIndex = 0;
 
+			assert(numTableHandles <= maxNumHandlesBinding);
+
 			if (CBVResource)
 			{
 				auto& rootParameterIndex = m_graphicsPipelineStateObject->m_pipelineResourceMapping.m_CBVMappings[spaceID];
@@ -108,6 +107,16 @@ namespace ElysiaRenderer
 					case PipelineType::Graphics:
 					{
 						m_commandList->SetGraphicsRootConstantBufferView(rootParameterIndex.value(), CBVResource->GetGPUAddress());
+						break;
+					}
+					case PipelineType::Compute:
+					{
+						m_commandList->SetComputeRootConstantBufferView(rootParameterIndex.value(), CBVResource->GetGPUAddress());
+						break;
+					}
+					default:
+					{
+						assert(false);
 						break;
 					}
 				}
@@ -126,7 +135,7 @@ namespace ElysiaRenderer
 				}
 				else
 				{
-					//handles[currentHandleIndex++] = static_cast<DX12BufferResource*>(SRV->m_resource)->GetSRVDescriptor().GetCPUHandle();
+					handles[currentHandleIndex++] = static_cast<DX12BufferResource*>(SRV->m_resource)->GetSRVDescriptor().GetCPUHandle();
 				}
 			}
 			DX12DescriptorHeapHandle blockStart = m_currSRVHeap->AllocateRenderPassDescriptorBlock(numTableHandles);
@@ -206,5 +215,25 @@ namespace ElysiaRenderer
 	void DX12GraphicsContext::DrawInstanced(UINT vertexCount, UINT instanceCount, UINT startIndexLocation, UINT vertexStartOffset, UINT startInstanceLocation)
 	{
 		m_commandList->DrawIndexedInstanced(vertexCount, instanceCount, startIndexLocation, vertexStartOffset, startInstanceLocation);
+	}
+
+	void DX12GraphicsContext::Dispatch(size_t groupCountX, size_t groupCountY, size_t groupCountZ)
+	{
+		m_commandList->Dispatch(groupCountX, groupCountY, groupCountZ);
+	}
+
+	void DX12GraphicsContext::Dispatch1D(size_t threadCountX, size_t groupSizeX)
+	{
+		Dispatch(GetGroupCount(threadCountX, groupSizeX), 1, 1);
+	}
+
+	void DX12GraphicsContext::Dispatch2D(size_t threadCountX, size_t threadCountY, size_t groupSizeX, size_t groupSizeY)
+	{
+		Dispatch(GetGroupCount(threadCountX, groupSizeX), GetGroupCount(threadCountY, groupSizeY), 1);
+	}
+
+	void DX12GraphicsContext::Dispatch3D(size_t threadCountX, size_t threadCountY, size_t threadCountZ, size_t groupSizeX, size_t groupSizeY, size_t groupSizeZ)
+	{
+		Dispatch(GetGroupCount(threadCountX, groupSizeX), GetGroupCount(threadCountY, groupSizeY), GetGroupCount(threadCountZ, groupSizeZ));
 	}
 }

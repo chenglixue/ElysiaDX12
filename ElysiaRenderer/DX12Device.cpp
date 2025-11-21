@@ -158,7 +158,7 @@ namespace ElysiaRenderer
 		// Create Queue
 		{
 			m_graphicsQueue = std::make_unique<DX12Queue>(m_device, D3D12_COMMAND_LIST_TYPE_DIRECT);
-			//m_computeQueue = std::make_unique<DX12Queue>(m_device);
+			m_computeQueue = std::make_unique<DX12Queue>(m_device, D3D12_COMMAND_LIST_TYPE_COMPUTE);
 			m_copyQueue = std::make_unique<DX12Queue>(m_device, D3D12_COMMAND_LIST_TYPE_COPY);
 		}
 
@@ -1297,8 +1297,7 @@ namespace ElysiaRenderer
 		// wait on fences from 2 frames ago
 		m_graphicsQueue->WaitForFenceCPUBlocking(m_endOfFrameFences[m_frameID].m_graphicsQueueFence);
 		m_copyQueue->WaitForFenceCPUBlocking(m_endOfFrameFences[m_frameID].m_copyQueueFence);
-		/*m_computeQueue->WaitForFenceCPUBlocking(m_endOfFrameFences[m_frameID].m_computeQueueFence);
-		m_copyQueue->WaitForFenceCPUBlocking(m_endOfFrameFences[m_frameID].m_copyQueueFence);*/
+		m_computeQueue->WaitForFenceCPUBlocking(m_endOfFrameFences[m_frameID].m_computeQueueFence);
 
 		ProcessDestruction(m_frameID);
 
@@ -1314,6 +1313,7 @@ namespace ElysiaRenderer
 		SubmitContextWork(*m_uploadContexts[m_frameID]);
 
 		m_endOfFrameFences[m_frameID].m_copyQueueFence = m_copyQueue->SingalFence();
+		m_endOfFrameFences[m_frameID].m_computeQueueFence = m_computeQueue->SingalFence();
 	}
 
 	void DX12Device::Present()
@@ -1326,5 +1326,6 @@ namespace ElysiaRenderer
 	{
 		m_graphicsQueue->WaitForIdle();
 		m_copyQueue->WaitForIdle();
+		m_computeQueue->WaitForIdle();
 	}
 }

@@ -33,6 +33,11 @@ namespace ElysiaRenderer
 		void DrawInstanced(UINT vertexCount, UINT instanceCount, UINT vertexStartOffset, UINT startInstanceLocation);
 		void DrawInstanced(UINT vertexCount, UINT instanceCount, UINT startIndexLocation, UINT vertexStartOffset, UINT startInstanceLocation);
 
+		void Dispatch(size_t groupCountX, size_t groupCountY, size_t groupCountZ);
+		void Dispatch1D(size_t threadCountX, size_t groupSizeX);
+		void Dispatch2D(size_t threadCountX, size_t threadCountY, size_t groupSizeX, size_t groupSizeY);
+		void Dispatch3D(size_t threadCountX, size_t threadCountY, size_t threadCountZ, size_t groupSizeX, size_t groupSizeY, size_t groupSizeZ);
+
 	private:
 		PipelineStateObject* m_graphicsPipelineStateObject = nullptr;
 	};
