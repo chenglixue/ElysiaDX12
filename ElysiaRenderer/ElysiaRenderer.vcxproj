@@ -161,6 +161,7 @@
     <ClInclude Include="AOPass.h" />
     <ClInclude Include="AOUtility.h" />
     <ClInclude Include="BasePass.h" />
+    <ClInclude Include="BloomPass.h" />
     <ClInclude Include="BoundingBox.h" />
     <ClInclude Include="BufferManager.h" />
     <ClInclude Include="BufferUtility.h" />
@@ -298,6 +299,7 @@
   <ItemGroup>
     <ClCompile Include="AOPass.cpp" />
     <ClCompile Include="BasePass.cpp" />
+    <ClCompile Include="BloomPass.cpp" />
     <ClCompile Include="BufferManager.cpp" />
     <ClCompile Include="CameraManager.cpp" />
     <ClCompile Include="D3D12MemoryAllocator\D3D12MemAlloc.cpp">
@@ -593,6 +595,9 @@
     <None Include="Resource\Shaders\public\SSAO.hlsl">
       <FileType>Document</FileType>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Resource\Shaders\public\Bloom.hlsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

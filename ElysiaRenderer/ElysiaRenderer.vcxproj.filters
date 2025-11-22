@@ -382,6 +382,9 @@
     <ClInclude Include="ContextUtility.h">
       <Filter>Header Files\Utility</Filter>
     </ClInclude>
+    <ClInclude Include="BloomPass.h">
+      <Filter>Header Files\Render\Pass</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -782,6 +785,9 @@
     <ClCompile Include="DX12ComputeContext.cpp">
       <Filter>Source Files\DX12</Filter>
     </ClCompile>
+    <ClCompile Include="BloomPass.cpp">
+      <Filter>Source Files\Render\Pass</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CopyFileToFolders Include="dxc\bin\x64\dxcompiler.dll" />
@@ -818,5 +824,10 @@
     <Image Include="Resource\Tex\Wood.dds">
       <Filter>Resource Files\Tex</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Resource\Shaders\public\Bloom.hlsl">
+      <Filter>Resource Files\Shader\Public</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

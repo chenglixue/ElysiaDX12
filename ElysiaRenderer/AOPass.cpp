@@ -90,6 +90,7 @@ namespace ElysiaRenderer
 
 		m_pMaterial->SetConstantVariable("g_AOSampleKernelArray", GenerateSSAOSampleKernel());
 		TextureManager::GetInstance().AddGlobalRT("g_AOIndex", m_pAORT->GetTexture()->GetResourceHeapIndex());
+
 	}
 
 	void AOPass::Execute()

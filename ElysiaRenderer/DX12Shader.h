@@ -41,6 +41,7 @@ namespace ElysiaRenderer
 		UINT PassIndex;
 		std::unique_ptr<DX12Shader> pVSShader = nullptr;
 		std::unique_ptr<DX12Shader>	pPSShader = nullptr;
+		std::unique_ptr<DX12Shader>	pCSShader = nullptr;
 		D3D12_RASTERIZER_DESC		RasterizerDesc;
 		D3D12_BLEND_DESC			BlendDesc;
 		D3D12_DEPTH_STENCIL_DESC	DepthStencilDesc;

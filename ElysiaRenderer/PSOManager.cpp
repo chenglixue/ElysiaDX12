@@ -103,4 +103,25 @@ namespace ElysiaRenderer
 
 		return pipelineStateObject;
 	}
+
+	PipelineStateObject* PSOManager::GetComputePipelineState(RenderMaterial* pMaterial, UINT passIndex)
+	{
+		auto& passData = pMaterial->GetPassData(passIndex);
+
+		auto resourceMapping = PipelineResourceMapping();
+		auto pDX12RootSignature = std::unique_ptr<DX12RootSignature>(GetDevice()->CreateRootSignature(*passData.MeshResourceLayouts, resourceMapping));
+
+		D3D12_COMPUTE_PIPELINE_STATE_DESC PSODesc{};
+		PSODesc.CS = D3D12_SHADER_BYTECODE
+		{
+			.pShaderBytecode = passData.pCSShader->GetShader()->GetBufferPointer(),
+			.BytecodeLength = passData.pCSShader->GetShader()->GetBufferSize(),
+		};
+		PSODesc.pRootSignature = pDX12RootSignature->GetSignature();
+	}
+
+	PipelineStateObject* GetComputePipelineState(const D3D12_COMPUTE_PIPELINE_STATE_DESC& PSODesc, DX12RootSignature* pRootSignature)
+	{
+
+	}
 }

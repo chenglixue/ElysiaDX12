@@ -28,6 +28,7 @@ namespace ElysiaRenderer
 		void SetVertexBuffer(UINT startIndex, UINT numVertexBuffer, D3D12_VERTEX_BUFFER_VIEW& vertexBufferView);
 		void SetIndexBuffer(const D3D12_INDEX_BUFFER_VIEW& indexBufferView);
 
+		void DrawFullScreenTriangle();
 		void Draw(UINT vertexCount, UINT vertexStartOffset = 0);
 		void Draw(UINT vertexCount, UINT vertexStartOffset, UINT startIndexLocation);
 		void DrawInstanced(UINT vertexCount, UINT instanceCount, UINT vertexStartOffset, UINT startInstanceLocation);

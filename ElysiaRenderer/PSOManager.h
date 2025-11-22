@@ -55,10 +55,13 @@ namespace ElysiaRenderer
 			const RenderTargetDesc& renderTargetDesc,
 			D3D12_PRIMITIVE_TOPOLOGY_TYPE topology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
 
+		PipelineStateObject* GetComputePipelineState(RenderMaterial* pMaterial, UINT passIndex);
+
 	private:
 		std::unordered_map<D3D12_GRAPHICS_PIPELINE_STATE_DESC, std::unique_ptr<PipelineStateObject>> m_pipelineStates;
 
 		PipelineStateObject* GetGraphicsPipelineState(const D3D12_GRAPHICS_PIPELINE_STATE_DESC& PSODesc, DX12RootSignature* pRootSignature);
+		PipelineStateObject* GetComputePipelineState(const D3D12_COMPUTE_PIPELINE_STATE_DESC& PSODesc, DX12RootSignature* pRootSignature);
 	};
 
 	extern std::unique_ptr<PSOManager> g_pPSOManager;

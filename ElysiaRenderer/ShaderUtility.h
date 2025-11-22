@@ -67,6 +67,7 @@ namespace ElysiaRenderer
 		std::wstring				FilePath;
 		std::wstring				VertexEntryPoint = L"VS";
 		std::wstring				FragmentEntryPoint = L"PS";
+		std::wstring				ComputeEntryPoint = L"CS";
 		D3D12_RASTERIZER_DESC		RasterizerDesc;
 		D3D12_BLEND_DESC			BlendDesc;
 		D3D12_DEPTH_STENCIL_DESC	DepthStencilDesc;

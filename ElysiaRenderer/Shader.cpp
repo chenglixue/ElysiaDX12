@@ -32,6 +32,11 @@ namespace ElysiaRenderer
 			fragmentShaderCreateDesc.shaderType = ShaderType::Pixel;
 			newPassData.pPSShader = std::move(GetDevice()->CreateShader(fragmentShaderCreateDesc));
 
+			ShaderCreateDesc computeShaderCreateDesc{};
+			computeShaderCreateDesc.shaderName = shaderPasses[passID].FilePath;
+			computeShaderCreateDesc.entryPoint = shaderPasses[passID].FragmentEntryPoint;
+			computeShaderCreateDesc.shaderType = ShaderType::Compute;
+
 			// shader reflect
 			for (auto& VSShaderVariable : newPassData.pVSShader->GetVariable())
 			{

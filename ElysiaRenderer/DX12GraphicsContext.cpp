@@ -88,7 +88,7 @@ namespace ElysiaRenderer
 			auto CBVResource = pipelineBindResourceSpace->GetCBV();
 
 			static const uint32_t maxNumHandlesBinding = 16;
-			const UINT numTableHandles = static_cast<UINT>(SRVResources.size());
+			const UINT numTableHandles = static_cast<UINT>(SRVResources.size() + UAVResources.size());
 			assert(numTableHandles <= maxNumHandlesBinding);
 
 			static const uint32_t singleDescriptorRangeCopyArray[maxNumHandlesBinding]{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ,1 };
@@ -127,6 +127,18 @@ namespace ElysiaRenderer
 				return;
 			}
 
+			for (auto& UAV : UAVResources)
+			{
+				if (UAV->m_resource->GetBufferType() == GPUResourceType::Texture)
+				{
+					handles[currentHandleIndex++] = static_cast<DX12TextureResource*>(UAV->m_resource)->GetUAVDescriptor().GetCPUHandle();
+				}
+				else
+				{
+					handles[currentHandleIndex++] = static_cast<DX12BufferResource*>(UAV->m_resource)->GetUAVDescriptor().GetCPUHandle();
+				}
+			}
+
 			for (auto& SRV : SRVResources)
 			{
 				if (SRV->m_resource->GetBufferType() == GPUResourceType::Texture)
@@ -149,6 +161,17 @@ namespace ElysiaRenderer
 				case PipelineType::Graphics:
 				{
 					m_commandList->SetGraphicsRootDescriptorTable(tableMapping.value(), blockStart.GetGPUHandle());
+					break;
+				}
+				case PipelineType::Compute:
+				{
+					m_commandList->SetComputeRootDescriptorTable(tableMapping.value(), blockStart.GetGPUHandle());
+					break;
+				}
+				default:
+				{
+					assert(false);
+
 					break;
 				}
 			}
@@ -200,6 +223,12 @@ namespace ElysiaRenderer
 		m_commandList->IASetIndexBuffer(&indexBufferView);
 	}
 
+	void DX12GraphicsContext::DrawFullScreenTriangle()
+	{
+		SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+		m_commandList->IASetIndexBuffer(nullptr);
+		Draw(3);
+	}
 	void DX12GraphicsContext::Draw(UINT vertexCount, UINT vertexStartOffset)
 	{
 		DrawInstanced(vertexCount, 1, vertexStartOffset, 0);

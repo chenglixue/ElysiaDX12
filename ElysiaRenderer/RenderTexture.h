@@ -66,4 +66,24 @@ namespace ElysiaRenderer
 
 		return cameraDepthRT;
 	}
+
+	inline std::unique_ptr<RenderTexture> CreateRWRenderTexture(
+		UINT64 width,
+		UINT64 height,
+		DXGI_FORMAT format,
+		bool enableRandomWrite,
+		const wchar_t* name = L"")
+	{
+		RenderTextureDesc desc{};
+		desc.Width = width;
+		desc.Height = height;
+		desc.Format = format;
+		desc.Name = name;
+		desc.EnableRandomWrite = enableRandomWrite;
+
+		auto cameraDepthRT = std::make_unique<RenderTexture>();
+		cameraDepthRT->Init(desc);
+
+		return cameraDepthRT;
+	}
 }
