@@ -25,7 +25,7 @@ namespace ElysiaRenderer
 
 	PipelineStateObject* PSOManager::GetGraphicsPipelineState(const D3D12_GRAPHICS_PIPELINE_STATE_DESC& PSODesc, DX12RootSignature* pRootSignature)
 	{
-		auto emplaceResult = m_pipelineStates.try_emplace(PSODesc);
+		auto emplaceResult = m_graphicsPipelineStates.try_emplace(PSODesc);
 
 		if (emplaceResult.second) 
 		{
@@ -118,10 +118,35 @@ namespace ElysiaRenderer
 			.BytecodeLength = passData.pCSShader->GetShader()->GetBufferSize(),
 		};
 		PSODesc.pRootSignature = pDX12RootSignature->GetSignature();
+
+		auto pipelineStateObject = GetComputePipelineState(PSODesc, pDX12RootSignature.get());
+		if (pipelineStateObject != nullptr)
+		{
+			pipelineStateObject->m_pipelineResourceMapping = resourceMapping;
+			pipelineStateObject->m_rootSignature = std::move(pDX12RootSignature);
+		}
+
+		return pipelineStateObject;
 	}
 
-	PipelineStateObject* GetComputePipelineState(const D3D12_COMPUTE_PIPELINE_STATE_DESC& PSODesc, DX12RootSignature* pRootSignature)
+	PipelineStateObject* PSOManager::GetComputePipelineState(const D3D12_COMPUTE_PIPELINE_STATE_DESC& PSODesc, DX12RootSignature* pRootSignature)
 	{
+		auto emplaceResult = m_computePipelineStates.try_emplace(PSODesc);
 
+		if (emplaceResult.second)
+		{
+			CComPtr<ID3D12PipelineState> pipelineState = nullptr;
+			ElysiaHelper::ThrowIfFailed(GetDevice()->GetDevice()->CreateComputePipelineState(&PSODesc, IID_PPV_ARGS(&pipelineState)));
+
+			auto computePipeline = std::make_unique<DX12ComputePipelineState>(pipelineState, pRootSignature);
+
+			std::unique_ptr<PipelineStateObject> pipelineStateObject = std::make_unique<PipelineStateObject>();
+			pipelineStateObject->m_pipelineType = PipelineType::Compute;
+			pipelineStateObject->m_pipelineState = std::move(computePipeline);
+
+			emplaceResult.first->second = std::move(pipelineStateObject);
+		}
+
+		return emplaceResult.first->second.get();
 	}
 }

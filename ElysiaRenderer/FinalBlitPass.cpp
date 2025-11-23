@@ -106,7 +106,7 @@ namespace ElysiaRenderer
 			m_pCommand->SetPipeline(pipelineStateData);
 			m_pCommand->SetPipelineResource(PER_PASS_SPACE, m_pMaterial->GetPassData(ShaderPassIDs::BlitPassID).MeshResourceLayouts->m_spaces[PER_PASS_SPACE]);
 
-			m_pCommand->Draw(3, 0);
+			m_pCommand->DrawFullScreenTriangle();
 		}
 		
 		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), m_pCommand->GetCommandList());

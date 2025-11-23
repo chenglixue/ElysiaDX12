@@ -22,8 +22,21 @@ namespace ElysiaRenderer
 
 	void DX12GraphicsContext::ClearRenderTarget(const RenderTexture& renderTarget, Color color)
 	{
+		auto oldState = renderTarget.GetTexture()->GetUsageState();
+		if (oldState != D3D12_RESOURCE_STATE_RENDER_TARGET)
+		{
+			AddBarrier(*renderTarget.GetTexture(), D3D12_RESOURCE_STATE_RENDER_TARGET);
+			FlushBarrier();
+		}
+
 		m_commandList->ClearRenderTargetView(renderTarget.GetTexture()->GetRTVDescriptor().GetCPUHandle(),
 			color, 0, nullptr);
+
+		if (oldState != D3D12_RESOURCE_STATE_RENDER_TARGET)
+		{
+			AddBarrier(*renderTarget.GetTexture(), oldState);
+			FlushBarrier();
+		}
 	}
 
 	void DX12GraphicsContext::ClearRenderTarget(const DX12TextureResource& renderTarget, Color color)
@@ -100,26 +113,28 @@ namespace ElysiaRenderer
 			if (CBVResource)
 			{
 				auto& rootParameterIndex = m_graphicsPipelineStateObject->m_pipelineResourceMapping.m_CBVMappings[spaceID];
-				assert(rootParameterIndex.has_value());
-
-				switch (m_graphicsPipelineStateObject->m_pipelineType)
+				if (rootParameterIndex.has_value())
 				{
-					case PipelineType::Graphics:
+					switch (m_graphicsPipelineStateObject->m_pipelineType)
 					{
-						m_commandList->SetGraphicsRootConstantBufferView(rootParameterIndex.value(), CBVResource->GetGPUAddress());
-						break;
-					}
-					case PipelineType::Compute:
-					{
-						m_commandList->SetComputeRootConstantBufferView(rootParameterIndex.value(), CBVResource->GetGPUAddress());
-						break;
-					}
-					default:
-					{
-						assert(false);
-						break;
+						case PipelineType::Graphics:
+						{
+							m_commandList->SetGraphicsRootConstantBufferView(rootParameterIndex.value(), CBVResource->GetGPUAddress());
+							break;
+						}
+						case PipelineType::Compute:
+						{
+							m_commandList->SetComputeRootConstantBufferView(rootParameterIndex.value(), CBVResource->GetGPUAddress());
+							break;
+						} 
+						default:
+						{
+							assert(false);
+							break;
+						}
 					}
 				}
+				
 			}
 
 			if (numTableHandles == 0)
@@ -264,5 +279,33 @@ namespace ElysiaRenderer
 	void DX12GraphicsContext::Dispatch3D(size_t threadCountX, size_t threadCountY, size_t threadCountZ, size_t groupSizeX, size_t groupSizeY, size_t groupSizeZ)
 	{
 		Dispatch(GetGroupCount(threadCountX, groupSizeX), GetGroupCount(threadCountY, groupSizeY), GetGroupCount(threadCountZ, groupSizeZ));
+	}
+
+	void DX12GraphicsContext::CopyTexture(RenderTexture* sourceRT, RenderTexture* destRT)
+	{
+		auto sourceOldState = sourceRT->GetTexture()->GetUsageState();
+		auto destOldState = destRT->GetTexture()->GetUsageState();
+
+		if (sourceOldState != D3D12_RESOURCE_STATE_COPY_SOURCE)
+		{
+			AddBarrier(*sourceRT->GetTexture(), D3D12_RESOURCE_STATE_COPY_SOURCE, false);
+		}
+		if (destOldState != D3D12_RESOURCE_STATE_COPY_DEST)
+		{
+			AddBarrier(*destRT->GetTexture(), D3D12_RESOURCE_STATE_COPY_DEST, false);
+		}
+		FlushBarrier();
+
+		GetCommandList()->CopyResource(destRT->GetResource(), sourceRT->GetResource());
+
+		if (sourceRT->GetTexture()->GetUsageState() != sourceOldState)
+		{
+			AddBarrier(*sourceRT->GetTexture(), sourceOldState, false);
+		}
+		if (destRT->GetTexture()->GetUsageState() != destOldState)
+		{
+			AddBarrier(*destRT->GetTexture(), destOldState, false);
+		}
+		FlushBarrier();
 	}
 }

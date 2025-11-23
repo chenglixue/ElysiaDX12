@@ -187,7 +187,7 @@ namespace ElysiaRenderer
 			m_pMaterial->ApplyConstantData();
 			m_pCommand->SetPipelineResource(PER_PASS_SPACE, m_pMaterial->GetPassData(ShaderPasseIDs::BlitPassID).MeshResourceLayouts->m_spaces[PER_PASS_SPACE]);
 
-			m_pCommand->Draw(3, 0);
+			m_pCommand->DrawFullScreenTriangle();
 		}
 
 		m_pCommand->AddBarrier(*GetBufferManager()->GetCameraColorRT()->GetTexture(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);

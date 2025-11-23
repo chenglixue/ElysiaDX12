@@ -294,6 +294,7 @@ namespace ElysiaRenderer
 		GetRenderResource()->GetCBVFrameVariable()->GBuffer4Index = m_GBufferRTs[GBufferIndex++]->GetTexture()->GetResourceHeapIndex();
 		GetRenderResource()->GetCBVFrameVariable()->GBuffer5Index = m_GBufferRTs[GBufferIndex++]->GetTexture()->GetResourceHeapIndex();
 		GetRenderResource()->GetCBVFrameVariable()->OpaqueDepthIndex = GetBufferManager()->GetCameraDepthRT()->GetTexture()->GetResourceHeapIndex();
+		GetRenderResource()->GetCBVFrameVariable()->OpaqueColorIndex = GetBufferManager()->GetCameraColorRT()->GetTexture()->GetResourceHeapIndex();
 
 
 	}

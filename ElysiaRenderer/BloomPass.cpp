@@ -44,7 +44,7 @@ namespace ElysiaRenderer
 						static_cast<UINT64>(m_renderSize.y),
 						DXGI_FORMAT_R11G11B10_FLOAT,
 						true,
-						L"Temp RT");
+						L"Bloom RT");
 					break;
 				}
 				case HDRQuality::High:
@@ -54,7 +54,7 @@ namespace ElysiaRenderer
 						static_cast<UINT64>(m_renderSize.y),
 						DXGI_FORMAT_R16G16B16A16_FLOAT,
 						true,
-						L"Temp RT");
+						L"Bloom RT");
 					break;
 				}
 				default:
@@ -66,11 +66,12 @@ namespace ElysiaRenderer
 		}
 		
 		m_shaderPasses = std::vector<ShaderPass>
-		{
+		{ 
 			ShaderPass
 			{
 				.Name = "Bloom Pass",
 				.FilePath = L"Shaders\\public\\Bloom.hlsl",
+				.ComputeEntryPoint = L"CS"
 			},
 			/*ShaderPass
 			{
@@ -81,26 +82,23 @@ namespace ElysiaRenderer
 				.RasterizerDesc = GetRasterizerState(RasterizerState::NoCullNoMS),
 				.BlendDesc = GetBlendState(BlendState::Disabled),
 				.DepthStencilDesc = GetDepthState(DepthState::Disabled)
-			}*/
+			}*/  
 		};
-
+		  
 		m_pMaterial = std::make_unique<RenderMaterial>(m_shaderPasses);
 		ShaderPasseIDs::BloomPassID = m_pMaterial->FindPassIndex("Bloom Pass");
 
 		{
-			RenderTargetDesc RTDesc = RenderTargetDesc
-			{
-				.m_renderTargetFormats = m_pBloomRT->GetFormat(),
-				.m_numRenderTargets = 1,
-				.m_depthStencilFormat = GetBufferManager()->GetCameraDepthRT()->GetFormat()
-			};
-
 			auto emplaceResult = m_PipelineStateObjects.try_emplace(ShaderPasseIDs::BloomPassID);
 			if (emplaceResult.second)
 			{
-				emplaceResult.first->second = GetPSOManager()->GetGraphicsPipelineState(m_pMaterial.get(), ShaderPasseIDs::BloomPassID, RTDesc);
+				emplaceResult.first->second = GetPSOManager()->GetComputePipelineState(m_pMaterial.get(), ShaderPasseIDs::BloomPassID);
 			}
 		}
+		m_pMaterial->SetConstantVariable("g_bloomRTIndex", m_pBloomRT->GetTexture()->GetResourceHeapIndex());
+		m_pMaterial->SetConstantVariable("g_ScreenSize", GetScreenSize(m_renderSize));
+		m_pMaterial->ApplyConstantData();
+
 	}
 	void BloomPass::Execute()
 	{
@@ -116,17 +114,11 @@ namespace ElysiaRenderer
 
 	void BloomPass::DoBloomPass()
 	{
-		m_pCommand->AddBarrier(*m_pBloomRT->GetTexture(), D3D12_RESOURCE_STATE_RENDER_TARGET);
-		m_pCommand->FlushBarrier();
-		m_pCommand->ClearRenderTarget(*m_pBloomRT->GetTexture(), Color::Black);
-
-		m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_renderSize));
-		m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		m_pCommand->ClearRenderTarget(*m_pBloomRT, Color::Black);
+		m_pCommand->AddBarrier(*m_pBloomRT->GetTexture(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
 		PipelineInfo pipelineStateData{};
 		pipelineStateData.m_pipelineStateObject = m_PipelineStateObjects[ShaderPasseIDs::BloomPassID];
-		pipelineStateData.m_renderTargets = { m_pBloomRT->GetTexture() };
-		pipelineStateData.m_depthStencilTarget = GetBufferManager()->GetCameraDepthRT()->GetTexture();
 
 		bool isReady = true;
 		{
@@ -135,7 +127,6 @@ namespace ElysiaRenderer
 				ThrowRuntimeError("null texture resource");
 			}
 			isReady &= m_pBloomRT->GetTexture()->GetIsReady();
-			isReady &= GetBufferManager()->GetCameraDepthRT()->GetTexture()->GetIsReady();
 		}
 		if (isReady)
 		{
@@ -143,10 +134,13 @@ namespace ElysiaRenderer
 			m_pCommand->SetPipelineResource(PER_PASS_SPACE, m_pMaterial->GetPassData(ShaderPasseIDs::BloomPassID).MeshResourceLayouts->m_spaces[PER_PASS_SPACE]);
 			m_pCommand->SetPipelineResource(PER_FRAME_SPACE, GetRenderResource()->GetPerFrameBindResourceSpace());
 
-			m_pCommand->Draw(3, 0);
+			m_pCommand->Dispatch(m_pBloomRT->GetWidth() / 8, m_pBloomRT->GetHeight() / 8, 1);
+
+			m_pCommand->CopyTexture(m_pBloomRT.get(), GetBufferManager()->GetCameraColorRT());
+			m_pCommand->AddBarrier(*GetBufferManager()->GetCameraColorRT()->GetTexture(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		}
 
-		m_pCommand->AddBarrier(*m_pBloomRT->GetTexture(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		m_pCommand->AddBarrier(*m_pBloomRT->GetTexture(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 		m_pCommand->FlushBarrier();
 	}
 

@@ -54,4 +54,19 @@ namespace ElysiaRenderer
 	DX12GraphicsPipelineState::~DX12GraphicsPipelineState()
 	{
 	}
+
+
+	DX12ComputePipelineState::DX12ComputePipelineState()
+		: DX12PipelineState()
+	{
+		m_pipelineType = PipelineType::Compute;
+	}
+	DX12ComputePipelineState::DX12ComputePipelineState(CComPtr<ID3D12PipelineState> pipelineState, DX12RootSignature* rootSignature)
+		: DX12PipelineState(pipelineState, rootSignature)
+	{
+		m_pipelineType = PipelineType::Compute;
+	}
+	DX12ComputePipelineState::~DX12ComputePipelineState()
+	{
+	}
 }

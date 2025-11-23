@@ -2,6 +2,7 @@
 #define COLOR_H
 
 #include "Math.hlsli"
+#include "Common.hlsl"
 
 // sRGB
 float SRGBToLinear(float c)
@@ -126,5 +127,35 @@ float3 AMDTonemapInvert(float3 c)
       TonemapWithWeight(c, 0.25));
 }
 
+float3 ToneMapFilmicALU(in float3 color)
+{
+    color *= 16.0;
+    const float A = 0.15; // 线性强度
+    const float B = 0.50; // 肩部强度
+    const float C = 0.10; // 趾部强度
+    const float D = 0.20; // 白点阈值
+    const float E = 0.02; // 暗部提升
+    const float F = 0.30; // 线性斜率
+    return ((color * (A * color + C * B) + D * E) / (color * (A * color + B) + D * F)) - E / F;
+}
+
+float3 uncharted2_tonemap_partial(float3 x)
+{
+    float A = 0.15f;
+    float B = 0.50f;
+    float C = 0.10f;
+    float D = 0.20f;
+    float E = 0.02f;
+    float F = 0.30f;
+    return ((x * (A * x + C * B) + D * E) / (x * (A * x + B) + D * F)) - E / F;
+}
+float3 uncharted2_filmic(float3 v)
+{
+    float exposure_bias = 2.0f;
+    float3 curr = uncharted2_tonemap_partial(v * exposure_bias);
+    float3 W = 11.2f;
+    float3 white_scale = 1.0f / uncharted2_tonemap_partial(W);
+    return curr * white_scale;
+}
 
 #endif

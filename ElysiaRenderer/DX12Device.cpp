@@ -233,7 +233,7 @@ namespace ElysiaRenderer
 			m_destructionQueues[i].m_buffers = std::make_unique<std::vector<DX12BufferResource>>();
 			m_destructionQueues[i].m_textures = std::make_unique<std::vector<DX12TextureResource>>();
 			m_destructionQueues[i].m_contexts = std::make_unique<std::vector<DX12Context>>();
-			m_destructionQueues[i].m_pipelineStates = std::make_unique<std::vector<DX12PipelineState>>();
+			m_destructionQueues[i].m_graphicsPipelineStates = std::make_unique<std::vector<DX12PipelineState>>();
 		}*/
 		m_frameID = 0;
 		m_frameIndex = 0;
@@ -969,7 +969,7 @@ namespace ElysiaRenderer
 						std::cout << std::endl;
 #endif // DEBUG
 
-						ShaderVariable temp
+						ShaderVariable temp 
 						{
 							.type = ShaderVariable::Type::ConstantBuffer,
 							.registerPos = registerPos,
@@ -1159,6 +1159,7 @@ namespace ElysiaRenderer
 			{
 				const auto CBV = currSpace->GetCBV();
 				auto SRVs = currSpace->GetSRVs();
+				auto UAVs = currSpace->GetUAVs();
 
 				if (CBV)
 				{
@@ -1169,9 +1170,22 @@ namespace ElysiaRenderer
 					rootParameters.emplace_back(std::move(rootParameter));
 				}
 
-				if (SRVs.empty())
+				if (SRVs.empty() && UAVs.empty())
 				{
 					continue;
+				}
+
+				for (auto& uav : UAVs)
+				{
+					D3D12_DESCRIPTOR_RANGE1 range{};
+					range.BaseShaderRegister = uav->m_bindingIndex;
+					range.NumDescriptors = 1;
+					range.OffsetInDescriptorsFromTableStart = static_cast<uint32_t>(currDescriptorRange.size());
+					range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
+					range.RegisterSpace = currSpaceID;
+					range.Flags = D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE | D3D12_DESCRIPTOR_RANGE_FLAG_DATA_VOLATILE;
+
+					currDescriptorRange.push_back(range);
 				}
 
 				// all of SRV Resource has one DESCRIPTOR RANGE which only has one descriptor

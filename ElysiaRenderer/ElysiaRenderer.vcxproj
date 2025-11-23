@@ -597,7 +597,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Resource\Shaders\public\Bloom.hlsl" />
+    <None Include="Resource\Shaders\public\Bloom.hlsl">
+      <FileType>Document</FileType>
+    </None>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

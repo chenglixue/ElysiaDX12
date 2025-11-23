@@ -34,6 +34,16 @@ namespace ElysiaRenderer
 	private:
 	};
 
+	class DX12ComputePipelineState : public DX12PipelineState
+	{
+	public:
+		DX12ComputePipelineState();
+		DX12ComputePipelineState(CComPtr<ID3D12PipelineState> pipelineState, DX12RootSignature* rootSignature);
+		~DX12ComputePipelineState() override;
+
+	private:
+	};
+
 	struct PipelineStateObject
 	{
 		std::unique_ptr<DX12PipelineState> m_pipelineState = nullptr;

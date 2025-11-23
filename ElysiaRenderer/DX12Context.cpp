@@ -68,7 +68,7 @@ namespace ElysiaRenderer
 		}
 	}
 
-	void DX12Context::AddBarrier(DX12GPUResource& resource, D3D12_RESOURCE_STATES newState)
+	void DX12Context::AddBarrier(DX12GPUResource& resource, D3D12_RESOURCE_STATES newState, bool isFlush)
 	{
 		if (m_numQueuedBarriers >= MAX_QUEUED_BARRIERS)
 		{
@@ -87,6 +87,11 @@ namespace ElysiaRenderer
 			barrierDesc.Transition = {resource.GetResource(), D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES, oldState, newState};
 
 			resource.SetUsageState(newState);
+		}
+
+		if (isFlush)
+		{
+			FlushBarrier();
 		}
 	}
 

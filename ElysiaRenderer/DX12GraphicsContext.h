@@ -39,6 +39,8 @@ namespace ElysiaRenderer
 		void Dispatch2D(size_t threadCountX, size_t threadCountY, size_t groupSizeX, size_t groupSizeY);
 		void Dispatch3D(size_t threadCountX, size_t threadCountY, size_t threadCountZ, size_t groupSizeX, size_t groupSizeY, size_t groupSizeZ);
 
+		void CopyTexture(RenderTexture* sourceRT, RenderTexture* destRT);
+
 	private:
 		PipelineStateObject* m_graphicsPipelineStateObject = nullptr;
 	};

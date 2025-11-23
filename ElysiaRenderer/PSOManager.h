@@ -31,6 +31,30 @@ namespace std
 			return memcmp(&a, &b, sizeof(argument_type)) == 0;
 		}
 	};
+
+	template<>
+	struct hash<D3D12_COMPUTE_PIPELINE_STATE_DESC>
+	{
+		using argument_type = D3D12_COMPUTE_PIPELINE_STATE_DESC;
+		using result_type = size_t;
+
+		size_t operator()(argument_type const& v) const
+		{
+			return xxh::GetHash<argument_type>(v);
+		}
+	};
+
+	template<>
+	struct equal_to<D3D12_COMPUTE_PIPELINE_STATE_DESC>
+	{
+		using argument_type = D3D12_COMPUTE_PIPELINE_STATE_DESC;
+		using result_type = size_t;
+
+		bool operator()(argument_type const& a, argument_type const& b) const
+		{
+			return memcmp(&a, &b, sizeof(argument_type)) == 0;
+		}
+	};
 }
 
 namespace ElysiaRenderer
@@ -58,7 +82,8 @@ namespace ElysiaRenderer
 		PipelineStateObject* GetComputePipelineState(RenderMaterial* pMaterial, UINT passIndex);
 
 	private:
-		std::unordered_map<D3D12_GRAPHICS_PIPELINE_STATE_DESC, std::unique_ptr<PipelineStateObject>> m_pipelineStates;
+		std::unordered_map<D3D12_GRAPHICS_PIPELINE_STATE_DESC, std::unique_ptr<PipelineStateObject>> m_graphicsPipelineStates{};
+		std::unordered_map<D3D12_COMPUTE_PIPELINE_STATE_DESC, std::unique_ptr<PipelineStateObject>> m_computePipelineStates{};
 
 		PipelineStateObject* GetGraphicsPipelineState(const D3D12_GRAPHICS_PIPELINE_STATE_DESC& PSODesc, DX12RootSignature* pRootSignature);
 		PipelineStateObject* GetComputePipelineState(const D3D12_COMPUTE_PIPELINE_STATE_DESC& PSODesc, DX12RootSignature* pRootSignature);

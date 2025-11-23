@@ -16,6 +16,7 @@
 #include "TonemapPass.h"
 #include "UIPass.h"
 #include "FinalBlitPass.h"
+#include "BloomPass.h"
 
 #include "SobolSequenceGenerator.h"
 #include "CBVParameter.h"
@@ -165,6 +166,7 @@ namespace ElysiaRenderer
 		m_passes.emplace_back(std::move(std::make_unique<AOPass>(m_pCameraManager->GetMainCamera())));
 		m_passes.emplace_back(std::move(std::make_unique<OpaquePass>(m_pCameraManager->GetMainCamera())));
 		m_passes.emplace_back(std::move(std::make_unique<TonemapPass>(m_pCameraManager->GetMainCamera())));
+		m_passes.emplace_back(std::move(std::make_unique<BloomPass>(m_pCameraManager->GetMainCamera())));
 		m_passes.emplace_back(std::move(std::make_unique<UIPass>()));
 		m_passes.emplace_back(std::move(std::make_unique<FinalBlitPass>(m_pCameraManager->GetMainCamera())));
 		for (auto& pass : m_passes)

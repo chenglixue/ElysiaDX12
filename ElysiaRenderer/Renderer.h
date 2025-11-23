@@ -90,7 +90,7 @@ namespace ElysiaRenderer
 		void Setup();
 		void CreateConstantBuffers();
 		
-		void Execute();
+		void Execute(); 
 	};     
 }   
-       
+          

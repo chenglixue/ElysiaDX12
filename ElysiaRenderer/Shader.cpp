@@ -34,36 +34,73 @@ namespace ElysiaRenderer
 
 			ShaderCreateDesc computeShaderCreateDesc{};
 			computeShaderCreateDesc.shaderName = shaderPasses[passID].FilePath;
-			computeShaderCreateDesc.entryPoint = shaderPasses[passID].FragmentEntryPoint;
+			computeShaderCreateDesc.entryPoint = shaderPasses[passID].ComputeEntryPoint;
 			computeShaderCreateDesc.shaderType = ShaderType::Compute;
+			newPassData.pCSShader = std::move(GetDevice()->CreateShader(computeShaderCreateDesc));
 
 			// shader reflect
-			for (auto& VSShaderVariable : newPassData.pVSShader->GetVariable())
+			if (newPassData.pVSShader)
 			{
-				auto emplaceResult = m_shaderVariables.try_emplace(VSShaderVariable.name);
-				if (emplaceResult.second)
+				for (auto& VSShaderVariable : newPassData.pVSShader->GetVariable())
 				{
-					emplaceResult.first->second = VSShaderVariable;
+					auto emplaceResult = m_shaderVariables.try_emplace(VSShaderVariable.name);
+					if (emplaceResult.second)
+					{
+						emplaceResult.first->second = VSShaderVariable;
+					}
 				}
+
 			}
-			for (auto& PSShaderVariable : newPassData.pPSShader->GetVariable())
+			if (newPassData.pPSShader)
 			{
-				auto emplaceResult = m_shaderVariables.try_emplace(PSShaderVariable.name);
-				if (emplaceResult.second)
+				for (auto& PSShaderVariable : newPassData.pPSShader->GetVariable())
 				{
-					emplaceResult.first->second = PSShaderVariable;
+					auto emplaceResult = m_shaderVariables.try_emplace(PSShaderVariable.name);
+					if (emplaceResult.second)
+					{
+						emplaceResult.first->second = PSShaderVariable;
+					}
+				}
+
+			}
+			if (newPassData.pCSShader)
+			{
+				for (auto& CSShaderVariable : newPassData.pCSShader->GetVariable())
+				{
+					auto emplaceResult = m_shaderVariables.try_emplace(CSShaderVariable.name);
+					if (emplaceResult.second)
+					{
+						emplaceResult.first->second = CSShaderVariable;
+					}
 				}
 			}
 
-			for (auto& VSConstantVariableDesc : newPassData.pVSShader->GetConstantBufferVariables())
+			if (newPassData.pVSShader)
 			{
-				VSConstantVariableDesc.second.PassID = passID;
-				m_constantVariableDescs.insert({ VSConstantVariableDesc.first, VSConstantVariableDesc.second});
+				for (auto& VSConstantVariableDesc : newPassData.pVSShader->GetConstantBufferVariables())
+				{
+					VSConstantVariableDesc.second.PassID = passID;
+					m_constantVariableDescs.insert({ VSConstantVariableDesc.first, VSConstantVariableDesc.second });
+				}
+
 			}
-			for (auto& PSConstantVariableDesc : newPassData.pPSShader->GetConstantBufferVariables())
+			if (newPassData.pPSShader)
 			{
-				PSConstantVariableDesc.second.PassID = passID;
-				m_constantVariableDescs.insert({ PSConstantVariableDesc.first, PSConstantVariableDesc.second });
+				for (auto& PSConstantVariableDesc : newPassData.pPSShader->GetConstantBufferVariables())
+				{
+					PSConstantVariableDesc.second.PassID = passID;
+					m_constantVariableDescs.insert({ PSConstantVariableDesc.first, PSConstantVariableDesc.second });
+				}
+
+			}
+			if (newPassData.pCSShader)
+			{
+				for (auto& CSConstantVariableDesc : newPassData.pCSShader->GetConstantBufferVariables())
+				{
+					CSConstantVariableDesc.second.PassID = passID;
+					m_constantVariableDescs.insert({ CSConstantVariableDesc.first, CSConstantVariableDesc.second });
+				}
+
 			}
 
 			newPassData.MeshResourceLayouts = std::make_unique<PipelineResourceLayout>();
