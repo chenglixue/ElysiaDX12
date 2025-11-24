@@ -85,6 +85,12 @@
     <Filter Include="Source Files\Render\Pass">
       <UniqueIdentifier>{829ccb55-0151-4544-acf1-286f8b3782f4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\AMD">
+      <UniqueIdentifier>{52ff4184-481e-4d4e-88fb-c48990620ffc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\AMD">
+      <UniqueIdentifier>{3498ca6f-6662-4108-8d36-e7bbc1be8e5b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DX12Queue.h">
@@ -388,6 +394,18 @@
     <ClInclude Include="AMD\LPM\ColorConversion.h">
       <Filter>Header Files\Utility</Filter>
     </ClInclude>
+    <ClInclude Include="AMD\LPM\FreesyncHDR.h">
+      <Filter>Header Files\AMD</Filter>
+    </ClInclude>
+    <ClInclude Include="AMD\LPM\Misc.h">
+      <Filter>Header Files\AMD</Filter>
+    </ClInclude>
+    <ClInclude Include="AMD\LPM\ffx_a.h">
+      <Filter>Header Files\AMD</Filter>
+    </ClInclude>
+    <ClInclude Include="AMD\LPM\ffx_lpm.h">
+      <Filter>Header Files\AMD</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -553,6 +571,7 @@
     <None Include="Resource\Shaders\public\Bloom.hlsl">
       <Filter>Resource Files\Shader\Public</Filter>
     </None>
+    <None Include="dxc\bin\x64\dxcompiler.dll" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -797,10 +816,16 @@
     <ClCompile Include="AMD\LPM\ColorConversion.cpp">
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
+    <ClCompile Include="AMD\LPM\FreesyncHDR.cpp">
+      <Filter>Source Files\AMD</Filter>
+    </ClCompile>
+    <ClCompile Include="AMD\LPM\Misc.cpp">
+      <Filter>Source Files\AMD</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <CopyFileToFolders Include="dxc\bin\x64\dxcompiler.dll" />
     <CopyFileToFolders Include="dxc\bin\x64\dxil.dll" />
+    <CopyFileToFolders Include="AMD\libs\AGS\amd_ags_x64.dll" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\x64\Debug\Tex\CyborgWeapon_BaseColor.dds">

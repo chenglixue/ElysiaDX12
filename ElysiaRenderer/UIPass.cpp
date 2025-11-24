@@ -72,8 +72,8 @@ namespace ElysiaRenderer
 			ImGui::SliderFloat("Shadow Depth Bias", &pUserData.shadowDepthBias, 0, 10);
 			ImGui::SliderFloat("Shadow Slope Depth Bias", &pUserData.shadowSlopeDepthBias, 0, 10);
 			ImGui::SliderFloat("Shadow Max Slope Depth Bias", &pUserData.shadowMaxSlopeDepthBias, 0, 10);
-		}
-
+		} 
+		     
 		if (ImGui::CollapsingHeader("PBR Data"))
 		{
 			ImGui::ColorEdit3("Base Color Tint", (float*)&pUserData.BaseColorTint);
@@ -87,7 +87,7 @@ namespace ElysiaRenderer
 		}
 
 		if (ImGui::CollapsingHeader("HDR"))
-		{
+		{ 
 			ImGui::Checkbox("Is Enable HDR", &pUserData.IsUseHDR);
 
 			int HDRQualityIndex = (int)pUserData.HDRLevel;
@@ -111,7 +111,7 @@ namespace ElysiaRenderer
 			ImGui::SliderFloat("LPM Exposure", &pUserData.LpmExposure, 3.0f, 11.0f);
 			ImGui::SliderFloat("Contrast", &pUserData.Contrast, 0.0f, 1.0f);
 			ImGui::SliderFloat("Shoulder Contrast", &pUserData.ShoulderContrast, 1.0f, 1.2f);
-			ImGui::SliderFloat3("Saturation", &pUserData.Saturation[0], 0.0f, 1.0f);
+			ImGui::SliderFloat3("Saturation", &pUserData.Saturation[0], 0.0f, 2.0f);
 			ImGui::SliderFloat3("Crosstalk", &pUserData.Crosstalk[0], 0.0f, 1.0f);
 		}
 

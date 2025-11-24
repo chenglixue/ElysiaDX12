@@ -1,6 +1,7 @@
 #pragma once
 #include "BasePass.h"
 //#include "AMD/libs/vectormath/vectormath.hpp"
+#include "AMD/LPM/FreesyncHDR.h"
 
 namespace ElysiaRenderer
 {

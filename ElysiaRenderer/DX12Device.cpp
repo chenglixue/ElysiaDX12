@@ -734,7 +734,8 @@ namespace ElysiaRenderer
 			DXC_ARG_PACK_MATRIX_ROW_MAJOR,
 			DXC_ARG_DEBUG,
 			DXC_ARG_SKIP_OPTIMIZATIONS,
-			DXC_ARG_ALL_RESOURCES_BOUND
+			DXC_ARG_ALL_RESOURCES_BOUND,
+			DXC_ARG_OPTIMIZATION_LEVEL0
 		};
 		pszArgs.emplace_back(L"-D");
 		pszArgs.emplace_back(L"EDITOR");

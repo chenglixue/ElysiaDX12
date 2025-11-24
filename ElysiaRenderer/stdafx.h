@@ -1,4 +1,8 @@
 #pragma once
+
+#include <SDKDDKVer.h>
+#define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
+
 #include <windows.h>
 #include <windowsx.h>
 #include <wrl.h>
@@ -47,6 +51,8 @@
 
 using namespace DirectX;
 using namespace DirectX::SimpleMath;
+
+
 
 #pragma comment(lib, "Windowscodecs.lib")
 #pragma comment(lib, "RuntimeObject.lib")

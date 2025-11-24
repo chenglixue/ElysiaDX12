@@ -14,12 +14,18 @@ static std::vector<UINT> ctl(24 * 4);
 
 A_STATIC void LpmSetupOut(AU1 i, inAU4 v)
 {
-	for (int j = 0; j < 4; ++j) { ctl[i * 4 + j] = v[j]; }
+	for (int j = 0; j < 4; ++j) 
+	{ 
+		ctl[i * 4 + j] = v[j]; 
+	}
 }
 #include "AMD/LPM/ffx_lpm.h"
 
 namespace ElysiaRenderer
-{
+{ 
+	using namespace CAULDRON_DX12;
+	using namespace ElysiaHelper;
+
 	int TonemapPass::ShaderPasseIDs::BlitPassID = -1;
 	int TonemapPass::ShaderPasseIDs::TonemapPassID = -1;
 
@@ -36,7 +42,7 @@ namespace ElysiaRenderer
 	{
 
 	}
-
+	    
 	void TonemapPass::Configure()
 	{
 		if (!UserData::GetInstance().IsUseHDR)
@@ -129,17 +135,35 @@ namespace ElysiaRenderer
 	}
 	void TonemapPass::Execute()
 	{
-		SetupGamutMapperMatrices(
-            ColorSpace_REC709,
-			UserData::GetInstance().colorSpace,
-            &m_inputToOutputMatrix
+		SetupGamutMapperMatrices( 
+            ColorSpace_REC709, 
+			UserData::GetInstance().colorSpace, 
+            &m_inputToOutputMatrix   
         );
 
-		varAF2(fs2R);
+		varAF2(fs2R);   
 		varAF2(fs2G);
-		varAF2(fs2B);
+		varAF2(fs2B);   
 		varAF2(fs2W);
 		varAF2(displayMinMaxLuminance);
+		if (m_displayMode != DisplayMode::DISPLAYMODE_SDR)
+		{
+			const DXGI_OUTPUT_DESC1* displayInfo = CAULDRON_DX12::GetDisplayInfo();
+
+			// Only used in fs2 modes
+			fs2R[0] = displayInfo->RedPrimary[0];
+			fs2R[1] = displayInfo->RedPrimary[1];
+			fs2G[0] = displayInfo->GreenPrimary[0];
+			fs2G[1] = displayInfo->GreenPrimary[1];
+			fs2B[0] = displayInfo->BluePrimary[0];
+			fs2B[1] = displayInfo->BluePrimary[1];
+			fs2W[0] = displayInfo->WhitePoint[0];
+			fs2W[1] = displayInfo->WhitePoint[1];
+			// Only used in fs2 modes
+
+			displayMinMaxLuminance[0] = displayInfo->MinLuminance;
+			displayMinMaxLuminance[1] = displayInfo->MaxLuminance;
+		}
 
 		m_shoulder = UserData::GetInstance().bShoulder;
 		m_softGap = UserData::GetInstance().SoftGap;
@@ -193,8 +217,84 @@ namespace ElysiaRenderer
 				}
 				break;
 			}
-		}
 
+			case ColorSpace_REC2020:
+			{
+				switch (m_displayMode)
+				{
+				case DisplayMode::DISPLAYMODE_SDR:
+					SetLPMConfig(LPM_CONFIG_709_2020);
+					SetLPMColors(LPM_COLORS_709_2020);
+					break;
+
+				case DisplayMode::DISPLAYMODE_FSHDR_Gamma22:
+					SetLPMConfig(LPM_CONFIG_FS2RAW_2020);
+					SetLPMColors(LPM_COLORS_FS2RAW_2020);
+					break;
+
+				case DisplayMode::DISPLAYMODE_FSHDR_SCRGB:
+					fs2S = LpmFs2ScrgbScalar(displayMinMaxLuminance[0], displayMinMaxLuminance[1]);
+					SetLPMConfig(LPM_CONFIG_FS2SCRGB_2020);
+					SetLPMColors(LPM_COLORS_FS2SCRGB_2020);
+					break;
+
+				case DisplayMode::DISPLAYMODE_HDR10_2084:
+					hdr10S = LpmHdr10RawScalar(displayMinMaxLuminance[1]);
+					SetLPMConfig(LPM_CONFIG_HDR10RAW_2020);
+					SetLPMColors(LPM_COLORS_HDR10RAW_2020);
+					break;
+
+				case DisplayMode::DISPLAYMODE_HDR10_SCRGB:
+					hdr10S = LpmHdr10ScrgbScalar(displayMinMaxLuminance[1]);
+					SetLPMConfig(LPM_CONFIG_HDR10SCRGB_2020);
+					SetLPMColors(LPM_COLORS_HDR10SCRGB_2020);
+					break;
+
+				default:
+					break;
+				}
+				break;
+			}
+
+			case ColorSpace_P3:
+			{
+				switch (m_displayMode)
+				{
+				case DisplayMode::DISPLAYMODE_SDR:
+					SetLPMConfig(LPM_CONFIG_709_P3);
+					SetLPMColors(LPM_COLORS_709_P3);
+					break;
+
+				case DisplayMode::DISPLAYMODE_FSHDR_Gamma22:
+					SetLPMConfig(LPM_CONFIG_FS2RAW_P3);
+					SetLPMColors(LPM_COLORS_FS2RAW_P3);
+					break;
+
+				case DisplayMode::DISPLAYMODE_FSHDR_SCRGB:
+					fs2S = LpmFs2ScrgbScalar(displayMinMaxLuminance[0], displayMinMaxLuminance[1]);
+					SetLPMConfig(LPM_CONFIG_FS2SCRGB_P3);
+					SetLPMColors(LPM_COLORS_FS2SCRGB_P3);
+					break;
+
+				case DisplayMode::DISPLAYMODE_HDR10_2084:
+					hdr10S = LpmHdr10RawScalar(displayMinMaxLuminance[1]);
+					SetLPMConfig(LPM_CONFIG_HDR10RAW_P3);
+					SetLPMColors(LPM_COLORS_HDR10RAW_P3);
+					break;
+
+				case DisplayMode::DISPLAYMODE_HDR10_SCRGB:
+					hdr10S = LpmHdr10ScrgbScalar(displayMinMaxLuminance[1]);
+					SetLPMConfig(LPM_CONFIG_HDR10SCRGB_P3);
+					SetLPMColors(LPM_COLORS_HDR10SCRGB_P3);
+					break;
+
+				default:
+					break;
+				}
+				break;
+			}
+		}
+		  
 		LpmSetup(m_shoulder, m_con, m_soft, m_con2, m_clip, m_scaleOnly,
 			m_xyRedW, m_xyGreenW, m_xyBlueW, m_xyWhiteW,
 			m_xyRedO, m_xyGreenO, m_xyBlueO, m_xyWhiteO,
@@ -202,16 +302,16 @@ namespace ElysiaRenderer
 			m_scaleC,
 			m_softGap, m_hdrMax, m_exposure, m_contrast, m_shoulderContrast,
 			m_saturation, m_crosstalk);
-
-		m_pMaterial->SetConstantVariable("u_shoulder", m_shoulder, 1);
-		m_pMaterial->SetConstantVariable("u_con", m_con, 1);
-		m_pMaterial->SetConstantVariable("u_soft", m_soft, 1);
-		m_pMaterial->SetConstantVariable("u_con2", m_con2, 1);
-		m_pMaterial->SetConstantVariable("u_clip", m_clip, 1); 
-		m_pMaterial->SetConstantVariable("u_scaleOnly", m_scaleOnly, 1);
-		m_pMaterial->SetConstantVariable("u_displayMode", (UINT)m_displayMode, 1);
-		m_pMaterial->SetConstantVariable("u_inputToOutputMatrix", m_inputToOutputMatrix, 1);
-		m_pMaterial->SetConstantVariable("u_ctl", ctl, 1);
+		 
+		m_pMaterial->SetConstantVariable("u_shoulder", m_shoulder, ShaderPasseIDs::TonemapPassID);
+		m_pMaterial->SetConstantVariable("u_con", m_con, ShaderPasseIDs::TonemapPassID);
+		m_pMaterial->SetConstantVariable("u_soft", m_soft, ShaderPasseIDs::TonemapPassID);
+		m_pMaterial->SetConstantVariable("u_con2", m_con2, ShaderPasseIDs::TonemapPassID);
+		m_pMaterial->SetConstantVariable("u_clip", m_clip, ShaderPasseIDs::TonemapPassID);
+		m_pMaterial->SetConstantVariable("u_scaleOnly", m_scaleOnly, ShaderPasseIDs::TonemapPassID);
+		m_pMaterial->SetConstantVariable("u_displayMode", (UINT)m_displayMode, ShaderPasseIDs::TonemapPassID);
+		m_pMaterial->SetConstantVariable("u_inputToOutputMatrix", m_inputToOutputMatrix, ShaderPasseIDs::TonemapPassID);
+		m_pMaterial->SetConstantVariable("u_ctl", ctl, ShaderPasseIDs::TonemapPassID);
 		m_pMaterial->ApplyConstantData();
 	}
 

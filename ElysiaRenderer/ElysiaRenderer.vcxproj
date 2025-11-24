@@ -73,8 +73,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>D:\DX12\ElysiaRenderer\x64\Debug\Assimp\include;D:\DX12\ElysiaDX12\x64\Debug\Assimp\Environment;D:\DX12\ElysiaDX12\x64\Debug\Assimp\include;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\DX12\ElysiaDX12\x64\Debug\Assimp\include;D:\DX12\ElysiaRenderer\x64\Debug\Assimp\Environment;$(LibraryPath)</LibraryPath>
+    <IncludePath>D:\DX12\ElysiaRenderer\x64\Debug\Assimp\include;D:\DX12\ElysiaDX12\x64\Debug\Assimp\Environment;D:\DX12\ElysiaDX12\x64\Debug\Assimp\include;D:\DX12\ElysiaDX12\ElysiaRenderer\AMD\libs\AGS;D:\DX12\ElysiaDX12\x64\Debug\Shaders;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\DX12\ElysiaDX12\ElysiaRenderer\AMD\libs\AGS;D:\DX12\ElysiaDX12\x64\Debug\Assimp\include;D:\DX12\ElysiaRenderer\x64\Debug\Assimp\Environment;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -111,7 +111,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;USE_PIX;PROFILE;PROFILE_BUILD;DBG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>D:\DX12\ElysiaRenderer\x64\Debug\Shaders;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc\include;D:\DX12\ElysiaDX12\x64\Debug\Assimp\include\assimp;DirectXTK12\Inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\DX12\ElysiaRenderer\x64\Debug\Shaders;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc\include;D:\DX12\ElysiaDX12\x64\Debug\Assimp\include\assimp;DirectXTK12\Inc;D:\DX12\ElysiaDX12\ElysiaRenderer\AMD\libs\AGS;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>0018;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -119,8 +119,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
-      <AdditionalDependencies>d3d12.lib;dxcompiler.lib;dxgi.lib;assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc\lib\spectre\x64;D:\DX12\ElysiaRenderer\ElysiaRenderer\dxc\lib\x64;D:\DX12\ElysiaDX12\x64\Debug\Assimp\Environment;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>d3d12.lib;dxcompiler.lib;dxgi.lib;assimp-vc143-mt.lib;amd_ags_x64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc\lib\spectre\x64;D:\DX12\ElysiaRenderer\ElysiaRenderer\dxc\lib\x64;D:\DX12\ElysiaDX12\x64\Debug\Assimp\Environment;D:\DX12\ElysiaDX12\ElysiaRenderer\AMD\libs\AGS;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>xcopy $(ProjectDir)Resource $(TargetDir) /Y /E</Command>
@@ -159,6 +159,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="AMD\LPM\ColorConversion.h" />
+    <ClInclude Include="AMD\LPM\ffx_a.h" />
+    <ClInclude Include="AMD\LPM\ffx_lpm.h" />
+    <ClInclude Include="AMD\LPM\FreesyncHDR.h" />
+    <ClInclude Include="AMD\LPM\Misc.h" />
     <ClInclude Include="AOPass.h" />
     <ClInclude Include="AOUtility.h" />
     <ClInclude Include="BasePass.h" />
@@ -261,10 +265,6 @@
     <ClInclude Include="UserData.h" />
   </ItemGroup>
   <ItemGroup>
-    <CopyFileToFolders Include="dxc\bin\x64\dxcompiler.dll">
-      <FileType>Document</FileType>
-      <DeploymentContent>true</DeploymentContent>
-    </CopyFileToFolders>
     <CopyFileToFolders Include="dxc\bin\x64\dxil.dll">
       <FileType>Document</FileType>
       <DeploymentContent>true</DeploymentContent>
@@ -274,6 +274,10 @@
     <None Include="..\x64\Debug\Shaders\private\Math.hlsli" />
     <None Include="..\x64\Debug\Shaders\private\SharedCommon.hlsli" />
     <None Include="..\x64\Debug\Shaders\private\Transform.hlsli" />
+    <CopyFileToFolders Include="AMD\libs\AGS\amd_ags_x64.dll">
+      <FileType>Document</FileType>
+    </CopyFileToFolders>
+    <None Include="dxc\bin\x64\dxcompiler.dll" />
     <None Include="DXTex\Shaders\Compiled\BC6HEncode_EncodeBlockCS.inc" />
     <None Include="DXTex\Shaders\Compiled\BC6HEncode_TryModeG10CS.inc" />
     <None Include="DXTex\Shaders\Compiled\BC6HEncode_TryModeLE10CS.inc" />
@@ -301,6 +305,10 @@
     <ClCompile Include="AMD\LPM\ColorConversion.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="AMD\LPM\FreesyncHDR.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="AMD\LPM\Misc.cpp" />
     <ClCompile Include="AOPass.cpp" />
     <ClCompile Include="BasePass.cpp" />
     <ClCompile Include="BloomPass.cpp" />

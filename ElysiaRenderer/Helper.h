@@ -1,5 +1,6 @@
 #pragma once
 #include "stdafx.h"
+#include "AMD/LPM/Misc.h"
 
 #include "PSOHelper.h"
 #include "RenderHelper.h"
@@ -107,19 +108,27 @@ namespace ElysiaHelper
         const HRESULT m_hr;
     };
 
+    inline void ShowErrorMessageBox(LPCWSTR lpErrorString)
+    {
+        int msgboxID = MessageBoxW(NULL, lpErrorString, L"Error", MB_OK);
+    }
+
     inline static void ThrowIfFailed(HRESULT hr)
     {
         if (FAILED(hr))
-        {
-            _com_error err(hr);
-            // ĞŞ¸Ä InitD3D º¯ÊıÖĞµÄ¼ÓÔØÍ¼Ïñ²¿·Ö
-            if (FAILED(hr)) 
-            {
-                std::cerr << "Failed to load image: " << hr << std::endl;
-                _com_error err(hr);
-            }
-            throw HrException(hr);
-        }
+    {
+        wchar_t err[256];
+        memset(err, 0, 256);
+        FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM, NULL, hr, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), err, 255, NULL);
+        char errA[256];
+        size_t returnSize;
+        wcstombs_s(&returnSize, errA, 255, err, 255);
+        Trace(errA);
+#ifdef _DEBUG
+        ShowErrorMessageBox(err);
+#endif
+        throw 1;
+    }
     }
 
     inline static void ThrowIfFailed(BOOL hr)
@@ -237,7 +246,7 @@ namespace ElysiaHelper
         MultiByteToWideChar(CP_UTF8, 0, s.c_str(), slength, buf, len);
         LPCWSTR wstr = buf;
 
-        // ×¢Òâ£ºµ÷ÓÃÕßĞèÒª¸ºÔğÊÍ·ÅÄÚ´æ
+        // æ³¨æ„ï¼šè°ƒç”¨è€…éœ€è¦è´Ÿè´£é‡Šæ”¾å†…å­˜
         return wstr;
     }
 
@@ -245,16 +254,16 @@ namespace ElysiaHelper
     inline static std::wstring StringToWstring(const std::string& str) {
         if (str.empty()) return L"";
 
-        // ·½·¨1£ºC++11£¨ÒÑÆúÓÃ£¬µ«¼òµ¥£©
+        // æ–¹æ³•1ï¼šC++11ï¼ˆå·²å¼ƒç”¨ï¼Œä½†ç®€å•ï¼‰
 #ifdef _WIN32
-// Windows ÏÂÓÃ Win32 API ¸ü¿É¿¿
+// Windows ä¸‹ç”¨ Win32 API æ›´å¯é 
         int size = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, nullptr, 0);
         if (size == 0) return L"";
         std::wstring wstr(size, 0);
         MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, &wstr[0], size);
         return wstr;
 #else
-// Linux/macOS Ê¹ÓÃ C++11£¨Ğè±àÒëÆ÷Ö§³Ö£©
+// Linux/macOS ä½¿ç”¨ C++11ï¼ˆéœ€ç¼–è¯‘å™¨æ”¯æŒï¼‰
         std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
         return converter.from_bytes(str);
 #endif
@@ -264,16 +273,16 @@ namespace ElysiaHelper
     inline static std::string WstringToString(const std::wstring& wstr) {
         if (wstr.empty()) return "";
 
-        // ·½·¨1£ºC++11£¨ÒÑÆúÓÃ£¬µ«¼òµ¥£©
+        // æ–¹æ³•1ï¼šC++11ï¼ˆå·²å¼ƒç”¨ï¼Œä½†ç®€å•ï¼‰
 #ifdef _WIN32
-// Windows ÏÂÓÃ Win32 API ¸ü¿É¿¿
+// Windows ä¸‹ç”¨ Win32 API æ›´å¯é 
         int size = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, nullptr, 0, nullptr, nullptr);
         if (size == 0) return "";
         std::string str(size, 0);
         WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, &str[0], size, nullptr, nullptr);
         return str;
 #else
-// Linux/macOS Ê¹ÓÃ C++11£¨Ğè±àÒëÆ÷Ö§³Ö£©
+// Linux/macOS ä½¿ç”¨ C++11ï¼ˆéœ€ç¼–è¯‘å™¨æ”¯æŒï¼‰
         std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
         return converter.to_bytes(wstr);
 #endif
@@ -300,7 +309,7 @@ namespace ElysiaHelper
 
     inline static void printWString(LPCWSTR wstr) 
     {
-        std::wcout.imbue(std::locale("zh_CN.UTF-8")); // ÉèÖÃÇøÓòÒÔ±ãÕıÈ·ÏÔÊ¾ Unicode ×Ö·û
+        std::wcout.imbue(std::locale("zh_CN.UTF-8")); // è®¾ç½®åŒºåŸŸä»¥ä¾¿æ­£ç¡®æ˜¾ç¤º Unicode å­—ç¬¦
         std::wcout << L"Wide string: " << wstr << std::endl;
     }
 
@@ -416,10 +425,10 @@ namespace ElysiaHelper
 
     inline static std::wstring RemoveLastUnderscoreAndAfter(std::wstring str) 
     {
-        // ²éÕÒ×îºóÒ»¸öÏÂ»®ÏßµÄÎ»ÖÃ
+        // æŸ¥æ‰¾æœ€åä¸€ä¸ªä¸‹åˆ’çº¿çš„ä½ç½®
         size_t lastUnderscorePos = str.rfind(L'_');
         if (lastUnderscorePos != std::wstring::npos) {
-            // È¥³ı×îºóÒ»¸öÏÂ»®Ïß¼°ÆäºóÃæµÄÄÚÈİ
+            // å»é™¤æœ€åä¸€ä¸ªä¸‹åˆ’çº¿åŠå…¶åé¢çš„å†…å®¹
             str.erase(lastUnderscorePos);
         }
         return str;
@@ -427,10 +436,10 @@ namespace ElysiaHelper
 
     inline static std::wstring RemoveLastAnythingAndAfter(std::wstring str, const wchar_t* target)
     {
-        // ²éÕÒ×îºóÒ»¸öÏÂ»®ÏßµÄÎ»ÖÃ
+        // æŸ¥æ‰¾æœ€åä¸€ä¸ªä¸‹åˆ’çº¿çš„ä½ç½®
         size_t lastUnderscorePos = str.rfind(target);
         if (lastUnderscorePos != std::wstring::npos) {
-            // È¥³ı×îºóÒ»¸öÏÂ»®Ïß¼°ÆäºóÃæµÄÄÚÈİ
+            // å»é™¤æœ€åä¸€ä¸ªä¸‹åˆ’çº¿åŠå…¶åé¢çš„å†…å®¹
             str.erase(lastUnderscorePos);
         }
         return str;
@@ -591,7 +600,7 @@ namespace ElysiaHelper
     { DXGI_FORMAT_FORCE_UINT, "DXGI_FORMAT_FORCE_UINT" }
     };
 
-    // º¯Êı£º½« DXGI_FORMAT ×ª»»Îª×Ö·û´®
+    // å‡½æ•°ï¼šå°† DXGI_FORMAT è½¬æ¢ä¸ºå­—ç¬¦ä¸²
     inline const char* DXGIFormatToString(DXGI_FORMAT format) 
     {
         auto it = formatMap.find(format);

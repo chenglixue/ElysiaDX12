@@ -20,7 +20,7 @@
 
 #include "../libs/vectormath/vectormath.hpp"
 
-enum ColorSpace : int
+enum ColorSpace : UINT
 {
     ColorSpace_REC709 = 0,
     ColorSpace_P3,
