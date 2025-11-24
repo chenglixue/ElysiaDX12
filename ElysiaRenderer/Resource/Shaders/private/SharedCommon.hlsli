@@ -38,7 +38,6 @@
 
 #define UINT        uint
 #define int32_t     int
-typedef UINT UIT32x2[2];
 
 #define DepthDisable                0
 #define DepthEnabled                1

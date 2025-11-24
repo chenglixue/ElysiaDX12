@@ -4,6 +4,7 @@
 #include "PSOHelper.h"
 #include "RenderHelper.h"
 #include "Math.h"
+#include "AMD/libs/vectormath/vectormath.hpp"
 
 namespace ElysiaHelper
 {

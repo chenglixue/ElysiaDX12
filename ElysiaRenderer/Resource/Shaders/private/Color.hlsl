@@ -129,14 +129,9 @@ float3 AMDTonemapInvert(float3 c)
 
 float3 ToneMapFilmicALU(in float3 color)
 {
-    color *= 16.0;
-    const float A = 0.15; // 线性强度
-    const float B = 0.50; // 肩部强度
-    const float C = 0.10; // 趾部强度
-    const float D = 0.20; // 白点阈值
-    const float E = 0.02; // 暗部提升
-    const float F = 0.30; // 线性斜率
-    return ((color * (A * color + C * B) + D * E) / (color * (A * color + B) + D * F)) - E / F;
+    color = max(0, color - 0.004f);
+    color = (color * (6.2f * color + 0.5f)) / (color * (6.2f * color + 1.7f) + 0.06f);
+    return color;
 }
 
 float3 uncharted2_tonemap_partial(float3 x)
@@ -157,5 +152,31 @@ float3 uncharted2_filmic(float3 v)
     float3 white_scale = 1.0f / uncharted2_tonemap_partial(W);
     return curr * white_scale;
 }
+
+float3 ApplyGamma(float3 color)
+{
+    color.xyz = pow(color.xyz, 1.0f / 2.2f);
+    return color;
+}
+
+float3 ApplyPQ(float3 color)
+{
+    // Apply ST2084 curve
+    float m1 = 2610.0 / 4096.0 / 4;
+    float m2 = 2523.0 / 4096.0 * 128;
+    float c1 = 3424.0 / 4096.0;
+    float c2 = 2413.0 / 4096.0 * 32;
+    float c3 = 2392.0 / 4096.0 * 32;
+    float3 cp = pow(abs(color.xyz), m1);
+    color.xyz = pow((c1 + c2 * cp) / (1 + c3 * cp), m2);
+    return color;
+}
+
+float3 ApplyscRGBScale(float3 color, float minLuminancePerNits, float maxLuminancePerNits)
+{
+    color.xyz = (color.xyz * (maxLuminancePerNits - minLuminancePerNits)) + float3(minLuminancePerNits, minLuminancePerNits, minLuminancePerNits);
+    return color;
+}
+
 
 #endif

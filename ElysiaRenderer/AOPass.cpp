@@ -197,14 +197,16 @@ namespace ElysiaRenderer
 	std::vector<Vector4> AOPass::GenerateSSAOSampleKernel()
 	{
 		std::vector<Vector4> o{};
-		o.reserve(UserData::GetInstance().aoParameter.SampleCount);
+		int maxSampleCount = 64;
+		maxSampleCount = min(UserData::GetInstance().aoParameter.SampleCount, maxSampleCount);
+		o.reserve(maxSampleCount);
 
-		for (UINT i = 0; i < UserData::GetInstance().aoParameter.SampleCount; i++)
+		for (UINT i = 0; i < maxSampleCount; i++)
 		{
 			auto randomVec = Vector4(MathHelper::RandF(-1.f, 1.f), MathHelper::RandF(-1.f, 1.f), MathHelper::RandF(0.f, 1.f), 1.f);
 			//randomVec.Normalize();
 
-			auto scale = (float)i / UserData::GetInstance().aoParameter.SampleCount;
+			auto scale = (float)i / maxSampleCount;
 			scale = MathHelper::Lerp(0.01f, 1.f, scale * scale);   // 二次函数分布
 			randomVec = randomVec * scale;
 

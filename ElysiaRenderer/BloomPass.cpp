@@ -71,6 +71,7 @@ namespace ElysiaRenderer
 			{
 				.Name = "Bloom Pass",
 				.FilePath = L"Shaders\\public\\Bloom.hlsl",
+				.IsComputeShader = true,
 				.ComputeEntryPoint = L"CS"
 			},
 			/*ShaderPass
@@ -95,10 +96,6 @@ namespace ElysiaRenderer
 				emplaceResult.first->second = GetPSOManager()->GetComputePipelineState(m_pMaterial.get(), ShaderPasseIDs::BloomPassID);
 			}
 		}
-		m_pMaterial->SetConstantVariable("g_bloomRTIndex", m_pBloomRT->GetTexture()->GetResourceHeapIndex());
-		m_pMaterial->SetConstantVariable("g_ScreenSize", GetScreenSize(m_renderSize));
-		m_pMaterial->ApplyConstantData();
-
 	}
 	void BloomPass::Execute()
 	{
@@ -133,6 +130,10 @@ namespace ElysiaRenderer
 			m_pCommand->SetPipeline(pipelineStateData);
 			m_pCommand->SetPipelineResource(PER_PASS_SPACE, m_pMaterial->GetPassData(ShaderPasseIDs::BloomPassID).MeshResourceLayouts->m_spaces[PER_PASS_SPACE]);
 			m_pCommand->SetPipelineResource(PER_FRAME_SPACE, GetRenderResource()->GetPerFrameBindResourceSpace());
+
+			m_pMaterial->SetConstantVariable("g_DestTextureIndex", m_pBloomRT->GetTexture()->GetResourceHeapIndex());
+			m_pMaterial->SetConstantVariable("g_DestSize", GetScreenSize(m_renderSize));
+			m_pMaterial->ApplyConstantData();
 
 			m_pCommand->Dispatch(m_pBloomRT->GetWidth() / 8, m_pBloomRT->GetHeight() / 8, 1);
 

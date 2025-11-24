@@ -2,6 +2,7 @@
 #include "Serialization.h"
 #include "ShadowUtility.h"
 #include "TonemapUtility.h"
+#include "AMD/LPM/ColorConversion.h"
 #include "AOUtility.h"
 #include "DebugUtility.h"
 
@@ -52,11 +53,20 @@ namespace ElysiaRenderer
 		ShadowQuality shadowQuality = ShadowQuality::VeryHigh;
 		float shadowDepthBias = 0;
 		float shadowSlopeDepthBias = 0;
-		float shadowMaxSlopeDepthBias = 0;
+		float shadowMaxSlopeDepthBias = 0; 
 
 		bool IsUseHDR = true;
 		HDRQuality HDRLevel = HDRQuality::High; 
 		TonemapMode tonemapMode = TonemapMode::None;
+		ColorSpace colorSpace = ColorSpace::ColorSpace_REC709;
+		bool  bShoulder; // Use optional extra shoulderContrast tuning (set to false if shoulderContrast is 1.0).
+		float SoftGap; // Range of 0 to a little over zero, controls how much feather region in out-of-gamut mapping, 0=clip.
+		float HdrMax; // Maximum input value.
+		float LpmExposure; // Number of stops between 'hdrMax' and 18% mid-level on input.
+		float Contrast; // Input range {0.0 (no extra contrast) to 1.0 (maximum contrast)}.
+		float ShoulderContrast; // Shoulder shaping, 1.0 = no change (fast path).
+		float Saturation[3]; // A per channel adjustment, use <0 decrease, 0=no change, >0 increase.
+		float Crosstalk[3]; // One channel must be 1.0, the rest can be <= 1.0 but not zero.
 
 		AOParameter aoParameter{};
 

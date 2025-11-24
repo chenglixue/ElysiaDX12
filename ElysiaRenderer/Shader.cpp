@@ -20,23 +20,28 @@ namespace ElysiaRenderer
 			newPassData.PassIndex = passID;
 
 			// create dx12 shader
-			ShaderCreateDesc vertexShaderCreateDesc{};
-			vertexShaderCreateDesc.shaderName = shaderPasses[passID].FilePath;
-			vertexShaderCreateDesc.entryPoint = shaderPasses[passID].VertexEntryPoint;
-			vertexShaderCreateDesc.shaderType = ShaderType::Vertex;
-			newPassData.pVSShader = std::move(GetDevice()->CreateShader(vertexShaderCreateDesc));
+			if (!shaderPasses[passID].IsComputeShader)
+			{
+				ShaderCreateDesc vertexShaderCreateDesc{};
+				vertexShaderCreateDesc.shaderName = shaderPasses[passID].FilePath;
+				vertexShaderCreateDesc.entryPoint = shaderPasses[passID].VertexEntryPoint;
+				vertexShaderCreateDesc.shaderType = ShaderType::Vertex;
+				newPassData.pVSShader = std::move(GetDevice()->CreateShader(vertexShaderCreateDesc));
 
-			ShaderCreateDesc fragmentShaderCreateDesc{};
-			fragmentShaderCreateDesc.shaderName = shaderPasses[passID].FilePath;
-			fragmentShaderCreateDesc.entryPoint = shaderPasses[passID].FragmentEntryPoint;
-			fragmentShaderCreateDesc.shaderType = ShaderType::Pixel;
-			newPassData.pPSShader = std::move(GetDevice()->CreateShader(fragmentShaderCreateDesc));
-
-			ShaderCreateDesc computeShaderCreateDesc{};
-			computeShaderCreateDesc.shaderName = shaderPasses[passID].FilePath;
-			computeShaderCreateDesc.entryPoint = shaderPasses[passID].ComputeEntryPoint;
-			computeShaderCreateDesc.shaderType = ShaderType::Compute;
-			newPassData.pCSShader = std::move(GetDevice()->CreateShader(computeShaderCreateDesc));
+				ShaderCreateDesc fragmentShaderCreateDesc{};
+				fragmentShaderCreateDesc.shaderName = shaderPasses[passID].FilePath;
+				fragmentShaderCreateDesc.entryPoint = shaderPasses[passID].FragmentEntryPoint;
+				fragmentShaderCreateDesc.shaderType = ShaderType::Pixel;
+				newPassData.pPSShader = std::move(GetDevice()->CreateShader(fragmentShaderCreateDesc));
+			}
+			else
+			{
+				ShaderCreateDesc computeShaderCreateDesc{};
+				computeShaderCreateDesc.shaderName = shaderPasses[passID].FilePath;
+				computeShaderCreateDesc.entryPoint = shaderPasses[passID].ComputeEntryPoint;
+				computeShaderCreateDesc.shaderType = ShaderType::Compute;
+				newPassData.pCSShader = std::move(GetDevice()->CreateShader(computeShaderCreateDesc));
+			}
 
 			// shader reflect
 			if (newPassData.pVSShader)
@@ -249,10 +254,33 @@ namespace ElysiaRenderer
 	template void Shader::SetConstantVariable<Vector3>(const std::string&, const Vector3, UINT);
 	template void Shader::SetConstantVariable<Vector4>(const std::string&, const Vector4, UINT);
 	template void Shader::SetConstantVariable<Matrix>(const std::string&, const Matrix, UINT);
+	template void Shader::SetConstantVariable<math::Matrix4>(const std::string&, math::Matrix4, UINT passID);
 	template void Shader::SetConstantVariable<bool>(const std::string&, const bool, UINT);
 	template void Shader::SetConstantVariable<std::vector<Vector2>>(const std::string&, const std::vector<Vector2>, UINT);
 	template void Shader::SetConstantVariable<std::vector<Vector3>>(const std::string&, const std::vector<Vector3>, UINT);
 	template<> void Shader::SetConstantVariable<std::vector<Vector4>>(const std::string& name, const std::vector<Vector4> data, UINT passID)
+	{
+		std::lock_guard<std::mutex> lockGuard(m_setDataMutex);
+		const void* pSourceData = data.data();
+
+		auto itr = m_constantVariableDescs.equal_range(name);
+		for (auto currItr = itr.first; currItr != itr.second; ++currItr)
+		{
+			if (currItr->second.PassID == passID)
+			{
+				memcpy(currItr->second.pData.data(), pSourceData, currItr->second.Size);
+
+				for (auto& passData : m_passDatas)
+				{
+					if (passData.second.PassIndex != passID) continue;
+
+					auto meshResourceLayouts = passData.second.MeshResourceLayouts.get();
+					currItr->second.IsDirty = true;
+				}
+			}
+		}
+	}
+	template<> void Shader::SetConstantVariable<std::vector<UINT>>(const std::string& name, const std::vector<UINT> data, UINT passID)
 	{
 		std::lock_guard<std::mutex> lockGuard(m_setDataMutex);
 		const void* pSourceData = data.data();

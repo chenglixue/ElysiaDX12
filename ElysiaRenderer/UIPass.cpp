@@ -99,6 +99,20 @@ namespace ElysiaRenderer
 			ImGui::Combo("Tonemap Mode", &tonemapModeIndex,
 				StringViewToChar(magic_enum::enum_names<TonemapMode>().data(), magic_enum::enum_count<TonemapMode>()).data(), (int)magic_enum::enum_count<TonemapMode>());
 			pUserData.tonemapMode = (TonemapMode)tonemapModeIndex;
+
+			int colorSpaceIndex = (int)pUserData.colorSpace;
+			ImGui::Combo("Color space", &colorSpaceIndex,
+				StringViewToChar(magic_enum::enum_names<ColorSpace>().data(), magic_enum::enum_count<ColorSpace>()).data(), (int)magic_enum::enum_count<ColorSpace>());
+			pUserData.colorSpace = (ColorSpace)colorSpaceIndex;
+
+			ImGui::Checkbox("Shoulder", &pUserData.bShoulder);
+			ImGui::SliderFloat("Soft Gap", &pUserData.SoftGap, 0.0f, 0.5f);
+			ImGui::SliderFloat("HDR Max", &pUserData.HdrMax, 8.0f, 2048.0f);
+			ImGui::SliderFloat("LPM Exposure", &pUserData.LpmExposure, 3.0f, 11.0f);
+			ImGui::SliderFloat("Contrast", &pUserData.Contrast, 0.0f, 1.0f);
+			ImGui::SliderFloat("Shoulder Contrast", &pUserData.ShoulderContrast, 1.0f, 1.2f);
+			ImGui::SliderFloat3("Saturation", &pUserData.Saturation[0], 0.0f, 1.0f);
+			ImGui::SliderFloat3("Crosstalk", &pUserData.Crosstalk[0], 0.0f, 1.0f);
 		}
 
 		if (ImGui::CollapsingHeader("AO"))

@@ -65,6 +65,7 @@ namespace ElysiaRenderer
 	{
 		std::string					Name;
 		std::wstring				FilePath;
+		bool						IsComputeShader = false;
 		std::wstring				VertexEntryPoint = L"VS";
 		std::wstring				FragmentEntryPoint = L"PS";
 		std::wstring				ComputeEntryPoint = L"CS";
