@@ -12,16 +12,20 @@ namespace ElysiaRenderer
 
 	enum class TonemapMode : UINT
 	{
-		None = 0,
-		Neutral
+		Neutral = 0,
+		LMP,
+		AMD,
+		ACESFilm,
+		Uncharted2,
+		DX11DSK
 	};
 
-	enum class DisplayMode : UINT
+	/*enum class DisplayMode : UINT
 	{
 		DISPLAYMODE_SDR = 0,
 		DISPLAYMODE_FSHDR_Gamma22,
 		DISPLAYMODE_FSHDR_SCRGB,
 		DISPLAYMODE_HDR10_2084,
 		DISPLAYMODE_HDR10_SCRGB
-	};
+	};*/
 }

@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include "../../libs/vectormath/vectormath.hpp"
+#include "../libs/vectormath/vectormath.hpp"
 
 static constexpr float AMD_PI = 3.1415926535897932384626433832795f;
 static constexpr float AMD_PI_OVER_2 = 1.5707963267948966192313216916398f;

@@ -77,6 +77,16 @@ namespace ElysiaRenderer
 		XMINT2 m_lastMousePos{};
 		float m_aspectRatio;
 
+		bool              m_VsyncEnabled;
+
+		// Display management
+		DisplayMode               m_currentDisplayMode;
+		DisplayMode               m_previousDisplayModeNamesIndex;
+		DisplayMode               m_currentDisplayModeNamesIndex;
+		std::vector<DisplayMode>  m_displayModesAvailable;
+		std::vector<const char*>  m_displayModesNamesAvailable;
+		bool                      m_disableLocalDimming;
+
 		std::shared_ptr<DX12UI> m_pUI = nullptr;
 		std::unique_ptr<DX12GraphicsContext> m_graphicsContext = nullptr;
 		std::vector<std::unique_ptr<D3D12_SAMPLER_DESC>> m_samplers{};
@@ -85,12 +95,12 @@ namespace ElysiaRenderer
 		std::unique_ptr<CameraManager>	m_pCameraManager = nullptr;  
 		std::unique_ptr<TextureManager>	m_pTextureManager = nullptr;
 
-		void UpdateCBV();
-		  
 		void Setup();
-		void CreateConstantBuffers();
+		void Execute();
 		
-		void Execute(); 
+		void CreateConstantBuffers();
+		void UpdateCBV();
+		void UpdateDisplay(int displayMode, bool disableLocalDimming);
 	};     
 }   
           

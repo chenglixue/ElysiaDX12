@@ -31,12 +31,19 @@ namespace ElysiaRenderer
 	using namespace ElysiaModel;
 
 	Renderer::Renderer(HWND windowHandle, UINT2 screenSize, std::shared_ptr<DX12UI> pUI) :
-		m_pUI(pUI)
+		m_pUI(pUI),
+		m_disableLocalDimming(false),
+		m_displayModesAvailable(),
+		m_displayModesNamesAvailable(),
+		m_currentDisplayMode(DISPLAYMODE_SDR),
+		m_VsyncEnabled(false)
 	{
 		m_windowHandle = windowHandle;
 		m_aspectRatio = static_cast<float>(screenSize.x) / static_cast<float>(screenSize.y);
 		g_device = std::make_unique<DX12Device>(windowHandle, screenSize);
 		m_graphicsContext = GetDevice()->CreateGraphicsContext();
+
+		g_device->EnumerateDisplayModes(&m_displayModesAvailable, &m_displayModesNamesAvailable);
 
 		m_pUI->InitDescriptor(windowHandle, std::move(GetDevice()));
 		m_pCameraManager = std::make_unique<CameraManager>();
@@ -90,6 +97,7 @@ namespace ElysiaRenderer
 	}
 	void Renderer::Update()
 	{
+		UpdateDisplay();
 		//OnKeyboardInput();
 		GetLightManager()->Update();
 		UpdateCBV();
@@ -132,6 +140,25 @@ namespace ElysiaRenderer
 	}
 	void Renderer::OnKeyboardInput()
 	{
+	}
+
+	void Renderer::Execute()
+	{
+		GetDevice()->BeginFrame();
+		m_graphicsContext->Reset();
+
+		//PIXHelper pix(m_graphicsContext->GetCommandList(), "Deferred Render");
+		for (auto& pass : m_passes)
+		{
+			pass->Render();
+		}
+
+		{
+			GetDevice()->SubmitContextWork(*m_graphicsContext);
+
+			GetDevice()->EndFrame();
+			GetDevice()->Present();
+		}
 	}
 
 	void Renderer::UpdateCBV()
@@ -201,23 +228,24 @@ namespace ElysiaRenderer
 		GetRenderResource()->GetPerFrameBindResourceSpace()->SetCBV(GetBufferManager()->GetSingleConstantBuffer(PER_FRAME_SPACE));
 		GetRenderResource()->GetPerFrameBindResourceSpace()->Lock();
 	}
-
-	void Renderer::Execute()
+	void Renderer::UpdateDisplay(int displayMode, bool disableLocalDimming)
 	{
-		GetDevice()->BeginFrame();
-		m_graphicsContext->Reset();
-
-		//PIXHelper pix(m_graphicsContext->GetCommandList(), "Deferred Render");
-		for (auto& pass : m_passes)
+		// Nothing was changed in UI
+		if (displayMode < 0)
 		{
-			pass->Render();
+			m_currentDisplayModeNamesIndex = m_previousDisplayModeNamesIndex;
+			return;
 		}
 
+		if (m_currentDisplayMode != displayMode || m_disableLocalDimming != disableLocalDimming)
 		{
-			GetDevice()->SubmitContextWork(*m_graphicsContext);
+			// Flush GPU
+			g_device->WaitForIdle();
 
-			GetDevice()->EndFrame();
-			GetDevice()->Present();
+			m_currentDisplayMode = (DisplayMode)displayMode;
+			m_disableLocalDimming = disableLocalDimming;
+
+			g_device->OnCreateWindowSizeDependentResources(GetDevice()->GetScreenSize().x, GetDevice()->GetScreenSize().y, m_VsyncEnabled, m_currentDisplayMode, m_disableLocalDimming);
 		}
-	} 
+	}
 }            

@@ -5,6 +5,7 @@
 #include "AMD/LPM/ColorConversion.h"
 #include "AOUtility.h"
 #include "DebugUtility.h"
+#include "AMD/LPM/FreesyncHDR.h"
 
 namespace ElysiaRenderer
 {
@@ -57,8 +58,9 @@ namespace ElysiaRenderer
 
 		bool IsUseHDR = true;
 		HDRQuality HDRLevel = HDRQuality::High; 
-		TonemapMode tonemapMode = TonemapMode::None;
+		TonemapMode tonemapMode = TonemapMode::LMP;
 		ColorSpace colorSpace = ColorSpace::ColorSpace_REC709;
+		CAULDRON_DX12::DisplayMode displayMode = CAULDRON_DX12::DisplayMode::DISPLAYMODE_SDR;
 		bool  bShoulder; // Use optional extra shoulderContrast tuning (set to false if shoulderContrast is 1.0).
 		float SoftGap; // Range of 0 to a little over zero, controls how much feather region in out-of-gamut mapping, 0=clip.
 		float HdrMax; // Maximum input value.

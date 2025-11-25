@@ -1,5 +1,6 @@
 #pragma once
 #include "IManager.h"
+#include "IUpdate.h"
 #include "DX12TextureBuffer.h"
 #include "Helper.h"
 
@@ -11,7 +12,7 @@ namespace ElysiaRenderer
 	class RenderTexture;
 	struct BufferCreationDesc;
 
-	class BufferManager : public IManager
+	class BufferManager : public IManager, IUpdate
 	{
 	public:
 		BufferManager() = default;
@@ -22,6 +23,7 @@ namespace ElysiaRenderer
 
 		virtual void Init() override;
 		virtual void Destory() override;
+		virtual void Update() override;
 
 		DX12BufferResource* GetSingleConstantBuffer(uint8_t spaceID) const noexcept;
 		DX12BufferResource* GetMutilConstantBuffer(uint8_t spaceID, UINT frameID, UINT objectIndex) const noexcept;

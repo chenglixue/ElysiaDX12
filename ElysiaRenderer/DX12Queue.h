@@ -41,7 +41,7 @@ namespace ElysiaRenderer
 		void WaitForFenceCPUBlocking(uint64_t fenceValue);
 		void WaitForIdle() 
 		{
-			// m_nextFenceValue - 1:√ø¥Œsingal∫Û£¨m_nextFenceValue++
+			// m_nextFenceValue - 1:ÊØèÊ¨°singalÂêéÔºåm_nextFenceValue++
 			WaitForFenceCPUBlocking(m_nextFenceValue - 1); 
 		}
 

@@ -265,7 +265,7 @@ namespace ElysiaRenderer
 		{
 			if (currItr->second.PassID == passID)
 			{
-				memcpy(currItr->second.pData.data(), pSourceData, currItr->second.Size);
+				memcpy(currItr->second.pData.data(), pSourceData, currItr->second.Size / 4);
 
 				for (auto& passData : m_passDatas)
 				{

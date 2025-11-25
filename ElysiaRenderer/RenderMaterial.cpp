@@ -30,7 +30,7 @@ namespace ElysiaRenderer
 	{
 		m_pShader->SetConstantVariable(name, data, passID);
 	}
-	void RenderMaterial::ApplyConstantData()
+	void RenderMaterial::ApplyConstantData() 
 	{
 		m_pShader->ApplyConstantData();
 	}

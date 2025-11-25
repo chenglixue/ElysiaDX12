@@ -65,6 +65,14 @@ namespace ElysiaRenderer
 
 	}
 
+	void BufferManager::Update() 
+	{
+		switch (UserData::GetInstance().displayMode)
+		{
+
+		}
+	}
+
 	DX12BufferResource* BufferManager::GetSingleConstantBuffer(uint8_t spaceID) const noexcept
 	{
 		switch (spaceID)

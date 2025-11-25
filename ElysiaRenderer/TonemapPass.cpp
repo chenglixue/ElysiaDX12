@@ -164,20 +164,20 @@ namespace ElysiaRenderer
 			displayMinMaxLuminance[0] = displayInfo->MinLuminance;
 			displayMinMaxLuminance[1] = displayInfo->MaxLuminance;
 		}
-
+		 
 		m_shoulder = UserData::GetInstance().bShoulder;
 		m_softGap = UserData::GetInstance().SoftGap;
 		m_hdrMax = UserData::GetInstance().HdrMax;
 		m_exposure = UserData::GetInstance().LpmExposure;
 		m_contrast = UserData::GetInstance().Contrast;
 		m_shoulderContrast = UserData::GetInstance().ShoulderContrast;
-		m_saturation[0] = UserData::GetInstance().Saturation[0]; 
+		m_saturation[0] = UserData::GetInstance().Saturation[0];
 		m_saturation[1] = UserData::GetInstance().Saturation[1];
 		m_saturation[2] = UserData::GetInstance().Saturation[2];
-		m_crosstalk[0] = UserData::GetInstance().Crosstalk[0]; 
+		m_crosstalk[0] = UserData::GetInstance().Crosstalk[0];
 		m_crosstalk[1] = UserData::GetInstance().Crosstalk[1];
 		m_crosstalk[2] = UserData::GetInstance().Crosstalk[2];
-
+		
 		switch (UserData::GetInstance().colorSpace)
 		{
 			case ColorSpace_REC709:
@@ -294,7 +294,7 @@ namespace ElysiaRenderer
 				break;
 			}
 		}
-		  
+		
 		LpmSetup(m_shoulder, m_con, m_soft, m_con2, m_clip, m_scaleOnly,
 			m_xyRedW, m_xyGreenW, m_xyBlueW, m_xyWhiteW,
 			m_xyRedO, m_xyGreenO, m_xyBlueO, m_xyWhiteO,
@@ -312,6 +312,7 @@ namespace ElysiaRenderer
 		m_pMaterial->SetConstantVariable("u_displayMode", (UINT)m_displayMode, ShaderPasseIDs::TonemapPassID);
 		m_pMaterial->SetConstantVariable("u_inputToOutputMatrix", m_inputToOutputMatrix, ShaderPasseIDs::TonemapPassID);
 		m_pMaterial->SetConstantVariable("u_ctl", ctl, ShaderPasseIDs::TonemapPassID);
+		m_pMaterial->SetConstantVariable("tonemapMode", (UINT)UserData::GetInstance().tonemapMode, ShaderPasseIDs::TonemapPassID);
 		m_pMaterial->ApplyConstantData();
 	}
 

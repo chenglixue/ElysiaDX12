@@ -11,7 +11,8 @@
 #include "DX12StagingDescriptorHeap.h"
 #include "DX12Queue.h"
 #include "DX12Shader.h"
-
+#include "AMD/LPM/FreesyncHDR.h"
+#include "AMD\libs\AGS\amd_ags.h"
 
 #include "UserData.h"
 
@@ -23,7 +24,8 @@ namespace ElysiaRenderer
 	std::unique_ptr<DX12Device> g_device = nullptr;
 
 	DX12Device::DX12Device(HWND windowHandle, ElysiaHelper::UINT2 screenSize)
-		: m_screenSize(screenSize)
+		:	m_screenSize(screenSize),
+			m_hWnd(windowHandle)
 	{
 		InitializeDeviceResources(windowHandle);
 		CreateWindowDependentResources();
@@ -80,8 +82,8 @@ namespace ElysiaRenderer
 	{
 		// Enable Debug
 		{
-			// ½öÔÚdebugÄ£Ê½ÏÂ¿ÉÓÃ£¬¿ÉÒÔ»ñÈ¡¸ü¶àµÄµ÷ÊÔÐÅÏ¢ºÍ´íÎó±¨¸æ
-		// ±ØÐëÔÚ´´½¨D3D12 DeviceÇ°ÆôÓÃµ÷ÊÔ²ã£¬ÆôÓÃºó¿ÉÒÔÖ±½ÓÉ¾³ý(ÒòÎª´´½¨D3D12 Deviceºó£¬µ÷ÓÃ¸ÃAPI»áÔÚruntime×Ô¶¯É¾³ýDevice)
+			// ï¿½ï¿½ï¿½ï¿½debugÄ£Ê½ï¿½Â¿ï¿½ï¿½Ã£ï¿½ï¿½ï¿½ï¿½Ô»ï¿½È¡ï¿½ï¿½ï¿½ï¿½Äµï¿½ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½Í´ï¿½ï¿½ó±¨¸ï¿½
+		// ï¿½ï¿½ï¿½ï¿½ï¿½Ú´ï¿½ï¿½ï¿½D3D12 DeviceÇ°ï¿½ï¿½ï¿½Ãµï¿½ï¿½Ô²ã£¬ï¿½ï¿½ï¿½Ãºï¿½ï¿½ï¿½ï¿½Ö±ï¿½ï¿½É¾ï¿½ï¿½(ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½D3D12 Deviceï¿½ó£¬µï¿½ï¿½Ã¸ï¿½APIï¿½ï¿½ï¿½ï¿½runtimeï¿½Ô¶ï¿½É¾ï¿½ï¿½Device)
 		// https://learn.microsoft.com/en-us/windows/win32/api/d3d12sdklayers/nf-d3d12sdklayers-id3d12debug-enabledebuglayer
 #if defined(_DEBUG)
 			ID3D12Debug* debugController;
@@ -101,15 +103,15 @@ namespace ElysiaRenderer
 		// Get Adapter & Create Device & Create Allocator
 		{
 			// Create Adapter
-			IDXGIAdapter1* adapter = nullptr;
+			m_adapter = nullptr;
 			UINT bestAdapterIndex = 0;
-			size_t bestAdapterMemory = 0;	// ¼ÇÂ¼×î´ó×¨ÓÃÏÔ´æ
+			size_t bestAdapterMemory = 0;	// ï¿½ï¿½Â¼ï¿½ï¿½ï¿½×¨ï¿½ï¿½ï¿½Ô´ï¿½
 			for (UINT currAdapterIndex = 0; 
-				m_DXGIFactory->EnumAdapters1(currAdapterIndex, &adapter) != DXGI_ERROR_NOT_FOUND; 
+				m_DXGIFactory->EnumAdapters1(currAdapterIndex, &m_adapter) != DXGI_ERROR_NOT_FOUND;
 				currAdapterIndex++)
 			{
 				DXGI_ADAPTER_DESC1 adapterDesc;
-				ElysiaHelper::AssertIfFailed(adapter->GetDesc1(&adapterDesc));
+				ElysiaHelper::AssertIfFailed(m_adapter->GetDesc1(&adapterDesc));
 
 				// soft ware adapter
 				if (adapterDesc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE)
@@ -117,21 +119,56 @@ namespace ElysiaRenderer
 					continue;
 				}
 
+				DXGI_ADAPTER_DESC AdapterDesc;
+				m_adapter->GetDesc(&AdapterDesc);
+				const bool bAMDGPU = (AdapterDesc.VendorId == 0x1002);
+
+				if (bAMDGPU)
+				{
+					AGSReturnCode result = agsInitialize(AGS_MAKE_VERSION(AMD_AGS_VERSION_MAJOR, AMD_AGS_VERSION_MINOR, AMD_AGS_VERSION_PATCH), nullptr, &m_agsContext, &m_agsGPUInfo);
+					if (result == AGS_SUCCESS)
+					{
+						AGSDX12DeviceCreationParams creationParams = {};
+						creationParams.pAdapter = m_adapter;
+						creationParams.iid = __uuidof(m_device);
+						creationParams.FeatureLevel = D3D_FEATURE_LEVEL_12_0;
+
+						AGSDX12ExtensionParams extensionParams = {};
+						AGSDX12ReturnedParams returnedParams = {};
+
+						// Create AGS Device
+						//
+						AGSReturnCode rc = agsDriverExtensionsDX12_CreateDevice(m_agsContext, &creationParams, &extensionParams, &returnedParams);
+						if (rc == AGS_SUCCESS)
+						{
+							m_device = dynamic_cast<ID3D12Device5*>(returnedParams.pDevice);
+						}
+						else
+						{
+							Trace("Warning: AGS CreateDevice() failed w/ code=%d", rc);
+						}
+					}
+					else
+					{
+						Trace("Warning: agsInitialize() failed w/ code=%d", result);
+					}
+				}
+
 				// check support D3D12
-				if (FAILED(D3D12CreateDevice(adapter, D3D_FEATURE_LEVEL_12_2, _uuidof(ID3D12Device), nullptr)))
+				if (FAILED(D3D12CreateDevice(m_adapter, D3D_FEATURE_LEVEL_12_2, _uuidof(ID3D12Device), nullptr)))
 				{
 					continue;
 				}
 
-				// DedicatedVideoMemory:ÏÔ¿¨×Ô´øµÄ¸ßËÙÏÔ´æ
-				// DedicatedSystemMemory:ÏµÍ³ÄÚ´æÖÐ»®·Ö¸øÏÔ¿¨×¨ÓÃµÄ²¿·Ö
+				// DedicatedVideoMemory:ï¿½Ô¿ï¿½ï¿½Ô´ï¿½ï¿½Ä¸ï¿½ï¿½ï¿½ï¿½Ô´ï¿½
+				// DedicatedSystemMemory:ÏµÍ³ï¿½Ú´ï¿½ï¿½Ð»ï¿½ï¿½Ö¸ï¿½ï¿½Ô¿ï¿½×¨ï¿½ÃµÄ²ï¿½ï¿½ï¿½
 				if (adapterDesc.DedicatedVideoMemory > bestAdapterMemory)
 				{
 					bestAdapterIndex = currAdapterIndex;
 					bestAdapterMemory = adapterDesc.DedicatedVideoMemory;
 				}
 
-				ElysiaHelper::SafeRelease(adapter);
+				ElysiaHelper::SafeRelease(m_adapter);
 			}
 
 			if (bestAdapterMemory <= 0)
@@ -139,21 +176,24 @@ namespace ElysiaRenderer
 				ElysiaHelper::AssertError("Failed to find an adapter.");
 			}
 
-			m_DXGIFactory->EnumAdapters1(bestAdapterIndex, &adapter);
+			m_DXGIFactory->EnumAdapters1(bestAdapterIndex, &m_adapter);
 
 			// Create Device
-			ElysiaHelper::AssertIfFailed(D3D12CreateDevice(adapter, D3D_FEATURE_LEVEL_12_2, IID_PPV_ARGS(&m_device)));
+			ElysiaHelper::AssertIfFailed(D3D12CreateDevice(m_adapter, D3D_FEATURE_LEVEL_12_2, IID_PPV_ARGS(&m_device)));
 
 			// Create Allocator
 			{
 				D3D12MA::ALLOCATOR_DESC allocatorDesc = {};
 				allocatorDesc.Flags = D3D12MA::ALLOCATOR_FLAG_NONE;
-				allocatorDesc.pAdapter = adapter;
+				allocatorDesc.pAdapter = m_adapter;
 				allocatorDesc.pDevice = m_device;
 
 				D3D12MA::CreateAllocator(&allocatorDesc, &m_allocator);
 			}
 		}
+
+		CAULDRON_DX12::fsHdrInit(GetAGSContext(), GetAGSGPUInfo(), m_hWnd, m_adapter);
+		m_format = fsHdrGetFormat(DISPLAYMODE_SDR);
 
 		// Create Queue
 		{
@@ -189,7 +229,7 @@ namespace ElysiaRenderer
 			ZeroMemory(&swapChainDesc, sizeof(swapChainDesc));
 			swapChainDesc.Width = lround(m_screenSize.x);
 			swapChainDesc.Height = lround(m_screenSize.y);
-			swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+			swapChainDesc.Format = m_format;
 			swapChainDesc.Stereo = false;
 			swapChainDesc.SampleDesc.Count = 1;
 			swapChainDesc.SampleDesc.Quality = 0;
@@ -200,8 +240,14 @@ namespace ElysiaRenderer
 			swapChainDesc.Scaling = DXGI_SCALING_NONE;
 			swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
 
+			ThrowIfFailed(m_DXGIFactory->CheckFeatureSupport(
+				DXGI_FEATURE_PRESENT_ALLOW_TEARING, &m_bTearingSupport, sizeof(m_bTearingSupport)));
+
+			swapChainDesc.Flags = m_bTearingSupport ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0;
+
 			IDXGISwapChain1* swapChain;
 			ElysiaHelper::AssertIfFailed(m_DXGIFactory->CreateSwapChainForHwnd(m_graphicsQueue->GetCommandQueue(), windowHandle, &swapChainDesc, nullptr, nullptr, &swapChain));
+			ThrowIfFailed(m_DXGIFactory->MakeWindowAssociation(m_hWnd, DXGI_MWA_NO_ALT_ENTER));
 			ElysiaHelper::AssertIfFailed(swapChain->QueryInterface(__uuidof(IDXGISwapChain3), (void**)&m_swapChain));
 			ElysiaHelper::SafeRelease(swapChain);
 		}
@@ -239,6 +285,10 @@ namespace ElysiaRenderer
 		m_frameIndex = 0;
 		m_freeReservedDescriptorIndices.resize(NUM_RESERVED_SRV_DESCRIPTORS - 1);
 		std::iota(m_freeReservedDescriptorIndices.begin(), m_freeReservedDescriptorIndices.end(), 1);
+		if (m_displayMode == CAULDRON_DX12::DisplayMode::DISPLAYMODE_SDR)
+		{
+			m_format = ConvertIntoGammaFormat(m_format);
+		}
 	}
 	void DX12Device::CreateWindowDependentResources()
 	{
@@ -246,6 +296,8 @@ namespace ElysiaRenderer
 		{
 			for (UINT currBufferIndex = 0; currBufferIndex < NUM_BACK_BUFFERS; currBufferIndex++)
 			{
+				if (m_backBuffers[currBufferIndex]) m_backBuffers[currBufferIndex].reset();
+
 				auto currBackBufferRTVHandle = m_RTVStagingDescriptorHeap->NewDescriptorHeapHandle();
 
 				ID3D12Resource* backBufferResource = nullptr;
@@ -253,7 +305,7 @@ namespace ElysiaRenderer
 				backBufferResource->SetName(L"Camera Color Buffer");
 
 				D3D12_RENDER_TARGET_VIEW_DESC RTVDecs = {};
-				RTVDecs.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+				RTVDecs.Format = m_format;
 				RTVDecs.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 				RTVDecs.Texture2D.MipSlice = 0;
 				RTVDecs.Texture2D.PlaneSlice = 0;
@@ -265,6 +317,56 @@ namespace ElysiaRenderer
 				m_backBuffers[currBufferIndex]->SetRTVDescriptor(currBackBufferRTVHandle);
 			}
 		}
+	}
+	void DX12Device::OnCreateWindowSizeDependentResources(uint32_t dwWidth, uint32_t dwHeight, bool bVSyncOn, DisplayMode displayMode, bool disableLocalDimming)
+	{
+		// check whether the requested mode is supported and fall back to SDR if not supported
+		bool bIsModeSupported = IsModeSupported(displayMode);
+		if (bIsModeSupported == false)
+		{
+			assert(!"FS HDR display mode not supported");
+			displayMode = DISPLAYMODE_SDR;
+		}
+
+		if ((displayMode == CAULDRON_DX12::DisplayMode::DISPLAYMODE_HDR10_2084 ||
+				displayMode == CAULDRON_DX12::DisplayMode::DISPLAYMODE_HDR10_SCRGB)
+				&&
+				(displayMode == CAULDRON_DX12::DisplayMode::DISPLAYMODE_FSHDR_Gamma22 ||
+					displayMode == CAULDRON_DX12::DisplayMode::DISPLAYMODE_FSHDR_SCRGB))
+		{
+			ThrowIfFailed(
+				m_swapChain->ResizeBuffers(
+					NUM_BACK_BUFFERS,
+					lround(m_screenSize.x),
+					lround(m_screenSize.y),
+					DXGI_FORMAT_B8G8R8A8_UNORM,
+					0)
+			);
+
+			ThrowIfFailed(m_swapChain->SetColorSpace1(DXGI_COLOR_SPACE_RGB_FULL_G22_NONE_P709));
+		}
+
+		m_displayMode = displayMode;
+		m_format = fsHdrGetFormat(displayMode);
+		m_bVSyncOn = bVSyncOn;
+
+		ThrowIfFailed(
+				m_swapChain->ResizeBuffers(
+					NUM_BACK_BUFFERS,
+					lround(m_screenSize.x),
+					lround(m_screenSize.y),
+					m_format,
+					0)
+			);
+		fsHdrSetDisplayMode(displayMode, disableLocalDimming, m_swapChain);
+
+		// if SDR, convert add gamma for the swapchain format so blending is correct
+		if (m_displayMode == DISPLAYMODE_SDR)
+		{
+			m_format = ConvertIntoGammaFormat(m_format);
+		}
+
+		CreateWindowDependentResources(m_displayMode);
 	}
 
 	std::unique_ptr<DX12GraphicsContext>		DX12Device::CreateGraphicsContext()
@@ -437,12 +539,12 @@ namespace ElysiaRenderer
 		auto newTex = std::move(CreateTexture(createDesc));
 		///
 
-		// Ã¿¸öMipÍ¼Ïàµ±ÓÚÒ»¸ö×Ó×ÊÔ´
+		// Ã¿ï¿½ï¿½MipÍ¼ï¿½àµ±ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô´
 		auto textureUpload = std::make_unique<DX12TextureUpload>();
 		textureUpload->m_textureBuffer = newTex.get();
 		textureUpload->m_numSubResources = static_cast<UINT>(texMetaData.mipLevels * texMetaData.arraySize);
 
-		UINT numRows[MAX_TEXTURE_SUBRESOURCE_COUNT];	// Ã¿¸ö×Ó×ÊÔ´µÄÐÐÊý
+		UINT numRows[MAX_TEXTURE_SUBRESOURCE_COUNT];	// Ã¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		uint64_t rowSizesInBytes[MAX_TEXTURE_SUBRESOURCE_COUNT];
 
 		auto resourceDesc = textureUpload->m_textureBuffer->GetResourceDesc();
@@ -459,17 +561,17 @@ namespace ElysiaRenderer
 
 				const D3D12_PLACED_SUBRESOURCE_FOOTPRINT& subResourcelayout = textureUpload->m_subResourceLayouts[subResourceIndex];
 				const uint64_t subResourceHeight = numRows[subResourceIndex];
-				// Ã¿ÐÐÊý¾ÝµÄ×Ö½ÚÊý
+				// Ã¿ï¿½ï¿½ï¿½ï¿½ï¿½Ýµï¿½ï¿½Ö½ï¿½ï¿½ï¿½
 				const uint64_t subResourcePitch = ElysiaHelper::AlignU32(subResourcelayout.Footprint.RowPitch, D3D12_TEXTURE_DATA_PITCH_ALIGNMENT);
 				const uint64_t subResourceDepth = subResourcelayout.Footprint.Depth;
 				uint8_t* destSubResourceMemory = textureUpload->m_pTextureData.get() + subResourcelayout.Offset;
 
-				// sliceIndexÊÇ3DÎÆÀíµÄÇÐÆ¬Ë÷Òý£¬2DÎÆÀíµÄÇÐÆ¬Ë÷ÒýÎª0
+				// sliceIndexï¿½ï¿½3Dï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½2Dï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ¬ï¿½ï¿½ï¿½ï¿½Îª0
 				for (uint64_t sliceIndex = 0; sliceIndex < subResourceDepth; sliceIndex++)
 				{
 					const auto subImage = imageData->GetImage(mipIndex, arrayIndex, sliceIndex);
 					const uint8_t* sourceSubResourceMemory = subImage->pixels;
-					// ¿½±´Í¼Æ¬Ã¿ÐÐÊý¾Ý
+					// ï¿½ï¿½ï¿½ï¿½Í¼Æ¬Ã¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 					for (uint64_t height = 0; height < subResourceHeight; ++height)
 					{
 						memcpy(destSubResourceMemory, sourceSubResourceMemory, (std::min)(subResourcePitch, subImage->rowPitch));
@@ -1342,5 +1444,24 @@ namespace ElysiaRenderer
 		m_graphicsQueue->WaitForIdle();
 		m_copyQueue->WaitForIdle();
 		m_computeQueue->WaitForIdle();
+	}
+
+	bool DX12Device::IsModeSupported(DisplayMode displayMode)
+	{
+		std::vector<DisplayMode> displayModesAvailable;
+		EnumerateDisplayModes(&displayModesAvailable);
+		return  std::find(displayModesAvailable.begin(), displayModesAvailable.end(), displayMode) != displayModesAvailable.end();
+	}
+	
+	void DX12Device::EnumerateDisplayModes(std::vector<CAULDRON_DX12::DisplayMode> *pModes, std::vector<const char *> *pNames)
+	{
+		fsHdrEnumerateDisplayModes(pModes);
+
+		if (pNames != NULL)
+		{
+			pNames->clear();
+			for (DisplayMode mode : *pModes)
+				pNames->push_back(fsHdrGetDisplayModeString(mode));
+		}
 	}
 }

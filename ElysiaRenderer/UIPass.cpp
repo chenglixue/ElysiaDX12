@@ -96,9 +96,14 @@ namespace ElysiaRenderer
 			pUserData.HDRLevel = (HDRQuality)HDRQualityIndex;
 
 			int tonemapModeIndex = (int)pUserData.tonemapMode;
-			ImGui::Combo("Tonemap Mode", &tonemapModeIndex,
+			ImGui::Combo("Tonemap Mode", &tonemapModeIndex, 
 				StringViewToChar(magic_enum::enum_names<TonemapMode>().data(), magic_enum::enum_count<TonemapMode>()).data(), (int)magic_enum::enum_count<TonemapMode>());
 			pUserData.tonemapMode = (TonemapMode)tonemapModeIndex;
+
+			int displayModeIndex = (int)pUserData.displayMode;
+			ImGui::Combo("Display Mode", &displayModeIndex,
+				StringViewToChar(magic_enum::enum_names<CAULDRON_DX12::DisplayMode>().data(), magic_enum::enum_count<CAULDRON_DX12::DisplayMode>()).data(), (int)magic_enum::enum_count<CAULDRON_DX12::DisplayMode>());
+			pUserData.displayMode = (CAULDRON_DX12::DisplayMode)displayModeIndex;
 
 			int colorSpaceIndex = (int)pUserData.colorSpace;
 			ImGui::Combo("Color space", &colorSpaceIndex,

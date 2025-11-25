@@ -199,6 +199,7 @@ namespace ElysiaRenderer
 		std::vector<Vector4> o{};
 		int maxSampleCount = 64;
 		maxSampleCount = min(UserData::GetInstance().aoParameter.SampleCount, maxSampleCount);
+		maxSampleCount = max(8, maxSampleCount);
 		o.reserve(maxSampleCount);
 
 		for (UINT i = 0; i < maxSampleCount; i++)

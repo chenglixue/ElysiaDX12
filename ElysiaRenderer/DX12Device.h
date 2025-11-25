@@ -4,6 +4,7 @@
 #include "DX12RootSignature.h"
 #include "TextureUtility.h"
 #include "DX12DescriptorHeapHandle.h"
+#include "AMD/LPM/FreesyncHDR.h"
 
 namespace ElysiaRenderer
 {
@@ -23,6 +24,8 @@ namespace ElysiaRenderer
 		UINT submissionIndex = 0;
 	};
 
+	using namespace CAULDRON_DX12;
+
 	class DX12Device
 	{
 	public:
@@ -40,6 +43,10 @@ namespace ElysiaRenderer
 		IDXGISwapChain4*		GetSwapChain()
 		{
 			return m_swapChain;
+		}
+		DXGI_FORMAT				GetSwapChainFormat()
+		{
+			return m_format;
 		}
 		D3D12MA::Allocator*		GetAllocator()
 		{
@@ -78,7 +85,11 @@ namespace ElysiaRenderer
 		{
 			return m_uploadContexts[m_frameID].get();
 		}
+		AGSContext* GetAGSContext() { return m_agsContext; }
+		AGSGPUInfo* GetAGSGPUInfo() { return &m_agsGPUInfo; }
 
+		void CreateWindowDependentResources();
+		void OnCreateWindowSizeDependentResources(uint32_t dwWidth, uint32_t dwHeight, bool bVSyncOn, DisplayMode displayMode = DISPLAYMODE_SDR, bool disableLocalDimming = false);
 		std::unique_ptr<DX12GraphicsContext>		CreateGraphicsContext();
 		std::unique_ptr<DX12BufferResource>			CreateBuffer(const BufferCreationDesc& bufferCreationDesc);
 		std::unique_ptr<DX12TextureResource>		CreateTextureFromFile(const TextureCreationDesc& textureCreationDesc);
@@ -105,8 +116,11 @@ namespace ElysiaRenderer
 		void EndFrame();
 		void Present();
 
+		bool IsModeSupported(DisplayMode displayMode);
+		void EnumerateDisplayModes(std::vector<DisplayMode> *pModes, std::vector<const char *> *pNames = NULL);
+
 	private:
-		// ¼ÇÂ¼DX12QueuÃ¿´ÎsingalºóµÄm_nextFenceValue
+		// ï¿½ï¿½Â¼DX12QueuÃ¿ï¿½ï¿½singalï¿½ï¿½ï¿½m_nextFenceValue
 		struct EndOfFrameFences
 		{
 			uint64_t m_graphicsQueueFence = 0;
@@ -123,14 +137,21 @@ namespace ElysiaRenderer
 		};
 
 		void InitializeDeviceResources(HWND windowHandle);
-		void CreateWindowDependentResources();
 		void ProcessDestruction(UINT frameIndex);
 
+		HWND m_hWnd;
 		ElysiaHelper::UINT2 m_screenSize;
 		UINT m_frameIndex;
 		UINT m_frameID;
+		DXGI_FORMAT m_format;
+		AGSContext* m_agsContext = nullptr;
+		AGSGPUInfo  m_agsGPUInfo = {};
+		BOOL m_bTearingSupport = false;
+		DisplayMode m_displayMode = DISPLAYMODE_SDR;
+		bool m_bVSyncOn = false;
 
 		ID3D12Device5* m_device = nullptr;
+		IDXGIAdapter1* m_adapter = nullptr;
 		IDXGIFactory7* m_DXGIFactory = nullptr;
 		IDXGISwapChain4* m_swapChain = nullptr;
 		D3D12MA::Allocator* m_allocator = nullptr;

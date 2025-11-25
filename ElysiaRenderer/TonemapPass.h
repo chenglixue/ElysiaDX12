@@ -45,8 +45,8 @@ namespace ElysiaRenderer
 		float m_shoulderContrast; // Shoulder shaping, 1.0 = no change (fast path).
 		float m_saturation[3]; // A per channel adjustment, use <0 decrease, 0=no change, >0 increase.
 		float m_crosstalk[3]; // One channel must be 1.0, the rest can be <= 1.0 but not zero.
-		 
-		DisplayMode m_displayMode;
+		
+		CAULDRON_DX12::DisplayMode m_displayMode;
 		math::Matrix4 m_inputToOutputMatrix;
 		 
 		void SetLPMConfig(bool con, bool soft, bool con2, bool clip, bool scaleOnly);

@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "DX12Device.h"
 #include "CBVParameter.h"
+#include "AMD/LPM/FreesyncHDR.h"
 
 namespace ElysiaRenderer
 {
@@ -23,6 +24,14 @@ namespace ElysiaRenderer
 			return m_perFrameBindResourceSpace.get();
 		}
 		CBVFrameVariable* GetCBVFrameVariable();
+		void SetDisplayMode(CAULDRON_DX12::DisplayMode newDisplayMode)
+		{
+			m_currDisplayMode = newDisplayMode;
+		}
+		CAULDRON_DX12::DisplayMode GetDisplayMode() const noexcept
+		{
+			return m_currDisplayMode;
+		}
 
 	private:
 
@@ -31,8 +40,9 @@ namespace ElysiaRenderer
 
 		DX12Device* m_device = nullptr;
 		std::unique_ptr<CBVFrameVariable> m_pCBVFrameVariable = nullptr;
-	};
 
+		CAULDRON_DX12::DisplayMode m_currDisplayMode = CAULDRON_DX12::DisplayMode::DISPLAYMODE_SDR;
+	};
 
 	extern std::unique_ptr<RenderResource> g_pRenderResource;
 	inline RenderResource* GetRenderResource()

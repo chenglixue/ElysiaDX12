@@ -112,7 +112,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>D:\DX12\ElysiaRenderer\x64\Debug\Shaders;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc\include;D:\DX12\ElysiaDX12\x64\Debug\Assimp\include\assimp;DirectXTK12\Inc;D:\DX12\ElysiaDX12\ElysiaRenderer\AMD\libs\AGS;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <DisableSpecificWarnings>0018;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <DisableSpecificWarnings>5033;4819;0018;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
@@ -120,7 +120,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
       <AdditionalDependencies>d3d12.lib;dxcompiler.lib;dxgi.lib;assimp-vc143-mt.lib;amd_ags_x64.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc\lib\spectre\x64;D:\DX12\ElysiaRenderer\ElysiaRenderer\dxc\lib\x64;D:\DX12\ElysiaDX12\x64\Debug\Assimp\Environment;D:\DX12\ElysiaDX12\ElysiaRenderer\AMD\libs\AGS;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc\lib\spectre\x64;D:\DX12\ElysiaRenderer\ElysiaRenderer\dxc\lib\x64;D:\DX12\ElysiaDX12\x64\Debug\Assimp\Environment;D:\DX12\ElysiaDX12\ElysiaRenderer\AMD\libs\AGS;C:\Work\ElysiaRenderer\ElysiaRenderer\AMD\libs\AGS;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>xcopy $(ProjectDir)Resource $(TargetDir) /Y /E</Command>
@@ -184,6 +184,7 @@
     <ClInclude Include="FinalBlitPass.h" />
     <ClInclude Include="GBufferPass.h" />
     <ClInclude Include="Hash.h" />
+    <ClInclude Include="Helper\DxgiFormatHelper.h" />
     <ClInclude Include="LightUtility.h" />
     <ClInclude Include="Metalib.h" />
     <ClInclude Include="MObject.h" />
@@ -308,7 +309,9 @@
     <ClCompile Include="AMD\LPM\FreesyncHDR.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="AMD\LPM\Misc.cpp" />
+    <ClCompile Include="AMD\LPM\Misc.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="AOPass.cpp" />
     <ClCompile Include="BasePass.cpp" />
     <ClCompile Include="BloomPass.cpp" />
@@ -329,6 +332,7 @@
     <ClCompile Include="File.cpp" />
     <ClCompile Include="FinalBlitPass.cpp" />
     <ClCompile Include="GBufferPass.cpp" />
+    <ClCompile Include="Helper\DxgiFormatHelper.cpp" />
     <ClCompile Include="ModelImporter.cpp" />
     <ClCompile Include="DX12PipelineState.cpp" />
     <ClCompile Include="DX12Queue.cpp" />
@@ -612,6 +616,9 @@
     <None Include="Resource\Shaders\public\Bloom.hlsl">
       <FileType>Document</FileType>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Lib\" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
