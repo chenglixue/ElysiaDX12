@@ -44,10 +44,11 @@ namespace ElysiaRenderer
 
 		RenderTargetDesc RTDesc = RenderTargetDesc
 		{
-			.m_renderTargetFormats = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
+			.m_renderTargetFormats = GetDevice()->GetSwapChainFormat(),
 			.m_numRenderTargets = 1,
 			.m_depthStencilFormat = GetBufferManager()->GetCameraDepthRT()->GetFormat()
 		};
+		m_backBufferFormat = GetDevice()->GetSwapChainFormat();
 		auto emplaceResult = m_PipelineStateObjects.try_emplace(ShaderPassIDs::BlitPassID);
 		if (emplaceResult.second)
 		{
@@ -56,6 +57,7 @@ namespace ElysiaRenderer
 	}
 	void FinalBlitPass::Execute()
 	{
+		UpdatePSO();
 	}
 	void FinalBlitPass::Render()
 	{
@@ -73,7 +75,7 @@ namespace ElysiaRenderer
 
 		PipelineInfo pipelineStateData{};
 		pipelineStateData.m_pipelineStateObject = m_PipelineStateObjects[ShaderPassIDs::BlitPassID];
-		pipelineStateData.m_renderTargets.emplace_back(&cameraColorRT);
+		pipelineStateData.m_renderTargets.emplace_back(&GetDevice()->GetCurrBackBuffer());
 		pipelineStateData.m_depthStencilTarget = GetBufferManager()->GetCameraDepthRT()->GetTexture();
 
 		bool isReady = true;
@@ -113,5 +115,23 @@ namespace ElysiaRenderer
 
 		m_pCommand->AddBarrier(GetDevice()->GetCurrBackBuffer(), D3D12_RESOURCE_STATE_PRESENT);
 		m_pCommand->FlushBarrier();
+	}
+
+	void FinalBlitPass::UpdatePSO()
+	{
+		if(m_backBufferFormat != GetDevice()->GetSwapChainFormat())
+		{
+			{
+				RenderTargetDesc RTDesc = RenderTargetDesc
+				{
+					.m_renderTargetFormats = GetDevice()->GetSwapChainFormat(),
+					.m_numRenderTargets = 1,
+					.m_depthStencilFormat = GetBufferManager()->GetCameraDepthRT()->GetFormat()
+				};
+				m_backBufferFormat = GetDevice()->GetSwapChainFormat();
+
+				m_PipelineStateObjects[ShaderPassIDs::BlitPassID] = GetPSOManager()->GetGraphicsPipelineState(m_pMaterial.get(), ShaderPassIDs::BlitPassID, RTDesc);
+			} 
+		}
 	}
 }

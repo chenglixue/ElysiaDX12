@@ -44,6 +44,7 @@ namespace ElysiaRenderer
 				.m_numRenderTargets = 1,
 				.m_depthStencilFormat = GetBufferManager()->GetCameraDepthRT()->GetFormat()
 			};
+			m_cameraColorFormat = GetBufferManager()->GetCameraColorRT()->GetFormat();
 			auto emplaceResult = m_PipelineStateObjects.try_emplace(ShaderPasseIDs::OpaqueLightPassID);
 			if (emplaceResult.second)
 			{
@@ -57,6 +58,8 @@ namespace ElysiaRenderer
 
 	void OpaquePass::Execute()
 	{
+		UpdatePSO();
+		
 		m_pMaterial->SetConstantVariable("screenSize", GetScreenSize(Vector2(m_renderSize.x, m_renderSize.y)));
 		m_pMaterial->SetConstantVariable("viewMatrix", m_pCamera->GetViewMat());
 		m_pMaterial->SetConstantVariable("viewMatrix_I", m_pCamera->GetViewMat().Invert());
@@ -110,5 +113,24 @@ namespace ElysiaRenderer
 
 		m_pCommand->AddBarrier(*cameraColorRT->GetTexture(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		m_pCommand->FlushBarrier();
+	}
+
+	void OpaquePass::UpdatePSO()
+	{
+		if(m_cameraColorFormat != GetBufferManager()->GetCameraColorRT()->GetFormat())
+		{
+			{
+				RenderTargetDesc RTDesc = RenderTargetDesc
+				{
+					.m_renderTargetFormats = GetBufferManager()->GetCameraColorRT()->GetFormat(),
+					.m_numRenderTargets = 1,
+					.m_depthStencilFormat = GetBufferManager()->GetCameraDepthRT()->GetFormat()
+				};
+				m_cameraColorFormat = GetBufferManager()->GetCameraColorRT()->GetFormat();
+
+				auto emplaceResult = m_PipelineStateObjects.try_emplace(ShaderPasseIDs::OpaqueLightPassID);
+				emplaceResult.first->second = GetPSOManager()->GetGraphicsPipelineState(m_pMaterial.get(), ShaderPasseIDs::OpaqueLightPassID, RTDesc);
+			} 
+		}
 	}
 }

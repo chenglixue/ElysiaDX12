@@ -149,6 +149,7 @@ namespace ElysiaRenderer
 		BOOL m_bTearingSupport = false;
 		DisplayMode m_displayMode = DISPLAYMODE_SDR;
 		bool m_bVSyncOn = false;
+		DXGI_SWAP_CHAIN_DESC1 m_descSwapChain = {};
 
 		ID3D12Device5* m_device = nullptr;
 		IDXGIAdapter1* m_adapter = nullptr;

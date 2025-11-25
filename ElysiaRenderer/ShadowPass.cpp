@@ -69,6 +69,7 @@ namespace ElysiaRenderer
 	}
 	void ShadowPass::Execute()
 	{
+		UpdatePSO();
 		m_pMainShadow->UpdateShadowTransform(m_pMainLight);
 		GetRenderResource()->GetCBVFrameVariable()->ShadowTexIndex = m_pShadowRT->GetTexture()->GetResourceHeapIndex();
 		GetRenderResource()->GetCBVFrameVariable()->shadowMatrix = m_pMainShadow->GetShadowMat();
@@ -235,5 +236,10 @@ namespace ElysiaRenderer
 	RenderTexture* ShadowPass::GetShadowRT() const
 	{
 		return m_pShadowRT.get();
+	}
+
+	void ShadowPass::UpdatePSO()
+	{
+		
 	}
 }

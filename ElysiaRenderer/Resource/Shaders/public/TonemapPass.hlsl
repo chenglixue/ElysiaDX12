@@ -11,6 +11,13 @@
 #define Uncharted2 4
 #define DX11DSK 5
 
+#define DISPLAYMODE_SDR 0
+#define DISPLAYMODE_FSHDR_Gamma22 1
+#define DISPLAYMODE_FSHDR_SCRGB 2
+#define DISPLAYMODE_HDR10_2084 3
+#define DISPLAYMODE_HDR10DISPLAYMODE_HDR10_SCRGB_2084 4
+
+
 cbuffer PassConstant : register(b0, perPassSpace)
 {
     uint blitterTextureIndex;
@@ -115,6 +122,20 @@ PSOutput PS(PSInput i)
             color.rgb = DX11DSKTone(color);
             break;
         }
+    }
+
+    switch (u_displayMode)
+    {
+        case DISPLAYMODE_FSHDR_Gamma22:
+            {
+                color.rgb = ApplyGamma(color);
+                break;
+            }
+        case DISPLAYMODE_HDR10_2084:
+            {
+                color.rgb = ApplyPQ(color);
+                break;
+            }
     }
     
     o.target0 = float4(color.rgb, 1.f);

@@ -21,6 +21,7 @@ namespace ElysiaRenderer
 		virtual void Configure() override;
 		virtual void Execute() override;
 		virtual void Render() override;
+		virtual void UpdatePSO() override;
 
 		virtual void Dispose() override;
 

@@ -17,6 +17,7 @@ namespace ElysiaRenderer
 		virtual void Execute() override;
 		virtual void Render() override;
 		virtual void Dispose() override;
+		virtual void UpdatePSO() override;
 
 	private:
 		std::unique_ptr<RenderTexture> m_pAORT = nullptr;
@@ -30,5 +31,6 @@ namespace ElysiaRenderer
 		void DoCalcAO();
 		void DoBlitToBackBuffer();
 		std::vector<Vector4> GenerateSSAOSampleKernel();
+		DXGI_FORMAT m_cameraColorFormat = DXGI_FORMAT_UNKNOWN;
 	};
 }

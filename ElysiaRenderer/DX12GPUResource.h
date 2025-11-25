@@ -16,7 +16,7 @@ namespace ElysiaRenderer
 		{
 			return m_bufferType;
 		}
-		CComPtr<ID3D12Resource> GetResource()
+		CComPtr<ID3D12Resource>& GetResource()
 		{
 			return m_resource;
 		}

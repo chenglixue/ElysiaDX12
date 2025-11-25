@@ -69,6 +69,7 @@ namespace ElysiaRenderer
 
 	void GBufferPass::Execute() 
 	{
+		UpdatePSO();
 		m_pMaterial->SetConstantVariable("screenSize", GetScreenSize(Vector2(m_renderSize.x, m_renderSize.y)));
 		m_pMaterial->SetConstantVariable("viewMatrix", m_pCamera->GetViewMat());
 		m_pMaterial->SetConstantVariable("viewMatrix_I", m_pCamera->GetViewMat().Invert());
@@ -205,6 +206,11 @@ namespace ElysiaRenderer
 	void GBufferPass::Dispose()
 	{
 		m_GBufferRTs.clear();
+	}
+
+	void GBufferPass::UpdatePSO()
+	{
+		
 	}
 
 	void GBufferPass::CreateRTs()

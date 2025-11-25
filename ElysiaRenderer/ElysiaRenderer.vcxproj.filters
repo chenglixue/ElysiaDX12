@@ -406,6 +406,9 @@
     <ClInclude Include="AMD\LPM\ffx_lpm.h">
       <Filter>Header Files\AMD</Filter>
     </ClInclude>
+    <ClInclude Include="Helper\DxgiFormatHelper.h">
+      <Filter>Header Files\Helper</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -821,6 +824,9 @@
     </ClCompile>
     <ClCompile Include="AMD\LPM\Misc.cpp">
       <Filter>Source Files\AMD</Filter>
+    </ClCompile>
+    <ClCompile Include="Helper\DxgiFormatHelper.cpp">
+      <Filter>Source Files\Helper</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

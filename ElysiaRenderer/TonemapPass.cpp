@@ -126,6 +126,7 @@ namespace ElysiaRenderer
 				.m_numRenderTargets = 1,
 				.m_depthStencilFormat = GetBufferManager()->GetCameraDepthRT()->GetFormat()
 			};
+			m_cameraColorFormat = GetBufferManager()->GetCameraColorRT()->GetFormat();
 			auto emplaceResult = m_PipelineStateObjects.try_emplace(ShaderPasseIDs::TonemapPassID);
 			if (emplaceResult.second)
 			{  
@@ -146,7 +147,7 @@ namespace ElysiaRenderer
 		varAF2(fs2B);   
 		varAF2(fs2W);
 		varAF2(displayMinMaxLuminance);
-		if (m_displayMode != DisplayMode::DISPLAYMODE_SDR)
+		if (UserData::GetInstance().displayMode != DisplayMode::DISPLAYMODE_SDR)
 		{
 			const DXGI_OUTPUT_DESC1* displayInfo = CAULDRON_DX12::GetDisplayInfo();
 
@@ -182,7 +183,7 @@ namespace ElysiaRenderer
 		{
 			case ColorSpace_REC709:
 			{
-				switch (m_displayMode)
+				switch (UserData::GetInstance().displayMode)
 				{
 				case DisplayMode::DISPLAYMODE_SDR:
 					SetLPMConfig(LPM_CONFIG_709_709);
@@ -220,7 +221,7 @@ namespace ElysiaRenderer
 
 			case ColorSpace_REC2020:
 			{
-				switch (m_displayMode)
+				switch (UserData::GetInstance().displayMode)
 				{
 				case DisplayMode::DISPLAYMODE_SDR:
 					SetLPMConfig(LPM_CONFIG_709_2020);
@@ -258,7 +259,7 @@ namespace ElysiaRenderer
 
 			case ColorSpace_P3:
 			{
-				switch (m_displayMode)
+				switch (UserData::GetInstance().displayMode)
 				{
 				case DisplayMode::DISPLAYMODE_SDR:
 					SetLPMConfig(LPM_CONFIG_709_P3);
@@ -302,6 +303,7 @@ namespace ElysiaRenderer
 			m_scaleC,
 			m_softGap, m_hdrMax, m_exposure, m_contrast, m_shoulderContrast,
 			m_saturation, m_crosstalk);
+
 		 
 		m_pMaterial->SetConstantVariable("u_shoulder", m_shoulder, ShaderPasseIDs::TonemapPassID);
 		m_pMaterial->SetConstantVariable("u_con", m_con, ShaderPasseIDs::TonemapPassID);
@@ -309,7 +311,7 @@ namespace ElysiaRenderer
 		m_pMaterial->SetConstantVariable("u_con2", m_con2, ShaderPasseIDs::TonemapPassID);
 		m_pMaterial->SetConstantVariable("u_clip", m_clip, ShaderPasseIDs::TonemapPassID);
 		m_pMaterial->SetConstantVariable("u_scaleOnly", m_scaleOnly, ShaderPasseIDs::TonemapPassID);
-		m_pMaterial->SetConstantVariable("u_displayMode", (UINT)m_displayMode, ShaderPasseIDs::TonemapPassID);
+		m_pMaterial->SetConstantVariable("u_displayMode", (UINT)UserData::GetInstance().displayMode, ShaderPasseIDs::TonemapPassID);
 		m_pMaterial->SetConstantVariable("u_inputToOutputMatrix", m_inputToOutputMatrix, ShaderPasseIDs::TonemapPassID);
 		m_pMaterial->SetConstantVariable("u_ctl", ctl, ShaderPasseIDs::TonemapPassID);
 		m_pMaterial->SetConstantVariable("tonemapMode", (UINT)UserData::GetInstance().tonemapMode, ShaderPasseIDs::TonemapPassID);
@@ -425,6 +427,45 @@ namespace ElysiaRenderer
 		m_xyWhiteC[0] = xyWhiteC[0]; m_xyWhiteC[1] = xyWhiteC[1];
 
 		m_scaleC = scaleC;
+	}
+
+	void TonemapPass::UpdatePSO()
+	{
+		// if(m_cameraColorFormat != GetBufferManager()->GetCameraColorRT()->GetFormat())
+		// {
+		// 	if(m_pTempRT)
+		// 	{
+		// 		m_pTempRT.reset();
+		// 		
+		// 		m_pTempRT = CreateRenderTexture(static_cast<UINT64>(m_renderSize.x),
+		// 		static_cast<UINT64>(m_renderSize.y),
+		// 		GetBufferManager()->GetCameraColorRT()->GetFormat(),
+		// 		L"Temp RT");
+		// 	}
+		// 	
+		// 	{
+		// 		RenderTargetDesc RTDesc = RenderTargetDesc
+		// 		{
+		// 			.m_renderTargetFormats = GetBufferManager()->GetCameraColorRT()->GetFormat(),
+		// 			.m_numRenderTargets = 1,
+		// 			.m_depthStencilFormat = GetBufferManager()->GetCameraDepthRT()->GetFormat()
+		// 		};
+		// 		m_cameraColorFormat = GetBufferManager()->GetCameraColorRT()->GetFormat();
+		//
+		// 		m_PipelineStateObjects[ShaderPasseIDs::TonemapPassID] = GetPSOManager()->GetGraphicsPipelineState(m_pMaterial.get(), ShaderPasseIDs::TonemapPassID, RTDesc);
+		//
+		// 	}
+		// 	{
+		// 		RenderTargetDesc RTDesc = RenderTargetDesc
+		// 		{
+		// 			.m_renderTargetFormats = m_pTempRT->GetFormat(),
+		// 			.m_numRenderTargets = 1,
+		// 			.m_depthStencilFormat = GetBufferManager()->GetCameraDepthRT()->GetFormat()
+		// 		};
+		//
+		// 		m_PipelineStateObjects[ShaderPasseIDs::BlitPassID] = GetPSOManager()->GetGraphicsPipelineState(m_pMaterial.get(), ShaderPasseIDs::BlitPassID, RTDesc);
+		// 	}
+		// }
 	}
 
 }

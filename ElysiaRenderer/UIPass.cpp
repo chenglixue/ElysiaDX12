@@ -18,6 +18,8 @@ namespace ElysiaRenderer
 	}
 	void UIPass::Execute()
 	{
+		UpdatePSO();
+		
 		ImGui_ImplDX12_NewFrame();
 		ImGui_ImplWin32_NewFrame();
 		ImGui::NewFrame();
@@ -36,6 +38,11 @@ namespace ElysiaRenderer
 	void UIPass::Dispose()
 	{
 
+	}
+
+	void UIPass::UpdatePSO()
+	{
+		
 	}
 
 	void UIPass::AddUIItems()

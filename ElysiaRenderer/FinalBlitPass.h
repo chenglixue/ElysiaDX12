@@ -16,6 +16,7 @@ namespace ElysiaRenderer
 		virtual void Configure() override;
 		virtual void Execute() override;
 		virtual void Render() override;
+		virtual void UpdatePSO() override;
 
 		virtual void Dispose() override;
 
@@ -24,5 +25,8 @@ namespace ElysiaRenderer
 		{
 			static int BlitPassID;
 		};
+		
+		DXGI_FORMAT m_backBufferFormat = DXGI_FORMAT_UNKNOWN;
+
 	};
 }

@@ -28,6 +28,8 @@ namespace ElysiaRenderer
 
 		virtual void Dispose();
 
+		virtual void UpdatePSO() = 0;
+
 	protected:
 		Vector2 m_renderSize;
 		DX12GraphicsContext* m_pCommand = nullptr;

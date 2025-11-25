@@ -80,6 +80,7 @@ namespace ElysiaRenderer
 				.m_numRenderTargets = 1,
 				.m_depthStencilFormat = GetBufferManager()->GetCameraDepthRT()->GetFormat()
 			};
+			m_cameraColorFormat = GetBufferManager()->GetCameraColorRT()->GetFormat();
 
 			auto emplaceResult = m_PipelineStateObjects.try_emplace(ShaderPasseIDs::BlitPassID);
 			if (emplaceResult.second)
@@ -95,6 +96,7 @@ namespace ElysiaRenderer
 
 	void AOPass::Execute()
 	{
+		UpdatePSO();
 		m_pMaterial->SetConstantVariable("g_ScreenSize", GetScreenSize(Vector2(m_renderSize.x, m_renderSize.y)));
 		m_pMaterial->SetConstantVariable("viewMatrix", m_pCamera->GetViewMat());
 		m_pMaterial->SetConstantVariable("viewMatrix_I", m_pCamera->GetViewMat().Invert());
@@ -118,7 +120,12 @@ namespace ElysiaRenderer
 		Execute();
 
 		DoCalcAO();
-		DoBlitToBackBuffer();
+		//DoBlitToBackBuffer();
+	}
+
+	void AOPass::UpdatePSO()
+	{
+		
 	}
 
 	void AOPass::DoCalcAO()
@@ -208,7 +215,7 @@ namespace ElysiaRenderer
 			//randomVec.Normalize();
 
 			auto scale = (float)i / maxSampleCount;
-			scale = MathHelper::Lerp(0.01f, 1.f, scale * scale);   // 二次函数分布
+			scale = MathHelper::Lerp(0.01f, 1.f, scale * scale);   // 浜屾鍑芥暟鍒嗗竷
 			randomVec = randomVec * scale;
 
 			o.emplace_back(std::move(randomVec));

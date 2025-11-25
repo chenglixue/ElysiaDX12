@@ -23,7 +23,7 @@ namespace ElysiaRenderer
 	}
 	void SkyboxPass::Execute()
 	{
-
+		UpdatePSO();
 	}
 	void SkyboxPass::Render()
 	{
@@ -113,5 +113,10 @@ namespace ElysiaRenderer
 		//// let cubemap z = 1 pass z-test, otherwise it'll be failed in z-test because data of zbuffer is 1
 		////pipelineStateCreateDesc.m_depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 		//(*m_pGraphicsPipelineStates)[ShaderQueue::Skybox] = std::move(GetDevice()->CreateGraphicsPipelineState(pipelineStateCreateDesc, meshResourceLayout));
+	}
+
+	void SkyboxPass::UpdatePSO()
+	{
+		
 	}
 }

@@ -281,6 +281,8 @@ namespace ElysiaRenderer
 	template void Shader::SetConstantVariable<std::vector<Vector3>>(const std::string&, const std::vector<Vector3>, UINT);
 	template<> void Shader::SetConstantVariable<std::vector<Vector4>>(const std::string& name, const std::vector<Vector4> data, UINT passID)
 	{
+		if(data.data() == nullptr) return;
+		
 		std::lock_guard<std::mutex> lockGuard(m_setDataMutex);
 		const void* pSourceData = data.data();
 

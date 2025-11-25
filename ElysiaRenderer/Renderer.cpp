@@ -81,7 +81,8 @@ namespace ElysiaRenderer
 		printf("done\n");
 
 		DeSerializeUserData();
-
+		UpdateDisplay(UserData::GetInstance().displayMode, m_disableLocalDimming);
+		
 		InitPSOHelpers();  
 
 		m_pCameraManager->Init(); 
@@ -97,7 +98,13 @@ namespace ElysiaRenderer
 	}
 	void Renderer::Update()
 	{
-		UpdateDisplay();
+		if (CheckIfWindowModeHdrOn() && (m_displayModesAvailable[m_currentDisplayModeNamesIndex] == DISPLAYMODE_SDR ||
+						m_displayModesAvailable[m_currentDisplayModeNamesIndex] == DISPLAYMODE_HDR10_2084 ||
+						m_displayModesAvailable[m_currentDisplayModeNamesIndex] == DISPLAYMODE_HDR10_SCRGB))
+		{
+			UpdateDisplay(UserData::GetInstance().displayMode, m_disableLocalDimming);
+			GetBufferManager()->Update();
+		}
 		//OnKeyboardInput();
 		GetLightManager()->Update();
 		UpdateCBV();

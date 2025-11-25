@@ -225,28 +225,27 @@ namespace ElysiaRenderer
 
 		// Create Swap Chain
 		{
-			DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
-			ZeroMemory(&swapChainDesc, sizeof(swapChainDesc));
-			swapChainDesc.Width = lround(m_screenSize.x);
-			swapChainDesc.Height = lround(m_screenSize.y);
-			swapChainDesc.Format = m_format;
-			swapChainDesc.Stereo = false;
-			swapChainDesc.SampleDesc.Count = 1;
-			swapChainDesc.SampleDesc.Quality = 0;
-			swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-			swapChainDesc.BufferCount = NUM_BACK_BUFFERS;
-			swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-			swapChainDesc.Flags = 0;
-			swapChainDesc.Scaling = DXGI_SCALING_NONE;
-			swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
+			m_descSwapChain;
+			m_descSwapChain.Width = lround(m_screenSize.x);
+			m_descSwapChain.Height = lround(m_screenSize.y);
+			m_descSwapChain.Format = m_format;
+			m_descSwapChain.Stereo = false;
+			m_descSwapChain.SampleDesc.Count = 1;
+			m_descSwapChain.SampleDesc.Quality = 0;
+			m_descSwapChain.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+			m_descSwapChain.BufferCount = NUM_BACK_BUFFERS;
+			m_descSwapChain.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+			m_descSwapChain.Flags = 0;
+			m_descSwapChain.Scaling = DXGI_SCALING_NONE;
+			m_descSwapChain.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
 
 			ThrowIfFailed(m_DXGIFactory->CheckFeatureSupport(
 				DXGI_FEATURE_PRESENT_ALLOW_TEARING, &m_bTearingSupport, sizeof(m_bTearingSupport)));
 
-			swapChainDesc.Flags = m_bTearingSupport ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0;
+			m_descSwapChain.Flags = m_bTearingSupport ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0;
 
 			IDXGISwapChain1* swapChain;
-			ElysiaHelper::AssertIfFailed(m_DXGIFactory->CreateSwapChainForHwnd(m_graphicsQueue->GetCommandQueue(), windowHandle, &swapChainDesc, nullptr, nullptr, &swapChain));
+			ElysiaHelper::AssertIfFailed(m_DXGIFactory->CreateSwapChainForHwnd(m_graphicsQueue->GetCommandQueue(), windowHandle, &m_descSwapChain, nullptr, nullptr, &swapChain));
 			ThrowIfFailed(m_DXGIFactory->MakeWindowAssociation(m_hWnd, DXGI_MWA_NO_ALT_ENTER));
 			ElysiaHelper::AssertIfFailed(swapChain->QueryInterface(__uuidof(IDXGISwapChain3), (void**)&m_swapChain));
 			ElysiaHelper::SafeRelease(swapChain);
@@ -296,8 +295,6 @@ namespace ElysiaRenderer
 		{
 			for (UINT currBufferIndex = 0; currBufferIndex < NUM_BACK_BUFFERS; currBufferIndex++)
 			{
-				if (m_backBuffers[currBufferIndex]) m_backBuffers[currBufferIndex].reset();
-
 				auto currBackBufferRTVHandle = m_RTVStagingDescriptorHeap->NewDescriptorHeapHandle();
 
 				ID3D12Resource* backBufferResource = nullptr;
@@ -315,6 +312,7 @@ namespace ElysiaRenderer
 					backBufferResource, D3D12_RESOURCE_STATE_PRESENT);
 				m_backBuffers[currBufferIndex]->SetResourceDesc(backBufferResource->GetDesc());
 				m_backBuffers[currBufferIndex]->SetRTVDescriptor(currBackBufferRTVHandle);
+				backBufferResource->Release();
 			}
 		}
 	}
@@ -324,7 +322,7 @@ namespace ElysiaRenderer
 		bool bIsModeSupported = IsModeSupported(displayMode);
 		if (bIsModeSupported == false)
 		{
-			assert(!"FS HDR display mode not supported");
+			//assert(!"FS HDR display mode not supported");
 			displayMode = DISPLAYMODE_SDR;
 		}
 
@@ -340,7 +338,7 @@ namespace ElysiaRenderer
 					lround(m_screenSize.x),
 					lround(m_screenSize.y),
 					DXGI_FORMAT_B8G8R8A8_UNORM,
-					0)
+					m_descSwapChain.Flags)
 			);
 
 			ThrowIfFailed(m_swapChain->SetColorSpace1(DXGI_COLOR_SPACE_RGB_FULL_G22_NONE_P709));
@@ -350,14 +348,19 @@ namespace ElysiaRenderer
 		m_format = fsHdrGetFormat(displayMode);
 		m_bVSyncOn = bVSyncOn;
 
-		ThrowIfFailed(
-				m_swapChain->ResizeBuffers(
-					NUM_BACK_BUFFERS,
-					lround(m_screenSize.x),
-					lround(m_screenSize.y),
-					m_format,
-					0)
-			);
+		for (size_t i = 0; i < m_backBuffers.size(); ++i)
+		{
+			m_backBuffers[i]->GetResource().Release();
+		}
+
+		 ThrowIfFailed(
+		 		m_swapChain->ResizeBuffers(
+		 			NUM_BACK_BUFFERS,
+		 			lround(m_screenSize.x),
+		 			lround(m_screenSize.y),
+		 			m_format,
+		 			m_descSwapChain.Flags)
+		 	);
 		fsHdrSetDisplayMode(displayMode, disableLocalDimming, m_swapChain);
 
 		// if SDR, convert add gamma for the swapchain format so blending is correct
@@ -366,7 +369,7 @@ namespace ElysiaRenderer
 			m_format = ConvertIntoGammaFormat(m_format);
 		}
 
-		CreateWindowDependentResources(m_displayMode);
+		CreateWindowDependentResources();
 	}
 
 	std::unique_ptr<DX12GraphicsContext>		DX12Device::CreateGraphicsContext()

@@ -99,7 +99,7 @@ namespace ElysiaRenderer
 	}
 	void BloomPass::Execute()
 	{
-
+		UpdatePSO();
 	}
 	void BloomPass::Render()
 	{
@@ -145,4 +145,8 @@ namespace ElysiaRenderer
 		m_pCommand->FlushBarrier();
 	}
 
+	void BloomPass::UpdatePSO()
+	{
+		
+	}
 }

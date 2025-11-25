@@ -17,6 +17,7 @@ namespace ElysiaRenderer
 		virtual void Configure() override;
 		virtual void Execute() override;
 		virtual void Render() override;
+		virtual void UpdatePSO() override;
 
 		virtual void Dispose() override;
 
@@ -28,6 +29,8 @@ namespace ElysiaRenderer
 			static int BlitPassID;
 			static int TonemapPassID;
 		};
+
+		DXGI_FORMAT m_cameraColorFormat = DXGI_FORMAT_UNKNOWN;
 
 		bool m_shoulder; // Use optional extra shoulderContrast tuning (set to false if shoulderContrast is 1.0).
 		bool m_con; // Use first RGB conversion matrix, if 'soft' then 'con' must be true also.
@@ -46,7 +49,6 @@ namespace ElysiaRenderer
 		float m_saturation[3]; // A per channel adjustment, use <0 decrease, 0=no change, >0 increase.
 		float m_crosstalk[3]; // One channel must be 1.0, the rest can be <= 1.0 but not zero.
 		
-		CAULDRON_DX12::DisplayMode m_displayMode;
 		math::Matrix4 m_inputToOutputMatrix;
 		 
 		void SetLPMConfig(bool con, bool soft, bool con2, bool clip, bool scaleOnly);

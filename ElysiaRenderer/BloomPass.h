@@ -15,6 +15,7 @@ namespace ElysiaRenderer
 		virtual void Execute() override;
 		virtual void Render() override;
 		virtual void Dispose() override;
+		virtual void UpdatePSO() override;
 
 	private:
 		std::unique_ptr<RenderTexture> m_pBloomRT = nullptr;
