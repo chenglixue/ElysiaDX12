@@ -14,6 +14,11 @@ namespace ElysiaRenderer
 		return m_pShader->GetPassData(passIndex);
 	}
 
+	const UINT RenderMaterial::FindPassIndex(const std::string& name) const noexcept
+	{
+		return m_pShader->FindPassIndex(name);
+	}
+
 	template<typename T>
 	void RenderMaterial::SetConstantVariable(const std::string& name, T data, UINT passID)
 	{

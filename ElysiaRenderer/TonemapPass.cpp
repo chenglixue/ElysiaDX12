@@ -304,7 +304,7 @@ namespace ElysiaRenderer
 			m_softGap, m_hdrMax, m_exposure, m_contrast, m_shoulderContrast,
 			m_saturation, m_crosstalk);
 
-		 
+		
 		m_pMaterial->SetConstantVariable("u_shoulder", m_shoulder, ShaderPasseIDs::TonemapPassID);
 		m_pMaterial->SetConstantVariable("u_con", m_con, ShaderPasseIDs::TonemapPassID);
 		m_pMaterial->SetConstantVariable("u_soft", m_soft, ShaderPasseIDs::TonemapPassID);

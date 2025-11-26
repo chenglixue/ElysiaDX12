@@ -9,14 +9,12 @@ namespace ElysiaRenderer
 {
 	int BloomPass::ShaderPasseIDs::BloomPassID = -1;
 	int BloomPass::ShaderPasseIDs::BlitPassID = -1;
+	size_t BloomPass::ShaderIDs::g_DestTextureIndexID = -1;
 	
-	size_t BloomPass::ShaderIDs::g_DestTextureIndexID = PropertyToID("g_DestTextureIndex");
-	
-
 	BloomPass::BloomPass(DX12Camera* pCamera) :
 		BasePass(pCamera)
 	{
-
+		ShaderIDs::g_DestTextureIndexID = PropertyToID("g_DestTextureIndex");
 	}
 	BloomPass::~BloomPass()
 	{

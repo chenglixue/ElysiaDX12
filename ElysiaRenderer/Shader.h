@@ -13,11 +13,12 @@ namespace ElysiaRenderer
 		Shader(std::vector<ShaderPass>& shaderPasses);
 
 		const PassData& GetPassData(UINT passIndex) const noexcept;
+		const UINT FindPassIndex(const std::string& name) const noexcept;
 
 		template<typename T> 
 		void SetConstantVariable(const std::string& name, const T data, UINT passID = 0);
 		template<typename T>
-		void Shader::SetConstantVariable(const size_t hash, const T data, UINT passID = 0);
+		void SetConstantVariable(const size_t hash, const T data, UINT passID = 0);
 		void ApplyConstantData(); 
 
 		const std::unordered_map<std::string, ShaderVariable>& GetShaderVariables() const noexcept

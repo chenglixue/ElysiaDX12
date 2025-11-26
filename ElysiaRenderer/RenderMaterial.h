@@ -17,6 +17,7 @@ namespace ElysiaRenderer
 		~RenderMaterial() = default;
 
 		const PassData& GetPassData(UINT passIndex) const noexcept;
+		const UINT FindPassIndex(const std::string& name) const noexcept;
 
 		template<typename T>
 		void SetConstantVariable(const std::string& name, T data, UINT passID = 0);

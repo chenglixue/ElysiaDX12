@@ -39,6 +39,7 @@ namespace ElysiaRenderer
 	struct PassData
 	{
 		UINT PassIndex;
+		std::string Name;
 		std::unique_ptr<DX12Shader> pVSShader = nullptr;
 		std::unique_ptr<DX12Shader>	pPSShader = nullptr;
 		std::unique_ptr<DX12Shader>	pCSShader = nullptr;

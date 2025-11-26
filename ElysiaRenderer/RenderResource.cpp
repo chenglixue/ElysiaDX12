@@ -5,12 +5,12 @@
 namespace ElysiaRenderer
 {
 	std::unique_ptr<RenderResource> g_pRenderResource = nullptr;
+	std::unordered_map<size_t, std::string> g_shaderConstantVariables{};
 
 	RenderResource::RenderResource() :
 		m_perObjectBindResourceSpace(std::make_unique<PipelineResourceSpace>()),
 		m_perFrameBindResourceSpace(std::make_unique<PipelineResourceSpace>()),
-		m_pCBVFrameVariable(std::make_unique<CBVFrameVariable>()),
-		m_shaderConstantVariables()
+		m_pCBVFrameVariable(std::make_unique<CBVFrameVariable>())
 	{
 	}
 
@@ -41,7 +41,7 @@ namespace ElysiaRenderer
 
 	std::string RenderResource::GetShaderConstantVariable(size_t hash) const noexcept
 	{
-		return m_shaderConstantVariables.at(hash);
+		return g_shaderConstantVariables.at(hash);
 	}
 
 	void RenderResource::SetDisplayMode(CAULDRON_DX12::DisplayMode newDisplayMode)
@@ -49,9 +49,9 @@ namespace ElysiaRenderer
 		m_currDisplayMode = newDisplayMode;
 	}
 
-	size_t RenderResource::AddShaderConstantVariable(const size_t hash, const std::string& name)
+	void AddShaderConstantVariable(const size_t hash, const std::string& name)
 	{
-		auto result = m_shaderConstantVariables.try_emplace(hash);
+		auto result = g_shaderConstantVariables.try_emplace(hash);
 		if (result.second)
 		{
 			result.first->second = name;
@@ -62,6 +62,8 @@ namespace ElysiaRenderer
 	{
 		auto hash = xxh::GetHash(name);
 
-		GetRenderResource()->AddShaderConstantVariable(hash, name);
+		AddShaderConstantVariable(hash, name);
+
+		return hash;
 	}
 }

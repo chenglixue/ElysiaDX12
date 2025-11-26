@@ -20,6 +20,7 @@ namespace ElysiaRenderer
 
 			// set shader pass
 			newPassData.PassIndex = passID;
+			newPassData.Name = shaderPasses[passID].Name;
 
 			bool hasCS = shaderPasses[passID].IsComputeShader;
 			
@@ -199,6 +200,19 @@ namespace ElysiaRenderer
 		}
 	}
 
+	const UINT Shader::FindPassIndex(const std::string& name) const noexcept
+	{
+		for(size_t passIndex = 0; passIndex < m_passDatas.size(); ++passIndex)
+		{
+			if(m_passDatas[passIndex].Name == name)
+			{
+				return static_cast<UINT>(passIndex);
+			}
+		}
+
+		ThrowRuntimeError("invalid pass index");
+	}
+
 	template<typename T>
 	void Shader::SetConstantVariable(const std::string& name, const T data, UINT passID)
 	{
@@ -206,10 +220,10 @@ namespace ElysiaRenderer
 		const void* pSourceData = &data;
 
 		auto hash = PropertyToID(name);
-		auto constantVariableDescMap = m_constantVariableDescs.at(passID);
+		auto& constantVariableDescMap = m_constantVariableDescs.at(passID);
 		if (constantVariableDescMap.contains(hash))
 		{
-			auto constantVariableDesc = constantVariableDescMap.at(hash);
+			auto& constantVariableDesc = constantVariableDescMap.at(hash);
 			memcpy(constantVariableDesc.pData.data(), pSourceData, constantVariableDesc.Size);
 
 			constantVariableDesc.IsDirty = true;
@@ -222,10 +236,10 @@ namespace ElysiaRenderer
 		std::lock_guard<std::mutex> lockGuard(m_setDataMutex);
 		const void* pSourceData = &data;
 
-		auto constantVariableDescMap = m_constantVariableDescs.at(passID);
+		auto& constantVariableDescMap = m_constantVariableDescs.at(passID);
 		if (constantVariableDescMap.contains(hash))
 		{
-			auto constantVariableDesc = constantVariableDescMap.at(hash);
+			auto& constantVariableDesc = constantVariableDescMap.at(hash);
 			memcpy(constantVariableDesc.pData.data(), pSourceData, constantVariableDesc.Size);
 
 			constantVariableDesc.IsDirty = true;
@@ -241,45 +255,19 @@ namespace ElysiaRenderer
 			auto& passData = m_passDatas[i];
 			auto& constantVariableDescs = m_constantVariableDescs[i];
 
-			for(auto constantVariableDesc : constantVariableDescs)
+			for(auto& pair : constantVariableDescs)
 			{
-				if (constantVariableDesc.second.)
-			}
-
-			for (auto& passData : m_passDatas)
-			{
-				if (passData.second.PassIndex != desc.PassID) continue;
+				auto& desc = pair.second;
+				
 				if (!desc.IsDirty) continue;
 
-				auto meshResourceLayouts = passData.second.MeshResourceLayouts.get();
-
+				auto meshResourceLayouts = passData.MeshResourceLayouts.get();
 				auto buffer = meshResourceLayouts->m_spaces[desc.SpaceID]->GetCBV()->GetMappedBuffer();
 				buffer += desc.StartOffset;
 				assert(buffer != nullptr && desc.pData.data() != nullptr && desc.Size > 0);
 				memcpy(buffer, desc.pData.data(), desc.Size);
-
+				desc.IsDirty = false;
 			}
-			desc.IsDirty = true;
-		}
-
-		for (auto& constantVariableDesc : m_constantVariableDescs)
-		{
-			auto& desc = constantVariableDesc.second;
-
-			for (auto& passData : m_passDatas)
-			{
-				if (passData.second.PassIndex != desc.PassID) continue;
-				if (!desc.IsDirty) continue;
-
-				auto meshResourceLayouts = passData.second.MeshResourceLayouts.get();
-
-				auto buffer = meshResourceLayouts->m_spaces[desc.SpaceID]->GetCBV()->GetMappedBuffer();
-				buffer += desc.StartOffset;
-				assert(buffer != nullptr && desc.pData.data() != nullptr && desc.Size > 0);
-				memcpy(buffer, desc.pData.data(), desc.Size);
-
-			}
-			desc.IsDirty = true;
 		}
 	}
 
@@ -293,50 +281,23 @@ namespace ElysiaRenderer
 	template void Shader::SetConstantVariable<math::Matrix4>(const std::string&, math::Matrix4, UINT passID);
 	template<> void Shader::SetConstantVariable<bool>(const std::string& name, const bool data, UINT passID)
 	{
-		std::lock_guard<std::mutex> lockGuard(m_setDataMutex);
-		const void* pSourceData = &data;
-
-		auto itr = m_constantVariableDescs.equal_range(name);
-		for (auto currItr = itr.first; currItr != itr.second; ++currItr)
-		{
-			if (currItr->second.PassID == passID)
-			{
-				memcpy(currItr->second.pData.data(), pSourceData, currItr->second.Size / 4);
-
-				for (auto& passData : m_passDatas)
-				{
-					if (passData.second.PassIndex != passID) continue;
-
-					auto meshResourceLayouts = passData.second.MeshResourceLayouts.get();
-					currItr->second.IsDirty = true;
-				}
-			}
-		}
+		SetConstantVariable(name, (UINT)(data == true ? 1 : 0), passID);
 	}
 	template void Shader::SetConstantVariable<std::vector<Vector2>>(const std::string&, const std::vector<Vector2>, UINT);
 	template void Shader::SetConstantVariable<std::vector<Vector3>>(const std::string&, const std::vector<Vector3>, UINT);
 	template<> void Shader::SetConstantVariable<std::vector<Vector4>>(const std::string& name, const std::vector<Vector4> data, UINT passID)
 	{
-		if(data.data() == nullptr) return;
-		
 		std::lock_guard<std::mutex> lockGuard(m_setDataMutex);
 		const void* pSourceData = data.data();
 
-		auto itr = m_constantVariableDescs.equal_range(name);
-		for (auto currItr = itr.first; currItr != itr.second; ++currItr)
+		auto hash = PropertyToID(name);
+		auto constantVariableDescMap = m_constantVariableDescs.at(passID);
+		if (constantVariableDescMap.contains(hash))
 		{
-			if (currItr->second.PassID == passID)
-			{
-				memcpy(currItr->second.pData.data(), pSourceData, currItr->second.Size);
+			auto constantVariableDesc = constantVariableDescMap.at(hash);
+			memcpy(constantVariableDesc.pData.data(), pSourceData, constantVariableDesc.Size);
 
-				for (auto& passData : m_passDatas)
-				{
-					if (passData.second.PassIndex != passID) continue;
-
-					auto meshResourceLayouts = passData.second.MeshResourceLayouts.get();
-					currItr->second.IsDirty = true;
-				}
-			}
+			constantVariableDesc.IsDirty = true;
 		}
 	}
 	template<> void Shader::SetConstantVariable<std::vector<UINT>>(const std::string& name, const std::vector<UINT> data, UINT passID)
@@ -344,21 +305,14 @@ namespace ElysiaRenderer
 		std::lock_guard<std::mutex> lockGuard(m_setDataMutex);
 		const void* pSourceData = data.data();
 
-		auto itr = m_constantVariableDescs.equal_range(name);
-		for (auto currItr = itr.first; currItr != itr.second; ++currItr)
+		auto hash = PropertyToID(name);
+		auto& constantVariableDescMap = m_constantVariableDescs.at(passID);
+		if (constantVariableDescMap.contains(hash))
 		{
-			if (currItr->second.PassID == passID)
-			{
-				memcpy(currItr->second.pData.data(), pSourceData, currItr->second.Size);
+			auto& constantVariableDesc = constantVariableDescMap.at(hash);
+			memcpy(constantVariableDesc.pData.data(), pSourceData, constantVariableDesc.Size);
 
-				for (auto& passData : m_passDatas)
-				{
-					if (passData.second.PassIndex != passID) continue;
-
-					auto meshResourceLayouts = passData.second.MeshResourceLayouts.get();
-					currItr->second.IsDirty = true;
-				}
-			}
+			constantVariableDesc.IsDirty = true;
 		}
 	}
 
@@ -375,49 +329,29 @@ namespace ElysiaRenderer
 		std::lock_guard<std::mutex> lockGuard(m_setDataMutex);
 		const void* pSourceData = &data;
 
-		auto name = GetRenderResource()->GetShaderConstantVariable(hash);
-		auto itr = m_constantVariableDescs.equal_range(name);
-		for (auto currItr = itr.first; currItr != itr.second; ++currItr)
+		auto constantVariableDescMap = m_constantVariableDescs.at(passID);
+		if (constantVariableDescMap.contains(hash))
 		{
-			if (currItr->second.PassID == passID)
-			{
-				memcpy(currItr->second.pData.data(), pSourceData, currItr->second.Size / 4);
+			auto constantVariableDesc = constantVariableDescMap.at(hash);
+			memcpy(constantVariableDesc.pData.data(), pSourceData, constantVariableDesc.Size / 4);
 
-				for (auto& passData : m_passDatas)
-				{
-					if (passData.second.PassIndex != passID) continue;
-
-					auto meshResourceLayouts = passData.second.MeshResourceLayouts.get();
-					currItr->second.IsDirty = true;
-				}
-			}
+			constantVariableDesc.IsDirty = true;
 		}
 	}
 	template void Shader::SetConstantVariable<std::vector<Vector2>>(const size_t hash, const std::vector<Vector2>, UINT);
 	template void Shader::SetConstantVariable<std::vector<Vector3>>(const size_t hash, const std::vector<Vector3>, UINT);
 	template<> void Shader::SetConstantVariable<std::vector<Vector4>>(const size_t hash, const std::vector<Vector4> data, UINT passID)
 	{
-		if(data.data() == nullptr) return;
-		
 		std::lock_guard<std::mutex> lockGuard(m_setDataMutex);
 		const void* pSourceData = data.data();
 
-		auto name = GetRenderResource()->GetShaderConstantVariable(hash);
-		auto itr = m_constantVariableDescs.equal_range(name);
-		for (auto currItr = itr.first; currItr != itr.second; ++currItr)
+		auto constantVariableDescMap = m_constantVariableDescs.at(passID);
+		if (constantVariableDescMap.contains(hash))
 		{
-			if (currItr->second.PassID == passID)
-			{
-				memcpy(currItr->second.pData.data(), pSourceData, currItr->second.Size);
+			auto constantVariableDesc = constantVariableDescMap.at(hash);
+			memcpy(constantVariableDesc.pData.data(), pSourceData, constantVariableDesc.Size);
 
-				for (auto& passData : m_passDatas)
-				{
-					if (passData.second.PassIndex != passID) continue;
-
-					auto meshResourceLayouts = passData.second.MeshResourceLayouts.get();
-					currItr->second.IsDirty = true;
-				}
-			}
+			constantVariableDesc.IsDirty = true;
 		}
 	}
 	template<> void Shader::SetConstantVariable<std::vector<UINT>>(const size_t hash, const std::vector<UINT> data, UINT passID)
@@ -425,22 +359,13 @@ namespace ElysiaRenderer
 		std::lock_guard<std::mutex> lockGuard(m_setDataMutex);
 		const void* pSourceData = data.data();
 
-		auto name = GetRenderResource()->GetShaderConstantVariable(hash);
-		auto itr = m_constantVariableDescs.equal_range(name);
-		for (auto currItr = itr.first; currItr != itr.second; ++currItr)
+		auto constantVariableDescMap = m_constantVariableDescs.at(passID);
+		if (constantVariableDescMap.contains(hash))
 		{
-			if (currItr->second.PassID == passID)
-			{
-				memcpy(currItr->second.pData.data(), pSourceData, currItr->second.Size);
+			auto constantVariableDesc = constantVariableDescMap.at(hash);
+			memcpy(constantVariableDesc.pData.data(), pSourceData, constantVariableDesc.Size);
 
-				for (auto& passData : m_passDatas)
-				{
-					if (passData.second.PassIndex != passID) continue;
-
-					auto meshResourceLayouts = passData.second.MeshResourceLayouts.get();
-					currItr->second.IsDirty = true;
-				}
-			}
+			constantVariableDesc.IsDirty = true;
 		}
 	}
 }

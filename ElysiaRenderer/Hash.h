@@ -26,7 +26,7 @@ namespace xxh
 
 	inline size_t GetHash(const void* data, size_t size)
 	{
-		if constexpr (size < 32)
+		if (size < 32)
 		{
 			return xxh::xxhash_gethash_small(data, size);
 		}
