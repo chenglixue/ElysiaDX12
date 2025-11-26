@@ -1,128 +1,428 @@
 ﻿  Skipping vcpkg. (no packages)
 cl : command line  warning D9014: invalid value '18' for '/wd'; assuming '5999'
+  stdafx.cpp
+cl : command line  warning D9014: invalid value '18' for '/wd'; assuming '5999'
+  ColorConversion.cpp
+  FreesyncHDR.cpp
+  Misc.cpp
+  D3D12MemAlloc.cpp
+  BC.cpp
+  BC4BC5.cpp
+  BC6HBC7.cpp
+  BCDirectCompute.cpp
+  DirectXTexCompress.cpp
+  DirectXTexCompressGPU.cpp
+  DirectXTexConvert.cpp
+  DirectXTexD3D11.cpp
+  DirectXTexDDS.cpp
+  DirectXTexFlipRotate.cpp
+  DirectXTexImage.cpp
+  DirectXTexMipmaps.cpp
+  DirectXTexMisc.cpp
+  DirectXTexNormalMaps.cpp
+  DirectXTexTGA.cpp
+  DirectXTexUtil.cpp
+  Generating Code...
+  Compiling...
+  DirectXTexWIC.cpp
+  imgui.cpp
+  imgui_demo.cpp
+  imgui_draw.cpp
+  imgui_impl_dx12.cpp
+  imgui_impl_win32.cpp
+  imgui_tables.cpp
+  imgui_widgets.cpp
+  main.cpp
+C:\Work\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file 'main.cpp')
+  
+  Generating Code...
+C:\Work\ElysiaRenderer\ElysiaRenderer\main.cpp(292): warning C4715: 'WndProc': not all control paths return a value
+cl : command line  warning D9014: invalid value '18' for '/wd'; assuming '5999'
+  AOPass.cpp
+C:\Work\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file '/AOPass.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\AOPass.cpp(208,20): warning C4018: '<': signed/unsigned mismatch
+  (compiling source file '/AOPass.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\AOPass.cpp(212,22): warning C4018: '<': signed/unsigned mismatch
+  (compiling source file '/AOPass.cpp')
+  
+  BasePass.cpp
+C:\Work\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file '/BasePass.cpp')
+  
+  BloomPass.cpp
+C:\Work\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file '/BloomPass.cpp')
+  
   BufferManager.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+C:\Work\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
   (compiling source file '/BufferManager.cpp')
   
-  ElysiaRenderer.vcxproj -> D:\DX12\ElysiaDX12\x64\Debug\ElysiaRenderer.exe
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Mesh\diablo3_pose.obj
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Mesh\LOW_WEPON.fbx
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Mesh\plane.fbx
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Mesh\Sphere.fbx
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Mesh\UE.fbx
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\private\AmbientCubemap.hlsl
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\private\AreaLightCommon.hlsl
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\private\BRDF.hlsl
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\private\Color.hlsl
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\private\Common.hlsl
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\private\DeferredCommon.hlsl
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\private\EnergyPreservation.hlsl
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\private\ffx_a.h
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\private\ffx_lpm.h
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\private\Light.hlsl
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\private\Light.hlsli
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\private\LightAccumulator.hlsl
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\private\LightCommon.hlsl
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\private\Macros.hlsli
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\private\Math.hlsli
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\private\MonteCarlo.hlsl
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\private\Random.hlsl
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\private\ShadingCommon.hlsl
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\private\ShadingModel.hlsl
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\private\ShadowCommon.hlsl
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\private\SharedCommon.hlsli
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\private\Transform.hlsli
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\public\Blit.hlsl
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\public\Bloom.hlsl
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\public\FullScreenTriangle.hlsl
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\public\GBuffer.hlsl
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\public\Opaque.hlsl
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\public\PBR.hlsl
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\public\Shadow.hlsl
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\public\Skybox.hlsl
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\public\SSAO.hlsl
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Shaders\public\TonemapPass.hlsl
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Background_Albedo.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Background_Normal.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Background_Roughness.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\ChainTexture_Albedo.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\ChainTexture_Metallic.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\ChainTexture_Normal.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\ChainTexture_Roughness.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Dielectric_metallic.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\gi_flag.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Lion_Albedo.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Lion_Normal.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Lion_Roughness.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Metallic_metallic.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza.fbx
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Arch_diffuse.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Arch_normal.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Arch_roughness.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Bricks_a_Albedo.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Bricks_a_Normal.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Bricks_a_Roughness.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Ceiling_diffuse.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Ceiling_normal.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Ceiling_roughness.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Column_a_diffuse.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Column_a_normal.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Column_a_roughness.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Column_b_diffuse.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Column_b_normal.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Column_b_roughness.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Column_c_diffuse.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Column_c_normal.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Column_c_roughness.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Curtain_Blue_diffuse.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Curtain_Blue_normal.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Curtain_Green_diffuse.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Curtain_Green_normal.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Curtain_metallic.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Curtain_Red_diffuse.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Curtain_Red_normal.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Curtain_roughness.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Details_diffuse.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Details_metallic.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Details_normal.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Details_roughness.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Fabric_Blue_diffuse.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Fabric_Blue_normal.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Fabric_Green_diffuse.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Fabric_Green_normal.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Fabric_metallic.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Fabric_Red_diffuse.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Fabric_Red_normal.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Fabric_roughness.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_FlagPole_diffuse.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_FlagPole_normal.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_FlagPole_roughness.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Floor_diffuse.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Floor_normal.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Floor_roughness.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Roof_diffuse.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Roof_normal.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Roof_roughness.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Thorn_diffuse.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Thorn_normal.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Sponza_Thorn_roughness.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\VaseHanging_diffuse.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\VaseHanging_normal.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\VaseHanging_roughness.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\VasePlant_diffuse.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\VasePlant_normal.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\VasePlant_roughness.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\VaseRound_diffuse.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\VaseRound_normal.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\VaseRound_roughness.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Vase_diffuse.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Vase_normal.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Sponza\Vase_roughness.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Tex\Black.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Tex\bluenoise_frd_1024x1024.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Tex\cubemap0.dds
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Tex\GGX_Eavg_LUT.dds
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Tex\GGX_E_LUT.dds
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Tex\White.png
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Resource\Tex\Wood.dds
-  复制了 120 个文件
+  CameraManager.cpp
+  DX12BufferResource.cpp
+C:\Work\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file '/DX12BufferResource.cpp')
+  
+  DX12Camera.cpp
+  DX12ComputeContext.cpp
+C:\Work\ElysiaRenderer\ElysiaRenderer\DX12ComputeContext.h(8,8): warning C4099: 'ElysiaRenderer::PipelineStateObject': type name first seen using 'struct' now seen using 'class'
+  (compiling source file '/DX12ComputeContext.cpp')
+      C:\Work\ElysiaRenderer\ElysiaRenderer\DX12PipelineState.h(47,9):
+      see declaration of 'ElysiaRenderer::PipelineStateObject'
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file '/DX12ComputeContext.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\DX12ComputeContext.cpp(89,53): warning C4267: 'argument': conversion from 'size_t' to 'UINT', possible loss of data
+  (compiling source file '/DX12ComputeContext.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\DX12ComputeContext.cpp(89,40): warning C4267: 'argument': conversion from 'size_t' to 'UINT', possible loss of data
+  (compiling source file '/DX12ComputeContext.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\DX12ComputeContext.cpp(89,27): warning C4267: 'argument': conversion from 'size_t' to 'UINT', possible loss of data
+  (compiling source file '/DX12ComputeContext.cpp')
+  
+  DX12Context.cpp
+C:\Work\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file '/DX12Context.cpp')
+  
+  DX12DescriptorHeap.cpp
+  DX12Device.cpp
+C:\Work\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file '/DX12Device.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\DX12Device.cpp(824,11): warning C4129: 'S': unrecognized character escape sequence
+  (compiling source file '/DX12Device.cpp')
+  
+  DX12GraphicsContext.cpp
+C:\Work\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file '/DX12GraphicsContext.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\DX12GraphicsContext.cpp(266,53): warning C4267: 'argument': conversion from 'size_t' to 'UINT', possible loss of data
+  (compiling source file '/DX12GraphicsContext.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\DX12GraphicsContext.cpp(266,40): warning C4267: 'argument': conversion from 'size_t' to 'UINT', possible loss of data
+  (compiling source file '/DX12GraphicsContext.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\DX12GraphicsContext.cpp(266,27): warning C4267: 'argument': conversion from 'size_t' to 'UINT', possible loss of data
+  (compiling source file '/DX12GraphicsContext.cpp')
+  
+  DX12Light.cpp
+  DX12Material.cpp
+C:\Work\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file '/DX12Material.cpp')
+  
+  File.cpp
+  FinalBlitPass.cpp
+C:\Work\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file '/FinalBlitPass.cpp')
+  
+  GBufferPass.cpp
+C:\Work\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file '/GBufferPass.cpp')
+  
+  DxgiFormatHelper.cpp
+  ModelImporter.cpp
+C:\Work\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file '/ModelImporter.cpp')
+  
+  DX12PipelineState.cpp
+C:\Work\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file '/DX12PipelineState.cpp')
+  
+  Generating Code...
+  Compiling...
+  DX12Queue.cpp
+  DX12QueueManager.cpp
+  DX12RenderPassDescriptorHeap.cpp
+C:\Work\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file '/DX12RenderPassDescriptorHeap.cpp')
+  
+  DX12RootSignature.cpp
+  DX12Shader.cpp
+  DX12Shadow.cpp
+C:\Work\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file '/DX12Shadow.cpp')
+  
+  DX12StagingDescriptorHeap.cpp
+C:\Work\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file '/DX12StagingDescriptorHeap.cpp')
+  
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\xutility(241,54): warning C4267: 'initializing': conversion from 'size_t' to '_Ty', possible loss of data
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\xutility(241,54): warning C4267:         with
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\xutility(241,54): warning C4267:         [
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\xutility(241,54): warning C4267:             _Ty=UINT
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\xutility(241,54): warning C4267:         ]
+  (compiling source file '/DX12StagingDescriptorHeap.cpp')
+      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\xutility(241,54):
+      the template instantiation context (the oldest one first) is
+          C:\Work\ElysiaRenderer\ElysiaRenderer\DX12StagingDescriptorHeap.cpp(57,20):
+          see reference to function template instantiation '_Ty &std::vector<_Ty,std::allocator<_Ty>>::emplace_back<uint64_t>(uint64_t &&)' being compiled
+          with
+          [
+              _Ty=std::seed_seq::result_type
+          ]
+          C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\vector(862,24):
+          see reference to function template instantiation '_Ty &std::vector<_Ty,std::allocator<_Ty>>::_Emplace_one_at_back<unsigned __int64>(unsigned __int64 &&)' being compiled
+          with
+          [
+              _Ty=std::seed_seq::result_type
+          ]
+          C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\vector(780,20):
+          see reference to function template instantiation '_Ty &std::vector<_Ty,std::allocator<_Ty>>::_Emplace_back_with_unused_capacity<unsigned __int64>(unsigned __int64 &&)' being compiled
+          with
+          [
+              _Ty=std::seed_seq::result_type
+          ]
+          C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\vector(795,13):
+          see reference to function template instantiation 'void std::_Construct_in_place<unsigned int,_Ty>(unsigned int &,_Ty &&) noexcept' being compiled
+          with
+          [
+              _Ty=size_t
+          ]
+          C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\xutility(251,14):
+          see reference to function template instantiation '_Ty *std::construct_at<_Ty,unsigned __int64,0x0>(_Ty *const ,unsigned __int64 &&) noexcept(<expr>)' being compiled
+          with
+          [
+              _Ty=UINT
+          ]
+  
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\xutility(255,61): warning C4267: 'initializing': conversion from 'size_t' to 'unsigned int', possible loss of data
+  (compiling source file '/DX12StagingDescriptorHeap.cpp')
+  
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\xutility(242,69): warning C4267: 'initializing': conversion from 'size_t' to '_Ty', possible loss of data
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\xutility(242,69): warning C4267:         with
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\xutility(242,69): warning C4267:         [
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\xutility(242,69): warning C4267:             _Ty=UINT
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\xutility(242,69): warning C4267:         ]
+  (compiling source file '/DX12StagingDescriptorHeap.cpp')
+      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\xutility(242,69):
+      the template instantiation context (the oldest one first) is
+          C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\vector(795,13):
+          see reference to function template instantiation 'void std::_Construct_in_place<unsigned int,_Ty>(unsigned int &,_Ty &&) noexcept' being compiled
+          with
+          [
+              _Ty=size_t
+          ]
+          C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\xutility(251,14):
+          see reference to function template instantiation '_Ty *std::construct_at<_Ty,unsigned __int64,0x0>(_Ty *const ,unsigned __int64 &&) noexcept' being compiled
+          with
+          [
+              _Ty=UINT
+          ]
+  
+  DX12TextureBuffer.cpp
+C:\Work\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file '/DX12TextureBuffer.cpp')
+  
+  DX12UI.cpp
+C:\Work\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file '/DX12UI.cpp')
+  
+  DX12UploadContext.cpp
+C:\Work\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file '/DX12UploadContext.cpp')
+  
+  DX12GPUResource.cpp
+  LightManager.cpp
+  MeshManager.cpp
+  OpaquePass.cpp
+C:\Work\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file '/OpaquePass.cpp')
+  
+  PipelineResourceSpace.cpp
+C:\Work\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file '/PipelineResourceSpace.cpp')
+  
+  PipelineStateUtility.cpp
+  PIXHelper.cpp
+  PSOHelper.cpp
+  PSOManager.cpp
+C:\Work\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file '/PSOManager.cpp')
+  
+  Renderer.cpp
+C:\Work\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file '/Renderer.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(255,111): warning C4244: 'argument': conversion from 'const float' to 'uint32_t', possible loss of data
+  (compiling source file '/Renderer.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\Renderer.cpp(255,79): warning C4244: 'argument': conversion from 'const float' to 'uint32_t', possible loss of data
+  (compiling source file '/Renderer.cpp')
+  
+  Generating Code...
+  Compiling...
+  RenderMaterial.cpp
+  RenderResource.cpp
+C:\Work\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file '/RenderResource.cpp')
+  
+  RenderTexture.cpp
+C:\Work\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file '/RenderTexture.cpp')
+  
+  Shader.cpp
+C:\Work\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file '/Shader.cpp')
+  
+  ShaderManager.cpp
+C:\Work\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file '/ShaderManager.cpp')
+  
+  ShaderUtility.cpp
+  ShadowPass.cpp
+C:\Work\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file '/ShadowPass.cpp')
+  
+  SkyboxPass.cpp
+C:\Work\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file '/SkyboxPass.cpp')
+  
+  SobolSequenceGenerator.cpp
+  TextureManager.cpp
+C:\Work\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file '/TextureManager.cpp')
+  
+  TonemapPass.cpp
+C:\Work\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file '/TonemapPass.cpp')
+  
+  Transform.cpp
+  UIPass.cpp
+C:\Work\ElysiaRenderer\ElysiaRenderer\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file '/UIPass.cpp')
+  
+  UserData.cpp
+  xxhash.cpp
+  Generating Code...
+C:\Work\ElysiaRenderer\ElysiaRenderer\Shader.cpp(186): warning C4172: returning address of local variable or temporary
+C:\Work\ElysiaRenderer\ElysiaRenderer\Shader.cpp(174): warning C4172: returning address of local variable or temporary
+DirectXTK12.lib(SimpleMath.obj) : warning LNK4099: PDB '' was not found with 'DirectXTK12.lib(SimpleMath.obj)' or at ''; linking object as if no debug info
+DirectXTK12.lib(pch.obj) : warning LNK4099: PDB '' was not found with 'DirectXTK12.lib(pch.obj)' or at ''; linking object as if no debug info
+     Creating library C:\Work\ElysiaRenderer\x64\Debug\ElysiaRenderer.lib and object C:\Work\ElysiaRenderer\x64\Debug\ElysiaRenderer.exp
+  ElysiaRenderer.vcxproj -> C:\Work\ElysiaRenderer\x64\Debug\ElysiaRenderer.exe
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Mesh\diablo3_pose.obj
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Mesh\LOW_WEPON.fbx
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Mesh\plane.fbx
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Mesh\Sphere.fbx
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Mesh\UE.fbx
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\AmbientCubemap.hlsl
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\AreaLightCommon.hlsl
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\BRDF.hlsl
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\Color.hlsl
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\Common.hlsl
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\DeferredCommon.hlsl
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\EnergyPreservation.hlsl
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\ffx_a.h
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\ffx_lpm.h
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\Light.hlsl
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\Light.hlsli
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\LightAccumulator.hlsl
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\LightCommon.hlsl
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\Macros.hlsli
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\Math.hlsli
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\MonteCarlo.hlsl
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\Random.hlsl
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\ShadingCommon.hlsl
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\ShadingModel.hlsl
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\ShadowCommon.hlsl
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\SharedCommon.hlsli
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\private\Transform.hlsli
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\public\Blit.hlsl
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\public\Bloom.hlsl
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\public\FullScreenTriangle.hlsl
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\public\GBuffer.hlsl
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\public\Opaque.hlsl
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\public\PBR.hlsl
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\public\Shadow.hlsl
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\public\Skybox.hlsl
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\public\SSAO.hlsl
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Shaders\public\TonemapPass.hlsl
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Background_Albedo.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Background_Normal.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Background_Roughness.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\ChainTexture_Albedo.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\ChainTexture_Metallic.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\ChainTexture_Normal.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\ChainTexture_Roughness.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Dielectric_metallic.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\gi_flag.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Lion_Albedo.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Lion_Normal.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Lion_Roughness.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Metallic_metallic.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza.fbx
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Arch_diffuse.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Arch_normal.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Arch_roughness.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Bricks_a_Albedo.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Bricks_a_Normal.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Bricks_a_Roughness.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Ceiling_diffuse.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Ceiling_normal.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Ceiling_roughness.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Column_a_diffuse.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Column_a_normal.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Column_a_roughness.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Column_b_diffuse.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Column_b_normal.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Column_b_roughness.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Column_c_diffuse.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Column_c_normal.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Column_c_roughness.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Curtain_Blue_diffuse.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Curtain_Blue_normal.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Curtain_Green_diffuse.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Curtain_Green_normal.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Curtain_metallic.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Curtain_Red_diffuse.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Curtain_Red_normal.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Curtain_roughness.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Details_diffuse.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Details_metallic.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Details_normal.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Details_roughness.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Fabric_Blue_diffuse.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Fabric_Blue_normal.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Fabric_Green_diffuse.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Fabric_Green_normal.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Fabric_metallic.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Fabric_Red_diffuse.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Fabric_Red_normal.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Fabric_roughness.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_FlagPole_diffuse.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_FlagPole_normal.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_FlagPole_roughness.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Floor_diffuse.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Floor_normal.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Floor_roughness.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Roof_diffuse.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Roof_normal.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Roof_roughness.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Thorn_diffuse.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Thorn_normal.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Sponza_Thorn_roughness.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\VaseHanging_diffuse.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\VaseHanging_normal.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\VaseHanging_roughness.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\VasePlant_diffuse.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\VasePlant_normal.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\VasePlant_roughness.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\VaseRound_diffuse.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\VaseRound_normal.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\VaseRound_roughness.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Vase_diffuse.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Vase_normal.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Sponza\Vase_roughness.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Tex\Black.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Tex\bluenoise_frd_1024x1024.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Tex\cubemap0.dds
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Tex\GGX_Eavg_LUT.dds
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Tex\GGX_E_LUT.dds
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Tex\White.png
+  C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Tex\Wood.dds
+  120 File(s) copied
