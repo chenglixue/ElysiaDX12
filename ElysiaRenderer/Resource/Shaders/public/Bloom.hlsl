@@ -49,7 +49,6 @@ void BloomWeightedDownSample(uint3 dispatchThreadID : SV_DispatchThreadID)
     float3 blurColor = colorSum / weightSum;
     
     RWTexture2D<float4> o = ResourceDescriptorHeap[g_DestTextureIndex];
-    SamplerState warpLinearSampler = SamplerDescriptorHeap[WarpLinearSampler];
     
     o[dispatchThreadID.xy] = float4(blurColor, 1.f);
 }
@@ -62,7 +61,8 @@ void CS(uint3 dispatchThreadID : SV_DispatchThreadID)
     RWTexture2D<float4> o = ResourceDescriptorHeap[g_DestTextureIndex];
     SamplerState warpLinearSampler = SamplerDescriptorHeap[WarpLinearSampler];
     
-    o[dispatchThreadID.xy] = SampleTexture2D(OpaqueColorIndex, screenUV, WarpLinearSampler);
+    //o[dispatchThreadID.xy] = SampleTexture2D(g_DestTextureIndex, screenUV, WarpLinearSampler);
+    o[dispatchThreadID.xy] = LoadTexture2D(g_DestTextureIndex, dispatchThreadID.xy);
 }
 
 float3 ApplyThreshold(float3 color, out float luminance)

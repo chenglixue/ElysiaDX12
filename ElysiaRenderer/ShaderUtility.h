@@ -4,16 +4,6 @@
 
 namespace ElysiaRenderer
 {
-	enum ShaderQueue : UINT
-	{
-		Shadow = 1000,
-		GBuffer = 1500,
-		Opaque = 2000,
-		Skybox = 3000,
-		Transparent = 4000,
-		Blit = 5000
-	};
-
 	enum class ShaderType : uint8_t
 	{
 		Vertex = 0,
@@ -53,7 +43,6 @@ namespace ElysiaRenderer
 			
 		}
 
-		UINT		PassID = 0;
 		UINT		SpaceID = 0;
 		UINT        StartOffset;    // Offset in constant buffer's backing store
 		UINT        Size;           // Size of variable (in bytes)
@@ -77,4 +66,5 @@ namespace ElysiaRenderer
 	
 
 	DXGI_FORMAT MaskToFormat(const uint32_t Mask);
+
 }

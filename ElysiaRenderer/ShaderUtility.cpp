@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "ShaderUtility.h"
 
+#include "Hash.h"
+
 namespace ElysiaRenderer
 {
 	DXGI_FORMAT MaskToFormat(const uint32_t Mask)
@@ -20,4 +22,6 @@ namespace ElysiaRenderer
 			return DXGI_FORMAT_UNKNOWN;
 		}
 	}
+
+	
 }

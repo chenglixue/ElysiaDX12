@@ -20,9 +20,10 @@ namespace ElysiaRenderer
 	{
 		if (!UserData::GetInstance().IsUseHDR)
 		{
-			m_pCameraColorRT = CreateRenderTexture(static_cast<UINT64>(GetDevice()->GetScreenSize().x),
+			m_pCameraColorRT = CreateRWRenderTexture(static_cast<UINT64>(GetDevice()->GetScreenSize().x),
 				static_cast<UINT64>(GetDevice()->GetScreenSize().y),
 				DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
+				true,
 				L"Camera Color RT");
 		}
 		else
@@ -31,17 +32,19 @@ namespace ElysiaRenderer
 			{
 				case HDRQuality::Low: 
 				{
-					m_pCameraColorRT = CreateRenderTexture(static_cast<UINT64>(GetDevice()->GetScreenSize().x),
+					m_pCameraColorRT = CreateRWRenderTexture(static_cast<UINT64>(GetDevice()->GetScreenSize().x),
 						static_cast<UINT64>(GetDevice()->GetScreenSize().y),
 						DXGI_FORMAT_R11G11B10_FLOAT,
+						true,
 						L"Camera Color RT"); 
 					break;  
 				} 
 				case HDRQuality::High:
 				{ 
-					m_pCameraColorRT = CreateRenderTexture(static_cast<UINT64>(GetDevice()->GetScreenSize().x),
+					m_pCameraColorRT = CreateRWRenderTexture(static_cast<UINT64>(GetDevice()->GetScreenSize().x),
 						static_cast<UINT64>(GetDevice()->GetScreenSize().y),
 						DXGI_FORMAT_R16G16B16A16_FLOAT,
+						true,
 						L"Camera Color RT");
 					break;
 				}

@@ -324,9 +324,8 @@ namespace ElysiaRenderer
 
 		Execute();
 		{
-			m_pCommand->AddBarrier(*m_pTempRT->GetTexture(), D3D12_RESOURCE_STATE_RENDER_TARGET);
-			m_pCommand->FlushBarrier();
-			m_pCommand->ClearRenderTarget(*m_pTempRT->GetTexture(), Color(0, 0, 0, 0));
+			m_pCommand->AddBarrier(m_pTempRT.get(), D3D12_RESOURCE_STATE_RENDER_TARGET);
+			m_pCommand->ClearRenderTarget(m_pTempRT.get(), Color::Black);
 
 			m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_renderSize));
 			m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -355,15 +354,14 @@ namespace ElysiaRenderer
 				m_pCommand->DrawFullScreenTriangle();
 			}
 
-			m_pCommand->AddBarrier(*m_pTempRT->GetTexture(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-			m_pCommand->FlushBarrier();
+			m_pCommand->AddBarrier(m_pTempRT.get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		}
 
 		{
 			auto cameraColorRT = GetBufferManager()->GetCameraColorRT();
 
-			m_pCommand->AddBarrier(*cameraColorRT->GetTexture(), D3D12_RESOURCE_STATE_RENDER_TARGET);
-			m_pCommand->ClearRenderTarget(*cameraColorRT->GetTexture(), Color(0, 0, 0, 0));
+			m_pCommand->AddBarrier(cameraColorRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+			m_pCommand->ClearRenderTarget(cameraColorRT, Color::Black);
 
 			m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_renderSize));
 			m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -392,7 +390,7 @@ namespace ElysiaRenderer
 				m_pCommand->DrawFullScreenTriangle();
 			}
 
-			m_pCommand->AddBarrier(*cameraColorRT->GetTexture(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+			m_pCommand->AddBarrier(cameraColorRT, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		}
 	}
 

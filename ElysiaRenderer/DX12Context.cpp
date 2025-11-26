@@ -95,6 +95,35 @@ namespace ElysiaRenderer
 		}
 	}
 
+	void DX12Context::AddBarrier(RenderTexture* RT, D3D12_RESOURCE_STATES newState, bool isFlush)
+	{
+		if (m_numQueuedBarriers >= MAX_QUEUED_BARRIERS)
+		{
+			FlushBarrier();
+		}
+
+		auto resource = RT->GetTexture();
+
+		D3D12_RESOURCE_STATES oldState = resource->GetUsageState();
+		if (oldState != newState)
+		{
+			D3D12_RESOURCE_BARRIER& barrierDesc = m_resourceBarriers[m_numQueuedBarriers];
+			m_numQueuedBarriers++;
+
+			// Describes the transition of subresources between different usages
+			barrierDesc.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+			barrierDesc.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+			barrierDesc.Transition = {resource->GetResource(), D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES, oldState, newState};
+
+			resource->SetUsageState(newState);
+		}
+
+		if (isFlush)
+		{
+			FlushBarrier();
+		}
+	}
+
 	void DX12Context::FlushBarrier()
 	{
 		if (m_numQueuedBarriers > 0)

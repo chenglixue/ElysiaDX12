@@ -26,6 +26,11 @@ namespace ElysiaRenderer
 			static int BlitPassID;
 		};
 
+		struct ShaderIDs
+		{
+			static size_t g_DestTextureIndexID;
+		};
+
 		void DoBloomPass();
 	};
 }

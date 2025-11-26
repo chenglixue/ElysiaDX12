@@ -67,7 +67,6 @@ namespace ElysiaRenderer
 		auto& cameraColorRT = GetDevice()->GetCurrBackBuffer();
 
 		m_pCommand->AddBarrier(cameraColorRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
-		m_pCommand->FlushBarrier();
 		m_pCommand->ClearRenderTarget(cameraColorRT, Color(0, 0, 0, 0));
 
 		m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -114,7 +113,6 @@ namespace ElysiaRenderer
 		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), m_pCommand->GetCommandList());
 
 		m_pCommand->AddBarrier(GetDevice()->GetCurrBackBuffer(), D3D12_RESOURCE_STATE_PRESENT);
-		m_pCommand->FlushBarrier();
 	}
 
 	void FinalBlitPass::UpdatePSO()

@@ -130,9 +130,8 @@ namespace ElysiaRenderer
 
 	void AOPass::DoCalcAO()
 	{
-		m_pCommand->AddBarrier(*m_pAORT->GetTexture(), D3D12_RESOURCE_STATE_RENDER_TARGET);
-		m_pCommand->FlushBarrier();
-		m_pCommand->ClearRenderTarget(*m_pAORT->GetTexture(), Color::Black);
+		m_pCommand->AddBarrier(m_pAORT.get(), D3D12_RESOURCE_STATE_RENDER_TARGET);
+		m_pCommand->ClearRenderTarget(m_pAORT.get(), Color::Black);
 
 		m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_renderSize));
 		m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -160,8 +159,7 @@ namespace ElysiaRenderer
 			m_pCommand->Draw(3, 0);
 		}
 
-		m_pCommand->AddBarrier(*m_pAORT->GetTexture(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-		m_pCommand->FlushBarrier();
+		m_pCommand->AddBarrier(m_pAORT.get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 	}
 
 	void AOPass::DoBlitToBackBuffer()

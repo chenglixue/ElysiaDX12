@@ -20,21 +20,21 @@ namespace ElysiaRenderer
 	{
 	}
 
-	void DX12GraphicsContext::ClearRenderTarget(const RenderTexture& renderTarget, Color color)
+	void DX12GraphicsContext::ClearRenderTarget(const RenderTexture* renderTarget, Color color)
 	{
-		auto oldState = renderTarget.GetTexture()->GetUsageState();
+		auto oldState = renderTarget->GetTexture()->GetUsageState();
 		if (oldState != D3D12_RESOURCE_STATE_RENDER_TARGET)
 		{
-			AddBarrier(*renderTarget.GetTexture(), D3D12_RESOURCE_STATE_RENDER_TARGET);
+			AddBarrier(*renderTarget->GetTexture(), D3D12_RESOURCE_STATE_RENDER_TARGET);
 			FlushBarrier();
 		}
 
-		m_commandList->ClearRenderTargetView(renderTarget.GetTexture()->GetRTVDescriptor().GetCPUHandle(),
+		m_commandList->ClearRenderTargetView(renderTarget->GetTexture()->GetRTVDescriptor().GetCPUHandle(),
 			color, 0, nullptr);
 
 		if (oldState != D3D12_RESOURCE_STATE_RENDER_TARGET)
 		{
-			AddBarrier(*renderTarget.GetTexture(), oldState);
+			AddBarrier(*renderTarget->GetTexture(), oldState);
 			FlushBarrier();
 		}
 	}
@@ -44,9 +44,9 @@ namespace ElysiaRenderer
 		m_commandList->ClearRenderTargetView(renderTarget.GetRTVDescriptor().GetCPUHandle(),
 			color, 0, nullptr);
 	}
-	void DX12GraphicsContext::ClearDepthStencilTarget(const RenderTexture& renderTarget, float depth, uint8_t stencil)
+	void DX12GraphicsContext::ClearDepthStencilTarget(const RenderTexture* renderTarget, float depth, uint8_t stencil)
 	{
-		m_commandList->ClearDepthStencilView(renderTarget.GetTexture()->GetDSVDescriptor().GetCPUHandle(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL,
+		m_commandList->ClearDepthStencilView(renderTarget->GetTexture()->GetDSVDescriptor().GetCPUHandle(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL,
 			depth, stencil, 0, nullptr);
 	}
 

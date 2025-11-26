@@ -90,13 +90,11 @@ namespace ElysiaRenderer
 
 		for (auto& RT : m_GBufferRTs)
 		{
-			m_pCommand->AddBarrier(*RT->GetTexture(), D3D12_RESOURCE_STATE_RENDER_TARGET);
-			m_pCommand->FlushBarrier();
-			m_pCommand->ClearRenderTarget(*RT->GetTexture(), Color(0.f, 0.f, 0.f, 0.f));
+			m_pCommand->AddBarrier(RT.get(), D3D12_RESOURCE_STATE_RENDER_TARGET);
+			m_pCommand->ClearRenderTarget(RT.get(), Color::Black);
 		}
-		m_pCommand->AddBarrier(*cameraDepthRT->GetTexture(), D3D12_RESOURCE_STATE_DEPTH_WRITE);
-		m_pCommand->FlushBarrier();
-		m_pCommand->ClearDepthStencilTarget(*cameraDepthRT, 1.f, 0);
+		m_pCommand->AddBarrier(cameraDepthRT, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+		m_pCommand->ClearDepthStencilTarget(cameraDepthRT, 1.f, 0);
 
 		m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_renderSize));
@@ -197,10 +195,9 @@ namespace ElysiaRenderer
 
 		for (auto& RT : m_GBufferRTs)
 		{
-			m_pCommand->AddBarrier(*RT->GetTexture(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+			m_pCommand->AddBarrier(RT.get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		}
-		m_pCommand->AddBarrier(*cameraDepthRT->GetTexture(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_DEPTH_READ);
-		m_pCommand->FlushBarrier();
+		m_pCommand->AddBarrier(cameraDepthRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_DEPTH_READ);
 	}
 
 	void GBufferPass::Dispose()

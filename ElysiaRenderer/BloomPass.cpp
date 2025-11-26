@@ -9,6 +9,9 @@ namespace ElysiaRenderer
 {
 	int BloomPass::ShaderPasseIDs::BloomPassID = -1;
 	int BloomPass::ShaderPasseIDs::BlitPassID = -1;
+	
+	size_t BloomPass::ShaderIDs::g_DestTextureIndexID = PropertyToID("g_DestTextureIndex");
+	
 
 	BloomPass::BloomPass(DX12Camera* pCamera) :
 		BasePass(pCamera)
@@ -106,13 +109,14 @@ namespace ElysiaRenderer
 		PIXHelper pix(m_pCommand->GetCommandList(), "Bloom Pass");
 		Execute();
 
+		std::vector<int>
+
 		DoBloomPass();
 	}
 
 	void BloomPass::DoBloomPass()
 	{
-		m_pCommand->ClearRenderTarget(*m_pBloomRT, Color::Black);
-		m_pCommand->AddBarrier(*m_pBloomRT->GetTexture(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+		m_pCommand->AddBarrier(GetBufferManager()->GetCameraColorRT(), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
 		PipelineInfo pipelineStateData{};
 		pipelineStateData.m_pipelineStateObject = m_PipelineStateObjects[ShaderPasseIDs::BloomPassID];
@@ -130,19 +134,15 @@ namespace ElysiaRenderer
 			m_pCommand->SetPipeline(pipelineStateData);
 			m_pCommand->SetPipelineResource(PER_PASS_SPACE, m_pMaterial->GetPassData(ShaderPasseIDs::BloomPassID).MeshResourceLayouts->m_spaces[PER_PASS_SPACE]);
 			m_pCommand->SetPipelineResource(PER_FRAME_SPACE, GetRenderResource()->GetPerFrameBindResourceSpace());
-
-			m_pMaterial->SetConstantVariable("g_DestTextureIndex", m_pBloomRT->GetTexture()->GetResourceHeapIndex());
+ 
+			m_pMaterial->SetConstantVariable(ShaderIDs::g_DestTextureIndexID, GetBufferManager()->GetCameraColorRT()->GetTexture()->GetResourceHeapIndex());
 			m_pMaterial->SetConstantVariable("g_DestSize", GetScreenSize(m_renderSize));
 			m_pMaterial->ApplyConstantData();
-
+ 
 			m_pCommand->Dispatch(m_pBloomRT->GetWidth() / 8, m_pBloomRT->GetHeight() / 8, 1);
-
-			m_pCommand->CopyTexture(m_pBloomRT.get(), GetBufferManager()->GetCameraColorRT());
-			m_pCommand->AddBarrier(*GetBufferManager()->GetCameraColorRT()->GetTexture(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		}
 
-		m_pCommand->AddBarrier(*m_pBloomRT->GetTexture(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
-		m_pCommand->FlushBarrier();
+		m_pCommand->AddBarrier(GetBufferManager()->GetCameraColorRT(), D3D12_RESOURCE_STATE_RENDER_TARGET);
 	}
 
 	void BloomPass::UpdatePSO()

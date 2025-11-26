@@ -24,4 +24,20 @@ namespace xxh
 	}
 
 
+	inline size_t GetHash(const void* data, size_t size)
+	{
+		if constexpr (size < 32)
+		{
+			return xxh::xxhash_gethash_small(data, size);
+		}
+		else
+		{
+			return xxh::xxhash_gethash(data, size);
+		}
+	}
+
+	inline size_t GetHash(const std::string& str)
+	{
+		return GetHash(str.data(), str.size());
+	}
 }
