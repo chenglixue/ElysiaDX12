@@ -1,0 +1,41 @@
+#pragma once
+#include "BasePass.h"
+#include "lib/DX12/DX12Shadow.h"
+#include "Manager/LightManager.h"
+#include "lib/Utility/RenderTexture.h"
+
+
+namespace ElysiaRenderer
+{
+	using namespace ElysiaHelper;
+
+	class RenderMaterial;
+
+	class ShadowPass : public BasePass
+	{
+	public:
+		ShadowPass(DX12Camera* pCamera);
+		virtual ~ShadowPass() override;
+
+		//virtual void Setup(const RenderPassData& renderPasssData) override;
+		virtual void Configure() override;
+		virtual void Execute() override;
+		virtual void Render() override;
+		virtual void UpdatePSO() override;
+
+		virtual void Dispose() override;
+
+		RenderTexture* GetShadowRT() const;
+	private:
+		std::unique_ptr<RenderTexture> m_pShadowRT = nullptr;
+		std::unique_ptr<DX12Shadow> m_pMainShadow = nullptr;
+		DX12DirectionLight* m_pMainLight = nullptr;
+
+		struct ShaderPasseIDs
+		{
+			static int ShadowCastPassID;
+		};
+
+		void CreateMainShadow(float boundSphereRadius, DXGI_FORMAT format);
+	};
+}

@@ -1,7 +1,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include "Renderer.h"
-#include "ModelImporter.h"
-#include "DX12UI.h"
+#include "lib/Model/ModelImporter.h"
+#include "lib/DX12/DX12UI.h"
 #include "pix3.h"
 
 using namespace ElysiaRenderer;
@@ -132,7 +132,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam)
 	{
 		return true;
 	}
-	const ImGuiIO imio = ImGui::GetIO();	// µ±¶Ôui½øĞĞ²Ù×÷Ê±£¬ÈÃäÖÈ¾µÄÆäËûÎïÌå²»ÊÜÆäÓ°Ïì(ÈçÍÏ×§uiÊ±£¬·ÀÖ¹ÒÆ¶¯Ïà»úÊÓ½Ç)
+	const ImGuiIO imio = ImGui::GetIO();	// ï¿½ï¿½ï¿½ï¿½uiï¿½ï¿½ï¿½Ğ²ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½å²»ï¿½ï¿½ï¿½ï¿½Ó°ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½×§uiÊ±ï¿½ï¿½ï¿½ï¿½Ö¹ï¿½Æ¶ï¿½ï¿½ï¿½ï¿½ï¿½Ó½ï¿½)
 
 	switch (umessage)
 	{

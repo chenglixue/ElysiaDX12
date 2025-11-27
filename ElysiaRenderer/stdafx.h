@@ -37,7 +37,7 @@
 #include <comdef.h> // For _com_error
 #include <locale>
 #include <codecvt>
-#include "Metalib.h"
+#include "lib/Utility/Metalib.h"
 
 #include "magic_enum/magic_enum.hpp"
 #include "SimpleMath/SimpleMath.h"

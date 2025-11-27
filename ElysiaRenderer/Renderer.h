@@ -1,8 +1,8 @@
 #pragma once
 
-#include "DX12Device.h"
-#include "Helper.h"
-#include "BasePass.h"
+#include "lib/DX12/DX12Device.h"
+#include "lib/Utility/Helper.h"
+#include "src/Pass/BasePass.h"
 
 namespace ElysiaRenderer 
 {

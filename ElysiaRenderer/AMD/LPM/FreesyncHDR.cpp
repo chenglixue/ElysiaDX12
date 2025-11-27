@@ -22,7 +22,7 @@
 
 #include <string.h>
 #include <dxgi1_6.h>
-#include "../../Helper.h"
+#include "lib/Utility/Helper.h"
 
 namespace CAULDRON_DX12
 {

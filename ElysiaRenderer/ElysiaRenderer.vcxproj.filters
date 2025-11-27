@@ -93,79 +93,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DX12Queue.h">
-      <Filter>Header Files\DX12</Filter>
-    </ClInclude>
-    <ClInclude Include="Helper.h">
-      <Filter>Header Files\Helper</Filter>
-    </ClInclude>
-    <ClInclude Include="DX12QueueManager.h">
-      <Filter>Header Files\DX12</Filter>
-    </ClInclude>
-    <ClInclude Include="DX12DescriptorHeap.h">
-      <Filter>Header Files\DX12</Filter>
-    </ClInclude>
-    <ClInclude Include="DX12DescriptorHeapHandle.h">
-      <Filter>Header Files\DX12</Filter>
-    </ClInclude>
-    <ClInclude Include="DX12Device.h">
-      <Filter>Header Files\DX12</Filter>
-    </ClInclude>
-    <ClInclude Include="DX12GPUResource.h">
-      <Filter>Header Files\DX12</Filter>
-    </ClInclude>
-    <ClInclude Include="DX12RenderPassDescriptorHeap.h">
-      <Filter>Header Files\DX12</Filter>
-    </ClInclude>
-    <ClInclude Include="DX12StagingDescriptorHeap.h">
-      <Filter>Header Files\DX12</Filter>
-    </ClInclude>
-    <ClInclude Include="DX12Context.h">
-      <Filter>Header Files\DX12</Filter>
-    </ClInclude>
     <ClInclude Include="Renderer.h" />
-    <ClInclude Include="DX12BufferResource.h">
-      <Filter>Header Files\DX12</Filter>
-    </ClInclude>
-    <ClInclude Include="DX12GraphicsContext.h">
-      <Filter>Header Files\DX12</Filter>
-    </ClInclude>
-    <ClInclude Include="DX12Shader.h">
-      <Filter>Header Files\DX12</Filter>
-    </ClInclude>
-    <ClInclude Include="DX12RootSignature.h">
-      <Filter>Header Files\DX12</Filter>
-    </ClInclude>
-    <ClInclude Include="DX12PipelineState.h">
-      <Filter>Header Files\DX12</Filter>
-    </ClInclude>
-    <ClInclude Include="DX12TextureBuffer.h">
-      <Filter>Header Files\DX12</Filter>
-    </ClInclude>
-    <ClInclude Include="DX12UploadContext.h">
-      <Filter>Header Files\DX12</Filter>
-    </ClInclude>
-    <ClInclude Include="ModelImporter.h">
-      <Filter>Header Files\Model</Filter>
-    </ClInclude>
-    <ClInclude Include="DX12Vertex.h">
-      <Filter>Header Files\Model</Filter>
-    </ClInclude>
-    <ClInclude Include="Mesh.h">
-      <Filter>Header Files\Model</Filter>
-    </ClInclude>
-    <ClInclude Include="DX12MeshRender.h">
-      <Filter>Header Files\Model</Filter>
-    </ClInclude>
-    <ClInclude Include="Math.h">
-      <Filter>Header Files\Helper</Filter>
-    </ClInclude>
-    <ClInclude Include="DX12Camera.h">
-      <Filter>Header Files\DX12</Filter>
-    </ClInclude>
-    <ClInclude Include="DX12Light.h">
-      <Filter>Header Files\DX12</Filter>
-    </ClInclude>
     <ClInclude Include="stdafx.h">
       <Filter>Header Files\Helper</Filter>
     </ClInclude>
@@ -223,173 +151,8 @@
     <ClInclude Include="SimpleMath\SimpleMath.h">
       <Filter>Header Files\Lib</Filter>
     </ClInclude>
-    <ClInclude Include="DX12UI.h">
-      <Filter>Header Files\DX12</Filter>
-    </ClInclude>
-    <ClInclude Include="DX12Shadow.h">
-      <Filter>Header Files\DX12</Filter>
-    </ClInclude>
-    <ClInclude Include="CameraManager.h">
-      <Filter>Header Files\Manager</Filter>
-    </ClInclude>
-    <ClInclude Include="IManager.h">
-      <Filter>Header Files\Manager</Filter>
-    </ClInclude>
-    <ClInclude Include="PipelineResourceSpace.h">
-      <Filter>Header Files\DX12</Filter>
-    </ClInclude>
-    <ClInclude Include="Transform.h">
-      <Filter>Header Files\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="IUpdate.h">
-      <Filter>Header Files\Manager</Filter>
-    </ClInclude>
-    <ClInclude Include="LightManager.h">
-      <Filter>Header Files\Manager</Filter>
-    </ClInclude>
-    <ClInclude Include="TextureManager.h">
-      <Filter>Header Files\Manager</Filter>
-    </ClInclude>
-    <ClInclude Include="ShaderManager.h">
-      <Filter>Header Files\Manager</Filter>
-    </ClInclude>
-    <ClInclude Include="BufferManager.h">
-      <Filter>Header Files\Manager</Filter>
-    </ClInclude>
-    <ClInclude Include="MeshManager.h">
-      <Filter>Header Files\Manager</Filter>
-    </ClInclude>
-    <ClInclude Include="CBVParameter.h">
-      <Filter>Header Files\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="Material.h">
-      <Filter>Header Files\Model</Filter>
-    </ClInclude>
-    <ClInclude Include="BoundingBox.h">
-      <Filter>Header Files\Lib</Filter>
-    </ClInclude>
-    <ClInclude Include="UserData.h">
-      <Filter>Header Files\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="RenderTexture.h">
-      <Filter>Header Files\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="RenderPassData.h">
-      <Filter>Header Files\Render</Filter>
-    </ClInclude>
-    <ClInclude Include="RenderResource.h">
-      <Filter>Header Files\Render</Filter>
-    </ClInclude>
-    <ClInclude Include="PSOHelper.h">
-      <Filter>Header Files\Helper</Filter>
-    </ClInclude>
-    <ClInclude Include="ShadowUtility.h">
-      <Filter>Header Files\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="LightUtility.h">
-      <Filter>Header Files\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="PipelineStateUtility.h">
-      <Filter>Header Files\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="TextureUtility.h">
-      <Filter>Header Files\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="BufferUtility.h">
-      <Filter>Header Files\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="RenderTextureUtility.h">
-      <Filter>Header Files\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="PipelineResourceUtility.h">
-      <Filter>Header Files\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="DX12Material.h">
-      <Filter>Header Files\DX12</Filter>
-    </ClInclude>
-    <ClInclude Include="MObject.h">
-      <Filter>Source Files\DX12</Filter>
-    </ClInclude>
-    <ClInclude Include="PIXHelper.h">
-      <Filter>Header Files\Helper</Filter>
-    </ClInclude>
-    <ClInclude Include="ShaderUtility.h">
-      <Filter>Header Files\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="RenderMaterial.h">
-      <Filter>Header Files\Render</Filter>
-    </ClInclude>
-    <ClInclude Include="Shader.h">
-      <Filter>Header Files\Render</Filter>
-    </ClInclude>
-    <ClInclude Include="PSOManager.h">
-      <Filter>Header Files\Manager</Filter>
-    </ClInclude>
-    <ClInclude Include="BasePass.h">
-      <Filter>Header Files\Render\Pass</Filter>
-    </ClInclude>
-    <ClInclude Include="FinalBlitPass.h">
-      <Filter>Header Files\Render\Pass</Filter>
-    </ClInclude>
-    <ClInclude Include="GBufferPass.h">
-      <Filter>Header Files\Render\Pass</Filter>
-    </ClInclude>
-    <ClInclude Include="OpaquePass.h">
-      <Filter>Header Files\Render\Pass</Filter>
-    </ClInclude>
-    <ClInclude Include="ShadowPass.h">
-      <Filter>Header Files\Render\Pass</Filter>
-    </ClInclude>
-    <ClInclude Include="SkyboxPass.h">
-      <Filter>Header Files\Render\Pass</Filter>
-    </ClInclude>
-    <ClInclude Include="TonemapPass.h">
-      <Filter>Header Files\Render\Pass</Filter>
-    </ClInclude>
-    <ClInclude Include="UIPass.h">
-      <Filter>Header Files\Render\Pass</Filter>
-    </ClInclude>
     <ClInclude Include="D3D12MemoryAllocator\D3D12MemAlloc.h">
       <Filter>Header Files\Lib</Filter>
-    </ClInclude>
-    <ClInclude Include="TonemapUtility.h">
-      <Filter>Header Files\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="AOPass.h">
-      <Filter>Header Files\Render\Pass</Filter>
-    </ClInclude>
-    <ClInclude Include="Common.h">
-      <Filter>Header Files\Helper</Filter>
-    </ClInclude>
-    <ClInclude Include="File.h">
-      <Filter>Header Files\Helper</Filter>
-    </ClInclude>
-    <ClInclude Include="Hash.h">
-      <Filter>Header Files\Helper</Filter>
-    </ClInclude>
-    <ClInclude Include="Metalib.h">
-      <Filter>Header Files\Helper</Filter>
-    </ClInclude>
-    <ClInclude Include="Serialization.h">
-      <Filter>Header Files\Helper</Filter>
-    </ClInclude>
-    <ClInclude Include="SobolSequenceGenerator.h">
-      <Filter>Header Files\Helper</Filter>
-    </ClInclude>
-    <ClInclude Include="AOUtility.h">
-      <Filter>Header Files\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="DebugUtility.h">
-      <Filter>Header Files\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="DX12ComputeContext.h">
-      <Filter>Header Files\DX12</Filter>
-    </ClInclude>
-    <ClInclude Include="ContextUtility.h">
-      <Filter>Header Files\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="BloomPass.h">
-      <Filter>Header Files\Render\Pass</Filter>
     </ClInclude>
     <ClInclude Include="AMD\LPM\ColorConversion.h">
       <Filter>Header Files\Utility</Filter>
@@ -408,6 +171,240 @@
     </ClInclude>
     <ClInclude Include="Helper\DxgiFormatHelper.h">
       <Filter>Header Files\Helper</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\DX12\DX12BufferResource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\DX12\DX12Camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\DX12\DX12ComputeContext.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\DX12\DX12Context.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\DX12\DX12DescriptorHeap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\DX12\DX12DescriptorHeapHandle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\DX12\DX12Device.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\DX12\DX12GPUResource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\DX12\DX12GraphicsContext.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\DX12\DX12Light.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\DX12\DX12Material.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\DX12\DX12MeshRender.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\DX12\DX12PipelineState.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\DX12\DX12Queue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\DX12\DX12QueueManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\DX12\DX12RenderPassDescriptorHeap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\DX12\DX12RootSignature.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\DX12\DX12Shader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\DX12\DX12Shadow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\DX12\DX12StagingDescriptorHeap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\DX12\DX12TextureBuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\DX12\DX12UI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\DX12\DX12UploadContext.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\DX12\DX12Vertex.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\File\File.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\File\Serialization.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\Model\BoundingBox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\Model\Material.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\Model\Mesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\Model\ModelImporter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\Utility\AOUtility.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\Utility\BufferUtility.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\Utility\Common.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\Utility\ContextUtility.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\Utility\DebugUtility.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\Utility\Hash.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\Utility\Helper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\Utility\LightUtility.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\Utility\Math.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\Utility\Metalib.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\Utility\PipelineResourceSpace.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\Utility\PipelineResourceUtility.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\Utility\PipelineStateUtility.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\Utility\PIXHelper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\Utility\PSOHelper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\Utility\RenderTexture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\Utility\RenderTextureUtility.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\Utility\ShaderUtility.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\Utility\ShadowUtility.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\Utility\SobolSequenceGenerator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\Utility\TextureUtility.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\Utility\TonemapUtility.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Manager\BufferManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Manager\CameraManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Manager\IManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Manager\IUpdate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Manager\LightManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Manager\MeshManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Manager\PSOManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Manager\ShaderManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Manager\TextureManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Parameter\CBVParameter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Parameter\UserData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Pass\AOPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Pass\BasePass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Pass\BloomPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Pass\FinalBlitPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Pass\GBufferPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Pass\OpaquePass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Pass\RenderPassData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Pass\ShadowPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Pass\SkyboxPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Pass\TonemapPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Pass\UIPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RenderMaterial.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RenderResource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Shader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Transform.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -578,58 +575,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="DX12Queue.cpp">
-      <Filter>Source Files\DX12</Filter>
-    </ClCompile>
-    <ClCompile Include="DX12QueueManager.cpp">
-      <Filter>Source Files\DX12</Filter>
-    </ClCompile>
-    <ClCompile Include="DX12Device.cpp">
-      <Filter>Source Files\DX12</Filter>
-    </ClCompile>
-    <ClCompile Include="DX12GPUResource.cpp">
-      <Filter>Source Files\DX12</Filter>
-    </ClCompile>
-    <ClCompile Include="DX12RenderPassDescriptorHeap.cpp">
-      <Filter>Source Files\DX12</Filter>
-    </ClCompile>
-    <ClCompile Include="DX12StagingDescriptorHeap.cpp">
-      <Filter>Source Files\DX12</Filter>
-    </ClCompile>
-    <ClCompile Include="DX12DescriptorHeap.cpp">
-      <Filter>Source Files\DX12</Filter>
-    </ClCompile>
-    <ClCompile Include="DX12Context.cpp">
-      <Filter>Source Files\DX12</Filter>
-    </ClCompile>
     <ClCompile Include="Renderer.cpp" />
-    <ClCompile Include="DX12Shader.cpp">
-      <Filter>Source Files\DX12</Filter>
-    </ClCompile>
-    <ClCompile Include="DX12RootSignature.cpp">
-      <Filter>Source Files\DX12</Filter>
-    </ClCompile>
-    <ClCompile Include="DX12BufferResource.cpp">
-      <Filter>Source Files\DX12</Filter>
-    </ClCompile>
-    <ClCompile Include="DX12GraphicsContext.cpp">
-      <Filter>Source Files\DX12</Filter>
-    </ClCompile>
-    <ClCompile Include="DX12PipelineState.cpp">
-      <Filter>Source Files\DX12</Filter>
-    </ClCompile>
-    <ClCompile Include="DX12UploadContext.cpp">
-      <Filter>Source Files\DX12</Filter>
-    </ClCompile>
-    <ClCompile Include="ModelImporter.cpp">
-      <Filter>Source Files\Model</Filter>
-    </ClCompile>
-    <ClCompile Include="DX12Light.cpp">
-      <Filter>Source Files\DX12</Filter>
-    </ClCompile>
-    <ClCompile Include="DX12TextureBuffer.cpp">
-      <Filter>Source Files\DX12</Filter>
-    </ClCompile>
     <ClCompile Include="DXTex\BC.cpp">
       <Filter>Source Files\Lib</Filter>
     </ClCompile>
@@ -702,119 +648,11 @@
     <ClCompile Include="imgui\imgui_widgets.cpp">
       <Filter>Source Files\Lib</Filter>
     </ClCompile>
-    <ClCompile Include="DX12UI.cpp">
-      <Filter>Source Files\DX12</Filter>
-    </ClCompile>
-    <ClCompile Include="DX12Camera.cpp">
-      <Filter>Source Files\DX12</Filter>
-    </ClCompile>
-    <ClCompile Include="DX12Shadow.cpp">
-      <Filter>Source Files\DX12</Filter>
-    </ClCompile>
-    <ClCompile Include="CameraManager.cpp">
-      <Filter>Source Files\Manager</Filter>
-    </ClCompile>
-    <ClCompile Include="PipelineResourceSpace.cpp">
-      <Filter>Source Files\DX12</Filter>
-    </ClCompile>
-    <ClCompile Include="Transform.cpp">
-      <Filter>Source Files\Utility</Filter>
-    </ClCompile>
-    <ClCompile Include="LightManager.cpp">
-      <Filter>Source Files\Manager</Filter>
-    </ClCompile>
-    <ClCompile Include="ShaderManager.cpp">
-      <Filter>Source Files\Manager</Filter>
-    </ClCompile>
-    <ClCompile Include="BufferManager.cpp">
-      <Filter>Source Files\Manager</Filter>
-    </ClCompile>
-    <ClCompile Include="MeshManager.cpp">
-      <Filter>Source Files\Manager</Filter>
-    </ClCompile>
-    <ClCompile Include="TextureManager.cpp">
-      <Filter>Source Files\Manager</Filter>
-    </ClCompile>
-    <ClCompile Include="File.cpp">
-      <Filter>Source Files\Utility</Filter>
-    </ClCompile>
-    <ClCompile Include="UserData.cpp">
-      <Filter>Source Files\Utility</Filter>
-    </ClCompile>
-    <ClCompile Include="SobolSequenceGenerator.cpp">
-      <Filter>Source Files\Utility</Filter>
-    </ClCompile>
-    <ClCompile Include="RenderTexture.cpp">
-      <Filter>Source Files\Utility</Filter>
-    </ClCompile>
-    <ClCompile Include="RenderResource.cpp">
-      <Filter>Source Files\Render</Filter>
-    </ClCompile>
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files\Helper</Filter>
     </ClCompile>
-    <ClCompile Include="PSOHelper.cpp">
-      <Filter>Source Files\Helper</Filter>
-    </ClCompile>
-    <ClCompile Include="PIXHelper.cpp">
-      <Filter>Source Files\Helper</Filter>
-    </ClCompile>
-    <ClCompile Include="DX12Material.cpp">
-      <Filter>Source Files\DX12</Filter>
-    </ClCompile>
-    <ClCompile Include="ShaderUtility.cpp">
-      <Filter>Source Files\Utility</Filter>
-    </ClCompile>
-    <ClCompile Include="RenderMaterial.cpp">
-      <Filter>Source Files\Render</Filter>
-    </ClCompile>
-    <ClCompile Include="Shader.cpp">
-      <Filter>Source Files\Render</Filter>
-    </ClCompile>
-    <ClCompile Include="PSOManager.cpp">
-      <Filter>Source Files\Manager</Filter>
-    </ClCompile>
-    <ClCompile Include="BasePass.cpp">
-      <Filter>Source Files\Render\Pass</Filter>
-    </ClCompile>
-    <ClCompile Include="FinalBlitPass.cpp">
-      <Filter>Source Files\Render\Pass</Filter>
-    </ClCompile>
-    <ClCompile Include="GBufferPass.cpp">
-      <Filter>Source Files\Render\Pass</Filter>
-    </ClCompile>
-    <ClCompile Include="OpaquePass.cpp">
-      <Filter>Source Files\Render\Pass</Filter>
-    </ClCompile>
-    <ClCompile Include="ShadowPass.cpp">
-      <Filter>Source Files\Render\Pass</Filter>
-    </ClCompile>
-    <ClCompile Include="SkyboxPass.cpp">
-      <Filter>Source Files\Render\Pass</Filter>
-    </ClCompile>
-    <ClCompile Include="TonemapPass.cpp">
-      <Filter>Source Files\Render\Pass</Filter>
-    </ClCompile>
-    <ClCompile Include="UIPass.cpp">
-      <Filter>Source Files\Render\Pass</Filter>
-    </ClCompile>
-    <ClCompile Include="PipelineStateUtility.cpp">
-      <Filter>Source Files\Utility</Filter>
-    </ClCompile>
     <ClCompile Include="D3D12MemoryAllocator\D3D12MemAlloc.cpp">
       <Filter>Source Files\Lib</Filter>
-    </ClCompile>
-    <ClCompile Include="xxhash.cpp">
-      <Filter>Source Files\Utility</Filter>
-    </ClCompile>
-    <ClCompile Include="AOPass.cpp">
-      <Filter>Source Files\Render\Pass</Filter>
-    </ClCompile>
-    <ClCompile Include="DX12ComputeContext.cpp">
-      <Filter>Source Files\DX12</Filter>
-    </ClCompile>
-    <ClCompile Include="BloomPass.cpp">
-      <Filter>Source Files\Render\Pass</Filter>
     </ClCompile>
     <ClCompile Include="AMD\LPM\ColorConversion.cpp">
       <Filter>Source Files\Utility</Filter>
@@ -827,6 +665,165 @@
     </ClCompile>
     <ClCompile Include="Helper\DxgiFormatHelper.cpp">
       <Filter>Source Files\Helper</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\DX12\DX12BufferResource.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\DX12\DX12Camera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\DX12\DX12ComputeContext.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\DX12\DX12Context.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\DX12\DX12DescriptorHeap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\DX12\DX12Device.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\DX12\DX12GPUResource.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\DX12\DX12GraphicsContext.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\DX12\DX12Light.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\DX12\DX12Material.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\DX12\DX12PipelineState.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\DX12\DX12Queue.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\DX12\DX12QueueManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\DX12\DX12RenderPassDescriptorHeap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\DX12\DX12RootSignature.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\DX12\DX12Shader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\DX12\DX12Shadow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\DX12\DX12StagingDescriptorHeap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\DX12\DX12TextureBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\DX12\DX12UI.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\DX12\DX12UploadContext.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\File\File.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\Model\ModelImporter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\Utility\PipelineResourceSpace.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\Utility\PipelineStateUtility.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\Utility\PIXHelper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\Utility\PSOHelper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\Utility\RenderTexture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\Utility\ShaderUtility.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\Utility\SobolSequenceGenerator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\Utility\xxhash.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Manager\BufferManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Manager\CameraManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Manager\LightManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Manager\MeshManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Manager\PSOManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Manager\ShaderManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Manager\TextureManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Parameter\UserData.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Pass\AOPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Pass\BasePass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Pass\BloomPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Pass\FinalBlitPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Pass\GBufferPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Pass\OpaquePass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Pass\ShadowPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Pass\SkyboxPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Pass\TonemapPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Pass\UIPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RenderMaterial.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RenderResource.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Shader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Transform.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

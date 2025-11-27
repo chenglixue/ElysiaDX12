@@ -3,23 +3,23 @@
 
 #include <dxgidebug.h>
 
-#include "DX12UI.h"
-#include "BufferManager.h"
-#include "LightManager.h"
-#include "CameraManager.h"
-#include "ShaderManager.h"
+#include "lib/DX12//DX12UI.h"
+#include "src/Manager/BufferManager.h"
+#include "src/Manager/LightManager.h"
+#include "src/Manager/CameraManager.h"
+#include "src/Manager/ShaderManager.h"
 
-#include "ShadowPass.h"
-#include "GBufferPass.h"
-#include "AOPass.h"
-#include "OpaquePass.h"
-#include "TonemapPass.h"
-#include "UIPass.h"
-#include "FinalBlitPass.h"
-#include "BloomPass.h"
+#include "src/Pass/ShadowPass.h"
+#include "src/Pass/GBufferPass.h"
+#include "src/Pass/AOPass.h"
+#include "src/Pass/OpaquePass.h"
+#include "src/Pass/TonemapPass.h"
+#include "src/Pass/UIPass.h"
+#include "src/Pass/FinalBlitPass.h"
+#include "src/Pass/BloomPass.h"
 
-#include "SobolSequenceGenerator.h"
-#include "CBVParameter.h"
+#include "lib/Utility/SobolSequenceGenerator.h"
+#include "src/Parameter/CBVParameter.h"
 #include "RenderResource.h"
 
 
