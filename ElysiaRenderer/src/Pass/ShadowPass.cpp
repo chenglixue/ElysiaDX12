@@ -11,11 +11,30 @@
 namespace ElysiaRenderer
 {
 	int ShadowPass::ShaderPasseIDs::ShadowCastPassID = -1;
+	size_t ShadowPass::ShaderIDs::shadowNearZ = SIZE_MAX;
+	size_t ShadowPass::ShaderIDs::shadowFarZ = SIZE_MAX;
+	size_t ShadowPass::ShaderIDs::shadowDepthBias = SIZE_MAX;
+	size_t ShadowPass::ShaderIDs::shadowSlopeDepthBias = SIZE_MAX;
+	size_t ShadowPass::ShaderIDs::shadowMaxSlopeDepthBias = SIZE_MAX;
+	size_t ShadowPass::ShaderIDs::g_sobolSequence = SIZE_MAX;
+	size_t ShadowPass::ShaderIDs::worldMatrix = SIZE_MAX;
+	size_t ShadowPass::ShaderIDs::baseColorTexIndex = SIZE_MAX;
+	size_t ShadowPass::ShaderIDs::opacity = SIZE_MAX;
+	size_t ShadowPass::ShaderIDs::cutoff = SIZE_MAX;
 
 	ShadowPass::ShadowPass(DX12Camera* pCamera) :
 		BasePass(pCamera)
 	{
-
+		ShaderIDs::shadowNearZ = PropertyToID("shadowNearZ");
+		ShaderIDs::shadowFarZ = PropertyToID("shadowFarZ");
+		ShaderIDs::shadowDepthBias = PropertyToID("shadowDepthBias");
+		ShaderIDs::shadowSlopeDepthBias = PropertyToID("shadowSlopeDepthBias");
+		ShaderIDs::shadowMaxSlopeDepthBias = PropertyToID("shadowMaxSlopeDepthBias");
+		ShaderIDs::g_sobolSequence = PropertyToID("g_sobolSequence");
+		ShaderIDs::worldMatrix = PropertyToID("worldMatrix");
+		ShaderIDs::baseColorTexIndex = PropertyToID("baseColorTexIndex");
+		ShaderIDs::opacity = PropertyToID("opacity");
+		ShaderIDs::cutoff = PropertyToID("cutoff");
 	};
 	ShadowPass::~ShadowPass()
 	{
@@ -75,14 +94,14 @@ namespace ElysiaRenderer
 		GetRenderResource()->GetCBVFrameVariable()->shadowMatrix = m_pMainShadow->GetShadowMat();
 		GetRenderResource()->GetCBVFrameVariable()->shadowSize = GetScreenSize(Vector2(m_pMainShadow->GetWidth(), m_pMainShadow->GetHeight()));
 
-		m_pMaterial->SetConstantVariable("shadowNearZ", m_pMainShadow->GetNearZ());
-		m_pMaterial->SetConstantVariable("shadowFarZ", m_pMainShadow->GetFarZ());
-		m_pMaterial->SetConstantVariable("shadowDepthBias", UserData::GetInstance().shadowDepthBias / 100);
-		m_pMaterial->SetConstantVariable("shadowSlopeDepthBias", UserData::GetInstance().shadowSlopeDepthBias / 100);
-		m_pMaterial->SetConstantVariable("shadowMaxSlopeDepthBias", UserData::GetInstance().shadowMaxSlopeDepthBias / 100);
+		m_pMaterial->SetConstantVariable(ShaderIDs::shadowNearZ, m_pMainShadow->GetNearZ());
+		m_pMaterial->SetConstantVariable(ShaderIDs::shadowFarZ, m_pMainShadow->GetFarZ());
+		m_pMaterial->SetConstantVariable(ShaderIDs::shadowDepthBias, UserData::GetInstance().shadowDepthBias / 100);
+		m_pMaterial->SetConstantVariable(ShaderIDs::shadowSlopeDepthBias, UserData::GetInstance().shadowSlopeDepthBias / 100);
+		m_pMaterial->SetConstantVariable(ShaderIDs::shadowMaxSlopeDepthBias, UserData::GetInstance().shadowMaxSlopeDepthBias / 100);
 
-		/*auto sobolSequence = Create2DSobolSqeuence(64);
-		m_pMaterial->SetConstantVariable("g_sobolSequence", &sobolSequence);*/
+		auto sobolSequence = Create2DSobolSqeuence(64);
+		m_pMaterial->SetConstantVariable(ShaderIDs::g_sobolSequence, sobolSequence);
 
 		m_pMaterial->ApplyConstantData();
 	}
@@ -137,7 +156,7 @@ namespace ElysiaRenderer
 						m_pMaterial->GetPassData(ShaderPasseIDs::ShadowCastPassID).MeshResourceLayouts->m_spaces[PER_OBJECT_SPACE] = nullptr;
 					}
 					m_pMaterial->GetPassData(ShaderPasseIDs::ShadowCastPassID).MeshResourceLayouts->m_spaces[PER_OBJECT_SPACE] = pPipelineResourceSpace.release();
-					m_pMaterial->SetConstantVariable("worldMatrix", meshRenderer.m_CBVObjectParameter->worldMatrix);
+					m_pMaterial->SetConstantVariable(ShaderIDs::worldMatrix, meshRenderer.m_CBVObjectParameter->worldMatrix);
 					m_pMaterial->ApplyConstantData();
 					m_pCommand->SetPipelineResource(PER_OBJECT_SPACE, m_pMaterial->GetPassData(ShaderPasseIDs::ShadowCastPassID).MeshResourceLayouts->m_spaces[PER_OBJECT_SPACE]);
 				}
@@ -153,9 +172,9 @@ namespace ElysiaRenderer
 					}
 					m_pMaterial->GetPassData(ShaderPasseIDs::ShadowCastPassID).MeshResourceLayouts->m_spaces[PER_MATERIAL_SPACE] = pPipelineResourceSpace.release();
 
-					m_pMaterial->SetConstantVariable("baseColorTexIndex", meshRenderer.m_CBVObjectParameter->baseColorTexIndex);
-					m_pMaterial->SetConstantVariable("opacity", meshRenderer.m_CBVObjectParameter->opacity);
-					m_pMaterial->SetConstantVariable("cutoff", meshRenderer.m_CBVObjectParameter->cutoff);
+					m_pMaterial->SetConstantVariable(ShaderIDs::baseColorTexIndex, meshRenderer.m_CBVObjectParameter->baseColorTexIndex);
+					m_pMaterial->SetConstantVariable(ShaderIDs::opacity, meshRenderer.m_CBVObjectParameter->opacity);
+					m_pMaterial->SetConstantVariable(ShaderIDs::cutoff, meshRenderer.m_CBVObjectParameter->cutoff);
 					m_pMaterial->ApplyConstantData();
 					m_pCommand->SetPipelineResource(PER_MATERIAL_SPACE, m_pMaterial->GetPassData(ShaderPasseIDs::ShadowCastPassID).MeshResourceLayouts->m_spaces[PER_MATERIAL_SPACE]);
 				}

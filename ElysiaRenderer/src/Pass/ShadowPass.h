@@ -35,6 +35,19 @@ namespace ElysiaRenderer
 		{
 			static int ShadowCastPassID;
 		};
+		struct ShaderIDs
+		{
+			static size_t shadowNearZ;
+			static size_t shadowFarZ;
+			static size_t shadowDepthBias;
+			static size_t shadowSlopeDepthBias;
+			static size_t shadowMaxSlopeDepthBias;
+			static size_t g_sobolSequence;
+			static size_t worldMatrix;
+			static size_t baseColorTexIndex;
+			static size_t opacity;
+			static size_t cutoff;
+		};
 
 		void CreateMainShadow(float boundSphereRadius, DXGI_FORMAT format);
 	};

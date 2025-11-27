@@ -73,7 +73,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>D:\DX12\ElysiaRenderer\x64\Debug\Assimp\include;D:\DX12\ElysiaDX12\x64\Debug\Assimp\Environment;D:\DX12\ElysiaDX12\x64\Debug\Assimp\include;D:\DX12\ElysiaDX12\ElysiaRenderer\AMD\libs\AGS;D:\DX12\ElysiaDX12\x64\Debug\Shaders;C:\Work\ElysiaRenderer\ElysiaRenderer;C:\Work\ElysiaRenderer\ElysiaRenderer\lib;C:\Work\ElysiaRenderer\ElysiaRenderer\src;$(IncludePath)</IncludePath>
+    <IncludePath>D:\DX12\ElysiaRenderer\x64\Debug\Assimp\include;D:\DX12\ElysiaDX12\x64\Debug\Assimp\Environment;D:\DX12\ElysiaDX12\x64\Debug\Assimp\include;D:\DX12\ElysiaDX12\ElysiaRenderer\AMD\libs\AGS;D:\DX12\ElysiaDX12\x64\Debug\Shaders;C:\Work\ElysiaRenderer\ElysiaRenderer;C:\Work\ElysiaRenderer\ElysiaRenderer\lib;C:\Work\ElysiaRenderer\ElysiaRenderer\src;D:\DX12\ElysiaDX12\ElysiaRenderer\src;D:\DX12\ElysiaDX12\ElysiaRenderer\lib;D:\DX12\ElysiaDX12\ElysiaRenderer;$(IncludePath)</IncludePath>
     <LibraryPath>D:\DX12\ElysiaDX12\ElysiaRenderer\AMD\libs\AGS;D:\DX12\ElysiaDX12\x64\Debug\Assimp\include;D:\DX12\ElysiaRenderer\x64\Debug\Assimp\Environment;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

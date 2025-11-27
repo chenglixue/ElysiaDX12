@@ -23,6 +23,18 @@ namespace ElysiaRenderer
 		{
 			static int OpaqueLightPassID;
 		};
+		struct ShaderIDs
+		{
+			static size_t g_AOIndex;
+			
+			static size_t screenSize;
+			static size_t viewMatrix;
+			static size_t viewMatrix_I;
+			static size_t projMatrix;
+			static size_t projMatrix_I;
+			static size_t viewProjMatrix;
+			static size_t viewProjMatrix_I;
+		};
 
 		DXGI_FORMAT m_cameraColorFormat = DXGI_FORMAT_UNKNOWN;
 	};

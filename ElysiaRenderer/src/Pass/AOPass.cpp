@@ -12,10 +12,39 @@ namespace ElysiaRenderer
 	int AOPass::ShaderPasseIDs::AOPassID = -1;
 	int AOPass::ShaderPasseIDs::BlitPassID = -1;
 
+	size_t AOPass::ShaderIDs::g_ScreenSize = SIZE_MAX;
+	size_t AOPass::ShaderIDs::viewMatrix = SIZE_MAX;
+	size_t AOPass::ShaderIDs::viewMatrix_I = SIZE_MAX;
+	size_t AOPass::ShaderIDs::projMatrix = SIZE_MAX;
+	size_t AOPass::ShaderIDs::projMatrix_I = SIZE_MAX;
+	size_t AOPass::ShaderIDs::viewProjMatrix = SIZE_MAX;
+	size_t AOPass::ShaderIDs::viewProjMatrix_I = SIZE_MAX;
+	size_t AOPass::ShaderIDs::g_AOSampleKernelArray = SIZE_MAX;
+	size_t AOPass::ShaderIDs::g_AOSampleCount = SIZE_MAX;
+	size_t AOPass::ShaderIDs::g_AORadius = SIZE_MAX;
+	size_t AOPass::ShaderIDs::g_AOIntensityMul = SIZE_MAX;
+	size_t AOPass::ShaderIDs::g_AOIntensityPow = SIZE_MAX;
+	size_t AOPass::ShaderIDs::g_AOIndex = SIZE_MAX;
+	size_t AOPass::ShaderIDs::blitterTextureIndex = SIZE_MAX;
+
 	AOPass::AOPass(DX12Camera* pCamera) :
 		BasePass(pCamera)
 	{
-
+		ShaderIDs::g_ScreenSize = PropertyToID("g_ScreenSize");
+		ShaderIDs::viewMatrix = PropertyToID("viewMatrix");
+		ShaderIDs::viewMatrix_I = PropertyToID("viewMatrix_I");
+		ShaderIDs::projMatrix = PropertyToID("projMatrix");
+		ShaderIDs::projMatrix_I = PropertyToID("projMatrix_I");
+		ShaderIDs::viewProjMatrix = PropertyToID("viewProjMatrix");
+		ShaderIDs::viewProjMatrix_I = PropertyToID("viewProjMatrix_I");
+		
+		ShaderIDs::g_AOSampleKernelArray = PropertyToID("g_AOSampleKernelArray");
+		ShaderIDs::g_AOSampleCount = PropertyToID("g_AOSampleCount");
+		ShaderIDs::g_AORadius = PropertyToID("g_AORadius");
+		ShaderIDs::g_AOIntensityMul = PropertyToID("g_AOIntensityMul");
+		ShaderIDs::g_AOIntensityPow = PropertyToID("g_AOIntensityPow");
+		ShaderIDs::g_AOIndex = PropertyToID("g_AOIndex");
+		ShaderIDs::blitterTextureIndex = PropertyToID("blitterTextureIndex");
 	}
 	AOPass::~AOPass()
 	{
@@ -89,7 +118,7 @@ namespace ElysiaRenderer
 			}
 		} 
 
-		m_pMaterial->SetConstantVariable("g_AOSampleKernelArray", GenerateSSAOSampleKernel());
+		m_pMaterial->SetConstantVariable(ShaderIDs::g_AOSampleKernelArray, GenerateSSAOSampleKernel());
 		TextureManager::GetInstance().AddGlobalRT("g_AOIndex", m_pAORT->GetTexture()->GetResourceHeapIndex());
 
 	}
@@ -97,18 +126,18 @@ namespace ElysiaRenderer
 	void AOPass::Execute()
 	{
 		UpdatePSO();
-		m_pMaterial->SetConstantVariable("g_ScreenSize", GetScreenSize(Vector2(m_renderSize.x, m_renderSize.y)));
-		m_pMaterial->SetConstantVariable("viewMatrix", m_pCamera->GetViewMat());
-		m_pMaterial->SetConstantVariable("viewMatrix_I", m_pCamera->GetViewMat().Invert());
-		m_pMaterial->SetConstantVariable("projMatrix", m_pCamera->GetProjMat());
-		m_pMaterial->SetConstantVariable("projMatrix_I", m_pCamera->GetProjMat().Invert());
-		m_pMaterial->SetConstantVariable("viewProjMatrix", m_pCamera->GetViewMat() * m_pCamera->GetProjMat());
-		m_pMaterial->SetConstantVariable("viewProjMatrix_I", (m_pCamera->GetViewMat() * m_pCamera->GetProjMat()).Invert());
+		m_pMaterial->SetConstantVariable(ShaderIDs::g_ScreenSize, GetScreenSize(Vector2(m_renderSize.x, m_renderSize.y)));
+		m_pMaterial->SetConstantVariable(ShaderIDs::viewMatrix, m_pCamera->GetViewMat());
+		m_pMaterial->SetConstantVariable(ShaderIDs::viewMatrix_I, m_pCamera->GetViewMat().Invert());
+		m_pMaterial->SetConstantVariable(ShaderIDs::projMatrix, m_pCamera->GetProjMat());
+		m_pMaterial->SetConstantVariable(ShaderIDs::projMatrix_I, m_pCamera->GetProjMat().Invert());
+		m_pMaterial->SetConstantVariable(ShaderIDs::viewProjMatrix, m_pCamera->GetViewMat() * m_pCamera->GetProjMat());
+		m_pMaterial->SetConstantVariable(ShaderIDs::viewProjMatrix_I, (m_pCamera->GetViewMat() * m_pCamera->GetProjMat()).Invert());
 
-		m_pMaterial->SetConstantVariable("g_AOSampleCount", UserData::GetInstance().aoParameter.SampleCount);
-		m_pMaterial->SetConstantVariable("g_AORadius", UserData::GetInstance().aoParameter.Radius);
-		m_pMaterial->SetConstantVariable("g_AOIntensityMul", UserData::GetInstance().aoParameter.IntensityMul);
-		m_pMaterial->SetConstantVariable("g_AOIntensityPow", UserData::GetInstance().aoParameter.IntensityPow);
+		m_pMaterial->SetConstantVariable(ShaderIDs::g_AOSampleCount, UserData::GetInstance().aoParameter.SampleCount);
+		m_pMaterial->SetConstantVariable(ShaderIDs::g_AORadius, UserData::GetInstance().aoParameter.Radius);
+		m_pMaterial->SetConstantVariable(ShaderIDs::g_AOIntensityMul, UserData::GetInstance().aoParameter.IntensityMul);
+		m_pMaterial->SetConstantVariable(ShaderIDs::g_AOIntensityPow, UserData::GetInstance().aoParameter.IntensityPow);
 
 		m_pMaterial->ApplyConstantData();
 	}
@@ -156,7 +185,7 @@ namespace ElysiaRenderer
 			m_pCommand->SetPipelineResource(PER_PASS_SPACE, m_pMaterial->GetPassData(ShaderPasseIDs::AOPassID).MeshResourceLayouts->m_spaces[PER_PASS_SPACE]);
 			m_pCommand->SetPipelineResource(PER_FRAME_SPACE, GetRenderResource()->GetPerFrameBindResourceSpace());
 
-			m_pCommand->Draw(3, 0);
+			m_pCommand->DrawFullScreenTriangle();
 		}
 
 		m_pCommand->AddBarrier(m_pAORT.get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
@@ -188,7 +217,7 @@ namespace ElysiaRenderer
 		if (isReady)
 		{
 			m_pCommand->SetPipeline(pipelineStateData);
-			m_pMaterial->SetConstantVariable("blitterTextureIndex", m_pAORT->GetTexture()->GetResourceHeapIndex(), ShaderPasseIDs::BlitPassID);
+			m_pMaterial->SetConstantVariable(ShaderIDs::blitterTextureIndex, m_pAORT->GetTexture()->GetResourceHeapIndex(), ShaderPasseIDs::BlitPassID);
 			m_pMaterial->ApplyConstantData();
 			m_pCommand->SetPipelineResource(PER_PASS_SPACE, m_pMaterial->GetPassData(ShaderPasseIDs::BlitPassID).MeshResourceLayouts->m_spaces[PER_PASS_SPACE]);
 

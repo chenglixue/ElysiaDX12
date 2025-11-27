@@ -43,7 +43,7 @@ namespace ElysiaRenderer
 			
 		}
 
-		UINT		PassID = -1;
+		// UINT		PassID = -1;
 		UINT		SpaceID = 0;
 		UINT        StartOffset;    // Offset in constant buffer's backing store
 		UINT        Size;           // Size of variable (in bytes)

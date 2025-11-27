@@ -283,8 +283,36 @@ namespace ElysiaRenderer
 	{
 		SetConstantVariable(name, (UINT)(data == true ? 1 : 0), passID);
 	}
-	template void Shader::SetConstantVariable<std::vector<Vector2>>(const std::string&, const std::vector<Vector2>, UINT);
-	template void Shader::SetConstantVariable<std::vector<Vector3>>(const std::string&, const std::vector<Vector3>, UINT);
+	template<> void Shader::SetConstantVariable<std::vector<Vector2>>(const std::string& name, const std::vector<Vector2> data, UINT passID)
+	{
+		std::lock_guard<std::mutex> lockGuard(m_setDataMutex);
+		const void* pSourceData = data.data();
+
+		auto hash = PropertyToID(name);
+		auto constantVariableDescMap = m_constantVariableDescs.at(passID);
+		if (constantVariableDescMap.contains(hash))
+		{
+			auto constantVariableDesc = constantVariableDescMap.at(hash);
+			memcpy(constantVariableDesc.pData.data(), pSourceData, constantVariableDesc.Size);
+
+			constantVariableDesc.IsDirty = true;
+		}
+	}
+	template<> void Shader::SetConstantVariable<std::vector<Vector3>>(const std::string& name, const std::vector<Vector3> data, UINT passID)
+	{
+		std::lock_guard<std::mutex> lockGuard(m_setDataMutex);
+		const void* pSourceData = data.data();
+
+		auto hash = PropertyToID(name);
+		auto constantVariableDescMap = m_constantVariableDescs.at(passID);
+		if (constantVariableDescMap.contains(hash))
+		{
+			auto constantVariableDesc = constantVariableDescMap.at(hash);
+			memcpy(constantVariableDesc.pData.data(), pSourceData, constantVariableDesc.Size);
+
+			constantVariableDesc.IsDirty = true;
+		}
+	}
 	template<> void Shader::SetConstantVariable<std::vector<Vector4>>(const std::string& name, const std::vector<Vector4> data, UINT passID)
 	{
 		std::lock_guard<std::mutex> lockGuard(m_setDataMutex);
@@ -326,29 +354,45 @@ namespace ElysiaRenderer
 	template void Shader::SetConstantVariable<math::Matrix4>(const size_t hash, math::Matrix4, UINT passID);
 	template<> void Shader::SetConstantVariable<bool>(const size_t hash, const bool data, UINT passID)
 	{
+		SetConstantVariable(hash, (UINT)(data == true ? 1 : 0), passID);
+	}
+	template<> void Shader::SetConstantVariable<std::vector<Vector2>>(const size_t hash, const std::vector<Vector2> data , UINT passID)
+	{
 		std::lock_guard<std::mutex> lockGuard(m_setDataMutex);
-		const void* pSourceData = &data;
+		const void* pSourceData = data.data();
 
-		auto constantVariableDescMap = m_constantVariableDescs.at(passID);
+		auto& constantVariableDescMap = m_constantVariableDescs.at(passID);
 		if (constantVariableDescMap.contains(hash))
 		{
-			auto constantVariableDesc = constantVariableDescMap.at(hash);
-			memcpy(constantVariableDesc.pData.data(), pSourceData, constantVariableDesc.Size / 4);
+			auto& constantVariableDesc = constantVariableDescMap.at(hash);
+			memcpy(constantVariableDesc.pData.data(), pSourceData, constantVariableDesc.Size);
 
 			constantVariableDesc.IsDirty = true;
 		}
 	}
-	template void Shader::SetConstantVariable<std::vector<Vector2>>(const size_t hash, const std::vector<Vector2>, UINT);
-	template void Shader::SetConstantVariable<std::vector<Vector3>>(const size_t hash, const std::vector<Vector3>, UINT);
+	template<> void Shader::SetConstantVariable<std::vector<Vector3>>(const size_t hash, const std::vector<Vector3> data, UINT passID)
+	{
+		std::lock_guard<std::mutex> lockGuard(m_setDataMutex);
+		const void* pSourceData = data.data();
+
+		auto& constantVariableDescMap = m_constantVariableDescs.at(passID);
+		if (constantVariableDescMap.contains(hash))
+		{
+			auto& constantVariableDesc = constantVariableDescMap.at(hash);
+			memcpy(constantVariableDesc.pData.data(), pSourceData, constantVariableDesc.Size);
+
+			constantVariableDesc.IsDirty = true;
+		}
+	}
 	template<> void Shader::SetConstantVariable<std::vector<Vector4>>(const size_t hash, const std::vector<Vector4> data, UINT passID)
 	{
 		std::lock_guard<std::mutex> lockGuard(m_setDataMutex);
 		const void* pSourceData = data.data();
 
-		auto constantVariableDescMap = m_constantVariableDescs.at(passID);
+		auto& constantVariableDescMap = m_constantVariableDescs.at(passID);
 		if (constantVariableDescMap.contains(hash))
 		{
-			auto constantVariableDesc = constantVariableDescMap.at(hash);
+			auto& constantVariableDesc = constantVariableDescMap.at(hash);
 			memcpy(constantVariableDesc.pData.data(), pSourceData, constantVariableDesc.Size);
 
 			constantVariableDesc.IsDirty = true;
@@ -359,10 +403,10 @@ namespace ElysiaRenderer
 		std::lock_guard<std::mutex> lockGuard(m_setDataMutex);
 		const void* pSourceData = data.data();
 
-		auto constantVariableDescMap = m_constantVariableDescs.at(passID);
+		auto& constantVariableDescMap = m_constantVariableDescs.at(passID);
 		if (constantVariableDescMap.contains(hash))
 		{
-			auto constantVariableDesc = constantVariableDescMap.at(hash);
+			auto& constantVariableDesc = constantVariableDescMap.at(hash);
 			memcpy(constantVariableDesc.pData.data(), pSourceData, constantVariableDesc.Size);
 
 			constantVariableDesc.IsDirty = true;

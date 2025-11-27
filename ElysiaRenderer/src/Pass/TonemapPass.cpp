@@ -7,6 +7,7 @@
 
 #include <stdint.h>
 #define A_CPU 1
+#include "RenderResource.h"
 #include "AMD/LPM/ffx_a.h"
 A_STATIC AF1 fs2S;
 A_STATIC AF1 hdr10S;
@@ -28,11 +29,32 @@ namespace ElysiaRenderer
 
 	int TonemapPass::ShaderPasseIDs::BlitPassID = -1;
 	int TonemapPass::ShaderPasseIDs::TonemapPassID = -1;
+	size_t TonemapPass::ShaderIDs::u_shoulder = SIZE_MAX;
+	size_t TonemapPass::ShaderIDs::u_con = SIZE_MAX;
+	size_t TonemapPass::ShaderIDs::u_soft = SIZE_MAX;
+	size_t TonemapPass::ShaderIDs::u_con2 = SIZE_MAX;
+	size_t TonemapPass::ShaderIDs::u_clip = SIZE_MAX;
+	size_t TonemapPass::ShaderIDs::u_scaleOnly = SIZE_MAX;
+	size_t TonemapPass::ShaderIDs::u_displayMode = SIZE_MAX;
+	size_t TonemapPass::ShaderIDs::u_inputToOutputMatrix = SIZE_MAX;
+	size_t TonemapPass::ShaderIDs::u_ctl = SIZE_MAX;
+	size_t TonemapPass::ShaderIDs::tonemapMode = SIZE_MAX;
+	size_t TonemapPass::ShaderIDs::blitterTextureIndex = SIZE_MAX;
 
 	TonemapPass::TonemapPass(DX12Camera* pCamera) : 
 		BasePass(pCamera)
 	{
-
+		ShaderIDs::u_shoulder = PropertyToID("u_shoulder");
+		ShaderIDs::u_con = PropertyToID("u_con");
+		ShaderIDs::u_soft = PropertyToID("u_soft");
+		ShaderIDs::u_con2 = PropertyToID("u_con2");
+		ShaderIDs::u_clip = PropertyToID("u_clip");
+		ShaderIDs::u_scaleOnly = PropertyToID("u_scaleOnly");
+		ShaderIDs::u_displayMode = PropertyToID("u_displayMode");
+		ShaderIDs::u_inputToOutputMatrix = PropertyToID("u_inputToOutputMatrix");
+		ShaderIDs::u_ctl = PropertyToID("u_ctl");
+		ShaderIDs::tonemapMode = PropertyToID("tonemapMode");
+		ShaderIDs::blitterTextureIndex = PropertyToID("blitterTextureIndex");
 	}
 	TonemapPass::~TonemapPass()
 	{
@@ -305,16 +327,16 @@ namespace ElysiaRenderer
 			m_saturation, m_crosstalk);
 
 		
-		m_pMaterial->SetConstantVariable("u_shoulder", m_shoulder, ShaderPasseIDs::TonemapPassID);
-		m_pMaterial->SetConstantVariable("u_con", m_con, ShaderPasseIDs::TonemapPassID);
-		m_pMaterial->SetConstantVariable("u_soft", m_soft, ShaderPasseIDs::TonemapPassID);
-		m_pMaterial->SetConstantVariable("u_con2", m_con2, ShaderPasseIDs::TonemapPassID);
-		m_pMaterial->SetConstantVariable("u_clip", m_clip, ShaderPasseIDs::TonemapPassID);
-		m_pMaterial->SetConstantVariable("u_scaleOnly", m_scaleOnly, ShaderPasseIDs::TonemapPassID);
-		m_pMaterial->SetConstantVariable("u_displayMode", (UINT)UserData::GetInstance().displayMode, ShaderPasseIDs::TonemapPassID);
-		m_pMaterial->SetConstantVariable("u_inputToOutputMatrix", m_inputToOutputMatrix, ShaderPasseIDs::TonemapPassID);
-		m_pMaterial->SetConstantVariable("u_ctl", ctl, ShaderPasseIDs::TonemapPassID);
-		m_pMaterial->SetConstantVariable("tonemapMode", (UINT)UserData::GetInstance().tonemapMode, ShaderPasseIDs::TonemapPassID);
+		m_pMaterial->SetConstantVariable(ShaderIDs::u_shoulder, m_shoulder, ShaderPasseIDs::TonemapPassID);
+		m_pMaterial->SetConstantVariable(ShaderIDs::u_con2, m_con, ShaderPasseIDs::TonemapPassID);
+		m_pMaterial->SetConstantVariable(ShaderIDs::u_soft, m_soft, ShaderPasseIDs::TonemapPassID);
+		m_pMaterial->SetConstantVariable(ShaderIDs::u_con2, m_con2, ShaderPasseIDs::TonemapPassID);
+		m_pMaterial->SetConstantVariable(ShaderIDs::u_clip, m_clip, ShaderPasseIDs::TonemapPassID);
+		m_pMaterial->SetConstantVariable(ShaderIDs::u_scaleOnly, m_scaleOnly, ShaderPasseIDs::TonemapPassID);
+		m_pMaterial->SetConstantVariable(ShaderIDs::u_displayMode, (UINT)UserData::GetInstance().displayMode, ShaderPasseIDs::TonemapPassID);
+		m_pMaterial->SetConstantVariable(ShaderIDs::u_inputToOutputMatrix, m_inputToOutputMatrix, ShaderPasseIDs::TonemapPassID);
+		m_pMaterial->SetConstantVariable(ShaderIDs::u_ctl, ctl, ShaderPasseIDs::TonemapPassID);
+		m_pMaterial->SetConstantVariable(ShaderIDs::tonemapMode, (UINT)UserData::GetInstance().tonemapMode, ShaderPasseIDs::TonemapPassID);
 		m_pMaterial->ApplyConstantData();
 	}
 
@@ -383,7 +405,7 @@ namespace ElysiaRenderer
 			if (isReady)
 			{
 				m_pCommand->SetPipeline(pipelineStateData);
-				m_pMaterial->SetConstantVariable("blitterTextureIndex", m_pTempRT->GetTexture()->GetResourceHeapIndex(), ShaderPasseIDs::TonemapPassID);
+				m_pMaterial->SetConstantVariable(ShaderIDs::blitterTextureIndex, m_pTempRT->GetTexture()->GetResourceHeapIndex(), ShaderPasseIDs::TonemapPassID);
 				m_pMaterial->ApplyConstantData();
 				m_pCommand->SetPipelineResource(PER_PASS_SPACE, m_pMaterial->GetPassData(ShaderPasseIDs::TonemapPassID).MeshResourceLayouts->m_spaces[PER_PASS_SPACE]);
 

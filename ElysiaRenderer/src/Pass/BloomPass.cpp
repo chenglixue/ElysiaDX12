@@ -9,12 +9,15 @@ namespace ElysiaRenderer
 {
 	int BloomPass::ShaderPasseIDs::BloomPassID = -1;
 	int BloomPass::ShaderPasseIDs::BlitPassID = -1;
-	size_t BloomPass::ShaderIDs::g_DestTextureIndexID = -1;
+	
+	size_t BloomPass::ShaderIDs::g_DestTextureIndexID = SIZE_MAX;
+	size_t BloomPass::ShaderIDs::g_DestSize = SIZE_MAX;
 	
 	BloomPass::BloomPass(DX12Camera* pCamera) :
 		BasePass(pCamera)
 	{
 		ShaderIDs::g_DestTextureIndexID = PropertyToID("g_DestTextureIndex");
+		ShaderIDs::g_DestSize = PropertyToID("g_DestSize");
 	}
 	BloomPass::~BloomPass()
 	{
@@ -134,7 +137,7 @@ namespace ElysiaRenderer
 			m_pCommand->SetPipelineResource(PER_FRAME_SPACE, GetRenderResource()->GetPerFrameBindResourceSpace());
  
 			m_pMaterial->SetConstantVariable(ShaderIDs::g_DestTextureIndexID, GetBufferManager()->GetCameraColorRT()->GetTexture()->GetResourceHeapIndex());
-			m_pMaterial->SetConstantVariable("g_DestSize", GetScreenSize(m_renderSize));
+			m_pMaterial->SetConstantVariable(ShaderIDs::g_DestSize, GetScreenSize(m_renderSize));
 			m_pMaterial->ApplyConstantData();
  
 			m_pCommand->Dispatch(m_pBloomRT->GetWidth() / 8, m_pBloomRT->GetHeight() / 8, 1);

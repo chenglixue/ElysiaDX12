@@ -27,6 +27,25 @@ namespace ElysiaRenderer
 			static int AOPassID;
 			static int BlitPassID;
 		};
+		struct ShaderIDs
+		{
+			static size_t g_ScreenSize;
+			static size_t viewMatrix;
+			static size_t viewMatrix_I;
+			static size_t projMatrix;
+			static size_t projMatrix_I;
+			static size_t viewProjMatrix;
+			static size_t viewProjMatrix_I;
+			
+			static size_t g_AOSampleKernelArray;
+			static size_t g_AOSampleCount;
+			static size_t g_AORadius;
+			static size_t g_AOIntensityMul;
+			static size_t g_AOIntensityPow;
+
+			static size_t g_AOIndex;
+			static size_t blitterTextureIndex;
+		};
 
 		void DoCalcAO();
 		void DoBlitToBackBuffer();

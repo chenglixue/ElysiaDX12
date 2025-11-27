@@ -29,6 +29,20 @@ namespace ElysiaRenderer
 			static int BlitPassID;
 			static int TonemapPassID;
 		};
+		struct ShaderIDs
+		{
+			static size_t u_shoulder;
+			static size_t u_con;
+			static size_t u_soft;
+			static size_t u_con2;
+			static size_t u_clip;
+			static size_t u_scaleOnly;
+			static size_t u_displayMode;
+			static size_t u_inputToOutputMatrix;
+			static size_t u_ctl;
+			static size_t tonemapMode;
+			static size_t blitterTextureIndex;
+		};
 
 		DXGI_FORMAT m_cameraColorFormat = DXGI_FORMAT_UNKNOWN;
 

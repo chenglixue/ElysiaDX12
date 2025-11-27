@@ -9,10 +9,27 @@ namespace ElysiaRenderer
 {
 	int OpaquePass::ShaderPasseIDs::OpaqueLightPassID = -1;
 
+	size_t OpaquePass::ShaderIDs::g_AOIndex = SIZE_MAX;
+	size_t OpaquePass::ShaderIDs::screenSize = SIZE_MAX;
+	size_t OpaquePass::ShaderIDs::viewMatrix = SIZE_MAX;
+	size_t OpaquePass::ShaderIDs::viewMatrix_I = SIZE_MAX;
+	size_t OpaquePass::ShaderIDs::projMatrix = SIZE_MAX;
+	size_t OpaquePass::ShaderIDs::projMatrix_I = SIZE_MAX;
+	size_t OpaquePass::ShaderIDs::viewProjMatrix = SIZE_MAX;
+	size_t OpaquePass::ShaderIDs::viewProjMatrix_I = SIZE_MAX;
+
 	OpaquePass::OpaquePass(DX12Camera* pCamera):
 		BasePass(pCamera)
 	{
+		ShaderIDs::g_AOIndex = PropertyToID("g_AOIndex");
 
+		ShaderIDs::screenSize = PropertyToID("screenSize");
+		ShaderIDs::viewMatrix = PropertyToID("viewMatrix");
+		ShaderIDs::viewMatrix_I = PropertyToID("viewMatrix_I");
+		ShaderIDs::projMatrix = PropertyToID("projMatrix");
+		ShaderIDs::projMatrix_I = PropertyToID("projMatrix_I");
+		ShaderIDs::viewProjMatrix = PropertyToID("viewProjMatrix");
+		ShaderIDs::viewProjMatrix_I = PropertyToID("viewProjMatrix_I");
 	}
 
 	OpaquePass::~OpaquePass()
@@ -53,20 +70,20 @@ namespace ElysiaRenderer
 			}
 		}
 
-		m_pMaterial->SetConstantVariable("g_AOIndex", TextureManager::GetInstance().GetGlobalRT("g_AOIndex"));
+		m_pMaterial->SetConstantVariable(ShaderIDs::g_AOIndex, TextureManager::GetInstance().GetGlobalRT("g_AOIndex"));
 	}
 
 	void OpaquePass::Execute()
 	{
 		UpdatePSO();
 		
-		m_pMaterial->SetConstantVariable("screenSize", GetScreenSize(Vector2(m_renderSize.x, m_renderSize.y)));
-		m_pMaterial->SetConstantVariable("viewMatrix", m_pCamera->GetViewMat());
-		m_pMaterial->SetConstantVariable("viewMatrix_I", m_pCamera->GetViewMat().Invert());
-		m_pMaterial->SetConstantVariable("projMatrix", m_pCamera->GetProjMat());
-		m_pMaterial->SetConstantVariable("projMatrix_I", m_pCamera->GetProjMat().Invert());
-		m_pMaterial->SetConstantVariable("viewProjMatrix", m_pCamera->GetViewMat() * m_pCamera->GetProjMat());
-		m_pMaterial->SetConstantVariable("viewProjMatrix_I", (m_pCamera->GetViewMat() * m_pCamera->GetProjMat()).Invert());
+		m_pMaterial->SetConstantVariable(ShaderIDs::screenSize, GetScreenSize(Vector2(m_renderSize.x, m_renderSize.y)));
+		m_pMaterial->SetConstantVariable(ShaderIDs::viewMatrix, m_pCamera->GetViewMat());
+		m_pMaterial->SetConstantVariable(ShaderIDs::viewMatrix_I, m_pCamera->GetViewMat().Invert());
+		m_pMaterial->SetConstantVariable(ShaderIDs::projMatrix, m_pCamera->GetProjMat());
+		m_pMaterial->SetConstantVariable(ShaderIDs::projMatrix_I, m_pCamera->GetProjMat().Invert());
+		m_pMaterial->SetConstantVariable(ShaderIDs::viewProjMatrix, m_pCamera->GetViewMat() * m_pCamera->GetProjMat());
+		m_pMaterial->SetConstantVariable(ShaderIDs::viewProjMatrix_I, (m_pCamera->GetViewMat() * m_pCamera->GetProjMat()).Invert());
 
 		m_pMaterial->ApplyConstantData();
 	}

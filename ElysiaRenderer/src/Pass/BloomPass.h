@@ -29,6 +29,7 @@ namespace ElysiaRenderer
 		struct ShaderIDs
 		{
 			static size_t g_DestTextureIndexID;
+			static size_t g_DestSize;
 		};
 
 		void DoBloomPass();
