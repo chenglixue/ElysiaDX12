@@ -2,6 +2,7 @@
 #include "DX12Shader.h"
 #include "DX12PipelineState.h"
 #include <d3d12shader.h>    // Shader reflection.
+#include "../Utility/ShaderCompileOptions.h"
 
 namespace ElysiaRenderer
 {
@@ -62,8 +63,13 @@ namespace ElysiaRenderer
 	{
 		m_constantBufferVariables[name] = desc;
 	}
-	std::unordered_map<std::string, ShaderConstantVariableDesc>& DX12Shader::GetConstantBufferVariables() noexcept
+	const std::unordered_map<std::string, ShaderConstantVariableDesc>& DX12Shader::GetConstantBufferVariables() noexcept
 	{
 		return m_constantBufferVariables;
+	}
+
+	const ShaderPragmaInfo& DX12Shader::GetShaderPragmaInfo() const noexcept
+	{
+		return m_shaderPragmaInfo;
 	}
 }

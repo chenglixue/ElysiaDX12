@@ -4,6 +4,7 @@
 #include "lib/DX12/DX12Device.h"
 #include "lib/Utility/RenderTexture.h"
 #include "RenderResource.h"
+#include "lib/Event/Messager.h"
 
 namespace ElysiaRenderer
 {
@@ -70,6 +71,10 @@ namespace ElysiaRenderer
 				StringViewToChar(magic_enum::enum_names<ShadowType>().data(), magic_enum::enum_count<ShadowType>()).data(),
 				(int)magic_enum::enum_count<ShadowType>());
 			shadowTypeIndex = std::clamp(shadowTypeIndex, 0, static_cast<int>(magic_enum::enum_count<ShadowType>()));
+			if (ImGui::IsItemEdited())
+			{
+				GetMessager()->RegisterHandler(MessageID::ShadowType, )
+			}
 			pUserData.shadowType = (ShadowType)shadowTypeIndex;
 
 			int shadowQualityIndex = (int)pUserData.shadowQuality;

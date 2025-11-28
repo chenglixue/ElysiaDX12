@@ -1,6 +1,8 @@
 #pragma once
 #include "Helper.h"
 #include "PipelineResourceUtility.h"
+#include <regex>
+#include "ShaderCompileOptions.h"
 
 namespace ElysiaRenderer
 {
@@ -64,8 +66,31 @@ namespace ElysiaRenderer
 		D3D12_DEPTH_STENCIL_DESC	DepthStencilDesc;
 	};
 
-	
+	struct PragmaKeywordGroup
+	{
+		std::vector<std::wstring> Keywords;
+	};
+
+	struct ShaderPragmaInfo
+	{
+		std::vector<PragmaKeywordGroup> KeywordGroups;
+	};
+
+	struct ShaderVariant
+	{
+		std::vector<std::wstring> EnabledKeywords;
+	};
 
 	DXGI_FORMAT MaskToFormat(const uint32_t Mask);
 
+	ShaderPragmaInfo ParseShaderPragmas(const std::wstring& source);
+
+	void BuildShaderVariants(const ShaderPragmaInfo& info,
+		size_t groupIndex,
+		std::vector<std::wstring>& current,
+		std::vector<ShaderVariant>& output);
+
+	// ShaderCompileOptions BuildOptionsForVariant(
+	// const ShaderCompileOptions& base,
+	// const ShaderVariant& variant);
 }

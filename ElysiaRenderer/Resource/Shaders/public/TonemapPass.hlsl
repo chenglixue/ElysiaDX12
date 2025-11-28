@@ -1,8 +1,4 @@
-#if EDITOR
-#include <private\Color.hlsl>
-#else
-#include "../private\Color.hlsl"
-#endif
+#include "private\Color.hlsl"
 
 #define Neutral 0
 #define LMP 1

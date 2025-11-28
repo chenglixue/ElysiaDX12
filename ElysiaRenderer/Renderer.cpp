@@ -8,6 +8,7 @@
 #include "src/Manager/LightManager.h"
 #include "src/Manager/CameraManager.h"
 #include "src/Manager/ShaderManager.h"
+#include "lib/Event/Messager.h"
 
 #include "src/Pass/ShadowPass.h"
 #include "src/Pass/GBufferPass.h"
@@ -53,6 +54,7 @@ namespace ElysiaRenderer
 		g_pShaderManager = std::make_unique<ShaderManager>();
 		g_pRenderResource = std::make_unique<RenderResource>();
 		g_pPSOManager = std::make_unique<PSOManager>();
+		g_messager = std::make_unique<Messager>();
 		
 		g_pModelImporter = std::make_unique<ModelImporter>(GetBufferManager(), m_pTextureManager.get());
 	}

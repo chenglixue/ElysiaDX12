@@ -23,5 +23,64 @@ namespace ElysiaRenderer
 		}
 	}
 
-	
+	ShaderPragmaInfo ParseShaderPragmas(const std::wstring& source)
+	{
+		ShaderPragmaInfo pragmaInfo{};
+
+		std::wregex re(LR"(#\s*pragma\s+([A-Za-z_][A-Za-z0-9_]*)\s+(.*))");
+		auto begin = std::wsregex_iterator(source.begin(), source.end(), re);
+		auto end = std::wsregex_iterator();
+
+		for (auto it = begin; it != end; ++it)
+		{  
+			std::wstring type = (*it)[1].str(); 
+			std::wstring args = (*it)[2].str();
+
+			PragmaKeywordGroup keywordGroup{};
+
+			std::wistringstream iss(args);
+			std::wstring key;
+			while (iss >> key)
+			{
+				// "_" 或 "__" 表示空宏（不定义任何宏）
+				if (std::all_of(key.begin(), key.end(), [](wchar_t c){ return c == L'_' ; }))
+					keywordGroup.Keywords.push_back(L""); // empty macro
+				else
+					keywordGroup.Keywords.push_back(key);
+			}
+			if (!keywordGroup.Keywords.empty())
+				pragmaInfo.KeywordGroups.push_back(std::move(keywordGroup));
+		}
+
+		return pragmaInfo;
+	}
+
+	void BuildShaderVariants(const ShaderPragmaInfo& info,
+		size_t groupIndex,
+		std::vector<std::wstring>& current,
+		std::vector<ShaderVariant>& output)
+	{
+		if (groupIndex == info.KeywordGroups.size()) 
+		{
+			output.push_back({ current });
+			return;
+		}
+
+		const auto& group = info.KeywordGroups[groupIndex];
+
+		for (auto& key : group.Keywords)
+		{
+			// empty macro -> 不添加宏
+			if (key.empty())
+			{
+				BuildShaderVariants(info, groupIndex + 1, current, output);
+			}
+			else
+			{
+				current.push_back(key);
+				BuildShaderVariants(info, groupIndex + 1, current, output);
+				current.pop_back();
+			}
+		}
+	}
 }

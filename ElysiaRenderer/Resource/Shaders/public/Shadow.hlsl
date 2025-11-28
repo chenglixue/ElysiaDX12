@@ -1,14 +1,11 @@
-#if EDITOR
 #include <private\ShadingCommon.hlsl>
 #include <private\Light.hlsl>
 #include <private\LightCommon.hlsl>
 #include <private\ShadowCommon.hlsl>
-#else
-#include "../private\ShadingCommon.hlsl"
-#include "../private\Light.hlsl"
-#include "../private\LightCommon.hlsl"
-#include "../private\ShadowCommon.hlsl"
-#endif
+
+// #pragma Rasterizer RasterizerBackFaceCull
+// #pragma Blend BlendDisable
+// #pragma Depth DepthWritesEnabled
 
 cbuffer ObjectConstant : register(b0, perObjectSpace)
 {

@@ -25,7 +25,10 @@ namespace ElysiaRenderer
 		const D3D12_INPUT_LAYOUT_DESC& GetInputElementDesc() const noexcept;
 
 		void SetConstantBufferVariable(const std::string name, const ShaderConstantVariableDesc&& desc);
-		std::unordered_map<std::string, ShaderConstantVariableDesc>& GetConstantBufferVariables() noexcept;
+		const std::unordered_map<std::string, ShaderConstantVariableDesc>& GetConstantBufferVariables() noexcept;
+
+		const ShaderPragmaInfo& GetShaderPragmaInfo() const noexcept;
+		
 	private:
 		CComPtr<IDxcBlob> m_shader;
 		D3D12_INPUT_LAYOUT_DESC m_inputLayoutDesc;
@@ -33,6 +36,8 @@ namespace ElysiaRenderer
 		std::vector <std::string > m_inputElementSemanticNames;
 		std::vector<ShaderVariable> m_variables;
 		std::unordered_map<std::string, ShaderConstantVariableDesc> m_constantBufferVariables;
+
+		ShaderPragmaInfo m_shaderPragmaInfo;
 	};
 
 	struct PassData

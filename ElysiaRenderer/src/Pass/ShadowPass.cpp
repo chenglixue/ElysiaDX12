@@ -1,8 +1,8 @@
 #include "stdafx.h"
 #include "ShadowPass.h"
 
-#include "lib/DX12//DX12Material.h"
-#include "RenderResource.h"
+#include "lib/DX12/DX12Material.h"
+#include "RenderResource.h" 
 #include "lib/Utility/PIXHelper.h"
 #include "RenderMaterial.h"
 #include "Manager/PSOManager.h"
@@ -50,14 +50,14 @@ namespace ElysiaRenderer
 		m_shaderPasses = std::vector<ShaderPass>
 		{ 
 			ShaderPass
-			{
+			{ 
 				.Name = "Shadow Cast Pass",
 				.FilePath = L"Shaders\\public\\Shadow.hlsl",
 				.RasterizerDesc = GetRasterizerState(RasterizerState::BackFaceCull),
-				.BlendDesc = GetBlendState(BlendState::Disabled),
+				.BlendDesc = GetBlendState(BlendState::Disabled), 
 				.DepthStencilDesc = GetDepthState(DepthState::WritesEnabled)
-			}
-		};
+			} 
+		}; 
 		m_pMaterial = std::move(std::make_unique<RenderMaterial>(m_shaderPasses));
 		ShaderPasseIDs::ShadowCastPassID = m_pMaterial->FindPassIndex("Shadow Cast Pass");
 

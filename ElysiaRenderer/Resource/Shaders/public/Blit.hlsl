@@ -1,8 +1,4 @@
-#if EDITOR
-#include <private\SharedCommon.hlsli>
-#else
-#include "../private\SharedCommon.hlsli"
-#endif
+#include "private\SharedCommon.hlsli"
 
 cbuffer PassConstant : register(b0, perPassSpace)
 {

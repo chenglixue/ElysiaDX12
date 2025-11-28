@@ -1,12 +1,6 @@
-#if EDITOR
-#include <public\Blit.hlsl>
-#include <private\ShadingCommon.hlsl>
-#include <private\SharedCommon.hlsli>
-#else
-#include "Blit.hlsl"
-#include "../private\ShadingCommon.hlsl"
-#include "../private\SharedCommon.hlsli"
-#endif
+#include "public\Blit.hlsl"
+#include "private\ShadingCommon.hlsl"
+#include "private\ShadowCommon.hlsl"
 
 #define _AO_MAX_SAMPLE_COUNT 256
 
@@ -99,7 +93,7 @@ PSOutput PS(PSInput i)
     [unroll(256)]
     for (UINT sampleIndex = 0; sampleIndex < g_AOSampleCount; ++sampleIndex)
     {
-        // ·¨Ïß°ëÇòµÄËæ»úÏòÁ¿
+        // ï¿½ï¿½ï¿½ß°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         float3 randomVec = mul(g_AOSampleKernelArray[sampleIndex].xyz, TBN);
         randomVec = GetRandomVecHalf(sampleIndex * inputParam.ScreenUV);
         float scale = (float) sampleIndex / (float) g_AOSampleCount;
