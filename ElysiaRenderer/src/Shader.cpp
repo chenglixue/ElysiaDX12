@@ -53,6 +53,8 @@ namespace ElysiaRenderer
 			{
 				if (newPassData.pCSShader)
 				{
+					auto shaderVariantData = newPassData.pCSShader->GetShaderVariantDatas();
+					
 					for (auto& CSShaderVariable : newPassData.pCSShader->GetVariable())
 					{
 						auto emplaceResult = m_shaderVariables.try_emplace(CSShaderVariable.name);
@@ -75,7 +77,6 @@ namespace ElysiaRenderer
 							emplaceResult.first->second = VSShaderVariable;
 						}
 					}
-
 				}
 				if (newPassData.pPSShader)
 				{
@@ -87,7 +88,6 @@ namespace ElysiaRenderer
 							emplaceResult.first->second = PSShaderVariable;
 						}
 					}
-
 				}
 			}
 

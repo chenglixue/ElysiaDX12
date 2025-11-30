@@ -51,8 +51,9 @@ namespace ElysiaHelper
     constexpr UINT32 INVALID_RESOURCE_TABLE_INDEX = UINT_MAX;
     constexpr UINT32 MAX_TEXTURE_SUBRESOURCE_COUNT = 32;
     constexpr UINT32 StandardMSAAPattern = 0xFFFFFFFF;
+    constexpr UINT32 MAX_VARIANTS = 128;
 
-    constexpr UINT MAX_MAIN_LIGHT_COUNT = 1;
+    constexpr UINT MAX_MAIN_LIGHT_COUNT = 256;
 
     using SubResourceLayouts = std::array<D3D12_PLACED_SUBRESOURCE_FOOTPRINT, MAX_TEXTURE_SUBRESOURCE_COUNT>;
 

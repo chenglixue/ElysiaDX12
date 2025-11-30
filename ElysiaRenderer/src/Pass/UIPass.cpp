@@ -73,7 +73,7 @@ namespace ElysiaRenderer
 			shadowTypeIndex = std::clamp(shadowTypeIndex, 0, static_cast<int>(magic_enum::enum_count<ShadowType>()));
 			if (ImGui::IsItemEdited())
 			{
-				GetMessager()->RegisterHandler(MessageID::ShadowType, )
+				Messager::GetInstance().Broadcast(MessageID::ShadowType, shadowTypeIndex);
 			}
 			pUserData.shadowType = (ShadowType)shadowTypeIndex;
 

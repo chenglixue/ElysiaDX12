@@ -7,23 +7,29 @@ namespace ElysiaHelper
     class Messager
     {
     public:
-        void RegisterHandler(size_t messageID, std::function<void()> handler);
+        using Handler = std::function<void(void*)>;
         
-        void HandleMessage(size_t messageID);
-        template<typename T>
-        void HandleMessage(size_t messageID, T value);
-        template<typename T1, typename T2>
-        void HandleMessage(size_t messageID, T1 value1, T2 value2);
-        template<typename T1, typename T2, typename T3>
-        void HandleMessage(size_t messageID, T1 value1, T2 value2, T3 value3);
+        static Messager& GetInstance()
+        {
+            std::call_once(m_initInstanceFlag, []() {
+                m_instance.reset(new Messager());
+                });
+
+            return *m_instance;
+        }
+
+        template<typename... T>
+        void AddListener(size_t id, std::function<void(const T&...)> listener);
+
+        template<typename... T>
+        void Broadcast(size_t id, const T&... value);
         
     private:
-        std::unordered_map<size_t, std::function<void()>> m_handlers;
+        static std::unique_ptr<Messager> m_instance;
+        static std::once_flag m_initInstanceFlag;
+        
+        std::unordered_map<size_t, std::vector<Handler>> m_handlers;
     };
 
-    extern std::unique_ptr<Messager> g_messager;
-    Messager* GetMessager()
-    {
-        return g_messager.get();
-    }
+    
 }

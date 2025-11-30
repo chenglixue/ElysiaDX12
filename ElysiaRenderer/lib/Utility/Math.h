@@ -99,4 +99,9 @@ namespace ElysiaHelper
 		
 	};
 
+	static size_t Absdiff(size_t a, size_t b)
+	{
+		return a > b ? a - b : b - a;
+	}
+
 }

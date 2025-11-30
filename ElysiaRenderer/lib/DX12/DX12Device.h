@@ -94,7 +94,7 @@ namespace ElysiaRenderer
 		std::unique_ptr<DX12BufferResource>			CreateBuffer(const BufferCreationDesc& bufferCreationDesc);
 		std::unique_ptr<DX12TextureResource>		CreateTextureFromFile(const TextureCreationDesc& textureCreationDesc);
 		std::unique_ptr<DX12TextureResource>		CreateTexture(const TexCreateDesc& desc);
-		std::unique_ptr<DX12Shader>					CreateShader(ShaderCreateDesc& shaderCreateDesc);
+		std::unique_ptr<DX12Shader>					CreateShader(ShaderCreateDesc& shaderCreateDesc, const std::vector<std::wstring>& enabledKeywords);
 		void										CreateSamplers(D3D12_SHADER_VISIBILITY shaderVisibility = D3D12_SHADER_VISIBILITY_ALL);
 		void										CreateRootParameters(DX12RootSignature* rootSignature, std::vector<DX12RootParameter*>& rootParamters);
 		DX12RootSignature*							CreateRootSignature(const PipelineResourceLayout& resourceLayout, PipelineResourceMapping& resourceMapping);
@@ -138,6 +138,20 @@ namespace ElysiaRenderer
 
 		void InitializeDeviceResources(HWND windowHandle);
 		void ProcessDestruction(UINT frameIndex);
+
+		ShaderReflectionData DX12Device::ReflectShaderStage(CComPtr<IDxcResult> pResults, CComPtr<IDxcUtils> pUtils);
+		const ShaderBytecode DX12Device::CompileShaderStage(
+			const std::wstring& path,
+			const std::wstring& entry,
+			const std::wstring& target,
+			const std::vector<LPCWSTR>&,
+			const DxcBuffer& sourceBuffer);
+		ShaderVariantData DX12Device::CompileVariantAllStages(
+			const ShaderCompileOptions& baseOptions,
+			const ShaderCreateDesc& desc,
+			const DxcBuffer& source,
+			const ShaderKeywordSet& keywordSet,
+			const ShaderKeywordSpace* keywordSpace);
 
 		HWND m_hWnd;
 		ElysiaHelper::UINT2 m_screenSize;

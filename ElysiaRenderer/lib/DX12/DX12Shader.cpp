@@ -15,6 +15,13 @@ namespace ElysiaRenderer
 		m_shader(shader)
 	{
 	}
+	
+	DX12Shader::DX12Shader(std::unique_ptr<ShaderVariantManager> pShaderVariantManager) :
+		m_pShaderVariantManager(std::move(pShaderVariantManager))
+	{
+	}
+
+
 
 	DX12Shader::~DX12Shader()
 	{
@@ -26,30 +33,11 @@ namespace ElysiaRenderer
 		return m_shader;
 	}
 
-	void DX12Shader::SetVariable(const std::vector<ShaderVariable> shaderVariables)
-	{
-		m_variables = shaderVariables;
-	}
 	const std::vector<ShaderVariable>& DX12Shader::GetVariable() const noexcept
 	{
 		return m_variables;
 	}
 
-
-	void DX12Shader::SetInputElementData(const std::vector<D3D12_INPUT_ELEMENT_DESC> inputElementData)
-	{
-		m_inputElementData = inputElementData;
-
-		m_inputLayoutDesc = D3D12_INPUT_LAYOUT_DESC
-		{
-			.pInputElementDescs = m_inputElementData.data(),
-			.NumElements = static_cast<UINT32>(m_inputElementData.size()),
-		};
-	}
-	void DX12Shader::SetInputElementSemanticNames(const std::vector <std::string> inputElementSemanticNames)
-	{
-		m_inputElementSemanticNames = inputElementSemanticNames;
-	}
 	const std::vector <std::string>& DX12Shader::GetInputElementSemanticNames() const noexcept
 	{
 		return m_inputElementSemanticNames;
@@ -59,10 +47,6 @@ namespace ElysiaRenderer
 		return m_inputLayoutDesc;
 	}
 
-	void DX12Shader::SetConstantBufferVariable(const std::string name, const ShaderConstantVariableDesc&& desc)
-	{
-		m_constantBufferVariables[name] = desc;
-	}
 	const std::unordered_map<std::string, ShaderConstantVariableDesc>& DX12Shader::GetConstantBufferVariables() noexcept
 	{
 		return m_constantBufferVariables;

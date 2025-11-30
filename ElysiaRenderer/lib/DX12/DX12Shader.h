@@ -6,38 +6,22 @@
 namespace ElysiaRenderer
 {
 	struct PipelineStateObject;
+	class ShaderVariantManager;
 	
 	class DX12Shader
 	{
 	public:
 		DX12Shader();
 		DX12Shader(CComPtr<IDxcBlob> shader);
+		DX12Shader(std::unique_ptr<ShaderVariantManager> );
 		~DX12Shader();
 
 		CComPtr<IDxcBlob>& GetShader();
-
-		void SetVariable(const std::vector<ShaderVariable> shaderVariables);
-		const std::vector<ShaderVariable>& GetVariable() const noexcept;
-
-		void SetInputElementData(const std::vector<D3D12_INPUT_ELEMENT_DESC>);
-		void SetInputElementSemanticNames(const std::vector <std::string>);
-		const std::vector <std::string>& GetInputElementSemanticNames() const noexcept;
-		const D3D12_INPUT_LAYOUT_DESC& GetInputElementDesc() const noexcept;
-
-		void SetConstantBufferVariable(const std::string name, const ShaderConstantVariableDesc&& desc);
-		const std::unordered_map<std::string, ShaderConstantVariableDesc>& GetConstantBufferVariables() noexcept;
-
-		const ShaderPragmaInfo& GetShaderPragmaInfo() const noexcept;
-		
+		const std::vector<ShaderVariantData>& GetShaderVariantDatas();
 	private:
 		CComPtr<IDxcBlob> m_shader;
-		D3D12_INPUT_LAYOUT_DESC m_inputLayoutDesc;
-		std::vector<D3D12_INPUT_ELEMENT_DESC> m_inputElementData;
-		std::vector <std::string > m_inputElementSemanticNames;
-		std::vector<ShaderVariable> m_variables;
-		std::unordered_map<std::string, ShaderConstantVariableDesc> m_constantBufferVariables;
 
-		ShaderPragmaInfo m_shaderPragmaInfo;
+		std::unique_ptr<ShaderVariantManager> m_pShaderVariantManager = nullptr;
 	};
 
 	struct PassData

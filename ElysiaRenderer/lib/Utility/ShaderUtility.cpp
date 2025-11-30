@@ -23,6 +23,13 @@ namespace ElysiaRenderer
 		}
 	}
 
+	bool IsUnderlineKeyword(const std::wstring& s)
+	{
+		// "_" "__" "___" 都视为空 keyword
+		return !s.empty() && std::all_of(s.begin(), s.end(), [](wchar_t c) { return c == L'_'; });
+	}
+
+
 	ShaderPragmaInfo ParseShaderPragmas(const std::wstring& source)
 	{
 		ShaderPragmaInfo pragmaInfo{};
@@ -43,7 +50,7 @@ namespace ElysiaRenderer
 			while (iss >> key)
 			{
 				// "_" 或 "__" 表示空宏（不定义任何宏）
-				if (std::all_of(key.begin(), key.end(), [](wchar_t c){ return c == L'_' ; }))
+				if (IsUnderlineKeyword(key))
 					keywordGroup.Keywords.push_back(L""); // empty macro
 				else
 					keywordGroup.Keywords.push_back(key);
@@ -55,32 +62,5 @@ namespace ElysiaRenderer
 		return pragmaInfo;
 	}
 
-	void BuildShaderVariants(const ShaderPragmaInfo& info,
-		size_t groupIndex,
-		std::vector<std::wstring>& current,
-		std::vector<ShaderVariant>& output)
-	{
-		if (groupIndex == info.KeywordGroups.size()) 
-		{
-			output.push_back({ current });
-			return;
-		}
-
-		const auto& group = info.KeywordGroups[groupIndex];
-
-		for (auto& key : group.Keywords)
-		{
-			// empty macro -> 不添加宏
-			if (key.empty())
-			{
-				BuildShaderVariants(info, groupIndex + 1, current, output);
-			}
-			else
-			{
-				current.push_back(key);
-				BuildShaderVariants(info, groupIndex + 1, current, output);
-				current.pop_back();
-			}
-		}
-	}
+	
 }

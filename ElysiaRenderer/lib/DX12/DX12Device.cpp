@@ -18,6 +18,7 @@
 #include "lib/Event/Messager.h"
 #include "../Utility/RenderTexture.h"
 #include "Utility/ShaderCompileOptions.h"
+#include "src/Manager/ShaderVariantManager.h"
 
 namespace ElysiaRenderer
 {
@@ -763,7 +764,7 @@ namespace ElysiaRenderer
 		return newTex;
 	}
 
-	std::unique_ptr<DX12Shader>					DX12Device::CreateShader(ShaderCreateDesc& shaderCreateDesc)
+	std::unique_ptr<DX12Shader>					DX12Device::CreateShader(ShaderCreateDesc& shaderCreateDesc, const std::vector<std::wstring>& enabledKeywords)
 	{
 		/// Enable Debug
 #if defined(_DEBUG)
@@ -773,67 +774,13 @@ namespace ElysiaRenderer
 		UINT compileFlags = 0;
 #endif
 
-		/// Switch Target
-		std::wstring target;
-		switch (shaderCreateDesc.shaderType)
-		{
-		case ShaderType::Vertex:
-		{
-			target = L"vs_6_6";
-		}
-			
-			break;
-		case ShaderType::Pixel:
-		{
-			target = L"ps_6_6";
-		}
-			break;
-		case ShaderType::Compute:
-		{
-			target = L"cs_6_6";
-		}
-			break;
-
-		default:
-			ElysiaHelper::AssertError("Unimplemented shader type.");
-			break;
-		}
-
 		//
 		// Get x64 path
 		WCHAR assetsPath[512];
 		ElysiaHelper::GetAssetsPath(assetsPath, _countof(assetsPath));
 
-		// 
-		// Create compiler and utils.
-		//
-		CComPtr<IDxcUtils> pUtils;
-		CComPtr<IDxcCompiler3> pCompiler;
-		ThrowIfFailed(DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&pUtils)));
-		ThrowIfFailed(DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&pCompiler)));
-
-		//
-		// Create default include handler
-		//
-		CComPtr<IDxcIncludeHandler> pIncludeHandler;
-		ThrowIfFailed(pUtils->CreateDefaultIncludeHandler(&pIncludeHandler));
-
-		std::cout << std::filesystem::path(shaderCreateDesc.shaderName).string() << std::endl;
-		std::cout << std::filesystem::path(shaderCreateDesc.entryPoint).string() << std::endl;
-		std::cout << std::filesystem::path(target).string() << std::endl;
-		auto temp = std::filesystem::path(assetsPath).wstring();
-		temp += L"\\Shaders";
-
-		LPCWSTR pdbName = std::wstring(shaderCreateDesc.shaderName + shaderCreateDesc.entryPoint + std::wstring(L".pdb")).c_str();
-		LPCWSTR binName = std::wstring(shaderCreateDesc.shaderName + shaderCreateDesc.entryPoint + std::wstring(L".bin")).c_str();
-
 		ElysiaHelper::ShaderCompileOptions compileOptions;
-		compileOptions.SetShaderPath(shaderCreateDesc.shaderName);
-		compileOptions.SetEntry(shaderCreateDesc.entryPoint);
-		compileOptions.SetTarget(target);
-		compileOptions.AddIncludeDir(temp);
-		compileOptions.AddIncludeDir(temp + L"\\public");
-		compileOptions.AddIncludeDir(temp + L"\\private");
+		
 #if defined(_DEBUG)
 		compileOptions.EnableDebug(true);
 		compileOptions.SetOptLevel(0);
@@ -841,322 +788,53 @@ namespace ElysiaRenderer
 		compileOptions.EnableDebug(false);
 		compileOptions.SetOptLevel(3);
 #endif
-		auto& usetData = UserData::GetInstance();
-		switch (usetData.shadowQuality)
-		{
-		case ShadowQuality::Low:
-			{
-				compileOptions.AddMacro(L"SHADOW_QUALITY_LOW");
-				break;
-			}
-		case ShadowQuality::Middle:
-			{
-				compileOptions.AddMacro(L"SHADOW_QUALITY_MIDDLE");
-				break;
-			}
-		case ShadowQuality::High:
-			{
-				compileOptions.AddMacro(L"SHADOW_QUALITY_HIGH");
-				break;
-			}
-		case ShadowQuality::VeryHigh:
-			{
-				compileOptions.AddMacro(L"SHADOW_QUALITY_VERYHIGH");
-				break;
-			}
-		default:
-			{
-				compileOptions.AddMacro(L"SHADOW_QUALITY_VERYHIGH");
-				ThrowRuntimeError("inivalid shadow quality");
-				break;
-			}
-		}
-		switch (UserData::GetInstance().shadowType)
-		{
-		case ShadowType::Hard:
-			{
-				compileOptions.AddMacro(L"HARD_SHADOW");
-				break;
-			}
-		case ShadowType::Soft:
-			{
-				compileOptions.AddMacro(L"SOFT_SHADOW");
-				break;
-			}
-		default:
-			{
-				ThrowRuntimeError("inivalid shadow type");
-				break;
-			}
-		}
 		
-		auto pszArgs = compileOptions.BuildArguments();
+		CComPtr<IDxcUtils> pUtils;
+		CComPtr<IDxcCompiler3> pCompiler;
+		ThrowIfFailed(DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&pUtils)));
+		ThrowIfFailed(DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&pCompiler)));
 		
 		//
 		// Open source file.  
 		//
 		CComPtr<IDxcBlobEncoding> pSource;
-		auto path = ElysiaHelper::GetAssetFullPath(assetsPath, shaderCreateDesc.shaderName.c_str());
-		ThrowIfFailed(pUtils->LoadFile(ElysiaHelper::GetAssetFullPath(assetsPath, shaderCreateDesc.shaderName.c_str()).c_str(), nullptr, &pSource));
+		auto path = ElysiaHelper::GetAssetFullPath(assetsPath, shaderCreateDesc.stages.begin()->ShaderName.c_str());
+		ThrowIfFailed(pUtils->LoadFile(ElysiaHelper::GetAssetFullPath(assetsPath, shaderCreateDesc.stages.begin()->ShaderName.c_str()).c_str(), nullptr, &pSource));
 		DxcBuffer Source
 		{
 			.Ptr = pSource->GetBufferPointer(),
 			.Size = pSource->GetBufferSize(),
 			.Encoding = DXC_CP_ACP	// Assume BOM says UTF8 or UTF16 or this is ANSI text.
 		};
-		 
-		//
-		// Compile it with specified arguments.
-		//
-		CComPtr<IDxcResult> pResults;
-		auto hr = pCompiler->Compile(
-			&Source,                // Source buffer.
-			pszArgs.data(),         // Array of pointers to arguments.
-			(UINT)pszArgs.size(),      // Number of arguments.
-			pIncludeHandler,        // User-provided interface to handle #include directives (optional).
-			IID_PPV_ARGS(&pResults) // Compiler output status, buffer, and errors.
-		);
-		if (FAILED(hr))
-		{
-			ThrowRuntimeError(std::string("Failed to compile shader with path : ") + WstringToString(shaderCreateDesc.shaderName));
-		}
 
 		std::wstring hlslWString = StringToWstring((const char*)Source.Ptr);
 		auto pragmaInfo = ParseShaderPragmas(hlslWString);
-		//
-		// Print errors if present.
-		//
-		CComPtr<IDxcBlobUtf8> pErrors = nullptr;
-		pResults->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&pErrors), nullptr);
-		// Note that d3dcompiler would return null if no errors or warnings are present.
-		// IDxcCompiler3::Compile will always return an error buffer, but its length
-		// will be zero if there are no warnings or errors.
-		if (pErrors != nullptr && pErrors->GetStringLength() != 0)
-			wprintf(L"Warnings and Errors:\n%S\n", pErrors->GetStringPointer());
 
-		//
-		// Quit if the compilation failed.
-		//
-		HRESULT hrStatus;
-		pResults->GetStatus(&hrStatus);
-		if (FAILED(hrStatus))
+		auto pKeywordSpace = std::make_unique<ShaderKeywordSpace>();
+		for (auto& group : pragmaInfo.KeywordGroups)
 		{
-			wprintf(L"Compilation Failed\n");
-			return nullptr;
+			for (auto& key : group.Keywords)
+			{
+				if (!key.empty())
+				{
+					pKeywordSpace->AddKeyword(key);
+				}
+			}
 		}
 
-		//
-		// Save shader binary.
-		//
-		CComPtr<IDxcBlob> pShader = nullptr;
-		CComPtr<IDxcBlobUtf16> pShaderName = nullptr;
-		pResults->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&pShader), nullptr);
-		if (pShader != nullptr)
-		{
-			FILE* fp = NULL;
+		auto variantMgr = std::make_unique<ShaderVariantManager>(pKeywordSpace.get());
+		variantMgr->SetCompileCallback(
+			[&](const ShaderKeywordSet& set)
+			{
+				return CompileVariantAllStages(compileOptions, shaderCreateDesc, Source, set, pKeywordSpace.get());
+			});
 
-			/*_wfopen_s(&fp, pShaderName->GetStringPointer(), L"wb");
-			fwrite(pShader->GetBufferPointer(), pShader->GetBufferSize(), 1, fp);
-			fclose(fp);*/
+		auto variants = variantMgr->BuildAllVariants(pragmaInfo);
+		variantMgr->InitializeFromCompiled(variants);
 
-			std::cout << "Shader compiled successfully. Size: " << pShader->GetBufferSize() << " bytes" << std::endl;
-			std::cout << "Shader compiled successfully. Adress: " << pShader->GetBufferPointer() << std::endl;
-		}
 		
 
-		//
-		// Save pdb.
-		//
-		CComPtr<IDxcBlob> pPDB = nullptr;
-		CComPtr<IDxcBlobUtf16> pPDBName = nullptr;
-		pResults->GetOutput(DXC_OUT_PDB, IID_PPV_ARGS(&pPDB), &pPDBName);
-		{
-			FILE* fp = NULL;
-
-			// Note that if you don't specify -Fd, a pdb name will be automatically generated.
-			// Use this file name to save the pdb so that PIX can find it quickly.
-			_wfopen_s(&fp, pPDBName->GetStringPointer(), L"wb");
-			fwrite(pPDB->GetBufferPointer(), pPDB->GetBufferSize(), 1, fp);
-			fclose(fp);
-		}
-
-		//
-		// Print hash.
-		//
-		CComPtr<IDxcBlob> pHash = nullptr;
-		pResults->GetOutput(DXC_OUT_SHADER_HASH, IID_PPV_ARGS(&pHash), nullptr);
-		if (pHash != nullptr)
-		{
-			wprintf(L"Hash: ");
-			DxcShaderHash* pHashBuf = (DxcShaderHash*)pHash->GetBufferPointer();
-			for (int i = 0; i < _countof(pHashBuf->HashDigest); i++)
-				wprintf(L"%.2x", pHashBuf->HashDigest[i]);
-			wprintf(L"\n");
-		}
-
-		//
-		// Demonstrate getting the hash from the PDB blob using the IDxcUtils::GetPDBContents API
-		//
-		CComPtr<IDxcBlob> pHashDigestBlob = nullptr;
-		CComPtr<IDxcBlob> pDebugDxilContainer = nullptr;
-		if (SUCCEEDED(pUtils->GetPDBContents(pPDB, &pHashDigestBlob, &pDebugDxilContainer)))
-		{
-			// This API returns the raw hash digest, rather than a DxcShaderHash structure.
-			// This will be the same as the DxcShaderHash::HashDigest returned from
-			// IDxcResult::GetOutput(DXC_OUT_SHADER_HASH, ...).
-			wprintf(L"Hash from PDB: ");
-			const BYTE* pHashDigest = (const BYTE*)pHashDigestBlob->GetBufferPointer();
-			assert(pHashDigestBlob->GetBufferSize() == 16); // hash digest is always 16 bytes.
-			for (int i = 0; i < pHashDigestBlob->GetBufferSize(); i++)
-				wprintf(L"%.2x", pHashDigest[i]);
-			wprintf(L"\n");
-
-			// The pDebugDxilContainer blob will contain a DxilContainer formatted
-			// binary, but with different parts than the pShader blob retrieved
-			// earlier.
-			// The parts in this container will vary depending on debug options and
-			// the compiler version.
-			// This blob is not meant to be directly interpreted by an application.
-		}
-
-		auto o = std::make_unique<DX12Shader>(pShader);
-
-		//
-		// Get separate reflection.
-		//
-		CComPtr<IDxcBlob> pReflectionData;
-		CComPtr< ID3D12ShaderReflection > pReflection;
-		ThrowIfFailed(pResults->GetOutput(DXC_OUT_REFLECTION, IID_PPV_ARGS(&pReflectionData), nullptr));
-		if (pReflectionData != nullptr)
-		{
-			// Optionally, save reflection blob for later here.
-
-			// Create reflection interface.
-			const DxcBuffer ReflectionData
-			{
-				.Ptr = pReflectionData->GetBufferPointer(),
-				.Size = pReflectionData->GetBufferSize(),
-				.Encoding = DXC_CP_ACP,
-			};
-
-			pUtils->CreateReflection(&ReflectionData, IID_PPV_ARGS(&pReflection));
-
-			// Use reflection interface here.
-			D3D12_SHADER_DESC pShaderDesc{};
-			pReflection->GetDesc(&pShaderDesc);
-
-			// Set ConstantBuffer layout & constant buffer member
-			{
-				std::vector<ShaderVariable> shaderVariables{};
-				for (UINT i = 0; i < pShaderDesc.BoundResources; ++i)
-				{
-					D3D12_SHADER_INPUT_BIND_DESC resourceDesc{};
-					pReflection->GetResourceBindingDesc(i, &resourceDesc);
-
-					if (resourceDesc.Type == D3D_SIT_CBUFFER)
-					{
-						ID3D12ShaderReflectionConstantBuffer* pConstantBuffer = pReflection->GetConstantBufferByIndex(i);
-						D3D12_SHADER_BUFFER_DESC constantBufferDesc{};
-						pConstantBuffer->GetDesc(&constantBufferDesc);
-
-						auto variableName = constantBufferDesc.Name;
-						D3D_SHADER_INPUT_TYPE resourceType = resourceDesc.Type;
-						auto spaceID = resourceDesc.Space;
-						auto registerPos = resourceDesc.BindPoint;
-
-#ifdef DEBUG
-						std::cout << "variable name is " << variableName << std::endl;
-						std::cout << "Resource type is " << resourceType << std::endl;
-						std::cout << "Register space is " << spaceID << std::endl;
-						std::cout << "bind point is " << registerPos << std::endl;
-						std::cout << std::endl;
-#endif // DEBUG
-
-						ShaderVariable temp 
-						{
-							.type = ShaderVariable::Type::ConstantBuffer,
-							.registerPos = registerPos,
-							.spaceID = spaceID,
-							.name = variableName,
-							.size = constantBufferDesc.Size
-						};
-						shaderVariables.emplace_back(temp);
-
-						for (UINT memberIndex = 0; memberIndex < constantBufferDesc.Variables; ++memberIndex)
-						{
-							auto memberVariable = pConstantBuffer->GetVariableByIndex(memberIndex);
-							D3D12_SHADER_VARIABLE_DESC variableDesc{};
-							memberVariable->GetDesc(&variableDesc);
-
-							ShaderConstantVariableDesc constantVariableDesc{};
-							constantVariableDesc.SpaceID = spaceID;
-							constantVariableDesc.StartOffset = variableDesc.StartOffset;
-							constantVariableDesc.Size = variableDesc.Size;
-							//constantVariableDesc.pData = new char[constantVariableDesc.Size];
-							constantVariableDesc.pData = std::vector<char>(constantVariableDesc.Size);
-
-#ifdef DEBUG
-							std::cout << "Constant variable name is " << variableDesc.Name << std::endl;
-							std::cout << "Space ID is " << constantVariableDesc.SpaceID << std::endl;
-							std::cout << "Start Offset is " << constantVariableDesc.StartOffset << std::endl;
-							std::cout << "Size is " << constantVariableDesc.Size << std::endl;
-							std::cout << "Address is " << constantVariableDesc.pData.data() << std::endl;
-							std::cout << std::endl;
-#endif // DEBUG
-
-							o->SetConstantBufferVariable(variableDesc.Name, std::move(constantVariableDesc));
-						}
-					}
-				}
-				o->SetVariable(std::move(shaderVariables));
-			}
-
-			// Get Vertex layout
-			{
-				if (shaderCreateDesc.shaderType == ShaderType::Vertex)
-				{
-					std::vector<D3D12_INPUT_ELEMENT_DESC> inputElementDesc(pShaderDesc.InputParameters);
-					std::vector <std::string > inputElementSemanticNames{ pShaderDesc.InputParameters };
-
-					for (UINT32 parameterIndex = 0; parameterIndex < pShaderDesc.InputParameters; ++parameterIndex)
-					{
-						D3D12_SIGNATURE_PARAMETER_DESC signatureParameterDesc{};
-						pReflection->GetInputParameterDesc(parameterIndex, &signatureParameterDesc);
-
-						inputElementSemanticNames[parameterIndex] = signatureParameterDesc.SemanticName;
-					}
-					o->SetInputElementSemanticNames(std::move(inputElementSemanticNames));
-
-					for (UINT32 parameterIndex = 0; parameterIndex < pShaderDesc.InputParameters; ++parameterIndex)
-					{
-						D3D12_SIGNATURE_PARAMETER_DESC signatureParameterDesc{};
-						pReflection->GetInputParameterDesc(parameterIndex, &signatureParameterDesc);
-
-						inputElementDesc[parameterIndex] = D3D12_INPUT_ELEMENT_DESC
-							{
-									.SemanticName = o->GetInputElementSemanticNames()[parameterIndex].c_str(),
-									.SemanticIndex = signatureParameterDesc.SemanticIndex,
-									.Format = MaskToFormat(signatureParameterDesc.Mask),
-									.InputSlot = 0u,
-									.AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT,
-									.InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,
-									// There doesn't seem to be a obvious way to 
-									// automate this currently, which might be a issue when instanced rendering is used
-									.InstanceDataStepRate = 0u
-							};
-
-#ifdef DEBUG
-						std::cout << "Input Element name is " << inputElementDesc[parameterIndex].SemanticName << std::endl;
-						std::cout << "Input Element Index is " << inputElementDesc[parameterIndex].SemanticIndex << std::endl;
-						std::cout << "Input Element Format is " << DXGIFormatToString(inputElementDesc[parameterIndex].Format) << std::endl;
-						std::cout << std::endl;
-#endif // DEBUG
-					}
-
-					o->SetInputElementData(std::move(inputElementDesc));
-				}
-			}
-		}
+		auto o = std::make_unique<DX12Shader>(std::move(variantMgr));
 
 		return o;
 	}
@@ -1463,5 +1141,347 @@ namespace ElysiaRenderer
 			for (DisplayMode mode : *pModes)
 				pNames->push_back(fsHdrGetDisplayModeString(mode));
 		}
+	}
+
+	ShaderReflectionData DX12Device::ReflectShaderStage(CComPtr<IDxcResult> pResults, CComPtr<IDxcUtils> pUtils)
+	{
+		ShaderReflectionData o{};
+
+		//
+		// Get separate reflection.
+		//
+		CComPtr<IDxcBlob> pReflectionData;
+		CComPtr< ID3D12ShaderReflection > pReflection;
+		ThrowIfFailed(pResults->GetOutput(DXC_OUT_REFLECTION, IID_PPV_ARGS(&pReflectionData), nullptr));
+		if (pReflectionData != nullptr)
+		{
+			// Optionally, save reflection blob for later here.
+
+			// Create reflection interface.
+			const DxcBuffer ReflectionData
+			{
+				.Ptr = pReflectionData->GetBufferPointer(),
+				.Size = pReflectionData->GetBufferSize(),
+				.Encoding = DXC_CP_ACP,
+			};
+
+			pUtils->CreateReflection(&ReflectionData, IID_PPV_ARGS(&pReflection));
+
+			// Use reflection interface here.
+			D3D12_SHADER_DESC pShaderDesc{};
+			pReflection->GetDesc(&pShaderDesc);
+			
+			// Set ConstantBuffer layout & constant buffer member
+			{
+				std::unordered_map<std::string, ShaderReflectionData::ShaderVariable> shaderVariables{};
+				for (UINT i = 0; i < pShaderDesc.BoundResources; ++i)
+				{
+					D3D12_SHADER_INPUT_BIND_DESC resourceDesc{};
+					pReflection->GetResourceBindingDesc(i, &resourceDesc);
+
+					if (resourceDesc.Type == D3D_SIT_CBUFFER)
+					{
+						ID3D12ShaderReflectionConstantBuffer* pConstantBuffer = pReflection->GetConstantBufferByIndex(i);
+						D3D12_SHADER_BUFFER_DESC constantBufferDesc{};
+						pConstantBuffer->GetDesc(&constantBufferDesc);
+
+						auto variableName = constantBufferDesc.Name;
+						D3D_SHADER_INPUT_TYPE resourceType = resourceDesc.Type;
+						auto spaceID = resourceDesc.Space;
+						auto registerPos = resourceDesc.BindPoint;
+
+						ShaderReflectionData::ShaderVariable temp 
+						{
+							.type = ShaderReflectionData::ShaderVariable::Type::ConstantBuffer,
+							.registerPos = registerPos,
+							.spaceID = spaceID,
+							.name = variableName,
+							.size = constantBufferDesc.Size
+						};
+						shaderVariables.insert({variableName, temp});
+
+						for (UINT memberIndex = 0; memberIndex < constantBufferDesc.Variables; ++memberIndex)
+						{
+							auto memberVariable = pConstantBuffer->GetVariableByIndex(memberIndex);
+							D3D12_SHADER_VARIABLE_DESC variableDesc{};
+							memberVariable->GetDesc(&variableDesc);
+
+							ShaderReflectionData::ShaderConstantVariableDesc constantVariableDesc{};
+							constantVariableDesc.SpaceID = spaceID;
+							constantVariableDesc.StartOffset = variableDesc.StartOffset;
+							constantVariableDesc.Size = variableDesc.Size;
+							//constantVariableDesc.pData = new char[constantVariableDesc.Size];
+							constantVariableDesc.pData = std::vector<char>(constantVariableDesc.Size);
+
+							shaderVariables[variableName].members.insert({variableDesc.Name, constantVariableDesc});
+						}
+					}
+				}
+				o.cbuffers = std::move(shaderVariables);
+			}
+
+			// Get Vertex layout
+			{
+				std::vector<D3D12_INPUT_ELEMENT_DESC> inputElementDesc(pShaderDesc.InputParameters);
+				std::vector <std::string > inputElementSemanticNames{ pShaderDesc.InputParameters };
+
+				for (UINT32 parameterIndex = 0; parameterIndex < pShaderDesc.InputParameters; ++parameterIndex)
+				{
+					D3D12_SIGNATURE_PARAMETER_DESC signatureParameterDesc{};
+					pReflection->GetInputParameterDesc(parameterIndex, &signatureParameterDesc);
+
+					inputElementSemanticNames[parameterIndex] = signatureParameterDesc.SemanticName;
+				}
+				o.InputElementSemanticNames = std::move(inputElementSemanticNames);
+
+				for (UINT32 parameterIndex = 0; parameterIndex < pShaderDesc.InputParameters; ++parameterIndex)
+				{
+					D3D12_SIGNATURE_PARAMETER_DESC signatureParameterDesc{};
+					pReflection->GetInputParameterDesc(parameterIndex, &signatureParameterDesc);
+
+					inputElementDesc[parameterIndex] = D3D12_INPUT_ELEMENT_DESC
+					{
+						.SemanticName = o.InputElementSemanticNames[parameterIndex].c_str(),
+						.SemanticIndex = signatureParameterDesc.SemanticIndex,
+						.Format = MaskToFormat(signatureParameterDesc.Mask),
+						.InputSlot = 0u,
+						.AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT,
+						.InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,
+										// There doesn't seem to be a obvious way to 
+										// automate this currently, which might be a issue when instanced rendering is used
+						.InstanceDataStepRate = 0u
+					};
+				}
+
+				o.InputLayoutElementDescs = std::move(inputElementDesc);
+				o.InputLayoutDesc = 
+				{
+					.pInputElementDescs = o.InputLayoutElementDescs.data(),
+					.NumElements = static_cast<UINT32>(o.InputLayoutElementDescs.size()),
+				};
+			}
+		}
+	}
+	
+	const ShaderBytecode DX12Device::CompileShaderStage(
+			const std::wstring& path,
+			const std::wstring& entry,
+			const std::wstring& target,
+			const std::vector<LPCWSTR>& args,
+			const DxcBuffer& sourceBuffer)
+	{
+		
+		// 
+		// Create compiler and utils.
+		//
+		CComPtr<IDxcUtils> pUtils;
+		CComPtr<IDxcCompiler3> pCompiler;
+		ThrowIfFailed(DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&pUtils)));
+		ThrowIfFailed(DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&pCompiler)));
+
+		//
+		// Create default include handler
+		//
+		CComPtr<IDxcIncludeHandler> pIncludeHandler;
+		ThrowIfFailed(pUtils->CreateDefaultIncludeHandler(&pIncludeHandler));
+
+		auto pszArgs = args;
+		//
+		// Compile it with specified arguments.
+		//
+		CComPtr<IDxcResult> pResults;
+		auto hr = pCompiler->Compile(
+			&sourceBuffer,                // Source buffer.
+			pszArgs.data(),         // Array of pointers to arguments.
+			(UINT)pszArgs.size(),      // Number of arguments.
+			pIncludeHandler,        // User-provided interface to handle #include directives (optional).
+			IID_PPV_ARGS(&pResults) // Compiler output status, buffer, and errors.
+		);
+		if (FAILED(hr))
+		{
+			ThrowRuntimeError(std::string("Failed to compile shader with path : ") + WstringToString(path + entry));
+		}
+
+		//
+		// Print errors if present.
+		//
+		CComPtr<IDxcBlobUtf8> pErrors = nullptr;
+		pResults->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&pErrors), nullptr);
+		// Note that d3dcompiler would return null if no errors or warnings are present.
+		// IDxcCompiler3::Compile will always return an error buffer, but its length
+		// will be zero if there are no warnings or errors.
+		if (pErrors != nullptr && pErrors->GetStringLength() != 0)
+			wprintf(L"Warnings and Errors:\n%S\n", pErrors->GetStringPointer());
+
+		//
+		// Quit if the compilation failed.
+		//
+		HRESULT hrStatus;
+		pResults->GetStatus(&hrStatus);
+		if (FAILED(hrStatus))
+		{
+			wprintf(L"Compilation Failed\n");
+		}
+
+		//
+		// Save shader binary.
+		//
+		CComPtr<IDxcBlob> pShader = nullptr;
+		CComPtr<IDxcBlobUtf16> pShaderName = nullptr;
+		pResults->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&pShader), nullptr);
+		if (pShader != nullptr)
+		{
+			FILE* fp = NULL;
+
+			/*_wfopen_s(&fp, pShaderName->GetStringPointer(), L"wb");
+			fwrite(pShader->GetBufferPointer(), pShader->GetBufferSize(), 1, fp);
+			fclose(fp);*/
+
+			std::cout << "Shader compiled successfully. Size: " << pShader->GetBufferSize() << " bytes" << std::endl;
+			std::cout << "Shader compiled successfully. Adress: " << pShader->GetBufferPointer() << std::endl;
+		}
+
+		//
+		// Save pdb.
+		//
+		CComPtr<IDxcBlob> pPDB = nullptr;
+		CComPtr<IDxcBlobUtf16> pPDBName = nullptr;
+		pResults->GetOutput(DXC_OUT_PDB, IID_PPV_ARGS(&pPDB), &pPDBName);
+		if(pPDB != nullptr && pPDBName != nullptr)
+		{
+			FILE* fp = NULL;
+
+			// Note that if you don't specify -Fd, a pdb name will be automatically generated.
+			// Use this file name to save the pdb so that PIX can find it quickly.
+			_wfopen_s(&fp, pPDBName->GetStringPointer(), L"wb");
+			fwrite(pPDB->GetBufferPointer(), pPDB->GetBufferSize(), 1, fp);
+			fclose(fp);
+		}
+
+		//
+		// Print hash.
+		//
+		CComPtr<IDxcBlob> pHash = nullptr;
+		pResults->GetOutput(DXC_OUT_SHADER_HASH, IID_PPV_ARGS(&pHash), nullptr);
+		if (pHash != nullptr && pHash->GetBufferSize() >= 16)
+		{
+			wprintf(L"Hash: ");
+			DxcShaderHash* pHashBuf = (DxcShaderHash*)pHash->GetBufferPointer();
+			for (int i = 0; i < _countof(pHashBuf->HashDigest); i++)
+				wprintf(L"%.2x", pHashBuf->HashDigest[i]);
+			wprintf(L"\n");
+		}
+
+		//
+		// Demonstrate getting the hash from the PDB blob using the IDxcUtils::GetPDBContents API
+		//
+		CComPtr<IDxcBlob> pHashDigestBlob = nullptr;
+		CComPtr<IDxcBlob> pDebugDxilContainer = nullptr;
+		if (SUCCEEDED(pUtils->GetPDBContents(pPDB, &pHashDigestBlob, &pDebugDxilContainer)))
+		{
+			// This API returns the raw hash digest, rather than a DxcShaderHash structure.
+			// This will be the same as the DxcShaderHash::HashDigest returned from
+			// IDxcResult::GetOutput(DXC_OUT_SHADER_HASH, ...).
+			wprintf(L"Hash from PDB: ");
+			const BYTE* pHashDigest = (const BYTE*)pHashDigestBlob->GetBufferPointer();
+			assert(pHashDigestBlob->GetBufferSize() == 16); // hash digest is always 16 bytes.
+			for (int i = 0; i < pHashDigestBlob->GetBufferSize(); i++)
+				wprintf(L"%.2x", pHashDigest[i]);
+			wprintf(L"\n");
+
+			// The pDebugDxilContainer blob will contain a DxilContainer formatted
+			// binary, but with different parts than the pShader blob retrieved
+			// earlier.
+			// The parts in this container will vary depending on debug options and
+			// the compiler version.
+			// This blob is not meant to be directly interpreted by an application.
+		}
+
+		auto reflectionData = ReflectShaderStage(pResults, pUtils);
+
+		ShaderBytecode o
+		{
+			.bytecode = pShader,
+			.entry = entry,
+			.target = target,
+			.ReflectionData = std::move(reflectionData)
+		};
+	}
+	
+	ShaderVariantData DX12Device::CompileVariantAllStages(
+			const ShaderCompileOptions& compileOptions,
+			const ShaderCreateDesc& desc,
+			const DxcBuffer& source,
+			const ShaderKeywordSet& keywordSet,
+			const ShaderKeywordSpace* keywordSpace)
+	{
+		ShaderVariantData o{};
+		o.KeywordSet = keywordSet;
+
+		for(auto& stage : desc.stages)
+		{
+			/// Switch Target
+			std::wstring target;
+			switch (stage.ShaderType)
+			{
+				case ShaderType::Vertex:
+					{
+						target = L"vs_6_6";
+					}
+			
+				break;
+				case ShaderType::Pixel:
+					{
+						target = L"ps_6_6";
+					}
+				break;
+				case ShaderType::Compute:
+					{
+						target = L"cs_6_6";
+					}
+				break;
+
+				default:
+					ElysiaHelper::AssertError("Unimplemented shader type.");
+				break;
+			}
+
+			//
+			// Get x64 path
+			WCHAR assetsPath[512];
+			ElysiaHelper::GetAssetsPath(assetsPath, _countof(assetsPath));
+
+			std::cout << std::filesystem::path(stage.ShaderName).string() << std::endl;
+			std::cout << std::filesystem::path(stage.EntryPoint).string() << std::endl;
+			std::cout << std::filesystem::path(target).string() << std::endl;
+			auto temp = std::filesystem::path(assetsPath).wstring();
+			temp += L"\\Shaders";
+
+			LPCWSTR pdbName = std::wstring(stage.ShaderName + stage.EntryPoint + std::wstring(L".pdb")).c_str();
+			LPCWSTR binName = std::wstring(stage.ShaderName + stage.EntryPoint + std::wstring(L".bin")).c_str();
+
+			auto newCompileOptions = compileOptions;
+			newCompileOptions.SetShaderPath(stage.ShaderName);
+			newCompileOptions.SetEntry(stage.EntryPoint);
+			newCompileOptions.SetTarget(target);
+			newCompileOptions.AddIncludeDir(temp);
+			newCompileOptions.AddIncludeDir(temp + L"\\public");
+			newCompileOptions.AddIncludeDir(temp + L"\\private");
+
+			for (size_t i = 0; i < keywordSpace->Count(); i++)
+			{
+				if(keywordSet.Bits().test(i))
+				{
+					auto name = keywordSpace->GetName((int)i);
+					newCompileOptions.AddMacro(name);
+				}
+			}
+			auto pszArgs = newCompileOptions.BuildArguments();
+
+			o.StageShaders[stage.ShaderType] = CompileShaderStage(stage.ShaderName, stage.EntryPoint, stage.Target, pszArgs, source);
+			o.MergedReflectionData.Merge(o.StageShaders[stage.ShaderType].ReflectionData);
+		}
+		
+		return o;
 	}
 }

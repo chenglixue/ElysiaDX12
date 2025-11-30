@@ -3,9 +3,13 @@
 #include <private\LightCommon.hlsl>
 #include <private\ShadowCommon.hlsl>
 
-// #pragma Rasterizer RasterizerBackFaceCull
-// #pragma Blend BlendDisable
-// #pragma Depth DepthWritesEnabled
+#pragma Rasterizer RasterizerBackFaceCull
+#pragma Blend BlendDisable
+#pragma Depth DepthWritesEnabled
+
+#pragma shader_feature SHADOW_QUALITY_LOW SHADOW_QUALITY_MIDDLE SHADOW_QUALITY_HIGH SHADOW_QUALITY_VERYHIGH
+#pragma shader_feature HARD_SHADOW SOFT_SHADOW
+
 
 cbuffer ObjectConstant : register(b0, perObjectSpace)
 {
@@ -27,6 +31,8 @@ cbuffer PassConstant : register(b0, perPassSpace)
     float shadowDepthBias;
     float shadowSlopeDepthBias;
     float shadowMaxSlopeDepthBias;
+    UINT shadowQuality;
+    UINT shadowType;
     
     Vector2 g_sobolSequence[64];
 };
