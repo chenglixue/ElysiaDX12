@@ -84,7 +84,7 @@ namespace ElysiaRenderer
 			}
 		};
 
-		m_pMaterial = std::make_unique<RenderMaterial>(m_shaderPasses);
+		m_pMaterial = std::make_unique<Material>(m_shaderPasses);
 		ShaderPasseIDs::AOPassID = m_pMaterial->FindPassIndex("AO Pass");
 		ShaderPasseIDs::BlitPassID = m_pMaterial->FindPassIndex("Blit Pass");
 

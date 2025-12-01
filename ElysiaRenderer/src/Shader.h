@@ -20,15 +20,8 @@ namespace ElysiaRenderer
 		void SetConstantVariable(const size_t hash, const T data, UINT passID = 0);
 		void ApplyConstantData(); 
 
-		const std::unordered_map<std::string, ShaderVariable>& GetShaderVariables() const noexcept
-		{
-			return m_shaderVariables;
-		}
-
 	private:
 		std::mutex m_setDataMutex;
-		std::unordered_map<std::string, ShaderVariable> m_shaderVariables;
-		std::unordered_map<UINT, std::unordered_map<size_t, ShaderConstantVariableDesc>> m_constantVariableDescs;
 		std::vector<PassData> m_passDatas;
 	};
 }

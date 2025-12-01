@@ -12,7 +12,7 @@ namespace ElysiaRenderer
 	class DX12Shader;
 	class DX12RootSignature;
 	class DX12TextureResource;
-	class RenderMaterial;
+	class Material;
 
 	enum class PipelineType : uint8_t
 	{
@@ -30,7 +30,7 @@ namespace ElysiaRenderer
 
 	struct PSODescriptor
 	{
-		RenderMaterial* pRenderMaterial;
+		Material* pRenderMaterial;
 		UINT ShaderPassIndex;
 		RenderTargetDesc RTDesc;
 	};

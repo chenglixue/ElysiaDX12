@@ -60,7 +60,7 @@ namespace std
 namespace ElysiaRenderer
 {
 
-	class RenderMaterial;
+	class Material;
 	struct PipelineStateObject;
 
 	class PSOManager : IManager
@@ -75,11 +75,11 @@ namespace ElysiaRenderer
 		virtual void Init() override;
 		virtual void Destory() override;
 
-		PipelineStateObject* GetGraphicsPipelineState(RenderMaterial* pMaterial, UINT passIndex,
+		PipelineStateObject* GetGraphicsPipelineState(Material* pMaterial, UINT passIndex,
 			const RenderTargetDesc& renderTargetDesc,
 			D3D12_PRIMITIVE_TOPOLOGY_TYPE topology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
 
-		PipelineStateObject* GetComputePipelineState(RenderMaterial* pMaterial, UINT passIndex);
+		PipelineStateObject* GetComputePipelineState(Material* pMaterial, UINT passIndex);
 
 	private:
 		std::unordered_map<D3D12_GRAPHICS_PIPELINE_STATE_DESC, std::unique_ptr<PipelineStateObject>> m_graphicsPipelineStates{};

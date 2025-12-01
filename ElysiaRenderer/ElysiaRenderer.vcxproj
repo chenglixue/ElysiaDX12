@@ -194,7 +194,7 @@
     <ClInclude Include="lib\File\File.h" />
     <ClInclude Include="lib\File\Serialization.h" />
     <ClInclude Include="lib\Model\BoundingBox.h" />
-    <ClInclude Include="lib\Model\Material.h" />
+    <ClInclude Include="lib\Model\MaterialData.h" />
     <ClInclude Include="lib\Model\Mesh.h" />
     <ClInclude Include="lib\Model\ModelImporter.h" />
     <ClInclude Include="lib\Utility\AOUtility.h" />
@@ -264,7 +264,7 @@
     <ClInclude Include="imgui\imstb_truetype.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="SimpleMath\SimpleMath.h" />
-    <ClInclude Include="src\RenderMaterial.h" />
+    <ClInclude Include="src\Material.h" />
     <ClInclude Include="src\RenderResource.h" />
     <ClInclude Include="src\Shader.h" />
     <ClInclude Include="src\Transform.h" />
@@ -4127,7 +4127,7 @@
       <DisableSpecificWarnings>5033;4819;0018;</DisableSpecificWarnings>
       <LinkCompiled>true</LinkCompiled>
     </ClCompile>
-    <ClCompile Include="src\RenderMaterial.cpp">
+    <ClCompile Include="src\Material.cpp">
       <AdditionalIncludeDirectories>C:\Work\ElysiaRenderer\packages\boost.1.87.0\build\..\lib\native\include\;C:\Work\ElysiaRenderer\packages\Microsoft.Direct3D.D3D12.1.618.1\build\native\include;C:\Work\ElysiaRenderer\packages\Microsoft.Direct3D.D3D12.1.618.1\build\native\include\d3dx12;C:\Work\ElysiaRenderer\packages\Microsoft.Direct3D.D3D12.1.618.1\build\native\;C:\Work\ElysiaRenderer\packages\directxtk12_desktop_win10.2025.7.10.1\build\native\..\..\include;C:\Work\ElysiaRenderer\packages\WinPixEventRuntime.1.0.240308001\build\..\Include\WinPixEventRuntime;D:\DX12\ElysiaRenderer\x64\Debug\Shaders;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc\include;D:\DX12\ElysiaDX12\x64\Debug\Assimp\include\assimp;DirectXTK12\Inc;D:\DX12\ElysiaDX12\ElysiaRenderer\AMD\libs\AGS;;C:\Work\ElysiaRenderer\packages\Vcpkg.Nuget.1.5.0\vcpkg_bin\installed\x64-windows\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>

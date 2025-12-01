@@ -78,7 +78,7 @@ namespace ElysiaRenderer
 			},
 		};
 
-		m_pMaterial = std::move(std::make_unique<RenderMaterial>(m_shaderPasses));
+		m_pMaterial = std::move(std::make_unique<Material>(m_shaderPasses));
 		ShaderPasseIDs::GBufferPassID = m_pMaterial->FindPassIndex("GBuffer Pass");
 
 		for (UINT meshIndex = 0; meshIndex < GetModelImporter()->GetMeshCount(); ++meshIndex)

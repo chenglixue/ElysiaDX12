@@ -19,7 +19,6 @@ namespace ElysiaRenderer
 		ShaderType ShaderType;
 		std::wstring ShaderName;	// include file type(such as ".hlsl")
 		std::wstring EntryPoint;
-		std::wstring Target;
 	};
 
 	struct ShaderCreateDesc
@@ -115,17 +114,15 @@ namespace ElysiaRenderer
 		
 		std::unordered_map<ShaderType, ShaderBytecode> StageShaders;
 		ShaderReflectionData MergedReflectionData;
-		
-		std::array<uint8_t, 16> HashDigest;
-		std::wstring PDBName;
-		CComPtr<IDxcBlob> ObjectBlob;
-		CComPtr<IDxcBlob> PDBBlob;
+		std::unique_ptr<PipelineResourceLayout> MeshResourceLayouts;
 	};
 
 	DXGI_FORMAT MaskToFormat(const uint32_t Mask);
 
 	static bool IsUnderlineKeyword(const std::wstring& s);
 
+	std::unordered_map<std::wstring, std::wstring> ParseShaderRenderPragmas(const std::wstring& source);
+	
 	ShaderPragmaInfo ParseShaderPragmas(const std::wstring& source);
 
 	// ShaderCompileOptions BuildOptionsForVariant(

@@ -94,7 +94,7 @@ namespace ElysiaRenderer
 		std::unique_ptr<DX12BufferResource>			CreateBuffer(const BufferCreationDesc& bufferCreationDesc);
 		std::unique_ptr<DX12TextureResource>		CreateTextureFromFile(const TextureCreationDesc& textureCreationDesc);
 		std::unique_ptr<DX12TextureResource>		CreateTexture(const TexCreateDesc& desc);
-		std::unique_ptr<DX12Shader>					CreateShader(ShaderCreateDesc& shaderCreateDesc, const std::vector<std::wstring>& enabledKeywords);
+		std::unique_ptr<DX12Shader>					CreateShader(ShaderCreateDesc& shaderCreateDesc);
 		void										CreateSamplers(D3D12_SHADER_VISIBILITY shaderVisibility = D3D12_SHADER_VISIBILITY_ALL);
 		void										CreateRootParameters(DX12RootSignature* rootSignature, std::vector<DX12RootParameter*>& rootParamters);
 		DX12RootSignature*							CreateRootSignature(const PipelineResourceLayout& resourceLayout, PipelineResourceMapping& resourceMapping);

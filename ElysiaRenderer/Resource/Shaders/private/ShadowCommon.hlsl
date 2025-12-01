@@ -285,7 +285,7 @@ float SampleShadowPCF(in Texture2D shadowMap,
     
 #if defined(HARD_SHADOW)
     o = shadowMap.SampleCmpLevelZero(compShadowSampler, shadowPos.xy, shadowPos.z);
-#else
+#elif defined(SOFT_SHADOW)
     #if defined (SHADOW_QUALITY_LOW)
     o = Manual1x1PCF(shadowPos.xy, shadowPos.z, shadowMap, pointShadowSampler, shadowMapSize);
     #elif defined (SHADOW_QUALITY_MIDDLE)

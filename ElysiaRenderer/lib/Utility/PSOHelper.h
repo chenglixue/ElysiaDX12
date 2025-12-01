@@ -57,8 +57,11 @@ namespace ElysiaHelper
     void InitDepthStencil();
 
     D3D12_BLEND_DESC GetBlendState(BlendState blendState);
-
+    D3D12_BLEND_DESC GetBlendState(std::wstring blendStateName);
+    
     D3D12_RASTERIZER_DESC GetRasterizerState(RasterizerState rasterizerState);
-
+    D3D12_RASTERIZER_DESC GetRasterizerState(std::wstring rasterizerStateName);
+    
     D3D12_DEPTH_STENCIL_DESC GetDepthState(DepthState depthState);
+    D3D12_DEPTH_STENCIL_DESC GetDepthState(std::wstring depthStateName);
 }

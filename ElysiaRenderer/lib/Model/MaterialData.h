@@ -5,7 +5,7 @@ namespace ElysiaModel
 {
 	using namespace SimpleMath;
 
-	struct Material
+	struct MaterialData
 	{
 		Color diffuse;
 		Color emission;

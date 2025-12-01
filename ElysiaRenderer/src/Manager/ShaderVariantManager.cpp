@@ -128,4 +128,9 @@ namespace ElysiaRenderer
             }
         }
     }
+
+    const std::vector<ShaderVariantData>& ShaderVariantManager::GetAllVariants() const noexcept
+    {
+        return m_variants;
+    }
 }

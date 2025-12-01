@@ -29,6 +29,24 @@ namespace ElysiaRenderer
 		return !s.empty() && std::all_of(s.begin(), s.end(), [](wchar_t c) { return c == L'_'; });
 	}
 
+	std::unordered_map<std::wstring, std::wstring> ParseShaderRenderPragmas(const std::wstring& source)
+	{
+		std::unordered_map<std::wstring, std::wstring> o{};
+
+		std::wregex re(LR"(#\s*pragma\s+(Rasterizer|Blend|Depth)\s+(.*))");
+		auto begin = std::wsregex_iterator(source.begin(), source.end(), re);
+		auto end = std::wsregex_iterator();
+
+		for (auto it = begin; it != end; ++it)
+		{
+			std::wstring type = (*it)[1].str(); // Rasterizer / Blend / Depth
+			std::wstring args = (*it)[2].str(); // RasterizerBackFaceCull
+
+			o[type] = args;
+		}
+
+		return o;
+	}
 
 	ShaderPragmaInfo ParseShaderPragmas(const std::wstring& source)
 	{

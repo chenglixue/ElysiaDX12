@@ -78,7 +78,7 @@ namespace ElysiaRenderer
 		}
 #endif // DEBUG
 
-	}
+}
 
 	void DX12Device::InitializeDeviceResources(HWND windowHandle)
 	{
@@ -764,7 +764,7 @@ namespace ElysiaRenderer
 		return newTex;
 	}
 
-	std::unique_ptr<DX12Shader>					DX12Device::CreateShader(ShaderCreateDesc& shaderCreateDesc, const std::vector<std::wstring>& enabledKeywords)
+	std::unique_ptr<DX12Shader>					DX12Device::CreateShader(ShaderCreateDesc& shaderCreateDesc)
 	{
 		/// Enable Debug
 #if defined(_DEBUG)
@@ -809,6 +809,7 @@ namespace ElysiaRenderer
 
 		std::wstring hlslWString = StringToWstring((const char*)Source.Ptr);
 		auto pragmaInfo = ParseShaderPragmas(hlslWString);
+		auto renderStates = ParseShaderRenderPragmas(hlslWString);
 
 		auto pKeywordSpace = std::make_unique<ShaderKeywordSpace>();
 		for (auto& group : pragmaInfo.KeywordGroups)
@@ -832,9 +833,8 @@ namespace ElysiaRenderer
 		auto variants = variantMgr->BuildAllVariants(pragmaInfo);
 		variantMgr->InitializeFromCompiled(variants);
 
-		
-
 		auto o = std::make_unique<DX12Shader>(std::move(variantMgr));
+		o->SetRenderStates(renderStates);
 
 		return o;
 	}
@@ -1478,8 +1478,36 @@ namespace ElysiaRenderer
 			}
 			auto pszArgs = newCompileOptions.BuildArguments();
 
-			o.StageShaders[stage.ShaderType] = CompileShaderStage(stage.ShaderName, stage.EntryPoint, stage.Target, pszArgs, source);
+			o.StageShaders[stage.ShaderType] = CompileShaderStage(stage.ShaderName, stage.EntryPoint, target, pszArgs, source);
 			o.MergedReflectionData.Merge(o.StageShaders[stage.ShaderType].ReflectionData);
+		}
+
+		o.MeshResourceLayouts = std::make_unique<PipelineResourceLayout>();
+		for (auto& shaderVariable : o.MergedReflectionData.cbuffers)
+		{
+			auto currVariable = shaderVariable.second;
+			switch (currVariable.type)
+			{
+			case ShaderReflectionData::ShaderVariable::Type::ConstantBuffer:
+				{
+					BufferCreationDesc bufferDesc
+					{
+						.m_name = stringToLPCWSTR(currVariable.name),
+						.m_size = currVariable.size,
+						.m_viewFlags = GPUResourceFlags::CBV,
+						.m_accessFlags = BufferAccessFlags::HostWritable,
+						.m_isRawAccess = false,
+					};
+					
+					{
+						std::unique_ptr<PipelineResourceSpace> pPipelineResourceSpace = std::make_unique<PipelineResourceSpace>();
+						pPipelineResourceSpace->SetCBVDesc(bufferDesc);
+						o.MeshResourceLayouts->m_spaces[currVariable.spaceID] = pPipelineResourceSpace.release();
+					}
+
+					break;
+				}
+			}
 		}
 		
 		return o;

@@ -39,7 +39,7 @@ namespace ElysiaRenderer
 			},
 		};
 
-		m_pMaterial = std::make_unique<RenderMaterial>(m_shaderPasses);
+		m_pMaterial = std::make_unique<Material>(m_shaderPasses);
 		ShaderPassIDs::BlitPassID = m_pMaterial->FindPassIndex("Blit Pass");
 
 		RenderTargetDesc RTDesc = RenderTargetDesc

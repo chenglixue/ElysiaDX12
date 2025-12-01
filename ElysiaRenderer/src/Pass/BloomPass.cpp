@@ -90,7 +90,7 @@ namespace ElysiaRenderer
 			}*/  
 		};
 		  
-		m_pMaterial = std::make_unique<RenderMaterial>(m_shaderPasses);
+		m_pMaterial = std::make_unique<Material>(m_shaderPasses);
 		ShaderPasseIDs::BloomPassID = m_pMaterial->FindPassIndex("Bloom Pass");
 
 		{

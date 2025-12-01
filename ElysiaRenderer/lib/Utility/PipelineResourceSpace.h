@@ -1,5 +1,6 @@
 #pragma once
 #include "PipelineResourceUtility.h"
+#include "BufferUtility.h"
 
 namespace ElysiaRenderer
 {
@@ -17,10 +18,12 @@ namespace ElysiaRenderer
 		PipelineResourceSpace(PipelineResourceSpace&& rhs) = default;
 		~PipelineResourceSpace() = default;
 
+		const BufferCreationDesc& GetCBVDesc() const noexcept;
 		DX12BufferResource* GetCBV();
 		std::vector<PipelineResourceBinding*>& GetSRVs();
 		std::vector<PipelineResourceBinding*>& GetUAVs();
 
+		void SetCBVDesc(const BufferCreationDesc&);
 		void SetCBV(DX12BufferResource* CBVResource);
 		void SetSRV(PipelineResourceBinding* SRVResource);
 		void SetUAV(PipelineResourceBinding* UAVResource);
@@ -31,6 +34,7 @@ namespace ElysiaRenderer
 	private:
 		UINT GetIndexOfBindingIndex(const std::vector<PipelineResourceBinding*>& bindResources, UINT bindingIndex);
 
+		BufferCreationDesc m_CBVDesc;
 		DX12BufferResource* m_CBV;
 		std::vector<PipelineResourceBinding*> m_SRVs;
 		std::vector<PipelineResourceBinding*> m_UAVs;

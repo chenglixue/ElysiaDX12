@@ -1,6 +1,6 @@
 #pragma once
 #include "Mesh.h"
-#include "Material.h"
+#include "MaterialData.h"
 #include "../DX12/DX12MeshRender.h"
 #include "BoundingBox.h"
 #include "src/Manager/TextureManager.h"
@@ -25,7 +25,7 @@ namespace ElysiaModel
 		const Mesh& GetMesh(UINT meshIndex) const;
 
 		UINT GetMaterialCount() const noexcept;
-		const Material& GetMaterial(UINT materialIndex) const;
+		const MaterialData& GetMaterial(UINT materialIndex) const;
 
 		UINT GetVertexStride() const noexcept;
 
@@ -61,7 +61,7 @@ namespace ElysiaModel
 		TextureManager* m_pTextureManager = nullptr;
 
 		MeshData	m_meshData{};
-		Material*	m_pMaterial = nullptr;
+		MaterialData*	m_pMaterialData = nullptr;
 		Mesh*		m_pMesh = nullptr;
 		MeshRender* m_pMeshRender = nullptr;
 		

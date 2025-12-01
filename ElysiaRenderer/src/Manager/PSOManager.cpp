@@ -2,7 +2,7 @@
 #include "PSOManager.h"
 
 #include "lib/DX12/DX12Device.h"
-#include "RenderMaterial.h"
+#include "Material.h"
 
 namespace ElysiaRenderer
 {
@@ -44,7 +44,7 @@ namespace ElysiaRenderer
 		return emplaceResult.first->second.get();
 	}
 
-	PipelineStateObject* PSOManager::GetGraphicsPipelineState(RenderMaterial* pMaterial, UINT passIndex,
+	PipelineStateObject* PSOManager::GetGraphicsPipelineState(Material* pMaterial, UINT passIndex,
 		const RenderTargetDesc& renderTargetDesc,
 		D3D12_PRIMITIVE_TOPOLOGY_TYPE topology)
 	{
@@ -104,7 +104,7 @@ namespace ElysiaRenderer
 		return pipelineStateObject;
 	}
 
-	PipelineStateObject* PSOManager::GetComputePipelineState(RenderMaterial* pMaterial, UINT passIndex)
+	PipelineStateObject* PSOManager::GetComputePipelineState(Material* pMaterial, UINT passIndex)
 	{
 		auto& passData = pMaterial->GetPassData(passIndex);
 

@@ -9,7 +9,7 @@ namespace ElysiaRenderer
 {
 	using namespace ElysiaHelper;
 
-	class RenderMaterial;
+	class Material;
 
 	class ShadowPass : public BasePass
 	{
@@ -22,6 +22,7 @@ namespace ElysiaRenderer
 		virtual void Execute() override;
 		virtual void Render() override;
 		virtual void UpdatePSO() override;
+		virtual ShaderVariantData UpdateVariant() override;
 
 		virtual void Dispose() override;
 

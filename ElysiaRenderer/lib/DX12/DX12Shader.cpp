@@ -3,57 +3,33 @@
 #include "DX12PipelineState.h"
 #include <d3d12shader.h>    // Shader reflection.
 #include "../Utility/ShaderCompileOptions.h"
+#include "Manager/ShaderVariantManager.h"
 
 namespace ElysiaRenderer
 {
-	DX12Shader::DX12Shader() : 
-		m_shader(nullptr),
-		m_constantBufferVariables(std::unordered_map<std::string, ShaderConstantVariableDesc>())
-	{
-	}
-	DX12Shader::DX12Shader(CComPtr<IDxcBlob> shader) : 
-		m_shader(shader)
-	{
-	}
 	
 	DX12Shader::DX12Shader(std::unique_ptr<ShaderVariantManager> pShaderVariantManager) :
 		m_pShaderVariantManager(std::move(pShaderVariantManager))
 	{
 	}
 
-
-
 	DX12Shader::~DX12Shader()
 	{
-		m_constantBufferVariables.clear();
+		
 	}
 
-	CComPtr<IDxcBlob>& DX12Shader::GetShader()
+	ShaderVariantManager* DX12Shader::GetVariantManager() const noexcept
 	{
-		return m_shader;
+		return m_pShaderVariantManager.get();
 	}
 
-	const std::vector<ShaderVariable>& DX12Shader::GetVariable() const noexcept
+	const std::unordered_map<std::wstring, std::wstring>& DX12Shader::GetRenderStates() const noexcept
 	{
-		return m_variables;
+		return m_renderStates;
 	}
 
-	const std::vector <std::string>& DX12Shader::GetInputElementSemanticNames() const noexcept
+	void DX12Shader::SetRenderStates(const std::unordered_map<std::wstring, std::wstring>& renderStates)
 	{
-		return m_inputElementSemanticNames;
-	}
-	const D3D12_INPUT_LAYOUT_DESC& DX12Shader::GetInputElementDesc() const noexcept
-	{
-		return m_inputLayoutDesc;
-	}
-
-	const std::unordered_map<std::string, ShaderConstantVariableDesc>& DX12Shader::GetConstantBufferVariables() noexcept
-	{
-		return m_constantBufferVariables;
-	}
-
-	const ShaderPragmaInfo& DX12Shader::GetShaderPragmaInfo() const noexcept
-	{
-		return m_shaderPragmaInfo;
+		m_renderStates = renderStates;
 	}
 }

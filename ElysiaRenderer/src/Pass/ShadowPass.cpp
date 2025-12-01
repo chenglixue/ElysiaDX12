@@ -4,9 +4,10 @@
 #include "lib/DX12/DX12Material.h"
 #include "RenderResource.h" 
 #include "lib/Utility/PIXHelper.h"
-#include "RenderMaterial.h"
+#include "Material.h"
 #include "Manager/PSOManager.h"
 #include "lib/Utility/SobolSequenceGenerator.h"
+#include "Manager/ShaderVariantManager.h"
 
 namespace ElysiaRenderer
 {
@@ -53,28 +54,13 @@ namespace ElysiaRenderer
 			{ 
 				.Name = "Shadow Cast Pass",
 				.FilePath = L"Shaders\\public\\Shadow.hlsl",
-				.RasterizerDesc = GetRasterizerState(RasterizerState::BackFaceCull),
-				.BlendDesc = GetBlendState(BlendState::Disabled), 
-				.DepthStencilDesc = GetDepthState(DepthState::WritesEnabled)
 			} 
 		}; 
-		m_pMaterial = std::move(std::make_unique<RenderMaterial>(m_shaderPasses));
+		m_pMaterial = std::move(std::make_unique<Material>(m_shaderPasses));
 		ShaderPasseIDs::ShadowCastPassID = m_pMaterial->FindPassIndex("Shadow Cast Pass");
 
-		for (UINT meshIndex = 0; meshIndex < GetModelImporter()->GetMeshCount(); ++meshIndex)
-		{
-			auto& meshRenderer = GetModelImporter()->GetMeshRenderer(meshIndex);
-
-			for (UINT frameIndex = 0; frameIndex < NUM_FRAMES_IN_FLIGHT; ++frameIndex)
-			{
-				auto objectBufferDesc = m_pMaterial->GetPassData(ShaderPasseIDs::ShadowCastPassID).ObjectBufferDesc;
-				meshRenderer.m_objectBuffers[frameIndex] = std::move(GetDevice()->CreateBuffer(objectBufferDesc));
-
-				auto materialBufferDesc = m_pMaterial->GetPassData(ShaderPasseIDs::ShadowCastPassID).MaterialBufferDesc;
-				meshRenderer.m_materialBuffers[frameIndex] = std::move(GetDevice()->CreateBuffer(materialBufferDesc));
-			}
-		}
-
+		UpdateVariant();
+		
 		{
 			RenderTargetDesc RTDesc = CreateDefaultRenderTargetDesc();
 			RTDesc.m_numRenderTargets = 0;
@@ -85,6 +71,9 @@ namespace ElysiaRenderer
 				emplaceResult.first->second = GetPSOManager()->GetGraphicsPipelineState(m_pMaterial.get(), ShaderPasseIDs::ShadowCastPassID, RTDesc);
 			}
 		}
+
+		
+		
 	}
 	void ShadowPass::Execute()
 	{
@@ -190,12 +179,12 @@ namespace ElysiaRenderer
 
 		m_pCommand->AddBarrier(m_pShadowRT.get(), D3D12_RESOURCE_STATE_DEPTH_READ);
 	}
-
+	
 	void ShadowPass::Dispose()
 	{
 
 	}
-
+	
 	void ShadowPass::CreateMainShadow(float boundSphereRadius, DXGI_FORMAT format)
 	{
 		float resolution;
@@ -248,14 +237,86 @@ namespace ElysiaRenderer
 			m_pMainShadow = std::move(shadowMap);
 		}
 	}
-
+	
 	RenderTexture* ShadowPass::GetShadowRT() const
 	{
 		return m_pShadowRT.get();
 	}
-
+	
 	void ShadowPass::UpdatePSO()
 	{
 		
 	}
+	
+	ShaderVariantData ShadowPass::UpdateVariant()
+	{
+		switch (UserData::GetInstance().shadowQuality)
+		{
+			case ShadowQuality::Low:
+			{
+				m_enableKeywords.emplace_back(L"SHADOW_QUALITY_LOW");
+				break;
+			}
+			case ShadowQuality::Middle:
+			{
+				m_enableKeywords.emplace_back(L"SHADOW_QUALITY_MIDDLE");
+				break;
+			}
+			case ShadowQuality::High:
+			{
+				m_enableKeywords.emplace_back(L"SHADOW_QUALITY_HIGH");
+				break;
+			}
+			case ShadowQuality::VeryHigh:
+			{
+				m_enableKeywords.emplace_back(L"SHADOW_QUALITY_VERYHIGH");
+				break;
+			}
+		}
+		switch (UserData::GetInstance().shadowType)
+		{
+			case ShadowType::Hard:
+			{
+				m_enableKeywords.emplace_back(L"HARD_SHADOW");
+				break;
+			}
+			case ShadowType::Soft:
+			{
+				m_enableKeywords.emplace_back(L"SOFT_SHADOW");
+				break;
+			}
+		}
+		
+		auto VariantManager = m_pMaterial->GetPassData(ShaderPasseIDs::ShadowCastPassID).pShader->GetVariantManager();
+		auto& currVariantData = VariantManager->GetOrCompileVariantByNames(m_enableKeywords);
+
+		if (m_pMaterial->HasMeshRender())
+		{
+			for (UINT meshIndex = 0; meshIndex < GetModelImporter()->GetMeshCount(); ++meshIndex)
+			{
+				auto& meshRenderer = GetModelImporter()->GetMeshRenderer(meshIndex);
+
+				for (UINT frameIndex = 0; frameIndex < NUM_FRAMES_IN_FLIGHT; ++frameIndex)
+				{
+					auto objectBufferDesc = currVariantData.MeshResourceLayouts->m_spaces[PER_OBJECT_SPACE]->GetCBVDesc();
+					if (meshRenderer.m_objectBuffers[frameIndex] &&
+						meshRenderer.m_objectBuffers[frameIndex]->GetResourceDesc().Width != objectBufferDesc.m_size)
+					{
+						meshRenderer.m_objectBuffers[frameIndex].reset();
+						meshRenderer.m_objectBuffers[frameIndex] = std::move(GetDevice()->CreateBuffer(objectBufferDesc));
+					}
+
+					auto materialBufferDesc = currVariantData.MeshResourceLayouts->m_spaces[PER_MATERIAL_SPACE]->GetCBVDesc();
+					if (meshRenderer.m_materialBuffers[frameIndex] &&
+						meshRenderer.m_materialBuffers[frameIndex]->GetResourceDesc().Width != materialBufferDesc.m_size)
+					{
+						meshRenderer.m_materialBuffers[frameIndex].reset();
+						meshRenderer.m_materialBuffers[frameIndex] = std::move(GetDevice()->CreateBuffer(materialBufferDesc));
+					}
+				}
+			}
+		}
+		
+	}
+
 }

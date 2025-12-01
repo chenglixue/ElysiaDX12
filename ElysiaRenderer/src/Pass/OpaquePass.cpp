@@ -51,7 +51,7 @@ namespace ElysiaRenderer
 				.BlendDesc = GetBlendState(BlendState::Disabled),
 				.DepthStencilDesc = GetDepthState(DepthState::Disabled) 
 			});
-		m_pMaterial = std::make_unique<RenderMaterial>(m_shaderPasses);
+		m_pMaterial = std::make_unique<Material>(m_shaderPasses);
 		ShaderPasseIDs::OpaqueLightPassID = m_pMaterial->FindPassIndex("Opaque Light Pass");
 
 		{

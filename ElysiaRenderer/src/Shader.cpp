@@ -9,8 +9,6 @@
 namespace ElysiaRenderer
 {
 	Shader::Shader(std::vector<ShaderPass>& shaderPasses) :
-		m_shaderVariables(),
-		m_constantVariableDescs(),
 		m_passDatas()
 	{
 		m_passDatas.reserve(shaderPasses.size());
@@ -22,120 +20,36 @@ namespace ElysiaRenderer
 			newPassData.PassIndex = passID;
 			newPassData.Name = shaderPasses[passID].Name;
 
-			bool hasCS = shaderPasses[passID].IsComputeShader;
-			
-			// create dx12 shader
-			if (!hasCS)
+			ShaderCreateDesc desc;
+			if (!shaderPasses[passID].IsComputeShader)
 			{
-				ShaderCreateDesc vertexShaderCreateDesc{};
-				vertexShaderCreateDesc.shaderName = shaderPasses[passID].FilePath;
-				vertexShaderCreateDesc.entryPoint = shaderPasses[passID].VertexEntryPoint;
-				vertexShaderCreateDesc.shaderType = ShaderType::Vertex;
-				newPassData.pVSShader = std::move(GetDevice()->CreateShader(vertexShaderCreateDesc));
-
-				ShaderCreateDesc fragmentShaderCreateDesc{};
-				fragmentShaderCreateDesc.shaderName = shaderPasses[passID].FilePath;
-				fragmentShaderCreateDesc.entryPoint = shaderPasses[passID].FragmentEntryPoint;
-				fragmentShaderCreateDesc.shaderType = ShaderType::Pixel;
-				newPassData.pPSShader = std::move(GetDevice()->CreateShader(fragmentShaderCreateDesc));
+				desc.stages = 
+				{
+					ShaderStageDesc
+					{
+						.ShaderType = ShaderType::Vertex,
+						.EntryPoint = shaderPasses[passID].VertexEntryPoint,
+					},
+					ShaderStageDesc
+					{
+						.ShaderType = ShaderType::Pixel,
+						.EntryPoint = shaderPasses[passID].VertexEntryPoint,
+					}
+				};
 			}
 			else
 			{
-				ShaderCreateDesc computeShaderCreateDesc{};
-				computeShaderCreateDesc.shaderName = shaderPasses[passID].FilePath;
-				computeShaderCreateDesc.entryPoint = shaderPasses[passID].ComputeEntryPoint;
-				computeShaderCreateDesc.shaderType = ShaderType::Compute;
-				newPassData.pCSShader = std::move(GetDevice()->CreateShader(computeShaderCreateDesc));
+				desc.stages = 
+				{
+					ShaderStageDesc
+					{
+						.ShaderType = ShaderType::Compute,
+						.EntryPoint = shaderPasses[passID].ComputeEntryPoint,
+					}
+				};
 			}
 
-			// shader reflect
-			if (hasCS)
-			{
-				if (newPassData.pCSShader)
-				{
-					auto shaderVariantData = newPassData.pCSShader->GetShaderVariantDatas();
-					
-					for (auto& CSShaderVariable : newPassData.pCSShader->GetVariable())
-					{
-						auto emplaceResult = m_shaderVariables.try_emplace(CSShaderVariable.name);
-						if (emplaceResult.second)
-						{
-							emplaceResult.first->second = CSShaderVariable;
-						}
-					}
-				}
-			}
-			else
-			{
-				if (newPassData.pVSShader)
-				{
-					for (auto& VSShaderVariable : newPassData.pVSShader->GetVariable())
-					{
-						auto emplaceResult = m_shaderVariables.try_emplace(VSShaderVariable.name);
-						if (emplaceResult.second)
-						{
-							emplaceResult.first->second = VSShaderVariable;
-						}
-					}
-				}
-				if (newPassData.pPSShader)
-				{
-					for (auto& PSShaderVariable : newPassData.pPSShader->GetVariable())
-					{
-						auto emplaceResult = m_shaderVariables.try_emplace(PSShaderVariable.name);
-						if (emplaceResult.second)
-						{
-							emplaceResult.first->second = PSShaderVariable;
-						}
-					}
-				}
-			}
-
-			m_constantVariableDescs.emplace(passID, std::unordered_map<size_t, ShaderConstantVariableDesc>{});
-			if (hasCS)
-			{
-				if (newPassData.pCSShader)
-				{
-					for (auto& CSConstantVariableDesc : newPassData.pCSShader->GetConstantBufferVariables())
-					{
-						auto hash = PropertyToID(CSConstantVariableDesc.first);
-
-						auto& passMap = m_constantVariableDescs[passID];
-						passMap.emplace(hash, CSConstantVariableDesc.second);
-					}
-				}
-			}
-			else
-			{
-				if (newPassData.pVSShader)
-				{
-					for (auto& VSConstantVariableDesc : newPassData.pVSShader->GetConstantBufferVariables())
-					{
-						auto hash = PropertyToID(VSConstantVariableDesc.first);
-
-						auto emplaceresult = m_constantVariableDescs[passID].try_emplace(hash);
-						if (emplaceresult.second)
-						{
-							emplaceresult.first->second = VSConstantVariableDesc.second;
-						}
-					}
-
-				}
-				if (newPassData.pPSShader)
-				{
-					for (auto& PSConstantVariableDesc : newPassData.pPSShader->GetConstantBufferVariables())
-					{
-						auto hash = PropertyToID(PSConstantVariableDesc.first);
-
-						auto emplaceresult = m_constantVariableDescs[passID].try_emplace(hash);
-						if (emplaceresult.second)
-						{
-							emplaceresult.first->second = PSConstantVariableDesc.second;
-						}
-					}
-
-				}
-			}
+			newPassData.pShader = GetDevice()->CreateShader(desc);
 
 			newPassData.MeshResourceLayouts = std::make_unique<PipelineResourceLayout>();
 			// set bind resource for rootsignature

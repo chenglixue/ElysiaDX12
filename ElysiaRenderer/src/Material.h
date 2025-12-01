@@ -3,20 +3,24 @@
 
 #include "lib/Utility/ShaderUtility.h"
 #include "Shader.h"
+#include "lib/Model/ModelImporter.h"
 
 namespace ElysiaRenderer
 {
 	class Shader;
 
-	class RenderMaterial
+	class Material
 	{
 	public:
-		RenderMaterial() = default;
-		RenderMaterial(std::vector<ShaderPass>& shaderPasses);
-		~RenderMaterial() = default;
+		Material() = default;
+		Material(std::vector<ShaderPass>& shaderPasses);
+		Material(std::vector<ShaderPass>& shaderPasses, MeshRender* m_pMeshRender);
+		~Material() = default;
 
+		void Init(std::vector<ShaderPass>& shaderPasses);
 		const PassData& GetPassData(UINT passIndex) const noexcept;
 		const UINT FindPassIndex(const std::string& name) const noexcept;
+		bool HasMeshRender() const noexcept;
 
 		template<typename T>
 		void SetConstantVariable(const std::string& name, T data, UINT passID = 0);
@@ -25,6 +29,8 @@ namespace ElysiaRenderer
 		void ApplyConstantData();
 
 	private:
-		std::unique_ptr<Shader> m_pShader = nullptr;
+		std::mutex m_setDataMutex;
+		std::vector<PassData> m_passDatas;
+		MeshRender* m_pMeshRender;
 	};
 }

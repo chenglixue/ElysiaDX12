@@ -21,6 +21,10 @@ namespace ElysiaRenderer
 		return UINT_MAX;
 	}
 
+	const BufferCreationDesc& PipelineResourceSpace::GetCBVDesc() const noexcept
+	{
+		return m_CBVDesc;
+	}
 	DX12BufferResource* PipelineResourceSpace::GetCBV()
 	{
 		return m_CBV;
@@ -34,6 +38,10 @@ namespace ElysiaRenderer
 		return m_UAVs;
 	}
 
+	void PipelineResourceSpace::SetCBVDesc(const BufferCreationDesc& desc)
+	{
+		m_CBVDesc = desc;
+	}
 
 	void PipelineResourceSpace::SetCBV(DX12BufferResource* CBVResource)
 	{

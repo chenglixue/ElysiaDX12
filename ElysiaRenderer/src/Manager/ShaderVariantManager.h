@@ -35,6 +35,8 @@ namespace ElysiaRenderer
         const ShaderVariantData& GetOrCompileVariantByNames(const std::vector<std::wstring>& enabledNames);
         const ShaderVariantData& GetOrCompileVariant(const ShaderKeywordSet& set);
 
+        const std::vector<ShaderVariantData>& GetAllVariants() const noexcept;
+
     private:
         ShaderKeywordSpace* m_pKeywordSpace;
         std::vector<ShaderVariantData> m_variants;

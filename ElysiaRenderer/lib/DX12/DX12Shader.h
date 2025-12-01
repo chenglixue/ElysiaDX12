@@ -11,31 +11,27 @@ namespace ElysiaRenderer
 	class DX12Shader
 	{
 	public:
-		DX12Shader();
-		DX12Shader(CComPtr<IDxcBlob> shader);
+		DX12Shader() = default;
 		DX12Shader(std::unique_ptr<ShaderVariantManager> );
 		~DX12Shader();
 
-		CComPtr<IDxcBlob>& GetShader();
-		const std::vector<ShaderVariantData>& GetShaderVariantDatas();
-	private:
-		CComPtr<IDxcBlob> m_shader;
+		void SetRenderStates(const std::unordered_map<std::wstring, std::wstring>&);
 
+		const std::unordered_map<std::wstring, std::wstring>& GetRenderStates() const noexcept;
+		ShaderVariantManager* GetVariantManager() const noexcept;
+	private:
 		std::unique_ptr<ShaderVariantManager> m_pShaderVariantManager = nullptr;
+		std::unordered_map<std::wstring, std::wstring> m_renderStates;
 	};
 
 	struct PassData
 	{
 		UINT PassIndex;
 		std::string Name;
-		std::unique_ptr<DX12Shader> pVSShader = nullptr;
-		std::unique_ptr<DX12Shader>	pPSShader = nullptr;
-		std::unique_ptr<DX12Shader>	pCSShader = nullptr;
+		std::unique_ptr<DX12Shader> pShader = nullptr;
 		D3D12_RASTERIZER_DESC		RasterizerDesc;
 		D3D12_BLEND_DESC			BlendDesc;
 		D3D12_DEPTH_STENCIL_DESC	DepthStencilDesc;
 		std::unique_ptr<PipelineResourceLayout> MeshResourceLayouts;
-		BufferCreationDesc			ObjectBufferDesc;
-		BufferCreationDesc			MaterialBufferDesc;
 	};
 }

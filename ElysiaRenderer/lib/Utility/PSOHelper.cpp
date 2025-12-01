@@ -192,6 +192,45 @@ namespace ElysiaHelper
 
         return BlendStateDescs[UINT64(blendState)];
     }
+    D3D12_BLEND_DESC GetBlendState(std::wstring blendStateName)
+    {
+        BlendState blendState;
+        switch (blendStateName)
+        {
+            case L"Disabled":
+            {
+                blendState = BlendState::Disabled;
+                break;
+            }
+            case L"Additive":
+            {
+                blendState = BlendState::Additive;
+                break;
+            }
+            case L"AlphaBlend":
+            {
+                blendState = BlendState::AlphaBlend;
+                break;
+            }
+            case L"PreMultiplied":
+            {
+                blendState = BlendState::PreMultiplied;
+                break;
+            }
+            case L"NoColorWrites":
+            {
+                blendState = BlendState::NoColorWrites;
+                break;
+            }
+            case L"PreMultipliedRGB":
+            {
+                blendState = BlendState::PreMultipliedRGB;
+                break;
+            }
+        }
+
+        return GetBlendState(blendState);
+    }
 
     D3D12_RASTERIZER_DESC GetRasterizerState(RasterizerState rasterizerState)
     {
@@ -199,11 +238,84 @@ namespace ElysiaHelper
 
         return RasterizerStateDescs[UINT64(rasterizerState)];
     }
+    D3D12_RASTERIZER_DESC GetRasterizerState(std::wstring rasterizerStateName)
+    {
+        RasterizerState rasterizerState;
+        switch (rasterizerStateName)
+        {
+            case L"NoCull":
+            {
+                rasterizerState = RasterizerState::NoCull;
+                break;
+            }
+            case L"BackFaceCull":
+            {
+                rasterizerState = RasterizerState::BackFaceCull;
+                break;
+            }
+            case L"BackFaceCullNoZClip":
+            {
+                rasterizerState = RasterizerState::BackFaceCullNoZClip;
+                break;
+            }
+            case L"FrontFaceCull":
+            {
+                rasterizerState = RasterizerState::FrontFaceCull;
+                break;
+            }
+            case L"NoCullNoMS":
+            {
+                rasterizerState = RasterizerState::NoCullNoMS;
+                break;
+            }
+            case L"Wireframe":
+            {
+                rasterizerState = RasterizerState::Wireframe;
+                break;
+            }
+        }
+
+        return GetRasterizerState(rasterizerState);
+    }
 
     D3D12_DEPTH_STENCIL_DESC GetDepthState(DepthState depthState)
     {
         assert(UINT64(depthState) < ArraySize_(DepthStateDescs));
 
         return DepthStateDescs[UINT64(depthState)];
+    }
+    D3D12_DEPTH_STENCIL_DESC GetDepthState(std::wstring depthStateName)
+    {
+        DepthState depthState;
+        switch (depthStateName)
+        {
+            case L"Disabled":
+            {
+                depthState = DepthState::Disabled;
+                break;
+            }
+            case L"Enabled":
+            {
+                depthState = DepthState::Enabled;
+                break;
+            }
+            case L"Reversed":
+            {
+                depthState = DepthState::Reversed;
+                break;
+            }
+            case L"WritesEnabled":
+            {
+                depthState = DepthState::WritesEnabled;
+                break;
+            }
+            case L"ReversedWritesEnabled":
+            {
+                depthState = DepthState::ReversedWritesEnabled;
+                break;
+            }
+        }
+
+        return GetDepthState(depthState);
     }
 }

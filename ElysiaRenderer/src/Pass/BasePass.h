@@ -1,6 +1,6 @@
 #pragma once
 #include "lib/Model//ModelImporter.h"
-#include "RenderMaterial.h"
+#include "Material.h"
 #include "RenderPassData.h"
 #include "Parameter/UserData.h"
 #include "Manager/PSOManager.h"
@@ -29,6 +29,7 @@ namespace ElysiaRenderer
 		virtual void Dispose();
 
 		virtual void UpdatePSO() = 0;
+		virtual ShaderVariantData UpdateVariant() = 0;
 
 	protected:
 		Vector2 m_renderSize;
@@ -36,7 +37,8 @@ namespace ElysiaRenderer
 		DX12Camera* m_pCamera = nullptr;
 
 		std::vector<ShaderPass> m_shaderPasses;
-		std::unique_ptr<RenderMaterial> m_pMaterial = nullptr;
+		std::unique_ptr<Material> m_pMaterial = nullptr;
 		std::unordered_map<UINT, PipelineStateObject*> m_PipelineStateObjects;
+		std::vector<std::wstring> m_enableKeywords;
 	};
 }

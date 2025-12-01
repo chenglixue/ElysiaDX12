@@ -46,10 +46,10 @@ namespace ElysiaModel
 	{
 		return m_meshData.materialCount;
 	}
-	const Material& ModelImporter::GetMaterial(UINT materialIndex) const
+	const MaterialData& ModelImporter::GetMaterial(UINT materialIndex) const
 	{
 		assert(materialIndex < m_meshData.materialCount);
-		return m_pMaterial[materialIndex];
+		return m_pMaterialData[materialIndex];
 	}
 
 	UINT ModelImporter::GetVertexStride() const noexcept
@@ -159,12 +159,12 @@ namespace ElysiaModel
 
 		// load material
 		m_meshData.materialCount = pScene->mNumMaterials;
-		m_pMaterial = new Material[m_meshData.materialCount];
-		memset(m_pMaterial, 0, sizeof(Material) * m_meshData.materialCount);
+		m_pMaterialData = new MaterialData[m_meshData.materialCount];
+		memset(m_pMaterialData, 0, sizeof(MaterialData) * m_meshData.materialCount);
 		for (UINT materialIndex = 0; materialIndex < m_meshData.materialCount; ++materialIndex)
 		{
 			const auto srcMaterial = pScene->mMaterials[materialIndex];
-			auto destMaterial = m_pMaterial + materialIndex;
+			auto destMaterial = m_pMaterialData + materialIndex;
 
 			aiColor3D diffuse(1.0f, 1.0f, 1.0f);
 			aiColor3D specular(1.0f, 1.0f, 1.0f);
@@ -189,16 +189,16 @@ namespace ElysiaModel
 			srcMaterial->Get(AI_MATKEY_SHININESS_STRENGTH, specularIntensity);
 			if (srcMaterial->GetTexture(aiTextureType_DIFFUSE, 0, &texDiffusePath) == aiReturn_SUCCESS)
 			{
-				strncpy_s(destMaterial->texDiffusePath, texDiffusePath.C_Str(), Material::maxTexPath - 1);
+				strncpy_s(destMaterial->texDiffusePath, texDiffusePath.C_Str(), MaterialData::maxTexPath - 1);
 			}
 			if (srcMaterial->GetTexture(aiTextureType_AMBIENT, 0, &texMetallicPath) == aiReturn_SUCCESS)
 			{
-				strncpy_s(destMaterial->texMetallicPath, texMetallicPath.C_Str(), Material::maxTexPath - 1);
+				strncpy_s(destMaterial->texMetallicPath, texMetallicPath.C_Str(), MaterialData::maxTexPath - 1);
 			}
 			if (srcMaterial->GetTexture(aiTextureType_NORMALS, 0, &texNormalPath) == aiReturn_SUCCESS ||
 				srcMaterial->GetTexture(aiTextureType_HEIGHT, 0, &texNormalPath) == aiReturn_SUCCESS)
 			{
-				strncpy_s(destMaterial->texNormalPath, texNormalPath.C_Str(), Material::maxTexPath - 1);
+				strncpy_s(destMaterial->texNormalPath, texNormalPath.C_Str(), MaterialData::maxTexPath - 1);
 			}
 			srcMaterial->Get(AI_MATKEY_TEXTURE(aiTextureType_EMISSIVE, 0), texEmissionPath);
 			srcMaterial->Get(AI_MATKEY_TEXTURE(aiTextureType_LIGHTMAP, 0), texLightmapPath);
@@ -212,13 +212,13 @@ namespace ElysiaModel
 			destMaterial->shininess = shininess;
 			destMaterial->specularIntensity = specularIntensity;
 
-			strncpy_s(destMaterial->texEmissionPath, texEmissionPath.C_Str(), Material::maxTexPath - 1);
-			strncpy_s(destMaterial->texLightmapPath, texLightmapPath.C_Str(), Material::maxTexPath - 1);
-			strncpy_s(destMaterial->texReflectionPath, texReflectionPath.C_Str(), Material::maxTexPath - 1);
+			strncpy_s(destMaterial->texEmissionPath, texEmissionPath.C_Str(), MaterialData::maxTexPath - 1);
+			strncpy_s(destMaterial->texLightmapPath, texLightmapPath.C_Str(), MaterialData::maxTexPath - 1);
+			strncpy_s(destMaterial->texReflectionPath, texReflectionPath.C_Str(), MaterialData::maxTexPath - 1);
 
 			aiString materialName;
 			srcMaterial->Get(AI_MATKEY_NAME, materialName);
-			strncpy_s(destMaterial->name, materialName.C_Str(), Material::maxMaterialName - 1);
+			strncpy_s(destMaterial->name, materialName.C_Str(), MaterialData::maxMaterialName - 1);
 		}
 
 		// load mesh
@@ -396,12 +396,12 @@ namespace ElysiaModel
 		SerializeData(serializer, m_vertexStride);
 
 		m_pMesh = new Mesh[m_meshData.meshCount];
-		m_pMaterial = new Material[m_meshData.materialCount];
+		m_pMaterialData = new MaterialData[m_meshData.materialCount];
 		m_pVertexData = new uint8_t[m_meshData.vertexDataByteSize];
 		m_pIndexData = new uint8_t[m_meshData.indexDataByteSize];
 
 		BulkSerializeArray(serializer, m_pMesh, static_cast<UINT64>(m_meshData.meshCount));
-		BulkSerializeArray(serializer, m_pMaterial, static_cast<UINT64>(m_meshData.materialCount));
+		BulkSerializeArray(serializer, m_pMaterialData, static_cast<UINT64>(m_meshData.materialCount));
 		BulkSerializeArray(serializer, m_pVertexData, static_cast<UINT64>(m_meshData.vertexDataByteSize));
 		BulkSerializeArray(serializer, m_pIndexData, static_cast<UINT64> (m_meshData.vertexDataByteSize));
 
@@ -418,7 +418,7 @@ namespace ElysiaModel
 		SerializeData(serializer, m_vertexStride);
 
 		BulkSerializeArray(serializer, m_pMesh, static_cast<UINT64>(m_meshData.meshCount));
-		BulkSerializeArray(serializer, m_pMaterial, static_cast<UINT64>(m_meshData.materialCount));
+		BulkSerializeArray(serializer, m_pMaterialData, static_cast<UINT64>(m_meshData.materialCount));
 		BulkSerializeArray(serializer, m_pVertexData, static_cast<UINT64>(m_meshData.vertexDataByteSize));
 		BulkSerializeArray(serializer, m_pIndexData, static_cast<UINT64>(m_meshData.vertexDataByteSize));
 
@@ -610,24 +610,24 @@ namespace ElysiaModel
 		 
 		for (UINT materialIndex = 0; materialIndex < m_meshData.materialCount; ++materialIndex)
 		{
-			std::wstring diffusePath = basePath + RemoveExt(m_pMaterial[materialIndex].texDiffusePath);
+			std::wstring diffusePath = basePath + RemoveExt(m_pMaterialData[materialIndex].texDiffusePath);
 			texBufferCreateDesc.texturePath = diffusePath + L".png";
 			texBufferCreateDesc.isSRGB = true;
 			auto diffuseTex = std::move(GetDevice()->CreateTextureFromFile(texBufferCreateDesc));
 			if (diffuseTex != nullptr)
 			{
-				m_pMaterial[materialIndex].diffuseTexIndex = diffuseTex->GetResourceHeapIndex();
+				m_pMaterialData[materialIndex].diffuseTexIndex = diffuseTex->GetResourceHeapIndex();
 			}
 			else
 			{
 				texBufferCreateDesc.texturePath = assetsPath + DefaultWhiteTexturePath;
 				diffuseTex = std::move(GetDevice()->CreateTextureFromFile(texBufferCreateDesc));
 				assert(diffuseTex != nullptr);
-				m_pMaterial[materialIndex].diffuseTexIndex = diffuseTex->GetResourceHeapIndex();
+				m_pMaterialData[materialIndex].diffuseTexIndex = diffuseTex->GetResourceHeapIndex();
 			}
 			m_pTextureManager->AddTextureResource(std::move(diffuseTex));
 
-			std::wstring metallicPath = basePath + RemoveExt(m_pMaterial[materialIndex].texMetallicPath);
+			std::wstring metallicPath = basePath + RemoveExt(m_pMaterialData[materialIndex].texMetallicPath);
 			texBufferCreateDesc.texturePath = metallicPath + L".png";
 			texBufferCreateDesc.isSRGB = true;
 			auto metallicTex = std::move(GetDevice()->CreateTextureFromFile(texBufferCreateDesc));
@@ -638,18 +638,18 @@ namespace ElysiaModel
 			}
 			if (metallicTex != nullptr)
 			{
-				m_pMaterial[materialIndex].metallicTexIndex = metallicTex->GetResourceHeapIndex();
+				m_pMaterialData[materialIndex].metallicTexIndex = metallicTex->GetResourceHeapIndex();
 			}
 			else
 			{
 				texBufferCreateDesc.texturePath = assetsPath + DefaultBlackTexturePath;
 				metallicTex = std::move(GetDevice()->CreateTextureFromFile(texBufferCreateDesc));
 				assert(metallicTex != nullptr);
-				m_pMaterial[materialIndex].metallicTexIndex = metallicTex->GetResourceHeapIndex();
+				m_pMaterialData[materialIndex].metallicTexIndex = metallicTex->GetResourceHeapIndex();
 			}
 			m_pTextureManager->AddTextureResource(std::move(metallicTex));
 
-			std::wstring roughnessPath = basePath + RemoveExt(m_pMaterial[materialIndex].texRoughnessPath);
+			std::wstring roughnessPath = basePath + RemoveExt(m_pMaterialData[materialIndex].texRoughnessPath);
 			texBufferCreateDesc.texturePath = roughnessPath + L".png";
 			texBufferCreateDesc.isSRGB = true;
 			auto roughnessTex = std::move(GetDevice()->CreateTextureFromFile(texBufferCreateDesc));
@@ -660,18 +660,18 @@ namespace ElysiaModel
 			}
 			if (roughnessTex != nullptr)
 			{
-				m_pMaterial[materialIndex].roughnessTexIndex = roughnessTex->GetResourceHeapIndex();
+				m_pMaterialData[materialIndex].roughnessTexIndex = roughnessTex->GetResourceHeapIndex();
 			}
 			else
 			{
 				texBufferCreateDesc.texturePath = assetsPath + DefaultWhiteTexturePath;
 				roughnessTex = std::move(GetDevice()->CreateTextureFromFile(texBufferCreateDesc));
 				assert(roughnessTex != nullptr);
-				m_pMaterial[materialIndex].roughnessTexIndex = roughnessTex->GetResourceHeapIndex();
+				m_pMaterialData[materialIndex].roughnessTexIndex = roughnessTex->GetResourceHeapIndex();
 			}
 			m_pTextureManager->AddTextureResource(std::move(roughnessTex));
 
-			std::wstring normalPath = basePath + RemoveExt(m_pMaterial[materialIndex].texNormalPath);
+			std::wstring normalPath = basePath + RemoveExt(m_pMaterialData[materialIndex].texNormalPath);
 			texBufferCreateDesc.texturePath = normalPath + L".png";
 			texBufferCreateDesc.isSRGB = false;
 			auto normalTex = std::move(GetDevice()->CreateTextureFromFile(texBufferCreateDesc));
@@ -682,12 +682,12 @@ namespace ElysiaModel
 			}
 			if (normalTex != nullptr)
 			{
-				m_pMaterial[materialIndex].normalTexIndex = normalTex->GetResourceHeapIndex();
-				m_pMaterial[materialIndex].hasNormal = true;
+				m_pMaterialData[materialIndex].normalTexIndex = normalTex->GetResourceHeapIndex();
+				m_pMaterialData[materialIndex].hasNormal = true;
 			}
 			else
 			{
-				m_pMaterial[materialIndex].hasNormal = false;
+				m_pMaterialData[materialIndex].hasNormal = false;
 			}
 			m_pTextureManager->AddTextureResource(std::move(normalTex));
 		}
@@ -745,7 +745,7 @@ namespace ElysiaModel
 		printf("material count: %u\n", m_meshData.materialCount);
 		for (uint32_t materialIndex = 0; materialIndex < m_meshData.materialCount; materialIndex++)
 		{
-			//const Material* material = m_pMaterial + materialIndex;
+			//const MaterialData* material = m_pMaterialData + materialIndex;
 			printf("material %u\n", materialIndex);
 		}
 		printf("\n");
@@ -828,11 +828,11 @@ namespace ElysiaModel
 			pCurrMeshRender->m_CBVObjectParameter->opacity = 1.f;
 			pCurrMeshRender->m_CBVObjectParameter->worldMatrix = pCurrMeshRender->m_worldMatrix;
 
-			pCurrMeshRender->m_CBVObjectParameter->baseColorTexIndex = m_pMaterial[meshIndex].diffuseTexIndex;
-			pCurrMeshRender->m_CBVObjectParameter->specularTexIndex = m_pMaterial[meshIndex].specularTexIndex;
-			pCurrMeshRender->m_CBVObjectParameter->normalTexIndex = m_pMaterial[meshIndex].normalTexIndex;
-			pCurrMeshRender->m_CBVObjectParameter->metallicTexIndex = m_pMaterial[meshIndex].metallicTexIndex;
-			pCurrMeshRender->m_CBVObjectParameter->roughnessTexIndex = m_pMaterial[meshIndex].roughnessTexIndex;
+			pCurrMeshRender->m_CBVObjectParameter->baseColorTexIndex = m_pMaterialData[meshIndex].diffuseTexIndex;
+			pCurrMeshRender->m_CBVObjectParameter->specularTexIndex = m_pMaterialData[meshIndex].specularTexIndex;
+			pCurrMeshRender->m_CBVObjectParameter->normalTexIndex = m_pMaterialData[meshIndex].normalTexIndex;
+			pCurrMeshRender->m_CBVObjectParameter->metallicTexIndex = m_pMaterialData[meshIndex].metallicTexIndex;
+			pCurrMeshRender->m_CBVObjectParameter->roughnessTexIndex = m_pMaterialData[meshIndex].roughnessTexIndex;
 
 			//pCurrMeshRender->m_CBVObjectParameter->vertexIndex = m_pBufferManager->GetVertexBuffer()->GetResourceHeapIndex();
 		}
