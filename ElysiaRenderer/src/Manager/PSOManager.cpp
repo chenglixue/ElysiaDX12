@@ -2,7 +2,7 @@
 #include "PSOManager.h"
 
 #include "lib/DX12/DX12Device.h"
-#include "Material.h"
+#include "src/Material.h"
 
 namespace ElysiaRenderer
 {
@@ -22,7 +22,7 @@ namespace ElysiaRenderer
 	{
 
 	}
-
+	
 	PipelineStateObject* PSOManager::GetGraphicsPipelineState(const D3D12_GRAPHICS_PIPELINE_STATE_DESC& PSODesc, DX12RootSignature* pRootSignature)
 	{
 		auto emplaceResult = m_graphicsPipelineStates.try_emplace(PSODesc);
@@ -51,27 +51,27 @@ namespace ElysiaRenderer
 		auto& passData = pMaterial->GetPassData(passIndex);
 
 		auto resourceMapping = PipelineResourceMapping();
-		auto pDX12RootSignature = std::unique_ptr<DX12RootSignature>(GetDevice()->CreateRootSignature(*passData.MeshResourceLayouts, resourceMapping));
+		auto pDX12RootSignature = std::unique_ptr<DX12RootSignature>(GetDevice()->CreateRootSignature(*passData.pCurrVariantData->MeshResourceLayouts, resourceMapping));
 
 		D3D12_GRAPHICS_PIPELINE_STATE_DESC PSODesc{};
 
 		PSODesc.pRootSignature = pDX12RootSignature->GetSignature();
 		PSODesc.VS = D3D12_SHADER_BYTECODE
 		{
-			.pShaderBytecode = passData.pVSShader->GetShader()->GetBufferPointer(),
-			.BytecodeLength = passData.pVSShader->GetShader()->GetBufferSize(),
+			.pShaderBytecode = passData.pCurrVariantData->StageShaders.at(ShaderType::Vertex).bytecode->GetBufferPointer(), //pVSShader->GetShader()->GetBufferPointer(),
+			.BytecodeLength = passData.pCurrVariantData->StageShaders.at(ShaderType::Vertex).bytecode->GetBufferSize(),
 		};
 		PSODesc.PS = D3D12_SHADER_BYTECODE
 		{
-			.pShaderBytecode = passData.pPSShader->GetShader()->GetBufferPointer(),
-			.BytecodeLength = passData.pPSShader->GetShader()->GetBufferSize(),
+			.pShaderBytecode = passData.pCurrVariantData->StageShaders.at(ShaderType::Pixel).bytecode->GetBufferPointer(),
+			.BytecodeLength = passData.pCurrVariantData->StageShaders.at(ShaderType::Pixel).bytecode->GetBufferSize(),
 		};
 
 		PSODesc.BlendState = passData.BlendDesc;
 		PSODesc.RasterizerState = passData.RasterizerDesc;
 		PSODesc.DepthStencilState = passData.DepthStencilDesc;
 		PSODesc.SampleMask = UINT_MAX;
-		PSODesc.InputLayout = passData.pVSShader->GetInputElementDesc();
+		PSODesc.InputLayout = passData.pCurrVariantData->MergedReflectionData.InputLayoutDesc;
 		PSODesc.PrimitiveTopologyType = topology;
 		PSODesc.SampleDesc = DXGI_SAMPLE_DESC
 		{
@@ -109,13 +109,13 @@ namespace ElysiaRenderer
 		auto& passData = pMaterial->GetPassData(passIndex);
 
 		auto resourceMapping = PipelineResourceMapping();
-		auto pDX12RootSignature = std::unique_ptr<DX12RootSignature>(GetDevice()->CreateRootSignature(*passData.MeshResourceLayouts, resourceMapping));
+		auto pDX12RootSignature = std::unique_ptr<DX12RootSignature>(GetDevice()->CreateRootSignature(*passData.pCurrVariantData->MeshResourceLayouts, resourceMapping));
 
 		D3D12_COMPUTE_PIPELINE_STATE_DESC PSODesc{};
 		PSODesc.CS = D3D12_SHADER_BYTECODE
 		{
-			.pShaderBytecode = passData.pCSShader->GetShader()->GetBufferPointer(),
-			.BytecodeLength = passData.pCSShader->GetShader()->GetBufferSize(),
+			.pShaderBytecode = passData.pCurrVariantData->StageShaders.at(ShaderType::Compute).bytecode->GetBufferPointer(),
+			.BytecodeLength = passData.pCurrVariantData->StageShaders.at(ShaderType::Compute).bytecode->GetBufferSize(),
 		};
 		PSODesc.pRootSignature = pDX12RootSignature->GetSignature();
 

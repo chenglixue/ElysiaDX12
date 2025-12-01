@@ -15,6 +15,7 @@
 #include "AMD\libs\AGS\amd_ags.h"
 
 // #include "src/Parameter/UserData.h"
+#include "RenderResource.h"
 #include "lib/Event/Messager.h"
 #include "../Utility/RenderTexture.h"
 #include "Utility/ShaderCompileOptions.h"
@@ -1210,10 +1211,8 @@ namespace ElysiaRenderer
 							constantVariableDesc.SpaceID = spaceID;
 							constantVariableDesc.StartOffset = variableDesc.StartOffset;
 							constantVariableDesc.Size = variableDesc.Size;
-							//constantVariableDesc.pData = new char[constantVariableDesc.Size];
-							constantVariableDesc.pData = std::vector<char>(constantVariableDesc.Size);
 
-							shaderVariables[variableName].members.insert({variableDesc.Name, constantVariableDesc});
+							shaderVariables[variableName].members.emplace_back(std::move(constantVariableDesc));
 						}
 					}
 				}
@@ -1482,6 +1481,8 @@ namespace ElysiaRenderer
 			o.MergedReflectionData.Merge(o.StageShaders[stage.ShaderType].ReflectionData);
 		}
 
+		MergeCBufferLayout CBufferLayout{};
+		size_t globalOffset = 0;
 		o.MeshResourceLayouts = std::make_unique<PipelineResourceLayout>();
 		for (auto& shaderVariable : o.MergedReflectionData.cbuffers)
 		{
@@ -1508,7 +1509,24 @@ namespace ElysiaRenderer
 					break;
 				}
 			}
+			
+			for(auto& member : currVariable.members)
+			{
+				MergeCBufferLayout::CBuffer buffer
+				{
+					.offset = globalOffset + member.StartOffset,
+					.size = member.Size,
+					.hashName = PropertyToID(member.Name),
+					.space = member.SpaceID,
+				};
+				
+				CBufferLayout.variables.emplace(buffer.hashName, buffer);
+			}
+			globalOffset += currVariable.size;
 		}
+		CBufferLayout.totalSize = globalOffset;
+		
+		o.pMergedCBuffer = new UINT8[CBufferLayout.totalSize];
 		
 		return o;
 	}

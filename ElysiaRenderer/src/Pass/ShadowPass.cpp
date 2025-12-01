@@ -4,10 +4,8 @@
 #include "lib/DX12/DX12Material.h"
 #include "RenderResource.h" 
 #include "lib/Utility/PIXHelper.h"
-#include "Material.h"
 #include "Manager/PSOManager.h"
 #include "lib/Utility/SobolSequenceGenerator.h"
-#include "Manager/ShaderVariantManager.h"
 
 namespace ElysiaRenderer
 {
@@ -60,20 +58,6 @@ namespace ElysiaRenderer
 		ShaderPasseIDs::ShadowCastPassID = m_pMaterial->FindPassIndex("Shadow Cast Pass");
 
 		UpdateVariant();
-		
-		{
-			RenderTargetDesc RTDesc = CreateDefaultRenderTargetDesc();
-			RTDesc.m_numRenderTargets = 0;
-			RTDesc.m_depthStencilFormat = GetShadowRT()->GetFormat();
-			auto emplaceResult = m_PipelineStateObjects.try_emplace(ShaderPasseIDs::ShadowCastPassID);
-			if (emplaceResult.second)
-			{
-				emplaceResult.first->second = GetPSOManager()->GetGraphicsPipelineState(m_pMaterial.get(), ShaderPasseIDs::ShadowCastPassID, RTDesc);
-			}
-		}
-
-		
-		
 	}
 	void ShadowPass::Execute()
 	{
@@ -83,16 +67,7 @@ namespace ElysiaRenderer
 		GetRenderResource()->GetCBVFrameVariable()->shadowMatrix = m_pMainShadow->GetShadowMat();
 		GetRenderResource()->GetCBVFrameVariable()->shadowSize = GetScreenSize(Vector2(m_pMainShadow->GetWidth(), m_pMainShadow->GetHeight()));
 
-		m_pMaterial->SetConstantVariable(ShaderIDs::shadowNearZ, m_pMainShadow->GetNearZ());
-		m_pMaterial->SetConstantVariable(ShaderIDs::shadowFarZ, m_pMainShadow->GetFarZ());
-		m_pMaterial->SetConstantVariable(ShaderIDs::shadowDepthBias, UserData::GetInstance().shadowDepthBias / 100);
-		m_pMaterial->SetConstantVariable(ShaderIDs::shadowSlopeDepthBias, UserData::GetInstance().shadowSlopeDepthBias / 100);
-		m_pMaterial->SetConstantVariable(ShaderIDs::shadowMaxSlopeDepthBias, UserData::GetInstance().shadowMaxSlopeDepthBias / 100);
-
 		auto sobolSequence = Create2DSobolSqeuence(64);
-		m_pMaterial->SetConstantVariable(ShaderIDs::g_sobolSequence, sobolSequence);
-
-		m_pMaterial->ApplyConstantData();
 	}
 	void ShadowPass::Render()
 	{
@@ -125,58 +100,47 @@ namespace ElysiaRenderer
 			m_pCommand->SetViewport(m_pMainShadow->GetViewport());
 			m_pCommand->SetScissorRect(m_pMainShadow->GetScissorRect());
 			m_pCommand->SetPipeline(pipelineStateData);
-
-			auto pMeshResourceLayouts = std::make_unique<PipelineResourceLayout>();
 			
-			m_pCommand->SetPipelineResource(PER_PASS_SPACE, m_pMaterial->GetPassData(ShaderPasseIDs::ShadowCastPassID).MeshResourceLayouts->m_spaces[PER_PASS_SPACE]);
-			m_pCommand->SetPipelineResource(PER_FRAME_SPACE, GetRenderResource()->GetPerFrameBindResourceSpace());
+			auto& shadowPassData = m_pMaterial->GetPassData(ShaderPasseIDs::ShadowCastPassID);
+			m_pCommand->SetPipelineResource(PER_PASS_SPACE, shadowPassData.pCurrVariantData->MeshResourceLayouts->m_spaces[PER_PASS_SPACE]);
+			m_pCommand->SetPipelineResource(PER_FRAME_SPACE, shadowPassData.pCurrVariantData->MeshResourceLayouts->m_spaces[PER_FRAME_SPACE]);
 
 			UINT vertexStride = GetModelImporter()->GetVertexStride();
 
-			for (UINT meshIndex = 0; meshIndex < GetModelImporter()->GetMeshCount(); ++meshIndex)
+			if(m_pMaterial->HasMeshRender())
 			{
-				const auto& meshRenderer = GetModelImporter()->GetMeshRenderer(meshIndex);
-				const auto& mesh = meshRenderer.m_mesh;
-
+				for (UINT meshIndex = 0; meshIndex < GetModelImporter()->GetMeshCount(); ++meshIndex)
 				{
-					std::unique_ptr<PipelineResourceSpace> pPipelineResourceSpace = std::make_unique<PipelineResourceSpace>();
-					pPipelineResourceSpace->SetCBV(meshRenderer.m_objectBuffers[GetDevice()->GetFrameID()].get());
-					pPipelineResourceSpace->Lock();
-					if (m_pMaterial->GetPassData(ShaderPasseIDs::ShadowCastPassID).MeshResourceLayouts->m_spaces[PER_OBJECT_SPACE] != nullptr)
+					const auto& meshRenderer = GetModelImporter()->GetMeshRenderer(meshIndex);
+					const auto& mesh = meshRenderer.m_mesh;
+					const auto& passData = m_pMaterial->GetPassData(ShaderPasseIDs::ShadowCastPassID);
+					
 					{
-						delete m_pMaterial->GetPassData(ShaderPasseIDs::ShadowCastPassID).MeshResourceLayouts->m_spaces[PER_OBJECT_SPACE];
-						m_pMaterial->GetPassData(ShaderPasseIDs::ShadowCastPassID).MeshResourceLayouts->m_spaces[PER_OBJECT_SPACE] = nullptr;
+						auto objectSpace = passData.pCurrVariantData->MeshResourceLayouts->m_spaces[PER_OBJECT_SPACE];
+						objectSpace->SetCBV(meshRenderer.m_objectBuffers[GetDevice()->GetFrameID()].get());
+						objectSpace->Lock();
+						
+						m_pCommand->SetPipelineResource(PER_OBJECT_SPACE, objectSpace);
 					}
-					m_pMaterial->GetPassData(ShaderPasseIDs::ShadowCastPassID).MeshResourceLayouts->m_spaces[PER_OBJECT_SPACE] = pPipelineResourceSpace.release();
-					m_pMaterial->SetConstantVariable(ShaderIDs::worldMatrix, meshRenderer.m_CBVObjectParameter->worldMatrix);
-					m_pMaterial->ApplyConstantData();
-					m_pCommand->SetPipelineResource(PER_OBJECT_SPACE, m_pMaterial->GetPassData(ShaderPasseIDs::ShadowCastPassID).MeshResourceLayouts->m_spaces[PER_OBJECT_SPACE]);
-				}
 
-				{
-					std::unique_ptr<PipelineResourceSpace> pPipelineResourceSpace = std::make_unique<PipelineResourceSpace>();
-					pPipelineResourceSpace->SetCBV(meshRenderer.m_materialBuffers[GetDevice()->GetFrameID()].get());
-					pPipelineResourceSpace->Lock();
-					if (m_pMaterial->GetPassData(ShaderPasseIDs::ShadowCastPassID).MeshResourceLayouts->m_spaces[PER_MATERIAL_SPACE] != nullptr)
 					{
-						delete m_pMaterial->GetPassData(ShaderPasseIDs::ShadowCastPassID).MeshResourceLayouts->m_spaces[PER_MATERIAL_SPACE];
-						m_pMaterial->GetPassData(ShaderPasseIDs::ShadowCastPassID).MeshResourceLayouts->m_spaces[PER_MATERIAL_SPACE] = nullptr;
+						auto materialSpace = passData.pCurrVariantData->MeshResourceLayouts->m_spaces[PER_MATERIAL_SPACE];
+						materialSpace->SetCBV(meshRenderer.m_materialBuffers[GetDevice()->GetFrameID()].get());
+						materialSpace->Lock();
+						m_pCommand->SetPipelineResource(PER_MATERIAL_SPACE, materialSpace);
 					}
-					m_pMaterial->GetPassData(ShaderPasseIDs::ShadowCastPassID).MeshResourceLayouts->m_spaces[PER_MATERIAL_SPACE] = pPipelineResourceSpace.release();
 
-					m_pMaterial->SetConstantVariable(ShaderIDs::baseColorTexIndex, meshRenderer.m_CBVObjectParameter->baseColorTexIndex);
-					m_pMaterial->SetConstantVariable(ShaderIDs::opacity, meshRenderer.m_CBVObjectParameter->opacity);
-					m_pMaterial->SetConstantVariable(ShaderIDs::cutoff, meshRenderer.m_CBVObjectParameter->cutoff);
-					m_pMaterial->ApplyConstantData();
-					m_pCommand->SetPipelineResource(PER_MATERIAL_SPACE, m_pMaterial->GetPassData(ShaderPasseIDs::ShadowCastPassID).MeshResourceLayouts->m_spaces[PER_MATERIAL_SPACE]);
+					auto startIndex = mesh->indexDataOffset / sizeof(UINT16);
+					auto startVertex = mesh->vertexDataOffset / vertexStride;
+					auto VertexCount = mesh->vertexCount;
+					auto indexCount = mesh->indexCount;
+
+					m_pCommand->Draw(indexCount, startVertex, static_cast<UINT>(startIndex));
 				}
-
-				auto startIndex = mesh->indexDataOffset / sizeof(UINT16);
-				auto startVertex = mesh->vertexDataOffset / vertexStride;
-				auto VertexCount = mesh->vertexCount;
-				auto indexCount = mesh->indexCount;
-
-				m_pCommand->Draw(indexCount, startVertex, static_cast<UINT>(startIndex));
+			}
+			else
+			{
+				m_pCommand->DrawFullScreenTriangle();
 			}
 		}
 
@@ -253,50 +217,86 @@ namespace ElysiaRenderer
 	
 	ShaderVariantData ShadowPass::UpdateVariant()
 	{
+		UpdateShadowPassVariant();
+	}
+
+	void ShadowPass::UpdateShadowPassVariant()
+	{
+		UINT passIndex = ShaderPasseIDs::ShadowCastPassID;
+		std::vector<std::wstring> enableKeywords{};
+		
 		switch (UserData::GetInstance().shadowQuality)
 		{
 			case ShadowQuality::Low:
-			{
-				m_enableKeywords.emplace_back(L"SHADOW_QUALITY_LOW");
-				break;
-			}
+				{
+					enableKeywords.emplace_back(L"SHADOW_QUALITY_LOW");
+					break;
+				}
 			case ShadowQuality::Middle:
-			{
-				m_enableKeywords.emplace_back(L"SHADOW_QUALITY_MIDDLE");
-				break;
-			}
+				{
+					enableKeywords.emplace_back(L"SHADOW_QUALITY_MIDDLE");
+					break;
+				}
 			case ShadowQuality::High:
-			{
-				m_enableKeywords.emplace_back(L"SHADOW_QUALITY_HIGH");
-				break;
-			}
+				{
+					enableKeywords.emplace_back(L"SHADOW_QUALITY_HIGH");
+					break;
+				}
 			case ShadowQuality::VeryHigh:
-			{
-				m_enableKeywords.emplace_back(L"SHADOW_QUALITY_VERYHIGH");
-				break;
-			}
+				{
+					enableKeywords.emplace_back(L"SHADOW_QUALITY_VERYHIGH");
+					break;
+				}
 		}
 		switch (UserData::GetInstance().shadowType)
 		{
 			case ShadowType::Hard:
-			{
-				m_enableKeywords.emplace_back(L"HARD_SHADOW");
-				break;
-			}
+				{
+					enableKeywords.emplace_back(L"HARD_SHADOW");
+					break;
+				}
 			case ShadowType::Soft:
-			{
-				m_enableKeywords.emplace_back(L"SOFT_SHADOW");
-				break;
-			}
+				{
+					enableKeywords.emplace_back(L"SOFT_SHADOW");
+					break;
+				}
 		}
 		
-		auto VariantManager = m_pMaterial->GetPassData(ShaderPasseIDs::ShadowCastPassID).pShader->GetVariantManager();
-		auto& currVariantData = VariantManager->GetOrCompileVariantByNames(m_enableKeywords);
-
-		if (currVariantData.MeshResourceLayouts->m_spaces[PER_PASS_SPACE] != nullptr)
+		auto& passData = m_pMaterial->GetPassData(passIndex);
+		
+		auto emplaceResult = passData.keywords.try_emplace(enableKeywords);
+		if(emplaceResult.second)
 		{
-			m_pPassConstantBuffer = std::make_unique<DX12BufferResource>()
+			auto VariantManager = passData.pShader->GetVariantManager();
+			auto currVariantData = &VariantManager->GetOrCompileVariantByNames(enableKeywords);
+			
+			if(m_pMaterial->GetCurrVariantData() == nullptr || m_pMaterial->GetCurrVariantData() != currVariantData)
+			{
+				m_pMaterial->SetCurrVariantData(currVariantData);
+				m_pMaterial->SetPipelineResourceLayout(currVariantData->MeshResourceLayouts.get());
+			}
+			
+			{
+				RenderTargetDesc RTDesc = CreateDefaultRenderTargetDesc();
+				RTDesc.m_numRenderTargets = 0;
+				RTDesc.m_depthStencilFormat = GetShadowRT()->GetFormat();
+				
+				passData.pPipelineStateObject = GetPSOManager()->GetGraphicsPipelineState(m_pMaterial.get(), ShaderPasseIDs::ShadowCastPassID, RTDesc);
+				
+				emplaceResult.first->second = 
+				{
+					.pPipelineStateObject = passData.pPipelineStateObject,
+					.pCurrVariantData = currVariantData
+				};
+			}
 		}
+		else
+		{
+			passData.pCurrVariantData = passData.keywords.at(enableKeywords).pCurrVariantData;
+			passData.pPipelineStateObject = passData.keywords.at(enableKeywords).pPipelineStateObject;
+		}
+		
+		
 	}
-
+	
 }

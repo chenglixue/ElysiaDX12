@@ -72,7 +72,7 @@ namespace ElysiaRenderer
 		}
 	}
 
-	const PassData& Material::GetPassData(UINT passIndex) const noexcept
+	PassData& Material::GetPassData(UINT passIndex)  noexcept
 	{
 		return m_passDatas.at(passIndex);
 	}
@@ -110,6 +110,10 @@ namespace ElysiaRenderer
 						meshRenderer.m_objectBuffers[frameIndex].reset();
 						meshRenderer.m_objectBuffers[frameIndex] = std::move(GetDevice()->CreateBuffer(objectBufferDesc));
 					}
+					else if(meshRenderer.m_objectBuffers[frameIndex] == nullptr)
+					{
+						meshRenderer.m_objectBuffers[frameIndex] = std::move(GetDevice()->CreateBuffer(objectBufferDesc));
+					}
 
 					auto materialBufferDesc = pPipelineResourceLayout->m_spaces[PER_MATERIAL_SPACE]->GetCBVDesc();
 					if (meshRenderer.m_materialBuffers[frameIndex] &&
@@ -118,57 +122,53 @@ namespace ElysiaRenderer
 						meshRenderer.m_materialBuffers[frameIndex].reset();
 						meshRenderer.m_materialBuffers[frameIndex] = std::move(GetDevice()->CreateBuffer(materialBufferDesc));
 					}
+					else if(meshRenderer.m_materialBuffers[frameIndex] == nullptr)
+					{
+						meshRenderer.m_materialBuffers[frameIndex] = std::move(GetDevice()->CreateBuffer(materialBufferDesc));
+					}
 				}
 			}
 		}
 
 		if (pPipelineResourceLayout->m_spaces[PER_PASS_SPACE] != nullptr)
 		{
+			const auto& desc = pPipelineResourceLayout->m_spaces[PER_PASS_SPACE]->GetCBVDesc();
+			if(m_pPassConstantBuffer != nullptr && m_pPassConstantBuffer->GetResourceDesc().Width != desc.m_size)
+			{
+				m_pPassConstantBuffer.reset();
+				m_pPassConstantBuffer = std::move(GetDevice()->CreateBuffer(desc));
+			}
+			else if(m_pPassConstantBuffer == nullptr)
+			{
+				m_pPassConstantBuffer = std::move(GetDevice()->CreateBuffer(desc));
+			}
 			
 		}
-	}
-
-	template<typename T>
-	void Material::SetConstantVariable(const std::string& name, T data, UINT passID)
-	{
-		m_pShader->SetConstantVariable(name, data, passID);
+		
+		if(pPipelineResourceLayout->m_spaces[PER_FRAME_SPACE] != nullptr)
+		{
+			const auto& desc = pPipelineResourceLayout->m_spaces[PER_FRAME_SPACE]->GetCBVDesc();
+			if(m_pFrameConstantBuffer != nullptr && m_pFrameConstantBuffer->GetResourceDesc().Width != desc.m_size)
+			{
+				m_pFrameConstantBuffer.reset();
+				m_pFrameConstantBuffer = std::move(GetDevice()->CreateBuffer(desc));
+			}
+			else if(m_pFrameConstantBuffer == nullptr)
+			{
+				m_pFrameConstantBuffer = std::move(GetDevice()->CreateBuffer(desc));
+			}
+		}
 	}
 	
-	template<typename T>
-	void Material::SetConstantVariable(const size_t hash, T data, UINT passID)
+	void Material::SetCurrVariantData(const ShaderVariantData* pCurrVariantData)
 	{
-		m_pShader->SetConstantVariable(hash, data, passID);
+		assert(pCurrVariantData != nullptr);
+		m_pCurrVariantData = pCurrVariantData;
 	}
-	void Material::ApplyConstantData() 
+	
+	const ShaderVariantData* Material::GetCurrVariantData() const
 	{
-		m_pShader->ApplyConstantData();
+		return m_pCurrVariantData;
 	}
-
-	template void Material::SetConstantVariable<UINT>(const std::string&, UINT, UINT passID);
-	template void Material::SetConstantVariable<int>(const std::string&, int, UINT passID);
-	template void Material::SetConstantVariable<float>(const std::string&, float, UINT passID);
-	template void Material::SetConstantVariable<Vector2>(const std::string&, Vector2, UINT passID);
-	template void Material::SetConstantVariable<Vector3>(const std::string&, Vector3, UINT passID);
-	template void Material::SetConstantVariable<Vector4>(const std::string&, Vector4, UINT passID);
-	template void Material::SetConstantVariable<Matrix>(const std::string&, Matrix, UINT passID);
-	template void Material::SetConstantVariable<math::Matrix4>(const std::string&, math::Matrix4, UINT passID);
-	template void Material::SetConstantVariable<bool>(const std::string&, bool, UINT passID);
-	template void Material::SetConstantVariable<std::vector<Vector2>>(const std::string&, std::vector<Vector2>, UINT passID);
-	template void Material::SetConstantVariable<std::vector<Vector3>>(const std::string&, std::vector<Vector3>, UINT passID);
-	template void Material::SetConstantVariable<std::vector<Vector4>>(const std::string&, std::vector<Vector4>, UINT passID);
-	template void Material::SetConstantVariable<std::vector<UINT>>(const std::string&, std::vector<UINT>, UINT passID);
-
-	template void Material::SetConstantVariable<UINT>(const size_t, UINT, UINT passID);
-	template void Material::SetConstantVariable<int>(const size_t, int, UINT passID);
-	template void Material::SetConstantVariable<float>(const size_t, float, UINT passID);
-	template void Material::SetConstantVariable<Vector2>(const size_t, Vector2, UINT passID);
-	template void Material::SetConstantVariable<Vector3>(const size_t, Vector3, UINT passID);
-	template void Material::SetConstantVariable<Vector4>(const size_t, Vector4, UINT passID);
-	template void Material::SetConstantVariable<Matrix>(const size_t, Matrix, UINT passID);
-	template void Material::SetConstantVariable<math::Matrix4>(const size_t, math::Matrix4, UINT passID);
-	template void Material::SetConstantVariable<bool>(const size_t, bool, UINT passID);
-	template void Material::SetConstantVariable<std::vector<Vector2>>(const size_t, std::vector<Vector2>, UINT passID);
-	template void Material::SetConstantVariable<std::vector<Vector3>>(const size_t, std::vector<Vector3>, UINT passID);
-	template void Material::SetConstantVariable<std::vector<Vector4>>(const size_t, std::vector<Vector4>, UINT passID);
-	template void Material::SetConstantVariable<std::vector<UINT>>(const size_t, std::vector<UINT>, UINT passID);
+	
 }

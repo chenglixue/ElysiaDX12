@@ -1,11 +1,13 @@
 #pragma once
 #include "lib/Model//ModelImporter.h"
-#include "Material.h"
+#include "src/Material.h"
 #include "RenderPassData.h"
 #include "Parameter/UserData.h"
 #include "Manager/PSOManager.h"
 #include "lib/DX12/DX12Camera.h"
 #include "lib/Utility/PIXHelper.h"
+#include "Manager/ShaderVariantManager.h"
+
 
 namespace ElysiaRenderer
 {
@@ -39,6 +41,5 @@ namespace ElysiaRenderer
 		std::vector<ShaderPass> m_shaderPasses;
 		std::unique_ptr<Material> m_pMaterial = nullptr;
 		std::unordered_map<UINT, PipelineStateObject*> m_PipelineStateObjects;
-		std::vector<std::wstring> m_enableKeywords;
 	};
 }

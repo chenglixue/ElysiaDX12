@@ -7,7 +7,7 @@
 
 namespace ElysiaRenderer
 {
-	enum class ShaderType : uint8_t
+	enum class ShaderType : UINT
 	{
 		Vertex = 0,
 		Pixel = 1,
@@ -60,8 +60,7 @@ namespace ElysiaRenderer
 			UINT		SpaceID = 0;
 			UINT        StartOffset;    // Offset in constant buffer's backing store
 			UINT        Size;           // Size of variable (in bytes)
-			bool		IsDirty = false;
-			std::vector<char> 	pData;
+			std::string	Name;
 		};
 
 		struct ShaderVariable
@@ -78,7 +77,7 @@ namespace ElysiaRenderer
 			UINT spaceID = 0;
 			std::string name;
 			UINT size = 0;
-			std::unordered_map<std::string, ShaderConstantVariableDesc> members;
+			std::vector<ShaderConstantVariableDesc> members;
 		};
 		
 		std::unordered_map<std::string, ShaderVariable> cbuffers;
@@ -115,6 +114,21 @@ namespace ElysiaRenderer
 		std::unordered_map<ShaderType, ShaderBytecode> StageShaders;
 		ShaderReflectionData MergedReflectionData;
 		std::unique_ptr<PipelineResourceLayout> MeshResourceLayouts;
+		uint8_t* pMergedCBuffer = nullptr;
+	};
+	
+	struct MergeCBufferLayout
+	{
+		size_t totalSize = 0;
+		struct CBuffer
+		{
+			size_t offset;       // global offset
+			size_t size;
+			size_t hashName;       // name hash
+			uint32_t space;      // register space
+		};
+		
+		std::unordered_map<uint32_t, CBuffer> variables;
 	};
 
 	DXGI_FORMAT MaskToFormat(const uint32_t Mask);

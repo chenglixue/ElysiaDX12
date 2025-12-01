@@ -23,6 +23,18 @@ namespace xxh
 		}
 	}
 
+	inline size_t GetHash(std::vector<std::wstring> data)
+	{
+		auto size = data.size() * sizeof(std::wstring);
+		if(size < 32)
+		{
+			return xxh::xxhash_gethash_small(data.data(), size);
+		}
+		else
+		{
+			return xxh::xxhash_gethash(data.data(), size);
+		}
+	}
 
 	inline size_t GetHash(const void* data, size_t size)
 	{

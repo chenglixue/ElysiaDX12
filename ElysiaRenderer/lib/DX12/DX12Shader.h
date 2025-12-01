@@ -24,14 +24,5 @@ namespace ElysiaRenderer
 		std::unordered_map<std::wstring, std::wstring> m_renderStates;
 	};
 
-	struct PassData
-	{
-		UINT PassIndex;
-		std::string Name;
-		std::unique_ptr<DX12Shader> pShader = nullptr;
-		D3D12_RASTERIZER_DESC		RasterizerDesc;
-		D3D12_BLEND_DESC			BlendDesc;
-		D3D12_DEPTH_STENCIL_DESC	DepthStencilDesc;
-		std::unique_ptr<PipelineResourceLayout> MeshResourceLayouts;
-	};
+	
 }
