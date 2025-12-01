@@ -9,6 +9,8 @@
 
 namespace ElysiaRenderer
 {
+	using namespace ElysiaModel;
+	
 	Material::Material(std::vector<ShaderPass>& shaderPasses)
 	{
 		Init(shaderPasses);
@@ -89,6 +91,41 @@ namespace ElysiaRenderer
 	bool Material::HasMeshRender() const noexcept
 	{
 		return m_pMeshRender != nullptr;
+	}
+
+	void Material::SetPipelineResourceLayout(PipelineResourceLayout* pPipelineResourceLayout)
+	{
+		if (HasMeshRender())
+		{
+			for (UINT meshIndex = 0; meshIndex < GetModelImporter()->GetMeshCount(); ++meshIndex)
+			{
+				auto& meshRenderer = m_pMeshRender[meshIndex];
+
+				for (UINT frameIndex = 0; frameIndex < NUM_FRAMES_IN_FLIGHT; ++frameIndex)
+				{
+					auto objectBufferDesc = pPipelineResourceLayout->m_spaces[PER_OBJECT_SPACE]->GetCBVDesc();
+					if (meshRenderer.m_objectBuffers[frameIndex] &&
+						meshRenderer.m_objectBuffers[frameIndex]->GetResourceDesc().Width != objectBufferDesc.m_size)
+					{
+						meshRenderer.m_objectBuffers[frameIndex].reset();
+						meshRenderer.m_objectBuffers[frameIndex] = std::move(GetDevice()->CreateBuffer(objectBufferDesc));
+					}
+
+					auto materialBufferDesc = pPipelineResourceLayout->m_spaces[PER_MATERIAL_SPACE]->GetCBVDesc();
+					if (meshRenderer.m_materialBuffers[frameIndex] &&
+						meshRenderer.m_materialBuffers[frameIndex]->GetResourceDesc().Width != materialBufferDesc.m_size)
+					{
+						meshRenderer.m_materialBuffers[frameIndex].reset();
+						meshRenderer.m_materialBuffers[frameIndex] = std::move(GetDevice()->CreateBuffer(materialBufferDesc));
+					}
+				}
+			}
+		}
+
+		if (pPipelineResourceLayout->m_spaces[PER_PASS_SPACE] != nullptr)
+		{
+			
+		}
 	}
 
 	template<typename T>

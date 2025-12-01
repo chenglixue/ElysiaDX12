@@ -28,9 +28,13 @@ namespace ElysiaRenderer
 		void SetConstantVariable(const size_t hash, T data, UINT passID = 0);
 		void ApplyConstantData();
 
+		void SetPipelineResourceLayout(PipelineResourceLayout* pPipelineResourceLayout);
+
 	private:
 		std::mutex m_setDataMutex;
 		std::vector<PassData> m_passDatas;
 		MeshRender* m_pMeshRender;
+		std::unique_ptr<DX12BufferResource> m_pPassConstantBuffer;
+		std::unique_ptr<DX12BufferResource> m_pFrameConstantBuffer;
 	};
 }

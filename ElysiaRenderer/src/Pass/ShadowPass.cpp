@@ -125,6 +125,9 @@ namespace ElysiaRenderer
 			m_pCommand->SetViewport(m_pMainShadow->GetViewport());
 			m_pCommand->SetScissorRect(m_pMainShadow->GetScissorRect());
 			m_pCommand->SetPipeline(pipelineStateData);
+
+			auto pMeshResourceLayouts = std::make_unique<PipelineResourceLayout>();
+			
 			m_pCommand->SetPipelineResource(PER_PASS_SPACE, m_pMaterial->GetPassData(ShaderPasseIDs::ShadowCastPassID).MeshResourceLayouts->m_spaces[PER_PASS_SPACE]);
 			m_pCommand->SetPipelineResource(PER_FRAME_SPACE, GetRenderResource()->GetPerFrameBindResourceSpace());
 
@@ -290,33 +293,10 @@ namespace ElysiaRenderer
 		auto VariantManager = m_pMaterial->GetPassData(ShaderPasseIDs::ShadowCastPassID).pShader->GetVariantManager();
 		auto& currVariantData = VariantManager->GetOrCompileVariantByNames(m_enableKeywords);
 
-		if (m_pMaterial->HasMeshRender())
+		if (currVariantData.MeshResourceLayouts->m_spaces[PER_PASS_SPACE] != nullptr)
 		{
-			for (UINT meshIndex = 0; meshIndex < GetModelImporter()->GetMeshCount(); ++meshIndex)
-			{
-				auto& meshRenderer = GetModelImporter()->GetMeshRenderer(meshIndex);
-
-				for (UINT frameIndex = 0; frameIndex < NUM_FRAMES_IN_FLIGHT; ++frameIndex)
-				{
-					auto objectBufferDesc = currVariantData.MeshResourceLayouts->m_spaces[PER_OBJECT_SPACE]->GetCBVDesc();
-					if (meshRenderer.m_objectBuffers[frameIndex] &&
-						meshRenderer.m_objectBuffers[frameIndex]->GetResourceDesc().Width != objectBufferDesc.m_size)
-					{
-						meshRenderer.m_objectBuffers[frameIndex].reset();
-						meshRenderer.m_objectBuffers[frameIndex] = std::move(GetDevice()->CreateBuffer(objectBufferDesc));
-					}
-
-					auto materialBufferDesc = currVariantData.MeshResourceLayouts->m_spaces[PER_MATERIAL_SPACE]->GetCBVDesc();
-					if (meshRenderer.m_materialBuffers[frameIndex] &&
-						meshRenderer.m_materialBuffers[frameIndex]->GetResourceDesc().Width != materialBufferDesc.m_size)
-					{
-						meshRenderer.m_materialBuffers[frameIndex].reset();
-						meshRenderer.m_materialBuffers[frameIndex] = std::move(GetDevice()->CreateBuffer(materialBufferDesc));
-					}
-				}
-			}
+			m_pPassConstantBuffer = std::make_unique<DX12BufferResource>()
 		}
-		
 	}
 
 }
