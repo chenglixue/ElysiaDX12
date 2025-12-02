@@ -14,8 +14,7 @@ namespace ElysiaRenderer
 		m_pCamera(pCamera),
 		m_shaderPasses(),
 		m_pMaterial(),
-		m_PipelineStateObjects(),
-		m_enableKeywords()
+		m_PipelineStateObjects()
 	{
 
 	}

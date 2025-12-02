@@ -832,7 +832,7 @@ namespace ElysiaRenderer
 			});
 
 		auto variants = variantMgr->BuildAllVariants(pragmaInfo);
-		variantMgr->InitializeFromCompiled(variants);
+		variantMgr->InitializeFromCompiled(std::move(variants));
 
 		auto o = std::make_unique<DX12Shader>(std::move(variantMgr));
 		o->SetRenderStates(renderStates);
@@ -1174,7 +1174,7 @@ namespace ElysiaRenderer
 			
 			// Set ConstantBuffer layout & constant buffer member
 			{
-				std::unordered_map<std::string, ShaderReflectionData::ShaderVariable> shaderVariables{};
+				std::unordered_map<UINT32, ShaderReflectionData::ShaderVariable> shaderVariables{};
 				for (UINT i = 0; i < pShaderDesc.BoundResources; ++i)
 				{
 					D3D12_SHADER_INPUT_BIND_DESC resourceDesc{};
@@ -1199,7 +1199,7 @@ namespace ElysiaRenderer
 							.name = variableName,
 							.size = constantBufferDesc.Size
 						};
-						shaderVariables.insert({variableName, temp});
+						shaderVariables.insert({temp.spaceID, temp});
 
 						for (UINT memberIndex = 0; memberIndex < constantBufferDesc.Variables; ++memberIndex)
 						{
@@ -1211,8 +1211,9 @@ namespace ElysiaRenderer
 							constantVariableDesc.SpaceID = spaceID;
 							constantVariableDesc.StartOffset = variableDesc.StartOffset;
 							constantVariableDesc.Size = variableDesc.Size;
+							constantVariableDesc.Name = PropertyToID(variableDesc.Name);
 
-							shaderVariables[variableName].members.emplace_back(std::move(constantVariableDesc));
+							shaderVariables[temp.spaceID].members.emplace(constantVariableDesc.Name, std::move(constantVariableDesc));
 						}
 					}
 				}
@@ -1260,6 +1261,8 @@ namespace ElysiaRenderer
 				};
 			}
 		}
+
+		return o;
 	}
 	
 	const ShaderBytecode DX12Device::CompileShaderStage(
@@ -1405,6 +1408,8 @@ namespace ElysiaRenderer
 			.target = target,
 			.ReflectionData = std::move(reflectionData)
 		};
+
+		return o;
 	}
 	
 	ShaderVariantData DX12Device::CompileVariantAllStages(
@@ -1480,9 +1485,7 @@ namespace ElysiaRenderer
 			o.StageShaders[stage.ShaderType] = CompileShaderStage(stage.ShaderName, stage.EntryPoint, target, pszArgs, source);
 			o.MergedReflectionData.Merge(o.StageShaders[stage.ShaderType].ReflectionData);
 		}
-
-		MergeCBufferLayout CBufferLayout{};
-		size_t globalOffset = 0;
+		
 		o.MeshResourceLayouts = std::make_unique<PipelineResourceLayout>();
 		for (auto& shaderVariable : o.MergedReflectionData.cbuffers)
 		{
@@ -1503,30 +1506,18 @@ namespace ElysiaRenderer
 					{
 						std::unique_ptr<PipelineResourceSpace> pPipelineResourceSpace = std::make_unique<PipelineResourceSpace>();
 						pPipelineResourceSpace->SetCBVDesc(bufferDesc);
+						if (currVariable.spaceID == PER_PASS_SPACE || currVariable.spaceID == PER_FRAME_SPACE)
+						{
+							auto pGPUBuffer = std::move(CreateBuffer(bufferDesc));
+							pPipelineResourceSpace->SetCBV(pGPUBuffer.release());
+						}
 						o.MeshResourceLayouts->m_spaces[currVariable.spaceID] = pPipelineResourceSpace.release();
 					}
 
 					break;
 				}
 			}
-			
-			for(auto& member : currVariable.members)
-			{
-				MergeCBufferLayout::CBuffer buffer
-				{
-					.offset = globalOffset + member.StartOffset,
-					.size = member.Size,
-					.hashName = PropertyToID(member.Name),
-					.space = member.SpaceID,
-				};
-				
-				CBufferLayout.variables.emplace(buffer.hashName, buffer);
-			}
-			globalOffset += currVariable.size;
 		}
-		CBufferLayout.totalSize = globalOffset;
-		
-		o.pMergedCBuffer = new UINT8[CBufferLayout.totalSize];
 		
 		return o;
 	}

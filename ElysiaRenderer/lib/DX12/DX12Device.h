@@ -139,14 +139,14 @@ namespace ElysiaRenderer
 		void InitializeDeviceResources(HWND windowHandle);
 		void ProcessDestruction(UINT frameIndex);
 
-		ShaderReflectionData DX12Device::ReflectShaderStage(CComPtr<IDxcResult> pResults, CComPtr<IDxcUtils> pUtils);
-		const ShaderBytecode DX12Device::CompileShaderStage(
+		ShaderReflectionData ReflectShaderStage(CComPtr<IDxcResult> pResults, CComPtr<IDxcUtils> pUtils);
+		const ShaderBytecode CompileShaderStage(
 			const std::wstring& path,
 			const std::wstring& entry,
 			const std::wstring& target,
 			const std::vector<LPCWSTR>&,
 			const DxcBuffer& sourceBuffer);
-		ShaderVariantData DX12Device::CompileVariantAllStages(
+		ShaderVariantData CompileVariantAllStages(
 			const ShaderCompileOptions& baseOptions,
 			const ShaderCreateDesc& desc,
 			const DxcBuffer& source,

@@ -31,7 +31,7 @@ namespace ElysiaRenderer
 		virtual void Dispose();
 
 		virtual void UpdatePSO() = 0;
-		virtual ShaderVariantData UpdateVariant() = 0;
+		virtual void UpdateVariant() = 0;
 
 	protected:
 		Vector2 m_renderSize;

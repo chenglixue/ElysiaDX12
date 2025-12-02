@@ -64,4 +64,8 @@ namespace ElysiaHelper
     
     D3D12_DEPTH_STENCIL_DESC GetDepthState(DepthState depthState);
     D3D12_DEPTH_STENCIL_DESC GetDepthState(std::wstring depthStateName);
+
+    extern std::unordered_map<std::wstring, BlendState> g_blendStateMap;
+    extern std::unordered_map<std::wstring, RasterizerState> g_rasterizerStateMap;
+    extern std::unordered_map<std::wstring, DepthState> g_depthStateMap;
 }

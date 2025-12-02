@@ -14,12 +14,12 @@ namespace ElysiaRenderer
         return result;
     }
     
-    void ShaderVariantManager::InitializeFromCompiled(const std::vector<ShaderVariantData>& compiledVariants)
+    void ShaderVariantManager::InitializeFromCompiled(const std::vector<ShaderVariantData>&& compiledVariants)
     {
         m_variants.clear();
         m_mapKeywordToIndex.clear();
 
-        m_variants = compiledVariants;
+        m_variants = std::move(compiledVariants);
 
         for(size_t variantIndex = 0; variantIndex < compiledVariants.size(); ++variantIndex)
         {

@@ -4,6 +4,34 @@
 
 namespace ElysiaHelper
 {
+    std::unordered_map<std::wstring, BlendState> g_blendStateMap
+    {
+        {L"Disabled", BlendState::Disabled},
+        {L"Additive", BlendState::Additive},
+        {L"AlphaBlend", BlendState::AlphaBlend},
+        {L"PreMultiplied", BlendState::PreMultiplied},
+        {L"NoColorWrites", BlendState::NoColorWrites},
+        {L"PreMultipliedRGB", BlendState::PreMultipliedRGB},
+    };
+    std::unordered_map<std::wstring, RasterizerState> g_rasterizerStateMap
+    {
+        {L"NoCull", RasterizerState::NoCull},
+        {L"BackFaceCull", RasterizerState::BackFaceCull},
+        {L"BackFaceCullNoZClip", RasterizerState::BackFaceCullNoZClip},
+        {L"FrontFaceCull", RasterizerState::FrontFaceCull},
+        {L"NoCullNoMS", RasterizerState::NoCullNoMS},
+        {L"Wireframe", RasterizerState::Wireframe},
+    };
+    std::unordered_map<std::wstring, DepthState> g_depthStateMap
+    {
+        {L"Disabled", DepthState::Disabled},
+        {L"Enabled", DepthState::Enabled},
+        {L"Reversed", DepthState::Reversed},
+        {L"WritesEnabled", DepthState::WritesEnabled},
+        {L"ReversedWritesEnabled", DepthState::ReversedWritesEnabled},
+    };
+    
+    
     static const UINT64 NumBlendStates = UINT64(BlendState::NumValues);
     static const UINT64 NumRasterizerStates = UINT64(RasterizerState::NumValues);
     static const UINT64 NumDepthStates = UINT64(DepthState::NumValues);
@@ -194,40 +222,7 @@ namespace ElysiaHelper
     }
     D3D12_BLEND_DESC GetBlendState(std::wstring blendStateName)
     {
-        BlendState blendState;
-        switch (blendStateName)
-        {
-            case L"Disabled":
-            {
-                blendState = BlendState::Disabled;
-                break;
-            }
-            case L"Additive":
-            {
-                blendState = BlendState::Additive;
-                break;
-            }
-            case L"AlphaBlend":
-            {
-                blendState = BlendState::AlphaBlend;
-                break;
-            }
-            case L"PreMultiplied":
-            {
-                blendState = BlendState::PreMultiplied;
-                break;
-            }
-            case L"NoColorWrites":
-            {
-                blendState = BlendState::NoColorWrites;
-                break;
-            }
-            case L"PreMultipliedRGB":
-            {
-                blendState = BlendState::PreMultipliedRGB;
-                break;
-            }
-        }
+        BlendState blendState = g_blendStateMap[blendStateName];
 
         return GetBlendState(blendState);
     }
@@ -240,40 +235,7 @@ namespace ElysiaHelper
     }
     D3D12_RASTERIZER_DESC GetRasterizerState(std::wstring rasterizerStateName)
     {
-        RasterizerState rasterizerState;
-        switch (rasterizerStateName)
-        {
-            case L"NoCull":
-            {
-                rasterizerState = RasterizerState::NoCull;
-                break;
-            }
-            case L"BackFaceCull":
-            {
-                rasterizerState = RasterizerState::BackFaceCull;
-                break;
-            }
-            case L"BackFaceCullNoZClip":
-            {
-                rasterizerState = RasterizerState::BackFaceCullNoZClip;
-                break;
-            }
-            case L"FrontFaceCull":
-            {
-                rasterizerState = RasterizerState::FrontFaceCull;
-                break;
-            }
-            case L"NoCullNoMS":
-            {
-                rasterizerState = RasterizerState::NoCullNoMS;
-                break;
-            }
-            case L"Wireframe":
-            {
-                rasterizerState = RasterizerState::Wireframe;
-                break;
-            }
-        }
+        RasterizerState rasterizerState = g_rasterizerStateMap[rasterizerStateName];
 
         return GetRasterizerState(rasterizerState);
     }
@@ -286,35 +248,7 @@ namespace ElysiaHelper
     }
     D3D12_DEPTH_STENCIL_DESC GetDepthState(std::wstring depthStateName)
     {
-        DepthState depthState;
-        switch (depthStateName)
-        {
-            case L"Disabled":
-            {
-                depthState = DepthState::Disabled;
-                break;
-            }
-            case L"Enabled":
-            {
-                depthState = DepthState::Enabled;
-                break;
-            }
-            case L"Reversed":
-            {
-                depthState = DepthState::Reversed;
-                break;
-            }
-            case L"WritesEnabled":
-            {
-                depthState = DepthState::WritesEnabled;
-                break;
-            }
-            case L"ReversedWritesEnabled":
-            {
-                depthState = DepthState::ReversedWritesEnabled;
-                break;
-            }
-        }
+        DepthState depthState = g_depthStateMap[depthStateName];
 
         return GetDepthState(depthState);
     }

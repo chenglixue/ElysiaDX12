@@ -54,7 +54,7 @@ namespace ElysiaRenderer
 				.FilePath = L"Shaders\\public\\Shadow.hlsl",
 			} 
 		}; 
-		m_pMaterial = std::move(std::make_unique<Material>(m_shaderPasses));
+		m_pMaterial = std::move(std::make_unique<Material>(m_shaderPasses, &GetModelImporter()->GetMeshRenderer(0)));
 		ShaderPasseIDs::ShadowCastPassID = m_pMaterial->FindPassIndex("Shadow Cast Pass");
 
 		UpdateVariant();
@@ -102,8 +102,9 @@ namespace ElysiaRenderer
 			m_pCommand->SetPipeline(pipelineStateData);
 			
 			auto& shadowPassData = m_pMaterial->GetPassData(ShaderPasseIDs::ShadowCastPassID);
-			m_pCommand->SetPipelineResource(PER_PASS_SPACE, shadowPassData.pCurrVariantData->MeshResourceLayouts->m_spaces[PER_PASS_SPACE]);
-			m_pCommand->SetPipelineResource(PER_FRAME_SPACE, shadowPassData.pCurrVariantData->MeshResourceLayouts->m_spaces[PER_FRAME_SPACE]);
+			auto meshResourceLayout = shadowPassData.pCurrVariantData->MeshResourceLayouts.get();
+			m_pCommand->SetPipelineResource(PER_PASS_SPACE, meshResourceLayout->m_spaces[PER_PASS_SPACE]);
+			m_pCommand->SetPipelineResource(PER_FRAME_SPACE, meshResourceLayout->m_spaces[PER_FRAME_SPACE]);
 
 			UINT vertexStride = GetModelImporter()->GetVertexStride();
 
@@ -113,20 +114,22 @@ namespace ElysiaRenderer
 				{
 					const auto& meshRenderer = GetModelImporter()->GetMeshRenderer(meshIndex);
 					const auto& mesh = meshRenderer.m_mesh;
-					const auto& passData = m_pMaterial->GetPassData(ShaderPasseIDs::ShadowCastPassID);
 					
 					{
-						auto objectSpace = passData.pCurrVariantData->MeshResourceLayouts->m_spaces[PER_OBJECT_SPACE];
+						auto objectSpace = meshResourceLayout->m_spaces[PER_OBJECT_SPACE];
 						objectSpace->SetCBV(meshRenderer.m_objectBuffers[GetDevice()->GetFrameID()].get());
 						objectSpace->Lock();
+						m_pMaterial->SetMaterialCBufferGPUPtr(PER_OBJECT_SPACE, objectSpace->GetCBV()->GetMappedBuffer());
 						
 						m_pCommand->SetPipelineResource(PER_OBJECT_SPACE, objectSpace);
 					}
 
 					{
-						auto materialSpace = passData.pCurrVariantData->MeshResourceLayouts->m_spaces[PER_MATERIAL_SPACE];
+						auto materialSpace = meshResourceLayout->m_spaces[PER_MATERIAL_SPACE];
 						materialSpace->SetCBV(meshRenderer.m_materialBuffers[GetDevice()->GetFrameID()].get());
 						materialSpace->Lock();
+						m_pMaterial->SetMaterialCBufferGPUPtr(PER_MATERIAL_SPACE, materialSpace->GetCBV()->GetMappedBuffer());
+						
 						m_pCommand->SetPipelineResource(PER_MATERIAL_SPACE, materialSpace);
 					}
 
@@ -215,14 +218,13 @@ namespace ElysiaRenderer
 		
 	}
 	
-	ShaderVariantData ShadowPass::UpdateVariant()
+	void ShadowPass::UpdateVariant()
 	{
-		UpdateShadowPassVariant();
+		UpdateShadowPassVariant(ShaderPasseIDs::ShadowCastPassID);
 	}
 
-	void ShadowPass::UpdateShadowPassVariant()
+	void ShadowPass::UpdateShadowPassVariant(UINT passIndex)
 	{
-		UINT passIndex = ShaderPasseIDs::ShadowCastPassID;
 		std::vector<std::wstring> enableKeywords{};
 		
 		switch (UserData::GetInstance().shadowQuality)
@@ -269,11 +271,15 @@ namespace ElysiaRenderer
 		{
 			auto VariantManager = passData.pShader->GetVariantManager();
 			auto currVariantData = &VariantManager->GetOrCompileVariantByNames(enableKeywords);
+			auto resourceLayouts = currVariantData->MeshResourceLayouts.get();
 			
-			if(m_pMaterial->GetCurrVariantData() == nullptr || m_pMaterial->GetCurrVariantData() != currVariantData)
+			if(passData.pCurrVariantData == nullptr || passData.pCurrVariantData != currVariantData)
 			{
-				m_pMaterial->SetCurrVariantData(currVariantData);
-				m_pMaterial->SetPipelineResourceLayout(currVariantData->MeshResourceLayouts.get());
+				m_pMaterial->SetPipelineResourceLayout(resourceLayouts);
+				passData.pCurrVariantData = currVariantData;
+
+				passData.pPassGPUPtr = resourceLayouts->m_spaces[PER_PASS_SPACE]->GetCBV()->GetMappedBuffer();
+				passData.pFrameGPUPtr = resourceLayouts->m_spaces[PER_FRAME_SPACE]->GetCBV()->GetMappedBuffer();
 			}
 			
 			{
@@ -282,21 +288,27 @@ namespace ElysiaRenderer
 				RTDesc.m_depthStencilFormat = GetShadowRT()->GetFormat();
 				
 				passData.pPipelineStateObject = GetPSOManager()->GetGraphicsPipelineState(m_pMaterial.get(), ShaderPasseIDs::ShadowCastPassID, RTDesc);
-				
+
 				emplaceResult.first->second = 
 				{
+					.pCurrVariantData = currVariantData,
 					.pPipelineStateObject = passData.pPipelineStateObject,
-					.pCurrVariantData = currVariantData
+					.pPassGPUPtr = resourceLayouts->m_spaces[PER_PASS_SPACE]->GetCBV()->GetMappedBuffer(),
+					.pFrameGPUPtr = resourceLayouts->m_spaces[PER_FRAME_SPACE]->GetCBV()->GetMappedBuffer(),
 				};
 			}
 		}
 		else
 		{
-			passData.pCurrVariantData = passData.keywords.at(enableKeywords).pCurrVariantData;
-			passData.pPipelineStateObject = passData.keywords.at(enableKeywords).pPipelineStateObject;
+			const auto& saveData = passData.keywords.at(enableKeywords);
+			
+			passData.pCurrVariantData = saveData.pCurrVariantData;
+			passData.pPipelineStateObject = saveData.pPipelineStateObject;
+			passData.pPassGPUPtr = saveData.pPassGPUPtr;
+			passData.pFrameGPUPtr = saveData.pFrameGPUPtr;
 		}
-		
-		
+
+		m_pMaterial->CreateMaterialCBuffer(passIndex);
 	}
 	
 }

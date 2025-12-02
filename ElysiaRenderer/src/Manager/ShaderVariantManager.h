@@ -26,7 +26,7 @@ namespace ElysiaRenderer
 
         std::vector<ShaderVariantData> BuildAllVariants(const ShaderPragmaInfo& pragmaInfo);
 
-        void InitializeFromCompiled(const std::vector<ShaderVariantData>& compiledVariants);
+        void InitializeFromCompiled(const std::vector<ShaderVariantData>&& compiledVariants);
 
         ShaderKeywordSet BuildSetFromNames(const std::vector<std::wstring>& enabledNames) const;
 

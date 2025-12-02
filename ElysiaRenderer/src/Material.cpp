@@ -42,11 +42,13 @@ namespace ElysiaRenderer
 					ShaderStageDesc
 					{
 						.ShaderType = ShaderType::Vertex,
+						.ShaderName = shaderPasses[passID].FilePath,
 						.EntryPoint = shaderPasses[passID].VertexEntryPoint,
 					},
 					ShaderStageDesc
 					{
 						.ShaderType = ShaderType::Pixel,
+						.ShaderName = shaderPasses[passID].FilePath,
 						.EntryPoint = shaderPasses[passID].VertexEntryPoint,
 					}
 				};
@@ -91,6 +93,24 @@ namespace ElysiaRenderer
 	bool Material::HasMeshRender() const noexcept
 	{
 		return m_pMeshRender != nullptr;
+	}
+
+	void Material::CreateMaterialCBuffer(size_t passIndex)
+	{
+		auto layouts = m_passDatas[passIndex].pCurrVariantData->MergedReflectionData.cbuffers;
+		auto& pMaterialCBuffer = m_passDatas[passIndex].pMaterialCBuffer;
+		
+		if (pMaterialCBuffer != nullptr) pMaterialCBuffer.reset();
+		
+		pMaterialCBuffer = std::make_unique<MaterialRuntimeCBuffer>();
+		
+		for (auto&[space, layout] : layouts)
+		{
+			RuntimeCBuffer runtimeCBuffer{};
+			runtimeCBuffer.CPUPtr.resize(layout.size);
+
+			pMaterialCBuffer->CBuffers[space] = runtimeCBuffer;
+		}
 	}
 
 	void Material::SetPipelineResourceLayout(PipelineResourceLayout* pPipelineResourceLayout)
@@ -160,15 +180,59 @@ namespace ElysiaRenderer
 		}
 	}
 	
-	void Material::SetCurrVariantData(const ShaderVariantData* pCurrVariantData)
+	void Material::SetMaterialCBufferGPUPtr(UINT spaceID, UINT8* pMappedBuffer, size_t passIndex)
 	{
-		assert(pCurrVariantData != nullptr);
-		m_pCurrVariantData = pCurrVariantData;
+		assert(passIndex < m_passDatas.size());
+		m_passDatas[passIndex].pMaterialCBuffer->CBuffers[spaceID].GPUPtr = pMappedBuffer;
 	}
-	
-	const ShaderVariantData* Material::GetCurrVariantData() const
+
+	template<typename T>
+	void Material::UpdateCBuffer(RuntimeCBuffer& CBuffer, UINT32 offset, const T& data)
 	{
-		return m_pCurrVariantData;
+		memcpy(CBuffer.CPUPtr.data() + offset, &data, sizeof(T));
+		CBuffer.MakeDirty(offset, sizeof(T));
 	}
-	
+
+	void Material::SetFloat(const size_t hashName, const float& value, size_t passIndex)
+	{
+		assert(passIndex < m_passDatas.size());
+		
+		auto pMaterialCBuffer = m_passDatas[passIndex].pMaterialCBuffer.get();
+		assert(pMaterialCBuffer);
+
+		auto allCBuffers = pMaterialCBuffer->CBuffers;
+		for (UINT spaceID = 0; spaceID < allCBuffers.size(); ++spaceID)
+		{
+			if (allCBuffers.find(spaceID) == allCBuffers.end()) continue;
+			auto cbuffer = allCBuffers[spaceID];
+
+			const auto& mergedReflectionData = m_passDatas[passIndex].pCurrVariantData->MergedReflectionData;
+			if (mergedReflectionData.HasCBufferMember(spaceID, hashName))
+			{
+				const auto memberData = mergedReflectionData.FindCBufferMember(spaceID, hashName);
+				UpdateCBuffer<float>(cbuffer, memberData.StartOffset, value);
+			}
+			
+			
+		}
+	}
+
+	void Material::Flush()
+	{
+		for (auto& passData : m_passDatas)
+		{
+			for (auto&[spaceID, CBuffer] : passData.pMaterialCBuffer->CBuffers)
+			{
+				if (!CBuffer.HasDirtyRange()) continue;
+
+				UINT32 size = CBuffer.DirtyEnd - CBuffer.DirtyBegin;
+
+				memcpy(CBuffer.GPUPtr + CBuffer.DirtyBegin, CBuffer.CPUPtr.data() + CBuffer.DirtyBegin, size);
+
+				CBuffer.ClearDirty();
+			}	
+		}
+		
+	}
+
 }

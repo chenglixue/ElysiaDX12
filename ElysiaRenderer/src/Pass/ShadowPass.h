@@ -20,12 +20,12 @@ namespace ElysiaRenderer
 		virtual void Execute() override;
 		virtual void Render() override;
 		virtual void UpdatePSO() override;
-		virtual ShaderVariantData UpdateVariant() override;
+		virtual void UpdateVariant() override;
 
 		virtual void Dispose() override;
 
 		RenderTexture* GetShadowRT() const;
-		void UpdateShadowPassVariant();
+		void UpdateShadowPassVariant(UINT passIndex);
 	private:
 		std::unique_ptr<RenderTexture> m_pShadowRT = nullptr;
 		std::unique_ptr<DX12Shadow> m_pMainShadow = nullptr;
