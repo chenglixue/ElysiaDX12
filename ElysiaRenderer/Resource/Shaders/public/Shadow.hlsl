@@ -3,9 +3,9 @@
 #include <private\LightCommon.hlsl>
 #include <private\ShadowCommon.hlsl>
 
-#pragma Rasterizer RasterizerBackFaceCull
-#pragma Blend BlendDisable
-#pragma Depth DepthWritesEnabled
+#pragma Rasterizer BackFaceCull
+#pragma Blend BDisable
+#pragma Depth WritesEnabled
 
 #pragma shader_feature SHADOW_QUALITY_LOW SHADOW_QUALITY_MIDDLE SHADOW_QUALITY_HIGH SHADOW_QUALITY_VERYHIGH
 #pragma shader_feature HARD_SHADOW SOFT_SHADOW

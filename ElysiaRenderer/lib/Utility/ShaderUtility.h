@@ -82,7 +82,6 @@ namespace ElysiaRenderer
 		
 		std::unordered_map<UINT32, ShaderVariable> cbuffers;
 
-		D3D12_INPUT_LAYOUT_DESC InputLayoutDesc;
 		std::vector<D3D12_INPUT_ELEMENT_DESC> InputLayoutElementDescs;
 		std::vector <std::string> InputElementSemanticNames;
 

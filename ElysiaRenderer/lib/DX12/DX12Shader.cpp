@@ -8,8 +8,9 @@
 namespace ElysiaRenderer
 {
 	
-	DX12Shader::DX12Shader(std::unique_ptr<ShaderVariantManager> pShaderVariantManager) :
-		m_pShaderVariantManager(std::move(pShaderVariantManager))
+	DX12Shader::DX12Shader(std::unique_ptr<ShaderVariantManager> pShaderVariantManager, std::unique_ptr<ShaderKeywordSpace> pKeywordSpace) :
+		m_pShaderVariantManager(std::move(pShaderVariantManager)),
+		m_pKeywordSpace(std::move(pKeywordSpace))
 	{
 	}
 

@@ -26,7 +26,7 @@ namespace ElysiaRenderer
 
         std::vector<ShaderVariantData> BuildAllVariants(const ShaderPragmaInfo& pragmaInfo);
 
-        void InitializeFromCompiled(const std::vector<ShaderVariantData>&& compiledVariants);
+        void InitializeFromCompiled(const std::vector<ShaderVariantData> compiledVariants);
 
         ShaderKeywordSet BuildSetFromNames(const std::vector<std::wstring>& enabledNames) const;
 
@@ -38,7 +38,7 @@ namespace ElysiaRenderer
         const std::vector<ShaderVariantData>& GetAllVariants() const noexcept;
 
     private:
-        ShaderKeywordSpace* m_pKeywordSpace;
+        ShaderKeywordSpace* m_pKeywordSpace = nullptr;
         std::vector<ShaderVariantData> m_variants;
         // map from keywordset-key to variant index
         std::unordered_map<ShaderKeywordSet, int, ShaderKeywordSetHash> m_mapKeywordToIndex;

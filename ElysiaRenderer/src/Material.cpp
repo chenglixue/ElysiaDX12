@@ -49,7 +49,7 @@ namespace ElysiaRenderer
 					{
 						.ShaderType = ShaderType::Pixel,
 						.ShaderName = shaderPasses[passID].FilePath,
-						.EntryPoint = shaderPasses[passID].VertexEntryPoint,
+						.EntryPoint = shaderPasses[passID].FragmentEntryPoint,
 					}
 				};
 			}
@@ -65,13 +65,13 @@ namespace ElysiaRenderer
 				};
 			}
 
-			newPassData.pShader = GetDevice()->CreateShader(desc);
+			newPassData.pShader = std::move(GetDevice()->CreateShader(desc));
 			newPassData.BlendDesc = GetBlendState(newPassData.pShader->GetRenderStates().at(L"Blend"));
 			newPassData.RasterizerDesc = GetRasterizerState(newPassData.pShader->GetRenderStates().at(L"Rasterizer"));
 			newPassData.DepthStencilDesc = GetDepthState(newPassData.pShader->GetRenderStates().at(L"Depth"));
 
 			m_passDatas.emplace_back(std::move(newPassData));
-		}
+		} 
 	}
 
 	PassData& Material::GetPassData(UINT passIndex)  noexcept

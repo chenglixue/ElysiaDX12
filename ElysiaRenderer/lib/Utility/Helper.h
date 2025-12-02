@@ -611,4 +611,28 @@ namespace ElysiaHelper
         }
         return "Unknown";
     }
+    
+    inline std::wstring FormatHrMessage(HRESULT hr)
+    {
+        // Try _com_error first
+        _com_error err(hr);
+        LPCTSTR msg = err.ErrorMessage();
+        if (msg && *msg)
+            return std::wstring(msg);
+
+        // Fallback to FormatMessage
+        LPWSTR buffer = nullptr;
+        DWORD size = FormatMessageW(
+            FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+            nullptr, hr, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+            (LPWSTR)&buffer, 0, nullptr);
+
+        std::wstring out;
+        if (size && buffer)
+        {
+            out.assign(buffer, buffer + size);
+            LocalFree(buffer);
+        }
+        return out;
+    }
 }

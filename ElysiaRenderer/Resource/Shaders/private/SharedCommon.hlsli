@@ -39,26 +39,6 @@
 #define UINT        uint
 #define int32_t     int
 
-#define DepthDisable                0
-#define DepthEnabled                1
-#define DepthReversed               2
-#define DepthWritesEnabled          3
-#define DepthReversedWritesEnabled  4
-
-#define BlendDisable                0
-#define BlendAdditive               1
-#define BlendAlphaBlend             2
-#define BlendAlphaPreMultiplied     3
-#define BlendAlphaNoColorWrites     4
-#define BlendAlphaPreMultipliedRGB  5
-
-#define RasterizerNoCull                0
-#define RasterizerBackFaceCull          1
-#define RasterizerBackFaceCullNoZClip   2
-#define RasterizerFrontFaceCull         3
-#define RasterizerNoCullNoMS            4
-#define RasterizerWireframe             5
-
 cbuffer GlobalConstant : register(b0, perFrameSpace)
 {
     Vector4 cameraPosWS;

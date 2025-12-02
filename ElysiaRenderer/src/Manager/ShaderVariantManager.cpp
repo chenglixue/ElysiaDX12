@@ -14,7 +14,7 @@ namespace ElysiaRenderer
         return result;
     }
     
-    void ShaderVariantManager::InitializeFromCompiled(const std::vector<ShaderVariantData>&& compiledVariants)
+    void ShaderVariantManager::InitializeFromCompiled(const std::vector<ShaderVariantData> compiledVariants)
     {
         m_variants.clear();
         m_mapKeywordToIndex.clear();

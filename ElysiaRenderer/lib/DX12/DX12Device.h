@@ -140,7 +140,7 @@ namespace ElysiaRenderer
 		void ProcessDestruction(UINT frameIndex);
 
 		ShaderReflectionData ReflectShaderStage(CComPtr<IDxcResult> pResults, CComPtr<IDxcUtils> pUtils);
-		const ShaderBytecode CompileShaderStage(
+		ShaderBytecode CompileShaderStage(
 			const std::wstring& path,
 			const std::wstring& entry,
 			const std::wstring& target,

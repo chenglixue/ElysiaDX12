@@ -68,7 +68,7 @@ namespace ElysiaRenderer
 		GetRenderResource()->GetCBVFrameVariable()->shadowSize = GetScreenSize(Vector2(m_pMainShadow->GetWidth(), m_pMainShadow->GetHeight()));
 
 		auto sobolSequence = Create2DSobolSqeuence(64);
-	}
+	} 
 	void ShadowPass::Render()
 	{
 		PIXHelper pix(m_pCommand->GetCommandList(), "Shadow Pass");
@@ -263,7 +263,7 @@ namespace ElysiaRenderer
 					break;
 				}
 		}
-		
+		 
 		auto& passData = m_pMaterial->GetPassData(passIndex);
 		
 		auto emplaceResult = passData.keywords.try_emplace(enableKeywords);

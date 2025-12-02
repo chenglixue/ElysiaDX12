@@ -52,7 +52,7 @@ namespace ElysiaRenderer
 	{
 		ShaderPragmaInfo pragmaInfo{};
 
-		std::wregex re(LR"(#\s*pragma\s+([A-Za-z_][A-Za-z0-9_]*)\s+(.*))");
+		std::wregex re(LR"(#\s*pragma\s+(shader_feature)\s+(.*))");
 		auto begin = std::wsregex_iterator(source.begin(), source.end(), re);
 		auto end = std::wsregex_iterator();
 

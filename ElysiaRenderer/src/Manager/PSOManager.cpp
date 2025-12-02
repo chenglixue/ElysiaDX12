@@ -52,26 +52,55 @@ namespace ElysiaRenderer
 
 		auto resourceMapping = PipelineResourceMapping();
 		auto pDX12RootSignature = std::unique_ptr<DX12RootSignature>(GetDevice()->CreateRootSignature(*passData.pCurrVariantData->MeshResourceLayouts, resourceMapping));
-
+		assert(pDX12RootSignature);
+		assert(pDX12RootSignature->GetSignature());
+		
 		D3D12_GRAPHICS_PIPELINE_STATE_DESC PSODesc{};
-
 		PSODesc.pRootSignature = pDX12RootSignature->GetSignature();
+		
+		auto& stageShaders = passData.pCurrVariantData->StageShaders;
+		if (stageShaders.count(ShaderType::Vertex) == 0 || stageShaders.count(ShaderType::Pixel) == 0)
+		{
+			ThrowRuntimeError("Missing VS/PS stage bytecode for this variant.");
+		}
+		auto vsBytecode = stageShaders.at(ShaderType::Vertex).bytecode;
+		auto psBytecode = stageShaders.at(ShaderType::Pixel).bytecode;
+		if (!vsBytecode || !psBytecode)
+		{
+			ThrowRuntimeError("Null bytecode for VS/PS.");
+		}
 		PSODesc.VS = D3D12_SHADER_BYTECODE
 		{
-			.pShaderBytecode = passData.pCurrVariantData->StageShaders.at(ShaderType::Vertex).bytecode->GetBufferPointer(), //pVSShader->GetShader()->GetBufferPointer(),
-			.BytecodeLength = passData.pCurrVariantData->StageShaders.at(ShaderType::Vertex).bytecode->GetBufferSize(),
+			.pShaderBytecode = vsBytecode->GetBufferPointer(),
+			.BytecodeLength = vsBytecode->GetBufferSize(),
 		};
 		PSODesc.PS = D3D12_SHADER_BYTECODE
 		{
-			.pShaderBytecode = passData.pCurrVariantData->StageShaders.at(ShaderType::Pixel).bytecode->GetBufferPointer(),
-			.BytecodeLength = passData.pCurrVariantData->StageShaders.at(ShaderType::Pixel).bytecode->GetBufferSize(),
+			.pShaderBytecode = psBytecode->GetBufferPointer(),
+			.BytecodeLength = psBytecode->GetBufferSize(),
 		};
+		
+		auto inputLayoutData = stageShaders.at(ShaderType::Vertex).ReflectionData;
+		std::vector<std::string> localSemanticNames = inputLayoutData.InputElementSemanticNames;
+		std::vector<D3D12_INPUT_ELEMENT_DESC> localInputElements;
+		localInputElements.reserve(inputLayoutData.InputLayoutElementDescs.size());
+		// copy each element and bind pointer into localSemanticNames
+		for (size_t i = 0; i < inputLayoutData.InputLayoutElementDescs.size(); ++i)
+		{
+			D3D12_INPUT_ELEMENT_DESC elem = inputLayoutData.InputLayoutElementDescs[i];
+			// point SemanticName to stable c_str() in localSemanticNames
+			elem.SemanticName = localSemanticNames[i].c_str();
+			localInputElements.push_back(elem);
+		}
+		D3D12_INPUT_LAYOUT_DESC localInputLayoutDesc;
+		localInputLayoutDesc.pInputElementDescs = localInputElements.data();
+		localInputLayoutDesc.NumElements = static_cast<UINT>(localInputElements.size());
+		PSODesc.InputLayout = localInputLayoutDesc;
 
 		PSODesc.BlendState = passData.BlendDesc;
 		PSODesc.RasterizerState = passData.RasterizerDesc;
 		PSODesc.DepthStencilState = passData.DepthStencilDesc;
 		PSODesc.SampleMask = UINT_MAX;
-		PSODesc.InputLayout = passData.pCurrVariantData->MergedReflectionData.InputLayoutDesc;
 		PSODesc.PrimitiveTopologyType = topology;
 		PSODesc.SampleDesc = DXGI_SAMPLE_DESC
 		{
@@ -82,17 +111,10 @@ namespace ElysiaRenderer
 		auto desc = CreateDefaultRenderTargetDesc();
 		for (UINT i = 0; i < renderTargetDesc.m_numRenderTargets; ++i)
 		{
-			PSODesc.RTVFormats[i] = desc.m_renderTargetFormats[i];
-		}
-		PSODesc.NumRenderTargets = desc.m_numRenderTargets;
-		PSODesc.DSVFormat = desc.m_depthStencilFormat;
-
-		for (UINT i = 0; i < renderTargetDesc.m_numRenderTargets; ++i)
-		{
 			PSODesc.RTVFormats[i] = renderTargetDesc.m_renderTargetFormats[i];
 		}
-		PSODesc.DSVFormat = renderTargetDesc.m_depthStencilFormat;
 		PSODesc.NumRenderTargets = renderTargetDesc.m_numRenderTargets;
+		PSODesc.DSVFormat = renderTargetDesc.m_depthStencilFormat;
 
 		auto pipelineStateObject = GetGraphicsPipelineState(PSODesc, pDX12RootSignature.get());
 		if (pipelineStateObject != nullptr)

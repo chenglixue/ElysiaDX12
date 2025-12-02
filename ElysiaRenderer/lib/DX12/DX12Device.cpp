@@ -826,16 +826,24 @@ namespace ElysiaRenderer
 
 		auto variantMgr = std::make_unique<ShaderVariantManager>(pKeywordSpace.get());
 		variantMgr->SetCompileCallback(
-			[&](const ShaderKeywordSet& set)
+			[this, shaderCreateDesc, compileOptions, Source, ks = pKeywordSpace.get()](const ShaderKeywordSet& set)
 			{
-				return CompileVariantAllStages(compileOptions, shaderCreateDesc, Source, set, pKeywordSpace.get());
+				return CompileVariantAllStages(compileOptions, shaderCreateDesc, Source, set, ks);
 			});
 
 		auto variants = variantMgr->BuildAllVariants(pragmaInfo);
 		variantMgr->InitializeFromCompiled(std::move(variants));
 
-		auto o = std::make_unique<DX12Shader>(std::move(variantMgr));
+		auto o = std::make_unique<DX12Shader>(std::move(variantMgr), std::move(pKeywordSpace));
 		o->SetRenderStates(renderStates);
+		
+		o.InputElementSemanticNames = std::move(inputElementSemanticNames);
+		o.InputLayoutElementDescs = std::move(inputElementDesc);
+		o.InputLayoutDesc = D3D12_INPUT_LAYOUT_DESC
+		{
+			.pInputElementDescs = o.InputLayoutElementDescs.data(),
+			.NumElements = static_cast<UINT32>(o.InputLayoutElementDescs.size()),
+		};
 
 		return o;
 	}
@@ -1222,26 +1230,21 @@ namespace ElysiaRenderer
 
 			// Get Vertex layout
 			{
-				std::vector<D3D12_INPUT_ELEMENT_DESC> inputElementDesc(pShaderDesc.InputParameters);
-				std::vector <std::string > inputElementSemanticNames{ pShaderDesc.InputParameters };
+				std::vector<D3D12_INPUT_ELEMENT_DESC> inputElementDesc{};
+				inputElementDesc.reserve(pShaderDesc.InputParameters);
+				std::vector <std::string > inputElementSemanticNames{};
+				inputElementSemanticNames.reserve(pShaderDesc.InputParameters);
 
 				for (UINT32 parameterIndex = 0; parameterIndex < pShaderDesc.InputParameters; ++parameterIndex)
 				{
 					D3D12_SIGNATURE_PARAMETER_DESC signatureParameterDesc{};
-					pReflection->GetInputParameterDesc(parameterIndex, &signatureParameterDesc);
+					ThrowIfFailed(pReflection->GetInputParameterDesc(parameterIndex, &signatureParameterDesc));
 
-					inputElementSemanticNames[parameterIndex] = signatureParameterDesc.SemanticName;
-				}
-				o.InputElementSemanticNames = std::move(inputElementSemanticNames);
-
-				for (UINT32 parameterIndex = 0; parameterIndex < pShaderDesc.InputParameters; ++parameterIndex)
-				{
-					D3D12_SIGNATURE_PARAMETER_DESC signatureParameterDesc{};
-					pReflection->GetInputParameterDesc(parameterIndex, &signatureParameterDesc);
-
-					inputElementDesc[parameterIndex] = D3D12_INPUT_ELEMENT_DESC
+					inputElementSemanticNames.emplace_back(signatureParameterDesc.SemanticName ? signatureParameterDesc.SemanticName : std::string());
+					
+					inputElementDesc.emplace_back(D3D12_INPUT_ELEMENT_DESC
 					{
-						.SemanticName = o.InputElementSemanticNames[parameterIndex].c_str(),
+						.SemanticName = nullptr, //inputElementSemanticNames.back().c_str(),
 						.SemanticIndex = signatureParameterDesc.SemanticIndex,
 						.Format = MaskToFormat(signatureParameterDesc.Mask),
 						.InputSlot = 0u,
@@ -1250,11 +1253,12 @@ namespace ElysiaRenderer
 										// There doesn't seem to be a obvious way to 
 										// automate this currently, which might be a issue when instanced rendering is used
 						.InstanceDataStepRate = 0u
-					};
+					});
 				}
-
+				
+				o.InputElementSemanticNames = std::move(inputElementSemanticNames);
 				o.InputLayoutElementDescs = std::move(inputElementDesc);
-				o.InputLayoutDesc = 
+				o.InputLayoutDesc = D3D12_INPUT_LAYOUT_DESC
 				{
 					.pInputElementDescs = o.InputLayoutElementDescs.data(),
 					.NumElements = static_cast<UINT32>(o.InputLayoutElementDescs.size()),
@@ -1265,13 +1269,35 @@ namespace ElysiaRenderer
 		return o;
 	}
 	
-	const ShaderBytecode DX12Device::CompileShaderStage(
+	ShaderBytecode DX12Device::CompileShaderStage(
 			const std::wstring& path,
 			const std::wstring& entry,
 			const std::wstring& target,
 			const std::vector<LPCWSTR>& args,
 			const DxcBuffer& sourceBuffer)
 	{
+		std::wostringstream oss;
+		oss << L"[CompileShaderStage] path=" << path << L", entry=" << entry << L", target=" << target << L"\n";
+		oss << L"Args (" << args.size() << L"):\n";
+		for (size_t i = 0; i < args.size(); ++i)
+		{
+			LPCWSTR a = args[i];
+			if (!a)
+				oss << L"  [" << i << L"] = <nullptr>\n";
+			else
+				oss << L"  [" << i << L"] = " << a << L"\n";
+		}
+		OutputDebugStringW(oss.str().c_str());
+		std::wcout << oss.str();
+		
+		// Validate args (no null pointers)
+		for (size_t i = 0; i < args.size(); ++i)
+		{
+			if (args[i] == nullptr)
+			{
+				ThrowRuntimeError("CompileShaderStage: args contains nullptr at index " + std::to_string(i));
+			}
+		}
 		
 		// 
 		// Create compiler and utils.
@@ -1285,14 +1311,22 @@ namespace ElysiaRenderer
 		// Create default include handler
 		//
 		CComPtr<IDxcIncludeHandler> pIncludeHandler;
-		ThrowIfFailed(pUtils->CreateDefaultIncludeHandler(&pIncludeHandler));
+		auto hr = pUtils->CreateDefaultIncludeHandler(&pIncludeHandler);
+		if (FAILED(hr) || !pIncludeHandler)
+		{
+			// Not fatal, but warn
+			std::wstring msg = FormatHrMessage(hr);
+			std::wcerr << L"[Warning] CreateDefaultIncludeHandler failed: " << msg << L"\n";
+			// we still continue (pIncludeHandler may be nullptr)
+		}
 
 		auto pszArgs = args;
+		
 		//
 		// Compile it with specified arguments.
 		//
 		CComPtr<IDxcResult> pResults;
-		auto hr = pCompiler->Compile(
+		hr = pCompiler->Compile(
 			&sourceBuffer,                // Source buffer.
 			pszArgs.data(),         // Array of pointers to arguments.
 			(UINT)pszArgs.size(),      // Number of arguments.
@@ -1301,7 +1335,20 @@ namespace ElysiaRenderer
 		);
 		if (FAILED(hr))
 		{
-			ThrowRuntimeError(std::string("Failed to compile shader with path : ") + WstringToString(path + entry));
+			std::wstring hrmsg = FormatHrMessage(hr);
+			std::wostringstream oss;
+			oss << L"DXC Compile call failed for " << path << L" entry=" << entry << L" target=" << target << L"\n";
+			oss << L"HRESULT: 0x" << std::hex << hr << L" (" << hrmsg << L")\n";
+			// also try to get any error text returned in pResults (sometimes present even if Compile returned failure)
+			if (pResults)
+			{
+				CComPtr<IDxcBlobUtf8> pErrors;
+				if (SUCCEEDED(pResults->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&pErrors), nullptr)) && pErrors && pErrors->GetStringLength() > 0)
+				{
+					oss << L"Compiler errors/warnings:\n" << (const char*)pErrors->GetStringPointer() << L"\n";
+				}
+			}
+			ThrowRuntimeError(std::string("DXC compile call failed: ") + WstringToString(oss.str()));
 		}
 
 		//
@@ -1331,6 +1378,13 @@ namespace ElysiaRenderer
 		CComPtr<IDxcBlob> pShader = nullptr;
 		CComPtr<IDxcBlobUtf16> pShaderName = nullptr;
 		pResults->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&pShader), nullptr);
+		if (!pShader)
+		{
+			std::ostringstream oss;
+			oss << "DXC compiled, but DXC_OUT_OBJECT is null for " << WstringToString(path)
+				<< " entry=" << WstringToString(entry) << " target=" << WstringToString(target) << "\n";
+			ThrowRuntimeError(oss.str());
+		}
 		if (pShader != nullptr)
 		{
 			FILE* fp = NULL;
@@ -1399,14 +1453,12 @@ namespace ElysiaRenderer
 			// This blob is not meant to be directly interpreted by an application.
 		}
 
-		auto reflectionData = ReflectShaderStage(pResults, pUtils);
-
 		ShaderBytecode o
 		{
 			.bytecode = pShader,
 			.entry = entry,
 			.target = target,
-			.ReflectionData = std::move(reflectionData)
+			.ReflectionData = ReflectShaderStage(pResults, pUtils)
 		};
 
 		return o;
