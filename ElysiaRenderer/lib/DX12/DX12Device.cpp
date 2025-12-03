@@ -836,14 +836,7 @@ namespace ElysiaRenderer
 
 		auto o = std::make_unique<DX12Shader>(std::move(variantMgr), std::move(pKeywordSpace));
 		o->SetRenderStates(renderStates);
-		
-		o.InputElementSemanticNames = std::move(inputElementSemanticNames);
-		o.InputLayoutElementDescs = std::move(inputElementDesc);
-		o.InputLayoutDesc = D3D12_INPUT_LAYOUT_DESC
-		{
-			.pInputElementDescs = o.InputLayoutElementDescs.data(),
-			.NumElements = static_cast<UINT32>(o.InputLayoutElementDescs.size()),
-		};
+		o->BakeVertexLayout();
 
 		return o;
 	}

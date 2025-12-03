@@ -51,7 +51,8 @@ namespace ElysiaRenderer
 		auto& passData = pMaterial->GetPassData(passIndex);
 
 		auto resourceMapping = PipelineResourceMapping();
-		auto pDX12RootSignature = std::unique_ptr<DX12RootSignature>(GetDevice()->CreateRootSignature(*passData.pCurrVariantData->MeshResourceLayouts, resourceMapping));
+		auto pDX12RootSignature = std::unique_ptr<DX12RootSignature>(GetDevice()->CreateRootSignature(
+			*passData.pCurrVariantData->MeshResourceLayouts, resourceMapping));
 		assert(pDX12RootSignature);
 		assert(pDX12RootSignature->GetSignature());
 		
@@ -108,7 +109,6 @@ namespace ElysiaRenderer
 			.Quality = 0
 		};
 		
-		auto desc = CreateDefaultRenderTargetDesc();
 		for (UINT i = 0; i < renderTargetDesc.m_numRenderTargets; ++i)
 		{
 			PSODesc.RTVFormats[i] = renderTargetDesc.m_renderTargetFormats[i];

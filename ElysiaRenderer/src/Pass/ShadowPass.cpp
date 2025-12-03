@@ -310,5 +310,4 @@ namespace ElysiaRenderer
 
 		m_pMaterial->CreateMaterialCBuffer(passIndex);
 	}
-	
 }

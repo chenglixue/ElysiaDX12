@@ -14,6 +14,13 @@ namespace ElysiaHelper
     class ShaderCompileOptions
     {
     public:
+        ShaderCompileOptions() :
+            m_macros(),
+            m_includeDirs(),
+            m_tempStrings()
+        {
+            
+        }
         void SetShaderPath(const std::wstring& path) {m_path = path;}
         void SetEntry(const std::wstring& entry) { m_entry = entry; }
         void SetTarget(const std::wstring& target) { m_target = target; }
