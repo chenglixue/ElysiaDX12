@@ -32,8 +32,8 @@ namespace ElysiaRenderer
 
         int FindBestVariantIndex(const ShaderKeywordSet& target);
 
-        const ShaderVariantData& GetOrCompileVariantByNames(const std::vector<std::wstring>& enabledNames);
-        const ShaderVariantData& GetOrCompileVariant(const ShaderKeywordSet& set);
+        ShaderVariantData& GetOrCompileVariantByNames(const std::vector<std::wstring>& enabledNames);
+        ShaderVariantData& GetOrCompileVariant(const ShaderKeywordSet& set);
 
         const std::vector<ShaderVariantData>& GetAllVariants() const noexcept;
 

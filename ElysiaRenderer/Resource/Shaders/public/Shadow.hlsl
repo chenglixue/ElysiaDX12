@@ -13,7 +13,8 @@
 
 cbuffer ObjectConstant : register(b0, perObjectSpace)
 {
-    Matrix worldMatrix;
+    float test;
+    row_major Matrix worldMatrix;
 };
 
 cbuffer MaterialConstant : register(b0, perMaterialSpace)
@@ -31,8 +32,6 @@ cbuffer PassConstant : register(b0, perPassSpace)
     float shadowDepthBias;
     float shadowSlopeDepthBias;
     float shadowMaxSlopeDepthBias;
-    UINT shadowQuality;
-    UINT shadowType;
     
     Vector2 g_sobolSequence[64];
 };
@@ -93,7 +92,8 @@ PSOutput PS(PSInput i)
     
     SamplerState warpLinearSampler = SamplerDescriptorHeap[WarpLinearSampler];
     Texture2D<float4> baseColorTex = ResourceDescriptorHeap[GBuffer4Index];
-        
+    
+    o.target0 = test;
     float4 baseColor = baseColorTex.Sample(warpLinearSampler, i.uv) * opacity;
     clip(baseColor.a - cutoff);
     

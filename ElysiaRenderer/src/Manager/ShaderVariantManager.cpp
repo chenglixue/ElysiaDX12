@@ -70,7 +70,7 @@ namespace ElysiaRenderer
         return bestIdx;
     }
 
-    const ShaderVariantData& ShaderVariantManager::GetOrCompileVariant(const ShaderKeywordSet& set)
+    ShaderVariantData& ShaderVariantManager::GetOrCompileVariant(const ShaderKeywordSet& set)
     {
         auto it = m_mapKeywordToIndex.find(set);
         if (it != m_mapKeywordToIndex.end())
@@ -90,7 +90,7 @@ namespace ElysiaRenderer
         return m_variants.back();
     }
 
-    const ShaderVariantData& ShaderVariantManager::GetOrCompileVariantByNames(const std::vector<std::wstring>& enabledNames)
+    ShaderVariantData& ShaderVariantManager::GetOrCompileVariantByNames(const std::vector<std::wstring>& enabledNames)
     {
         ShaderKeywordSet set = BuildSetFromNames(enabledNames);
         return GetOrCompileVariant(set);

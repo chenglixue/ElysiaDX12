@@ -600,6 +600,9 @@ namespace DirectX
 
             // Constants
             static const Matrix Identity;
+            
+            static bool EqualMatrix(const Matrix& a, const Matrix& b, float epsilon = 1e-6f);
+
         };
 
         // Binary operators

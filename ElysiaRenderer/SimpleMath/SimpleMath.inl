@@ -2741,6 +2741,19 @@ inline Matrix Matrix::Transform(const Matrix& M, const Quaternion& rotation) noe
     return result;
 }
 
+inline bool Matrix::EqualMatrix(const Matrix& a, const Matrix& b, float epsilon)
+{
+    const float* pa = reinterpret_cast<const float*>(&a);
+    const float* pb = reinterpret_cast<const float*>(&b);
+
+    for (int i = 0; i < 16; ++i)
+    {
+        if (fabsf(pa[i] - pb[i]) > epsilon)
+            return false;
+    }
+    return true;
+}
+
 
 /****************************************************************************
  *

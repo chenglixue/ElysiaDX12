@@ -52,7 +52,7 @@ namespace ElysiaRenderer
 
 		auto resourceMapping = PipelineResourceMapping();
 		auto pDX12RootSignature = std::unique_ptr<DX12RootSignature>(GetDevice()->CreateRootSignature(
-			*passData.pCurrVariantData->MeshResourceLayouts, resourceMapping));
+			*passData.pCurrVariantData->pMeshResourceLayout, resourceMapping));
 		assert(pDX12RootSignature);
 		assert(pDX12RootSignature->GetSignature());
 		
@@ -131,7 +131,7 @@ namespace ElysiaRenderer
 		auto& passData = pMaterial->GetPassData(passIndex);
 
 		auto resourceMapping = PipelineResourceMapping();
-		auto pDX12RootSignature = std::unique_ptr<DX12RootSignature>(GetDevice()->CreateRootSignature(*passData.pCurrVariantData->MeshResourceLayouts, resourceMapping));
+		auto pDX12RootSignature = std::unique_ptr<DX12RootSignature>(GetDevice()->CreateRootSignature(*passData.pCurrVariantData->pMeshResourceLayout, resourceMapping));
 
 		D3D12_COMPUTE_PIPELINE_STATE_DESC PSODesc{};
 		PSODesc.CS = D3D12_SHADER_BYTECODE

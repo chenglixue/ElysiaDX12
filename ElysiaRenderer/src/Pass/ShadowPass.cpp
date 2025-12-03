@@ -58,8 +58,6 @@ namespace ElysiaRenderer
 		ShaderPasseIDs::ShadowCastPassID = m_pMaterial->FindPassIndex("Shadow Cast Pass");
 
 		UpdateVariant();
-
-		
 	}
 	void ShadowPass::Execute()
 	{
@@ -84,88 +82,15 @@ namespace ElysiaRenderer
 
 		m_pCommand->AddBarrier(m_pShadowRT.get(), D3D12_RESOURCE_STATE_DEPTH_WRITE);
 		m_pCommand->ClearDepthStencilTarget(m_pShadowRT.get(), 1.f, 0);
-
-		m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		m_pCommand->SetIndexBuffer(GetBufferManager()->GetIndexBufferView()); 
-		m_pCommand->SetVertexBuffer(0, 1, const_cast<D3D12_VERTEX_BUFFER_VIEW&>(GetBufferManager()->GetVertexBufferView()));
-
 		PipelineInfo pipelineStateData{};
 		pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(ShaderPasseIDs::ShadowCastPassID).pPipelineStateObject;
 		pipelineStateData.m_renderTargets = {};
 		pipelineStateData.m_depthStencilTarget = m_pShadowRT->GetTexture();
-
-		bool isReady = IsTexReady(
-	{
-				m_pShadowRT.get(),
-			});
-		if (isReady)
+		m_pCommand->SetPipeline(pipelineStateData);
+		
+		if (IsTexReady({m_pShadowRT.get()}))
 		{
-			m_pCommand->SetViewport(m_pMainShadow->GetViewport());
-			m_pCommand->SetScissorRect(m_pMainShadow->GetScissorRect());
-			m_pCommand->SetPipeline(pipelineStateData);
-			
-			auto& shadowPassData = m_pMaterial->GetPassData(ShaderPasseIDs::ShadowCastPassID);
-			auto meshResourceLayout = shadowPassData.pCurrVariantData->MeshResourceLayouts.get();
-			m_pCommand->SetPipelineResource(PER_PASS_SPACE, meshResourceLayout->m_spaces[PER_PASS_SPACE]);
-			m_pCommand->SetPipelineResource(PER_FRAME_SPACE, meshResourceLayout->m_spaces[PER_FRAME_SPACE]);
-
-			UINT vertexStride = GetModelImporter()->GetVertexStride();
-
-			if(m_pMaterial->HasMeshRender())
-			{
-				for (UINT meshIndex = 0; meshIndex < GetModelImporter()->GetMeshCount(); ++meshIndex)
-				{
-					const auto& meshRenderer = GetModelImporter()->GetMeshRenderer(meshIndex);
-					const auto& mesh = meshRenderer.m_mesh;
-					
-					{
-						if (meshResourceLayout->m_spaces[PER_OBJECT_SPACE] != nullptr)
-						{
-							delete meshResourceLayout->m_spaces[PER_OBJECT_SPACE];
-							meshResourceLayout->m_spaces[PER_OBJECT_SPACE] = nullptr;
-						}
-						auto newObjectSpace = std::make_unique<PipelineResourceSpace>();
-						newObjectSpace->SetCBV(meshRenderer.m_objectBuffers[GetDevice()->GetFrameID()].get());
-						newObjectSpace->Lock();
-						meshResourceLayout->m_spaces[PER_OBJECT_SPACE] = newObjectSpace.release();
-						m_pMaterial->SetMaterialCBufferGPUPtr(PER_OBJECT_SPACE, ShaderPasseIDs::ShadowCastPassID);
-						
-						m_pCommand->SetPipelineResource(PER_OBJECT_SPACE, meshResourceLayout->m_spaces[PER_OBJECT_SPACE]);
-					}
-
-					{
-						if (meshResourceLayout->m_spaces[PER_MATERIAL_SPACE] != nullptr)
-						{
-							delete meshResourceLayout->m_spaces[PER_MATERIAL_SPACE];
-							meshResourceLayout->m_spaces[PER_MATERIAL_SPACE] = nullptr;
-						}
-						auto newSpace = std::make_unique<PipelineResourceSpace>();
-						newSpace->SetCBV(meshRenderer.m_materialBuffers[GetDevice()->GetFrameID()].get());
-						newSpace->Lock();
-						meshResourceLayout->m_spaces[PER_MATERIAL_SPACE] = newSpace.release();
-						m_pMaterial->SetMaterialCBufferGPUPtr(PER_MATERIAL_SPACE, ShaderPasseIDs::ShadowCastPassID);
-
-						m_pCommand->SetPipelineResource(PER_MATERIAL_SPACE, meshResourceLayout->m_spaces[PER_MATERIAL_SPACE]);
-					}
-
-					m_pMaterial->SetMatrix(ShaderIDs::worldMatrix, meshRenderer.m_CBVObjectParameter->worldMatrix);
-					m_pMaterial->SetUINT(ShaderIDs::baseColorTexIndex, meshRenderer.m_CBVObjectParameter->baseColorTexIndex);
-					m_pMaterial->SetFloat(ShaderIDs::opacity, meshRenderer.m_CBVObjectParameter->opacity);
-					m_pMaterial->SetFloat(ShaderIDs::cutoff, meshRenderer.m_CBVObjectParameter->cutoff);
-					m_pMaterial->Flush();
-
-					auto startIndex = mesh->indexDataOffset / sizeof(UINT16);
-					auto startVertex = mesh->vertexDataOffset / vertexStride;
-					auto VertexCount = mesh->vertexCount;
-					auto indexCount = mesh->indexCount;
-
-					m_pCommand->Draw(indexCount, startVertex, static_cast<UINT>(startIndex));
-				}
-			}
-			else
-			{
-				m_pCommand->DrawFullScreenTriangle();
-			}
+			DrawMesh(ShaderPasseIDs::ShadowCastPassID);
 		}
 
 		m_pCommand->AddBarrier(m_pShadowRT.get(), D3D12_RESOURCE_STATE_DEPTH_READ);
@@ -228,7 +153,6 @@ namespace ElysiaRenderer
 			m_pMainShadow = std::move(shadowMap);
 		}
 	}
-	
 	RenderTexture* ShadowPass::GetShadowRT() const
 	{
 		return m_pShadowRT.get();
@@ -238,12 +162,10 @@ namespace ElysiaRenderer
 	{
 		
 	}
-	
 	void ShadowPass::UpdateVariant()
 	{
 		UpdateShadowPassVariant(ShaderPasseIDs::ShadowCastPassID);
 	}
-
 	void ShadowPass::UpdateShadowPassVariant(UINT passIndex)
 	{
 		std::vector<std::wstring> enableKeywords{};
@@ -292,7 +214,7 @@ namespace ElysiaRenderer
 		{
 			auto VariantManager = passData.pShader->GetVariantManager();
 			auto currVariantData = &VariantManager->GetOrCompileVariantByNames(enableKeywords);
-			auto resourceLayouts = currVariantData->MeshResourceLayouts.get();
+			auto resourceLayouts = currVariantData->pMeshResourceLayout.get();
 			
 			if(passData.pCurrVariantData == nullptr || passData.pCurrVariantData != currVariantData)
 			{
@@ -334,8 +256,80 @@ namespace ElysiaRenderer
 		m_pMaterial->SetMaterialCBufferGPUPtr(PER_FRAME_SPACE, passIndex);
 	}
 
-	void ShadowPass::SetObjectResource()
+	void ShadowPass::SetObjectResource(const MeshRender& meshRender, PipelineResourceLayout* pResourceLayout, UINT passIndex)
 	{
+		assert(pResourceLayout);
+		assert(meshRender.m_mesh);
 		
+		if (pResourceLayout->m_spaces[PER_OBJECT_SPACE] != nullptr)
+		{
+			delete pResourceLayout->m_spaces[PER_OBJECT_SPACE];
+			pResourceLayout->m_spaces[PER_OBJECT_SPACE] = nullptr;
+		}
+		auto newObjectSpace = std::make_unique<PipelineResourceSpace>();
+		newObjectSpace->SetCBV(meshRender.m_objectBuffers[GetDevice()->GetFrameID()].get());
+		newObjectSpace->Lock();
+		pResourceLayout->m_spaces[PER_OBJECT_SPACE] = newObjectSpace.release();
+		m_pMaterial->SetMaterialCBufferGPUPtr(PER_OBJECT_SPACE, passIndex);
+						
+		m_pCommand->SetPipelineResource(PER_OBJECT_SPACE, pResourceLayout->m_spaces[PER_OBJECT_SPACE]);
+	}
+	void ShadowPass::SetMaterialResource(const MeshRender& meshRender, PipelineResourceLayout* pResourceLayout, UINT passIndex)
+	{
+		assert(pResourceLayout);
+		assert(meshRender.m_mesh);
+		
+		if (pResourceLayout->m_spaces[PER_MATERIAL_SPACE] != nullptr)
+		{
+			delete pResourceLayout->m_spaces[PER_MATERIAL_SPACE];
+			pResourceLayout->m_spaces[PER_MATERIAL_SPACE] = nullptr;
+		}
+		auto newSpace = std::make_unique<PipelineResourceSpace>();
+		newSpace->SetCBV(meshRender.m_materialBuffers[GetDevice()->GetFrameID()].get());
+		newSpace->Lock();
+		pResourceLayout->m_spaces[PER_MATERIAL_SPACE] = newSpace.release();
+		m_pMaterial->SetMaterialCBufferGPUPtr(PER_MATERIAL_SPACE, passIndex);
+
+		m_pCommand->SetPipelineResource(PER_MATERIAL_SPACE, pResourceLayout->m_spaces[PER_MATERIAL_SPACE]);
+	}
+	void ShadowPass::DrawMesh(UINT passIndex)
+	{
+		m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		m_pCommand->SetIndexBuffer(GetBufferManager()->GetIndexBufferView()); 
+		m_pCommand->SetVertexBuffer(0, 1, const_cast<D3D12_VERTEX_BUFFER_VIEW&>(GetBufferManager()->GetVertexBufferView()));
+		
+		auto& passData = m_pMaterial->GetPassData(passIndex);
+		auto meshResourceLayout = passData.GetMeshResourceLayout();
+		
+		if(meshResourceLayout->IsValidSpace(PER_PASS_SPACE))
+		{
+			m_pCommand->SetPipelineResource(PER_PASS_SPACE, meshResourceLayout->m_spaces[PER_PASS_SPACE]);
+		}
+		if(meshResourceLayout->IsValidSpace(PER_FRAME_SPACE))
+		{
+			m_pCommand->SetPipelineResource(PER_FRAME_SPACE, GetRenderResource()->GetPerFrameBindResourceSpace());
+		}
+		
+		for (UINT meshIndex = 0; meshIndex < GetModelImporter()->GetMeshCount(); ++meshIndex)
+		{
+			const auto& meshRenderer = GetModelImporter()->GetMeshRenderer(meshIndex);
+			const auto& mesh = meshRenderer.m_mesh;
+			
+			SetObjectResource(meshRenderer, meshResourceLayout, passIndex);
+			SetMaterialResource(meshRenderer, meshResourceLayout, passIndex);
+
+			m_pMaterial->SetMatrix(ShaderIDs::worldMatrix, meshRenderer.m_CBVObjectParameter->worldMatrix);
+			m_pMaterial->SetUINT(ShaderIDs::baseColorTexIndex, meshRenderer.m_CBVObjectParameter->baseColorTexIndex);
+			m_pMaterial->SetFloat(ShaderIDs::opacity, meshRenderer.m_CBVObjectParameter->opacity + 1);
+			m_pMaterial->SetFloat(ShaderIDs::cutoff, meshRenderer.m_CBVObjectParameter->cutoff + 1);
+			m_pMaterial->SetFloat(PropertyToID("test"), 1);
+			m_pMaterial->Flush();
+
+			auto startIndex = mesh->indexDataOffset / sizeof(UINT16);
+			auto startVertex = mesh->vertexDataOffset / GetModelImporter()->GetVertexStride();
+			auto indexCount = mesh->indexCount;
+
+			m_pCommand->Draw(indexCount, startVertex, static_cast<UINT>(startIndex));
+		}
 	}
 }

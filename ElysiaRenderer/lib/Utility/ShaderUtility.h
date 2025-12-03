@@ -120,7 +120,7 @@ namespace ElysiaRenderer
 		
 		std::unordered_map<ShaderType, ShaderBytecode> StageShaders;
 		ShaderReflectionData MergedReflectionData;
-		std::unique_ptr<PipelineResourceLayout> MeshResourceLayouts;
+		std::unique_ptr<PipelineResourceLayout> pMeshResourceLayout;
 
 		ShaderVariantData() =default;
 
@@ -128,14 +128,14 @@ namespace ElysiaRenderer
 		: KeywordSet(other.KeywordSet),
 		  StageShaders(other.StageShaders),
 		  MergedReflectionData(other.MergedReflectionData),
-		  MeshResourceLayouts(other.MeshResourceLayouts ? std::make_unique<PipelineResourceLayout>(*other.MeshResourceLayouts) : nullptr) {}
+		  pMeshResourceLayout(other.pMeshResourceLayout ? std::make_unique<PipelineResourceLayout>(*other.pMeshResourceLayout) : nullptr) {}
 
 		// 移动构造函数
 		ShaderVariantData(ShaderVariantData&& other) noexcept
 			: KeywordSet(std::move(other.KeywordSet)),
 			  StageShaders(std::move(other.StageShaders)),
 			  MergedReflectionData(std::move(other.MergedReflectionData)),
-			  MeshResourceLayouts(std::move(other.MeshResourceLayouts)) {}
+			  pMeshResourceLayout(std::move(other.pMeshResourceLayout)) {}
 
 		ShaderVariantData& operator=(const ShaderVariantData& rhs)
 		{
@@ -143,7 +143,7 @@ namespace ElysiaRenderer
 				KeywordSet = rhs.KeywordSet;
 				StageShaders = rhs.StageShaders;
 				MergedReflectionData = rhs.MergedReflectionData;
-				MeshResourceLayouts = rhs.MeshResourceLayouts ? std::make_unique<PipelineResourceLayout>(*rhs.MeshResourceLayouts) : nullptr;
+				pMeshResourceLayout = rhs.pMeshResourceLayout ? std::make_unique<PipelineResourceLayout>(*rhs.pMeshResourceLayout) : nullptr;
 			}
 			return *this;
 		}
@@ -152,7 +152,7 @@ namespace ElysiaRenderer
 		{
 			if (this != & rhs)
 			{
-				this->MeshResourceLayouts = std::move(rhs.MeshResourceLayouts);
+				this->pMeshResourceLayout = std::move(rhs.pMeshResourceLayout);
 				this->KeywordSet = std::move(rhs.KeywordSet);
 				this->StageShaders = std::move(rhs.StageShaders);
 				this->MergedReflectionData = std::move(rhs.MergedReflectionData);

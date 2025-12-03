@@ -24,6 +24,12 @@ namespace ElysiaRenderer
 	struct PipelineResourceLayout
 	{
 		std::array<PipelineResourceSpace*, NUM_RESOURCE_SPACES> m_spaces{  };
+		
+		bool IsValidSpace(size_t spaceID)
+		{
+			assert(spaceID < NUM_RESOURCE_SPACES);
+			return m_spaces[spaceID];
+		}
 	};
 
 	inline bool SortPipelineBindings(PipelineResourceBinding* a, PipelineResourceBinding* b)

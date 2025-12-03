@@ -73,7 +73,7 @@ namespace ElysiaRenderer
 	};
 	struct MaterialRuntimeCBuffer
 	{
-		std::unordered_map<uint32_t, RuntimeCBuffer> CBuffers;
+		std::array<RuntimeCBuffer, NUM_RESOURCE_SPACES> CBuffers;
 	};
 	
 	struct PassData
@@ -84,7 +84,7 @@ namespace ElysiaRenderer
 		D3D12_RASTERIZER_DESC		RasterizerDesc;
 		D3D12_BLEND_DESC			BlendDesc;
 		D3D12_DEPTH_STENCIL_DESC	DepthStencilDesc;
-		const ShaderVariantData*	pCurrVariantData = nullptr;
+		ShaderVariantData*	pCurrVariantData = nullptr;
 		PipelineStateObject*  pPipelineStateObject = nullptr;
 		std::unique_ptr<MaterialRuntimeCBuffer> pMaterialCBuffer = nullptr;
 		UINT8* pPassGPUPtr = nullptr;
@@ -92,16 +92,20 @@ namespace ElysiaRenderer
 		
 		struct SaveData
 		{
-			const ShaderVariantData*	pCurrVariantData = nullptr;
+			ShaderVariantData*	pCurrVariantData = nullptr;
 			PipelineStateObject*  pPipelineStateObject = nullptr;
 			UINT8* pPassGPUPtr = nullptr;
 			UINT8* pFrameGPUPtr = nullptr;
 		};
 		
-		
-		
 		// enableKeywords : SaveData
 		std::unordered_map<std::vector<std::wstring>, SaveData> keywords;
+		
+		PipelineResourceLayout* GetMeshResourceLayout()
+		{
+			assert(pCurrVariantData);
+			return pCurrVariantData->pMeshResourceLayout.get();
+		}
 	};
 
 	

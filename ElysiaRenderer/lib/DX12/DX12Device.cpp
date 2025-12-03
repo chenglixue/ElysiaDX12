@@ -1533,7 +1533,7 @@ namespace ElysiaRenderer
 			o.MergedReflectionData.Merge(o.StageShaders[stage.ShaderType].ReflectionData);
 		}
 		
-		o.MeshResourceLayouts = std::make_unique<PipelineResourceLayout>();
+		o.pMeshResourceLayout = std::make_unique<PipelineResourceLayout>();
 		for (auto& shaderVariable : o.MergedReflectionData.cbuffers)
 		{
 			auto currVariable = shaderVariable.second;
@@ -1550,17 +1550,12 @@ namespace ElysiaRenderer
 						.m_isRawAccess = false,
 					};
 					
-					{
-						std::unique_ptr<PipelineResourceSpace> pPipelineResourceSpace = std::make_unique<PipelineResourceSpace>();
-						pPipelineResourceSpace->SetCBVDesc(bufferDesc);
-						//if (currVariable.spaceID == PER_PASS_SPACE || currVariable.spaceID == PER_FRAME_SPACE)
-						{
-							auto pGPUBuffer = std::move(CreateBuffer(bufferDesc));
-							pPipelineResourceSpace->SetCBV(pGPUBuffer.release());
-							pPipelineResourceSpace->Lock();
-						}
-						o.MeshResourceLayouts->m_spaces[currVariable.spaceID] = pPipelineResourceSpace.release();
-					}
+					std::unique_ptr<PipelineResourceSpace> pPipelineResourceSpace = std::make_unique<PipelineResourceSpace>();
+					pPipelineResourceSpace->SetCBVDesc(bufferDesc);
+					auto pGPUBuffer = std::move(CreateBuffer(bufferDesc));
+					pPipelineResourceSpace->SetCBV(pGPUBuffer.release());
+					pPipelineResourceSpace->Lock();
+					o.pMeshResourceLayout->m_spaces[currVariable.spaceID] = pPipelineResourceSpace.release();
 
 					break;
 				}

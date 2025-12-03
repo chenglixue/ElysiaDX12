@@ -11,6 +11,35 @@ namespace ElysiaRenderer
 {
 	using namespace ElysiaModel;
 	
+	// ---------- EqualBufferData 帮助函数（POD 精确比较或浮点带容差） ----------
+	inline bool EqualBufferDataExact(const void* a, const void* b, size_t bytes) noexcept
+	{
+		return memcmp(a, b, bytes) == 0;
+	}
+
+	// 浮点容差比较（用于 Matrix/Vector）
+	inline bool EqualFloatBufferWithTolerance(const float* a, const float* b, size_t count, float eps = 1e-6f) noexcept
+	{
+		for (size_t i = 0; i < count; ++i)
+		{
+			if (fabsf(a[i] - b[i]) > eps) return false;
+		}
+		return true;
+	}
+	
+	template<typename T>
+	inline bool EqualBufferData(const T* a, const T* b, size_t count) noexcept
+	{
+		if constexpr (std::is_floating_point_v<T>)
+		{
+			return EqualFloatBufferWithTolerance(reinterpret_cast<const float*>(a), reinterpret_cast<const float*>(b), count);
+		}
+		else
+		{
+			return memcmp(a, b, sizeof(T) * count) == 0;
+		}
+	}
+	
 	Material::Material(std::vector<ShaderPass>& shaderPasses)
 	{
 		Init(shaderPasses);
@@ -97,17 +126,15 @@ namespace ElysiaRenderer
 
 	void Material::CreateMaterialCBuffer(size_t passIndex)
 	{
-		auto layouts = m_passDatas[passIndex].pCurrVariantData->MergedReflectionData.cbuffers;
+		auto& layouts = m_passDatas[passIndex].pCurrVariantData->MergedReflectionData.cbuffers;
 		auto& pMaterialCBuffer = m_passDatas[passIndex].pMaterialCBuffer;
 		
 		pMaterialCBuffer = std::make_unique<MaterialRuntimeCBuffer>();
 		
 		for (auto&[space, layout] : layouts)
-		{
-			RuntimeCBuffer runtimeCBuffer{};
-			runtimeCBuffer.CPUPtr.resize(layout.size);
-
-			pMaterialCBuffer->CBuffers[space] = runtimeCBuffer;
+		{ 
+			pMaterialCBuffer->CBuffers[space].CPUPtr.resize(layout.size);
+			pMaterialCBuffer->CBuffers[space].GPUPtr = nullptr;
 		}
 	}
 
@@ -122,25 +149,25 @@ namespace ElysiaRenderer
 				for (UINT frameIndex = 0; frameIndex < NUM_FRAMES_IN_FLIGHT; ++frameIndex)
 				{
 					auto objectBufferDesc = pPipelineResourceLayout->m_spaces[PER_OBJECT_SPACE]->GetCBVDesc();
-					if (meshRenderer.m_objectBuffers[frameIndex] &&
-						meshRenderer.m_objectBuffers[frameIndex]->GetResourceDesc().Width != objectBufferDesc.m_size)
-					{
-						meshRenderer.m_objectBuffers[frameIndex].reset();
-						meshRenderer.m_objectBuffers[frameIndex] = std::move(GetDevice()->CreateBuffer(objectBufferDesc));
-					}
-					else if(meshRenderer.m_objectBuffers[frameIndex] == nullptr)
+					// if (meshRenderer.m_objectBuffers[frameIndex] &&
+					// 	meshRenderer.m_objectBuffers[frameIndex]->GetResourceDesc().Width != objectBufferDesc.m_size)
+					// {
+					// 	meshRenderer.m_objectBuffers[frameIndex].reset();
+					// 	meshRenderer.m_objectBuffers[frameIndex] = std::move(GetDevice()->CreateBuffer(objectBufferDesc));
+					// }
+					// else if(meshRenderer.m_objectBuffers[frameIndex] == nullptr)
 					{
 						meshRenderer.m_objectBuffers[frameIndex] = std::move(GetDevice()->CreateBuffer(objectBufferDesc));
 					}
 
 					auto materialBufferDesc = pPipelineResourceLayout->m_spaces[PER_MATERIAL_SPACE]->GetCBVDesc();
-					if (meshRenderer.m_materialBuffers[frameIndex] &&
-						meshRenderer.m_materialBuffers[frameIndex]->GetResourceDesc().Width != materialBufferDesc.m_size)
-					{
-						meshRenderer.m_materialBuffers[frameIndex].reset();
-						meshRenderer.m_materialBuffers[frameIndex] = std::move(GetDevice()->CreateBuffer(materialBufferDesc));
-					}
-					else if(meshRenderer.m_materialBuffers[frameIndex] == nullptr)
+					// if (meshRenderer.m_materialBuffers[frameIndex] &&
+					// 	meshRenderer.m_materialBuffers[frameIndex]->GetResourceDesc().Width != materialBufferDesc.m_size)
+					// {
+					// 	meshRenderer.m_materialBuffers[frameIndex].reset();
+					// 	meshRenderer.m_materialBuffers[frameIndex] = std::move(GetDevice()->CreateBuffer(materialBufferDesc));
+					// }
+					// else if(meshRenderer.m_materialBuffers[frameIndex] == nullptr)
 					{
 						meshRenderer.m_materialBuffers[frameIndex] = std::move(GetDevice()->CreateBuffer(materialBufferDesc));
 					}
@@ -152,9 +179,10 @@ namespace ElysiaRenderer
 	void Material::SetMaterialCBufferGPUPtr(UINT spaceID, size_t passIndex)
 	{
 		assert(passIndex < m_passDatas.size());
-
 		auto& passData = GetPassData(passIndex);
-		auto  GPUPtr = passData.pCurrVariantData->MeshResourceLayouts->m_spaces[spaceID]->GetCBV()->GetMappedBuffer();
+		assert(passData.pCurrVariantData && passData.pCurrVariantData->pMeshResourceLayout && passData.pCurrVariantData->pMeshResourceLayout->m_spaces[spaceID]);
+		
+		auto  GPUPtr = passData.pCurrVariantData->pMeshResourceLayout->m_spaces[spaceID]->GetCBV()->GetMappedBuffer();
 		assert(GPUPtr);
 		m_passDatas[passIndex].pMaterialCBuffer->CBuffers[spaceID].GPUPtr = GPUPtr;
 	}
@@ -163,7 +191,7 @@ namespace ElysiaRenderer
 	{
 		for (auto& passData : m_passDatas)
 		{
-			for (auto& [spaceID, CBuffer] : passData.pMaterialCBuffer->CBuffers)
+			for (auto& CBuffer : passData.pMaterialCBuffer->CBuffers)
 			{
 				if (!CBuffer.HasDirtyRange()) continue;
 
@@ -181,12 +209,15 @@ namespace ElysiaRenderer
 	template<typename T>
 	void Material::UpdateCBuffer(RuntimeCBuffer& CBuffer, UINT32 offset, const T data)
 	{
-		if (offset + sizeof(T) > CBuffer.CPUPtr.size())
+		static_assert(std::is_trivially_copyable_v<T>, "T must be POD");
+		
+		const size_t size = sizeof(T);
+		if (offset + size > CBuffer.CPUPtr.size())
 		{
 			throw std::out_of_range("Buffer update exceeds allocated size.");
-		}
-		memcpy(CBuffer.CPUPtr.data() + offset, &data, sizeof(T));
-		CBuffer.MakeDirty(offset, sizeof(T));
+		} 
+		memcpy(CBuffer.CPUPtr.data() + offset, &data, size);
+		CBuffer.MakeDirty(offset, size);
 	}
 	template<typename T>
 	void Material::UpdateCBuffer(RuntimeCBuffer& CBuffer, UINT32 offset, const std::vector<T> data)
@@ -204,13 +235,13 @@ namespace ElysiaRenderer
 	{
 		assert(passIndex < m_passDatas.size());
 		
-		auto& pMaterialCBuffer = m_passDatas[passIndex].pMaterialCBuffer;
+		auto pMaterialCBuffer = m_passDatas[passIndex].pMaterialCBuffer.get();
 		assert(pMaterialCBuffer);
 
 		auto& allCBuffers = pMaterialCBuffer->CBuffers;
 		for (UINT spaceID = 0; spaceID < allCBuffers.size(); ++spaceID)
 		{
-			if (allCBuffers.count(spaceID) == 0) continue;
+			if (!allCBuffers[spaceID].CPUPtr.data()) continue;
 			auto& cbuffer = allCBuffers[spaceID];
 
 			const auto& mergedReflectionData = m_passDatas[passIndex].pCurrVariantData->MergedReflectionData;
@@ -236,7 +267,7 @@ namespace ElysiaRenderer
 		auto& allCBuffers = pMaterialCBuffer->CBuffers;
 		for (UINT spaceID = 0; spaceID < allCBuffers.size(); ++spaceID)
 		{
-			if (allCBuffers.count(spaceID) == 0) continue;
+			if (!allCBuffers[spaceID].CPUPtr.data()) continue;
 			auto& cbuffer = allCBuffers[spaceID];
 
 			const auto& mergedReflectionData = m_passDatas[passIndex].pCurrVariantData->MergedReflectionData;
@@ -262,7 +293,7 @@ namespace ElysiaRenderer
 		auto& allCBuffers = pMaterialCBuffer->CBuffers;
 		for (UINT spaceID = 0; spaceID < allCBuffers.size(); ++spaceID)
 		{
-			if (allCBuffers.count(spaceID) == 0) continue;
+			if (!allCBuffers[spaceID].CPUPtr.data()) continue;
 			auto& cbuffer = allCBuffers[spaceID];
 
 			const auto& mergedReflectionData = m_passDatas[passIndex].pCurrVariantData->MergedReflectionData;
@@ -277,7 +308,7 @@ namespace ElysiaRenderer
 				}
 			}
 		}
-	}
+	} 
 	void Material::SetBool(const size_t hashName, const int newValue, size_t passIndex)
 	{
 		assert(passIndex < m_passDatas.size());
@@ -288,7 +319,7 @@ namespace ElysiaRenderer
 		auto& allCBuffers = pMaterialCBuffer->CBuffers;
 		for (UINT spaceID = 0; spaceID < allCBuffers.size(); ++spaceID)
 		{
-			if (allCBuffers.count(spaceID) == 0) continue;
+			if (!allCBuffers[spaceID].CPUPtr.data()) continue;
 			auto& cbuffer = allCBuffers[spaceID];
 
 			const auto& mergedReflectionData = m_passDatas[passIndex].pCurrVariantData->MergedReflectionData;
@@ -307,24 +338,31 @@ namespace ElysiaRenderer
 	void Material::SetMatrix(const size_t hashName, const Matrix newValue, size_t passIndex)
 	{
 		assert(passIndex < m_passDatas.size());
-
+		
 		auto& pMaterialCBuffer = m_passDatas[passIndex].pMaterialCBuffer;
 		assert(pMaterialCBuffer);
 
 		auto& allCBuffers = pMaterialCBuffer->CBuffers;
-		for (UINT spaceID = 0; spaceID < allCBuffers.size(); ++spaceID)
+		for (UINT spaceID = 0; spaceID < NUM_RESOURCE_SPACES; ++spaceID)
 		{
-			if (allCBuffers.count(spaceID) == 0) continue;
+			if (!allCBuffers[spaceID].CPUPtr.data()) continue;
 			auto& cbuffer = allCBuffers[spaceID];
-
+ 
 			const auto& mergedReflectionData = m_passDatas[passIndex].pCurrVariantData->MergedReflectionData;
 			if (mergedReflectionData.HasCBufferMember(spaceID, hashName))
 			{
 				const auto memberData = mergedReflectionData.FindCBufferMember(spaceID, hashName);
 
+				if (cbuffer.CPUPtr.empty() || memberData.StartOffset + sizeof(Matrix) > cbuffer.CPUPtr.size())
+				{
+					ThrowRuntimeError("invalid size");
+					return;
+				} 
+				
 				Matrix currValue;
 				memcpy(&currValue, cbuffer.CPUPtr.data() + memberData.StartOffset, sizeof(Matrix));
-				if (currValue != newValue)
+				
+				if (!EqualFloatBufferWithTolerance(reinterpret_cast<const float*>(&currValue), reinterpret_cast<const float*>(&newValue), 16))
 				{
 					UpdateCBuffer<Matrix>(cbuffer, memberData.StartOffset, newValue);
 				}
@@ -345,7 +383,7 @@ namespace ElysiaRenderer
 		auto& allCBuffers = pMaterialCBuffer->CBuffers;
 		for (UINT spaceID = 0; spaceID < allCBuffers.size(); ++spaceID)
 		{
-			if (allCBuffers.count(spaceID) == 0) continue;
+			if (!allCBuffers[spaceID].CPUPtr.data()) continue;
 			auto& cbuffer = allCBuffers[spaceID];
 
 			const auto& mergedReflectionData = m_passDatas[passIndex].pCurrVariantData->MergedReflectionData;
@@ -381,7 +419,7 @@ namespace ElysiaRenderer
 		auto& allCBuffers = pMaterialCBuffer->CBuffers;
 		for (UINT spaceID = 0; spaceID < allCBuffers.size(); ++spaceID)
 		{
-			if (allCBuffers.count(spaceID) == 0) continue;
+			if (!allCBuffers[spaceID].CPUPtr.data()) continue;
 			auto& cbuffer = allCBuffers[spaceID];
 
 			const auto& mergedReflectionData = m_passDatas[passIndex].pCurrVariantData->MergedReflectionData;
@@ -418,7 +456,7 @@ namespace ElysiaRenderer
 		auto& allCBuffers = pMaterialCBuffer->CBuffers;
 		for (UINT spaceID = 0; spaceID < allCBuffers.size(); ++spaceID)
 		{
-			if (allCBuffers.count(spaceID) == 0) continue;
+			if (!allCBuffers[spaceID].CPUPtr.data()) continue;
 			auto& cbuffer = allCBuffers[spaceID];
 
 			const auto& mergedReflectionData = m_passDatas[passIndex].pCurrVariantData->MergedReflectionData;
@@ -455,7 +493,7 @@ namespace ElysiaRenderer
 		auto& allCBuffers = pMaterialCBuffer->CBuffers;
 		for (UINT spaceID = 0; spaceID < allCBuffers.size(); ++spaceID)
 		{
-			if (allCBuffers.count(spaceID) == 0) continue;
+			if (!allCBuffers[spaceID].CPUPtr.data()) continue;
 			auto& cbuffer = allCBuffers[spaceID];
 
 			const auto& mergedReflectionData = m_passDatas[passIndex].pCurrVariantData->MergedReflectionData;
