@@ -1551,10 +1551,11 @@ namespace ElysiaRenderer
 					{
 						std::unique_ptr<PipelineResourceSpace> pPipelineResourceSpace = std::make_unique<PipelineResourceSpace>();
 						pPipelineResourceSpace->SetCBVDesc(bufferDesc);
-						if (currVariable.spaceID == PER_PASS_SPACE || currVariable.spaceID == PER_FRAME_SPACE)
+						//if (currVariable.spaceID == PER_PASS_SPACE || currVariable.spaceID == PER_FRAME_SPACE)
 						{
 							auto pGPUBuffer = std::move(CreateBuffer(bufferDesc));
 							pPipelineResourceSpace->SetCBV(pGPUBuffer.release());
+							pPipelineResourceSpace->Lock();
 						}
 						o.MeshResourceLayouts->m_spaces[currVariable.spaceID] = pPipelineResourceSpace.release();
 					}

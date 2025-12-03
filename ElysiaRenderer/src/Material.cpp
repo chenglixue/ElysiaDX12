@@ -149,35 +149,6 @@ namespace ElysiaRenderer
 				}
 			}
 		}
-
-		if (pPipelineResourceLayout->m_spaces[PER_PASS_SPACE] != nullptr)
-		{
-			const auto& desc = pPipelineResourceLayout->m_spaces[PER_PASS_SPACE]->GetCBVDesc();
-			if(m_pPassConstantBuffer != nullptr && m_pPassConstantBuffer->GetResourceDesc().Width != desc.m_size)
-			{
-				m_pPassConstantBuffer.reset();
-				m_pPassConstantBuffer = std::move(GetDevice()->CreateBuffer(desc));
-			}
-			else if(m_pPassConstantBuffer == nullptr)
-			{
-				m_pPassConstantBuffer = std::move(GetDevice()->CreateBuffer(desc));
-			}
-			
-		}
-		
-		if(pPipelineResourceLayout->m_spaces[PER_FRAME_SPACE] != nullptr)
-		{
-			const auto& desc = pPipelineResourceLayout->m_spaces[PER_FRAME_SPACE]->GetCBVDesc();
-			if(m_pFrameConstantBuffer != nullptr && m_pFrameConstantBuffer->GetResourceDesc().Width != desc.m_size)
-			{
-				m_pFrameConstantBuffer.reset();
-				m_pFrameConstantBuffer = std::move(GetDevice()->CreateBuffer(desc));
-			}
-			else if(m_pFrameConstantBuffer == nullptr)
-			{
-				m_pFrameConstantBuffer = std::move(GetDevice()->CreateBuffer(desc));
-			}
-		}
 	}
 	
 	void Material::SetMaterialCBufferGPUPtr(UINT spaceID, UINT8* pMappedBuffer, size_t passIndex)

@@ -83,7 +83,7 @@ namespace ElysiaRenderer
 		m_pCommand->SetVertexBuffer(0, 1, const_cast<D3D12_VERTEX_BUFFER_VIEW&>(GetBufferManager()->GetVertexBufferView()));
 
 		PipelineInfo pipelineStateData{};
-		pipelineStateData.m_pipelineStateObject = m_PipelineStateObjects[ShaderPasseIDs::ShadowCastPassID];
+		pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(ShaderPasseIDs::ShadowCastPassID).pPipelineStateObject;
 		pipelineStateData.m_renderTargets = {};
 		pipelineStateData.m_depthStencilTarget = m_pShadowRT->GetTexture();
 

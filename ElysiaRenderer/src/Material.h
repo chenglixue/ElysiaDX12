@@ -75,7 +75,7 @@ namespace ElysiaRenderer
 		D3D12_BLEND_DESC			BlendDesc;
 		D3D12_DEPTH_STENCIL_DESC	DepthStencilDesc;
 		const ShaderVariantData*	pCurrVariantData = nullptr;
-		const PipelineStateObject*  pPipelineStateObject = nullptr;
+		PipelineStateObject*  pPipelineStateObject = nullptr;
 		std::unique_ptr<MaterialRuntimeCBuffer> pMaterialCBuffer = nullptr;
 		UINT8* pPassGPUPtr = nullptr;
 		UINT8* pFrameGPUPtr = nullptr;
@@ -83,7 +83,7 @@ namespace ElysiaRenderer
 		struct SaveData
 		{
 			const ShaderVariantData*	pCurrVariantData = nullptr;
-			const PipelineStateObject*  pPipelineStateObject = nullptr;
+			PipelineStateObject*  pPipelineStateObject = nullptr;
 			UINT8* pPassGPUPtr = nullptr;
 			UINT8* pFrameGPUPtr = nullptr;
 		};
