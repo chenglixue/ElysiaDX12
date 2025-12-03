@@ -67,6 +67,13 @@ namespace ElysiaRenderer
 
 				currElement.SemanticName = semanticPtr;
 				currVertexLayout.m_vertexInputLayoutElementDescs.emplace_back(currElement);
+
+#ifdef DEBUG
+				std::cout << "Input Element name is " << currVertexLayout.m_vertexInputLayoutElementDescs.back().SemanticName << std::endl;
+				std::cout << "Input Element Index is " << currVertexLayout.m_vertexInputLayoutElementDescs.back().SemanticIndex << std::endl;
+				std::cout << "Input Element Format is " << DXGIFormatToString(currVertexLayout.m_vertexInputLayoutElementDescs.back().Format) << std::endl;
+				std::cout << std::endl;
+#endif // DEBUG
 			}
 
 			if (!currVertexLayout.m_vertexInputLayoutElementDescs.empty())
@@ -81,6 +88,7 @@ namespace ElysiaRenderer
 				currReflectionData.InputLayoutDesc.pInputElementDescs = nullptr;
 				currReflectionData.InputLayoutDesc.NumElements = 0;
 			}
+
 		}
 	}
 }

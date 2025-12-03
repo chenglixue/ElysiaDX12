@@ -1,14 +1,25 @@
 ﻿  Skipping vcpkg. (no packages)
 cl : command line  warning D9014: invalid value '18' for '/wd'; assuming '5999'
-  ShadowPass.cpp
+  Material.cpp
 C:\Work\ElysiaRenderer\ElysiaRenderer\lib\DX12\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file '/src/Pass/ShadowPass.cpp')
+  (compiling source file '/src/Material.cpp')
   
 C:\Work\ElysiaRenderer\ElysiaRenderer\src\Manager\ShaderVariantManager.h(8,11): warning C4099: 'ElysiaRenderer::ShaderVariantData': type name first seen using 'struct' now seen using 'class'
-  (compiling source file '/src/Pass/ShadowPass.cpp')
+  (compiling source file '/src/Material.cpp')
       C:\Work\ElysiaRenderer\ElysiaRenderer\lib\Utility\ShaderUtility.h(117,9):
       see declaration of 'ElysiaRenderer::ShaderVariantData'
   
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Material.cpp(156,32): warning C4267: 'argument': conversion from 'size_t' to 'UINT', possible loss of data
+  (compiling source file '/src/Material.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Material.cpp(200,29): warning C4267: 'argument': conversion from 'size_t' to 'UINT32', possible loss of data
+  (compiling source file '/src/Material.cpp')
+      C:\Work\ElysiaRenderer\ElysiaRenderer\src\Material.cpp(200,29):
+      the template instantiation context (the oldest one first) is
+          C:\Work\ElysiaRenderer\ElysiaRenderer\src\Material.cpp(332,6):
+          see reference to function template instantiation 'void ElysiaRenderer::Material::UpdateCBuffer<float>(ElysiaRenderer::RuntimeCBuffer &,UINT32,const std::vector<float,std::allocator<float>>)' being compiled
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Material.cpp(91): warning C4715: 'ElysiaRenderer::Material::FindPassIndex': not all control paths return a value
   ElysiaRenderer.vcxproj -> C:\Work\ElysiaRenderer\x64\Debug\ElysiaRenderer.exe
   C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Mesh\diablo3_pose.obj
   C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Mesh\LOW_WEPON.fbx

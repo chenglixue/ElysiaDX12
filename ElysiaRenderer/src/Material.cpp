@@ -100,8 +100,6 @@ namespace ElysiaRenderer
 		auto layouts = m_passDatas[passIndex].pCurrVariantData->MergedReflectionData.cbuffers;
 		auto& pMaterialCBuffer = m_passDatas[passIndex].pMaterialCBuffer;
 		
-		if (pMaterialCBuffer != nullptr) pMaterialCBuffer.reset();
-		
 		pMaterialCBuffer = std::make_unique<MaterialRuntimeCBuffer>();
 		
 		for (auto&[space, layout] : layouts)
@@ -151,59 +149,333 @@ namespace ElysiaRenderer
 		}
 	}
 	
-	void Material::SetMaterialCBufferGPUPtr(UINT spaceID, UINT8* pMappedBuffer, size_t passIndex)
+	void Material::SetMaterialCBufferGPUPtr(UINT spaceID, size_t passIndex)
 	{
 		assert(passIndex < m_passDatas.size());
-		m_passDatas[passIndex].pMaterialCBuffer->CBuffers[spaceID].GPUPtr = pMappedBuffer;
-	}
 
-	template<typename T>
-	void Material::UpdateCBuffer(RuntimeCBuffer& CBuffer, UINT32 offset, const T& data)
-	{
-		memcpy(CBuffer.CPUPtr.data() + offset, &data, sizeof(T));
-		CBuffer.MakeDirty(offset, sizeof(T));
-	}
-
-	void Material::SetFloat(const size_t hashName, const float& value, size_t passIndex)
-	{
-		assert(passIndex < m_passDatas.size());
-		
-		auto pMaterialCBuffer = m_passDatas[passIndex].pMaterialCBuffer.get();
-		assert(pMaterialCBuffer);
-
-		auto allCBuffers = pMaterialCBuffer->CBuffers;
-		for (UINT spaceID = 0; spaceID < allCBuffers.size(); ++spaceID)
-		{
-			if (allCBuffers.find(spaceID) == allCBuffers.end()) continue;
-			auto cbuffer = allCBuffers[spaceID];
-
-			const auto& mergedReflectionData = m_passDatas[passIndex].pCurrVariantData->MergedReflectionData;
-			if (mergedReflectionData.HasCBufferMember(spaceID, hashName))
-			{
-				const auto memberData = mergedReflectionData.FindCBufferMember(spaceID, hashName);
-				UpdateCBuffer<float>(cbuffer, memberData.StartOffset, value);
-			}
-			
-			
-		}
+		auto& passData = GetPassData(passIndex);
+		auto  GPUPtr = passData.pCurrVariantData->MeshResourceLayouts->m_spaces[spaceID]->GetCBV()->GetMappedBuffer();
+		assert(GPUPtr);
+		m_passDatas[passIndex].pMaterialCBuffer->CBuffers[spaceID].GPUPtr = GPUPtr;
 	}
 
 	void Material::Flush()
 	{
 		for (auto& passData : m_passDatas)
 		{
-			for (auto&[spaceID, CBuffer] : passData.pMaterialCBuffer->CBuffers)
+			for (auto& [spaceID, CBuffer] : passData.pMaterialCBuffer->CBuffers)
 			{
 				if (!CBuffer.HasDirtyRange()) continue;
 
 				UINT32 size = CBuffer.DirtyEnd - CBuffer.DirtyBegin;
+				assert(CBuffer.DirtyBegin + size <= CBuffer.CPUPtr.size());
 
 				memcpy(CBuffer.GPUPtr + CBuffer.DirtyBegin, CBuffer.CPUPtr.data() + CBuffer.DirtyBegin, size);
 
 				CBuffer.ClearDirty();
-			}	
+			}
 		}
-		
+
 	}
 
+	template<typename T>
+	void Material::UpdateCBuffer(RuntimeCBuffer& CBuffer, UINT32 offset, const T data)
+	{
+		if (offset + sizeof(T) > CBuffer.CPUPtr.size())
+		{
+			throw std::out_of_range("Buffer update exceeds allocated size.");
+		}
+		memcpy(CBuffer.CPUPtr.data() + offset, &data, sizeof(T));
+		CBuffer.MakeDirty(offset, sizeof(T));
+	}
+	template<typename T>
+	void Material::UpdateCBuffer(RuntimeCBuffer& CBuffer, UINT32 offset, const std::vector<T> data)
+	{
+		auto size = sizeof(T) * data.size();
+		if (offset + size > CBuffer.CPUPtr.size())
+		{
+			throw std::out_of_range("Buffer update exceeds allocated size.");
+		}
+		memcpy(CBuffer.CPUPtr.data() + offset, data.data(), size);
+		CBuffer.MakeDirty(offset, size);
+	}
+
+	void Material::SetFloat(const size_t hashName, const float newValue, size_t passIndex)
+	{
+		assert(passIndex < m_passDatas.size());
+		
+		auto& pMaterialCBuffer = m_passDatas[passIndex].pMaterialCBuffer;
+		assert(pMaterialCBuffer);
+
+		auto& allCBuffers = pMaterialCBuffer->CBuffers;
+		for (UINT spaceID = 0; spaceID < allCBuffers.size(); ++spaceID)
+		{
+			if (allCBuffers.count(spaceID) == 0) continue;
+			auto& cbuffer = allCBuffers[spaceID];
+
+			const auto& mergedReflectionData = m_passDatas[passIndex].pCurrVariantData->MergedReflectionData;
+			if (mergedReflectionData.HasCBufferMember(spaceID, hashName))
+			{
+				const auto memberData = mergedReflectionData.FindCBufferMember(spaceID, hashName);
+
+				float currValue = *reinterpret_cast<float*>(cbuffer.CPUPtr.data() + memberData.StartOffset);
+				if (currValue != newValue)
+				{
+					UpdateCBuffer<float>(cbuffer, memberData.StartOffset, newValue);
+				}
+			}
+		}
+	}
+	void Material::SetInt(const size_t hashName, const int newValue, size_t passIndex)
+	{
+		assert(passIndex < m_passDatas.size());
+
+		auto& pMaterialCBuffer = m_passDatas[passIndex].pMaterialCBuffer;
+		assert(pMaterialCBuffer);
+
+		auto& allCBuffers = pMaterialCBuffer->CBuffers;
+		for (UINT spaceID = 0; spaceID < allCBuffers.size(); ++spaceID)
+		{
+			if (allCBuffers.count(spaceID) == 0) continue;
+			auto& cbuffer = allCBuffers[spaceID];
+
+			const auto& mergedReflectionData = m_passDatas[passIndex].pCurrVariantData->MergedReflectionData;
+			if (mergedReflectionData.HasCBufferMember(spaceID, hashName))
+			{
+				const auto memberData = mergedReflectionData.FindCBufferMember(spaceID, hashName);
+
+				auto currValue = *reinterpret_cast<int*>(cbuffer.CPUPtr.data() + memberData.StartOffset);
+				if (currValue != newValue)
+				{
+					UpdateCBuffer<int>(cbuffer, memberData.StartOffset, newValue);
+				}
+			}
+		}
+	}
+	void Material::SetUINT(const size_t hashName, const UINT newValue, size_t passIndex)
+	{
+		assert(passIndex < m_passDatas.size());
+
+		auto& pMaterialCBuffer = m_passDatas[passIndex].pMaterialCBuffer;
+		assert(pMaterialCBuffer);
+
+		auto& allCBuffers = pMaterialCBuffer->CBuffers;
+		for (UINT spaceID = 0; spaceID < allCBuffers.size(); ++spaceID)
+		{
+			if (allCBuffers.count(spaceID) == 0) continue;
+			auto& cbuffer = allCBuffers[spaceID];
+
+			const auto& mergedReflectionData = m_passDatas[passIndex].pCurrVariantData->MergedReflectionData;
+			if (mergedReflectionData.HasCBufferMember(spaceID, hashName))
+			{
+				const auto memberData = mergedReflectionData.FindCBufferMember(spaceID, hashName);
+
+				auto currValue = *reinterpret_cast<UINT*>(cbuffer.CPUPtr.data() + memberData.StartOffset);
+				if (currValue != newValue)
+				{
+					UpdateCBuffer<UINT>(cbuffer, memberData.StartOffset, newValue);
+				}
+			}
+		}
+	}
+	void Material::SetBool(const size_t hashName, const int newValue, size_t passIndex)
+	{
+		assert(passIndex < m_passDatas.size());
+
+		auto& pMaterialCBuffer = m_passDatas[passIndex].pMaterialCBuffer;
+		assert(pMaterialCBuffer);
+
+		auto& allCBuffers = pMaterialCBuffer->CBuffers;
+		for (UINT spaceID = 0; spaceID < allCBuffers.size(); ++spaceID)
+		{
+			if (allCBuffers.count(spaceID) == 0) continue;
+			auto& cbuffer = allCBuffers[spaceID];
+
+			const auto& mergedReflectionData = m_passDatas[passIndex].pCurrVariantData->MergedReflectionData;
+			if (mergedReflectionData.HasCBufferMember(spaceID, hashName))
+			{
+				const auto memberData = mergedReflectionData.FindCBufferMember(spaceID, hashName);
+
+				auto currValue = *reinterpret_cast<int*>(cbuffer.CPUPtr.data() + memberData.StartOffset);
+				if (currValue != newValue)
+				{
+					UpdateCBuffer<int>(cbuffer, memberData.StartOffset, newValue);
+				}
+			}
+		}
+	}
+	void Material::SetMatrix(const size_t hashName, const Matrix newValue, size_t passIndex)
+	{
+		assert(passIndex < m_passDatas.size());
+
+		auto& pMaterialCBuffer = m_passDatas[passIndex].pMaterialCBuffer;
+		assert(pMaterialCBuffer);
+
+		auto& allCBuffers = pMaterialCBuffer->CBuffers;
+		for (UINT spaceID = 0; spaceID < allCBuffers.size(); ++spaceID)
+		{
+			if (allCBuffers.count(spaceID) == 0) continue;
+			auto& cbuffer = allCBuffers[spaceID];
+
+			const auto& mergedReflectionData = m_passDatas[passIndex].pCurrVariantData->MergedReflectionData;
+			if (mergedReflectionData.HasCBufferMember(spaceID, hashName))
+			{
+				const auto memberData = mergedReflectionData.FindCBufferMember(spaceID, hashName);
+
+				Matrix currValue;
+				memcpy(&currValue, cbuffer.CPUPtr.data() + memberData.StartOffset, sizeof(Matrix));
+				if (currValue != newValue)
+				{
+					UpdateCBuffer<Matrix>(cbuffer, memberData.StartOffset, newValue);
+				}
+			}
+		}
+	}
+	void Material::SetFloatArray(const size_t hashName, const std::vector<float> newValue, size_t passIndex)
+	{
+		assert(passIndex < m_passDatas.size());
+		if (newValue.empty())
+		{
+			throw std::out_of_range("empty vector");
+		}
+
+		auto& pMaterialCBuffer = m_passDatas[passIndex].pMaterialCBuffer;
+		assert(pMaterialCBuffer);
+
+		auto& allCBuffers = pMaterialCBuffer->CBuffers;
+		for (UINT spaceID = 0; spaceID < allCBuffers.size(); ++spaceID)
+		{
+			if (allCBuffers.count(spaceID) == 0) continue;
+			auto& cbuffer = allCBuffers[spaceID];
+
+			const auto& mergedReflectionData = m_passDatas[passIndex].pCurrVariantData->MergedReflectionData;
+			if (mergedReflectionData.HasCBufferMember(spaceID, hashName))
+			{
+				const auto memberData = mergedReflectionData.FindCBufferMember(spaceID, hashName);
+
+				std::vector<float> currValue(newValue.size());
+				if (cbuffer.CPUPtr.empty() || memberData.StartOffset + sizeof(float) * newValue.size() > cbuffer.CPUPtr.size())
+				{
+					return;
+				}
+				memcpy(currValue.data(), cbuffer.CPUPtr.data() + memberData.StartOffset, sizeof(float) * newValue.size());
+
+				if (currValue != newValue)
+				{
+					UpdateCBuffer<float>(cbuffer, memberData.StartOffset, newValue);
+				}
+			}
+		}
+	}
+	void Material::SetVector2Array(const size_t hashName, const std::vector<Vector2> newValue, size_t passIndex)
+	{
+		assert(passIndex < m_passDatas.size());
+		if (newValue.empty())
+		{
+			throw std::out_of_range("empty vector");
+		}
+
+		auto& pMaterialCBuffer = m_passDatas[passIndex].pMaterialCBuffer;
+		assert(pMaterialCBuffer);
+
+		auto& allCBuffers = pMaterialCBuffer->CBuffers;
+		for (UINT spaceID = 0; spaceID < allCBuffers.size(); ++spaceID)
+		{
+			if (allCBuffers.count(spaceID) == 0) continue;
+			auto& cbuffer = allCBuffers[spaceID];
+
+			const auto& mergedReflectionData = m_passDatas[passIndex].pCurrVariantData->MergedReflectionData;
+			if (mergedReflectionData.HasCBufferMember(spaceID, hashName))
+			{
+				const auto memberData = mergedReflectionData.FindCBufferMember(spaceID, hashName);
+
+				std::vector<Vector2> currValue(newValue.size());
+				if (cbuffer.CPUPtr.empty() || memberData.StartOffset + sizeof(Vector2) * newValue.size() > cbuffer.CPUPtr.size())
+				{
+					return;
+				}
+
+				memcpy(currValue.data(), cbuffer.CPUPtr.data() + memberData.StartOffset, sizeof(Vector2) * newValue.size());
+
+				if (currValue != newValue)
+				{
+					UpdateCBuffer<Vector2>(cbuffer, memberData.StartOffset, newValue);
+				}
+			}
+		}
+	}
+	void Material::SetVector3Array(const size_t hashName, const std::vector<Vector3> newValue, size_t passIndex)
+	{
+		assert(passIndex < m_passDatas.size());
+		if (newValue.empty())
+		{
+			throw std::out_of_range("empty vector");
+		}
+
+		auto& pMaterialCBuffer = m_passDatas[passIndex].pMaterialCBuffer;
+		assert(pMaterialCBuffer);
+
+		auto& allCBuffers = pMaterialCBuffer->CBuffers;
+		for (UINT spaceID = 0; spaceID < allCBuffers.size(); ++spaceID)
+		{
+			if (allCBuffers.count(spaceID) == 0) continue;
+			auto& cbuffer = allCBuffers[spaceID];
+
+			const auto& mergedReflectionData = m_passDatas[passIndex].pCurrVariantData->MergedReflectionData;
+			if (mergedReflectionData.HasCBufferMember(spaceID, hashName))
+			{
+				const auto memberData = mergedReflectionData.FindCBufferMember(spaceID, hashName);
+
+				std::vector<Vector3> currValue(newValue.size());
+				if (cbuffer.CPUPtr.empty() || memberData.StartOffset + sizeof(Vector3) * newValue.size() > cbuffer.CPUPtr.size())
+				{
+					return;
+				}
+
+				memcpy(currValue.data(), cbuffer.CPUPtr.data() + memberData.StartOffset, sizeof(Vector3) * newValue.size());
+
+				if (currValue != newValue)
+				{
+					UpdateCBuffer<Vector3>(cbuffer, memberData.StartOffset, newValue);
+				}
+			}
+		}
+	}
+	void Material::SetVector4Array(const size_t hashName, const std::vector<Vector4> newValue, size_t passIndex)
+	{
+		assert(passIndex < m_passDatas.size());
+		if (newValue.empty())
+		{
+			throw std::out_of_range("empty vector");
+		}
+
+		auto& pMaterialCBuffer = m_passDatas[passIndex].pMaterialCBuffer;
+		assert(pMaterialCBuffer);
+
+		auto& allCBuffers = pMaterialCBuffer->CBuffers;
+		for (UINT spaceID = 0; spaceID < allCBuffers.size(); ++spaceID)
+		{
+			if (allCBuffers.count(spaceID) == 0) continue;
+			auto& cbuffer = allCBuffers[spaceID];
+
+			const auto& mergedReflectionData = m_passDatas[passIndex].pCurrVariantData->MergedReflectionData;
+			if (mergedReflectionData.HasCBufferMember(spaceID, hashName))
+			{
+				const auto memberData = mergedReflectionData.FindCBufferMember(spaceID, hashName);
+
+				std::vector<Vector4> currValue(newValue.size());
+				if (cbuffer.CPUPtr.empty() || memberData.StartOffset + sizeof(Vector3) * newValue.size() > cbuffer.CPUPtr.size())
+				{
+					return;
+				}
+
+				memcpy(currValue.data(), cbuffer.CPUPtr.data() + memberData.StartOffset, sizeof(Vector4) * newValue.size());
+
+				if (currValue != newValue)
+				{
+					UpdateCBuffer<Vector4>(cbuffer, memberData.StartOffset, newValue);
+				}
+			}
+		}
+	}
 }

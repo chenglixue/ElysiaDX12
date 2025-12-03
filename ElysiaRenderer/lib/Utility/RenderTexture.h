@@ -86,4 +86,20 @@ namespace ElysiaRenderer
 
 		return cameraDepthRT;
 	}
+
+	inline bool IsTexReady(const std::vector<ElysiaRenderer::RenderTexture*> texs)
+	{
+		bool isReady = true;
+
+		for (const auto& tex : texs)
+		{
+			if (tex->GetTexture() == nullptr)
+			{
+				ThrowRuntimeError("null tex resource");;
+			}
+			isReady &= tex->GetTexture()->GetIsReady();
+		}
+
+		return isReady;
+	}
 }

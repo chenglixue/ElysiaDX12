@@ -1214,6 +1214,13 @@ namespace ElysiaRenderer
 							constantVariableDesc.Size = variableDesc.Size;
 							constantVariableDesc.Name = PropertyToID(variableDesc.Name);
 
+#ifdef DEBUG
+							std::cout << "Constant variable name is " << variableDesc.Name << std::endl;
+							std::cout << "Space ID is " << constantVariableDesc.SpaceID << std::endl;
+							std::cout << "Start Offset is " << constantVariableDesc.StartOffset << std::endl;
+							std::cout << "Size is " << constantVariableDesc.Size << std::endl;
+#endif
+
 							shaderVariables[temp.spaceID].members.emplace(constantVariableDesc.Name, std::move(constantVariableDesc));
 						}
 					}
@@ -1247,6 +1254,8 @@ namespace ElysiaRenderer
 										// automate this currently, which might be a issue when instanced rendering is used
 						.InstanceDataStepRate = 0u
 					});
+
+
 				}
 				
 				o.InputElementSemanticNames = std::move(inputElementSemanticNames);
@@ -1371,13 +1380,6 @@ namespace ElysiaRenderer
 		CComPtr<IDxcBlob> pShader = nullptr;
 		CComPtr<IDxcBlobUtf16> pShaderName = nullptr;
 		pResults->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&pShader), nullptr);
-		if (!pShader)
-		{
-			std::ostringstream oss;
-			oss << "DXC compiled, but DXC_OUT_OBJECT is null for " << WstringToString(path)
-				<< " entry=" << WstringToString(entry) << " target=" << WstringToString(target) << "\n";
-			ThrowRuntimeError(oss.str());
-		}
 		if (pShader != nullptr)
 		{
 			FILE* fp = NULL;
@@ -1396,7 +1398,7 @@ namespace ElysiaRenderer
 		CComPtr<IDxcBlob> pPDB = nullptr;
 		CComPtr<IDxcBlobUtf16> pPDBName = nullptr;
 		pResults->GetOutput(DXC_OUT_PDB, IID_PPV_ARGS(&pPDB), &pPDBName);
-		if(pPDB != nullptr && pPDBName != nullptr)
+		//if(pPDB != nullptr && pPDBName != nullptr)
 		{
 			FILE* fp = NULL;
 

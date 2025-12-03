@@ -12,10 +12,14 @@ namespace ElysiaHelper
             m_path.c_str(),
             L"-E", m_entry.c_str(),
             L"-T", m_target.c_str(),
+#ifndef DEBUG
             L"-Qstrip_reflect",
-            L"Qstrip_debug",
+#endif
+            //L"Qstrip_debug",
             DXC_ARG_PACK_MATRIX_ROW_MAJOR,
-            DXC_ARG_ALL_RESOURCES_BOUND,
+            //DXC_ARG_ALL_RESOURCES_BOUND,
+            //DXC_ARG_DEBUG,
+            //DXC_ARG_SKIP_OPTIMIZATIONS,
         };
 
         m_tempStrings.clear();
@@ -42,7 +46,7 @@ namespace ElysiaHelper
         {
             switch (m_optLevel)
             {
-            case 0: args.push_back(L"-O0"); break;
+            case 0: args.push_back(L"-Od"); break;
             case 1: args.push_back(L"-O1"); break;
             case 2: args.push_back(L"-O2"); break;
             case 3: args.push_back(L"-O3"); break;

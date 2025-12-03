@@ -25,7 +25,6 @@ namespace ElysiaRenderer
 		virtual void Dispose() override;
 
 		RenderTexture* GetShadowRT() const;
-		void UpdateShadowPassVariant(UINT passIndex);
 	private:
 		std::unique_ptr<RenderTexture> m_pShadowRT = nullptr;
 		std::unique_ptr<DX12Shadow> m_pMainShadow = nullptr;
@@ -50,5 +49,7 @@ namespace ElysiaRenderer
 		};
 
 		void CreateMainShadow(float boundSphereRadius, DXGI_FORMAT format);
+		void UpdateShadowPassVariant(UINT passIndex);
+		void SetObjectResource();
 	};
 }

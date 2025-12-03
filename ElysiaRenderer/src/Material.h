@@ -46,17 +46,27 @@ namespace ElysiaRenderer
 
 		void MakeDirty(UINT32 offset, UINT32 size)
 		{
-			DirtyBegin = min(DirtyBegin, offset);
-			DirtyEnd = max(DirtyEnd, offset + size);
+			if (offset < DirtyEnd) 
+			{
+				// 若新数据覆盖了现有脏区域，更新结束位置
+				DirtyEnd = max(DirtyEnd, offset + size);
+			}
+			else 
+			{
+				// 否则更新脏区的开始和结束位置
+				DirtyBegin = min(DirtyBegin, offset);
+				DirtyEnd = max(DirtyEnd, offset + size);
+			}
 		}
 
-		bool HasDirtyRange() const
+		bool HasDirtyRange() const noexcept
 		{
 			return DirtyBegin < DirtyEnd;
 		}
 
 		void ClearDirty()
 		{
+			
 			DirtyBegin = UINT32_MAX;
 			DirtyEnd = 0;
 		}
@@ -111,9 +121,17 @@ namespace ElysiaRenderer
 		void CreateMaterialCBuffer(size_t passIndex);
 		
 		void SetPipelineResourceLayout(PipelineResourceLayout* pPipelineResourceLayout);
-		void SetMaterialCBufferGPUPtr(UINT spaceID, UINT8* pMappedBuffer,size_t passIndex = 0);
+		void SetMaterialCBufferGPUPtr(UINT spaceID, size_t passIndex = 0);
 
-		void SetFloat(const size_t hashName, const float& value, size_t passIndex = 0);
+		void SetFloat(const size_t hashName, const float newValue, size_t passIndex = 0);
+		void SetInt(const size_t hashName, const int newValue, size_t passIndex = 0);
+		void SetUINT(const size_t hashName, const UINT newValue, size_t passIndex = 0);
+		void SetBool(const size_t hashName, const int newValue, size_t passIndex = 0);
+		void SetMatrix(const size_t hashName, const Matrix newValue, size_t passIndex = 0);
+		void SetFloatArray(const size_t hashName, const std::vector<float> newValue, size_t passIndex = 0);
+		void SetVector2Array(const size_t hashName, const std::vector<Vector2> newValue, size_t passIndex = 0);
+		void SetVector3Array(const size_t hashName, const std::vector<Vector3> newValue, size_t passIndex = 0);
+		void SetVector4Array(const size_t hashName, const std::vector<Vector4> newValue, size_t passIndex = 0);
 		void Flush();
 
 	private:
@@ -124,6 +142,8 @@ namespace ElysiaRenderer
 		std::unique_ptr<DX12BufferResource> m_pFrameConstantBuffer = nullptr;
 
 		template<typename T>
-		void UpdateCBuffer(RuntimeCBuffer& CBuffer, UINT32 offset, const T& data);
+		void UpdateCBuffer(RuntimeCBuffer& CBuffer, UINT32 offset, const T data);
+		template<typename T>
+		void UpdateCBuffer(RuntimeCBuffer& CBuffer, UINT32 offset, const std::vector<T> data);
 	};
 }
