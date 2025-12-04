@@ -7,27 +7,28 @@
 
 namespace ElysiaRenderer
 {
-    UploadRingBuffer::UploadRingBuffer(DX12Device* pDevice, DX12Queue* qQueue, const size_t size, LPCWSTR name) :
-        m_size(size),
-        m_pQueue(qQueue)
+    UploadRingBuffer::UploadRingBuffer(DX12Device* pDevice, const size_t size, LPCWSTR name) :
+        m_size(size)
     {
         Init(pDevice, size, name);
     }
 
     UploadRingBuffer::~UploadRingBuffer()
     {
-        m_pBuffer.reset();
+        assert(m_pResource && m_pCPUPtr);
+        
+        m_pResource->Unmap(0, nullptr);
+        m_pCPUPtr = nullptr;
     }
 
-    uint8_t* UploadRingBuffer::GetGPUPtr() const noexcept
+    ID3D12Resource* UploadRingBuffer::GetResource() const noexcept
     {
-        assert(m_pBuffer && m_pBuffer->GetMappedBuffer());
+        assert(m_pResource);
 
-        return m_pBuffer->m_mappedBuffer;
+        return m_pResource;
     }
 
-
-    HRESULT UploadRingBuffer::Init(DX12Device* pDevice, const size_t size, LPCWSTR name)
+    void UploadRingBuffer::Init(DX12Device* pDevice, const size_t size, LPCWSTR name)
     {
         assert(pDevice && pDevice->GetAllocator());
         
@@ -53,40 +54,47 @@ namespace ElysiaRenderer
         CComPtr<ID3D12Resource> pResource = nullptr;
         ElysiaHelper::ThrowIfFailed(pDevice->GetAllocator()->CreateResource(&allocationDesc, &resourceDesc, usageState, nullptr,
             &pAllocation, IID_PPV_ARGS(&pResource)));
-
-        m_pBuffer = std::make_unique<DX12BufferResource>(pResource, usageState, pAllocation);
-
-        m_pBuffer->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&m_pBuffer->m_mappedBuffer));
+        
+        if(name)
+        {
+            pResource->SetName(name);
+        }
+        
+        ThrowIfFailed(m_pResource->Map(0, nullptr, reinterpret_cast<void**>(&m_pCPUPtr)));
+        m_gpuAddress = m_pResource->GetGPUVirtualAddress();
     }
+    
     bool UploadRingBuffer::Allocate(size_t size,
             D3D12_GPU_VIRTUAL_ADDRESS& outGPUAddress,
-            void*& outCPUAddress,
-            size_t& outOffset,
+            UINT8*& outCPUAddress,
             size_t alignment)
     {
-        size_t alignedOffset = AlignUp(m_head, alignment);
-        if (alignedOffset + size > m_size)
+        std::lock_guard<std::mutex> lock(m_mutex);
+        
+        const size_t alignedSize = AlignUp(size, alignment);
+        const size_t currentOffset = AlignUp(m_head, alignment);
+        // 尝试主段分配
+        if (currentOffset + alignedSize <= m_size)
         {
-            Reset();
-            return false;
+            outCPUAddress = m_pCPUPtr + currentOffset;
+            outGPUAddress = m_gpuAddress + currentOffset;
+            m_head = currentOffset + alignedSize;
+            return true;
         }
 
-        outOffset = alignedOffset;
-        outCPUAddress = m_pCPUPtr + alignedOffset;
-        outGPUAddress = m_pBuffer->GetGPUAddress() + alignedOffset;
-
-        m_head = alignedOffset + size;
-
-        return true;
-    }
-
-    void UploadRingBuffer::WaitGPU(UINT64 fenceValue)
-    {
-        if (m_pQueue->IsFenceCompleted(fenceValue))
+        // 主段不够 → 尝试绕回到开头（wrap around）
+        if (alignedSize <= m_size)
         {
-            m_pQueue->WaitForFenceCPUBlocking(fenceValue);
+            Reset();  // 会把 m_head 设为 0
+            outCPUAddress = m_pCPUPtr;
+            outGPUAddress = m_gpuAddress;
+            m_head = alignedSize;
+            return true;
         }
+
+        return false;
     }
+
     void UploadRingBuffer::Reset()
     {
         m_head = 0;

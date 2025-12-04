@@ -23,14 +23,14 @@ namespace ElysiaRenderer
 
 	}
 	
-	PipelineStateObject* PSOManager::GetGraphicsPipelineState(const D3D12_GRAPHICS_PIPELINE_STATE_DESC& PSODesc, DX12RootSignature* pRootSignature)
+	PipelineStateObject* PSOManager::GetGraphicsPipelineState(DX12Device* pDevice, const D3D12_GRAPHICS_PIPELINE_STATE_DESC& PSODesc, DX12RootSignature* pRootSignature)
 	{
 		auto emplaceResult = m_graphicsPipelineStates.try_emplace(PSODesc);
 
 		if (emplaceResult.second) 
 		{
 			CComPtr<ID3D12PipelineState> pipelineState = nullptr;
-			ElysiaHelper::ThrowIfFailed(GetDevice()->GetDevice()->CreateGraphicsPipelineState(&PSODesc, IID_PPV_ARGS(&pipelineState)));
+			ElysiaHelper::ThrowIfFailed(pDevice->GetDevice()->CreateGraphicsPipelineState(&PSODesc, IID_PPV_ARGS(&pipelineState)));
 
 			auto graphicsPipeline = std::make_unique<DX12GraphicsPipelineState>(pipelineState, pRootSignature);
 
@@ -44,14 +44,14 @@ namespace ElysiaRenderer
 		return emplaceResult.first->second.get();
 	}
 
-	PipelineStateObject* PSOManager::GetGraphicsPipelineState(Material* pMaterial, UINT passIndex,
+	PipelineStateObject* PSOManager::GetGraphicsPipelineState(DX12Device* pDevice, Material* pMaterial, UINT passIndex,
 		const RenderTargetDesc& renderTargetDesc,
 		D3D12_PRIMITIVE_TOPOLOGY_TYPE topology)
 	{
 		auto& passData = pMaterial->GetPassData(passIndex);
 
 		auto resourceMapping = PipelineResourceMapping();
-		auto pDX12RootSignature = std::unique_ptr<DX12RootSignature>(GetDevice()->CreateRootSignature(
+		auto pDX12RootSignature = std::unique_ptr<DX12RootSignature>(pDevice->CreateRootSignature(
 			*passData.pCurrVariantData->pMeshResourceLayout, resourceMapping));
 		assert(pDX12RootSignature);
 		assert(pDX12RootSignature->GetSignature());
@@ -116,7 +116,7 @@ namespace ElysiaRenderer
 		PSODesc.NumRenderTargets = renderTargetDesc.m_numRenderTargets;
 		PSODesc.DSVFormat = renderTargetDesc.m_depthStencilFormat;
 
-		auto pipelineStateObject = GetGraphicsPipelineState(PSODesc, pDX12RootSignature.get());
+		auto pipelineStateObject = GetGraphicsPipelineState(pDevice, PSODesc, pDX12RootSignature.get());
 		if (pipelineStateObject != nullptr)
 		{
 			pipelineStateObject->m_pipelineResourceMapping = resourceMapping;
@@ -126,12 +126,12 @@ namespace ElysiaRenderer
 		return pipelineStateObject;
 	}
 
-	PipelineStateObject* PSOManager::GetComputePipelineState(Material* pMaterial, UINT passIndex)
+	PipelineStateObject* PSOManager::GetComputePipelineState(DX12Device* pDevice, Material* pMaterial, UINT passIndex)
 	{
 		auto& passData = pMaterial->GetPassData(passIndex);
 
 		auto resourceMapping = PipelineResourceMapping();
-		auto pDX12RootSignature = std::unique_ptr<DX12RootSignature>(GetDevice()->CreateRootSignature(*passData.pCurrVariantData->pMeshResourceLayout, resourceMapping));
+		auto pDX12RootSignature = std::unique_ptr<DX12RootSignature>(pDevice->CreateRootSignature(*passData.pCurrVariantData->pMeshResourceLayout, resourceMapping));
 
 		D3D12_COMPUTE_PIPELINE_STATE_DESC PSODesc{};
 		PSODesc.CS = D3D12_SHADER_BYTECODE
@@ -141,7 +141,7 @@ namespace ElysiaRenderer
 		};
 		PSODesc.pRootSignature = pDX12RootSignature->GetSignature();
 
-		auto pipelineStateObject = GetComputePipelineState(PSODesc, pDX12RootSignature.get());
+		auto pipelineStateObject = GetComputePipelineState(pDevice, PSODesc, pDX12RootSignature.get());
 		if (pipelineStateObject != nullptr)
 		{
 			pipelineStateObject->m_pipelineResourceMapping = resourceMapping;
@@ -151,14 +151,14 @@ namespace ElysiaRenderer
 		return pipelineStateObject;
 	}
 
-	PipelineStateObject* PSOManager::GetComputePipelineState(const D3D12_COMPUTE_PIPELINE_STATE_DESC& PSODesc, DX12RootSignature* pRootSignature)
+	PipelineStateObject* PSOManager::GetComputePipelineState(DX12Device* pDevice, const D3D12_COMPUTE_PIPELINE_STATE_DESC& PSODesc, DX12RootSignature* pRootSignature)
 	{
 		auto emplaceResult = m_computePipelineStates.try_emplace(PSODesc);
 
 		if (emplaceResult.second)
 		{
 			CComPtr<ID3D12PipelineState> pipelineState = nullptr;
-			ElysiaHelper::ThrowIfFailed(GetDevice()->GetDevice()->CreateComputePipelineState(&PSODesc, IID_PPV_ARGS(&pipelineState)));
+			ElysiaHelper::ThrowIfFailed(pDevice->GetDevice()->CreateComputePipelineState(&PSODesc, IID_PPV_ARGS(&pipelineState)));
 
 			auto computePipeline = std::make_unique<DX12ComputePipelineState>(pipelineState, pRootSignature);
 

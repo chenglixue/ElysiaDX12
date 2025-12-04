@@ -20,14 +20,36 @@ namespace ElysiaRenderer
 
 		return UINT_MAX;
 	}
-
-	const BufferCreationDesc& PipelineResourceSpace::GetCBVDesc() const noexcept
+	
+	void PipelineResourceSpace::ExpectCBV(UINT registerIndex)
 	{
-		return m_CBVDesc;
+		m_expectedBindings[registerIndex] = ResourceType::CBV;
 	}
-	DX12BufferResource* PipelineResourceSpace::GetCBV()
+	void PipelineResourceSpace::ExpectSRV(UINT registerIndex)
 	{
-		return m_CBV;
+		m_expectedBindings[registerIndex] = ResourceType::SRV;
+	}
+	void PipelineResourceSpace::ExpectUAV(UINT registerIndex)
+	{
+		m_expectedBindings[registerIndex] = ResourceType::UAV;
+	}
+	bool PipelineResourceSpace::HasExpectedCBV() const
+	{
+		return std::any_of(m_expectedBindings.begin(), m_expectedBindings.end(),
+			[](const auto& kv) { return kv.second == ResourceType::CBV; });
+	}
+	bool PipelineResourceSpace::HasDynamicCBV() const noexcept
+	{
+		return m_hasDynamicCBV;
+	}
+
+	DX12BufferResource* PipelineResourceSpace::GetStaticCBV() const
+	{
+		return m_pStaticCBV;
+	}
+	D3D12_GPU_VIRTUAL_ADDRESS PipelineResourceSpace::GetDynamicCBV() const
+	{
+		return m_dynamicCBVAddress;
 	}
 	std::vector<PipelineResourceBinding*>& PipelineResourceSpace::GetSRVs()
 	{
@@ -38,12 +60,7 @@ namespace ElysiaRenderer
 		return m_UAVs;
 	}
 
-	void PipelineResourceSpace::SetCBVDesc(const BufferCreationDesc& desc)
-	{
-		m_CBVDesc = desc;
-	}
-
-	void PipelineResourceSpace::SetCBV(DX12BufferResource* CBVResource)
+	void PipelineResourceSpace::SetStaticCBV(DX12BufferResource* CBVResource)
 	{
 		if (m_isLocked)
 		{
@@ -53,13 +70,18 @@ namespace ElysiaRenderer
 			}
 			else
 			{
-				m_CBV = CBVResource;
+				m_pStaticCBV = CBVResource;
 			}
 		}
 		else
 		{
-			m_CBV = CBVResource;
+			m_pStaticCBV = CBVResource;
 		}
+	}
+	void PipelineResourceSpace::SetDynamicCBV(D3D12_GPU_VIRTUAL_ADDRESS GPUVA)
+	{
+		m_dynamicCBVAddress = GPUVA;
+		m_hasDynamicCBV = false;
 	}
 	void PipelineResourceSpace::SetSRV(PipelineResourceBinding* SRVResource)
 	{

@@ -98,7 +98,6 @@ namespace ElysiaRenderer
 		{
 			auto UAVResources = pipelineBindResourceSpace->GetUAVs();
 			auto SRVResources = pipelineBindResourceSpace->GetSRVs();
-			auto CBVResource = pipelineBindResourceSpace->GetCBV();
 
 			static const uint32_t maxNumHandlesBinding = 16;
 			const UINT numTableHandles = static_cast<UINT>(SRVResources.size() + UAVResources.size());
@@ -110,7 +109,7 @@ namespace ElysiaRenderer
 
 			assert(numTableHandles <= maxNumHandlesBinding);
 
-			if (CBVResource)
+			if (pipelineBindResourceSpace->GetStaticCBV() || pipelineBindResourceSpace->HasDynamicCBV())
 			{
 				auto& rootParameterIndex = m_graphicsPipelineStateObject->m_pipelineResourceMapping.m_CBVMappings[spaceID];
 				if (rootParameterIndex.has_value())
@@ -119,12 +118,26 @@ namespace ElysiaRenderer
 					{
 						case PipelineType::Graphics:
 						{
-							m_commandList->SetGraphicsRootConstantBufferView(rootParameterIndex.value(), CBVResource->GetGPUAddress());
+								if(pipelineBindResourceSpace->HasDynamicCBV())
+								{
+									m_commandList->SetGraphicsRootConstantBufferView(rootParameterIndex.value(), pipelineBindResourceSpace->GetDynamicCBV());
+								}
+								else if(pipelineBindResourceSpace->GetStaticCBV())
+								{
+									m_commandList->SetGraphicsRootConstantBufferView(rootParameterIndex.value(), pipelineBindResourceSpace->GetStaticCBV()->GetGPUAddress());
+								}
 							break;
 						}
 						case PipelineType::Compute:
 						{
-							m_commandList->SetComputeRootConstantBufferView(rootParameterIndex.value(), CBVResource->GetGPUAddress());
+								if(pipelineBindResourceSpace->HasDynamicCBV())
+								{
+									m_commandList->SetComputeRootConstantBufferView(rootParameterIndex.value(), pipelineBindResourceSpace->GetDynamicCBV());
+								}
+								else if(pipelineBindResourceSpace->GetStaticCBV())
+								{
+									m_commandList->SetComputeRootConstantBufferView(rootParameterIndex.value(), pipelineBindResourceSpace->GetStaticCBV()->GetGPUAddress());
+								}
 							break;
 						} 
 						default:
@@ -134,7 +147,6 @@ namespace ElysiaRenderer
 						}
 					}
 				}
-				
 			}
 
 			if (numTableHandles == 0)

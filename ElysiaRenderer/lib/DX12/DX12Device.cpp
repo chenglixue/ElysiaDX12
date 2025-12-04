@@ -273,7 +273,7 @@ namespace ElysiaRenderer
 
 		// Create Global Upload Buffer
 		{
-			m_pGlobalUploadBuffer = std::make_unique<UploadRingBuffer>(this, m_graphicsQueue.get(), 64 * 1024 * 1024, L"Global Upload Buffer");
+			m_pGlobalUploadBuffer = std::make_unique<UploadRingBuffer>(this, 64 * 1024 * 1024, L"Global Upload Buffer");
 		}
 
 		CreateSamplers();
@@ -938,65 +938,61 @@ namespace ElysiaRenderer
 		for (UINT currSpaceID = 0; currSpaceID < NUM_RESOURCE_SPACES; ++currSpaceID)
 		{
 			auto currSpace = resourceLayout.m_spaces[currSpaceID];
+			if(!currSpace) continue;
 			std::vector<D3D12_DESCRIPTOR_RANGE1>& currDescriptorRange = desciptorRanges[currSpaceID];
 
-			if (currSpace)
+			auto SRVs = currSpace->GetSRVs();
+			auto UAVs = currSpace->GetUAVs();
+
+			if (currSpace->HasExpectedCBV())
 			{
-				const auto CBV = currSpace->GetCBV();
-				auto SRVs = currSpace->GetSRVs();
-				auto UAVs = currSpace->GetUAVs();
-
-				if (CBV)
-				{
-					DX12RootParameter* rootParameter = new DX12RootParameter();
-					rootParameter->InitAsConstantBufferView(0, D3D12_SHADER_VISIBILITY_ALL, currSpaceID);
-
-					resourceMapping.m_CBVMappings[currSpaceID] = static_cast<UINT>(rootParameters.size());
-					rootParameters.emplace_back(std::move(rootParameter));
-				}
-
-				if (SRVs.empty() && UAVs.empty())
-				{
-					continue;
-				}
-
-				for (auto& uav : UAVs)
-				{
-					D3D12_DESCRIPTOR_RANGE1 range{};
-					range.BaseShaderRegister = uav->m_bindingIndex;
-					range.NumDescriptors = 1;
-					range.OffsetInDescriptorsFromTableStart = static_cast<uint32_t>(currDescriptorRange.size());
-					range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
-					range.RegisterSpace = currSpaceID;
-					range.Flags = D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE | D3D12_DESCRIPTOR_RANGE_FLAG_DATA_VOLATILE;
-
-					currDescriptorRange.push_back(range);
-				}
-
-				// all of SRV Resource has one DESCRIPTOR RANGE which only has one descriptor
-				for (auto& SRV : SRVs)
-				{
-					D3D12_DESCRIPTOR_RANGE1 pDescriptorRange{};
-					pDescriptorRange.BaseShaderRegister = SRV->m_bindingIndex;
-					pDescriptorRange.NumDescriptors = 1;
-					pDescriptorRange.OffsetInDescriptorsFromTableStart = static_cast<UINT>(currDescriptorRange.size());
-					pDescriptorRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-					pDescriptorRange.RegisterSpace = currSpaceID;
-					pDescriptorRange.Flags = D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE | D3D12_DESCRIPTOR_RANGE_FLAG_DATA_VOLATILE;
-
-					currDescriptorRange.emplace_back(pDescriptorRange);
-				}
-
 				DX12RootParameter* rootParameter = new DX12RootParameter();
-				rootParameter->InitAsDescriptorTable(static_cast<UINT>(currDescriptorRange.size()), currDescriptorRange.data(), D3D12_SHADER_VISIBILITY_ALL);
+				rootParameter->InitAsConstantBufferView(0, D3D12_SHADER_VISIBILITY_ALL, currSpaceID);
 
-				resourceMapping.m_TableMappings[currSpaceID] = static_cast<UINT>(rootParameters.size());
+				resourceMapping.m_CBVMappings[currSpaceID] = static_cast<UINT>(rootParameters.size());
 				rootParameters.emplace_back(std::move(rootParameter));
 			}
+
+			if (SRVs.empty() && UAVs.empty())
+			{
+				continue;
+			}
+
+			for (auto& uav : UAVs)
+			{
+				D3D12_DESCRIPTOR_RANGE1 range{};
+				range.BaseShaderRegister = uav->m_bindingIndex;
+				range.NumDescriptors = 1;
+				range.OffsetInDescriptorsFromTableStart = static_cast<uint32_t>(currDescriptorRange.size());
+				range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
+				range.RegisterSpace = currSpaceID;
+				range.Flags = D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE | D3D12_DESCRIPTOR_RANGE_FLAG_DATA_VOLATILE;
+
+				currDescriptorRange.push_back(range);
+			}
+
+			// all of SRV Resource has one DESCRIPTOR RANGE which only has one descriptor
+			for (auto& SRV : SRVs)
+			{
+				D3D12_DESCRIPTOR_RANGE1 pDescriptorRange{};
+				pDescriptorRange.BaseShaderRegister = SRV->m_bindingIndex;
+				pDescriptorRange.NumDescriptors = 1;
+				pDescriptorRange.OffsetInDescriptorsFromTableStart = static_cast<UINT>(currDescriptorRange.size());
+				pDescriptorRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+				pDescriptorRange.RegisterSpace = currSpaceID;
+				pDescriptorRange.Flags = D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE | D3D12_DESCRIPTOR_RANGE_FLAG_DATA_VOLATILE;
+
+				currDescriptorRange.emplace_back(pDescriptorRange);
+			}
+
+			DX12RootParameter* rootParameter = new DX12RootParameter();
+			rootParameter->InitAsDescriptorTable(static_cast<UINT>(currDescriptorRange.size()), currDescriptorRange.data(), D3D12_SHADER_VISIBILITY_ALL);
+
+			resourceMapping.m_TableMappings[currSpaceID] = static_cast<UINT>(rootParameters.size());
+			rootParameters.emplace_back(std::move(rootParameter));
 		}
 
 		UINT numRootParamter = static_cast<UINT>(rootParameters.size());
-		//UINT numSampler = NUM_SAMPLER_DESCRIPTORS;
 		UINT numSampler = 0;
 		DX12RootSignature* rootSignature = new DX12RootSignature(numRootParamter, numSampler);
 
@@ -1094,10 +1090,12 @@ namespace ElysiaRenderer
 		m_frameID = (m_frameID + 1) % NUM_FRAMES_IN_FLIGHT;
 
 		// wait on fences from 2 frames ago
-		m_graphicsQueue->WaitForFenceCPUBlocking(m_endOfFrameFences[m_frameID].m_graphicsQueueFence);
-		m_copyQueue->WaitForFenceCPUBlocking(m_endOfFrameFences[m_frameID].m_copyQueueFence);
-		m_computeQueue->WaitForFenceCPUBlocking(m_endOfFrameFences[m_frameID].m_computeQueueFence);
-		m_pGlobalUploadBuffer->WaitGPU(m_endOfFrameFences[m_frameID].m_graphicsQueueFence);
+		auto& fenceValue = m_endOfFrameFences[m_frameID];
+		m_graphicsQueue->WaitForFenceCPUBlocking(fenceValue.m_graphicsQueueFence);
+		m_copyQueue->WaitForFenceCPUBlocking(fenceValue.m_copyQueueFence);
+		m_computeQueue->WaitForFenceCPUBlocking(fenceValue.m_computeQueueFence);
+		
+		m_pGlobalUploadBuffer->Reset();
 
 		ProcessDestruction(m_frameID);
 
@@ -1120,9 +1118,6 @@ namespace ElysiaRenderer
 	{
 		m_swapChain->Present(0, 0);
 		m_endOfFrameFences[m_frameID].m_graphicsQueueFence = m_graphicsQueue->SingalFence();
-		
-		m_pGlobalUploadBuffer->WaitGPU(m_endOfFrameFences[m_frameID].m_graphicsQueueFence);
-		m_pGlobalUploadBuffer->Reset();
 	}
 
 	void DX12Device::WaitForIdle()
@@ -1200,8 +1195,8 @@ namespace ElysiaRenderer
 
 						ShaderReflectionData::ShaderVariable temp 
 						{
-							.type = ShaderReflectionData::ShaderVariable::Type::ConstantBuffer,
-							.registerPos = registerPos,
+							.type = resourceDesc.Type,
+							.bindPoint = registerPos,
 							.spaceID = spaceID,
 							.name = variableName,
 							.size = constantBufferDesc.Size
@@ -1219,7 +1214,6 @@ namespace ElysiaRenderer
 							constantVariableDesc.StartOffset = variableDesc.StartOffset;
 							constantVariableDesc.Size = variableDesc.Size;
 							constantVariableDesc.Name = PropertyToID(variableDesc.Name);
-
 #ifdef DEBUG
 							std::cout << "Constant variable name is " << variableDesc.Name << std::endl;
 							std::cout << "Space ID is " << constantVariableDesc.SpaceID << std::endl;
@@ -1543,29 +1537,27 @@ namespace ElysiaRenderer
 		for (auto& shaderVariable : o.MergedReflectionData.cbuffers)
 		{
 			auto currVariable = shaderVariable.second;
+			
+			std::unique_ptr<PipelineResourceSpace> pPipelineResourceSpace = std::make_unique<PipelineResourceSpace>();
 			switch (currVariable.type)
 			{
-			case ShaderReflectionData::ShaderVariable::Type::ConstantBuffer:
+				case D3D_SIT_CBUFFER:
 				{
-					BufferCreationDesc bufferDesc
-					{
-						.m_name = stringToLPCWSTR(currVariable.name),
-						.m_size = currVariable.size,
-						.m_viewFlags = GPUResourceFlags::CBV,
-						.m_accessFlags = BufferAccessFlags::HostWritable,
-						.m_isRawAccess = false,
-					};
-					
-					std::unique_ptr<PipelineResourceSpace> pPipelineResourceSpace = std::make_unique<PipelineResourceSpace>();
-					pPipelineResourceSpace->SetCBVDesc(bufferDesc);
-					auto pGPUBuffer = std::move(CreateBuffer(bufferDesc));
-					pPipelineResourceSpace->SetCBV(pGPUBuffer.release());
-					pPipelineResourceSpace->Lock();
-					o.pMeshResourceLayout->m_spaces[currVariable.spaceID] = pPipelineResourceSpace.release();
-
+					pPipelineResourceSpace->ExpectCBV(currVariable.bindPoint);
 					break;
 				}
+				case D3D_SIT_TEXTURE:
+				{
+					pPipelineResourceSpace->ExpectSRV(currVariable.bindPoint);
+					break;
+				}
+				case D3D_SIT_STRUCTURED:
+					{
+						pPipelineResourceSpace->ExpectUAV(currVariable.bindPoint);
+						break;
+					}
 			}
+			o.pMeshResourceLayout->m_spaces[currVariable.spaceID] = pPipelineResourceSpace.release();
 		}
 		
 		return o;

@@ -39,7 +39,7 @@ namespace ElysiaRenderer
 		assert(pipelineBindResourceSpace->IsLocked());
 
 		auto SRVResources = pipelineBindResourceSpace->GetSRVs();
-		auto CBVResource = pipelineBindResourceSpace->GetCBV();
+		auto CBVResource = pipelineBindResourceSpace->GetStaticCBV();
 
 		static const uint32_t maxNumHandlesBinding = 16;
 		const UINT numTableHandles = static_cast<UINT>(SRVResources.size());

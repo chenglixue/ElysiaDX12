@@ -4,6 +4,7 @@
 #include <regex>
 #include "ShaderCompileOptions.h"
 #include "lib/Utility/ShaderKeywordSet.h"
+#include <d3d12shader.h>    // Shader reflection.
 
 namespace ElysiaRenderer
 {
@@ -65,15 +66,8 @@ namespace ElysiaRenderer
 
 		struct ShaderVariable
 		{
-			enum Type : UINT64
-			{
-				DescriptorHeap = 0,
-				ConstantBuffer,
-				TypeCount
-			};
-
-			Type type;
-			UINT registerPos = 0;
+			_D3D_SHADER_INPUT_TYPE type;
+			UINT bindPoint = 0;
 			UINT spaceID = 0;
 			std::string name;
 			UINT size = 0;
@@ -85,7 +79,12 @@ namespace ElysiaRenderer
 		std::vector<D3D12_INPUT_ELEMENT_DESC> InputLayoutElementDescs;
 		std::vector <std::string> InputElementSemanticNames;
 
-		void Merge(const ShaderReflectionData& data)
+		ShaderVariable GetCBuffer(UINT32 spaceID) const
+		{
+			return cbuffers.at(spaceID);
+		}
+		
+		void Merge(ShaderReflectionData& data)
 		{
 			for(auto& cbuffer : data.cbuffers)
 			{

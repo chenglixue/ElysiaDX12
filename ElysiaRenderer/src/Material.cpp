@@ -128,50 +128,6 @@ namespace ElysiaRenderer
 		return m_pMeshRender != nullptr;
 	}
 
-	void Material::CreateMaterialCBuffer(size_t passIndex)
-	{
-		auto& layouts = m_passDatas[passIndex].pCurrVariantData->MergedReflectionData.cbuffers;
-		auto& pMaterialCBuffer = m_passDatas[passIndex].pMaterialCBuffer;
-		
-		pMaterialCBuffer = std::make_unique<MaterialRuntimeCBuffer>();
-		
-		for (auto&[space, layout] : layouts)
-		{ 
-			pMaterialCBuffer->CBuffers[space].CPUPtr.resize(layout.size);
-			pMaterialCBuffer->CBuffers[space].GPUPtr = nullptr;
-		}
-	}
-	
-	void Material::SetMaterialCBufferGPUPtr(UINT spaceID, size_t passIndex)
-	{
-		assert(passIndex < m_passDatas.size());
-		auto& passData = GetPassData(passIndex);
-		assert(passData.pCurrVariantData && passData.pCurrVariantData->pMeshResourceLayout && passData.pCurrVariantData->pMeshResourceLayout->m_spaces[spaceID]);
-		
-		auto  GPUPtr = passData.pCurrVariantData->pMeshResourceLayout->m_spaces[spaceID]->GetCBV()->GetMappedBuffer();
-		assert(GPUPtr);
-		m_passDatas[passIndex].pMaterialCBuffer->CBuffers[spaceID].GPUPtr = GPUPtr;
-	}
-
-	void Material::Flush()
-	{
-		for (auto& passData : m_passDatas)
-		{
-			for (auto& CBuffer : passData.pMaterialCBuffer->CBuffers)
-			{
-				if (!CBuffer.HasDirtyRange()) continue;
-
-				UINT32 size = CBuffer.DirtyEnd - CBuffer.DirtyBegin;
-				assert(CBuffer.DirtyBegin + size <= CBuffer.CPUPtr.size());
-
-				memcpy(CBuffer.GPUPtr + CBuffer.DirtyBegin, CBuffer.CPUPtr.data() + CBuffer.DirtyBegin, size);
-
-				CBuffer.ClearDirty();
-			}
-		}
-
-	}
-
 	template<typename T>
 	void Material::UpdateCBuffer(RuntimeCBuffer& CBuffer, UINT32 offset, const T data)
 	{

@@ -17,14 +17,20 @@ namespace ElysiaRenderer
 		PipelineResourceSpace& operator=(const PipelineResourceSpace& rhs) = default;
 		PipelineResourceSpace(PipelineResourceSpace&& rhs) = default;
 		~PipelineResourceSpace() = default;
+		
+		void ExpectCBV(UINT registerIndex);
+		void ExpectSRV(UINT registerIndex);
+		void ExpectUAV(UINT registerIndex);
+		bool HasExpectedCBV() const noexcept;
+		bool HasDynamicCBV() const noexcept;
+		
+		DX12BufferResource* GetStaticCBV() const;
+		D3D12_GPU_VIRTUAL_ADDRESS GetDynamicCBV() const;
+		std::vector<PipelineResourceBinding*>& GetSRVs() ;
+		std::vector<PipelineResourceBinding*>& GetUAVs() ;
 
-		const BufferCreationDesc& GetCBVDesc() const noexcept;
-		DX12BufferResource* GetCBV();
-		std::vector<PipelineResourceBinding*>& GetSRVs();
-		std::vector<PipelineResourceBinding*>& GetUAVs();
-
-		void SetCBVDesc(const BufferCreationDesc&);
-		void SetCBV(DX12BufferResource* CBVResource);
+		void SetStaticCBV(DX12BufferResource* CBVResource);
+		void SetDynamicCBV(D3D12_GPU_VIRTUAL_ADDRESS GPUVA);
 		void SetSRV(PipelineResourceBinding* SRVResource);
 		void SetUAV(PipelineResourceBinding* UAVResource);
 
@@ -33,12 +39,15 @@ namespace ElysiaRenderer
 
 	private:
 		UINT GetIndexOfBindingIndex(const std::vector<PipelineResourceBinding*>& bindResources, UINT bindingIndex);
-
-		BufferCreationDesc m_CBVDesc;
-		DX12BufferResource* m_CBV;
+		enum class ResourceType { CBV, SRV, UAV };
+		std::map<UINT, ResourceType> m_expectedBindings;
+		
+		DX12BufferResource* m_pStaticCBV = nullptr;
+		D3D12_GPU_VIRTUAL_ADDRESS m_dynamicCBVAddress = 0;
 		std::vector<PipelineResourceBinding*> m_SRVs;
 		std::vector<PipelineResourceBinding*> m_UAVs;
 		bool m_isLocked = false;
+		bool m_hasDynamicCBV = false;
 	};
 }
 

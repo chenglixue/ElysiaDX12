@@ -230,7 +230,7 @@ namespace ElysiaRenderer
 
 		desc.m_size = sizeof(CBVFrameVariable);
 		GetBufferManager()->AddConstantBuffer(PER_FRAME_SPACE, desc);
-		GetRenderResource()->GetPerFrameBindResourceSpace()->SetCBV(GetBufferManager()->GetSingleConstantBuffer(PER_FRAME_SPACE));
+		GetRenderResource()->GetPerFrameBindResourceSpace()->SetStaticCBV(GetBufferManager()->GetSingleConstantBuffer(PER_FRAME_SPACE));
 		GetRenderResource()->GetPerFrameBindResourceSpace()->Lock();
 	}
 	void RendererSystem::UpdateDisplay(int displayMode, bool disableLocalDimming)

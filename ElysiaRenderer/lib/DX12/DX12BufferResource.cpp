@@ -8,7 +8,7 @@ namespace ElysiaRenderer
 		m_isDirty(false),
 		m_mappedBuffer(nullptr)
 	{
-
+		
 	}
 	DX12BufferResource::DX12BufferResource(CComPtr<ID3D12Resource> resource, D3D12_RESOURCE_STATES usageState, CComPtr<D3D12MA::Allocation> allocation)
 		: DX12GPUResource(resource, usageState),

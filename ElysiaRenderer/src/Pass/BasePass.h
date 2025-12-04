@@ -15,6 +15,7 @@ namespace ElysiaRenderer
 
 	class RenderTexture;
 	class DX12GraphicsContext;
+	class UploadRingBuffer;
 
 	class BasePass
 	{
@@ -32,6 +33,12 @@ namespace ElysiaRenderer
 
 		virtual void UpdatePSO() = 0;
 		virtual void UpdateVariant() = 0;
+		
+		bool UploadMaterialConstants(
+			UploadRingBuffer* pUploadBuffer,
+			UINT spaceID,
+			const Material* pMaterial,
+			const ShaderVariantData* pVariantData);
 
 	protected:
 		Vector2 m_renderSize;

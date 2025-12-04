@@ -62,6 +62,7 @@ namespace ElysiaRenderer
 
 	class Material;
 	struct PipelineStateObject;
+	class DX12Device;
 
 	class PSOManager : IManager
 	{
@@ -75,18 +76,18 @@ namespace ElysiaRenderer
 		virtual void Init() override;
 		virtual void Destory() override;
 
-		PipelineStateObject* GetGraphicsPipelineState(Material* pMaterial, UINT passIndex,
+		PipelineStateObject* GetGraphicsPipelineState(DX12Device* pDevice, Material* pMaterial, UINT passIndex,
 			const RenderTargetDesc& renderTargetDesc,
 			D3D12_PRIMITIVE_TOPOLOGY_TYPE topology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
 
-		PipelineStateObject* GetComputePipelineState(Material* pMaterial, UINT passIndex);
+		PipelineStateObject* GetComputePipelineState(DX12Device* pDevice, Material* pMaterial, UINT passIndex);
 
 	private:
 		std::unordered_map<D3D12_GRAPHICS_PIPELINE_STATE_DESC, std::unique_ptr<PipelineStateObject>> m_graphicsPipelineStates{};
 		std::unordered_map<D3D12_COMPUTE_PIPELINE_STATE_DESC, std::unique_ptr<PipelineStateObject>> m_computePipelineStates{};
 
-		PipelineStateObject* GetGraphicsPipelineState(const D3D12_GRAPHICS_PIPELINE_STATE_DESC& PSODesc, DX12RootSignature* pRootSignature);
-		PipelineStateObject* GetComputePipelineState(const D3D12_COMPUTE_PIPELINE_STATE_DESC& PSODesc, DX12RootSignature* pRootSignature);
+		PipelineStateObject* GetGraphicsPipelineState(DX12Device* pDevice, const D3D12_GRAPHICS_PIPELINE_STATE_DESC& PSODesc, DX12RootSignature* pRootSignature);
+		PipelineStateObject* GetComputePipelineState(DX12Device* pDevice, const D3D12_COMPUTE_PIPELINE_STATE_DESC& PSODesc, DX12RootSignature* pRootSignature);
 	};
 
 	extern std::unique_ptr<PSOManager> g_pPSOManager;

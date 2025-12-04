@@ -217,26 +217,19 @@ namespace ElysiaRenderer
 			
 			if(passData.pCurrVariantData == nullptr || passData.pCurrVariantData != currVariantData)
 			{
-				m_pMaterial->SetPipelineResourceLayout(resourceLayouts);
 				passData.pCurrVariantData = currVariantData;
-
-				passData.pPassGPUPtr = resourceLayouts->m_spaces[PER_PASS_SPACE]->GetCBV()->GetMappedBuffer();
-				passData.pFrameGPUPtr = resourceLayouts->m_spaces[PER_FRAME_SPACE]->GetCBV()->GetMappedBuffer();
 			}
 			
 			{
 				RenderTargetDesc RTDesc = CreateDefaultRenderTargetDesc();
 				RTDesc.m_numRenderTargets = 0;
 				RTDesc.m_depthStencilFormat = GetShadowRT()->GetFormat();
-				
-				passData.pPipelineStateObject = GetPSOManager()->GetGraphicsPipelineState(m_pMaterial.get(), ShaderPasseIDs::ShadowCastPassID, RTDesc);
+				passData.pPipelineStateObject = GetPSOManager()->GetGraphicsPipelineState(m_pDevice, m_pMaterial.get(), ShaderPasseIDs::ShadowCastPassID, RTDesc);
 
 				emplaceResult.first->second = 
 				{
 					.pCurrVariantData = currVariantData,
 					.pPipelineStateObject = passData.pPipelineStateObject,
-					.pPassGPUPtr = resourceLayouts->m_spaces[PER_PASS_SPACE]->GetCBV()->GetMappedBuffer(),
-					.pFrameGPUPtr = resourceLayouts->m_spaces[PER_FRAME_SPACE]->GetCBV()->GetMappedBuffer(),
 				};
 			}
 		}
@@ -246,13 +239,7 @@ namespace ElysiaRenderer
 			
 			passData.pCurrVariantData = saveData.pCurrVariantData;
 			passData.pPipelineStateObject = saveData.pPipelineStateObject;
-			passData.pPassGPUPtr = saveData.pPassGPUPtr;
-			passData.pFrameGPUPtr = saveData.pFrameGPUPtr;
 		}
-
-		m_pMaterial->CreateMaterialCBuffer(passIndex);
-		m_pMaterial->SetMaterialCBufferGPUPtr(PER_PASS_SPACE, passIndex);
-		m_pMaterial->SetMaterialCBufferGPUPtr(PER_FRAME_SPACE, passIndex);
 	}
 
 	void ShadowPass::SetObjectResource(const MeshRender& meshRender, PipelineResourceLayout* pResourceLayout, UINT passIndex)
@@ -266,7 +253,7 @@ namespace ElysiaRenderer
 			pResourceLayout->m_spaces[PER_OBJECT_SPACE] = nullptr;
 		}
 		auto newObjectSpace = std::make_unique<PipelineResourceSpace>();
-		newObjectSpace->SetCBV(meshRender.m_objectBuffers[GetDevice()->GetFrameID()].get());
+		newObjectSpace->SetStaticCBV(meshRender.m_objectBuffers[GetDevice()->GetFrameID()].get());
 		newObjectSpace->Lock();
 		pResourceLayout->m_spaces[PER_OBJECT_SPACE] = newObjectSpace.release();
 		m_pMaterial->SetMaterialCBufferGPUPtr(PER_OBJECT_SPACE, passIndex);
@@ -284,7 +271,7 @@ namespace ElysiaRenderer
 			pResourceLayout->m_spaces[PER_MATERIAL_SPACE] = nullptr;
 		}
 		auto newSpace = std::make_unique<PipelineResourceSpace>();
-		newSpace->SetCBV(meshRender.m_materialBuffers[GetDevice()->GetFrameID()].get());
+		newSpace->SetStaticCBV(meshRender.m_materialBuffers[GetDevice()->GetFrameID()].get());
 		newSpace->Lock();
 		pResourceLayout->m_spaces[PER_MATERIAL_SPACE] = newSpace.release();
 		m_pMaterial->SetMaterialCBufferGPUPtr(PER_MATERIAL_SPACE, passIndex);

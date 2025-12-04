@@ -5,6 +5,7 @@
 #include "lib/Model/ModelImporter.h"
 #include "lib/Utility/Hash.h"
 #include "lib/DX12/DX12Shader.h"
+#include "MaterialParams.h"
 
 namespace std
 {
@@ -35,47 +36,6 @@ namespace std
 namespace ElysiaRenderer
 {
 	class Shader;
-
-	struct RuntimeCBuffer
-	{
-		UINT8* GPUPtr = nullptr;
-		std::vector<UINT8> CPUPtr{};
-
-		UINT32 DirtyBegin = UINT32_MAX;
-		UINT32 DirtyEnd = 0;
-
-		void MakeDirty(UINT32 offset, UINT32 size)
-		{
-			if (offset < DirtyEnd) 
-			{
-				// �������ݸ��������������򣬸��½���λ��
-				DirtyEnd = max(DirtyEnd, offset + size);
-			}
-			else 
-			{
-				// ������������Ŀ�ʼ�ͽ���λ��
-				DirtyBegin = min(DirtyBegin, offset);
-				DirtyEnd = max(DirtyEnd, offset + size);
-			}
-		}
-
-		bool HasDirtyRange() const noexcept
-		{
-			return DirtyBegin < DirtyEnd;
-		}
-
-		void ClearDirty()
-		{
-			
-			DirtyBegin = UINT32_MAX;
-			DirtyEnd = 0;
-		}
-	};
-	struct MaterialRuntimeCBuffer
-	{
-		std::array<RuntimeCBuffer, NUM_RESOURCE_SPACES> CBuffers;
-	};
-	
 	struct PassData
 	{
 		UINT PassIndex;
@@ -86,16 +46,11 @@ namespace ElysiaRenderer
 		D3D12_DEPTH_STENCIL_DESC	DepthStencilDesc;
 		ShaderVariantData*	pCurrVariantData = nullptr;
 		PipelineStateObject*  pPipelineStateObject = nullptr;
-		std::unique_ptr<MaterialRuntimeCBuffer> pMaterialCBuffer = nullptr;
-		UINT8* pPassGPUPtr = nullptr;
-		UINT8* pFrameGPUPtr = nullptr;
 		
 		struct SaveData
 		{
 			ShaderVariantData*	pCurrVariantData = nullptr;
 			PipelineStateObject*  pPipelineStateObject = nullptr;
-			UINT8* pPassGPUPtr = nullptr;
-			UINT8* pFrameGPUPtr = nullptr;
 		};
 		
 		// enableKeywords : SaveData
@@ -120,9 +75,7 @@ namespace ElysiaRenderer
 		PassData& GetPassData(UINT passIndex) noexcept;
 		const UINT FindPassIndex(const std::string& name) const noexcept;
 		bool HasMeshRender() const noexcept;
-		void CreateMaterialCBuffer(size_t passIndex);
-		
-		void SetMaterialCBufferGPUPtr(UINT spaceID, size_t passIndex = 0);
+		MaterialParameterBlock GetParameterBlock() const noexcept {return m_parameterBlock;};
 
 		void SetFloat(const size_t hashName, const float newValue, size_t passIndex = 0);
 		void SetInt(const size_t hashName, const int newValue, size_t passIndex = 0);
@@ -140,10 +93,7 @@ namespace ElysiaRenderer
 		std::vector<PassData> m_passDatas;
 		DX12Device* m_pDevice = nullptr;
 		MeshRender* m_pMeshRender = nullptr;
-
-		template<typename T>
-		void UpdateCBuffer(RuntimeCBuffer& CBuffer, UINT32 offset, const T data);
-		template<typename T>
-		void UpdateCBuffer(RuntimeCBuffer& CBuffer, UINT32 offset, const std::vector<T> data);
+		std::unique_ptr<ShaderVariantData> m_pCurrVariantData;
+		MaterialParameterBlock m_parameterBlock;	// 所有材质参数
 	};
 }

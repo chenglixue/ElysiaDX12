@@ -1,0 +1,58 @@
+﻿#pragma once
+#include "lib/Utility/Helper.h"
+
+namespace ElysiaRenderer
+{
+	class MaterialParameterBlock
+	{
+	public:
+		enum Type{FLOAT, INT, UINT, BOOL, FLOAT2, FLOAT3, FLOAT4, MATRIX4X4};
+		
+		struct ParamValue
+		{
+			std::array<float, 16> data{}; // 最大支持 mat4x4
+			uint32_t rowCount = 1;
+			uint32_t colCount = 1;
+
+			bool operator==(const ParamValue& other) const;
+			bool Equals(const ParamValue& other, Type type, float tolerance = 1e-6f) const;
+		};
+		
+		struct MaterialParam
+		{
+			Type type;
+			size_t nameHash;
+			ParamValue value; 
+
+			bool operator==(const MaterialParam& other) const
+			{
+				return nameHash == other.nameHash && value.Equals(other.value, type);
+			}
+		};
+		
+	public:
+		void SetInt(size_t nameHash, int v);
+		void SetUInt(size_t nameHash, unsigned int v);
+		void SetFloat(size_t nameHash, float v);
+		void SetFloat2(size_t nameHash, const Vector2& v);
+		void SetFloat3(size_t nameHash, const Vector3& v);
+		void SetFloat4(size_t nameHash, const Vector4& v);
+		void SetMatrix(size_t nameHash, const Matrix& m);
+
+		const std::vector<MaterialParam>& GetParams() const { return m_params; }
+		
+		const MaterialParam* FindParam(size_t nameHash) const;
+		MaterialParam* FindParam(size_t nameHash);
+		
+		void RemoveParam(size_t nameHash);
+		void Clear() { m_params.clear(); }
+		void MergeFrom(const MaterialParameterBlock& other);
+		
+	private:
+		std::vector<MaterialParam> m_params;
+		
+		template<typename T>
+		void SetOrAdd(size_t nameHash, Type type, const T& value);
+	};
+}
+
