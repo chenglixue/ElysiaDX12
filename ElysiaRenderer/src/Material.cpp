@@ -11,13 +11,13 @@ namespace ElysiaRenderer
 {
 	using namespace ElysiaModel;
 	
-	// ---------- EqualBufferData °ïÖúº¯Êý£¨POD ¾«È·±È½Ï»ò¸¡µã´øÈÝ²î£© ----------
+	// ---------- EqualBufferData ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½POD ï¿½ï¿½È·ï¿½È½Ï»ò¸¡µï¿½ï¿½ï¿½Ý²î£© ----------
 	inline bool EqualBufferDataExact(const void* a, const void* b, size_t bytes) noexcept
 	{
 		return memcmp(a, b, bytes) == 0;
 	}
 
-	// ¸¡µãÈÝ²î±È½Ï£¨ÓÃÓÚ Matrix/Vector£©
+	// ï¿½ï¿½ï¿½ï¿½ï¿½Ý²ï¿½È½Ï£ï¿½ï¿½ï¿½ï¿½ï¿½ Matrix/Vectorï¿½ï¿½
 	inline bool EqualFloatBufferWithTolerance(const float* a, const float* b, size_t count, float eps = 1e-6f) noexcept
 	{
 		for (size_t i = 0; i < count; ++i)
@@ -40,14 +40,18 @@ namespace ElysiaRenderer
 		}
 	}
 	
-	Material::Material(std::vector<ShaderPass>& shaderPasses)
+	Material::Material(DX12Device* pDevice, std::vector<ShaderPass>& shaderPasses) :
+		m_pDevice(pDevice)
 	{
+		assert(pDevice);
 		Init(shaderPasses);
 	}
 
-	Material::Material(std::vector<ShaderPass>& shaderPasses, MeshRender* pMeshRender) :
+	Material::Material(DX12Device* pDevice, std::vector<ShaderPass>& shaderPasses, MeshRender* pMeshRender) :
+		m_pDevice(pDevice),
 		m_pMeshRender(pMeshRender)
 	{
+		assert(pDevice);
 		Init(shaderPasses);
 	}
 
@@ -94,7 +98,7 @@ namespace ElysiaRenderer
 				};
 			}
 
-			newPassData.pShader = std::move(GetDevice()->CreateShader(desc));
+			newPassData.pShader = std::move(m_pDevice->CreateShader(desc));
 			newPassData.BlendDesc = GetBlendState(newPassData.pShader->GetRenderStates().at(L"Blend"));
 			newPassData.RasterizerDesc = GetRasterizerState(newPassData.pShader->GetRenderStates().at(L"Rasterizer"));
 			newPassData.DepthStencilDesc = GetDepthState(newPassData.pShader->GetRenderStates().at(L"Depth"));
@@ -135,44 +139,6 @@ namespace ElysiaRenderer
 		{ 
 			pMaterialCBuffer->CBuffers[space].CPUPtr.resize(layout.size);
 			pMaterialCBuffer->CBuffers[space].GPUPtr = nullptr;
-		}
-	}
-
-	void Material::SetPipelineResourceLayout(PipelineResourceLayout* pPipelineResourceLayout)
-	{
-		if (HasMeshRender())
-		{
-			for (UINT meshIndex = 0; meshIndex < GetModelImporter()->GetMeshCount(); ++meshIndex)
-			{
-				auto& meshRenderer = m_pMeshRender[meshIndex];
-
-				for (UINT frameIndex = 0; frameIndex < NUM_FRAMES_IN_FLIGHT; ++frameIndex)
-				{
-					auto objectBufferDesc = pPipelineResourceLayout->m_spaces[PER_OBJECT_SPACE]->GetCBVDesc();
-					// if (meshRenderer.m_objectBuffers[frameIndex] &&
-					// 	meshRenderer.m_objectBuffers[frameIndex]->GetResourceDesc().Width != objectBufferDesc.m_size)
-					// {
-					// 	meshRenderer.m_objectBuffers[frameIndex].reset();
-					// 	meshRenderer.m_objectBuffers[frameIndex] = std::move(GetDevice()->CreateBuffer(objectBufferDesc));
-					// }
-					// else if(meshRenderer.m_objectBuffers[frameIndex] == nullptr)
-					{
-						meshRenderer.m_objectBuffers[frameIndex] = std::move(GetDevice()->CreateBuffer(objectBufferDesc));
-					}
-
-					auto materialBufferDesc = pPipelineResourceLayout->m_spaces[PER_MATERIAL_SPACE]->GetCBVDesc();
-					// if (meshRenderer.m_materialBuffers[frameIndex] &&
-					// 	meshRenderer.m_materialBuffers[frameIndex]->GetResourceDesc().Width != materialBufferDesc.m_size)
-					// {
-					// 	meshRenderer.m_materialBuffers[frameIndex].reset();
-					// 	meshRenderer.m_materialBuffers[frameIndex] = std::move(GetDevice()->CreateBuffer(materialBufferDesc));
-					// }
-					// else if(meshRenderer.m_materialBuffers[frameIndex] == nullptr)
-					{
-						meshRenderer.m_materialBuffers[frameIndex] = std::move(GetDevice()->CreateBuffer(materialBufferDesc));
-					}
-				}
-			}
 		}
 	}
 	
@@ -357,7 +323,7 @@ namespace ElysiaRenderer
 				{
 					ThrowRuntimeError("invalid size");
 					return;
-				} 
+				}
 				
 				Matrix currValue;
 				memcpy(&currValue, cbuffer.CPUPtr.data() + memberData.StartOffset, sizeof(Matrix));

@@ -16,11 +16,11 @@ namespace ElysiaRenderer
 	struct PipelineStateObject;
 	class DX12TextureResource;
 	
-	class Renderer
+	class RendererSystem
 	{
 	public:
-		Renderer(HWND windowHandle, ElysiaHelper::UINT2 screenSize, std::shared_ptr<DX12UI> pUI);
-		~Renderer();
+		RendererSystem(HWND windowHandle, ElysiaHelper::UINT2 screenSize, std::unique_ptr<DX12UI> pUI);
+		~RendererSystem();
 
 		void Init();
 		void Update();
@@ -87,7 +87,8 @@ namespace ElysiaRenderer
 		std::vector<const char*>  m_displayModesNamesAvailable;
 		bool                      m_disableLocalDimming;
 
-		std::shared_ptr<DX12UI> m_pUI = nullptr;
+		std::unique_ptr<DX12Device> m_pDevice = nullptr;
+		DX12UI* m_pUI = nullptr;
 		std::unique_ptr<DX12GraphicsContext> m_graphicsContext = nullptr;
 		std::vector<std::unique_ptr<D3D12_SAMPLER_DESC>> m_samplers{};
 		std::vector<std::unique_ptr<BasePass>> m_passes{};

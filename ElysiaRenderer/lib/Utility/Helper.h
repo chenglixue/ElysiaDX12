@@ -635,6 +635,4 @@ namespace ElysiaHelper
         }
         return out;
     }
-
-    
 }

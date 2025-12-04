@@ -35,6 +35,7 @@ namespace ElysiaRenderer
 
 	protected:
 		Vector2 m_renderSize;
+		DX12Device* m_pDevice = nullptr;
 		DX12GraphicsContext* m_pCommand = nullptr;
 		DX12Camera* m_pCamera = nullptr;
 

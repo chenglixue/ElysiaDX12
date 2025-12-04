@@ -16,6 +16,7 @@
 
 // #include "src/Parameter/UserData.h"
 #include "RenderResource.h"
+#include "UploadRingBuffer.h"
 #include "lib/Event/Messager.h"
 #include "../Utility/RenderTexture.h"
 #include "Utility/ShaderCompileOptions.h"
@@ -23,9 +24,6 @@
 
 namespace ElysiaRenderer
 {
-
-	std::unique_ptr<DX12Device> g_device = nullptr;
-
 	DX12Device::DX12Device(HWND windowHandle, ElysiaHelper::UINT2 screenSize)
 		:	m_screenSize(screenSize),
 			m_hWnd(windowHandle)
@@ -273,16 +271,13 @@ namespace ElysiaRenderer
 			}
 		}
 
+		// Create Global Upload Buffer
+		{
+			m_pGlobalUploadBuffer = std::make_unique<UploadRingBuffer>(this, m_graphicsQueue.get(), 64 * 1024 * 1024, L"Global Upload Buffer");
+		}
+
 		CreateSamplers();
 
-
-		/*for (UINT i = 0; i < NUM_FRAMES_IN_FLIGHT; ++i)
-		{
-			m_destructionQueues[i].m_buffers = std::make_unique<std::vector<DX12BufferResource>>();
-			m_destructionQueues[i].m_textures = std::make_unique<std::vector<DX12TextureResource>>();
-			m_destructionQueues[i].m_contexts = std::make_unique<std::vector<DX12Context>>();
-			m_destructionQueues[i].m_graphicsPipelineStates = std::make_unique<std::vector<DX12PipelineState>>();
-		}*/
 		m_frameID = 0;
 		m_frameIndex = 0;
 		m_freeReservedDescriptorIndices.resize(NUM_RESERVED_SRV_DESCRIPTORS - 1);
@@ -375,6 +370,12 @@ namespace ElysiaRenderer
 		CreateWindowDependentResources();
 	}
 
+	UploadRingBuffer* DX12Device::GetGlobalUploadBuffer() const noexcept
+	{
+		assert(m_pGlobalUploadBuffer);
+		return m_pGlobalUploadBuffer.get();
+	}
+	
 	std::unique_ptr<DX12GraphicsContext>		DX12Device::CreateGraphicsContext()
 	{
 		auto graphicsContext = std::make_unique<DX12GraphicsContext>(this);
@@ -412,7 +413,7 @@ namespace ElysiaRenderer
 		ElysiaHelper::ThrowIfFailed(m_allocator->CreateResource(&allocationDesc, &resourceDesc, usageState, nullptr,
 			&pAllocation, IID_PPV_ARGS(&pResource)));
 		//pResource->SetName(bufferCreationDesc.m_name);
-		 
+		
 		auto pNewBuffer = std::make_unique<DX12BufferResource>(pResource, usageState, pAllocation);
 
 		if (isHasCBV)
@@ -469,6 +470,7 @@ namespace ElysiaRenderer
 
 		return pNewBuffer;
 	}
+
 	
 	std::unique_ptr<DX12TextureResource>		DX12Device::CreateTextureFromFile(const TextureCreationDesc& textureCreationDesc)
 	{
@@ -1095,6 +1097,7 @@ namespace ElysiaRenderer
 		m_graphicsQueue->WaitForFenceCPUBlocking(m_endOfFrameFences[m_frameID].m_graphicsQueueFence);
 		m_copyQueue->WaitForFenceCPUBlocking(m_endOfFrameFences[m_frameID].m_copyQueueFence);
 		m_computeQueue->WaitForFenceCPUBlocking(m_endOfFrameFences[m_frameID].m_computeQueueFence);
+		m_pGlobalUploadBuffer->WaitGPU(m_endOfFrameFences[m_frameID].m_graphicsQueueFence);
 
 		ProcessDestruction(m_frameID);
 
@@ -1117,6 +1120,9 @@ namespace ElysiaRenderer
 	{
 		m_swapChain->Present(0, 0);
 		m_endOfFrameFences[m_frameID].m_graphicsQueueFence = m_graphicsQueue->SingalFence();
+		
+		m_pGlobalUploadBuffer->WaitGPU(m_endOfFrameFences[m_frameID].m_graphicsQueueFence);
+		m_pGlobalUploadBuffer->Reset();
 	}
 
 	void DX12Device::WaitForIdle()

@@ -15,6 +15,7 @@ namespace ElysiaRenderer
 	class DX12UploadContext;
 	class DX12GraphicsContext;
 	class DX12BufferResource;
+	class UploadRingBuffer;
 	class DX12StagingDescriptorHeap;
 	class DX12Queue;
 
@@ -87,6 +88,7 @@ namespace ElysiaRenderer
 		}
 		AGSContext* GetAGSContext() { return m_agsContext; }
 		AGSGPUInfo* GetAGSGPUInfo() { return &m_agsGPUInfo; }
+		UploadRingBuffer* GetGlobalUploadBuffer() const noexcept;
 
 		void CreateWindowDependentResources();
 		void OnCreateWindowSizeDependentResources(uint32_t dwWidth, uint32_t dwHeight, bool bVSyncOn, DisplayMode displayMode = DISPLAYMODE_SDR, bool disableLocalDimming = false);
@@ -184,19 +186,9 @@ namespace ElysiaRenderer
 		std::vector<UINT> m_freeReservedDescriptorIndices;
 		std::array<std::unique_ptr<DX12UploadContext>, NUM_FRAMES_IN_FLIGHT> m_uploadContexts;
 		std::array<std::unique_ptr<DX12TextureResource>, NUM_BACK_BUFFERS> m_backBuffers;
+		std::unique_ptr<UploadRingBuffer> m_pGlobalUploadBuffer;
 		std::array<EndOfFrameFences, NUM_FRAMES_IN_FLIGHT> m_endOfFrameFences;
 		std::array<std::vector<std::pair<uint64_t, D3D12_COMMAND_LIST_TYPE>>, NUM_FRAMES_IN_FLIGHT> m_contextSubmissions;
 		std::array<DestructionQueue, NUM_FRAMES_IN_FLIGHT> m_destructionQueues;
 	};
-
-	extern std::unique_ptr<DX12Device> g_device;
-
-	inline DX12Device* GetDevice()
-	{
-		if (g_device == nullptr)
-		{
-			ThrowRuntimeError("null device");
-		}
-		return g_device.get();
-	}
 }

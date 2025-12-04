@@ -48,12 +48,12 @@ namespace ElysiaRenderer
 		{
 			if (offset < DirtyEnd) 
 			{
-				// ÈôÐÂÊý¾Ý¸²¸ÇÁËÏÖÓÐÔàÇøÓò£¬¸üÐÂ½áÊøÎ»ÖÃ
+				// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ò£¬¸ï¿½ï¿½Â½ï¿½ï¿½ï¿½Î»ï¿½ï¿½
 				DirtyEnd = max(DirtyEnd, offset + size);
 			}
 			else 
 			{
-				// ·ñÔò¸üÐÂÔàÇøµÄ¿ªÊ¼ºÍ½áÊøÎ»ÖÃ
+				// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½Ê¼ï¿½Í½ï¿½ï¿½ï¿½Î»ï¿½ï¿½
 				DirtyBegin = min(DirtyBegin, offset);
 				DirtyEnd = max(DirtyEnd, offset + size);
 			}
@@ -107,15 +107,13 @@ namespace ElysiaRenderer
 			return pCurrVariantData->pMeshResourceLayout.get();
 		}
 	};
-
-	
 	
 	class Material
 	{
 	public:
 		Material() = default;
-		Material(std::vector<ShaderPass>& shaderPasses);
-		Material(std::vector<ShaderPass>& shaderPasses, MeshRender* m_pMeshRender);
+		Material(DX12Device* pDevice, std::vector<ShaderPass>& shaderPasses);
+		Material(DX12Device* pDevice,std::vector<ShaderPass>& shaderPasses, MeshRender* m_pMeshRender);
 		~Material() = default;
 
 		void Init(std::vector<ShaderPass>& shaderPasses);
@@ -124,7 +122,6 @@ namespace ElysiaRenderer
 		bool HasMeshRender() const noexcept;
 		void CreateMaterialCBuffer(size_t passIndex);
 		
-		void SetPipelineResourceLayout(PipelineResourceLayout* pPipelineResourceLayout);
 		void SetMaterialCBufferGPUPtr(UINT spaceID, size_t passIndex = 0);
 
 		void SetFloat(const size_t hashName, const float newValue, size_t passIndex = 0);
@@ -141,9 +138,8 @@ namespace ElysiaRenderer
 	private:
 		std::mutex m_setDataMutex;
 		std::vector<PassData> m_passDatas;
-		MeshRender* m_pMeshRender;
-		std::unique_ptr<DX12BufferResource> m_pPassConstantBuffer = nullptr;
-		std::unique_ptr<DX12BufferResource> m_pFrameConstantBuffer = nullptr;
+		DX12Device* m_pDevice = nullptr;
+		MeshRender* m_pMeshRender = nullptr;
 
 		template<typename T>
 		void UpdateCBuffer(RuntimeCBuffer& CBuffer, UINT32 offset, const T data);

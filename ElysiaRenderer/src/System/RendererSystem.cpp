@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "Renderer.h"
+#include "RendererSystem.h"
 
 #include <dxgidebug.h>
 
@@ -22,6 +22,7 @@
 #include "lib/Utility/SobolSequenceGenerator.h"
 #include "src/Parameter/CBVParameter.h"
 #include "RenderResource.h"
+#include "DX12/UploadRingBuffer.h"
 
 extern "C" { __declspec(dllexport) extern const UINT D3D12SDKVersion = 618; }
 extern "C" { __declspec(dllexport) extern const char* D3D12SDKPath = ".\\D3D12\\"; }
@@ -30,8 +31,8 @@ namespace ElysiaRenderer
 {
 	using namespace ElysiaModel;
 
-	Renderer::Renderer(HWND windowHandle, UINT2 screenSize, std::shared_ptr<DX12UI> pUI) :
-		m_pUI(pUI),
+	RendererSystem::RendererSystem(HWND windowHandle, UINT2 screenSize, std::unique_ptr<DX12UI> pUI) :
+		m_pUI(pUI.get()),
 		m_disableLocalDimming(false),
 		m_displayModesAvailable(),
 		m_displayModesNamesAvailable(),
@@ -40,12 +41,12 @@ namespace ElysiaRenderer
 	{
 		m_windowHandle = windowHandle;
 		m_aspectRatio = static_cast<float>(screenSize.x) / static_cast<float>(screenSize.y);
-		g_device = std::make_unique<DX12Device>(windowHandle, screenSize);
-		m_graphicsContext = GetDevice()->CreateGraphicsContext();
+		m_pDevice = std::make_unique<DX12Device>(windowHandle, screenSize);
+		m_graphicsContext = m_pDevice->CreateGraphicsContext();
 
-		g_device->EnumerateDisplayModes(&m_displayModesAvailable, &m_displayModesNamesAvailable);
+		m_pDevice->EnumerateDisplayModes(&m_displayModesAvailable, &m_displayModesNamesAvailable);
 
-		m_pUI->InitDescriptor(windowHandle, std::move(GetDevice()));
+		m_pUI->InitDescriptor(windowHandle, m_pDevice.get());
 		m_pCameraManager = std::make_unique<CameraManager>();
 		g_pLightManager = std::make_unique<LightManager>();
 		g_pBufferManager = std::make_unique<BufferManager>();
@@ -57,11 +58,11 @@ namespace ElysiaRenderer
 		g_pModelImporter = std::make_unique<ModelImporter>(GetBufferManager(), m_pTextureManager.get());
 	}
 
-	Renderer::~Renderer()
+	RendererSystem::~RendererSystem()
 	{
 	}
 
-	void Renderer::Init()
+	void RendererSystem::Init()
 	{
 #if (_WIN32_WINNT >= 0x0A00 /*_WIN32_WINNT_WIN10*/)
 		Microsoft::WRL::Wrappers::RoInitializeWrapper initialize(RO_INIT_MULTITHREADED);
@@ -96,7 +97,7 @@ namespace ElysiaRenderer
 
 		Setup();
 	}
-	void Renderer::Update()
+	void RendererSystem::Update()
 	{
 		if (CheckIfWindowModeHdrOn() && (m_displayModesAvailable[m_currentDisplayModeNamesIndex] == DISPLAYMODE_SDR ||
 						m_displayModesAvailable[m_currentDisplayModeNamesIndex] == DISPLAYMODE_HDR10_2084 ||
@@ -110,23 +111,23 @@ namespace ElysiaRenderer
 		UpdateCBV();
 		SerializeUserData();
 	}
-	void Renderer::Render()
+	void RendererSystem::Render()
 	{
 		Execute();
 	}
-	void Renderer::Destory()
+	void RendererSystem::Destory()
 	{
-		GetDevice()->WaitForIdle();
-		GetDevice()->DestoryContext(std::move(m_graphicsContext));
+		m_pDevice->WaitForIdle();
+		m_pDevice->DestoryContext(std::move(m_graphicsContext));
 
 		m_graphicsContext.release();
 	}
-	void Renderer::Resize()
+	void RendererSystem::Resize()
 	{
 
 	}
 
-	void Renderer::OnMouseDown(WPARAM btnState, int x, int y)
+	void RendererSystem::OnMouseDown(WPARAM btnState, int x, int y)
 	{
 		m_lastMousePos = XMINT2(x, y);
 
@@ -136,44 +137,41 @@ namespace ElysiaRenderer
 		// until the ReleaseCapture function is called to release the capture.
 		SetCapture(m_windowHandle);
 	}
-	void Renderer::OnMouseUp(WPARAM btnState, int x, int y)
+	void RendererSystem::OnMouseUp(WPARAM btnState, int x, int y)
 	{
 		ReleaseCapture();
 	}
-	void Renderer::OnMouseMove(WPARAM btnState, int x, int y)
+	void RendererSystem::OnMouseMove(WPARAM btnState, int x, int y)
 	{
 		m_lastMousePos.x = x;
 		m_lastMousePos.y = y;
 	}
-	void Renderer::OnKeyboardInput()
+	void RendererSystem::OnKeyboardInput()
 	{
 	}
 
-	void Renderer::Execute()
+	void RendererSystem::Execute()
 	{
-		GetDevice()->BeginFrame();
+		m_pDevice->BeginFrame();
 		m_graphicsContext->Reset();
 
-		//PIXHelper pix(m_graphicsContext->GetCommandList(), "Deferred Render");
 		for (auto& pass : m_passes)
 		{
 			pass->Render();
 		}
 
-		{
-			GetDevice()->SubmitContextWork(*m_graphicsContext);
-
-			GetDevice()->EndFrame();
-			GetDevice()->Present();
-		}
+		m_pDevice->SubmitContextWork(*m_graphicsContext);
+		m_pDevice->EndFrame();
+		m_pDevice->Present();
+		
 	}
 
-	void Renderer::UpdateCBV()
+	void RendererSystem::UpdateCBV()
 	{
 		auto passParameter = GetRenderResource()->GetCBVFrameVariable();
 		passParameter->cameraPosWS = m_pCameraManager->GetMainCamera()->GetPosition4();
 		passParameter->lightData = std::move(GetLightManager()->GetMainLight()->CreateLightData());
-		passParameter->frameIndex = GetDevice()->GetFrameIndex();
+		passParameter->frameIndex = m_pDevice->GetFrameIndex();
 		passParameter->nearZ = m_pCameraManager->GetMainCamera()->GetNearZ();
 		passParameter->farZ = m_pCameraManager->GetMainCamera()->GetFarZ();
 		passParameter->ZBufferParams = Vector4(1 - m_pCameraManager->GetMainCamera()->GetFarZ() / m_pCameraManager->GetMainCamera()->GetNearZ(),
@@ -183,7 +181,7 @@ namespace ElysiaRenderer
 		GetBufferManager()->GetSingleConstantBuffer(PER_FRAME_SPACE)->SetMappedData(GetRenderResource()->GetCBVFrameVariable(), sizeof(CBVFrameVariable));
 	}
 
-	void Renderer::Setup()
+	void RendererSystem::Setup()
 	{
 		GetModelImporter()->CreateVertexBuffer();
 		GetModelImporter()->CreateIndexBuffer();
@@ -192,7 +190,7 @@ namespace ElysiaRenderer
  		CreateConstantBuffers();
 
 		RenderPassData passData{};  
-		passData.RenderSize = GetDevice()->GetScreenSize().xy();
+		passData.RenderSize = m_pDevice->GetScreenSize().xy();
 		passData.pCommand = m_graphicsContext.get();
 
 		m_passes.emplace_back(std::move(std::make_unique<ShadowPass>(m_pCameraManager->GetMainCamera())));
@@ -208,7 +206,7 @@ namespace ElysiaRenderer
 			pass->Setup(passData);
 		}
 	}
-	void Renderer::CreateConstantBuffers()
+	void RendererSystem::CreateConstantBuffers()
 	{
 		BufferCreationDesc desc{};
 		desc.m_accessFlags = BufferAccessFlags::HostWritable;
@@ -235,7 +233,7 @@ namespace ElysiaRenderer
 		GetRenderResource()->GetPerFrameBindResourceSpace()->SetCBV(GetBufferManager()->GetSingleConstantBuffer(PER_FRAME_SPACE));
 		GetRenderResource()->GetPerFrameBindResourceSpace()->Lock();
 	}
-	void Renderer::UpdateDisplay(int displayMode, bool disableLocalDimming)
+	void RendererSystem::UpdateDisplay(int displayMode, bool disableLocalDimming)
 	{
 		// Nothing was changed in UI
 		if (displayMode < 0)
@@ -247,12 +245,12 @@ namespace ElysiaRenderer
 		if (m_currentDisplayMode != displayMode || m_disableLocalDimming != disableLocalDimming)
 		{
 			// Flush GPU
-			g_device->WaitForIdle();
+			m_pDevice->WaitForIdle();
 
 			m_currentDisplayMode = (DisplayMode)displayMode;
 			m_disableLocalDimming = disableLocalDimming;
 
-			g_device->OnCreateWindowSizeDependentResources(GetDevice()->GetScreenSize().x, GetDevice()->GetScreenSize().y, m_VsyncEnabled, m_currentDisplayMode, m_disableLocalDimming);
+			m_pDevice->OnCreateWindowSizeDependentResources(m_pDevice->GetScreenSize().x, m_pDevice->GetScreenSize().y, m_VsyncEnabled, m_currentDisplayMode, m_disableLocalDimming);
 		}
 	}
 }            

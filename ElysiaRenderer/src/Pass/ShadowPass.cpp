@@ -39,6 +39,10 @@ namespace ElysiaRenderer
 	{
 		Dispose();
 	}
+	void ShadowPass::Dispose()
+	{
+
+	}
 
 	void ShadowPass::Configure()
 	{
@@ -46,7 +50,7 @@ namespace ElysiaRenderer
 		CreateMainShadow(1000, DXGI_FORMAT_D24_UNORM_S8_UINT);
 		GetRenderResource()->GetCBVFrameVariable()->ShadowTexIndex = m_pShadowRT->GetTexture()->GetResourceHeapIndex();
 		
-		m_shaderPasses = std::vector<ShaderPass>
+		m_shaderPasses =
 		{ 
 			ShaderPass
 			{ 
@@ -54,7 +58,7 @@ namespace ElysiaRenderer
 				.FilePath = L"Shaders\\public\\Shadow.hlsl",
 			} 
 		}; 
-		m_pMaterial = std::move(std::make_unique<Material>(m_shaderPasses, &GetModelImporter()->GetMeshRenderer(0)));
+		m_pMaterial = std::move(std::make_unique<Material>(m_pDevice, m_shaderPasses, &GetModelImporter()->GetMeshRenderer(0)));
 		ShaderPasseIDs::ShadowCastPassID = m_pMaterial->FindPassIndex("Shadow Cast Pass");
 
 		UpdateVariant();
@@ -94,11 +98,6 @@ namespace ElysiaRenderer
 		}
 
 		m_pCommand->AddBarrier(m_pShadowRT.get(), D3D12_RESOURCE_STATE_DEPTH_READ);
-	}
-	
-	void ShadowPass::Dispose()
-	{
-
 	}
 	
 	void ShadowPass::CreateMainShadow(float boundSphereRadius, DXGI_FORMAT format)

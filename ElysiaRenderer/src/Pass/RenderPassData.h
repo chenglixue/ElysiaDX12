@@ -7,6 +7,7 @@ namespace ElysiaRenderer
 	struct RenderPassData
 	{
 		Vector2 RenderSize = Vector2::One;
-		DX12GraphicsContext* pCommand;
+		DX12Device* pDevice = nullptr;
+		DX12GraphicsContext* pCommand = nullptr;
 	};
 }

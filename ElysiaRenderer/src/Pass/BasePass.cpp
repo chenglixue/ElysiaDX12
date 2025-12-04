@@ -28,6 +28,7 @@ namespace ElysiaRenderer
 	{
 		m_renderSize = renderPassData.RenderSize;
 		m_pCommand = renderPassData.pCommand;
+		m_pDevice = renderPassData.pDevice;
 
 		Configure();
 	}
