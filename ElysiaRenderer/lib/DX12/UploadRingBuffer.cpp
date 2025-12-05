@@ -3,7 +3,7 @@
 
 #include "DX12Device.h"
 #include "lib/Utility/Helper.h"
-#include "DX12Queue.h"
+#include "RenderResource.h"
 
 namespace ElysiaRenderer
 {
@@ -97,5 +97,29 @@ namespace ElysiaRenderer
     void UploadRingBuffer::Reset()
     {
         m_head = 0;
+    }
+    
+    D3D12_GPU_VIRTUAL_ADDRESS UploadFrameConstant(
+           UploadRingBuffer* pUploadBuffer,
+           size_t totalSize)
+    {
+        if (totalSize == 0)
+        {
+            return 0;
+        }
+
+        D3D12_GPU_VIRTUAL_ADDRESS GPUAddress = 0;
+        UINT8* CPUAddress = nullptr;
+ 
+        if(!pUploadBuffer->Allocate(totalSize, GPUAddress, CPUAddress))
+        {
+            assert(false && "UploadRingBuffer is full! Call Reset() at beginning of frame.");
+            return 0;
+        }
+        memset(CPUAddress, 0, totalSize);
+
+        memcpy(CPUAddress, RenderResource::GetInstance().GetCBVFrameVariable(), totalSize);
+
+        return GPUAddress;
     }
 }

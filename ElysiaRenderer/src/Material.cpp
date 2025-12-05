@@ -6,6 +6,7 @@
 #include "lib/Utility/PipelineResourceUtility.h"
 #include "RenderResource.h"
 #include "Manager/ShaderVariantManager.h"
+#include "lib/DX12/UploadRingBuffer.h"
 
 namespace ElysiaRenderer
 {
@@ -113,5 +114,95 @@ namespace ElysiaRenderer
 	void Material::SetMatrix(size_t nameHash, const Matrix& m)
 	{
 		m_parameterBlock.SetMatrix(nameHash, m);
+	}
+	
+	D3D12_GPU_VIRTUAL_ADDRESS  UploadMaterialConstants(
+			UploadRingBuffer* pUploadBuffer,
+			UINT8 spaceID,
+			Material* pMaterial,
+			const ShaderVariantData* pVariantData)
+	{
+		assert(pUploadBuffer);
+		assert(pMaterial);
+		assert(spaceID < NUM_RESOURCE_SPACES);
+		const auto& CBuffer = pVariantData->MergedReflectionData.GetCBuffer(spaceID);
+		
+		size_t totalSize = CBuffer.size;
+		if (totalSize == 0)
+		{
+			return 0;
+		}
+		
+		D3D12_GPU_VIRTUAL_ADDRESS GPUAddress;
+		UINT8* CPUAddress = nullptr;
+		if(!pUploadBuffer->Allocate(totalSize, GPUAddress, CPUAddress))
+		{
+			assert(false && "UploadRingBuffer is full! Call Reset() at beginning of frame.");
+			return 0;
+		}
+		memset(CPUAddress, 0, totalSize);
+		
+		for(const auto& memberPair : CBuffer.members)
+		{
+			auto& member =  memberPair.second;
+			const MaterialParameterBlock::MaterialParam* pMaterialParam = pMaterial->GetParameterBlock().FindParam(member.Name);
+			if(!pMaterialParam) continue;
+			
+			uint8_t* dest = CPUAddress + member.StartOffset;
+			switch (pMaterialParam->type)
+			{
+			case MaterialParameterBlock::INT:
+				{
+					*reinterpret_cast<int*>(dest) = static_cast<int>(pMaterialParam->value.data[0]);
+					break;
+				}
+			case MaterialParameterBlock::UINT:
+				{
+					*reinterpret_cast<UINT*>(dest) = static_cast<unsigned int>(pMaterialParam->value.data[0]);
+					break;
+				}
+			case MaterialParameterBlock::BOOL:
+				{
+					*reinterpret_cast<UINT*>(dest) = static_cast<unsigned int>(pMaterialParam->value.data[0]);
+					break;
+				}
+			case MaterialParameterBlock::FLOAT:
+				{
+					*reinterpret_cast<float*>(dest) = (pMaterialParam->value.data[0]);
+					break;
+				}
+			case MaterialParameterBlock::FLOAT2:
+				{
+					auto& v = *reinterpret_cast<Vector2*>(dest);
+					v.x = pMaterialParam->value.data[0];
+					v.y = pMaterialParam->value.data[1];
+					break;
+				}
+			case MaterialParameterBlock::FLOAT3:
+				{
+					auto& v = *reinterpret_cast<Vector3*>(dest);
+					v.x = pMaterialParam->value.data[0];
+					v.y = pMaterialParam->value.data[1];
+					v.z = pMaterialParam->value.data[2];
+					break;
+				}
+			case MaterialParameterBlock::FLOAT4:
+				{
+					auto& v = *reinterpret_cast<Vector4*>(dest);
+					v.x = pMaterialParam->value.data[0];
+					v.y = pMaterialParam->value.data[1];
+					v.z = pMaterialParam->value.data[2];
+					v.w = pMaterialParam->value.data[3];
+					break;
+				}
+			case MaterialParameterBlock::MATRIX4X4:
+				{
+					memcpy(dest, pMaterialParam->value.data.data(), 64);
+					break;
+				}
+			}
+		}
+
+		return GPUAddress;
 	}
 }

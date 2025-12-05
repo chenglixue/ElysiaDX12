@@ -25,6 +25,13 @@ namespace ElysiaRenderer
 	{
 		std::array<PipelineResourceSpace*, NUM_RESOURCE_SPACES> m_spaces{  };
 		
+		void SetSpace(UINT8 spaceID, PipelineResourceSpace* pSpace)
+		{
+			assert(spaceID < NUM_RESOURCE_SPACES && pSpace);
+			
+			m_spaces[spaceID] = pSpace;
+		}
+		
 		bool IsValidSpace(size_t spaceID)
 		{
 			assert(spaceID < NUM_RESOURCE_SPACES);

@@ -237,8 +237,7 @@ namespace ElysiaRenderer
 		
 		auto& passData = m_pMaterial->GetPassData(passIndex);
 		SetSpaceResource(passData, PER_PASS_SPACE);
-		passData.pCurrVariantData->pMeshResourceLayout->m_spaces[PER_FRAME_SPACE] = RenderResource::GetInstance().GetPerFrameBindResourceSpace();
-		m_pCommand->SetPipelineResource(PER_FRAME_SPACE, passData.pCurrVariantData->pMeshResourceLayout->m_spaces[PER_FRAME_SPACE]);
+		SetSpaceResource(passData, PER_FRAME_SPACE);
 		
 		for (UINT meshIndex = 0; meshIndex < GetModelImporter()->GetMeshCount(); ++meshIndex)
 		{

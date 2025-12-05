@@ -97,10 +97,8 @@ namespace ElysiaRenderer
 						m_displayModesAvailable[m_currentDisplayModeNamesIndex] == DISPLAYMODE_HDR10_SCRGB))
 		{
 			UpdateDisplay(UserData::GetInstance().displayMode, m_disableLocalDimming);
-			BufferManager::GetInstance().Update();
 		}
 		//OnKeyboardInput();
-		LightManager::GetInstance().Update();
 		UpdateCBV();
 		SerializeUserData();
 	}
@@ -158,31 +156,6 @@ namespace ElysiaRenderer
 		m_pDevice->Present();
 		
 	}
-
-	D3D12_GPU_VIRTUAL_ADDRESS UploadFrameConstant(
-			UploadRingBuffer* pUploadBuffer,
-			size_t totalSize)
-	{
-		if (totalSize == 0)
-		{
-			return 0;
-		}
-
-		D3D12_GPU_VIRTUAL_ADDRESS GPUAddress;
-		UINT8* CPUAddress = nullptr;
-
-		if(!pUploadBuffer->Allocate(totalSize, GPUAddress, CPUAddress))
-		{
-			assert(false && "UploadRingBuffer is full! Call Reset() at beginning of frame.");
-			return 0;
-		}
-		memset(CPUAddress, 0, totalSize);
-
-		memcpy(CPUAddress, (RenderResource::GetInstance().GetCBVFrameVariable()), totalSize);
-
-		return GPUAddress;
-	}
-	
 	void RendererSystem::UpdateCBV()
 	{
 		auto pCameraManager = &CameraManager::GetInstance();
@@ -208,8 +181,6 @@ namespace ElysiaRenderer
 		GetModelImporter()->CreateIndexBuffer();
 		GetModelImporter()->CreateMeshRenders();
 
- 		CreateConstantBuffers();
-
 		RenderPassData passData{};  
 		passData.RenderSize = m_pDevice->GetScreenSize().xy();
 		passData.pCommand = m_graphicsContext.get();
@@ -227,33 +198,6 @@ namespace ElysiaRenderer
 		{ 
 			pass->Setup(passData);
 		}
-	}
-	void RendererSystem::CreateConstantBuffers()
-	{
-		BufferCreationDesc desc{};
-		desc.m_accessFlags = BufferAccessFlags::HostWritable;
-		desc.m_viewFlags = GPUResourceFlags::CBV;
-		desc.m_isRawAccess = false;
-		
-		desc.m_size = sizeof(CBVObjectParameter);
-		for (UINT meshIndex = 0; meshIndex < GetModelImporter()->GetMeshCount(); ++meshIndex)
-		{
-			const auto& meshRenderer = GetModelImporter()->GetMeshRenderer(meshIndex);
-
-			BufferManager::GetInstance().AddConstantBuffer(PER_OBJECT_SPACE, desc);
-
-			auto objectConstantParameter = *meshRenderer.m_CBVObjectParameter;
-			for (UINT frameIndex = 0; frameIndex < NUM_FRAMES_IN_FLIGHT; ++frameIndex)
-			{
-				auto objectContantBuffer = BufferManager::GetInstance().GetMutilConstantBuffer(PER_OBJECT_SPACE, frameIndex, meshIndex);
-				objectContantBuffer->SetMappedData(&objectConstantParameter, sizeof(CBVObjectParameter));
-			}
-		}
-
-		desc.m_size = sizeof(CBVFrameVariable);
-		BufferManager::GetInstance().AddConstantBuffer(PER_FRAME_SPACE, desc);
-		RenderResource::GetInstance().GetPerFrameBindResourceSpace()->SetStaticCBV(BufferManager::GetInstance().GetSingleConstantBuffer(PER_FRAME_SPACE));
-		RenderResource::GetInstance().GetPerFrameBindResourceSpace()->Lock();
 	}
 	void RendererSystem::UpdateDisplay(int displayMode, bool disableLocalDimming)
 	{

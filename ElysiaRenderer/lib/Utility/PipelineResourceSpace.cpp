@@ -81,7 +81,7 @@ namespace ElysiaRenderer
 	void PipelineResourceSpace::SetDynamicCBV(D3D12_GPU_VIRTUAL_ADDRESS GPUVA)
 	{
 		m_dynamicCBVAddress = GPUVA;
-		m_hasDynamicCBV = false;
+		m_hasDynamicCBV = true;
 	}
 	void PipelineResourceSpace::SetSRV(PipelineResourceBinding* SRVResource)
 	{

@@ -77,45 +77,6 @@ namespace ElysiaRenderer
 		
 	}
 
-	DX12BufferResource* BufferManager::GetSingleConstantBuffer(uint8_t spaceID) const noexcept
-	{
-		switch (spaceID)
-		{
-		case PER_PASS_SPACE:
-		{
-			return m_pPassConstantBuffer.get();
-			break;
-		}
-
-		case PER_FRAME_SPACE:
-		{
-			return m_pFrameConstantBuffer.get();
-			break;
-		}
-		default:
-		{
-			AssertError("Invalid constant buffer space ID");
-		}
-		}
-
-		return nullptr;
-
-	}
-
-	DX12BufferResource* BufferManager::GetMutilConstantBuffer(uint8_t spaceID, UINT frameID, UINT objectIndex) const noexcept
-	{
-		switch (spaceID)
-		{
-		case PER_OBJECT_SPACE:
-		{
-			return m_objectConstantBuffers[objectIndex * 2 + frameID].get();
-			break;
-		}
-		}
-
-		return nullptr;
-	}
-
 	RenderTexture* BufferManager::GetCameraDepthRT() const noexcept
 	{
 		return m_pCameraDepthRT.get();
@@ -144,39 +105,6 @@ namespace ElysiaRenderer
 	const D3D12_VERTEX_BUFFER_VIEW& BufferManager::GetVertexBufferView() const noexcept
 	{
 		return m_vertexBufferView;
-	}
-
-	void BufferManager::AddConstantBuffer(uint8_t spaceID, BufferCreationDesc createDesc)
-	{
-		switch (spaceID)
-		{
-			case PER_PASS_SPACE:
-			{
-				m_pPassConstantBuffer = std::move(m_pDevice->CreateBuffer(createDesc));
-			
-				break;
-			}
-
-			case PER_OBJECT_SPACE:
-			{
-				for (int i = 0; i < NUM_FRAMES_IN_FLIGHT; ++i)
-				{
-					m_objectConstantBuffers.emplace_back(std::move(m_pDevice->CreateBuffer(createDesc)));
-				}
-
-				break;
-			}
-
-			case PER_FRAME_SPACE:
-			{
-				m_pFrameConstantBuffer = std::move(m_pDevice->CreateBuffer(createDesc));
-				break;
-			}
-			default:
-			{
-				break;
-			}
-		}
 	}
 
 	void BufferManager::AddVertexBuffer(BufferCreationDesc desc)

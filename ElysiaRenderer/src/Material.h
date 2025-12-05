@@ -36,6 +36,8 @@ namespace std
 namespace ElysiaRenderer
 {
 	class Shader;
+	class UploadRingBuffer;
+	
 	struct PassData
 	{
 		UINT PassIndex;
@@ -73,7 +75,7 @@ namespace ElysiaRenderer
 		void Init(std::vector<ShaderPass>& shaderPasses);
 		PassData& GetPassData(UINT passIndex) noexcept;
 		const UINT FindPassIndex(const std::string& name) const noexcept;
-		MaterialParameterBlock GetParameterBlock() const noexcept {return m_parameterBlock;}
+		MaterialParameterBlock& GetParameterBlock() {return m_parameterBlock;}
 
 		void SetInt(size_t nameHash, int v);
 		void SetUInt(size_t nameHash, unsigned int v);
@@ -87,7 +89,12 @@ namespace ElysiaRenderer
 		std::mutex m_setDataMutex;
 		std::vector<PassData> m_passDatas;
 		DX12Device* m_pDevice = nullptr;
-		std::unique_ptr<ShaderVariantData> m_pCurrVariantData;
 		MaterialParameterBlock m_parameterBlock;	// 所有材质参数
 	};
+	
+	D3D12_GPU_VIRTUAL_ADDRESS  UploadMaterialConstants(
+			UploadRingBuffer* pUploadBuffer,
+			UINT8 spaceID,
+			Material* pMaterial,
+			const ShaderVariantData* pVariantData);
 }

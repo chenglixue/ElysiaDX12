@@ -46,18 +46,6 @@ namespace ElysiaRenderer
 		std::unique_ptr<Material> m_pMaterial = nullptr;
 		std::unordered_map<UINT, PipelineStateObject*> m_PipelineStateObjects;
 
-		D3D12_GPU_VIRTUAL_ADDRESS UploadFrameConstant(
-			UploadRingBuffer* pUploadBuffer,
-			UINT8 spaceID
-			);
-
-		D3D12_GPU_VIRTUAL_ADDRESS  UploadMaterialConstants(
-			UploadRingBuffer* pUploadBuffer,
-			UINT8 spaceID,
-			const Material* pMaterial,
-			const ShaderVariantData* pVariantData);
-
 		void SetSpaceResource(PassData& passData, UINT8 spaceID);
-		void SetFrameResource(PassData& passData, UINT8 spaceID);
 	};
 }

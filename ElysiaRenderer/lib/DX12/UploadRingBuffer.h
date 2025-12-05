@@ -31,6 +31,10 @@ namespace ElysiaRenderer
         DX12Queue*                  m_pQueue = nullptr;
         std::mutex                  m_mutex;
     };
+    
+    D3D12_GPU_VIRTUAL_ADDRESS UploadFrameConstant(
+            UploadRingBuffer* pUploadBuffer,
+            size_t totalSize);
 }
 
 

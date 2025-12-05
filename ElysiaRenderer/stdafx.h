@@ -39,6 +39,7 @@
 #include <codecvt>
 #include <bitset>
 #include "lib/Utility/Metalib.h"
+#include <boost/container/stable_vector.hpp>
 
 #include "magic_enum/magic_enum.hpp"
 #include "SimpleMath/SimpleMath.h"

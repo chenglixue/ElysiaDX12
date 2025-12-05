@@ -778,7 +778,8 @@ namespace ElysiaHelper
         int width, height, channels;
         unsigned char* data = stbi_load(utf8Path.c_str(), &width, &height, &channels, STBI_rgb_alpha);
     
-        if (!data) {
+        if (!data) 
+        {
             std::cerr << "STB failed to load image: " << stbi_failure_reason() << std::endl;
             return false;
         }

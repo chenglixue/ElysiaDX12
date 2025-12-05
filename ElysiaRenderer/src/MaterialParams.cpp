@@ -225,7 +225,10 @@ namespace ElysiaRenderer
 	MaterialParameterBlock::MaterialParam* MaterialParameterBlock::FindParam(size_t nameHash)
 	{
 		auto it = std::find_if(m_params.begin(), m_params.end(),
-			[nameHash](const MaterialParam& p) { return p.nameHash == nameHash; });
+			[nameHash](const MaterialParam& p) { 
+				return p.nameHash == nameHash; 
+			});
+        
 		return (it != m_params.end()) ? &(*it) : nullptr;
 	}
 
@@ -263,4 +266,6 @@ namespace ElysiaRenderer
 			}
 		}
 	}
+	
+	
 }

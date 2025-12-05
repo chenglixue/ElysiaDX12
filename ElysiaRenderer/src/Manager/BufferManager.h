@@ -40,8 +40,6 @@ namespace ElysiaRenderer
 		virtual void Destory() override;
 		virtual void Update() override;
 
-		DX12BufferResource* GetSingleConstantBuffer(uint8_t spaceID) const noexcept;
-		DX12BufferResource* GetMutilConstantBuffer(uint8_t spaceID, UINT frameID, UINT objectIndex) const noexcept;
 		RenderTexture* GetCameraDepthRT() const noexcept;
 		RenderTexture* GetCameraColorRT() const noexcept;
 		DX12BufferResource* GetVertexBuffer() const noexcept;
@@ -49,7 +47,6 @@ namespace ElysiaRenderer
 		const D3D12_INDEX_BUFFER_VIEW& GetIndexBufferView() const noexcept;
 		const D3D12_VERTEX_BUFFER_VIEW& GetVertexBufferView() const noexcept;
 
-		void AddConstantBuffer(uint8_t spaceID, BufferCreationDesc createDesc);
 		void AddVertexBuffer(BufferCreationDesc desc);
 		void AddIndexBuffer(BufferCreationDesc desc);
 		void SetVertexBufferView(const D3D12_VERTEX_BUFFER_VIEW& view);
@@ -59,10 +56,6 @@ namespace ElysiaRenderer
 		DX12Device* m_pDevice = nullptr;
 		static std::unique_ptr<BufferManager> m_instance;
 		static std::once_flag m_initInstanceFlag;
-
-		std::vector<std::unique_ptr<DX12BufferResource>> m_objectConstantBuffers{};
-		std::unique_ptr<DX12BufferResource> m_pPassConstantBuffer = nullptr;
-		std::unique_ptr<DX12BufferResource> m_pFrameConstantBuffer = nullptr;
 
 		std::unique_ptr<RenderTexture> m_pCameraColorRT = nullptr;
 		std::unique_ptr<RenderTexture> m_pCameraDepthRT = nullptr;

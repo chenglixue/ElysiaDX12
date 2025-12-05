@@ -96,7 +96,6 @@ namespace ElysiaRenderer
 		void Setup();
 		void Execute();
 		
-		void CreateConstantBuffers();
 		void UpdateCBV();
 		void UpdateDisplay(int displayMode, bool disableLocalDimming);
 	};     
