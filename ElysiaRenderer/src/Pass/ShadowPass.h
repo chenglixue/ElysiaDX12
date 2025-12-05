@@ -50,8 +50,10 @@ namespace ElysiaRenderer
 
 		void CreateMainShadow(float boundSphereRadius, DXGI_FORMAT format);
 		void UpdateShadowPassVariant(UINT passIndex);
-		void SetObjectResource(const MeshRender& , PipelineResourceLayout* , UINT passIndex);
-		void SetMaterialResource(const MeshRender& , PipelineResourceLayout* , UINT passIndex);
+		void SetObjectResource(const MeshRender& , PassData& );
+		void SetMaterialResource(const MeshRender& , PassData& );
 		void DrawMesh(UINT passIndex);
+
+		void DrawShadowPass();
 	};
 }

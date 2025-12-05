@@ -3,14 +3,18 @@
 
 namespace ElysiaRenderer
 {
+	std::unique_ptr<CameraManager> CameraManager::m_instance;
+	std::once_flag CameraManager::m_initInstanceFlag;
+	
 	CameraManager::~CameraManager()
 	{
 		Destory();
 	}
 
-	void CameraManager::Init()
+	void CameraManager::Init(DX12Device* pDevice)
 	{
-		//CreateMainCamera(Vector3(0.0f, 3.0f, -10.0f), 16.f / 9.f, 3.14159f / 4.0f, 1.f, 300.f);
+		assert(pDevice);
+		m_pDevice = pDevice;
 	}
 
 	void CameraManager::Update()

@@ -15,7 +15,15 @@ namespace ElysiaRenderer
 		RenderResource(RenderResource&& rhs) = default;
 		~RenderResource();
 
-		PipelineResourceSpace* GetPerObjectBindResourceSpace();
+		static RenderResource& GetInstance()
+		{
+			std::call_once(m_initInstanceFlag, []() {
+				m_instance.reset(new RenderResource());
+				});
+
+			return *m_instance;
+		}
+
 		PipelineResourceSpace* GetPerFrameBindResourceSpace();
 		CBVFrameVariable* GetCBVFrameVariable();
 		CAULDRON_DX12::DisplayMode GetDisplayMode() const noexcept;
@@ -25,28 +33,16 @@ namespace ElysiaRenderer
 
 
 	private:
-
-		std::unique_ptr<PipelineResourceSpace> m_perObjectBindResourceSpace;
-		std::unique_ptr<PipelineResourceSpace> m_perFrameBindResourceSpace;
-
 		DX12Device* m_device = nullptr;
+		static std::unique_ptr<RenderResource> m_instance;
+		static std::once_flag m_initInstanceFlag;
+		
+		std::unique_ptr<PipelineResourceSpace> m_perFrameBindResourceSpace;
 		std::unique_ptr<CBVFrameVariable> m_pCBVFrameVariable = nullptr;
 
 		CAULDRON_DX12::DisplayMode m_currDisplayMode = CAULDRON_DX12::DisplayMode::DISPLAYMODE_SDR;
 	};
 
-	extern std::unordered_map<size_t, std::string> g_shaderConstantVariables;
-	extern std::unique_ptr<RenderResource> g_pRenderResource;
-	inline RenderResource* GetRenderResource()
-	{
-		if (g_pRenderResource == nullptr)
-		{
-			ThrowRuntimeError("Null Render Resource");
-		}
-		return g_pRenderResource.get();
-	}
-
-	void AddShaderConstantVariable(const size_t hash, const std::string& name);
 	size_t PropertyToID(const std::string& name);
 
 }

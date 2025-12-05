@@ -51,13 +51,12 @@ namespace ElysiaRenderer
             .HeapType = D3D12_HEAP_TYPE_UPLOAD
         };
         CComPtr<D3D12MA::Allocation> pAllocation = nullptr;
-        CComPtr<ID3D12Resource> pResource = nullptr;
         ElysiaHelper::ThrowIfFailed(pDevice->GetAllocator()->CreateResource(&allocationDesc, &resourceDesc, usageState, nullptr,
-            &pAllocation, IID_PPV_ARGS(&pResource)));
+            &pAllocation, IID_PPV_ARGS(&m_pResource)));
         
         if(name)
         {
-            pResource->SetName(name);
+            m_pResource->SetName(name);
         }
         
         ThrowIfFailed(m_pResource->Map(0, nullptr, reinterpret_cast<void**>(&m_pCPUPtr)));

@@ -474,8 +474,11 @@ namespace ElysiaRenderer
 	
 	std::unique_ptr<DX12TextureResource>		DX12Device::CreateTextureFromFile(const TextureCreationDesc& textureCreationDesc)
 	{
-		auto& texturePath = textureCreationDesc.texturePath;
+		auto texturePath = textureCreationDesc.texturePath;
 		bool isSRGB = textureCreationDesc.isSRGB;
+
+		// std::filesystem::exists(WstringToString(texturePath));
+		// IsFileLocked(texturePath);
 
 		const std::wstring extension = GetFileExtension(texturePath.c_str());
 		/// Load DDS
@@ -512,8 +515,14 @@ namespace ElysiaRenderer
 			auto loadResult = DirectX::LoadFromWICFile(texturePath.c_str(), DirectX::WIC_FLAGS_NONE, nullptr, tempImage);
 			if (loadResult != S_OK)
 			{
-				std::cout << WstringToString(textureCreationDesc.texturePath) + " not found" << std::endl;
-				return nullptr;
+				if (!LoadWithSTB(texturePath, tempImage))
+				{
+					// PrintPathInfo(texturePath);
+					// TestFileAccess(texturePath);
+					//std::cout << WstringToString(textureCreationDesc.texturePath) + " not found" << std::endl;
+					return nullptr;
+				}
+				
 			}
 			ThrowIfFailed(DirectX::GenerateMipMaps(*tempImage.GetImage(0, 0, 0), DirectX::TEX_FILTER_DEFAULT, 0, *imageData, false));
 		}

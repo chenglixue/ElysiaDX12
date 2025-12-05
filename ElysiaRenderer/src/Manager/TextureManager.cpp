@@ -15,8 +15,10 @@ namespace ElysiaRenderer
 		Destory();
 	}
 
-	void TextureManager::Init()
+	void TextureManager::Init(DX12Device* pDevice)
 	{
+		assert(pDevice);
+		m_pDevice = pDevice;
 		LoadGlobalTextures();
 	}
 	void TextureManager::Destory()
@@ -70,9 +72,9 @@ namespace ElysiaRenderer
 		{
 			texBufferCreateDesc.texturePath = L"Tex\\GGX_E_LUT.dds";
 			texBufferCreateDesc.isSRGB = false;
-			auto newTex = std::move(GetDevice()->CreateTextureFromFile(texBufferCreateDesc));
+			auto newTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
 
-			GetRenderResource()->GetCBVFrameVariable()->GGX_E_LUT_Index = newTex->GetResourceHeapIndex();
+			RenderResource::GetInstance().GetCBVFrameVariable()->GGX_E_LUT_Index = newTex->GetResourceHeapIndex();
 			 
 			this->AddTextureResource(std::move(newTex)); 
 		} 
@@ -80,9 +82,9 @@ namespace ElysiaRenderer
 		{
 			texBufferCreateDesc.texturePath = L"Tex\\GGX_Eavg_LUT.dds";
 			texBufferCreateDesc.isSRGB = false;
-			auto newTex = std::move(GetDevice()->CreateTextureFromFile(texBufferCreateDesc));
+			auto newTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
 
-			GetRenderResource()->GetCBVFrameVariable()->GGX_Eavg_LUT_Index = newTex->GetResourceHeapIndex();
+			RenderResource::GetInstance().GetCBVFrameVariable()->GGX_Eavg_LUT_Index = newTex->GetResourceHeapIndex();
 
 			this->AddTextureResource(std::move(newTex));
 
@@ -91,24 +93,26 @@ namespace ElysiaRenderer
 		{
 			texBufferCreateDesc.texturePath = L"Tex\\cubemap0.dds";
 			texBufferCreateDesc.isSRGB = false;
-			auto newTex = std::move(GetDevice()->CreateTextureFromFile(texBufferCreateDesc));
+			auto newTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
 
-			GetRenderResource()->GetCBVFrameVariable()->SkyboxTexIndex = newTex->GetResourceHeapIndex();
+			RenderResource::GetInstance().GetCBVFrameVariable()->SkyboxTexIndex = newTex->GetResourceHeapIndex();
 
 			this->AddTextureResource(std::move(newTex));
 		}
 
 		{
-			WCHAR assetsPath[512];
-			ElysiaHelper::GetAssetsPath(assetsPath, _countof(assetsPath));
-			texBufferCreateDesc.texturePath = StringToWstring(std::filesystem::path(assetsPath).string() + "Tex\\bluenoise_frd_1024x1024.png");
-			texBufferCreateDesc.isSRGB = false;
-
-			auto newTex = std::move(GetDevice()->CreateTextureFromFile(texBufferCreateDesc));
-
-			GetRenderResource()->GetCBVFrameVariable()->BlueNoiseTexIndex = newTex->GetResourceHeapIndex();
-
-			this->AddTextureResource(std::move(newTex));
+			// WCHAR assetsPath[512];
+			// ElysiaHelper::GetAssetsPath(assetsPath, _countof(assetsPath));
+			// std::wstring target = L"Tex\\Black.png";
+			// auto path = ElysiaHelper::GetAssetFullPath(assetsPath, target.c_str());
+			// texBufferCreateDesc.texturePath = path;
+			// texBufferCreateDesc.isSRGB = false;
+			//
+			// auto newTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
+			//
+			// RenderResource::GetInstance().GetCBVFrameVariable()->BlueNoiseTexIndex = newTex->GetResourceHeapIndex();
+			//
+			// this->AddTextureResource(std::move(newTex));
 		}
 	}
 }

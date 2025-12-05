@@ -14,7 +14,16 @@ namespace ElysiaRenderer
 		CameraManager(CameraManager&& rhs) = default;
 		~CameraManager();
 
-		virtual void Init() override;
+		static CameraManager& GetInstance()
+		{
+			std::call_once(m_initInstanceFlag, []() {
+				m_instance.reset(new CameraManager());
+				});
+
+			return *m_instance;
+		}
+
+		virtual void Init(DX12Device* pDevice) override;
 		virtual void Update() override;
 		virtual void Destory() override;
 
@@ -26,7 +35,9 @@ namespace ElysiaRenderer
 		void CreateMainCamera(Vector3 position, float aspectRatio, float fovy, float nearZ, float farZ);
 
 	private:
-
+		static std::unique_ptr<CameraManager> m_instance;
+		static std::once_flag m_initInstanceFlag;
+		DX12Device* m_pDevice = nullptr;
 		std::unique_ptr<DX12Camera> m_mainCamera = nullptr;
 	};
 }

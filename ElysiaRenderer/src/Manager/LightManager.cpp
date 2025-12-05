@@ -5,15 +5,18 @@
 
 namespace ElysiaRenderer
 {
-	std::unique_ptr<LightManager> g_pLightManager = nullptr;
-
+	std::unique_ptr<LightManager> LightManager::m_instance;
+	std::once_flag LightManager::m_initInstanceFlag;
+	
 	LightManager::~LightManager()
 	{
 		Destory();
 	}
 
-	void LightManager::Init()
+	void LightManager::Init(DX12Device* pDevice)
 	{
+		assert(pDevice);
+		m_pDevice = pDevice;
 		CreatMainLight();
 	}
 
@@ -48,10 +51,5 @@ namespace ElysiaRenderer
 		{
 			m_mainLight = std::make_unique<DX12DirectionLight>(pUserData.lightColor, pUserData.lightDir, pUserData.lightIntensity);
 		}
-	}
-
-	LightManager* GetLightManager()
-	{
-		return g_pLightManager.get();
 	}
 }

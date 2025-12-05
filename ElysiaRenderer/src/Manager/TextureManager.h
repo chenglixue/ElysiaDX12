@@ -23,7 +23,7 @@ namespace ElysiaRenderer
 			return *m_instance;
 		}
 
-		virtual void Init() override;
+		virtual void Init(DX12Device* pDevice) override;
 		virtual void Destory() override;
 
 		void LoadGlobalTextures();
@@ -35,6 +35,7 @@ namespace ElysiaRenderer
 		const std::vector<DX12TextureResource*> GetTextureResources() const noexcept;
 
 	private:
+		DX12Device* m_pDevice = nullptr;
 		static std::unique_ptr<TextureManager> m_instance;
 		static std::once_flag m_initInstanceFlag;
 

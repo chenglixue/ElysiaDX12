@@ -3,10 +3,7 @@
 
 namespace ElysiaRenderer
 {
-	static inline bool FloatEqual(float a, float b, float eps = 1e-6f)
-	{
-		return std::abs(a - b) <= eps;
-	}
+	using namespace ElysiaHelper;
 	
 	bool MaterialParameterBlock::ParamValue::operator==(const ParamValue& other) const
 	{
@@ -22,8 +19,11 @@ namespace ElysiaRenderer
 				return FloatEqual(data[0], other.data[0], tolerance);
 
 			case Type::INT:
+				return *reinterpret_cast<const int*>(&data[0]) == 
+					   *reinterpret_cast<const int*>(&other.data[0]);
 			case Type::UINT:
-				return static_cast<int>(data[0]) == static_cast<int>(other.data[0]);
+				return FloatEqual(data[0], other.data[0], tolerance) &&
+					   FloatEqual(data[1], other.data[1], tolerance);
 
 			case Type::FLOAT2:
 				return FloatEqual(data[0], other.data[0], tolerance) &&
@@ -50,33 +50,74 @@ namespace ElysiaRenderer
 		}
 		return false;
 	}
+
+	void MaterialParameterBlock::MarkAsDirty()
+	{
+		m_isDirty = true;
+        
+		// 如果有脏状态回调，调用它
+		if (m_dirtyCallback)
+		{
+			m_dirtyCallback();
+		}
+	}
+    
+	void MaterialParameterBlock::ClearDirty()
+	{
+		m_isDirty = false;
+	}
+    
+	bool MaterialParameterBlock::IsDirty() const
+	{
+		return m_isDirty;
+	}
+	
+	void MaterialParameterBlock::SetDirtyCallback(std::function<void()> callback)
+	{
+		m_dirtyCallback = callback;
+	}
 	
 	template<typename T>
 	void MaterialParameterBlock::SetOrAdd(size_t nameHash, Type type, const T& value)
 	{
 		auto it = std::find_if(m_params.begin(), m_params.end(),
 			[nameHash](const MaterialParam& p) { return p.nameHash == nameHash; });
-
+    
 		if (it != m_params.end())
 		{
+			// 检查类型是否匹配
 			if (it->type != type)
 			{
 				it->type = type;
-				it->value = {}; // reset
+				it->value = ParamValue(); // 重置值
+				SetValue(it->value, value);
+				MarkAsDirty(); // 类型改变，标记为脏
 			}
-			memcpy(it->value.data.data(), &value, sizeof(T));
-			it->value.rowCount = (type == Type::MATRIX4X4) ? 4 : 1;
-			it->value.colCount = (type == Type::MATRIX4X4) ? 4 : 1;
+			else
+			{
+				// 创建临时值用于比较
+				ParamValue tempValue;
+				SetValue(tempValue, value);
+                
+				// 检查值是否相等（使用容忍度）
+				const float tolerance = 1e-6f; // 浮点数比较容忍度
+				if (!it->value.Equals(tempValue, type, tolerance))
+				{
+					// 值不同，更新并标记为脏
+					SetValue(it->value, value);
+					MarkAsDirty();
+				}
+			}
 		}
 		else
 		{
+			// 添加新参数
 			MaterialParam param;
 			param.nameHash = nameHash;
 			param.type = type;
-			memcpy(param.value.data.data(), &value, sizeof(T));
-			param.value.rowCount = (type == Type::MATRIX4X4) ? 4 : 1;
-			param.value.colCount = (type == Type::MATRIX4X4) ? 4 : 1;
+			SetValue(param.value, value);
 			m_params.emplace_back(std::move(param));
+			MarkAsDirty(); // 新参数，标记为脏
 		}
 	}
 	
@@ -96,25 +137,83 @@ namespace ElysiaRenderer
 	}
 	void MaterialParameterBlock::SetFloat2(size_t nameHash, const Vector2& v)
 	{
-		SetOrAdd(nameHash, Type::FLOAT2, *reinterpret_cast<const XMFLOAT2*>(&v));
+		SetOrAdd(nameHash, Type::FLOAT2, *reinterpret_cast<const Vector2*>(&v));
 	}
 	void MaterialParameterBlock::SetFloat3(size_t nameHash, const Vector3& v)
 	{
-		SetOrAdd(nameHash, Type::FLOAT3, *reinterpret_cast<const XMFLOAT3*>(&v));
+		SetOrAdd(nameHash, Type::FLOAT3, *reinterpret_cast<const Vector3*>(&v));
 	}
 	void MaterialParameterBlock::SetFloat4(size_t nameHash, const Vector4& v)
 	{
-		SetOrAdd(nameHash, Type::FLOAT4, *reinterpret_cast<const XMFLOAT4*>(&v));
+		SetOrAdd(nameHash, Type::FLOAT4, *reinterpret_cast<const Vector4*>(&v));
 	}
 	void MaterialParameterBlock::SetMatrix(size_t nameHash, const Matrix& m)
 	{
-		XMFLOAT4X4 xm;
-		XMStoreFloat4x4(&xm, XMLoadFloat4x4(reinterpret_cast<const XMFLOAT4X4*>(&m)));
-    
-		// D3D 默认是 row-major，cbuffer 中也是 row-major 存储
-		// 所以我们可以直接拷贝 16 个 float
-		SetOrAdd(nameHash, Type::MATRIX4X4, xm);
+		SetOrAdd(nameHash, Type::MATRIX4X4, m);
 	}
+
+	void MaterialParameterBlock::SetValue(ParamValue& dst, float v)
+	{
+		dst.data[0] = v;
+		dst.rowCount = 1;
+		dst.colCount = 1;
+	}
+	void MaterialParameterBlock::SetValue(ParamValue& dst, int v)
+	{
+		*reinterpret_cast<int*>(&dst.data[0]) = v;
+		dst.rowCount = 1;
+		dst.colCount = 1;
+	}
+	void MaterialParameterBlock::SetValue(ParamValue& dst, unsigned int v)
+	{
+		*reinterpret_cast<unsigned int*>(&dst.data[0]) = v;
+		dst.rowCount = 1;
+		dst.colCount = 1;
+	}
+	void MaterialParameterBlock::SetValue(ParamValue& dst, const Vector2& v)
+	{
+		dst.data[0] = v.x;
+		dst.data[1] = v.y;
+		dst.rowCount = 1;
+		dst.colCount = 2;
+	}
+	void MaterialParameterBlock::SetValue(ParamValue& dst, const Vector3& v)
+	{
+		dst.data[0] = v.x;
+		dst.data[1] = v.y;
+		dst.data[2] = v.z;
+		dst.rowCount = 1;
+		dst.colCount = 3;
+	}
+	void MaterialParameterBlock::SetValue(ParamValue& dst, const Vector4& v)
+	{
+		dst.data[0] = v.x;
+		dst.data[1] = v.y;
+		dst.data[2] = v.z;
+		dst.data[3] = v.w;
+		dst.rowCount = 1;
+		dst.colCount = 4;
+	}
+	void MaterialParameterBlock::SetValue(ParamValue& dst, const Matrix& m)
+	{
+		for (int i = 0; i < 4; i++)
+        {
+            for (int j = 0; j < 4; j++)
+            {
+                dst.data[i * 4 + j] = m.m[i][j];
+            }
+        }
+        dst.rowCount = 4;
+        dst.colCount = 4;
+	}
+
+	template void MaterialParameterBlock::SetOrAdd<float>(size_t, Type, const float&);
+	template void MaterialParameterBlock::SetOrAdd<int>(size_t, Type, const int&);
+	template void MaterialParameterBlock::SetOrAdd<unsigned int>(size_t, Type, const unsigned int&);
+	template void MaterialParameterBlock::SetOrAdd<Vector2>(size_t, Type, const Vector2&);
+	template void MaterialParameterBlock::SetOrAdd<Vector3>(size_t, Type, const Vector3&);
+	template void MaterialParameterBlock::SetOrAdd<Vector4>(size_t, Type, const Vector4&);
+	template void MaterialParameterBlock::SetOrAdd<Matrix>(size_t, Type, const Matrix&);
 	
 	const MaterialParameterBlock::MaterialParam* MaterialParameterBlock::FindParam(size_t nameHash) const
 	{
@@ -140,19 +239,26 @@ namespace ElysiaRenderer
 
 	void MaterialParameterBlock::MergeFrom(const MaterialParameterBlock& other)
 	{
-		for (const auto& param : other.GetParams())
+		for (const auto& srcParam : other.GetParams())
 		{
-			auto* existing = FindParam(param.nameHash);
-			if (!existing || existing->type != param.type)
+			auto* dstParam = FindParam(srcParam.nameHash);
+			if (!dstParam)
 			{
-				// 添加或替换
-				*this.*([&](auto dummy) { this->SetOrAdd(param.nameHash, param.type, dummy); })(param.value.data);
+				m_params.push_back(srcParam);
 			}
 			else
 			{
-				if (!existing->value.Equals(param.value, param.type))
+				if (dstParam->type != srcParam.type)
 				{
-					existing->value = param.value;
+					dstParam->type = srcParam.type;
+					dstParam->value = srcParam.value;
+				}
+				else
+				{
+					if (!dstParam->value.Equals(srcParam.value, srcParam.type))
+					{
+						dstParam->value = srcParam.value;
+					}
 				}
 			}
 		}

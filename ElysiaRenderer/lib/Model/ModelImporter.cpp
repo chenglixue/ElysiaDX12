@@ -21,9 +21,8 @@ namespace ElysiaModel
 
 	std::unique_ptr<ModelImporter> g_pModelImporter = nullptr;
 
-	ModelImporter::ModelImporter(BufferManager* pBufferManager, TextureManager* pTextureManager) :
-		m_pBufferManager(std::move(pBufferManager)),
-		m_pTextureManager(std::move(pTextureManager))
+	ModelImporter::ModelImporter(DX12Device* pDevice) :
+		m_pDevice(pDevice)
 	{
 
 	}
@@ -613,7 +612,7 @@ namespace ElysiaModel
 			std::wstring diffusePath = basePath + RemoveExt(m_pMaterialData[materialIndex].texDiffusePath);
 			texBufferCreateDesc.texturePath = diffusePath + L".png";
 			texBufferCreateDesc.isSRGB = true;
-			auto diffuseTex = std::move(GetDevice()->CreateTextureFromFile(texBufferCreateDesc));
+			auto diffuseTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
 			if (diffuseTex != nullptr)
 			{
 				m_pMaterialData[materialIndex].diffuseTexIndex = diffuseTex->GetResourceHeapIndex();
@@ -621,20 +620,20 @@ namespace ElysiaModel
 			else
 			{
 				texBufferCreateDesc.texturePath = assetsPath + DefaultWhiteTexturePath;
-				diffuseTex = std::move(GetDevice()->CreateTextureFromFile(texBufferCreateDesc));
+				diffuseTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
 				assert(diffuseTex != nullptr);
 				m_pMaterialData[materialIndex].diffuseTexIndex = diffuseTex->GetResourceHeapIndex();
 			}
-			m_pTextureManager->AddTextureResource(std::move(diffuseTex));
+			TextureManager::GetInstance().AddTextureResource(std::move(diffuseTex));
 
 			std::wstring metallicPath = basePath + RemoveExt(m_pMaterialData[materialIndex].texMetallicPath);
 			texBufferCreateDesc.texturePath = metallicPath + L".png";
 			texBufferCreateDesc.isSRGB = true;
-			auto metallicTex = std::move(GetDevice()->CreateTextureFromFile(texBufferCreateDesc));
+			auto metallicTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
 			if (metallicTex == nullptr)
 			{
 				texBufferCreateDesc.texturePath = RemoveLastUnderscoreAndAfter(diffusePath) + L"_Metallic.png";
-				metallicTex = std::move(GetDevice()->CreateTextureFromFile(texBufferCreateDesc));
+				metallicTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
 			}
 			if (metallicTex != nullptr)
 			{
@@ -643,20 +642,20 @@ namespace ElysiaModel
 			else
 			{
 				texBufferCreateDesc.texturePath = assetsPath + DefaultBlackTexturePath;
-				metallicTex = std::move(GetDevice()->CreateTextureFromFile(texBufferCreateDesc));
+				metallicTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
 				assert(metallicTex != nullptr);
 				m_pMaterialData[materialIndex].metallicTexIndex = metallicTex->GetResourceHeapIndex();
 			}
-			m_pTextureManager->AddTextureResource(std::move(metallicTex));
+			TextureManager::GetInstance().AddTextureResource(std::move(metallicTex));
 
 			std::wstring roughnessPath = basePath + RemoveExt(m_pMaterialData[materialIndex].texRoughnessPath);
 			texBufferCreateDesc.texturePath = roughnessPath + L".png";
 			texBufferCreateDesc.isSRGB = true;
-			auto roughnessTex = std::move(GetDevice()->CreateTextureFromFile(texBufferCreateDesc));
+			auto roughnessTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
 			if (roughnessTex == nullptr)
 			{
 				texBufferCreateDesc.texturePath = RemoveLastUnderscoreAndAfter(diffusePath) + L"_Roughness.png";
-				roughnessTex = std::move(GetDevice()->CreateTextureFromFile(texBufferCreateDesc));
+				roughnessTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
 			}
 			if (roughnessTex != nullptr)
 			{
@@ -665,20 +664,20 @@ namespace ElysiaModel
 			else
 			{
 				texBufferCreateDesc.texturePath = assetsPath + DefaultWhiteTexturePath;
-				roughnessTex = std::move(GetDevice()->CreateTextureFromFile(texBufferCreateDesc));
+				roughnessTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
 				assert(roughnessTex != nullptr);
 				m_pMaterialData[materialIndex].roughnessTexIndex = roughnessTex->GetResourceHeapIndex();
 			}
-			m_pTextureManager->AddTextureResource(std::move(roughnessTex));
+			TextureManager::GetInstance().AddTextureResource(std::move(roughnessTex));
 
 			std::wstring normalPath = basePath + RemoveExt(m_pMaterialData[materialIndex].texNormalPath);
 			texBufferCreateDesc.texturePath = normalPath + L".png";
 			texBufferCreateDesc.isSRGB = false;
-			auto normalTex = std::move(GetDevice()->CreateTextureFromFile(texBufferCreateDesc));
+			auto normalTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
 			if (normalTex == nullptr)
 			{
 				texBufferCreateDesc.texturePath = RemoveLastUnderscoreAndAfter(diffusePath) + L"_Normal.png";
-				normalTex = std::move(GetDevice()->CreateTextureFromFile(texBufferCreateDesc));
+				normalTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
 			}
 			if (normalTex != nullptr)
 			{
@@ -689,7 +688,7 @@ namespace ElysiaModel
 			{
 				m_pMaterialData[materialIndex].hasNormal = false;
 			}
-			m_pTextureManager->AddTextureResource(std::move(normalTex));
+			TextureManager::GetInstance().AddTextureResource(std::move(normalTex));
 		}
 	}
 
@@ -759,32 +758,32 @@ namespace ElysiaModel
 		bufferCreationDesc.m_viewFlags = GPUResourceFlags::None;
 		bufferCreationDesc.m_isRawAccess = false;
 
-		m_pBufferManager->AddVertexBuffer(bufferCreationDesc);
+		BufferManager::GetInstance().AddVertexBuffer(bufferCreationDesc);
 
 		if ((bufferCreationDesc.m_viewFlags & GPUResourceFlags::SRV) == GPUResourceFlags::SRV
 			&& (bufferCreationDesc.m_accessFlags & BufferAccessFlags::GPUOnly) == BufferAccessFlags::GPUOnly)
 		{
 			auto pBufferUpload = std::make_unique<DX12BufferUpload>();
-			pBufferUpload->m_buffer = m_pBufferManager->GetVertexBuffer();
+			pBufferUpload->m_buffer = BufferManager::GetInstance().GetVertexBuffer();
 			pBufferUpload->m_bufferData = std::make_unique<uint8_t[]>(m_meshData.vertexDataByteSize);
 			pBufferUpload->m_bufferDataSize = bufferCreationDesc.m_size;
 
 			memcpy_s(pBufferUpload->m_bufferData.get(), pBufferUpload->m_bufferDataSize, m_pIndexData, pBufferUpload->m_bufferDataSize);
 
-			GetDevice()->GetUploadContext()->AddBufferToUploads(std::move(pBufferUpload));
+			m_pDevice->GetUploadContext()->AddBufferToUploads(std::move(pBufferUpload));
 		}
 		else
 		{
-			m_pBufferManager->GetVertexBuffer()->SetMappedData(m_pVertexData, m_meshData.vertexDataByteSize);
+			BufferManager::GetInstance().GetVertexBuffer()->SetMappedData(m_pVertexData, m_meshData.vertexDataByteSize);
 
 			D3D12_VERTEX_BUFFER_VIEW bufferView{};
-			bufferView.BufferLocation = m_pBufferManager->GetVertexBuffer()->GetGPUAddress();
+			bufferView.BufferLocation = BufferManager::GetInstance().GetVertexBuffer()->GetGPUAddress();
 			bufferView.StrideInBytes = m_vertexStride;
 			bufferView.SizeInBytes = m_meshData.vertexDataByteSize;
-			m_pBufferManager->SetVertexBufferView(bufferView);
+			BufferManager::GetInstance().SetVertexBufferView(bufferView);
 		}
 
-		return m_pBufferManager->GetVertexBuffer();
+		return BufferManager::GetInstance().GetVertexBuffer();
 	}
 
 	bool ModelImporter::CreateIndexBuffer()
@@ -795,17 +794,17 @@ namespace ElysiaModel
 		bufferCreationDesc.m_viewFlags = GPUResourceFlags::None;
 		bufferCreationDesc.m_isRawAccess = false;
 
-		m_pBufferManager->AddIndexBuffer(bufferCreationDesc);
+		BufferManager::GetInstance().AddIndexBuffer(bufferCreationDesc);
 
-		m_pBufferManager->GetIndexBuffer()->SetMappedData(m_pIndexData, m_meshData.indexDataByteSize);
+		BufferManager::GetInstance().GetIndexBuffer()->SetMappedData(m_pIndexData, m_meshData.indexDataByteSize);
 
 		D3D12_INDEX_BUFFER_VIEW bufferView{};
-		bufferView.BufferLocation = m_pBufferManager->GetIndexBuffer()->GetGPUAddress();
+		bufferView.BufferLocation = BufferManager::GetInstance().GetIndexBuffer()->GetGPUAddress();
 		bufferView.Format = DXGI_FORMAT_R16_UINT;
 		bufferView.SizeInBytes = m_meshData.indexDataByteSize;
-		m_pBufferManager->SetIndexBufferView(bufferView);
+		BufferManager::GetInstance().SetIndexBufferView(bufferView);
 
-		return m_pBufferManager->GetIndexBuffer();
+		return BufferManager::GetInstance().GetIndexBuffer();
 	}
 
 	void ModelImporter::CreateMeshRenders()

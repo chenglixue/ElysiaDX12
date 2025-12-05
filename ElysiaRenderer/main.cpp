@@ -43,7 +43,7 @@ int main()
 		(GetSystemMetrics(SM_CXSCREEN) - windowSize.x) / 2, (GetSystemMetrics(SM_CYSCREEN) - windowSize.y) / 2, windowSize.x, windowSize.y,
 		nullptr, nullptr, moduleHandle, nullptr);
 
-	g_pRenderer = std::make_unique<ElysiaRenderer::RendererSystem>(windowHandle, windowSize, pUI);
+	g_pRenderer = std::make_unique<ElysiaRenderer::RendererSystem>(windowHandle, windowSize, pUI.get());
 	g_pRenderer->Init();
 
 	

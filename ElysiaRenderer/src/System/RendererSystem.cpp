@@ -7,7 +7,6 @@
 #include "src/Manager/BufferManager.h"
 #include "src/Manager/LightManager.h"
 #include "src/Manager/CameraManager.h"
-#include "src/Manager/ShaderManager.h"
 #include "lib/Event/Messager.h"
 
 #include "src/Pass/ShadowPass.h"
@@ -23,6 +22,7 @@
 #include "src/Parameter/CBVParameter.h"
 #include "RenderResource.h"
 #include "DX12/UploadRingBuffer.h"
+#include "Manager/RenderTargetManager.h"
 
 extern "C" { __declspec(dllexport) extern const UINT D3D12SDKVersion = 618; }
 extern "C" { __declspec(dllexport) extern const char* D3D12SDKPath = ".\\D3D12\\"; }
@@ -31,8 +31,8 @@ namespace ElysiaRenderer
 {
 	using namespace ElysiaModel;
 
-	RendererSystem::RendererSystem(HWND windowHandle, UINT2 screenSize, std::unique_ptr<DX12UI> pUI) :
-		m_pUI(pUI.get()),
+	RendererSystem::RendererSystem(HWND windowHandle, UINT2 screenSize, DX12UI* pUI) :
+		m_pUI(pUI),
 		m_disableLocalDimming(false),
 		m_displayModesAvailable(),
 		m_displayModesNamesAvailable(),
@@ -47,15 +47,14 @@ namespace ElysiaRenderer
 		m_pDevice->EnumerateDisplayModes(&m_displayModesAvailable, &m_displayModesNamesAvailable);
 
 		m_pUI->InitDescriptor(windowHandle, m_pDevice.get());
-		m_pCameraManager = std::make_unique<CameraManager>();
-		g_pLightManager = std::make_unique<LightManager>();
-		g_pBufferManager = std::make_unique<BufferManager>();
-		m_pTextureManager = std::make_unique<TextureManager>();
-		g_pShaderManager = std::make_unique<ShaderManager>();
-		g_pRenderResource = std::make_unique<RenderResource>();
-		g_pPSOManager = std::make_unique<PSOManager>();
+		TextureManager::GetInstance().Init(m_pDevice.get());
+		RenderTargetManager::GetInstance().Init(m_pDevice.get());
+		CameraManager::GetInstance().Init(m_pDevice.get());
+		LightManager::GetInstance().Init(m_pDevice.get());
+		BufferManager::GetInstance().Init(m_pDevice.get());
+		PSOManager::GetInstance().Init(m_pDevice.get());
 		
-		g_pModelImporter = std::make_unique<ModelImporter>(GetBufferManager(), m_pTextureManager.get());
+		g_pModelImporter = std::make_unique<ModelImporter>(m_pDevice.get());
 	}
 
 	RendererSystem::~RendererSystem()
@@ -86,13 +85,7 @@ namespace ElysiaRenderer
 		
 		InitPSOHelpers();  
 
-		m_pCameraManager->Init(); 
-		GetLightManager()->Init();
-		GetBufferManager()->Init();
-		m_pTextureManager->Init();
-		GetShaderManager()->Init();
-		
-		m_pCameraManager->CreateMainCamera(Vector3(-11.5f, 200.85f, -0.45f) ,
+		CameraManager::GetInstance().CreateMainCamera(Vector3(-11.5f, 200.85f, -0.45f) ,
 			m_aspectRatio, 3.14159f / 4.0f, 0.1f, 2000.f);
 
 		Setup();
@@ -104,10 +97,10 @@ namespace ElysiaRenderer
 						m_displayModesAvailable[m_currentDisplayModeNamesIndex] == DISPLAYMODE_HDR10_SCRGB))
 		{
 			UpdateDisplay(UserData::GetInstance().displayMode, m_disableLocalDimming);
-			GetBufferManager()->Update();
+			BufferManager::GetInstance().Update();
 		}
 		//OnKeyboardInput();
-		GetLightManager()->Update();
+		LightManager::GetInstance().Update();
 		UpdateCBV();
 		SerializeUserData();
 	}
@@ -166,19 +159,47 @@ namespace ElysiaRenderer
 		
 	}
 
+	D3D12_GPU_VIRTUAL_ADDRESS UploadFrameConstant(
+			UploadRingBuffer* pUploadBuffer,
+			size_t totalSize)
+	{
+		if (totalSize == 0)
+		{
+			return 0;
+		}
+
+		D3D12_GPU_VIRTUAL_ADDRESS GPUAddress;
+		UINT8* CPUAddress = nullptr;
+
+		if(!pUploadBuffer->Allocate(totalSize, GPUAddress, CPUAddress))
+		{
+			assert(false && "UploadRingBuffer is full! Call Reset() at beginning of frame.");
+			return 0;
+		}
+		memset(CPUAddress, 0, totalSize);
+
+		memcpy(CPUAddress, (RenderResource::GetInstance().GetCBVFrameVariable()), totalSize);
+
+		return GPUAddress;
+	}
+	
 	void RendererSystem::UpdateCBV()
 	{
-		auto passParameter = GetRenderResource()->GetCBVFrameVariable();
-		passParameter->cameraPosWS = m_pCameraManager->GetMainCamera()->GetPosition4();
-		passParameter->lightData = std::move(GetLightManager()->GetMainLight()->CreateLightData());
+		auto pCameraManager = &CameraManager::GetInstance();
+		auto passParameter = RenderResource::GetInstance().GetCBVFrameVariable();
+		passParameter->cameraPosWS = CameraManager::GetInstance().GetMainCamera()->GetPosition4();
+		passParameter->lightData = std::move(LightManager::GetInstance().GetMainLight()->CreateLightData());
 		passParameter->frameIndex = m_pDevice->GetFrameIndex();
-		passParameter->nearZ = m_pCameraManager->GetMainCamera()->GetNearZ();
-		passParameter->farZ = m_pCameraManager->GetMainCamera()->GetFarZ();
-		passParameter->ZBufferParams = Vector4(1 - m_pCameraManager->GetMainCamera()->GetFarZ() / m_pCameraManager->GetMainCamera()->GetNearZ(),
-			m_pCameraManager->GetMainCamera()->GetFarZ() / m_pCameraManager->GetMainCamera()->GetNearZ(),
-			(1 - m_pCameraManager->GetMainCamera()->GetFarZ() / m_pCameraManager->GetMainCamera()->GetNearZ()) / m_pCameraManager->GetMainCamera()->GetFarZ(),
-			(m_pCameraManager->GetMainCamera()->GetFarZ() / m_pCameraManager->GetMainCamera()->GetNearZ()) / m_pCameraManager->GetMainCamera()->GetFarZ());
-		GetBufferManager()->GetSingleConstantBuffer(PER_FRAME_SPACE)->SetMappedData(GetRenderResource()->GetCBVFrameVariable(), sizeof(CBVFrameVariable));
+		passParameter->nearZ = CameraManager::GetInstance().GetMainCamera()->GetNearZ();
+		passParameter->farZ = CameraManager::GetInstance().GetMainCamera()->GetFarZ();
+		passParameter->ZBufferParams = Vector4(1 - CameraManager::GetInstance().GetMainCamera()->GetFarZ() / pCameraManager->GetMainCamera()->GetNearZ(),
+			pCameraManager->GetMainCamera()->GetFarZ() / pCameraManager->GetMainCamera()->GetNearZ(),
+			(1 - pCameraManager->GetMainCamera()->GetFarZ() / pCameraManager->GetMainCamera()->GetNearZ()) / pCameraManager->GetMainCamera()->GetFarZ(),
+			(pCameraManager->GetMainCamera()->GetFarZ() / pCameraManager->GetMainCamera()->GetNearZ()) / pCameraManager->GetMainCamera()->GetFarZ());
+
+		auto GPUAddress = UploadFrameConstant(m_pDevice->GetGlobalUploadBuffer(), sizeof(CBVFrameVariable));
+		RenderResource::GetInstance().GetPerFrameBindResourceSpace()->SetDynamicCBV(GPUAddress);
+		RenderResource::GetInstance().GetPerFrameBindResourceSpace()->Lock();
 	}
 
 	void RendererSystem::Setup()
@@ -192,8 +213,9 @@ namespace ElysiaRenderer
 		RenderPassData passData{};  
 		passData.RenderSize = m_pDevice->GetScreenSize().xy();
 		passData.pCommand = m_graphicsContext.get();
+		passData.pDevice = m_pDevice.get();
 
-		m_passes.emplace_back(std::move(std::make_unique<ShadowPass>(m_pCameraManager->GetMainCamera())));
+		m_passes.emplace_back(std::move(std::make_unique<ShadowPass>(CameraManager::GetInstance().GetMainCamera())));
 		// m_passes.emplace_back(std::move(std::make_unique<GBufferPass>(m_pCameraManager->GetMainCamera())));
 		// m_passes.emplace_back(std::move(std::make_unique<AOPass>(m_pCameraManager->GetMainCamera())));
 		// m_passes.emplace_back(std::move(std::make_unique<OpaquePass>(m_pCameraManager->GetMainCamera())));
@@ -218,20 +240,20 @@ namespace ElysiaRenderer
 		{
 			const auto& meshRenderer = GetModelImporter()->GetMeshRenderer(meshIndex);
 
-			GetBufferManager()->AddConstantBuffer(PER_OBJECT_SPACE, desc);
+			BufferManager::GetInstance().AddConstantBuffer(PER_OBJECT_SPACE, desc);
 
 			auto objectConstantParameter = *meshRenderer.m_CBVObjectParameter;
 			for (UINT frameIndex = 0; frameIndex < NUM_FRAMES_IN_FLIGHT; ++frameIndex)
 			{
-				auto objectContantBuffer = GetBufferManager()->GetMutilConstantBuffer(PER_OBJECT_SPACE, frameIndex, meshIndex);
+				auto objectContantBuffer = BufferManager::GetInstance().GetMutilConstantBuffer(PER_OBJECT_SPACE, frameIndex, meshIndex);
 				objectContantBuffer->SetMappedData(&objectConstantParameter, sizeof(CBVObjectParameter));
 			}
 		}
 
 		desc.m_size = sizeof(CBVFrameVariable);
-		GetBufferManager()->AddConstantBuffer(PER_FRAME_SPACE, desc);
-		GetRenderResource()->GetPerFrameBindResourceSpace()->SetStaticCBV(GetBufferManager()->GetSingleConstantBuffer(PER_FRAME_SPACE));
-		GetRenderResource()->GetPerFrameBindResourceSpace()->Lock();
+		BufferManager::GetInstance().AddConstantBuffer(PER_FRAME_SPACE, desc);
+		RenderResource::GetInstance().GetPerFrameBindResourceSpace()->SetStaticCBV(BufferManager::GetInstance().GetSingleConstantBuffer(PER_FRAME_SPACE));
+		RenderResource::GetInstance().GetPerFrameBindResourceSpace()->Lock();
 	}
 	void RendererSystem::UpdateDisplay(int displayMode, bool disableLocalDimming)
 	{

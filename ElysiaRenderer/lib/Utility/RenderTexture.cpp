@@ -9,7 +9,7 @@ namespace ElysiaRenderer
 		ShutDowm();
 	}
 
-	void RenderTexture::Init(RenderTextureDesc desc)
+	void RenderTexture::Init(DX12Device* pDevice, RenderTextureDesc desc)
 	{
 		ShutDowm();
 
@@ -71,7 +71,7 @@ namespace ElysiaRenderer
 			m_isDepth = true;
 		}
 
-		m_pTexture = std::move(GetDevice()->CreateTexture(textureCreateDesc));
+		m_pTexture = std::move(pDevice->CreateTexture(textureCreateDesc));
 	}
 
 	void RenderTexture::ShutDowm()

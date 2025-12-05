@@ -7,6 +7,8 @@
 #include "Math.h"
 #include "AMD/libs/vectormath/vectormath.hpp"
 #include "Helper/DxgiFormatHelper.h"
+#include "lib/Utility/Hash.h"
+#include "stb_image.h"
 
 namespace ElysiaHelper
 {
@@ -272,7 +274,8 @@ namespace ElysiaHelper
     }
 
     // Convert std::wstring to std::string
-    inline static std::string WstringToString(const std::wstring& wstr) {
+    inline static std::string WstringToString(const std::wstring& wstr)
+    {
         if (wstr.empty()) return "";
 
         // 方法1：C++11（已弃用，但简单）
@@ -634,5 +637,173 @@ namespace ElysiaHelper
             LocalFree(buffer);
         }
         return out;
+    }
+    
+    inline size_t PropertyToID(const std::string& name)
+    {
+        auto hash = xxh::GetHash(name);
+
+        return hash;
+    }
+
+    inline bool FloatEqual(float a, float b, float eps = 1e-6f)
+    {
+        return std::abs(a - b) <= eps;
+    }
+
+    inline bool IsFileLocked(const std::wstring& path)
+    {
+        HANDLE hFile = CreateFileW(
+            path.c_str(),
+            GENERIC_READ,
+            0, // 不共享
+            NULL,
+            OPEN_EXISTING,
+            FILE_ATTRIBUTE_NORMAL,
+            NULL
+        );
+    
+        if (hFile == INVALID_HANDLE_VALUE)
+        {
+            DWORD error = GetLastError();
+            if (error == ERROR_SHARING_VIOLATION || error == ERROR_LOCK_VIOLATION)
+            {
+                return true;
+            }
+        }
+        else
+        {
+            CloseHandle(hFile);
+        }
+        return false;
+    }
+
+    inline void PrintPathInfo(const std::wstring& path)
+    {
+        // 打印原始路径
+        std::wcout << L"Raw path: " << path << std::endl;
+    
+        // 检查路径长度
+        std::wcout << L"Path length: " << path.length() << L" characters" << std::endl;
+    
+        // 检查路径是否包含特殊字符
+        bool hasSpecialChars = false;
+        for (wchar_t c : path) {
+            if (c < 32 || c > 126) {
+                hasSpecialChars = true;
+                std::wcout << L"Special character found: U+" << std::hex << static_cast<int>(c) << std::endl;
+            }
+        }
+    
+        if (!hasSpecialChars) {
+            std::wcout << L"No special characters found" << std::endl;
+        }
+    }
+
+    inline bool TestFileAccess(const std::wstring& path)
+    {
+        // 尝试使用低级API打开文件
+        HANDLE hFile = CreateFileW(
+            path.c_str(),
+            GENERIC_READ,
+            FILE_SHARE_READ,
+            NULL,
+            OPEN_EXISTING,
+            FILE_ATTRIBUTE_NORMAL,
+            NULL
+        );
+    
+        if (hFile == INVALID_HANDLE_VALUE) {
+            DWORD error = GetLastError();
+            std::wcerr << L"CreateFileW failed with error: " << error << std::endl;
+            return false;
+        }
+    
+        // 获取文件大小
+        LARGE_INTEGER fileSize;
+        if (!GetFileSizeEx(hFile, &fileSize)) {
+            DWORD error = GetLastError();
+            std::wcerr << L"GetFileSizeEx failed with error: " << error << std::endl;
+            CloseHandle(hFile);
+            return false;
+        }
+    
+        std::wcout << L"File size: " << fileSize.QuadPart << L" bytes" << std::endl;
+    
+        // 尝试读取文件头
+        BYTE buffer[8];
+        DWORD bytesRead;
+        if (!ReadFile(hFile, buffer, sizeof(buffer), &bytesRead, NULL)) {
+            DWORD error = GetLastError();
+            std::wcerr << L"ReadFile failed with error: " << error << std::endl;
+            CloseHandle(hFile);
+            return false;
+        }
+    
+        // 检查PNG文件头 (89 50 4E 47 0D 0A 1A 0A)
+        if (bytesRead == 8 && 
+            buffer[0] == 0x89 && buffer[1] == 0x50 && buffer[2] == 0x4E && buffer[3] == 0x47 &&
+            buffer[4] == 0x0D && buffer[5] == 0x0A && buffer[6] == 0x1A && buffer[7] == 0x0A) {
+            std::wcout << L"Valid PNG header detected" << std::endl;
+            } else {
+                std::wcout << L"Invalid PNG header detected" << std::endl;
+            }
+    
+        CloseHandle(hFile);
+        return true;
+    }
+
+    inline std::wstring SanitizePath(const std::wstring& path)
+    {
+        // 创建不含空字符的副本
+        std::wstring sanitized;
+        sanitized.reserve(path.size());
+    
+        for (wchar_t c : path) {
+            if (c != L'\0') {
+                sanitized += c;
+            }
+        }
+    
+        return sanitized;
+    }
+
+
+    inline bool LoadWithSTB(const std::wstring& path, DirectX::ScratchImage& image)
+    {
+        // 将宽字符串转换为UTF-8
+        std::string utf8Path = WstringToString(path);
+    
+        // 使用stb_image加载
+        int width, height, channels;
+        unsigned char* data = stbi_load(utf8Path.c_str(), &width, &height, &channels, STBI_rgb_alpha);
+    
+        if (!data) {
+            std::cerr << "STB failed to load image: " << stbi_failure_reason() << std::endl;
+            return false;
+        }
+    
+        // 创建ScratchImage
+        DirectX::TexMetadata metadata;
+        metadata.width = width;
+        metadata.height = height;
+        metadata.depth = 1;
+        metadata.arraySize = 1;
+        metadata.mipLevels = 1;
+        metadata.format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        metadata.dimension = DirectX::TEX_DIMENSION_TEXTURE2D;
+    
+        HRESULT hr = image.Initialize(metadata);
+        if (FAILED(hr)) {
+            stbi_image_free(data);
+            return false;
+        }
+    
+        // 复制像素数据
+        const DirectX::Image* img = image.GetImage(0, 0, 0);
+        memcpy(img->pixels, data, width * height * 4);
+    
+        stbi_image_free(data);
+        return true;
     }
 }

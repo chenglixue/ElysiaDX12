@@ -68,31 +68,25 @@ namespace ElysiaRenderer
 	public:
 		Material() = default;
 		Material(DX12Device* pDevice, std::vector<ShaderPass>& shaderPasses);
-		Material(DX12Device* pDevice,std::vector<ShaderPass>& shaderPasses, MeshRender* m_pMeshRender);
 		~Material() = default;
 
 		void Init(std::vector<ShaderPass>& shaderPasses);
 		PassData& GetPassData(UINT passIndex) noexcept;
 		const UINT FindPassIndex(const std::string& name) const noexcept;
-		bool HasMeshRender() const noexcept;
-		MaterialParameterBlock GetParameterBlock() const noexcept {return m_parameterBlock;};
+		MaterialParameterBlock GetParameterBlock() const noexcept {return m_parameterBlock;}
 
-		void SetFloat(const size_t hashName, const float newValue, size_t passIndex = 0);
-		void SetInt(const size_t hashName, const int newValue, size_t passIndex = 0);
-		void SetUINT(const size_t hashName, const UINT newValue, size_t passIndex = 0);
-		void SetBool(const size_t hashName, const int newValue, size_t passIndex = 0);
-		void SetMatrix(const size_t hashName, const Matrix newValue, size_t passIndex = 0);
-		void SetFloatArray(const size_t hashName, const std::vector<float> newValue, size_t passIndex = 0);
-		void SetVector2Array(const size_t hashName, const std::vector<Vector2> newValue, size_t passIndex = 0);
-		void SetVector3Array(const size_t hashName, const std::vector<Vector3> newValue, size_t passIndex = 0);
-		void SetVector4Array(const size_t hashName, const std::vector<Vector4> newValue, size_t passIndex = 0);
-		void Flush();
+		void SetInt(size_t nameHash, int v);
+		void SetUInt(size_t nameHash, unsigned int v);
+		void SetFloat(size_t nameHash, float v);
+		void SetFloat2(size_t nameHash, const Vector2& v);
+		void SetFloat3(size_t nameHash, const Vector3& v);
+		void SetFloat4(size_t nameHash, const Vector4& v);
+		void SetMatrix(size_t nameHash, const Matrix& m);
 
 	private:
 		std::mutex m_setDataMutex;
 		std::vector<PassData> m_passDatas;
 		DX12Device* m_pDevice = nullptr;
-		MeshRender* m_pMeshRender = nullptr;
 		std::unique_ptr<ShaderVariantData> m_pCurrVariantData;
 		MaterialParameterBlock m_parameterBlock;	// 所有材质参数
 	};

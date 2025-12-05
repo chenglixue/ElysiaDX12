@@ -33,7 +33,7 @@ namespace ElysiaRenderer
 	{
 		m_expectedBindings[registerIndex] = ResourceType::UAV;
 	}
-	bool PipelineResourceSpace::HasExpectedCBV() const
+	bool PipelineResourceSpace::HasExpectedCBV() const noexcept
 	{
 		return std::any_of(m_expectedBindings.begin(), m_expectedBindings.end(),
 			[](const auto& kv) { return kv.second == ResourceType::CBV; });

@@ -47,12 +47,29 @@ namespace ElysiaRenderer
 		void RemoveParam(size_t nameHash);
 		void Clear() { m_params.clear(); }
 		void MergeFrom(const MaterialParameterBlock& other);
+
+		// 设置脏状态改变回调
+		void SetDirtyCallback(std::function<void()> callback);
+		
+		void MarkAsDirty();
+		void ClearDirty();
+		bool IsDirty() const;
 		
 	private:
 		std::vector<MaterialParam> m_params;
+		std::function<void()> m_dirtyCallback;
+		bool m_isDirty = false;
 		
 		template<typename T>
 		void SetOrAdd(size_t nameHash, Type type, const T& value);
+
+		void SetValue(ParamValue& dst, float v);
+		void SetValue(ParamValue& dst, int v);
+		void SetValue(ParamValue& dst, unsigned int v);
+		void SetValue(ParamValue& dst, const Vector2& v);
+		void SetValue(ParamValue& dst, const Vector3& v);
+		void SetValue(ParamValue& dst, const Vector4& v);
+		void SetValue(ParamValue& dst, const Matrix& m);
 	};
 }
 

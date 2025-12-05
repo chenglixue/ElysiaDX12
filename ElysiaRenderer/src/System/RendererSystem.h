@@ -19,7 +19,7 @@ namespace ElysiaRenderer
 	class RendererSystem
 	{
 	public:
-		RendererSystem(HWND windowHandle, ElysiaHelper::UINT2 screenSize, std::unique_ptr<DX12UI> pUI);
+		RendererSystem(HWND windowHandle, ElysiaHelper::UINT2 screenSize, DX12UI* pUI);
 		~RendererSystem();
 
 		void Init();
@@ -92,9 +92,6 @@ namespace ElysiaRenderer
 		std::unique_ptr<DX12GraphicsContext> m_graphicsContext = nullptr;
 		std::vector<std::unique_ptr<D3D12_SAMPLER_DESC>> m_samplers{};
 		std::vector<std::unique_ptr<BasePass>> m_passes{};
-
-		std::unique_ptr<CameraManager>	m_pCameraManager = nullptr;  
-		std::unique_ptr<TextureManager>	m_pTextureManager = nullptr;
 
 		void Setup();
 		void Execute();

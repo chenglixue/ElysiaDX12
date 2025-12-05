@@ -1,16 +1,22 @@
 #pragma once
+#include "lib/Utility/Helper.h"
+
+
 #include "IManager.h"
 #include "IUpdate.h"
 #include "lib/DX12/DX12TextureBuffer.h"
-#include "lib/Utility/Helper.h"
+#include "lib/Utility/RenderTexture.h"
+
+
+namespace ElysiaRenderer
+{
+	class DX12Device;
+	struct BufferCreationDesc;
+}
 
 namespace ElysiaRenderer
 {
 	using namespace ElysiaHelper;
-
-	class DX12Device;
-	class RenderTexture;
-	struct BufferCreationDesc;
 
 	class BufferManager : public IManager, IUpdate
 	{
@@ -21,7 +27,16 @@ namespace ElysiaRenderer
 		BufferManager(BufferManager&& rhs) = default;
 		~BufferManager();
 
-		virtual void Init() override;
+		static BufferManager& GetInstance()
+		{
+			std::call_once(m_initInstanceFlag, []() {
+				m_instance.reset(new BufferManager());
+				});
+
+			return *m_instance;
+		}
+
+		virtual void Init(DX12Device* pDevice) override;
 		virtual void Destory() override;
 		virtual void Update() override;
 
@@ -41,6 +56,10 @@ namespace ElysiaRenderer
 		void SetIndexBufferView(const D3D12_INDEX_BUFFER_VIEW& view);
 
 	private:
+		DX12Device* m_pDevice = nullptr;
+		static std::unique_ptr<BufferManager> m_instance;
+		static std::once_flag m_initInstanceFlag;
+
 		std::vector<std::unique_ptr<DX12BufferResource>> m_objectConstantBuffers{};
 		std::unique_ptr<DX12BufferResource> m_pPassConstantBuffer = nullptr;
 		std::unique_ptr<DX12BufferResource> m_pFrameConstantBuffer = nullptr;
@@ -53,15 +72,4 @@ namespace ElysiaRenderer
 		D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView{};
 		D3D12_INDEX_BUFFER_VIEW m_indexBufferView{};
 	};
-
-	extern std::unique_ptr<BufferManager> g_pBufferManager;
-
-	inline static BufferManager* GetBufferManager()
-	{
-		if (g_pBufferManager == nullptr)
-		{
-			ThrowRuntimeError("null buffer manager");
-		}
-		return g_pBufferManager.get();
-	}
 }

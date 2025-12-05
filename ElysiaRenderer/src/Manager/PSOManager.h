@@ -73,7 +73,16 @@ namespace ElysiaRenderer
 		PSOManager(PSOManager&& rhs) = default;
 		~PSOManager();
 
-		virtual void Init() override;
+		static PSOManager& GetInstance()
+		{
+			std::call_once(m_initInstanceFlag, []() {
+				m_instance.reset(new PSOManager());
+				});
+
+			return *m_instance;
+		}
+
+		virtual void Init(DX12Device* pDevice) override;
 		virtual void Destory() override;
 
 		PipelineStateObject* GetGraphicsPipelineState(DX12Device* pDevice, Material* pMaterial, UINT passIndex,
@@ -83,20 +92,14 @@ namespace ElysiaRenderer
 		PipelineStateObject* GetComputePipelineState(DX12Device* pDevice, Material* pMaterial, UINT passIndex);
 
 	private:
+		DX12Device* m_pDevice = nullptr;
+		static std::unique_ptr<PSOManager> m_instance;
+		static std::once_flag m_initInstanceFlag;
+		
 		std::unordered_map<D3D12_GRAPHICS_PIPELINE_STATE_DESC, std::unique_ptr<PipelineStateObject>> m_graphicsPipelineStates{};
 		std::unordered_map<D3D12_COMPUTE_PIPELINE_STATE_DESC, std::unique_ptr<PipelineStateObject>> m_computePipelineStates{};
 
 		PipelineStateObject* GetGraphicsPipelineState(DX12Device* pDevice, const D3D12_GRAPHICS_PIPELINE_STATE_DESC& PSODesc, DX12RootSignature* pRootSignature);
 		PipelineStateObject* GetComputePipelineState(DX12Device* pDevice, const D3D12_COMPUTE_PIPELINE_STATE_DESC& PSODesc, DX12RootSignature* pRootSignature);
 	};
-
-	extern std::unique_ptr<PSOManager> g_pPSOManager;
-	inline static PSOManager* GetPSOManager()
-	{
-		if (g_pPSOManager == nullptr)
-		{
-			ThrowRuntimeError("null PSO manager");
-		}
-		return g_pPSOManager.get();
-	}
 }

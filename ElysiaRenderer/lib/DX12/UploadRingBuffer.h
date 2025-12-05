@@ -27,7 +27,6 @@ namespace ElysiaRenderer
         UINT8*                      m_pCPUPtr = nullptr;
         size_t                      m_size = 0;
         size_t                      m_head = 0;             // 当前分配位置（字节偏移）
-        D3D12MA::Allocator*         m_allocator = nullptr;
 
         DX12Queue*                  m_pQueue = nullptr;
         std::mutex                  m_mutex;

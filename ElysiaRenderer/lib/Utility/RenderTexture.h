@@ -4,13 +4,18 @@
 
 namespace ElysiaRenderer
 {
+	class DX12Device;
+}
+
+namespace ElysiaRenderer
+{
 	class RenderTexture
 	{
 	public:
 		RenderTexture() = default;
 		~RenderTexture();
 
-		void Init(RenderTextureDesc desc);
+		void Init(DX12Device* pDevice, RenderTextureDesc desc);
 		void ShutDowm();
 
 		DX12TextureResource* GetTexture() const;
@@ -29,65 +34,7 @@ namespace ElysiaRenderer
 		UINT m_MSAAQuality = 0;
 	};
 
-	inline std::unique_ptr<RenderTexture> CreateRenderTexture(
-		UINT64 width, 
-		UINT64 height,
-		DXGI_FORMAT format,
-		const wchar_t* name = L"")
-	{
-		RenderTextureDesc desc{};
-		desc.Width = width;
-		desc.Height = height;
-		desc.Format = format;
-		desc.Name = name;
-
-		auto cameraDepthRT = std::make_unique<RenderTexture>();
-		cameraDepthRT->Init(desc);
-
-		return cameraDepthRT;
-	}
-
-	inline std::unique_ptr<RenderTexture> CreateRenderTexture(
-		UINT64 width,
-		UINT64 height,
-		DXGI_FORMAT format,
-		bool isDepth,
-		const wchar_t* name = L"")
-	{
-		RenderTextureDesc desc{};
-		desc.Width = width;
-		desc.Height = height;
-		desc.Format = format;
-		desc.Name = name;
-		desc.IsDepth = isDepth;
-
-		auto cameraDepthRT = std::make_unique<RenderTexture>();
-		cameraDepthRT->Init(desc);
-
-		return cameraDepthRT;
-	}
-
-	inline std::unique_ptr<RenderTexture> CreateRWRenderTexture(
-		UINT64 width,
-		UINT64 height,
-		DXGI_FORMAT format,
-		bool enableRandomWrite,
-		const wchar_t* name = L"")
-	{
-		RenderTextureDesc desc{};
-		desc.Width = width;
-		desc.Height = height;
-		desc.Format = format;
-		desc.Name = name;
-		desc.EnableRandomWrite = enableRandomWrite;
-
-		auto cameraDepthRT = std::make_unique<RenderTexture>();
-		cameraDepthRT->Init(desc);
-
-		return cameraDepthRT;
-	}
-
-	inline bool IsTexReady(const std::vector<ElysiaRenderer::RenderTexture*> texs)
+	inline bool IsRenderTextureReady(const std::vector<ElysiaRenderer::RenderTexture*> texs)
 	{
 		bool isReady = true;
 

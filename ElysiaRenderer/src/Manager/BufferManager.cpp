@@ -1,27 +1,31 @@
 #include "stdafx.h"
 #include "BufferManager.h"
 
+#include "RenderTargetManager.h"
 #include "lib/DX12/DX12Device.h"
 #include "lib/DX12/DX12TextureBuffer.h"
 #include "lib/DX12/DX12BufferResource.h"
-#include "lib/Utility/RenderTexture.h"
 #include "Parameter/UserData.h"
 
 namespace ElysiaRenderer
 {
-	std::unique_ptr<BufferManager> g_pBufferManager = nullptr;
-
+	std::unique_ptr<BufferManager> BufferManager::m_instance;
+	std::once_flag BufferManager::m_initInstanceFlag;
+	
 	BufferManager::~BufferManager()
 	{
 		Destory();
 	}
 
-	void BufferManager::Init()
+	void BufferManager::Init(DX12Device* pDevice)
 	{
+		assert(pDevice);
+		m_pDevice = pDevice;
+		
 		if (!UserData::GetInstance().IsUseHDR)
 		{
-			m_pCameraColorRT = CreateRWRenderTexture(static_cast<UINT64>(GetDevice()->GetScreenSize().x),
-				static_cast<UINT64>(GetDevice()->GetScreenSize().y),
+			m_pCameraColorRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(static_cast<UINT64>(m_pDevice->GetScreenSize().x),
+				static_cast<UINT64>(m_pDevice->GetScreenSize().y),
 				DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
 				true,
 				L"Camera Color RT");
@@ -32,8 +36,8 @@ namespace ElysiaRenderer
 			{
 				case HDRQuality::Low: 
 				{
-					m_pCameraColorRT = CreateRWRenderTexture(static_cast<UINT64>(GetDevice()->GetScreenSize().x),
-						static_cast<UINT64>(GetDevice()->GetScreenSize().y),
+					m_pCameraColorRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(static_cast<UINT64>(m_pDevice->GetScreenSize().x),
+						static_cast<UINT64>(m_pDevice->GetScreenSize().y),
 						DXGI_FORMAT_R11G11B10_FLOAT,
 						true,
 						L"Camera Color RT"); 
@@ -41,8 +45,8 @@ namespace ElysiaRenderer
 				} 
 				case HDRQuality::High:
 				{ 
-					m_pCameraColorRT = CreateRWRenderTexture(static_cast<UINT64>(GetDevice()->GetScreenSize().x),
-						static_cast<UINT64>(GetDevice()->GetScreenSize().y),
+					m_pCameraColorRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(static_cast<UINT64>(m_pDevice->GetScreenSize().x),
+						static_cast<UINT64>(m_pDevice->GetScreenSize().y),
 						DXGI_FORMAT_R16G16B16A16_FLOAT,
 						true,
 						L"Camera Color RT");
@@ -55,9 +59,9 @@ namespace ElysiaRenderer
 				}
 			}
 		}
-		m_pCameraDepthRT = CreateRenderTexture(
-			static_cast<UINT64>(GetDevice()->GetScreenSize().x),
-			static_cast<UINT64>(GetDevice()->GetScreenSize().y),
+		m_pCameraDepthRT = RenderTargetManager::GetInstance().CreateRenderTexture(
+			static_cast<UINT64>(m_pDevice->GetScreenSize().x),
+			static_cast<UINT64>(m_pDevice->GetScreenSize().y),
 			DXGI_FORMAT_D24_UNORM_S8_UINT,
 			true,
 			L"Camera Depth RT");
@@ -148,7 +152,7 @@ namespace ElysiaRenderer
 		{
 			case PER_PASS_SPACE:
 			{
-				m_pPassConstantBuffer = std::move(GetDevice()->CreateBuffer(createDesc));
+				m_pPassConstantBuffer = std::move(m_pDevice->CreateBuffer(createDesc));
 			
 				break;
 			}
@@ -157,7 +161,7 @@ namespace ElysiaRenderer
 			{
 				for (int i = 0; i < NUM_FRAMES_IN_FLIGHT; ++i)
 				{
-					m_objectConstantBuffers.emplace_back(std::move(GetDevice()->CreateBuffer(createDesc)));
+					m_objectConstantBuffers.emplace_back(std::move(m_pDevice->CreateBuffer(createDesc)));
 				}
 
 				break;
@@ -165,7 +169,7 @@ namespace ElysiaRenderer
 
 			case PER_FRAME_SPACE:
 			{
-				m_pFrameConstantBuffer = std::move(GetDevice()->CreateBuffer(createDesc));
+				m_pFrameConstantBuffer = std::move(m_pDevice->CreateBuffer(createDesc));
 				break;
 			}
 			default:
@@ -177,12 +181,12 @@ namespace ElysiaRenderer
 
 	void BufferManager::AddVertexBuffer(BufferCreationDesc desc)
 	{
-		m_pVertexBuffer = std::move(GetDevice()->CreateBuffer(desc));
+		m_pVertexBuffer = std::move(m_pDevice->CreateBuffer(desc));
 	}
 
 	void BufferManager::AddIndexBuffer(BufferCreationDesc desc)
 	{
-		m_pIndexBuffer = std::move(GetDevice()->CreateBuffer(desc));
+		m_pIndexBuffer = std::move(m_pDevice->CreateBuffer(desc));
 	}
 
 	void BufferManager::SetVertexBufferView(const D3D12_VERTEX_BUFFER_VIEW& view)

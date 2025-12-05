@@ -6,16 +6,18 @@
 
 namespace ElysiaRenderer
 {
-	std::unique_ptr<PSOManager> g_pPSOManager = nullptr;
-
+	std::unique_ptr<PSOManager> PSOManager::m_instance;
+	std::once_flag PSOManager::m_initInstanceFlag;
+	
 	PSOManager::~PSOManager()
 	{
 		Destory();
 	}
 
-	void PSOManager::Init()
+	void PSOManager::Init(DX12Device* pDevice)
 	{
-
+		assert(pDevice);
+		m_pDevice = pDevice;
 	}
 
 	void PSOManager::Destory()
