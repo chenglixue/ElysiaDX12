@@ -13,6 +13,18 @@ namespace ElysiaRenderer
 	
 	bool MaterialParameterBlock::ParamValue::Equals(const ParamValue& other, Type type, float tolerance) const
 	{
+		auto arrayEqual = [](const std::vector<float>& arrayData, const ParamValue& other, size_t step, float tolerance)
+		{
+			auto o = true;
+			for (size_t i = 0; i < arrayData.size(); i += step)
+			{
+				for (int j = 0; j < i + step; ++j)
+				{
+					o &= FloatEqual(arrayData[j], other.data[j], tolerance);
+					if (!o) return false;
+				}
+			}
+		};
 		switch (type)
 		{
 			case Type::FLOAT:
@@ -47,7 +59,40 @@ namespace ElysiaRenderer
 						return false;
 				}
 				return true;
+			case Type::IntArray:
+			{
+				auto o = true;
+				for (size_t i = 0; i < arrayData.size(); i ++)
+				{
+					o &= *reinterpret_cast<const int*>(&data[i]) == 
+					   *reinterpret_cast<const int*>(&other.data[i]);
+					
+					if (!o) return false;
+				}
+				return true;
+			}
+            case Type::FloatArray:
+                {
+                    return arrayEqual(arrayData, other, 1, tolerance);
+                }
+            case Type::Float2Array:
+                {
+                    return arrayEqual(arrayData, other, 2, tolerance);
+                }
+            case Type::Float3Array:
+                {
+                    return arrayEqual(arrayData, other, 3, tolerance);
+                }
+            case Type::Float4Array:
+                {
+                    return arrayEqual(arrayData, other, 4, tolerance);
+                }
+            case Type::MatrixArray:
+                {
+                    return arrayEqual(arrayData, other, 16, tolerance);
+                }
 		}
+		
 		return false;
 	}
 
@@ -120,7 +165,29 @@ namespace ElysiaRenderer
 			MarkAsDirty(); // 新参数，标记为脏
 		}
 	}
-	
+	template<typename T>
+	void MaterialParameterBlock::SetOrAddArray(size_t nameHash, Type type, const T* values, size_t count)
+	{
+		auto it = std::find_if(m_params.begin(), m_params.end(),
+			[nameHash](const MaterialParam& p) { return p.nameHash == nameHash; });
+
+		if (it != m_params.end())
+		{
+			
+		}
+		else
+		{
+			MaterialParam param;
+			param.nameHash = nameHash;
+			param.type = type;
+			SetValue(param.value, value);
+			m_params.emplace_back(std::move(param));
+			MarkAsDirty(); // 新参数，标记为脏
+		}
+
+		
+	}
+
 	void MaterialParameterBlock::SetFloat(size_t nameHash, float v)
 	{
 		SetOrAdd(nameHash, Type::FLOAT, v);
@@ -150,6 +217,30 @@ namespace ElysiaRenderer
 	void MaterialParameterBlock::SetMatrix(size_t nameHash, const Matrix& m)
 	{
 		SetOrAdd(nameHash, Type::MATRIX4X4, m);
+	}
+	void MaterialParameterBlock::SetFloatArray(size_t nameHash, const std::vector<float>& values)
+	{
+		
+	}
+	void MaterialParameterBlock::SetIntArray(size_t nameHash, const std::vector<int>& values)
+	{
+		
+	}
+	void MaterialParameterBlock::SetVector2Array(size_t nameHash, const std::vector<Vector2>& values)
+	{
+		
+	}
+	void MaterialParameterBlock::SetVector3Array(size_t nameHash, const std::vector<Vector3>& values)
+	{
+		
+	}
+	void MaterialParameterBlock::SetVector4Array(size_t nameHash, const std::vector<Vector4>& values)
+	{
+		
+	}
+	void MaterialParameterBlock::SetMatrixArray(size_t nameHash, const std::vector<Matrix>& matrices)
+	{
+		
 	}
 
 	void MaterialParameterBlock::SetValue(ParamValue& dst, float v)
@@ -205,6 +296,30 @@ namespace ElysiaRenderer
         }
         dst.rowCount = 4;
         dst.colCount = 4;
+	}
+	void MaterialParameterBlock::SetValue(ParamValue& dst, const std::vector<float>& m)
+	{
+		
+	}
+	void MaterialParameterBlock::SetValue(ParamValue& dst, const std::vector<int>& m)
+	{
+		
+	}
+	void MaterialParameterBlock::SetValue(ParamValue& dst, const std::vector<Vector2>& m)
+	{
+		
+	}
+	void MaterialParameterBlock::SetValue(ParamValue& dst, const std::vector<Vector3>& m)
+	{
+		
+	}
+	void MaterialParameterBlock::SetValue(ParamValue& dst, const std::vector<Vector4>& m)
+	{
+		
+	}
+	void MaterialParameterBlock::SetValue(ParamValue& dst, const std::vector<Matrix>& m)
+	{
+		
 	}
 
 	template void MaterialParameterBlock::SetOrAdd<float>(size_t, Type, const float&);

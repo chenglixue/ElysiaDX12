@@ -48,4 +48,10 @@ namespace ElysiaRenderer
 
 		void SetSpaceResource(PassData& passData, UINT8 spaceID);
 	};
+
+	D3D12_GPU_VIRTUAL_ADDRESS  UploadMaterialConstants(
+			UploadRingBuffer* pUploadBuffer,
+			UINT8 spaceID,
+			Material* pMaterial,
+			const ShaderVariantData* pVariantData);
 }

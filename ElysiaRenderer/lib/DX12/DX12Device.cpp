@@ -477,7 +477,7 @@ namespace ElysiaRenderer
 		auto texturePath = textureCreationDesc.texturePath;
 		bool isSRGB = textureCreationDesc.isSRGB;
 
-		// std::filesystem::exists(WstringToString(texturePath));
+		
 		// IsFileLocked(texturePath);
 
 		const std::wstring extension = GetFileExtension(texturePath.c_str());
@@ -501,6 +501,11 @@ namespace ElysiaRenderer
 			WCHAR assetsPath[512];
 			ElysiaHelper::GetAssetsPath(assetsPath, _countof(assetsPath));
 
+			if (!std::filesystem::exists(WstringToString(assetsPath + texturePath)))
+			{
+				return nullptr;
+			}
+
 			imageData = std::make_unique<DirectX::ScratchImage>();
 			auto loadResult = DirectX::LoadFromDDSFile((assetsPath + texturePath).c_str(), DirectX::DDS_FLAGS_NONE, nullptr, *imageData);
 			if (loadResult != S_OK)
@@ -511,6 +516,10 @@ namespace ElysiaRenderer
 		}
 		else
 		{
+			if (!std::filesystem::exists(WstringToString(texturePath)))
+			{
+				return nullptr;
+			}
 			DirectX::ScratchImage tempImage;
 			auto loadResult = DirectX::LoadFromWICFile(texturePath.c_str(), DirectX::WIC_FLAGS_NONE, nullptr, tempImage);
 			if (loadResult != S_OK)

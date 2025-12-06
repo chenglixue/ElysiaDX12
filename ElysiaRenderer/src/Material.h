@@ -91,10 +91,4 @@ namespace ElysiaRenderer
 		DX12Device* m_pDevice = nullptr;
 		MaterialParameterBlock m_parameterBlock;	// 所有材质参数
 	};
-	
-	D3D12_GPU_VIRTUAL_ADDRESS  UploadMaterialConstants(
-			UploadRingBuffer* pUploadBuffer,
-			UINT8 spaceID,
-			Material* pMaterial,
-			const ShaderVariantData* pVariantData);
 }
