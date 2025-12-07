@@ -10,7 +10,7 @@ namespace ElysiaRenderer
 		{
 			FLOAT,
 			INT,
-			UINT,
+			UInt,
 			BOOL,
 			FLOAT2,
 			FLOAT3,
@@ -18,6 +18,7 @@ namespace ElysiaRenderer
 			MATRIX4X4,
 			FloatArray,
 			IntArray,
+			UIntArray,
 			Float2Array,
 			Float3Array,
 			Float4Array,
@@ -59,6 +60,7 @@ namespace ElysiaRenderer
 
 		void SetFloatArray(size_t nameHash, const std::vector<float>& values);
 		void SetIntArray(size_t nameHash, const std::vector<int>& values);
+		void SetUINTArray(size_t nameHash, const std::vector<UINT>& values);
 		void SetVector2Array(size_t nameHash, const std::vector<Vector2>& values);
 		void SetVector3Array(size_t nameHash, const std::vector<Vector3>& values);
 		void SetVector4Array(size_t nameHash, const std::vector<Vector4>& values);
@@ -96,12 +98,13 @@ namespace ElysiaRenderer
 		void SetValue(ParamValue& dst, const Matrix& m);
 		void SetValue(ParamValue& dst, const std::vector<float>& m);
 		void SetValue(ParamValue& dst, const std::vector<int>& m);
+		void SetValue(ParamValue& dst, const std::vector<UINT>& m);
 		void SetValue(ParamValue& dst, const std::vector<Vector2>& m);
 		void SetValue(ParamValue& dst, const std::vector<Vector3>& m);
 		void SetValue(ParamValue& dst, const std::vector<Vector4>& m);
 		void SetValue(ParamValue& dst, const std::vector<Matrix>& m);
 		template<typename T>
-		void SetOrAddArray(size_t nameHash, Type type, const T* values, size_t count);
+		void SetOrAddArray(size_t nameHash, Type type, const std::vector<T>&  values);
 	};
 
 	

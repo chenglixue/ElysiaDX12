@@ -74,34 +74,34 @@ namespace ElysiaRenderer
 			uint8_t* dest = CPUAddress + member.StartOffset;
 			switch (pMaterialParam->type)
 			{
-			case MaterialParameterBlock::INT:
+				case MaterialParameterBlock::INT:
 				{
 					*reinterpret_cast<int*>(dest) = static_cast<int>(pMaterialParam->value.data[0]);
 					break;
 				}
-			case MaterialParameterBlock::UINT:
+				case MaterialParameterBlock::UInt:
 				{
 					*reinterpret_cast<UINT*>(dest) = static_cast<unsigned int>(pMaterialParam->value.data[0]);
 					break;
 				}
-			case MaterialParameterBlock::BOOL:
+				case MaterialParameterBlock::BOOL:
 				{
 					*reinterpret_cast<UINT*>(dest) = static_cast<unsigned int>(pMaterialParam->value.data[0]);
 					break;
 				}
-			case MaterialParameterBlock::FLOAT:
+				case MaterialParameterBlock::FLOAT:
 				{
 					*reinterpret_cast<float*>(dest) = (pMaterialParam->value.data[0]);
 					break;
 				}
-			case MaterialParameterBlock::FLOAT2:
+				case MaterialParameterBlock::FLOAT2:
 				{
 					auto& v = *reinterpret_cast<Vector2*>(dest);
 					v.x = pMaterialParam->value.data[0];
 					v.y = pMaterialParam->value.data[1];
 					break;
 				}
-			case MaterialParameterBlock::FLOAT3:
+				case MaterialParameterBlock::FLOAT3:
 				{
 					auto& v = *reinterpret_cast<Vector3*>(dest);
 					v.x = pMaterialParam->value.data[0];
@@ -109,7 +109,7 @@ namespace ElysiaRenderer
 					v.z = pMaterialParam->value.data[2];
 					break;
 				}
-			case MaterialParameterBlock::FLOAT4:
+				case MaterialParameterBlock::FLOAT4:
 				{
 					auto& v = *reinterpret_cast<Vector4*>(dest);
 					v.x = pMaterialParam->value.data[0];
@@ -118,9 +118,44 @@ namespace ElysiaRenderer
 					v.w = pMaterialParam->value.data[3];
 					break;
 				}
-			case MaterialParameterBlock::MATRIX4X4:
+				case MaterialParameterBlock::MATRIX4X4:
+					{
+						memcpy(dest, pMaterialParam->value.data.data(), 64);
+						break;
+					}
+				case MaterialParameterBlock::FloatArray:
 				{
-					memcpy(dest, pMaterialParam->value.data.data(), 64);
+					memcpy(dest, pMaterialParam->value.arrayData.data(), sizeof(float) * pMaterialParam->value.arrayData.size());
+					break;
+				}
+				case MaterialParameterBlock::IntArray:
+				{
+					memcpy(dest, pMaterialParam->value.arrayData.data(), sizeof(int) * pMaterialParam->value.arrayData.size());
+					break;
+				}
+				case MaterialParameterBlock::UIntArray:
+				{
+					memcpy(dest, pMaterialParam->value.arrayData.data(), sizeof(UINT) * pMaterialParam->value.arrayData.size());
+					break;
+				}
+				case MaterialParameterBlock::Float2Array:
+				{
+					memcpy(dest, pMaterialParam->value.arrayData.data(), sizeof(float) * pMaterialParam->value.arrayData.size());
+					break;
+				}
+				case MaterialParameterBlock::Float3Array:
+				{
+					memcpy(dest, pMaterialParam->value.arrayData.data(), sizeof(float) * pMaterialParam->value.arrayData.size());
+					break;
+				}
+				case MaterialParameterBlock::Float4Array:
+				{
+					memcpy(dest, pMaterialParam->value.arrayData.data(), sizeof(float) * pMaterialParam->value.arrayData.size());
+					break;
+				}
+				case MaterialParameterBlock::MatrixArray:
+				{
+					memcpy(dest, pMaterialParam->value.arrayData.data(), sizeof(float) * pMaterialParam->value.arrayData.size());
 					break;
 				}
 			}

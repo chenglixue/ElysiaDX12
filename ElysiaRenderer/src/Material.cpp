@@ -115,6 +115,32 @@ namespace ElysiaRenderer
 	{
 		m_parameterBlock.SetMatrix(nameHash, m);
 	}
-	
-	
+	void Material::SetFloatArray(size_t nameHash, const std::vector<float>& v)
+	{
+		m_parameterBlock.SetFloatArray(nameHash, v);
+	}
+	void Material::SetIntArray(size_t nameHash, const std::vector<int>& v)
+	{
+		m_parameterBlock.SetIntArray(nameHash, v);
+	}
+	void Material::SetUINTArray(size_t nameHash, const std::vector<UINT>& v)
+	{
+		m_parameterBlock.SetUINTArray(nameHash, v);
+	}
+	void Material::SetVector2Array(size_t nameHash, const std::vector<Vector2>& v)
+	{
+		m_parameterBlock.SetVector2Array(nameHash, v);
+	}
+	void Material::SetVector3Array(size_t nameHash, const std::vector<Vector3>& v)
+	{
+		m_parameterBlock.SetVector3Array(nameHash, v);
+	}
+	void Material::SetVector4Array(size_t nameHash, const std::vector<Vector4>& v)
+	{
+		m_parameterBlock.SetVector4Array(nameHash, v);
+	}
+	void Material::SetMatrixArray(size_t nameHash, const std::vector<Matrix>& v)
+	{
+		m_parameterBlock.SetMatrixArray(nameHash, v);
+	}
 }

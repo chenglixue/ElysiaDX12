@@ -33,7 +33,7 @@ namespace ElysiaRenderer
 			case Type::INT:
 				return *reinterpret_cast<const int*>(&data[0]) == 
 					   *reinterpret_cast<const int*>(&other.data[0]);
-			case Type::UINT:
+			case Type::UInt:
 				return FloatEqual(data[0], other.data[0], tolerance) &&
 					   FloatEqual(data[1], other.data[1], tolerance);
 
@@ -66,6 +66,18 @@ namespace ElysiaRenderer
 				{
 					o &= *reinterpret_cast<const int*>(&data[i]) == 
 					   *reinterpret_cast<const int*>(&other.data[i]);
+					
+					if (!o) return false;
+				}
+				return true;
+			}
+			case Type::UIntArray:
+			{
+				auto o = true;
+				for (size_t i = 0; i < arrayData.size(); i ++)
+				{
+					o &= *reinterpret_cast<const UINT*>(&data[i]) == 
+					   *reinterpret_cast<const UINT*>(&other.data[i]);
 					
 					if (!o) return false;
 				}
@@ -166,21 +178,42 @@ namespace ElysiaRenderer
 		}
 	}
 	template<typename T>
-	void MaterialParameterBlock::SetOrAddArray(size_t nameHash, Type type, const T* values, size_t count)
+	void MaterialParameterBlock::SetOrAddArray(size_t nameHash, Type type, const std::vector<T>& values)
 	{
 		auto it = std::find_if(m_params.begin(), m_params.end(),
 			[nameHash](const MaterialParam& p) { return p.nameHash == nameHash; });
 
 		if (it != m_params.end())
 		{
-			
+			if (it->type != type)
+			{
+				it->type = type;
+				it->value = ParamValue(); // 重置值
+				SetValue(it->value, values);
+				MarkAsDirty(); // 类型改变，标记为脏
+			}
+			else
+			{
+				// 创建临时值用于比较
+				ParamValue tempValue;
+				SetValue(tempValue, values);
+                
+				// 检查值是否相等（使用容忍度）
+				const float tolerance = 1e-6f; // 浮点数比较容忍度
+				if (!it->value.Equals(tempValue, type, tolerance))
+				{
+					// 值不同，更新并标记为脏
+					SetValue(it->value, values);
+					MarkAsDirty();
+				}
+			}
 		}
 		else
 		{
 			MaterialParam param;
 			param.nameHash = nameHash;
 			param.type = type;
-			SetValue(param.value, value);
+			SetValue(param.value, values);
 			m_params.emplace_back(std::move(param));
 			MarkAsDirty(); // 新参数，标记为脏
 		}
@@ -200,7 +233,7 @@ namespace ElysiaRenderer
 	void MaterialParameterBlock::SetUInt(size_t nameHash, unsigned int v)
 	{
 		float fv = static_cast<float>(v);
-		SetOrAdd(nameHash, Type::UINT, fv);
+		SetOrAdd(nameHash, Type::UInt, fv);
 	}
 	void MaterialParameterBlock::SetFloat2(size_t nameHash, const Vector2& v)
 	{
@@ -220,27 +253,43 @@ namespace ElysiaRenderer
 	}
 	void MaterialParameterBlock::SetFloatArray(size_t nameHash, const std::vector<float>& values)
 	{
-		
+		SetOrAddArray(nameHash, Type::FloatArray, values);
 	}
 	void MaterialParameterBlock::SetIntArray(size_t nameHash, const std::vector<int>& values)
 	{
-		
+		std::vector<float> tempVec{};
+		tempVec.reserve(values.size());
+		for(size_t i = 0; i < values.size(); ++i)
+		{
+			tempVec.emplace_back(static_cast<float>(values[i]));
+		}
+		SetOrAddArray(nameHash, Type::IntArray, std::move(tempVec));
+	}
+	void MaterialParameterBlock::SetUINTArray(size_t nameHash, const std::vector<uint32_t>& values)
+	{
+		std::vector<float> tempVec{};
+		tempVec.reserve(values.size());
+		for(size_t i = 0; i < values.size(); ++i)
+		{
+			tempVec.emplace_back(static_cast<float>(values[i]));
+		}
+		SetOrAddArray(nameHash, Type::UIntArray, std::move(tempVec));
 	}
 	void MaterialParameterBlock::SetVector2Array(size_t nameHash, const std::vector<Vector2>& values)
 	{
-		
+		SetOrAddArray(nameHash, Type::Float2Array, values);
 	}
 	void MaterialParameterBlock::SetVector3Array(size_t nameHash, const std::vector<Vector3>& values)
 	{
-		
+		SetOrAdd(nameHash, Type::Float3Array, values);
 	}
 	void MaterialParameterBlock::SetVector4Array(size_t nameHash, const std::vector<Vector4>& values)
 	{
-		
+		SetOrAdd(nameHash, Type::Float4Array, values);
 	}
-	void MaterialParameterBlock::SetMatrixArray(size_t nameHash, const std::vector<Matrix>& matrices)
+	void MaterialParameterBlock::SetMatrixArray(size_t nameHash, const std::vector<Matrix>& values)
 	{
-		
+		SetOrAdd(nameHash, Type::MatrixArray, values);
 	}
 
 	void MaterialParameterBlock::SetValue(ParamValue& dst, float v)
@@ -297,29 +346,90 @@ namespace ElysiaRenderer
         dst.rowCount = 4;
         dst.colCount = 4;
 	}
-	void MaterialParameterBlock::SetValue(ParamValue& dst, const std::vector<float>& m)
+	void MaterialParameterBlock::SetValue(ParamValue& dst, const std::vector<float>& floatArray)
 	{
-		
+		dst.arrayData.reserve(floatArray.size());
+		for(auto& value : floatArray)
+		{
+			dst.arrayData.emplace_back(value);
+		}
+		dst.rowCount = 1;
+		dst.colCount = floatArray.size();
 	}
-	void MaterialParameterBlock::SetValue(ParamValue& dst, const std::vector<int>& m)
+	void MaterialParameterBlock::SetValue(ParamValue& dst, const std::vector<int>& intArray)
 	{
-		
+		dst.arrayData.reserve(intArray.size());
+		for(size_t i = 0; i < intArray.size(); i++)
+		{
+			*reinterpret_cast<int*>(&dst.arrayData[i]) = intArray[i];
+		}
+		dst.rowCount = 1;
+		dst.colCount = intArray.size();
 	}
-	void MaterialParameterBlock::SetValue(ParamValue& dst, const std::vector<Vector2>& m)
+	void MaterialParameterBlock::SetValue(ParamValue& dst, const std::vector<UINT>& UINTArray)
 	{
-		
+		dst.arrayData.reserve(UINTArray.size());
+		for(size_t i = 0; i < UINTArray.size(); i++)
+		{
+			*reinterpret_cast<UINT*>(&dst.arrayData[i]) = UINTArray[i];
+		}
+		dst.rowCount = 1;
+		dst.colCount = UINTArray.size();
 	}
-	void MaterialParameterBlock::SetValue(ParamValue& dst, const std::vector<Vector3>& m)
+	void MaterialParameterBlock::SetValue(ParamValue& dst, const std::vector<Vector2>& Vector2Array)
 	{
-		
+		dst.arrayData.reserve(2 * Vector2Array.size());
+		for(auto& value : Vector2Array)
+		{
+			dst.arrayData.emplace_back(value.x);
+			dst.arrayData.emplace_back(value.y);
+		}
+		dst.rowCount = 1;
+		dst.colCount = dst.arrayData.size();
 	}
-	void MaterialParameterBlock::SetValue(ParamValue& dst, const std::vector<Vector4>& m)
+	void MaterialParameterBlock::SetValue(ParamValue& dst, const std::vector<Vector3>& Vector3Array)
 	{
-		
+		dst.arrayData.reserve(3 * Vector3Array.size());
+		for(auto& value : Vector3Array)
+		{
+			dst.arrayData.emplace_back(value.x);
+			dst.arrayData.emplace_back(value.y);
+			dst.arrayData.emplace_back(value.z);
+		}
+		dst.rowCount = 1;
+		dst.colCount = dst.arrayData.size();
 	}
-	void MaterialParameterBlock::SetValue(ParamValue& dst, const std::vector<Matrix>& m)
+	void MaterialParameterBlock::SetValue(ParamValue& dst, const std::vector<Vector4>& Vector4Array)
 	{
-		
+		dst.arrayData.reserve(4 * Vector4Array.size());
+		for(auto& value : Vector4Array)
+		{
+			dst.arrayData.emplace_back(value.x);
+			dst.arrayData.emplace_back(value.y);
+			dst.arrayData.emplace_back(value.z);
+			dst.arrayData.emplace_back(value.w);
+		}
+		dst.rowCount = 1;
+		dst.colCount = dst.arrayData.size();
+	}
+	void MaterialParameterBlock::SetValue(ParamValue& dst, const std::vector<Matrix>& MatrixArray)
+	{
+		dst.arrayData.reserve(16 * MatrixArray.size());
+		for(auto& value : MatrixArray)
+		{
+			std::vector<float> tempMatrix = {};
+			tempMatrix.reserve(16);
+			for (int i = 0; i < 4; i++)
+			{
+				for (int j = 0; j < 4; j++)
+				{
+					tempMatrix[i * 4 + j] = value.m[i][j];
+				}
+			}
+			dst.arrayData.insert(dst.arrayData.begin(), tempMatrix.begin(), tempMatrix.end());
+		}
+		dst.rowCount = 4;
+		dst.colCount = MatrixArray.size() * 4;
 	}
 
 	template void MaterialParameterBlock::SetOrAdd<float>(size_t, Type, const float&);
@@ -329,6 +439,13 @@ namespace ElysiaRenderer
 	template void MaterialParameterBlock::SetOrAdd<Vector3>(size_t, Type, const Vector3&);
 	template void MaterialParameterBlock::SetOrAdd<Vector4>(size_t, Type, const Vector4&);
 	template void MaterialParameterBlock::SetOrAdd<Matrix>(size_t, Type, const Matrix&);
+	template void MaterialParameterBlock::SetOrAddArray<float>(size_t nameHash, Type type, const std::vector<float>& values);
+	template void MaterialParameterBlock::SetOrAddArray<int>(size_t nameHash, Type type, const std::vector<int>& values);
+	template void MaterialParameterBlock::SetOrAddArray<unsigned int>(size_t nameHash, Type type, const std::vector<unsigned int>& values);
+	template void MaterialParameterBlock::SetOrAddArray<Vector2>(size_t nameHash, Type type, const std::vector<Vector2>& values);
+	template void MaterialParameterBlock::SetOrAddArray<Vector3>(size_t nameHash, Type type, const std::vector<Vector3>& values);
+	template void MaterialParameterBlock::SetOrAddArray<Vector4>(size_t nameHash, Type type, const std::vector<Vector4>& values);
+	template void MaterialParameterBlock::SetOrAddArray<Matrix>(size_t nameHash, Type type, const std::vector<Matrix>& values);
 	
 	const MaterialParameterBlock::MaterialParam* MaterialParameterBlock::FindParam(size_t nameHash) const
 	{

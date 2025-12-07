@@ -77,6 +77,10 @@ namespace ElysiaRenderer
 		m_pMaterial->SetFloat(ShaderIDs::shadowDepthBias, UserData::GetInstance().shadowDepthBias / 100);
 		m_pMaterial->SetFloat(ShaderIDs::shadowSlopeDepthBias, UserData::GetInstance().shadowSlopeDepthBias / 100);
 		m_pMaterial->SetFloat(ShaderIDs::shadowMaxSlopeDepthBias, UserData::GetInstance().shadowMaxSlopeDepthBias / 100);
+		m_pMaterial->SetVector2Array(ShaderIDs::g_sobolSequence, Create2DSobolSqeuence(64));
+		
+		RenderResource::GetInstance().GetCBVFrameVariable()->shadowMatrix = m_pMainShadow->GetShadowMat();
+		memcpy(RenderResource::GetInstance().GetPerFrameBindResourceSpace()->GetDynamicCBV(), sizeof(CBVFrameVariable));
 	} 
 	void ShadowPass::Render()
 	{

@@ -84,6 +84,13 @@ namespace ElysiaRenderer
 		void SetFloat3(size_t nameHash, const Vector3& v);
 		void SetFloat4(size_t nameHash, const Vector4& v);
 		void SetMatrix(size_t nameHash, const Matrix& m);
+		void SetFloatArray(size_t nameHash, const std::vector<float>& values);
+		void SetIntArray(size_t nameHash, const std::vector<int>& values);
+		void SetUINTArray(size_t nameHash, const std::vector<UINT>& values);
+		void SetVector2Array(size_t nameHash, const std::vector<Vector2>& values);
+		void SetVector3Array(size_t nameHash, const std::vector<Vector3>& values);
+		void SetVector4Array(size_t nameHash, const std::vector<Vector4>& values);
+		void SetMatrixArray(size_t nameHash, const std::vector<Matrix>& values);
 
 	private:
 		std::mutex m_setDataMutex;
