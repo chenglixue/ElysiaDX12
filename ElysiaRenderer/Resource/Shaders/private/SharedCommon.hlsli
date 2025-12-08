@@ -57,7 +57,6 @@ cbuffer GlobalConstant : register(b0, perFrameSpace)
 	UINT frameIndex;
     float nearZ;
     float farZ;
-    
 	UINT GGX_E_LUT_Index;
 
 	UINT GGX_Eavg_LUT_Index;
@@ -65,16 +64,8 @@ cbuffer GlobalConstant : register(b0, perFrameSpace)
 	UINT ShadowTexIndex;
 	UINT BlueNoiseTexIndex;
 
-	UINT GBuffer0Index;
-	UINT GBuffer1Index;
-	UINT GBuffer2Index;
-	UINT GBuffer3Index;
-
-	UINT GBuffer4Index;
-	UINT GBuffer5Index;
 	UINT OpaqueDepthIndex;
     UINT OpaqueColorIndex;
-    
 };
 
 struct DX12Vertex

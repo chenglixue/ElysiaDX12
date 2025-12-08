@@ -168,7 +168,7 @@ namespace ElysiaRenderer
 		passData.pDevice = m_pDevice.get();
 
 		m_passes.emplace_back(std::move(std::make_unique<ShadowPass>(CameraManager::GetInstance().GetMainCamera())));
-		// m_passes.emplace_back(std::move(std::make_unique<GBufferPass>(m_pCameraManager->GetMainCamera())));
+		m_passes.emplace_back(std::move(std::make_unique<GBufferPass>(CameraManager::GetInstance().GetMainCamera())));
 		// m_passes.emplace_back(std::move(std::make_unique<AOPass>(m_pCameraManager->GetMainCamera())));
 		// m_passes.emplace_back(std::move(std::make_unique<OpaquePass>(m_pCameraManager->GetMainCamera())));
 		// m_passes.emplace_back(std::move(std::make_unique<TonemapPass>(m_pCameraManager->GetMainCamera())));

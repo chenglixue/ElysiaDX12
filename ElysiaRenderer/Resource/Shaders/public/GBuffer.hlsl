@@ -12,22 +12,29 @@ cbuffer MaterialConstant : register(b0, perMaterialSpace)
 {   
     float opacity;
     float cutoff;
-    
     UINT baseColorTexIndex;
     UINT normalTexIndex;
+    
     UINT metallicTexIndex;
     UINT roughnessTexIndex;
     UINT specularTexIndex;
+    UINT GBuffer0Index;
     
+    UINT GBuffer1Index;
+    UINT GBuffer2Index;
+    UINT GBuffer3Index;
+    UINT GBuffer4Index;
+    
+    UINT GBuffer5Index;
     Vector3 baseColorTint;
-    Vector3 ambientCubemapTint;
     
+    Vector3 ambientCubemapTint;
     float normalIntensity;
+    
     float metallicIntensity;
     float roughnessIntensity;
     float ambientCubemapIntensity;
-    
-    bool g_hasNormalTex;
+    float g_hasNormalTex;
 };
 
 cbuffer PassConstant : register(b0, perPassSpace)

@@ -13,7 +13,6 @@
 
 cbuffer ObjectConstant : register(b0, perObjectSpace)
 {
-    float test;
     row_major Matrix worldMatrix;
 };
 
@@ -93,7 +92,6 @@ PSOutput PS(PSInput i)
     SamplerState warpLinearSampler = SamplerDescriptorHeap[WarpLinearSampler];
     Texture2D<float4> baseColorTex = ResourceDescriptorHeap[GBuffer4Index];
     
-    o.target0 = test;
     float4 baseColor = baseColorTex.Sample(warpLinearSampler, i.uv) * opacity;
     clip(baseColor.a - cutoff);
     

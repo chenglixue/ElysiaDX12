@@ -36,7 +36,8 @@ namespace ElysiaRenderer
 			case Type::UInt:
 				return FloatEqual(data[0], other.data[0], tolerance) &&
 					   FloatEqual(data[1], other.data[1], tolerance);
-
+			case Type::BOOL:
+				return FloatEqual(data[0], other.data[0], tolerance);
 			case Type::FLOAT2:
 				return FloatEqual(data[0], other.data[0], tolerance) &&
 					   FloatEqual(data[1], other.data[1], tolerance);
@@ -235,6 +236,11 @@ namespace ElysiaRenderer
 		float fv = static_cast<float>(v);
 		SetOrAdd(nameHash, Type::UInt, fv);
 	}
+	void MaterialParameterBlock::SetBool(size_t nameHash, bool v)
+	{
+		SetOrAdd(nameHash, Type::BOOL, v ? 1.f : 0.f);
+	}
+
 	void MaterialParameterBlock::SetFloat2(size_t nameHash, const Vector2& v)
 	{
 		SetOrAdd(nameHash, Type::FLOAT2, *reinterpret_cast<const Vector2*>(&v));

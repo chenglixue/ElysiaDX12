@@ -45,7 +45,7 @@ namespace ElysiaModel
 	{
 		return m_meshData.materialCount;
 	}
-	const MaterialData& ModelImporter::GetMaterial(UINT materialIndex) const
+	const MaterialData& ModelImporter::GetMaterialData(UINT materialIndex) const
 	{
 		assert(materialIndex < m_meshData.materialCount);
 		return m_pMaterialData[materialIndex];

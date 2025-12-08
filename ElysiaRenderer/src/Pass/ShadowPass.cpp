@@ -64,6 +64,7 @@ namespace ElysiaRenderer
 		m_pMaterial = std::move(std::make_unique<Material>(m_pDevice, m_shaderPasses));
 		ShaderPasseIDs::ShadowCastPassID = m_pMaterial->FindPassIndex("Shadow Cast Pass");
 
+		m_sobolSqeuences = Create2DSobolSqeuence(64);
 		UpdateVariant();
 	}
 	void ShadowPass::Execute()
@@ -79,7 +80,7 @@ namespace ElysiaRenderer
 		m_pMaterial->SetFloat(ShaderIDs::shadowDepthBias, UserData::GetInstance().shadowDepthBias / 100);
 		m_pMaterial->SetFloat(ShaderIDs::shadowSlopeDepthBias, UserData::GetInstance().shadowSlopeDepthBias / 100);
 		m_pMaterial->SetFloat(ShaderIDs::shadowMaxSlopeDepthBias, UserData::GetInstance().shadowMaxSlopeDepthBias / 100);
-		m_pMaterial->SetVector2Array(ShaderIDs::g_sobolSequence, Create2DSobolSqeuence(64));
+		m_pMaterial->SetVector2Array(ShaderIDs::g_sobolSequence, m_sobolSqeuences);
 
 		auto pCameraManager = &CameraManager::GetInstance();
 		auto passParameter = RenderResource::GetInstance().GetCBVFrameVariable();
@@ -93,6 +94,9 @@ namespace ElysiaRenderer
 			(1 - pCameraManager->GetMainCamera()->GetFarZ() / pCameraManager->GetMainCamera()->GetNearZ()) / pCameraManager->GetMainCamera()->GetFarZ(),
 			(pCameraManager->GetMainCamera()->GetFarZ() / pCameraManager->GetMainCamera()->GetNearZ()) / pCameraManager->GetMainCamera()->GetFarZ());
 		passParameter->shadowMatrix = m_pMainShadow->GetShadowMat();
+		passParameter->OpaqueColorIndex = BufferManager::GetInstance().GetCameraColorRT()->GetTexture()->GetResourceHeapIndex();
+		passParameter->OpaqueDepthIndex = BufferManager::GetInstance().GetCameraDepthRT()->GetTexture()->GetResourceHeapIndex();
+		passParameter->ShadowTexIndex = m_pShadowRT->GetTexture()->GetResourceHeapIndex();
 		
 		auto GPUAddress = UploadFrameConstant(m_pDevice->GetGlobalUploadBuffer(), sizeof(CBVFrameVariable),
 			RenderResource::GetInstance().GetPerFrameBindResourceSpace()->GetCPUPtr());
@@ -223,10 +227,7 @@ namespace ElysiaRenderer
 			auto currVariantData = &VariantManager->GetOrCompileVariantByNames(enableKeywords);
 			auto resourceLayouts = currVariantData->pMeshResourceLayout.get();
 			
-			if(passData.pCurrVariantData == nullptr || passData.pCurrVariantData != currVariantData)
-			{
-				passData.pCurrVariantData = currVariantData;
-			}
+			passData.pCurrVariantData = currVariantData;
 			
 			{
 				RenderTargetDesc RTDesc = CreateDefaultRenderTargetDesc();
@@ -264,6 +265,11 @@ namespace ElysiaRenderer
 		{
 			const auto& meshRenderer = GetModelImporter()->GetMeshRenderer(meshIndex);
 			const auto& mesh = meshRenderer.m_mesh;
+
+			m_pMaterial->SetMatrix(ShaderIDs::worldMatrix, meshRenderer.m_worldMatrix);
+			m_pMaterial->SetUInt(ShaderIDs::baseColorTexIndex, meshRenderer.m_CBVObjectParameter->baseColorTexIndex);
+			m_pMaterial->SetFloat(ShaderIDs::cutoff, meshRenderer.m_CBVObjectParameter->cutoff);
+			m_pMaterial->SetFloat(ShaderIDs::opacity, meshRenderer.m_CBVObjectParameter->opacity);
 			
 			SetSpaceResource(passData, PER_OBJECT_SPACE);
 			SetSpaceResource(passData, PER_MATERIAL_SPACE);

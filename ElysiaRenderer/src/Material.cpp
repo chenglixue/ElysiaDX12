@@ -95,6 +95,11 @@ namespace ElysiaRenderer
 	{
 		m_parameterBlock.SetUInt(nameHash, v);
 	}
+	void Material::SetBool(size_t nameHash, bool v)
+	{
+		m_parameterBlock.SetBool(nameHash, v);
+	}
+
 	void Material::SetFloat(size_t nameHash, float v)
 	{
 		m_parameterBlock.SetFloat(nameHash, v);

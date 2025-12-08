@@ -79,6 +79,7 @@ namespace ElysiaRenderer
 
 		void SetInt(size_t nameHash, int v);
 		void SetUInt(size_t nameHash, unsigned int v);
+		void SetBool(size_t nameHash, bool v);
 		void SetFloat(size_t nameHash, float v);
 		void SetFloat2(size_t nameHash, const Vector2& v);
 		void SetFloat3(size_t nameHash, const Vector3& v);

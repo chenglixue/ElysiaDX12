@@ -1,1464 +1,279 @@
 ﻿  Skipping vcpkg. (no packages)
-  BasePass.cpp
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\optional(11): warning STL4038: The contents of <optional> are available only with C++17 or later.
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\filesystem(12): warning STL4038: The contents of <filesystem> are available only with C++17 or later.
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Metalib.h(4,10): error C2988: unrecognizable template declaration/definition
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Metalib.h(4,10): error C2059: syntax error: '('
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Metalib.h(5,26): error C2143: syntax error: missing ';' before '{'
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Metalib.h(5,26): error C2447: '{': missing function header (old-style formal list?)
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Metalib.h(17,16): error C2039: 'is_bounded_array_v': is not a member of 'std'
-  (compiling source file 'BasePass.cpp')
-      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\fstream(20,1):
-      see declaration of 'std'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Metalib.h(17,10): error C2988: unrecognizable template declaration/definition
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Metalib.h(17,10): error C2059: syntax error: '('
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Metalib.h(17,80): error C2143: syntax error: missing ';' before '{'
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Metalib.h(17,80): error C2447: '{': missing function header (old-style formal list?)
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Metalib.h(21,16): error C2039: 'is_bounded_array_v': is not a member of 'std'
-  (compiling source file 'BasePass.cpp')
-      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\fstream(20,1):
-      see declaration of 'std'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Metalib.h(21,10): error C2988: unrecognizable template declaration/definition
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Metalib.h(21,10): error C2059: syntax error: '('
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Metalib.h(21,84): error C2143: syntax error: missing ';' before '{'
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Metalib.h(21,84): error C2447: '{': missing function header (old-style formal list?)
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(132,12): error C2039: 'optional': is not a member of 'std'
-  (compiling source file 'BasePass.cpp')
-      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\fstream(20,1):
-      see declaration of 'std'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(132,1): error C2873: 'optional': symbol cannot be used in a using-declaration
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(139,12): error C2039: 'string_view': is not a member of 'std'
-  (compiling source file 'BasePass.cpp')
-      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\fstream(20,1):
-      see declaration of 'std'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(139,1): error C2873: 'string_view': symbol cannot be used in a using-declaration
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(149,19): error C2653: 'string_view': is not a class or namespace name
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(149,32): error C2061: syntax error: identifier 'value_type'
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(150,30): error C2653: 'string_view': is not a class or namespace name
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(150,43): error C2065: 'value_type': undeclared identifier
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(150,20): error C2923: 'std::is_same_v': 'value_type' is not a valid template type argument for parameter '<unnamed-symbol>'
-  (compiling source file 'BasePass.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(150,43):
-      see declaration of 'value_type'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(150,15): error C2062: type 'unknown-type' unexpected
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(152,3): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(189,61): error C3861: 'string_view': identifier not found
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(189,61): error C2065: 'string_view': undeclared identifier
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(189,33): error C2923: 'std::pair': 'string_view' is not a valid template type argument for parameter '_Ty2'
-  (compiling source file 'BasePass.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(189,61):
-      see declaration of 'string_view'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(189,33): error C2955: 'std::pair': use of class template requires template argument list
-  (compiling source file 'BasePass.cpp')
-      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\utility(222,1):
-      see declaration of 'std::pair'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(191,25): error C2061: syntax error: identifier 'string_view'
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(191,42): error C2059: syntax error: ':'
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(199,23): error C7525: inline variables require at least '/std:c++17'
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(199,48): error C2440: '<function-style-cast>': cannot convert from 'initializer list' to 'magic_enum::customize::customize_t'
-  (compiling source file 'BasePass.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(199,48):
-      'magic_enum::customize::customize_t::customize_t': no overloaded function could convert all the argument types
-          D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(196,1):
-          could be 'magic_enum::customize::customize_t::customize_t(magic_enum::customize::customize_t &&)'
-              D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(199,48):
-              'magic_enum::customize::customize_t::customize_t(magic_enum::customize::customize_t &&)': cannot convert argument 1 from 'magic_enum::customize::detail::customize_tag' to 'magic_enum::customize::customize_t &&'
-                  D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(199,72):
-                  Reason: cannot convert from 'magic_enum::customize::detail::customize_tag' to 'magic_enum::customize::customize_t'
-                  D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(199,72):
-                  No user-defined-conversion operator available that can perform this conversion, or the operator cannot be called
-          D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(196,1):
-          or       'magic_enum::customize::customize_t::customize_t(const magic_enum::customize::customize_t &)'
-              D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(199,48):
-              'magic_enum::customize::customize_t::customize_t(const magic_enum::customize::customize_t &)': cannot convert argument 1 from 'magic_enum::customize::detail::customize_tag' to 'const magic_enum::customize::customize_t &'
-                  D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(199,72):
-                  Reason: cannot convert from 'magic_enum::customize::detail::customize_tag' to 'const magic_enum::customize::customize_t'
-                  D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(199,72):
-                  No user-defined-conversion operator available that can perform this conversion, or the operator cannot be called
-          D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(199,48):
-          while trying to match the argument list '(magic_enum::customize::detail::customize_tag)'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(201,23): error C7525: inline variables require at least '/std:c++17'
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(201,48): error C2440: '<function-style-cast>': cannot convert from 'initializer list' to 'magic_enum::customize::customize_t'
-  (compiling source file 'BasePass.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(201,48):
-      'magic_enum::customize::customize_t::customize_t': no overloaded function could convert all the argument types
-          D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(196,1):
-          could be 'magic_enum::customize::customize_t::customize_t(magic_enum::customize::customize_t &&)'
-              D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(201,48):
-              'magic_enum::customize::customize_t::customize_t(magic_enum::customize::customize_t &&)': cannot convert argument 1 from 'magic_enum::customize::detail::customize_tag' to 'magic_enum::customize::customize_t &&'
-                  D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(201,72):
-                  Reason: cannot convert from 'magic_enum::customize::detail::customize_tag' to 'magic_enum::customize::customize_t'
-                  D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(201,72):
-                  No user-defined-conversion operator available that can perform this conversion, or the operator cannot be called
-          D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(196,1):
-          or       'magic_enum::customize::customize_t::customize_t(const magic_enum::customize::customize_t &)'
-              D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(201,48):
-              'magic_enum::customize::customize_t::customize_t(const magic_enum::customize::customize_t &)': cannot convert argument 1 from 'magic_enum::customize::detail::customize_tag' to 'const magic_enum::customize::customize_t &'
-                  D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(201,72):
-                  Reason: cannot convert from 'magic_enum::customize::detail::customize_tag' to 'const magic_enum::customize::customize_t'
-                  D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(201,72):
-                  No user-defined-conversion operator available that can perform this conversion, or the operator cannot be called
-          D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(201,48):
-          while trying to match the argument list '(magic_enum::customize::detail::customize_tag)'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(227,11): error C3533: a parameter cannot have a type that contains 'auto'
-  (compiling source file 'BasePass.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(227,11):
-      'auto' in non-type template parameters requires at least '/std:c++17'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(231,23): error C7525: inline variables require at least '/std:c++17'
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(263,33): error C2061: syntax error: identifier 'string_view'
-  (compiling source file 'BasePass.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(263,33):
-      the template instantiation context (the oldest one first) is
-          D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(281,2):
-          see reference to class template instantiation 'magic_enum::detail::static_str<N>' being compiled
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(267,1): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(267,28): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(267,19): error C2178: 'magic_enum::detail::static_str<N>::char_type' cannot be declared with 'constexpr' specifier
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(267,52): error C2334: unexpected token(s) preceding '{'; skipping apparent function body
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(271,22): error C2833: 'operator string_view' is not a recognized operator or type
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(271,1): error C2059: syntax error: 'newline'
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(271,51): error C2334: unexpected token(s) preceding '{'; skipping apparent function body
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(278,24): error C2061: syntax error: identifier 'string_view'
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(280,3): error C2327: 'magic_enum::detail::static_str<N>::char_type': is not a type name, static, or enumerator
-  (compiling source file 'BasePass.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(280,3):
-      see declaration of 'magic_enum::detail::static_str<N>::char_type'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(280,13): error C3646: 'chars_': unknown override specifier
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(280,19): error C2143: syntax error: missing ',' before '['
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(280,52): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(263,72): error C3861: 'str': identifier not found
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(263,72): error C2065: 'str': undeclared identifier
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(275,96): error C2065: 'chars_': undeclared identifier
-  (compiling source file 'BasePass.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(275,3):
-      This diagnostic occurred in the compiler generated function 'magic_enum::detail::static_str<N>::static_str(const char *,std::integer_sequence<uint16_t,I...>) noexcept'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(275,115): error C2187: syntax error: 'char_type' was unexpected here
-  (compiling source file 'BasePass.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(275,3):
-      This diagnostic occurred in the compiler generated function 'magic_enum::detail::static_str<N>::static_str(const char *,std::integer_sequence<uint16_t,I...>) noexcept'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(278,96): error C2065: 'chars_': undeclared identifier
-  (compiling source file 'BasePass.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(278,3):
-      This diagnostic occurred in the compiler generated function 'magic_enum::detail::static_str<N>::static_str(void) noexcept'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(278,103): error C2065: 'str': undeclared identifier
-  (compiling source file 'BasePass.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(278,3):
-      This diagnostic occurred in the compiler generated function 'magic_enum::detail::static_str<N>::static_str(void) noexcept'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(278,126): error C2187: syntax error: 'char_type' was unexpected here
-  (compiling source file 'BasePass.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(278,3):
-      This diagnostic occurred in the compiler generated function 'magic_enum::detail::static_str<N>::static_str(void) noexcept'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(290,46): error C2143: syntax error: missing ';' before 'noexcept'
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(290,33): error C2178: 'magic_enum::detail::static_str<0>::string_view' cannot be declared with 'constexpr' specifier
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(290,33): error C2460: 'magic_enum::detail::static_str<0>::string_view': uses 'magic_enum::detail::static_str<0>', which is being defined
-  (compiling source file 'BasePass.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(284,1):
-      see declaration of 'magic_enum::detail::static_str<0>'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(290,33): error C2178: 'magic_enum::detail::static_str<0>::string_view' cannot be declared with 'explicit' specifier
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(290,55): error C2334: unexpected token(s) preceding '{'; skipping apparent function body
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(292,1): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(292,28): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(292,19): error C2178: 'magic_enum::detail::static_str<0>::char_type' cannot be declared with 'constexpr' specifier
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(292,52): error C2334: unexpected token(s) preceding '{'; skipping apparent function body
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(288,52): error C2789: 'magic_enum::detail::static_str<0>::string_view': an object of const-qualified type must be initialized
-  (compiling source file 'BasePass.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(290,33):
-      see declaration of 'magic_enum::detail::static_str<0>::string_view'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(288,52): error C2789: 'magic_enum::detail::static_str<0>::char_type': an object of const-qualified type must be initialized
-  (compiling source file 'BasePass.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(292,19):
-      see declaration of 'magic_enum::detail::static_str<0>::char_type'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(288,3): error C3615: constexpr function 'magic_enum::detail::static_str<0>::static_str' cannot result in a constant expression
-  (compiling source file 'BasePass.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(288,3):
-      failure was caused by 'constexpr' constructor not initializing member 'magic_enum::detail::static_str<0>::string_view'
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(288,3):
-      failure was caused by 'constexpr' constructor not initializing member 'magic_enum::detail::static_str<0>::char_type'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(301,30): error C3646: 'to_lower': unknown override specifier
-  (compiling source file 'BasePass.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(301,30):
-      the template instantiation context (the oldest one first) is
-          D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(310,2):
-          see reference to class template instantiation 'magic_enum::detail::case_insensitive<Op>' being compiled
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(301,39): error C2065: 'char_type': undeclared identifier
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(301,49): error C2146: syntax error: missing ')' before identifier 'c'
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(301,61): error C2334: unexpected token(s) preceding '{'; skipping apparent function body
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(307,110): error C2065: 'char_type': undeclared identifier
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(307,83): error C2923: 'std::is_same_v': 'char_type' is not a valid template type argument for parameter '<unnamed-symbol>'
-  (compiling source file 'BasePass.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(307,110):
-      see declaration of 'char_type'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(307,156): error C2065: 'char_type': undeclared identifier
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(307,129): error C2923: 'std::is_same_v': 'char_type' is not a valid template type argument for parameter '<unnamed-symbol>'
-  (compiling source file 'BasePass.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(307,156):
-      see declaration of 'char_type'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(307,124): error C2062: type 'unknown-type' unexpected
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(312,28): error C2065: 'string_view': undeclared identifier
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(312,40): error C2146: syntax error: missing ')' before identifier 'str'
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(312,67): error C2143: syntax error: missing ';' before '{'
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(312,67): error C2447: '{': missing function header (old-style formal list?)
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(336,70): error C3861: 'string_view': identifier not found
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(336,70): error C2065: 'string_view': undeclared identifier
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(343,44): error C2760: syntax error: ',' was unexpected here; expected 'expression'
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(343,44): error C2760: syntax error: ',' was unexpected here; expected ';'
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(343,44): error C3878: syntax error: unexpected token ',' following 'jump_statement'
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(343,44): message : error recovery skipped: ','
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(343,61): error C2760: syntax error: ',' was unexpected here; expected ';'
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(343,63): error C2065: 'char_type': undeclared identifier
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(343,74): error C2065: 'char_type': undeclared identifier
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(343,84): error C2760: syntax error: ';' was unexpected here; expected 'expression'
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(347,26): error C2065: 'string_view': undeclared identifier
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(347,38): error C2146: syntax error: missing ')' before identifier 'lhs'
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(347,61): warning C5051: attribute [[maybe_unused]] requires at least '/std:c++17'; ignored
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(347,148): error C2143: syntax error: missing ';' before '{'
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(347,148): error C2447: '{': missing function header (old-style formal list?)
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(378,3): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(381,10): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(383,10): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(385,10): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(398,3): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(418,23): error C7525: inline variables require at least '/std:c++17'
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(424,3): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(479,3): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(483,10): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(485,10): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(494,23): error C7525: inline variables require at least '/std:c++17'
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(496,11): error C3533: a parameter cannot have a type that contains 'auto'
-  (compiling source file 'BasePass.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(496,11):
-      'auto' in non-type template parameters requires at least '/std:c++17'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(500,3): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(603,3): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(607,10): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(609,10): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(622,23): error C7525: inline variables require at least '/std:c++17'
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(624,23): error C3533: a parameter cannot have a type that contains 'auto'
-  (compiling source file 'BasePass.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(624,23):
-      'auto' in non-type template parameters requires at least '/std:c++17'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(634,3): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(638,10): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(656,3): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(660,10): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(674,3): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(680,5): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(690,3): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(696,5): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(724,3): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(726,3): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(749,3): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(782,3): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(784,10): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(813,23): error C7525: inline variables require at least '/std:c++17'
-  (compiling source file 'BasePass.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(813,23): error C1003: error count exceeds 100; stopping compilation
-  (compiling source file 'BasePass.cpp')
-  
-  BufferManager.cpp
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\optional(11): warning STL4038: The contents of <optional> are available only with C++17 or later.
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\filesystem(12): warning STL4038: The contents of <filesystem> are available only with C++17 or later.
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Metalib.h(4,10): error C2988: unrecognizable template declaration/definition
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Metalib.h(4,10): error C2059: syntax error: '('
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Metalib.h(5,26): error C2143: syntax error: missing ';' before '{'
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Metalib.h(5,26): error C2447: '{': missing function header (old-style formal list?)
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Metalib.h(17,16): error C2039: 'is_bounded_array_v': is not a member of 'std'
-  (compiling source file 'BufferManager.cpp')
-      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\fstream(20,1):
-      see declaration of 'std'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Metalib.h(17,10): error C2988: unrecognizable template declaration/definition
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Metalib.h(17,10): error C2059: syntax error: '('
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Metalib.h(17,80): error C2143: syntax error: missing ';' before '{'
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Metalib.h(17,80): error C2447: '{': missing function header (old-style formal list?)
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Metalib.h(21,16): error C2039: 'is_bounded_array_v': is not a member of 'std'
-  (compiling source file 'BufferManager.cpp')
-      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\fstream(20,1):
-      see declaration of 'std'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Metalib.h(21,10): error C2988: unrecognizable template declaration/definition
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Metalib.h(21,10): error C2059: syntax error: '('
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Metalib.h(21,84): error C2143: syntax error: missing ';' before '{'
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Metalib.h(21,84): error C2447: '{': missing function header (old-style formal list?)
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(132,12): error C2039: 'optional': is not a member of 'std'
-  (compiling source file 'BufferManager.cpp')
-      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\fstream(20,1):
-      see declaration of 'std'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(132,1): error C2873: 'optional': symbol cannot be used in a using-declaration
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(139,12): error C2039: 'string_view': is not a member of 'std'
-  (compiling source file 'BufferManager.cpp')
-      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\fstream(20,1):
-      see declaration of 'std'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(139,1): error C2873: 'string_view': symbol cannot be used in a using-declaration
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(149,19): error C2653: 'string_view': is not a class or namespace name
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(149,32): error C2061: syntax error: identifier 'value_type'
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(150,30): error C2653: 'string_view': is not a class or namespace name
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(150,43): error C2065: 'value_type': undeclared identifier
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(150,20): error C2923: 'std::is_same_v': 'value_type' is not a valid template type argument for parameter '<unnamed-symbol>'
-  (compiling source file 'BufferManager.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(150,43):
-      see declaration of 'value_type'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(150,15): error C2062: type 'unknown-type' unexpected
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(152,3): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(189,61): error C3861: 'string_view': identifier not found
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(189,61): error C2065: 'string_view': undeclared identifier
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(189,33): error C2923: 'std::pair': 'string_view' is not a valid template type argument for parameter '_Ty2'
-  (compiling source file 'BufferManager.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(189,61):
-      see declaration of 'string_view'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(189,33): error C2955: 'std::pair': use of class template requires template argument list
-  (compiling source file 'BufferManager.cpp')
-      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\utility(222,1):
-      see declaration of 'std::pair'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(191,25): error C2061: syntax error: identifier 'string_view'
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(191,42): error C2059: syntax error: ':'
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(199,23): error C7525: inline variables require at least '/std:c++17'
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(199,48): error C2440: '<function-style-cast>': cannot convert from 'initializer list' to 'magic_enum::customize::customize_t'
-  (compiling source file 'BufferManager.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(199,48):
-      'magic_enum::customize::customize_t::customize_t': no overloaded function could convert all the argument types
-          D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(196,1):
-          could be 'magic_enum::customize::customize_t::customize_t(magic_enum::customize::customize_t &&)'
-              D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(199,48):
-              'magic_enum::customize::customize_t::customize_t(magic_enum::customize::customize_t &&)': cannot convert argument 1 from 'magic_enum::customize::detail::customize_tag' to 'magic_enum::customize::customize_t &&'
-                  D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(199,72):
-                  Reason: cannot convert from 'magic_enum::customize::detail::customize_tag' to 'magic_enum::customize::customize_t'
-                  D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(199,72):
-                  No user-defined-conversion operator available that can perform this conversion, or the operator cannot be called
-          D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(196,1):
-          or       'magic_enum::customize::customize_t::customize_t(const magic_enum::customize::customize_t &)'
-              D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(199,48):
-              'magic_enum::customize::customize_t::customize_t(const magic_enum::customize::customize_t &)': cannot convert argument 1 from 'magic_enum::customize::detail::customize_tag' to 'const magic_enum::customize::customize_t &'
-                  D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(199,72):
-                  Reason: cannot convert from 'magic_enum::customize::detail::customize_tag' to 'const magic_enum::customize::customize_t'
-                  D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(199,72):
-                  No user-defined-conversion operator available that can perform this conversion, or the operator cannot be called
-          D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(199,48):
-          while trying to match the argument list '(magic_enum::customize::detail::customize_tag)'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(201,23): error C7525: inline variables require at least '/std:c++17'
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(201,48): error C2440: '<function-style-cast>': cannot convert from 'initializer list' to 'magic_enum::customize::customize_t'
-  (compiling source file 'BufferManager.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(201,48):
-      'magic_enum::customize::customize_t::customize_t': no overloaded function could convert all the argument types
-          D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(196,1):
-          could be 'magic_enum::customize::customize_t::customize_t(magic_enum::customize::customize_t &&)'
-              D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(201,48):
-              'magic_enum::customize::customize_t::customize_t(magic_enum::customize::customize_t &&)': cannot convert argument 1 from 'magic_enum::customize::detail::customize_tag' to 'magic_enum::customize::customize_t &&'
-                  D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(201,72):
-                  Reason: cannot convert from 'magic_enum::customize::detail::customize_tag' to 'magic_enum::customize::customize_t'
-                  D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(201,72):
-                  No user-defined-conversion operator available that can perform this conversion, or the operator cannot be called
-          D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(196,1):
-          or       'magic_enum::customize::customize_t::customize_t(const magic_enum::customize::customize_t &)'
-              D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(201,48):
-              'magic_enum::customize::customize_t::customize_t(const magic_enum::customize::customize_t &)': cannot convert argument 1 from 'magic_enum::customize::detail::customize_tag' to 'const magic_enum::customize::customize_t &'
-                  D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(201,72):
-                  Reason: cannot convert from 'magic_enum::customize::detail::customize_tag' to 'const magic_enum::customize::customize_t'
-                  D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(201,72):
-                  No user-defined-conversion operator available that can perform this conversion, or the operator cannot be called
-          D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(201,48):
-          while trying to match the argument list '(magic_enum::customize::detail::customize_tag)'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(227,11): error C3533: a parameter cannot have a type that contains 'auto'
-  (compiling source file 'BufferManager.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(227,11):
-      'auto' in non-type template parameters requires at least '/std:c++17'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(231,23): error C7525: inline variables require at least '/std:c++17'
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(263,33): error C2061: syntax error: identifier 'string_view'
-  (compiling source file 'BufferManager.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(263,33):
-      the template instantiation context (the oldest one first) is
-          D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(281,2):
-          see reference to class template instantiation 'magic_enum::detail::static_str<N>' being compiled
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(267,1): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(267,28): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(267,19): error C2178: 'magic_enum::detail::static_str<N>::char_type' cannot be declared with 'constexpr' specifier
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(267,52): error C2334: unexpected token(s) preceding '{'; skipping apparent function body
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(271,22): error C2833: 'operator string_view' is not a recognized operator or type
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(271,1): error C2059: syntax error: 'newline'
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(271,51): error C2334: unexpected token(s) preceding '{'; skipping apparent function body
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(278,24): error C2061: syntax error: identifier 'string_view'
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(280,3): error C2327: 'magic_enum::detail::static_str<N>::char_type': is not a type name, static, or enumerator
-  (compiling source file 'BufferManager.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(280,3):
-      see declaration of 'magic_enum::detail::static_str<N>::char_type'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(280,13): error C3646: 'chars_': unknown override specifier
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(280,19): error C2143: syntax error: missing ',' before '['
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(280,52): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(263,72): error C3861: 'str': identifier not found
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(263,72): error C2065: 'str': undeclared identifier
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(275,96): error C2065: 'chars_': undeclared identifier
-  (compiling source file 'BufferManager.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(275,3):
-      This diagnostic occurred in the compiler generated function 'magic_enum::detail::static_str<N>::static_str(const char *,std::integer_sequence<uint16_t,I...>) noexcept'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(275,115): error C2187: syntax error: 'char_type' was unexpected here
-  (compiling source file 'BufferManager.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(275,3):
-      This diagnostic occurred in the compiler generated function 'magic_enum::detail::static_str<N>::static_str(const char *,std::integer_sequence<uint16_t,I...>) noexcept'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(278,96): error C2065: 'chars_': undeclared identifier
-  (compiling source file 'BufferManager.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(278,3):
-      This diagnostic occurred in the compiler generated function 'magic_enum::detail::static_str<N>::static_str(void) noexcept'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(278,103): error C2065: 'str': undeclared identifier
-  (compiling source file 'BufferManager.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(278,3):
-      This diagnostic occurred in the compiler generated function 'magic_enum::detail::static_str<N>::static_str(void) noexcept'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(278,126): error C2187: syntax error: 'char_type' was unexpected here
-  (compiling source file 'BufferManager.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(278,3):
-      This diagnostic occurred in the compiler generated function 'magic_enum::detail::static_str<N>::static_str(void) noexcept'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(290,46): error C2143: syntax error: missing ';' before 'noexcept'
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(290,33): error C2178: 'magic_enum::detail::static_str<0>::string_view' cannot be declared with 'constexpr' specifier
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(290,33): error C2460: 'magic_enum::detail::static_str<0>::string_view': uses 'magic_enum::detail::static_str<0>', which is being defined
-  (compiling source file 'BufferManager.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(284,1):
-      see declaration of 'magic_enum::detail::static_str<0>'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(290,33): error C2178: 'magic_enum::detail::static_str<0>::string_view' cannot be declared with 'explicit' specifier
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(290,55): error C2334: unexpected token(s) preceding '{'; skipping apparent function body
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(292,1): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(292,28): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(292,19): error C2178: 'magic_enum::detail::static_str<0>::char_type' cannot be declared with 'constexpr' specifier
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(292,52): error C2334: unexpected token(s) preceding '{'; skipping apparent function body
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(288,52): error C2789: 'magic_enum::detail::static_str<0>::string_view': an object of const-qualified type must be initialized
-  (compiling source file 'BufferManager.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(290,33):
-      see declaration of 'magic_enum::detail::static_str<0>::string_view'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(288,52): error C2789: 'magic_enum::detail::static_str<0>::char_type': an object of const-qualified type must be initialized
-  (compiling source file 'BufferManager.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(292,19):
-      see declaration of 'magic_enum::detail::static_str<0>::char_type'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(288,3): error C3615: constexpr function 'magic_enum::detail::static_str<0>::static_str' cannot result in a constant expression
-  (compiling source file 'BufferManager.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(288,3):
-      failure was caused by 'constexpr' constructor not initializing member 'magic_enum::detail::static_str<0>::string_view'
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(288,3):
-      failure was caused by 'constexpr' constructor not initializing member 'magic_enum::detail::static_str<0>::char_type'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(301,30): error C3646: 'to_lower': unknown override specifier
-  (compiling source file 'BufferManager.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(301,30):
-      the template instantiation context (the oldest one first) is
-          D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(310,2):
-          see reference to class template instantiation 'magic_enum::detail::case_insensitive<Op>' being compiled
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(301,39): error C2065: 'char_type': undeclared identifier
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(301,49): error C2146: syntax error: missing ')' before identifier 'c'
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(301,61): error C2334: unexpected token(s) preceding '{'; skipping apparent function body
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(307,110): error C2065: 'char_type': undeclared identifier
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(307,83): error C2923: 'std::is_same_v': 'char_type' is not a valid template type argument for parameter '<unnamed-symbol>'
-  (compiling source file 'BufferManager.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(307,110):
-      see declaration of 'char_type'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(307,156): error C2065: 'char_type': undeclared identifier
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(307,129): error C2923: 'std::is_same_v': 'char_type' is not a valid template type argument for parameter '<unnamed-symbol>'
-  (compiling source file 'BufferManager.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(307,156):
-      see declaration of 'char_type'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(307,124): error C2062: type 'unknown-type' unexpected
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(312,28): error C2065: 'string_view': undeclared identifier
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(312,40): error C2146: syntax error: missing ')' before identifier 'str'
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(312,67): error C2143: syntax error: missing ';' before '{'
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(312,67): error C2447: '{': missing function header (old-style formal list?)
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(336,70): error C3861: 'string_view': identifier not found
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(336,70): error C2065: 'string_view': undeclared identifier
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(343,44): error C2760: syntax error: ',' was unexpected here; expected 'expression'
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(343,44): error C2760: syntax error: ',' was unexpected here; expected ';'
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(343,44): error C3878: syntax error: unexpected token ',' following 'jump_statement'
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(343,44): message : error recovery skipped: ','
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(343,61): error C2760: syntax error: ',' was unexpected here; expected ';'
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(343,63): error C2065: 'char_type': undeclared identifier
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(343,74): error C2065: 'char_type': undeclared identifier
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(343,84): error C2760: syntax error: ';' was unexpected here; expected 'expression'
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(347,26): error C2065: 'string_view': undeclared identifier
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(347,38): error C2146: syntax error: missing ')' before identifier 'lhs'
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(347,61): warning C5051: attribute [[maybe_unused]] requires at least '/std:c++17'; ignored
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(347,148): error C2143: syntax error: missing ';' before '{'
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(347,148): error C2447: '{': missing function header (old-style formal list?)
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(378,3): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(381,10): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(383,10): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(385,10): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(398,3): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(418,23): error C7525: inline variables require at least '/std:c++17'
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(424,3): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(479,3): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(483,10): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(485,10): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(494,23): error C7525: inline variables require at least '/std:c++17'
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(496,11): error C3533: a parameter cannot have a type that contains 'auto'
-  (compiling source file 'BufferManager.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(496,11):
-      'auto' in non-type template parameters requires at least '/std:c++17'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(500,3): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(603,3): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(607,10): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(609,10): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(622,23): error C7525: inline variables require at least '/std:c++17'
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(624,23): error C3533: a parameter cannot have a type that contains 'auto'
-  (compiling source file 'BufferManager.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(624,23):
-      'auto' in non-type template parameters requires at least '/std:c++17'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(634,3): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(638,10): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(656,3): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(660,10): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(674,3): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(680,5): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(690,3): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(696,5): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(724,3): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(726,3): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(749,3): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(782,3): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(784,10): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(813,23): error C7525: inline variables require at least '/std:c++17'
-  (compiling source file 'BufferManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(813,23): error C1003: error count exceeds 100; stopping compilation
-  (compiling source file 'BufferManager.cpp')
-  
-  CameraManager.cpp
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\optional(11): warning STL4038: The contents of <optional> are available only with C++17 or later.
-C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\filesystem(12): warning STL4038: The contents of <filesystem> are available only with C++17 or later.
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Metalib.h(4,10): error C2988: unrecognizable template declaration/definition
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Metalib.h(4,10): error C2059: syntax error: '('
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Metalib.h(5,26): error C2143: syntax error: missing ';' before '{'
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Metalib.h(5,26): error C2447: '{': missing function header (old-style formal list?)
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Metalib.h(17,16): error C2039: 'is_bounded_array_v': is not a member of 'std'
-  (compiling source file 'CameraManager.cpp')
-      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\fstream(20,1):
-      see declaration of 'std'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Metalib.h(17,10): error C2988: unrecognizable template declaration/definition
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Metalib.h(17,10): error C2059: syntax error: '('
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Metalib.h(17,80): error C2143: syntax error: missing ';' before '{'
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Metalib.h(17,80): error C2447: '{': missing function header (old-style formal list?)
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Metalib.h(21,16): error C2039: 'is_bounded_array_v': is not a member of 'std'
-  (compiling source file 'CameraManager.cpp')
-      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\fstream(20,1):
-      see declaration of 'std'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Metalib.h(21,10): error C2988: unrecognizable template declaration/definition
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Metalib.h(21,10): error C2059: syntax error: '('
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Metalib.h(21,84): error C2143: syntax error: missing ';' before '{'
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\Metalib.h(21,84): error C2447: '{': missing function header (old-style formal list?)
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(132,12): error C2039: 'optional': is not a member of 'std'
-  (compiling source file 'CameraManager.cpp')
-      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\fstream(20,1):
-      see declaration of 'std'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(132,1): error C2873: 'optional': symbol cannot be used in a using-declaration
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(139,12): error C2039: 'string_view': is not a member of 'std'
-  (compiling source file 'CameraManager.cpp')
-      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\fstream(20,1):
-      see declaration of 'std'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(139,1): error C2873: 'string_view': symbol cannot be used in a using-declaration
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(149,19): error C2653: 'string_view': is not a class or namespace name
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(149,32): error C2061: syntax error: identifier 'value_type'
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(150,30): error C2653: 'string_view': is not a class or namespace name
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(150,43): error C2065: 'value_type': undeclared identifier
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(150,20): error C2923: 'std::is_same_v': 'value_type' is not a valid template type argument for parameter '<unnamed-symbol>'
-  (compiling source file 'CameraManager.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(150,43):
-      see declaration of 'value_type'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(150,15): error C2062: type 'unknown-type' unexpected
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(152,3): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(189,61): error C3861: 'string_view': identifier not found
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(189,61): error C2065: 'string_view': undeclared identifier
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(189,33): error C2923: 'std::pair': 'string_view' is not a valid template type argument for parameter '_Ty2'
-  (compiling source file 'CameraManager.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(189,61):
-      see declaration of 'string_view'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(189,33): error C2955: 'std::pair': use of class template requires template argument list
-  (compiling source file 'CameraManager.cpp')
-      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include\utility(222,1):
-      see declaration of 'std::pair'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(191,25): error C2061: syntax error: identifier 'string_view'
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(191,42): error C2059: syntax error: ':'
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(199,23): error C7525: inline variables require at least '/std:c++17'
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(199,48): error C2440: '<function-style-cast>': cannot convert from 'initializer list' to 'magic_enum::customize::customize_t'
-  (compiling source file 'CameraManager.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(199,48):
-      'magic_enum::customize::customize_t::customize_t': no overloaded function could convert all the argument types
-          D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(196,1):
-          could be 'magic_enum::customize::customize_t::customize_t(magic_enum::customize::customize_t &&)'
-              D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(199,48):
-              'magic_enum::customize::customize_t::customize_t(magic_enum::customize::customize_t &&)': cannot convert argument 1 from 'magic_enum::customize::detail::customize_tag' to 'magic_enum::customize::customize_t &&'
-                  D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(199,72):
-                  Reason: cannot convert from 'magic_enum::customize::detail::customize_tag' to 'magic_enum::customize::customize_t'
-                  D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(199,72):
-                  No user-defined-conversion operator available that can perform this conversion, or the operator cannot be called
-          D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(196,1):
-          or       'magic_enum::customize::customize_t::customize_t(const magic_enum::customize::customize_t &)'
-              D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(199,48):
-              'magic_enum::customize::customize_t::customize_t(const magic_enum::customize::customize_t &)': cannot convert argument 1 from 'magic_enum::customize::detail::customize_tag' to 'const magic_enum::customize::customize_t &'
-                  D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(199,72):
-                  Reason: cannot convert from 'magic_enum::customize::detail::customize_tag' to 'const magic_enum::customize::customize_t'
-                  D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(199,72):
-                  No user-defined-conversion operator available that can perform this conversion, or the operator cannot be called
-          D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(199,48):
-          while trying to match the argument list '(magic_enum::customize::detail::customize_tag)'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(201,23): error C7525: inline variables require at least '/std:c++17'
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(201,48): error C2440: '<function-style-cast>': cannot convert from 'initializer list' to 'magic_enum::customize::customize_t'
-  (compiling source file 'CameraManager.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(201,48):
-      'magic_enum::customize::customize_t::customize_t': no overloaded function could convert all the argument types
-          D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(196,1):
-          could be 'magic_enum::customize::customize_t::customize_t(magic_enum::customize::customize_t &&)'
-              D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(201,48):
-              'magic_enum::customize::customize_t::customize_t(magic_enum::customize::customize_t &&)': cannot convert argument 1 from 'magic_enum::customize::detail::customize_tag' to 'magic_enum::customize::customize_t &&'
-                  D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(201,72):
-                  Reason: cannot convert from 'magic_enum::customize::detail::customize_tag' to 'magic_enum::customize::customize_t'
-                  D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(201,72):
-                  No user-defined-conversion operator available that can perform this conversion, or the operator cannot be called
-          D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(196,1):
-          or       'magic_enum::customize::customize_t::customize_t(const magic_enum::customize::customize_t &)'
-              D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(201,48):
-              'magic_enum::customize::customize_t::customize_t(const magic_enum::customize::customize_t &)': cannot convert argument 1 from 'magic_enum::customize::detail::customize_tag' to 'const magic_enum::customize::customize_t &'
-                  D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(201,72):
-                  Reason: cannot convert from 'magic_enum::customize::detail::customize_tag' to 'const magic_enum::customize::customize_t'
-                  D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(201,72):
-                  No user-defined-conversion operator available that can perform this conversion, or the operator cannot be called
-          D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(201,48):
-          while trying to match the argument list '(magic_enum::customize::detail::customize_tag)'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(227,11): error C3533: a parameter cannot have a type that contains 'auto'
-  (compiling source file 'CameraManager.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(227,11):
-      'auto' in non-type template parameters requires at least '/std:c++17'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(231,23): error C7525: inline variables require at least '/std:c++17'
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(263,33): error C2061: syntax error: identifier 'string_view'
-  (compiling source file 'CameraManager.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(263,33):
-      the template instantiation context (the oldest one first) is
-          D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(281,2):
-          see reference to class template instantiation 'magic_enum::detail::static_str<N>' being compiled
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(267,1): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(267,28): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(267,19): error C2178: 'magic_enum::detail::static_str<N>::char_type' cannot be declared with 'constexpr' specifier
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(267,52): error C2334: unexpected token(s) preceding '{'; skipping apparent function body
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(271,22): error C2833: 'operator string_view' is not a recognized operator or type
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(271,1): error C2059: syntax error: 'newline'
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(271,51): error C2334: unexpected token(s) preceding '{'; skipping apparent function body
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(278,24): error C2061: syntax error: identifier 'string_view'
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(280,3): error C2327: 'magic_enum::detail::static_str<N>::char_type': is not a type name, static, or enumerator
-  (compiling source file 'CameraManager.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(280,3):
-      see declaration of 'magic_enum::detail::static_str<N>::char_type'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(280,13): error C3646: 'chars_': unknown override specifier
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(280,19): error C2143: syntax error: missing ',' before '['
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(280,52): error C2238: unexpected token(s) preceding ';'
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(263,72): error C3861: 'str': identifier not found
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(263,72): error C2065: 'str': undeclared identifier
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(275,96): error C2065: 'chars_': undeclared identifier
-  (compiling source file 'CameraManager.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(275,3):
-      This diagnostic occurred in the compiler generated function 'magic_enum::detail::static_str<N>::static_str(const char *,std::integer_sequence<uint16_t,I...>) noexcept'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(275,115): error C2187: syntax error: 'char_type' was unexpected here
-  (compiling source file 'CameraManager.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(275,3):
-      This diagnostic occurred in the compiler generated function 'magic_enum::detail::static_str<N>::static_str(const char *,std::integer_sequence<uint16_t,I...>) noexcept'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(278,96): error C2065: 'chars_': undeclared identifier
-  (compiling source file 'CameraManager.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(278,3):
-      This diagnostic occurred in the compiler generated function 'magic_enum::detail::static_str<N>::static_str(void) noexcept'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(278,103): error C2065: 'str': undeclared identifier
-  (compiling source file 'CameraManager.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(278,3):
-      This diagnostic occurred in the compiler generated function 'magic_enum::detail::static_str<N>::static_str(void) noexcept'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(278,126): error C2187: syntax error: 'char_type' was unexpected here
-  (compiling source file 'CameraManager.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(278,3):
-      This diagnostic occurred in the compiler generated function 'magic_enum::detail::static_str<N>::static_str(void) noexcept'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(290,46): error C2143: syntax error: missing ';' before 'noexcept'
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(290,33): error C2178: 'magic_enum::detail::static_str<0>::string_view' cannot be declared with 'constexpr' specifier
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(290,33): error C2460: 'magic_enum::detail::static_str<0>::string_view': uses 'magic_enum::detail::static_str<0>', which is being defined
-  (compiling source file 'CameraManager.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(284,1):
-      see declaration of 'magic_enum::detail::static_str<0>'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(290,33): error C2178: 'magic_enum::detail::static_str<0>::string_view' cannot be declared with 'explicit' specifier
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(290,55): error C2334: unexpected token(s) preceding '{'; skipping apparent function body
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(292,1): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(292,28): error C2143: syntax error: missing ';' before '*'
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(292,19): error C2178: 'magic_enum::detail::static_str<0>::char_type' cannot be declared with 'constexpr' specifier
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(292,52): error C2334: unexpected token(s) preceding '{'; skipping apparent function body
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(288,52): error C2789: 'magic_enum::detail::static_str<0>::string_view': an object of const-qualified type must be initialized
-  (compiling source file 'CameraManager.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(290,33):
-      see declaration of 'magic_enum::detail::static_str<0>::string_view'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(288,52): error C2789: 'magic_enum::detail::static_str<0>::char_type': an object of const-qualified type must be initialized
-  (compiling source file 'CameraManager.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(292,19):
-      see declaration of 'magic_enum::detail::static_str<0>::char_type'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(288,3): error C3615: constexpr function 'magic_enum::detail::static_str<0>::static_str' cannot result in a constant expression
-  (compiling source file 'CameraManager.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(288,3):
-      failure was caused by 'constexpr' constructor not initializing member 'magic_enum::detail::static_str<0>::string_view'
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(288,3):
-      failure was caused by 'constexpr' constructor not initializing member 'magic_enum::detail::static_str<0>::char_type'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(301,30): error C3646: 'to_lower': unknown override specifier
-  (compiling source file 'CameraManager.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(301,30):
-      the template instantiation context (the oldest one first) is
-          D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(310,2):
-          see reference to class template instantiation 'magic_enum::detail::case_insensitive<Op>' being compiled
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(301,39): error C2065: 'char_type': undeclared identifier
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(301,49): error C2146: syntax error: missing ')' before identifier 'c'
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(301,61): error C2334: unexpected token(s) preceding '{'; skipping apparent function body
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(307,110): error C2065: 'char_type': undeclared identifier
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(307,83): error C2923: 'std::is_same_v': 'char_type' is not a valid template type argument for parameter '<unnamed-symbol>'
-  (compiling source file 'CameraManager.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(307,110):
-      see declaration of 'char_type'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(307,156): error C2065: 'char_type': undeclared identifier
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(307,129): error C2923: 'std::is_same_v': 'char_type' is not a valid template type argument for parameter '<unnamed-symbol>'
-  (compiling source file 'CameraManager.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(307,156):
-      see declaration of 'char_type'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(307,124): error C2062: type 'unknown-type' unexpected
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(312,28): error C2065: 'string_view': undeclared identifier
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(312,40): error C2146: syntax error: missing ')' before identifier 'str'
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(312,67): error C2143: syntax error: missing ';' before '{'
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(312,67): error C2447: '{': missing function header (old-style formal list?)
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(336,70): error C3861: 'string_view': identifier not found
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(336,70): error C2065: 'string_view': undeclared identifier
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(343,44): error C2760: syntax error: ',' was unexpected here; expected 'expression'
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(343,44): error C2760: syntax error: ',' was unexpected here; expected ';'
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(343,44): error C3878: syntax error: unexpected token ',' following 'jump_statement'
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(343,44): message : error recovery skipped: ','
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(343,61): error C2760: syntax error: ',' was unexpected here; expected ';'
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(343,63): error C2065: 'char_type': undeclared identifier
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(343,74): error C2065: 'char_type': undeclared identifier
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(343,84): error C2760: syntax error: ';' was unexpected here; expected 'expression'
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(347,26): error C2065: 'string_view': undeclared identifier
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(347,38): error C2146: syntax error: missing ')' before identifier 'lhs'
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(347,61): warning C5051: attribute [[maybe_unused]] requires at least '/std:c++17'; ignored
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(347,148): error C2143: syntax error: missing ';' before '{'
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(347,148): error C2447: '{': missing function header (old-style formal list?)
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(378,3): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(381,10): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(383,10): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(385,10): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(398,3): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(418,23): error C7525: inline variables require at least '/std:c++17'
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(424,3): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(479,3): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(483,10): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(485,10): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(494,23): error C7525: inline variables require at least '/std:c++17'
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(496,11): error C3533: a parameter cannot have a type that contains 'auto'
-  (compiling source file 'CameraManager.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(496,11):
-      'auto' in non-type template parameters requires at least '/std:c++17'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(500,3): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(603,3): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(607,10): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(609,10): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(622,23): error C7525: inline variables require at least '/std:c++17'
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(624,23): error C3533: a parameter cannot have a type that contains 'auto'
-  (compiling source file 'CameraManager.cpp')
-      D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(624,23):
-      'auto' in non-type template parameters requires at least '/std:c++17'
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(634,3): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(638,10): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(656,3): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(660,10): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(674,3): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(680,5): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(690,3): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(696,5): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(724,3): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(726,3): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(749,3): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(782,3): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(784,10): warning C4984: 'if constexpr' is a C++17 language extension
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(813,23): error C7525: inline variables require at least '/std:c++17'
-  (compiling source file 'CameraManager.cpp')
-  
-D:\DX12\ElysiaRenderer\ElysiaRenderer\magic_enum\magic_enum.hpp(813,23): error C1003: error count exceeds 100; stopping compilation
-  (compiling source file 'CameraManager.cpp')
-  
-  D3D12MemAlloc.cpp
-  DX12BufferResource.cpp
+  ColorConversion.cpp
+  UploadRingBuffer.cpp
+C:\Work\ElysiaRenderer\ElysiaRenderer\lib\Utility\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file 'lib/DX12/UploadRingBuffer.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\lib\DX12\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file 'lib/DX12/UploadRingBuffer.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\lib\DX12\UploadRingBuffer.cpp(36,39): warning C4267: 'argument': conversion from 'size_t' to 'uint32_t', possible loss of data
+  MessageID.cpp
+  Messager.cpp
+C:\Work\ElysiaRenderer\ElysiaRenderer\lib\Utility\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file 'lib/Event/Messager.cpp')
+  
+  ShaderCompileOptions.cpp
+C:\Work\ElysiaRenderer\ElysiaRenderer\lib\Utility\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file 'lib/Utility/ShaderCompileOptions.cpp')
+  
+  ShaderKeywordSet.cpp
+C:\Work\ElysiaRenderer\ElysiaRenderer\lib\Utility\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file 'lib/Utility/ShaderKeywordSet.cpp')
+  
+  ShaderKeywordSpace.cpp
+C:\Work\ElysiaRenderer\ElysiaRenderer\lib\Utility\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file 'lib/Utility/ShaderKeywordSpace.cpp')
+  
+  stb_image.cpp
+  RenderTargetManager.cpp
+C:\Work\ElysiaRenderer\ElysiaRenderer\lib\Utility\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file 'src/Manager/RenderTargetManager.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\lib\DX12\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file 'src/Manager/RenderTargetManager.cpp')
+  
+  ShaderVariantManager.cpp
+C:\Work\ElysiaRenderer\ElysiaRenderer\lib\Utility\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file 'src/Manager/ShaderVariantManager.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Manager\ShaderVariantManager.h(8,11): warning C4099: 'ElysiaRenderer::ShaderVariantData': type name first seen using 'struct' now seen using 'class'
+  (compiling source file 'src/Manager/ShaderVariantManager.cpp')
+      C:\Work\ElysiaRenderer\ElysiaRenderer\lib\Utility\ShaderUtility.h(116,9):
+      see declaration of 'ElysiaRenderer::ShaderVariantData'
+  
+  MaterialParams.cpp
+C:\Work\ElysiaRenderer\ElysiaRenderer\lib\Utility\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file 'src/MaterialParams.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\MaterialParams.cpp(357,33): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\MaterialParams.cpp(367,31): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\MaterialParams.cpp(377,32): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\MaterialParams.cpp(388,36): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\MaterialParams.cpp(400,36): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\MaterialParams.cpp(413,36): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\MaterialParams.cpp(432,37): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
+  stdafx.cpp
+  Generating Code...
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\MaterialParams.cpp(27): warning C4715: '`ElysiaRenderer::MaterialParameterBlock::ParamValue::Equals'::`2'::<lambda_1>::operator()': not all control paths return a value
+cl : command line  warning D9014: invalid value '18' for '/wd'; assuming '5999'
+  RendererSystem.cpp
+C:\Work\ElysiaRenderer\ElysiaRenderer\lib\DX12\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file '/src/System/RendererSystem.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Manager\ShaderVariantManager.h(8,11): warning C4099: 'ElysiaRenderer::ShaderVariantData': type name first seen using 'struct' now seen using 'class'
+  (compiling source file '/src/System/RendererSystem.cpp')
+      C:\Work\ElysiaRenderer\ElysiaRenderer\lib\Utility\ShaderUtility.h(116,9):
+      see declaration of 'ElysiaRenderer::ShaderVariantData'
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\System\RendererSystem.cpp(200,108): warning C4244: 'argument': conversion from 'const float' to 'uint32_t', possible loss of data
+  (compiling source file '/src/System/RendererSystem.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\System\RendererSystem.cpp(200,78): warning C4244: 'argument': conversion from 'const float' to 'uint32_t', possible loss of data
+  (compiling source file '/src/System/RendererSystem.cpp')
+  
+DX12BufferResource.obj : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in ColorConversion.obj
+DX12BufferResource.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in ColorConversion.obj
+DX12BufferResource.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/OPT:ICF' specification
+DX12Camera.obj : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in ColorConversion.obj
+DX12Camera.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in ColorConversion.obj
+DX12ComputeContext.obj : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in ColorConversion.obj
+DX12ComputeContext.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in ColorConversion.obj
+DX12Context.obj : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in ColorConversion.obj
+DX12Context.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in ColorConversion.obj
+DX12DescriptorHeap.obj : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in ColorConversion.obj
+DX12DescriptorHeap.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in ColorConversion.obj
+DX12Device.obj : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in ColorConversion.obj
+DX12Device.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in ColorConversion.obj
+DX12GPUResource.obj : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in ColorConversion.obj
+DX12GPUResource.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in ColorConversion.obj
+DX12GraphicsContext.obj : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in ColorConversion.obj
+DX12GraphicsContext.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in ColorConversion.obj
+DX12Light.obj : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in ColorConversion.obj
+DX12Light.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in ColorConversion.obj
+DX12Material.obj : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in ColorConversion.obj
+DX12Material.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in ColorConversion.obj
+DX12PipelineState.obj : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in ColorConversion.obj
+DX12PipelineState.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in ColorConversion.obj
+DX12Queue.obj : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in ColorConversion.obj
+DX12Queue.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in ColorConversion.obj
+DX12QueueManager.obj : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in ColorConversion.obj
+DX12QueueManager.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in ColorConversion.obj
+DX12RenderPassDescriptorHeap.obj : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in ColorConversion.obj
+DX12RenderPassDescriptorHeap.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in ColorConversion.obj
+DX12RootSignature.obj : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in ColorConversion.obj
+DX12RootSignature.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in ColorConversion.obj
+DX12Shader.obj : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in ColorConversion.obj
+DX12Shader.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in ColorConversion.obj
+DX12Shadow.obj : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in ColorConversion.obj
+DX12Shadow.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in ColorConversion.obj
+DX12StagingDescriptorHeap.obj : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in ColorConversion.obj
+DX12StagingDescriptorHeap.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in ColorConversion.obj
+DX12TextureBuffer.obj : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in ColorConversion.obj
+DX12TextureBuffer.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in ColorConversion.obj
+DX12UI.obj : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in ColorConversion.obj
+DX12UI.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in ColorConversion.obj
+DX12UploadContext.obj : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in ColorConversion.obj
+DX12UploadContext.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in ColorConversion.obj
+File.obj : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in ColorConversion.obj
+File.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in ColorConversion.obj
+ModelImporter.obj : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in ColorConversion.obj
+ModelImporter.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in ColorConversion.obj
+PipelineResourceSpace.obj : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in ColorConversion.obj
+PipelineResourceSpace.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in ColorConversion.obj
+PipelineStateUtility.obj : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in ColorConversion.obj
+PipelineStateUtility.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in ColorConversion.obj
+PIXHelper.obj : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in ColorConversion.obj
+PIXHelper.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in ColorConversion.obj
+PSOHelper.obj : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in ColorConversion.obj
+PSOHelper.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in ColorConversion.obj
+RenderTexture.obj : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in ColorConversion.obj
+RenderTexture.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in ColorConversion.obj
+ShaderUtility.obj : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in ColorConversion.obj
+ShaderUtility.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in ColorConversion.obj
+SobolSequenceGenerator.obj : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in ColorConversion.obj
+SobolSequenceGenerator.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in ColorConversion.obj
+xxhash.obj : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in ColorConversion.obj
+xxhash.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in ColorConversion.obj
+BufferManager.obj : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in ColorConversion.obj
+BufferManager.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in ColorConversion.obj
+CameraManager.obj : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in ColorConversion.obj
+CameraManager.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in ColorConversion.obj
+LightManager.obj : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in ColorConversion.obj
+LightManager.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in ColorConversion.obj
+MeshManager.obj : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in ColorConversion.obj
+MeshManager.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in ColorConversion.obj
+PSOManager.obj : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in ColorConversion.obj
+PSOManager.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in ColorConversion.obj
+TextureManager.obj : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in ColorConversion.obj
+TextureManager.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in ColorConversion.obj
+UserData.obj : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in ColorConversion.obj
+UserData.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in ColorConversion.obj
+AOPass.obj : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in ColorConversion.obj
+AOPass.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in ColorConversion.obj
+BasePass.obj : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in ColorConversion.obj
+BasePass.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in ColorConversion.obj
+BloomPass.obj : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in ColorConversion.obj
+BloomPass.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in ColorConversion.obj
+FinalBlitPass.obj : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in ColorConversion.obj
+FinalBlitPass.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in ColorConversion.obj
+GBufferPass.obj : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in ColorConversion.obj
+GBufferPass.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in ColorConversion.obj
+OpaquePass.obj : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in ColorConversion.obj
+OpaquePass.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in ColorConversion.obj
+ShadowPass.obj : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in ColorConversion.obj
+ShadowPass.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in ColorConversion.obj
+SkyboxPass.obj : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in ColorConversion.obj
+SkyboxPass.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in ColorConversion.obj
+TonemapPass.obj : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in ColorConversion.obj
+TonemapPass.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in ColorConversion.obj
+UIPass.obj : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in ColorConversion.obj
+UIPass.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in ColorConversion.obj
+Material.obj : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in ColorConversion.obj
+Material.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in ColorConversion.obj
+RenderResource.obj : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in ColorConversion.obj
+RenderResource.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in ColorConversion.obj
+RendererSystem.obj : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in ColorConversion.obj
+RendererSystem.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in ColorConversion.obj
+Transform.obj : error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '2' doesn't match value '0' in ColorConversion.obj
+Transform.obj : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MDd_DynamicDebug' doesn't match value 'MD_DynamicRelease' in ColorConversion.obj
+     Creating library C:\Work\ElysiaRenderer\x64\Release\ElysiaRenderer.lib and object C:\Work\ElysiaRenderer\x64\Release\ElysiaRenderer.exp
+LINK : warning LNK4098: defaultlib 'MSVCRTD' conflicts with use of other libs; use /NODEFAULTLIB:library
+Material.obj : error LNK2001: unresolved external symbol __imp__invalid_parameter
+RenderResource.obj : error LNK2001: unresolved external symbol __imp__invalid_parameter
+RendererSystem.obj : error LNK2001: unresolved external symbol __imp__invalid_parameter
+BasePass.obj : error LNK2001: unresolved external symbol __imp__invalid_parameter
+ShadowPass.obj : error LNK2001: unresolved external symbol __imp__invalid_parameter
+SkyboxPass.obj : error LNK2001: unresolved external symbol __imp__invalid_parameter
+UIPass.obj : error LNK2001: unresolved external symbol __imp__invalid_parameter
+MeshManager.obj : error LNK2001: unresolved external symbol __imp__invalid_parameter
+PSOManager.obj : error LNK2001: unresolved external symbol __imp__invalid_parameter
+TextureManager.obj : error LNK2001: unresolved external symbol __imp__invalid_parameter
+UserData.obj : error LNK2001: unresolved external symbol __imp__invalid_parameter
+SobolSequenceGenerator.obj : error LNK2001: unresolved external symbol __imp__invalid_parameter
+xxhash.obj : error LNK2001: unresolved external symbol __imp__invalid_parameter
+BufferManager.obj : error LNK2001: unresolved external symbol __imp__invalid_parameter
+LightManager.obj : error LNK2001: unresolved external symbol __imp__invalid_parameter
+PIXHelper.obj : error LNK2001: unresolved external symbol __imp__invalid_parameter
+PSOHelper.obj : error LNK2001: unresolved external symbol __imp__invalid_parameter
+RenderTexture.obj : error LNK2001: unresolved external symbol __imp__invalid_parameter
+ShaderUtility.obj : error LNK2001: unresolved external symbol __imp__invalid_parameter
+File.obj : error LNK2001: unresolved external symbol __imp__invalid_parameter
+ModelImporter.obj : error LNK2001: unresolved external symbol __imp__invalid_parameter
+PipelineResourceSpace.obj : error LNK2001: unresolved external symbol __imp__invalid_parameter
+PipelineStateUtility.obj : error LNK2001: unresolved external symbol __imp__invalid_parameter
+DX12StagingDescriptorHeap.obj : error LNK2001: unresolved external symbol __imp__invalid_parameter
+DX12TextureBuffer.obj : error LNK2001: unresolved external symbol __imp__invalid_parameter
+DX12UI.obj : error LNK2001: unresolved external symbol __imp__invalid_parameter
+DX12UploadContext.obj : error LNK2001: unresolved external symbol __imp__invalid_parameter
+DX12RenderPassDescriptorHeap.obj : error LNK2001: unresolved external symbol __imp__invalid_parameter
+DX12RootSignature.obj : error LNK2001: unresolved external symbol __imp__invalid_parameter
+DX12Shader.obj : error LNK2001: unresolved external symbol __imp__invalid_parameter
+DX12Shadow.obj : error LNK2001: unresolved external symbol __imp__invalid_parameter
+DX12Material.obj : error LNK2001: unresolved external symbol __imp__invalid_parameter
+DX12PipelineState.obj : error LNK2001: unresolved external symbol __imp__invalid_parameter
+DX12Queue.obj : error LNK2001: unresolved external symbol __imp__invalid_parameter
+DX12QueueManager.obj : error LNK2001: unresolved external symbol __imp__invalid_parameter
+DX12Device.obj : error LNK2001: unresolved external symbol __imp__invalid_parameter
+DX12GPUResource.obj : error LNK2001: unresolved external symbol __imp__invalid_parameter
+DX12GraphicsContext.obj : error LNK2001: unresolved external symbol __imp__invalid_parameter
+DX12Light.obj : error LNK2001: unresolved external symbol __imp__invalid_parameter
+DX12BufferResource.obj : error LNK2001: unresolved external symbol __imp__invalid_parameter
+DX12ComputeContext.obj : error LNK2001: unresolved external symbol __imp__invalid_parameter
+DX12Context.obj : error LNK2001: unresolved external symbol __imp__invalid_parameter
+DX12DescriptorHeap.obj : error LNK2001: unresolved external symbol __imp__invalid_parameter
+Material.obj : error LNK2001: unresolved external symbol __imp__CrtDbgReport
+RenderResource.obj : error LNK2001: unresolved external symbol __imp__CrtDbgReport
+RendererSystem.obj : error LNK2001: unresolved external symbol __imp__CrtDbgReport
+BasePass.obj : error LNK2001: unresolved external symbol __imp__CrtDbgReport
+ShadowPass.obj : error LNK2001: unresolved external symbol __imp__CrtDbgReport
+SkyboxPass.obj : error LNK2001: unresolved external symbol __imp__CrtDbgReport
+UIPass.obj : error LNK2001: unresolved external symbol __imp__CrtDbgReport
+MeshManager.obj : error LNK2001: unresolved external symbol __imp__CrtDbgReport
+PSOManager.obj : error LNK2001: unresolved external symbol __imp__CrtDbgReport
+TextureManager.obj : error LNK2001: unresolved external symbol __imp__CrtDbgReport
+UserData.obj : error LNK2001: unresolved external symbol __imp__CrtDbgReport
+SobolSequenceGenerator.obj : error LNK2001: unresolved external symbol __imp__CrtDbgReport
+xxhash.obj : error LNK2001: unresolved external symbol __imp__CrtDbgReport
+BufferManager.obj : error LNK2001: unresolved external symbol __imp__CrtDbgReport
+LightManager.obj : error LNK2001: unresolved external symbol __imp__CrtDbgReport
+PIXHelper.obj : error LNK2001: unresolved external symbol __imp__CrtDbgReport
+PSOHelper.obj : error LNK2001: unresolved external symbol __imp__CrtDbgReport
+RenderTexture.obj : error LNK2001: unresolved external symbol __imp__CrtDbgReport
+ShaderUtility.obj : error LNK2001: unresolved external symbol __imp__CrtDbgReport
+File.obj : error LNK2001: unresolved external symbol __imp__CrtDbgReport
+ModelImporter.obj : error LNK2001: unresolved external symbol __imp__CrtDbgReport
+PipelineResourceSpace.obj : error LNK2001: unresolved external symbol __imp__CrtDbgReport
+PipelineStateUtility.obj : error LNK2001: unresolved external symbol __imp__CrtDbgReport
+DX12StagingDescriptorHeap.obj : error LNK2001: unresolved external symbol __imp__CrtDbgReport
+DX12TextureBuffer.obj : error LNK2001: unresolved external symbol __imp__CrtDbgReport
+DX12UI.obj : error LNK2001: unresolved external symbol __imp__CrtDbgReport
+DX12UploadContext.obj : error LNK2001: unresolved external symbol __imp__CrtDbgReport
+DX12RenderPassDescriptorHeap.obj : error LNK2001: unresolved external symbol __imp__CrtDbgReport
+DX12RootSignature.obj : error LNK2001: unresolved external symbol __imp__CrtDbgReport
+DX12Shader.obj : error LNK2001: unresolved external symbol __imp__CrtDbgReport
+DX12Shadow.obj : error LNK2001: unresolved external symbol __imp__CrtDbgReport
+DX12Material.obj : error LNK2001: unresolved external symbol __imp__CrtDbgReport
+DX12PipelineState.obj : error LNK2001: unresolved external symbol __imp__CrtDbgReport
+DX12Queue.obj : error LNK2001: unresolved external symbol __imp__CrtDbgReport
+DX12QueueManager.obj : error LNK2001: unresolved external symbol __imp__CrtDbgReport
+DX12Device.obj : error LNK2001: unresolved external symbol __imp__CrtDbgReport
+DX12GPUResource.obj : error LNK2001: unresolved external symbol __imp__CrtDbgReport
+DX12GraphicsContext.obj : error LNK2001: unresolved external symbol __imp__CrtDbgReport
+DX12Light.obj : error LNK2001: unresolved external symbol __imp__CrtDbgReport
+DX12BufferResource.obj : error LNK2001: unresolved external symbol __imp__CrtDbgReport
+DX12ComputeContext.obj : error LNK2001: unresolved external symbol __imp__CrtDbgReport
+DX12Context.obj : error LNK2001: unresolved external symbol __imp__CrtDbgReport
+DX12DescriptorHeap.obj : error LNK2001: unresolved external symbol __imp__CrtDbgReport
+DX12TextureBuffer.obj : error LNK2001: unresolved external symbol __imp__CrtDbgReportW
+PSOManager.obj : error LNK2001: unresolved external symbol __imp__CrtDbgReportW
+DX12BufferResource.obj : error LNK2001: unresolved external symbol __imp__CrtDbgReportW
+DX12Device.obj : error LNK2001: unresolved external symbol __imp__CrtDbgReportW
+DX12GPUResource.obj : error LNK2001: unresolved external symbol __imp__CrtDbgReportW
+DX12RootSignature.obj : error LNK2001: unresolved external symbol __imp__CrtDbgReportW
+Material.obj : error LNK2011: precompiled object not linked in; image may not run
+    Hint on symbols that are defined and could potentially match:
+      __@@_PchSym_@00@UPPdUBUhUyrmUwvhpglkPCACCPdrmBAUcGEUivovzhvUkxsOlyq@4B2008FD98C1DD4
+      __@@_PchSym_@00@UztvmgUPdlipUEUhUrmgvinvwrzgvUexgllohUzgohOmzgrevkilqPBACIAJCBDBUlyqiPhkvxgivUznwGEUhgwzucOlyq@4B2008FD98C1DD4
+DX12Device.obj : error LNK2001: unresolved external symbol DXGI_DEBUG_ALL
+C:\Work\ElysiaRenderer\x64\Release\ElysiaRenderer.exe : fatal error LNK1120: 5 unresolved externals

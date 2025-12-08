@@ -25,7 +25,7 @@ namespace ElysiaModel
 		const Mesh& GetMesh(UINT meshIndex) const;
 
 		UINT GetMaterialCount() const noexcept;
-		const MaterialData& GetMaterial(UINT materialIndex) const;
+		const MaterialData& GetMaterialData(UINT materialIndex) const;
 
 		UINT GetVertexStride() const noexcept;
 
