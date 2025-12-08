@@ -26,6 +26,7 @@ namespace ElysiaRenderer
 		
 		DX12BufferResource* GetStaticCBV() const;
 		D3D12_GPU_VIRTUAL_ADDRESS GetDynamicCBV() const;
+		UINT8*& GetCPUPtr() noexcept;
 		std::vector<PipelineResourceBinding*>& GetSRVs() ;
 		std::vector<PipelineResourceBinding*>& GetUAVs() ;
 
@@ -41,7 +42,8 @@ namespace ElysiaRenderer
 		UINT GetIndexOfBindingIndex(const std::vector<PipelineResourceBinding*>& bindResources, UINT bindingIndex);
 		enum class ResourceType { CBV, SRV, UAV };
 		std::map<UINT, ResourceType> m_expectedBindings;
-		
+
+		UINT8* m_CPUPtr = nullptr;
 		DX12BufferResource* m_pStaticCBV = nullptr;
 		D3D12_GPU_VIRTUAL_ADDRESS m_dynamicCBVAddress = 0;
 		std::vector<PipelineResourceBinding*> m_SRVs;

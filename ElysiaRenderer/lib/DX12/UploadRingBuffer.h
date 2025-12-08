@@ -34,7 +34,8 @@ namespace ElysiaRenderer
     
     D3D12_GPU_VIRTUAL_ADDRESS UploadFrameConstant(
             UploadRingBuffer* pUploadBuffer,
-            size_t totalSize);
+            size_t totalSize,
+            UINT8*& CPUAddress);
 }
 
 

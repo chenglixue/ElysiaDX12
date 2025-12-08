@@ -3,9 +3,11 @@
 
 #include "lib/DX12/DX12Material.h"
 #include "RenderResource.h" 
+#include "DX12/UploadRingBuffer.h"
 #include "lib/Utility/PIXHelper.h"
 #include "Manager/PSOManager.h"
 #include "lib/Utility/SobolSequenceGenerator.h"
+#include "Manager/CameraManager.h"
 #include "Manager/RenderTargetManager.h"
 
 namespace ElysiaRenderer
@@ -78,9 +80,24 @@ namespace ElysiaRenderer
 		m_pMaterial->SetFloat(ShaderIDs::shadowSlopeDepthBias, UserData::GetInstance().shadowSlopeDepthBias / 100);
 		m_pMaterial->SetFloat(ShaderIDs::shadowMaxSlopeDepthBias, UserData::GetInstance().shadowMaxSlopeDepthBias / 100);
 		m_pMaterial->SetVector2Array(ShaderIDs::g_sobolSequence, Create2DSobolSqeuence(64));
+
+		auto pCameraManager = &CameraManager::GetInstance();
+		auto passParameter = RenderResource::GetInstance().GetCBVFrameVariable();
+		passParameter->cameraPosWS = CameraManager::GetInstance().GetMainCamera()->GetPosition4();
+		passParameter->lightData = std::move(LightManager::GetInstance().GetMainLight()->CreateLightData());
+		passParameter->frameIndex = m_pDevice->GetFrameIndex();
+		passParameter->nearZ = CameraManager::GetInstance().GetMainCamera()->GetNearZ();
+		passParameter->farZ = CameraManager::GetInstance().GetMainCamera()->GetFarZ();
+		passParameter->ZBufferParams = Vector4(1 - CameraManager::GetInstance().GetMainCamera()->GetFarZ() / pCameraManager->GetMainCamera()->GetNearZ(),
+			pCameraManager->GetMainCamera()->GetFarZ() / pCameraManager->GetMainCamera()->GetNearZ(),
+			(1 - pCameraManager->GetMainCamera()->GetFarZ() / pCameraManager->GetMainCamera()->GetNearZ()) / pCameraManager->GetMainCamera()->GetFarZ(),
+			(pCameraManager->GetMainCamera()->GetFarZ() / pCameraManager->GetMainCamera()->GetNearZ()) / pCameraManager->GetMainCamera()->GetFarZ());
+		passParameter->shadowMatrix = m_pMainShadow->GetShadowMat();
 		
-		RenderResource::GetInstance().GetCBVFrameVariable()->shadowMatrix = m_pMainShadow->GetShadowMat();
-		memcpy(RenderResource::GetInstance().GetPerFrameBindResourceSpace()->GetDynamicCBV(), sizeof(CBVFrameVariable));
+		auto GPUAddress = UploadFrameConstant(m_pDevice->GetGlobalUploadBuffer(), sizeof(CBVFrameVariable),
+			RenderResource::GetInstance().GetPerFrameBindResourceSpace()->GetCPUPtr());
+		RenderResource::GetInstance().GetPerFrameBindResourceSpace()->SetDynamicCBV(GPUAddress);
+		RenderResource::GetInstance().GetPerFrameBindResourceSpace()->Lock();
 	} 
 	void ShadowPass::Render()
 	{

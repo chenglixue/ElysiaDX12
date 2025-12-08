@@ -51,6 +51,11 @@ namespace ElysiaRenderer
 	{
 		return m_dynamicCBVAddress;
 	}
+	UINT8*& PipelineResourceSpace::GetCPUPtr() noexcept
+	{
+		return m_CPUPtr;
+	}
+
 	std::vector<PipelineResourceBinding*>& PipelineResourceSpace::GetSRVs()
 	{
 		return m_SRVs;

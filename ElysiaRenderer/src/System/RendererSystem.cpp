@@ -99,7 +99,6 @@ namespace ElysiaRenderer
 			UpdateDisplay(UserData::GetInstance().displayMode, m_disableLocalDimming);
 		}
 		//OnKeyboardInput();
-		UpdateCBV();
 		SerializeUserData();
 	}
 	void RendererSystem::Render()
@@ -155,24 +154,6 @@ namespace ElysiaRenderer
 		m_pDevice->EndFrame();
 		m_pDevice->Present();
 		
-	}
-	void RendererSystem::UpdateCBV()
-	{
-		auto pCameraManager = &CameraManager::GetInstance();
-		auto passParameter = RenderResource::GetInstance().GetCBVFrameVariable();
-		passParameter->cameraPosWS = CameraManager::GetInstance().GetMainCamera()->GetPosition4();
-		passParameter->lightData = std::move(LightManager::GetInstance().GetMainLight()->CreateLightData());
-		passParameter->frameIndex = m_pDevice->GetFrameIndex();
-		passParameter->nearZ = CameraManager::GetInstance().GetMainCamera()->GetNearZ();
-		passParameter->farZ = CameraManager::GetInstance().GetMainCamera()->GetFarZ();
-		passParameter->ZBufferParams = Vector4(1 - CameraManager::GetInstance().GetMainCamera()->GetFarZ() / pCameraManager->GetMainCamera()->GetNearZ(),
-			pCameraManager->GetMainCamera()->GetFarZ() / pCameraManager->GetMainCamera()->GetNearZ(),
-			(1 - pCameraManager->GetMainCamera()->GetFarZ() / pCameraManager->GetMainCamera()->GetNearZ()) / pCameraManager->GetMainCamera()->GetFarZ(),
-			(pCameraManager->GetMainCamera()->GetFarZ() / pCameraManager->GetMainCamera()->GetNearZ()) / pCameraManager->GetMainCamera()->GetFarZ());
-
-		auto GPUAddress = UploadFrameConstant(m_pDevice->GetGlobalUploadBuffer(), sizeof(CBVFrameVariable));
-		RenderResource::GetInstance().GetPerFrameBindResourceSpace()->SetDynamicCBV(GPUAddress);
-		RenderResource::GetInstance().GetPerFrameBindResourceSpace()->Lock();
 	}
 
 	void RendererSystem::Setup()

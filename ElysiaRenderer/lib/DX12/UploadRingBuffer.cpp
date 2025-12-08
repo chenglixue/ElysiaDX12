@@ -100,8 +100,9 @@ namespace ElysiaRenderer
     }
     
     D3D12_GPU_VIRTUAL_ADDRESS UploadFrameConstant(
-           UploadRingBuffer* pUploadBuffer,
-           size_t totalSize)
+        UploadRingBuffer* pUploadBuffer,
+        size_t totalSize,
+        UINT8*& CPUAddress)
     {
         if (totalSize == 0)
         {
@@ -109,29 +110,6 @@ namespace ElysiaRenderer
         }
 
         D3D12_GPU_VIRTUAL_ADDRESS GPUAddress = 0;
-        UINT8* CPUAddress = nullptr;
- 
-        if(!pUploadBuffer->Allocate(totalSize, GPUAddress, CPUAddress))
-        {
-            assert(false && "UploadRingBuffer is full! Call Reset() at beginning of frame.");
-            return 0;
-        }
-        memset(CPUAddress, 0, totalSize);
-
-        memcpy(CPUAddress, RenderResource::GetInstance().GetCBVFrameVariable(), totalSize);
-
-        return GPUAddress;
-    }
-    
-    void UploadFrameConstant(D3D12_GPU_VIRTUAL_ADDRESS GPUAddress, UploadRingBuffer* pUploadBuffer,
-           size_t totalSize)
-    {
-        if (totalSize == 0)
-        {
-            return;
-        }
-
-        UINT8* CPUAddress = nullptr;
  
         if(!pUploadBuffer->Allocate(totalSize, GPUAddress, CPUAddress))
         {
