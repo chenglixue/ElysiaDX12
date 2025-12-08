@@ -26,7 +26,7 @@ namespace ElysiaRenderer
 
 		RenderTexture* GetShadowRT() const;
 	private:
-		std::unique_ptr<RenderTexture> m_pShadowRT = nullptr;
+		RenderTexture* m_pShadowRT = nullptr;
 		std::unique_ptr<DX12Shadow> m_pMainShadow = nullptr;
 		DX12DirectionLight* m_pMainLight = nullptr;
 		std::vector<Vector2> m_sobolSqeuences; 
@@ -34,6 +34,10 @@ namespace ElysiaRenderer
 		struct ShaderPasseIDs
 		{
 			static int ShadowCastPassID;
+		};
+		struct RenderTextureIDs
+		{
+			static size_t ShadowRTID;
 		};
 		struct ShaderIDs
 		{

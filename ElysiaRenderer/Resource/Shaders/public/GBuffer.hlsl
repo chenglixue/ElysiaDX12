@@ -3,6 +3,10 @@
 #include <private\LightCommon.hlsl>
 #include <private\ShadowCommon.hlsl>
 
+#pragma Rasterizer BackFaceCull
+#pragma Blend Disable
+#pragma Depth WritesEnabled
+
 cbuffer ObjectConstant : register(b0, perObjectSpace)
 {
     Matrix worldMatrix;
@@ -18,14 +22,7 @@ cbuffer MaterialConstant : register(b0, perMaterialSpace)
     UINT metallicTexIndex;
     UINT roughnessTexIndex;
     UINT specularTexIndex;
-    UINT GBuffer0Index;
     
-    UINT GBuffer1Index;
-    UINT GBuffer2Index;
-    UINT GBuffer3Index;
-    UINT GBuffer4Index;
-    
-    UINT GBuffer5Index;
     Vector3 baseColorTint;
     
     Vector3 ambientCubemapTint;

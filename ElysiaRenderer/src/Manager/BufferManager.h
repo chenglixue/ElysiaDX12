@@ -57,8 +57,8 @@ namespace ElysiaRenderer
 		static std::unique_ptr<BufferManager> m_instance;
 		static std::once_flag m_initInstanceFlag;
 
-		std::unique_ptr<RenderTexture> m_pCameraColorRT = nullptr;
-		std::unique_ptr<RenderTexture> m_pCameraDepthRT = nullptr;
+		RenderTexture* m_pCameraColorRT = nullptr;
+		RenderTexture* m_pCameraDepthRT = nullptr;
 		
 		std::unique_ptr<DX12BufferResource> m_pVertexBuffer = nullptr;
 		std::unique_ptr<DX12BufferResource> m_pIndexBuffer = nullptr;

@@ -63,7 +63,14 @@ cbuffer GlobalConstant : register(b0, perFrameSpace)
 	UINT SkyboxTexIndex;
 	UINT ShadowTexIndex;
 	UINT BlueNoiseTexIndex;
-
+    
+    UINT GBuffer0Index;
+    UINT GBuffer1Index;
+    UINT GBuffer2Index;
+    UINT GBuffer3Index;
+    
+    UINT GBuffer4Index;
+    UINT GBuffer5Index;
 	UINT OpaqueDepthIndex;
     UINT OpaqueColorIndex;
 };

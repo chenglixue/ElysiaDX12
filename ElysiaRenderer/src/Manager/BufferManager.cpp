@@ -28,7 +28,7 @@ namespace ElysiaRenderer
 				static_cast<UINT64>(m_pDevice->GetScreenSize().y),
 				DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
 				true,
-				L"Camera Color RT");
+				"Camera Color RT");
 		}
 		else
 		{
@@ -40,7 +40,7 @@ namespace ElysiaRenderer
 						static_cast<UINT64>(m_pDevice->GetScreenSize().y),
 						DXGI_FORMAT_R11G11B10_FLOAT,
 						true,
-						L"Camera Color RT"); 
+						"Camera Color RT"); 
 					break;  
 				} 
 				case HDRQuality::High:
@@ -49,7 +49,7 @@ namespace ElysiaRenderer
 						static_cast<UINT64>(m_pDevice->GetScreenSize().y),
 						DXGI_FORMAT_R16G16B16A16_FLOAT,
 						true,
-						L"Camera Color RT");
+						"Camera Color RT");
 					break;
 				}
 				default:
@@ -64,7 +64,7 @@ namespace ElysiaRenderer
 			static_cast<UINT64>(m_pDevice->GetScreenSize().y),
 			DXGI_FORMAT_D24_UNORM_S8_UINT,
 			true,
-			L"Camera Depth RT");
+			"Camera Depth RT");
 	}
 
 	void BufferManager::Destory()
@@ -79,12 +79,12 @@ namespace ElysiaRenderer
 
 	RenderTexture* BufferManager::GetCameraDepthRT() const noexcept
 	{
-		return m_pCameraDepthRT.get();
+		return m_pCameraDepthRT;
 	}
 
 	RenderTexture* BufferManager::GetCameraColorRT() const noexcept
 	{
-		return m_pCameraColorRT.get();
+		return m_pCameraColorRT;
 	}
 
 	DX12BufferResource* BufferManager::GetVertexBuffer() const noexcept

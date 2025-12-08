@@ -25,6 +25,15 @@ namespace ElysiaRenderer
 		{
 			static int GBufferPassID;
 		};
+		struct RenderTextureIDs
+		{
+			static size_t GBufferPass0ID;
+			static size_t GBufferPass1ID;
+			static size_t GBufferPass2ID;
+			static size_t GBufferPass3ID;
+			static size_t GBufferPass4ID;
+			static size_t GBufferPass5ID;
+		};
 		struct ShaderIDs
 		{
 			static size_t screenSize;
@@ -56,7 +65,7 @@ namespace ElysiaRenderer
 			static size_t GBuffer4Index;
 			static size_t GBuffer5Index;
 		};
-		std::vector<std::unique_ptr<RenderTexture>> m_GBufferRTs{};
+		std::vector<RenderTexture*> m_GBufferRTs{};
 
 		std::vector<DX12TextureResource*> GetGBuffers();
 		void CreateRTs();

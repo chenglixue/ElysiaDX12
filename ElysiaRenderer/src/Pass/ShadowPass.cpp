@@ -13,6 +13,9 @@
 namespace ElysiaRenderer
 {
 	int ShadowPass::ShaderPasseIDs::ShadowCastPassID = -1;
+	
+	size_t ShadowPass::RenderTextureIDs::ShadowRTID = SIZE_MAX;
+	
 	size_t ShadowPass::ShaderIDs::shadowNearZ = SIZE_MAX;
 	size_t ShadowPass::ShaderIDs::shadowFarZ = SIZE_MAX;
 	size_t ShadowPass::ShaderIDs::shadowDepthBias = SIZE_MAX;
@@ -27,6 +30,8 @@ namespace ElysiaRenderer
 	ShadowPass::ShadowPass(DX12Camera* pCamera) :
 		BasePass(pCamera)
 	{
+		RenderTextureIDs::ShadowRTID = PropertyToID("Shadow RT");
+		
 		ShaderIDs::shadowNearZ = PropertyToID("shadowNearZ");
 		ShaderIDs::shadowFarZ = PropertyToID("shadowFarZ");
 		ShaderIDs::shadowDepthBias = PropertyToID("shadowDepthBias");
@@ -149,7 +154,7 @@ namespace ElysiaRenderer
 			static_cast<UINT64>(resolution),
 			format,
 			true,
-			L"Shadow RT");
+			RenderResource::GetInstance().GetPropertyName(RenderTextureIDs::ShadowRTID));
 
 		auto shadowMap = std::make_unique<DX12Shadow>(m_pShadowRT->GetTexture());
 		shadowMap->InitBoundSphere(boundSphereRadius);
@@ -166,7 +171,7 @@ namespace ElysiaRenderer
 	}
 	RenderTexture* ShadowPass::GetShadowRT() const
 	{
-		return m_pShadowRT.get();
+		return m_pShadowRT;
 	}
 	
 	void ShadowPass::UpdatePSO()
@@ -284,19 +289,20 @@ namespace ElysiaRenderer
 
 	void ShadowPass::DrawShadowPass()
 	{
-		m_pCommand->AddBarrier(m_pShadowRT.get(), D3D12_RESOURCE_STATE_DEPTH_WRITE);
-		m_pCommand->ClearDepthStencilTarget(m_pShadowRT.get(), 1.f, 0);
+		m_pCommand->AddBarrier(m_pShadowRT, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+		m_pCommand->ClearDepthStencilTarget(m_pShadowRT, 1.f, 0);
+		
 		PipelineInfo pipelineStateData{};
 		pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(ShaderPasseIDs::ShadowCastPassID).pPipelineStateObject;
 		pipelineStateData.m_renderTargets = {};
 		pipelineStateData.m_depthStencilTarget = m_pShadowRT->GetTexture();
 		m_pCommand->SetPipeline(pipelineStateData);
 		
-		if (IsRenderTextureReady({m_pShadowRT.get()}))
+		if (IsRenderTextureReady({m_pShadowRT}))
 		{
 			DrawMesh(ShaderPasseIDs::ShadowCastPassID);
 		}
 
-		m_pCommand->AddBarrier(m_pShadowRT.get(), D3D12_RESOURCE_STATE_DEPTH_READ);
+		m_pCommand->AddBarrier(m_pShadowRT, D3D12_RESOURCE_STATE_DEPTH_READ);
 	}
 }

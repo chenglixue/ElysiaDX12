@@ -37,11 +37,31 @@ namespace ElysiaRenderer
 	{
 		m_currDisplayMode = newDisplayMode;
 	}
+	
+	size_t RenderResource::AddPropertyID(const std::string& name)
+	{
+		auto nameHash = xxh::GetHash(name);
+		auto emplaceResult = m_nameHashs.try_emplace(nameHash);
+		if(emplaceResult.second)
+		{
+			emplaceResult.first->second = name;
+			return nameHash;
+		}
+		return SIZE_MAX;
+	}
+	
+	std::string RenderResource::GetPropertyName(size_t hash) const noexcept
+	{
+		if(m_nameHashs.contains(hash))
+		{
+			return m_nameHashs.at(hash);
+		}
+		
+		return "";
+	}
 
 	size_t PropertyToID(const std::string& name)
 	{
-		auto hash = xxh::GetHash(name);
-
-		return hash;
+		return RenderResource::GetInstance().AddPropertyID(name);
 	}
 }

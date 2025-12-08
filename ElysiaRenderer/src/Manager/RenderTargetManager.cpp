@@ -21,63 +21,109 @@ namespace ElysiaRenderer
         assert(pDevice);
         m_pDevice = pDevice;
     }
+    
+    RenderTexture* RenderTargetManager::GetRenderTexture(const std::string& name) const
+    {
+        auto nameHash = PropertyToID(name);
+        if(m_renderTextures.contains(nameHash))
+        {
+            return m_renderTextures.at(nameHash).get();
+        }
+        
+        assert("not find target render texture");
+        
+        return nullptr;
+    }
+    RenderTexture* RenderTargetManager::GetRenderTexture(size_t nameHash) const
+    {
+        if(m_renderTextures.contains(nameHash))
+        {
+            return m_renderTextures.at(nameHash).get();
+        }
+        
+        assert("not find target render texture");
+        
+        return nullptr;
+    }
 
-    std::unique_ptr<RenderTexture> RenderTargetManager::CreateRenderTexture(
+    RenderTexture* RenderTargetManager::CreateRenderTexture(
         UINT64 width, 
         UINT64 height,
         DXGI_FORMAT format,
-        const wchar_t* name)
+        const std::string& name)
     {
         RenderTextureDesc desc{};
         desc.Width = width;
         desc.Height = height;
         desc.Format = format;
-        desc.Name = name;
+        desc.Name = stringToLPCWSTR(name);
 
-        auto cameraDepthRT = std::make_unique<RenderTexture>();
-        cameraDepthRT->Init(m_pDevice, desc);
-
-        return cameraDepthRT;
+        auto newRT = std::make_unique<RenderTexture>();
+        
+        auto emplaceResult = m_renderTextures.try_emplace(PropertyToID(name));
+        if(emplaceResult.second)
+        {
+            newRT->Init(m_pDevice, desc);
+            emplaceResult.first->second = std::move(newRT);
+            
+            return emplaceResult.first->second.get();
+        }
+        
+        return m_renderTextures.at(PropertyToID(name)).get();
     }
         
-    std::unique_ptr<RenderTexture> RenderTargetManager::CreateRenderTexture(
-    UINT64 width,
-    UINT64 height,
-    DXGI_FORMAT format,
-    bool isDepth,
-    const wchar_t* name)
+    RenderTexture* RenderTargetManager::CreateRenderTexture(
+        UINT64 width,
+        UINT64 height,
+        DXGI_FORMAT format,
+        bool isDepth,
+        const std::string& name)
     {
         RenderTextureDesc desc{};
         desc.Width = width;
         desc.Height = height;
         desc.Format = format;
-        desc.Name = name;
+        desc.Name = stringToLPCWSTR(name);
         desc.IsDepth = isDepth;
 
-        auto cameraDepthRT = std::make_unique<RenderTexture>();
-        cameraDepthRT->Init(m_pDevice, desc);
-
-        return cameraDepthRT;
+        auto newRT = std::make_unique<RenderTexture>();
+        auto emplaceResult = m_renderTextures.try_emplace(PropertyToID(name));
+        if(emplaceResult.second)
+        {
+            newRT->Init(m_pDevice, desc);
+            emplaceResult.first->second = std::move(newRT);
+            
+            return emplaceResult.first->second.get();
+        }
+        
+        return m_renderTextures.at(PropertyToID(name)).get();
     }
 
-    std::unique_ptr<RenderTexture> RenderTargetManager::CreateRWRenderTexture(
-    UINT64 width,
-    UINT64 height,
-    DXGI_FORMAT format,
-    bool enableRandomWrite,
-    const wchar_t* name)
+    RenderTexture* RenderTargetManager::CreateRWRenderTexture(
+        UINT64 width,
+        UINT64 height,
+        DXGI_FORMAT format,
+        bool enableRandomWrite,
+        const std::string& name)
     {
         RenderTextureDesc desc{};
         desc.Width = width;
         desc.Height = height;
         desc.Format = format;
-        desc.Name = name;
+        desc.Name = stringToLPCWSTR(name);
         desc.EnableRandomWrite = enableRandomWrite;
 
-        auto cameraDepthRT = std::make_unique<RenderTexture>();
-        cameraDepthRT->Init(m_pDevice, desc);
-
-        return cameraDepthRT;
+        auto newRT = std::make_unique<RenderTexture>();
+        auto emplaceResult = m_renderTextures.try_emplace(PropertyToID(name));
+        if(emplaceResult.second)
+        {
+            newRT->Init(m_pDevice, desc);
+            emplaceResult.first->second = std::move(newRT);
+            
+            return emplaceResult.first->second.get();
+        }
+        
+        return m_renderTextures.at(PropertyToID(name)).get();
     }
 
 }

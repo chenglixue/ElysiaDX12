@@ -7,6 +7,13 @@
 namespace ElysiaRenderer
 {
 	int GBufferPass::ShaderPasseIDs::GBufferPassID = -1;
+	
+	size_t GBufferPass::RenderTextureIDs::GBufferPass0ID = SIZE_MAX;
+	size_t GBufferPass::RenderTextureIDs::GBufferPass1ID = SIZE_MAX;
+	size_t GBufferPass::RenderTextureIDs::GBufferPass2ID = SIZE_MAX;
+	size_t GBufferPass::RenderTextureIDs::GBufferPass3ID = SIZE_MAX;
+	size_t GBufferPass::RenderTextureIDs::GBufferPass4ID = SIZE_MAX;
+	size_t GBufferPass::RenderTextureIDs::GBufferPass5ID = SIZE_MAX;
 
 	size_t GBufferPass::ShaderIDs::screenSize = SIZE_MAX;
 	size_t GBufferPass::ShaderIDs::viewMatrix = SIZE_MAX;
@@ -40,6 +47,13 @@ namespace ElysiaRenderer
 	GBufferPass::GBufferPass(DX12Camera* pCamera) :
 		BasePass(pCamera)
 	{
+		RenderTextureIDs::GBufferPass0ID = PropertyToID("GBuffer_0");
+		RenderTextureIDs::GBufferPass1ID = PropertyToID("GBuffer_1");
+		RenderTextureIDs::GBufferPass2ID = PropertyToID("GBuffer_2");
+		RenderTextureIDs::GBufferPass3ID = PropertyToID("GBuffer_3");
+		RenderTextureIDs::GBufferPass4ID = PropertyToID("GBuffer_4");
+		RenderTextureIDs::GBufferPass5ID = PropertyToID("GBuffer_5");
+		
 		ShaderIDs::screenSize = PropertyToID("screenSize");
 		ShaderIDs::viewMatrix = PropertyToID("viewMatrix");
 		ShaderIDs::viewMatrix_I = PropertyToID("viewMatrix_I");
@@ -85,12 +99,12 @@ namespace ElysiaRenderer
 
 		UpdateVariant();
 
-		m_pMaterial->SetUInt(ShaderIDs::GBuffer0Index, m_GBufferRTs[0]->GetTexture()->GetResourceHeapIndex());
-		m_pMaterial->SetUInt(ShaderIDs::GBuffer1Index, m_GBufferRTs[1]->GetTexture()->GetResourceHeapIndex());
-		m_pMaterial->SetUInt(ShaderIDs::GBuffer2Index, m_GBufferRTs[2]->GetTexture()->GetResourceHeapIndex());
-		m_pMaterial->SetUInt(ShaderIDs::GBuffer3Index, m_GBufferRTs[3]->GetTexture()->GetResourceHeapIndex());
-		m_pMaterial->SetUInt(ShaderIDs::GBuffer4Index, m_GBufferRTs[4]->GetTexture()->GetResourceHeapIndex());
-		m_pMaterial->SetUInt(ShaderIDs::GBuffer5Index, m_GBufferRTs[5]->GetTexture()->GetResourceHeapIndex());
+		RenderResource::GetInstance().GetCBVFrameVariable()->GBuffer0Index = m_GBufferRTs[0]->GetTexture()->GetResourceHeapIndex();
+		RenderResource::GetInstance().GetCBVFrameVariable()->GBuffer1Index = m_GBufferRTs[1]->GetTexture()->GetResourceHeapIndex();
+		RenderResource::GetInstance().GetCBVFrameVariable()->GBuffer2Index = m_GBufferRTs[2]->GetTexture()->GetResourceHeapIndex();
+		RenderResource::GetInstance().GetCBVFrameVariable()->GBuffer3Index = m_GBufferRTs[3]->GetTexture()->GetResourceHeapIndex();
+		RenderResource::GetInstance().GetCBVFrameVariable()->GBuffer4Index = m_GBufferRTs[4]->GetTexture()->GetResourceHeapIndex();
+		RenderResource::GetInstance().GetCBVFrameVariable()->GBuffer5Index = m_GBufferRTs[5]->GetTexture()->GetResourceHeapIndex();
 	}
 
 	void GBufferPass::Execute()
@@ -132,14 +146,12 @@ namespace ElysiaRenderer
 
 	void GBufferPass::CreateRTs()
 	{
-		RenderTextureDesc RTCreateDesc{};
-
 		// Base Color , ShadingModel
 		{
 			auto pGBufferRT = RenderTargetManager::GetInstance().CreateRenderTexture(static_cast<UINT64>(m_renderSize.x),
 				static_cast<UINT64>(m_renderSize.y),
 				DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
-				L"GBuffer_0");
+				RenderResource::GetInstance().GetPropertyName(RenderTextureIDs::GBufferPass0ID));
 
 			m_GBufferRTs.emplace_back(std::move(pGBufferRT));
 		}
@@ -149,7 +161,7 @@ namespace ElysiaRenderer
 			auto pGBufferRT = RenderTargetManager::GetInstance().CreateRenderTexture(static_cast<UINT64>(m_renderSize.x),
 				static_cast<UINT64>(m_renderSize.y),
 				DXGI_FORMAT_R8G8B8A8_UNORM,
-				L"GBuffer_1");
+				RenderResource::GetInstance().GetPropertyName(RenderTextureIDs::GBufferPass1ID));
 
 			m_GBufferRTs.emplace_back(std::move(pGBufferRT));
 		}
@@ -159,7 +171,7 @@ namespace ElysiaRenderer
 			auto pGBufferRT = RenderTargetManager::GetInstance().CreateRenderTexture(static_cast<UINT64>(m_renderSize.x),
 				static_cast<UINT64>(m_renderSize.y),
 				DXGI_FORMAT_R8G8B8A8_UNORM,
-				L"GBuffer_2");
+				RenderResource::GetInstance().GetPropertyName(RenderTextureIDs::GBufferPass2ID));
 
 			m_GBufferRTs.emplace_back(std::move(pGBufferRT));
 		}
@@ -169,7 +181,7 @@ namespace ElysiaRenderer
 			auto pGBufferRT = RenderTargetManager::GetInstance().CreateRenderTexture(static_cast<UINT64>(m_renderSize.x),
 				static_cast<UINT64>(m_renderSize.y),
 				DXGI_FORMAT_R10G10B10A2_UNORM,
-				L"GBuffer_3");
+				RenderResource::GetInstance().GetPropertyName(RenderTextureIDs::GBufferPass3ID));
 
 			m_GBufferRTs.emplace_back(std::move(pGBufferRT));
 		}
@@ -179,7 +191,7 @@ namespace ElysiaRenderer
 			auto pGBufferRT = RenderTargetManager::GetInstance().CreateRenderTexture(static_cast<UINT64>(m_renderSize.x),
 				static_cast<UINT64>(m_renderSize.y),
 				DXGI_FORMAT_R10G10B10A2_UNORM,
-				L"GBuffer_4");
+				RenderResource::GetInstance().GetPropertyName(RenderTextureIDs::GBufferPass4ID));
 
 			m_GBufferRTs.emplace_back(std::move(pGBufferRT));
 		}
@@ -189,7 +201,7 @@ namespace ElysiaRenderer
 			auto pGBufferRT = RenderTargetManager::GetInstance().CreateRenderTexture(static_cast<UINT64>(m_renderSize.x),
 				static_cast<UINT64>(m_renderSize.y),
 				DXGI_FORMAT_R16G16B16A16_SNORM,
-				L"GBuffer_5");
+				RenderResource::GetInstance().GetPropertyName(RenderTextureIDs::GBufferPass5ID));
 
 			m_GBufferRTs.emplace_back(std::move(pGBufferRT));
 		}
@@ -298,14 +310,14 @@ namespace ElysiaRenderer
 
 		for (auto& RT : m_GBufferRTs)
 		{
-			m_pCommand->AddBarrier(RT.get(), D3D12_RESOURCE_STATE_RENDER_TARGET);
-			m_pCommand->ClearRenderTarget(RT.get(), Color::Black);
+			m_pCommand->AddBarrier(RT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+			m_pCommand->ClearRenderTarget(RT, Color::Black);
 		}
 		m_pCommand->AddBarrier(cameraDepthRT, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 		m_pCommand->ClearDepthStencilTarget(cameraDepthRT, 1.f, 0);
 		
 		PipelineInfo pipelineStateData{};
-		pipelineStateData.m_pipelineStateObject = m_PipelineStateObjects[ShaderPasseIDs::GBufferPassID];
+		pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(ShaderPasseIDs::GBufferPassID).pPipelineStateObject;
 		pipelineStateData.m_renderTargets = std::move(GetGBuffers());
 		pipelineStateData.m_depthStencilTarget = cameraDepthRT->GetTexture();
 		m_pCommand->SetPipeline(pipelineStateData);
@@ -334,10 +346,8 @@ namespace ElysiaRenderer
 
 		for (auto& RT : m_GBufferRTs)
 		{
-			m_pCommand->AddBarrier(RT.get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+			m_pCommand->AddBarrier(RT, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		}
 		m_pCommand->AddBarrier(cameraDepthRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_DEPTH_READ);
 	}
-
-	
 }

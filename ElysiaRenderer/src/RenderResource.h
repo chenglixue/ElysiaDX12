@@ -30,8 +30,11 @@ namespace ElysiaRenderer
 		std::string GetShaderConstantVariable(size_t hash) const noexcept;
 		
 		void SetDisplayMode(CAULDRON_DX12::DisplayMode newDisplayMode);
+		
+		size_t AddPropertyID(const std::string& name);
+		std::string GetPropertyName(size_t hash) const noexcept;
 
-
+		std::unordered_map<size_t, std::string> m_nameHashs;
 	private:
 		DX12Device* m_device = nullptr;
 		static std::unique_ptr<RenderResource> m_instance;
@@ -44,5 +47,4 @@ namespace ElysiaRenderer
 	};
 
 	size_t PropertyToID(const std::string& name);
-
 }
