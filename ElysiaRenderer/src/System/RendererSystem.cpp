@@ -44,8 +44,11 @@ namespace ElysiaRenderer
 		m_pDevice = std::make_unique<DX12Device>(windowHandle, screenSize);
 		m_graphicsContext = m_pDevice->CreateGraphicsContext();
 
+		DeSerializeUserData();
+		
 		m_pDevice->EnumerateDisplayModes(&m_displayModesAvailable, &m_displayModesNamesAvailable);
 
+		
 		m_pUI->InitDescriptor(windowHandle, m_pDevice.get());
 		TextureManager::GetInstance().Init(m_pDevice.get());
 		RenderTargetManager::GetInstance().Init(m_pDevice.get());
@@ -80,7 +83,6 @@ namespace ElysiaRenderer
 		}
 		printf("done\n");
 
-		DeSerializeUserData();
 		UpdateDisplay(UserData::GetInstance().displayMode, m_disableLocalDimming);
 		
 		InitPSOHelpers();  
