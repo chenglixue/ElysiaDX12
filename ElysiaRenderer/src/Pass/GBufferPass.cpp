@@ -322,12 +322,6 @@ namespace ElysiaRenderer
 		}
 		m_pCommand->ClearDepthStencilTarget(cameraDepthRT, 1.f, 0);
 		
-		PipelineInfo pipelineStateData{};
-		pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(ShaderPassIDs::GBufferPassID).pPipelineStateObject;
-		pipelineStateData.m_renderTargets = std::move(GetGBuffers());
-		pipelineStateData.m_depthStencilTarget = cameraDepthRT->GetTexture();
-		m_pCommand->SetPipeline(pipelineStateData);
-
 		bool isReady = true;
 		{
 			for (auto& RT : m_GBufferRTs)
@@ -347,6 +341,11 @@ namespace ElysiaRenderer
 		}
 		if (isReady)
 		{
+			PipelineInfo pipelineStateData{};
+			pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(ShaderPassIDs::GBufferPassID).pPipelineStateObject;
+			pipelineStateData.m_renderTargets = std::move(GetGBuffers());
+			pipelineStateData.m_depthStencilTarget = cameraDepthRT->GetTexture();
+			m_pCommand->SetPipeline(pipelineStateData);
 			DrawMesh(ShaderPassIDs::GBufferPassID);
 		}
 

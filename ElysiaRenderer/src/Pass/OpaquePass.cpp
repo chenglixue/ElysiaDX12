@@ -76,7 +76,7 @@ namespace ElysiaRenderer
 	void OpaquePass::Render()
 	{
 		PIXHelper pix(m_pCommand->GetCommandList(), "Opaque Light Pass");
-
+		
 		Execute();
 
 		DrawLightingPass();
@@ -84,16 +84,7 @@ namespace ElysiaRenderer
 	void OpaquePass::DrawLightingPass()
 	{
 		auto cameraColorRT = BufferManager::GetInstance().GetCameraColorRT();
-
-		m_pCommand->AddBarrier(cameraColorRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
-		m_pCommand->ClearRenderTarget(cameraColorRT, Color::Black);
-
-		PipelineInfo pipelineStateData
-		{
-			.m_pipelineStateObject = m_pMaterial->GetPassData(ShaderPassIDs::OpaqueLightPassID).pPipelineStateObject,
-			.m_renderTargets = { cameraColorRT->GetTexture() },
-			.m_depthStencilTarget = BufferManager::GetInstance().GetCameraDepthRT()->GetTexture()
-		};
+		auto cameraDepthRT = BufferManager::GetInstance().GetCameraDepthRT();
 
 		bool isReady = true;
 		{
@@ -106,18 +97,35 @@ namespace ElysiaRenderer
 		}
 		if (isReady)
 		{
+			auto& passData = m_pMaterial->GetPassData(ShaderPassIDs::OpaqueLightPassID);
+			assert(passData.pPipelineStateObject);
+			
+			m_pCommand->AddBarrier(cameraColorRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+			m_pCommand->ClearRenderTarget(cameraColorRT, Color::Black);
+			
+			PipelineInfo pipelineStateData
+			{
+				.m_pipelineStateObject = passData.pPipelineStateObject,
+				.m_renderTargets = { cameraColorRT->GetTexture() },
+				.m_depthStencilTarget = BufferManager::GetInstance().GetCameraDepthRT()->GetTexture()
+			};
 			m_pCommand->SetPipeline(pipelineStateData);
 			m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_renderSize));
 			m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			
-			auto& passData = m_pMaterial->GetPassData(ShaderPassIDs::OpaqueLightPassID);
 			SetSpaceResource(passData, PER_PASS_SPACE);
 			SetSpaceResource(passData, PER_FRAME_SPACE);
-
 			m_pCommand->DrawFullScreenTriangle();
+			
+			m_pCommand->AddBarrier(cameraColorRT, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		}
-		
-		m_pCommand->AddBarrier(cameraColorRT, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		else
+		{
+			m_pCommand->AddBarrier(cameraColorRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+			m_pCommand->ClearRenderTarget(cameraColorRT, Color::Black);
+			
+			m_pCommand->AddBarrier(cameraColorRT, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		}
 	}
 
 	void OpaquePass::UpdatePSO()
@@ -132,9 +140,8 @@ namespace ElysiaRenderer
 					.m_depthStencilFormat = BufferManager::GetInstance().GetCameraDepthRT()->GetFormat()
 				};
 				m_cameraColorFormat = BufferManager::GetInstance().GetCameraColorRT()->GetFormat();
-
-				auto emplaceResult = m_PipelineStateObjects.try_emplace(ShaderPassIDs::OpaqueLightPassID);
-				emplaceResult.first->second = PSOManager::GetInstance().GetGraphicsPipelineState(m_pDevice,
+				
+				m_pMaterial->GetPassData(ShaderPassIDs::OpaqueLightPassID).pPipelineStateObject = PSOManager::GetInstance().GetGraphicsPipelineState(m_pDevice,
 					m_pMaterial.get(), ShaderPassIDs::OpaqueLightPassID, RTDesc);
 			} 
 		}
@@ -167,6 +174,7 @@ namespace ElysiaRenderer
 					.m_numRenderTargets = 1,
 					.m_depthStencilFormat = BufferManager::GetInstance().GetCameraDepthRT()->GetFormat()
 				};
+				m_cameraColorFormat = BufferManager::GetInstance().GetCameraColorRT()->GetFormat();
 				passData.pPipelineStateObject = PSOManager::GetInstance().GetGraphicsPipelineState(m_pDevice, m_pMaterial.get(), passIndex, RTDesc);
 
 				emplaceResult.first->second = 

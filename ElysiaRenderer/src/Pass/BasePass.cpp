@@ -166,7 +166,7 @@ namespace ElysiaRenderer
 
 	void BasePass::SetSpaceResource(PassData& passData, UINT8 spaceID)
 	{
-		if(spaceID != PER_FRAME_SPACE)
+		if(spaceID != PER_FRAME_SPACE) 
 		{
 			auto pCurrVariantData = passData.pCurrVariantData;
 			assert(pCurrVariantData);

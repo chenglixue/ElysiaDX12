@@ -56,7 +56,7 @@ namespace ElysiaRenderer
 		auto& backBuffer = m_pDevice->GetCurrBackBuffer();
 
 		m_pCommand->AddBarrier(backBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET);
-		m_pCommand->ClearRenderTarget(backBuffer, Color(0, 0, 0, 0));
+		m_pCommand->ClearRenderTarget(backBuffer, Color::Black);
 
 		PipelineInfo pipelineStateData{};
 		pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(ShaderPassIDs::BlitPassID).pPipelineStateObject;
@@ -77,14 +77,18 @@ namespace ElysiaRenderer
 			{
 			case DebugMode::None:
 				{
-					m_pMaterial->SetUInt(ShaderIDs::blitterTextureIndex, BufferManager::GetInstance().GetCameraColorRT()->GetTexture()->GetResourceHeapIndex());
+					m_pMaterial->SetUInt(ShaderIDs::blitterTextureIndex, BufferManager::GetInstance().GetCameraColorRT()->GetResourceHeapIndex());
 
 					break;
 				}
 			case DebugMode::AO:
 				{
 					m_pMaterial->SetUInt(ShaderIDs::blitterTextureIndex, TextureManager::GetInstance().GetGlobalRT("g_AOIndex"));
-
+					break;
+				}
+				default:
+				{
+					m_pMaterial->SetUInt(ShaderIDs::blitterTextureIndex, BufferManager::GetInstance().GetCameraColorRT()->GetResourceHeapIndex());
 
 					break;
 				}
@@ -121,7 +125,7 @@ namespace ElysiaRenderer
 				};
 				m_backBufferFormat = m_pDevice->GetSwapChainFormat();
 
-				m_PipelineStateObjects[ShaderPassIDs::BlitPassID] = PSOManager::GetInstance().GetGraphicsPipelineState(m_pDevice,
+				m_pMaterial->GetPassData(ShaderPassIDs::BlitPassID).pPipelineStateObject = PSOManager::GetInstance().GetGraphicsPipelineState(m_pDevice,
 					m_pMaterial.get(), ShaderPassIDs::BlitPassID, RTDesc);
 			} 
 		}
@@ -155,6 +159,7 @@ namespace ElysiaRenderer
 					.m_numRenderTargets = 1,
 					.m_depthStencilFormat = BufferManager::GetInstance().GetCameraDepthRT()->GetFormat()
 				};
+				m_backBufferFormat = m_pDevice->GetSwapChainFormat();
 				passData.pPipelineStateObject = PSOManager::GetInstance().GetGraphicsPipelineState(m_pDevice, m_pMaterial.get(), passID, RTDesc);
 
 				emplaceResult.first->second = 
