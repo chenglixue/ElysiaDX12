@@ -30,7 +30,6 @@ namespace ElysiaRenderer
 		uint64_t SingalFence();
 
 		bool IsFenceCompleted(uint64_t fenceValue);
-		uint64_t PollCurrentFenceValue();
 
 		// GPU Wait
 		void InsertWait(uint64_t fenceValue);
@@ -39,22 +38,16 @@ namespace ElysiaRenderer
 
 		// CPU Wait
 		void WaitForFenceCPUBlocking(uint64_t fenceValue);
-		void WaitForIdle() 
-		{
-			// m_nextFenceValue - 1:每次singal后，m_nextFenceValue++
-			WaitForFenceCPUBlocking(m_nextFenceValue - 1); 
-		}
+		void WaitForIdle();
 
 	private:
-		ID3D12CommandQueue* m_commandQueue;
+		CComPtr<ID3D12CommandQueue> m_commandQueue = nullptr;
 		D3D12_COMMAND_LIST_TYPE m_queueType;
 
-		ID3D12Fence* m_fence;
-		uint64_t m_nextFenceValue;
-		uint64_t m_lastCompletedFenceValue;
-		std::mutex m_fenceMutex;
-		std::mutex m_eventMutex;
+		CComPtr<ID3D12Fence> m_fence = nullptr;
+		std::atomic<uint64_t> m_nextFenceValue;
+		std::atomic<uint64_t> m_lastCompletedFenceValue;
 
-		HANDLE m_fenceEventHandle;
+		HANDLE m_fenceEventHandle = nullptr;
 	};
 }

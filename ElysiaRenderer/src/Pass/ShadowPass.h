@@ -31,7 +31,7 @@ namespace ElysiaRenderer
 		DX12DirectionLight* m_pMainLight = nullptr;
 		std::vector<Vector2> m_sobolSqeuences; 
 
-		struct ShaderPasseIDs
+		struct ShaderPassIDs
 		{
 			static int ShadowCastPassID;
 		};

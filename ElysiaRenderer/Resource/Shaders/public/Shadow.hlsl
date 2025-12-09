@@ -38,10 +38,6 @@ cbuffer PassConstant : register(b0, perPassSpace)
     Vector2 g_sobolSequence[64];
 };
 
-#define DepthState DepthWritesEnabled
-#define BlendState BlendDisable
-#define RasterizerState RasterizerBackFaceCull
-
 struct VSInput
 {
     float3 positionOS : POSITION;
@@ -93,7 +89,7 @@ PSOutput PS(PSInput i)
     PSOutput o = (PSOutput) 0;
     
     SamplerState warpLinearSampler = SamplerDescriptorHeap[WarpLinearSampler];
-    Texture2D<float4> baseColorTex = ResourceDescriptorHeap[GBuffer4Index];
+    Texture2D<float4> baseColorTex = ResourceDescriptorHeap[baseColorTexIndex];
     
     float4 baseColor = baseColorTex.Sample(warpLinearSampler, i.uv) * opacity;
     clip(baseColor.a - cutoff);

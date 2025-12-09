@@ -12,7 +12,7 @@
 
 namespace ElysiaRenderer
 {
-	int ShadowPass::ShaderPasseIDs::ShadowCastPassID = -1;
+	int ShadowPass::ShaderPassIDs::ShadowCastPassID = -1;
 	
 	size_t ShadowPass::RenderTextureIDs::ShadowRTID = SIZE_MAX;
 	
@@ -51,7 +51,7 @@ namespace ElysiaRenderer
 	{
 
 	}
-
+ 
 	void ShadowPass::Configure()
 	{
 		m_pMainLight = LightManager::GetInstance().GetMainLight();
@@ -67,7 +67,7 @@ namespace ElysiaRenderer
 			} 
 		};
 		m_pMaterial = std::move(std::make_unique<Material>(m_pDevice, m_shaderPasses));
-		ShaderPasseIDs::ShadowCastPassID = m_pMaterial->FindPassIndex("Shadow Cast Pass");
+		ShaderPassIDs::ShadowCastPassID = m_pMaterial->FindPassIndex("Shadow Cast Pass");
 
 		m_sobolSqeuences = Create2DSobolSqeuence(64);
 		UpdateVariant();
@@ -98,10 +98,8 @@ namespace ElysiaRenderer
 			pCameraManager->GetMainCamera()->GetFarZ() / pCameraManager->GetMainCamera()->GetNearZ(),
 			(1 - pCameraManager->GetMainCamera()->GetFarZ() / pCameraManager->GetMainCamera()->GetNearZ()) / pCameraManager->GetMainCamera()->GetFarZ(),
 			(pCameraManager->GetMainCamera()->GetFarZ() / pCameraManager->GetMainCamera()->GetNearZ()) / pCameraManager->GetMainCamera()->GetFarZ());
-		passParameter->shadowMatrix = m_pMainShadow->GetShadowMat();
-		passParameter->OpaqueColorIndex = BufferManager::GetInstance().GetCameraColorRT()->GetTexture()->GetResourceHeapIndex();
-		passParameter->OpaqueDepthIndex = BufferManager::GetInstance().GetCameraDepthRT()->GetTexture()->GetResourceHeapIndex();
-		passParameter->ShadowTexIndex = m_pShadowRT->GetTexture()->GetResourceHeapIndex();
+		passParameter->OpaqueColorIndex = BufferManager::GetInstance().GetCameraColorRT()->GetResourceHeapIndex();
+		passParameter->OpaqueDepthIndex = BufferManager::GetInstance().GetCameraDepthRT()->GetResourceHeapIndex();
 		
 		auto GPUAddress = UploadFrameConstant(m_pDevice->GetGlobalUploadBuffer(), sizeof(CBVFrameVariable),
 			RenderResource::GetInstance().GetPerFrameBindResourceSpace()->GetCPUPtr());
@@ -180,7 +178,7 @@ namespace ElysiaRenderer
 	}
 	void ShadowPass::UpdateVariant()
 	{
-		UpdateShadowPassVariant(ShaderPasseIDs::ShadowCastPassID);
+		UpdateShadowPassVariant(ShaderPassIDs::ShadowCastPassID);
 	}
 	void ShadowPass::UpdateShadowPassVariant(UINT passIndex)
 	{
@@ -292,15 +290,18 @@ namespace ElysiaRenderer
 		m_pCommand->AddBarrier(m_pShadowRT, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 		m_pCommand->ClearDepthStencilTarget(m_pShadowRT, 1.f, 0);
 		
+		m_pCommand->SetViewport(m_pMainShadow->GetViewport());
+		m_pCommand->SetScissorRect(m_pMainShadow->GetScissorRect());
+		   
 		PipelineInfo pipelineStateData{};
-		pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(ShaderPasseIDs::ShadowCastPassID).pPipelineStateObject;
+		pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(ShaderPassIDs::ShadowCastPassID).pPipelineStateObject;
 		pipelineStateData.m_renderTargets = {};
 		pipelineStateData.m_depthStencilTarget = m_pShadowRT->GetTexture();
 		m_pCommand->SetPipeline(pipelineStateData);
 		
 		if (IsRenderTextureReady({m_pShadowRT}))
 		{
-			DrawMesh(ShaderPasseIDs::ShadowCastPassID);
+			DrawMesh(ShaderPassIDs::ShadowCastPassID);
 		}
 
 		m_pCommand->AddBarrier(m_pShadowRT, D3D12_RESOURCE_STATE_DEPTH_READ);

@@ -128,7 +128,6 @@ PSOutput PS(PSInput i)
     o.target4 = float4(encodeGBufferData.IBL * encodeGBufferData.AO, encodeGBufferData.Opacity);
     o.target5 = float4(encodeGBufferData.Velocity, 0.f, 0.f);
 
-    o.target0 = 1;
     return o;
 }
 

@@ -8,7 +8,7 @@
 
 namespace ElysiaRenderer
 {
-	int OpaquePass::ShaderPasseIDs::OpaqueLightPassID = -1;
+	int OpaquePass::ShaderPassIDs::OpaqueLightPassID = -1;
 
 	size_t OpaquePass::ShaderIDs::g_AOIndex = SIZE_MAX;
 	size_t OpaquePass::ShaderIDs::screenSize = SIZE_MAX;
@@ -53,7 +53,7 @@ namespace ElysiaRenderer
 			}
 		};
 		m_pMaterial = std::make_unique<Material>(m_pDevice, m_shaderPasses);
-		ShaderPasseIDs::OpaqueLightPassID = m_pMaterial->FindPassIndex("Opaque Light Pass");
+		ShaderPassIDs::OpaqueLightPassID = m_pMaterial->FindPassIndex("Opaque Light Pass");
 
 		UpdateVariant();
 
@@ -88,12 +88,9 @@ namespace ElysiaRenderer
 		m_pCommand->AddBarrier(cameraColorRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
 		m_pCommand->ClearRenderTarget(cameraColorRT, Color::Black);
 
-		m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_renderSize));
-		m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
 		PipelineInfo pipelineStateData
 		{
-			.m_pipelineStateObject = m_PipelineStateObjects[ShaderPasseIDs::OpaqueLightPassID],
+			.m_pipelineStateObject = m_pMaterial->GetPassData(ShaderPassIDs::OpaqueLightPassID).pPipelineStateObject,
 			.m_renderTargets = { cameraColorRT->GetTexture() },
 			.m_depthStencilTarget = BufferManager::GetInstance().GetCameraDepthRT()->GetTexture()
 		};
@@ -110,8 +107,10 @@ namespace ElysiaRenderer
 		if (isReady)
 		{
 			m_pCommand->SetPipeline(pipelineStateData);
-
-			auto& passData = m_pMaterial->GetPassData(ShaderPasseIDs::OpaqueLightPassID);
+			m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_renderSize));
+			m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			
+			auto& passData = m_pMaterial->GetPassData(ShaderPassIDs::OpaqueLightPassID);
 			SetSpaceResource(passData, PER_PASS_SPACE);
 			SetSpaceResource(passData, PER_FRAME_SPACE);
 
@@ -134,15 +133,15 @@ namespace ElysiaRenderer
 				};
 				m_cameraColorFormat = BufferManager::GetInstance().GetCameraColorRT()->GetFormat();
 
-				auto emplaceResult = m_PipelineStateObjects.try_emplace(ShaderPasseIDs::OpaqueLightPassID);
+				auto emplaceResult = m_PipelineStateObjects.try_emplace(ShaderPassIDs::OpaqueLightPassID);
 				emplaceResult.first->second = PSOManager::GetInstance().GetGraphicsPipelineState(m_pDevice,
-					m_pMaterial.get(), ShaderPasseIDs::OpaqueLightPassID, RTDesc);
+					m_pMaterial.get(), ShaderPassIDs::OpaqueLightPassID, RTDesc);
 			} 
 		}
 	}
 	void OpaquePass::UpdateVariant()
 	{
-		UpdateLightingPassVariant(ShaderPasseIDs::OpaqueLightPassID);
+		UpdateLightingPassVariant(ShaderPassIDs::OpaqueLightPassID);
 	}
 	void OpaquePass::UpdateLightingPassVariant(UINT passIndex)
 	{

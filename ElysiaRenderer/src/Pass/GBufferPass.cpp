@@ -6,7 +6,7 @@
 
 namespace ElysiaRenderer
 {
-	int GBufferPass::ShaderPasseIDs::GBufferPassID = -1;
+	int GBufferPass::ShaderPassIDs::GBufferPassID = -1;
 	
 	size_t GBufferPass::RenderTextureIDs::GBufferPass0ID = SIZE_MAX;
 	size_t GBufferPass::RenderTextureIDs::GBufferPass1ID = SIZE_MAX;
@@ -95,22 +95,22 @@ namespace ElysiaRenderer
 			},
 		};
 		m_pMaterial = std::move(std::make_unique<Material>(m_pDevice, m_shaderPasses));
-		ShaderPasseIDs::GBufferPassID = m_pMaterial->FindPassIndex("GBuffer Pass");
+		ShaderPassIDs::GBufferPassID = m_pMaterial->FindPassIndex("GBuffer Pass");
 
 		UpdateVariant();
 
-		
-	}
-
-	void GBufferPass::Execute()
-	{
-		UpdatePSO();
 		RenderResource::GetInstance().GetCBVFrameVariable()->GBuffer0Index = m_GBufferRTs[0]->GetResourceHeapIndex();
 		RenderResource::GetInstance().GetCBVFrameVariable()->GBuffer1Index = m_GBufferRTs[1]->GetResourceHeapIndex();
 		RenderResource::GetInstance().GetCBVFrameVariable()->GBuffer2Index = m_GBufferRTs[2]->GetResourceHeapIndex();
 		RenderResource::GetInstance().GetCBVFrameVariable()->GBuffer3Index = m_GBufferRTs[3]->GetResourceHeapIndex();
 		RenderResource::GetInstance().GetCBVFrameVariable()->GBuffer4Index = m_GBufferRTs[4]->GetResourceHeapIndex();
 		RenderResource::GetInstance().GetCBVFrameVariable()->GBuffer5Index = m_GBufferRTs[5]->GetResourceHeapIndex();
+	}
+
+	void GBufferPass::Execute()
+	{
+		UpdatePSO();
+		
 		m_pMaterial->SetFloat4(ShaderIDs::screenSize, GetScreenSize(Vector2(m_renderSize.x, m_renderSize.y)));
 		m_pMaterial->SetMatrix(ShaderIDs::viewMatrix, m_pCamera->GetViewMat());
 		m_pMaterial->SetMatrix(ShaderIDs::viewMatrix_I, m_pCamera->GetViewMat().Invert());
@@ -221,7 +221,7 @@ namespace ElysiaRenderer
 
 	void GBufferPass::UpdateVariant()
 	{
-		UpdateGBufferPassVariant(ShaderPasseIDs::GBufferPassID);
+		UpdateGBufferPassVariant(ShaderPassIDs::GBufferPassID);
 	}
 	void GBufferPass::UpdateGBufferPassVariant(UINT passIndex)
 	{
@@ -270,6 +270,7 @@ namespace ElysiaRenderer
 
 	void GBufferPass::DrawMesh(UINT passIndex)
 	{
+		m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_renderSize));
 		m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		m_pCommand->SetIndexBuffer(BufferManager::GetInstance().GetIndexBufferView()); 
 		m_pCommand->SetVertexBuffer(0, 1, const_cast<D3D12_VERTEX_BUFFER_VIEW&>(BufferManager::GetInstance().GetVertexBufferView()));
@@ -322,12 +323,32 @@ namespace ElysiaRenderer
 		m_pCommand->ClearDepthStencilTarget(cameraDepthRT, 1.f, 0);
 		
 		PipelineInfo pipelineStateData{};
-		pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(ShaderPasseIDs::GBufferPassID).pPipelineStateObject;
+		pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(ShaderPassIDs::GBufferPassID).pPipelineStateObject;
 		pipelineStateData.m_renderTargets = std::move(GetGBuffers());
 		pipelineStateData.m_depthStencilTarget = cameraDepthRT->GetTexture();
 		m_pCommand->SetPipeline(pipelineStateData);
 
-		DrawMesh(ShaderPasseIDs::GBufferPassID);
+		bool isReady = true;
+		{
+			for (auto& RT : m_GBufferRTs)
+			{
+				if (RT->GetTexture() == nullptr)
+				{
+					ThrowRuntimeError("null texture resource");
+				}
+				isReady &= RT->GetTexture()->GetIsReady();
+			}
+
+			if (cameraDepthRT->GetTexture() == nullptr)
+			{
+				ThrowRuntimeError("null texture resource");
+			}
+			isReady &= cameraDepthRT->GetTexture()->GetIsReady();
+		}
+		if (isReady)
+		{
+			DrawMesh(ShaderPassIDs::GBufferPassID);
+		}
 
 		for (auto& RT : m_GBufferRTs)
 		{

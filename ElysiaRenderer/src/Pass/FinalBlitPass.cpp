@@ -53,17 +53,14 @@ namespace ElysiaRenderer
 
 	void FinalBlitPass::DoFinalBlit()
 	{
-		auto& cameraColorRT = m_pDevice->GetCurrBackBuffer();
+		auto& backBuffer = m_pDevice->GetCurrBackBuffer();
 
-		m_pCommand->AddBarrier(cameraColorRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
-		m_pCommand->ClearRenderTarget(cameraColorRT, Color(0, 0, 0, 0));
-
-		m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(static_cast<UINT>(m_renderSize.x), static_cast<UINT>(m_renderSize.y)));
+		m_pCommand->AddBarrier(backBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET);
+		m_pCommand->ClearRenderTarget(backBuffer, Color(0, 0, 0, 0));
 
 		PipelineInfo pipelineStateData{};
-		pipelineStateData.m_pipelineStateObject = m_PipelineStateObjects[ShaderPassIDs::BlitPassID];
-		pipelineStateData.m_renderTargets.emplace_back(&m_pDevice->GetCurrBackBuffer());
+		pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(ShaderPassIDs::BlitPassID).pPipelineStateObject;
+		pipelineStateData.m_renderTargets.emplace_back(&backBuffer);
 		pipelineStateData.m_depthStencilTarget = BufferManager::GetInstance().GetCameraDepthRT()->GetTexture();
 
 		bool isReady = true;
@@ -93,6 +90,8 @@ namespace ElysiaRenderer
 				}
 			}
 			
+			m_pCommand->SetDefaultViewportAndScissor(UINT2(m_renderSize));
+			m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			m_pCommand->SetPipeline(pipelineStateData);
 			
 			auto& passData = m_pMaterial->GetPassData(ShaderPassIDs::BlitPassID);
@@ -101,9 +100,12 @@ namespace ElysiaRenderer
 			m_pCommand->DrawFullScreenTriangle();
 		}
 		
-		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), m_pCommand->GetCommandList());
+		if (ImGui::GetDrawData())
+		{
+			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), m_pCommand->GetCommandList());
+		}
 
-		m_pCommand->AddBarrier(m_pDevice->GetCurrBackBuffer(), D3D12_RESOURCE_STATE_PRESENT);
+		m_pCommand->AddBarrier(backBuffer, D3D12_RESOURCE_STATE_PRESENT);
 	}
 
 	void FinalBlitPass::UpdatePSO()

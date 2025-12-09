@@ -154,7 +154,7 @@ namespace ElysiaRenderer
 
 		m_pDevice->SubmitContextWork(*m_graphicsContext);
 		m_pDevice->EndFrame();
-		m_pDevice->Present();
+		m_pDevice->Present(); 
 	}
 
 	void RendererSystem::Setup()

@@ -20,7 +20,7 @@ namespace ElysiaRenderer
 		virtual void Dispose() override;
 
 	private:
-		struct ShaderPasseIDs
+		struct ShaderPassIDs
 		{
 			static int OpaqueLightPassID;
 		};
