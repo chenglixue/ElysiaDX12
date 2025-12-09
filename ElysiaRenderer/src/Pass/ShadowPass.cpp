@@ -65,7 +65,7 @@ namespace ElysiaRenderer
 				.Name = "Shadow Cast Pass",
 				.FilePath = L"Shaders\\public\\Shadow.hlsl",
 			} 
-		}; 
+		};
 		m_pMaterial = std::move(std::make_unique<Material>(m_pDevice, m_shaderPasses));
 		ShaderPasseIDs::ShadowCastPassID = m_pMaterial->FindPassIndex("Shadow Cast Pass");
 
@@ -238,7 +238,7 @@ namespace ElysiaRenderer
 				RenderTargetDesc RTDesc = CreateDefaultRenderTargetDesc();
 				RTDesc.m_numRenderTargets = 0;
 				RTDesc.m_depthStencilFormat = GetShadowRT()->GetFormat();
-				passData.pPipelineStateObject = PSOManager::GetInstance().GetGraphicsPipelineState(m_pDevice, m_pMaterial.get(), ShaderPasseIDs::ShadowCastPassID, RTDesc);
+				passData.pPipelineStateObject = PSOManager::GetInstance().GetGraphicsPipelineState(m_pDevice, m_pMaterial.get(), passIndex, RTDesc);
 
 				emplaceResult.first->second = 
 				{

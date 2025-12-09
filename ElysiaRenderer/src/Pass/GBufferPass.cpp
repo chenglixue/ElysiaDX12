@@ -99,17 +99,18 @@ namespace ElysiaRenderer
 
 		UpdateVariant();
 
+		
+	}
+
+	void GBufferPass::Execute()
+	{
+		UpdatePSO();
 		RenderResource::GetInstance().GetCBVFrameVariable()->GBuffer0Index = m_GBufferRTs[0]->GetResourceHeapIndex();
 		RenderResource::GetInstance().GetCBVFrameVariable()->GBuffer1Index = m_GBufferRTs[1]->GetResourceHeapIndex();
 		RenderResource::GetInstance().GetCBVFrameVariable()->GBuffer2Index = m_GBufferRTs[2]->GetResourceHeapIndex();
 		RenderResource::GetInstance().GetCBVFrameVariable()->GBuffer3Index = m_GBufferRTs[3]->GetResourceHeapIndex();
 		RenderResource::GetInstance().GetCBVFrameVariable()->GBuffer4Index = m_GBufferRTs[4]->GetResourceHeapIndex();
 		RenderResource::GetInstance().GetCBVFrameVariable()->GBuffer5Index = m_GBufferRTs[5]->GetResourceHeapIndex();
-	}
-
-	void GBufferPass::Execute()
-	{
-		UpdatePSO();
 		m_pMaterial->SetFloat4(ShaderIDs::screenSize, GetScreenSize(Vector2(m_renderSize.x, m_renderSize.y)));
 		m_pMaterial->SetMatrix(ShaderIDs::viewMatrix, m_pCamera->GetViewMat());
 		m_pMaterial->SetMatrix(ShaderIDs::viewMatrix_I, m_pCamera->GetViewMat().Invert());
@@ -326,27 +327,7 @@ namespace ElysiaRenderer
 		pipelineStateData.m_depthStencilTarget = cameraDepthRT->GetTexture();
 		m_pCommand->SetPipeline(pipelineStateData);
 
-		bool isReady = true;
-		{
-			for (auto& RT : m_GBufferRTs)
-			{
-				if (RT->GetTexture() == nullptr)
-				{
-					ThrowRuntimeError("null texture resource");
-				}
-				isReady &= RT->GetTexture()->GetIsReady();
-			}
-
-			if (cameraDepthRT->GetTexture() == nullptr)
-			{
-				ThrowRuntimeError("null texture resource");
-			}
-			isReady &= cameraDepthRT->GetTexture()->GetIsReady();
-		}
-		if (isReady)
-		{
-			DrawMesh(ShaderPasseIDs::GBufferPassID);
-		}
+		DrawMesh(ShaderPasseIDs::GBufferPassID);
 
 		for (auto& RT : m_GBufferRTs)
 		{
