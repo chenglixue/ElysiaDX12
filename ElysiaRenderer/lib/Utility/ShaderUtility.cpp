@@ -33,7 +33,7 @@ namespace ElysiaRenderer
 	{
 		std::unordered_map<std::wstring, std::wstring> o{};
 
-		std::wregex re(LR"(#\s*pragma\s+(Rasterizer|Blend|Depth)\s+(.*))");
+		std::wregex re(LR"(#\s*pragma\s+(Rasterizer|Blend|Depth|Vertex|Pixel)\s+(.*))");
 		auto begin = std::wsregex_iterator(source.begin(), source.end(), re);
 		auto end = std::wsregex_iterator();
 

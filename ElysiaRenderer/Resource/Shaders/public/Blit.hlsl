@@ -1,5 +1,12 @@
 #include "private\SharedCommon.hlsli"
 
+#pragma Vertex BlitVS
+#pragma Pixel BlitPS
+
+#pragma Rasterizer NoCullNoMS
+#pragma Blend Disabled
+#pragma Depth Disabled
+
 cbuffer PassConstant : register(b0, perPassSpace)
 {
     UINT blitterTextureIndex;

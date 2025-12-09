@@ -826,6 +826,7 @@ namespace ElysiaModel
 			pCurrMeshRender->m_CBVObjectParameter->roughnessIntensity = 1.f;
 			pCurrMeshRender->m_CBVObjectParameter->opacity = 1.f;
 			pCurrMeshRender->m_CBVObjectParameter->worldMatrix = pCurrMeshRender->m_worldMatrix;
+			pCurrMeshRender->m_CBVObjectParameter->hasNormalTex = m_pMaterialData[meshIndex].hasNormal;
 
 			pCurrMeshRender->m_CBVObjectParameter->baseColorTexIndex = m_pMaterialData[meshIndex].diffuseTexIndex;
 			pCurrMeshRender->m_CBVObjectParameter->specularTexIndex = m_pMaterialData[meshIndex].specularTexIndex;

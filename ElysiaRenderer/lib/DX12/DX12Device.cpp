@@ -831,6 +831,22 @@ namespace ElysiaRenderer
 		std::wstring hlslWString = StringToWstring((const char*)Source.Ptr);
 		auto pragmaInfo = ParseShaderPragmas(hlslWString);
 		auto renderStates = ParseShaderRenderPragmas(hlslWString);
+		for (auto& stage : shaderCreateDesc.stages)
+		{
+			switch (stage.ShaderType)
+			{
+				case ShaderType::Vertex:
+				{
+					stage.EntryPoint = renderStates.at(L"Vertex");
+					break;
+				}
+				case ShaderType::Pixel: 
+				{
+					stage.EntryPoint = renderStates.at(L"Pixel");
+					break;
+				}
+			}
+		}
 
 		auto pKeywordSpace = std::make_unique<ShaderKeywordSpace>();
 		for (auto& group : pragmaInfo.KeywordGroups)
@@ -1232,12 +1248,12 @@ namespace ElysiaRenderer
 							constantVariableDesc.StartOffset = variableDesc.StartOffset;
 							constantVariableDesc.Size = variableDesc.Size;
 							constantVariableDesc.Name = PropertyToID(variableDesc.Name);
-#ifdef DEBUG
-							std::cout << "Constant variable name is " << variableDesc.Name << std::endl;
-							std::cout << "Space ID is " << constantVariableDesc.SpaceID << std::endl;
-							std::cout << "Start Offset is " << constantVariableDesc.StartOffset << std::endl;
-							std::cout << "Size is " << constantVariableDesc.Size << std::endl;
-#endif
+// #ifdef DEBUG
+// 							std::cout << "Constant variable name is " << variableDesc.Name << std::endl;
+// 							std::cout << "Space ID is " << constantVariableDesc.SpaceID << std::endl;
+// 							std::cout << "Start Offset is " << constantVariableDesc.StartOffset << std::endl;
+// 							std::cout << "Size is " << constantVariableDesc.Size << std::endl;
+// #endif
 
 							shaderVariables[temp.spaceID].members.emplace(constantVariableDesc.Name, std::move(constantVariableDesc));
 						}
@@ -1296,19 +1312,19 @@ namespace ElysiaRenderer
 			const std::vector<LPCWSTR>& args,
 			const DxcBuffer& sourceBuffer)
 	{
-		std::wostringstream oss;
-		oss << L"[CompileShaderStage] path=" << path << L", entry=" << entry << L", target=" << target << L"\n";
-		oss << L"Args (" << args.size() << L"):\n";
-		for (size_t i = 0; i < args.size(); ++i)
-		{
-			LPCWSTR a = args[i];
-			if (!a)
-				oss << L"  [" << i << L"] = <nullptr>\n";
-			else
-				oss << L"  [" << i << L"] = " << a << L"\n";
-		}
-		OutputDebugStringW(oss.str().c_str());
-		std::wcout << oss.str();
+		// std::wostringstream oss;
+		// oss << L"[CompileShaderStage] path=" << path << L", entry=" << entry << L", target=" << target << L"\n";
+		// oss << L"Args (" << args.size() << L"):\n";
+		// for (size_t i = 0; i < args.size(); ++i)
+		// {
+		// 	LPCWSTR a = args[i];
+		// 	if (!a)
+		// 		oss << L"  [" << i << L"] = <nullptr>\n";
+		// 	else
+		// 		oss << L"  [" << i << L"] = " << a << L"\n";
+		// }
+		// OutputDebugStringW(oss.str().c_str());
+		// std::wcout << oss.str();
 		
 		// Validate args (no null pointers)
 		for (size_t i = 0; i < args.size(); ++i)

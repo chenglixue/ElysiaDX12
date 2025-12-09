@@ -45,9 +45,8 @@ namespace ElysiaRenderer
 		if(emplaceResult.second)
 		{
 			emplaceResult.first->second = name;
-			return nameHash;
 		}
-		return SIZE_MAX;
+		return nameHash;
 	}
 	
 	std::string RenderResource::GetPropertyName(size_t hash) const noexcept

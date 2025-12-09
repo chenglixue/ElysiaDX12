@@ -2,6 +2,13 @@
 #include "private\ShadingCommon.hlsl"
 #include "private\ShadowCommon.hlsl"
 
+#pragma Vertex VS
+#pragma Pixel PS
+
+#pragma Rasterizer NoCullNoMS
+#pragma Blend Disabled
+#pragma Depth Disabled
+
 #define _AO_MAX_SAMPLE_COUNT 256
 
 cbuffer PassConstant : register(b0, perPassSpace)

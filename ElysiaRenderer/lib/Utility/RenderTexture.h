@@ -25,6 +25,7 @@ namespace ElysiaRenderer
 		DXGI_FORMAT GetFormat() const;
 		ID3D12Resource* GetResource() const;
 		UINT64 GetSubresourceIndex(UINT64 mipmapLevel, UINT64 arraySlice) const;
+		UINT GetResourceHeapIndex() const noexcept;
 
 	private:
 		std::unique_ptr<DX12TextureResource> m_pTexture;

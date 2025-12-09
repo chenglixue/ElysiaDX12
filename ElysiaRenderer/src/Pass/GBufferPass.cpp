@@ -99,12 +99,12 @@ namespace ElysiaRenderer
 
 		UpdateVariant();
 
-		RenderResource::GetInstance().GetCBVFrameVariable()->GBuffer0Index = m_GBufferRTs[0]->GetTexture()->GetResourceHeapIndex();
-		RenderResource::GetInstance().GetCBVFrameVariable()->GBuffer1Index = m_GBufferRTs[1]->GetTexture()->GetResourceHeapIndex();
-		RenderResource::GetInstance().GetCBVFrameVariable()->GBuffer2Index = m_GBufferRTs[2]->GetTexture()->GetResourceHeapIndex();
-		RenderResource::GetInstance().GetCBVFrameVariable()->GBuffer3Index = m_GBufferRTs[3]->GetTexture()->GetResourceHeapIndex();
-		RenderResource::GetInstance().GetCBVFrameVariable()->GBuffer4Index = m_GBufferRTs[4]->GetTexture()->GetResourceHeapIndex();
-		RenderResource::GetInstance().GetCBVFrameVariable()->GBuffer5Index = m_GBufferRTs[5]->GetTexture()->GetResourceHeapIndex();
+		RenderResource::GetInstance().GetCBVFrameVariable()->GBuffer0Index = m_GBufferRTs[0]->GetResourceHeapIndex();
+		RenderResource::GetInstance().GetCBVFrameVariable()->GBuffer1Index = m_GBufferRTs[1]->GetResourceHeapIndex();
+		RenderResource::GetInstance().GetCBVFrameVariable()->GBuffer2Index = m_GBufferRTs[2]->GetResourceHeapIndex();
+		RenderResource::GetInstance().GetCBVFrameVariable()->GBuffer3Index = m_GBufferRTs[3]->GetResourceHeapIndex();
+		RenderResource::GetInstance().GetCBVFrameVariable()->GBuffer4Index = m_GBufferRTs[4]->GetResourceHeapIndex();
+		RenderResource::GetInstance().GetCBVFrameVariable()->GBuffer5Index = m_GBufferRTs[5]->GetResourceHeapIndex();
 	}
 
 	void GBufferPass::Execute()
@@ -233,7 +233,6 @@ namespace ElysiaRenderer
 		{
 			auto VariantManager = passData.pShader->GetVariantManager();
 			auto currVariantData = &VariantManager->GetOrCompileVariantByNames(enableKeywords);
-			auto resourceLayouts = currVariantData->pMeshResourceLayout.get();
 			
 			if(passData.pCurrVariantData == nullptr || passData.pCurrVariantData != currVariantData)
 			{
@@ -250,7 +249,7 @@ namespace ElysiaRenderer
 				{
 					RTDesc.m_renderTargetFormats[i] = m_GBufferRTs[i]->GetFormat();
 				}
-				passData.pPipelineStateObject = PSOManager::GetInstance().GetGraphicsPipelineState(m_pDevice, m_pMaterial.get(), ShaderPasseIDs::GBufferPassID, RTDesc);
+				passData.pPipelineStateObject = PSOManager::GetInstance().GetGraphicsPipelineState(m_pDevice, m_pMaterial.get(), passIndex, RTDesc);
 
 				emplaceResult.first->second = 
 				{
@@ -310,10 +309,15 @@ namespace ElysiaRenderer
 
 		for (auto& RT : m_GBufferRTs)
 		{
-			m_pCommand->AddBarrier(RT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+			m_pCommand->AddBarrier(RT, D3D12_RESOURCE_STATE_RENDER_TARGET, false);
+		}
+		m_pCommand->AddBarrier(cameraDepthRT, D3D12_RESOURCE_STATE_DEPTH_WRITE, false);
+		m_pCommand->FlushBarrier();
+		
+		for (auto& RT : m_GBufferRTs)
+		{
 			m_pCommand->ClearRenderTarget(RT, Color::Black);
 		}
-		m_pCommand->AddBarrier(cameraDepthRT, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 		m_pCommand->ClearDepthStencilTarget(cameraDepthRT, 1.f, 0);
 		
 		PipelineInfo pipelineStateData{};
@@ -346,8 +350,9 @@ namespace ElysiaRenderer
 
 		for (auto& RT : m_GBufferRTs)
 		{
-			m_pCommand->AddBarrier(RT, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+			m_pCommand->AddBarrier(RT, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, false);
 		}
-		m_pCommand->AddBarrier(cameraDepthRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_DEPTH_READ);
+		m_pCommand->AddBarrier(cameraDepthRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_DEPTH_READ, false);
+		m_pCommand->FlushBarrier();
 	}
 }

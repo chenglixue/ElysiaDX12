@@ -110,4 +110,9 @@ namespace ElysiaRenderer
 	{
 		return arraySlice * m_pTexture->GetResourceDesc().MipLevels + mipmapLevel;
 	}
+	UINT RenderTexture::GetResourceHeapIndex() const noexcept
+	{
+		return m_pTexture->GetResourceHeapIndex();
+	}
+
 }

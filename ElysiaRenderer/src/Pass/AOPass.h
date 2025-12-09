@@ -18,14 +18,21 @@
 // 		virtual void Render() override;
 // 		virtual void Dispose() override;
 // 		virtual void UpdatePSO() override;
-//
+// 		virtual void UpdateVariant() override;
+// 		
+// 		void UpdateGBufferPassVariant(UINT passIndex);
 // 	private:
-// 		std::unique_ptr<RenderTexture> m_pAORT = nullptr;
+// 		RenderTexture* m_pAORT = nullptr;
 //
 // 		struct ShaderPasseIDs
 // 		{
 // 			static int AOPassID;
 // 			static int BlitPassID;
+// 		};
+// 		struct RenderTextureIDs
+// 		{
+// 			static size_t AORTID;
+// 			static size_t AOTempRTID;
 // 		};
 // 		struct ShaderIDs
 // 		{

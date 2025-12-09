@@ -3,6 +3,13 @@
 #include <private\LightCommon.hlsl>
 #include <private\ShadowCommon.hlsl>
 
+#pragma Vertex VS
+#pragma Pixel PS
+
+#pragma Rasterizer NoCullNoMS
+#pragma Blend Disabled
+#pragma Depth Disabled
+
 cbuffer PassConstant : register(b0, perPassSpace)
 {
     Vector4 screenSize;
@@ -79,6 +86,7 @@ PSOutput PS(PSInput i)
     Texture2D<float> AOTex = ResourceDescriptorHeap[g_AOIndex];
     SamplerState warpLinearSampler = SamplerDescriptorHeap[WarpLinearSampler];
     float AO = AOTex.Sample(warpLinearSampler, inputParam.ScreenUV);
+    AO = 1;
     
     float4 lighting = GetDynamicLighting(inputParam, GBufferData, mainLightData, AO);
     lighting += float4(GBufferData.SceneColor, 1.f) * AO;

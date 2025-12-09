@@ -1,9 +1,10 @@
-#include "stdafx.h"
+ #include "stdafx.h"
 // #include "AOPass.h"
 //
 // #include "lib/DX12/DX12Device.h"
 // #include "lib/Utility/RenderTexture.h"
 // #include "RenderResource.h"
+// #include "Manager/RenderTargetManager.h"
 //
 // namespace ElysiaRenderer
 // {
@@ -11,6 +12,9 @@
 //
 // 	int AOPass::ShaderPasseIDs::AOPassID = -1;
 // 	int AOPass::ShaderPasseIDs::BlitPassID = -1;
+//
+// 	size_t AOPass::RenderTextureIDs::AORTID = SIZE_MAX;
+// 	size_t AOPass::RenderTextureIDs::AOTempRTID = SIZE_MAX;
 //
 // 	size_t AOPass::ShaderIDs::g_ScreenSize = SIZE_MAX;
 // 	size_t AOPass::ShaderIDs::viewMatrix = SIZE_MAX;
@@ -30,6 +34,10 @@
 // 	AOPass::AOPass(DX12Camera* pCamera) :
 // 		BasePass(pCamera)
 // 	{
+// 		RenderTextureIDs::AORTID = PropertyToID("AO RT");
+// 		RenderTextureIDs::AOTempRTID = PropertyToID("AO Temp RT");
+// 		RenderTextureIDs::AOTempRTID = SIZE_MAX;
+// 		
 // 		ShaderIDs::g_ScreenSize = PropertyToID("g_ScreenSize");
 // 		ShaderIDs::viewMatrix = PropertyToID("viewMatrix");
 // 		ShaderIDs::viewMatrix_I = PropertyToID("viewMatrix_I");
@@ -57,34 +65,25 @@
 //
 // 	void AOPass::Configure()
 // 	{
-// 		m_pAORT = CreateRenderTexture(static_cast<UINT64>(m_renderSize.x),
+// 		m_pAORT = RenderTargetManager::GetInstance().CreateRenderTexture(static_cast<UINT64>(m_renderSize.x),
 // 			static_cast<UINT64>(m_renderSize.y),
 // 			DXGI_FORMAT_R8G8B8A8_UNORM,
-// 			L"AO RT");
+// 			RenderResource::GetInstance().GetPropertyName(RenderTextureIDs::AORTID));
 //
-// 		m_shaderPasses = std::vector<ShaderPass>
+// 		m_shaderPasses =
 // 		{
 // 			ShaderPass
 // 			{
 // 				.Name = "AO Pass",
 // 				.FilePath = L"Shaders\\public\\SSAO.hlsl",
-// 				.RasterizerDesc = GetRasterizerState(RasterizerState::NoCullNoMS),
-// 				.BlendDesc = GetBlendState(BlendState::Disabled),
-// 				.DepthStencilDesc = GetDepthState(DepthState::Disabled)
 // 			},
 // 			ShaderPass
 // 			{
 // 				.Name = "Blit Pass",
 // 				.FilePath = L"Shaders\\public\\Blit.hlsl",
-// 				.VertexEntryPoint = L"BlitVS",
-// 				.FragmentEntryPoint = L"BlitPS",
-// 				.RasterizerDesc = GetRasterizerState(RasterizerState::NoCullNoMS),
-// 				.BlendDesc = GetBlendState(BlendState::Disabled),
-// 				.DepthStencilDesc = GetDepthState(DepthState::Disabled)
 // 			}
 // 		};
-//
-// 		m_pMaterial = std::make_unique<Material>(m_shaderPasses);
+// 		m_pMaterial = std::make_unique<Material>(m_pDevice, m_shaderPasses);
 // 		ShaderPasseIDs::AOPassID = m_pMaterial->FindPassIndex("AO Pass");
 // 		ShaderPasseIDs::BlitPassID = m_pMaterial->FindPassIndex("Blit Pass");
 //
@@ -118,9 +117,7 @@
 // 			}
 // 		} 
 //
-// 		m_pMaterial->SetConstantVariable(ShaderIDs::g_AOSampleKernelArray, GenerateSSAOSampleKernel());
-// 		TextureManager::GetInstance().AddGlobalRT("g_AOIndex", m_pAORT->GetTexture()->GetResourceHeapIndex());
-//
+// 		m_pMaterial->SetVector4Array(ShaderIDs::g_AOSampleKernelArray, GenerateSSAOSampleKernel());
 // 	}
 //
 // 	void AOPass::Execute()
@@ -153,6 +150,16 @@
 // 	}
 //
 // 	void AOPass::UpdatePSO()
+// 	{
+// 		
+// 	}
+//
+// 	void AOPass::UpdateVariant()
+// 	{
+// 		//UpdateBlitPassVariant();
+// 	}
+//
+// 	void UpdateGBufferPassVariant(UINT passIndex)
 // 	{
 // 		
 // 	}

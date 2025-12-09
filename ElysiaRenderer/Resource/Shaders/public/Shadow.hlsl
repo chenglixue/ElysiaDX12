@@ -3,8 +3,11 @@
 #include <private\LightCommon.hlsl>
 #include <private\ShadowCommon.hlsl>
 
+#pragma Vertex VS
+#pragma Pixel PS
+
 #pragma Rasterizer BackFaceCull
-#pragma Blend Disable
+#pragma Blend Disabled
 #pragma Depth WritesEnabled
 
 #pragma shader_feature SHADOW_QUALITY_LOW SHADOW_QUALITY_MIDDLE SHADOW_QUALITY_HIGH SHADOW_QUALITY_VERYHIGH
