@@ -10,11 +10,6 @@ namespace ElysiaRenderer
 	std::unique_ptr<TextureManager> TextureManager::m_instance;
 	std::once_flag TextureManager::m_initInstanceFlag;
 
-	size_t TextureManager::RenderTextureIDs::GGX_E_LUTID = SIZE_MAX;
-	size_t TextureManager::RenderTextureIDs::GGX_Eavg_LUTID = SIZE_MAX;
-	size_t TextureManager::RenderTextureIDs::SkyboxID = SIZE_MAX;
-	size_t TextureManager::RenderTextureIDs::BlueNoiseID = SIZE_MAX;
-
 	TextureManager::~TextureManager()
 	{
 		Destory();
@@ -31,11 +26,43 @@ namespace ElysiaRenderer
 
 	}
 
-	void TextureManager::AddTextureResource(std::unique_ptr<DX12TextureResource> pTextureResource, size_t nameHash)
+	void TextureManager::AddTextureResource(std::unique_ptr<DX12TextureResource> pTextureResource)
 	{
 		if (pTextureResource == nullptr) return;
 
-		m_textureResources.emplace(nameHash, std::move(pTextureResource));
+		m_textureResources.emplace_back(std::move(pTextureResource));
+	}
+
+	void TextureManager::AddGlobalRT(const std::string& name, UINT RTIndex)
+	{
+		auto tryEmplace = m_globalRTIndexs.try_emplace(name);
+		if (tryEmplace.second)
+		{
+			tryEmplace.first->second = RTIndex;
+		}
+	}
+
+	UINT TextureManager::GetGlobalRT(const std::string& name)
+	{
+		if (!m_globalRTIndexs.contains(name))
+		{
+			ThrowRuntimeError("Null RT Index");
+		}
+
+		return m_globalRTIndexs.at(name);
+	}
+
+
+	const std::vector<DX12TextureResource*> TextureManager::GetTextureResources() const noexcept
+	{
+		std::vector<DX12TextureResource*> o{ m_textureResources.size()};
+
+		for (size_t i = 0; i < m_textureResources.size(); ++i)
+		{
+			o[i] = m_textureResources[i].get();
+		}
+
+		return o;
 	}
 
 	void TextureManager::LoadGlobalTextures()
@@ -43,31 +70,34 @@ namespace ElysiaRenderer
 		TextureCreationDesc texBufferCreateDesc{};
 
 		{
-			RenderTextureIDs::GGX_E_LUTID = PropertyToID("GGX_E_LUT");
 			texBufferCreateDesc.texturePath = L"Tex\\GGX_E_LUT.dds";
 			texBufferCreateDesc.isSRGB = false;
 			auto newTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
 
-			this->AddTextureResource(std::move(newTex), RenderTextureIDs::GGX_E_LUTID); 
+			RenderResource::GetInstance().GetCBVFrameVariable(m_pDevice->GetFrameID())->GGX_E_LUT_Index = newTex->GetResourceHeapIndex();
+			 
+			this->AddTextureResource(std::move(newTex)); 
 		} 
 
 		{
-			RenderTextureIDs::GGX_Eavg_LUTID = PropertyToID("GGX_Eavg_LUT");
 			texBufferCreateDesc.texturePath = L"Tex\\GGX_Eavg_LUT.dds";
 			texBufferCreateDesc.isSRGB = false;
 			auto newTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
 
-			this->AddTextureResource(std::move(newTex), RenderTextureIDs::GGX_Eavg_LUTID);
+			RenderResource::GetInstance().GetCBVFrameVariable(m_pDevice->GetFrameID())->GGX_Eavg_LUT_Index = newTex->GetResourceHeapIndex();
+
+			this->AddTextureResource(std::move(newTex));
 
 		}
 
 		{
-			RenderTextureIDs::SkyboxID = PropertyToID("SkyboxTex");
 			texBufferCreateDesc.texturePath = L"Tex\\cubemap0.dds";
 			texBufferCreateDesc.isSRGB = false;
 			auto newTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
 
-			this->AddTextureResource(std::move(newTex), RenderTextureIDs::SkyboxID);
+			RenderResource::GetInstance().GetCBVFrameVariable(m_pDevice->GetFrameID())->SkyboxTexIndex = newTex->GetResourceHeapIndex();
+
+			this->AddTextureResource(std::move(newTex));
 		}
 
 		{
@@ -84,10 +114,5 @@ namespace ElysiaRenderer
 			//
 			// this->AddTextureResource(std::move(newTex));
 		}
-	}
-
-	UINT TextureManager::GetTextureHeapIndex(size_t nameHash) const noexcept
-	{
-		return m_textureResources.at(nameHash)->GetResourceHeapIndex();
 	}
 }

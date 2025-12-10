@@ -57,11 +57,15 @@ namespace ElysiaRenderer
 
 		m_pCommand->AddBarrier(backBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET);
 		m_pCommand->ClearRenderTarget(backBuffer, Color::Black);
-
+		
 		PipelineInfo pipelineStateData{};
 		pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(ShaderPassIDs::BlitPassID).pPipelineStateObject;
 		pipelineStateData.m_renderTargets.emplace_back(&backBuffer);
 		pipelineStateData.m_depthStencilTarget = BufferManager::GetInstance().GetCameraDepthRT()->GetTexture();
+			m_pCommand->SetPipeline(pipelineStateData);
+		
+		auto& passData = m_pMaterial->GetPassData(ShaderPassIDs::BlitPassID);
+		SetSpaceResource(passData, PER_PASS_SPACE);
 
 		bool isReady = true;
 		{
@@ -96,10 +100,7 @@ namespace ElysiaRenderer
 			
 			m_pCommand->SetDefaultViewportAndScissor(UINT2(m_renderSize));
 			m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-			m_pCommand->SetPipeline(pipelineStateData);
 			
-			auto& passData = m_pMaterial->GetPassData(ShaderPassIDs::BlitPassID);
-			SetSpaceResource(passData, PER_PASS_SPACE);
 
 			m_pCommand->DrawFullScreenTriangle();
 		}

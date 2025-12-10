@@ -96,9 +96,6 @@ namespace ElysiaRenderer
 				dst->GBuffer3Index = RenderTargetManager::GetInstance().GetRenderTexture(GBufferPass::RenderTextureIDs::GBufferPass3ID)->GetResourceHeapIndex();
 				dst->GBuffer4Index = RenderTargetManager::GetInstance().GetRenderTexture(GBufferPass::RenderTextureIDs::GBufferPass4ID)->GetResourceHeapIndex();
 				dst->GBuffer5Index = RenderTargetManager::GetInstance().GetRenderTexture(GBufferPass::RenderTextureIDs::GBufferPass5ID)->GetResourceHeapIndex();
-				dst->GGX_E_LUT_Index = TextureManager::GetInstance().GetTextureHeapIndex(TextureManager::RenderTextureIDs::GGX_E_LUTID);
-				dst->GGX_Eavg_LUT_Index = TextureManager::GetInstance().GetTextureHeapIndex(TextureManager::RenderTextureIDs::GGX_Eavg_LUTID);
-				dst->SkyboxTexIndex = TextureManager::GetInstance().GetTextureHeapIndex(TextureManager::RenderTextureIDs::SkyboxID);
 			});
 
 		if (!RenderResource::GetInstance().GetPerFrameBindResourceSpace()->IsLocked())

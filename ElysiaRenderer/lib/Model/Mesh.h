@@ -106,6 +106,7 @@ namespace ElysiaRenderer
 	{
 		uint32_t meshCount;
 		uint32_t materialCount;
+		uint32_t indexCount = 0;
 		uint32_t vertexDataByteSize;
 		uint32_t indexDataByteSize;
 

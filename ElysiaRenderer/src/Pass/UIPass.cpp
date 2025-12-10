@@ -134,7 +134,7 @@ namespace ElysiaRenderer
 			ImGui::SliderFloat("HDR Max", &pUserData.HdrMax, 8.0f, 2048.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
 			ImGui::SliderFloat("LPM Exposure", &pUserData.LpmExposure, 3.0f, 11.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
 			ImGui::SliderFloat("Contrast", &pUserData.Contrast, 0.0f, 1.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
-			ImGui::SliderFloat("Shoulder Contrast", &pUserData.ShoulderContrast, 1.0f, 1.2f), "%.3f", ImGuiSliderFlags_AlwaysClamp;
+			ImGui::SliderFloat("Shoulder Contrast", &pUserData.ShoulderContrast, 1.0f, 1.2f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
 			ImGui::SliderFloat3("Saturation", &pUserData.Saturation[0], 0.0f, 2.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
 			ImGui::SliderFloat3("Crosstalk", &pUserData.Crosstalk[0], 0.0f, 1.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
 		}
