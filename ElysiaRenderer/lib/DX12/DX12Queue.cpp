@@ -4,11 +4,16 @@
 
 namespace ElysiaRenderer
 {
-	DX12Queue::DX12Queue(ID3D12Device* device, D3D12_COMMAND_LIST_TYPE commandType)	:
-		m_queueType(commandType),
-		m_nextFenceValue(1),
-		m_lastCompletedFenceValue(0)
+	DX12Queue::DX12Queue(ID3D12Device* device, D3D12_COMMAND_LIST_TYPE commandType)
 	{
+		m_commandQueue = nullptr;
+		m_queueType = commandType;
+
+		m_fence = nullptr;
+		m_nextFenceValue = 1;
+		m_lastCompletedFenceValue = 0;
+		m_fenceEventHandle = 0;
+
 		D3D12_COMMAND_QUEUE_DESC queueDesc = {};
 		queueDesc.Type = m_queueType;
 		queueDesc.NodeMask = 0;
@@ -25,22 +30,25 @@ namespace ElysiaRenderer
 
 	DX12Queue::~DX12Queue()
 	{
-		if(m_fenceEventHandle)
-		{
-			CloseHandle(m_fenceEventHandle);
-			m_fenceEventHandle = nullptr;
-		}
+		ElysiaHelper::SafeRelease(m_commandQueue);
+		ElysiaHelper::SafeRelease(m_fence);
+
+		CloseHandle(m_fenceEventHandle);
 	}
 
+	uint64_t DX12Queue::PollCurrentFenceValue()
+	{
+		m_lastCompletedFenceValue = (std::max)(m_lastCompletedFenceValue, m_fence->GetCompletedValue());
+		return m_lastCompletedFenceValue;
+	}
 	bool DX12Queue::IsFenceCompleted(uint64_t fenceValue)
 	{
-		uint64_t completed = m_lastCompletedFenceValue.load(std::memory_order_acquire);
-		if (completed >= fenceValue) return true;
-		
-		// Only query GPU if needed
-		completed = m_fence->GetCompletedValue();
-		m_lastCompletedFenceValue.store(completed, std::memory_order_release);
-		return completed >= fenceValue;
+		if (m_lastCompletedFenceValue < fenceValue)
+		{
+			PollCurrentFenceValue();
+		}
+
+		return m_lastCompletedFenceValue >= fenceValue;
 	}
 
 	void DX12Queue::InsertWait(uint64_t fenceValue)
@@ -59,20 +67,18 @@ namespace ElysiaRenderer
 	// 判断m_lastCompletedFenceValue是否>=fenceValue，是则说明已经同步，无需等待；否则，还需等待GPU，同步之后，使得m_lastCompletedFenceValue = fenceValue,用于下次判断
 	void DX12Queue::WaitForFenceCPUBlocking(uint64_t fenceValue)
 	{
-		if (IsFenceCompleted(fenceValue)) return;
+		if (IsFenceCompleted(fenceValue))
+		{
+			return;
+		}
 
-		// Use single shared event (manual reset cleared after wait)
-		m_fence->SetEventOnCompletion(fenceValue, m_fenceEventHandle);
-		WaitForSingleObject(m_fenceEventHandle, INFINITE);
-		ResetEvent(m_fenceEventHandle);  // 必须手动重置！
+		{
+			std::lock_guard<std::mutex> lockGuard(m_eventMutex);
 
-		m_lastCompletedFenceValue.store(fenceValue, std::memory_order_release);
-	}
-	
-	void DX12Queue::WaitForIdle() 
-	{
-		// m_nextFenceValue - 1:每次singal后，m_nextFenceValue++
-		WaitForFenceCPUBlocking(m_nextFenceValue.load(std::memory_order_acquire) - 1); 
+			m_fence->SetEventOnCompletion(fenceValue, m_fenceEventHandle);
+			WaitForSingleObjectEx(m_fenceEventHandle, INFINITE, false);
+			m_lastCompletedFenceValue = fenceValue;
+		}
 	}
 
 	uint64_t DX12Queue::ExecuteCommandList(ID3D12CommandList* commandList)
@@ -85,10 +91,10 @@ namespace ElysiaRenderer
 
 	uint64_t DX12Queue::SingalFence()
 	{
-		uint64_t value = m_nextFenceValue.fetch_add(1, std::memory_order_relaxed);
+		std::lock_guard<std::mutex> lockGuard(m_fenceMutex);
 
-		m_commandQueue->Signal(m_fence, value);
+		m_commandQueue->Signal(m_fence, m_nextFenceValue);
 
-		return value;
+		return m_nextFenceValue++;
 	}
 }
