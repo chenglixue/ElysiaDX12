@@ -91,7 +91,7 @@ PSOutput PS(PSInput i)
     //lighting += float4(GBufferData.SceneColor, 1.f) * AO;
     
     o.target0.rg = screenUV;
-    return o;
+    //return o;
     o.target0.rgb = shadow;
     return o;
 }

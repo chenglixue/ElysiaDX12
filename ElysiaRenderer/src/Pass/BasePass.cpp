@@ -39,7 +39,7 @@ namespace ElysiaRenderer
 	{
 	}
 
-	D3D12_GPU_VIRTUAL_ADDRESS  UploadMaterialConstants(
+	D3D12_GPU_VIRTUAL_ADDRESS  BasePass::UploadMaterialConstants(
 			UploadRingBuffer* pUploadBuffer,
 			UINT8 spaceID,
 			Material* pMaterial,
@@ -58,7 +58,7 @@ namespace ElysiaRenderer
 		
 		D3D12_GPU_VIRTUAL_ADDRESS GPUAddress;
 		UINT8* CPUAddress = nullptr;
-		if(!pUploadBuffer->Allocate(totalSize, GPUAddress, CPUAddress))
+		if(!pUploadBuffer->AllocateForFrame(m_pDevice->GetFrameID(), totalSize, GPUAddress, CPUAddress))
 		{
 			assert(false && "UploadRingBuffer is full! Call Reset() at beginning of frame.");
 			return 0;

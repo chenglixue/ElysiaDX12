@@ -624,7 +624,7 @@ namespace ElysiaModel
 				assert(diffuseTex != nullptr);
 				m_pMaterialData[materialIndex].diffuseTexIndex = diffuseTex->GetResourceHeapIndex();
 			}
-			TextureManager::GetInstance().AddTextureResource(std::move(diffuseTex));
+			TextureManager::GetInstance().AddTextureResource(std::move(diffuseTex), PropertyToID(WstringToString(texBufferCreateDesc.texturePath)));
 
 			std::wstring metallicPath = basePath + RemoveExt(m_pMaterialData[materialIndex].texMetallicPath);
 			texBufferCreateDesc.texturePath = metallicPath + L".png";
@@ -646,7 +646,7 @@ namespace ElysiaModel
 				assert(metallicTex != nullptr);
 				m_pMaterialData[materialIndex].metallicTexIndex = metallicTex->GetResourceHeapIndex();
 			}
-			TextureManager::GetInstance().AddTextureResource(std::move(metallicTex));
+			TextureManager::GetInstance().AddTextureResource(std::move(metallicTex), PropertyToID(WstringToString(texBufferCreateDesc.texturePath)));
 
 			std::wstring roughnessPath = basePath + RemoveExt(m_pMaterialData[materialIndex].texRoughnessPath);
 			texBufferCreateDesc.texturePath = roughnessPath + L".png";
@@ -668,7 +668,7 @@ namespace ElysiaModel
 				assert(roughnessTex != nullptr);
 				m_pMaterialData[materialIndex].roughnessTexIndex = roughnessTex->GetResourceHeapIndex();
 			}
-			TextureManager::GetInstance().AddTextureResource(std::move(roughnessTex));
+			TextureManager::GetInstance().AddTextureResource(std::move(roughnessTex), PropertyToID(WstringToString(texBufferCreateDesc.texturePath)));
 
 			std::wstring normalPath = basePath + RemoveExt(m_pMaterialData[materialIndex].texNormalPath);
 			texBufferCreateDesc.texturePath = normalPath + L".png";
@@ -688,7 +688,7 @@ namespace ElysiaModel
 			{
 				m_pMaterialData[materialIndex].hasNormal = false;
 			}
-			TextureManager::GetInstance().AddTextureResource(std::move(normalTex));
+			TextureManager::GetInstance().AddTextureResource(std::move(normalTex), PropertyToID(WstringToString(texBufferCreateDesc.texturePath)));
 		}
 	}
 
@@ -754,34 +754,27 @@ namespace ElysiaModel
 	{
 		BufferCreationDesc bufferCreationDesc{};
 		bufferCreationDesc.m_size = m_meshData.vertexDataByteSize;
-		bufferCreationDesc.m_accessFlags = BufferAccessFlags::HostWritable;
-		bufferCreationDesc.m_viewFlags = GPUResourceFlags::None;
-		bufferCreationDesc.m_isRawAccess = false;
+		bufferCreationDesc.m_accessFlags = BufferAccessFlags::GPUOnly;
+		bufferCreationDesc.m_viewFlags = GPUResourceFlags::SRV;
+		bufferCreationDesc.m_isRawAccess = true;
+		bufferCreationDesc.m_stride = m_vertexStride;
 
 		BufferManager::GetInstance().AddVertexBuffer(bufferCreationDesc);
 
-		if ((bufferCreationDesc.m_viewFlags & GPUResourceFlags::SRV) == GPUResourceFlags::SRV
-			&& (bufferCreationDesc.m_accessFlags & BufferAccessFlags::GPUOnly) == BufferAccessFlags::GPUOnly)
-		{
-			auto pBufferUpload = std::make_unique<DX12BufferUpload>();
-			pBufferUpload->m_buffer = BufferManager::GetInstance().GetVertexBuffer();
-			pBufferUpload->m_bufferData = std::make_unique<uint8_t[]>(m_meshData.vertexDataByteSize);
-			pBufferUpload->m_bufferDataSize = bufferCreationDesc.m_size;
+		auto pBufferUpload = std::make_unique<DX12BufferUpload>();
+		pBufferUpload->m_buffer = BufferManager::GetInstance().GetVertexBuffer();
+		pBufferUpload->m_bufferData = std::make_unique<uint8_t[]>(m_meshData.vertexDataByteSize);
+		pBufferUpload->m_bufferDataSize = bufferCreationDesc.m_size;
 
-			memcpy_s(pBufferUpload->m_bufferData.get(), pBufferUpload->m_bufferDataSize, m_pIndexData, pBufferUpload->m_bufferDataSize);
+		memcpy_s(pBufferUpload->m_bufferData.get(), pBufferUpload->m_bufferDataSize, m_pVertexData, pBufferUpload->m_bufferDataSize);
 
-			m_pDevice->GetUploadContext()->AddBufferToUploads(std::move(pBufferUpload));
-		}
-		else
-		{
-			BufferManager::GetInstance().GetVertexBuffer()->SetMappedData(m_pVertexData, m_meshData.vertexDataByteSize);
+		m_pDevice->GetUploadContext()->AddBufferToUploads(std::move(pBufferUpload));
 
-			D3D12_VERTEX_BUFFER_VIEW bufferView{};
-			bufferView.BufferLocation = BufferManager::GetInstance().GetVertexBuffer()->GetGPUAddress();
-			bufferView.StrideInBytes = m_vertexStride;
-			bufferView.SizeInBytes = m_meshData.vertexDataByteSize;
-			BufferManager::GetInstance().SetVertexBufferView(bufferView);
-		}
+		D3D12_VERTEX_BUFFER_VIEW bufferView{};
+		bufferView.BufferLocation = BufferManager::GetInstance().GetVertexBuffer()->GetGPUAddress();
+		bufferView.StrideInBytes = m_vertexStride;
+		bufferView.SizeInBytes = m_meshData.vertexDataByteSize;
+		BufferManager::GetInstance().SetVertexBufferView(bufferView);
 
 		return BufferManager::GetInstance().GetVertexBuffer();
 	}
@@ -790,18 +783,25 @@ namespace ElysiaModel
 	{
 		BufferCreationDesc bufferCreationDesc{};
 		bufferCreationDesc.m_size = m_meshData.indexDataByteSize;
-		bufferCreationDesc.m_accessFlags = BufferAccessFlags::HostWritable;
-		bufferCreationDesc.m_viewFlags = GPUResourceFlags::None;
-		bufferCreationDesc.m_isRawAccess = false;
+		bufferCreationDesc.m_accessFlags = BufferAccessFlags::GPUOnly;
+		bufferCreationDesc.m_viewFlags = GPUResourceFlags::SRV;
+		bufferCreationDesc.m_isRawAccess = true;
 
 		BufferManager::GetInstance().AddIndexBuffer(bufferCreationDesc);
 
-		BufferManager::GetInstance().GetIndexBuffer()->SetMappedData(m_pIndexData, m_meshData.indexDataByteSize);
+		auto pBufferUpload = std::make_unique<DX12BufferUpload>();
+		pBufferUpload->m_buffer = BufferManager::GetInstance().GetIndexBuffer();
+		pBufferUpload->m_bufferData = std::make_unique<uint8_t[]>(bufferCreationDesc.m_size);
+		pBufferUpload->m_bufferDataSize = bufferCreationDesc.m_size;
+
+		memcpy_s(pBufferUpload->m_bufferData.get(), pBufferUpload->m_bufferDataSize, m_pIndexData, pBufferUpload->m_bufferDataSize);
+
+		m_pDevice->GetUploadContext()->AddBufferToUploads(std::move(pBufferUpload));
 
 		D3D12_INDEX_BUFFER_VIEW bufferView{};
 		bufferView.BufferLocation = BufferManager::GetInstance().GetIndexBuffer()->GetGPUAddress();
-		bufferView.Format = DXGI_FORMAT_R16_UINT;
 		bufferView.SizeInBytes = m_meshData.indexDataByteSize;
+		bufferView.Format = DXGI_FORMAT_R16_UINT;
 		BufferManager::GetInstance().SetIndexBufferView(bufferView);
 
 		return BufferManager::GetInstance().GetIndexBuffer();

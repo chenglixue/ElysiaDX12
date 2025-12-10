@@ -8,6 +8,16 @@ namespace ElysiaRenderer
 	class GBufferPass : public BasePass
 	{
 	public:
+		struct RenderTextureIDs
+		{
+			static size_t GBufferPass0ID;
+			static size_t GBufferPass1ID;
+			static size_t GBufferPass2ID;
+			static size_t GBufferPass3ID;
+			static size_t GBufferPass4ID;
+			static size_t GBufferPass5ID;
+		};
+		
 		GBufferPass(DX12Camera* pCamera);
 		virtual ~GBufferPass() override;
 
@@ -25,15 +35,7 @@ namespace ElysiaRenderer
 		{
 			static int GBufferPassID;
 		};
-		struct RenderTextureIDs
-		{
-			static size_t GBufferPass0ID;
-			static size_t GBufferPass1ID;
-			static size_t GBufferPass2ID;
-			static size_t GBufferPass3ID;
-			static size_t GBufferPass4ID;
-			static size_t GBufferPass5ID;
-		};
+		
 		struct ShaderIDs
 		{
 			static size_t screenSize;

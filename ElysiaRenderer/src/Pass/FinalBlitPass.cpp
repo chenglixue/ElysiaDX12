@@ -83,7 +83,7 @@ namespace ElysiaRenderer
 				}
 			case DebugMode::AO:
 				{
-					m_pMaterial->SetUInt(ShaderIDs::blitterTextureIndex, TextureManager::GetInstance().GetGlobalRT("g_AOIndex"));
+					//m_pMaterial->SetUInt(ShaderIDs::blitterTextureIndex, TextureManager::GetInstance().GetGlobalRT("g_AOIndex"));
 					break;
 				}
 				default:

@@ -101,25 +101,6 @@ namespace ElysiaRenderer
 			UpdateDisplay(UserData::GetInstance().displayMode, m_disableLocalDimming);
 		}
 		//OnKeyboardInput();
-		
-		auto pCameraManager = &CameraManager::GetInstance();
-		auto passParameter = RenderResource::GetInstance().GetCBVFrameVariable();
-		passParameter->cameraPosWS = CameraManager::GetInstance().GetMainCamera()->GetPosition4();
-		passParameter->lightData = std::move(LightManager::GetInstance().GetMainLight()->CreateLightData());
-		passParameter->frameIndex = m_pDevice->GetFrameIndex();
-		passParameter->nearZ = CameraManager::GetInstance().GetMainCamera()->GetNearZ();
-		passParameter->farZ = CameraManager::GetInstance().GetMainCamera()->GetFarZ();
-		passParameter->ZBufferParams = Vector4(1 - CameraManager::GetInstance().GetMainCamera()->GetFarZ() / pCameraManager->GetMainCamera()->GetNearZ(),
-			pCameraManager->GetMainCamera()->GetFarZ() / pCameraManager->GetMainCamera()->GetNearZ(),
-			(1 - pCameraManager->GetMainCamera()->GetFarZ() / pCameraManager->GetMainCamera()->GetNearZ()) / pCameraManager->GetMainCamera()->GetFarZ(),
-			(pCameraManager->GetMainCamera()->GetFarZ() / pCameraManager->GetMainCamera()->GetNearZ()) / pCameraManager->GetMainCamera()->GetFarZ());
-		passParameter->OpaqueColorIndex = BufferManager::GetInstance().GetCameraColorRT()->GetResourceHeapIndex();
-		passParameter->OpaqueDepthIndex = BufferManager::GetInstance().GetCameraDepthRT()->GetResourceHeapIndex();
-		
-		auto GPUAddress = UploadFrameConstant(m_pDevice->GetGlobalUploadBuffer(), sizeof(CBVFrameVariable),
-			RenderResource::GetInstance().GetPerFrameBindResourceSpace()->GetCPUPtr());
-		RenderResource::GetInstance().GetPerFrameBindResourceSpace()->SetDynamicCBV(GPUAddress);
-		RenderResource::GetInstance().GetPerFrameBindResourceSpace()->Lock();
 		SerializeUserData();
 	}
 	void RendererSystem::Render()
@@ -190,7 +171,7 @@ namespace ElysiaRenderer
 		};
 
 		m_passes.emplace_back(std::move(std::make_unique<ShadowPass>(CameraManager::GetInstance().GetMainCamera())));
-		//m_passes.emplace_back(std::move(std::make_unique<GBufferPass>(CameraManager::GetInstance().GetMainCamera())));
+		m_passes.emplace_back(std::move(std::make_unique<GBufferPass>(CameraManager::GetInstance().GetMainCamera())));
 		// m_passes.emplace_back(std::move(std::make_unique<AOPass>(m_pCameraManager->GetMainCamera())));
 		m_passes.emplace_back(std::move(std::make_unique<OpaquePass>(CameraManager::GetInstance().GetMainCamera())));
 		// m_passes.emplace_back(std::move(std::make_unique<TonemapPass>(m_pCameraManager->GetMainCamera())));

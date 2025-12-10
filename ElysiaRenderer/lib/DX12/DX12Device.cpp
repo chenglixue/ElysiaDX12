@@ -273,7 +273,7 @@ namespace ElysiaRenderer
 
 		// Create Global Upload Buffer
 		{
-			m_pGlobalUploadBuffer = std::make_unique<UploadRingBuffer>(this, 64 * 1024 * 1024, L"Global Upload Buffer");
+			m_pGlobalUploadBuffer = std::make_unique<UploadRingBuffer>(this, 16 * 1024 * 1024, L"Global Upload Buffer");
 		}
 
 		CreateSamplers();
@@ -427,14 +427,14 @@ namespace ElysiaRenderer
 		}
 
 		if (isHasSRV)
-		{
+		{ 
 			D3D12_SHADER_RESOURCE_VIEW_DESC SRVDesc{};
 			SRVDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 			SRVDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
 			SRVDesc.Format = bufferCreationDesc.m_isRawAccess ? DXGI_FORMAT_R32_TYPELESS : DXGI_FORMAT_UNKNOWN;
 			SRVDesc.Buffer.FirstElement = 0;
 			SRVDesc.Buffer.NumElements = static_cast<UINT>(bufferCreationDesc.m_isRawAccess ? bufferCreationDesc.m_size / 4 : numElements);
-			SRVDesc.Buffer.StructureByteStride = bufferCreationDesc.m_isRawAccess ? 0 : static_cast<UINT>(pNewBuffer->GetStride());
+			SRVDesc.Buffer.StructureByteStride = bufferCreationDesc.m_stride > 0 ? static_cast<UINT>(pNewBuffer->GetStride()) : 0;
 			SRVDesc.Buffer.Flags = bufferCreationDesc.m_isRawAccess ? D3D12_BUFFER_SRV_FLAG_RAW : D3D12_BUFFER_SRV_FLAG_NONE;
 
 			pNewBuffer->SetSRVDescriptor(m_SRVStagingDescriptorHeap->NewDescriptorHeapHandle());
@@ -1129,8 +1129,8 @@ namespace ElysiaRenderer
 		m_copyQueue->WaitForFenceCPUBlocking(fenceValue.m_copyQueueFence);
 		m_computeQueue->WaitForFenceCPUBlocking(fenceValue.m_computeQueueFence);
 		
-		m_pGlobalUploadBuffer->Reset();
-
+		m_pGlobalUploadBuffer->Reset(m_frameID);
+		
 		ProcessDestruction(m_frameID);
 
 		m_uploadContexts[m_frameID]->ResolveProcessedUploads();

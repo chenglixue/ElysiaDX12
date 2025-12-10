@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "ShadowPass.h"
 
+#include "GBufferPass.h"
 #include "lib/DX12/DX12Material.h"
 #include "RenderResource.h" 
 #include "DX12/UploadRingBuffer.h"
@@ -9,6 +10,7 @@
 #include "lib/Utility/SobolSequenceGenerator.h"
 #include "Manager/CameraManager.h"
 #include "Manager/RenderTargetManager.h"
+#include "Utility/RenderHelper.h"
 
 namespace ElysiaRenderer
 {
@@ -56,7 +58,6 @@ namespace ElysiaRenderer
 	{
 		m_pMainLight = LightManager::GetInstance().GetMainLight();
 		CreateMainShadow(1000, DXGI_FORMAT_D24_UNORM_S8_UINT);
-		RenderResource::GetInstance().GetCBVFrameVariable()->ShadowTexIndex = m_pShadowRT->GetResourceHeapIndex();
 		
 		m_shaderPasses =
 		{ 
@@ -75,8 +76,37 @@ namespace ElysiaRenderer
 	void ShadowPass::Execute()
 	{
 		m_pMainShadow->UpdateShadowTransform(m_pMainLight);
-		RenderResource::GetInstance().GetCBVFrameVariable()->shadowMatrix = m_pMainShadow->GetShadowMat();
-		RenderResource::GetInstance().GetCBVFrameVariable()->shadowSize = GetScreenSize(Vector2(m_pMainShadow->GetWidth(), m_pMainShadow->GetHeight()));
+		auto GPUAddress = UploadFrameConstant(m_pDevice->GetFrameID(), m_pDevice->GetGlobalUploadBuffer(),
+			[this](CBVFrameVariable* dst)
+			{
+				dst->cameraPosWS = CameraManager::GetInstance().GetMainCamera()->GetPosition4();
+				dst->lightData = std::move(LightManager::GetInstance().GetMainLight()->CreateLightData());
+				dst->frameIndex = m_pDevice->GetFrameIndex();
+				dst->nearZ = CameraManager::GetInstance().GetMainCamera()->GetNearZ();
+				dst->farZ = CameraManager::GetInstance().GetMainCamera()->GetFarZ();
+				dst->OpaqueColorIndex = BufferManager::GetInstance().GetCameraColorRT()->GetResourceHeapIndex();
+				dst->OpaqueDepthIndex = BufferManager::GetInstance().GetCameraDepthRT()->GetResourceHeapIndex();
+				dst->ZBufferParams = GetZBufferParams(CameraManager::GetInstance().GetMainCamera()->GetNearZ(), CameraManager::GetInstance().GetMainCamera()->GetFarZ());
+				dst->ShadowTexIndex = m_pShadowRT->GetResourceHeapIndex();
+				dst->shadowMatrix = m_pMainShadow->GetShadowMat();
+				dst->shadowSize = GetScreenSize(Vector2(m_pMainShadow->GetWidth(), m_pMainShadow->GetHeight()));
+				dst->GBuffer0Index = RenderTargetManager::GetInstance().GetRenderTexture(GBufferPass::RenderTextureIDs::GBufferPass0ID)->GetResourceHeapIndex();
+				dst->GBuffer1Index = RenderTargetManager::GetInstance().GetRenderTexture(GBufferPass::RenderTextureIDs::GBufferPass1ID)->GetResourceHeapIndex();
+				dst->GBuffer2Index = RenderTargetManager::GetInstance().GetRenderTexture(GBufferPass::RenderTextureIDs::GBufferPass2ID)->GetResourceHeapIndex();
+				dst->GBuffer3Index = RenderTargetManager::GetInstance().GetRenderTexture(GBufferPass::RenderTextureIDs::GBufferPass3ID)->GetResourceHeapIndex();
+				dst->GBuffer4Index = RenderTargetManager::GetInstance().GetRenderTexture(GBufferPass::RenderTextureIDs::GBufferPass4ID)->GetResourceHeapIndex();
+				dst->GBuffer5Index = RenderTargetManager::GetInstance().GetRenderTexture(GBufferPass::RenderTextureIDs::GBufferPass5ID)->GetResourceHeapIndex();
+				dst->GGX_E_LUT_Index = TextureManager::GetInstance().GetTextureHeapIndex(TextureManager::RenderTextureIDs::GGX_E_LUTID);
+				dst->GGX_Eavg_LUT_Index = TextureManager::GetInstance().GetTextureHeapIndex(TextureManager::RenderTextureIDs::GGX_Eavg_LUTID);
+				dst->SkyboxTexIndex = TextureManager::GetInstance().GetTextureHeapIndex(TextureManager::RenderTextureIDs::SkyboxID);
+			});
+
+		if (!RenderResource::GetInstance().GetPerFrameBindResourceSpace()->IsLocked())
+		{
+			RenderResource::GetInstance().GetPerFrameBindResourceSpace()->SetDynamicCBV(GPUAddress);
+			RenderResource::GetInstance().GetPerFrameBindResourceSpace()->Lock();
+		}
+		
  
 		m_pMaterial->SetFloat(ShaderIDs::shadowNearZ, m_pMainShadow->GetNearZ());
 		m_pMaterial->SetFloat(ShaderIDs::shadowFarZ, m_pMainShadow->GetFarZ());
@@ -84,8 +114,6 @@ namespace ElysiaRenderer
 		m_pMaterial->SetFloat(ShaderIDs::shadowSlopeDepthBias, UserData::GetInstance().shadowSlopeDepthBias / 100);
 		m_pMaterial->SetFloat(ShaderIDs::shadowMaxSlopeDepthBias, UserData::GetInstance().shadowMaxSlopeDepthBias / 100);
 		m_pMaterial->SetVector2Array(ShaderIDs::g_sobolSequence, m_sobolSqeuences);
-		
-		memcpy(RenderResource::GetInstance().GetPerFrameBindResourceSpace()->GetCPUPtr(), RenderResource::GetInstance().GetCBVFrameVariable(), sizeof(CBVFrameVariable));
 	} 
 	void ShadowPass::Render()
 	{
@@ -238,7 +266,7 @@ namespace ElysiaRenderer
 	void ShadowPass::DrawMesh(UINT passIndex)
 	{
 		m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		m_pCommand->SetIndexBuffer(BufferManager::GetInstance().GetIndexBufferView()); 
+		m_pCommand->SetIndexBuffer(BufferManager::GetInstance().GetIndexBufferView());
 		m_pCommand->SetVertexBuffer(0, 1, const_cast<D3D12_VERTEX_BUFFER_VIEW&>(BufferManager::GetInstance().GetVertexBufferView()));
 		
 		auto& passData = m_pMaterial->GetPassData(passIndex);

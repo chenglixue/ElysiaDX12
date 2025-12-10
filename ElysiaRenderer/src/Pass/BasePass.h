@@ -34,7 +34,11 @@ namespace ElysiaRenderer
 		virtual void UpdatePSO() = 0;
 		virtual void UpdateVariant() = 0;
 		
-		
+		D3D12_GPU_VIRTUAL_ADDRESS  UploadMaterialConstants(
+			UploadRingBuffer* pUploadBuffer,
+			UINT8 spaceID,
+			Material* pMaterial,
+			const ShaderVariantData* pVariantData);
 
 	protected:
 		Vector2 m_renderSize;
@@ -48,10 +52,4 @@ namespace ElysiaRenderer
 
 		void SetSpaceResource(PassData& passData, UINT8 spaceID);
 	};
-
-	D3D12_GPU_VIRTUAL_ADDRESS  UploadMaterialConstants(
-			UploadRingBuffer* pUploadBuffer,
-			UINT8 spaceID,
-			Material* pMaterial,
-			const ShaderVariantData* pVariantData);
 }

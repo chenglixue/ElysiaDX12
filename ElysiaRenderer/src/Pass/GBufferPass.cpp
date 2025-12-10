@@ -98,13 +98,6 @@ namespace ElysiaRenderer
 		ShaderPassIDs::GBufferPassID = m_pMaterial->FindPassIndex("GBuffer Pass");
 
 		UpdateVariant();
-
-		RenderResource::GetInstance().GetCBVFrameVariable()->GBuffer0Index = m_GBufferRTs[0]->GetResourceHeapIndex();
-		RenderResource::GetInstance().GetCBVFrameVariable()->GBuffer1Index = m_GBufferRTs[1]->GetResourceHeapIndex();
-		RenderResource::GetInstance().GetCBVFrameVariable()->GBuffer2Index = m_GBufferRTs[2]->GetResourceHeapIndex();
-		RenderResource::GetInstance().GetCBVFrameVariable()->GBuffer3Index = m_GBufferRTs[3]->GetResourceHeapIndex();
-		RenderResource::GetInstance().GetCBVFrameVariable()->GBuffer4Index = m_GBufferRTs[4]->GetResourceHeapIndex();
-		RenderResource::GetInstance().GetCBVFrameVariable()->GBuffer5Index = m_GBufferRTs[5]->GetResourceHeapIndex();
 	}
 
 	void GBufferPass::Execute()

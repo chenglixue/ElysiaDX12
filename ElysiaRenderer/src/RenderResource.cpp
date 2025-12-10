@@ -9,7 +9,7 @@ namespace ElysiaRenderer
 
 	RenderResource::RenderResource() :
 		m_perFrameBindResourceSpace(std::make_unique<PipelineResourceSpace>()),
-		m_pCBVFrameVariable(std::make_unique<CBVFrameVariable>())
+		m_pCBVFrameVariables(std::make_unique<CBVFrameVariable>())
 	{
 	}
 
@@ -23,9 +23,9 @@ namespace ElysiaRenderer
 		return m_perFrameBindResourceSpace.get();
 	}
 	
-	CBVFrameVariable* RenderResource::GetCBVFrameVariable()
+	CBVFrameVariable* RenderResource::GetCBVFrameVariable(UINT8 frameID)
 	{
-		return m_pCBVFrameVariable.get();
+		return m_pCBVFrameVariables[frameID].get();
 	}
 
 	CAULDRON_DX12::DisplayMode RenderResource::GetDisplayMode() const noexcept
