@@ -78,9 +78,6 @@ namespace ElysiaRenderer
 
 		virtual void Destory()
 		{
-			//ElysiaHelper::SafeRelease(m_allocation);
-			//ElysiaHelper::SafeRelease(m_resource);
-			//m_GPUAddress = 0;
 		}
 
 	protected:

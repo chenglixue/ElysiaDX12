@@ -403,18 +403,18 @@ namespace ElysiaRenderer
 		bool isHasSRV = ((bufferCreationDesc.m_viewFlags & GPUResourceFlags::SRV) == GPUResourceFlags::SRV);
 		bool isHasUAV = ((bufferCreationDesc.m_viewFlags & GPUResourceFlags::UAV) == GPUResourceFlags::UAV);
 
-		D3D12_RESOURCE_STATES usageState = isHostVisible ? D3D12_RESOURCE_STATE_GENERIC_READ : D3D12_RESOURCE_STATE_COPY_DEST;
-		
+		// D3D12_RESOURCE_STATE_GENERIC_READ
+		D3D12_RESOURCE_STATES resourceState = isHostVisible ? D3D12_RESOURCE_STATE_GENERIC_READ : D3D12_RESOURCE_STATE_COPY_DEST;
 		D3D12MA::ALLOCATION_DESC allocationDesc{};
 		allocationDesc.HeapType = isHostVisible ? D3D12_HEAP_TYPE_UPLOAD : D3D12_HEAP_TYPE_DEFAULT;
 
 		CComPtr<D3D12MA::Allocation> pAllocation = nullptr;
 		CComPtr<ID3D12Resource> pResource = nullptr;
-		ElysiaHelper::ThrowIfFailed(m_allocator->CreateResource(&allocationDesc, &resourceDesc, usageState, nullptr,
+		ElysiaHelper::ThrowIfFailed(m_allocator->CreateResource(&allocationDesc, &resourceDesc, resourceState, nullptr,
 			&pAllocation, IID_PPV_ARGS(&pResource)));
 		//pResource->SetName(bufferCreationDesc.m_name);
 		
-		auto pNewBuffer = std::make_unique<DX12BufferResource>(pResource, usageState, pAllocation);
+		auto pNewBuffer = std::make_unique<DX12BufferResource>(pResource, resourceState, pAllocation);
 
 		if (isHasCBV)
 		{
@@ -476,7 +476,6 @@ namespace ElysiaRenderer
 	{
 		auto texturePath = textureCreationDesc.texturePath;
 		bool isSRGB = textureCreationDesc.isSRGB;
-
 		
 		// IsFileLocked(texturePath);
 
@@ -563,14 +562,12 @@ namespace ElysiaRenderer
 		createDesc.m_typeFlag = TexTypeFlags::SRV;
 
 		auto newTex = std::move(CreateTexture(createDesc));
-		///
 
-		// ÿ��Mipͼ�൱��һ������Դ
-		auto textureUpload = std::make_unique<DX12TextureUpload>();
+		auto textureUpload = new DX12TextureUpload();
 		textureUpload->m_textureBuffer = newTex.get();
 		textureUpload->m_numSubResources = static_cast<UINT>(texMetaData.mipLevels * texMetaData.arraySize);
 
-		UINT numRows[MAX_TEXTURE_SUBRESOURCE_COUNT];	// ÿ������Դ������
+		UINT numRows[MAX_TEXTURE_SUBRESOURCE_COUNT];
 		uint64_t rowSizesInBytes[MAX_TEXTURE_SUBRESOURCE_COUNT];
 
 		auto resourceDesc = textureUpload->m_textureBuffer->GetResourceDesc();
@@ -587,17 +584,14 @@ namespace ElysiaRenderer
 
 				const D3D12_PLACED_SUBRESOURCE_FOOTPRINT& subResourcelayout = textureUpload->m_subResourceLayouts[subResourceIndex];
 				const uint64_t subResourceHeight = numRows[subResourceIndex];
-				// ÿ�����ݵ��ֽ���
 				const uint64_t subResourcePitch = ElysiaHelper::AlignU32(subResourcelayout.Footprint.RowPitch, D3D12_TEXTURE_DATA_PITCH_ALIGNMENT);
 				const uint64_t subResourceDepth = subResourcelayout.Footprint.Depth;
 				uint8_t* destSubResourceMemory = textureUpload->m_pTextureData.get() + subResourcelayout.Offset;
 
-				// sliceIndex��3D�������Ƭ������2D�������Ƭ����Ϊ0
 				for (uint64_t sliceIndex = 0; sliceIndex < subResourceDepth; sliceIndex++)
 				{
 					const auto subImage = imageData->GetImage(mipIndex, arrayIndex, sliceIndex);
 					const uint8_t* sourceSubResourceMemory = subImage->pixels;
-					// ����ͼƬÿ������
 					for (uint64_t height = 0; height < subResourceHeight; ++height)
 					{
 						memcpy(destSubResourceMemory, sourceSubResourceMemory, (std::min)(subResourcePitch, subImage->rowPitch));

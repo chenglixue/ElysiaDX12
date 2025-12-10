@@ -71,4 +71,5 @@ namespace ElysiaRenderer
 		assert(m_mappedBuffer != nullptr && bufferData != nullptr && bufferSize > 0 && bufferSize <= m_resourceDesc.Width);
 		memcpy_s(m_mappedBuffer, m_resourceDesc.Width, bufferData, bufferSize);
 	}
+	
 }

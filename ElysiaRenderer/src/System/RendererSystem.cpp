@@ -147,16 +147,17 @@ namespace ElysiaRenderer
 		m_pDevice->BeginFrame();
 		m_graphicsContext->Reset();
 
-		for (auto& pass : m_passes)
+		if(BufferManager::GetInstance().GetVertexBuffer()->GetIsReady() && BufferManager::GetInstance().GetIndexBuffer()->GetIsReady())
 		{
-			pass->Render();
+			for (auto& pass : m_passes)
+			{
+				pass->Render();
+			}
 		}
+		
 
 		m_pDevice->SubmitContextWork(*m_graphicsContext);
 		m_pDevice->EndFrame();
-
-		g_pModelImporter->CreateVertexView();
-		g_pModelImporter->CreateIndexView();
 
 		m_pDevice->Present(); 
 	}
@@ -174,14 +175,14 @@ namespace ElysiaRenderer
 			.pCommand = m_graphicsContext.get(),
 		};
 
-		m_passes.emplace_back(std::move(std::make_unique<ShadowPass>(CameraManager::GetInstance().GetMainCamera())));
-		m_passes.emplace_back(std::move(std::make_unique<GBufferPass>(CameraManager::GetInstance().GetMainCamera())));
+		//m_passes.emplace_back(std::move(std::make_unique<ShadowPass>(CameraManager::GetInstance().GetMainCamera())));
+		//m_passes.emplace_back(std::move(std::make_unique<GBufferPass>(CameraManager::GetInstance().GetMainCamera())));
 		// m_passes.emplace_back(std::move(std::make_unique<AOPass>(m_pCameraManager->GetMainCamera())));
-		m_passes.emplace_back(std::move(std::make_unique<OpaquePass>(CameraManager::GetInstance().GetMainCamera())));
+		//m_passes.emplace_back(std::move(std::make_unique<OpaquePass>(CameraManager::GetInstance().GetMainCamera())));
 		// m_passes.emplace_back(std::move(std::make_unique<TonemapPass>(m_pCameraManager->GetMainCamera())));
 		// m_passes.emplace_back(std::move(std::make_unique<BloomPass>(m_pCameraManager->GetMainCamera())));
 		m_passes.emplace_back(std::move(std::make_unique<UIPass>()));
-		m_passes.emplace_back(std::move(std::make_unique<FinalBlitPass>(CameraManager::GetInstance().GetMainCamera())));
+		//m_passes.emplace_back(std::move(std::make_unique<FinalBlitPass>(CameraManager::GetInstance().GetMainCamera())));
 		for (auto& pass : m_passes)
 		{ 
 			pass->Setup(passData);

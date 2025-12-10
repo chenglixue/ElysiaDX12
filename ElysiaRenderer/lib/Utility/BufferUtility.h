@@ -25,7 +25,7 @@ namespace ElysiaRenderer
 		GPUOnly = 0,
 		HostWritable = 1
 	};
-
+	
 	struct BufferCreationDesc
 	{
 		LPCWSTR m_name;
@@ -41,6 +41,7 @@ namespace ElysiaRenderer
 		DX12BufferResource* m_buffer = nullptr;
 		std::unique_ptr<uint8_t[]> m_bufferData = nullptr;
 		size_t m_bufferDataSize = 0;
+		std::function<void (DX12BufferUpload*)> onComplete; 
 	};
 
 	inline BufferAccessFlags operator&(BufferAccessFlags a, BufferAccessFlags b)
