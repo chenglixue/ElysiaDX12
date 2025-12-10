@@ -1,28 +1,40 @@
 ﻿  Skipping vcpkg. (no packages)
 cl : command line  warning D9014: invalid value '18' for '/wd'; assuming '5999'
-  DX12Context.cpp
+  RendererSystem.cpp
 C:\Work\ElysiaRenderer\ElysiaRenderer\lib\DX12\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file '/lib/DX12/DX12Context.cpp')
-  
-  DX12Device.cpp
-C:\Work\ElysiaRenderer\ElysiaRenderer\lib\DX12\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file '/lib/DX12/DX12Device.cpp')
-  
-C:\Work\ElysiaRenderer\ElysiaRenderer\lib\DX12\UploadRingBuffer.h(11,11): warning C4099: 'ElysiaRenderer::CBVFrameVariable': type name first seen using 'struct' now seen using 'class'
-  (compiling source file '/lib/DX12/DX12Device.cpp')
-      C:\Work\ElysiaRenderer\ElysiaRenderer\src\Parameter\CBVParameter.h(55,9):
-      see declaration of 'ElysiaRenderer::CBVFrameVariable'
+  (compiling source file '/src/System/RendererSystem.cpp')
   
 C:\Work\ElysiaRenderer\ElysiaRenderer\src\Manager\ShaderVariantManager.h(8,11): warning C4099: 'ElysiaRenderer::ShaderVariantData': type name first seen using 'struct' now seen using 'class'
-  (compiling source file '/lib/DX12/DX12Device.cpp')
+  (compiling source file '/src/System/RendererSystem.cpp')
       C:\Work\ElysiaRenderer\ElysiaRenderer\lib\Utility\ShaderUtility.h(116,9):
       see declaration of 'ElysiaRenderer::ShaderVariantData'
   
-  ModelImporter.cpp
-C:\Work\ElysiaRenderer\ElysiaRenderer\lib\DX12\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
-  (compiling source file '/lib/Model/ModelImporter.cpp')
+C:\Work\ElysiaRenderer\ElysiaRenderer\lib\DX12\UploadRingBuffer.h(11,11): warning C4099: 'ElysiaRenderer::CBVFrameVariable': type name first seen using 'struct' now seen using 'class'
+  (compiling source file '/src/System/RendererSystem.cpp')
+      C:\Work\ElysiaRenderer\ElysiaRenderer\src\Parameter\CBVParameter.h(55,9):
+      see declaration of 'ElysiaRenderer::CBVFrameVariable'
   
-  Generating Code...
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\System\RendererSystem.cpp(207,108): warning C4244: 'argument': conversion from 'const float' to 'uint32_t', possible loss of data
+  (compiling source file '/src/System/RendererSystem.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\System\RendererSystem.cpp(207,78): warning C4244: 'argument': conversion from 'const float' to 'uint32_t', possible loss of data
+  (compiling source file '/src/System/RendererSystem.cpp')
+  
+cl : command line  warning D9014: invalid value '18' for '/wd'; assuming '5999'
+  ShadowPass.cpp
+C:\Work\ElysiaRenderer\ElysiaRenderer\lib\DX12\DX12DescriptorHeapHandle.h(54,20): warning C4552: '!=': result of expression not used
+  (compiling source file '/src/Pass/ShadowPass.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Manager\ShaderVariantManager.h(8,11): warning C4099: 'ElysiaRenderer::ShaderVariantData': type name first seen using 'struct' now seen using 'class'
+  (compiling source file '/src/Pass/ShadowPass.cpp')
+      C:\Work\ElysiaRenderer\ElysiaRenderer\lib\Utility\ShaderUtility.h(116,9):
+      see declaration of 'ElysiaRenderer::ShaderVariantData'
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\lib\DX12\UploadRingBuffer.h(11,11): warning C4099: 'ElysiaRenderer::CBVFrameVariable': type name first seen using 'struct' now seen using 'class'
+  (compiling source file '/src/Pass/ShadowPass.cpp')
+      C:\Work\ElysiaRenderer\ElysiaRenderer\src\Parameter\CBVParameter.h(55,9):
+      see declaration of 'ElysiaRenderer::CBVFrameVariable'
+  
   ElysiaRenderer.vcxproj -> C:\Work\ElysiaRenderer\x64\Debug\ElysiaRenderer.exe
   C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Mesh\diablo3_pose.obj
   C:\Work\ElysiaRenderer\ElysiaRenderer\Resource\Mesh\LOW_WEPON.fbx

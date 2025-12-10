@@ -47,6 +47,8 @@ namespace ElysiaModel
 
 		bool CreateVertexBuffer();
 		bool CreateIndexBuffer();
+		void CreateVertexView();
+		void CreateIndexView();
 
 		void CreateMeshRenders();
 

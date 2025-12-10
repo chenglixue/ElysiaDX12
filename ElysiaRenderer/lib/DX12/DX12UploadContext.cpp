@@ -60,11 +60,24 @@ namespace ElysiaRenderer
 				break;
 			}
 
+			AddBarrier(bufferUpload.m_buffer->GetResource(), D3D12_RESOURCE_STATE_COPY_DEST);
+			auto transitionIn = CD3DX12_RESOURCE_BARRIER::Transition(
+				bufferUpload.m_buffer->GetResource(),
+				D3D12_RESOURCE_STATE_COMMON,
+				D3D12_RESOURCE_STATE_COPY_DEST);
+			m_commandList->ResourceBarrier(1, &transitionIn);
 			memcpy(m_bufferUploadHeap->GetMappedBuffer() + bufferUploadHeapOffset, bufferUpload.m_bufferData.get(), bufferUpload.m_bufferDataSize);
 
 			CopyBufferRegion(*bufferUpload.m_buffer, 0, *m_bufferUploadHeap, bufferUploadHeapOffset, bufferUpload.m_bufferDataSize);
 
+			auto transitionOut = CD3DX12_RESOURCE_BARRIER::Transition(
+				bufferUpload.m_buffer->GetResource(),
+				D3D12_RESOURCE_STATE_COPY_DEST,
+				D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+			m_commandList->ResourceBarrier(1, &transitionOut);
+
 			bufferUploadHeapOffset += bufferUpload.m_bufferDataSize;
+			bufferUploadHeapOffset = AlignUp(bufferUploadHeapOffset, (size_t)D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
 			m_bufferUploadsInProgress.emplace_back(bufferUpload.m_buffer);
 		}
 

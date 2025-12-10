@@ -154,6 +154,10 @@ namespace ElysiaRenderer
 
 		m_pDevice->SubmitContextWork(*m_graphicsContext);
 		m_pDevice->EndFrame();
+
+		g_pModelImporter->CreateVertexView();
+		g_pModelImporter->CreateIndexView();
+
 		m_pDevice->Present(); 
 	}
 
