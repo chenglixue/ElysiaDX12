@@ -97,7 +97,7 @@ namespace ElysiaRenderer
 	}
 	void Material::SetBool(size_t nameHash, bool v)
 	{
-		m_parameterBlock.SetBool(nameHash, v);
+		m_parameterBlock.SetFloat(nameHash, v ? 1.f : 0.f);
 	}
 
 	void Material::SetFloat(size_t nameHash, float v)
