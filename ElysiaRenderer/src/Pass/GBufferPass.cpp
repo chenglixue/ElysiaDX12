@@ -8,35 +8,35 @@ namespace ElysiaRenderer
 {
 	int GBufferPass::ShaderPassIDs::GBufferPassID = -1;
 	
-	size_t GBufferPass::RenderTextureIDs::GBufferPass0ID = SIZE_MAX;
-	size_t GBufferPass::RenderTextureIDs::GBufferPass1ID = SIZE_MAX;
-	size_t GBufferPass::RenderTextureIDs::GBufferPass2ID = SIZE_MAX;
-	size_t GBufferPass::RenderTextureIDs::GBufferPass3ID = SIZE_MAX;
-	size_t GBufferPass::RenderTextureIDs::GBufferPass4ID = SIZE_MAX;
-	size_t GBufferPass::RenderTextureIDs::GBufferPass5ID = SIZE_MAX;
+	size_t GBufferPass::RenderTextureIDs::GBufferPass0ID = PropertyToID("GBuffer_0");
+	size_t GBufferPass::RenderTextureIDs::GBufferPass1ID = PropertyToID("GBuffer_1");
+	size_t GBufferPass::RenderTextureIDs::GBufferPass2ID = PropertyToID("GBuffer_2");
+	size_t GBufferPass::RenderTextureIDs::GBufferPass3ID = PropertyToID("GBuffer_3");
+	size_t GBufferPass::RenderTextureIDs::GBufferPass4ID = PropertyToID("GBuffer_4");
+	size_t GBufferPass::RenderTextureIDs::GBufferPass5ID = PropertyToID("GBuffer_5");
 
-	size_t GBufferPass::ShaderIDs::screenSize = SIZE_MAX;
-	size_t GBufferPass::ShaderIDs::viewMatrix = SIZE_MAX;
-	size_t GBufferPass::ShaderIDs::viewMatrix_I = SIZE_MAX;
-	size_t GBufferPass::ShaderIDs::projMatrix = SIZE_MAX;
-	size_t GBufferPass::ShaderIDs::projMatrix_I = SIZE_MAX;
-	size_t GBufferPass::ShaderIDs::viewProjMatrix = SIZE_MAX;
-	size_t GBufferPass::ShaderIDs::viewProjMatrix_I = SIZE_MAX;
-	size_t GBufferPass::ShaderIDs::worldMatrix = SIZE_MAX;
-	size_t GBufferPass::ShaderIDs::opacity = SIZE_MAX;
-	size_t GBufferPass::ShaderIDs::cutoff = SIZE_MAX;
-	size_t GBufferPass::ShaderIDs::baseColorTexIndex = SIZE_MAX;
-	size_t GBufferPass::ShaderIDs::normalTexIndex = SIZE_MAX;
-	size_t GBufferPass::ShaderIDs::metallicTexIndex = SIZE_MAX;
-	size_t GBufferPass::ShaderIDs::roughnessTexIndex = SIZE_MAX;
-	size_t GBufferPass::ShaderIDs::specularTexIndex = SIZE_MAX;
-	size_t GBufferPass::ShaderIDs::baseColorTint = SIZE_MAX;
-	size_t GBufferPass::ShaderIDs::ambientCubemapTint = SIZE_MAX;
-	size_t GBufferPass::ShaderIDs::normalIntensity = SIZE_MAX;
-	size_t GBufferPass::ShaderIDs::metallicIntensity = SIZE_MAX;
-	size_t GBufferPass::ShaderIDs::roughnessIntensity = SIZE_MAX;
-	size_t GBufferPass::ShaderIDs::ambientCubemapIntensity = SIZE_MAX;
-	size_t GBufferPass::ShaderIDs::g_hasNormalTex = SIZE_MAX;
+	size_t GBufferPass::ShaderIDs::screenSize = PropertyToID("screenSize");
+	size_t GBufferPass::ShaderIDs::viewMatrix = PropertyToID("viewMatrix");
+	size_t GBufferPass::ShaderIDs::viewMatrix_I = PropertyToID("viewMatrix_I");
+	size_t GBufferPass::ShaderIDs::projMatrix = PropertyToID("projMatrix");
+	size_t GBufferPass::ShaderIDs::projMatrix_I = PropertyToID("projMatrix_I");
+	size_t GBufferPass::ShaderIDs::viewProjMatrix = PropertyToID("viewProjMatrix");
+	size_t GBufferPass::ShaderIDs::viewProjMatrix_I = PropertyToID("viewProjMatrix_I");
+	size_t GBufferPass::ShaderIDs::worldMatrix = PropertyToID("worldMatrix");
+	size_t GBufferPass::ShaderIDs::opacity = PropertyToID("opacity");
+	size_t GBufferPass::ShaderIDs::cutoff = PropertyToID("cutoff");
+	size_t GBufferPass::ShaderIDs::baseColorTexIndex = PropertyToID("baseColorTexIndex");
+	size_t GBufferPass::ShaderIDs::normalTexIndex = PropertyToID("normalTexIndex");
+	size_t GBufferPass::ShaderIDs::metallicTexIndex = PropertyToID("metallicTexIndex");
+	size_t GBufferPass::ShaderIDs::roughnessTexIndex = PropertyToID("roughnessTexIndex");
+	size_t GBufferPass::ShaderIDs::specularTexIndex = PropertyToID("specularTexIndex");
+	size_t GBufferPass::ShaderIDs::baseColorTint = PropertyToID("baseColorTint");
+	size_t GBufferPass::ShaderIDs::ambientCubemapTint = PropertyToID("ambientCubemapTint");
+	size_t GBufferPass::ShaderIDs::normalIntensity = PropertyToID("normalIntensity");
+	size_t GBufferPass::ShaderIDs::metallicIntensity = PropertyToID("metallicIntensity");
+	size_t GBufferPass::ShaderIDs::roughnessIntensity = PropertyToID("roughnessIntensity");
+	size_t GBufferPass::ShaderIDs::ambientCubemapIntensity = PropertyToID("ambientCubemapIntensity");
+	size_t GBufferPass::ShaderIDs::g_hasNormalTex = PropertyToID("g_hasNormalTex");
 	size_t GBufferPass::ShaderIDs::GBuffer0Index = SIZE_MAX;
 	size_t GBufferPass::ShaderIDs::GBuffer1Index = SIZE_MAX;
 	size_t GBufferPass::ShaderIDs::GBuffer2Index = SIZE_MAX;
@@ -47,35 +47,7 @@ namespace ElysiaRenderer
 	GBufferPass::GBufferPass(DX12Camera* pCamera) :
 		BasePass(pCamera)
 	{
-		RenderTextureIDs::GBufferPass0ID = PropertyToID("GBuffer_0");
-		RenderTextureIDs::GBufferPass1ID = PropertyToID("GBuffer_1");
-		RenderTextureIDs::GBufferPass2ID = PropertyToID("GBuffer_2");
-		RenderTextureIDs::GBufferPass3ID = PropertyToID("GBuffer_3");
-		RenderTextureIDs::GBufferPass4ID = PropertyToID("GBuffer_4");
-		RenderTextureIDs::GBufferPass5ID = PropertyToID("GBuffer_5");
-		
-		ShaderIDs::screenSize = PropertyToID("screenSize");
-		ShaderIDs::viewMatrix = PropertyToID("viewMatrix");
-		ShaderIDs::viewMatrix_I = PropertyToID("viewMatrix_I");
-		ShaderIDs::projMatrix = PropertyToID("projMatrix");
-		ShaderIDs::projMatrix_I = PropertyToID("projMatrix_I");
-		ShaderIDs::viewProjMatrix = PropertyToID("viewProjMatrix");
-		ShaderIDs::viewProjMatrix_I = PropertyToID("viewProjMatrix_I");
-		ShaderIDs::worldMatrix = PropertyToID("worldMatrix");
-		ShaderIDs::opacity = PropertyToID("opacity");
-		ShaderIDs::cutoff = PropertyToID("cutoff");
-		ShaderIDs::baseColorTexIndex = PropertyToID("baseColorTexIndex");
-		ShaderIDs::normalTexIndex = PropertyToID("normalTexIndex");
-		ShaderIDs::metallicTexIndex = PropertyToID("metallicTexIndex");
-		ShaderIDs::roughnessTexIndex = PropertyToID("roughnessTexIndex");
-		ShaderIDs::specularTexIndex = PropertyToID("specularTexIndex");
-		ShaderIDs::baseColorTint = PropertyToID("baseColorTint");
-		ShaderIDs::ambientCubemapTint = PropertyToID("ambientCubemapTint");
-		ShaderIDs::normalIntensity = PropertyToID("normalIntensity");
-		ShaderIDs::metallicIntensity = PropertyToID("metallicIntensity");
-		ShaderIDs::roughnessIntensity = PropertyToID("roughnessIntensity");
-		ShaderIDs::ambientCubemapIntensity = PropertyToID("ambientCubemapIntensity");
-		ShaderIDs::g_hasNormalTex = PropertyToID("g_hasNormalTex");
+
 	}
 	GBufferPass::~GBufferPass()
 	{

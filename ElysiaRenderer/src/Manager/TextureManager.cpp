@@ -33,38 +33,6 @@ namespace ElysiaRenderer
 		m_textureResources.emplace_back(std::move(pTextureResource));
 	}
 
-	void TextureManager::AddGlobalRT(const std::string& name, UINT RTIndex)
-	{
-		auto tryEmplace = m_globalRTIndexs.try_emplace(name);
-		if (tryEmplace.second)
-		{
-			tryEmplace.first->second = RTIndex;
-		}
-	}
-
-	UINT TextureManager::GetGlobalRT(const std::string& name)
-	{
-		if (!m_globalRTIndexs.contains(name))
-		{
-			ThrowRuntimeError("Null RT Index");
-		}
-
-		return m_globalRTIndexs.at(name);
-	}
-
-
-	const std::vector<DX12TextureResource*> TextureManager::GetTextureResources() const noexcept
-	{
-		std::vector<DX12TextureResource*> o{ m_textureResources.size()};
-
-		for (size_t i = 0; i < m_textureResources.size(); ++i)
-		{
-			o[i] = m_textureResources[i].get();
-		}
-
-		return o;
-	}
-
 	void TextureManager::LoadGlobalTextures()
 	{
 		TextureCreationDesc texBufferCreateDesc{};
@@ -74,8 +42,6 @@ namespace ElysiaRenderer
 			texBufferCreateDesc.isSRGB = false;
 			auto newTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
 
-			RenderResource::GetInstance().GetCBVFrameVariable(m_pDevice->GetFrameID())->GGX_E_LUT_Index = newTex->GetResourceHeapIndex();
-			 
 			this->AddTextureResource(std::move(newTex)); 
 		} 
 
@@ -83,8 +49,6 @@ namespace ElysiaRenderer
 			texBufferCreateDesc.texturePath = L"Tex\\GGX_Eavg_LUT.dds";
 			texBufferCreateDesc.isSRGB = false;
 			auto newTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
-
-			RenderResource::GetInstance().GetCBVFrameVariable(m_pDevice->GetFrameID())->GGX_Eavg_LUT_Index = newTex->GetResourceHeapIndex();
 
 			this->AddTextureResource(std::move(newTex));
 
@@ -95,24 +59,20 @@ namespace ElysiaRenderer
 			texBufferCreateDesc.isSRGB = false;
 			auto newTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
 
-			RenderResource::GetInstance().GetCBVFrameVariable(m_pDevice->GetFrameID())->SkyboxTexIndex = newTex->GetResourceHeapIndex();
-
 			this->AddTextureResource(std::move(newTex));
 		}
 
 		{
-			// WCHAR assetsPath[512];
-			// ElysiaHelper::GetAssetsPath(assetsPath, _countof(assetsPath));
-			// std::wstring target = L"Tex\\Black.png";
-			// auto path = ElysiaHelper::GetAssetFullPath(assetsPath, target.c_str());
-			// texBufferCreateDesc.texturePath = path;
-			// texBufferCreateDesc.isSRGB = false;
-			//
-			// auto newTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
-			//
-			// RenderResource::GetInstance().GetCBVFrameVariable()->BlueNoiseTexIndex = newTex->GetResourceHeapIndex();
-			//
-			// this->AddTextureResource(std::move(newTex));
+			WCHAR assetsPath[512];
+			ElysiaHelper::GetAssetsPath(assetsPath, _countof(assetsPath));
+			std::wstring target = L"blue_noise.dds";
+			auto path = ElysiaHelper::GetAssetFullPath(assetsPath, target.c_str());
+			texBufferCreateDesc.texturePath = path;
+			texBufferCreateDesc.isSRGB = false;
+			
+			auto newTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
+			
+			this->AddTextureResource(std::move(newTex));
 		}
 	}
 }

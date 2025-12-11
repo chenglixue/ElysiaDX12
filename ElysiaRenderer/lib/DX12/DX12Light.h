@@ -1,8 +1,11 @@
 #pragma once
 #include "../Utility/LightUtility.h"
+#include "DX12Shadow.h"
 
 namespace ElysiaRenderer
 {
+	class RenderTexture;
+	class DX12Shadow;
 	using namespace SimpleMath;
 	using namespace ElysiaHelper;
 
@@ -47,8 +50,13 @@ namespace ElysiaRenderer
 		~DX12DirectionLight() = default;
 
 		virtual LightData CreateLightData() override;
-
+		void CreateMainShadow(float boundSphereRadius, DXGI_FORMAT format);
+		
+		DX12Shadow* GetMainShadow() const noexcept;
+		RenderTexture* GetMainShadowRT() const noexcept;
 	private:
 		LightType m_lightType = LightType::Dir;
+		std::unique_ptr<DX12Shadow> m_pMainShadow = nullptr;
+		RenderTexture* m_pShadowRT = nullptr;
 	};
 }

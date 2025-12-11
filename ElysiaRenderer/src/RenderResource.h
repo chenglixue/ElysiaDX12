@@ -24,8 +24,8 @@ namespace ElysiaRenderer
 			return *m_instance;
 		}
 
-		PipelineResourceSpace* GetPerFrameBindResourceSpace();
-		CBVFrameVariable* GetCBVFrameVariable(UINT8 frameID);
+		PipelineResourceSpace* GetPerFrameBindResourceSpace(UINT frameID);
+		CBVFrameVariable& GetCBVFrameVariable();
 		CAULDRON_DX12::DisplayMode GetDisplayMode() const noexcept;
 		std::string GetShaderConstantVariable(size_t hash) const noexcept;
 		
@@ -35,13 +35,13 @@ namespace ElysiaRenderer
 		std::string GetPropertyName(size_t hash) const noexcept;
 
 		std::unordered_map<size_t, std::string> m_nameHashs;
+		std::array<std::unique_ptr<PipelineResourceSpace>, NUM_FRAMES_IN_FLIGHT> m_perFrameBindResourceSpaces;
 	private:
 		DX12Device* m_device = nullptr;
 		static std::unique_ptr<RenderResource> m_instance;
 		static std::once_flag m_initInstanceFlag;
 		
-		std::unique_ptr<PipelineResourceSpace> m_perFrameBindResourceSpace;
-		std::array<std::unique_ptr<CBVFrameVariable>, NUM_FRAMES_IN_FLIGHT> m_pCBVFrameVariables;
+		CBVFrameVariable m_CBVFrameVariable;
 
 		CAULDRON_DX12::DisplayMode m_currDisplayMode = CAULDRON_DX12::DisplayMode::DISPLAYMODE_SDR;
 	};

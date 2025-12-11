@@ -8,9 +8,13 @@ namespace ElysiaRenderer
 	std::once_flag RenderResource::m_initInstanceFlag;
 
 	RenderResource::RenderResource() :
-		m_perFrameBindResourceSpace(std::make_unique<PipelineResourceSpace>()),
-		m_pCBVFrameVariables(std::make_unique<CBVFrameVariable>())
+		m_perFrameBindResourceSpaces(),
+		m_CBVFrameVariable()
 	{
+		for (UINT i = 0; i < NUM_FRAMES_IN_FLIGHT; ++i)
+		{
+			m_perFrameBindResourceSpaces[i] = std::make_unique<PipelineResourceSpace>();
+		}
 	}
 
 	RenderResource::~RenderResource()
@@ -18,14 +22,14 @@ namespace ElysiaRenderer
 
 	}
 
-	PipelineResourceSpace* RenderResource::GetPerFrameBindResourceSpace()
+	PipelineResourceSpace* RenderResource::GetPerFrameBindResourceSpace(UINT frameID)
 	{
-		return m_perFrameBindResourceSpace.get();
+		return m_perFrameBindResourceSpaces[frameID].get();
 	}
 	
-	CBVFrameVariable* RenderResource::GetCBVFrameVariable(UINT8 frameID)
+	CBVFrameVariable& RenderResource::GetCBVFrameVariable()
 	{
-		return m_pCBVFrameVariables[frameID].get();
+		return m_CBVFrameVariable;
 	}
 
 	CAULDRON_DX12::DisplayMode RenderResource::GetDisplayMode() const noexcept

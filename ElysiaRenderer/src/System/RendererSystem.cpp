@@ -23,6 +23,7 @@
 #include "RenderResource.h"
 #include "DX12/UploadRingBuffer.h"
 #include "Manager/RenderTargetManager.h"
+#include "Pass/PreDrawPass.h"
 
 extern "C" { __declspec(dllexport) extern const UINT D3D12SDKVersion = 618; }
 extern "C" { __declspec(dllexport) extern const char* D3D12SDKPath = ".\\D3D12\\"; }
@@ -100,6 +101,7 @@ namespace ElysiaRenderer
 		{
 			UpdateDisplay(UserData::GetInstance().displayMode, m_disableLocalDimming);
 		}
+		LightManager::GetInstance().Update();
 		//OnKeyboardInput();
 		SerializeUserData();
 	}
@@ -149,6 +151,7 @@ namespace ElysiaRenderer
 
 		if(BufferManager::GetInstance().GetVertexBuffer()->GetIsReady() && BufferManager::GetInstance().GetIndexBuffer()->GetIsReady())
 		{
+			
 			for (auto& pass : m_passes)
 			{
 				pass->Render();
@@ -174,14 +177,15 @@ namespace ElysiaRenderer
 			.pCommand = m_graphicsContext.get(),
 		};
 
+		m_passes.emplace_back(std::move(std::make_unique<PreDrawPass>(CameraManager::GetInstance().GetMainCamera())));
 		m_passes.emplace_back(std::move(std::make_unique<ShadowPass>(CameraManager::GetInstance().GetMainCamera())));
 		m_passes.emplace_back(std::move(std::make_unique<GBufferPass>(CameraManager::GetInstance().GetMainCamera())));
 		// m_passes.emplace_back(std::move(std::make_unique<AOPass>(m_pCameraManager->GetMainCamera())));
 		m_passes.emplace_back(std::move(std::make_unique<OpaquePass>(CameraManager::GetInstance().GetMainCamera())));
 		// m_passes.emplace_back(std::move(std::make_unique<TonemapPass>(m_pCameraManager->GetMainCamera())));
 		// m_passes.emplace_back(std::move(std::make_unique<BloomPass>(m_pCameraManager->GetMainCamera())));
-		m_passes.emplace_back(std::move(std::make_unique<UIPass>()));
 		m_passes.emplace_back(std::move(std::make_unique<FinalBlitPass>(CameraManager::GetInstance().GetMainCamera())));
+		m_passes.emplace_back(std::move(std::make_unique<UIPass>()));
 		for (auto& pass : m_passes)
 		{ 
 			pass->Setup(passData);

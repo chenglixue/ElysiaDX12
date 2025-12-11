@@ -199,7 +199,7 @@ namespace ElysiaRenderer
 			
 			if (pResourceLayout->IsValidSpace(spaceID))
 			{
-				pResourceLayout->m_spaces[PER_FRAME_SPACE] = RenderResource::GetInstance().GetPerFrameBindResourceSpace();
+				pResourceLayout->m_spaces[PER_FRAME_SPACE] = RenderResource::GetInstance().GetPerFrameBindResourceSpace(m_pDevice->GetFrameID());
 				m_pCommand->SetPipelineResource(PER_FRAME_SPACE, passData.pCurrVariantData->pMeshResourceLayout->m_spaces[PER_FRAME_SPACE]);
 			}
 		}

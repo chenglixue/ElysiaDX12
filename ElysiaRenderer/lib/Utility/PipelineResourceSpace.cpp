@@ -20,6 +20,17 @@ namespace ElysiaRenderer
 
 		return UINT_MAX;
 	}
+
+	void PipelineResourceSpace::Reset()
+	{
+		m_hasDynamicCBV = false;
+		m_isLocked = false;
+		m_pStaticCBV = nullptr;
+		m_dynamicCBVAddress = 0;
+		m_SRVs.clear();
+		m_UAVs.clear();
+		m_expectedBindings.clear();
+	}
 	
 	void PipelineResourceSpace::ExpectCBV(UINT registerIndex)
 	{
@@ -50,10 +61,6 @@ namespace ElysiaRenderer
 	D3D12_GPU_VIRTUAL_ADDRESS PipelineResourceSpace::GetDynamicCBV() const
 	{
 		return m_dynamicCBVAddress;
-	}
-	UINT8*& PipelineResourceSpace::GetCPUPtr() noexcept
-	{
-		return m_CPUPtr;
 	}
 
 	std::vector<PipelineResourceBinding*>& PipelineResourceSpace::GetSRVs()

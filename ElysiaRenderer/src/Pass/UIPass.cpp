@@ -34,6 +34,7 @@ namespace ElysiaRenderer
 		Execute();
 
 		ImGui::Render();
+		
 	}
 
 	void UIPass::Dispose()

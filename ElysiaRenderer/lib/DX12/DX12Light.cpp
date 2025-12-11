@@ -2,6 +2,12 @@
 #include "../Utility/Helper.h"
 #include "DX12Light.h"
 
+#include "DX12Shadow.h"
+#include "RenderResource.h"
+#include "Manager/RenderTargetManager.h"
+#include "Parameter/UserData.h"
+#include "Pass/ShadowPass.h"
+
 namespace ElysiaRenderer
 {
 
@@ -59,4 +65,67 @@ namespace ElysiaRenderer
 
 		return o;
 	}
+	void DX12DirectionLight::CreateMainShadow(float boundSphereRadius, DXGI_FORMAT format)
+	{
+		float resolution;
+		switch (UserData::GetInstance().shadowQuality)
+		{
+		case ShadowQuality::Low:
+			{
+				resolution = 512;
+				break;
+			}
+		case ShadowQuality::Middle:
+			{
+				resolution = 1024;
+				break;
+			}
+		case ShadowQuality::High:
+			{
+				resolution = 2048;
+				break;
+			}
+		case ShadowQuality::VeryHigh:
+			{
+				resolution = 4096;
+				break;
+			}
+		default:
+			{
+				resolution = 1024;
+				ThrowRuntimeError("inivalid shadow quality");
+				break;
+			}
+		}
+		m_pShadowRT = RenderTargetManager::GetInstance().CreateRenderTexture(
+			static_cast<UINT64>(resolution),
+			static_cast<UINT64>(resolution),
+			format,
+			true,
+			RenderResource::GetInstance().GetPropertyName(ShadowPass::RenderTextureIDs::ShadowRTID));
+
+		auto shadowMap = std::make_unique<DX12Shadow>(m_pShadowRT->GetTexture());
+		shadowMap->InitBoundSphere(boundSphereRadius);
+
+		if (m_pMainShadow != nullptr)
+		{
+			m_pMainShadow.reset();
+			m_pMainShadow = std::move(shadowMap);
+		}
+		else
+		{
+			m_pMainShadow = std::move(shadowMap);
+		}
+	}
+	RenderTexture* DX12DirectionLight::GetMainShadowRT() const noexcept
+	{
+		assert(m_pMainShadow != nullptr);
+		return m_pShadowRT;
+	}
+	
+	DX12Shadow* DX12DirectionLight::GetMainShadow() const noexcept
+	{
+		return m_pMainShadow.get();
+	}
+	
 }

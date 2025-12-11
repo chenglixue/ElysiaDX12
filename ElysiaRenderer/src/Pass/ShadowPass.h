@@ -12,25 +12,6 @@ namespace ElysiaRenderer
 	class ShadowPass : public BasePass
 	{
 	public:
-		ShadowPass(DX12Camera* pCamera);
-		virtual ~ShadowPass() override;
-
-		//virtual void Setup(const RenderPassData& renderPasssData) override;
-		virtual void Configure() override;
-		virtual void Execute() override;
-		virtual void Render() override;
-		virtual void UpdatePSO() override;
-		virtual void UpdateVariant() override;
-
-		virtual void Dispose() override;
-
-		RenderTexture* GetShadowRT() const;
-	private:
-		RenderTexture* m_pShadowRT = nullptr;
-		std::unique_ptr<DX12Shadow> m_pMainShadow = nullptr;
-		DX12DirectionLight* m_pMainLight = nullptr;
-		std::vector<Vector2> m_sobolSqeuences; 
-
 		struct ShaderPassIDs
 		{
 			static int ShadowCastPassID;
@@ -52,13 +33,25 @@ namespace ElysiaRenderer
 			static size_t opacity;
 			static size_t cutoff;
 		};
+		
+	public:
+		ShadowPass(DX12Camera* pCamera);
+		virtual ~ShadowPass() override;
 
-		void CreateMainShadow(float boundSphereRadius, DXGI_FORMAT format);
+		//virtual void Setup(const RenderPassData& renderPasssData) override;
+		virtual void Configure() override;
+		virtual void Execute() override;
+		virtual void Render() override;
+		virtual void UpdatePSO() override;
+		virtual void UpdateVariant() override;
+
+		virtual void Dispose() override;
+	private:
+		DX12Light* m_pMainLight;
+		std::vector<Vector2> m_sobolSqeuences;
+
 		void UpdateShadowPassVariant(UINT passIndex);
-		void SetObjectResource(const MeshRender& , PassData& );
-		void SetMaterialResource(const MeshRender& , PassData& );
 		void DrawMesh(UINT passIndex);
-
 		void DrawShadowPass();
 	};
 }

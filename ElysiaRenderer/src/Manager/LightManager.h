@@ -6,6 +6,8 @@
 
 namespace ElysiaRenderer
 {
+	class DX12Shadow;
+
 	class LightManager : public IManager, IUpdate
 	{
 	public:
@@ -23,22 +25,21 @@ namespace ElysiaRenderer
 
 			return *m_instance;
 		}
-
+ 
 		virtual void Init(DX12Device* pDevice) override;
 		virtual void Destory() override;
 		virtual void Update() override;
 
 		DX12DirectionLight* GetMainLight();
-
+		DX12Shadow* GetMainShadow();
+		RenderTexture* GetMainShadowRT() const;
 	private:
-		DX12Device* m_pDevice = nullptr;
-
-		void CreatMainLight();
-
 		static std::unique_ptr<LightManager> m_instance;
 		static std::once_flag m_initInstanceFlag;
+		DX12Device* m_pDevice = nullptr;
 
-		std::unique_ptr<DX12DirectionLight> m_mainLight = nullptr;
+		std::unique_ptr<DX12DirectionLight> m_pMainLight = nullptr;
 
+		void CreatMainLight();
 	};
 }

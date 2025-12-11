@@ -16,34 +16,22 @@ namespace ElysiaRenderer
 {
 	int ShadowPass::ShaderPassIDs::ShadowCastPassID = -1;
 	
-	size_t ShadowPass::RenderTextureIDs::ShadowRTID = SIZE_MAX;
+	size_t ShadowPass::RenderTextureIDs::ShadowRTID = PropertyToID("Shadow RT");
 	
-	size_t ShadowPass::ShaderIDs::shadowNearZ = SIZE_MAX;
-	size_t ShadowPass::ShaderIDs::shadowFarZ = SIZE_MAX;
-	size_t ShadowPass::ShaderIDs::shadowDepthBias = SIZE_MAX;
-	size_t ShadowPass::ShaderIDs::shadowSlopeDepthBias = SIZE_MAX;
-	size_t ShadowPass::ShaderIDs::shadowMaxSlopeDepthBias = SIZE_MAX;
-	size_t ShadowPass::ShaderIDs::g_sobolSequence = SIZE_MAX;
-	size_t ShadowPass::ShaderIDs::worldMatrix = SIZE_MAX;
-	size_t ShadowPass::ShaderIDs::baseColorTexIndex = SIZE_MAX;
-	size_t ShadowPass::ShaderIDs::opacity = SIZE_MAX;
-	size_t ShadowPass::ShaderIDs::cutoff = SIZE_MAX;
+	size_t ShadowPass::ShaderIDs::shadowNearZ = PropertyToID("shadowNearZ");
+	size_t ShadowPass::ShaderIDs::shadowFarZ = PropertyToID("shadowFarZ");
+	size_t ShadowPass::ShaderIDs::shadowDepthBias = PropertyToID("shadowDepthBias");
+	size_t ShadowPass::ShaderIDs::shadowSlopeDepthBias = PropertyToID("shadowSlopeDepthBias");
+	size_t ShadowPass::ShaderIDs::shadowMaxSlopeDepthBias = PropertyToID("shadowMaxSlopeDepthBias");
+	size_t ShadowPass::ShaderIDs::g_sobolSequence = PropertyToID("g_sobolSequence");
+	size_t ShadowPass::ShaderIDs::worldMatrix = PropertyToID("worldMatrix");
+	size_t ShadowPass::ShaderIDs::baseColorTexIndex = PropertyToID("baseColorTexIndex");
+	size_t ShadowPass::ShaderIDs::opacity = PropertyToID("opacity");
+	size_t ShadowPass::ShaderIDs::cutoff = PropertyToID("cutoff");
 
 	ShadowPass::ShadowPass(DX12Camera* pCamera) :
 		BasePass(pCamera)
 	{
-		RenderTextureIDs::ShadowRTID = PropertyToID("Shadow RT");
-		
-		ShaderIDs::shadowNearZ = PropertyToID("shadowNearZ");
-		ShaderIDs::shadowFarZ = PropertyToID("shadowFarZ");
-		ShaderIDs::shadowDepthBias = PropertyToID("shadowDepthBias");
-		ShaderIDs::shadowSlopeDepthBias = PropertyToID("shadowSlopeDepthBias");
-		ShaderIDs::shadowMaxSlopeDepthBias = PropertyToID("shadowMaxSlopeDepthBias");
-		ShaderIDs::g_sobolSequence = PropertyToID("g_sobolSequence");
-		ShaderIDs::worldMatrix = PropertyToID("worldMatrix");
-		ShaderIDs::baseColorTexIndex = PropertyToID("baseColorTexIndex");
-		ShaderIDs::opacity = PropertyToID("opacity");
-		ShaderIDs::cutoff = PropertyToID("cutoff");
 	};
 	ShadowPass::~ShadowPass()
 	{
@@ -57,7 +45,6 @@ namespace ElysiaRenderer
 	void ShadowPass::Configure()
 	{
 		m_pMainLight = LightManager::GetInstance().GetMainLight();
-		CreateMainShadow(1000, DXGI_FORMAT_D24_UNORM_S8_UINT);
 		
 		m_shaderPasses =
 		{ 
@@ -75,38 +62,8 @@ namespace ElysiaRenderer
 	}
 	void ShadowPass::Execute()
 	{
-		m_pMainShadow->UpdateShadowTransform(m_pMainLight);
-		auto GPUAddress = UploadFrameConstant(m_pDevice->GetFrameID(), m_pDevice->GetGlobalUploadBuffer(),
-			[this](CBVFrameVariable* dst)
-			{
-				dst->cameraPosWS = CameraManager::GetInstance().GetMainCamera()->GetPosition4();
-				dst->lightData = std::move(LightManager::GetInstance().GetMainLight()->CreateLightData());
-				dst->frameIndex = m_pDevice->GetFrameIndex();
-				dst->nearZ = CameraManager::GetInstance().GetMainCamera()->GetNearZ();
-				dst->farZ = CameraManager::GetInstance().GetMainCamera()->GetFarZ();
-				dst->OpaqueColorIndex = BufferManager::GetInstance().GetCameraColorRT()->GetResourceHeapIndex();
-				dst->OpaqueDepthIndex = BufferManager::GetInstance().GetCameraDepthRT()->GetResourceHeapIndex();
-				dst->ZBufferParams = GetZBufferParams(CameraManager::GetInstance().GetMainCamera()->GetNearZ(), CameraManager::GetInstance().GetMainCamera()->GetFarZ());
-				dst->ShadowTexIndex = m_pShadowRT->GetResourceHeapIndex();
-				dst->shadowMatrix = m_pMainShadow->GetShadowMat();
-				dst->shadowSize = GetScreenSize(Vector2(m_pMainShadow->GetWidth(), m_pMainShadow->GetHeight()));
-				dst->GBuffer0Index = RenderTargetManager::GetInstance().GetRenderTexture(GBufferPass::RenderTextureIDs::GBufferPass0ID)->GetResourceHeapIndex();
-				dst->GBuffer1Index = RenderTargetManager::GetInstance().GetRenderTexture(GBufferPass::RenderTextureIDs::GBufferPass1ID)->GetResourceHeapIndex();
-				dst->GBuffer2Index = RenderTargetManager::GetInstance().GetRenderTexture(GBufferPass::RenderTextureIDs::GBufferPass2ID)->GetResourceHeapIndex();
-				dst->GBuffer3Index = RenderTargetManager::GetInstance().GetRenderTexture(GBufferPass::RenderTextureIDs::GBufferPass3ID)->GetResourceHeapIndex();
-				dst->GBuffer4Index = RenderTargetManager::GetInstance().GetRenderTexture(GBufferPass::RenderTextureIDs::GBufferPass4ID)->GetResourceHeapIndex();
-				dst->GBuffer5Index = RenderTargetManager::GetInstance().GetRenderTexture(GBufferPass::RenderTextureIDs::GBufferPass5ID)->GetResourceHeapIndex();
-			});
-
-		if (!RenderResource::GetInstance().GetPerFrameBindResourceSpace()->IsLocked())
-		{
-			RenderResource::GetInstance().GetPerFrameBindResourceSpace()->SetDynamicCBV(GPUAddress);
-			RenderResource::GetInstance().GetPerFrameBindResourceSpace()->Lock();
-		}
-		
- 
-		m_pMaterial->SetFloat(ShaderIDs::shadowNearZ, m_pMainShadow->GetNearZ());
-		m_pMaterial->SetFloat(ShaderIDs::shadowFarZ, m_pMainShadow->GetFarZ());
+		m_pMaterial->SetFloat(ShaderIDs::shadowNearZ, LightManager::GetInstance().GetMainShadow()->GetNearZ());
+		m_pMaterial->SetFloat(ShaderIDs::shadowFarZ, LightManager::GetInstance().GetMainShadow()->GetFarZ());
 		m_pMaterial->SetFloat(ShaderIDs::shadowDepthBias, UserData::GetInstance().shadowDepthBias / 100);
 		m_pMaterial->SetFloat(ShaderIDs::shadowSlopeDepthBias, UserData::GetInstance().shadowSlopeDepthBias / 100);
 		m_pMaterial->SetFloat(ShaderIDs::shadowMaxSlopeDepthBias, UserData::GetInstance().shadowMaxSlopeDepthBias / 100);
@@ -119,63 +76,6 @@ namespace ElysiaRenderer
 		Execute();
 
 		DrawShadowPass();
-	}
-	
-	void ShadowPass::CreateMainShadow(float boundSphereRadius, DXGI_FORMAT format)
-	{
-		float resolution;
-		switch (UserData::GetInstance().shadowQuality)
-		{
-		case ShadowQuality::Low:
-		{
-			resolution = 512;
-			break;
-		}
-		case ShadowQuality::Middle:
-		{
-			resolution = 1024;
-			break;
-		}
-		case ShadowQuality::High:
-		{
-			resolution = 2048;
-			break;
-		}
-		case ShadowQuality::VeryHigh:
-		{
-			resolution = 4096;
-			break;
-		}
-		default:
-		{
-			resolution = 1024;
-			ThrowRuntimeError("inivalid shadow quality");
-			break;
-		}
-		}
-		m_pShadowRT = RenderTargetManager::GetInstance().CreateRenderTexture(
-			static_cast<UINT64>(resolution),
-			static_cast<UINT64>(resolution),
-			format,
-			true,
-			RenderResource::GetInstance().GetPropertyName(RenderTextureIDs::ShadowRTID));
-
-		auto shadowMap = std::make_unique<DX12Shadow>(m_pShadowRT->GetTexture());
-		shadowMap->InitBoundSphere(boundSphereRadius);
-
-		if (m_pMainShadow != nullptr)
-		{
-			m_pMainShadow.reset();
-			m_pMainShadow = std::move(shadowMap);
-		}
-		else
-		{
-			m_pMainShadow = std::move(shadowMap);
-		}
-	}
-	RenderTexture* ShadowPass::GetShadowRT() const
-	{
-		return m_pShadowRT;
 	}
 	
 	void ShadowPass::UpdatePSO()
@@ -241,7 +141,7 @@ namespace ElysiaRenderer
 			{
 				RenderTargetDesc RTDesc = CreateDefaultRenderTargetDesc();
 				RTDesc.m_numRenderTargets = 0;
-				RTDesc.m_depthStencilFormat = GetShadowRT()->GetFormat();
+				RTDesc.m_depthStencilFormat = LightManager::GetInstance().GetMainShadowRT()->GetFormat();
 				passData.pPipelineStateObject = PSOManager::GetInstance().GetGraphicsPipelineState(m_pDevice, m_pMaterial.get(), passIndex, RTDesc);
 
 				emplaceResult.first->second = 
@@ -293,22 +193,23 @@ namespace ElysiaRenderer
 
 	void ShadowPass::DrawShadowPass()
 	{
-		m_pCommand->AddBarrier(m_pShadowRT, D3D12_RESOURCE_STATE_DEPTH_WRITE);
-		m_pCommand->ClearDepthStencilTarget(m_pShadowRT, 1.f, 0);
+		auto pShadowRT = LightManager::GetInstance().GetMainShadowRT();
+		m_pCommand->AddBarrier(pShadowRT, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+		m_pCommand->ClearDepthStencilTarget(pShadowRT, 1.f, 0);
 		
-		if (IsRenderTextureReady({m_pShadowRT}))
+		if (IsRenderTextureReady({pShadowRT}))
 		{
 			PipelineInfo pipelineStateData{};
 			pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(ShaderPassIDs::ShadowCastPassID).pPipelineStateObject;
 			pipelineStateData.m_renderTargets = {};
-			pipelineStateData.m_depthStencilTarget = m_pShadowRT->GetTexture();
+			pipelineStateData.m_depthStencilTarget = pShadowRT->GetTexture();
 			m_pCommand->SetPipeline(pipelineStateData);
 			
-			m_pCommand->SetViewport(m_pMainShadow->GetViewport());
-			m_pCommand->SetScissorRect(m_pMainShadow->GetScissorRect());
+			m_pCommand->SetViewport(reinterpret_cast<DX12DirectionLight*>(m_pMainLight)->GetMainShadow()->GetViewport());
+			m_pCommand->SetScissorRect(reinterpret_cast<DX12DirectionLight*>(m_pMainLight)->GetMainShadow()->GetScissorRect());
 			DrawMesh(ShaderPassIDs::ShadowCastPassID);
 		}
 
-		m_pCommand->AddBarrier(m_pShadowRT, D3D12_RESOURCE_STATE_DEPTH_READ);
+		m_pCommand->AddBarrier(pShadowRT, D3D12_RESOURCE_STATE_DEPTH_READ);
 	}
 }

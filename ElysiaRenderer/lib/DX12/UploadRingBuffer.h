@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "RenderResource.h"
 #include "Parameter/CBVParameter.h"
 #include "Utility/Helper.h"
 
@@ -41,20 +42,21 @@ namespace ElysiaRenderer
     };
     
     inline D3D12_GPU_VIRTUAL_ADDRESS UploadFrameConstant(
-        UINT frameID,
-        UploadRingBuffer* pUploadBuffer, std::function<void (ElysiaRenderer::CBVFrameVariable*) > callBack)
+        DX12Device* pDevice,
+        std::function<void (CBVFrameVariable*) > callBack)
     {
-        size_t totalSize = sizeof(ElysiaRenderer::CBVFrameVariable);
+        UINT frameID = pDevice->GetFrameID();
+        UploadRingBuffer* pUploadBuffer = pDevice->GetGlobalUploadBuffer();
+        size_t totalSize = sizeof(CBVFrameVariable);
 
         D3D12_GPU_VIRTUAL_ADDRESS GPUAddress = 0;
-        UINT8* CPUAddress;
- 
+        UINT8* CPUAddress = nullptr;
         if(!pUploadBuffer->AllocateForFrame(frameID, totalSize, GPUAddress, CPUAddress))
         {
             assert(false && "UploadRingBuffer is full! Call Reset() at beginning of frame.");
             return 0;
         }
-        auto* dst = reinterpret_cast<CBVFrameVariable*>(CPUAddress);
+        auto dst = reinterpret_cast<CBVFrameVariable*>(CPUAddress);
 
         callBack(dst);
         

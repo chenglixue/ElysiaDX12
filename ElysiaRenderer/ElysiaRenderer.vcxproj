@@ -260,6 +260,7 @@
     <ClInclude Include="src\Pass\FinalBlitPass.h" />
     <ClInclude Include="src\Pass\GBufferPass.h" />
     <ClInclude Include="src\Pass\OpaquePass.h" />
+    <ClInclude Include="src\Pass\PreDrawPass.h" />
     <ClInclude Include="src\Pass\RenderPassData.h" />
     <ClInclude Include="src\Pass\ShadowPass.h" />
     <ClInclude Include="src\Pass\SkyboxPass.h" />
@@ -3802,6 +3803,7 @@
       <DisableSpecificWarnings>5033;4819;0018;</DisableSpecificWarnings>
       <LinkCompiled>true</LinkCompiled>
     </ClCompile>
+    <ClCompile Include="src\Pass\PreDrawPass.cpp" />
     <ClCompile Include="src\Pass\ShadowPass.cpp">
       <AdditionalIncludeDirectories>C:\Work\ElysiaRenderer\packages\boost.1.87.0\build\..\lib\native\include\;C:\Work\ElysiaRenderer\packages\Microsoft.Direct3D.D3D12.1.618.1\build\native\include;C:\Work\ElysiaRenderer\packages\Microsoft.Direct3D.D3D12.1.618.1\build\native\include\d3dx12;C:\Work\ElysiaRenderer\packages\Microsoft.Direct3D.D3D12.1.618.1\build\native\;C:\Work\ElysiaRenderer\packages\directxtk12_desktop_win10.2025.7.10.1\build\native\..\..\include;C:\Work\ElysiaRenderer\packages\WinPixEventRuntime.1.0.240308001\build\..\Include\WinPixEventRuntime;D:\DX12\ElysiaRenderer\x64\Debug\Shaders;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc\include;D:\DX12\ElysiaDX12\x64\Debug\Assimp\include\assimp;DirectXTK12\Inc;D:\DX12\ElysiaDX12\ElysiaRenderer\AMD\libs\AGS;;C:\Work\ElysiaRenderer\packages\Vcpkg.Nuget.1.5.0\vcpkg_bin\installed\x64-windows\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>

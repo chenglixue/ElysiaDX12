@@ -2,6 +2,7 @@
 #include "LightManager.h"
 
 #include "Parameter/UserData.h"
+#include "src/Pass/ShadowPass.h"
 
 namespace ElysiaRenderer
 {
@@ -18,6 +19,7 @@ namespace ElysiaRenderer
 		assert(pDevice);
 		m_pDevice = pDevice;
 		CreatMainLight();
+		
 	}
 
 	void LightManager::Destory()
@@ -29,27 +31,39 @@ namespace ElysiaRenderer
 	{
 		auto& pUsetData = UserData::GetInstance();
 
-		m_mainLight->m_lightColor = pUsetData.lightColor;
-		m_mainLight->m_lightDir = pUsetData.lightDir;
-		m_mainLight->m_lightIntensity = pUsetData.lightIntensity;
+		m_pMainLight->m_lightColor = pUsetData.lightColor;
+		m_pMainLight->m_lightDir = pUsetData.lightDir;
+		m_pMainLight->m_lightIntensity = pUsetData.lightIntensity;
+
+		m_pMainLight->GetMainShadow()->UpdateShadowTransform(m_pMainLight.get());
 	}
 
 	DX12DirectionLight* LightManager::GetMainLight()
 	{
-		return m_mainLight.get();
+		return m_pMainLight.get();
+	}
+	DX12Shadow* LightManager::GetMainShadow()
+	{
+		return m_pMainLight->GetMainShadow();
+	}
+	RenderTexture* LightManager::GetMainShadowRT() const
+	{
+		return m_pMainLight->GetMainShadowRT();
 	}
 
 	void LightManager::CreatMainLight()
 	{
 		auto& pUserData = UserData::GetInstance();
-		if (m_mainLight != nullptr)
+		if (m_pMainLight != nullptr)
 		{
-			m_mainLight.reset();
-			m_mainLight = std::make_unique<DX12DirectionLight>(pUserData.lightColor, pUserData.lightDir, pUserData.lightIntensity);
+			m_pMainLight.reset();
+			m_pMainLight = std::make_unique<DX12DirectionLight>(pUserData.lightColor, pUserData.lightDir, pUserData.lightIntensity);
 		}
 		else
 		{
-			m_mainLight = std::make_unique<DX12DirectionLight>(pUserData.lightColor, pUserData.lightDir, pUserData.lightIntensity);
+			m_pMainLight = std::make_unique<DX12DirectionLight>(pUserData.lightColor, pUserData.lightDir, pUserData.lightIntensity);
 		}
+		
+		m_pMainLight->CreateMainShadow(1000, DXGI_FORMAT_D24_UNORM_S8_UINT);
 	}
 }
