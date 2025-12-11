@@ -65,8 +65,10 @@ namespace ElysiaRenderer
 
 			AddBarrier(*bufferUpload->m_buffer, D3D12_RESOURCE_STATE_COPY_DEST);
 			memcpy(m_bufferUploadHeap->GetMappedBuffer() + bufferUploadHeapOffset, bufferUpload->m_bufferData.get(), bufferUpload->m_bufferDataSize);
-
-			CopyBufferRegion(*bufferUpload->m_buffer, 0, *m_bufferUploadHeap, bufferUploadHeapOffset, bufferUpload->m_bufferDataSize);
+			D3D12_SUBRESOURCE_DATA subData = { bufferUpload->m_bufferData.get(), (UINT)bufferUpload->m_bufferDataSize, (UINT)bufferUpload->m_bufferDataSize};
+			UpdateSubresources(m_commandList, bufferUpload->m_buffer->GetResource(), m_bufferUploadHeap->GetResource(),
+				bufferUploadHeapOffset, 0, 1, &subData);
+			//CopyBufferRegion(*bufferUpload->m_buffer, 0, *m_bufferUploadHeap, bufferUploadHeapOffset, bufferUpload->m_bufferDataSize);
 
 			AddBarrier(*bufferUpload->m_buffer, D3D12_RESOURCE_STATE_COMMON);
 			

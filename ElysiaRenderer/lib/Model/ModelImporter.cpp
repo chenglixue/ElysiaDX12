@@ -776,6 +776,7 @@ namespace ElysiaModel
 				
 			BufferManager::GetInstance().SetVertexBufferView(bufferView);
 		};
+		memcpy(pBufferUpload->m_bufferData.get(), m_pVertexData, bufferCreationDesc.m_size);
 
 		m_pDevice->GetUploadContext()->AddBufferToUploads(std::move(pBufferUpload));
 
@@ -806,6 +807,7 @@ namespace ElysiaModel
 				
 			BufferManager::GetInstance().SetIndexBufferView(bufferView);
 		};
+		memcpy(pBufferUpload->m_bufferData.get(), m_pIndexData, bufferCreationDesc.m_size);
 
 		m_pDevice->GetUploadContext()->AddBufferToUploads(std::move(pBufferUpload));
 

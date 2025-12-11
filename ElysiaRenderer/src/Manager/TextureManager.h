@@ -12,13 +12,14 @@ namespace ElysiaRenderer
 		TextureManager(const TextureManager& rhs) = delete;
 		TextureManager& operator=(TextureManager& rhs) = delete;
 		TextureManager(TextureManager&& rhs) = default;
-		~TextureManager();
+		~TextureManager(); 
 
 		static TextureManager& GetInstance()
 		{
-			std::call_once(m_initInstanceFlag, []() {
+			std::call_once(m_initInstanceFlag, []()
+			{
 				m_instance.reset(new TextureManager());
-				});
+			});
 
 			return *m_instance;
 		}

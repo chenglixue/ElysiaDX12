@@ -2,10 +2,6 @@
 #include <d3d12.h>
 #include <cstdint>
 
-// ================================
-// 简化版 d3dx12.h：仅包含 UpdateSubresources 所需定义
-// ================================
-
 namespace Microsoft {
 namespace Direct3D {
 namespace Helpers {
@@ -90,6 +86,46 @@ inline UINT64 UpdateSubresources(
     }
 
     return totalSize;
+}
+
+    inline UINT64 UpdateSubresources(
+    _In_ ID3D12GraphicsCommandList* pCmdList,
+    _In_ ID3D12Resource* pDestinationResource,
+    _In_ ID3D12Resource* pIntermediate,
+    UINT64 IntermediateOffset,
+    _In_range_(0,D3D12_REQ_SUBRESOURCES) UINT FirstSubresource,
+    _In_range_(0,D3D12_REQ_SUBRESOURCES-FirstSubresource) UINT NumSubresources,
+    _In_reads_(NumSubresources) const D3D12_SUBRESOURCE_DATA* pSrcData) noexcept
+{
+    UINT64 RequiredSize = 0;
+    const auto MemToAlloc = static_cast<UINT64>(sizeof(D3D12_PLACED_SUBRESOURCE_FOOTPRINT) + sizeof(UINT) + sizeof(UINT64)) * NumSubresources;
+    if (MemToAlloc > SIZE_MAX)
+    {
+        return 0;
+    }
+    void* pMem = HeapAlloc(GetProcessHeap(), 0, static_cast<SIZE_T>(MemToAlloc));
+    if (pMem == nullptr)
+    {
+        return 0;
+    }
+    auto pLayouts = static_cast<D3D12_PLACED_SUBRESOURCE_FOOTPRINT*>(pMem);
+    auto pRowSizesInBytes = reinterpret_cast<UINT64*>(pLayouts + NumSubresources);
+    auto pNumRows = reinterpret_cast<UINT*>(pRowSizesInBytes + NumSubresources);
+
+#if defined(_MSC_VER) || !defined(_WIN32)
+    const auto Desc = pDestinationResource->GetDesc();
+#else
+    D3D12_RESOURCE_DESC tmpDesc;
+    const auto& Desc = *pDestinationResource->GetDesc(&tmpDesc);
+#endif
+    ID3D12Device* pDevice = nullptr;
+    pDestinationResource->GetDevice(IID_ID3D12Device, reinterpret_cast<void**>(&pDevice));
+    pDevice->GetCopyableFootprints(&Desc, FirstSubresource, NumSubresources, IntermediateOffset, pLayouts, pNumRows, pRowSizesInBytes, &RequiredSize);
+    pDevice->Release();
+
+    const UINT64 Result = UpdateSubresources(pCmdList, pDestinationResource, pIntermediate, FirstSubresource, NumSubresources, RequiredSize, pLayouts, pNumRows, pRowSizesInBytes, pSrcData);
+    HeapFree(GetProcessHeap(), 0, pMem);
+    return Result;
 }
 
 }}} // namespace Microsoft::Direct3D::Helpers
