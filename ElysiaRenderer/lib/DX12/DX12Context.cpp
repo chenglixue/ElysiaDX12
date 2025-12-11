@@ -139,13 +139,13 @@ namespace ElysiaRenderer
 	{
 		for (UINT currSubResourceIndex = 0; currSubResourceIndex < numSubResources; ++currSubResourceIndex)
 		{
-			if (dest.GetResource()->GetDesc().Format != source.GetResource()->GetDesc().Format) 
-			{
-				ElysiaHelper::AssertError(
-					"CopyTextureRegion: Source and destination resource formats must match. "
-					"Use UpdateSubresources or pre-convert data.");
-				return;
-			}
+			// if (dest.GetResource()->GetDesc().Format != source.GetResource()->GetDesc().Format) 
+			// {
+			// 	ElysiaHelper::AssertError(
+			// 		"CopyTextureRegion: Source and destination resource formats must match. "
+			// 		"Use UpdateSubresources or pre-convert data.");
+			// 	return;
+			// }
 			
 			D3D12_TEXTURE_COPY_LOCATION destLocation{};
 			destLocation.pResource = dest.GetResource();

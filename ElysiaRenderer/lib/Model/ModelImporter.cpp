@@ -800,7 +800,7 @@ namespace ElysiaModel
 		{
 			D3D12_INDEX_BUFFER_VIEW bufferView
 			{
-				.BufferLocation = BufferManager::GetInstance().GetVertexBuffer()->GetGPUAddress(),
+				.BufferLocation = BufferManager::GetInstance().GetIndexBuffer()->GetGPUAddress(),
 				.SizeInBytes = static_cast<UINT>(pBufferUpload->m_bufferDataSize),
 				.Format = DXGI_FORMAT_R16_UINT,
 			};
@@ -840,8 +840,6 @@ namespace ElysiaModel
 			pCurrMeshRender->m_CBVObjectParameter->normalTexIndex = m_pMaterialData[meshIndex].normalTexIndex;
 			pCurrMeshRender->m_CBVObjectParameter->metallicTexIndex = m_pMaterialData[meshIndex].metallicTexIndex;
 			pCurrMeshRender->m_CBVObjectParameter->roughnessTexIndex = m_pMaterialData[meshIndex].roughnessTexIndex;
-
-			//pCurrMeshRender->m_CBVObjectParameter->vertexIndex = m_pBufferManager->GetVertexBuffer()->GetResourceHeapIndex();
 		}
 	}
 

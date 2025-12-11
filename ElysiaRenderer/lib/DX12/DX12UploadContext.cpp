@@ -86,11 +86,11 @@ namespace ElysiaRenderer
 			}
 
 			memcpy(m_textureUploadHeap->GetMappedBuffer() + texUploadHeapOffset, currUpload->m_pTextureData.get(), currUpload->m_textureDataSize);
-			UpdateSubresources(m_commandList, 
-				currUpload->m_textureBuffer->GetResource(), m_textureUploadHeap->GetResource(), texUploadHeapOffset,
-				0, currUpload->m_numSubResources, currUpload->m_subResourceLayouts.data());
-			// CopyTextureRegion(*currUpload->m_textureBuffer, *m_textureUploadHeap, texUploadHeapOffset,
-			// 	currUpload->m_subResourceLayouts, currUpload->m_numSubResources);
+			// UpdateSubresources(m_commandList, 
+			// 	currUpload->m_textureBuffer->GetResource(), m_textureUploadHeap->GetResource(), texUploadHeapOffset,
+			// 	0, currUpload->m_numSubResources, currUpload->m_subResourceLayouts.data());
+			CopyTextureRegion(*currUpload->m_textureBuffer, *m_textureUploadHeap, texUploadHeapOffset,
+				currUpload->m_subResourceLayouts, currUpload->m_numSubResources);
 
 			texUploadHeapOffset += currUpload->m_textureDataSize;
 			texUploadHeapOffset = AlignU64(texUploadHeapOffset, 512);

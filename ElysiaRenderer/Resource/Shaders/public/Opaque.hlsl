@@ -80,7 +80,6 @@ PSOutput PS(PSInput i)
     inputParam.ScreenVector = GetScreenVectorWS(cameraPosWS.xyz, positionWS);
     
     LightData mainLightData = GetMainLight(mainLight);
-    float shadow = SunShadowVisibility(inputParam.PositionWS, inputParam.ScreenUV, shadowSize, shadowMatrix);
     
     // Texture2D<float> AOTex = ResourceDescriptorHeap[g_AOIndex];
     // SamplerState warpLinearSampler = SamplerDescriptorHeap[WarpLinearSampler];

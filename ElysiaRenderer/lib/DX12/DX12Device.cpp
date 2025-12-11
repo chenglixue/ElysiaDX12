@@ -521,17 +521,17 @@ namespace ElysiaRenderer
 			}
 			DirectX::ScratchImage tempImage;
 			auto loadResult = DirectX::LoadFromWICFile(texturePath.c_str(), DirectX::WIC_FLAGS_NONE, nullptr, tempImage);
-			if (loadResult != S_OK)
-			{
-				if (!LoadWithSTB(texturePath, tempImage))
-				{
-					// PrintPathInfo(texturePath);
-					// TestFileAccess(texturePath);
-					//std::cout << WstringToString(textureCreationDesc.texturePath) + " not found" << std::endl;
-					return nullptr;
-				}
-				
-			}
+			// if (loadResult != S_OK)
+			// {
+			// 	if (!LoadWithSTB(texturePath, tempImage))
+			// 	{
+			// 		// PrintPathInfo(texturePath);
+			// 		// TestFileAccess(texturePath);
+			// 		//std::cout << WstringToString(textureCreationDesc.texturePath) + " not found" << std::endl;
+			// 		return nullptr;
+			// 	}
+			// 	
+			// }
 			ThrowIfFailed(DirectX::GenerateMipMaps(*tempImage.GetImage(0, 0, 0), DirectX::TEX_FILTER_DEFAULT, 0, *imageData, false));
 		}
 		///

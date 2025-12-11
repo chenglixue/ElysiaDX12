@@ -238,7 +238,8 @@ namespace ElysiaRenderer
 	}
 	void MaterialParameterBlock::SetBool(size_t nameHash, bool v)
 	{
-		SetOrAdd(nameHash, Type::BOOL, v ? 1.f : 0.f);
+		float fv = v ? 1.f : 0.f;
+		SetOrAdd(nameHash, Type::BOOL, fv);
 	}
 
 	void MaterialParameterBlock::SetFloat2(size_t nameHash, const Vector2& v)
