@@ -1,6 +1,7 @@
 #pragma once
 #include "../DX12/DX12TextureBuffer.h"
 #include "RenderTextureUtility.h"
+#include "Manager/TextureManager.h"
 
 namespace ElysiaRenderer
 {
@@ -28,7 +29,7 @@ namespace ElysiaRenderer
 		UINT GetResourceHeapIndex() const noexcept;
 
 	private:
-		std::unique_ptr<DX12TextureResource> m_pTexture;
+		TextureManager::Handle m_handle;
 		bool m_isDepth = false;
 		DXGI_FORMAT m_depthFormat;
 		UINT m_MSAASamples = 0;

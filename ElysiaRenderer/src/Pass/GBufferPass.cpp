@@ -8,12 +8,12 @@ namespace ElysiaRenderer
 {
 	int GBufferPass::ShaderPassIDs::GBufferPassID = -1;
 	
-	size_t GBufferPass::RenderTextureIDs::GBufferPass0ID = PropertyToID("GBuffer_0");
-	size_t GBufferPass::RenderTextureIDs::GBufferPass1ID = PropertyToID("GBuffer_1");
-	size_t GBufferPass::RenderTextureIDs::GBufferPass2ID = PropertyToID("GBuffer_2");
-	size_t GBufferPass::RenderTextureIDs::GBufferPass3ID = PropertyToID("GBuffer_3");
-	size_t GBufferPass::RenderTextureIDs::GBufferPass4ID = PropertyToID("GBuffer_4");
-	size_t GBufferPass::RenderTextureIDs::GBufferPass5ID = PropertyToID("GBuffer_5");
+	size_t GBufferPass::RenderTextureIDs::GBuffer0ID = PropertyToID("GBuffer_0");
+	size_t GBufferPass::RenderTextureIDs::GBuffer1ID = PropertyToID("GBuffer_1");
+	size_t GBufferPass::RenderTextureIDs::GBuffer2ID = PropertyToID("GBuffer_2");
+	size_t GBufferPass::RenderTextureIDs::GBuffer3ID = PropertyToID("GBuffer_3");
+	size_t GBufferPass::RenderTextureIDs::GBuffer4ID = PropertyToID("GBuffer_4");
+	size_t GBufferPass::RenderTextureIDs::GBuffer5ID = PropertyToID("GBuffer_5");
 
 	size_t GBufferPass::ShaderIDs::screenSize = PropertyToID("screenSize");
 	size_t GBufferPass::ShaderIDs::viewMatrix = PropertyToID("viewMatrix");
@@ -37,12 +37,6 @@ namespace ElysiaRenderer
 	size_t GBufferPass::ShaderIDs::roughnessIntensity = PropertyToID("roughnessIntensity");
 	size_t GBufferPass::ShaderIDs::ambientCubemapIntensity = PropertyToID("ambientCubemapIntensity");
 	size_t GBufferPass::ShaderIDs::g_hasNormalTex = PropertyToID("g_hasNormalTex");
-	size_t GBufferPass::ShaderIDs::GBuffer0Index = SIZE_MAX;
-	size_t GBufferPass::ShaderIDs::GBuffer1Index = SIZE_MAX;
-	size_t GBufferPass::ShaderIDs::GBuffer2Index = SIZE_MAX;
-	size_t GBufferPass::ShaderIDs::GBuffer3Index = SIZE_MAX;
-	size_t GBufferPass::ShaderIDs::GBuffer4Index = SIZE_MAX;
-	size_t GBufferPass::ShaderIDs::GBuffer5Index = SIZE_MAX;
 	
 	GBufferPass::GBufferPass(DX12Camera* pCamera) :
 		BasePass(pCamera)
@@ -117,7 +111,7 @@ namespace ElysiaRenderer
 			auto pGBufferRT = RenderTargetManager::GetInstance().CreateRenderTexture(static_cast<UINT64>(m_renderSize.x),
 				static_cast<UINT64>(m_renderSize.y),
 				DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
-				RenderResource::GetInstance().GetPropertyName(RenderTextureIDs::GBufferPass0ID));
+				RenderResource::GetInstance().GetPropertyName(RenderTextureIDs::GBuffer0ID));
 
 			m_GBufferRTs.emplace_back(std::move(pGBufferRT));
 		}
@@ -127,7 +121,7 @@ namespace ElysiaRenderer
 			auto pGBufferRT = RenderTargetManager::GetInstance().CreateRenderTexture(static_cast<UINT64>(m_renderSize.x),
 				static_cast<UINT64>(m_renderSize.y),
 				DXGI_FORMAT_R8G8B8A8_UNORM,
-				RenderResource::GetInstance().GetPropertyName(RenderTextureIDs::GBufferPass1ID));
+				RenderResource::GetInstance().GetPropertyName(RenderTextureIDs::GBuffer1ID));
 
 			m_GBufferRTs.emplace_back(std::move(pGBufferRT));
 		}
@@ -137,7 +131,7 @@ namespace ElysiaRenderer
 			auto pGBufferRT = RenderTargetManager::GetInstance().CreateRenderTexture(static_cast<UINT64>(m_renderSize.x),
 				static_cast<UINT64>(m_renderSize.y),
 				DXGI_FORMAT_R8G8B8A8_UNORM,
-				RenderResource::GetInstance().GetPropertyName(RenderTextureIDs::GBufferPass2ID));
+				RenderResource::GetInstance().GetPropertyName(RenderTextureIDs::GBuffer2ID));
 
 			m_GBufferRTs.emplace_back(std::move(pGBufferRT));
 		}
@@ -147,7 +141,7 @@ namespace ElysiaRenderer
 			auto pGBufferRT = RenderTargetManager::GetInstance().CreateRenderTexture(static_cast<UINT64>(m_renderSize.x),
 				static_cast<UINT64>(m_renderSize.y),
 				DXGI_FORMAT_R10G10B10A2_UNORM,
-				RenderResource::GetInstance().GetPropertyName(RenderTextureIDs::GBufferPass3ID));
+				RenderResource::GetInstance().GetPropertyName(RenderTextureIDs::GBuffer3ID));
 
 			m_GBufferRTs.emplace_back(std::move(pGBufferRT));
 		}
@@ -157,7 +151,7 @@ namespace ElysiaRenderer
 			auto pGBufferRT = RenderTargetManager::GetInstance().CreateRenderTexture(static_cast<UINT64>(m_renderSize.x),
 				static_cast<UINT64>(m_renderSize.y),
 				DXGI_FORMAT_R10G10B10A2_UNORM,
-				RenderResource::GetInstance().GetPropertyName(RenderTextureIDs::GBufferPass4ID));
+				RenderResource::GetInstance().GetPropertyName(RenderTextureIDs::GBuffer4ID));
 
 			m_GBufferRTs.emplace_back(std::move(pGBufferRT));
 		}
@@ -167,7 +161,7 @@ namespace ElysiaRenderer
 			auto pGBufferRT = RenderTargetManager::GetInstance().CreateRenderTexture(static_cast<UINT64>(m_renderSize.x),
 				static_cast<UINT64>(m_renderSize.y),
 				DXGI_FORMAT_R16G16B16A16_SNORM,
-				RenderResource::GetInstance().GetPropertyName(RenderTextureIDs::GBufferPass5ID));
+				RenderResource::GetInstance().GetPropertyName(RenderTextureIDs::GBuffer5ID));
 
 			m_GBufferRTs.emplace_back(std::move(pGBufferRT));
 		}

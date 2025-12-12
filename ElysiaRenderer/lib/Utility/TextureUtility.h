@@ -110,6 +110,6 @@ namespace ElysiaRenderer
 		std::unique_ptr<uint8_t[]> m_pTextureData;
 		size_t m_textureDataSize = 0;
 		UINT m_numSubResources = 0;
-		SubResourceLayouts m_subResourceLayouts{ 0 };
+		ElysiaHelper::SubResourceLayouts m_subResourceLayouts{ 0 };
 	};
 }

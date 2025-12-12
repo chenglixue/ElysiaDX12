@@ -10,12 +10,12 @@ namespace ElysiaRenderer
 	public:
 		struct RenderTextureIDs
 		{
-			static size_t GBufferPass0ID;
-			static size_t GBufferPass1ID;
-			static size_t GBufferPass2ID;
-			static size_t GBufferPass3ID;
-			static size_t GBufferPass4ID;
-			static size_t GBufferPass5ID;
+			static size_t GBuffer0ID;
+			static size_t GBuffer1ID;
+			static size_t GBuffer2ID;
+			static size_t GBuffer3ID;
+			static size_t GBuffer4ID;
+			static size_t GBuffer5ID;
 		};
 		
 		GBufferPass(DX12Camera* pCamera);

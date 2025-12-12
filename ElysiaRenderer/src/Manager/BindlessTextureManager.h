@@ -1,51 +1,56 @@
 ﻿#pragma once
 #include "lib/Utility/Helper.h"
 #include "IManager.h"
+#include "DX12/DX12DescriptorHeapHandle.h"
+#include "Utility/TextureUtility.h"
 
 namespace ElysiaRenderer
 {
+	class DX12RenderPassDescriptorHeap;
 	class DX12TextureResource;
+	class DX12StagingDescriptorHeap;
+}
+
+namespace ElysiaRenderer
+{
+	using namespace ElysiaHelper;
+	
 	class BindlessTextureManager : IManager
 	{
 	public:
-		struct Handle
+		struct TextureHandle
 		{
-			UINT index;
-			bool IsValid() const { return index != ~0u; }
-			static Handle Invalid() { return { ~0u }; }
+			UINT textureIndex;
+			UINT resourceHeapIndex = UINT_MAX;
+			bool IsValid() const { return textureIndex != ~0u && resourceHeapIndex != UINT_MAX; }
+			static TextureHandle Invalid() { return { ~0u }; }
 		};
 		
 	public:
-		static BindlessTextureManager& GetInstance()
-		{
-			std::call_once(m_initInstanceFlag, []()
-			{
-				m_instance.reset(new BindlessTextureManager());
-			});
-
-			return *m_instance;
-		}
-		
 		virtual void Init(DX12Device* pDevice) override;
 		virtual void Destory() override;
 		
-		Handle CreateTextureFromFile(const std::wstring& filePath, bool isSRGB = false);
-		Handle CreateCubeMapFromFile(const std::wstring& filePath, bool isSRGB = false);
+		TextureHandle CreateTextureFromFile(const std::wstring& filePath, bool isSRGB = false);
+		TextureHandle CreateTexture(const D3D12_RESOURCE_DESC& resourceDesc, TexTypeFlags flag, std::wstring name = L"");
 		
-		D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle(UINT index) const ;
-		D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(UINT index) const ;
-		D3D12_GPU_DESCRIPTOR_HANDLE GetGPUBaseHandle() const noexcept;
-		
-		DX12TextureResource* GetTexture(Handle handle) const noexcept;
+		DX12TextureResource* GetTexture(TextureHandle handle) const noexcept;
 		UINT GetMaxCapicity() const noexcept;
-		UINT GetUsedCount() const;
+		UINT GetUsedCount() const noexcept;
 		
 		void Clear();
 		
 	private:
 		DX12Device* m_pDevice = nullptr;
-		static std::unique_ptr<BindlessTextureManager> m_instance;
-		static std::once_flag m_initInstanceFlag;
+		
+		std::mutex                  m_mutex;
+		
+		std::vector<std::unique_ptr<DX12TextureResource>> m_textures;
+		DX12DescriptorHeapHandle m_startHeapHandle;
+		
+		static inline constexpr UINT m_maxTextureNum = 4096;
+
+		std::unique_ptr<DX12TextureResource>	LoadTextureFromFile_L(const std::wstring& filePath, bool isSRGB);
+		std::unique_ptr<DX12TextureResource>	CreateTexture_L(const D3D12_RESOURCE_DESC& resourceDesc, TexTypeFlags flag, std::wstring name = L"");
 	};
 }
 

@@ -18,32 +18,32 @@ namespace ElysiaRenderer
 		assert(desc.Format != DXGI_FORMAT_UNKNOWN);
 		assert(desc.MSAASamples > 0);
 
-		TexCreateDesc textureCreateDesc{};
-		textureCreateDesc.m_resouceDesc.Width = desc.Width;
-		textureCreateDesc.m_resouceDesc.Height = static_cast<UINT>(desc.Height);
-		textureCreateDesc.m_resouceDesc.MipLevels = desc.MipmapLevels;
+		D3D12_RESOURCE_DESC resouceDesc{};
+		resouceDesc.Width = desc.Width;
+		resouceDesc.Height = static_cast<UINT>(desc.Height);
+		resouceDesc.MipLevels = desc.MipmapLevels;
 		switch (desc.Dimension)
 		{
 			case TextureDimension::Tex2D :
 			{
-				textureCreateDesc.m_resouceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+				resouceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 				break;
 			}
 			case TextureDimension::Tex2DArray:
 			{
-				textureCreateDesc.m_resouceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-				textureCreateDesc.m_resouceDesc.DepthOrArraySize = static_cast<UINT16>(desc.ArraySize);
+				resouceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+				resouceDesc.DepthOrArraySize = static_cast<UINT16>(desc.ArraySize);
 				break;
 			}
 			case TextureDimension::Tex3D:
 			{
-				textureCreateDesc.m_resouceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE3D;
+				resouceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE3D;
 				break;
 			}
 			case TextureDimension::Cube:
 			{
-				textureCreateDesc.m_resouceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-				textureCreateDesc.m_resouceDesc.DepthOrArraySize = 6;
+				resouceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+				resouceDesc.DepthOrArraySize = 6;
 				break;
 			}
 			default:
@@ -52,17 +52,20 @@ namespace ElysiaRenderer
 				break;
 			}
 		}
-		textureCreateDesc.m_resouceDesc.Format = desc.Format;
-		textureCreateDesc.m_resouceDesc.SampleDesc.Count = static_cast<UINT>(desc.MSAASamples);
-		textureCreateDesc.m_resouceDesc.SampleDesc.Quality = desc.MSAASamples > 1 ? StandardMSAAPattern : 0;
+		resouceDesc.Format = desc.Format;
+		resouceDesc.SampleDesc.Count = static_cast<UINT>(desc.MSAASamples);
+		resouceDesc.SampleDesc.Quality = desc.MSAASamples > 1 ? StandardMSAAPattern : 0;
+		resouceDesc.Alignment = 0;
+		resouceDesc.DepthOrArraySize = desc.ArraySize;
+		resouceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+		resouceDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 
-		textureCreateDesc.m_name = desc.Name;
-		textureCreateDesc.m_typeFlag = TexTypeFlags::SRV;
-		textureCreateDesc.m_typeFlag = desc.IsDepth ? 
-			textureCreateDesc.m_typeFlag | TexTypeFlags::DSV : textureCreateDesc.m_typeFlag | TexTypeFlags::RTV;
+		TexTypeFlags typeFlag = TexTypeFlags::SRV;
+		typeFlag = desc.IsDepth ? 
+			typeFlag | TexTypeFlags::DSV : typeFlag | TexTypeFlags::RTV;
 		if (desc.EnableRandomWrite)
 		{
-			textureCreateDesc.m_typeFlag = textureCreateDesc.m_typeFlag | TexTypeFlags::UAV;
+			typeFlag = typeFlag | TexTypeFlags::UAV;
 		}
 
 		if (desc.IsDepth)
@@ -71,48 +74,48 @@ namespace ElysiaRenderer
 			m_isDepth = true;
 		}
 
-		m_pTexture = std::move(pDevice->CreateTexture(textureCreateDesc));
+		m_handle = std::move(TextureManager::GetInstance().CreateTexture(resouceDesc, typeFlag, desc.Name));
 	}
 
 	void RenderTexture::ShutDowm()
 	{
-		if (m_pTexture)
+		if (m_handle.IsValid())
 		{
-			m_pTexture.reset();
+			TextureManager::GetInstance().Release(m_handle);
 		}
 	}
 
 	DX12TextureResource* RenderTexture::GetTexture() const
 	{
-		return m_pTexture.get();
+		return TextureManager::GetInstance().GetTexture(m_handle);
 	}
 	UINT64 RenderTexture::GetSRVIndex() const
 	{
-		return m_pTexture->GetSRVDescriptor().GetHeapIndex();
+		return GetTexture()->GetSRVDescriptor().GetHeapIndex();
 	}
 	UINT64 RenderTexture::GetWidth() const
 	{
-		return m_pTexture->GetResourceDesc().Width;
+		return GetTexture()->GetResourceDesc().Width;
 	}
 	UINT64 RenderTexture::GetHeight() const
 	{
-		return m_pTexture->GetResourceDesc().Height;
+		return GetTexture()->GetResourceDesc().Height;
 	}
 	DXGI_FORMAT RenderTexture::GetFormat() const
 	{
-		return m_isDepth ? m_depthFormat : m_pTexture->GetResourceDesc().Format;
+		return m_isDepth ? m_depthFormat : GetTexture()->GetResourceDesc().Format;
 	}
 	ID3D12Resource* RenderTexture::GetResource() const
 	{
-		return m_pTexture->GetResource();
+		return GetTexture()->GetResource();
 	}
 	UINT64 RenderTexture::GetSubresourceIndex(UINT64 mipmapLevel, UINT64 arraySlice) const
 	{
-		return arraySlice * m_pTexture->GetResourceDesc().MipLevels + mipmapLevel;
+		return arraySlice * GetTexture()->GetResourceDesc().MipLevels + mipmapLevel;
 	}
 	UINT RenderTexture::GetResourceHeapIndex() const noexcept
 	{
-		return m_pTexture->GetResourceHeapIndex();
+		return GetTexture()->GetResourceHeapIndex();
 	}
 
 }

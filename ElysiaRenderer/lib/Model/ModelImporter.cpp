@@ -611,85 +611,58 @@ namespace ElysiaModel
 		for (UINT materialIndex = 0; materialIndex < m_meshData.materialCount; ++materialIndex)
 		{
 			std::wstring diffusePath = basePath + RemoveExt(m_pMaterialData[materialIndex].texDiffusePath);
-			texBufferCreateDesc.texturePath = diffusePath + L".png";
-			texBufferCreateDesc.isSRGB = true;
-			auto diffuseTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
-			if (diffuseTex != nullptr)
+			
+			TextureManager::Handle diffuseHandle = std::filesystem::exists(diffusePath + L".png") ?
+				std::move(TextureManager::GetInstance().LoadDynamicTexture(diffusePath + L".png", true)) :
+				std::move(TextureManager::GetInstance().LoadDynamicTexture(assetsPath + DefaultWhiteTexturePath, true)); 
+			if (diffuseHandle.IsValid())
 			{
-				m_pMaterialData[materialIndex].diffuseTexIndex = diffuseTex->GetResourceHeapIndex();
+				m_pMaterialData[materialIndex].diffuseTexIndex = diffuseHandle.GetResourceHeapIndex();
 			}
-			else
-			{
-				texBufferCreateDesc.texturePath = assetsPath + DefaultWhiteTexturePath;
-				diffuseTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
-				assert(diffuseTex != nullptr);
-				m_pMaterialData[materialIndex].diffuseTexIndex = diffuseTex->GetResourceHeapIndex();
-			}
-			TextureManager::GetInstance().AddTextureResource(std::move(diffuseTex));
 
 			std::wstring metallicPath = basePath + RemoveExt(m_pMaterialData[materialIndex].texMetallicPath);
-			texBufferCreateDesc.texturePath = metallicPath + L".png";
-			texBufferCreateDesc.isSRGB = true;
-			auto metallicTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
-			if (metallicTex == nullptr)
+			TextureManager::Handle metallicHandle = std::filesystem::exists(metallicPath + L".png") ?
+				std::move(TextureManager::GetInstance().LoadDynamicTexture(metallicPath + L".png", true)) :
+				std::move(TextureManager::GetInstance().LoadDynamicTexture(RemoveLastUnderscoreAndAfter(diffusePath) + L"_Metallic.png", true));
+			if (metallicHandle.IsValid())
 			{
-				texBufferCreateDesc.texturePath = RemoveLastUnderscoreAndAfter(diffusePath) + L"_Metallic.png";
-				metallicTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
-			}
-			if (metallicTex != nullptr)
-			{
-				m_pMaterialData[materialIndex].metallicTexIndex = metallicTex->GetResourceHeapIndex();
+				m_pMaterialData[materialIndex].metallicTexIndex = metallicHandle.GetResourceHeapIndex();
 			}
 			else
 			{
-				texBufferCreateDesc.texturePath = assetsPath + DefaultBlackTexturePath;
-				metallicTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
-				assert(metallicTex != nullptr);
-				m_pMaterialData[materialIndex].metallicTexIndex = metallicTex->GetResourceHeapIndex();
+				metallicHandle = std::move(TextureManager::GetInstance().LoadDynamicTexture(assetsPath + DefaultBlackTexturePath, true));
+				assert(metallicHandle.IsValid());
+				m_pMaterialData[materialIndex].metallicTexIndex = metallicHandle.GetResourceHeapIndex();
 			}
-			TextureManager::GetInstance().AddTextureResource(std::move(metallicTex));
-
+			
 			std::wstring roughnessPath = basePath + RemoveExt(m_pMaterialData[materialIndex].texRoughnessPath);
-			texBufferCreateDesc.texturePath = roughnessPath + L".png";
-			texBufferCreateDesc.isSRGB = true;
-			auto roughnessTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
-			if (roughnessTex == nullptr)
+			TextureManager::Handle roughnessHandle = std::filesystem::exists(roughnessPath + L".png") ?
+				std::move(TextureManager::GetInstance().LoadDynamicTexture(roughnessPath + L".png", true)) :
+				std::move(TextureManager::GetInstance().LoadDynamicTexture(RemoveLastUnderscoreAndAfter(diffusePath) + L"_Roughness.png", true));
+			if (roughnessHandle.IsValid())
 			{
-				texBufferCreateDesc.texturePath = RemoveLastUnderscoreAndAfter(diffusePath) + L"_Roughness.png";
-				roughnessTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
-			}
-			if (roughnessTex != nullptr)
-			{
-				m_pMaterialData[materialIndex].roughnessTexIndex = roughnessTex->GetResourceHeapIndex();
+				m_pMaterialData[materialIndex].roughnessTexIndex = roughnessHandle.GetResourceHeapIndex();
 			}
 			else
 			{
-				texBufferCreateDesc.texturePath = assetsPath + DefaultWhiteTexturePath;
-				roughnessTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
-				assert(roughnessTex != nullptr);
-				m_pMaterialData[materialIndex].roughnessTexIndex = roughnessTex->GetResourceHeapIndex();
+				roughnessHandle = std::move(TextureManager::GetInstance().LoadDynamicTexture(assetsPath + DefaultWhiteTexturePath, true));
+				assert(roughnessHandle.IsValid());
+				m_pMaterialData[materialIndex].roughnessTexIndex = roughnessHandle.GetResourceHeapIndex();
 			}
-			TextureManager::GetInstance().AddTextureResource(std::move(roughnessTex));
 
 			std::wstring normalPath = basePath + RemoveExt(m_pMaterialData[materialIndex].texNormalPath);
-			texBufferCreateDesc.texturePath = normalPath + L".png";
-			texBufferCreateDesc.isSRGB = false;
-			auto normalTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
-			if (normalTex == nullptr)
+			TextureManager::Handle normalHandle = std::filesystem::exists(normalPath + L".png") ?
+				std::move(TextureManager::GetInstance().LoadDynamicTexture(normalPath + L".png")) :
+				std::move(TextureManager::GetInstance().LoadDynamicTexture(RemoveLastUnderscoreAndAfter(diffusePath) + L"_Normal.png"));
+			if (normalHandle.IsValid())
 			{
-				texBufferCreateDesc.texturePath = RemoveLastUnderscoreAndAfter(diffusePath) + L"_Normal.png";
-				normalTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
-			}
-			if (normalTex != nullptr)
-			{
-				m_pMaterialData[materialIndex].normalTexIndex = normalTex->GetResourceHeapIndex();
+				m_pMaterialData[materialIndex].normalTexIndex = normalHandle.GetResourceHeapIndex();
 				m_pMaterialData[materialIndex].hasNormal = true;
 			}
 			else
 			{
 				m_pMaterialData[materialIndex].hasNormal = false;
 			}
-			TextureManager::GetInstance().AddTextureResource(std::move(normalTex));
 		}
 	}
 

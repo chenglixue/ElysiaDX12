@@ -19,60 +19,166 @@ namespace ElysiaRenderer
 	{
 		assert(pDevice);
 		m_pDevice = pDevice;
-		LoadGlobalTextures();
+
+		m_pBindlessTextureManager = std::make_unique<BindlessTextureManager>();
+		m_pBindlessTextureManager->Init(pDevice);
 	}
 	void TextureManager::Destory()
 	{
 
 	}
 
-	void TextureManager::AddTextureResource(std::unique_ptr<DX12TextureResource> pTextureResource)
+	TextureManager::Handle TextureManager::LoadDynamicTexture(const std::wstring& filePath, bool isSRGB)
 	{
-		if (pTextureResource == nullptr) return;
+		std::lock_guard<std::mutex> lock(m_mutex);
 
-		m_textureResources.emplace_back(std::move(pTextureResource));
+		auto nameHash = xxh::GetHash(filePath);
+		auto it = m_dynamicTextureMap.find(nameHash);
+		if (it != m_dynamicTextureMap.end())
+		{
+			it->second->refCount++;
+			return {it->second->textureHandle, filePath};
+		}
+
+		auto handle = m_pBindlessTextureManager->CreateTextureFromFile(filePath, isSRGB);
+		if (!handle.IsValid()) return Handle::Invalid();
+
+		auto managed = std::make_shared<ManagedTexture>();
+		managed->textureHandle = handle;
+		managed->flag = LoadFlags::Dynamic;
+		managed->refCount = 1;
+
+		m_dynamicTextureMap.emplace(nameHash, managed);
+#ifdef DEBUG
+		m_debugTextureMap.emplace(filePath, managed);
+#endif
+
+		return {handle, filePath};
 	}
 
-	void TextureManager::LoadGlobalTextures()
+	TextureManager::Handle TextureManager::LoadResidentTexture(const std::wstring& filePath, bool isSRGB)
 	{
-		TextureCreationDesc texBufferCreateDesc{};
+		std::lock_guard<std::mutex> lock(m_mutex);
 
+		auto nameHash = xxh::GetHash(filePath);
+		auto it = m_dynamicTextureMap.find(nameHash);
+		if (it != m_dynamicTextureMap.end())
 		{
-			texBufferCreateDesc.texturePath = L"Tex\\GGX_E_LUT.dds";
-			texBufferCreateDesc.isSRGB = false;
-			auto newTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
-
-			this->AddTextureResource(std::move(newTex)); 
-		} 
-
-		{
-			texBufferCreateDesc.texturePath = L"Tex\\GGX_Eavg_LUT.dds";
-			texBufferCreateDesc.isSRGB = false;
-			auto newTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
-
-			this->AddTextureResource(std::move(newTex));
-
+			return {it->second->textureHandle, filePath};
 		}
 
-		{
-			texBufferCreateDesc.texturePath = L"Tex\\cubemap0.dds";
-			texBufferCreateDesc.isSRGB = false;
-			auto newTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
+		auto handle = m_pBindlessTextureManager->CreateTextureFromFile(filePath, isSRGB);
+		if (!handle.IsValid()) return Handle::Invalid();
 
-			this->AddTextureResource(std::move(newTex));
+		auto managed = std::make_shared<ManagedTexture>();
+		managed->textureHandle = handle;
+		managed->flag = LoadFlags::Resident;
+
+		m_dynamicTextureMap.emplace(nameHash, managed);
+#ifdef DEBUG
+		m_debugTextureMap.emplace(filePath, managed);
+#endif
+
+		return {handle, filePath};
+	}
+
+	TextureManager::Handle TextureManager::CreateTexture(const D3D12_RESOURCE_DESC& resourceDesc, TexTypeFlags flag, std::wstring name)
+	{
+		std::lock_guard<std::mutex> lock(m_mutex);
+
+		auto nameHash = xxh::GetHash(name);
+		auto it = m_dynamicTextureMap.find(nameHash);
+		if (it != m_dynamicTextureMap.end())
+		{
+			it->second->refCount++;
+			return {it->second->textureHandle, name};
 		}
 
+		auto handle = m_pBindlessTextureManager->CreateTexture(resourceDesc, flag, name);
+		if (!handle.IsValid()) return Handle::Invalid();
+
+		auto managed = std::make_shared<ManagedTexture>();
+		managed->textureHandle = handle;
+		managed->refCount = 1;
+
+		m_dynamicTextureMap.emplace(nameHash, managed);
+#ifdef DEBUG
+		m_debugTextureMap.emplace(name, managed);
+#endif
+
+		return {handle, name};
+	}
+
+	int TextureManager::GetReferenceCount(const std::wstring& filePath) 
+	{
+		std::lock_guard<std::mutex> lock(m_mutex);
+		
+		auto nameHash = xxh::GetHash(filePath);
+
+		return m_dynamicTextureMap.contains(nameHash) ? m_dynamicTextureMap.at(nameHash)->refCount.load() : 0;
+	}
+
+	size_t TextureManager::GetTotalManagedCount() noexcept
+	{
+		std::lock_guard<std::mutex> lock(m_mutex);
+
+		return m_dynamicTextureMap.size();
+	}
+
+	DX12TextureResource* TextureManager::GetTexture(Handle handle) const
+	{
+		return m_pBindlessTextureManager->GetTexture(handle.textureHandle);
+	}
+	UINT TextureManager::GetResourceHeapIndex(Handle handle) const
+	{
+		return GetTexture(handle)->GetResourceHeapIndex();
+	}
+
+	void TextureManager::ShutDown()
+	{
+		std::lock_guard<std::mutex> lock(m_mutex);
+		m_dynamicTextureMap.clear();
+		m_residentTextureMap.clear();
+		m_pBindlessTextureManager->Destory();
+	}
+
+	void TextureManager::Release(Handle handle)
+	{
+		if (!handle.IsValid()) return;
+
+		std::lock_guard<std::mutex> lock(m_mutex);
+
+		auto pathHash = xxh::GetHash(handle.filePath);
+		auto it = m_dynamicTextureMap.find(pathHash);
+		if (it != m_dynamicTextureMap.end())
 		{
-			WCHAR assetsPath[512];
-			ElysiaHelper::GetAssetsPath(assetsPath, _countof(assetsPath));
-			std::wstring target = L"blue_noise.dds";
-			auto path = ElysiaHelper::GetAssetFullPath(assetsPath, target.c_str());
-			texBufferCreateDesc.texturePath = path;
-			texBufferCreateDesc.isSRGB = false;
-			
-			auto newTex = std::move(m_pDevice->CreateTextureFromFile(texBufferCreateDesc));
-			
-			this->AddTextureResource(std::move(newTex));
+			auto& managed = it->second;
+			if (managed->IsResident())
+			{
+				return;
+			}
+			int newCount = managed->refCount--;
+
+			if (newCount <= 0)
+			{
+				m_dynamicTextureMap.erase(it);
+			}
 		}
+
+		handle.Invalid();
+	}
+	
+	void TextureManager::PrintStats()
+	{
+		std::lock_guard<std::mutex> lock(m_mutex);
+
+		std::wcout << L"[TextureManager] Total Managed Textures: " << m_dynamicTextureMap.size() << std::endl;
+
+#ifdef DEBUG
+		for (const auto& kv : m_debugTextureMap)
+		{
+			std::wcout << L"  " << kv.first << L" (Refs: " << kv.second->refCount.load() << L")\n";
+		}
+#endif
 	}
 }
