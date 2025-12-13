@@ -32,7 +32,7 @@ namespace ElysiaRenderer
 	{
 		std::lock_guard<std::mutex> lock(m_mutex);
 
-		auto nameHash = xxh::GetHash(filePath);
+		auto nameHash = xxh::GetHash(WstringToString(filePath));
 		auto it = m_dynamicTextureMap.find(nameHash);
 		if (it != m_dynamicTextureMap.end())
 		{
@@ -86,7 +86,8 @@ namespace ElysiaRenderer
 	{
 		std::lock_guard<std::mutex> lock(m_mutex);
 
-		auto nameHash = xxh::GetHash(name);
+		auto stringName = WstringToString(name);
+		auto nameHash = xxh::GetHash(stringName);
 		auto it = m_dynamicTextureMap.find(nameHash);
 		if (it != m_dynamicTextureMap.end())
 		{

@@ -47,14 +47,25 @@ namespace ElysiaRenderer
 
 		
 		m_pDevice->EnumerateDisplayModes(&m_displayModesAvailable, &m_displayModesNamesAvailable);
+
+		DeSerializeUserData();
+
+		
 		
 		m_pUI->InitDescriptor(windowHandle, m_pDevice.get());
+		
+		TextureManager::GetInstance().Init(m_pDevice.get());
+		RenderTargetManager::GetInstance().Init(m_pDevice.get());
+		CameraManager::GetInstance().Init(m_pDevice.get());
+		LightManager::GetInstance().Init(m_pDevice.get());
+		BufferManager::GetInstance().Init(m_pDevice.get());
+		PSOManager::GetInstance().Init(m_pDevice.get());
 		
 		g_pModelImporter = std::make_unique<ModelImporter>(m_pDevice.get());
 	}
 
 	RendererSystem::~RendererSystem()
-	{
+	{ 
 	}
 
 	void RendererSystem::Init()
@@ -68,14 +79,8 @@ namespace ElysiaRenderer
 		if (FAILED(hr))
 			// error
 #endif
-		DeSerializeUserData();
-
-		TextureManager::GetInstance().Init(m_pDevice.get());
-		RenderTargetManager::GetInstance().Init(m_pDevice.get());
-		CameraManager::GetInstance().Init(m_pDevice.get());
-		LightManager::GetInstance().Init(m_pDevice.get());
-		BufferManager::GetInstance().Init(m_pDevice.get());
-		PSOManager::GetInstance().Init(m_pDevice.get());
+			
+		
 
 		printf("loading...\n");
 		if (!GetModelImporter()->Load(g_ModelPaths))
