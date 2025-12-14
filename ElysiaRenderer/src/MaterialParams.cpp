@@ -221,58 +221,76 @@ namespace ElysiaRenderer
 
 		
 	}
+	template<typename T>
+	void MaterialParameterBlock::SetOrAddWithPassID(size_t nameHash, Type type, const T& value, size_t passID)
+	{
+		auto scopedHash = MixPassAndName(passID, nameHash);
+		SetOrAdd(scopedHash, type, value);
+	}
+	template<typename T>
+	void MaterialParameterBlock::SetOrAddArrayWithPassID(size_t nameHash, Type type, const std::vector<T>&  values, size_t passID)
+	{
+		auto scopedHash = MixPassAndName(passID, nameHash);
+		SetOrAddArray(scopedHash, type, values);
+	}
+	size_t MaterialParameterBlock::MixPassAndName(size_t passID, size_t nameHash) const
+	{
+		constexpr size_t sizeBits = sizeof(size_t) * 8;
+		
+		if constexpr(sizeBits == 64)
+		{
+			return (passID << 32) | (nameHash & 0xFFFFFFFF);
+		}
+		else
+		{
+			// 32位系统下的简单混合 (减少冲突)
+			// 使用黄金比例乘数进行混合
+			return passID * 0x9E3779B9U ^ nameHash;
+		}
+	}
+	
 
-	void MaterialParameterBlock::SetFloat(size_t nameHash, float v)
+	void MaterialParameterBlock::SetFloat(size_t nameHash, float v, size_t passID)
 	{
-		SetOrAdd(nameHash, Type::FLOAT, v);
+		SetOrAddWithPassID(nameHash, Type::FLOAT, v, passID);
 	}
-	void MaterialParameterBlock::SetInt(size_t nameHash, int v)
-	{
-		float fv = static_cast<float>(v);
-		SetOrAdd(nameHash, Type::INT, fv);
-	}
-	void MaterialParameterBlock::SetUInt(size_t nameHash, unsigned int v)
+	void MaterialParameterBlock::SetInt(size_t nameHash, int v, size_t passID)
 	{
 		float fv = static_cast<float>(v);
-		SetOrAdd(nameHash, Type::UInt, fv);
+		SetOrAddWithPassID(nameHash, Type::INT, fv, passID);
 	}
-	void MaterialParameterBlock::SetBool(size_t nameHash, bool v)
+	void MaterialParameterBlock::SetUInt(size_t nameHash, unsigned int v, size_t passID)
+	{
+		float fv = static_cast<float>(v);
+		SetOrAddWithPassID(nameHash, Type::UInt, fv, passID);
+	}
+	void MaterialParameterBlock::SetBool(size_t nameHash, bool v, size_t passID)
 	{
 		float fv = v ? 1.f : 0.f;
-		SetOrAdd(nameHash, Type::BOOL, fv);
+		SetOrAddWithPassID(nameHash, Type::BOOL, fv, passID);
 	}
-
-	void MaterialParameterBlock::SetFloat2(size_t nameHash, const Vector2& v)
+	void MaterialParameterBlock::SetFloat2(size_t nameHash, const Vector2& v, size_t passID)
 	{
-		SetOrAdd(nameHash, Type::FLOAT2, *reinterpret_cast<const Vector2*>(&v));
+		SetOrAddWithPassID(nameHash, Type::FLOAT2, *reinterpret_cast<const Vector2*>(&v), passID);
 	}
-	void MaterialParameterBlock::SetFloat3(size_t nameHash, const Vector3& v)
+	void MaterialParameterBlock::SetFloat3(size_t nameHash, const Vector3& v, size_t passID)
 	{
-		SetOrAdd(nameHash, Type::FLOAT3, *reinterpret_cast<const Vector3*>(&v));
+		SetOrAddWithPassID(nameHash, Type::FLOAT3, *reinterpret_cast<const Vector3*>(&v), passID);
 	}
-	void MaterialParameterBlock::SetFloat4(size_t nameHash, const Vector4& v)
+	void MaterialParameterBlock::SetFloat4(size_t nameHash, const Vector4& v, size_t passID)
 	{
-		SetOrAdd(nameHash, Type::FLOAT4, *reinterpret_cast<const Vector4*>(&v));
+		SetOrAddWithPassID(nameHash, Type::FLOAT4, *reinterpret_cast<const Vector4*>(&v), passID);
 	}
-	void MaterialParameterBlock::SetMatrix(size_t nameHash, const Matrix& m)
+	void MaterialParameterBlock::SetMatrix(size_t nameHash, const Matrix& m, size_t passID)
 	{
-		SetOrAdd(nameHash, Type::MATRIX4X4, m);
+		SetOrAddWithPassID(nameHash, Type::MATRIX4X4, m, passID);
 	}
-	void MaterialParameterBlock::SetFloatArray(size_t nameHash, const std::vector<float>& values)
+	
+	void MaterialParameterBlock::SetFloatArray(size_t nameHash, const std::vector<float>& values, size_t passID)
 	{
-		SetOrAddArray(nameHash, Type::FloatArray, values);
+		SetOrAddArrayWithPassID(nameHash, Type::FloatArray, values, passID);
 	}
-	void MaterialParameterBlock::SetIntArray(size_t nameHash, const std::vector<int>& values)
-	{
-		std::vector<float> tempVec{};
-		tempVec.reserve(values.size());
-		for(size_t i = 0; i < values.size(); ++i)
-		{
-			tempVec.emplace_back(static_cast<float>(values[i]));
-		}
-		SetOrAddArray(nameHash, Type::IntArray, std::move(tempVec));
-	}
-	void MaterialParameterBlock::SetUINTArray(size_t nameHash, const std::vector<uint32_t>& values)
+	void MaterialParameterBlock::SetIntArray(size_t nameHash, const std::vector<int>& values, size_t passID)
 	{
 		std::vector<float> tempVec{};
 		tempVec.reserve(values.size());
@@ -280,23 +298,33 @@ namespace ElysiaRenderer
 		{
 			tempVec.emplace_back(static_cast<float>(values[i]));
 		}
-		SetOrAddArray(nameHash, Type::UIntArray, std::move(tempVec));
+		SetOrAddArrayWithPassID(nameHash, Type::IntArray, std::move(tempVec), passID);
 	}
-	void MaterialParameterBlock::SetVector2Array(size_t nameHash, const std::vector<Vector2>& values)
+	void MaterialParameterBlock::SetUINTArray(size_t nameHash, const std::vector<uint32_t>& values, size_t passID)
 	{
-		SetOrAddArray(nameHash, Type::Float2Array, values);
+		std::vector<float> tempVec{};
+		tempVec.reserve(values.size());
+		for(size_t i = 0; i < values.size(); ++i)
+		{
+			tempVec.emplace_back(static_cast<float>(values[i]));
+		}
+		SetOrAddArrayWithPassID(nameHash, Type::UIntArray, std::move(tempVec), passID);
 	}
-	void MaterialParameterBlock::SetVector3Array(size_t nameHash, const std::vector<Vector3>& values)
+	void MaterialParameterBlock::SetVector2Array(size_t nameHash, const std::vector<Vector2>& values, size_t passID)
 	{
-		SetOrAdd(nameHash, Type::Float3Array, values);
+		SetOrAddArrayWithPassID(nameHash, Type::Float2Array, values, passID);
 	}
-	void MaterialParameterBlock::SetVector4Array(size_t nameHash, const std::vector<Vector4>& values)
+	void MaterialParameterBlock::SetVector3Array(size_t nameHash, const std::vector<Vector3>& values, size_t passID)
 	{
-		SetOrAdd(nameHash, Type::Float4Array, values);
+		SetOrAddArrayWithPassID(nameHash, Type::Float3Array, values, passID);
 	}
-	void MaterialParameterBlock::SetMatrixArray(size_t nameHash, const std::vector<Matrix>& values)
+	void MaterialParameterBlock::SetVector4Array(size_t nameHash, const std::vector<Vector4>& values, size_t passID)
 	{
-		SetOrAdd(nameHash, Type::MatrixArray, values);
+		SetOrAddArrayWithPassID(nameHash, Type::Float4Array, values, passID);
+	}
+	void MaterialParameterBlock::SetMatrixArray(size_t nameHash, const std::vector<Matrix>& values, size_t passID)
+	{
+		SetOrAddArrayWithPassID(nameHash, Type::MatrixArray, values, passID);
 	}
 
 	void MaterialParameterBlock::SetValue(ParamValue& dst, float v)
@@ -368,7 +396,7 @@ namespace ElysiaRenderer
 		dst.arrayData.reserve(intArray.size());
 		for(size_t i = 0; i < intArray.size(); i++)
 		{
-			*reinterpret_cast<int*>(&dst.arrayData[i]) = intArray[i];
+			dst.arrayData.emplace_back(intArray[i]);
 		}
 		dst.rowCount = 1;
 		dst.colCount = intArray.size();
@@ -453,19 +481,35 @@ namespace ElysiaRenderer
 	template void MaterialParameterBlock::SetOrAddArray<Vector3>(size_t nameHash, Type type, const std::vector<Vector3>& values);
 	template void MaterialParameterBlock::SetOrAddArray<Vector4>(size_t nameHash, Type type, const std::vector<Vector4>& values);
 	template void MaterialParameterBlock::SetOrAddArray<Matrix>(size_t nameHash, Type type, const std::vector<Matrix>& values);
+	template void MaterialParameterBlock::SetOrAddWithPassID<float>(size_t, Type, const float&, size_t);
+	template void MaterialParameterBlock::SetOrAddWithPassID<int>(size_t, Type, const int&, size_t);
+	template void MaterialParameterBlock::SetOrAddWithPassID<unsigned int>(size_t, Type, const unsigned int&, size_t);
+	template void MaterialParameterBlock::SetOrAddWithPassID<Vector2>(size_t, Type, const Vector2&, size_t);
+	template void MaterialParameterBlock::SetOrAddWithPassID<Vector3>(size_t, Type, const Vector3&, size_t);
+	template void MaterialParameterBlock::SetOrAddWithPassID<Vector4>(size_t, Type, const Vector4&, size_t);
+	template void MaterialParameterBlock::SetOrAddWithPassID<Matrix>(size_t, Type, const Matrix&, size_t);
+	template void MaterialParameterBlock::SetOrAddArrayWithPassID<float>(size_t nameHash, Type type, const std::vector<float>& values, size_t);
+	template void MaterialParameterBlock::SetOrAddArrayWithPassID<int>(size_t nameHash, Type type, const std::vector<int>& values, size_t);
+	template void MaterialParameterBlock::SetOrAddArrayWithPassID<unsigned int>(size_t nameHash, Type type, const std::vector<unsigned int>& values, size_t);
+	template void MaterialParameterBlock::SetOrAddArrayWithPassID<Vector2>(size_t nameHash, Type type, const std::vector<Vector2>& values, size_t);
+	template void MaterialParameterBlock::SetOrAddArrayWithPassID<Vector3>(size_t nameHash, Type type, const std::vector<Vector3>& values, size_t);
+	template void MaterialParameterBlock::SetOrAddArrayWithPassID<Vector4>(size_t nameHash, Type type, const std::vector<Vector4>& values, size_t);
+	template void MaterialParameterBlock::SetOrAddArrayWithPassID<Matrix>(size_t nameHash, Type type, const std::vector<Matrix>& values, size_t);
 	
-	const MaterialParameterBlock::MaterialParam* MaterialParameterBlock::FindParam(size_t nameHash) const
+	const MaterialParameterBlock::MaterialParam* MaterialParameterBlock::FindParam(size_t nameHash, size_t passID) const
 	{
+		auto scopedHash = MixPassAndName(passID, nameHash);
 		auto it = std::find_if(m_params.begin(), m_params.end(),
-			[nameHash](const MaterialParam& p) { return p.nameHash == nameHash; });
+			[scopedHash](const MaterialParam& p) { return p.nameHash == scopedHash; });
 		return (it != m_params.end()) ? &(*it) : nullptr;
 	}
 
-	MaterialParameterBlock::MaterialParam* MaterialParameterBlock::FindParam(size_t nameHash)
+	MaterialParameterBlock::MaterialParam* MaterialParameterBlock::FindParam(size_t nameHash, size_t passID)
 	{
+		auto scopedHash = MixPassAndName(passID, nameHash);
 		auto it = std::find_if(m_params.begin(), m_params.end(),
-			[nameHash](const MaterialParam& p) { 
-				return p.nameHash == nameHash; 
+			[scopedHash](const MaterialParam& p) { 
+				return p.nameHash == scopedHash; 
 			});
         
 		return (it != m_params.end()) ? &(*it) : nullptr;

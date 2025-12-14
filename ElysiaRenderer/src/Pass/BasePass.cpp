@@ -43,7 +43,8 @@ namespace ElysiaRenderer
 			UploadRingBuffer* pUploadBuffer,
 			UINT8 spaceID,
 			Material* pMaterial,
-			const ShaderVariantData* pVariantData)
+			const ShaderVariantData* pVariantData,
+			size_t passID)
 	{
 		assert(pUploadBuffer);
 		assert(pMaterial);
@@ -68,7 +69,7 @@ namespace ElysiaRenderer
 		for(const auto& memberPair : CBuffer.members)
 		{
 			auto& member =  memberPair.second;
-			const MaterialParameterBlock::MaterialParam* pMaterialParam = pMaterial->GetParameterBlock().FindParam(member.Name);
+			const MaterialParameterBlock::MaterialParam* pMaterialParam = pMaterial->GetParameterBlock().FindParam(member.Name, passID);
 			if(!pMaterialParam) continue;
 			
 			uint8_t* dest = CPUAddress + member.StartOffset;

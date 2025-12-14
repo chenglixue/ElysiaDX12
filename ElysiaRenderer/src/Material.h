@@ -77,21 +77,21 @@ namespace ElysiaRenderer
 		const UINT FindPassIndex(const std::string& name) const noexcept;
 		MaterialParameterBlock& GetParameterBlock() {return m_parameterBlock;}
 
-		void SetInt(size_t nameHash, int v);
-		void SetUInt(size_t nameHash, unsigned int v);
-		void SetBool(size_t nameHash, bool v);
-		void SetFloat(size_t nameHash, float v);
-		void SetFloat2(size_t nameHash, const Vector2& v);
-		void SetFloat3(size_t nameHash, const Vector3& v);
-		void SetFloat4(size_t nameHash, const Vector4& v);
-		void SetMatrix(size_t nameHash, const Matrix& m);
-		void SetFloatArray(size_t nameHash, const std::vector<float>& values);
-		void SetIntArray(size_t nameHash, const std::vector<int>& values);
-		void SetUINTArray(size_t nameHash, const std::vector<UINT>& values);
-		void SetVector2Array(size_t nameHash, const std::vector<Vector2>& values);
-		void SetVector3Array(size_t nameHash, const std::vector<Vector3>& values);
-		void SetVector4Array(size_t nameHash, const std::vector<Vector4>& values);
-		void SetMatrixArray(size_t nameHash, const std::vector<Matrix>& values);
+		void SetInt(size_t nameHash, int v, size_t passID = 0);
+		void SetUInt(size_t nameHash, unsigned int v, size_t passID = 0);
+		void SetBool(size_t nameHash, bool v, size_t passID = 0);
+		void SetFloat(size_t nameHash, float v, size_t passID = 0);
+		void SetFloat2(size_t nameHash, const Vector2& v, size_t passID = 0);
+		void SetFloat3(size_t nameHash, const Vector3& v, size_t passID = 0);
+		void SetFloat4(size_t nameHash, const Vector4& v, size_t passID = 0);
+		void SetMatrix(size_t nameHash, const Matrix& m, size_t passID = 0);
+		void SetFloatArray(size_t nameHash, const std::vector<float>& values, size_t passID = 0);
+		void SetIntArray(size_t nameHash, const std::vector<int>& values, size_t passID = 0);
+		void SetUINTArray(size_t nameHash, const std::vector<UINT>& values, size_t passID = 0);
+		void SetVector2Array(size_t nameHash, const std::vector<Vector2>& values, size_t passID = 0);
+		void SetVector3Array(size_t nameHash, const std::vector<Vector3>& values, size_t passID = 0);
+		void SetVector4Array(size_t nameHash, const std::vector<Vector4>& values, size_t passID = 0);
+		void SetMatrixArray(size_t nameHash, const std::vector<Matrix>& values, size_t passID = 0);
 
 	private:
 		std::mutex m_setDataMutex;

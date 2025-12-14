@@ -38,7 +38,8 @@ namespace ElysiaRenderer
 			UploadRingBuffer* pUploadBuffer,
 			UINT8 spaceID,
 			Material* pMaterial,
-			const ShaderVariantData* pVariantData);
+			const ShaderVariantData* pVariantData,
+			size_t passID = 0);
 
 	protected:
 		Vector2 m_renderSize;

@@ -87,65 +87,64 @@ namespace ElysiaRenderer
 		}
 	}
 
-	void Material::SetInt(size_t nameHash, int v)
+	void Material::SetInt(size_t nameHash, int v, size_t passID)
 	{
-		m_parameterBlock.SetInt(nameHash, v);
+		m_parameterBlock.SetInt(nameHash, v, passID);
 	}
-	void Material::SetUInt(size_t nameHash, unsigned int v)
+	void Material::SetUInt(size_t nameHash, unsigned int v, size_t passID)
 	{
-		m_parameterBlock.SetUInt(nameHash, v);
+		m_parameterBlock.SetUInt(nameHash, v, passID);
 	}
-	void Material::SetBool(size_t nameHash, bool v)
+	void Material::SetBool(size_t nameHash, bool v, size_t passID)
 	{
-		m_parameterBlock.SetFloat(nameHash, v ? 1.f : 0.f);
+		m_parameterBlock.SetFloat(nameHash, v ? 1.f : 0.f, passID);
 	}
-
-	void Material::SetFloat(size_t nameHash, float v)
+	void Material::SetFloat(size_t nameHash, float v, size_t passID)
 	{
-		m_parameterBlock.SetFloat(nameHash, v);
+		m_parameterBlock.SetFloat(nameHash, v, passID);
 	}
-	void Material::SetFloat2(size_t nameHash, const Vector2& v)
+	void Material::SetFloat2(size_t nameHash, const Vector2& v, size_t passID)
 	{
-		m_parameterBlock.SetFloat2(nameHash, v);
+		m_parameterBlock.SetFloat2(nameHash, v, passID);
 	}
-	void Material::SetFloat3(size_t nameHash, const Vector3& v)
+	void Material::SetFloat3(size_t nameHash, const Vector3& v, size_t passID)
 	{
-		m_parameterBlock.SetFloat3(nameHash, v);
+		m_parameterBlock.SetFloat3(nameHash, v, passID);
 	}
-	void Material::SetFloat4(size_t nameHash, const Vector4& v)
+	void Material::SetFloat4(size_t nameHash, const Vector4& v, size_t passID)
 	{
-		m_parameterBlock.SetFloat4(nameHash, v);
+		m_parameterBlock.SetFloat4(nameHash, v, passID);
 	}
-	void Material::SetMatrix(size_t nameHash, const Matrix& m)
+	void Material::SetMatrix(size_t nameHash, const Matrix& m, size_t passID)
 	{
-		m_parameterBlock.SetMatrix(nameHash, m);
+		m_parameterBlock.SetMatrix(nameHash, m, passID);
 	}
-	void Material::SetFloatArray(size_t nameHash, const std::vector<float>& v)
+	void Material::SetFloatArray(size_t nameHash, const std::vector<float>& v, size_t passID)
 	{
-		m_parameterBlock.SetFloatArray(nameHash, v);
+		m_parameterBlock.SetFloatArray(nameHash, v, passID);
 	}
-	void Material::SetIntArray(size_t nameHash, const std::vector<int>& v)
+	void Material::SetIntArray(size_t nameHash, const std::vector<int>& v, size_t passID)
 	{
-		m_parameterBlock.SetIntArray(nameHash, v);
+		m_parameterBlock.SetIntArray(nameHash, v, passID);
 	}
-	void Material::SetUINTArray(size_t nameHash, const std::vector<UINT>& v)
+	void Material::SetUINTArray(size_t nameHash, const std::vector<UINT>& v, size_t passID)
 	{
-		m_parameterBlock.SetUINTArray(nameHash, v);
+		m_parameterBlock.SetUINTArray(nameHash, v, passID);
 	}
-	void Material::SetVector2Array(size_t nameHash, const std::vector<Vector2>& v)
+	void Material::SetVector2Array(size_t nameHash, const std::vector<Vector2>& v, size_t passID)
 	{
-		m_parameterBlock.SetVector2Array(nameHash, v);
+		m_parameterBlock.SetVector2Array(nameHash, v, passID);
 	}
-	void Material::SetVector3Array(size_t nameHash, const std::vector<Vector3>& v)
+	void Material::SetVector3Array(size_t nameHash, const std::vector<Vector3>& v, size_t passID)
 	{
-		m_parameterBlock.SetVector3Array(nameHash, v);
+		m_parameterBlock.SetVector3Array(nameHash, v, passID);
 	}
-	void Material::SetVector4Array(size_t nameHash, const std::vector<Vector4>& v)
+	void Material::SetVector4Array(size_t nameHash, const std::vector<Vector4>& v, size_t passID)
 	{
-		m_parameterBlock.SetVector4Array(nameHash, v);
+		m_parameterBlock.SetVector4Array(nameHash, v, passID);
 	}
-	void Material::SetMatrixArray(size_t nameHash, const std::vector<Matrix>& v)
+	void Material::SetMatrixArray(size_t nameHash, const std::vector<Matrix>& v, size_t passID)
 	{
-		m_parameterBlock.SetMatrixArray(nameHash, v);
+		m_parameterBlock.SetMatrixArray(nameHash, v, passID);
 	}
 }

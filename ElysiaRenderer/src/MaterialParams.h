@@ -50,27 +50,27 @@ namespace ElysiaRenderer
 		};
 		
 	public:
-		void SetInt(size_t nameHash, int v);
-		void SetUInt(size_t nameHash, unsigned int v);
-		void SetBool(size_t nameHash, bool v);
-		void SetFloat(size_t nameHash, float v);
-		void SetFloat2(size_t nameHash, const Vector2& v);
-		void SetFloat3(size_t nameHash, const Vector3& v);
-		void SetFloat4(size_t nameHash, const Vector4& v);
-		void SetMatrix(size_t nameHash, const Matrix& m);
+		void SetInt(size_t nameHash, int v, size_t passID = 0);
+		void SetUInt(size_t nameHash, unsigned int v, size_t passID = 0);
+		void SetBool(size_t nameHash, bool v, size_t passID = 0);
+		void SetFloat(size_t nameHash, float v, size_t passID = 0);
+		void SetFloat2(size_t nameHash, const Vector2& v, size_t passID = 0);
+		void SetFloat3(size_t nameHash, const Vector3& v, size_t passID = 0);
+		void SetFloat4(size_t nameHash, const Vector4& v, size_t passID = 0);
+		void SetMatrix(size_t nameHash, const Matrix& m, size_t passID = 0);
 
-		void SetFloatArray(size_t nameHash, const std::vector<float>& values);
-		void SetIntArray(size_t nameHash, const std::vector<int>& values);
-		void SetUINTArray(size_t nameHash, const std::vector<UINT>& values);
-		void SetVector2Array(size_t nameHash, const std::vector<Vector2>& values);
-		void SetVector3Array(size_t nameHash, const std::vector<Vector3>& values);
-		void SetVector4Array(size_t nameHash, const std::vector<Vector4>& values);
-		void SetMatrixArray(size_t nameHash, const std::vector<Matrix>& matrices);
+		void SetFloatArray(size_t nameHash, const std::vector<float>& values, size_t passID = 0);
+		void SetIntArray(size_t nameHash, const std::vector<int>& values, size_t passID = 0);
+		void SetUINTArray(size_t nameHash, const std::vector<UINT>& values, size_t passID = 0);
+		void SetVector2Array(size_t nameHash, const std::vector<Vector2>& values, size_t passID = 0);
+		void SetVector3Array(size_t nameHash, const std::vector<Vector3>& values, size_t passID = 0);
+		void SetVector4Array(size_t nameHash, const std::vector<Vector4>& values, size_t passID = 0);
+		void SetMatrixArray(size_t nameHash, const std::vector<Matrix>& matrices, size_t passID = 0);
 
 		const std::vector<MaterialParam>& GetParams() const { return m_params; }
 		
-		const MaterialParam* FindParam(size_t nameHash) const;
-		MaterialParam* FindParam(size_t nameHash);
+		const MaterialParam* FindParam(size_t nameHash, size_t passID = 0) const;
+		MaterialParam* FindParam(size_t nameHash, size_t passID = 0);
 		
 		void RemoveParam(size_t nameHash);
 		void Clear() { m_params.clear(); }
@@ -88,8 +88,7 @@ namespace ElysiaRenderer
 		std::function<void()> m_dirtyCallback;
 		bool m_isDirty = false;
 
-		template<typename T>
-		void SetOrAdd(size_t nameHash, Type type, const T& value);
+		
 		void SetValue(ParamValue& dst, float v);
 		void SetValue(ParamValue& dst, int v);
 		void SetValue(ParamValue& dst, unsigned int v);
@@ -104,8 +103,23 @@ namespace ElysiaRenderer
 		void SetValue(ParamValue& dst, const std::vector<Vector3>& m);
 		void SetValue(ParamValue& dst, const std::vector<Vector4>& m);
 		void SetValue(ParamValue& dst, const std::vector<Matrix>& m);
+		
+		template<typename T>
+		void SetOrAdd(size_t nameHash, Type type, const T& value);
 		template<typename T>
 		void SetOrAddArray(size_t nameHash, Type type, const std::vector<T>&  values);
+		
+		template<typename T>
+		void SetOrAddWithPassID(size_t nameHash, Type type, const T& value, size_t passID = 0);
+		template<typename T>
+		void SetOrAddArrayWithPassID(size_t nameHash, Type type, const std::vector<T>&  values, size_t passID = 0);
+		
+		// -------------------------------------------------------
+		// 核心混合函数：将 PassID 和 NameHash 合并
+		// -------------------------------------------------------
+		// 策略：如果 size_t 是 64位，使用 (PassID << 32) | NameHash
+		//       如果 size_t 是 32位，使用哈希混合 (FNV-like)
+		size_t MixPassAndName(size_t passID, size_t nameHash) const;
 	};
 
 	
