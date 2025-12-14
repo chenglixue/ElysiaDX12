@@ -111,10 +111,16 @@ namespace ElysiaRenderer
 		std::wstring entry;
 		std::wstring target;
 		ShaderReflectionData ReflectionData;
+		std::vector<LPCWSTR> args;
 	};
 
 	struct ShaderVariantData
 	{
+	private :
+		
+		
+	public:
+		
 		ShaderKeywordSet KeywordSet;
 		
 		std::unordered_map<ShaderType, ShaderBytecode> StageShaders;

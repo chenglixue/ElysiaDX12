@@ -10,6 +10,9 @@
 #pragma Blend Disabled
 #pragma Depth Disabled
 
+#pragma shader_feature SHADOW_QUALITY_LOW SHADOW_QUALITY_MIDDLE SHADOW_QUALITY_HIGH SHADOW_QUALITY_VERYHIGH
+#pragma shader_feature HARD_SHADOW SOFT_SHADOW
+
 cbuffer PassConstant : register(b0, perPassSpace)
 {
     Vector4 screenSize;
@@ -90,6 +93,6 @@ PSOutput PS(PSInput i)
     float4 lighting = GetDynamicLighting(inputParam, GBufferData, mainLightData, AO);
     lighting += float4(GBufferData.SceneColor, 1.f) * AO;
 
-    o.target0.rgb = shadow;
+    o.target0.rgb = lighting;
     return o;
 }

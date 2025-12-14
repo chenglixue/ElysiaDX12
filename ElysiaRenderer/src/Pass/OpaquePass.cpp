@@ -153,6 +153,43 @@ namespace ElysiaRenderer
 	void OpaquePass::UpdateLightingPassVariant(UINT passIndex)
 	{
 		std::vector<std::wstring> enableKeywords{};
+		
+		switch (UserData::GetInstance().shadowQuality)
+		{
+			case ShadowQuality::Low:
+				{
+					enableKeywords.emplace_back(L"SHADOW_QUALITY_LOW");
+					break;
+				}
+			case ShadowQuality::Middle:
+				{
+					enableKeywords.emplace_back(L"SHADOW_QUALITY_MIDDLE");
+					break;
+				}
+			case ShadowQuality::High:
+				{
+					enableKeywords.emplace_back(L"SHADOW_QUALITY_HIGH");
+					break;
+				}
+			case ShadowQuality::VeryHigh:
+				{
+					enableKeywords.emplace_back(L"SHADOW_QUALITY_VERYHIGH");
+					break;
+				}
+		}
+		switch (UserData::GetInstance().shadowType)
+		{
+			case ShadowType::Hard:
+				{
+					enableKeywords.emplace_back(L"HARD_SHADOW");
+					break;
+				}
+			case ShadowType::Soft:
+				{
+					enableKeywords.emplace_back(L"SOFT_SHADOW");
+					break;
+				} 
+		} 
 		 
 		auto& passData = m_pMaterial->GetPassData(passIndex);
 		

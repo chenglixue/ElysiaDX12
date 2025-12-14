@@ -125,7 +125,7 @@ namespace ElysiaRenderer
 					enableKeywords.emplace_back(L"SOFT_SHADOW");
 					break;
 				}
-		}
+		} 
 		 
 		auto& passData = m_pMaterial->GetPassData(passIndex);
 		
