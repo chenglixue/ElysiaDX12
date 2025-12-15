@@ -27,72 +27,14 @@ namespace ElysiaRenderer
 	{
 		m_bufferUploads.emplace_back(std::move(bufferUpload));
 	}
-
-	void DX12UploadContext::ProcessUploads()
+	
+	void DX12UploadContext::AddBufferProcess(DX12BufferUpload* bufferProcessed)
 	{
-		const auto numTextureUploads = static_cast<UINT>(m_textureUploads.size());
-		size_t texUploadHeapOffset = 0;
-		UINT numTexsProcessed = 0;
-
-		size_t totalSize = 0;
-		for (const auto& upload : m_bufferUploads)
-		{
-			totalSize += AlignU32(upload->m_bufferDataSize, D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
-		}
-
-		for (numBuffersProcessed; numBuffersProcessed < numBufferUploads; numBuffersProcessed++)
-		{
-			auto bufferUpload = m_bufferUploads[numBuffersProcessed];
-
-			if ((bufferUploadHeapOffset + bufferUpload->m_bufferDataSize) > m_bufferUploadHeap->GetResourceDesc().Width)
-			{
-				break;
-			}
-
-			AddBarrier(*bufferUpload->m_buffer, D3D12_RESOURCE_STATE_COPY_DEST);
-			memcpy(m_bufferUploadHeap->GetMappedBuffer() + bufferUploadHeapOffset, bufferUpload->m_bufferData.get(), bufferUpload->m_bufferDataSize);
-			D3D12_SUBRESOURCE_DATA subData = { bufferUpload->m_bufferData.get(), (UINT)bufferUpload->m_bufferDataSize, (UINT)bufferUpload->m_bufferDataSize};
-			UpdateSubresources(m_commandList, bufferUpload->m_buffer->GetResource(), m_bufferUploadHeap->GetResource(),
-				bufferUploadHeapOffset, 0, 1, &subData);
-			//CopyBufferRegion(*bufferUpload->m_buffer, 0, *m_bufferUploadHeap, bufferUploadHeapOffset, bufferUpload->m_bufferDataSize);
-
-			AddBarrier(*bufferUpload->m_buffer, D3D12_RESOURCE_STATE_COMMON);
-			
-			bufferUploadHeapOffset += bufferUpload->m_bufferDataSize;
-			bufferUploadHeapOffset = AlignUp(bufferUploadHeapOffset, (size_t)D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
-			m_bufferUploadsInProgress.emplace_back(std::move(bufferUpload));
-		}
-
-		for (numTexsProcessed; numTexsProcessed < numTextureUploads; ++numTexsProcessed)
-		{
-			auto currUpload = m_textureUploads[numTexsProcessed];
-			if (texUploadHeapOffset + currUpload->m_textureDataSize > m_textureUploadHeap->GetResourceDesc().Width)
-			{
-				break;
-			}
-
-			memcpy(m_textureUploadHeap->GetMappedBuffer() + texUploadHeapOffset, currUpload->m_pTextureData.get(), currUpload->m_textureDataSize);
-			// UpdateSubresources(m_commandList, 
-			// 	currUpload->m_textureBuffer->GetResource(), m_textureUploadHeap->GetResource(), texUploadHeapOffset,
-			// 	0, currUpload->m_numSubResources, currUpload->m_subResourceLayouts.data());
-			CopyTextureRegion(*currUpload->m_textureBuffer, *m_textureUploadHeap, texUploadHeapOffset,
-				currUpload->m_subResourceLayouts, currUpload->m_numSubResources);
-
-			texUploadHeapOffset += currUpload->m_textureDataSize;
-			texUploadHeapOffset = AlignU64(texUploadHeapOffset, 512);
-
-			m_textureUploadsInProgress.emplace_back(std::move(currUpload));
-		}
-
-		if (numBuffersProcessed > 0)
-		{
-			m_bufferUploads.erase(m_bufferUploads.begin(), m_bufferUploads.begin() + numBuffersProcessed);
-		}
-
-		if (numTexsProcessed > 0)
-		{
-			m_textureUploads.erase(m_textureUploads.begin(), m_textureUploads.begin() + numTexsProcessed);
-		}
+		m_bufferUploadsInProgress.emplace_back(bufferProcessed);
+	}
+	void DX12UploadContext::AddTextureProcess(DX12TextureUpload* textureProcessed)
+	{
+		m_textureUploadsInProgress.emplace_back(textureProcessed);
 	}
 
 	void DX12UploadContext::ResolveProcessedUploads()
@@ -100,11 +42,11 @@ namespace ElysiaRenderer
 		for (auto& bufferUploadInProgress : m_bufferUploadsInProgress)
 		{
 			bufferUploadInProgress->onComplete(bufferUploadInProgress);
-			bufferUploadInProgress->m_buffer->SetIsReady(true);
+			bufferUploadInProgress->buffer->SetIsReady(true);
 		}
 		for (auto& textureUploadInProgress : m_textureUploadsInProgress)
 		{
-			textureUploadInProgress->m_textureBuffer->SetIsReady(true);
+			textureUploadInProgress->pTextureBuffer->SetIsReady(true);
 		}
 
 		m_bufferUploadsInProgress.clear();

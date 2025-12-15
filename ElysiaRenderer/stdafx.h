@@ -18,7 +18,7 @@
 #include <mutex>
 #include <optional>
 #include "DXTex/DirectXTex.h"
-#include "D3dx12.h"
+#include "dxc/inc/d3dx12.h"
 #include "D3D12MemoryAllocator/D3D12MemAlloc.h"
 #include <dxgidebug.h>
 #include <numeric>
@@ -43,7 +43,6 @@
 
 #include "magic_enum/magic_enum.hpp"
 #include "SimpleMath/SimpleMath.h"
-#include "dxcapi.h"
 #include <atlbase.h>        // Common COM helpers.
 
 #include "imgui/imgui.h"

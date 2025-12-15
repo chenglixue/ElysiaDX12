@@ -18,6 +18,9 @@ namespace ElysiaRenderer
 
 		void AddTextureToUploads(DX12TextureUpload* textureUpload);
 		void AddBufferToUploads(DX12BufferUpload* bufferUpload);
+		
+		void AddBufferProcess(DX12BufferUpload* bufferProcessed);
+		void AddTextureProcess(DX12TextureUpload* textureProcessed);
 
 		void ProcessUploads();
 		void ResolveProcessedUploads();

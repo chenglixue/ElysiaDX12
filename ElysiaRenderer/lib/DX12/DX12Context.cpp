@@ -134,7 +134,7 @@ namespace ElysiaRenderer
 		}
 	}
 
-	void DX12Context::CopyTextureRegion(DX12GPUResource& dest, DX12GPUResource& source, size_t sourceOffset,
+	void DX12Context::CopyTextureRegion(DX12GPUResource& dest, ID3D12Resource* source, size_t sourceOffset,
 		SubResourceLayouts subResourceLayouts, UINT numSubResources)
 	{
 		for (UINT currSubResourceIndex = 0; currSubResourceIndex < numSubResources; ++currSubResourceIndex)
@@ -153,7 +153,7 @@ namespace ElysiaRenderer
 			destLocation.SubresourceIndex = currSubResourceIndex;
 
 			D3D12_TEXTURE_COPY_LOCATION sourceLocation{};
-			sourceLocation.pResource = source.GetResource();
+			sourceLocation.pResource = source;
 			sourceLocation.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
 			sourceLocation.PlacedFootprint = subResourceLayouts[currSubResourceIndex];
 			sourceLocation.PlacedFootprint.Offset += sourceOffset;

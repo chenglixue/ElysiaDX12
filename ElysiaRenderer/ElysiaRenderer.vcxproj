@@ -179,6 +179,7 @@
     <ClInclude Include="AMD\LPM\FreesyncHDR.h" />
     <ClInclude Include="AMD\LPM\Misc.h" />
     <ClInclude Include="D3D12MemoryAllocator\D3D12MemAlloc.h" />
+    <ClInclude Include="dxc\inc\d3dx12.h" />
     <ClInclude Include="Helper\DxgiFormatHelper.h" />
     <ClInclude Include="lib\DX12\DX12BufferResource.h" />
     <ClInclude Include="lib\DX12\DX12Camera.h" />

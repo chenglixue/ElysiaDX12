@@ -33,7 +33,7 @@ namespace ElysiaRenderer
 		
 		m_pUploadBuffer = std::make_unique<UploadRingBuffer>(m_pDevice, m_pAllocator, 256 * 1024 * 1024, L"Global Upload Buffer");
 		
-		 
+		
 		
 		if (!UserData::GetInstance().IsUseHDR)
 		{
@@ -231,26 +231,91 @@ namespace ElysiaRenderer
 		size_t totalSize = 0;
 		for (const auto& upload : bufferUploads)
 		{
-			totalSize += AlignU32(upload->m_bufferDataSize, D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
+			totalSize += AlignUp(upload->bufferDataSize, (size_t)D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
 		}
 
 		D3D12_GPU_VIRTUAL_ADDRESS gpuAddress;
 		UINT8* cpuAddress;
 		if (m_pUploadBuffer->AllocateForFrame(m_pDevice->GetFrameID(), totalSize, gpuAddress, cpuAddress))
 		{
-			for (auto& bufferUpload : bufferUploads)
+			for (numBuffersProcessed; numBuffersProcessed < numBufferUploads; numBuffersProcessed++)
 			{
-				if (bufferUploadHeapOffset + bufferUpload->m_bufferDataSize > totalSize)
+				auto bufferUpload = bufferUploads[numBuffersProcessed];
+				if (bufferUploadHeapOffset + bufferUpload->bufferDataSize > totalSize)
 				{
 					break;
 				}
 
-				uploadContext->AddBarrier(*bufferUpload->m_buffer, D3D12_RESOURCE_STATE_COPY_DEST);
-				memcpy(m_bufferUploadHeap->GetMappedBuffer() + bufferUploadHeapOffset, bufferUpload->pBufferData, bufferUpload->m_bufferDataSize);
+				uploadContext->AddBarrier(*bufferUpload->buffer, D3D12_RESOURCE_STATE_COPY_DEST, false);
+				memcpy(cpuAddress + bufferUploadHeapOffset, bufferUpload->pBufferData, bufferUpload->bufferDataSize);
+				D3D12_SUBRESOURCE_DATA subData = 
+				{
+						bufferUpload->pBufferData, 
+				static_cast<UINT>(bufferUpload->bufferDataSize), 
+				static_cast<UINT>(bufferUpload->bufferDataSize)
+				};
+				// uploadContext->CopyBufferRegion(*bufferUpload->buffer, 0, m_pUploadBuffer->GetResource(), 
+				// 	gpuAddress - m_pUploadBuffer->GetResource()->GetGPUVirtualAddress(), bufferUpload->bufferDataSize);
+				UpdateSubresources(uploadContext->GetCommandList(), bufferUpload->buffer->GetResource(), m_pUploadBuffer->GetResource(),
+				gpuAddress - m_pUploadBuffer->GetResource()->GetGPUVirtualAddress() + bufferUploadHeapOffset, 0, 1, &subData);
+				uploadContext->AddBarrier(*bufferUpload->buffer, D3D12_RESOURCE_STATE_COMMON, false);
+				bufferUploadHeapOffset += bufferUpload->bufferDataSize;
+				bufferUploadHeapOffset = AlignUp(bufferUploadHeapOffset, (size_t)D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
+				uploadContext->AddBufferProcess(bufferUpload);
+				
+				numBuffersProcessed++;
+			}
+			uploadContext->FlushBarrier();
+			
+			if(numBuffersProcessed > 0)
+			{
+				bufferUploads.erase(bufferUploads.begin(), bufferUploads.begin() + numBuffersProcessed);
 			}
 		}
 		
 	}
+	
+	void BufferManager::UploadTextureData(DX12UploadContext* uploadContext, std::vector<DX12TextureUpload*>& textureUploads)
+	{
+		const auto numTextureUploads = static_cast<UINT>(textureUploads.size());
+		size_t texUploadHeapOffset = 0;
+		UINT numTexsProcessed = 0;
+		
+		size_t totalSize = 0;
+		for (const auto& upload : textureUploads)
+		{
+			totalSize += AlignU64(upload->textureDataSize, 512);
+		}
+		
+		D3D12_GPU_VIRTUAL_ADDRESS gpuAddress;
+		UINT8* cpuAddress;
+		if (m_pUploadBuffer->AllocateForFrame(m_pDevice->GetFrameID(), totalSize, gpuAddress, cpuAddress))
+		{
+			for (numTexsProcessed; numTexsProcessed < numTextureUploads; ++numTexsProcessed)
+			{
+				auto textureUpload = textureUploads[numTexsProcessed];
+				if (texUploadHeapOffset + textureUpload->textureDataSize > totalSize)
+				{
+					break;
+				}
+				
+				memcpy(cpuAddress + texUploadHeapOffset, textureUpload->pTextureData, textureUpload->textureDataSize);
+				uploadContext->CopyTextureRegion(*textureUpload->pTextureBuffer, m_pUploadBuffer->GetResource(), texUploadHeapOffset,
+					textureUpload->subResourceLayouts, textureUpload->numSubResources);
+				
+				texUploadHeapOffset += textureUpload->textureDataSize;
+				texUploadHeapOffset = AlignU64(texUploadHeapOffset, 512);
+				
+				uploadContext->AddTextureProcess(textureUpload);
+			}
+			
+			if (numTexsProcessed > 0)
+			{
+				textureUploads.erase(textureUploads.begin(), textureUploads.begin() + numTexsProcessed);
+			}
+		}
+	}
+	
 
 	RenderTexture* BufferManager::GetCameraDepthRT() const noexcept
 	{

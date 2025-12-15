@@ -51,6 +51,7 @@ namespace ElysiaRenderer
 		void Release(BufferHandle handle);
 
 		void UploadBufferData(DX12UploadContext* uploadContext, std::vector<DX12BufferUpload*>& bufferUploads);
+		void UploadTextureData(DX12UploadContext* uploadContext, std::vector<DX12TextureUpload*>& textureUploads);
 
 		RenderTexture* GetCameraDepthRT() const noexcept;
 		RenderTexture* GetCameraColorRT() const noexcept;

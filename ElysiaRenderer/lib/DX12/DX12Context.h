@@ -25,7 +25,7 @@ namespace ElysiaRenderer
 		void AddBarrier(RenderTexture* resource, D3D12_RESOURCE_STATES newState, bool isFlush = true);
 
 		void FlushBarrier();
-		void CopyTextureRegion(DX12GPUResource& destination, DX12GPUResource& source, size_t sourceOffset, 
+		void CopyTextureRegion(DX12GPUResource& destination, ID3D12Resource* source, size_t sourceOffset, 
 			SubResourceLayouts subResourceLayouts, UINT numSubResources);
 		void CopyBufferRegion(DX12GPUResource& destination, UINT64 destOffset, 
 			DX12GPUResource& source, UINT64 sourceOffset, UINT64 numBytes);

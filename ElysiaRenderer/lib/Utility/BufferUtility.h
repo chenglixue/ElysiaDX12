@@ -39,10 +39,10 @@ namespace ElysiaRenderer
 
 	struct DX12BufferUpload
 	{
-		BufferManager::BufferHandle m_buffer = nullptr;
+		BufferManager::BufferHandle buffer = nullptr;
 		// std::unique_ptr<uint8_t[]> m_bufferData = nullptr;
 		UINT8* pBufferData = nullptr;
-		size_t m_bufferDataSize = 0;
+		size_t bufferDataSize = 0;
 		std::function<void (DX12BufferUpload*)> onComplete; 
 	};
 

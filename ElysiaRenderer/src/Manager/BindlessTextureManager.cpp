@@ -172,17 +172,17 @@ namespace ElysiaRenderer
 		auto newTex = std::move(this->CreateTexture_L(texDesc, TexTypeFlags::SRV));
 
 		auto textureUpload = new DX12TextureUpload();
-		textureUpload->m_textureBuffer = newTex.get();
-		textureUpload->m_numSubResources = static_cast<UINT>(texMetaData.mipLevels * texMetaData.arraySize);
+		textureUpload->pTextureBuffer = newTex.get();
+		textureUpload->numSubResources = static_cast<UINT>(texMetaData.mipLevels * texMetaData.arraySize);
 
 		UINT numRows[MAX_TEXTURE_SUBRESOURCE_COUNT];
 		uint64_t rowSizesInBytes[MAX_TEXTURE_SUBRESOURCE_COUNT];
 
-		auto resourceDesc = textureUpload->m_textureBuffer->GetResourceDesc();
-		m_pDevice->GetDevice()->GetCopyableFootprints(&resourceDesc, 0, textureUpload->m_numSubResources, 0,
-			textureUpload->m_subResourceLayouts.data(), numRows, rowSizesInBytes, &textureUpload->m_textureDataSize);
+		auto resourceDesc = textureUpload->pTextureBuffer->GetResourceDesc();
+		m_pDevice->GetDevice()->GetCopyableFootprints(&resourceDesc, 0, textureUpload->numSubResources, 0,
+			textureUpload->subResourceLayouts.data(), numRows, rowSizesInBytes, &textureUpload->textureDataSize);
 		
-		textureUpload->m_pTextureData = std::make_unique<uint8_t[]>(textureUpload->m_textureDataSize);
+		textureUpload->m_pTextureData = std::make_unique<uint8_t[]>(textureUpload->textureDataSize);
 
 		for (size_t arrayIndex = 0; arrayIndex < texMetaData.arraySize; ++arrayIndex)
 		{
@@ -190,7 +190,7 @@ namespace ElysiaRenderer
 			{
 				const uint64_t subResourceIndex = mipIndex + (arrayIndex * texMetaData.mipLevels);
 
-				const D3D12_PLACED_SUBRESOURCE_FOOTPRINT& subResourcelayout = textureUpload->m_subResourceLayouts[subResourceIndex];
+				const D3D12_PLACED_SUBRESOURCE_FOOTPRINT& subResourcelayout = textureUpload->subResourceLayouts[subResourceIndex];
 				const uint64_t subResourceHeight = numRows[subResourceIndex];
 				const uint64_t subResourcePitch = ElysiaHelper::AlignU32(subResourcelayout.Footprint.RowPitch, D3D12_TEXTURE_DATA_PITCH_ALIGNMENT);
 				const uint64_t subResourceDepth = subResourcelayout.Footprint.Depth;
