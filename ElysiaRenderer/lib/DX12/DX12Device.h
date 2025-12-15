@@ -53,9 +53,10 @@ namespace ElysiaRenderer
 		{
 			return m_format;
 		}
-		D3D12MA::Allocator*		GetAllocator()
+		IDXGIAdapter1*			GetAdapter() const noexcept
 		{
-			return m_allocator;
+			assert(m_adapter != nullptr);
+			return m_adapter;
 		}
 		UINT					GetFrameID() const
 		{
@@ -104,12 +105,10 @@ namespace ElysiaRenderer
 		}
 		AGSContext* GetAGSContext() { return m_agsContext; }
 		AGSGPUInfo* GetAGSGPUInfo() { return &m_agsGPUInfo; }
-		UploadRingBuffer* GetGlobalUploadBuffer() const noexcept;
 
 		void CreateWindowDependentResources();
 		void OnCreateWindowSizeDependentResources(uint32_t dwWidth, uint32_t dwHeight, bool bVSyncOn, DisplayMode displayMode = DISPLAYMODE_SDR, bool disableLocalDimming = false);
 		std::unique_ptr<DX12GraphicsContext>		CreateGraphicsContext();
-		std::unique_ptr<DX12BufferResource>			CreateBuffer(const BufferCreationDesc& bufferCreationDesc);
 		std::unique_ptr<DX12Shader>					CreateShader(ShaderCreateDesc& shaderCreateDesc);
 		void										CreateSamplers(D3D12_SHADER_VISIBILITY shaderVisibility = D3D12_SHADER_VISIBILITY_ALL);
 		void										CreateRootParameters(DX12RootSignature* rootSignature, std::vector<DX12RootParameter*>& rootParamters);
@@ -185,7 +184,6 @@ namespace ElysiaRenderer
 		IDXGIAdapter1* m_adapter = nullptr;
 		IDXGIFactory7* m_DXGIFactory = nullptr;
 		IDXGISwapChain4* m_swapChain = nullptr;
-		D3D12MA::Allocator* m_allocator = nullptr;
 		std::unique_ptr<DX12Queue> m_graphicsQueue;
 		std::unique_ptr<DX12Queue> m_computeQueue;
 		std::unique_ptr<DX12Queue> m_copyQueue;
@@ -199,7 +197,7 @@ namespace ElysiaRenderer
 		std::array<DX12DescriptorHeapHandle, NUM_FRAMES_IN_FLIGHT> m_ImguiDescriptors;
 		std::array<std::unique_ptr<DX12UploadContext>, NUM_FRAMES_IN_FLIGHT> m_uploadContexts;
 		std::array<std::unique_ptr<DX12TextureResource>, NUM_BACK_BUFFERS> m_backBuffers;
-		std::unique_ptr<UploadRingBuffer> m_pGlobalUploadBuffer;
+		
 		std::array<EndOfFrameFences, NUM_FRAMES_IN_FLIGHT> m_endOfFrameFences;
 		std::array<std::vector<std::pair<uint64_t, D3D12_COMMAND_LIST_TYPE>>, NUM_FRAMES_IN_FLIGHT> m_contextSubmissions;
 		std::array<DestructionQueue, NUM_FRAMES_IN_FLIGHT> m_destructionQueues;

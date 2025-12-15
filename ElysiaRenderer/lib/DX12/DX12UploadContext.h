@@ -10,9 +10,7 @@ namespace ElysiaRenderer
 	class DX12UploadContext : public DX12Context
 	{
 	public:
-		DX12UploadContext(DX12Device* device, 
-			std::unique_ptr<DX12BufferResource> bufferUploadHeap,
-			std::unique_ptr<DX12BufferResource> textureUploadHeap);
+		DX12UploadContext(DX12Device* device);
 		~DX12UploadContext() override;
 
 		DX12BufferResource* GetTexUploadHeap();
@@ -29,8 +27,5 @@ namespace ElysiaRenderer
 		std::vector<DX12TextureUpload*> m_textureUploads;
 		std::vector<DX12TextureUpload*> m_textureUploadsInProgress;
 		std::vector<DX12BufferUpload*> m_bufferUploadsInProgress;
-
-		std::unique_ptr<DX12BufferResource> m_textureUploadHeap = nullptr;
-		std::unique_ptr<DX12BufferResource> m_bufferUploadHeap = nullptr;
 	};
 }

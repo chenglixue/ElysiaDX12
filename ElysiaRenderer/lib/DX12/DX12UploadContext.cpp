@@ -8,12 +8,8 @@
 
 namespace ElysiaRenderer
 {
-	DX12UploadContext::DX12UploadContext(DX12Device* device,
-		std::unique_ptr<DX12BufferResource> bufferUploadHeap,
-		std::unique_ptr<DX12BufferResource> textureUploadHeap)
-		: DX12Context(device, D3D12_COMMAND_LIST_TYPE_COPY),
-		m_bufferUploadHeap(std::move(bufferUploadHeap)),
-		m_textureUploadHeap(std::move(textureUploadHeap))
+	DX12UploadContext::DX12UploadContext(DX12Device* device)
+		: DX12Context(device, D3D12_COMMAND_LIST_TYPE_COPY)
 	{
 
 	}
@@ -23,36 +19,26 @@ namespace ElysiaRenderer
 		m_textureUploads.clear();
 	}
 
-	DX12BufferResource* DX12UploadContext::GetTexUploadHeap()
-	{
-		return m_textureUploadHeap.get();
-	}
-	DX12BufferResource* DX12UploadContext::GetBufferUploadHeap()
-	{
-		return m_bufferUploadHeap.get();
-	}
-
 	void DX12UploadContext::AddTextureToUploads(DX12TextureUpload* textureUpload)
 	{
-		assert(textureUpload->m_textureDataSize <= m_textureUploadHeap->GetResourceDesc().Width);
-
 		m_textureUploads.emplace_back(std::move(textureUpload));
 	}
 	void DX12UploadContext::AddBufferToUploads(DX12BufferUpload* bufferUpload)
 	{
-		assert(bufferUpload->m_bufferDataSize < m_bufferUploadHeap->GetResourceDesc().Width);
-
 		m_bufferUploads.emplace_back(std::move(bufferUpload));
 	}
 
 	void DX12UploadContext::ProcessUploads()
 	{
 		const auto numTextureUploads = static_cast<UINT>(m_textureUploads.size());
-		const auto numBufferUploads = static_cast<UINT>(m_bufferUploads.size());
 		size_t texUploadHeapOffset = 0;
-		size_t bufferUploadHeapOffset = 0;
 		UINT numTexsProcessed = 0;
-		UINT numBuffersProcessed = 0;
+
+		size_t totalSize = 0;
+		for (const auto& upload : m_bufferUploads)
+		{
+			totalSize += AlignU32(upload->m_bufferDataSize, D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
+		}
 
 		for (numBuffersProcessed; numBuffersProcessed < numBufferUploads; numBuffersProcessed++)
 		{
@@ -80,7 +66,7 @@ namespace ElysiaRenderer
 		for (numTexsProcessed; numTexsProcessed < numTextureUploads; ++numTexsProcessed)
 		{
 			auto currUpload = m_textureUploads[numTexsProcessed];
-			if ((texUploadHeapOffset + currUpload->m_textureDataSize) > m_textureUploadHeap->GetResourceDesc().Width)
+			if (texUploadHeapOffset + currUpload->m_textureDataSize > m_textureUploadHeap->GetResourceDesc().Width)
 			{
 				break;
 			}

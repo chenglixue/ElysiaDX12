@@ -29,6 +29,10 @@ namespace ElysiaRenderer
 		}
 	}
 
+	UINT DX12BufferResource::GetIndex() const noexcept
+	{
+		return m_index;
+	}
 	float DX12BufferResource::GetStride() const noexcept
 	{
 		return static_cast<float>(m_stride);
@@ -50,6 +54,10 @@ namespace ElysiaRenderer
 		return m_mappedBuffer;
 	}
 
+	void DX12BufferResource::SetIndex(UINT index)
+	{
+		m_index = index;
+	}
 	void DX12BufferResource::SetStride(float stride)
 	{
 		m_stride = static_cast<size_t>(stride);

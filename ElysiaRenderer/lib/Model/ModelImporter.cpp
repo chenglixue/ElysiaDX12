@@ -727,48 +727,46 @@ namespace ElysiaModel
 	bool ModelImporter::CreateVertexBuffer()
 	{
 		BufferCreationDesc bufferCreationDesc{};
-		bufferCreationDesc.m_size = m_meshData.vertexDataByteSize;
-		bufferCreationDesc.m_accessFlags = BufferAccessFlags::GPUOnly;
-		bufferCreationDesc.m_viewFlags = GPUResourceFlags::None;
-		bufferCreationDesc.m_isRawAccess = true;
-		bufferCreationDesc.m_stride = m_vertexStride;
+		bufferCreationDesc.size = m_meshData.vertexDataByteSize;
+		bufferCreationDesc.accessFlags = BufferAccessFlags::GPUOnly;
+		bufferCreationDesc.viewFlags = GPUResourceFlags::None;
+		bufferCreationDesc.isRawAccess = true;
+		bufferCreationDesc.stride = m_vertexStride;
 		BufferManager::GetInstance().AddVertexBuffer(bufferCreationDesc);
 		
 		auto pBufferUpload = new DX12BufferUpload();
 		pBufferUpload->m_buffer = BufferManager::GetInstance().GetVertexBuffer();
-		pBufferUpload->m_bufferData = std::make_unique<uint8_t[]>(bufferCreationDesc.m_size);
-		pBufferUpload->m_bufferDataSize = bufferCreationDesc.m_size;
+		pBufferUpload->m_bufferDataSize = bufferCreationDesc.size;
+		pBufferUpload->pBufferData = m_pVertexData;
 		pBufferUpload->onComplete = [bufferCreationDesc](DX12BufferUpload* pBufferUpload)
 		{
 			D3D12_VERTEX_BUFFER_VIEW bufferView
 			{
 				.BufferLocation = BufferManager::GetInstance().GetVertexBuffer()->GetGPUAddress(),
 				.SizeInBytes = static_cast<UINT>(pBufferUpload->m_bufferDataSize),
-				.StrideInBytes = static_cast<UINT>(bufferCreationDesc.m_stride),
+				.StrideInBytes = static_cast<UINT>(bufferCreationDesc.stride),
 			};
-				
 			BufferManager::GetInstance().SetVertexBufferView(bufferView);
 		};
-		memcpy(pBufferUpload->m_bufferData.get(), m_pVertexData, bufferCreationDesc.m_size);
 
 		m_pDevice->GetUploadContext()->AddBufferToUploads(std::move(pBufferUpload));
 
-		return BufferManager::GetInstance().GetVertexBuffer();
+		return BufferManager::GetInstance().GetVertexBuffer() != nullptr;
 	}
 
 	bool ModelImporter::CreateIndexBuffer()
 	{
 		BufferCreationDesc bufferCreationDesc{};
-		bufferCreationDesc.m_size = m_meshData.indexDataByteSize;
-		bufferCreationDesc.m_accessFlags = BufferAccessFlags::GPUOnly;
-		bufferCreationDesc.m_viewFlags = GPUResourceFlags::None;
-		bufferCreationDesc.m_isRawAccess = true;
+		bufferCreationDesc.size = m_meshData.indexDataByteSize;
+		bufferCreationDesc.accessFlags = BufferAccessFlags::GPUOnly;
+		bufferCreationDesc.viewFlags = GPUResourceFlags::None;
+		bufferCreationDesc.isRawAccess = true;
 		BufferManager::GetInstance().AddIndexBuffer(bufferCreationDesc);
 
 		auto pBufferUpload = new DX12BufferUpload();
 		pBufferUpload->m_buffer = BufferManager::GetInstance().GetIndexBuffer();
-		pBufferUpload->m_bufferData = std::make_unique<uint8_t[]>(bufferCreationDesc.m_size);
-		pBufferUpload->m_bufferDataSize = bufferCreationDesc.m_size;
+		pBufferUpload->m_bufferData = std::make_unique<uint8_t[]>(bufferCreationDesc.size);
+		pBufferUpload->m_bufferDataSize = bufferCreationDesc.size;
 		pBufferUpload->onComplete = [this](DX12BufferUpload* pBufferUpload)
 		{
 			D3D12_INDEX_BUFFER_VIEW bufferView
@@ -780,11 +778,11 @@ namespace ElysiaModel
 				
 			BufferManager::GetInstance().SetIndexBufferView(bufferView);
 		};
-		memcpy(pBufferUpload->m_bufferData.get(), m_pIndexData, bufferCreationDesc.m_size);
+		memcpy(pBufferUpload->m_bufferData.get(), m_pIndexData, bufferCreationDesc.size);
 
 		m_pDevice->GetUploadContext()->AddBufferToUploads(std::move(pBufferUpload));
 
-		return BufferManager::GetInstance().GetIndexBuffer();
+		return BufferManager::GetInstance().GetIndexBuffer() != nullptr;
 	}
 
 	void ModelImporter::CreateMeshRenders()

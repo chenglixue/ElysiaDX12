@@ -182,7 +182,7 @@ namespace ElysiaRenderer
 					pResourceLayout->m_spaces[spaceID] = nullptr;
 				}
 			
-				auto GPUAddress = UploadMaterialConstants(m_pDevice->GetGlobalUploadBuffer(), spaceID,  m_pMaterial.get(), passData.pCurrVariantData);
+				auto GPUAddress = UploadMaterialConstants(BufferManager::GetInstance().GetUploadRingBuffer(), spaceID,  m_pMaterial.get(), passData.pCurrVariantData);
 				auto newSpace = std::make_unique<PipelineResourceSpace>();
 				newSpace->SetDynamicCBV(GPUAddress);
 				newSpace->Lock();

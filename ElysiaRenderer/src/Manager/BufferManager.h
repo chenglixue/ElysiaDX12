@@ -1,12 +1,13 @@
 #pragma once
+#include <queue>
+
 #include "lib/Utility/Helper.h"
 
 
 #include "IManager.h"
 #include "IUpdate.h"
-#include "lib/DX12/DX12TextureBuffer.h"
+#include "DX12/UploadRingBuffer.h"
 #include "lib/Utility/RenderTexture.h"
-
 
 namespace ElysiaRenderer
 {
@@ -20,6 +21,9 @@ namespace ElysiaRenderer
 
 	class BufferManager : public IManager, IUpdate
 	{
+	public:
+		using BufferHandle = std::shared_ptr<DX12BufferResource>;
+		
 	public:
 		BufferManager() = default;
 		BufferManager(const BufferManager& rhs) = delete;
@@ -40,10 +44,18 @@ namespace ElysiaRenderer
 		virtual void Destory() override;
 		virtual void Update() override;
 
+		D3D12MA::Allocator* GetAllocator() const noexcept;
+		UploadRingBuffer* GetUploadRingBuffer() const noexcept;
+
+		BufferHandle CreateBuffer(const BufferCreationDesc& bufferCreationDesc);
+		void Release(BufferHandle handle);
+
+		void UploadBufferData(DX12UploadContext* uploadContext, std::vector<DX12BufferUpload*>& bufferUploads);
+
 		RenderTexture* GetCameraDepthRT() const noexcept;
 		RenderTexture* GetCameraColorRT() const noexcept;
-		DX12BufferResource* GetVertexBuffer() const noexcept;
-		DX12BufferResource* GetIndexBuffer() const noexcept;
+		BufferHandle GetVertexBuffer() const noexcept;
+		BufferHandle GetIndexBuffer() const noexcept;
 		const D3D12_INDEX_BUFFER_VIEW& GetIndexBufferView() const noexcept;
 		const D3D12_VERTEX_BUFFER_VIEW& GetVertexBufferView() const noexcept;
 
@@ -51,18 +63,28 @@ namespace ElysiaRenderer
 		void AddIndexBuffer(BufferCreationDesc desc);
 		void SetVertexBufferView(const D3D12_VERTEX_BUFFER_VIEW& view);
 		void SetIndexBufferView(const D3D12_INDEX_BUFFER_VIEW& view);
-
+		
 	private:
-		DX12Device* m_pDevice = nullptr;
 		static std::unique_ptr<BufferManager> m_instance;
 		static std::once_flag m_initInstanceFlag;
+
+		DX12Device* m_pDevice = nullptr;
+		CComPtr<D3D12MA::Allocator> m_pAllocator = nullptr;
+		
+		std::vector<BufferHandle> m_buffers;
+		// 空闲槽位管理
+		std::queue<uint32_t> m_freeBufferSlots;
+
+		std::unique_ptr<UploadRingBuffer> m_pUploadBuffer;
 
 		RenderTexture* m_pCameraColorRT = nullptr;
 		RenderTexture* m_pCameraDepthRT = nullptr;
 		
-		std::unique_ptr<DX12BufferResource> m_pVertexBuffer = nullptr;
-		std::unique_ptr<DX12BufferResource> m_pIndexBuffer = nullptr;
+		BufferManager::BufferHandle m_pVertexBuffer = nullptr;
+		BufferManager::BufferHandle m_pIndexBuffer = nullptr;
 		D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView{};
 		D3D12_INDEX_BUFFER_VIEW m_indexBufferView{};
 	};
+
+	
 }

@@ -1,5 +1,6 @@
 #pragma once
 #include "Helper.h"
+#include "Manager/BufferManager.h"
 
 namespace ElysiaRenderer
 {
@@ -28,18 +29,19 @@ namespace ElysiaRenderer
 	
 	struct BufferCreationDesc
 	{
-		LPCWSTR m_name;
-		size_t m_size = 0;
-		size_t m_stride = 0;
-		GPUResourceFlags m_viewFlags = GPUResourceFlags::None;
-		BufferAccessFlags m_accessFlags = BufferAccessFlags::GPUOnly;
-		bool m_isRawAccess = false;
+		LPCWSTR name;
+		size_t size = 0;
+		size_t stride = 0;
+		GPUResourceFlags viewFlags = GPUResourceFlags::None;
+		BufferAccessFlags accessFlags = BufferAccessFlags::GPUOnly;
+		bool isRawAccess = false;
 	};
 
 	struct DX12BufferUpload
 	{
-		DX12BufferResource* m_buffer = nullptr;
-		std::unique_ptr<uint8_t[]> m_bufferData = nullptr;
+		BufferManager::BufferHandle m_buffer = nullptr;
+		// std::unique_ptr<uint8_t[]> m_bufferData = nullptr;
+		UINT8* pBufferData = nullptr;
 		size_t m_bufferDataSize = 0;
 		std::function<void (DX12BufferUpload*)> onComplete; 
 	};

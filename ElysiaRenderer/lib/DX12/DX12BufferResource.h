@@ -12,12 +12,14 @@ namespace ElysiaRenderer
 
 		~DX12BufferResource();
 
+		UINT GetIndex() const noexcept;
 		float GetStride() const noexcept;
 		DX12DescriptorHeapHandle GetCBVDescriptor() const noexcept;
 		DX12DescriptorHeapHandle GetSRVDescriptor() const noexcept;
 		DX12DescriptorHeapHandle GetUAVDescriptor() const noexcept;
 		uint8_t* GetMappedBuffer() const noexcept;
 
+		void SetIndex(UINT index);
 		void SetStride(float stride);
 		void SetCBVDescriptor(const DX12DescriptorHeapHandle& CBVDescriptor);
 		void SetSRVDescriptor(const DX12DescriptorHeapHandle& SRVDescriptor);
@@ -31,5 +33,8 @@ namespace ElysiaRenderer
 		DX12DescriptorHeapHandle m_CBVDescriptor;
 		DX12DescriptorHeapHandle m_SRVDescriptor;
 		DX12DescriptorHeapHandle m_UAVDescriptor;
+
+		// index of buffer pool
+		UINT m_index;
 	};
 }

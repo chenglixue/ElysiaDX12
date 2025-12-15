@@ -19,6 +19,7 @@
 #include "UploadRingBuffer.h"
 #include "lib/Event/Messager.h"
 #include "../Utility/RenderTexture.h"
+#include "Manager/BufferManager.h"
 #include "Utility/ShaderCompileOptions.h"
 #include "src/Manager/ShaderVariantManager.h"
 
@@ -31,7 +32,7 @@ namespace ElysiaRenderer
 		InitializeDeviceResources(windowHandle);
 		CreateWindowDependentResources();
 	}
-	   
+	     
 	DX12Device::~DX12Device()
 	{
 		WaitForIdle();
@@ -66,7 +67,6 @@ namespace ElysiaRenderer
 		ElysiaHelper::SafeRelease(m_device);
 		ElysiaHelper::SafeRelease(m_DXGIFactory);
 		ElysiaHelper::SafeRelease(m_swapChain);
-		ElysiaHelper::SafeRelease(m_allocator);
 
 #ifdef DEBUG
 		IDXGIDebug1* pDebug = nullptr;
@@ -181,16 +181,6 @@ namespace ElysiaRenderer
 
 			// Create Device
 			ElysiaHelper::AssertIfFailed(D3D12CreateDevice(m_adapter, D3D_FEATURE_LEVEL_12_2, IID_PPV_ARGS(&m_device)));
-
-			// Create Allocator
-			{
-				D3D12MA::ALLOCATOR_DESC allocatorDesc = {};
-				allocatorDesc.Flags = D3D12MA::ALLOCATOR_FLAG_NONE;
-				allocatorDesc.pAdapter = m_adapter;
-				allocatorDesc.pDevice = m_device;
-
-				D3D12MA::CreateAllocator(&allocatorDesc, &m_allocator);
-			}
 		}
 
 		CAULDRON_DX12::fsHdrInit(GetAGSContext(), GetAGSGPUInfo(), m_hWnd, m_adapter);
@@ -255,25 +245,17 @@ namespace ElysiaRenderer
 		// Create Upload Context
 		{
 			BufferCreationDesc uploadBufferDesc{};
-			uploadBufferDesc.m_accessFlags = BufferAccessFlags::HostWritable;
-			uploadBufferDesc.m_size = 40 * 4096 * 4096;
+			uploadBufferDesc.accessFlags = BufferAccessFlags::HostWritable;
+			uploadBufferDesc.size = 40 * 4096 * 4096;
 
 			BufferCreationDesc uploadTextureDesc{};
-			uploadTextureDesc.m_accessFlags = BufferAccessFlags::HostWritable;
-			uploadTextureDesc.m_size = 40 * 4096 * 4096;
+			uploadTextureDesc.accessFlags = BufferAccessFlags::HostWritable;
+			uploadTextureDesc.size = 40 * 4096 * 4096;
 
 			for (UINT currFrameIndex = 0; currFrameIndex < NUM_FRAMES_IN_FLIGHT; ++currFrameIndex)
 			{
-				m_uploadContexts[currFrameIndex] = std::make_unique<DX12UploadContext>(
-					this, 
-					CreateBuffer(uploadBufferDesc),
-					CreateBuffer(uploadTextureDesc));
+				m_uploadContexts[currFrameIndex] = std::make_unique<DX12UploadContext>(this);
 			}
-		}
-
-		// Create Global Upload Buffer
-		{
-			m_pGlobalUploadBuffer = std::make_unique<UploadRingBuffer>(this, 16 * 1024 * 1024, L"Global Upload Buffer");
 		}
 
 		CreateSamplers();
@@ -369,12 +351,6 @@ namespace ElysiaRenderer
 
 		CreateWindowDependentResources();
 	}
-
-	UploadRingBuffer* DX12Device::GetGlobalUploadBuffer() const noexcept
-	{
-		assert(m_pGlobalUploadBuffer);
-		return m_pGlobalUploadBuffer.get();
-	}
 	
 	std::unique_ptr<DX12GraphicsContext>		DX12Device::CreateGraphicsContext()
 	{
@@ -382,95 +358,6 @@ namespace ElysiaRenderer
 
 		return graphicsContext;
 	}
-	std::unique_ptr<DX12BufferResource>			DX12Device::CreateBuffer(const BufferCreationDesc& bufferCreationDesc)
-	{
-		D3D12_RESOURCE_DESC resourceDesc{};
-		resourceDesc.Width = AlignU32(static_cast<UINT>(bufferCreationDesc.m_size), 256);
-		resourceDesc.Height = 1;
-		resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-		resourceDesc.Alignment = 0;
-		resourceDesc.DepthOrArraySize = 1;
-		resourceDesc.MipLevels = 1;
-		resourceDesc.Format = DXGI_FORMAT_UNKNOWN;
-		resourceDesc.SampleDesc.Count = 1;
-		resourceDesc.SampleDesc.Quality = 0;
-		resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-		resourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
-
-		UINT numElements = static_cast<UINT>(bufferCreationDesc.m_stride > 0 ? bufferCreationDesc.m_size / bufferCreationDesc.m_stride : 1);
-		bool isHostVisible = ((bufferCreationDesc.m_accessFlags & BufferAccessFlags::HostWritable) == BufferAccessFlags::HostWritable);
-		bool isHasCBV = ((bufferCreationDesc.m_viewFlags & GPUResourceFlags::CBV) == GPUResourceFlags::CBV);
-		bool isHasSRV = ((bufferCreationDesc.m_viewFlags & GPUResourceFlags::SRV) == GPUResourceFlags::SRV);
-		bool isHasUAV = ((bufferCreationDesc.m_viewFlags & GPUResourceFlags::UAV) == GPUResourceFlags::UAV);
-
-		// D3D12_RESOURCE_STATE_GENERIC_READ
-		D3D12_RESOURCE_STATES resourceState = isHostVisible ? D3D12_RESOURCE_STATE_GENERIC_READ : D3D12_RESOURCE_STATE_COPY_DEST;
-		D3D12MA::ALLOCATION_DESC allocationDesc{};
-		allocationDesc.HeapType = isHostVisible ? D3D12_HEAP_TYPE_UPLOAD : D3D12_HEAP_TYPE_DEFAULT;
-
-		CComPtr<D3D12MA::Allocation> pAllocation = nullptr;
-		CComPtr<ID3D12Resource> pResource = nullptr;
-		ElysiaHelper::ThrowIfFailed(m_allocator->CreateResource(&allocationDesc, &resourceDesc, resourceState, nullptr,
-			&pAllocation, IID_PPV_ARGS(&pResource)));
-		//pResource->SetName(bufferCreationDesc.m_name);
-		
-		auto pNewBuffer = std::make_unique<DX12BufferResource>(pResource, resourceState, pAllocation);
-
-		if (isHasCBV)
-		{
-			D3D12_CONSTANT_BUFFER_VIEW_DESC CBVDesc{};
-			CBVDesc.SizeInBytes = static_cast<UINT>(pNewBuffer->GetResourceDesc().Width);
-			CBVDesc.BufferLocation = pNewBuffer->GetGPUAddress();
-
-			pNewBuffer->SetCBVDescriptor(m_SRVStagingDescriptorHeap->NewDescriptorHeapHandle());
-			m_device->CreateConstantBufferView(&CBVDesc, pNewBuffer->GetCBVDescriptor().GetCPUHandle());
-		}
-
-		if (isHasSRV)
-		{ 
-			D3D12_SHADER_RESOURCE_VIEW_DESC SRVDesc{};
-			SRVDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-			SRVDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
-			SRVDesc.Format = bufferCreationDesc.m_isRawAccess ? DXGI_FORMAT_R32_TYPELESS : DXGI_FORMAT_UNKNOWN;
-			SRVDesc.Buffer.FirstElement = 0;
-			SRVDesc.Buffer.NumElements = static_cast<UINT>(bufferCreationDesc.m_isRawAccess ? bufferCreationDesc.m_size / 4 : numElements);
-			SRVDesc.Buffer.StructureByteStride = bufferCreationDesc.m_stride > 0 ? static_cast<UINT>(pNewBuffer->GetStride()) : 0;
-			SRVDesc.Buffer.Flags = bufferCreationDesc.m_isRawAccess ? D3D12_BUFFER_SRV_FLAG_RAW : D3D12_BUFFER_SRV_FLAG_NONE;
-
-			pNewBuffer->SetSRVDescriptor(m_SRVStagingDescriptorHeap->NewDescriptorHeapHandle());
-			m_device->CreateShaderResourceView(pNewBuffer->GetResource(), &SRVDesc, pNewBuffer->GetSRVDescriptor().GetCPUHandle());
-
-			pNewBuffer->SetResourceHeapIndex(m_freeReservedDescriptorIndices.back());
-			m_freeReservedDescriptorIndices.pop_back();
-
-			CopyDescriptorFromStageToRenderPass(pNewBuffer->GetSRVDescriptor(), pNewBuffer->GetResourceHeapIndex());
-		}
-
-		if (isHasUAV)
-		{
-			D3D12_UNORDERED_ACCESS_VIEW_DESC UAVDesc{};
-
-			UAVDesc.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
-			UAVDesc.Format = bufferCreationDesc.m_isRawAccess ? DXGI_FORMAT_R32_TYPELESS : DXGI_FORMAT_UNKNOWN;
-			UAVDesc.Buffer.CounterOffsetInBytes = 0;
-			UAVDesc.Buffer.FirstElement = 0;
-			UAVDesc.Buffer.NumElements = static_cast<UINT>(bufferCreationDesc.m_isRawAccess ? bufferCreationDesc.m_size / 4 : numElements);
-			UAVDesc.Buffer.StructureByteStride = bufferCreationDesc.m_isRawAccess ? 0 : static_cast<UINT>(pNewBuffer->GetStride());
-			UAVDesc.Buffer.Flags = bufferCreationDesc.m_isRawAccess ? D3D12_BUFFER_UAV_FLAG_RAW : D3D12_BUFFER_UAV_FLAG_NONE;
-
-			pNewBuffer->SetUAVDescriptor(m_SRVStagingDescriptorHeap->NewDescriptorHeapHandle());
-
-			m_device->CreateUnorderedAccessView(pNewBuffer->GetResource(), nullptr, &UAVDesc, pNewBuffer->GetUAVDescriptor().GetCPUHandle());
-		}
-
-		if (isHostVisible)
-		{
-			pNewBuffer->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(&pNewBuffer->m_mappedBuffer));
-		}
-
-		return pNewBuffer;
-	}
-
 	std::unique_ptr<DX12Shader>					DX12Device::CreateShader(ShaderCreateDesc& shaderCreateDesc)
 	{
 		/// Enable Debug
@@ -816,7 +703,7 @@ namespace ElysiaRenderer
 		m_copyQueue->WaitForFenceCPUBlocking(fenceValue.m_copyQueueFence);
 		m_computeQueue->WaitForFenceCPUBlocking(fenceValue.m_computeQueueFence);
 		
-		m_pGlobalUploadBuffer->Reset(m_frameID);
+		BufferManager::GetInstance().GetUploadRingBuffer()->Reset(m_frameID);
 		
 		ProcessDestruction(m_frameID);
 
