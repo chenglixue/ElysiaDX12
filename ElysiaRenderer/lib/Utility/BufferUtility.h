@@ -6,6 +6,13 @@ namespace ElysiaRenderer
 	class DX12BufferResource;
 	using BufferHandle = std::shared_ptr<DX12BufferResource>;
 
+	enum GPUResourceState
+	{
+		NoInit,
+		InUse,
+		Free,
+	};
+	
 	enum class GPUResourceType : uint8_t
 	{
 		None = 0,

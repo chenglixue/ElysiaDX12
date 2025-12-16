@@ -48,7 +48,9 @@ namespace ElysiaRenderer
 		UploadRingBuffer* GetUploadRingBuffer() const noexcept;
 
 		BufferHandle CreateBuffer(const BufferCreationDesc& bufferCreationDesc);
+		void DestoryBuffer(const BufferHandle handle);
 		void Release(BufferHandle handle);
+		void ProcessGarbage(uint64_t currentFrameIndex);
 
 		void UploadBufferData(DX12UploadContext* uploadContext, std::vector<DX12BufferUpload*>& bufferUploads);
 		void UploadTextureData(DX12UploadContext* uploadContext, std::vector<DX12TextureUpload*>& textureUploads);
@@ -70,9 +72,12 @@ namespace ElysiaRenderer
 		DX12Device* m_pDevice = nullptr;
 		D3D12MA::Allocator* m_pAllocator = nullptr;
 		
-		std::vector<BufferHandle> m_buffers;
-		// 空闲槽位管理
-		std::queue<uint32_t> m_freeBufferSlots;
+		std::mutex m_createMutex;
+		std::mutex m_garbageMutex;
+		
+		std::vector<BufferHandle> m_bufferPools;
+		std::queue<uint32_t> m_freeBufferIndices;
+		std::vector<std::pair<uint64_t, BufferHandle>> m_grbageQueue;
 
 		std::unique_ptr<UploadRingBuffer> m_pUploadBuffer;
 

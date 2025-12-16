@@ -2,6 +2,8 @@
 #include "DX12GPUResource.h"
 #include "DX12DescriptorHeapHandle.h"
 
+#include "DX12Device.h"
+
 namespace ElysiaRenderer
 {
 	class DX12BufferResource : public DX12GPUResource
@@ -25,6 +27,8 @@ namespace ElysiaRenderer
 		void SetSRVDescriptor(const DX12DescriptorHeapHandle& SRVDescriptor);
 		void SetUAVDescriptor(const DX12DescriptorHeapHandle& UAVDescriptor);
 		void SetMappedData(const void* bufferData, size_t bufferSize);
+		
+		bool ReInit(DX12Device* pDevice, const BufferCreationDesc& bufferCreationDesc);
 
 		uint8_t* m_mappedBuffer = nullptr;
 	protected:

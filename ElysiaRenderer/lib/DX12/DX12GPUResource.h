@@ -41,10 +41,11 @@ namespace ElysiaRenderer
 		/// index of SRV Resource in SRV Descriptor heap
 		/// </summary>
 		/// <returns></returns>
-		const UINT& GetResourceHeapIndex()
+		const UINT& GetResourceHeapIndex() const noexcept
 		{
 			return m_descriptorHeapIndex;
 		}
+		bool IsFree() const noexcept {return m_state;}
 
 		void SetUsageState(D3D12_RESOURCE_STATES usageState)
 		{
@@ -76,9 +77,8 @@ namespace ElysiaRenderer
 			m_isReady = isReady;
 		}
 
-		virtual void Destory()
-		{
-		}
+		virtual void Destory();
+		void Reset();
 
 	protected:
 		CComPtr<ID3D12Resource> m_resource = nullptr;
@@ -90,5 +90,6 @@ namespace ElysiaRenderer
 		bool m_isReady = false;
 		UINT m_descriptorHeapIndex = INVALID_RESOURCE_TABLE_INDEX;
 		GPUResourceType m_bufferType = GPUResourceType::None;
+		GPUResourceState m_state = GPUResourceState::NoInit;
 	};
 }

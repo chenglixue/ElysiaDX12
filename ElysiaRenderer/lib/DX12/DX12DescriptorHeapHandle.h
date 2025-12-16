@@ -18,6 +18,12 @@ namespace ElysiaRenderer
 			m_GPUHandle.ptr = NULL;
 			m_heapIndex = 0;
 		}
+		
+		void Reset()
+		{
+			m_CPUHandle.ptr = NULL;
+			m_GPUHandle.ptr = NULL;
+		}
 
 		D3D12_CPU_DESCRIPTOR_HANDLE& GetCPUHandle()
 		{

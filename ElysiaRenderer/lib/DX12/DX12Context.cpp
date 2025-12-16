@@ -67,7 +67,8 @@ namespace ElysiaRenderer
 			BindDescriptorHeaps(currFrameID);
 		}
 	}
-
+	
+	
 	void DX12Context::AddBarrier(DX12GPUResource& resource, D3D12_RESOURCE_STATES newState, bool isFlush)
 	{
 		if (m_numQueuedBarriers >= MAX_QUEUED_BARRIERS)

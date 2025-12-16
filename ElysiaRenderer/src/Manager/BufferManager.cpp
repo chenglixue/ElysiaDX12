@@ -31,13 +31,13 @@ namespace ElysiaRenderer
 		allocatorDesc.pAdapter = m_pDevice->GetAdapter();
 		D3D12MA::CreateAllocator(&allocatorDesc, &m_pAllocator);
 		
-		m_pUploadBuffer = std::make_unique<UploadRingBuffer>(m_pDevice, m_pAllocator, 256 * 1024 * 1024, L"Global Upload Buffer");
+		m_pUploadBuffer = std::make_unique<UploadRingBuffer>(m_pDevice, m_pAllocator, 1024 * 1024 * 1024, L"Global Upload Buffer");
 	}
 
 	void BufferManager::Destory()
 	{
 		ElysiaHelper::SafeRelease(m_pAllocator);
-		for (auto& buffer : m_buffers)
+		for (auto& buffer : m_bufferPools)
 		{
 			if (buffer)
 			{
@@ -64,16 +64,27 @@ namespace ElysiaRenderer
 
 	BufferHandle BufferManager::CreateBuffer(const BufferCreationDesc& bufferCreationDesc)
 	{
+		std::lock_guard<std::mutex> lock(m_createMutex);
+		
+		auto alignSize = AlignU32((UINT)bufferCreationDesc.size, D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
+		
 		UINT32 index;
-		if (!m_freeBufferSlots.empty())
+		if (!m_freeBufferIndices.empty())
 		{
-			index = m_freeBufferSlots.front();
-			m_freeBufferSlots.pop();
+			index = m_freeBufferIndices.front();
+			m_freeBufferIndices.pop();
+			if(m_bufferPools[index] && m_bufferPools[index]->IsFree() && index < m_bufferPools.size() && m_bufferPools[index]->GetResourceDesc().Width < alignSize)
+			{
+				if(m_bufferPools[index]->ReInit(m_pDevice, bufferCreationDesc))
+				{
+					return m_bufferPools[index];
+				}
+			}
 		}
 		else
 		{
-			index = static_cast<UINT32>(m_buffers.size());
-			m_buffers.emplace_back();
+			index = static_cast<UINT32>(m_bufferPools.size());
+			m_bufferPools.emplace_back();
 		}
 
 		UINT numElements = static_cast<UINT>(bufferCreationDesc.stride > 0 ? bufferCreationDesc.size / bufferCreationDesc.stride : 1);
@@ -81,8 +92,7 @@ namespace ElysiaRenderer
 		bool isHasCBV = ((bufferCreationDesc.viewFlags & GPUResourceFlags::CBV) == GPUResourceFlags::CBV);
 		bool isHasSRV = ((bufferCreationDesc.viewFlags & GPUResourceFlags::SRV) == GPUResourceFlags::SRV);
 		bool isHasUAV = ((bufferCreationDesc.viewFlags & GPUResourceFlags::UAV) == GPUResourceFlags::UAV);
-
-		auto alignSize = AlignU32((UINT)bufferCreationDesc.size, D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
+		
 		D3D12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(alignSize);
 
 		D3D12_RESOURCE_STATES resourceState = isHostVisible ? D3D12_RESOURCE_STATE_GENERIC_READ : D3D12_RESOURCE_STATE_COPY_DEST;
@@ -152,27 +162,51 @@ namespace ElysiaRenderer
 			m_pDevice->GetDevice()->CreateUnorderedAccessView(pNewBuffer->GetResource(), nullptr, &UAVDesc, pNewBuffer->GetUAVDescriptor().GetCPUHandle());
 		}
 
-		if (index < m_buffers.size())
+		if (index < m_bufferPools.size())
 		{
-			m_buffers[index] = pNewBuffer;
+			m_bufferPools[index] = pNewBuffer;
 		}
 		else
 		{
-			m_buffers.emplace_back(pNewBuffer);
+			m_bufferPools.emplace_back(pNewBuffer);
 		}
 
 		return pNewBuffer;
+	}
+	void BufferManager::DestoryBuffer(const BufferHandle handle)
+	{
+		if(!handle) return;
+		
+		UINT64 deleteFrameIndex = m_pDevice->GetFrameIndex() + NUM_FRAMES_IN_FLIGHT;
+		m_grbageQueue.push_back({deleteFrameIndex, handle});
 	}
 	void BufferManager::Release(BufferHandle handle)
 	{
 		if (!handle) return;
 
 		UINT32 index = handle->GetIndex();
-		if (index < m_buffers.size() && m_buffers[index] == handle)
+		if (index < m_bufferPools.size() && m_bufferPools[index] == handle)
 		{
-			m_freeBufferSlots.push(index);
+			m_freeBufferIndices.push(index);
 
-			m_buffers[index].reset();
+			m_bufferPools[index]->Reset();
+		}
+	}
+	void BufferManager::ProcessGarbage(uint64_t currentFrameIndex)
+	{
+		std::lock_guard<std::mutex> lock(m_garbageMutex);
+		
+		auto it = m_grbageQueue.begin();
+		while(it != m_grbageQueue.end())
+		{
+			if(it->first <= currentFrameIndex)
+			{
+				it = m_grbageQueue.erase(it);
+			}
+			else
+			{
+				it++;
+			}
 		}
 	}
 
@@ -226,7 +260,6 @@ namespace ElysiaRenderer
 			}
 		}
 	}
-	
 	void BufferManager::UploadTextureData(DX12UploadContext* uploadContext, std::vector<DX12TextureUpload*>& textureUploads)
 	{
 		const auto numTextureUploads = static_cast<UINT>(textureUploads.size());
@@ -275,7 +308,6 @@ namespace ElysiaRenderer
 	{
 		return m_pVertexBuffer;
 	}
-
 	BufferHandle BufferManager::GetIndexBuffer() const noexcept
 	{
 		return m_pIndexBuffer;
@@ -285,7 +317,6 @@ namespace ElysiaRenderer
 	{
 		return m_indexBufferView;
 	}
-
 	const D3D12_VERTEX_BUFFER_VIEW& BufferManager::GetVertexBufferView() const noexcept
 	{
 		return m_vertexBufferView;
@@ -295,7 +326,6 @@ namespace ElysiaRenderer
 	{
 		m_pVertexBuffer = std::move(CreateBuffer(desc));
 	}
-
 	void BufferManager::AddIndexBuffer(BufferCreationDesc desc)
 	{
 		m_pIndexBuffer = std::move(CreateBuffer(desc));
@@ -305,7 +335,6 @@ namespace ElysiaRenderer
 	{
 		m_vertexBufferView = view;
 	}
-
 	void BufferManager::SetIndexBufferView(const D3D12_INDEX_BUFFER_VIEW& view)
 	{
 		m_indexBufferView = view;
