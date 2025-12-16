@@ -31,7 +31,7 @@ namespace ElysiaRenderer
 		allocatorDesc.pAdapter = m_pDevice->GetAdapter();
 		D3D12MA::CreateAllocator(&allocatorDesc, &m_pAllocator);
 		
-		m_pUploadBuffer = std::make_unique<UploadRingBuffer>(m_pDevice, m_pAllocator, 1024 * 1024 * 1024, L"Global Upload Buffer");
+		m_pUploadBuffer = std::make_unique<UploadRingBuffer>(m_pDevice, m_pAllocator, 256 * 1024 * 1024, L"Global Upload Buffer");
 	}
 
 	void BufferManager::Destory()
@@ -187,7 +187,7 @@ namespace ElysiaRenderer
 		size_t totalSize = 0;
 		for (const auto& upload : bufferUploads)
 		{
-			totalSize += AlignUp(upload->bufferDataSize, (size_t)D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
+			totalSize += AlignU32(upload->bufferDataSize, D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
 		}
 
 		D3D12_GPU_VIRTUAL_ADDRESS gpuAddress;
@@ -215,11 +215,8 @@ namespace ElysiaRenderer
 				UpdateSubresources(uploadContext->GetCommandList(), bufferUpload->buffer->GetResource(), m_pUploadBuffer->GetResource(),
 				gpuAddress - m_pUploadBuffer->GetResource()->GetGPUVirtualAddress() + bufferUploadHeapOffset, 0, 1, &subData);
 				uploadContext->AddBarrier(*bufferUpload->buffer, D3D12_RESOURCE_STATE_COMMON, false);
-				bufferUploadHeapOffset += bufferUpload->bufferDataSize;
-				bufferUploadHeapOffset = AlignUp(bufferUploadHeapOffset, (size_t)D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
+				bufferUploadHeapOffset = AlignU32(bufferUploadHeapOffset + bufferUpload->bufferDataSize, D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
 				uploadContext->AddBufferProcess(bufferUpload);
-				
-				numBuffersProcessed++;
 			}
 			uploadContext->FlushBarrier();
 			
@@ -228,7 +225,6 @@ namespace ElysiaRenderer
 				bufferUploads.erase(bufferUploads.begin(), bufferUploads.begin() + numBuffersProcessed);
 			}
 		}
-		
 	}
 	
 	void BufferManager::UploadTextureData(DX12UploadContext* uploadContext, std::vector<DX12TextureUpload*>& textureUploads)
@@ -242,7 +238,7 @@ namespace ElysiaRenderer
 		size_t totalSize = 0;
 		for (const auto& upload : textureUploads)
 		{
-			totalSize += AlignU32(upload->textureDataSize, D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
+			totalSize += AlignU64(upload->textureDataSize, 512);
 		}
 		
 		D3D12_GPU_VIRTUAL_ADDRESS gpuAddress;
@@ -258,11 +254,12 @@ namespace ElysiaRenderer
 				}
 				
 				memcpy(cpuAddress + texUploadHeapOffset, textureUpload->pTextureData.get(), textureUpload->textureDataSize);
-				uploadContext->CopyTextureRegion(*textureUpload->pTextureBuffer, m_pUploadBuffer->GetResource(), texUploadHeapOffset,
+				uploadContext->CopyTextureRegion(*textureUpload->pTextureBuffer, m_pUploadBuffer->GetResource(), 
+					gpuAddress - m_pUploadBuffer->GetResource()->GetGPUVirtualAddress() + texUploadHeapOffset,
 					textureUpload->subResourceLayouts, textureUpload->numSubResources);
 				
 				texUploadHeapOffset += textureUpload->textureDataSize;
-				texUploadHeapOffset = AlignU32(texUploadHeapOffset, (size_t)D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
+				texUploadHeapOffset = AlignU64(texUploadHeapOffset, 512);
 				
 				uploadContext->AddTextureProcess(textureUpload);
 			}
