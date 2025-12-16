@@ -107,7 +107,7 @@ namespace ElysiaRenderer
 	struct DX12TextureUpload
 	{
 		DX12TextureResource* pTextureBuffer;
-		UINT8* pTextureData = nullptr;
+		std::unique_ptr<UINT8[]> pTextureData = nullptr;
 		size_t textureDataSize = 0;
 		UINT numSubResources = 0;
 		ElysiaHelper::SubResourceLayouts subResourceLayouts{ 0 };

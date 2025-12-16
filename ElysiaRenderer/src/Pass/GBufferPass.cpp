@@ -203,7 +203,7 @@ namespace ElysiaRenderer
 				RenderTargetDesc RTDesc = RenderTargetDesc
 				{
 					.m_numRenderTargets = static_cast<UINT8>(m_GBufferRTs.size()),
-					.m_depthStencilFormat = BufferManager::GetInstance().GetCameraDepthRT()->GetFormat(),
+					.m_depthStencilFormat = m_pCameraDepthRT->GetFormat(),
 				};
 				for (int i = 0; i < m_GBufferRTs.size(); ++i)
 				{
@@ -266,20 +266,18 @@ namespace ElysiaRenderer
 
 	void GBufferPass::DrawGBufferPass()
 	{
-		auto cameraDepthRT = BufferManager::GetInstance().GetCameraDepthRT();
-
 		for (auto& RT : m_GBufferRTs)
 		{
 			m_pCommand->AddBarrier(RT, D3D12_RESOURCE_STATE_RENDER_TARGET, false);
 		}
-		m_pCommand->AddBarrier(cameraDepthRT, D3D12_RESOURCE_STATE_DEPTH_WRITE, false);
+		m_pCommand->AddBarrier(m_pCameraDepthRT, D3D12_RESOURCE_STATE_DEPTH_WRITE, false);
 		m_pCommand->FlushBarrier();
 		
 		for (auto& RT : m_GBufferRTs)
 		{
 			m_pCommand->ClearRenderTarget(RT, Color::Black);
 		}
-		m_pCommand->ClearDepthStencilTarget(cameraDepthRT, 1.f, 0);
+		m_pCommand->ClearDepthStencilTarget(m_pCameraDepthRT, 1.f, 0);
 		
 		bool isReady = true;
 		{
@@ -292,18 +290,18 @@ namespace ElysiaRenderer
 				isReady &= RT->GetTexture()->GetIsReady();
 			}
 
-			if (cameraDepthRT->GetTexture() == nullptr)
+			if (m_pCameraDepthRT->GetTexture() == nullptr)
 			{
 				ThrowRuntimeError("null texture resource");
 			}
-			isReady &= cameraDepthRT->GetTexture()->GetIsReady();
+			isReady &= m_pCameraDepthRT->GetTexture()->GetIsReady();
 		}
 		if (isReady)
 		{
 			PipelineInfo pipelineStateData{};
 			pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(ShaderPassIDs::GBufferPassID).pPipelineStateObject;
 			pipelineStateData.m_renderTargets = std::move(GetGBuffers());
-			pipelineStateData.m_depthStencilTarget = cameraDepthRT->GetTexture();
+			pipelineStateData.m_depthStencilTarget = m_pCameraDepthRT->GetTexture();
 			m_pCommand->SetPipeline(pipelineStateData);
 			DrawMesh(ShaderPassIDs::GBufferPassID);
 		}
@@ -312,7 +310,7 @@ namespace ElysiaRenderer
 		{
 			m_pCommand->AddBarrier(RT, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, false);
 		}
-		m_pCommand->AddBarrier(cameraDepthRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_DEPTH_READ, false);
+		m_pCommand->AddBarrier(m_pCameraDepthRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_DEPTH_READ, false);
 		m_pCommand->FlushBarrier();
 	}
 }

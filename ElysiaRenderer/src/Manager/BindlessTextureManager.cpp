@@ -1,6 +1,7 @@
 ﻿#include "stdafx.h"
 #include "BindlessTextureManager.h"
 
+#include "BufferManager.h"
 #include "DX12/DX12Device.h"
 #include "DX12/DX12RenderPassDescriptorHeap.h"
 #include "DX12/DX12StagingDescriptorHeap.h"
@@ -182,7 +183,7 @@ namespace ElysiaRenderer
 		m_pDevice->GetDevice()->GetCopyableFootprints(&resourceDesc, 0, textureUpload->numSubResources, 0,
 			textureUpload->subResourceLayouts.data(), numRows, rowSizesInBytes, &textureUpload->textureDataSize);
 		
-		textureUpload->m_pTextureData = std::make_unique<uint8_t[]>(textureUpload->textureDataSize);
+		textureUpload->pTextureData = std::make_unique<uint8_t[]>(textureUpload->textureDataSize);
 
 		for (size_t arrayIndex = 0; arrayIndex < texMetaData.arraySize; ++arrayIndex)
 		{
@@ -194,7 +195,7 @@ namespace ElysiaRenderer
 				const uint64_t subResourceHeight = numRows[subResourceIndex];
 				const uint64_t subResourcePitch = ElysiaHelper::AlignU32(subResourcelayout.Footprint.RowPitch, D3D12_TEXTURE_DATA_PITCH_ALIGNMENT);
 				const uint64_t subResourceDepth = subResourcelayout.Footprint.Depth;
-				uint8_t* destSubResourceMemory = textureUpload->m_pTextureData.get() + subResourcelayout.Offset;
+				uint8_t* destSubResourceMemory = textureUpload->pTextureData.get() + subResourcelayout.Offset;
 
 				for (uint64_t sliceIndex = 0; sliceIndex < subResourceDepth; sliceIndex++)
 				{
@@ -301,7 +302,7 @@ namespace ElysiaRenderer
 		allocationDesc.HeapType = D3D12_HEAP_TYPE_DEFAULT;
 		CComPtr<ID3D12Resource> texResource = nullptr;
 		CComPtr<D3D12MA::Allocation> allocation = nullptr;
-		ElysiaHelper::ThrowIfFailed(m_pDevice->GetAllocator()->CreateResource(&allocationDesc, &resourceDesc, usageState, (!hasRTV && !hasDSV) ? nullptr : &clearValue,
+		ElysiaHelper::ThrowIfFailed(BufferManager::GetInstance().GetAllocator()->CreateResource(&allocationDesc, &resourceDesc, usageState, (!hasRTV && !hasDSV) ? nullptr : &clearValue,
 			&allocation, IID_PPV_ARGS(&texResource)));
 		texResource->SetName(name.c_str());
 		/// 

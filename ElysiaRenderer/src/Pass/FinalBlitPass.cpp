@@ -61,7 +61,7 @@ namespace ElysiaRenderer
 		PipelineInfo pipelineStateData{};
 		pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(ShaderPassIDs::BlitPassID).pPipelineStateObject;
 		pipelineStateData.m_renderTargets.emplace_back(&backBuffer);
-		pipelineStateData.m_depthStencilTarget = BufferManager::GetInstance().GetCameraDepthRT()->GetTexture();
+		pipelineStateData.m_depthStencilTarget = m_pCameraDepthRT->GetTexture();
 			m_pCommand->SetPipeline(pipelineStateData);
 		
 		auto& passData = m_pMaterial->GetPassData(ShaderPassIDs::BlitPassID);
@@ -69,11 +69,11 @@ namespace ElysiaRenderer
 
 		bool isReady = true;
 		{
-			if (BufferManager::GetInstance().GetCameraDepthRT() == nullptr)
+			if (m_pCameraDepthRT == nullptr)
 			{
 				ThrowRuntimeError("nullptr");
 			} 
-			isReady &= BufferManager::GetInstance().GetCameraDepthRT()->GetTexture()->GetIsReady();
+			isReady &= m_pCameraDepthRT->GetTexture()->GetIsReady();
 		}
 		if (isReady) 
 		{ 
@@ -81,7 +81,7 @@ namespace ElysiaRenderer
 			{
 			case DebugMode::None:
 				{
-					m_pMaterial->SetUInt(ShaderIDs::blitterTextureIndex, BufferManager::GetInstance().GetCameraColorRT()->GetResourceHeapIndex());
+					m_pMaterial->SetUInt(ShaderIDs::blitterTextureIndex, m_pCameraColorRT->GetResourceHeapIndex());
 
 					break;
 				}
@@ -92,7 +92,7 @@ namespace ElysiaRenderer
 				}
 				default:
 				{
-					m_pMaterial->SetUInt(ShaderIDs::blitterTextureIndex, BufferManager::GetInstance().GetCameraColorRT()->GetResourceHeapIndex());
+					m_pMaterial->SetUInt(ShaderIDs::blitterTextureIndex, m_pCameraColorRT->GetResourceHeapIndex());
 
 					break;
 				}
@@ -122,7 +122,7 @@ namespace ElysiaRenderer
 				{
 					.m_renderTargetFormats = m_pDevice->GetSwapChainFormat(),
 					.m_numRenderTargets = 1,
-					.m_depthStencilFormat = BufferManager::GetInstance().GetCameraDepthRT()->GetFormat()
+					.m_depthStencilFormat = m_pCameraDepthRT->GetFormat()
 				};
 				m_backBufferFormat = m_pDevice->GetSwapChainFormat();
 
@@ -158,7 +158,7 @@ namespace ElysiaRenderer
 				{
 					.m_renderTargetFormats = m_pDevice->GetSwapChainFormat(),
 					.m_numRenderTargets = 1,
-					.m_depthStencilFormat = BufferManager::GetInstance().GetCameraDepthRT()->GetFormat()
+					.m_depthStencilFormat = m_pCameraDepthRT->GetFormat()
 				};
 				m_backBufferFormat = m_pDevice->GetSwapChainFormat();
 				passData.pPipelineStateObject = PSOManager::GetInstance().GetGraphicsPipelineState(m_pDevice, m_pMaterial.get(), passID, RTDesc);

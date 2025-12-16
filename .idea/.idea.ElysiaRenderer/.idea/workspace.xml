@@ -7,7 +7,16 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f31d721d-cfba-4714-b0ce-c46a1a48110d" name="Changes" comment="" />
+    <list default="true" id="f31d721d-cfba-4714-b0ce-c46a1a48110d" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.ElysiaRenderer/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.ElysiaRenderer/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/DX12GPUResource.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/DX12GPUResource.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/DX12UploadContext.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/DX12UploadContext.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/UploadRingBuffer.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/UploadRingBuffer.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/ElysiaRenderer.tlog/CL.command.1.tlog" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/ElysiaRenderer.tlog/CL.command.1.tlog" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/ElysiaRenderer.tlog/CL.read.1.tlog" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/ElysiaRenderer.tlog/CL.read.1.tlog" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/ElysiaRenderer.tlog/CL.write.1.tlog" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/ElysiaRenderer.tlog/CL.write.1.tlog" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/vc143.idb" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/vc143.idb" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -88,6 +97,7 @@
       <workItem from="1765770483025" duration="2420000" />
       <workItem from="1765778851087" duration="5883000" />
       <workItem from="1765785951312" duration="9211000" />
+      <workItem from="1765852050150" duration="8687000" />
     </task>
     <servers />
   </component>

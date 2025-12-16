@@ -31,6 +31,8 @@ namespace ElysiaRenderer
 		m_renderSize = renderPassData.RenderSize;
 		m_pCommand = renderPassData.pCommand;
 		m_pDevice = renderPassData.pDevice;
+		m_pCameraColorRT = renderPassData.pCameraColorRT;
+		m_pCameraDepthRT = renderPassData.pCameraDepthRT;
 
 		Configure();
 	}

@@ -43,8 +43,8 @@ namespace ElysiaRenderer
 				dst->shadowSize = GetScreenSize(Vector2(LightManager::GetInstance().GetMainShadow()->GetWidth(),
 					LightManager::GetInstance().GetMainShadow()->GetHeight()));
 
-				dst->OpaqueColorIndex = BufferManager::GetInstance().GetCameraColorRT()->GetResourceHeapIndex();
-				dst->OpaqueDepthIndex = BufferManager::GetInstance().GetCameraDepthRT()->GetResourceHeapIndex();
+				dst->OpaqueColorIndex = m_pCameraDepthRT->GetResourceHeapIndex();
+				dst->OpaqueDepthIndex = m_pCameraDepthRT->GetResourceHeapIndex();
 				dst->SkyboxTexIndex = TextureManager::GetInstance().LoadResidentTexture(L"Tex\\cubemap0.dds").GetResourceHeapIndex();
 				dst->GGX_E_LUT_Index = TextureManager::GetInstance().LoadResidentTexture(L"Tex\\GGX_E_LUT.dds").GetResourceHeapIndex();
 				dst->GGX_Eavg_LUT_Index = TextureManager::GetInstance().LoadResidentTexture(L"Tex\\GGX_Eavg_LUT.dds").GetResourceHeapIndex();

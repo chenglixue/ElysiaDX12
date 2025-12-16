@@ -1,10 +1,10 @@
 #pragma once
 #include "Helper.h"
-#include "Manager/BufferManager.h"
 
 namespace ElysiaRenderer
 {
 	class DX12BufferResource;
+	using BufferHandle = std::shared_ptr<DX12BufferResource>;
 
 	enum class GPUResourceType : uint8_t
 	{
@@ -39,9 +39,8 @@ namespace ElysiaRenderer
 
 	struct DX12BufferUpload
 	{
-		BufferManager::BufferHandle buffer = nullptr;
-		// std::unique_ptr<uint8_t[]> m_bufferData = nullptr;
-		UINT8* pBufferData = nullptr;
+		BufferHandle buffer = nullptr;
+		std::unique_ptr<uint8_t[]> pBufferData = nullptr;
 		size_t bufferDataSize = 0;
 		std::function<void (DX12BufferUpload*)> onComplete; 
 	};

@@ -83,31 +83,28 @@ namespace ElysiaRenderer
 	}
 	void OpaquePass::DrawLightingPass()
 	{
-		auto cameraColorRT = BufferManager::GetInstance().GetCameraColorRT();
-		auto cameraDepthRT = BufferManager::GetInstance().GetCameraDepthRT();
-
 		bool isReady = true;
 		{
-			if (cameraColorRT->GetTexture() == nullptr || BufferManager::GetInstance().GetCameraDepthRT()->GetTexture() == nullptr)
+			if (m_pCameraColorRT->GetTexture() == nullptr || m_pCameraDepthRT->GetTexture() == nullptr)
 			{
 				ThrowRuntimeError("null texture resource");
 			}
-			isReady &= cameraColorRT->GetTexture()->GetIsReady();
-			isReady &= BufferManager::GetInstance().GetCameraDepthRT()->GetTexture()->GetIsReady();
+			isReady &= m_pCameraColorRT->GetTexture()->GetIsReady();
+			isReady &= m_pCameraDepthRT->GetTexture()->GetIsReady();
 		}
 		if (isReady)
 		{
 			auto& passData = m_pMaterial->GetPassData(ShaderPassIDs::OpaqueLightPassID);
 			assert(passData.pPipelineStateObject);
 			
-			m_pCommand->AddBarrier(cameraColorRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
-			m_pCommand->ClearRenderTarget(cameraColorRT, Color::Black);
+			m_pCommand->AddBarrier(m_pCameraColorRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+			m_pCommand->ClearRenderTarget(m_pCameraColorRT, Color::Black);
 			
 			PipelineInfo pipelineStateData
 			{
 				.m_pipelineStateObject = passData.pPipelineStateObject,
-				.m_renderTargets = { cameraColorRT->GetTexture() },
-				.m_depthStencilTarget = BufferManager::GetInstance().GetCameraDepthRT()->GetTexture()
+				.m_renderTargets = { m_pCameraColorRT->GetTexture() },
+				.m_depthStencilTarget = m_pCameraDepthRT->GetTexture()
 			};
 			m_pCommand->SetPipeline(pipelineStateData);
 			m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_renderSize));
@@ -117,29 +114,29 @@ namespace ElysiaRenderer
 			SetSpaceResource(passData, PER_FRAME_SPACE);
 			m_pCommand->DrawFullScreenTriangle();
 			
-			m_pCommand->AddBarrier(cameraColorRT, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+			m_pCommand->AddBarrier(m_pCameraColorRT, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		}
 		else
 		{
-			m_pCommand->AddBarrier(cameraColorRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
-			m_pCommand->ClearRenderTarget(cameraColorRT, Color::Black);
+			m_pCommand->AddBarrier(m_pCameraColorRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+			m_pCommand->ClearRenderTarget(m_pCameraColorRT, Color::Black);
 			
-			m_pCommand->AddBarrier(cameraColorRT, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+			m_pCommand->AddBarrier(m_pCameraColorRT, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		}
 	}
 
 	void OpaquePass::UpdatePSO()
 	{
-		if(m_cameraColorFormat != BufferManager::GetInstance().GetCameraColorRT()->GetFormat())
+		if(m_cameraColorFormat != m_pCameraColorRT->GetFormat())
 		{
 			{
 				RenderTargetDesc RTDesc = RenderTargetDesc
 				{
-					.m_renderTargetFormats = BufferManager::GetInstance().GetCameraColorRT()->GetFormat(),
+					.m_renderTargetFormats = m_pCameraColorRT->GetFormat(),
 					.m_numRenderTargets = 1,
-					.m_depthStencilFormat = BufferManager::GetInstance().GetCameraDepthRT()->GetFormat()
+					.m_depthStencilFormat = m_pCameraDepthRT->GetFormat()
 				};
-				m_cameraColorFormat = BufferManager::GetInstance().GetCameraColorRT()->GetFormat();
+				m_cameraColorFormat = m_pCameraColorRT->GetFormat();
 				
 				m_pMaterial->GetPassData(ShaderPassIDs::OpaqueLightPassID).pPipelineStateObject = PSOManager::GetInstance().GetGraphicsPipelineState(m_pDevice,
 					m_pMaterial.get(), ShaderPassIDs::OpaqueLightPassID, RTDesc);
@@ -207,11 +204,11 @@ namespace ElysiaRenderer
 			{
 				RenderTargetDesc RTDesc = RenderTargetDesc
 				{
-					.m_renderTargetFormats = BufferManager::GetInstance().GetCameraColorRT()->GetFormat(),
+					.m_renderTargetFormats = m_pCameraColorRT->GetFormat(),
 					.m_numRenderTargets = 1,
-					.m_depthStencilFormat = BufferManager::GetInstance().GetCameraDepthRT()->GetFormat()
+					.m_depthStencilFormat = m_pCameraDepthRT->GetFormat()
 				};
-				m_cameraColorFormat = BufferManager::GetInstance().GetCameraColorRT()->GetFormat();
+				m_cameraColorFormat = m_pCameraColorRT->GetFormat();
 				passData.pPipelineStateObject = PSOManager::GetInstance().GetGraphicsPipelineState(m_pDevice, m_pMaterial.get(), passIndex, RTDesc);
 
 				emplaceResult.first->second = 

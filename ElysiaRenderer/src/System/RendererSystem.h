@@ -92,6 +92,8 @@ namespace ElysiaRenderer
 		std::unique_ptr<DX12GraphicsContext> m_graphicsContext = nullptr;
 		std::vector<std::unique_ptr<D3D12_SAMPLER_DESC>> m_samplers{};
 		std::vector<std::unique_ptr<BasePass>> m_passes{};
+		RenderTexture* m_pCameraColorRT = nullptr;
+		RenderTexture* m_pCameraDepthRT = nullptr;
 
 		void Setup();
 		void Execute();

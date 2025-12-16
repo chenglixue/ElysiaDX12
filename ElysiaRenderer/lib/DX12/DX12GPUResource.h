@@ -1,7 +1,6 @@
 #pragma once
 #include "../Utility/Helper.h"
 #include "../Utility/BufferUtility.h"
-#include "Utility/BufferUtility.h"
 
 namespace ElysiaRenderer
 {
@@ -13,7 +12,7 @@ namespace ElysiaRenderer
 		DX12GPUResource(CComPtr<ID3D12Resource> resource, D3D12_RESOURCE_STATES usageState);
 		~DX12GPUResource();
 
-		GPUResourceType GetBufferType()
+		GPUResourceType GetBufferType() const noexcept
 		{
 			return m_bufferType;
 		}
@@ -21,19 +20,19 @@ namespace ElysiaRenderer
 		{
 			return m_resource;
 		}
-		D3D12_GPU_VIRTUAL_ADDRESS GetGPUAddress()
+		D3D12_GPU_VIRTUAL_ADDRESS GetGPUAddress() const noexcept
 		{
 			return m_GPUAddress;
 		}
-		D3D12_RESOURCE_STATES GetUsageState()
+		D3D12_RESOURCE_STATES GetUsageState() const noexcept
 		{
 			return m_usageState;
 		}
-		D3D12_RESOURCE_DESC GetResourceDesc()
+		D3D12_RESOURCE_DESC GetResourceDesc() const noexcept
 		{
 			return m_resourceDesc;
 		}
-		CComPtr<D3D12MA::Allocation> GetAllocation()
+		CComPtr<D3D12MA::Allocation> GetAllocation() const noexcept
 		{
 			return m_allocation;
 		}
@@ -68,7 +67,7 @@ namespace ElysiaRenderer
 			m_descriptorHeapIndex = descriptorHeapIndex;
 		}
 
-		bool GetIsReady()
+		bool GetIsReady() const noexcept
 		{
 			return m_isReady;
 		}

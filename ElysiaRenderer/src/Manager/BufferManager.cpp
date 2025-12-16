@@ -31,53 +31,7 @@ namespace ElysiaRenderer
 		allocatorDesc.pAdapter = m_pDevice->GetAdapter();
 		D3D12MA::CreateAllocator(&allocatorDesc, &m_pAllocator);
 		
-		m_pUploadBuffer = std::make_unique<UploadRingBuffer>(m_pDevice, m_pAllocator, 256 * 1024 * 1024, L"Global Upload Buffer");
-		
-		
-		
-		if (!UserData::GetInstance().IsUseHDR)
-		{
-			m_pCameraColorRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(static_cast<UINT64>(m_pDevice->GetScreenSize().x),
-				static_cast<UINT64>(m_pDevice->GetScreenSize().y),
-				DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
-				true,
-				"Camera Color RT");
-		}
-		else
-		{
-			switch (UserData::GetInstance().HDRLevel)
-			{
-				case HDRQuality::Low: 
-				{
-					m_pCameraColorRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(static_cast<UINT64>(m_pDevice->GetScreenSize().x),
-						static_cast<UINT64>(m_pDevice->GetScreenSize().y),
-						DXGI_FORMAT_R11G11B10_FLOAT,
-						true,
-						"Camera Color RT"); 
-					break;  
-				} 
-				case HDRQuality::High:
-				{ 
-					m_pCameraColorRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(static_cast<UINT64>(m_pDevice->GetScreenSize().x),
-						static_cast<UINT64>(m_pDevice->GetScreenSize().y),
-						DXGI_FORMAT_R16G16B16A16_FLOAT,
-						true,
-						"Camera Color RT");
-					break;
-				}
-				default:
-				{ 
-					ThrowRuntimeError("Invalid choose");
-					break;
-				}
-			}
-		}
-		m_pCameraDepthRT = RenderTargetManager::GetInstance().CreateRenderTexture(
-			static_cast<UINT64>(m_pDevice->GetScreenSize().x),
-			static_cast<UINT64>(m_pDevice->GetScreenSize().y),
-			DXGI_FORMAT_D24_UNORM_S8_UINT,
-			true,
-			"Camera Depth RT");
+		m_pUploadBuffer = std::make_unique<UploadRingBuffer>(m_pDevice, m_pAllocator, 1024 * 1024 * 1024, L"Global Upload Buffer");
 	}
 
 	void BufferManager::Destory()
@@ -108,7 +62,7 @@ namespace ElysiaRenderer
 		return m_pUploadBuffer.get();
 	}
 
-	BufferManager::BufferHandle BufferManager::CreateBuffer(const BufferCreationDesc& bufferCreationDesc)
+	BufferHandle BufferManager::CreateBuffer(const BufferCreationDesc& bufferCreationDesc)
 	{
 		UINT32 index;
 		if (!m_freeBufferSlots.empty())
@@ -128,12 +82,12 @@ namespace ElysiaRenderer
 		bool isHasSRV = ((bufferCreationDesc.viewFlags & GPUResourceFlags::SRV) == GPUResourceFlags::SRV);
 		bool isHasUAV = ((bufferCreationDesc.viewFlags & GPUResourceFlags::UAV) == GPUResourceFlags::UAV);
 
-		auto alignSize = AlignU32(bufferCreationDesc.size, D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
+		auto alignSize = AlignU32((UINT)bufferCreationDesc.size, D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
 		D3D12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(alignSize);
 
-		D3D12_RESOURCE_STATES resourceState =D3D12_RESOURCE_STATE_GENERIC_READ;
+		D3D12_RESOURCE_STATES resourceState = isHostVisible ? D3D12_RESOURCE_STATE_GENERIC_READ : D3D12_RESOURCE_STATE_COPY_DEST;
 		D3D12MA::ALLOCATION_DESC allocationDesc{};
-		allocationDesc.HeapType = D3D12_HEAP_TYPE_UPLOAD;
+		allocationDesc.HeapType = isHostVisible ? D3D12_HEAP_TYPE_UPLOAD : D3D12_HEAP_TYPE_DEFAULT;
 		
 		CComPtr<D3D12MA::Allocation> pAllocation = nullptr;
 		CComPtr<ID3D12Resource> pResource = nullptr;
@@ -144,7 +98,7 @@ namespace ElysiaRenderer
 			pResource->SetName(bufferCreationDesc.name);
 		}
 
-		auto pNewBuffer = std::make_unique<DX12BufferResource>(pResource, resourceState, pAllocation);
+		auto pNewBuffer = std::make_shared<DX12BufferResource>(pResource, resourceState, pAllocation);
 		pNewBuffer->SetIndex(index);
 		if (isHostVisible)
 		{
@@ -200,11 +154,11 @@ namespace ElysiaRenderer
 
 		if (index < m_buffers.size())
 		{
-			m_buffers[index] = std::move(pNewBuffer);
+			m_buffers[index] = pNewBuffer;
 		}
 		else
 		{
-			m_buffers.emplace_back(std::move(pNewBuffer));
+			m_buffers.emplace_back(pNewBuffer);
 		}
 
 		return pNewBuffer;
@@ -228,6 +182,8 @@ namespace ElysiaRenderer
 		size_t bufferUploadHeapOffset = 0;
 		UINT numBuffersProcessed = 0;
 
+		if (numBufferUploads <=0) return;
+
 		size_t totalSize = 0;
 		for (const auto& upload : bufferUploads)
 		{
@@ -247,10 +203,10 @@ namespace ElysiaRenderer
 				}
 
 				uploadContext->AddBarrier(*bufferUpload->buffer, D3D12_RESOURCE_STATE_COPY_DEST, false);
-				memcpy(cpuAddress + bufferUploadHeapOffset, bufferUpload->pBufferData, bufferUpload->bufferDataSize);
+				memcpy(cpuAddress + bufferUploadHeapOffset, bufferUpload->pBufferData.get(), bufferUpload->bufferDataSize);
 				D3D12_SUBRESOURCE_DATA subData = 
 				{
-						bufferUpload->pBufferData, 
+						bufferUpload->pBufferData.get(), 
 				static_cast<UINT>(bufferUpload->bufferDataSize), 
 				static_cast<UINT>(bufferUpload->bufferDataSize)
 				};
@@ -280,11 +236,13 @@ namespace ElysiaRenderer
 		const auto numTextureUploads = static_cast<UINT>(textureUploads.size());
 		size_t texUploadHeapOffset = 0;
 		UINT numTexsProcessed = 0;
+
+		if (numTextureUploads <=0) return;
 		
 		size_t totalSize = 0;
 		for (const auto& upload : textureUploads)
 		{
-			totalSize += AlignU64(upload->textureDataSize, 512);
+			totalSize += AlignU32(upload->textureDataSize, D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
 		}
 		
 		D3D12_GPU_VIRTUAL_ADDRESS gpuAddress;
@@ -299,12 +257,12 @@ namespace ElysiaRenderer
 					break;
 				}
 				
-				memcpy(cpuAddress + texUploadHeapOffset, textureUpload->pTextureData, textureUpload->textureDataSize);
+				memcpy(cpuAddress + texUploadHeapOffset, textureUpload->pTextureData.get(), textureUpload->textureDataSize);
 				uploadContext->CopyTextureRegion(*textureUpload->pTextureBuffer, m_pUploadBuffer->GetResource(), texUploadHeapOffset,
 					textureUpload->subResourceLayouts, textureUpload->numSubResources);
 				
 				texUploadHeapOffset += textureUpload->textureDataSize;
-				texUploadHeapOffset = AlignU64(texUploadHeapOffset, 512);
+				texUploadHeapOffset = AlignU32(texUploadHeapOffset, (size_t)D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
 				
 				uploadContext->AddTextureProcess(textureUpload);
 			}
@@ -316,23 +274,12 @@ namespace ElysiaRenderer
 		}
 	}
 	
-
-	RenderTexture* BufferManager::GetCameraDepthRT() const noexcept
-	{
-		return m_pCameraDepthRT;
-	}
-
-	RenderTexture* BufferManager::GetCameraColorRT() const noexcept
-	{
-		return m_pCameraColorRT;
-	}
-
-	BufferManager::BufferHandle BufferManager::GetVertexBuffer() const noexcept
+	BufferHandle BufferManager::GetVertexBuffer() const noexcept
 	{
 		return m_pVertexBuffer;
 	}
 
-	BufferManager::BufferHandle BufferManager::GetIndexBuffer() const noexcept
+	BufferHandle BufferManager::GetIndexBuffer() const noexcept
 	{
 		return m_pIndexBuffer;
 	}
@@ -349,12 +296,12 @@ namespace ElysiaRenderer
 
 	void BufferManager::AddVertexBuffer(BufferCreationDesc desc)
 	{
-		m_pVertexBuffer = std::move(BufferManager::GetInstance().CreateBuffer(desc));
+		m_pVertexBuffer = std::move(CreateBuffer(desc));
 	}
 
 	void BufferManager::AddIndexBuffer(BufferCreationDesc desc)
 	{
-		m_pIndexBuffer = std::move(BufferManager::GetInstance().CreateBuffer(desc));
+		m_pIndexBuffer = std::move(CreateBuffer(desc));
 	}
 
 	void BufferManager::SetVertexBufferView(const D3D12_VERTEX_BUFFER_VIEW& view)

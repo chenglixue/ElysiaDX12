@@ -22,7 +22,7 @@ namespace ElysiaRenderer
 	class BufferManager : public IManager, IUpdate
 	{
 	public:
-		using BufferHandle = std::shared_ptr<DX12BufferResource>;
+		
 		
 	public:
 		BufferManager() = default;
@@ -53,8 +53,6 @@ namespace ElysiaRenderer
 		void UploadBufferData(DX12UploadContext* uploadContext, std::vector<DX12BufferUpload*>& bufferUploads);
 		void UploadTextureData(DX12UploadContext* uploadContext, std::vector<DX12TextureUpload*>& textureUploads);
 
-		RenderTexture* GetCameraDepthRT() const noexcept;
-		RenderTexture* GetCameraColorRT() const noexcept;
 		BufferHandle GetVertexBuffer() const noexcept;
 		BufferHandle GetIndexBuffer() const noexcept;
 		const D3D12_INDEX_BUFFER_VIEW& GetIndexBufferView() const noexcept;
@@ -70,7 +68,7 @@ namespace ElysiaRenderer
 		static std::once_flag m_initInstanceFlag;
 
 		DX12Device* m_pDevice = nullptr;
-		CComPtr<D3D12MA::Allocator> m_pAllocator = nullptr;
+		D3D12MA::Allocator* m_pAllocator = nullptr;
 		
 		std::vector<BufferHandle> m_buffers;
 		// 空闲槽位管理
@@ -78,11 +76,8 @@ namespace ElysiaRenderer
 
 		std::unique_ptr<UploadRingBuffer> m_pUploadBuffer;
 
-		RenderTexture* m_pCameraColorRT = nullptr;
-		RenderTexture* m_pCameraDepthRT = nullptr;
-		
-		BufferManager::BufferHandle m_pVertexBuffer = nullptr;
-		BufferManager::BufferHandle m_pIndexBuffer = nullptr;
+		BufferHandle m_pVertexBuffer = nullptr;
+		BufferHandle m_pIndexBuffer = nullptr;
 		D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView{};
 		D3D12_INDEX_BUFFER_VIEW m_indexBufferView{};
 	};

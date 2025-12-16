@@ -9,7 +9,7 @@ namespace ElysiaRenderer
     
     class DX12Device;
     class DX12Queue;
-    class CBVFrameVariable;
+    struct CBVFrameVariable;
     
     class UploadRingBuffer
     {

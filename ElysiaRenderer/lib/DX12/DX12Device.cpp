@@ -39,11 +39,6 @@ namespace ElysiaRenderer
 
 		for (UINT i = 0; i < NUM_FRAMES_IN_FLIGHT; ++i)
 		{
-			DestoryBuffer(std::unique_ptr<DX12BufferResource>(std::move(m_uploadContexts[i]->GetTexUploadHeap())));
-		}
-
-		for (UINT i = 0; i < NUM_FRAMES_IN_FLIGHT; ++i)
-		{
 			ProcessDestruction(i);
 		}
 
@@ -703,12 +698,12 @@ namespace ElysiaRenderer
 		m_copyQueue->WaitForFenceCPUBlocking(fenceValue.m_copyQueueFence);
 		m_computeQueue->WaitForFenceCPUBlocking(fenceValue.m_computeQueueFence);
 		
-		BufferManager::GetInstance().GetUploadRingBuffer()->Reset(m_frameID);
-		
 		ProcessDestruction(m_frameID);
 
 		m_uploadContexts[m_frameID]->ResolveProcessedUploads();
 		m_uploadContexts[m_frameID]->Reset();
+
+		BufferManager::GetInstance().GetUploadRingBuffer()->Reset(m_frameID);
 
 		m_contextSubmissions[m_frameID].clear();
 	}

@@ -37,6 +37,12 @@ namespace ElysiaRenderer
 		m_textureUploadsInProgress.emplace_back(textureProcessed);
 	}
 
+	void DX12UploadContext::ProcessUploads()
+	{
+		BufferManager::GetInstance().UploadBufferData(this, m_bufferUploads);
+		BufferManager::GetInstance().UploadTextureData(this, m_textureUploads);
+	}
+
 	void DX12UploadContext::ResolveProcessedUploads()
 	{
 		for (auto& bufferUploadInProgress : m_bufferUploadsInProgress)

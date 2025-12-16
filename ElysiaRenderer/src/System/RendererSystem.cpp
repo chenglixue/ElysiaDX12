@@ -53,12 +53,12 @@ namespace ElysiaRenderer
 		
 		
 		m_pUI->InitDescriptor(windowHandle, m_pDevice.get());
-		
+
+		BufferManager::GetInstance().Init(m_pDevice.get());
 		TextureManager::GetInstance().Init(m_pDevice.get());
 		RenderTargetManager::GetInstance().Init(m_pDevice.get());
 		CameraManager::GetInstance().Init(m_pDevice.get());
 		LightManager::GetInstance().Init(m_pDevice.get());
-		BufferManager::GetInstance().Init(m_pDevice.get());
 		PSOManager::GetInstance().Init(m_pDevice.get());
 		
 		g_pModelImporter = std::make_unique<ModelImporter>(m_pDevice.get());
@@ -156,7 +156,6 @@ namespace ElysiaRenderer
 
 		if(BufferManager::GetInstance().GetVertexBuffer()->GetIsReady() && BufferManager::GetInstance().GetIndexBuffer()->GetIsReady())
 		{
-			
 			for (auto& pass : m_passes)
 			{
 				pass->Render();
@@ -175,11 +174,57 @@ namespace ElysiaRenderer
 		GetModelImporter()->CreateIndexBuffer();
 		GetModelImporter()->CreateMeshRenders();
 
+		if (!UserData::GetInstance().IsUseHDR)
+		{
+			m_pCameraColorRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(static_cast<UINT64>(m_pDevice->GetScreenSize().x),
+				static_cast<UINT64>(m_pDevice->GetScreenSize().y),
+				DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
+				true,
+				"Camera Color RT");
+		}
+		else
+		{
+			switch (UserData::GetInstance().HDRLevel)
+			{
+			case HDRQuality::Low: 
+				{
+					m_pCameraColorRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(static_cast<UINT64>(m_pDevice->GetScreenSize().x),
+						static_cast<UINT64>(m_pDevice->GetScreenSize().y),
+						DXGI_FORMAT_R11G11B10_FLOAT,
+						true,
+						"Camera Color RT"); 
+					break;  
+				} 
+			case HDRQuality::High:
+				{ 
+					m_pCameraColorRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(static_cast<UINT64>(m_pDevice->GetScreenSize().x),
+						static_cast<UINT64>(m_pDevice->GetScreenSize().y),
+						DXGI_FORMAT_R16G16B16A16_FLOAT,
+						true,
+						"Camera Color RT");
+					break;
+				}
+			default:
+				{ 
+					ThrowRuntimeError("Invalid choose");
+					break;
+				}
+			}
+		}
+		m_pCameraDepthRT = RenderTargetManager::GetInstance().CreateRenderTexture(
+			static_cast<UINT64>(m_pDevice->GetScreenSize().x),
+			static_cast<UINT64>(m_pDevice->GetScreenSize().y),
+			DXGI_FORMAT_D24_UNORM_S8_UINT,
+			true,
+			"Camera Depth RT");
+
 		RenderPassData passData
 		{
 			.RenderSize = m_pDevice->GetScreenSize().xy(),
 			.pDevice = m_pDevice.get(), 
 			.pCommand = m_graphicsContext.get(),
+			.pCameraColorRT = m_pCameraColorRT,
+			.pCameraDepthRT = m_pCameraDepthRT
 		};
 
 		m_passes.emplace_back(std::move(std::make_unique<PreDrawPass>(CameraManager::GetInstance().GetMainCamera())));

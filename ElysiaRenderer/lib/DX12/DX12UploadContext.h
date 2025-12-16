@@ -13,9 +13,6 @@ namespace ElysiaRenderer
 		DX12UploadContext(DX12Device* device);
 		~DX12UploadContext() override;
 
-		DX12BufferResource* GetTexUploadHeap();
-		DX12BufferResource* GetBufferUploadHeap();
-
 		void AddTextureToUploads(DX12TextureUpload* textureUpload);
 		void AddBufferToUploads(DX12BufferUpload* bufferUpload);
 		
