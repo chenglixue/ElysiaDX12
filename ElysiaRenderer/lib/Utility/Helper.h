@@ -75,6 +75,11 @@ namespace ElysiaHelper
         assert((errorMessage, false));
     }
 
+    void ShowErrorMessage(const std::wstring& message)
+    {
+        MessageBox(NULL, message.c_str(), L"Error", MB_OK|MB_ICONERROR);
+    }
+
     inline void ThrowRuntimeError(std::string output)
     {
         throw std::runtime_error(output);
@@ -293,7 +298,16 @@ namespace ElysiaHelper
 #endif
     }
 
+    inline eastl::wstring ToEastlWString(const std::wstring& str)
+    {
+        return eastl::wstring(str.c_str());
+    }
 
+    inline std::wstring ToStdWString(const eastl::wstring& str)
+    {
+        return std::wstring(str.c_str());
+    }
+    
     inline static std::wstring RemoveExtension(const std::wstring& filePath)
     {
         return filePath.substr(0, filePath.rfind(L"."));
@@ -806,5 +820,45 @@ namespace ElysiaHelper
     
         stbi_image_free(data);
         return true;
+    }
+
+    void WriteLog(const wchar_t* format, ...)
+    {
+        wchar_t buffer[1024] = { 0 };
+        va_list args;
+        va_start(args, format);
+        vswprintf_s(buffer, ArraySize_(buffer), format, args);
+
+        OutputDebugStringW(buffer);
+        OutputDebugStringW(L"\n");
+    }
+
+    void WriteLog(const char* format, ...)
+    {
+        char buffer[1024] = { 0 };
+        va_list args;
+        va_start(args, format);
+        vsprintf_s(buffer, ArraySize_(buffer), format, args);
+
+        OutputDebugStringA(buffer);
+        OutputDebugStringA("\n");
+    }
+    
+    std::wstring MakeString(const wchar_t* format, ...)
+    {
+        wchar_t buffer[1024] = { 0 };
+        va_list args;
+        va_start(args, format);
+        vswprintf_s(buffer, ArraySize_(buffer), format, args);
+        return std::wstring(buffer);
+    }
+
+    std::string MakeString(const char* format, ...)
+    {
+        char buffer[1024] = { 0 };
+        va_list args;
+        va_start(args, format);
+        vsprintf_s(buffer, ArraySize_(buffer), format, args);
+        return std::string(buffer);
     }
 }

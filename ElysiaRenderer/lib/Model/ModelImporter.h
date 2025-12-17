@@ -1,5 +1,5 @@
 #pragma once
-#include "Mesh.h"
+#include "LoadedModel.h"
 #include "MaterialData.h"
 #include "../DX12/DX12MeshRender.h"
 #include "BoundingBox.h"
@@ -21,8 +21,11 @@ namespace ElysiaModel
 		ModelImporter(ModelImporter&& rhs) = default;
 		~ModelImporter();
 
+		bool LoadModel(const char* filePath, bool mergeByMaterial, bool invertTexcoordY, bool importMeshes,
+			bool importSkeletons, bool importAnimations, float scale, LoadedModel &model);
+
 		UINT GetMeshCount() const noexcept;
-		const Mesh& GetMesh(UINT meshIndex) const;
+		const LoadedModel& GetMesh(UINT meshIndex) const;
 
 		UINT GetMaterialCount() const noexcept;
 		const MaterialData& GetMaterialData(UINT materialIndex) const;
@@ -61,7 +64,7 @@ namespace ElysiaModel
 
 		MeshData	m_meshData{};
 		MaterialData*	m_pMaterialData = nullptr;
-		Mesh*		m_pMesh = nullptr;
+		LoadedModel*		m_pMesh = nullptr;
 		MeshRender* m_pMeshRender = nullptr;
 		
 		UINT m_vertexStride = 0;

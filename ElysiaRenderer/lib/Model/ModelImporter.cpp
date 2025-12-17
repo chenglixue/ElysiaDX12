@@ -35,7 +35,7 @@ namespace ElysiaModel
 	{
 		return m_meshData.meshCount;
 	}
-	const Mesh& ModelImporter::GetMesh(UINT meshIndex) const
+	const LoadedModel& ModelImporter::GetMesh(UINT meshIndex) const
 	{
 		assert(meshIndex < m_meshData.meshCount);
 		return m_pMesh[meshIndex];
@@ -222,8 +222,8 @@ namespace ElysiaModel
 
 		// load mesh
 		m_meshData.meshCount = pScene->mNumMeshes;
-		m_pMesh = new Mesh[m_meshData.meshCount];
-		memset(m_pMesh, 0, sizeof(Mesh) * m_meshData.meshCount);
+		m_pMesh = new LoadedModel[m_meshData.meshCount];
+		memset(m_pMesh, 0, sizeof(LoadedModel) * m_meshData.meshCount);
 		for (unsigned int meshIndex = 0; meshIndex < pScene->mNumMeshes; ++meshIndex)
 		{
 			const aiMesh* srcMesh = pScene->mMeshes[meshIndex];
@@ -395,7 +395,7 @@ namespace ElysiaModel
 		SerializeData(serializer, m_meshData);
 		SerializeData(serializer, m_vertexStride);
 
-		m_pMesh = new Mesh[m_meshData.meshCount];
+		m_pMesh = new LoadedModel[m_meshData.meshCount];
 		m_pMaterialData = new MaterialData[m_meshData.materialCount];
 		m_pVertexData = new uint8_t[m_meshData.vertexDataByteSize];
 		m_pIndexData = new uint8_t[m_meshData.indexDataByteSize];
@@ -467,7 +467,7 @@ namespace ElysiaModel
 	{
 		for (UINT meshIndex = 0; meshIndex < m_meshData.meshCount; ++meshIndex)
 		{
-			Mesh* pMesh = m_pMesh + meshIndex;
+			LoadedModel* pMesh = m_pMesh + meshIndex;
 			ComputeMeshBoundingBox(meshIndex, pMesh->boundingBox);
 		}
 
@@ -493,7 +493,7 @@ namespace ElysiaModel
 
 		for (unsigned int meshIndex = 0; meshIndex < m_meshData.meshCount; meshIndex++)
 		{
-			Mesh* mesh = m_pMesh + meshIndex;
+			LoadedModel* mesh = m_pMesh + meshIndex;
 			unsigned int indexCount = mesh->indexCount;
 			unsigned int vertexStride = mesh->vertexStride;
 			unsigned char* meshVertexData = (m_pVertexData + mesh->vertexDataOffset);
@@ -539,7 +539,7 @@ namespace ElysiaModel
 
 		for (unsigned int meshIndex = 0; meshIndex < m_meshData.meshCount; meshIndex++)
 		{
-			Mesh* mesh = m_pMesh + meshIndex;
+			LoadedModel* mesh = m_pMesh + meshIndex;
 			unsigned int vertexStride = mesh->vertexStride;
 			unsigned char* meshVertexData = (m_pVertexData + mesh->vertexDataOffset);
 
@@ -682,7 +682,7 @@ namespace ElysiaModel
 		printf("mesh count: %u\n", m_meshData.meshCount); 
 		for (uint32_t meshIndex = 0; meshIndex < m_meshData.meshCount; meshIndex++)
 		{
-			const Mesh* mesh = m_pMesh + meshIndex;
+			const LoadedModel* mesh = m_pMesh + meshIndex;
 
 			auto printAttribFormat = [](uint32_t format) -> void
 				{

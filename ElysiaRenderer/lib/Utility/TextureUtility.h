@@ -9,6 +9,7 @@ namespace ElysiaRenderer
 
 	const std::wstring DefaultBlackTexturePath = L"Tex\\Black.png";
 	const std::wstring DefaultWhiteTexturePath = L"Tex\\White.png";
+	const std::wstring DefaultNormalTexturePath = L"DefaultNormalMap.png";
 
 	enum class TexTypeFlags : uint8_t
 	{
