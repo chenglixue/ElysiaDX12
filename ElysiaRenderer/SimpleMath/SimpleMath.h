@@ -237,6 +237,13 @@ namespace DirectX
 
             Vector3(Vector3&&) = default;
             Vector3& operator=(Vector3&&) = default;
+            
+            Vector2 xy() const noexcept { return Vector2(x, y); }
+            Vector2 yx() const noexcept { return Vector2(y, x); }
+            Vector2 yz() const noexcept { return Vector2(y, z); }
+            Vector2 zy() const noexcept { return Vector2(z, y); }
+            Vector2 xz() const noexcept { return Vector2(x, z); }
+            Vector2 zx() const noexcept { return Vector2(z, x); }
 
             operator XMVECTOR() const noexcept { return XMLoadFloat3(this); }
 

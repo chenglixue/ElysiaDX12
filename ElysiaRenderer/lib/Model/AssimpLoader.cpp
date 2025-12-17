@@ -196,16 +196,28 @@ namespace ElysiaModel
             numIndices += pMesh.mNumFaces * 3;
         }
 
-        model.vertices.reserve(numVertices);
-        model.indices.reserve(numIndices);
-        model.meshes.reserve(numMeshes);
+        model.vertices.resize(numVertices);
+        model.indices.resize(numIndices);
+        model.meshes.resize(numMeshes);
         uint64 vtxOffset = 0;
         uint64 idxOffset = 0;
         for(UINT64 meshIdx = 0; meshIdx < numMeshes; meshIdx++)
         {
             model.meshes[meshIdx].InitFromAssimpMesh(*pScene->mMeshes[meshIdx], 1.f,
                 &model.vertices[vtxOffset], &model.indices[idxOffset]);
+            
+            model.aabbMin.x = eastl::min(model.aabbMin.x, model.meshes[meshIdx].aabbMin.x);
+            model.aabbMin.y = eastl::min(model.aabbMin.y, model.meshes[meshIdx].aabbMin.y);
+            model.aabbMin.z = eastl::min(model.aabbMin.z, model.meshes[meshIdx].aabbMin.z);
+
+            model.aabbMax.x = eastl::max(model.aabbMax.x, model.meshes[meshIdx].aabbMax.x);
+            model.aabbMax.y = eastl::max(model.aabbMax.y, model.meshes[meshIdx].aabbMax.y);
+            model.aabbMax.z = eastl::max(model.aabbMax.z, model.meshes[meshIdx].aabbMax.z);
+
+            vtxOffset += model.meshes[meshIdx].numVertices;
+            idxOffset += model.meshes[meshIdx].numIndices;
         }
+        
     }
 
     void LoadedModel::Mesh::InitFromAssimpMesh(const aiMesh& assimpMesh, float sceneScale,
@@ -213,22 +225,64 @@ namespace ElysiaModel
     {
         numVertices = assimpMesh.mNumVertices;
         numIndices = assimpMesh.mNumFaces * 3;
+        
+        vertices.resize(numVertices);
+        indices.resize(numIndices);
 
         indexType = IndexType::Index16Bit;
         if(numVertices > 0xFFFF)
         {
             ShowErrorMessage(L"32-bit indices not currently supported");
         }
-
-        if (assimpMesh.HasPositions())
+        
+        auto ConvertVec = [&](aiVector3D aiVec3)
         {
-            for (UINT32 vertexIdx = 0; vertexIdx < numVertices; vertexIdx++)
+            return Vector3(aiVec3.x, aiVec3.y, aiVec3.z);
+        };
+        
+        aabbMin = Vector3(FLT_MAX);
+        aabbMax = Vector3(-FLT_MAX);
+        for (UINT32 vertexIdx = 0; vertexIdx < numVertices; vertexIdx++)
+        {
+            if (assimpMesh.HasPositions())
             {
-
-                dstVertices->Position = 
+                Vector3 position = ConvertVec(assimpMesh.mVertices[vertexIdx]) * sceneScale;
+                
+                aabbMin.x = eastl::min(aabbMin.x, position.x);
+                aabbMin.y = eastl::min(aabbMin.y, position.y);
+                aabbMin.z = eastl::min(aabbMin.z, position.z);
+                
+                aabbMax.x = eastl::max(aabbMax.x, position.x);
+                aabbMax.y = eastl::max(aabbMax.y, position.y);
+                aabbMax.z = eastl::max(aabbMax.z, position.z);
+                
+                vertices[vertexIdx].Position = dstVertices[vertexIdx].Position = position;
             }
-            
+            if(assimpMesh.HasNormals())
+            {
+                vertices[vertexIdx].Normal = dstVertices[vertexIdx].Normal = ConvertVec(assimpMesh.mNormals[vertexIdx]);
+            }
+            if(assimpMesh.HasTextureCoords(0))
+            {
+                vertices[vertexIdx].UV = dstVertices[vertexIdx].UV = ConvertVec(assimpMesh.mTextureCoords[0][vertexIdx]).xy();
+            }
+            if(assimpMesh.HasTangentsAndBitangents())
+            {
+                vertices[vertexIdx].Tangent = dstVertices[vertexIdx].Tangent = ConvertVec(assimpMesh.mTangents[vertexIdx]);
+            }
         }
+
+        const UINT64 numTriangles = assimpMesh.mNumFaces;
+        for(uint64 triIdx = 0; triIdx < numTriangles; ++triIdx)
+        {
+            indices[triIdx * 3 + 0] = dstIndices[triIdx * 3 + 0] = UINT16(assimpMesh.mFaces[triIdx].mIndices[0]);
+            indices[triIdx * 3 + 1] = dstIndices[triIdx * 3 + 1] = UINT16(assimpMesh.mFaces[triIdx].mIndices[1]);
+            indices[triIdx * 3 + 2] = dstIndices[triIdx * 3 + 2] = UINT16(assimpMesh.mFaces[triIdx].mIndices[2]);
+        }
+        
+        vtxOffset = 0;
+        idxOffset = 0;
+        materialIndex = assimpMesh.mMaterialIndex;
     }
     
     bool LoadModel(const wchar_t* filePath, bool bMergeByMaterial, bool bInvertTexcoordY, bool bImportMeshes,
@@ -276,5 +330,7 @@ namespace ElysiaModel
             LoadMaterials(pScene, model);
             LoadMaterialResource(model.materials, fileDirectory, model.materialTextures);
         }
+        
+        std::cout << "Finished loading scene '%ls'" + WstringToString(filePath) << std::endl;
     }
 }

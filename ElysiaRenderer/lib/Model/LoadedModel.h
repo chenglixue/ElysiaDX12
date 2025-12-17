@@ -41,7 +41,6 @@ namespace ElysiaModel
 		Vector3 Normal;
 		Vector2 UV;
 		Vector3 Tangent;
-		Vector3 Bitangent;
 
 		MeshVertex()
 		{
@@ -53,7 +52,6 @@ namespace ElysiaModel
 			Normal = n;
 			UV = uv;
 			Tangent = t;
-			Bitangent = b;
 		}
 
 		void Transform(const Vector3& p, const Vector3& s, const Quaternion& q)
@@ -64,7 +62,6 @@ namespace ElysiaModel
 
 			Normal = Vector3::Transform(Normal, q);
 			Tangent = Vector3::Transform(Tangent, q);
-			Bitangent = Vector3::Transform(Bitangent, q);
 		}
 
 		template<typename TSerializer> void Serialize(TSerializer& serializer)
@@ -73,7 +70,6 @@ namespace ElysiaModel
 			SerializeItem(serializer, Normal);
 			SerializeItem(serializer, UV);
 			SerializeItem(serializer, Tangent);
-			SerializeItem(serializer, Bitangent);
 		}
 	};
 
@@ -168,10 +164,6 @@ namespace ElysiaModel
 			eastl::vector<MeshVertex> vertices;
 			eastl::vector<UINT16> indices;
 
-			eastl::vector<Vector3> positions;
-			eastl::vector<Vector3> normals;
-			eastl::vector<Vector3> tangents;
-			eastl::vector<Vector2> texcoords;
 			eastl::vector<Vector4> weights;
 			eastl::vector<Vector4> joints;
 
