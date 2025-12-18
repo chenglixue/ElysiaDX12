@@ -303,6 +303,25 @@ namespace ElysiaRenderer
 			}
 		}
 	}
+
+	BufferHandle BufferManager::CreateVertexBuffer(const LoadedModel& model)
+	{
+		BufferCreationDesc bufferCreationDesc = 
+		{
+			.name = stringToLPCWSTR(model.name),
+			.stride = sizeof(MeshVertex),
+			.size = model.vertices.size() * sizeof(MeshVertex),
+			.viewFlags = GPUResourceFlags::None,
+			.accessFlags = BufferAccessFlags::GPUOnly,
+			.isRawAccess = true
+		};
+
+		BufferManager::GetInstance().AddVertexBuffer(bufferCreationDesc);
+	}
+	BufferHandle BufferManager::CreateIndexBuffer(const LoadedModel& model)
+	{
+		
+	}
 	
 	BufferHandle BufferManager::GetVertexBuffer() const noexcept
 	{

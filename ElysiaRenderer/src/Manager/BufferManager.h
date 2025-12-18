@@ -3,11 +3,13 @@
 
 #include "lib/Utility/Helper.h"
 
-
 #include "IManager.h"
 #include "IUpdate.h"
+#include "DX12/DX12MeshRender.h"
 #include "DX12/UploadRingBuffer.h"
 #include "lib/Utility/RenderTexture.h"
+#include "lib/Model/LoadedModel.h"
+
 
 namespace ElysiaRenderer
 {
@@ -18,6 +20,7 @@ namespace ElysiaRenderer
 namespace ElysiaRenderer
 {
 	using namespace ElysiaHelper;
+	using namespace ElysiaModel;
 
 	class BufferManager : public IManager, IUpdate
 	{
@@ -54,6 +57,9 @@ namespace ElysiaRenderer
 
 		void UploadBufferData(DX12UploadContext* uploadContext, std::vector<DX12BufferUpload*>& bufferUploads);
 		void UploadTextureData(DX12UploadContext* uploadContext, std::vector<DX12TextureUpload*>& textureUploads);
+
+		BufferHandle CreateVertexBuffer(const LoadedModel& model);
+		BufferHandle CreateIndexBuffer(const LoadedModel& model);
 
 		BufferHandle GetVertexBuffer() const noexcept;
 		BufferHandle GetIndexBuffer() const noexcept;

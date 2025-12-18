@@ -24,6 +24,7 @@
 #include "DX12/UploadRingBuffer.h"
 #include "Manager/RenderTargetManager.h"
 #include "Pass/PreDrawPass.h"
+#include "lib/Model/AssimpLoader.h"
 
 extern "C" { __declspec(dllexport) extern const UINT D3D12SDKVersion = 618; }
 extern "C" { __declspec(dllexport) extern const char* D3D12SDKPath = ".\\D3D12\\"; }
@@ -60,8 +61,6 @@ namespace ElysiaRenderer
 		CameraManager::GetInstance().Init(m_pDevice.get());
 		LightManager::GetInstance().Init(m_pDevice.get());
 		PSOManager::GetInstance().Init(m_pDevice.get());
-		
-		g_pModelImporter = std::make_unique<ModelImporter>(m_pDevice.get());
 	}
 
 	RendererSystem::~RendererSystem()
@@ -80,10 +79,9 @@ namespace ElysiaRenderer
 			// error
 #endif
 			
-		
-
 		printf("loading...\n");
-		if (!GetModelImporter()->Load(g_ModelPaths))
+		LoadedModel loadModel;
+		if (!LoadModel(g_ModelPaths[0], true, true, false, false, 1, loadModel))
 		{
 			AssertError("failed to load model: %s\n");
 		}

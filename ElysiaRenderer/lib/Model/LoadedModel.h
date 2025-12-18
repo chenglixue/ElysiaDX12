@@ -1,5 +1,8 @@
 #pragma once
 #include "stdafx.h"
+
+#include <assimp/mesh.h>
+
 #include "../DX12/DX12Vertex.h"
 #include "BoundingBox.h"
 #include "Manager/TextureManager.h"
@@ -73,50 +76,7 @@ namespace ElysiaModel
 		}
 	};
 
-	struct LoadedSkeleton
-	{
-		struct Joint
-		{
-			Matrix invBindPose; // inverse bind pose transform (transforms from model space to joint space)
-			eastl::string name; // human-readable joint name
-			uint32_t parentIdx; // parent index or -1 if root
-		};
-
-		eastl::vector<Joint> joints;
-	};
-
-	struct LoadedAnimationClip
-	{
-		struct TranslationChannel
-		{
-			eastl::vector<float> m_timeKeys;
-			eastl::vector<Vector3> m_translations;
-		};
-
-		struct RotationChannel
-		{
-			eastl::vector<float> m_timeKeys;
-			eastl::vector<Quaternion> m_rotations;
-		};
-
-		struct ScaleChannel
-		{
-			eastl::vector<float> m_timeKeys;
-			eastl::vector<float> m_scales;
-		};
-
-		struct JointAnimationClip
-		{
-			TranslationChannel m_translationChannel;
-			RotationChannel m_rotationChannel;
-			ScaleChannel m_scaleChannel;
-		};
-
-		eastl::string name;
-		size_t skeletonIndex;
-		float duration;
-		eastl::vector<JointAnimationClip> jointAnimations;
-	};
+	
 	
 	struct LoadedMaterial
 	{
@@ -171,7 +131,8 @@ namespace ElysiaModel
 			void InitFromAssimpMesh(const aiMesh& assimpMesh, float sceneScale,
 									MeshVertex* dstVertices, UINT16* dstIndices);
 		};
-		
+
+		std::string name;
 		Vector3 aabbMin = Vector3(FLT_MAX);
 		Vector3 aabbMax = Vector3(-FLT_MAX);
 		eastl::vector<MeshVertex> vertices;
@@ -180,8 +141,54 @@ namespace ElysiaModel
 		eastl::vector<Mesh> meshes;
 		eastl::vector<LoadedMaterial> materials;
 		GrowableList<MaterialTexture*> materialTextures;
-		
-		
+
+		ElysiaRenderer::BufferHandle vertexBuffer;
+		ElysiaRenderer::BufferHandle indexBuffer;
+	};
+
+	struct LoadedSkeleton
+	{
+		struct Joint
+		{
+			Matrix invBindPose; // inverse bind pose transform (transforms from model space to joint space)
+			eastl::string name; // human-readable joint name
+			uint32_t parentIdx; // parent index or -1 if root
+		};
+
+		eastl::vector<Joint> joints;
+	};
+
+	struct LoadedAnimationClip
+	{
+		struct TranslationChannel
+		{
+			eastl::vector<float> m_timeKeys;
+			eastl::vector<Vector3> m_translations;
+		};
+
+		struct RotationChannel
+		{
+			eastl::vector<float> m_timeKeys;
+			eastl::vector<Quaternion> m_rotations;
+		};
+
+		struct ScaleChannel
+		{
+			eastl::vector<float> m_timeKeys;
+			eastl::vector<float> m_scales;
+		};
+
+		struct JointAnimationClip
+		{
+			TranslationChannel m_translationChannel;
+			RotationChannel m_rotationChannel;
+			ScaleChannel m_scaleChannel;
+		};
+
+		eastl::string name;
+		size_t skeletonIndex;
+		float duration;
+		eastl::vector<JointAnimationClip> jointAnimations;
 	};
 
 	struct MeshData

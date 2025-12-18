@@ -37,8 +37,8 @@ namespace ElysiaRenderer
 	struct BufferCreationDesc
 	{
 		LPCWSTR name;
-		size_t size = 0;
 		size_t stride = 0;
+		size_t size = 0;
 		GPUResourceFlags viewFlags = GPUResourceFlags::None;
 		BufferAccessFlags accessFlags = BufferAccessFlags::GPUOnly;
 		bool isRawAccess = false;

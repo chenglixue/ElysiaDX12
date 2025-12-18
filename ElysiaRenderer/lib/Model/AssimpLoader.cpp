@@ -29,36 +29,6 @@ namespace ElysiaModel
         eastl::vector<eastl::vector<int>> jointMap; // one per skeleton
     };
 
-    static float byteToFloat(int8_t b)
-    {
-        return fmaxf(b / 127.0f, -1.0f);
-    };
-
-    static float ubyteToFloat(uint8_t b)
-    {
-        return b / 255.0f;
-    };
-
-    static float shortToFloat(int16_t b)
-    {
-        return fmaxf(b / 32767.0f, -1.0f);
-    };
-
-    static float ushortToFloat(uint16_t b)
-    {
-        return b / 65535.0f;
-    };
-
-    static float intToFloat(int32_t b)
-    {
-        return fmaxf(b / (float)INT32_MAX, -1.0f);
-    };
-
-    static float uintToFloat(uint32_t b)
-    {
-        return b / (float)UINT32_MAX;
-    };
-
     void LoadMaterials(const aiScene* pScene, LoadedModel &model)
     {
         model.materials.reserve(pScene->mNumMaterials);
@@ -183,7 +153,7 @@ namespace ElysiaModel
         }
     }
 
-    void LoadMeshData(const aiScene* pScene, LoadedModel &model)
+    void LoadMeshData(const wchar_t* filePath, const aiScene* pScene, float sceneScale, LoadedModel &model)
     {
         const UINT64 numMeshes = pScene->mNumMeshes;
         UINT64 numVertices = 0;
@@ -203,7 +173,7 @@ namespace ElysiaModel
         uint64 idxOffset = 0;
         for(UINT64 meshIdx = 0; meshIdx < numMeshes; meshIdx++)
         {
-            model.meshes[meshIdx].InitFromAssimpMesh(*pScene->mMeshes[meshIdx], 1.f,
+            model.meshes[meshIdx].InitFromAssimpMesh(*pScene->mMeshes[meshIdx], sceneScale,
                 &model.vertices[vtxOffset], &model.indices[idxOffset]);
             
             model.aabbMin.x = eastl::min(model.aabbMin.x, model.meshes[meshIdx].aabbMin.x);
@@ -217,8 +187,7 @@ namespace ElysiaModel
             vtxOffset += model.meshes[meshIdx].numVertices;
             idxOffset += model.meshes[meshIdx].numIndices;
         }
-        
-    }
+    };
 
     void LoadedModel::Mesh::InitFromAssimpMesh(const aiMesh& assimpMesh, float sceneScale,
                                     MeshVertex* dstVertices, UINT16* dstIndices)
@@ -285,7 +254,7 @@ namespace ElysiaModel
         materialIndex = assimpMesh.mMaterialIndex;
     }
     
-    bool LoadModel(const wchar_t* filePath, bool bMergeByMaterial, bool bInvertTexcoordY, bool bImportMeshes,
+    bool LoadModel(const wchar_t* filePath, bool bInvertTexcoordY, bool bImportMeshes,
             bool bImportSkeletons, bool bImportAnimations, float scale, LoadedModel &model)
     {
         if (!FileExists(filePath))
@@ -329,6 +298,7 @@ namespace ElysiaModel
         {
             LoadMaterials(pScene, model);
             LoadMaterialResource(model.materials, fileDirectory, model.materialTextures);
+            LoadMeshData(filePath, pScene, scale, model);
         }
         
         std::cout << "Finished loading scene '%ls'" + WstringToString(filePath) << std::endl;
