@@ -292,6 +292,7 @@
     <ClInclude Include="src\System\RendererSystem.h" />
     <ClInclude Include="src\Transform.h" />
     <ClInclude Include="src\Utility\Containers.h" />
+    <ClInclude Include="src\Utility\SharedTypes.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
@@ -4420,6 +4421,7 @@
       <LinkCompiled>true</LinkCompiled>
     </ClCompile>
     <ClCompile Include="src\Utility\Containers.cpp" />
+    <ClCompile Include="src\Utility\SharedTypes.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
     </ClCompile>
