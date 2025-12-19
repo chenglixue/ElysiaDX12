@@ -8,10 +8,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f31d721d-cfba-4714-b0ce-c46a1a48110d" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/src/MeshRenderer.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/src/MeshRenderer.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.ElysiaRenderer/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.ElysiaRenderer/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/SimpleMath/SimpleMath.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/SimpleMath/SimpleMath.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Model/AssimpLoader.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/Model/AssimpLoader.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Model/LoadedModel.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/Model/LoadedModel.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/ElysiaRenderer.vcxproj" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/ElysiaRenderer.vcxproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/DX12MeshRender.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Manager/BufferManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Manager/BufferManager.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Manager/BufferManager.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Manager/BufferManager.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/System/RendererSystem.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/System/RendererSystem.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -40,6 +44,8 @@
     <setting file="file://$PROJECT_DIR$/../../Program Files (x86)/Windows Kits/10/Include/10.0.22621.0/shared/basetsd.h" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../Program Files (x86)/Windows Kits/10/Include/10.0.22621.0/ucrt/assert.h" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../Program Files (x86)/Windows Kits/10/Include/10.0.22621.0/um/debugapi.h" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../Program Files (x86)/Windows Kits/10/Include/10.0.22621.0/um/winnt.h" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.38.33130/include/vector" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.38.33130/include/xstring" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/x64/Debug/Assimp/include/assimp/material.h" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/x64/Debug/Assimp/include/assimp/material.inl" root0="SKIP_HIGHLIGHTING" />
@@ -105,6 +111,8 @@
       <workItem from="1765892118699" duration="512000" />
       <workItem from="1765892655468" duration="9726000" />
       <workItem from="1765937047408" duration="25129000" />
+      <workItem from="1766027753363" duration="16472000" />
+      <workItem from="1766114781661" duration="7995000" />
     </task>
     <servers />
   </component>

@@ -5,7 +5,6 @@
 
 #include "IManager.h"
 #include "IUpdate.h"
-#include "DX12/DX12MeshRender.h"
 #include "DX12/UploadRingBuffer.h"
 #include "lib/Utility/RenderTexture.h"
 #include "lib/Model/LoadedModel.h"
@@ -66,11 +65,6 @@ namespace ElysiaRenderer
 		const D3D12_INDEX_BUFFER_VIEW& GetIndexBufferView() const noexcept;
 		const D3D12_VERTEX_BUFFER_VIEW& GetVertexBufferView() const noexcept;
 
-		void AddVertexBuffer(BufferCreationDesc desc);
-		void AddIndexBuffer(BufferCreationDesc desc);
-		void SetVertexBufferView(const D3D12_VERTEX_BUFFER_VIEW& view);
-		void SetIndexBufferView(const D3D12_INDEX_BUFFER_VIEW& view);
-		
 	private:
 		static std::unique_ptr<BufferManager> m_instance;
 		static std::once_flag m_initInstanceFlag;

@@ -87,6 +87,9 @@ namespace ElysiaRenderer
 		}
 		printf("done\n");
 
+		BufferManager::GetInstance().CreateVertexBuffer(loadModel);
+		BufferManager::GetInstance().CreateIndexBuffer(loadModel);
+
 		UpdateDisplay(UserData::GetInstance().displayMode, m_disableLocalDimming);
 		
 		InitPSOHelpers();  
@@ -168,9 +171,7 @@ namespace ElysiaRenderer
 
 	void RendererSystem::Setup()
 	{
-		GetModelImporter()->CreateVertexBuffer();
-		GetModelImporter()->CreateIndexBuffer();
-		GetModelImporter()->CreateMeshRenders();
+		
 
 		if (!UserData::GetInstance().IsUseHDR)
 		{
