@@ -1,6 +1,7 @@
 #pragma once
 
 #include "lib/Utility/Helper.h"
+#include "Utility/SharedTypes.h"
 
 namespace ElysiaModel
 {
@@ -21,6 +22,7 @@ namespace ElysiaRenderer
         const ElysiaModel::LoadedModel* m_pModel = nullptr;
         eastl::vector<BoundingBox> m_meshBoundingBoxes;
         eastl::vector<UINT32> m_meshDrawIndices;
+        eastl::vector<MaterialTextureIndices> m_textureIndices;
     };
 }
 

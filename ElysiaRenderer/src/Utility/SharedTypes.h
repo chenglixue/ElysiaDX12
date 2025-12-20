@@ -7,4 +7,8 @@ struct MaterialTextureIndices
 	uint Normal;
 	uint Roughness;
 	uint Metallic;
+	uint Occlusion;
+	uint Specular;
+	uint Emissive;
+	uint Height;
 };

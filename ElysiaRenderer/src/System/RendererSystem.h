@@ -6,6 +6,7 @@
 
 namespace ElysiaRenderer 
 {
+	class MeshRenderer;
 	using namespace ElysiaHelper;
 
 	class MeshManager;
@@ -92,6 +93,7 @@ namespace ElysiaRenderer
 		std::unique_ptr<DX12GraphicsContext> m_graphicsContext = nullptr;
 		std::vector<std::unique_ptr<D3D12_SAMPLER_DESC>> m_samplers{};
 		std::vector<std::unique_ptr<BasePass>> m_passes{};
+		eastl::vector<std::unique_ptr<MeshRenderer>> m_meshRenderers;
 		RenderTexture* m_pCameraColorRT = nullptr;
 		RenderTexture* m_pCameraDepthRT = nullptr;
 

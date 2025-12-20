@@ -3,6 +3,7 @@
 
 #include <dxgidebug.h>
 
+#include "MeshRenderer.h"
 #include "lib/DX12//DX12UI.h"
 #include "src/Manager/BufferManager.h"
 #include "src/Manager/LightManager.h"
@@ -79,23 +80,7 @@ namespace ElysiaRenderer
 			// error
 #endif
 			
-		printf("loading...\n");
-		LoadedModel loadModel;
-		if (!LoadModel(g_ModelPaths[0], true, true, false, false, 1, loadModel))
-		{
-			AssertError("failed to load model: %s\n");
-		}
-		printf("done\n");
-
-		BufferManager::GetInstance().CreateVertexBuffer(loadModel);
-		BufferManager::GetInstance().CreateIndexBuffer(loadModel);
-
 		UpdateDisplay(UserData::GetInstance().displayMode, m_disableLocalDimming);
-		
-		InitPSOHelpers();  
-
-		CameraManager::GetInstance().CreateMainCamera(Vector3(-11.5f, 200.85f, -0.45f) ,
-			m_aspectRatio, 3.14159f / 4.0f, 0.1f, 2000.f);
 
 		Setup();
 	}
@@ -171,7 +156,29 @@ namespace ElysiaRenderer
 
 	void RendererSystem::Setup()
 	{
+		for (const auto& modelPath : g_ModelPaths)
+		{
+			LoadedModel loadModel;
+			printf("loading...\n");
+			if (!LoadModel(modelPath, true, true, false, false, 1, loadModel))
+			{
+				AssertError("failed to load model: %s\n");
+			}
+			printf("done\n");
+			auto pMeshRenderer = std::make_unique<MeshRenderer>();
+			pMeshRenderer->ShutDown();
+			pMeshRenderer->Init()
+		}
+
 		
+
+		BufferManager::GetInstance().CreateVertexBuffer(loadModel);
+		BufferManager::GetInstance().CreateIndexBuffer(loadModel);
+
+		InitPSOHelpers();
+
+		CameraManager::GetInstance().CreateMainCamera(Vector3(-11.5f, 200.85f, -0.45f) ,
+			m_aspectRatio, 3.14159f / 4.0f, 0.1f, 2000.f);
 
 		if (!UserData::GetInstance().IsUseHDR)
 		{

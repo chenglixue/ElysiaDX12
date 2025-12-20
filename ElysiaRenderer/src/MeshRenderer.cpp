@@ -2,7 +2,6 @@
 #include "MeshRenderer.h"
 
 #include "Model/LoadedModel.h"
-#include "Utility/SharedTypes.h"
 
 namespace ElysiaRenderer
 {
@@ -25,8 +24,28 @@ namespace ElysiaRenderer
         {
             const auto& materials = m_pModel->materials;
             const UINT64 materialCount = materials.size();
-            eastl::vector<MaterialTextureIndices> 
+            m_textureIndices.resize(materialCount);
+            for (UINT64 materialIndex = 0; materialIndex < materialCount; ++materialIndex)
+            {
+                const auto& material = materials[materialIndex];
+                auto& materialIndices = m_textureIndices[materialIndex];
+                
+                materialIndices.Albedo = material.textures[UINT64(ElysiaModel::MaterialTextures::Albedo)].GetResourceHeapIndex();
+                materialIndices.Normal = material.textures[UINT64(ElysiaModel::MaterialTextures::Normal)].GetResourceHeapIndex();
+                materialIndices.Metallic = material.textures[UINT64(ElysiaModel::MaterialTextures::Metallic)].GetResourceHeapIndex();
+                materialIndices.Roughness = material.textures[UINT64(ElysiaModel::MaterialTextures::Roughness)].GetResourceHeapIndex();
+                materialIndices.Occlusion = material.textures[UINT64(ElysiaModel::MaterialTextures::Occlusion)].GetResourceHeapIndex();
+                materialIndices.Specular = material.textures[UINT64(ElysiaModel::MaterialTextures::Specular)].GetResourceHeapIndex();
+                materialIndices.Height = material.textures[UINT64(ElysiaModel::MaterialTextures::Height)].GetResourceHeapIndex();
+                materialIndices.Emissive = material.textures[UINT64(ElysiaModel::MaterialTextures::Emissive)].GetResourceHeapIndex();
+            }
         }
     }
 
+    void MeshRenderer::ShutDown()
+    {
+        m_meshDrawIndices.clear();
+        m_textureIndices.clear();
+        m_meshBoundingBoxes.clear();
+    }
 }

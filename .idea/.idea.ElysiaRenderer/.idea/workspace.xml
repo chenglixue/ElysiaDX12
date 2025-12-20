@@ -8,14 +8,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f31d721d-cfba-4714-b0ce-c46a1a48110d" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/src/MeshRenderer.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/src/MeshRenderer.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.ElysiaRenderer/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.ElysiaRenderer/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/ElysiaRenderer.vcxproj" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/ElysiaRenderer.vcxproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/DX12MeshRender.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Manager/BufferManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Manager/BufferManager.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Manager/BufferManager.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Manager/BufferManager.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/MeshRenderer.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/MeshRenderer.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/MeshRenderer.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/MeshRenderer.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/System/RendererSystem.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/System/RendererSystem.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/System/RendererSystem.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/System/RendererSystem.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Utility/SharedTypes.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Utility/SharedTypes.h" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -113,6 +110,7 @@
       <workItem from="1765937047408" duration="25129000" />
       <workItem from="1766027753363" duration="16472000" />
       <workItem from="1766114781661" duration="7995000" />
+      <workItem from="1766225204693" duration="1616000" />
     </task>
     <servers />
   </component>
