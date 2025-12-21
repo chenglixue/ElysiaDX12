@@ -167,13 +167,11 @@ namespace ElysiaRenderer
 			printf("done\n");
 			auto pMeshRenderer = std::make_unique<MeshRenderer>();
 			pMeshRenderer->ShutDown();
-			pMeshRenderer->Init()
+			pMeshRenderer->Init(&loadModel);
+			
+			loadModel.vertexBuffer = BufferManager::GetInstance().CreateVertexBuffer(loadModel);
+			loadModel.indexBuffer = BufferManager::GetInstance().CreateIndexBuffer(loadModel);
 		}
-
-		
-
-		BufferManager::GetInstance().CreateVertexBuffer(loadModel);
-		BufferManager::GetInstance().CreateIndexBuffer(loadModel);
 
 		InitPSOHelpers();
 

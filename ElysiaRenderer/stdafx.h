@@ -42,6 +42,7 @@
 #include <boost/container/stable_vector.hpp>
 #include "lib/EASTL/string.h"
 #include "lib/EASTL/vector.h"
+#include "lib/EASTL/hash_map.h"
 
 #include "magic_enum/magic_enum.hpp"
 #include "SimpleMath/SimpleMath.h"

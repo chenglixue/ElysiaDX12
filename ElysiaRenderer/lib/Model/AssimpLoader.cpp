@@ -267,7 +267,7 @@ namespace ElysiaModel
         
         Assimp::Importer importer;
         auto fileDirectory = ToEastlWString(GetDirectoryFromFilePath(filePath));
-
+        
         const aiScene* pScene = importer.ReadFile(fileNameAnsi, 0);
         if(pScene == nullptr || pScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !pScene->mRootNode)
         {
