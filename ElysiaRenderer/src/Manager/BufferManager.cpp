@@ -315,28 +315,18 @@ namespace ElysiaRenderer
 			.accessFlags = BufferAccessFlags::GPUOnly,
 			.isRawAccess = true
 		};
-		m_pVertexBuffer = std::move(CreateBuffer(bufferCreationDesc));
-		assert(m_pVertexBuffer);
+		auto bufferHandle = std::move(CreateBuffer(bufferCreationDesc));
+		assert(bufferHandle);
 
 		auto pBufferUpload = new DX12BufferUpload();
-		pBufferUpload->buffer = m_pVertexBuffer;
+		pBufferUpload->buffer = bufferHandle;
 		pBufferUpload->bufferDataSize = bufferCreationDesc.size;
 		pBufferUpload->pBufferData = std::make_unique<uint8_t[]>(bufferCreationDesc.size);
-		pBufferUpload->onComplete = [this, bufferCreationDesc](DX12BufferUpload* pBufferUpload)
-		{
-			D3D12_VERTEX_BUFFER_VIEW bufferView
-			{
-				.BufferLocation = BufferManager::GetInstance().GetVertexBuffer()->GetGPUAddress(),
-				.SizeInBytes = static_cast<UINT>(pBufferUpload->bufferDataSize),
-				.StrideInBytes = static_cast<UINT>(bufferCreationDesc.stride),
-			};
-			m_vertexBufferView = bufferView;
-		};
 
 		memcpy(pBufferUpload->pBufferData.get(), model.vertices.data(), bufferCreationDesc.size);
 		m_pDevice->GetUploadContext()->AddBufferToUploads(std::move(pBufferUpload));
 
-		return m_pVertexBuffer;
+		return bufferHandle;
 	}
 	BufferHandle BufferManager::CreateIndexBuffer(const LoadedModel& model)
 	{
@@ -349,45 +339,16 @@ namespace ElysiaRenderer
 			.accessFlags = BufferAccessFlags::GPUOnly,
 			.isRawAccess = true
 		};
-		m_pIndexBuffer = std::move(CreateBuffer(bufferCreationDesc));
+		auto bufferHandle = std::move(CreateBuffer(bufferCreationDesc));
 
 		auto pBufferUpload = new DX12BufferUpload();
-		pBufferUpload->buffer = m_pIndexBuffer;
+		pBufferUpload->buffer = bufferHandle;
 		pBufferUpload->pBufferData = std::make_unique<uint8_t[]>(bufferCreationDesc.size);
 		pBufferUpload->bufferDataSize = bufferCreationDesc.size;
-		pBufferUpload->onComplete = [this](DX12BufferUpload* pBufferUpload)
-		{
-			D3D12_INDEX_BUFFER_VIEW bufferView
-			{
-				.BufferLocation = BufferManager::GetInstance().GetIndexBuffer()->GetGPUAddress(),
-				.SizeInBytes = static_cast<UINT>(pBufferUpload->bufferDataSize),
-				.Format = DXGI_FORMAT_R16_UINT,
-			};
-
-			m_indexBufferView = bufferView;
-		};
 		memcpy(pBufferUpload->pBufferData.get(), model.indices.data(), bufferCreationDesc.size);
 
 		m_pDevice->GetUploadContext()->AddBufferToUploads(std::move(pBufferUpload));
 
-		return m_pIndexBuffer;
-	}
-
-	BufferHandle BufferManager::GetVertexBuffer() const noexcept
-	{
-		return m_pVertexBuffer;
-	}
-	BufferHandle BufferManager::GetIndexBuffer() const noexcept
-	{
-		return m_pIndexBuffer;
-	}
-
-	const D3D12_INDEX_BUFFER_VIEW& BufferManager::GetIndexBufferView() const noexcept
-	{
-		return m_indexBufferView;
-	}
-	const D3D12_VERTEX_BUFFER_VIEW& BufferManager::GetVertexBufferView() const noexcept
-	{
-		return m_vertexBufferView;
+		return bufferHandle;
 	}
 }

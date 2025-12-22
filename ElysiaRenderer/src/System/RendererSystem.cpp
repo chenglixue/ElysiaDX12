@@ -26,6 +26,7 @@
 #include "Manager/RenderTargetManager.h"
 #include "Pass/PreDrawPass.h"
 #include "lib/Model/AssimpLoader.h"
+#include "Manager/ModelManager.h"
 
 extern "C" { __declspec(dllexport) extern const UINT D3D12SDKVersion = 618; }
 extern "C" { __declspec(dllexport) extern const char* D3D12SDKPath = ".\\D3D12\\"; }
@@ -140,12 +141,9 @@ namespace ElysiaRenderer
 		m_pDevice->BeginFrame();
 		m_graphicsContext->Reset();
 
-		if(BufferManager::GetInstance().GetVertexBuffer()->GetIsReady() && BufferManager::GetInstance().GetIndexBuffer()->GetIsReady())
+		for (auto& pass : m_passes)
 		{
-			for (auto& pass : m_passes)
-			{
-				pass->Render();
-			}
+			pass->Render();
 		}
 
 		m_pDevice->SubmitContextWork(*m_graphicsContext);
@@ -158,19 +156,11 @@ namespace ElysiaRenderer
 	{
 		for (const auto& modelPath : g_ModelPaths)
 		{
-			LoadedModel loadModel;
-			printf("loading...\n");
-			if (!LoadModel(modelPath, true, true, false, false, 1, loadModel))
-			{
-				AssertError("failed to load model: %s\n");
-			}
-			printf("done\n");
+			auto pLoadedModel = ModelManager::GetInstance().LoadModel(modelPath, 1);
+			
 			auto pMeshRenderer = std::make_unique<MeshRenderer>();
 			pMeshRenderer->ShutDown();
-			pMeshRenderer->Init(&loadModel);
-			
-			loadModel.vertexBuffer = BufferManager::GetInstance().CreateVertexBuffer(loadModel);
-			loadModel.indexBuffer = BufferManager::GetInstance().CreateIndexBuffer(loadModel);
+			pMeshRenderer->Init(pLoadedModel.get());
 		}
 
 		InitPSOHelpers();

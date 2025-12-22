@@ -63,7 +63,7 @@ namespace ElysiaHelper
     static const wchar_t* SHADER_OUTPUT_PATH = L"Shaders/Complied/";
 
 #define D3D_COMPILE_STANDARD_FILE_INCLUDE ((ID3DInclude*)(UINT_PTR)1)
-
+#define ArraySize_(x) ((sizeof(x) / sizeof(0[x])) / ((size_t)(!(sizeof(x) % sizeof(0[x])))))
 
     inline void AssertIfFailed(HRESULT hr)
     {
@@ -843,6 +843,7 @@ namespace ElysiaHelper
         OutputDebugStringA(buffer);
         OutputDebugStringA("\n");
     }
+    
     
     std::wstring MakeString(const wchar_t* format, ...)
     {

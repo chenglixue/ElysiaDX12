@@ -8,6 +8,7 @@
 #include "DX12/UploadRingBuffer.h"
 #include "Manager/TextureManager.h"
 #include "lib/Utility/Common.h"
+#include "Manager/BufferManager.h"
 
 namespace ElysiaRenderer
 {

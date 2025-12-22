@@ -6,6 +6,7 @@
 #include <assimp/postprocess.h>
 #include "iosfwd"
 #include "../File/Serialization.h"
+#include "Manager/BufferManager.h"
 
 namespace ElysiaModel
 {
@@ -92,14 +93,14 @@ namespace ElysiaModel
                 material.specularFactor = shininess;
             }
 
-            loadTexturePath(aiTextureType_DIFFUSE, material.textureNames[UINT64(MaterialTextures::Albedo)]);
-            loadTexturePath(aiTextureType_NORMALS, material.textureNames[UINT64(MaterialTextures::Normal)]);
-            loadTexturePath(aiTextureType_EMISSIVE, material.textureNames[UINT64(MaterialTextures::Emissive)]);
-            loadTexturePath(aiTextureType_METALNESS, material.textureNames[UINT64(MaterialTextures::Metallic)]);
-            loadTexturePath(aiTextureType_DIFFUSE_ROUGHNESS, material.textureNames[UINT64(MaterialTextures::Roughness)]);
-            loadTexturePath(aiTextureType_AMBIENT_OCCLUSION, material.textureNames[UINT64(MaterialTextures::Occlusion)]);
-            loadTexturePath(aiTextureType_SPECULAR, material.textureNames[UINT64(MaterialTextures::Specular)]);
-            loadTexturePath(aiTextureType_HEIGHT, material.textureNames[UINT64(MaterialTextures::Height)]);
+            loadTexturePath(aiTextureType_DIFFUSE, material.textureNames[UINT64(MaterialTextureType::Albedo)]);
+            loadTexturePath(aiTextureType_NORMALS, material.textureNames[UINT64(MaterialTextureType::Normal)]);
+            loadTexturePath(aiTextureType_EMISSIVE, material.textureNames[UINT64(MaterialTextureType::Emissive)]);
+            loadTexturePath(aiTextureType_METALNESS, material.textureNames[UINT64(MaterialTextureType::Metallic)]);
+            loadTexturePath(aiTextureType_DIFFUSE_ROUGHNESS, material.textureNames[UINT64(MaterialTextureType::Roughness)]);
+            loadTexturePath(aiTextureType_AMBIENT_OCCLUSION, material.textureNames[UINT64(MaterialTextureType::Occlusion)]);
+            loadTexturePath(aiTextureType_SPECULAR, material.textureNames[UINT64(MaterialTextureType::Specular)]);
+            loadTexturePath(aiTextureType_HEIGHT, material.textureNames[UINT64(MaterialTextureType::Height)]);
 
             model.materials.emplace_back(material);
         }
@@ -113,14 +114,14 @@ namespace ElysiaModel
         {
             auto& material = materials[matIdx];
 
-            for (UINT64 texType = 0; texType <= UINT64(MaterialTextures::Count); texType++)
+            for (UINT64 texType = 0; texType <= UINT64(MaterialTextureType::Count); texType++)
             {
                 material.textures[texType] = ElysiaRenderer::TextureManager::Handle::Invalid();
 
                 eastl::wstring path = fileDirectory + material.textureNames[texType];
                 if (material.textureNames[texType].length() <= 0 || FileExists(path.c_str()) == false)
                 {
-                    if (texType == UINT64(MaterialTextures::Albedo) || texType == UINT64(MaterialTextures::Roughness))
+                    if (texType == UINT64(MaterialTextureType::Albedo) || texType == UINT64(MaterialTextureType::Roughness))
                     {
                         path = ToEastlWString(ElysiaRenderer::DefaultWhiteTexturePath);
                     }
@@ -141,7 +142,7 @@ namespace ElysiaModel
                 {
                     MaterialTexture* newMatTexture = new MaterialTexture();
                     newMatTexture->name = path;
-                    bool useSRGB = texType == UINT64(MaterialTextures::Albedo);
+                    bool useSRGB = texType == UINT64(MaterialTextureType::Albedo);
                     newMatTexture->texture = ElysiaRenderer::TextureManager::GetInstance().LoadDynamicTexture(ToStdWString(path), useSRGB);
                     
                     UINT64 idx = materialTextures.Add(newMatTexture);
@@ -183,6 +184,20 @@ namespace ElysiaModel
             model.aabbMax.x = eastl::max(model.aabbMax.x, model.meshes[meshIdx].aabbMax.x);
             model.aabbMax.y = eastl::max(model.aabbMax.y, model.meshes[meshIdx].aabbMax.y);
             model.aabbMax.z = eastl::max(model.aabbMax.z, model.meshes[meshIdx].aabbMax.z);
+
+            vtxOffset += model.meshes[meshIdx].numVertices;
+            idxOffset += model.meshes[meshIdx].numIndices;
+        }
+        
+        model.vertexBuffer = ElysiaRenderer::BufferManager::GetInstance().CreateVertexBuffer(model);
+        model.indexBuffer = ElysiaRenderer::BufferManager::GetInstance().CreateIndexBuffer(model);
+        for (UINT64 meshIdx = 0; meshIdx < numMeshes; meshIdx++)
+        {
+            UINT64 vbOffset = vtxOffset * sizeof(MeshVertex);
+            UINT64 ibOffset = idxOffset * sizeof(UINT16);
+
+            model.meshes[meshIdx].InitCommon(model.vertexBuffer->GetGPUAddress(), model.indexBuffer->GetGPUAddress(),
+                vbOffset, ibOffset);
 
             vtxOffset += model.meshes[meshIdx].numVertices;
             idxOffset += model.meshes[meshIdx].numIndices;
@@ -249,17 +264,32 @@ namespace ElysiaModel
             indices[triIdx * 3 + 2] = dstIndices[triIdx * 3 + 2] = UINT16(assimpMesh.mFaces[triIdx].mIndices[2]);
         }
         
-        vtxOffset = 0;
-        idxOffset = 0;
         materialIndex = assimpMesh.mMaterialIndex;
     }
+
+    void LoadedModel::Mesh::InitCommon(uint64 vbAddress, uint64 ibAddress, uint64 vtxOffset_, uint64 idxOffset_)
+    {
+        assert(vertices.size() && indices.size());
+
+        vtxOffset = UINT(vtxOffset_);
+        idxOffset = UINT(idxOffset_);
+
+        vbView.BufferLocation = vbAddress;
+        vbView.SizeInBytes = sizeof(MeshVertex) * numVertices;
+        vbView.StrideInBytes = sizeof(MeshVertex);
+
+        ibView.BufferLocation = ibAddress;
+        ibView.SizeInBytes = IndexSize() * numIndices;
+        ibView.Format = IndexBufferFormat();
+    }
+
     
     bool LoadModel(const wchar_t* filePath, bool bInvertTexcoordY, bool bImportMeshes,
             bool bImportSkeletons, bool bImportAnimations, float scale, LoadedModel &model)
     {
         if (!FileExists(filePath))
         {
-            throw ShowErrorMessage(MakeString(L"Model file with path '%ls' does not exist", filePath));
+            ShowErrorMessage(MakeString(L"Model file with path '%ls' does not exist", filePath));
             return false;
         }
         WriteLog("Loading scene '%ls' with Assimp...", filePath);
@@ -271,18 +301,18 @@ namespace ElysiaModel
         const aiScene* pScene = importer.ReadFile(fileNameAnsi, 0);
         if(pScene == nullptr || pScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !pScene->mRootNode)
         {
-            throw ShowErrorMessage(L"Failed to load scene " + std::wstring(filePath) +
+            ShowErrorMessage(L"Failed to load scene " + std::wstring(filePath) +
                             L": " + StringToWstring(importer.GetErrorString()));
             return false;
         }
         if (pScene->mNumMeshes <= 0)
         {
-             throw ShowErrorMessage(L"Scene " + std::wstring(filePath) + L" has no meshes");
+             ShowErrorMessage(L"Scene " + std::wstring(filePath) + L" has no meshes");
             return false;
         }
         if (pScene->mNumMaterials <= 0)
         {
-            throw ShowErrorMessage(L"Scene " + std::wstring(filePath) + L" has no materials");
+            ShowErrorMessage(L"Scene " + std::wstring(filePath) + L" has no materials");
             return false;
         }
 

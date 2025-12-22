@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "Material.h"
 
-#include "lib/DX12/DX12Device.h"
 #include "lib/DX12/DX12BufferResource.h"
 #include "lib/Utility/PipelineResourceUtility.h"
 #include "RenderResource.h"
@@ -10,8 +9,6 @@
 
 namespace ElysiaRenderer
 {
-	using namespace ElysiaModel;
-	
 	Material::Material(DX12Device* pDevice, std::vector<ShaderPass>& shaderPasses) :
 		m_pDevice(pDevice)
 	{

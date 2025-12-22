@@ -11,8 +11,6 @@
 
 namespace ElysiaRenderer
 {
-	using namespace ElysiaModel;
-
 	class RenderTexture;
 	class DX12GraphicsContext;
 	class UploadRingBuffer;

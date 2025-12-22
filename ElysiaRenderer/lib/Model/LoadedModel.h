@@ -24,7 +24,7 @@ namespace ElysiaModel
 		Index32Bit = 1
 	};
 
-	enum class MaterialTextures
+	enum class MaterialTextureType
 	{
 		Albedo = 0,
 		Normal,
@@ -76,8 +76,6 @@ namespace ElysiaModel
 		}
 	};
 
-	
-	
 	struct LoadedMaterial
 	{
 		enum class Alpha
@@ -97,9 +95,9 @@ namespace ElysiaModel
 		float specularFactor;
 		Vector3 emissiveFactor;
 
-		eastl::wstring textureNames[UINT64(MaterialTextures::Count)];
-		ElysiaRenderer::TextureManager::Handle textures[uint64(MaterialTextures::Count)] = { };
-		UINT32 textureIndices[uint64(MaterialTextures::Count)] = {};
+		eastl::wstring textureNames[UINT64(MaterialTextureType::Count)];
+		ElysiaRenderer::TextureManager::Handle textures[uint64(MaterialTextureType::Count)] = { };
+		UINT32 textureIndices[uint64(MaterialTextureType::Count)] = {};
 	};
 
 	struct LoadedModel
@@ -118,8 +116,8 @@ namespace ElysiaModel
 			UINT32 vtxOffset = 0;
 			UINT32 idxOffset = 0;
 			IndexType indexType = IndexType::Index16Bit;
-			D3D12_VERTEX_BUFFER_VIEW vbView = { };
-			D3D12_INDEX_BUFFER_VIEW ibView = { };
+			D3D12_VERTEX_BUFFER_VIEW vbView;
+			D3D12_INDEX_BUFFER_VIEW ibView;
 
 			eastl::vector<MeshVertex> vertices;
 			eastl::vector<UINT16> indices;
@@ -127,11 +125,16 @@ namespace ElysiaModel
 			eastl::vector<Vector4> weights;
 			eastl::vector<Vector4> joints;
 
+			DXGI_FORMAT IndexBufferFormat() const { return DXGI_FORMAT_R16_UINT; }
+			UINT IndexSize() const { return 2; }
+
 			// Init from loaded files
 			void InitFromAssimpMesh(const aiMesh& assimpMesh, float sceneScale,
 									MeshVertex* dstVertices, UINT16* dstIndices);
-		};
 
+			void InitCommon(uint64 vbAddress, uint64 ibAddress, uint64 vtxOffset_, uint64 idxOffset_);
+		};
+		
 		std::string name;
 		Vector3 aabbMin = Vector3(FLT_MAX);
 		Vector3 aabbMax = Vector3(-FLT_MAX);
@@ -141,7 +144,7 @@ namespace ElysiaModel
 		eastl::vector<Mesh> meshes;
 		eastl::vector<LoadedMaterial> materials;
 		GrowableList<MaterialTexture*> materialTextures;
-
+		
 		ElysiaRenderer::BufferHandle vertexBuffer;
 		ElysiaRenderer::BufferHandle indexBuffer;
 	};

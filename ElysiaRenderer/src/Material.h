@@ -6,6 +6,7 @@
 #include "lib/Utility/Hash.h"
 #include "lib/DX12/DX12Shader.h"
 #include "MaterialParams.h"
+#include "lib/DX12/DX12Device.h"
 
 namespace std
 {

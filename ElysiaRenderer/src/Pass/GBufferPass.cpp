@@ -2,6 +2,7 @@
 #include "GBufferPass.h"
 #include "Manager/BufferManager.h"
 #include "RenderResource.h"
+#include "Manager/ModelManager.h"
 #include "Manager/RenderTargetManager.h"
 
 namespace ElysiaRenderer
@@ -231,13 +232,14 @@ namespace ElysiaRenderer
 	{
 		m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_renderSize));
 		m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		m_pCommand->SetIndexBuffer(BufferManager::GetInstance().GetIndexBufferView()); 
-		m_pCommand->SetVertexBuffer(0, 1, const_cast<D3D12_VERTEX_BUFFER_VIEW&>(BufferManager::GetInstance().GetVertexBufferView()));
 		
 		auto& passData = m_pMaterial->GetPassData(passIndex);
 		SetSpaceResource(passData, PER_PASS_SPACE); 
 		SetSpaceResource(passData, PER_FRAME_SPACE);
-		
+
+		for (UINT i = 0; i < ModelManager::GetInstance().)
+		m_pCommand->SetIndexBuffer(BufferManager::GetInstance().GetIndexBufferView()); 
+		m_pCommand->SetVertexBuffer(0, 1, const_cast<D3D12_VERTEX_BUFFER_VIEW&>(BufferManager::GetInstance().GetVertexBufferView()));
 		for (UINT meshIndex = 0; meshIndex < GetModelImporter()->GetMeshCount(); ++meshIndex)
 		{
 			const auto& meshRenderer = GetModelImporter()->GetMeshRenderer(meshIndex);

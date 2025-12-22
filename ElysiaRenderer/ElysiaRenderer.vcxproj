@@ -73,12 +73,12 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>D:\DX12\ElysiaRenderer\x64\Debug\Assimp\include;D:\DX12\ElysiaDX12\x64\Debug\Assimp\Environment;D:\DX12\ElysiaDX12\x64\Debug\Assimp\include;D:\DX12\ElysiaDX12\ElysiaRenderer\AMD\libs\AGS;D:\DX12\ElysiaDX12\x64\Debug\Shaders;C:\Work\ElysiaRenderer\ElysiaRenderer;C:\Work\ElysiaRenderer\ElysiaRenderer\lib;C:\Work\ElysiaRenderer\ElysiaRenderer\src;D:\DX12\ElysiaDX12\ElysiaRenderer\src;D:\DX12\ElysiaDX12\ElysiaRenderer\lib;D:\DX12\ElysiaDX12\ElysiaRenderer;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\DX12\ElysiaDX12\ElysiaRenderer\AMD\libs\AGS;D:\DX12\ElysiaDX12\x64\Debug\Assimp\include;D:\DX12\ElysiaRenderer\x64\Debug\Assimp\Environment;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Work\ElysiaRenderer\ElysiaRenderer;C:\Work\ElysiaRenderer\ElysiaRenderer\lib;C:\Work\ElysiaRenderer\ElysiaRenderer\include;C:\Work\ElysiaRenderer\ElysiaRenderer\src;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Work\ElysiaRenderer\ElysiaRenderer\AMD\libs\AGS;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>D:\DX12\ElysiaRenderer\x64\Debug\Assimp\include;D:\DX12\ElysiaDX12\x64\Debug\Assimp\Environment;D:\DX12\ElysiaDX12\x64\Debug\Assimp\include;D:\DX12\ElysiaDX12\ElysiaRenderer\AMD\libs\AGS;D:\DX12\ElysiaDX12\x64\Debug\Shaders;C:\Work\ElysiaRenderer\ElysiaRenderer;C:\Work\ElysiaRenderer\ElysiaRenderer\lib;C:\Work\ElysiaRenderer\ElysiaRenderer\src;D:\DX12\ElysiaDX12\ElysiaRenderer\src;D:\DX12\ElysiaDX12\ElysiaRenderer\lib;D:\DX12\ElysiaDX12\ElysiaRenderer;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\DX12\ElysiaDX12\ElysiaRenderer\AMD\libs\AGS;D:\DX12\ElysiaDX12\x64\Debug\Assimp\include;D:\DX12\ElysiaRenderer\x64\Debug\Assimp\Environment;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Work\ElysiaRenderer\ElysiaRenderer\lib\x64-windows\lib;D:\DX12\ElysiaRenderer\x64\Debug\Assimp\include;D:\DX12\ElysiaDX12\x64\Debug\Assimp\Environment;D:\DX12\ElysiaDX12\x64\Debug\Assimp\include;D:\DX12\ElysiaDX12\ElysiaRenderer\AMD\libs\AGS;D:\DX12\ElysiaDX12\x64\Debug\Shaders;C:\Work\ElysiaRenderer\ElysiaRenderer;C:\Work\ElysiaRenderer\ElysiaRenderer\lib;C:\Work\ElysiaRenderer\ElysiaRenderer\src;C:\Work\ElysiaRenderer\ElysiaRenderer\include;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\DX12\ElysiaDX12\ElysiaRenderer\AMD\libs\AGS;D:\DX12\ElysiaDX12\x64\Debug\Assimp\include;D:\DX12\ElysiaRenderer\x64\Debug\Assimp\Environment;C:\Work\ElysiaRenderer\ElysiaRenderer\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -115,7 +115,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;USE_PIX;PROFILE;PROFILE_BUILD;DBG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>D:\DX12\ElysiaRenderer\x64\Debug\Shaders;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc\include;D:\DX12\ElysiaDX12\x64\Debug\Assimp\include\assimp;DirectXTK12\Inc;D:\DX12\ElysiaDX12\ElysiaRenderer\AMD\libs\AGS;C:\Work\ElysiaRenderer\ElysiaRenderer;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc\include;C:\Work\ElysiaRenderer\ElysiaRenderer;C:\Work\ElysiaRenderer\ElysiaRenderer\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>5033;4819;0018;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -155,7 +155,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>D:\DX12\ElysiaRenderer\x64\Debug\Shaders;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc\include;D:\DX12\ElysiaDX12\x64\Debug\Assimp\include\assimp;DirectXTK12\Inc;D:\DX12\ElysiaDX12\ElysiaRenderer\AMD\libs\AGS;C:\Work\ElysiaRenderer\ElysiaRenderer;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\DX12\ElysiaRenderer\x64\Debug\Shaders;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc\include;D:\DX12\ElysiaDX12\x64\Debug\Assimp\include\assimp;DirectXTK12\Inc;D:\DX12\ElysiaDX12\ElysiaRenderer\AMD\libs\AGS;C:\Work\ElysiaRenderer\ElysiaRenderer\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>None</DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <WholeProgramOptimization>false</WholeProgramOptimization>
@@ -165,8 +165,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc\lib\spectre\x64;D:\DX12\ElysiaRenderer\ElysiaRenderer\dxc\lib\x64;D:\DX12\ElysiaDX12\x64\Debug\Assimp\Environment;D:\DX12\ElysiaDX12\ElysiaRenderer\AMD\libs\AGS;C:\Work\ElysiaRenderer\ElysiaRenderer\AMD\libs\AGS;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>d3d12.lib;dxcompiler.lib;dxgi.lib;assimp-vc143-mt.lib;amd_ags_x64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc\lib\spectre\x64;D:\DX12\ElysiaRenderer\ElysiaRenderer\dxc\lib\x64;D:\DX12\ElysiaDX12\x64\Debug\Assimp\Environment;D:\DX12\ElysiaDX12\ElysiaRenderer\AMD\libs\AGS;C:\Work\ElysiaRenderer\ElysiaRenderer\AMD\libs\AGS;C:\Work\ElysiaRenderer\ElysiaRenderer\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>d3d12.lib;dxcompiler.lib;dxgi.lib;assimp-vc143-mt.lib;amd_ags_x64.lib;EASTL.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy $(ProjectDir)Resource $(TargetDir) /Y /E</Command>
@@ -242,6 +242,7 @@
     <ClInclude Include="lib\Utility\stb_image.h" />
     <ClInclude Include="lib\Utility\TextureUtility.h" />
     <ClInclude Include="lib\Utility\TonemapUtility.h" />
+    <ClInclude Include="src\ECS\GameObject.h" />
     <ClInclude Include="src\Manager\BindlessTextureManager.h" />
     <ClInclude Include="src\Manager\BufferManager.h" />
     <ClInclude Include="src\Manager\CameraManager.h" />
@@ -252,6 +253,7 @@
     <ClInclude Include="src\Manager\ModelManager.h" />
     <ClInclude Include="src\Manager\PSOManager.h" />
     <ClInclude Include="src\Manager\RenderTargetManager.h" />
+    <ClInclude Include="src\Manager\SceneManager.h" />
     <ClInclude Include="src\Manager\ShaderVariantManager.h" />
     <ClInclude Include="src\Manager\TextureManager.h" />
     <ClInclude Include="src\MaterialParams.h" />
@@ -2819,6 +2821,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="src\ECS\GameObject.cpp" />
     <ClCompile Include="src\Manager\BindlessTextureManager.cpp" />
     <ClCompile Include="src\Manager\BufferManager.cpp">
       <AdditionalIncludeDirectories>C:\Work\ElysiaRenderer\packages\boost.1.87.0\build\..\lib\native\include\;C:\Work\ElysiaRenderer\packages\Microsoft.Direct3D.D3D12.1.618.1\build\native\include;C:\Work\ElysiaRenderer\packages\Microsoft.Direct3D.D3D12.1.618.1\build\native\include\d3dx12;C:\Work\ElysiaRenderer\packages\Microsoft.Direct3D.D3D12.1.618.1\build\native\;C:\Work\ElysiaRenderer\packages\directxtk12_desktop_win10.2025.7.10.1\build\native\..\..\include;C:\Work\ElysiaRenderer\packages\WinPixEventRuntime.1.0.240308001\build\..\Include\WinPixEventRuntime;D:\DX12\ElysiaRenderer\x64\Debug\Shaders;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc\include;D:\DX12\ElysiaDX12\x64\Debug\Assimp\include\assimp;DirectXTK12\Inc;D:\DX12\ElysiaDX12\ElysiaRenderer\AMD\libs\AGS;;C:\Work\ElysiaRenderer\packages\Vcpkg.Nuget.1.5.0\vcpkg_bin\installed\x64-windows\include</AdditionalIncludeDirectories>
@@ -3202,6 +3205,7 @@
       <LinkCompiled>true</LinkCompiled>
     </ClCompile>
     <ClCompile Include="src\Manager\RenderTargetManager.cpp" />
+    <ClCompile Include="src\Manager\SceneManager.cpp" />
     <ClCompile Include="src\Manager\ShaderVariantManager.cpp" />
     <ClCompile Include="src\Manager\TextureManager.cpp">
       <AdditionalIncludeDirectories>C:\Work\ElysiaRenderer\packages\boost.1.87.0\build\..\lib\native\include\;C:\Work\ElysiaRenderer\packages\Microsoft.Direct3D.D3D12.1.618.1\build\native\include;C:\Work\ElysiaRenderer\packages\Microsoft.Direct3D.D3D12.1.618.1\build\native\include\d3dx12;C:\Work\ElysiaRenderer\packages\Microsoft.Direct3D.D3D12.1.618.1\build\native\;C:\Work\ElysiaRenderer\packages\directxtk12_desktop_win10.2025.7.10.1\build\native\..\..\include;C:\Work\ElysiaRenderer\packages\WinPixEventRuntime.1.0.240308001\build\..\Include\WinPixEventRuntime;D:\DX12\ElysiaRenderer\x64\Debug\Shaders;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc\include;D:\DX12\ElysiaDX12\x64\Debug\Assimp\include\assimp;DirectXTK12\Inc;D:\DX12\ElysiaDX12\ElysiaRenderer\AMD\libs\AGS;;C:\Work\ElysiaRenderer\packages\Vcpkg.Nuget.1.5.0\vcpkg_bin\installed\x64-windows\include</AdditionalIncludeDirectories>

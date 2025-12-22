@@ -4,7 +4,6 @@
 
 namespace ElysiaRenderer
 {
-	class DX12TextureResource;
 
 	class TextureManager : public IManager
 	{

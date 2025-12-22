@@ -30,14 +30,14 @@ namespace ElysiaRenderer
                 const auto& material = materials[materialIndex];
                 auto& materialIndices = m_textureIndices[materialIndex];
                 
-                materialIndices.Albedo = material.textures[UINT64(ElysiaModel::MaterialTextures::Albedo)].GetResourceHeapIndex();
-                materialIndices.Normal = material.textures[UINT64(ElysiaModel::MaterialTextures::Normal)].GetResourceHeapIndex();
-                materialIndices.Metallic = material.textures[UINT64(ElysiaModel::MaterialTextures::Metallic)].GetResourceHeapIndex();
-                materialIndices.Roughness = material.textures[UINT64(ElysiaModel::MaterialTextures::Roughness)].GetResourceHeapIndex();
-                materialIndices.Occlusion = material.textures[UINT64(ElysiaModel::MaterialTextures::Occlusion)].GetResourceHeapIndex();
-                materialIndices.Specular = material.textures[UINT64(ElysiaModel::MaterialTextures::Specular)].GetResourceHeapIndex();
-                materialIndices.Height = material.textures[UINT64(ElysiaModel::MaterialTextures::Height)].GetResourceHeapIndex();
-                materialIndices.Emissive = material.textures[UINT64(ElysiaModel::MaterialTextures::Emissive)].GetResourceHeapIndex();
+                materialIndices.Albedo = material.textures[UINT64(ElysiaModel::MaterialTextureType::Albedo)].GetResourceHeapIndex();
+                materialIndices.Normal = material.textures[UINT64(ElysiaModel::MaterialTextureType::Normal)].GetResourceHeapIndex();
+                materialIndices.Metallic = material.textures[UINT64(ElysiaModel::MaterialTextureType::Metallic)].GetResourceHeapIndex();
+                materialIndices.Roughness = material.textures[UINT64(ElysiaModel::MaterialTextureType::Roughness)].GetResourceHeapIndex();
+                materialIndices.Occlusion = material.textures[UINT64(ElysiaModel::MaterialTextureType::Occlusion)].GetResourceHeapIndex();
+                materialIndices.Specular = material.textures[UINT64(ElysiaModel::MaterialTextureType::Specular)].GetResourceHeapIndex();
+                materialIndices.Height = material.textures[UINT64(ElysiaModel::MaterialTextureType::Height)].GetResourceHeapIndex();
+                materialIndices.Emissive = material.textures[UINT64(ElysiaModel::MaterialTextureType::Emissive)].GetResourceHeapIndex();
             }
         }
     }

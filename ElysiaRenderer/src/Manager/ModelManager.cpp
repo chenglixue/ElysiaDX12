@@ -6,12 +6,16 @@ namespace ElysiaRenderer
 {
 	std::unique_ptr<ModelManager> ModelManager::m_instance;
 	std::once_flag ModelManager::m_initInstanceFlag;
+	ModelManager::~ModelManager()
+	{
+		Destory();
+	}
 	
-	void ModelManager::Init(DX12Device* pDevice) override
+	void ModelManager::Init(DX12Device* pDevice) 
 	{
 		m_pDevice = pDevice;
 	}
-	void ModelManager::Destory() override
+	void ModelManager::Destory() 
 	{
 		
 	}

@@ -107,14 +107,14 @@ public:
     const T& operator[](uint64 idx) const
     {
         assert(idx < size);
-        Assert_(data != nullptr);
+        assert(data != nullptr);
         return data[idx];
     }
 
     T& operator[](uint64 idx)
     {
         assert(idx < size);
-        Assert_(data != nullptr);
+        assert(data != nullptr);
         return data[idx];
     }
 
@@ -219,14 +219,14 @@ public:
 
     uint64 Add(T item)
     {
-        Assert_(count < array.Size());
+        assert(count < array.Size());
         array[count] = item;
         return count++;
     }
 
     T& Add()
     {
-        Assert_(count < array.Size());
+        assert(count < array.Size());
         const uint64 idx = count++;
         new (&array[idx]) T;
         return array[idx];
@@ -237,7 +237,7 @@ public:
         if(itemCount == 0)
             return;
 
-        Assert_(count + (itemCount - 1) < array.Size());
+        assert(count + (itemCount - 1) < array.Size());
         for(uint64 i = 0; i < itemCount; ++i)
             array[i + count] = item;
         count += itemCount;
@@ -248,7 +248,7 @@ public:
         if(itemCount == 0)
             return;
 
-        Assert_(count + (itemCount - 1) < array.Size());
+        assert(count + (itemCount - 1) < array.Size());
         for(uint64 i = 0; i < itemCount; ++i)
             array[i + count] = items[i];
         count += itemCount;
@@ -256,7 +256,7 @@ public:
 
     void Insert(T item, uint64 idx)
     {
-        Assert_(count < array.Size());
+        assert(count < array.Size());
         assert(idx <= count);
         if(idx == count)
         {

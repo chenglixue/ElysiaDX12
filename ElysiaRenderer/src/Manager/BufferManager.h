@@ -60,11 +60,6 @@ namespace ElysiaRenderer
 		BufferHandle CreateVertexBuffer(const LoadedModel& model);
 		BufferHandle CreateIndexBuffer(const LoadedModel& model);
 
-		BufferHandle GetVertexBuffer() const noexcept;
-		BufferHandle GetIndexBuffer() const noexcept;
-		const D3D12_INDEX_BUFFER_VIEW& GetIndexBufferView() const noexcept;
-		const D3D12_VERTEX_BUFFER_VIEW& GetVertexBufferView() const noexcept;
-
 	private:
 		static std::unique_ptr<BufferManager> m_instance;
 		static std::once_flag m_initInstanceFlag;
@@ -80,11 +75,6 @@ namespace ElysiaRenderer
 		std::vector<std::pair<uint64_t, BufferHandle>> m_grbageQueue;
 
 		std::unique_ptr<UploadRingBuffer> m_pUploadBuffer;
-
-		BufferHandle m_pVertexBuffer = nullptr;
-		BufferHandle m_pIndexBuffer = nullptr;
-		D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView{};
-		D3D12_INDEX_BUFFER_VIEW m_indexBufferView{};
 	};
 
 	
