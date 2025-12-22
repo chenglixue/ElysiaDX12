@@ -11,7 +11,7 @@ namespace ElysiaRenderer
 		ModelManager(const ModelManager& rhs) = delete;
 		ModelManager& operator=(ModelManager& rhs) = delete;
 		ModelManager(ModelManager&& rhs) = default;
-		~ModelManager(); 
+		~ModelManager();
 		
 		static ModelManager& GetInstance()
 		{
@@ -26,7 +26,7 @@ namespace ElysiaRenderer
 		virtual void Init(DX12Device* pDevice) override;
 		virtual void Destory() override;
 		
-		std::shared_ptr<ElysiaModel::LoadedModel> LoadModel(const wchar_t* filePath, float scale);
+		std::shared_ptr<ElysiaModel::LoadedModel> LoadStaticModel(const wchar_t* filePath, float scale);
 		
 	private:
 		DX12Device* m_pDevice = nullptr;

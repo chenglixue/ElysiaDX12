@@ -20,11 +20,11 @@ namespace ElysiaRenderer
 		
 	}
 	
-	std::shared_ptr<ElysiaModel::LoadedModel> ModelManager::LoadModel(const wchar_t* filePath, float scale)
+	std::shared_ptr<ElysiaModel::LoadedModel> ModelManager::LoadStaticModel(const wchar_t* filePath, float scale)
 	{
 		std::lock_guard<std::mutex> lock(m_mutex);
 		
-		auto fileHash = xxh::GetHash(WstringToString(filePath));
+		auto fileHash = xxh::GetHash(ElysiaHelper::WstringToString(filePath));
 		if(m_modelCache.count(fileHash))
 		{
 			if(auto sharedModel = m_modelCache[fileHash].lock())
@@ -33,7 +33,7 @@ namespace ElysiaRenderer
 			}
 		}
 		
-		auto newModel = LoadModelFromDisk(filePath, true, true, true, true, scale);
+		auto newModel = LoadModelFromDisk(filePath, true, true, false, false, scale);
 		
 		std::shared_ptr<ElysiaModel::LoadedModel> sharedModel(newModel.release(), [this, fileHash](ElysiaModel::LoadedModel* ptr)
 		{

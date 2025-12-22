@@ -73,7 +73,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\Work\ElysiaRenderer\ElysiaRenderer;C:\Work\ElysiaRenderer\ElysiaRenderer\lib;C:\Work\ElysiaRenderer\ElysiaRenderer\include;C:\Work\ElysiaRenderer\ElysiaRenderer\src;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir);$(IncludePath)</IncludePath>
     <LibraryPath>C:\Work\ElysiaRenderer\ElysiaRenderer\AMD\libs\AGS;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -115,7 +115,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;USE_PIX;PROFILE;PROFILE_BUILD;DBG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc\include;C:\Work\ElysiaRenderer\ElysiaRenderer;C:\Work\ElysiaRenderer\ElysiaRenderer\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc\include;$(ProjectDir);$(ProjectDir)\include;$(ProjectDir)\lib;$(ProjectDir)\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>5033;4819;0018;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -242,7 +242,7 @@
     <ClInclude Include="lib\Utility\stb_image.h" />
     <ClInclude Include="lib\Utility\TextureUtility.h" />
     <ClInclude Include="lib\Utility\TonemapUtility.h" />
-    <ClInclude Include="src\ECS\GameObject.h" />
+    <ClInclude Include="src\ECS\Entity.h" />
     <ClInclude Include="src\Manager\BindlessTextureManager.h" />
     <ClInclude Include="src\Manager\BufferManager.h" />
     <ClInclude Include="src\Manager\CameraManager.h" />
@@ -292,6 +292,7 @@
     <ClInclude Include="SimpleMath\SimpleMath.h" />
     <ClInclude Include="src\Material.h" />
     <ClInclude Include="src\RenderResource.h" />
+    <ClInclude Include="src\Runtime\RenderCore\RenderItem.h" />
     <ClInclude Include="src\System\RendererSystem.h" />
     <ClInclude Include="src\Transform.h" />
     <ClInclude Include="src\Utility\Containers.h" />
@@ -320,16 +321,16 @@
     <None Include="DXTex\Shaders\Compiled\BC7Encode_TryMode137CS.inc" />
     <None Include="DXTex\Shaders\Compiled\BC7Encode_TryMode456CS.inc" />
     <None Include="packages.config" />
-    <None Include="Resource\Shaders\private\Light.hlsli">
+    <None Include="Assets\Shaders\private\Light.hlsli">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </None>
-    <None Include="Resource\Shaders\private\Macros.hlsli">
+    <None Include="Assets\Shaders\private\Macros.hlsli">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </None>
-    <None Include="Resource\Shaders\private\Math.hlsli">
+    <None Include="Assets\Shaders\private\Math.hlsli">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </None>
-    <None Include="Resource\Shaders\private\SharedCommon.hlsli">
+    <None Include="Assets\Shaders\private\SharedCommon.hlsli">
       <FileType>Document</FileType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </None>
@@ -2821,7 +2822,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="src\ECS\GameObject.cpp" />
+    <ClCompile Include="src\ECS\Entity.cpp" />
     <ClCompile Include="src\Manager\BindlessTextureManager.cpp" />
     <ClCompile Include="src\Manager\BufferManager.cpp">
       <AdditionalIncludeDirectories>C:\Work\ElysiaRenderer\packages\boost.1.87.0\build\..\lib\native\include\;C:\Work\ElysiaRenderer\packages\Microsoft.Direct3D.D3D12.1.618.1\build\native\include;C:\Work\ElysiaRenderer\packages\Microsoft.Direct3D.D3D12.1.618.1\build\native\include\d3dx12;C:\Work\ElysiaRenderer\packages\Microsoft.Direct3D.D3D12.1.618.1\build\native\;C:\Work\ElysiaRenderer\packages\directxtk12_desktop_win10.2025.7.10.1\build\native\..\..\include;C:\Work\ElysiaRenderer\packages\WinPixEventRuntime.1.0.240308001\build\..\Include\WinPixEventRuntime;D:\DX12\ElysiaRenderer\x64\Debug\Shaders;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc\include;D:\DX12\ElysiaDX12\x64\Debug\Assimp\include\assimp;DirectXTK12\Inc;D:\DX12\ElysiaDX12\ElysiaRenderer\AMD\libs\AGS;;C:\Work\ElysiaRenderer\packages\Vcpkg.Nuget.1.5.0\vcpkg_bin\installed\x64-windows\include</AdditionalIncludeDirectories>
@@ -4274,6 +4275,7 @@
       <DisableSpecificWarnings>5033;4819;0018;</DisableSpecificWarnings>
       <LinkCompiled>true</LinkCompiled>
     </ClCompile>
+    <ClCompile Include="src\Runtime\RenderCore\RenderItem.cpp" />
     <ClCompile Include="src\System\RendererSystem.cpp">
       <AdditionalIncludeDirectories>C:\Work\ElysiaRenderer\packages\boost.1.87.0\build\..\lib\native\include\;C:\Work\ElysiaRenderer\packages\Microsoft.Direct3D.D3D12.1.618.1\build\native\include;C:\Work\ElysiaRenderer\packages\Microsoft.Direct3D.D3D12.1.618.1\build\native\include\d3dx12;C:\Work\ElysiaRenderer\packages\Microsoft.Direct3D.D3D12.1.618.1\build\native\;C:\Work\ElysiaRenderer\packages\directxtk12_desktop_win10.2025.7.10.1\build\native\..\..\include;C:\Work\ElysiaRenderer\packages\WinPixEventRuntime.1.0.240308001\build\..\Include\WinPixEventRuntime;D:\DX12\ElysiaRenderer\x64\Debug\Shaders;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc\include;D:\DX12\ElysiaDX12\x64\Debug\Assimp\include\assimp;DirectXTK12\Inc;D:\DX12\ElysiaDX12\ElysiaRenderer\AMD\libs\AGS;C:\Work\ElysiaRenderer\ElysiaRenderer;;C:\Work\ElysiaRenderer\packages\Vcpkg.Nuget.1.5.0\vcpkg_bin\installed\x64-windows\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -4441,54 +4443,54 @@
     <Image Include="..\x64\Debug\Tex\GGX_E_LUT.dds" />
     <Image Include="..\x64\Debug\Tex\Skybox.dds" />
     <Image Include="..\x64\Debug\Tex\Wood.dds" />
-    <Image Include="Resource\Tex\cubemap0.dds" />
-    <Image Include="Resource\Tex\Wood.dds" />
+    <Image Include="Assets\Tex\cubemap0.dds" />
+    <Image Include="Assets\Tex\Wood.dds" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resource\Shaders\private\BRDF.hlsl">
+    <None Include="Assets\Shaders\private\BRDF.hlsl">
       <FileType>Document</FileType>
     </None>
-    <None Include="Resource\Shaders\private\Common.hlsl">
+    <None Include="Assets\Shaders\private\Common.hlsl">
       <FileType>Document</FileType>
     </None>
-    <None Include="Resource\Shaders\private\Light.hlsl">
+    <None Include="Assets\Shaders\private\Light.hlsl">
       <FileType>Document</FileType>
     </None>
-    <None Include="Resource\Shaders\private\LightCommon.hlsl">
+    <None Include="Assets\Shaders\private\LightCommon.hlsl">
       <FileType>Document</FileType>
     </None>
-    <None Include="Resource\Shaders\private\ShadingCommon.hlsl">
+    <None Include="Assets\Shaders\private\ShadingCommon.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resource\Shaders\private\Transform.hlsli">
+    <None Include="Assets\Shaders\private\Transform.hlsli">
       <FileType>Document</FileType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resource\Shaders\private\ShadingModel.hlsl">
+    <None Include="Assets\Shaders\private\ShadingModel.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resource\Shaders\private\EnergyPreservation.hlsl">
+    <None Include="Assets\Shaders\private\EnergyPreservation.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resource\Shaders\private\AreaLightCommon.hlsl">
+    <None Include="Assets\Shaders\private\AreaLightCommon.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resource\Shaders\private\LightAccumulator.hlsl">
+    <None Include="Assets\Shaders\private\LightAccumulator.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resource\Shaders\public\Skybox.hlsl">
+    <None Include="Assets\Shaders\public\Skybox.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>
@@ -4528,77 +4530,83 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resource\Shaders\private\MonteCarlo.hlsl">
+    <None Include="Assets\Shaders\private\MonteCarlo.hlsl">
       <FileType>Document</FileType>
     </None>
-    <None Include="Resource\Shaders\private\Random.hlsl">
-      <FileType>Document</FileType>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resource\Shaders\private\AmbientCubemap.hlsl">
+    <None Include="Assets\Shaders\private\Random.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resource\Shaders\public\Shadow.hlsl">
+    <None Include="Assets\Shaders\private\AmbientCubemap.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resource\Shaders\public\PBR.hlsl">
+    <None Include="Assets\Shaders\public\Shadow.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resource\Shaders\private\ShadowCommon.hlsl">
+    <None Include="Assets\Shaders\public\PBR.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resource\Shaders\public\GBuffer.hlsl">
+    <None Include="Assets\Shaders\private\ShadowCommon.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resource\Shaders\public\Opaque.hlsl">
+    <None Include="Assets\Shaders\public\GBuffer.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resource\Shaders\public\Blit.hlsl">
+    <None Include="Assets\Shaders\public\Opaque.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resource\Shaders\private\Color.hlsl">
+    <None Include="Assets\Shaders\public\Blit.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resource\Shaders\public\TonemapPass.hlsl">
+    <None Include="Assets\Shaders\private\Color.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resource\Shaders\private\DeferredCommon.hlsl">
+    <None Include="Assets\Shaders\public\TonemapPass.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resource\Shaders\public\FullScreenTriangle.hlsl">
+    <None Include="Assets\Shaders\private\DeferredCommon.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resource\Shaders\public\SSAO.hlsl">
+    <None Include="Assets\Shaders\public\FullScreenTriangle.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resource\Shaders\public\Bloom.hlsl">
+    <None Include="Assets\Shaders\public\SSAO.hlsl">
       <FileType>Document</FileType>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Assets\Shaders\public\Bloom.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="src\Editor\" />
+    <Folder Include="src\Runtime\Core\" />
+    <Folder Include="src\Runtime\Engine\" />
+    <Folder Include="src\ThirdParty\" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -5,7 +5,7 @@
 
 namespace ElysiaRenderer
 {
-    void MeshRenderer::Init(const ElysiaModel::LoadedModel* loadedModel)
+    void MeshRenderer::Init(const std::shared_ptr<ElysiaModel::LoadedModel>& loadedModel)
     {
         m_pModel = loadedModel;
 

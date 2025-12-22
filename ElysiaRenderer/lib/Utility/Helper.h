@@ -308,6 +308,26 @@ namespace ElysiaHelper
         return std::wstring(str.c_str());
     }
     
+    /**
+     * @brief 接受 std::string, char*, 或 string_view 并转为 eastl::string
+     */
+    inline eastl::string ToEastl(std::string_view sv) {
+        return eastl::string(sv.data(), sv.length());
+    }
+
+    /**
+     * @brief 接受 eastl::string (需手动转 view 或重载), char*, std::string 并转为 std::string
+     * 注意：EASTL 默认没有到 std::string_view 的隐式转换，所以我们保留一个重载
+     */
+    inline std::string ToStd(std::string_view sv) {
+        return std::string(sv.data(), sv.length());
+    }
+    
+    // 专门针对 eastl::string 的重载，方便直接调用
+    inline std::string ToStd(const eastl::string& str) {
+        return std::string(str.data(), str.length());
+    }
+    
     inline static std::wstring RemoveExtension(const std::wstring& filePath)
     {
         return filePath.substr(0, filePath.rfind(L"."));
