@@ -1,5 +1,5 @@
 #pragma once
-#include "Utility/SharedTypes.h"
+#include "Runtime/Model//SharedTypes.h"
 
 namespace ElysiaRenderer
 {

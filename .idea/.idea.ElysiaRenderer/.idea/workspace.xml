@@ -8,257 +8,325 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f31d721d-cfba-4714-b0ce-c46a1a48110d" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Mesh/LOW_WEPON.fbx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Mesh/Sphere.fbx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Mesh/UE.fbx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Mesh/plane.fbx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/private/AmbientCubemap.hlsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/private/AreaLightCommon.hlsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/private/BRDF.hlsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/private/Color.hlsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/private/Common.hlsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/private/DeferredCommon.hlsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/private/EnergyPreservation.hlsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/private/Light.hlsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/private/Light.hlsli" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/private/LightAccumulator.hlsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/private/LightCommon.hlsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/private/Macros.hlsli" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/private/Math.hlsli" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/private/MonteCarlo.hlsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/private/Random.hlsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/private/ShadingCommon.hlsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/private/ShadingModel.hlsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/private/ShadowCommon.hlsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/private/SharedCommon.hlsli" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/private/Transform.hlsli" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/private/ffx_a.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/private/ffx_lpm.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/public/Blit.hlsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/public/Bloom.hlsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/public/FullScreenTriangle.hlsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/public/GBuffer.hlsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/public/Opaque.hlsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/public/PBR.hlsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/public/SSAO.hlsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/public/Shadow.hlsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/public/Skybox.hlsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/public/TonemapPass.hlsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Background_Albedo.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Background_Normal.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Background_Roughness.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/ChainTexture_Albedo.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/ChainTexture_Metallic.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/ChainTexture_Normal.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/ChainTexture_Roughness.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Dielectric_metallic.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Lion_Albedo.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Lion_Normal.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Lion_Roughness.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Metallic_metallic.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Sponza.fbx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Sponza_Arch_diffuse.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Sponza_Arch_normal.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Sponza_Arch_roughness.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Sponza_Bricks_a_Albedo.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Sponza_Bricks_a_Normal.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Sponza_Bricks_a_Roughness.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Sponza_Ceiling_diffuse.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Sponza_Ceiling_normal.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Sponza_Ceiling_roughness.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Sponza_Column_a_diffuse.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Sponza_Column_a_normal.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Sponza_Column_a_roughness.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Sponza_Column_b_diffuse.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Sponza_Column_b_normal.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Sponza_Column_b_roughness.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Sponza_Column_c_diffuse.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Sponza_Column_c_normal.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Sponza_Column_c_roughness.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Sponza_Curtain_Blue_diffuse.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Sponza_Curtain_Blue_normal.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Sponza_Curtain_Green_diffuse.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Sponza_Curtain_Green_normal.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Sponza_Curtain_Red_diffuse.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Sponza_Curtain_Red_normal.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Sponza_Curtain_metallic.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Sponza_Curtain_roughness.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Sponza_Details_diffuse.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Sponza_Details_metallic.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Sponza_Details_normal.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Sponza_Details_roughness.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Sponza_Fabric_Blue_diffuse.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Sponza_Fabric_Blue_normal.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Sponza_Fabric_Green_diffuse.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Sponza_Fabric_Green_normal.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Sponza_Fabric_Red_diffuse.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Sponza_Fabric_Red_normal.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Sponza_Fabric_metallic.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Sponza_Fabric_roughness.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Sponza_FlagPole_diffuse.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Sponza_FlagPole_normal.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Sponza_FlagPole_roughness.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Sponza_Floor_diffuse.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Sponza_Floor_normal.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Sponza_Floor_roughness.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Sponza_Roof_diffuse.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Sponza_Roof_normal.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Sponza_Roof_roughness.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Sponza_Thorn_diffuse.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Sponza_Thorn_normal.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Sponza_Thorn_roughness.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/VaseHanging_diffuse.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/VaseHanging_normal.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/VaseHanging_roughness.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/VasePlant_diffuse.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/VasePlant_normal.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/VasePlant_roughness.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/VaseRound_diffuse.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/VaseRound_normal.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/VaseRound_roughness.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Vase_diffuse.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Vase_normal.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/Vase_roughness.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Sponza/gi_flag.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Tex/Black.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Tex/DefaultNormalMap.dds" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Tex/GGX_E_LUT.dds" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Tex/GGX_Eavg_LUT.dds" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Tex/White.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Tex/blue_noise.dds" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Tex/cubemap0.dds" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/RenderItem.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/RenderItem.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Engine/ECS/Transform.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Engine/FrameworkWindows.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Engine/FrameworkWindows.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.ElysiaRenderer/.idea/.name" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.ElysiaRenderer/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.ElysiaRenderer/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/LPM/ColorConversion.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/ColorConversion.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/LPM/ColorConversion.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/ColorConversion.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/LPM/FreesyncHDR.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/FreesyncHDR.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/LPM/FreesyncHDR.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/FreesyncHDR.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/LPM/Misc.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/Misc.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/LPM/Misc.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/Misc.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/LPM/ffx_a.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/ffx_a.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/LPM/ffx_lpm.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/ffx_lpm.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/AGS/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/AGS/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/AGS/amd_ags.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/AGS/amd_ags.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/AGS/amd_ags_x64.dll" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/AGS/amd_ags_x64.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/AGS/amd_ags_x64.lib" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/AGS/amd_ags_x64.lib" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/AGS/license.txt" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/AGS/license.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/DXC/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/DXC/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/DXC/bin/dxc.exe" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/DXC/bin/dxc.exe" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/DXC/bin/dxcompiler.dll" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/DXC/bin/dxcompiler.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/DXC/bin/dxil.dll" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/DXC/bin/dxil.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/DXC/bin/x64/dxc.exe" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/DXC/bin/x64/dxc.exe" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/DXC/bin/x64/dxcompiler.dll" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/DXC/bin/x64/dxcompiler.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/DXC/bin/x64/dxil.dll" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/DXC/bin/x64/dxil.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/DXC/inc/d3d12shader.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/DXC/inc/d3d12shader.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/DXC/inc/dxcapi.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/DXC/inc/dxcapi.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/DXC/lib/x64/dxcompiler.lib" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/DXC/lib/x64/dxcompiler.lib" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/VulkanMemoryAllocator/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/VulkanMemoryAllocator/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/VulkanMemoryAllocator/license.txt" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/VulkanMemoryAllocator/license.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/VulkanMemoryAllocator/vk_mem_alloc.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/VulkanMemoryAllocator/vk_mem_alloc.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/WinPixEventRuntime/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/WinPixEventRuntime/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/WinPixEventRuntime/PIXEvents.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/WinPixEventRuntime/PIXEvents.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/WinPixEventRuntime/PIXEventsCommon.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/WinPixEventRuntime/PIXEventsCommon.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/WinPixEventRuntime/WinPixEventRuntime.dll" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/WinPixEventRuntime/WinPixEventRuntime.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/WinPixEventRuntime/WinPixEventRuntime.lib" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/WinPixEventRuntime/WinPixEventRuntime.lib" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/WinPixEventRuntime/pix3.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/WinPixEventRuntime/pix3.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/WinPixEventRuntime/pix3_win.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/WinPixEventRuntime/pix3_win.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/d3d12x/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/d3d12x/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/d3d12x/d3dx12.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/d3d12x/d3dx12.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/d3d12x/license.txt" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/d3d12x/license.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/imgui/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/imgui/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/imgui/License.txt" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/imgui/License.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/imgui/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/imgui/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/imgui/ReadMe.txt" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/imgui/ReadMe.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/imgui/TODO.txt" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/imgui/TODO.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/imgui/extra_fonts/Cousine-Regular.ttf" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/imgui/extra_fonts/Cousine-Regular.ttf" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/imgui/extra_fonts/DroidSans.ttf" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/imgui/extra_fonts/DroidSans.ttf" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/imgui/extra_fonts/Karla-Regular.ttf" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/imgui/extra_fonts/Karla-Regular.ttf" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/imgui/extra_fonts/ProggyClean.ttf" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/imgui/extra_fonts/ProggyClean.ttf" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/imgui/extra_fonts/ProggyTiny.ttf" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/imgui/extra_fonts/ProggyTiny.ttf" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/imgui/extra_fonts/README.txt" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/imgui/extra_fonts/README.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/imgui/extra_fonts/Roboto-Medium.ttf" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/imgui/extra_fonts/Roboto-Medium.ttf" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/imgui/extra_fonts/binary_to_compressed_c.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/imgui/extra_fonts/binary_to_compressed_c.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/imgui/imconfig.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/imgui/imconfig.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/imgui/imgui.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/imgui/imgui.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/imgui/imgui.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/imgui/imgui.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/imgui/imgui_demo.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/imgui/imgui_demo.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/imgui/imgui_draw.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/imgui/imgui_draw.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/imgui/imgui_internal.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/imgui/imgui_internal.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/imgui/stb_rect_pack.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/imgui/stb_rect_pack.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/imgui/stb_textedit.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/imgui/stb_textedit.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/imgui/stb_truetype.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/imgui/stb_truetype.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/json/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/json/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/json/License.txt" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/json/License.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/json/json.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/json/json.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/stb/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/stb/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/stb/stb_image.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/stb/stb_image.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/stb/stb_image_write.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/stb/stb_image_write.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/vectormath/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/vectormath/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/vectormath/LICENSE.txt" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/vectormath/LICENSE.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/vectormath/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/vectormath/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/vectormath/common.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/vectormath/common.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/vectormath/docs/VectorMath-Library-Overview.pdf" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/vectormath/docs/VectorMath-Library-Overview.pdf" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/vectormath/scalar/matrix.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/vectormath/scalar/matrix.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/vectormath/scalar/quaternion.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/vectormath/scalar/quaternion.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/vectormath/scalar/vector.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/vectormath/scalar/vector.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/vectormath/scalar/vectormath.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/vectormath/scalar/vectormath.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/vectormath/sse/boolinvec.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/vectormath/sse/boolinvec.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/vectormath/sse/floatinvec.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/vectormath/sse/floatinvec.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/vectormath/sse/internal.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/vectormath/sse/internal.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/vectormath/sse/matrix.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/vectormath/sse/matrix.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/vectormath/sse/quaternion.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/vectormath/sse/quaternion.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/vectormath/sse/vecidx.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/vectormath/sse/vecidx.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/vectormath/sse/vector.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/vectormath/sse/vector.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/vectormath/sse/vectormath.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/vectormath/sse/vectormath.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/vectormath/vec2d.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/vectormath/vec2d.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/AMD/libs/vectormath/vectormath.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/vectormath/vectormath.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/D3D12MemoryAllocator/D3D12MemAlloc.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/D3D12MemoryAllocator/D3D12MemAlloc.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/D3D12MemoryAllocator/D3D12MemAlloc.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/D3D12MemoryAllocator/D3D12MemAlloc.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/DXTex/BC.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/BC.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/DXTex/BC.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/BC.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/DXTex/BC4BC5.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/BC4BC5.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/DXTex/BC6HBC7.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/BC6HBC7.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/DXTex/BCDirectCompute.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/BCDirectCompute.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/DXTex/BCDirectCompute.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/BCDirectCompute.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/DXTex/DDS.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/DDS.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/DXTex/DirectXTex.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/DXTex/DirectXTex.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/DXTex/DirectXTex.inl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/DXTex/DirectXTexCompress.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/DXTex/DirectXTexCompress.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/DXTex/DirectXTexCompressGPU.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/DXTex/DirectXTexCompressGPU.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/DXTex/DirectXTexConvert.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/DXTex/DirectXTexConvert.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/DXTex/DirectXTexD3D11.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/DXTex/DirectXTexD3D11.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/DXTex/DirectXTexDDS.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/DXTex/DirectXTexDDS.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/DXTex/DirectXTexFlipRotate.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/DXTex/DirectXTexFlipRotate.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/DXTex/DirectXTexImage.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/DXTex/DirectXTexImage.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/DXTex/DirectXTexMipmaps.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/DXTex/DirectXTexMipmaps.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/DXTex/DirectXTexMisc.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/DXTex/DirectXTexMisc.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/DXTex/DirectXTexNormalMaps.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/DXTex/DirectXTexNormalMaps.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/DXTex/DirectXTexP.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/DXTex/DirectXTexP.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/DXTex/DirectXTexPMAlpha.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/DXTex/DirectXTexTGA.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/DXTex/DirectXTexTGA.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/DXTex/DirectXTexUtil.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/DXTex/DirectXTexUtil.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/DXTex/DirectXTexWIC.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/DXTex/DirectXTexWIC.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/DXTex/Filters.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/Filters.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/DXTex/Shaders/BC6HEncode.hlsl" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/Shaders/BC6HEncode.hlsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/DXTex/Shaders/BC7Encode.hlsl" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/Shaders/BC7Encode.hlsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/DXTex/Shaders/CompileShaders.cmd" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/Shaders/CompileShaders.cmd" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/DXTex/Shaders/Compiled/BC6HEncode_EncodeBlockCS.inc" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/Shaders/Compiled/BC6HEncode_EncodeBlockCS.inc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/DXTex/Shaders/Compiled/BC6HEncode_TryModeG10CS.inc" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/Shaders/Compiled/BC6HEncode_TryModeG10CS.inc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/DXTex/Shaders/Compiled/BC6HEncode_TryModeLE10CS.inc" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/Shaders/Compiled/BC6HEncode_TryModeLE10CS.inc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/DXTex/Shaders/Compiled/BC7Encode_EncodeBlockCS.inc" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/Shaders/Compiled/BC7Encode_EncodeBlockCS.inc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/DXTex/Shaders/Compiled/BC7Encode_TryMode02CS.inc" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/Shaders/Compiled/BC7Encode_TryMode02CS.inc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/DXTex/Shaders/Compiled/BC7Encode_TryMode137CS.inc" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/Shaders/Compiled/BC7Encode_TryMode137CS.inc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/DXTex/Shaders/Compiled/BC7Encode_TryMode456CS.inc" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/Shaders/Compiled/BC7Encode_TryMode456CS.inc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/DXTex/scoped.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/scoped.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ElysiaRenderer/ElysiaRenderer.vcxproj" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/ElysiaRenderer.vcxproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Mesh/LOW_WEPON.fbx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Mesh/Sphere.fbx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Mesh/UE.fbx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Mesh/diablo3_pose.obj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Mesh/plane.fbx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Shaders/private/AmbientCubemap.hlsl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Shaders/private/AreaLightCommon.hlsl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Shaders/private/BRDF.hlsl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Shaders/private/Color.hlsl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Shaders/private/Common.hlsl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Shaders/private/DeferredCommon.hlsl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Shaders/private/EnergyPreservation.hlsl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Shaders/private/Light.hlsl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Shaders/private/Light.hlsli" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Shaders/private/LightAccumulator.hlsl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Shaders/private/LightCommon.hlsl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Shaders/private/Macros.hlsli" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Shaders/private/Math.hlsli" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Shaders/private/MonteCarlo.hlsl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Shaders/private/Random.hlsl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Shaders/private/ShadingCommon.hlsl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Shaders/private/ShadingModel.hlsl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Shaders/private/ShadowCommon.hlsl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Shaders/private/SharedCommon.hlsli" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Shaders/private/Transform.hlsli" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Shaders/private/ffx_a.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Shaders/private/ffx_lpm.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Shaders/public/Blit.hlsl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Shaders/public/Bloom.hlsl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Shaders/public/FullScreenTriangle.hlsl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Shaders/public/GBuffer.hlsl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Shaders/public/Opaque.hlsl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Shaders/public/PBR.hlsl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Shaders/public/SSAO.hlsl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Shaders/public/Shadow.hlsl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Shaders/public/Skybox.hlsl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Shaders/public/TonemapPass.hlsl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Background_Albedo.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Background_Normal.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Background_Roughness.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/ChainTexture_Albedo.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/ChainTexture_Metallic.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/ChainTexture_Normal.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/ChainTexture_Roughness.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Dielectric_metallic.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Lion_Albedo.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Lion_Normal.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Lion_Roughness.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Metallic_metallic.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Sponza.fbx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Sponza_Arch_diffuse.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Sponza_Arch_normal.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Sponza_Arch_roughness.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Sponza_Bricks_a_Albedo.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Sponza_Bricks_a_Normal.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Sponza_Bricks_a_Roughness.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Sponza_Ceiling_diffuse.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Sponza_Ceiling_normal.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Sponza_Ceiling_roughness.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Sponza_Column_a_diffuse.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Sponza_Column_a_normal.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Sponza_Column_a_roughness.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Sponza_Column_b_diffuse.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Sponza_Column_b_normal.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Sponza_Column_b_roughness.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Sponza_Column_c_diffuse.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Sponza_Column_c_normal.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Sponza_Column_c_roughness.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Sponza_Curtain_Blue_diffuse.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Sponza_Curtain_Blue_normal.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Sponza_Curtain_Green_diffuse.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Sponza_Curtain_Green_normal.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Sponza_Curtain_Red_diffuse.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Sponza_Curtain_Red_normal.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Sponza_Curtain_metallic.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Sponza_Curtain_roughness.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Sponza_Details_diffuse.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Sponza_Details_metallic.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Sponza_Details_normal.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Sponza_Details_roughness.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Sponza_Fabric_Blue_diffuse.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Sponza_Fabric_Blue_normal.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Sponza_Fabric_Green_diffuse.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Sponza_Fabric_Green_normal.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Sponza_Fabric_Red_diffuse.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Sponza_Fabric_Red_normal.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Sponza_Fabric_metallic.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Sponza_Fabric_roughness.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Sponza_FlagPole_diffuse.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Sponza_FlagPole_normal.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Sponza_FlagPole_roughness.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Sponza_Floor_diffuse.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Sponza_Floor_normal.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Sponza_Floor_roughness.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Sponza_Roof_diffuse.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Sponza_Roof_normal.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Sponza_Roof_roughness.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Sponza_Thorn_diffuse.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Sponza_Thorn_normal.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Sponza_Thorn_roughness.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/VaseHanging_diffuse.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/VaseHanging_normal.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/VaseHanging_roughness.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/VasePlant_diffuse.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/VasePlant_normal.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/VasePlant_roughness.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/VaseRound_diffuse.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/VaseRound_normal.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/VaseRound_roughness.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Vase_diffuse.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Vase_normal.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/Vase_roughness.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Sponza/gi_flag.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Tex/Black.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Tex/DefaultNormalMap.dds" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Tex/GGX_E_LUT.dds" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Tex/GGX_Eavg_LUT.dds" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Tex/White.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Tex/blue_noise.dds" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Resource/Tex/cubemap0.dds" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Utility/Helper.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/lib/Utility/Helper.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/ECS/GameObject.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ECS/Entity.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/ECS/GameObject.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ECS/Entity.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Manager/ModelManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Manager/ModelManager.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Manager/ModelManager.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Manager/ModelManager.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Manager/SceneManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Manager/SceneManager.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Manager/SceneManager.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Manager/SceneManager.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/MeshRenderer.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/MeshRenderer.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/MeshRenderer.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/MeshRenderer.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Helper/DxgiFormatHelper.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/DxgiFormatHelper.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Helper/DxgiFormatHelper.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/DxgiFormatHelper.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/RenderHelper.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/RenderHelper.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/SimpleMath/SimpleMath.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/SimpleMath/SimpleMath.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/SimpleMath/SimpleMath.inl" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/SimpleMath/SimpleMath.inl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/imgui/LICENSE_IMGUI.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/imgui/imconfig.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/imgui/imconfig.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/imgui/imgui.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/imgui/imgui.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/imgui/imgui.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/imgui/imgui.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/imgui/imgui_demo.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/imgui/imgui_demo.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/imgui/imgui_draw.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/imgui/imgui_draw.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/imgui/imgui_impl_dx12.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/imgui/imgui_impl_dx12.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/imgui/imgui_impl_dx12.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/imgui/imgui_impl_dx12.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/imgui/imgui_impl_win32.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/imgui/imgui_impl_win32.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/imgui/imgui_impl_win32.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/imgui/imgui_impl_win32.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/imgui/imgui_internal.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/imgui/imgui_internal.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/imgui/imgui_tables.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/imgui/imgui_tables.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/imgui/imgui_widgets.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/imgui/imgui_widgets.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/imgui/imstb_rectpack.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/imgui/imstb_rectpack.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/imgui/imstb_textedit.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/imgui/imstb_textedit.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/imgui/imstb_truetype.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/imgui/imstb_truetype.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/DX12BufferResource.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/DX12BufferResource.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/DX12BufferResource.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/DX12BufferResource.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/DX12Camera.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/DX12Camera.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/DX12Camera.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/DX12Camera.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/DX12ComputeContext.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/DX12ComputeContext.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/DX12ComputeContext.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/DX12ComputeContext.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/DX12Context.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/DX12Context.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/DX12Context.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/DX12Context.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/DX12DescriptorHeap.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/DX12DescriptorHeap.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/DX12DescriptorHeap.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/DX12DescriptorHeap.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/DX12DescriptorHeapHandle.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/DX12DescriptorHeapHandle.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/DX12Device.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/DX12Device.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/DX12Device.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/DX12Device.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/DX12GPUResource.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/DX12GPUResource.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/DX12GPUResource.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/DX12GPUResource.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/DX12GraphicsContext.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/DX12GraphicsContext.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/DX12GraphicsContext.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/DX12GraphicsContext.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/DX12Light.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/DX12Light.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/DX12Light.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/DX12Light.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/DX12Material.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/DX12Material.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/DX12PipelineState.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/DX12PipelineState.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/DX12PipelineState.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/DX12PipelineState.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/DX12Queue.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/DX12Queue.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/DX12Queue.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/DX12Queue.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/DX12QueueManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/DX12QueueManager.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/DX12QueueManager.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/DX12QueueManager.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/DX12RenderPassDescriptorHeap.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/DX12RenderPassDescriptorHeap.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/DX12RenderPassDescriptorHeap.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/DX12RenderPassDescriptorHeap.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/DX12RootSignature.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/DX12RootSignature.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/DX12RootSignature.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/DX12RootSignature.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/DX12Shader.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/DX12Shader.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/DX12Shader.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/DX12Shader.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/DX12Shadow.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/DX12Shadow.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/DX12Shadow.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/DX12Shadow.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/DX12StagingDescriptorHeap.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/DX12StagingDescriptorHeap.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/DX12StagingDescriptorHeap.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/DX12StagingDescriptorHeap.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/DX12TextureBuffer.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/DX12TextureBuffer.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/DX12TextureBuffer.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/DX12TextureBuffer.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/DX12UI.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Editor/DX12UI.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/DX12UI.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Editor/DX12UI.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/DX12UploadContext.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/DX12UploadContext.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/DX12UploadContext.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/DX12UploadContext.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/DX12Vertex.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/UploadRingBuffer.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/UploadRingBuffer.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/DX12/UploadRingBuffer.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/UploadRingBuffer.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Event/MessageID.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Event/MessageID.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Event/Messager.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Event/Messager.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/File/File.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/File/File.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/File/File.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/File/File.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/File/Serialization.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/File/Serialization.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Model/AssimpLoader.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Model/AssimpLoader.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Model/AssimpLoader.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Model/AssimpLoader.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Model/BoundingBox.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Programs/BoundingBox.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Model/LoadedModel.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Model/LoadedModel.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Model/MaterialData.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Model/MaterialData.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Model/ModelImporter.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Model/ModelImporter.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Model/ModelImporter.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Model/ModelImporter.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Utility/AOUtility.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/AOUtility.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Utility/BufferUtility.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/BufferUtility.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Utility/Common.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Programs/Common.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Utility/ContextUtility.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/ContextUtility.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Utility/DebugUtility.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Programs/DebugUtility.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Utility/Hash.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Programs/Hash.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Utility/Helper.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Programs/Helper.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Utility/LightUtility.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/LightUtility.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Utility/Math.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Programs/Math.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Utility/Metalib.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/Metalib.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Utility/PIXHelper.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Programs/PIXHelper.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Utility/PIXHelper.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Programs/PIXHelper.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Utility/PSOHelper.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/PSOHelper.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Utility/PSOHelper.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/PSOHelper.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Utility/PipelineResourceSpace.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/PipelineResourceSpace.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Utility/PipelineResourceSpace.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/PipelineResourceSpace.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Utility/PipelineResourceUtility.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/PipelineResourceUtility.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Utility/PipelineStateUtility.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/PipelineStateUtility.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Utility/PipelineStateUtility.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/PipelineStateUtility.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Utility/RenderHelper.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/RenderHelper.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Utility/RenderHelper.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/RenderHelper.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Utility/RenderTexture.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/RenderTexture.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Utility/RenderTexture.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/RenderTexture.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Utility/RenderTextureUtility.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/RenderTextureUtility.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Utility/ShaderCompileOptions.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/ShaderCompileOptions.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Utility/ShaderCompileOptions.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/ShaderCompileOptions.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Utility/ShaderKeywordSet.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/ShaderKeywordSet.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Utility/ShaderKeywordSet.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/ShaderKeywordSet.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Utility/ShaderKeywordSpace.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/ShaderKeywordSpace.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Utility/ShaderKeywordSpace.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/ShaderKeywordSpace.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Utility/ShaderUtility.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/ShaderUtility.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Utility/ShaderUtility.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/ShaderUtility.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Utility/ShadowUtility.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/ShadowUtility.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Utility/SobolSequenceGenerator.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Programs/SobolSequenceGenerator.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Utility/SobolSequenceGenerator.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Programs/SobolSequenceGenerator.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Utility/TextureUtility.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/TextureUtility.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Utility/TonemapUtility.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/TonemapUtility.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Utility/d3dx12_resource_helpers.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/d3dx12_resource_helpers.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Utility/d3dx12_resource_helpers.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/d3dx12_resource_helpers.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Utility/stb_image.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/stb_image.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Utility/stb_image.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/stb_image.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/lib/Utility/xxhash.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/xxhash.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/main.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Manager/BindlessTextureManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/BindlessTextureManager.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Manager/BindlessTextureManager.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/BindlessTextureManager.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Manager/BufferManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/BufferManager.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Manager/BufferManager.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/BufferManager.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Manager/CameraManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/CameraManager.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Manager/CameraManager.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/CameraManager.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Manager/IManager.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Programs/IManager.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Manager/IUpdate.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Programs/IUpdate.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Manager/LightManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/LightManager.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Manager/LightManager.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/LightManager.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Manager/MeshManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Model/MeshManager.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Manager/MeshManager.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Model/MeshManager.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Manager/ModelManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Model/ModelManager.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Manager/ModelManager.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Model/ModelManager.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Manager/PSOManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/PSOManager.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Manager/PSOManager.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/PSOManager.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Manager/RenderTargetManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/RenderTargetManager.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Manager/RenderTargetManager.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/RenderTargetManager.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Manager/SceneManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/SceneManager.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Manager/SceneManager.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/SceneManager.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Manager/ShaderVariantManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/ShaderVariantManager.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Manager/ShaderVariantManager.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/ShaderVariantManager.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Manager/TextureManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/TextureManager.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Manager/TextureManager.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/TextureManager.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Material.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Material.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Material.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Material.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/MaterialParams.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/MaterialParams.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/MaterialParams.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/MaterialParams.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/MeshRenderer.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/MeshRenderer.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/MeshRenderer.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/MeshRenderer.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Parameter/CBVParameter.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/CBVParameter.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Parameter/UserData.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Editor/UserData.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Parameter/UserData.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Editor/UserData.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Pass/AOPass.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/AOPass.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Pass/AOPass.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/AOPass.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Pass/BasePass.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/BasePass.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Pass/BasePass.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/BasePass.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Pass/BloomPass.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/BloomPass.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Pass/BloomPass.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/BloomPass.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Pass/FinalBlitPass.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/FinalBlitPass.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Pass/FinalBlitPass.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/FinalBlitPass.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Pass/GBufferPass.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/GBufferPass.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Pass/GBufferPass.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/GBufferPass.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Pass/OpaquePass.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/OpaquePass.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Pass/OpaquePass.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/OpaquePass.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Pass/PreDrawPass.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/PreDrawPass.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Pass/PreDrawPass.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/PreDrawPass.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Pass/RenderPassData.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/RenderPassData.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Pass/ShadowPass.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/ShadowPass.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Pass/ShadowPass.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/ShadowPass.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Pass/SkyboxPass.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/SkyboxPass.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Pass/SkyboxPass.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/SkyboxPass.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Pass/TonemapPass.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/TonemapPass.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Pass/TonemapPass.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/TonemapPass.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Pass/UIPass.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/UIPass.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Pass/UIPass.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/UIPass.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/RenderResource.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/RenderResource.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/RenderResource.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/RenderResource.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/RenderItem.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/RenderItem.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/System/RendererSystem.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Renderer.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/System/RendererSystem.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Renderer.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Transform.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Engine/ECS/Transform.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Transform.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Utility/Containers.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Programs/Containers.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Utility/Containers.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Programs/Containers.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Utility/SharedTypes.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Model/SharedTypes.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Utility/SharedTypes.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Model/SharedTypes.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/stdafx.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/stdafx.h" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -280,17 +348,23 @@
   <component name="GithubPullRequestsUISettings"><![CDATA[{
   "selectedUrlAndAccountId": {
     "url": "https://github.com/chenglixue/ElysiaDX12.git",
-    "accountId": "bd0bbad0-97f8-4513-9a04-f0f1c650a31f"
+    "accountId": "9226d57d-53ca-431c-95ac-99c14ef68890"
   }
 }]]></component>
   <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/../../Program Files (x86)/Windows Kits/10/Include/10.0.22621.0/um/WinUser.h" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../Program Files (x86)/Windows Kits/10/Include/10.0.22621.0/um/d3d12shader.h" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.38.33130/include/array" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.38.33130/include/memory" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/ElysiaRenderer/RenderHelper.h" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/ElysiaRenderer/include/EASTL/string.h" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/ElysiaRenderer/src/Manager/ModelManager.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/ElysiaRenderer/src/Manager/ModelManager.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/RenderItem.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/RenderItem.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/ElysiaRenderer/src/Utility/SharedTypes.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/ElysiaRenderer/src/Utility/SharedTypes.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/AGS/amd_ags.h" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Engine/ECS/Entity.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Engine/ECS/Entity.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Model/ModelManager.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Model/ModelManager.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Model/SharedTypes.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Model/SharedTypes.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/packages/Microsoft.Direct3D.D3D12.1.618.1/build/native/include/d3d12.h" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/x64/Debug/Assimp/include/assimp/material.h" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/x64/Debug/Assimp/include/assimp/material.inl" root0="SKIP_HIGHLIGHTING" />
@@ -304,21 +378,21 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "C/C++ Project.ElysiaRenderer.executor": "Debug",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "master",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "preferences.keymap",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;C/C++ Project.ElysiaRenderer.executor&quot;: &quot;Debug&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.keymap&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager">
     <configuration name="ElysiaRenderer" type="CppProject" factoryName="C++ Project">
       <configuration_1 setup="1">
@@ -362,6 +436,7 @@
       <workItem from="1766225204693" duration="1616000" />
       <workItem from="1766369594263" duration="11309000" />
       <workItem from="1766387329881" duration="10046000" />
+      <workItem from="1766455954963" duration="25411000" />
     </task>
     <servers />
   </component>

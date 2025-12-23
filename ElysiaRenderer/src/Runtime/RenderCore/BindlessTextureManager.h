@@ -1,0 +1,56 @@
+﻿#pragma once
+#include "Programs/Helper.h"
+#include "Programs/IManager.h"
+#include "Runtime/Core/DX12DescriptorHeapHandle.h"
+#include "Runtime/Core/TextureUtility.h"
+#include "Runtime/Core/DX12TextureBuffer.h"
+
+namespace ElysiaRenderer
+{
+	class ElysiaCore::DX12RenderPassDescriptorHeap;
+	class ElysiaCore::DX12StagingDescriptorHeap;
+}
+
+namespace ElysiaRenderer
+{
+	using namespace ElysiaCore;
+	
+	class BindlessTextureManager : IManager
+	{
+	public:
+		struct TextureHandle
+		{
+			UINT textureIndex;
+			UINT resourceHeapIndex = UINT_MAX;
+			bool IsValid() const { return textureIndex != ~0u && resourceHeapIndex != UINT_MAX; }
+			static TextureHandle Invalid() { return { ~0u }; }
+		};
+		
+	public:
+		virtual void Init(ElysiaCore::DX12Device* pDevice) override;
+		virtual void Destory() override;
+		
+		TextureHandle CreateTextureFromFile(const std::wstring& filePath, bool isSRGB = false);
+		TextureHandle CreateTexture(const D3D12_RESOURCE_DESC& resourceDesc, TexTypeFlags flag, std::wstring name = L"");
+		
+		DX12TextureResource* GetTexture(TextureHandle handle) const noexcept;
+		UINT GetMaxCapicity() const noexcept;
+		UINT GetUsedCount() const noexcept;
+		
+		void Clear();
+		
+	private:
+		ElysiaCore::DX12Device* m_pDevice = nullptr;
+		
+		std::mutex                  m_mutex;
+		
+		std::vector<std::unique_ptr<DX12TextureResource>> m_textures;
+		DX12DescriptorHeapHandle m_startHeapHandle;
+		
+		static inline constexpr UINT m_maxTextureNum = 4096;
+
+		std::unique_ptr<DX12TextureResource>	LoadTextureFromFile_L(const std::wstring& filePath, bool isSRGB);
+		std::unique_ptr<DX12TextureResource>	CreateTexture_L(const D3D12_RESOURCE_DESC& resourceDesc, TexTypeFlags flag, std::wstring name = L"");
+	};
+}
+

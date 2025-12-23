@@ -1,14 +1,14 @@
 #define _CRT_SECURE_NO_WARNINGS
-#include "src/System/RendererSystem.h"
-#include "lib/Model/ModelImporter.h"
-#include "lib/DX12/DX12UI.h"
+#include "Runtime/RenderCore/Renderer.h"
+#include "Runtime/Model/ModelImporter.h"
+#include "Editor/DX12UI.h"
 #include "pix3.h"
 
 using namespace ElysiaRenderer;
 using namespace std;
 using Microsoft::WRL::ComPtr;
 
-static std::unique_ptr<RendererSystem> g_pRenderer = nullptr;
+static std::unique_ptr<Renderer> g_pRenderer = nullptr;
 
 //find path to WinPixGpuCapturer.dll from the most-recently installed version of PIX
 static std::wstring GetLatestWinPixGpuCapturerPath_Cpp17();
@@ -43,7 +43,7 @@ int main()
 		(GetSystemMetrics(SM_CXSCREEN) - windowSize.x) / 2, (GetSystemMetrics(SM_CYSCREEN) - windowSize.y) / 2, windowSize.x, windowSize.y,
 		nullptr, nullptr, moduleHandle, nullptr);
 
-	g_pRenderer = std::make_unique<ElysiaRenderer::RendererSystem>(windowHandle, windowSize, pUI.get());
+	g_pRenderer = std::make_unique<ElysiaRenderer::Renderer>(windowHandle, windowSize, pUI.get());
 	g_pRenderer->Init();
 
 	

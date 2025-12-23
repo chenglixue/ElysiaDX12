@@ -17,9 +17,9 @@
 #include <vector>
 #include <mutex>
 #include <optional>
-#include "DXTex/DirectXTex.h"
+#include "ThirdParty/DXTex/DirectXTex.h"
 #include "dxc/inc/d3dx12.h"
-#include "D3D12MemoryAllocator/D3D12MemAlloc.h"
+#include "ThirdParty/D3D12MemoryAllocator/D3D12MemAlloc.h"
 #include <dxgidebug.h>
 #include <numeric>
 #include <pix3.h>
@@ -38,19 +38,19 @@
 #include <locale>
 #include <codecvt>
 #include <bitset>
-#include "lib/Utility/Metalib.h"
+#include "ThirdParty/Metalib.h"
 #include <boost/container/stable_vector.hpp>
 #include "include/EASTL/string.h"
 #include "include/EASTL/vector.h"
 #include "include/EASTL/hash_map.h"
 
 #include "magic_enum/magic_enum.hpp"
-#include "SimpleMath/SimpleMath.h"
+#include "ThirdParty/SimpleMath/SimpleMath.h"
 #include <atlbase.h>        // Common COM helpers.
 
-#include "imgui/imgui.h"
-#include "imgui/imgui_impl_win32.h"
-#include "imgui/imgui_impl_dx12.h"
+#include "ThirdParty/imgui/imgui.h"
+#include "ThirdParty/imgui/imgui_impl_win32.h"
+#include "ThirdParty/imgui/imgui_impl_dx12.h"
 #include <WICTextureLoader.h>
 
 using namespace DirectX;
