@@ -18,7 +18,7 @@
 // THE SOFTWARE.
 #pragma once
 
-#include "../libs/vectormath/vectormath.hpp"
+#include "AMD/libs/vectormath/vectormath.hpp"
 
 enum ColorSpace : UINT
 {

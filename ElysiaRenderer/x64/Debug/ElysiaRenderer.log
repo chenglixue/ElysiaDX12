@@ -1,6 +1,344 @@
 ﻿  Skipping vcpkg. (no packages)
 cl : command line  warning D9014: invalid value '18' for '/wd'; assuming '5999'
   stdafx.cpp
-\stdafx.cpp(1,1): error C1083: Cannot open compiler intermediate file: 'x64\Debug\ElysiaRenderer.pch': Invalid argument
-  (compiling source file '/stdafx.cpp')
+cl : command line  warning D9014: invalid value '18' for '/wd'; assuming '5999'
+  binary_to_compressed_c.cpp
+  imgui.cpp
+  imgui_demo.cpp
+  imgui_draw.cpp
+C:\Work\ElysiaRenderer\ElysiaRenderer\lib\imgui\extra_fonts\binary_to_compressed_c.cpp(381,1): error C1010: unexpected end of file while looking for precompiled header. Did you forget to add '#include "stdafx.h"' to your source?
+C:\Work\ElysiaRenderer\ElysiaRenderer\lib\imgui\imgui.cpp(855,1): warning C4005: 'IM_NEWLINE': macro redefinition
+      C:\Work\ElysiaRenderer\ElysiaRenderer\lib\imgui\imgui.cpp(853,1):
+      see previous definition of 'IM_NEWLINE'
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\lib\imgui\imgui.cpp(11740,1): error C1010: unexpected end of file while looking for precompiled header. Did you forget to add '#include "stdafx.h"' to your source?
+C:\Work\ElysiaRenderer\ElysiaRenderer\lib\imgui\imgui_demo.cpp(63,1): warning C4005: 'IM_NEWLINE': macro redefinition
+      C:\Work\ElysiaRenderer\ElysiaRenderer\lib\imgui\imgui_demo.cpp(61,1):
+      see previous definition of 'IM_NEWLINE'
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\lib\imgui\imgui_demo.cpp(3068,1): error C1010: unexpected end of file while looking for precompiled header. Did you forget to add '#include "stdafx.h"' to your source?
+C:\Work\ElysiaRenderer\ElysiaRenderer\lib\imgui\imgui_draw.cpp(2907,1): error C1010: unexpected end of file while looking for precompiled header. Did you forget to add '#include "stdafx.h"' to your source?
+  IMGUIHelper.cpp
+  UI.cpp
+  Containers.cpp
+  RenderHelper.cpp
+  UserMarker.cpp
+  ShaderCompileOptions.cpp
+  ShaderKeywordSet.cpp
+  ShaderKeywordSpace.cpp
+  SwapChain.cpp
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\SwapChain.h(41,28): error C2178: 'ElysiaCore::SwapChain::m_BackBufferCount' cannot be declared with 'constexpr' specifier
+  (compiling source file '/src/Runtime/Core/SwapChain.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(31,15): error C2065: 'PipelineResourceBinding': undeclared identifier
+  (compiling source file '/src/Runtime/Core/SwapChain.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(31,39): error C2059: syntax error: '>'
+  (compiling source file '/src/Runtime/Core/SwapChain.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(32,15): error C2065: 'PipelineResourceBinding': undeclared identifier
+  (compiling source file '/src/Runtime/Core/SwapChain.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(32,39): error C2059: syntax error: '>'
+  (compiling source file '/src/Runtime/Core/SwapChain.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(36,15): error C2061: syntax error: identifier 'PipelineResourceBinding'
+  (compiling source file '/src/Runtime/Core/SwapChain.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(37,15): error C2061: syntax error: identifier 'PipelineResourceBinding'
+  (compiling source file '/src/Runtime/Core/SwapChain.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(43,49): error C2065: 'PipelineResourceBinding': undeclared identifier
+  (compiling source file '/src/Runtime/Core/SwapChain.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(43,73): error C2059: syntax error: '>'
+  (compiling source file '/src/Runtime/Core/SwapChain.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(43,73): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+  (compiling source file '/src/Runtime/Core/SwapChain.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(43,37): error C2144: syntax error: 'unknown-type' should be preceded by ')'
+  (compiling source file '/src/Runtime/Core/SwapChain.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(43,37): error C2144: syntax error: 'unknown-type' should be preceded by ';'
+  (compiling source file '/src/Runtime/Core/SwapChain.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(43,96): error C3646: 'bindingIndex': unknown override specifier
+  (compiling source file '/src/Runtime/Core/SwapChain.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(43,108): error C2059: syntax error: ')'
+  (compiling source file '/src/Runtime/Core/SwapChain.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(45,12): error C2327: 'ElysiaCore::PipelineResourceSpace::UINT': is not a type name, static, or enumerator
+  (compiling source file '/src/Runtime/Core/SwapChain.cpp')
+      C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(45,12):
+      see declaration of 'ElysiaCore::PipelineResourceSpace::UINT'
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(49,15): error C2065: 'PipelineResourceBinding': undeclared identifier
+  (compiling source file '/src/Runtime/Core/SwapChain.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(49,39): error C2059: syntax error: '>'
+  (compiling source file '/src/Runtime/Core/SwapChain.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(50,15): error C2065: 'PipelineResourceBinding': undeclared identifier
+  (compiling source file '/src/Runtime/Core/SwapChain.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(50,39): error C2059: syntax error: '>'
+  (compiling source file '/src/Runtime/Core/SwapChain.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\DX12DescriptorHeapHandle.h(60,20): warning C4552: '!=': result of expression not used
+  (compiling source file '/src/Runtime/Core/SwapChain.cpp')
+  
+  UploadRingBuffer.cpp
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(31,15): error C2065: 'PipelineResourceBinding': undeclared identifier
+  (compiling source file '/src/Runtime/Core/UploadRingBuffer.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(31,39): error C2059: syntax error: '>'
+  (compiling source file '/src/Runtime/Core/UploadRingBuffer.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(32,15): error C2065: 'PipelineResourceBinding': undeclared identifier
+  (compiling source file '/src/Runtime/Core/UploadRingBuffer.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(32,39): error C2059: syntax error: '>'
+  (compiling source file '/src/Runtime/Core/UploadRingBuffer.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(36,15): error C2061: syntax error: identifier 'PipelineResourceBinding'
+  (compiling source file '/src/Runtime/Core/UploadRingBuffer.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(37,15): error C2061: syntax error: identifier 'PipelineResourceBinding'
+  (compiling source file '/src/Runtime/Core/UploadRingBuffer.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(43,49): error C2065: 'PipelineResourceBinding': undeclared identifier
+  (compiling source file '/src/Runtime/Core/UploadRingBuffer.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(43,73): error C2059: syntax error: '>'
+  (compiling source file '/src/Runtime/Core/UploadRingBuffer.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(43,73): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+  (compiling source file '/src/Runtime/Core/UploadRingBuffer.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(43,37): error C2144: syntax error: 'unknown-type' should be preceded by ')'
+  (compiling source file '/src/Runtime/Core/UploadRingBuffer.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(43,37): error C2144: syntax error: 'unknown-type' should be preceded by ';'
+  (compiling source file '/src/Runtime/Core/UploadRingBuffer.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(43,96): error C3646: 'bindingIndex': unknown override specifier
+  (compiling source file '/src/Runtime/Core/UploadRingBuffer.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(43,108): error C2059: syntax error: ')'
+  (compiling source file '/src/Runtime/Core/UploadRingBuffer.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(45,12): error C2327: 'ElysiaCore::PipelineResourceSpace::UINT': is not a type name, static, or enumerator
+  (compiling source file '/src/Runtime/Core/UploadRingBuffer.cpp')
+      C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(45,12):
+      see declaration of 'ElysiaCore::PipelineResourceSpace::UINT'
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(49,15): error C2065: 'PipelineResourceBinding': undeclared identifier
+  (compiling source file '/src/Runtime/Core/UploadRingBuffer.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(49,39): error C2059: syntax error: '>'
+  (compiling source file '/src/Runtime/Core/UploadRingBuffer.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(50,15): error C2065: 'PipelineResourceBinding': undeclared identifier
+  (compiling source file '/src/Runtime/Core/UploadRingBuffer.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(50,39): error C2059: syntax error: '>'
+  (compiling source file '/src/Runtime/Core/UploadRingBuffer.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\DX12DescriptorHeapHandle.h(60,20): warning C4552: '!=': result of expression not used
+  (compiling source file '/src/Runtime/Core/UploadRingBuffer.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Programs\BoundingBox.h(3,10): error C1083: Cannot open include file: '../Utility/Helper.h': No such file or directory
+  (compiling source file '/src/Runtime/Core/UploadRingBuffer.cpp')
+  
+  Benchmark.cpp
+  GPUTimestamps.cpp
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(31,15): error C2065: 'PipelineResourceBinding': undeclared identifier
+  (compiling source file '/src/Runtime/Developer/GPUTimestamps.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(31,39): error C2059: syntax error: '>'
+  (compiling source file '/src/Runtime/Developer/GPUTimestamps.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(32,15): error C2065: 'PipelineResourceBinding': undeclared identifier
+  (compiling source file '/src/Runtime/Developer/GPUTimestamps.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(32,39): error C2059: syntax error: '>'
+  (compiling source file '/src/Runtime/Developer/GPUTimestamps.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(36,15): error C2061: syntax error: identifier 'PipelineResourceBinding'
+  (compiling source file '/src/Runtime/Developer/GPUTimestamps.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(37,15): error C2061: syntax error: identifier 'PipelineResourceBinding'
+  (compiling source file '/src/Runtime/Developer/GPUTimestamps.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(43,49): error C2065: 'PipelineResourceBinding': undeclared identifier
+  (compiling source file '/src/Runtime/Developer/GPUTimestamps.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(43,73): error C2059: syntax error: '>'
+  (compiling source file '/src/Runtime/Developer/GPUTimestamps.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(43,73): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+  (compiling source file '/src/Runtime/Developer/GPUTimestamps.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(43,37): error C2144: syntax error: 'unknown-type' should be preceded by ')'
+  (compiling source file '/src/Runtime/Developer/GPUTimestamps.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(43,37): error C2144: syntax error: 'unknown-type' should be preceded by ';'
+  (compiling source file '/src/Runtime/Developer/GPUTimestamps.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(43,96): error C3646: 'bindingIndex': unknown override specifier
+  (compiling source file '/src/Runtime/Developer/GPUTimestamps.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(43,108): error C2059: syntax error: ')'
+  (compiling source file '/src/Runtime/Developer/GPUTimestamps.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(45,12): error C2327: 'ElysiaCore::PipelineResourceSpace::UINT': is not a type name, static, or enumerator
+  (compiling source file '/src/Runtime/Developer/GPUTimestamps.cpp')
+      C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(45,12):
+      see declaration of 'ElysiaCore::PipelineResourceSpace::UINT'
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(49,15): error C2065: 'PipelineResourceBinding': undeclared identifier
+  (compiling source file '/src/Runtime/Developer/GPUTimestamps.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(49,39): error C2059: syntax error: '>'
+  (compiling source file '/src/Runtime/Developer/GPUTimestamps.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(50,15): error C2065: 'PipelineResourceBinding': undeclared identifier
+  (compiling source file '/src/Runtime/Developer/GPUTimestamps.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(50,39): error C2059: syntax error: '>'
+  (compiling source file '/src/Runtime/Developer/GPUTimestamps.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\DX12DescriptorHeapHandle.h(60,20): warning C4552: '!=': result of expression not used
+  (compiling source file '/src/Runtime/Developer/GPUTimestamps.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Developer\GPUTimestamps.cpp(21,41): error C2102: '&' requires l-value
+  (compiling source file '/src/Runtime/Developer/GPUTimestamps.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Developer\GPUTimestamps.cpp(23,47): error C2102: '&' requires l-value
+  (compiling source file '/src/Runtime/Developer/GPUTimestamps.cpp')
+  
+  ElysiaFrame.cpp
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(31,15): error C2065: 'PipelineResourceBinding': undeclared identifier
+  (compiling source file '/src/Runtime/Engine/ElysiaFrame.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(31,39): error C2059: syntax error: '>'
+  (compiling source file '/src/Runtime/Engine/ElysiaFrame.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(32,15): error C2065: 'PipelineResourceBinding': undeclared identifier
+  (compiling source file '/src/Runtime/Engine/ElysiaFrame.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(32,39): error C2059: syntax error: '>'
+  (compiling source file '/src/Runtime/Engine/ElysiaFrame.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(36,15): error C2061: syntax error: identifier 'PipelineResourceBinding'
+  (compiling source file '/src/Runtime/Engine/ElysiaFrame.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(37,15): error C2061: syntax error: identifier 'PipelineResourceBinding'
+  (compiling source file '/src/Runtime/Engine/ElysiaFrame.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(43,49): error C2065: 'PipelineResourceBinding': undeclared identifier
+  (compiling source file '/src/Runtime/Engine/ElysiaFrame.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(43,73): error C2059: syntax error: '>'
+  (compiling source file '/src/Runtime/Engine/ElysiaFrame.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(43,73): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+  (compiling source file '/src/Runtime/Engine/ElysiaFrame.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(43,37): error C2144: syntax error: 'unknown-type' should be preceded by ')'
+  (compiling source file '/src/Runtime/Engine/ElysiaFrame.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(43,37): error C2144: syntax error: 'unknown-type' should be preceded by ';'
+  (compiling source file '/src/Runtime/Engine/ElysiaFrame.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(43,96): error C3646: 'bindingIndex': unknown override specifier
+  (compiling source file '/src/Runtime/Engine/ElysiaFrame.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(43,108): error C2059: syntax error: ')'
+  (compiling source file '/src/Runtime/Engine/ElysiaFrame.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(45,12): error C2327: 'ElysiaCore::PipelineResourceSpace::UINT': is not a type name, static, or enumerator
+  (compiling source file '/src/Runtime/Engine/ElysiaFrame.cpp')
+      C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(45,12):
+      see declaration of 'ElysiaCore::PipelineResourceSpace::UINT'
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(49,15): error C2065: 'PipelineResourceBinding': undeclared identifier
+  (compiling source file '/src/Runtime/Engine/ElysiaFrame.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(49,39): error C2059: syntax error: '>'
+  (compiling source file '/src/Runtime/Engine/ElysiaFrame.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(50,15): error C2065: 'PipelineResourceBinding': undeclared identifier
+  (compiling source file '/src/Runtime/Engine/ElysiaFrame.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(50,39): error C2059: syntax error: '>'
+  (compiling source file '/src/Runtime/Engine/ElysiaFrame.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\DX12DescriptorHeapHandle.h(60,20): warning C4552: '!=': result of expression not used
+  (compiling source file '/src/Runtime/Engine/ElysiaFrame.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\SwapChain.h(41,28): error C2178: 'ElysiaCore::SwapChain::m_BackBufferCount' cannot be declared with 'constexpr' specifier
+  (compiling source file '/src/Runtime/Engine/ElysiaFrame.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\RenderCore\Pass\RenderPassData.h(3,10): error C1083: Cannot open include file: 'lib/DX12//DX12GraphicsContext.h': No such file or directory
+  (compiling source file '/src/Runtime/Engine/ElysiaFrame.cpp')
+  
+  FrameworkWindows.cpp
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(31,15): error C2065: 'PipelineResourceBinding': undeclared identifier
+  (compiling source file '/src/Runtime/Engine/FrameworkWindows.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(31,39): error C2059: syntax error: '>'
+  (compiling source file '/src/Runtime/Engine/FrameworkWindows.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(32,15): error C2065: 'PipelineResourceBinding': undeclared identifier
+  (compiling source file '/src/Runtime/Engine/FrameworkWindows.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(32,39): error C2059: syntax error: '>'
+  (compiling source file '/src/Runtime/Engine/FrameworkWindows.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(36,15): error C2061: syntax error: identifier 'PipelineResourceBinding'
+  (compiling source file '/src/Runtime/Engine/FrameworkWindows.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(37,15): error C2061: syntax error: identifier 'PipelineResourceBinding'
+  (compiling source file '/src/Runtime/Engine/FrameworkWindows.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(43,49): error C2065: 'PipelineResourceBinding': undeclared identifier
+  (compiling source file '/src/Runtime/Engine/FrameworkWindows.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(43,73): error C2059: syntax error: '>'
+  (compiling source file '/src/Runtime/Engine/FrameworkWindows.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(43,73): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+  (compiling source file '/src/Runtime/Engine/FrameworkWindows.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(43,37): error C2144: syntax error: 'unknown-type' should be preceded by ')'
+  (compiling source file '/src/Runtime/Engine/FrameworkWindows.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(43,37): error C2144: syntax error: 'unknown-type' should be preceded by ';'
+  (compiling source file '/src/Runtime/Engine/FrameworkWindows.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(43,96): error C3646: 'bindingIndex': unknown override specifier
+  (compiling source file '/src/Runtime/Engine/FrameworkWindows.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(43,108): error C2059: syntax error: ')'
+  (compiling source file '/src/Runtime/Engine/FrameworkWindows.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(45,12): error C2327: 'ElysiaCore::PipelineResourceSpace::UINT': is not a type name, static, or enumerator
+  (compiling source file '/src/Runtime/Engine/FrameworkWindows.cpp')
+      C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(45,12):
+      see declaration of 'ElysiaCore::PipelineResourceSpace::UINT'
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(49,15): error C2065: 'PipelineResourceBinding': undeclared identifier
+  (compiling source file '/src/Runtime/Engine/FrameworkWindows.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(49,39): error C2059: syntax error: '>'
+  (compiling source file '/src/Runtime/Engine/FrameworkWindows.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(50,15): error C2065: 'PipelineResourceBinding': undeclared identifier
+  (compiling source file '/src/Runtime/Engine/FrameworkWindows.cpp')
+  
+C:\Work\ElysiaRenderer\ElysiaRenderer\src\Runtime\Core\PipelineResourceSpace.h(50,39): error C2059: syntax error: '>'
+  (compiling source file '/src/Runtime/Engine/FrameworkWindows.cpp')
   

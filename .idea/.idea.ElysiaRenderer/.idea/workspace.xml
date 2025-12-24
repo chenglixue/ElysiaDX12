@@ -8,6 +8,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f31d721d-cfba-4714-b0ce-c46a1a48110d" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Engine/ECS/Entity.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Engine/ECS/Entity.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Engine/ECS/Transform.cpp" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Engine/ECS/Transform.h" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Engine/FrameworkWindows.cpp" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Engine/FrameworkWindows.h" afterDir="false" />
@@ -320,7 +323,7 @@
       <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/RenderItem.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/RenderItem.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/System/RendererSystem.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Renderer.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/System/RendererSystem.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Renderer.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Transform.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Engine/ECS/Transform.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Transform.cpp" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Transform.h" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Utility/Containers.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Programs/Containers.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Utility/Containers.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Programs/Containers.h" afterDir="false" />
@@ -345,12 +348,12 @@
     &quot;assignee&quot;: &quot;chenglixue&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/chenglixue/ElysiaDX12.git",
-    "accountId": "9226d57d-53ca-431c-95ac-99c14ef68890"
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/chenglixue/ElysiaDX12.git&quot;,
+    &quot;accountId&quot;: &quot;9226d57d-53ca-431c-95ac-99c14ef68890&quot;
   }
-}]]></component>
+}</component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$PROJECT_DIR$/../../Program Files (x86)/Windows Kits/10/Include/10.0.22621.0/um/WinUser.h" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../Program Files (x86)/Windows Kits/10/Include/10.0.22621.0/um/d3d12shader.h" root0="SKIP_HIGHLIGHTING" />
@@ -436,7 +439,7 @@
       <workItem from="1766225204693" duration="1616000" />
       <workItem from="1766369594263" duration="11309000" />
       <workItem from="1766387329881" duration="10046000" />
-      <workItem from="1766455954963" duration="25411000" />
+      <workItem from="1766455954963" duration="26065000" />
     </task>
     <servers />
   </component>

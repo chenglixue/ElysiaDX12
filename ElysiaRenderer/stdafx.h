@@ -43,14 +43,12 @@
 #include "include/EASTL/string.h"
 #include "include/EASTL/vector.h"
 #include "include/EASTL/hash_map.h"
+#include "include/EASTL/algorithm.h"
 
 #include "magic_enum/magic_enum.hpp"
 #include "ThirdParty/SimpleMath/SimpleMath.h"
 #include <atlbase.h>        // Common COM helpers.
 
-#include "ThirdParty/imgui/imgui.h"
-#include "ThirdParty/imgui/imgui_impl_win32.h"
-#include "ThirdParty/imgui/imgui_impl_dx12.h"
 #include <WICTextureLoader.h>
 
 using namespace DirectX;

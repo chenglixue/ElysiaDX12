@@ -28,5 +28,13 @@ namespace ElysiaEngine
 		{
 			rotation *= Quaternion::CreateFromAxisAngle(axis, angle);
 		}
+
+		bool operator==(const Transform& other) const
+		{
+			if (this->position == other.position && this->rotation == other.rotation && this->scale == other.scale)
+			{
+				return true;
+			}
+		}
 	};
 }

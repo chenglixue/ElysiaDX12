@@ -1,8 +1,3 @@
-C:\Work\ElysiaRenderer\x64\Debug\WinPixEventRuntime.dll
-C:\Work\ElysiaRenderer\x64\Debug\D3D12\D3D12Core.dll
-C:\Work\ElysiaRenderer\x64\Debug\D3D12\D3D12Core.pdb
-C:\Work\ElysiaRenderer\x64\Debug\D3D12\D3D12SDKLayers.dll
-C:\Work\ElysiaRenderer\x64\Debug\D3D12\D3D12SDKLayers.pdb
 D:\DX12\ElysiaDX12\x64\Debug\WinPixEventRuntime.dll
 D:\DX12\ElysiaDX12\x64\Debug\D3D12\D3D12Core.dll
 D:\DX12\ElysiaDX12\x64\Debug\D3D12\D3D12Core.pdb

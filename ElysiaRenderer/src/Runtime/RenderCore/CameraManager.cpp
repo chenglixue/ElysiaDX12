@@ -42,6 +42,11 @@ namespace ElysiaRenderer
 		}
 		else
 		{
+			if (m_mainCamera->m_transform == transform && m_mainCamera->GetAspect() == aspectRatio
+				&& m_mainCamera->GetFOVY() == fovy && m_mainCamera->GetNearZ() == nearZ && m_mainCamera->GetFarZ() == farZ)
+			{
+				return;
+			}
 			m_mainCamera.reset();
 			m_mainCamera = std::make_unique<DX12Camera>(transform, aspectRatio, fovy, nearZ, farZ);
 		}

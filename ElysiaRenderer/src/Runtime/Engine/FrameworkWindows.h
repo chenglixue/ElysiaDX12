@@ -1,6 +1,7 @@
 #pragma once
 #include "ThirdParty/FreesyncHDR.h"
 #include "Runtime/Core/DX12Device.h"
+#include "Runtime/Core/SwapChain.h"
 
 namespace ElysiaEngine
 {
@@ -31,6 +32,7 @@ namespace ElysiaEngine
         void DeviceShutdown();
         void BeginFrame();
         void EndFrame();
+        void Present();
 
         // Fullscreen management & window events are handled by Cauldron instead of the client applications.
         void ToggleFullScreen();
@@ -50,25 +52,27 @@ namespace ElysiaEngine
         inline const char* const* GetDisplayModeNames() const { return &m_displayModesNamesAvailable[0]; }
         inline bool               GetLocalDimmingDisableState() const { return m_disableLocalDimming; }
         
-    private:
+    protected:
         eastl::wstring m_Name; // sample application name
         int m_Width ;  // application window dimensions
         int m_Height;  // application window dimensions
-
+        UINT m_frameID;
+        UINT64 m_frameIndex;
+        
         // Simulation management
         double  m_lastFrameTime;
         double  m_deltaTime;
 
         // Device management
         HWND   m_windowHwnd;
-        std::unique_ptr<ElysiaCore::DX12Device> m_device;
+        ElysiaCore::DX12Device* m_pDevice;
         bool   m_stablePowerState;
         bool   m_isCpuValidationLayerEnabled;
         bool   m_isGpuValidationLayerEnabled;
         bool   m_initializeAGS;
 
         // Swapchain management
-        SwapChain         m_swapChain;
+        ElysiaCore::SwapChain         m_swapChain;
         bool              m_VsyncEnabled;
         PresentationMode  m_fullscreenMode;
         PresentationMode  m_previousFullscreenMode;
@@ -93,8 +97,7 @@ namespace ElysiaEngine
         };
         SystemInfo  m_systemInfo;
     };
-}
 
-using namespace ElysiaEngine;
-int RunFramework(HINSTANCE hInstance, LPSTR lpCmdLine, int nCmdShow, FrameworkWindows *pFramework);
-void SetFullscreen(HWND hWnd, bool fullscreen);
+    int RunFramework(HINSTANCE hInstance, LPSTR lpCmdLine, int nCmdShow, FrameworkWindows *pFramework);
+    void SetFullscreen(HWND hWnd, bool fullscreen);
+}

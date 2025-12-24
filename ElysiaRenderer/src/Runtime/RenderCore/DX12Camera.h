@@ -9,6 +9,9 @@ namespace ElysiaRenderer
 	class DX12Camera
 	{
 	public:
+		Transform m_transform;
+		
+	public:
 		DX12Camera() = default;
 		DX12Camera(const Transform& transform, float aspectRatio, float fovY, float nearZ, float farZ) noexcept;
 		DX12Camera(const DX12Camera& rhs) = default;
@@ -16,7 +19,6 @@ namespace ElysiaRenderer
 		DX12Camera(DX12Camera&& rhs) = default;
 		~DX12Camera();
 
-		Transform	GetTransform()		const noexcept;
 		float		GetCameraSpeed()	const noexcept;
 		Vector3		GetPosition()		const noexcept;
 		Vector4		GetPosition4()		const noexcept;
@@ -47,7 +49,6 @@ namespace ElysiaRenderer
 		void UpdateProjMatrix() noexcept;
 
 	protected:
-		Transform m_transform;
 		Matrix  m_viewMatrix	= Matrix::Identity;
 		Matrix  m_projMatrix	= Matrix::Identity;
 

@@ -22,7 +22,7 @@
 #define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
 // Windows Header Files:
 #include <dxgi1_6.h>
-#include "..\libs\AGS\amd_ags.h"
+#include "AMD\libs\AGS\amd_ags.h"
 
 namespace CAULDRON_DX12
 {

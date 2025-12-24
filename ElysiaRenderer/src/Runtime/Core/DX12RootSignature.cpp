@@ -124,7 +124,7 @@ namespace ElysiaCore
 		staticSamplerDesc.ShaderVisibility = shaderVisibility;
 	}
 
-	void DX12RootSignature::Init(ID3D12Device5* device, D3D12_ROOT_SIGNATURE_FLAGS flags)
+	void DX12RootSignature::Init(ID3D12Device* device, D3D12_ROOT_SIGNATURE_FLAGS flags)
 	{
 		if (m_isInited) return;
 		assert(m_numInitedSamplers == m_numSamplers);

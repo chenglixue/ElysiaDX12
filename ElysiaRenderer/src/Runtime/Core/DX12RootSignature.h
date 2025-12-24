@@ -64,7 +64,7 @@ namespace ElysiaCore
 		}
 
 		void InitStaticSamplers(UINT slotIndex, const D3D12_SAMPLER_DESC& nonStaticSamplerDesc, D3D12_SHADER_VISIBILITY shaderVisibility = D3D12_SHADER_VISIBILITY_ALL);
-		void Init(ID3D12Device5* device, D3D12_ROOT_SIGNATURE_FLAGS Flags = D3D12_ROOT_SIGNATURE_FLAG_NONE);
+		void Init(ID3D12Device* device, D3D12_ROOT_SIGNATURE_FLAGS Flags = D3D12_ROOT_SIGNATURE_FLAG_NONE);
 
 		void Reset(UINT numRootParams = 0, UINT numStaticSamplers = 0);
 

@@ -305,6 +305,8 @@ namespace ElysiaEngine
         m_Name(name)
         , m_Width(0)
         , m_Height(0)
+        , m_frameID(0)
+        , m_frameIndex(0)
 
         // Simulation management
         , m_lastFrameTime(MillisecondsNow())
@@ -312,7 +314,7 @@ namespace ElysiaEngine
 
         // Device management
         , m_windowHwnd(NULL)
-        , m_device(std::make_unique<ElysiaCore::DX12Device>())
+        , m_pDevice(new ElysiaCore::DX12Device())
         , m_stablePowerState(false)
         , m_isCpuValidationLayerEnabled(ENABLE_CPU_VALIDATION_DEFAULT)
         , m_isGpuValidationLayerEnabled(ENABLE_GPU_VALIDATION_DEFAULT)
@@ -338,6 +340,7 @@ namespace ElysiaEngine
         // System info
         , m_systemInfo() // initialized after device
         {
+
         }
 
     void FrameworkWindows::DeviceInit(HWND WindowsHandle)
@@ -346,23 +349,23 @@ namespace ElysiaEngine
         m_windowHwnd = WindowsHandle;
 
         // Create Device
-        m_device->OnCreate(m_Name, m_isCpuValidationLayerEnabled, m_isGpuValidationLayerEnabled, m_windowHwnd, m_initializeAGS);
+        m_pDevice->OnCreate(m_Name, m_isCpuValidationLayerEnabled, m_isGpuValidationLayerEnabled, m_windowHwnd, m_initializeAGS);
 
         // set stable power state (only works when Developer Mode is enabled)
         if (m_stablePowerState)
         {
-            HRESULT hr = m_device->GetDevice()->SetStablePowerState(TRUE);
+            HRESULT hr = m_pDevice->GetDevice()->SetStablePowerState(TRUE);
 
             // handle failure / device removed
             if (FAILED(hr))
             {
-                HRESULT reason = m_device->GetDevice()->GetDeviceRemovedReason();
+                HRESULT reason = m_pDevice->GetDevice()->GetDeviceRemovedReason();
 
                 Trace("Warning: ID3D12Device::SetStablePowerState(TRUE) failed: Reason 0x%x (DXGI_ERROR). Recreating device, setting m_stablePowerState = false.", reason);
 
                 // device removed, so recreate
-                m_device->OnDestroy();
-                m_device->OnCreate(m_Name, m_isCpuValidationLayerEnabled, m_isGpuValidationLayerEnabled, m_windowHwnd, m_initializeAGS);
+                m_pDevice->OnDestroy();
+                m_pDevice->OnCreate(m_Name, m_isCpuValidationLayerEnabled, m_isGpuValidationLayerEnabled, m_windowHwnd, m_initializeAGS);
                 m_stablePowerState = false;
             }
         }
@@ -371,8 +374,7 @@ namespace ElysiaEngine
         m_monitor = MonitorFromWindow(m_windowHwnd, MONITOR_DEFAULTTONEAREST);
 
         // Create Swapchain
-        uint32_t dwNumberOfBackBuffers = 2;
-        m_swapChain.OnCreate(&m_device, dwNumberOfBackBuffers, m_windowHwnd);
+        m_swapChain.OnCreate(m_pDevice, m_windowHwnd);
 
         m_swapChain.EnumerateDisplayModes(&m_displayModesAvailable, &m_displayModesNamesAvailable);
 
@@ -384,8 +386,257 @@ namespace ElysiaEngine
 
         // Get system info
         std::string dummyStr;
-        m_device.GetDeviceInfo(&m_systemInfo.mGPUName, &dummyStr); // 2nd parameter is unused
+        m_pDevice->GetDeviceInfo(&m_systemInfo.mGPUName, &dummyStr); // 2nd parameter is unused
         m_systemInfo.mCPUName = GetCPUNameString();
         m_systemInfo.mGfxAPI = "DirectX 12";
     }
+
+    void FrameworkWindows::DeviceShutdown()
+    {
+        // Fullscreen state should always be false before exiting the app.
+        if (m_fullscreenMode == PRESENTATIONMODE_EXCLUSIVE_FULLSCREEN)
+            m_swapChain.SetFullScreen(false);
+
+        // Fall back to SDR when app closes
+        if (m_currentDisplayMode != DISPLAYMODE_SDR)
+            m_swapChain.OnCreateWindowSizeDependentResources(m_Width, m_Height, m_VsyncEnabled, DISPLAYMODE_SDR, false);
+
+        m_swapChain.OnDestroyWindowSizeDependentResources();
+        m_swapChain.OnDestroy();
+
+        m_pDevice->OnDestroy();
+    }
+
+    void FrameworkWindows::ToggleFullScreen()
+    {
+        if (m_fullscreenMode == PRESENTATIONMODE_WINDOWED)
+        {
+            m_fullscreenMode = PRESENTATIONMODE_BORDERLESS_FULLSCREEN;
+        }
+        else
+        {
+            m_fullscreenMode = PRESENTATIONMODE_WINDOWED;
+        }
+
+        HandleFullScreen();
+        m_previousFullscreenMode = m_fullscreenMode;
+    }
+
+    void FrameworkWindows::HandleFullScreen()
+    {
+        // Flush the gpu to make sure we don't change anything still active
+        m_pDevice->WaitForIdle();
+
+        // -------------------- For HDR only.
+        // If FS2 modes, always fallback to SDR
+        if (m_fullscreenMode == PRESENTATIONMODE_WINDOWED &&
+            (m_displayModesAvailable[m_currentDisplayModeNamesIndex] == DISPLAYMODE_FSHDR_Gamma22 ||
+                m_displayModesAvailable[m_currentDisplayModeNamesIndex] == DISPLAYMODE_FSHDR_SCRGB))
+        {
+            m_currentDisplayModeNamesIndex = DISPLAYMODE_SDR;
+        }
+        // when hdr10 modes, fall back to SDR unless windowMode hdr is enabled
+        else if (m_fullscreenMode == PRESENTATIONMODE_WINDOWED && !CheckIfWindowModeHdrOn() &&
+            (m_displayModesAvailable[m_currentDisplayModeNamesIndex] != DISPLAYMODE_SDR))
+        {
+            m_currentDisplayModeNamesIndex = DISPLAYMODE_SDR;
+        }
+        // For every other case go back to previous state
+        else
+        {
+            m_currentDisplayModeNamesIndex = m_previousDisplayModeNamesIndex;
+        }
+        // -------------------- For HDR only.
+
+        switch (m_fullscreenMode)
+        {
+        case PRESENTATIONMODE_WINDOWED:
+        {
+            if (m_previousFullscreenMode == PRESENTATIONMODE_EXCLUSIVE_FULLSCREEN)
+            {
+                m_swapChain.SetFullScreen(false);
+                m_forceManualResize = true;
+            }
+
+            SetFullscreen(m_windowHwnd, false);
+
+            break;
+        }
+
+        case PRESENTATIONMODE_BORDERLESS_FULLSCREEN:
+        {
+            if (m_previousFullscreenMode == PRESENTATIONMODE_WINDOWED)
+            {
+                SetFullscreen(m_windowHwnd, true);
+            }
+            else if (m_previousFullscreenMode == PRESENTATIONMODE_EXCLUSIVE_FULLSCREEN)
+            {
+                m_swapChain.SetFullScreen(false);
+                m_forceManualResize = true;
+            }
+
+            break;
+        }
+
+        case PRESENTATIONMODE_EXCLUSIVE_FULLSCREEN:
+        {
+            if (m_previousFullscreenMode == PRESENTATIONMODE_WINDOWED)
+            {
+                SetFullscreen(m_windowHwnd, true);
+            }
+
+            m_swapChain.SetFullScreen(true);
+            m_forceManualResize = true;
+
+            break;
+        }
+        }
+
+        RECT clientRect = {};
+        GetClientRect(m_windowHwnd, &clientRect);
+        OnResize(clientRect.right - clientRect.left, clientRect.bottom - clientRect.top, m_forceManualResize);
+        UpdateDisplay(m_displayModesAvailable[m_currentDisplayModeNamesIndex], m_disableLocalDimming);
+        m_forceManualResize = false;
+    }
+
+    void FrameworkWindows::OnResize(uint32_t width, uint32_t height, bool forceManulResize)
+    {
+        if (m_Width != width || m_Height != height || forceManulResize)
+        {
+            // Flush GPU
+            m_pDevice->WaitForIdle();
+
+            // Destroy resources (if we are not minimized)
+            if (m_Width > 0 && m_Height > 0)
+                m_swapChain.OnDestroyWindowSizeDependentResources();
+
+            m_Width = width;
+            m_Height = height;
+
+            // If resizing but not minimizing the recreate it with the new size
+            if (m_Width > 0 && m_Height > 0)
+                m_swapChain.OnCreateWindowSizeDependentResources(m_Width, m_Height, m_VsyncEnabled, m_currentDisplayMode, m_disableLocalDimming);
+
+            // Call sample defined OnResize()
+            OnResize();
+        }
+    }
+
+    void FrameworkWindows::UpdateDisplay(int displayMode, bool disableLocalDimming)
+    {
+        // Nothing was changed in UI
+        if (displayMode < 0)
+        {
+            m_currentDisplayModeNamesIndex = m_previousDisplayModeNamesIndex;
+            return;
+        }
+        
+        if (m_currentDisplayMode != displayMode || m_disableLocalDimming != disableLocalDimming)
+        {
+            // Flush GPU
+            m_pDevice->WaitForIdle();
+
+            m_swapChain.OnDestroyWindowSizeDependentResources();
+
+            m_currentDisplayMode = (DisplayMode)displayMode;
+            m_disableLocalDimming = disableLocalDimming;
+
+            m_swapChain.OnCreateWindowSizeDependentResources(m_Width, m_Height, m_VsyncEnabled, m_currentDisplayMode, m_disableLocalDimming);
+
+            // Call sample defined UpdateDisplay()
+            OnUpdateDisplay();
+        }
+    }
+
+    void FrameworkWindows::OnActivate(bool WindowActive)
+    {
+        // *********************************************************************************
+        // Edge case for handling Fullscreen Exclusive (FSE) mode 
+        // FSE<->FSB transitions are handled here and at the end of EndFrame().
+        if (WindowActive &&
+            m_fullscreenMode == PRESENTATIONMODE_BORDERLESS_FULLSCREEN &&
+            m_previousFullscreenMode == PRESENTATIONMODE_EXCLUSIVE_FULLSCREEN)
+        {
+            m_fullscreenMode = PRESENTATIONMODE_EXCLUSIVE_FULLSCREEN;
+            m_previousFullscreenMode = PRESENTATIONMODE_BORDERLESS_FULLSCREEN;
+            HandleFullScreen();
+            m_previousFullscreenMode = m_fullscreenMode;
+        }
+        // *********************************************************************************
+
+        if (m_displayModesAvailable[m_currentDisplayModeNamesIndex] == DisplayMode::DISPLAYMODE_SDR &&
+            m_displayModesAvailable[m_previousDisplayModeNamesIndex] == DisplayMode::DISPLAYMODE_SDR)
+            return;
+
+        if (CheckIfWindowModeHdrOn() &&
+            (m_displayModesAvailable[m_currentDisplayModeNamesIndex] == DISPLAYMODE_HDR10_2084 ||
+                m_displayModesAvailable[m_currentDisplayModeNamesIndex] == DISPLAYMODE_HDR10_SCRGB))
+            return;
+
+        // Fall back HDR to SDR when window is fullscreen but not the active window or foreground window
+        m_currentDisplayModeNamesIndex = WindowActive && (m_fullscreenMode != PRESENTATIONMODE_WINDOWED) ? m_previousDisplayModeNamesIndex : DisplayMode::DISPLAYMODE_SDR;
+
+        OnResize(m_Width, m_Height, m_forceManualResize);
+        UpdateDisplay(m_displayModesAvailable[m_currentDisplayModeNamesIndex], m_disableLocalDimming);
+    }
+
+    void FrameworkWindows::OnWindowMove()
+    {
+        // mutl monitor
+        HMONITOR currentMonitor = MonitorFromWindow(m_windowHwnd, MONITOR_DEFAULTTONEAREST);
+        if (m_monitor != currentMonitor)
+        {
+            m_swapChain.EnumerateDisplayModes(&m_displayModesAvailable, &m_displayModesNamesAvailable);
+            m_monitor = currentMonitor;
+            m_previousDisplayModeNamesIndex = m_currentDisplayModeNamesIndex = DISPLAYMODE_SDR;
+            UpdateDisplay(m_displayModesAvailable[m_currentDisplayModeNamesIndex], m_disableLocalDimming);
+        }
+    }
+
+    void FrameworkWindows::BeginFrame()
+    {
+        m_frameIndex++;
+        m_frameID = (m_frameID + 1) % ElysiaHelper::NUM_FRAMES_IN_FLIGHT;
+        
+        m_pDevice->BeginFrame(m_frameID);
+        
+        // Get timings
+        double timeNow = MillisecondsNow();
+        m_deltaTime = (float)(timeNow - m_lastFrameTime);
+        m_lastFrameTime = timeNow;
+    }
+
+    // EndFrame will handle Present and other end of frame logic needed
+    void FrameworkWindows::EndFrame()
+    {
+        m_swapChain.Present();
+
+        m_pDevice->EndFrame(m_frameID);
+
+        // If we are doing GPU Validation, flush every frame
+        if (m_isGpuValidationLayerEnabled)
+            m_pDevice->WaitForIdle();
+
+        // *********************************************************************************
+        // Edge case for handling Fullscreen Exclusive (FSE) mode
+        // Usually OnActivate() detects application changing focus and that's where this transition is handled.
+        // However, SwapChain::GetFullScreen() returns true when we handle the event in the OnActivate() block,
+        // which is not expected. Hence we handle FSE -> FSB transition here at the end of the frame.
+        if (m_fullscreenMode == PRESENTATIONMODE_EXCLUSIVE_FULLSCREEN)
+        {
+            bool isFullScreen = m_swapChain.GetFullScreen();
+            if (!isFullScreen)
+            {
+                m_fullscreenMode = PRESENTATIONMODE_BORDERLESS_FULLSCREEN;
+                HandleFullScreen();
+            }
+        }
+    }
+
+    void FrameworkWindows::Present()
+    {
+        m_swapChain.Present();
+        m_pDevice->Present(m_frameID);
+    }
+
 }

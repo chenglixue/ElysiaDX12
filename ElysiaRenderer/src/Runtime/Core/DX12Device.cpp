@@ -14,6 +14,7 @@
 
 #include "Runtime/RenderCore/RenderResource.h"
 #include "UploadRingBuffer.h"
+#include "Programs/UserMarker.h"
 #include "Runtime/RenderCore/RenderTexture.h"
 #include "Runtime/RenderCore/BufferManager.h"
 #include "Runtime/Core/ShaderCompileOptions.h"
@@ -24,13 +25,6 @@ namespace ElysiaCore
 {
 	using namespace ElysiaHelper;
 	
-// 	DX12Device::DX12Device(HWND windowHandle, UINT2 screenSize)
-// 		:	m_screenSize(screenSize),
-// 			m_hWnd(windowHandle)
-// 	{
-// 		InitializeDeviceResources(windowHandle);
-// 		CreateWindowDependentResources();
-// 	}
 // 	     
 // 	DX12Device::~DX12Device()
 // 	{
@@ -148,173 +142,80 @@ namespace ElysiaCore
 				}
 			}
 		}
+
+		if (!m_pDevice)
+		{
+			ThrowIfFailed(D3D12CreateDevice(m_pAdapter, D3D_FEATURE_LEVEL_12_0, IID_PPV_ARGS(&m_pDevice)));
+
+			if (bCPUValidationEnabled || bGpuValidationEnabled)
+			{
+				ID3D12InfoQueue* pInfoQueue;
+				if (m_pDevice->QueryInterface(IID_PPV_ARGS(&pInfoQueue)) == S_OK)
+				{
+					pInfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, true);
+					pInfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
+				}
+			}
+		}
+		SetName(m_pDevice, "device");
+
+		// Check for FP16 support
+		D3D12_FEATURE_DATA_D3D12_OPTIONS featureDataOptions = {};
+		ThrowIfFailed(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS, &featureDataOptions, sizeof(D3D12_FEATURE_DATA_D3D12_OPTIONS)));
+		m_fp16Supported = (featureDataOptions.MinPrecisionSupport & D3D12_SHADER_MIN_PRECISION_SUPPORT_16_BIT) != 0;
+
+		// Check for RT support
+		D3D12_FEATURE_DATA_D3D12_OPTIONS5 featureDataOptions5 = {};
+		ThrowIfFailed(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS5, &featureDataOptions5, sizeof(D3D12_FEATURE_DATA_D3D12_OPTIONS5)));
+		m_rt10Supported = (featureDataOptions5.RaytracingTier & D3D12_RAYTRACING_TIER_1_0) != 0;
+		m_rt11Supported = (featureDataOptions5.RaytracingTier & D3D12_RAYTRACING_TIER_1_1) != 0;
+
+		// Check for VariableShadingRate support
+		D3D12_FEATURE_DATA_D3D12_OPTIONS6 featureDataOptions6 = {};
+		ThrowIfFailed(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS6, &featureDataOptions6, sizeof(D3D12_FEATURE_DATA_D3D12_OPTIONS6)));
+		m_vrs1Supported = (featureDataOptions6.VariableShadingRateTier & D3D12_VARIABLE_SHADING_RATE_TIER_1) != 0;
+		m_vrs2Supported = (featureDataOptions6.VariableShadingRateTier & D3D12_VARIABLE_SHADING_RATE_TIER_2) != 0;
+
+		// Check for Barycentrics support
+		D3D12_FEATURE_DATA_D3D12_OPTIONS3 featureDataOptions3 = {};
+		ThrowIfFailed(m_pDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS3, &featureDataOptions3, sizeof(D3D12_FEATURE_DATA_D3D12_OPTIONS3)));
+		m_barycentricsSupported = featureDataOptions3.BarycentricsSupported;
+
+		InitializeDeviceResources();
 	}
 	void DX12Device::OnDestroy()
 	{
 		
 	}
 
-	void DX12Device::InitializeDeviceResources(HWND windowHandle)
+	void DX12Device::InitializeDeviceResources()
 	{
-		// Enable Debug
-		{
-			// ����debugģʽ�¿��ã����Ի�ȡ����ĵ�����Ϣ�ʹ��󱨸�
-		// �����ڴ���D3D12 Deviceǰ���õ��Բ㣬���ú����ֱ��ɾ��(��Ϊ����D3D12 Device�󣬵��ø�API����runtime�Զ�ɾ��Device)
-		// https://learn.microsoft.com/en-us/windows/win32/api/d3d12sdklayers/nf-d3d12sdklayers-id3d12debug-enabledebuglayer
-#if defined(_DEBUG)
-			ID3D12Debug* debugController;
-			if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController))))
-			{
-				debugController->EnableDebugLayer();
-				ElysiaHelper::SafeRelease(debugController);
-			}
-#endif
-		}
-
-		// Create DXGIFactory1
-		{
-			ElysiaHelper::AssertIfFailed(CreateDXGIFactory1(IID_PPV_ARGS(&m_DXGIFactory)));
-		}
-
-		// Get Adapter & Create Device & Create Allocator
-		{
-			// Create Adapter
-			m_pAdapter = nullptr;
-			UINT bestAdapterIndex = 0;
-			size_t bestAdapterMemory = 0;	// ��¼���ר���Դ�
-			for (UINT currAdapterIndex = 0; 
-				m_DXGIFactory->EnumAdapters1(currAdapterIndex, &m_pAdapter) != DXGI_ERROR_NOT_FOUND;
-				currAdapterIndex++)
-			{
-				DXGI_ADAPTER_DESC1 adapterDesc;
-				ElysiaHelper::AssertIfFailed(m_pAdapter->GetDesc1(&adapterDesc));
-
-				// soft ware adapter
-				if (adapterDesc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE)
-				{
-					continue;
-				}
-
-				DXGI_ADAPTER_DESC AdapterDesc;
-				m_pAdapter->GetDesc(&AdapterDesc);
-				const bool bAMDGPU = (AdapterDesc.VendorId == 0x1002);
-
-				if (bAMDGPU)
-				{
-					AGSReturnCode result = agsInitialize(AGS_MAKE_VERSION(AMD_AGS_VERSION_MAJOR, AMD_AGS_VERSION_MINOR, AMD_AGS_VERSION_PATCH), nullptr, &m_agsContext, &m_agsGPUInfo);
-					if (result == AGS_SUCCESS)
-					{
-						AGSDX12DeviceCreationParams creationParams = {};
-						creationParams.pAdapter = m_pAdapter;
-						creationParams.iid = __uuidof(m_device);
-						creationParams.FeatureLevel = D3D_FEATURE_LEVEL_12_0;
-
-						AGSDX12ExtensionParams extensionParams = {};
-						AGSDX12ReturnedParams returnedParams = {};
-
-						// Create AGS Device
-						//
-						AGSReturnCode rc = agsDriverExtensionsDX12_CreateDevice(m_agsContext, &creationParams, &extensionParams, &returnedParams);
-						if (rc == AGS_SUCCESS)
-						{
-							m_device = dynamic_cast<ID3D12Device5*>(returnedParams.pDevice);
-						}
-						else
-						{
-							Trace("Warning: AGS CreateDevice() failed w/ code=%d", rc);
-						}
-					}
-					else
-					{
-						Trace("Warning: agsInitialize() failed w/ code=%d", result);
-					}
-				}
-
-				// check support D3D12
-				if (FAILED(D3D12CreateDevice(m_pAdapter, D3D_FEATURE_LEVEL_12_2, _uuidof(ID3D12Device), nullptr)))
-				{
-					continue;
-				}
-
-				// DedicatedVideoMemory:�Կ��Դ��ĸ����Դ�
-				// DedicatedSystemMemory:ϵͳ�ڴ��л��ָ��Կ�ר�õĲ���
-				if (adapterDesc.DedicatedVideoMemory > bestAdapterMemory)
-				{
-					bestAdapterIndex = currAdapterIndex;
-					bestAdapterMemory = adapterDesc.DedicatedVideoMemory;
-				}
-
-				ElysiaHelper::SafeRelease(m_pAdapter);
-			}
-
-			if (bestAdapterMemory <= 0)
-			{
-				ElysiaHelper::AssertError("Failed to find an adapter.");
-			}
-
-			m_DXGIFactory->EnumAdapters1(bestAdapterIndex, &m_pAdapter);
-
-			// Create Device
-			ElysiaHelper::AssertIfFailed(D3D12CreateDevice(m_pAdapter, D3D_FEATURE_LEVEL_12_2, IID_PPV_ARGS(&m_device)));
-		}
-
-		CAULDRON_DX12::fsHdrInit(GetAGSContext(), GetAGSGPUInfo(), m_hWnd, m_pAdapter);
-		m_format = fsHdrGetFormat(DISPLAYMODE_SDR);
-
 		// Create Queue
 		{
-			m_graphicsQueue = std::make_unique<DX12Queue>(m_device, D3D12_COMMAND_LIST_TYPE_DIRECT);
-			m_computeQueue = std::make_unique<DX12Queue>(m_device, D3D12_COMMAND_LIST_TYPE_COMPUTE);
-			m_copyQueue = std::make_unique<DX12Queue>(m_device, D3D12_COMMAND_LIST_TYPE_COPY);
+			m_graphicsQueue = std::make_unique<DX12Queue>(m_pDevice, D3D12_COMMAND_LIST_TYPE_DIRECT);
+			m_computeQueue = std::make_unique<DX12Queue>(m_pDevice, D3D12_COMMAND_LIST_TYPE_COMPUTE);
+			m_copyQueue = std::make_unique<DX12Queue>(m_pDevice, D3D12_COMMAND_LIST_TYPE_COPY);
 		}
 
 		// Create Descriptor Heap
 		{
-			m_RTVStagingDescriptorHeap = std::make_unique<DX12StagingDescriptorHeap>(m_device, D3D12_DESCRIPTOR_HEAP_TYPE_RTV,
+			m_RTVStagingDescriptorHeap = std::make_unique<DX12StagingDescriptorHeap>(m_pDevice, D3D12_DESCRIPTOR_HEAP_TYPE_RTV,
 				NUM_RTV_STAGING_DESCRIPTORS);
-			m_SRVStagingDescriptorHeap = std::make_unique<DX12StagingDescriptorHeap>(m_device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
+			m_SRVStagingDescriptorHeap = std::make_unique<DX12StagingDescriptorHeap>(m_pDevice, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
 				NUM_SRV_STAGING_DESCRIPTORS);
-			m_DSVStagingDescriptorHeap = std::make_unique<DX12StagingDescriptorHeap>(m_device, D3D12_DESCRIPTOR_HEAP_TYPE_DSV,
+			m_DSVStagingDescriptorHeap = std::make_unique<DX12StagingDescriptorHeap>(m_pDevice, D3D12_DESCRIPTOR_HEAP_TYPE_DSV,
 				NUM_DSV_STAGING_DESCRIPTORS);
 
 			for (UINT currFrameIndex = 0; currFrameIndex < NUM_FRAMES_IN_FLIGHT; ++currFrameIndex)
 			{
-				m_SRVRenderPassDescriptorHeaps[currFrameIndex] = std::make_unique<DX12RenderPassDescriptorHeap>(m_device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
+				m_SRVRenderPassDescriptorHeaps[currFrameIndex] = std::make_unique<DX12RenderPassDescriptorHeap>(m_pDevice, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
 					NUM_RESERVED_SRV_DESCRIPTORS, NUM_SRV_RENDER_PASS_USER_DESCRIPTORS);
 
 				m_ImguiDescriptors[currFrameIndex] = m_SRVRenderPassDescriptorHeaps[currFrameIndex]->GetReservedDescriptor(IMGUI_RESERVED_DESCRIPTOR_INDEX);
 			}
 			
-			m_samplerRenderPassDescriptorHeap = std::make_unique<DX12RenderPassDescriptorHeap>(m_device, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER,
+			m_samplerRenderPassDescriptorHeap = std::make_unique<DX12RenderPassDescriptorHeap>(m_pDevice, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER,
 				0, NUM_SAMPLER_DESCRIPTORS);
-		}
-
-		// Create Swap Chain
-		{
-			m_descSwapChain;
-			m_descSwapChain.Width = lround(m_screenSize.x);
-			m_descSwapChain.Height = lround(m_screenSize.y);
-			m_descSwapChain.Format = m_format;
-			m_descSwapChain.Stereo = false;
-			m_descSwapChain.SampleDesc.Count = 1;
-			m_descSwapChain.SampleDesc.Quality = 0;
-			m_descSwapChain.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-			m_descSwapChain.BufferCount = NUM_BACK_BUFFERS;
-			m_descSwapChain.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-			m_descSwapChain.Flags = 0;
-			m_descSwapChain.Scaling = DXGI_SCALING_NONE;
-			m_descSwapChain.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
-
-			ThrowIfFailed(m_DXGIFactory->CheckFeatureSupport(
-				DXGI_FEATURE_PRESENT_ALLOW_TEARING, &m_bTearingSupport, sizeof(m_bTearingSupport)));
-
-			m_descSwapChain.Flags = m_bTearingSupport ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0;
-
-			IDXGISwapChain1* swapChain;
-			ElysiaHelper::AssertIfFailed(m_DXGIFactory->CreateSwapChainForHwnd(m_graphicsQueue->GetCommandQueue(), windowHandle, &m_descSwapChain, nullptr, nullptr, &swapChain));
-			ThrowIfFailed(m_DXGIFactory->MakeWindowAssociation(m_hWnd, DXGI_MWA_NO_ALT_ENTER));
-			ElysiaHelper::AssertIfFailed(swapChain->QueryInterface(__uuidof(IDXGISwapChain3), (void**)&m_swapChain));
-			ElysiaHelper::SafeRelease(swapChain);
 		}
 
 		// Create Upload Context
@@ -335,98 +236,10 @@ namespace ElysiaCore
 
 		CreateSamplers();
 
-		m_frameID = 0;
-		m_frameIndex = 0;
 		m_freeReservedDescriptorIndices.resize(NUM_RESERVED_SRV_DESCRIPTORS - 1);
 		std::iota(m_freeReservedDescriptorIndices.begin(), m_freeReservedDescriptorIndices.end(), 1);
-		if (m_displayMode == CAULDRON_DX12::DisplayMode::DISPLAYMODE_SDR)
-		{
-			m_format = ConvertIntoGammaFormat(m_format);
-		}
 	}
-	void DX12Device::CreateWindowDependentResources()
-	{
-		// Create Render Target
-		{
-			for (UINT currBufferIndex = 0; currBufferIndex < NUM_BACK_BUFFERS; currBufferIndex++)
-			{
-				auto currBackBufferRTVHandle = m_RTVStagingDescriptorHeap->NewDescriptorHeapHandle();
 
-				ID3D12Resource* backBufferResource = nullptr;
-				ElysiaHelper::AssertIfFailed(m_swapChain->GetBuffer(currBufferIndex, IID_PPV_ARGS(&backBufferResource)));
-				backBufferResource->SetName(L"Camera Color Buffer");
-
-				D3D12_RENDER_TARGET_VIEW_DESC RTVDecs = {};
-				RTVDecs.Format = m_format;
-				RTVDecs.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
-				RTVDecs.Texture2D.MipSlice = 0;
-				RTVDecs.Texture2D.PlaneSlice = 0;
-				m_device->CreateRenderTargetView(backBufferResource, &RTVDecs, currBackBufferRTVHandle.GetCPUHandle());
-
-				m_backBuffers[currBufferIndex] = std::make_unique<DX12TextureResource>(
-					backBufferResource, D3D12_RESOURCE_STATE_PRESENT);
-				m_backBuffers[currBufferIndex]->SetResourceDesc(backBufferResource->GetDesc());
-				m_backBuffers[currBufferIndex]->SetRTVDescriptor(currBackBufferRTVHandle);
-				backBufferResource->Release();
-			}
-		}
-	}
-	void DX12Device::OnCreateWindowSizeDependentResources(uint32_t dwWidth, uint32_t dwHeight, bool bVSyncOn, DisplayMode displayMode, bool disableLocalDimming)
-	{
-		// check whether the requested mode is supported and fall back to SDR if not supported
-		bool bIsModeSupported = IsModeSupported(displayMode);
-		if (bIsModeSupported == false)
-		{
-			//assert(!"FS HDR display mode not supported");
-			displayMode = DISPLAYMODE_SDR;
-		}
-
-		if ((displayMode == CAULDRON_DX12::DisplayMode::DISPLAYMODE_HDR10_2084 ||
-				displayMode == CAULDRON_DX12::DisplayMode::DISPLAYMODE_HDR10_SCRGB)
-				&&
-				(displayMode == CAULDRON_DX12::DisplayMode::DISPLAYMODE_FSHDR_Gamma22 ||
-					displayMode == CAULDRON_DX12::DisplayMode::DISPLAYMODE_FSHDR_SCRGB))
-		{
-			ThrowIfFailed(
-				m_swapChain->ResizeBuffers(
-					NUM_BACK_BUFFERS,
-					lround(m_screenSize.x),
-					lround(m_screenSize.y),
-					DXGI_FORMAT_B8G8R8A8_UNORM,
-					m_descSwapChain.Flags)
-			);
-
-			ThrowIfFailed(m_swapChain->SetColorSpace1(DXGI_COLOR_SPACE_RGB_FULL_G22_NONE_P709));
-		}
-
-		m_displayMode = displayMode;
-		m_format = fsHdrGetFormat(displayMode);
-		m_bVSyncOn = bVSyncOn;
-
-		for (size_t i = 0; i < m_backBuffers.size(); ++i)
-		{
-			m_backBuffers[i]->GetResource().Release();
-		}
-
-		 ThrowIfFailed(
-		 		m_swapChain->ResizeBuffers(
-		 			NUM_BACK_BUFFERS,
-		 			lround(m_screenSize.x),
-		 			lround(m_screenSize.y),
-		 			m_format,
-		 			m_descSwapChain.Flags)
-		 	);
-		fsHdrSetDisplayMode(displayMode, disableLocalDimming, m_swapChain);
-
-		// if SDR, convert add gamma for the swapchain format so blending is correct
-		if (m_displayMode == DISPLAYMODE_SDR)
-		{
-			m_format = ConvertIntoGammaFormat(m_format);
-		}
-
-		CreateWindowDependentResources();
-	}
-	
 	std::unique_ptr<DX12GraphicsContext>		DX12Device::CreateGraphicsContext()
 	{
 		auto graphicsContext = std::make_unique<DX12GraphicsContext>(this);
@@ -601,7 +414,7 @@ namespace ElysiaCore
 
 		for (uint32_t samplerIndex = 0; samplerIndex < NUM_SAMPLER_DESCRIPTORS; samplerIndex++)
 		{
-			m_device->CreateSampler(&samplerDescs[samplerIndex], currentSamplerDescriptor);
+			m_pDevice->CreateSampler(&samplerDescs[samplerIndex], currentSamplerDescriptor);
 			currentSamplerDescriptor.ptr += m_samplerRenderPassDescriptorHeap->GetDescriptorSingleSize();
 		}
 	}
@@ -681,7 +494,7 @@ namespace ElysiaCore
 
 		CreateRootParameters(rootSignature, rootParameters);
 
-		rootSignature->Init(m_device, 
+		rootSignature->Init(m_pDevice, 
 			D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT | 
 			D3D12_ROOT_SIGNATURE_FLAG_CBV_SRV_UAV_HEAP_DIRECTLY_INDEXED | 
 			D3D12_ROOT_SIGNATURE_FLAG_SAMPLER_HEAP_DIRECTLY_INDEXED);
@@ -692,7 +505,7 @@ namespace ElysiaCore
 	void DX12Device::CopyDescriptors(uint32_t numDestDescriptorRanges, const D3D12_CPU_DESCRIPTOR_HANDLE* destDescriptorRangeStarts, const uint32_t* destDescriptorRangeSizes,
 		uint32_t numSrcDescriptorRanges, const D3D12_CPU_DESCRIPTOR_HANDLE* srcDescriptorRangeStarts, const uint32_t* srcDescriptorRangeSizes, D3D12_DESCRIPTOR_HEAP_TYPE descriptorType)
 	{
-		m_device->CopyDescriptors(numDestDescriptorRanges, destDescriptorRangeStarts, destDescriptorRangeSizes, numSrcDescriptorRanges, srcDescriptorRangeStarts, srcDescriptorRangeSizes, descriptorType);
+		m_pDevice->CopyDescriptors(numDestDescriptorRanges, destDescriptorRangeStarts, destDescriptorRangeSizes, numSrcDescriptorRanges, srcDescriptorRangeStarts, srcDescriptorRangeSizes, descriptorType);
 	}
 	/// <summary>
 	/// 
@@ -704,11 +517,11 @@ namespace ElysiaCore
 		for (UINT currFrameIndex = 0; currFrameIndex < NUM_FRAMES_IN_FLIGHT; ++currFrameIndex)
 		{
 			auto targetDescriptor = m_SRVRenderPassDescriptorHeaps[currFrameIndex]->GetReservedDescriptor(index);
-			m_device->CopyDescriptorsSimple(1, targetDescriptor.GetCPUHandle(), SRVHandle.GetCPUHandle(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+			m_pDevice->CopyDescriptorsSimple(1, targetDescriptor.GetCPUHandle(), SRVHandle.GetCPUHandle(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 		}
 	}
 	
-	ContextSubmissionResult DX12Device::SubmitContextWork(DX12Context& context)
+	ContextSubmissionResult DX12Device::SubmitContextWork(DX12Context& context, UINT frameID)
 	{
 		uint64_t fenceResult = 0;
 
@@ -728,33 +541,29 @@ namespace ElysiaCore
 		}
 
 		ContextSubmissionResult submissionResult;
-		submissionResult.frameID = m_frameID;
-		submissionResult.submissionIndex = static_cast<UINT>(m_contextSubmissions[m_frameID].size());
+		submissionResult.frameID = frameID;
+		submissionResult.submissionIndex = static_cast<UINT>(m_contextSubmissions[frameID].size());
 
-		m_contextSubmissions[m_frameID].push_back(std::make_pair(fenceResult, context.GetContextType()));
+		m_contextSubmissions[frameID].push_back(std::make_pair(fenceResult, context.GetContextType()));
 
 		return submissionResult;
 	}
 
-	void DX12Device::DestoryContext(std::unique_ptr<DX12Context> context)
+	void DX12Device::DestoryContext(std::unique_ptr<DX12Context> context, UINT frameID)
 	{
-		m_destructionQueues[m_frameID].m_contexts.push_back(std::move(context));
+		m_destructionQueues[frameID].m_contexts.push_back(std::move(context));
 	}
-	void DX12Device::DestoryBuffer(std::unique_ptr<DX12BufferResource> buffer)
+	void DX12Device::DestoryBuffer(std::unique_ptr<DX12BufferResource> buffer, UINT frameID)
 	{
-		m_destructionQueues[m_frameID].m_buffers.push_back(std::move(buffer));
+		m_destructionQueues[frameID].m_buffers.push_back(std::move(buffer));
 	}
-	void DX12Device::DestoryPipelineState(std::unique_ptr<DX12PipelineState> pipelineState)
+	void DX12Device::DestoryPipelineState(std::unique_ptr<DX12PipelineState> pipelineState, UINT frameID)
 	{
-		m_destructionQueues[m_frameID].m_pipelineStates.push_back(std::move(pipelineState));
+		m_destructionQueues[frameID].m_pipelineStates.push_back(std::move(pipelineState));
 	}
-	void DX12Device::DestoryShader(std::unique_ptr<DX12Shader> shader)
+	void DX12Device::DestoryTexture(std::unique_ptr<DX12TextureResource> texture, UINT frameID)
 	{
-		//ElysiaHelper::SafeRelease(shader->GetShader());
-	}
-	void DX12Device::DestoryTexture(std::unique_ptr<DX12TextureResource> texture)
-	{
-		m_destructionQueues[m_frameID].m_textures.push_back(std::move(texture));
+		m_destructionQueues[frameID].m_textures.push_back(std::move(texture));
 	}
 
 	void DX12Device::ProcessDestruction(UINT frameIndex)
@@ -767,40 +576,36 @@ namespace ElysiaCore
 		(currFrameDestrctuionQueue.m_pipelineStates).clear();
 	}
 
-	void DX12Device::BeginFrame()
+	void DX12Device::BeginFrame(UINT frameID)
 	{
-		m_frameIndex++;
-		m_frameID = (m_frameID + 1) % NUM_FRAMES_IN_FLIGHT;
-
 		// wait on fences from 2 frames ago
-		auto& fenceValue = m_endOfFrameFences[m_frameID];
+		auto& fenceValue = m_endOfFrameFences[frameID];
 		m_graphicsQueue->WaitForFenceCPUBlocking(fenceValue.m_graphicsQueueFence);
 		m_copyQueue->WaitForFenceCPUBlocking(fenceValue.m_copyQueueFence);
 		m_computeQueue->WaitForFenceCPUBlocking(fenceValue.m_computeQueueFence);
 		
-		ProcessDestruction(m_frameID);
+		ProcessDestruction(frameID);
 
-		m_uploadContexts[m_frameID]->ResolveProcessedUploads();
-		m_uploadContexts[m_frameID]->Reset();
+		m_uploadContexts[frameID]->ResolveProcessedUploads();
+		m_uploadContexts[frameID]->Reset();
 
-		BufferManager::GetInstance().GetUploadRingBuffer()->Reset(m_frameID);
+		BufferManager::GetInstance().GetUploadRingBuffer()->Reset(frameID);
 
-		m_contextSubmissions[m_frameID].clear();
+		m_contextSubmissions[frameID].clear();
 	}
 
-	void DX12Device::EndFrame()
+	void DX12Device::EndFrame(UINT frameID)
 	{
-		m_uploadContexts[m_frameID]->ProcessUploads();
-		SubmitContextWork(*m_uploadContexts[m_frameID]);
+		m_uploadContexts[frameID]->ProcessUploads();
+		SubmitContextWork(*m_uploadContexts[frameID], frameID);
 
-		m_endOfFrameFences[m_frameID].m_copyQueueFence = m_copyQueue->SingalFence();
-		m_endOfFrameFences[m_frameID].m_computeQueueFence = m_computeQueue->SingalFence();
+		m_endOfFrameFences[frameID].m_copyQueueFence = m_copyQueue->SingalFence();
+		m_endOfFrameFences[frameID].m_computeQueueFence = m_computeQueue->SingalFence();
 	}
 
-	void DX12Device::Present()
+	void DX12Device::Present(UINT frameID)
 	{
-		m_swapChain->Present(0, 0);
-		m_endOfFrameFences[m_frameID].m_graphicsQueueFence = m_graphicsQueue->SingalFence();
+		m_endOfFrameFences[frameID].m_graphicsQueueFence = m_graphicsQueue->SingalFence();
 	}
 
 	void DX12Device::WaitForIdle()
@@ -808,25 +613,6 @@ namespace ElysiaCore
 		m_graphicsQueue->WaitForIdle();
 		m_copyQueue->WaitForIdle();
 		m_computeQueue->WaitForIdle();
-	}
-
-	bool DX12Device::IsModeSupported(DisplayMode displayMode)
-	{
-		std::vector<DisplayMode> displayModesAvailable;
-		EnumerateDisplayModes(&displayModesAvailable);
-		return  std::find(displayModesAvailable.begin(), displayModesAvailable.end(), displayMode) != displayModesAvailable.end();
-	}
-	
-	void DX12Device::EnumerateDisplayModes(std::vector<CAULDRON_DX12::DisplayMode> *pModes, std::vector<const char *> *pNames)
-	{
-		fsHdrEnumerateDisplayModes(pModes);
-
-		if (pNames != NULL)
-		{
-			pNames->clear();
-			for (DisplayMode mode : *pModes)
-				pNames->push_back(fsHdrGetDisplayModeString(mode));
-		}
 	}
 
 	ShaderReflectionData DX12Device::ReflectShaderStage(CComPtr<IDxcResult> pResults, CComPtr<IDxcUtils> pUtils)
@@ -1245,5 +1031,18 @@ namespace ElysiaCore
 		}
 		
 		return o;
+	}
+
+	void DX12Device::GetDeviceInfo(std::string *deviceName, std::string *driverVersion)
+	{
+		DXGI_ADAPTER_DESC adapterDescription;
+		m_pAdapter->GetDesc(&adapterDescription);
+
+		*deviceName = format("%S", adapterDescription.Description);
+
+		if (m_agsContext)
+			*driverVersion = m_agsGPUInfo.driverVersion;
+		else
+			*driverVersion = "Enable AGS for Driver Version";
 	}
 }

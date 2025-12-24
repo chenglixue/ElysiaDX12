@@ -4,6 +4,8 @@
 #include "Programs/Helper.h"
 #include "Pass/BasePass.h"
 #include "Runtime/Core/DX12GraphicsContext.h"
+#include "Runtime/Core/SwapChain.h"
+#include "Runtime/Developer/GPUTimestamps.h"
 
 namespace ElysiaRenderer 
 {
@@ -15,93 +17,43 @@ namespace ElysiaRenderer
 	class TextureManager;
 	class CameraManager;
 	class DX12UI;
+	class ElysiaCore::SwapChain;
 	struct ElysiaCore::PipelineStateObject;
 	class ElysiaCore::DX12TextureResource;
 	
 	class Renderer
 	{
 	public:
-		Renderer(HWND windowHandle, UINT2 screenSize, DX12UI* pUI);
-		~Renderer();
+		Renderer();
 
-		void Init();
-		void Update();
-		void Render(); 
-		void Destory();
-		void Resize();
+		void OnCreateWindowSizeDependentResources(SwapChain *pSwapChain, uint32_t Width, uint32_t Height);
+		void OnDestroyWindowSizeDependentResources();
+		void OnUpdateDisplayDependentResources(SwapChain* pSwapChain);
 
-		virtual void OnMouseDown(WPARAM btnState, int x, int y);
-		virtual void OnMouseUp(WPARAM btnState, int x, int y);
-		virtual void OnMouseMove(WPARAM btnState, int x, int y);
-		virtual void OnKeyboardInput();
+		void OnCreate(DX12Device* pDevice, SwapChain* pSwapChain);
+		void OnUpdate();
+		void OnRender(UINT frameID); 
+		void OnDestory();
 
-		bool IsStopped() const
-		{
-			return m_isStopped;
-		}
-		void SetIsStopped(bool isStopped)
-		{
-			m_isStopped = isStopped;
-		}
-		bool IsMin() const
-		{
-			return m_isMin;
-		}
-		void SetIsMin(bool isMin)
-		{
-			m_isMin = isMin;
-		}
-		bool IsMax() const
-		{
-			return m_isMax;
-		}
-		void SetIsMax(bool isMax)
-		{
-			m_isMax = isMax;
-		}
-		bool IsResizing() const
-		{
-			return m_isResizing;
-		}
-		void SetIsResizing(bool isResizing)
-		{
-			m_isResizing = isResizing;
-		}
+		const std::vector<TimeStamp> &GetTimingValues() { return m_TimeStamps; }
 
 	protected:
-		HWND m_windowHandle; 
+		DX12Device*						m_pDevice = nullptr;
 
-		bool m_isStopped = false;
-		bool m_isMin = false;
-		bool m_isMax = false;
-		bool m_isResizing = false;
+		uint32_t                        m_Width;
+		uint32_t                        m_Height;
+		D3D12_VIEWPORT                  m_viewport;
+		D3D12_RECT                      m_rectScissor;
+		
+		GPUTimestamps					m_GPUTimer;
+		std::vector<TimeStamp>          m_TimeStamps;
 
-		XMINT2 m_lastMousePos{};
-		float m_aspectRatio;
-
-		bool              m_VsyncEnabled;
-
-		// Display management
-		DisplayMode               m_currentDisplayMode;
-		DisplayMode               m_previousDisplayModeNamesIndex;
-		DisplayMode               m_currentDisplayModeNamesIndex;
-		std::vector<DisplayMode>  m_displayModesAvailable;
-		std::vector<const char*>  m_displayModesNamesAvailable;
-		bool                      m_disableLocalDimming;
-
-		std::unique_ptr<DX12Device> m_pDevice = nullptr;
-		DX12UI* m_pUI = nullptr;
 		std::unique_ptr<ElysiaCore::DX12GraphicsContext> m_graphicsContext = nullptr;
 		std::vector<std::unique_ptr<D3D12_SAMPLER_DESC>> m_samplers{};
 		std::vector<std::unique_ptr<BasePass>> m_passes{};
 		eastl::vector<std::unique_ptr<MeshRenderer>> m_meshRenderers;
 		RenderTexture* m_pCameraColorRT = nullptr;
 		RenderTexture* m_pCameraDepthRT = nullptr;
-
-		void Setup();
-		void Execute();
-		
-		void UpdateDisplay(int displayMode, bool disableLocalDimming);
 	};     
 }   
           

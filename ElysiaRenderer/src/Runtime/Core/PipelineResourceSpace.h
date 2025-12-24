@@ -1,6 +1,6 @@
 #pragma once
-#include "PipelineResourceUtility.h"
 #include "BufferUtility.h"
+#include "PipelineResourceUtility.h"
 
 namespace ElysiaCore
 {

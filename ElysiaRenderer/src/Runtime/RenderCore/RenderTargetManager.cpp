@@ -53,6 +53,20 @@ namespace ElysiaRenderer
         DXGI_FORMAT format,
         const std::string& name)
     {
+        auto nameHash = xxh::GetHash(name);
+        if (m_renderTextures.contains(nameHash))
+        {
+            auto RT = GetRenderTexture(nameHash);
+            if (width == RT->GetWidth() && height == RT->GetHeight() && format == RT->GetFormat())
+            {
+                return RT;
+            }
+            else
+            {
+                m_renderTextures.at(nameHash).reset();
+            }
+        }
+        
         RenderTextureDesc desc{};
         desc.Width = width;
         desc.Height = height;
@@ -80,12 +94,27 @@ namespace ElysiaRenderer
         bool isDepth,
         const std::string& name)
     {
+        auto nameHash = xxh::GetHash(name);
+        
         RenderTextureDesc desc{};
         desc.Width = width;
         desc.Height = height;
         desc.Format = format;
         desc.Name = stringToLPCWSTR(name);
         desc.IsDepth = isDepth;
+
+        if (m_renderTextures.contains(nameHash))
+        {
+            auto RT = GetRenderTexture(nameHash);
+            if (width == RT->GetWidth() && height == RT->GetHeight() && format == RT->GetFormat())
+            {
+                return RT;
+            }
+            else
+            {
+                m_renderTextures.at(nameHash).reset();
+            }
+        }
 
         auto newRT = std::make_unique<RenderTexture>();
         auto emplaceResult = m_renderTextures.try_emplace(xxh::GetHash(name));
@@ -107,6 +136,20 @@ namespace ElysiaRenderer
         bool enableRandomWrite,
         const std::string& name)
     {
+        auto nameHash = xxh::GetHash(name);
+        if (m_renderTextures.contains(nameHash))
+        {
+            auto RT = GetRenderTexture(nameHash);
+            if (width == RT->GetWidth() && height == RT->GetHeight() && format == RT->GetFormat())
+            {
+                return RT;
+            }
+            else
+            {
+                m_renderTextures.at(nameHash).reset();
+            }
+        }
+        
         RenderTextureDesc desc{};
         desc.Width = width;
         desc.Height = height;

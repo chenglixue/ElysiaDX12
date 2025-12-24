@@ -1,10 +1,12 @@
 #include "stdafx.h"
 
 #include "UserData.h"
-#include "lib/File/Serialization.h"
+#include "Runtime/Resource/Serialization.h"
 
 namespace ElysiaRenderer
 {
+	using namespace ElysiaHelper;
+	
 	std::once_flag UserData::m_initInstanceFlag;
 	std::unique_ptr<UserData> UserData::m_instance;
 

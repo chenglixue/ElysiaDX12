@@ -4,8 +4,9 @@
 #include "DX12RootSignature.h"
 #include "TextureUtility.h"
 #include "DX12DescriptorHeapHandle.h"
+#include "DX12Queue.h"
 #include "ThirdParty/FreesyncHDR.h"
-#include "AMD\libs\AGS\amd_ags.h"
+#include "lib/AMD/libs/AGS/amd_ags.h"
 
 namespace ElysiaCore
 {
@@ -31,49 +32,28 @@ namespace ElysiaCore
 	{
 	public:
 		std::vector<UINT> m_freeReservedDescriptorIndices;
-		
+		std::unique_ptr<DX12StagingDescriptorHeap> m_RTVStagingDescriptorHeap;
+		std::unique_ptr<DX12StagingDescriptorHeap> m_DSVStagingDescriptorHeap;
+		std::unique_ptr<DX12StagingDescriptorHeap> m_SRVStagingDescriptorHeap;
+		std::array<std::unique_ptr<DX12RenderPassDescriptorHeap>, NUM_FRAMES_IN_FLIGHT> m_SRVRenderPassDescriptorHeaps;
+		std::unique_ptr<DX12RenderPassDescriptorHeap> m_CBVRenderPassDescriptorHeap;
+		std::unique_ptr<DX12RenderPassDescriptorHeap> m_samplerRenderPassDescriptorHeap;
+		std::unique_ptr<DX12RenderPassDescriptorHeap> m_UAVRenderPassDescriptorHeap;
+		std::array<DX12DescriptorHeapHandle, NUM_FRAMES_IN_FLIGHT> m_ImguiDescriptors;
+
 	public:
 		DX12Device(){};
 		void OnCreate(eastl::wstring appName, bool bCPUValidationEnabled, bool bGpuValidationEnabled, HWND windowHandle, ElysiaHelper::UINT2 screenSize);
 		void OnDestroy();
 
-		ID3D12Device5*			GetDevice()
+		ID3D12Device*			GetDevice()
 		{
-			return m_device;
+			return m_pDevice;
 		}
-		IDXGIFactory7*			GetDXGIFactory()
-		{
-			return m_DXGIFactory;
-		}
-		IDXGISwapChain4*		GetSwapChain()
-		{
-			return m_swapChain;
-		}
-		DXGI_FORMAT				GetSwapChainFormat()
-		{
-			return m_format;
-		}
-		IDXGIAdapter1*			GetAdapter() const noexcept
+		IDXGIAdapter*			GetAdapter() const noexcept
 		{
 			assert(m_pAdapter != nullptr);
 			return m_pAdapter;
-		}
-		UINT					GetFrameID() const
-		{
-			return m_frameID;
-		}
-		UINT					GetFrameIndex() const
-		{
-			return m_frameIndex;
-		}
-		const Vector4			GetScreenSize() const
-		{
-			return std::move(Vector4(static_cast<float>(m_screenSize.x), static_cast<float>(m_screenSize.y),
-				1.f / static_cast<float>(m_screenSize.x), 1.f / static_cast<float>(m_screenSize.y)));
-		}
-		DX12TextureResource&	GetCurrBackBuffer()
-		{
-			return *m_backBuffers[m_swapChain->GetCurrentBackBufferIndex()];
 		}
 		DX12StagingDescriptorHeap* GetSRVStageHeap() const noexcept
 		{
@@ -95,54 +75,48 @@ namespace ElysiaCore
 		{
 			return *m_samplerRenderPassDescriptorHeap;
 		}
-		DX12DescriptorHeapHandle& GetImguiDescriptor(uint32_t index)
-		{ 
-			return m_ImguiDescriptors[index];
-		}
-		DX12UploadContext* GetUploadContext() const noexcept
-		{
-			return m_uploadContexts[m_frameID].get();
-		}
+		DX12DescriptorHeapHandle& GetImguiDescriptor(uint32_t index) { return m_ImguiDescriptors[index]; }
+		DX12UploadContext* GetUploadContext(UINT frameID) const noexcept{ return m_uploadContexts[frameID].get(); }
 		AGSContext* GetAGSContext() { return m_agsContext; }
 		AGSGPUInfo* GetAGSGPUInfo() { return &m_agsGPUInfo; }
+		ID3D12CommandQueue* GetDirectQueue() { return m_graphicsQueue->GetCommandQueue(); } 
 
-		void CreateWindowDependentResources();
-		void OnCreateWindowSizeDependentResources(uint32_t dwWidth, uint32_t dwHeight, bool bVSyncOn, DisplayMode displayMode = DISPLAYMODE_SDR, bool disableLocalDimming = false);
 		std::unique_ptr<DX12GraphicsContext>		CreateGraphicsContext();
 		std::unique_ptr<DX12Shader>					CreateShader(ShaderCreateDesc& shaderCreateDesc);
 		void										CreateSamplers(D3D12_SHADER_VISIBILITY shaderVisibility = D3D12_SHADER_VISIBILITY_ALL);
 		void										CreateRootParameters(DX12RootSignature* rootSignature, std::vector<DX12RootParameter*>& rootParamters);
 		DX12RootSignature*							CreateRootSignature(const PipelineResourceLayout& resourceLayout, PipelineResourceMapping& resourceMapping);
 
-		void DestoryShader(std::unique_ptr<DX12Shader> shader);
-		void DestoryBuffer(std::unique_ptr<DX12BufferResource> buffer);
-		void DestoryPipelineState(std::unique_ptr<DX12PipelineState> pipelineState);
-		void DestoryContext(std::unique_ptr<DX12Context> context);
-		void DestoryTexture(std::unique_ptr<DX12TextureResource> texture);
+		void DestoryBuffer(std::unique_ptr<DX12BufferResource> buffer, UINT frameID);
+		void DestoryPipelineState(std::unique_ptr<DX12PipelineState> pipelineState, UINT frameID);
+		void DestoryContext(std::unique_ptr<DX12Context> context, UINT frameID);
+		void DestoryTexture(std::unique_ptr<DX12TextureResource> texture, UINT frameID);
 
 		void CopyDescriptors(uint32_t numDestDescriptorRanges, const D3D12_CPU_DESCRIPTOR_HANDLE* destDescriptorRangeStarts, const uint32_t* destDescriptorRangeSizes,
 			uint32_t numSrcDescriptorRanges, const D3D12_CPU_DESCRIPTOR_HANDLE* srcDescriptorRangeStarts, const uint32_t* srcDescriptorRangeSizes, D3D12_DESCRIPTOR_HEAP_TYPE descriptorType);
 		void CopyDescriptorFromStageToRenderPass(DX12DescriptorHeapHandle SRVHandle, UINT index);
-		ContextSubmissionResult SubmitContextWork(DX12Context& context);
+		ContextSubmissionResult SubmitContextWork(DX12Context& context, UINT frameID);
 
 		void WaitForIdle();
 
-		void BeginFrame();
-		void EndFrame();
-		void Present();
+		void BeginFrame(UINT frameID);
+		void EndFrame(UINT frameID);
+		void Present(UINT frameID);
 
-		bool IsModeSupported(DisplayMode displayMode);
-		void EnumerateDisplayModes(std::vector<DisplayMode> *pModes, std::vector<const char *> *pNames = NULL);
-
+		void GetDeviceInfo(std::string *deviceGPUName, std::string *driverVersion);
+		bool IsFp16Supported() { return m_fp16Supported; }
+		bool IsRT10Supported() { return m_rt10Supported; }
+		bool IsRT11Supported() { return m_rt11Supported; }
+		bool IsVRSTier1Supported() { return m_vrs1Supported; }
+		bool IsVRSTier2Supported() { return m_vrs2Supported; }
+		bool IsBarycentricsSupported() { return m_barycentricsSupported; }
 	private:
-		// ��¼DX12Queuÿ��singal���m_nextFenceValue
 		struct EndOfFrameFences
 		{
 			uint64_t m_graphicsQueueFence = 0;
 			uint64_t m_computeQueueFence = 0;
 			uint64_t m_copyQueueFence = 0;
 		};
-
 		struct DestructionQueue
 		{
 			std::vector<std::unique_ptr<DX12BufferResource>> m_buffers;
@@ -151,7 +125,7 @@ namespace ElysiaCore
 			std::vector<std::unique_ptr<DX12PipelineState>> m_pipelineStates;
 		};
 
-		void InitializeDeviceResources(HWND windowHandle);
+		void InitializeDeviceResources();
 		void ProcessDestruction(UINT frameIndex);
 
 		ShaderReflectionData ReflectShaderStage(CComPtr<IDxcResult> pResults, CComPtr<IDxcUtils> pUtils);
@@ -170,35 +144,28 @@ namespace ElysiaCore
 
 		HWND m_hWnd;
 		ElysiaHelper::UINT2 m_screenSize = Vector2::Zero;
-		UINT m_frameIndex;
-		UINT m_frameID;
-		DXGI_FORMAT m_format;
+		
 		AGSContext* m_agsContext = nullptr;
 		AGSGPUInfo  m_agsGPUInfo = {};
 		BOOL m_bTearingSupport = false;
 		DisplayMode m_displayMode = DISPLAYMODE_SDR;
 		bool m_bVSyncOn = false;
-		DXGI_SWAP_CHAIN_DESC1 m_descSwapChain = {};
 
-		ID3D12Device5* m_device = nullptr;
+		bool                  m_fp16Supported = false;
+		bool                  m_rt10Supported = false;
+		bool                  m_rt11Supported = false;
+		bool                  m_vrs1Supported = false;
+		bool                  m_vrs2Supported = false;
+		bool                  m_barycentricsSupported = false;
+
+		ID3D12Device* m_pDevice = nullptr;
 		IDXGIAdapter* m_pAdapter = nullptr;
-		IDXGIFactory7* m_DXGIFactory = nullptr;
-		IDXGISwapChain4* m_swapChain = nullptr;
 		std::unique_ptr<DX12Queue> m_graphicsQueue;
 		std::unique_ptr<DX12Queue> m_computeQueue;
 		std::unique_ptr<DX12Queue> m_copyQueue;
-		std::unique_ptr<DX12StagingDescriptorHeap> m_RTVStagingDescriptorHeap;
-		std::unique_ptr<DX12StagingDescriptorHeap> m_DSVStagingDescriptorHeap;
-		std::unique_ptr<DX12StagingDescriptorHeap> m_SRVStagingDescriptorHeap;
-		std::array<std::unique_ptr<DX12RenderPassDescriptorHeap>, NUM_FRAMES_IN_FLIGHT> m_SRVRenderPassDescriptorHeaps;
-		std::unique_ptr<DX12RenderPassDescriptorHeap> m_CBVRenderPassDescriptorHeap;
-		std::unique_ptr<DX12RenderPassDescriptorHeap> m_samplerRenderPassDescriptorHeap;
-		std::unique_ptr<DX12RenderPassDescriptorHeap> m_UAVRenderPassDescriptorHeap;
-		std::array<DX12DescriptorHeapHandle, NUM_FRAMES_IN_FLIGHT> m_ImguiDescriptors;
+
+		std::array<EndOfFrameFences, ElysiaHelper::NUM_FRAMES_IN_FLIGHT> m_endOfFrameFences;
 		std::array<std::unique_ptr<DX12UploadContext>, NUM_FRAMES_IN_FLIGHT> m_uploadContexts;
-		std::array<std::unique_ptr<DX12TextureResource>, NUM_BACK_BUFFERS> m_backBuffers;
-		
-		std::array<EndOfFrameFences, NUM_FRAMES_IN_FLIGHT> m_endOfFrameFences;
 		std::array<std::vector<std::pair<uint64_t, D3D12_COMMAND_LIST_TYPE>>, NUM_FRAMES_IN_FLIGHT> m_contextSubmissions;
 		std::array<DestructionQueue, NUM_FRAMES_IN_FLIGHT> m_destructionQueues;
 	};

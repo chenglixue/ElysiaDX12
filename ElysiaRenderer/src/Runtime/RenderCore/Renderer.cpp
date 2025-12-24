@@ -38,125 +38,19 @@ namespace ElysiaRenderer
 	using namespace ElysiaModel;
 	using namespace ElysiaCore;
 
-	Renderer::Renderer(HWND windowHandle, UINT2 screenSize, DX12UI* pUI) :
-		m_pUI(pUI),
-		m_disableLocalDimming(false),
-		m_displayModesAvailable(),
-		m_displayModesNamesAvailable(),
-		m_currentDisplayMode(DISPLAYMODE_SDR),
-		m_VsyncEnabled(false)
+	Renderer::Renderer()
 	{
-		m_windowHandle = windowHandle;
-		m_aspectRatio = static_cast<float>(screenSize.x) / static_cast<float>(screenSize.y);
-		m_pDevice = std::make_unique<DX12Device>(windowHandle, screenSize);
+		
+	}
+
+	void Renderer::OnCreate(DX12Device* pDevice, SwapChain* pSwapChain)
+	{
+		m_pDevice = pDevice;
+		
 		m_graphicsContext = m_pDevice->CreateGraphicsContext();
+		// initialize the GPU time stamps module
+		m_GPUTimer.OnCreate(pDevice, NUM_BACK_BUFFERS);
 
-		
-		m_pDevice->EnumerateDisplayModes(&m_displayModesAvailable, &m_displayModesNamesAvailable);
-
-		DeSerializeUserData();
-
-		
-		
-		m_pUI->InitDescriptor(windowHandle, m_pDevice.get());
-
-		BufferManager::GetInstance().Init(m_pDevice.get());
-		TextureManager::GetInstance().Init(m_pDevice.get());
-		RenderTargetManager::GetInstance().Init(m_pDevice.get());
-		CameraManager::GetInstance().Init(m_pDevice.get());
-		LightManager::GetInstance().Init(m_pDevice.get());
-		PSOManager::GetInstance().Init(m_pDevice.get());
-	}
-
-	Renderer::~Renderer()
-	{ 
-	}
-
-	void Renderer::Init()
-	{
-#if (_WIN32_WINNT >= 0x0A00 /*_WIN32_WINNT_WIN10*/)
-		Microsoft::WRL::Wrappers::RoInitializeWrapper initialize(RO_INIT_MULTITHREADED);
-		if (FAILED(initialize))
-			// error
-#else
-		HRESULT hr = ThrowIfFailed(CoInitializeEx(nullptr, COINIT_MULTITHREADED));
-		if (FAILED(hr))
-			// error
-#endif
-			
-		UpdateDisplay(UserData::GetInstance().displayMode, m_disableLocalDimming);
-
-		Setup();
-	}
-	void Renderer::Update()
-	{
-		if (CheckIfWindowModeHdrOn() && (m_displayModesAvailable[m_currentDisplayModeNamesIndex] == DISPLAYMODE_SDR ||
-						m_displayModesAvailable[m_currentDisplayModeNamesIndex] == DISPLAYMODE_HDR10_2084 ||
-						m_displayModesAvailable[m_currentDisplayModeNamesIndex] == DISPLAYMODE_HDR10_SCRGB))
-		{
-			UpdateDisplay(UserData::GetInstance().displayMode, m_disableLocalDimming);
-		}
-		LightManager::GetInstance().Update();
-		//OnKeyboardInput();
-		SerializeUserData();
-	}
-	void Renderer::Render()
-	{
-		Execute();
-	}
-	void Renderer::Destory()
-	{
-		m_pDevice->WaitForIdle();
-		m_pDevice->DestoryContext(std::move(m_graphicsContext));
-
-		m_graphicsContext.release();
-	}
-	void Renderer::Resize()
-	{
-
-	}
-
-	void Renderer::OnMouseDown(WPARAM btnState, int x, int y)
-	{
-		m_lastMousePos = XMINT2(x, y);
-
-		// Capture mouse input to the specified window. 
-		// This means that even if the mouse pointer moves out of the window, 
-		// all subsequent mouse messages (such as WM_MOUSEMOVE, WM_LBUTTONDOWN, WM_RBUTTONDOWN, etc.) will still be sent to that window 
-		// until the ReleaseCapture function is called to release the capture.
-		SetCapture(m_windowHandle);
-	}
-	void Renderer::OnMouseUp(WPARAM btnState, int x, int y)
-	{
-		ReleaseCapture();
-	}
-	void Renderer::OnMouseMove(WPARAM btnState, int x, int y)
-	{
-		m_lastMousePos.x = x;
-		m_lastMousePos.y = y;
-	}
-	void Renderer::OnKeyboardInput()
-	{
-	}
-
-	void Renderer::Execute()
-	{
-		m_pDevice->BeginFrame();
-		m_graphicsContext->Reset();
-
-		for (auto& pass : m_passes)
-		{
-			pass->Render();
-		}
-
-		m_pDevice->SubmitContextWork(*m_graphicsContext);
-		m_pDevice->EndFrame();
-
-		m_pDevice->Present(); 
-	}
-
-	void Renderer::Setup()
-	{
 		for (const auto& modelPath : g_ModelPaths)
 		{
 			auto pLoadedModel = ModelManager::GetInstance().LoadStaticModel(modelPath, 1);
@@ -168,57 +62,10 @@ namespace ElysiaRenderer
 
 		InitPSOHelpers();
 
-		CameraManager::GetInstance().CreateMainCamera(Vector3(-11.5f, 200.85f, -0.45f) ,
-			m_aspectRatio, 3.14159f / 4.0f, 0.1f, 2000.f);
-
-		if (!UserData::GetInstance().IsUseHDR)
-		{
-			m_pCameraColorRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(static_cast<UINT64>(m_pDevice->GetScreenSize().x),
-				static_cast<UINT64>(m_pDevice->GetScreenSize().y),
-				DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
-				true,
-				"Camera Color RT");
-		}
-		else
-		{
-			switch (UserData::GetInstance().HDRLevel)
-			{
-			case HDRQuality::Low: 
-				{
-					m_pCameraColorRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(static_cast<UINT64>(m_pDevice->GetScreenSize().x),
-						static_cast<UINT64>(m_pDevice->GetScreenSize().y),
-						DXGI_FORMAT_R11G11B10_FLOAT,
-						true,
-						"Camera Color RT"); 
-					break;  
-				} 
-			case HDRQuality::High:
-				{ 
-					m_pCameraColorRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(static_cast<UINT64>(m_pDevice->GetScreenSize().x),
-						static_cast<UINT64>(m_pDevice->GetScreenSize().y),
-						DXGI_FORMAT_R16G16B16A16_FLOAT,
-						true,
-						"Camera Color RT");
-					break;
-				}
-			default:
-				{ 
-					ThrowRuntimeError("Invalid choose");
-					break;
-				}
-			}
-		}
-		m_pCameraDepthRT = RenderTargetManager::GetInstance().CreateRenderTexture(
-			static_cast<UINT64>(m_pDevice->GetScreenSize().x),
-			static_cast<UINT64>(m_pDevice->GetScreenSize().y),
-			DXGI_FORMAT_D24_UNORM_S8_UINT,
-			true,
-			"Camera Depth RT");
-
 		RenderPassData passData
 		{
-			.RenderSize = m_pDevice->GetScreenSize().xy(),
-			.pDevice = m_pDevice.get(), 
+			.RenderSize = {m_Width, m_Height},
+			.pDevice = m_pDevice, 
 			.pCommand = m_graphicsContext.get(),
 			.pCameraColorRT = m_pCameraColorRT,
 			.pCameraDepthRT = m_pCameraDepthRT
@@ -238,24 +85,88 @@ namespace ElysiaRenderer
 			pass->Setup(passData);
 		}
 	}
-	void Renderer::UpdateDisplay(int displayMode, bool disableLocalDimming)
+
+	void Renderer::OnCreateWindowSizeDependentResources(SwapChain *pSwapChain, uint32_t Width, uint32_t Height)
 	{
-		// Nothing was changed in UI
-		if (displayMode < 0)
+		m_Width = Width;
+		m_Height = Height;
+		m_viewport = { 0.0f, 0.0f, static_cast<float>(Width), static_cast<float>(Height), 0.0f, 1.0f };
+		m_rectScissor = { 0, 0, (LONG)Width, (LONG)Height };
+		
+		CameraManager::GetInstance().CreateMainCamera(Vector3(-11.5f, 200.85f, -0.45f),
+			static_cast<float>(Width) / static_cast<float>(Height),
+			3.14159f / 4.0f, 0.1f, 2000.f);
+
+		if (!UserData::GetInstance().IsUseHDR)
 		{
-			m_currentDisplayModeNamesIndex = m_previousDisplayModeNamesIndex;
-			return;
+			m_pCameraColorRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(Width, Height,
+				DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
+				true,
+				"Camera Color RT");
 		}
-
-		if (m_currentDisplayMode != displayMode || m_disableLocalDimming != disableLocalDimming)
+		else
 		{
-			// Flush GPU
-			m_pDevice->WaitForIdle();
-
-			m_currentDisplayMode = (DisplayMode)displayMode;
-			m_disableLocalDimming = disableLocalDimming;
-
-			m_pDevice->OnCreateWindowSizeDependentResources(m_pDevice->GetScreenSize().x, m_pDevice->GetScreenSize().y, m_VsyncEnabled, m_currentDisplayMode, m_disableLocalDimming);
+			switch (UserData::GetInstance().HDRLevel)
+			{
+			case HDRQuality::Low: 
+				{
+					m_pCameraColorRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(Width, Height,
+						DXGI_FORMAT_R11G11B10_FLOAT,
+						true,
+						"Camera Color RT"); 
+					break;  
+				} 
+			case HDRQuality::High:
+				{ 
+					m_pCameraColorRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(Width, Height,
+						DXGI_FORMAT_R16G16B16A16_FLOAT,
+						true,
+						"Camera Color RT");
+					break;
+				}
+			default:
+				{ 
+					ThrowRuntimeError("Invalid choose");
+					break;
+				}
+			}
 		}
+	}
+	void Renderer::OnDestroyWindowSizeDependentResources()
+	{
+		
+	}
+	void Renderer::OnUpdateDisplayDependentResources(SwapChain* pSwapChain)
+	{
+		
+	}
+
+	void Renderer::OnUpdate()
+	{
+		LightManager::GetInstance().Update();
+		SerializeUserData();
+	}
+	void Renderer::OnRender(UINT frameID)
+	{
+		m_graphicsContext->Reset();
+
+		// Timing values
+		UINT64 gpuTicksPerSecond;
+		m_pDevice->GetDirectQueue()->GetTimestampFrequency(&gpuTicksPerSecond);
+		m_GPUTimer.OnBeginFrame(gpuTicksPerSecond, &m_TimeStamps);
+		m_GPUTimer.GetTimeStamp(m_graphicsContext->GetCommandList(), "Begin Frame");
+		
+		for (auto& pass : m_passes)
+		{
+			pass->Render();
+		}
+		
+		m_pDevice->SubmitContextWork(*m_graphicsContext, frameID);
+
+		m_GPUTimer.OnEndFrame();
+	}
+	void Renderer::OnDestory()
+	{
+		m_graphicsContext.release();
 	}
 }            

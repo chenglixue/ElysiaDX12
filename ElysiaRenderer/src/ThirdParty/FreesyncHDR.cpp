@@ -17,12 +17,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#include "../../stdafx.h"
+#include "stdafx.h"
 #include "FreesyncHDR.h"
 
 #include <string.h>
 #include <dxgi1_6.h>
-#include "lib/Utility/Helper.h"
+#include "Programs/Helper.h"
 
 namespace CAULDRON_DX12
 {
@@ -80,7 +80,7 @@ namespace CAULDRON_DX12
     //--------------------------------------------------------------------------------------
     inline int ComputeIntersectionArea(int ax1, int ay1, int ax2, int ay2, int bx1, int by1, int bx2, int by2)
     {
-        return eastl::max(0, eastl::min(ax2, bx2) - eastl::max(ax1, bx1)) * eastl::max(0, eastl::min(ay2, by2) - eastl::max(ay1, by1));
+        return eastl::max(0, eastl::min(ax2, bx2) - eastl::max(ax1, bx1)) * eastl::max(0, min(ay2, by2) - eastl::max(ay1, by1));
     }
 
     bool FindBestDisplayIndex(RECT *windowRect, RECT *monitorRect, float *bestIntersectArea)
