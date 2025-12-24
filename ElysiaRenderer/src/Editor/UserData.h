@@ -1,11 +1,11 @@
 #pragma once
-#include "lib/File/Serialization.h"
-#include "lib/Utility/ShadowUtility.h"
-#include "lib/Utility/TonemapUtility.h"
-#include "AMD/LPM/ColorConversion.h"
-#include "lib/Utility/AOUtility.h"
-#include "lib/Utility/DebugUtility.h"
-#include "AMD/LPM/FreesyncHDR.h"
+#include "Runtime/Resource/Serialization.h"
+#include "Runtime/RenderCore/ShadowUtility.h"
+#include "Runtime/RenderCore/TonemapUtility.h"
+#include "ThirdParty/ColorConversion.h"
+#include "Runtime/RenderCore/AOUtility.h"
+#include "Programs/DebugUtility.h"
+#include "ThirdParty/FreesyncHDR.h"
 
 namespace ElysiaRenderer
 {

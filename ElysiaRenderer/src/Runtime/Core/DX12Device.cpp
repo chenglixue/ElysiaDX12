@@ -66,8 +66,10 @@ namespace ElysiaCore
 // #endif // DEBUG
 //
 // }
+	DX12Device::DX12Device()= default;
+	DX12Device::~DX12Device()= default;
 
-	void DX12Device::OnCreate(eastl::wstring appName, bool bCPUValidationEnabled, bool bGpuValidationEnabled, HWND windowHandle, ElysiaHelper::UINT2 screenSize)
+	void DX12Device::OnCreate(eastl::wstring appName, bool bCPUValidationEnabled, bool bGpuValidationEnabled)
 	{
 		// Enable the D3D12 debug layer
 		//
@@ -261,7 +263,7 @@ namespace ElysiaCore
 		WCHAR assetsPath[512];
 		ElysiaHelper::GetAssetsPath(assetsPath, _countof(assetsPath));
 
-		ElysiaHelper::ShaderCompileOptions compileOptions;
+		ShaderCompileOptions compileOptions;
 		
 #if defined(_DEBUG)
 		compileOptions.EnableDebug(true);
@@ -548,7 +550,7 @@ namespace ElysiaCore
 
 		return submissionResult;
 	}
-
+	
 	void DX12Device::DestoryContext(std::unique_ptr<DX12Context> context, UINT frameID)
 	{
 		m_destructionQueues[frameID].m_contexts.push_back(std::move(context));
@@ -565,7 +567,7 @@ namespace ElysiaCore
 	{
 		m_destructionQueues[frameID].m_textures.push_back(std::move(texture));
 	}
-
+	
 	void DX12Device::ProcessDestruction(UINT frameIndex)
 	{
 		auto& currFrameDestrctuionQueue = m_destructionQueues[frameIndex];
@@ -578,6 +580,7 @@ namespace ElysiaCore
 
 	void DX12Device::BeginFrame(UINT frameID)
 	{
+		m_frameID = frameID;
 		// wait on fences from 2 frames ago
 		auto& fenceValue = m_endOfFrameFences[frameID];
 		m_graphicsQueue->WaitForFenceCPUBlocking(fenceValue.m_graphicsQueueFence);
@@ -594,18 +597,18 @@ namespace ElysiaCore
 		m_contextSubmissions[frameID].clear();
 	}
 
-	void DX12Device::EndFrame(UINT frameID)
+	void DX12Device::EndFrame()
 	{
-		m_uploadContexts[frameID]->ProcessUploads();
-		SubmitContextWork(*m_uploadContexts[frameID], frameID);
+		m_uploadContexts[m_frameID]->ProcessUploads();
+		SubmitContextWork(*m_uploadContexts[m_frameID], m_frameID);
 
-		m_endOfFrameFences[frameID].m_copyQueueFence = m_copyQueue->SingalFence();
-		m_endOfFrameFences[frameID].m_computeQueueFence = m_computeQueue->SingalFence();
+		m_endOfFrameFences[m_frameID].m_copyQueueFence = m_copyQueue->SingalFence();
+		m_endOfFrameFences[m_frameID].m_computeQueueFence = m_computeQueue->SingalFence();
 	}
 
-	void DX12Device::Present(UINT frameID)
+	void DX12Device::Present()
 	{
-		m_endOfFrameFences[frameID].m_graphicsQueueFence = m_graphicsQueue->SingalFence();
+		m_endOfFrameFences[m_frameID].m_graphicsQueueFence = m_graphicsQueue->SingalFence();
 	}
 
 	void DX12Device::WaitForIdle()

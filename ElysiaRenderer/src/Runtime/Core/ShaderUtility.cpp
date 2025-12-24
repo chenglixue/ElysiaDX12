@@ -3,7 +3,7 @@
 
 #include "Programs/Hash.h"
 
-namespace ElysiaRenderer
+namespace ElysiaCore
 {
 	DXGI_FORMAT MaskToFormat(const uint32_t Mask)
 	{

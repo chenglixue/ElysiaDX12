@@ -1,12 +1,12 @@
 #pragma once
 #include "stdafx.h"
 
-#include <assimp/mesh.h>
+#include "assimp/mesh.h"
 
 #include "Programs/BoundingBox.h"
 #include "Runtime/RenderCore/TextureManager.h"
 #include "Runtime/RenderCore/BufferManager.h"
-#include "Utility/Containers.h"
+#include "Programs/Containers.h"
 
 namespace ElysiaModel
 {

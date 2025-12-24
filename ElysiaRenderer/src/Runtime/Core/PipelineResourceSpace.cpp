@@ -2,11 +2,14 @@
 #include "PipelineResourceSpace.h"
 
 #include "Runtime/Core/DX12BufferResource.h"
-#include "Runtime/Core/DX12TextureBuffer.h"
-
+#include "BufferUtility.h"
+#include "PipelineResourceUtility.h"
 
 namespace ElysiaCore
 {
+	PipelineResourceSpace::PipelineResourceSpace() = default;
+	PipelineResourceSpace::~PipelineResourceSpace() = default;
+	
 	UINT PipelineResourceSpace::GetIndexOfBindingIndex(const std::vector<PipelineResourceBinding*>& bindResources, UINT bindingIndex)
 	{
 		const UINT numBinds = static_cast<UINT>(bindResources.size());

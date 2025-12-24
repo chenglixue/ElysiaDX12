@@ -3,12 +3,10 @@
 
 namespace ElysiaRenderer
 {
-	class ElysiaCore::DX12Device;
-	
 	class MeshManager : public IManager
 	{
 	public:
-		MeshManager() = default;
+		MeshManager();
 		MeshManager(const MeshManager& rhs) = delete;
 		MeshManager& operator=(MeshManager& rhs) = delete;
 		MeshManager(MeshManager&& rhs) = default;
@@ -23,13 +21,13 @@ namespace ElysiaRenderer
 			return *m_instance;
 		}
 
-		virtual void Init(ElysiaCore::DX12Device* pDevice) override;
+		virtual void Init(DX12Device* pDevice) override;
 		virtual void Destory() override;
 
 		void LoadModel(const std::vector<LPCWSTR>& modelPaths);
 
 	private:
-		ElysiaCore::DX12Device* m_pDevice = nullptr;
+		DX12Device* m_pDevice = nullptr;
 		static std::unique_ptr<MeshManager> m_instance;
 		static std::once_flag m_initInstanceFlag;
 		

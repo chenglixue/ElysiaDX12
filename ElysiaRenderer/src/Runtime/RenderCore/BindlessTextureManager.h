@@ -7,8 +7,8 @@
 
 namespace ElysiaRenderer
 {
-	class ElysiaCore::DX12RenderPassDescriptorHeap;
-	class ElysiaCore::DX12StagingDescriptorHeap;
+	class DX12RenderPassDescriptorHeap;
+	class DX12StagingDescriptorHeap;
 }
 
 namespace ElysiaRenderer
@@ -27,7 +27,10 @@ namespace ElysiaRenderer
 		};
 		
 	public:
-		virtual void Init(ElysiaCore::DX12Device* pDevice) override;
+		BindlessTextureManager();
+		~BindlessTextureManager();
+		
+		virtual void Init(DX12Device* pDevice) override;
 		virtual void Destory() override;
 		
 		TextureHandle CreateTextureFromFile(const std::wstring& filePath, bool isSRGB = false);
@@ -40,7 +43,7 @@ namespace ElysiaRenderer
 		void Clear();
 		
 	private:
-		ElysiaCore::DX12Device* m_pDevice = nullptr;
+		DX12Device* m_pDevice = nullptr;
 		
 		std::mutex                  m_mutex;
 		

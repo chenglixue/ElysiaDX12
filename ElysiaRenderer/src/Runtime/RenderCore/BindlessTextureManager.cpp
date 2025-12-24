@@ -2,7 +2,6 @@
 #include "BindlessTextureManager.h"
 
 #include "BufferManager.h"
-#include "Runtime/Core/DX12Device.h"
 #include "Runtime/Core/DX12RenderPassDescriptorHeap.h"
 #include "Runtime/Core/DX12StagingDescriptorHeap.h"
 #include "Runtime/Core/DX12TextureBuffer.h"
@@ -10,7 +9,10 @@
 
 namespace ElysiaRenderer
 {
-	void BindlessTextureManager::Init(ElysiaCore::DX12Device* pDevice)
+	BindlessTextureManager::BindlessTextureManager() = default;
+	BindlessTextureManager::~BindlessTextureManager() = default;
+	
+	void BindlessTextureManager::Init(DX12Device* pDevice)
 	{
 		assert(pDevice);
 		m_pDevice = pDevice;

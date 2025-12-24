@@ -1,6 +1,6 @@
 #pragma once
 #include "stdafx.h"
-#include "../Utility/Helper.h"
+#include "Programs/Helper.h"
 
 namespace ElysiaHelper
 {

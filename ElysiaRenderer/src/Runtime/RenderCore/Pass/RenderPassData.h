@@ -1,6 +1,6 @@
 #pragma once
 #include "stdafx.h"
-#include "lib/DX12//DX12GraphicsContext.h"
+#include "Runtime/Core/DX12GraphicsContext.h"
 
 namespace ElysiaRenderer
 {

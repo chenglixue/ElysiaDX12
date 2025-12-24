@@ -1,6 +1,9 @@
 #include "stdafx.h"
 #include "FrameworkWindows.h"
 
+#include "FrameContext.h"
+#include "Runtime/RenderCore/BufferManager.h"
+
 
 namespace ElysiaEngine
 {
@@ -349,7 +352,7 @@ namespace ElysiaEngine
         m_windowHwnd = WindowsHandle;
 
         // Create Device
-        m_pDevice->OnCreate(m_Name, m_isCpuValidationLayerEnabled, m_isGpuValidationLayerEnabled, m_windowHwnd, m_initializeAGS);
+        m_pDevice->OnCreate(m_Name, m_isCpuValidationLayerEnabled, m_isGpuValidationLayerEnabled);
 
         // set stable power state (only works when Developer Mode is enabled)
         if (m_stablePowerState)
@@ -365,7 +368,7 @@ namespace ElysiaEngine
 
                 // device removed, so recreate
                 m_pDevice->OnDestroy();
-                m_pDevice->OnCreate(m_Name, m_isCpuValidationLayerEnabled, m_isGpuValidationLayerEnabled, m_windowHwnd, m_initializeAGS);
+                m_pDevice->OnCreate(m_Name, m_isCpuValidationLayerEnabled, m_isGpuValidationLayerEnabled);
                 m_stablePowerState = false;
             }
         }
@@ -598,7 +601,14 @@ namespace ElysiaEngine
         m_frameIndex++;
         m_frameID = (m_frameID + 1) % ElysiaHelper::NUM_FRAMES_IN_FLIGHT;
         
+        FrameContext frameContext
+        {
+            .frameID = m_frameID,
+            .frameIndex = m_frameIndex,
+        };
+        
         m_pDevice->BeginFrame(m_frameID);
+        ElysiaRenderer::BufferManager::GetInstance().Update(frameContext);
         
         // Get timings
         double timeNow = MillisecondsNow();
@@ -611,7 +621,7 @@ namespace ElysiaEngine
     {
         m_swapChain.Present();
 
-        m_pDevice->EndFrame(m_frameID);
+        m_pDevice->EndFrame();
 
         // If we are doing GPU Validation, flush every frame
         if (m_isGpuValidationLayerEnabled)
@@ -636,7 +646,7 @@ namespace ElysiaEngine
     void FrameworkWindows::Present()
     {
         m_swapChain.Present();
-        m_pDevice->Present(m_frameID);
+        m_pDevice->Present();
     }
 
 }

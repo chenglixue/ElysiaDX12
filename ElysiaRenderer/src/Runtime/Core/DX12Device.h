@@ -19,7 +19,10 @@ namespace ElysiaCore
 	class DX12BufferResource;
 	class DX12StagingDescriptorHeap;
 	class DX12Queue;
+}
 
+namespace ElysiaCore
+{
 	struct ContextSubmissionResult
 	{
 		UINT frameID = 0;
@@ -42,10 +45,12 @@ namespace ElysiaCore
 		std::array<DX12DescriptorHeapHandle, NUM_FRAMES_IN_FLIGHT> m_ImguiDescriptors;
 
 	public:
-		DX12Device(){};
-		void OnCreate(eastl::wstring appName, bool bCPUValidationEnabled, bool bGpuValidationEnabled, HWND windowHandle, ElysiaHelper::UINT2 screenSize);
+		DX12Device();
+		~DX12Device();
+		void OnCreate(eastl::wstring appName, bool bCPUValidationEnabled, bool bGpuValidationEnabled);
 		void OnDestroy();
 
+		UINT GetFrameID() const noexcept {return m_frameID;} 
 		ID3D12Device*			GetDevice()
 		{
 			return m_pDevice;
@@ -76,7 +81,7 @@ namespace ElysiaCore
 			return *m_samplerRenderPassDescriptorHeap;
 		}
 		DX12DescriptorHeapHandle& GetImguiDescriptor(uint32_t index) { return m_ImguiDescriptors[index]; }
-		DX12UploadContext* GetUploadContext(UINT frameID) const noexcept{ return m_uploadContexts[frameID].get(); }
+		DX12UploadContext* GetUploadContext() const noexcept{ return m_uploadContexts[m_frameID].get(); }
 		AGSContext* GetAGSContext() { return m_agsContext; }
 		AGSGPUInfo* GetAGSGPUInfo() { return &m_agsGPUInfo; }
 		ID3D12CommandQueue* GetDirectQueue() { return m_graphicsQueue->GetCommandQueue(); } 
@@ -100,8 +105,8 @@ namespace ElysiaCore
 		void WaitForIdle();
 
 		void BeginFrame(UINT frameID);
-		void EndFrame(UINT frameID);
-		void Present(UINT frameID);
+		void EndFrame();
+		void Present();
 
 		void GetDeviceInfo(std::string *deviceGPUName, std::string *driverVersion);
 		bool IsFp16Supported() { return m_fp16Supported; }
@@ -144,6 +149,7 @@ namespace ElysiaCore
 
 		HWND m_hWnd;
 		ElysiaHelper::UINT2 m_screenSize = Vector2::Zero;
+		UINT m_frameID = 0;
 		
 		AGSContext* m_agsContext = nullptr;
 		AGSGPUInfo  m_agsGPUInfo = {};
@@ -164,7 +170,7 @@ namespace ElysiaCore
 		std::unique_ptr<DX12Queue> m_computeQueue;
 		std::unique_ptr<DX12Queue> m_copyQueue;
 
-		std::array<EndOfFrameFences, ElysiaHelper::NUM_FRAMES_IN_FLIGHT> m_endOfFrameFences;
+		std::array<EndOfFrameFences, NUM_FRAMES_IN_FLIGHT> m_endOfFrameFences;
 		std::array<std::unique_ptr<DX12UploadContext>, NUM_FRAMES_IN_FLIGHT> m_uploadContexts;
 		std::array<std::vector<std::pair<uint64_t, D3D12_COMMAND_LIST_TYPE>>, NUM_FRAMES_IN_FLIGHT> m_contextSubmissions;
 		std::array<DestructionQueue, NUM_FRAMES_IN_FLIGHT> m_destructionQueues;

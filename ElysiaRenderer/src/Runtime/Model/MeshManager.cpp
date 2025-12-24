@@ -6,6 +6,8 @@ namespace ElysiaRenderer
 	std::unique_ptr<MeshManager> MeshManager::m_instance;
 	std::once_flag MeshManager::m_initInstanceFlag;
 	
+	MeshManager::MeshManager() = default;
+	
 	MeshManager::~MeshManager()
 	{
 		Destory();

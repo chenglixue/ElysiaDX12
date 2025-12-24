@@ -1,8 +1,0 @@
-﻿  Building Custom Rule D:/DX12/ElysiaRenderer/ElysiaRenderer/Assimp/Release/tools/assimp_cmd/CMakeLists.txt
-  CompareDump.cpp
-  ImageExtractor.cpp
-  Main.cpp
-  WriteDump.cpp
-  Info.cpp
-  Export.cpp
-  assimp_cmd.vcxproj -> D:\DX12\ElysiaRenderer\ElysiaRenderer\Assimp\Build\bin\Release\assimp.exe

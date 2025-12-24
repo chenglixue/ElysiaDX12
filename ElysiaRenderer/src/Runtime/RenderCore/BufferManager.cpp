@@ -46,9 +46,10 @@ namespace ElysiaRenderer
 		}
 	}
 
-	void BufferManager::Update() 
+	void BufferManager::Update(const ElysiaEngine::FrameContext& context) 
 	{
-		
+		m_frameID = context.frameID;
+		m_frameIndex = context.frameIndex;
 	}
 
 	D3D12MA::Allocator* BufferManager::GetAllocator() const noexcept
@@ -177,7 +178,7 @@ namespace ElysiaRenderer
 	{
 		if(!handle) return;
 		
-		UINT64 deleteFrameIndex = m_pDevice->GetFrameIndex() + NUM_FRAMES_IN_FLIGHT;
+		UINT64 deleteFrameIndex = m_frameIndex + NUM_FRAMES_IN_FLIGHT;
 		m_grbageQueue.push_back({deleteFrameIndex, handle});
 	}
 	void BufferManager::Release(BufferHandle handle)

@@ -28,7 +28,7 @@ namespace ElysiaRenderer
  
 		virtual void Init(ElysiaCore::DX12Device* pDevice) override;
 		virtual void Destory() override;
-		virtual void Update() override;
+		virtual void Update(const ElysiaEngine::FrameContext& context) override;
 
 		DX12DirectionLight* GetMainLight();
 		DX12Shadow* GetMainShadow();
@@ -38,6 +38,9 @@ namespace ElysiaRenderer
 		static std::once_flag m_initInstanceFlag;
 		ElysiaCore::DX12Device* m_pDevice = nullptr;
 
+		UINT m_frameID;
+		UINT64 m_frameIndex;
+		
 		std::unique_ptr<DX12DirectionLight> m_pMainLight = nullptr;
 
 		void CreatMainLight();

@@ -18,11 +18,6 @@ namespace ElysiaRenderer
 
 	}
 
-	Transform	DX12Camera::GetTransform()		const noexcept
-	{
-		return m_transform;
-	}
-
 	float		DX12Camera::GetCameraSpeed()	const noexcept
 	{
 		return m_speed;

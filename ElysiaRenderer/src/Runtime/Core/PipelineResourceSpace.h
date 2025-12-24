@@ -1,10 +1,15 @@
 #pragma once
-#include "BufferUtility.h"
-#include "PipelineResourceUtility.h"
+//#include "BufferUtility.h"
+//#include "PipelineResourceUtility.h"
 
 namespace ElysiaCore
 {
 	class DX12BufferResource;
+	struct PipelineResourceBinding;
+}
+
+namespace ElysiaCore
+{
 
 	/// <summary>
 	/// save all resource in root parameters
@@ -12,11 +17,11 @@ namespace ElysiaCore
 	class PipelineResourceSpace
 	{
 	public:
-		PipelineResourceSpace() = default;
+		PipelineResourceSpace();
 		PipelineResourceSpace(const PipelineResourceSpace& rhs) = default;
 		PipelineResourceSpace& operator=(const PipelineResourceSpace& rhs) = default;
 		PipelineResourceSpace(PipelineResourceSpace&& rhs) = default;
-		~PipelineResourceSpace() = default;
+		~PipelineResourceSpace();
 
 		void Reset();
 		

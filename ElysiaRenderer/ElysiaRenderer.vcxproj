@@ -73,7 +73,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(ProjectDir);$(ProjectDir)/src;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir);$(ProjectDir)/lib;$(ProjectDir)/src;$(ProjectDir)/Include;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Work\ElysiaRenderer\ElysiaRenderer\AMD\libs\AGS;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -119,6 +119,7 @@
       <DisableSpecificWarnings>5033;4819;0018;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <AdditionalOptions>/FS</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -235,6 +236,7 @@
     <ClInclude Include="src\Runtime\Developer\GPUTimestamps.h" />
     <ClInclude Include="src\Runtime\Engine\ECS\Transform.h" />
     <ClInclude Include="src\Runtime\Engine\ElysiaFrame.h" />
+    <ClInclude Include="src\Runtime\Engine\FrameContext.h" />
     <ClInclude Include="src\Runtime\Engine\FrameworkWindows.h" />
     <ClInclude Include="src\Runtime\Model\AssimpLoader.h" />
     <ClInclude Include="src\Runtime\Model\LoadedModel.h" />
@@ -2763,6 +2765,7 @@
       <LinkCompiled>true</LinkCompiled>
     </ClCompile>
     <ClCompile Include="src\Runtime\Engine\ElysiaFrame.cpp" />
+    <ClCompile Include="src\Runtime\Engine\FrameContext.cpp" />
     <ClCompile Include="src\Runtime\Engine\FrameworkWindows.cpp" />
     <ClCompile Include="src\Runtime\Model\AssimpLoader.cpp">
       <AdditionalIncludeDirectories>C:\Work\ElysiaRenderer\packages\boost.1.87.0\build\..\lib\native\include\;C:\Work\ElysiaRenderer\packages\Microsoft.Direct3D.D3D12.1.618.1\build\native\include;C:\Work\ElysiaRenderer\packages\Microsoft.Direct3D.D3D12.1.618.1\build\native\include\d3dx12;C:\Work\ElysiaRenderer\packages\Microsoft.Direct3D.D3D12.1.618.1\build\native\;C:\Work\ElysiaRenderer\packages\directxtk12_desktop_win10.2025.7.10.1\build\native\..\..\include;C:\Work\ElysiaRenderer\packages\WinPixEventRuntime.1.0.240308001\build\..\Include\WinPixEventRuntime;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc\include;C:\Work\ElysiaRenderer\ElysiaRenderer\;C:\Work\ElysiaRenderer\ElysiaRenderer\\include;C:\Work\ElysiaRenderer\ElysiaRenderer\\lib;C:\Work\ElysiaRenderer\ElysiaRenderer\\src;;C:\Work\ElysiaRenderer\packages\Vcpkg.Nuget.1.5.0\vcpkg_bin\installed\x64-windows\include;C:\Work\ElysiaRenderer\packages\Vcpkg.Nuget.1.5.0\vcpkg_bin\installed\x64-windows\installed\x64-windows\include</AdditionalIncludeDirectories>

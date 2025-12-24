@@ -19,9 +19,10 @@ namespace ElysiaRenderer
 		m_pDevice = pDevice;
 	}
 
-	void CameraManager::Update()
+	void CameraManager::Update(const ElysiaEngine::FrameContext& context)
 	{
-
+		m_frameID = context.frameID;
+		m_frameIndex = context.frameIndex;
 	}
 
 	void CameraManager::Destory()

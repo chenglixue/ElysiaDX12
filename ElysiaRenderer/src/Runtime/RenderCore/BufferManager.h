@@ -9,13 +9,7 @@
 #include "Runtime/RenderCore/RenderTexture.h"
 #include "Runtime/Model/LoadedModel.h"
 
-namespace ElysiaCore
-{
-	class DX12Device;
-	
-}
-
-namespace ElysiaHelper
+namespace ElysiaRenderer
 {
 	struct BufferCreationDesc;
 }
@@ -48,7 +42,7 @@ namespace ElysiaRenderer
 
 		virtual void Init(ElysiaCore::DX12Device* pDevice) override;
 		virtual void Destory() override;
-		virtual void Update() override;
+		virtual void Update(const ElysiaEngine::FrameContext& context) override;
 
 		D3D12MA::Allocator* GetAllocator() const noexcept;
 		UploadRingBuffer* GetUploadRingBuffer() const noexcept;
@@ -65,6 +59,8 @@ namespace ElysiaRenderer
 		BufferHandle CreateIndexBuffer(const LoadedModel& model);
 
 	private:
+		UINT m_frameID;
+		UINT64 m_frameIndex;
 		static std::unique_ptr<BufferManager> m_instance;
 		static std::once_flag m_initInstanceFlag;
 
@@ -78,7 +74,7 @@ namespace ElysiaRenderer
 		std::queue<uint32_t> m_freeBufferIndices;
 		std::vector<std::pair<uint64_t, BufferHandle>> m_grbageQueue;
 
-		std::unique_ptr<UploadRingBuffer> m_pUploadBuffer;
+		std::unique_ptr<ElysiaCore::UploadRingBuffer> m_pUploadBuffer;
 	};
 
 	

@@ -38,7 +38,7 @@ namespace ElysiaCore
         void CreateRTV();
 
         HWND m_hWnd = NULL;
-        constexpr uint32_t m_BackBufferCount = ElysiaHelper::NUM_FRAMES_IN_FLIGHT;
+        const uint32_t m_BackBufferCount = ElysiaHelper::NUM_FRAMES_IN_FLIGHT;
 
         DX12Device *m_pDevice = NULL;
         IDXGIFactory6 *m_pFactory = NULL;

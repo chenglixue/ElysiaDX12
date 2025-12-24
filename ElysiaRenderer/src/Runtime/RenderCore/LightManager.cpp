@@ -27,8 +27,11 @@ namespace ElysiaRenderer
 
 	}
 
-	void LightManager::Update()
+	void LightManager::Update(const ElysiaEngine::FrameContext& context)
 	{
+		m_frameID = context.frameID;
+		m_frameIndex = context.frameIndex;
+		
 		auto& pUsetData = UserData::GetInstance();
 
 		m_pMainLight->m_lightColor = pUsetData.lightColor;

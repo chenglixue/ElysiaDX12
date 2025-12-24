@@ -3,9 +3,7 @@
 
 #include "Runtime/Core/ShaderUtility.h"
 #include "Programs/Hash.h"
-#include "Runtime/Core/DX12Shader.h"
 #include "MaterialParams.h"
-#include "Runtime/Core/DX12Device.h"
 
 namespace std
 {
@@ -33,12 +31,22 @@ namespace std
 	};
 }
 
+namespace ElysiaCore
+{
+	class DX12Device;
+	class DX12Shader;
+	class PipelineStateObject;
+}
+
+namespace ElysiaRenderer
+{
+	class UploadRingBuffer;
+	
+}
+
 namespace ElysiaRenderer
 {
 	using namespace ElysiaCore;
-	
-	class Shader;
-	class UploadRingBuffer;
 	
 	struct PassData
 	{
@@ -70,9 +78,9 @@ namespace ElysiaRenderer
 	class Material
 	{
 	public:
-		Material() = default;
+		Material();
 		Material(DX12Device* pDevice, std::vector<ShaderPass>& shaderPasses);
-		~Material() = default;
+		~Material();
 
 		void Init(std::vector<ShaderPass>& shaderPasses);
 		PassData& GetPassData(UINT passIndex) noexcept;

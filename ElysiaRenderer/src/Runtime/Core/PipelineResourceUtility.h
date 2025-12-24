@@ -7,9 +7,6 @@ namespace ElysiaCore
 {
 	using namespace ElysiaHelper;
 
-	class ElysiaCore::DX12GPUResource;
-	class ElysiaCore::PipelineResourceSpace;
-
 	struct PipelineResourceMapping
 	{
 		// space id : root paramter index

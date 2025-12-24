@@ -6,10 +6,8 @@
 #include "Runtime/Core/ShaderKeywordSet.h"
 #include <d3d12shader.h>    // Shader reflection.
 
-namespace ElysiaHelper
+namespace ElysiaCore
 {
-	using namespace ElysiaCore;
-	
 	enum class ShaderType : UINT
 	{
 		Vertex = 0,

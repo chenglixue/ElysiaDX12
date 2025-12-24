@@ -6,15 +6,23 @@
 #include "RenderResource.h"
 #include "ShaderVariantManager.h"
 #include "Runtime/Core/UploadRingBuffer.h"
+#include "Runtime/Core/DX12Device.h"
+#include "Runtime/Core/DX12Shader.h"
+
 
 namespace ElysiaRenderer
 {
+	Material::Material() = default;
+	
 	Material::Material(DX12Device* pDevice, std::vector<ShaderPass>& shaderPasses) :
 		m_pDevice(pDevice)
 	{
 		assert(pDevice);
 		Init(shaderPasses);
 	}
+	
+	Material::~Material() = default;
+	
 
 	void Material::Init(std::vector<ShaderPass>& shaderPasses)
 	{

@@ -1,11 +1,11 @@
 #pragma once
 #include "Programs/IManager.h"
-#include "ECS/Entity.h"
+#include "Runtime/Engine/ECS/Entity.h"
 #include "src/Runtime/RenderCore/RenderItem.h"
 
 namespace ElysiaRenderer
 {
-    class SceneManager : ElysiaRenderer::IManager
+    class SceneManager : IManager
     {
     public:
         
