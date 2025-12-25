@@ -1,12 +1,15 @@
 #pragma once
 #include "DX12Context.h"
-#include "TextureUtility.h"
-#include "BufferUtility.h"
 
 namespace ElysiaCore
 {
 	class DX12Device;
+	struct DX12BufferUpload;
+	struct DX12TextureUpload;
+}
 
+namespace ElysiaCore
+{
 	class DX12UploadContext : public DX12Context
 	{
 	public:

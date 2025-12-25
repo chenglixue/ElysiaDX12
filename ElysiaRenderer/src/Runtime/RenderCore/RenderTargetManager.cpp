@@ -6,13 +6,14 @@
 
 namespace ElysiaRenderer
 {
+    using namespace ElysiaHelper;
+    
     std::unique_ptr<RenderTargetManager> RenderTargetManager::m_instance;
     std::once_flag RenderTargetManager::m_initInstanceFlag;
 
-    RenderTargetManager::~RenderTargetManager()
-    {
-        
-    }
+    RenderTargetManager::RenderTargetManager() = default;
+    RenderTargetManager::~RenderTargetManager() = default;
+
     void RenderTargetManager::Destory() 
     {
         

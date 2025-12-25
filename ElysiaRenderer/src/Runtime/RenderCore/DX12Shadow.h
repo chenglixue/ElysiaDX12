@@ -1,17 +1,24 @@
 #pragma once
-#include "ShadowUtility.h"
-#include "Runtime/Core/DX12TextureBuffer.h"
+
+namespace ElysiaCore
+{
+	class DX12TextureResource;
+}
 
 namespace ElysiaRenderer
 {
-	
 	class DX12Light;
+}
+
+namespace ElysiaRenderer
+{
+	using namespace ElysiaCore;
 
 	class DX12Shadow
 	{
 	public:
 		DX12Shadow() = default;
-		DX12Shadow(ElysiaCore::DX12TextureResource* buffer);
+		DX12Shadow(DX12TextureResource* buffer);
 		DX12Shadow(const DX12Shadow& rhs) = delete;
 		DX12Shadow& operator=(const DX12Shadow& rhs) = delete;
 		DX12Shadow(DX12Shadow&& rhs) = default;
@@ -19,7 +26,7 @@ namespace ElysiaRenderer
 
 		const UINT& GetWidth() const noexcept;
 		const UINT& GetHeight() const noexcept;
-		const ElysiaCore::DX12TextureResource* GetShadowRT() const noexcept;
+		const DX12TextureResource* GetShadowRT() const noexcept;
 		const D3D12_VIEWPORT& GetViewport() const noexcept;
 		const D3D12_RECT& GetScissorRect() const noexcept;
 		const float& GetNearZ() const noexcept;
@@ -43,7 +50,7 @@ namespace ElysiaRenderer
 		D3D12_VIEWPORT m_viewPort{};
 		D3D12_RECT m_scissorRect{};
 
-		ElysiaCore::DX12TextureResource* m_buffer = nullptr;
+		DX12TextureResource* m_buffer = nullptr;
 		BoundingSphere m_shadowBound;
 		Vector3 m_lightPos;
 		float m_nearZ;

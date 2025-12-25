@@ -1,15 +1,23 @@
 #pragma once
 #include "Programs/Helper.h"
 #include "Programs/Hash.h"
-#include <functional>
 
 namespace ElysiaCore
 {
 	class DX12Shader;
 	class DX12RootSignature;
 	class DX12TextureResource;
-	class Material;
+}
 
+namespace ElysiaRenderer
+{
+	class Material;
+}
+
+namespace ElysiaCore
+{
+	using namespace ElysiaRenderer;
+	
 	enum class PipelineType : uint8_t
 	{
 		None = 0,

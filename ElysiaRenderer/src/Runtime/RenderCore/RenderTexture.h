@@ -1,12 +1,10 @@
 #pragma once
 #include "RenderTextureUtility.h"
-#include "Runtime/Core/DX12TextureBuffer.h"
-#include "Runtime/RenderCore/RenderTextureUtility.h"
 #include "Runtime/RenderCore/TextureManager.h"
 
-namespace ElysiaRenderer
+namespace ElysiaCore
 {
-	class ElysiaCore::DX12Device;
+	class DX12Device;
 }
 
 namespace ElysiaRenderer
@@ -39,19 +37,5 @@ namespace ElysiaRenderer
 		UINT m_MSAAQuality = 0;
 	};
 
-	inline bool IsRenderTextureReady(const std::vector<ElysiaRenderer::RenderTexture*> texs)
-	{
-		bool isReady = true;
-
-		for (const auto& tex : texs)
-		{
-			if (tex->GetTexture() == nullptr)
-			{
-				ThrowRuntimeError("null tex resource");;
-			}
-			isReady &= tex->GetTexture()->GetIsReady();
-		}
-
-		return isReady;
-	}
+	bool IsRenderTextureReady(const std::vector<ElysiaRenderer::RenderTexture*> texs);
 }

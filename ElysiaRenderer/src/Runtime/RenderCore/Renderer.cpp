@@ -3,12 +3,21 @@
 
 #include <dxgidebug.h>
 
-#include "MeshRenderer.h"
 #include "Editor/DX12UI.h"
+#include "Editor/UserData.h"
+
+#include "Runtime/Core/DX12GraphicsContext.h"
+#include "Runtime/Core/DX12Device.h"
+
+#include "Runtime/Model/ModelManager.h"
+
+#include "MeshRenderer.h"
 #include "BufferManager.h"
 #include "LightManager.h"
 #include "CameraManager.h"
 
+#include "Pass/RenderPassData.h"
+#include "Pass/PreDrawPass.h"
 #include "Pass/ShadowPass.h"
 #include "Pass/GBufferPass.h"
 #include "Pass/AOPass.h"
@@ -18,17 +27,10 @@
 #include "Pass/FinalBlitPass.h"
 #include "Pass/BloomPass.h"
 
-#include "Programs/SobolSequenceGenerator.h"
-#include "CBVParameter.h"
-#include "PSOManager.h"
-#include "RenderResource.h"
-#include "Runtime/Core/UploadRingBuffer.h"
 #include "RenderTargetManager.h"
 #include "TonemapUtility.h"
-#include "Editor/UserData.h"
-#include "Pass/PreDrawPass.h"
-#include "Runtime/Model/AssimpLoader.h"
-#include "Runtime/Model/ModelManager.h"
+
+
 
 extern "C" { __declspec(dllexport) extern const UINT D3D12SDKVersion = 618; }
 extern "C" { __declspec(dllexport) extern const char* D3D12SDKPath = ".\\D3D12\\"; }
@@ -38,10 +40,8 @@ namespace ElysiaRenderer
 	using namespace ElysiaModel;
 	using namespace ElysiaCore;
 
-	Renderer::Renderer()
-	{
-		
-	}
+	Renderer::Renderer() = default;
+	Renderer::~Renderer() = default;
 
 	void Renderer::OnCreate(DX12Device* pDevice, SwapChain* pSwapChain)
 	{
@@ -141,14 +141,12 @@ namespace ElysiaRenderer
 		
 	}
 
-	void Renderer::OnUpdate()
-	{
-		LightManager::GetInstance().Update();
-		SerializeUserData();
-	}
-	void Renderer::OnRender(UINT frameID)
+	void Renderer::OnRender(ElysiaEngine::FrameContext frameContext)
 	{
 		m_graphicsContext->Reset();
+
+		LightManager::GetInstance().Update(frameContext);
+		SerializeUserData();
 
 		// Timing values
 		UINT64 gpuTicksPerSecond;
@@ -158,10 +156,10 @@ namespace ElysiaRenderer
 		
 		for (auto& pass : m_passes)
 		{
-			pass->Render();
+			pass->Render(frameContext);
 		}
 		
-		m_pDevice->SubmitContextWork(*m_graphicsContext, frameID);
+		m_pDevice->SubmitContextWork(*m_graphicsContext, frameContext.frameID);
 
 		m_GPUTimer.OnEndFrame();
 	}

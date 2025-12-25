@@ -2,13 +2,19 @@
 #include "LightManager.h"
 
 #include "Editor/UserData.h"
+
+#include "Runtime/Engine/ElysiaFrame.h"
+
 #include "Pass/ShadowPass.h"
+#include "DX12Light.h"
+#include "DX12Shadow.h"
 
 namespace ElysiaRenderer
 {
 	std::unique_ptr<LightManager> LightManager::m_instance;
 	std::once_flag LightManager::m_initInstanceFlag;
-	
+
+	LightManager::LightManager() = default;
 	LightManager::~LightManager()
 	{
 		Destory();

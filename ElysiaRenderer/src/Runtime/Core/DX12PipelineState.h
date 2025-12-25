@@ -5,7 +5,10 @@
 namespace ElysiaCore
 {
 	class DX12RootSignature;
+}
 
+namespace ElysiaCore
+{
 	class DX12PipelineState
 	{
 	public:
@@ -46,6 +49,9 @@ namespace ElysiaCore
 
 	struct PipelineStateObject
 	{
+		PipelineStateObject();
+		~PipelineStateObject();
+		
 		std::unique_ptr<DX12PipelineState> m_pipelineState = nullptr;
 		PipelineResourceMapping m_pipelineResourceMapping;
 		std::unique_ptr<DX12RootSignature> m_rootSignature = nullptr;

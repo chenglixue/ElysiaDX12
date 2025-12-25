@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "MeshRenderer.h"
 
-#include "Runtime/Model/LoadedModel.h"
+#include "Runtime/Resource/Model/LoadedModel.h"
 
 namespace ElysiaRenderer
 {

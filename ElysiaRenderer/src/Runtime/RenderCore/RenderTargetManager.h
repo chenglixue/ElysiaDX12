@@ -2,9 +2,13 @@
 #include "Programs/Helper.h"
 #include "Programs/IManager.h"
 
+namespace ElysiaCore
+{
+    class DX12Device;
+}
+
 namespace ElysiaRenderer
 {
-    class ElysiaCore::DX12Device;
     class RenderTexture;
 }
 
@@ -13,8 +17,8 @@ namespace ElysiaRenderer
     class RenderTargetManager : public IManager
     {
     public:
-        RenderTargetManager() = default;
-        RenderTargetManager(ElysiaCore::DX12Device* pDevice);
+        RenderTargetManager();
+        RenderTargetManager(DX12Device* pDevice);
         RenderTargetManager(const RenderTargetManager& rhs) = delete;
         RenderTargetManager& operator=(RenderTargetManager& rhs) = delete;
         RenderTargetManager(RenderTargetManager&& rhs) = default;
@@ -29,7 +33,7 @@ namespace ElysiaRenderer
             return *m_instance;
         }
 
-        virtual void Init(ElysiaCore::DX12Device* pDevice) override;
+        virtual void Init(DX12Device* pDevice) override;
         virtual void Destory() override;
         
         RenderTexture* GetRenderTexture(const std::string& name) const;
@@ -56,7 +60,7 @@ namespace ElysiaRenderer
         const std::string& name);
         
     private:
-        ElysiaCore::DX12Device* m_pDevice = nullptr;
+        DX12Device* m_pDevice = nullptr;
         static std::unique_ptr<RenderTargetManager> m_instance;
         static std::once_flag m_initInstanceFlag;
 

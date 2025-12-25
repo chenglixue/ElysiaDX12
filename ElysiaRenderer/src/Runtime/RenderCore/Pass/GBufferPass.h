@@ -1,7 +1,10 @@
 #pragma once
 #include "BasePass.h"
-#include "lib/Utility/RenderTexture.h"
-#include "lib/DX12/DX12Device.h"
+
+namespace ElysiaCore
+{
+	class DX12TextureResource;
+}
 
 namespace ElysiaRenderer
 {
@@ -23,8 +26,7 @@ namespace ElysiaRenderer
 
 		//virtual void Setup(const RenderPassData& renderPassData) override;
 		virtual void Configure() override;
-		virtual void Execute() override;
-		virtual void Render() override;
+		virtual void Render(ElysiaEngine::FrameContext context) override;
 		virtual void UpdatePSO() override;
 		virtual void UpdateVariant() override;
 

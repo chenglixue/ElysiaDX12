@@ -596,7 +596,7 @@ namespace ElysiaEngine
         }
     }
 
-    void FrameworkWindows::BeginFrame()
+    FrameContext FrameworkWindows::BeginFrame()
     {
         m_frameIndex++;
         m_frameID = (m_frameID + 1) % ElysiaHelper::NUM_FRAMES_IN_FLIGHT;
@@ -608,12 +608,13 @@ namespace ElysiaEngine
         };
         
         m_pDevice->BeginFrame(m_frameID);
-        ElysiaRenderer::BufferManager::GetInstance().Update(frameContext);
         
         // Get timings
         double timeNow = MillisecondsNow();
         m_deltaTime = (float)(timeNow - m_lastFrameTime);
         m_lastFrameTime = timeNow;
+
+        return frameContext;
     }
 
     // EndFrame will handle Present and other end of frame logic needed

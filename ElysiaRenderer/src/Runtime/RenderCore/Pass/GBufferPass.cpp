@@ -1,9 +1,25 @@
 #include "stdafx.h"
 #include "GBufferPass.h"
-#include "Manager/BufferManager.h"
-#include "RenderResource.h"
-#include "Manager/ModelManager.h"
-#include "Manager/RenderTargetManager.h"
+
+#include "Editor/UserData.h"
+#include "Programs/PIXHelper.h"
+
+#include "Runtime/Core/DX12GraphicsContext.h"
+#include "Runtime/Core/DX12TextureBuffer.h"
+#include "Runtime/Core/DX12Shader.h"
+
+#include "Runtime/Resource/Model/ModelManager.h"
+
+#include "Runtime/RenderCore/RenderResource.h"
+#include "Runtime/RenderCore/RenderTexture.h"
+#include "Runtime/RenderCore/Material.h"
+#include "Runtime/RenderCore/DX12Camera.h"
+#include "Runtime/RenderCore/BufferManager.h"
+#include "Runtime/RenderCore/RenderResource.h"
+#include "Runtime/RenderCore/RenderTargetManager.h"
+#include "Runtime/RenderCore/CameraManager.h"
+#include "Runtime/RenderCore/PSOManager.h"
+#include "Runtime/RenderCore/ShaderVariantManager.h"
 
 namespace ElysiaRenderer
 {
@@ -67,8 +83,10 @@ namespace ElysiaRenderer
 		UpdateVariant();
 	}
 
-	void GBufferPass::Execute()
+	void GBufferPass::Render(ElysiaEngine::FrameContext context)
 	{
+		PIXHelper pix(m_pCommand->GetCommandList(), "GBuffer Pass");
+
 		UpdatePSO();
 		
 		m_pMaterial->SetFloat4(ShaderIDs::screenSize, GetScreenSize(Vector2(m_renderSize.x, m_renderSize.y)));
@@ -84,13 +102,6 @@ namespace ElysiaRenderer
 		m_pMaterial->SetFloat(ShaderIDs::metallicIntensity, UserData::GetInstance().MetallicIntensity);
 		m_pMaterial->SetFloat(ShaderIDs::roughnessIntensity, UserData::GetInstance().RoughnessIntensity);
 		m_pMaterial->SetFloat(ShaderIDs::ambientCubemapIntensity, UserData::GetInstance().AmbientCubemapIntensity);
-	}
-
-	void GBufferPass::Render()
-	{
-		PIXHelper pix(m_pCommand->GetCommandList(), "GBuffer Pass");
-
-		Execute();
 
 		DrawGBufferPass();
 	}

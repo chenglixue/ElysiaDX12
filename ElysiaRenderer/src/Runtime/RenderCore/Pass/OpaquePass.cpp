@@ -1,10 +1,22 @@
 #include "stdafx.h"
 #include "OpaquePass.h"
 
-#include "lib/DX12/DX12Device.h"
-#include "lib/Utility/RenderTexture.h"
-#include "RenderResource.h"
-#include "Manager/RenderTargetManager.h"
+#include "Editor/UserData.h"
+#include "Programs/PIXHelper.h"
+
+#include "Runtime/Core/DX12GraphicsContext.h"
+#include "Runtime/Core/DX12Shader.h"
+#include "Runtime/Core/DX12TextureBuffer.h"
+
+#include "Runtime/RenderCore/RenderResource.h"
+#include "Runtime/RenderCore/RenderTexture.h"
+#include "Runtime/RenderCore/Material.h"
+#include "Runtime/RenderCore/DX12Camera.h"
+
+#include "Runtime/RenderCore/PSOManager.h"
+#include "Runtime/RenderCore/CameraManager.h"
+#include "Runtime/RenderCore/RenderTargetManager.h"
+#include "Runtime/RenderCore/ShaderVariantManager.h"
 
 namespace ElysiaRenderer
 {
@@ -61,8 +73,10 @@ namespace ElysiaRenderer
 		// 	RenderTargetManager::GetInstance().GetRenderTexture("g_AOIndex")->GetResourceHeapIndex());
 	}
 
-	void OpaquePass::Execute()
+	void OpaquePass::Render(ElysiaEngine::FrameContext context)
 	{
+		PIXHelper pix(m_pCommand->GetCommandList(), "Opaque Light Pass");
+		
 		UpdatePSO();
 		
 		m_pMaterial->SetFloat4(ShaderIDs::screenSize, GetScreenSize(Vector2(m_renderSize.x, m_renderSize.y)));
@@ -72,12 +86,6 @@ namespace ElysiaRenderer
 		m_pMaterial->SetMatrix(ShaderIDs::projMatrix_I, m_pCamera->GetProjMat().Invert());
 		m_pMaterial->SetMatrix(ShaderIDs::viewProjMatrix, m_pCamera->GetViewMat() * m_pCamera->GetProjMat());
 		m_pMaterial->SetMatrix(ShaderIDs::viewProjMatrix_I, (m_pCamera->GetViewMat() * m_pCamera->GetProjMat()).Invert());
-	}
-	void OpaquePass::Render()
-	{
-		PIXHelper pix(m_pCommand->GetCommandList(), "Opaque Light Pass");
-		
-		Execute();
 
 		DrawLightingPass();
 	}

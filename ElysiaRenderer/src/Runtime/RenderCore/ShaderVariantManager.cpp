@@ -1,6 +1,9 @@
 ﻿#include "stdafx.h"
 #include "ShaderVariantManager.h"
 
+#include "Runtime/Core/ShaderKeywordSet.h"
+#include "Runtime/Core/ShaderKeywordSpace.h"
+
 namespace ElysiaCore
 {
     std::vector<ShaderVariantData> ShaderVariantManager::BuildAllVariants(const ShaderPragmaInfo& pragmaInfo)

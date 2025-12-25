@@ -1,12 +1,8 @@
 #pragma once
-#include "DX12Shader.h"
-#include "DX12PipelineState.h"
-#include "DX12RootSignature.h"
-#include "TextureUtility.h"
+#include "ShaderUtility.h"
 #include "DX12DescriptorHeapHandle.h"
-#include "DX12Queue.h"
+#include "Programs/Helper.h"
 #include "ThirdParty/FreesyncHDR.h"
-#include "lib/AMD/libs/AGS/amd_ags.h"
 
 namespace ElysiaCore
 {
@@ -19,6 +15,11 @@ namespace ElysiaCore
 	class DX12BufferResource;
 	class DX12StagingDescriptorHeap;
 	class DX12Queue;
+	class DX12RootParameter;
+	class DX12RootSignature;
+	class DX12PipelineState;
+	class DX12Shader;
+	class ShaderKeywordSpace;
 }
 
 namespace ElysiaCore
@@ -30,6 +31,7 @@ namespace ElysiaCore
 	};
 
 	using namespace CAULDRON_DX12;
+	using namespace ElysiaHelper;
 
 	class DX12Device
 	{
@@ -84,7 +86,7 @@ namespace ElysiaCore
 		DX12UploadContext* GetUploadContext() const noexcept{ return m_uploadContexts[m_frameID].get(); }
 		AGSContext* GetAGSContext() { return m_agsContext; }
 		AGSGPUInfo* GetAGSGPUInfo() { return &m_agsGPUInfo; }
-		ID3D12CommandQueue* GetDirectQueue() { return m_graphicsQueue->GetCommandQueue(); } 
+		ID3D12CommandQueue* GetDirectQueue() const noexcept;
 
 		std::unique_ptr<DX12GraphicsContext>		CreateGraphicsContext();
 		std::unique_ptr<DX12Shader>					CreateShader(ShaderCreateDesc& shaderCreateDesc);

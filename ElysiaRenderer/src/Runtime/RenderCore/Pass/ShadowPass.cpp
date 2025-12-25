@@ -1,16 +1,29 @@
 #include "stdafx.h"
 #include "ShadowPass.h"
 
+#include "Programs/PIXHelper.h"
+#include "Programs/SobolSequenceGenerator.h"
+#include "Programs/RenderHelper.h"
+
+#include "Runtime/Core/DX12GraphicsContext.h"
+#include "Runtime/Core/DX12Shader.h"
+#include "Runtime/Core/UploadRingBuffer.h"
+
+#include "Runtime/RenderCore/RenderResource.h"
+#include "Runtime/RenderCore/RenderTexture.h"
+#include "Runtime/RenderCore/Material.h"
+#include "Runtime/RenderCore/DX12Light.h"
+#include "Runtime/RenderCore/DX12Shadow.h"
+#include "Runtime/RenderCore/LightManager.h"
+#include "Runtime/RenderCore/PSOManager.h"
+#include "Runtime/RenderCore/CameraManager.h"
+#include "Runtime/RenderCore/RenderTargetManager.h"
+#include "Runtime/RenderCore/ShaderVariantManager.h"
+
 #include "GBufferPass.h"
-#include "lib/DX12/DX12Material.h"
-#include "RenderResource.h" 
-#include "DX12/UploadRingBuffer.h"
-#include "lib/Utility/PIXHelper.h"
-#include "Manager/PSOManager.h"
-#include "lib/Utility/SobolSequenceGenerator.h"
-#include "Manager/CameraManager.h"
-#include "Manager/RenderTargetManager.h"
-#include "Utility/RenderHelper.h"
+#include "Editor/UserData.h"
+#include "Runtime/Resource/Model/ModelManager.h"
+#include "Runtime/RenderCore/BufferManager.h"
 
 namespace ElysiaRenderer
 {
@@ -60,20 +73,17 @@ namespace ElysiaRenderer
 		m_sobolSqeuences = Create2DSobolSqeuence(64);
 		UpdateVariant();
 	}
-	void ShadowPass::Execute()
+
+	void ShadowPass::Render(ElysiaEngine::FrameContext context)
 	{
+		PIXHelper pix(m_pCommand->GetCommandList(), "Shadow Pass");
+
 		m_pMaterial->SetFloat(ShaderIDs::shadowNearZ, LightManager::GetInstance().GetMainShadow()->GetNearZ());
 		m_pMaterial->SetFloat(ShaderIDs::shadowFarZ, LightManager::GetInstance().GetMainShadow()->GetFarZ());
 		m_pMaterial->SetFloat(ShaderIDs::shadowDepthBias, UserData::GetInstance().shadowDepthBias / 100);
 		m_pMaterial->SetFloat(ShaderIDs::shadowSlopeDepthBias, UserData::GetInstance().shadowSlopeDepthBias / 100);
 		m_pMaterial->SetFloat(ShaderIDs::shadowMaxSlopeDepthBias, UserData::GetInstance().shadowMaxSlopeDepthBias / 100);
 		m_pMaterial->SetVector2Array(ShaderIDs::g_sobolSequence, m_sobolSqeuences);
-	} 
-	void ShadowPass::Render()
-	{
-		PIXHelper pix(m_pCommand->GetCommandList(), "Shadow Pass");
-
-		Execute();
 
 		DrawShadowPass();
 	}
@@ -163,7 +173,7 @@ namespace ElysiaRenderer
 	void ShadowPass::DrawMesh(UINT passIndex)
 	{
 		m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		m_pCommand->SetIndexBuffer(BufferManager::GetInstance().GetIndexBufferView());
+		m_pCommand->SetIndexBuffer(ModelManager::GetInstance().());
 		m_pCommand->SetVertexBuffer(0, 1, const_cast<D3D12_VERTEX_BUFFER_VIEW&>(BufferManager::GetInstance().GetVertexBufferView()));
 		
 		auto& passData = m_pMaterial->GetPassData(passIndex);

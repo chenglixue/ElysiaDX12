@@ -3,6 +3,7 @@
 
 #include "Runtime/Core/DX12Device.h"
 #include "Material.h"
+#include "Runtime/Core/DX12RootSignature.h"
 
 namespace ElysiaRenderer
 {

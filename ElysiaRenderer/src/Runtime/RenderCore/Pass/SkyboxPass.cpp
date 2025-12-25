@@ -1,8 +1,8 @@
 #include "stdafx.h"
 #include "SkyboxPass.h"
 
-#include "lib/DX12/DX12Device.h"
-#include "lib/Utility/RenderTexture.h"
+#include "Runtime/Core/DX12Device.h"
+#include "Runtime/RenderCore/RenderTexture.h"
 
 
 namespace ElysiaRenderer
@@ -21,11 +21,7 @@ namespace ElysiaRenderer
 
 		CreatePSO();
 	}
-	void SkyboxPass::Execute()
-	{
-		UpdatePSO();
-	}
-	void SkyboxPass::Render()
+	void SkyboxPass::Render(ElysiaEngine::FrameContext context)
 	{
 		/*Execute();
 

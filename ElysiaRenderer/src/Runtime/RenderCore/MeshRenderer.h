@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Programs/Helper.h"
-#include "Runtime/Model/SharedTypes.h"
+#include "Runtime/Resource/Model/SharedTypes.h"
 
 namespace ElysiaModel
 {

@@ -1,8 +1,20 @@
 #include "stdafx.h"
 #include "FinalBlitPass.h"
 
-#include "lib/DX12/DX12Device.h"
-#include "lib/Utility/RenderTexture.h"
+#include "Editor/UserData.h"
+#include "Programs/PIXHelper.h"
+
+#include "Runtime/Core/DX12GraphicsContext.h"
+#include "Runtime/Core/DX12Shader.h"
+#include "Runtime/Core/DX12Device.h"
+#include "Runtime/Core/DX12TextureBuffer.h"
+
+#include "Runtime/RenderCore/RenderResource.h"
+#include "Runtime/RenderCore/RenderTexture.h"
+#include "Runtime/RenderCore/Material.h"
+#include "Runtime/RenderCore/PSOManager.h"
+#include "Runtime/RenderCore/RenderTargetManager.h"
+#include "Runtime/RenderCore/ShaderVariantManager.h"
 
 namespace ElysiaRenderer
 {
@@ -39,15 +51,12 @@ namespace ElysiaRenderer
 
 		UpdateVariant();
 	}
-	void FinalBlitPass::Execute()
-	{
-		UpdatePSO();
-	}
-	void FinalBlitPass::Render()
+	void FinalBlitPass::Render(ElysiaEngine::FrameContext context)
 	{
 		PIXHelper pix(m_pCommand->GetCommandList(), "Final Blit Pass");
 
-		Execute();
+		UpdatePSO();
+		
 		DoFinalBlit();
 	}
 

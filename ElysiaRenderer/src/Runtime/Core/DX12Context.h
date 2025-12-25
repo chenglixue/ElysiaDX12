@@ -1,19 +1,27 @@
 #pragma once
 #include "Programs/Helper.h"
-#include "Runtime/RenderCore/RenderTexture.h"
+
+namespace ElysiaCore
+{
+	class DX12Device;
+	class DX12GPUResource;
+	class DX12RenderPassDescriptorHeap;
+}
+
+namespace ElysiaRenderer
+{
+	class RenderTexture;
+}
 
 namespace ElysiaCore
 {
 	using namespace ElysiaHelper;
 	using namespace ElysiaRenderer;
 
-	class DX12Device;
-	class DX12GPUResource;
-	class DX12RenderPassDescriptorHeap;
-
 	class DX12Context
 	{
 	public:
+		DX12Context();
 		DX12Context(DX12Device* device, D3D12_COMMAND_LIST_TYPE commandType);
 		virtual ~DX12Context();
 		

@@ -1,14 +1,19 @@
 ﻿#pragma once
-#include "Runtime/RenderCore/RenderResource.h"
-#include "Runtime/RenderCore/CBVParameter.h"
 #include "Programs/Helper.h"
+
+namespace ElysiaCore
+{
+    class DX12Device;
+    class DX12Queue;
+}
+
+namespace ElysiaRenderer
+{
+    struct CBVFrameVariable;
+}
 
 namespace ElysiaCore 
 {
-    class ElysiaCore::DX12Device;
-    class DX12Queue;
-    struct ElysiaRenderer::CBVFrameVariable;
-    
     class UploadRingBuffer
     {
     public:
@@ -36,7 +41,7 @@ namespace ElysiaCore
         std::mutex                  m_mutex;
         size_t                      m_totalSize;
         size_t                      m_segmentSize;
-        std::array<size_t, NUM_FRAMES_IN_FLIGHT> m_frameUsed;
+        std::array<size_t, ElysiaHelper::NUM_FRAMES_IN_FLIGHT> m_frameUsed;
     };
     
     D3D12_GPU_VIRTUAL_ADDRESS UploadFrameConstant(

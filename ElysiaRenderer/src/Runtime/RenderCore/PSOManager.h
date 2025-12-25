@@ -2,8 +2,6 @@
 #include "Programs/Helper.h"
 #include "Programs/IManager.h"
 #include "Programs/Hash.h"
-#include <iostream>
-#include <functional>
 #include "Runtime/Core/PipelineStateUtility.h"
 #include "Runtime/Core/DX12PipelineState.h"
 
@@ -58,13 +56,18 @@ namespace std
 	};
 }
 
+namespace ElysiaCore
+{
+	class DX12Device;
+}
+
 namespace ElysiaRenderer
 {
-	using namespace ElysiaCore;
-	
 	class Material;
-	class ElysiaCore::DX12Device;
+}
 
+namespace ElysiaRenderer
+{
 	class PSOManager : IManager
 	{
 	public:

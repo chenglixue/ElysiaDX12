@@ -1,14 +1,20 @@
 #pragma once
 #include "Programs/IManager.h"
 #include "Programs/IUpdate.h"
-#include "DX12Camera.h"
 
 namespace ElysiaRenderer
 {
+	class DX12Camera;
+}
+
+namespace ElysiaRenderer
+{
+	using namespace ElysiaCore;
+	
 	class CameraManager : public IManager, IUpdate
 	{
 	public:
-		CameraManager() = default;
+		CameraManager();
 		CameraManager(const CameraManager& rhs) = delete;
 		CameraManager& operator=(CameraManager& rhs) = delete;
 		CameraManager(CameraManager&& rhs) = default;
@@ -37,7 +43,7 @@ namespace ElysiaRenderer
 	private:
 		static std::unique_ptr<CameraManager> m_instance;
 		static std::once_flag m_initInstanceFlag;
-		ElysiaCore::DX12Device* m_pDevice = nullptr;
+		DX12Device* m_pDevice = nullptr;
 		
 		UINT m_frameID;
 		UINT64 m_frameIndex;

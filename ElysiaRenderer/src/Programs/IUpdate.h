@@ -1,5 +1,9 @@
 #pragma once
-#include "Runtime/Engine/FrameContext.h"
+
+namespace ElysiaEngine
+{
+	struct FrameContext;
+}
 
 namespace ElysiaRenderer
 {

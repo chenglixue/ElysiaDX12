@@ -1,8 +1,10 @@
 #include "stdafx.h"
 #include "SceneManager.h"
 
-#include "Runtime/Model/LoadedModel.h"
-#include "Runtime/Model/ModelManager.h"
+#include "MeshRenderer.h"
+#include "Runtime/Resource/Model/LoadedModel.h"
+#include "Runtime/Resource/Model/ModelManager.h"
+#include "Runtime/Engine/ECS/Entity.h"
 
 namespace ElysiaRenderer
 {
@@ -16,7 +18,7 @@ namespace ElysiaRenderer
         Destory();
     }
 
-    void SceneManager::Init(ElysiaCore::DX12Device* pDevice)
+    void SceneManager::Init(DX12Device* pDevice)
     {
         m_pDevice = pDevice;
     }
@@ -25,18 +27,42 @@ namespace ElysiaRenderer
         
     }
 
-    Entity* SceneManager::CreateEntity(const eastl::string& name, const eastl::wstring& modelPath)
+    Entity* SceneManager::CreateEntityFromModel(const eastl::wstring& modelPath)
     {
-        auto pEntity = std::make_unique<Entity>(name);
-        pEntity->pMeshRenderer = std::make_unique<MeshRenderer>();
         auto model = ModelManager::GetInstance().LoadStaticModel(ToStdWString(modelPath).c_str(), 1);
-        pEntity->pMeshRenderer->ShutDown();
-        pEntity->pMeshRenderer->Init(model);
+        
+        auto pEntity = CreateEntity(model);
         
         Entity* ptr = pEntity.get();
         m_entities.emplace_back(std::move(pEntity));
         return ptr;
     }
+
+    std::unique_ptr<Entity> SceneManager::CreateEntity(const std::shared_ptr<ElysiaModel::LoadedModel>& model)
+    {
+        auto pParent = std::make_unique<Entity>(ToEastl(model->name));
+        pParent->transform.scale = Vector3(model->scale);
+        pParent->transform.position = (model->aabbMin + model->aabbMax) * 0.5f;
+
+        for (auto mesh : model->meshes)
+        {
+            auto pChild = std::make_unique<Entity>(ToEastl(mesh.name));
+            pChild->transform =
+            {
+                .position = Vector3::Zero,
+                .rotation = Quaternion::Identity,
+                .scale = Vector3::One,
+            };
+            pChild->pMeshRenderer = std::make_unique<MeshRenderer>();
+            pChild->pMeshRenderer->ShutDown();
+            pChild->pMeshRenderer->Init(model);
+            
+            pParent->AddChild(std::move(pChild));
+        }
+
+        return pParent;
+    }
+
     void SceneManager::CollectRenderItems(std::vector<RenderItem>& outList)
     {
         outList.clear();
@@ -46,7 +72,7 @@ namespace ElysiaRenderer
             if(!pEntity->pMeshRenderer) continue;
             
             const auto* pModel = pEntity->pMeshRenderer->GetModel();
-            const auto& worldMat = pEntity->transform->GetWorldMatrix();
+            const auto& worldMat = pEntity->transform.GetWorldMatrix();
             
             for(UINT64 meshIdx = 0; meshIdx < pModel->meshes.size(); meshIdx++)
             {

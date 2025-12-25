@@ -1,12 +1,22 @@
 ﻿#include "stdafx.h"
 #include "PreDrawPass.h"
 
+#include "Runtime/Core/DX12Device.h"
+#include "Runtime/Core/UploadRingBuffer.h"
+
+#include "Runtime/RenderCore/DX12Camera.h"
+#include "Runtime/RenderCore/DX12Light.h"
+#include "Runtime/RenderCore/DX12Shadow.h"
+#include "Runtime/RenderCore/RenderResource.h"
+#include "Runtime/RenderCore/RenderTexture.h"
+#include "Runtime/RenderCore/LightManager.h"
+#include "Runtime/RenderCore/CameraManager.h"
+#include "Runtime/RenderCore/RenderTargetManager.h"
+
+#include "Programs/RenderHelper.h"
+
 #include "GBufferPass.h"
-#include "RenderResource.h"
-#include "DX12/UploadRingBuffer.h"
-#include "Manager/CameraManager.h"
-#include "Manager/RenderTargetManager.h"
-#include "Utility/RenderHelper.h"
+#include "Runtime/RenderCore/TextureManager.h"
 
 namespace ElysiaRenderer
 {
@@ -27,15 +37,15 @@ namespace ElysiaRenderer
 	void PreDrawPass::Configure()
 	{
 	}
-	void PreDrawPass::Execute()
+	void PreDrawPass::Render(ElysiaEngine::FrameContext context)
 	{
-        auto GPUAddress = UploadFrameConstant(m_pDevice,
-			[this](CBVFrameVariable* dst)
+          auto GPUAddress = UploadFrameConstant(m_pDevice,
+			[this, context](CBVFrameVariable* dst)
 			{
 				*dst = RenderResource::GetInstance().GetCBVFrameVariable();
 				dst->cameraPosWS = CameraManager::GetInstance().GetMainCamera()->GetPosition4();
 				dst->lightData = std::move(LightManager::GetInstance().GetMainLight()->CreateLightData());
-				dst->frameIndex = m_pDevice->GetFrameIndex();
+				dst->frameIndex = context.frameIndex;
 				dst->nearZ = CameraManager::GetInstance().GetMainCamera()->GetNearZ();
 				dst->farZ = CameraManager::GetInstance().GetMainCamera()->GetFarZ();
 				dst->ZBufferParams = GetZBufferParams(CameraManager::GetInstance().GetMainCamera()->GetNearZ(), CameraManager::GetInstance().GetMainCamera()->GetFarZ());
@@ -62,10 +72,6 @@ namespace ElysiaRenderer
 		frameSpace->Reset();
 		frameSpace->SetDynamicCBV(GPUAddress);
 		frameSpace->Lock();
-	}
-	void PreDrawPass::Render()
-	{
-          Execute();
 	}
 	void PreDrawPass::UpdatePSO()
 	{

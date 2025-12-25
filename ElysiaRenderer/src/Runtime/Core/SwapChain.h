@@ -14,6 +14,8 @@ namespace ElysiaCore
     class SwapChain
     {
     public:
+        SwapChain();
+        ~SwapChain();
         void OnCreate(DX12Device *pDevice, HWND hWnd);
         void OnDestroy();
 

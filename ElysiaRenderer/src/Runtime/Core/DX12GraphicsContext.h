@@ -5,9 +5,16 @@
 namespace ElysiaCore
 {
 	class DX12Device;
-	class ElysiaRenderer::RenderTexture;
 	class PipelineResourceSpace;
+}
 
+namespace ElysiaRenderer
+{
+	class RenderTexture;
+}
+
+namespace ElysiaCore
+{
 	class DX12GraphicsContext : public DX12Context
 	{
 	public:

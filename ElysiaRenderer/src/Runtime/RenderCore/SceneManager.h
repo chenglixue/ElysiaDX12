@@ -1,16 +1,27 @@
 #pragma once
 #include "Programs/IManager.h"
-#include "Runtime/Engine/ECS/Entity.h"
 #include "src/Runtime/RenderCore/RenderItem.h"
+
+namespace ElysiaModel
+{
+    struct LoadedModel;
+}
+
+namespace ElysiaEngine
+{
+    struct Entity;
+}
 
 namespace ElysiaRenderer
 {
+    using namespace ElysiaEngine;
+    
     class SceneManager : IManager
     {
     public:
         
         ~SceneManager();
-
+        
         static SceneManager& GetInstance()
         {
             std::call_once(m_initInstanceFlag, []()
@@ -24,7 +35,7 @@ namespace ElysiaRenderer
         virtual void Init(ElysiaCore::DX12Device* pDevice) override;
         virtual void Destory() override;
         
-        Entity* CreateEntity(const eastl::string& name, const eastl::wstring& modelPath);
+        Entity* CreateEntityFromModel(const eastl::wstring& modelPath);
         void CollectRenderItems(std::vector<RenderItem>& outList);
         void ClearScene();
         
@@ -33,6 +44,8 @@ namespace ElysiaRenderer
         SceneManager(const SceneManager& rhs) = delete;
         SceneManager& operator=(SceneManager& rhs) = delete;
         SceneManager(SceneManager&& rhs) = default;
+
+        std::unique_ptr<Entity> CreateEntity(const std::shared_ptr<ElysiaModel::LoadedModel>& model);
         
         ElysiaCore::DX12Device* m_pDevice = nullptr;
         static std::unique_ptr<SceneManager> m_instance;

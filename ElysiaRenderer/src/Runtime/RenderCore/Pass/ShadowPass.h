@@ -1,10 +1,10 @@
 #pragma once
 #include "BasePass.h"
-#include "../DX12Shadow.h"
-#include "../LightManager.h"
-#include "../RenderTexture.h"
-#include "Runtime/RenderCore/DX12Camera.h"
 
+namespace ElysiaRenderer
+{
+	class DX12Light;
+}
 
 namespace ElysiaRenderer
 {
@@ -39,10 +39,8 @@ namespace ElysiaRenderer
 		ShadowPass(DX12Camera* pCamera);
 		virtual ~ShadowPass() override;
 
-		//virtual void Setup(const RenderPassData& renderPasssData) override;
 		virtual void Configure() override;
-		virtual void Execute() override;
-		virtual void Render() override;
+		virtual void Render(ElysiaEngine::FrameContext context) override;
 		virtual void UpdatePSO() override;
 		virtual void UpdateVariant() override;
 

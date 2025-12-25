@@ -7,6 +7,9 @@
 
 namespace ElysiaCore
 {
+    SwapChain::SwapChain() = default;
+    SwapChain::~SwapChain() = default;
+    
     void SwapChain::OnCreate(DX12Device *pDevice, HWND hWnd)
     {
         m_hWnd = hWnd;

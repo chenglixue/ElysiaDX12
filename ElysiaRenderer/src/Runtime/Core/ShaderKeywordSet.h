@@ -1,6 +1,5 @@
 ﻿#pragma once
 #include "Programs/Helper.h"
-#include "ShaderKeywordSpace.h"
 
 namespace ElysiaCore
 {

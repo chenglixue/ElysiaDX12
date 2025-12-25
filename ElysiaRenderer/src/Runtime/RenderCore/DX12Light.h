@@ -1,12 +1,14 @@
 #pragma once
 #include "LightUtility.h"
-#include "DX12Shadow.h"
 
 namespace ElysiaRenderer
 {
 	class RenderTexture;
 	class DX12Shadow;
+}
 
+namespace ElysiaRenderer
+{
 	class DX12Light
 	{
 	public:
@@ -40,12 +42,12 @@ namespace ElysiaRenderer
 	class DX12DirectionLight : public DX12Light
 	{
 	public:
-		DX12DirectionLight() = default;
+		DX12DirectionLight();
 		DX12DirectionLight(Vector3 lightColor, Vector3 lightDir, float intensity);
 		DX12DirectionLight(const DX12DirectionLight& rhs) = default;
 		DX12DirectionLight& operator=(const DX12DirectionLight& rhs) = default;
 		DX12DirectionLight(DX12DirectionLight&& rhs) = default;
-		~DX12DirectionLight() = default;
+		~DX12DirectionLight();
 
 		virtual LightData CreateLightData() override;
 		void CreateMainShadow(float boundSphereRadius, DXGI_FORMAT format);

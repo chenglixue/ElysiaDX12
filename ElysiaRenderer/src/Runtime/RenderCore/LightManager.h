@@ -2,16 +2,20 @@
 
 #include "Programs/IManager.h"
 #include "Programs/IUpdate.h"
-#include "DX12Light.h"
 
 namespace ElysiaRenderer
 {
+	class DX12DirectionLight;
+	class RenderTexture;
 	class DX12Shadow;
+}
 
+namespace ElysiaRenderer
+{
 	class LightManager : public IManager, IUpdate
 	{
 	public:
-		LightManager() = default;
+		LightManager();
 		LightManager(const LightManager& rhs) = delete;
 		LightManager& operator=(LightManager& rhs) = delete;
 		LightManager(LightManager&& rhs) = default;

@@ -2,10 +2,13 @@
 #include "ElysiaFrame.h"
 
 #include "Editor/IMGUIHelper.h"
+#include "Editor/UserData.h"
 #include "Runtime/RenderCore/BufferManager.h"
 #include "Runtime/RenderCore/LightManager.h"
 #include "Runtime/RenderCore/RenderTargetManager.h"
 #include "Runtime/RenderCore/CameraManager.h"
+#include "Runtime/RenderCore/PSOManager.h"
+#include "Runtime/RenderCore/TextureManager.h"
 
 namespace ElysiaEngine
 {
@@ -123,7 +126,7 @@ namespace ElysiaEngine
 
     void ElysiaFrame::OnRender()
     {
-        BeginFrame();
+        auto frameContext = BeginFrame();
         ElysiaEditor::ImGUI_UpdateIO();
         ImGui::NewFrame();
 
@@ -145,9 +148,10 @@ namespace ElysiaEngine
         else
         {
             OnUpdate();
+            BufferManager::GetInstance().Update(frameContext);
         }
 
-        m_pRenderer->OnRender(m_frameID);
+        m_pRenderer->OnRender(frameContext);
         EndFrame();
     }
 

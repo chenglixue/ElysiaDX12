@@ -1,12 +1,15 @@
 #pragma once
 #include "stdafx.h"
 #include "BufferUtility.h"
-
+#include "Programs/Helper.h"
 
 namespace ElysiaCore
 {
 	class DX12TextureResource;
+}
 
+namespace ElysiaCore
+{
 	const std::wstring DefaultBlackTexturePath = L"Tex\\Black.png";
 	const std::wstring DefaultWhiteTexturePath = L"Tex\\White.png";
 	const std::wstring DefaultNormalTexturePath = L"DefaultNormalMap.png";
@@ -107,6 +110,7 @@ namespace ElysiaCore
 
 	struct DX12TextureUpload
 	{
+		
 		DX12TextureResource* pTextureBuffer;
 		std::unique_ptr<UINT8[]> pTextureData = nullptr;
 		size_t textureDataSize = 0;

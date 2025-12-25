@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "RenderTexture.h"
 
+#include "Runtime/Core/DX12TextureBuffer.h"
+
 namespace ElysiaRenderer
 {
 	RenderTexture::~RenderTexture()
@@ -117,4 +119,19 @@ namespace ElysiaRenderer
 		return GetTexture()->GetResourceHeapIndex();
 	}
 
+	bool IsRenderTextureReady(const std::vector<ElysiaRenderer::RenderTexture*> texs)
+	{
+		bool isReady = true;
+
+		for (const auto& tex : texs)
+		{
+			if (tex->GetTexture() == nullptr)
+			{
+				ThrowRuntimeError("null tex resource");;
+			}
+			isReady &= tex->GetTexture()->GetIsReady();
+		}
+
+		return isReady;
+	}
 }

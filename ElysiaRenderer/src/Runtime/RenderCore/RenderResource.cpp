@@ -1,7 +1,8 @@
 #include "stdafx.h"
-
 #include "RenderResource.h"
+
 #include "Runtime/Core/PipelineResourceSpace.h"
+#include "Runtime/Core/DX12Device.h"
 
 namespace ElysiaRenderer
 {

@@ -1,10 +1,11 @@
 #pragma once
 #include "Programs/Helper.h"
+#include <d3d12shader.h>    // Shader reflection.
+
 #include "PipelineResourceUtility.h"
 #include <regex>
 #include "Runtime/Core/ShaderCompileOptions.h"
 #include "Runtime/Core/ShaderKeywordSet.h"
-#include <d3d12shader.h>    // Shader reflection.
 
 namespace ElysiaCore
 {

@@ -1,14 +1,13 @@
 #include "stdafx.h"
 #include "DX12Context.h"
+
 #include "DX12Device.h"
-#include "DX12GPUResource.h"
+#include "DX12TextureBuffer.h"
 #include "DX12RenderPassDescriptorHeap.h"
+#include "Runtime/RenderCore/RenderTexture.h"
 
 namespace ElysiaCore
 {
-	using namespace ElysiaHelper;
-	class DX12Device;
-
 	DX12Context::DX12Context(DX12Device* device, D3D12_COMMAND_LIST_TYPE commandType) :
 		m_device(device), m_contextType(commandType)
 	{

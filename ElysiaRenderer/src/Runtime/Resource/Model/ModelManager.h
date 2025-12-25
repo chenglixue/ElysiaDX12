@@ -1,6 +1,10 @@
 #pragma once
 #include "Programs/IManager.h"
-#include "Runtime/Model/LoadedModel.h"
+
+namespace ElysiaModel
+{
+	struct LoadedModel;
+}
 
 namespace ElysiaRenderer
 {

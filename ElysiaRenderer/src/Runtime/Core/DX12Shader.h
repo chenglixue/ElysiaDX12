@@ -1,13 +1,14 @@
 #pragma once
-#include "PipelineResourceUtility.h"
-#include "ShaderUtility.h"
-#include "BufferUtility.h"
 
 namespace ElysiaCore
 {
+	class ShaderKeywordSpace;
 	struct PipelineStateObject;
 	class ShaderVariantManager;
-	
+}
+
+namespace ElysiaCore
+{
 	class DX12Shader
 	{
 	public:

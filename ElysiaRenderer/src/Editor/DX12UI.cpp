@@ -2,7 +2,7 @@
 #include "DX12UI.h"
 
 
-namespace ElysiaRenderer
+namespace ElysiaEditor
 {
 	
 	DX12UI::DX12UI()

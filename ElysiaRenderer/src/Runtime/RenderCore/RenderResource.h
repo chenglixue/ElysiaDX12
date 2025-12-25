@@ -1,8 +1,12 @@
 #pragma once
-#include "stdafx.h"
-#include "Runtime/Core/DX12Device.h"
 #include "Runtime/RenderCore/CBVParameter.h"
 #include "ThirdParty/FreesyncHDR.h"
+
+namespace ElysiaCore
+{
+	class PipelineResourceSpace;
+	class DX12Device;
+}
 
 namespace ElysiaRenderer
 {
@@ -37,7 +41,7 @@ namespace ElysiaRenderer
 		std::string GetPropertyName(size_t hash) const noexcept;
 
 		std::unordered_map<size_t, std::string> m_nameHashs;
-		std::array<std::unique_ptr<PipelineResourceSpace>, NUM_FRAMES_IN_FLIGHT> m_perFrameBindResourceSpaces;
+		std::array<std::unique_ptr<PipelineResourceSpace>, ElysiaHelper::NUM_FRAMES_IN_FLIGHT> m_perFrameBindResourceSpaces;
 	private:
 		DX12Device* m_device = nullptr;
 		static std::unique_ptr<RenderResource> m_instance;

@@ -1,4 +1,5 @@
 #pragma once
+#include "FrameContext.h"
 #include "ThirdParty/FreesyncHDR.h"
 #include "Runtime/Core/DX12Device.h"
 #include "Runtime/Core/SwapChain.h"
@@ -30,7 +31,7 @@ namespace ElysiaEngine
         // Device & swapchain management
         void DeviceInit(HWND WindowsHandle);
         void DeviceShutdown();
-        void BeginFrame();
+        FrameContext BeginFrame();
         void EndFrame();
         void Present();
 

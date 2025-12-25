@@ -1,9 +1,12 @@
 #include "stdafx.h"
 #include "DX12Shader.h"
-#include "DX12PipelineState.h"
+
 #include <d3d12shader.h>    // Shader reflection.
-#include "Runtime/Core/ShaderCompileOptions.h"
+
+#include "ShaderKeywordSpace.h"
 #include "Runtime/RenderCore/ShaderVariantManager.h"
+#include "ShaderUtility.h"
+#include "PipelineResourceUtility.h"
 
 namespace ElysiaCore
 {

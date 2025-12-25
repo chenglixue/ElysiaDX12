@@ -1,7 +1,7 @@
 #pragma once
 #include "Runtime/Core/DX12Device.h"
 
-namespace ElysiaRenderer
+namespace ElysiaEditor
 {
 	using namespace ElysiaCore;
 	

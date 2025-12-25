@@ -1,14 +1,14 @@
 #include "stdafx.h"
 #include "BasePass.h"
 
-#include "lib/Utility/PIXHelper.h"
-#include "lib/Utility/RenderTexture.h"
-#include "RenderResource.h"
-#include "src/Material.h"
-#include "DX12/UploadRingBuffer.h"
-#include "Manager/TextureManager.h"
-#include "lib/Utility/Common.h"
-#include "Manager/BufferManager.h"
+#include "Runtime/Core/DX12Device.h"
+#include "Runtime/Core/DX12GraphicsContext.h"
+#include "Runtime/Core/UploadRingBuffer.h"
+
+#include "Runtime/RenderCore/RenderResource.h"
+#include "Runtime/RenderCore/Material.h"
+#include "Runtime/RenderCore/BufferManager.h"
+#include "Runtime/RenderCore/Pass/RenderPassData.h"
 
 namespace ElysiaRenderer
 {

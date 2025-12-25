@@ -2,12 +2,19 @@
 #include "CameraManager.h"
 
 #include "Runtime/Engine/ECS/Transform.h"
+#include "DX12Camera.h"
+#include "Runtime/Engine/FrameContext.h"
+
 
 namespace ElysiaRenderer
 {
 	std::unique_ptr<CameraManager> CameraManager::m_instance;
 	std::once_flag CameraManager::m_initInstanceFlag;
-	
+
+	CameraManager::CameraManager()
+	{
+		
+	}
 	CameraManager::~CameraManager()
 	{
 		Destory();

@@ -1,5 +1,4 @@
 ﻿#pragma once
-#include "Runtime/Core/ShaderKeywordSet.h"
 #include "Runtime/Core/ShaderUtility.h"
 
 namespace ElysiaCore

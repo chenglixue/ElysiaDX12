@@ -1,12 +1,16 @@
 #pragma once
 #include "DX12Context.h"
-#include "DX12PipelineState.h"
 
 namespace ElysiaCore
 {
 	class DX12Device;
 	class PipelineStateObject;
+	class PipelineResourceSpace;
+	struct PipelineInfo;
+}
 
+namespace ElysiaCore
+{
 	class DX12ComputeContext : public DX12Context
 	{
 	public:

@@ -1,7 +1,10 @@
 #pragma once
-#include "Runtime/RenderCore/MeshRenderer.h"
 #include "Transform.h"
-#include "Runtime/RenderCore/BufferManager.h"
+
+namespace ElysiaRenderer
+{
+    class MeshRenderer;
+}
 
 namespace ElysiaEngine
 {
@@ -12,10 +15,17 @@ namespace ElysiaEngine
     public:
         eastl::string name;
         Transform transform;
-        std::unique_ptr<MeshRenderer> meshRenderer;
+        std::unique_ptr<MeshRenderer> pMeshRenderer;
 
         Entity(eastl::string n) : name(std::move(n)) {}
         Entity(const Entity&) = delete;
         Entity& operator=(const Entity&) = delete;
+
+        void AddChild(std::unique_ptr<Entity> child);
+        void SetParent(Entity* pParent);
+
+    private:
+        Entity* m_pParent = nullptr;
+        std::vector<std::unique_ptr<Entity>> m_childs;
     };
 }

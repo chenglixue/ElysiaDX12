@@ -1,11 +1,14 @@
 #include "stdafx.h"
-#include "Programs/Helper.h"
 #include "DX12Light.h"
 
-#include "DX12Shadow.h"
-#include "RenderResource.h"
-#include "RenderTargetManager.h"
+#include "Programs/Helper.h"
+
 #include "Editor/UserData.h"
+
+#include "Runtime/RenderCore/RenderTexture.h"
+#include "RenderResource.h"
+#include "DX12Shadow.h"
+#include "RenderTargetManager.h"
 #include "Pass/ShadowPass.h"
 
 namespace ElysiaRenderer
@@ -50,6 +53,9 @@ namespace ElysiaRenderer
 	{
 		m_lightIntensity = lightIntensity;
 	}
+
+	DX12DirectionLight::DX12DirectionLight() =default;
+	DX12DirectionLight::~DX12DirectionLight() =default;
 
 	LightData DX12DirectionLight::CreateLightData()
 	{

@@ -136,6 +136,7 @@ namespace ElysiaModel
 		};
 		
 		std::string name;
+		float scale = 1;
 		Vector3 aabbMin = Vector3(FLT_MAX);
 		Vector3 aabbMax = Vector3(-FLT_MAX);
 		eastl::vector<MeshVertex> vertices;

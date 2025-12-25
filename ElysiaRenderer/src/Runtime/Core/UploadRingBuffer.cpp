@@ -5,6 +5,8 @@
 #include "Programs/Helper.h"
 #include "Runtime/RenderCore/BufferManager.h"
 #include "RenderHelper.h"
+#include "Runtime/RenderCore/CBVParameter.h"
+#include "Runtime/RenderCore/RenderResource.h"
 
 namespace ElysiaCore
 {

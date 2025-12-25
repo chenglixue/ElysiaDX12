@@ -5,6 +5,8 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include "iosfwd"
+#include "LoadedModel.h"
+#include "Runtime/Core/DX12BufferResource.h"
 
 namespace ElysiaModel
 {
@@ -154,6 +156,7 @@ namespace ElysiaModel
 
     void LoadMeshData(const wchar_t* filePath, const aiScene* pScene, float sceneScale, LoadedModel &model)
     {
+        model.scale = sceneScale;
         const UINT64 numMeshes = pScene->mNumMeshes;
         UINT64 numVertices = 0;
         UINT64 numIndices = 0;

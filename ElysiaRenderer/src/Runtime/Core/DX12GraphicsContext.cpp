@@ -6,6 +6,8 @@
 #include "DX12RenderPassDescriptorHeap.h"
 #include "Runtime/RenderCore/RenderTexture.h"
 #include "ContextUtility.h"
+#include "DX12TextureBuffer.h"
+
 
 namespace ElysiaCore
 {

@@ -1,5 +1,9 @@
 #pragma once
-#include "LoadedModel.h"
+
+namespace ElysiaModel
+{
+    struct LoadedModel;
+}
 
 namespace ElysiaModel
 {

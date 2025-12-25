@@ -3,9 +3,8 @@
 #include "Programs/IManager.h"
 #include "Runtime/Core/DX12DescriptorHeapHandle.h"
 #include "Runtime/Core/TextureUtility.h"
-#include "Runtime/Core/DX12TextureBuffer.h"
 
-namespace ElysiaRenderer
+namespace ElysiaCore
 {
 	class DX12RenderPassDescriptorHeap;
 	class DX12StagingDescriptorHeap;

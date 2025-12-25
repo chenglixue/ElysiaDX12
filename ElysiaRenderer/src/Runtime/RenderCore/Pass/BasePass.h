@@ -1,19 +1,29 @@
 #pragma once
-#include "Runtime/RenderCore/Material.h"
-#include "RenderPassData.h"
-#include "Editor/UserData.h"
-#include "../PSOManager.h"
-#include "../DX12Camera.h"
-#include "Programs/PIXHelper.h"
-#include "../ShaderVariantManager.h"
+#include "Runtime/Core/ShaderUtility.h"
+#include "Runtime/Engine/FrameContext.h"
 
+namespace ElysiaCore
+{
+	class DX12GraphicsContext;
+	class DX12Device;
+	class UploadRingBuffer;
+	struct PipelineStateObject;
+}
 
 namespace ElysiaRenderer
 {
 	class RenderTexture;
-	class ElysiaCore::DX12GraphicsContext;
-	class UploadRingBuffer;
+	class DX12Camera;
+	class Material;
+	struct PassData;
+	struct RenderPassData;
+}
 
+namespace ElysiaRenderer
+{
+	using namespace ElysiaCore;
+	using namespace ElysiaRenderer;
+	
 	class BasePass
 	{
 	public:
@@ -23,8 +33,7 @@ namespace ElysiaRenderer
 
 		virtual void Setup(const RenderPassData& renderPassData);
 		virtual void Configure() = 0;
-		virtual void Execute() = 0;
-		virtual void Render() = 0;
+		virtual void Render(ElysiaEngine::FrameContext context) = 0;
 
 		virtual void Dispose();
 

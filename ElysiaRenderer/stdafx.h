@@ -38,12 +38,18 @@
 #include <locale>
 #include <codecvt>
 #include <bitset>
+#include <functional>
 #include "ThirdParty/Metalib.h"
 #include <boost/container/stable_vector.hpp>
+
+#include <EASTL/internal/config.h>
 #include "include/EASTL/string.h"
 #include "include/EASTL/vector.h"
 #include "include/EASTL/hash_map.h"
 #include "include/EASTL/algorithm.h"
+#include "include/EASTL/internal/hashtable.h"
+#include "include/EASTL/internal/fixed_pool.h"
+#include "include/EASTL/intrusive_list.h"
 
 #include "magic_enum/magic_enum.hpp"
 #include "ThirdParty/SimpleMath/SimpleMath.h"

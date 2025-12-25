@@ -12,10 +12,8 @@ namespace ElysiaRenderer
 		FinalBlitPass(DX12Camera* pCamera);
 		virtual ~FinalBlitPass() override;
 
-		//virtual void Setup(const RenderPassData& renderPassData) override;
 		virtual void Configure() override;
-		virtual void Execute() override;
-		virtual void Render() override;
+		virtual void Render(ElysiaEngine::FrameContext context) override;
 		virtual void UpdatePSO() override;
 		virtual void UpdateVariant() override;
 

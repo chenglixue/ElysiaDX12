@@ -4,8 +4,9 @@
 #include "DX12Device.h"
 #include "DX12RootSignature.h"
 #include "DX12RenderPassDescriptorHeap.h"
-#include "Runtime/RenderCore/RenderTexture.h"
 #include "DX12PipelineState.h"
+#include "DX12BufferResource.h"
+#include "DX12TextureBuffer.h"
 #include "ContextUtility.h"
 
 namespace ElysiaCore

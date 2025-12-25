@@ -75,7 +75,7 @@ namespace ElysiaHelper
         assert((errorMessage, false));
     }
 
-    void ShowErrorMessage(const std::wstring& message)
+    inline void ShowErrorMessage(const std::wstring& message)
     {
         MessageBox(NULL, message.c_str(), L"Error", MB_OK|MB_ICONERROR);
     }
@@ -835,7 +835,7 @@ namespace ElysiaHelper
         return true;
     }
 
-    void WriteLog(const wchar_t* format, ...)
+    inline void WriteLog(const wchar_t* format, ...)
     {
         wchar_t buffer[1024] = { 0 };
         va_list args;
@@ -846,7 +846,7 @@ namespace ElysiaHelper
         OutputDebugStringW(L"\n");
     }
 
-    void WriteLog(const char* format, ...)
+    inline void WriteLog(const char* format, ...)
     {
         char buffer[1024] = { 0 };
         va_list args;
@@ -858,7 +858,7 @@ namespace ElysiaHelper
     }
     
     
-    std::wstring MakeString(const wchar_t* format, ...)
+    inline std::wstring MakeString(const wchar_t* format, ...)
     {
         wchar_t buffer[1024] = { 0 };
         va_list args;
@@ -867,7 +867,7 @@ namespace ElysiaHelper
         return std::wstring(buffer);
     }
 
-    std::string MakeString(const char* format, ...)
+    inline std::string MakeString(const char* format, ...)
     {
         char buffer[1024] = { 0 };
         va_list args;
@@ -876,3 +876,20 @@ namespace ElysiaHelper
         return std::string(buffer);
     }
 }
+
+namespace eastl
+{
+    // 当 EASTL 内部触发断言（如 vector 越界）时，会调用此函数
+    inline void AssertionFailure(const char* pExpression)
+    {
+        // 你可以在这里打断点、记录日志或抛出异常
+        printf("EASTL Assertion Failure: %s\n", pExpression);
+        __debugbreak(); // 触发调试器中断
+    }
+
+    
+}
+
+void* operator new[](size_t size, const char* /*name*/, int /*flags*/, unsigned /*debugFlags*/, const char* /*file*/, int /*line*/);
+
+void* operator new[](size_t size, size_t alignment, size_t alignmentOffset, const char* /*name*/, int /*flags*/, unsigned /*debugFlags*/, const char* /*file*/, int /*line*/);

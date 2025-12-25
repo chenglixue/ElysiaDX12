@@ -1,15 +1,17 @@
 #include "stdafx.h"
 #include "DX12PipelineState.h"
+
 #include "Runtime/RenderCore/RenderTexture.h"
+#include "DX12RootSignature.h"
 
 namespace ElysiaCore
 {
 	using namespace ElysiaRenderer;
-	
-	DX12PipelineState::DX12PipelineState()
-	{
 
-	}
+	PipelineStateObject::PipelineStateObject() =default;
+	PipelineStateObject::~PipelineStateObject() =default;
+	
+	DX12PipelineState::DX12PipelineState() = default;
 
 	DX12PipelineState::DX12PipelineState(CComPtr<ID3D12PipelineState> pipelineState)
 		: m_pipelineState(pipelineState)
@@ -23,10 +25,7 @@ namespace ElysiaCore
 
 	}
 
-	DX12PipelineState::~DX12PipelineState()
-	{
-
-	}
+	DX12PipelineState::~DX12PipelineState() = default;
 
 	CComPtr<ID3D12PipelineState> DX12PipelineState::GetPipelineState()
 	{

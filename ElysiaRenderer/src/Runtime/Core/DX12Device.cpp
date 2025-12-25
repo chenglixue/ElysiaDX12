@@ -11,15 +11,19 @@
 #include "DX12StagingDescriptorHeap.h"
 #include "DX12Queue.h"
 #include "DX12Shader.h"
+#include "DX12RootSignature.h"
+#include "DX12PipelineState.h"
+#include "ShaderKeywordSpace.h"
 
 #include "Runtime/RenderCore/RenderResource.h"
 #include "UploadRingBuffer.h"
 #include "Programs/UserMarker.h"
-#include "Runtime/RenderCore/RenderTexture.h"
 #include "Runtime/RenderCore/BufferManager.h"
 #include "Runtime/Core/ShaderCompileOptions.h"
 #include "Runtime/RenderCore/ShaderVariantManager.h"
 #include "ThirdParty/Misc.h"
+#include "lib/AMD/libs/AGS/amd_ags.h"
+
 
 namespace ElysiaCore
 {
@@ -1036,6 +1040,10 @@ namespace ElysiaCore
 		return o;
 	}
 
+	ID3D12CommandQueue* DX12Device::GetDirectQueue() const noexcept
+	{
+		return m_graphicsQueue->GetCommandQueue();
+	} 
 	void DX12Device::GetDeviceInfo(std::string *deviceName, std::string *driverVersion)
 	{
 		DXGI_ADAPTER_DESC adapterDescription;

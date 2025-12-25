@@ -1,20 +1,24 @@
 #include "stdafx.h"
 #include "BufferManager.h"
 
-#include "RenderTargetManager.h"
-#include "Runtime/Core/DX12StagingDescriptorHeap.h"
-#include "Runtime/Core/DX12UploadContext.h"
-#include "Runtime/Core/UploadRingBuffer.h"
-#include "Runtime/Core/DX12Device.h"
-#include "Runtime/Core/DX12TextureBuffer.h"
 #include "Runtime/Core/DX12BufferResource.h"
-#include "Editor/UserData.h"
+#include "Runtime/Core/DX12TextureBuffer.h"
+#include "Runtime/Core/DX12StagingDescriptorHeap.h"
+
+#include "Runtime/Model/LoadedModel.h"
+#include "Runtime/Core/UploadRingBuffer.h"
+#include "Runtime/Core/DX12UploadContext.h"
+#include "Runtime/Core/DX12Device.h"
+#include "Runtime/Core/BufferUtility.h"
+#include "Runtime/Engine/FrameContext.h"
+
 
 namespace ElysiaRenderer
 {
 	std::unique_ptr<BufferManager> BufferManager::m_instance;
 	std::once_flag BufferManager::m_initInstanceFlag;
-	
+
+	BufferManager::BufferManager() = default;
 	BufferManager::~BufferManager()
 	{
 		Destory();
@@ -63,7 +67,7 @@ namespace ElysiaRenderer
 		return m_pUploadBuffer.get();
 	}
 
-	BufferHandle BufferManager::CreateBuffer(const ElysiaCore::BufferCreationDesc& bufferCreationDesc)
+	BufferHandle BufferManager::CreateBuffer(const BufferCreationDesc& bufferCreationDesc)
 	{
 		std::lock_guard<std::mutex> lock(m_createMutex);
 		
@@ -305,13 +309,13 @@ namespace ElysiaRenderer
 		}
 	}
 
-	BufferHandle BufferManager::CreateVertexBuffer(const LoadedModel& model)
+	BufferHandle BufferManager::CreateVertexBuffer(const ElysiaModel::LoadedModel& model)
 	{
 		ElysiaCore::BufferCreationDesc bufferCreationDesc = 
 		{
 			.name = stringToLPCWSTR(model.name + " Vertex Buffer"),
-			.stride = sizeof(MeshVertex),
-			.size = model.vertices.size() * sizeof(MeshVertex),
+			.stride = sizeof(ElysiaModel::MeshVertex),
+			.size = model.vertices.size() * sizeof(ElysiaModel::MeshVertex),
 			.viewFlags = GPUResourceFlags::None,
 			.accessFlags = BufferAccessFlags::GPUOnly,
 			.isRawAccess = true
@@ -329,7 +333,7 @@ namespace ElysiaRenderer
 
 		return bufferHandle;
 	}
-	BufferHandle BufferManager::CreateIndexBuffer(const LoadedModel& model)
+	BufferHandle BufferManager::CreateIndexBuffer(const ElysiaModel::LoadedModel& model)
 	{
 		ElysiaCore::BufferCreationDesc bufferCreationDesc
 		{

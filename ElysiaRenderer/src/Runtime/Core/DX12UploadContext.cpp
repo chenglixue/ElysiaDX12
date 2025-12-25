@@ -1,10 +1,13 @@
 #include "stdafx.h"
+#include"DX12UploadContext.h"
+
 #include "DX12BufferResource.h"
 #include "DX12TextureBuffer.h"
-#include"DX12UploadContext.h"
 #include "ThirdParty/d3dx12_resource_helpers.h"
 
 #include "Runtime/RenderCore/BufferManager.h"
+#include "BufferUtility.h"
+#include "TextureUtility.h"
 
 namespace ElysiaCore
 {
@@ -36,7 +39,7 @@ namespace ElysiaCore
 	{
 		m_textureUploadsInProgress.emplace_back(textureProcessed);
 	}
-
+	
 	void DX12UploadContext::ProcessUploads()
 	{
 		BufferManager::GetInstance().UploadBufferData(this, m_bufferUploads);

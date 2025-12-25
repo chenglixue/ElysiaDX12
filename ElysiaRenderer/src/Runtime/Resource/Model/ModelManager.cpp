@@ -2,7 +2,8 @@
 #include "ModelManager.h"
 
 #include "AssimpLoader.h"
-#include "Runtime/Model/AssimpLoader.h"
+#include "Runtime/Resource/Model/AssimpLoader.h"
+#include "Runtime/Resource/Model/LoadedModel.h"
 
 namespace ElysiaRenderer
 {

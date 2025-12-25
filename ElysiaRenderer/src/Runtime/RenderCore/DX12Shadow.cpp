@@ -1,14 +1,15 @@
 #include "stdafx.h"
-#include "Programs/Helper.h"
 #include "DX12Shadow.h"
-#include "DX12Light.h"
 
+#include "Programs/Helper.h"
+#include "DX12Light.h"
+#include "Runtime/Core/DX12TextureBuffer.h"
 
 namespace ElysiaRenderer
 {
 	using namespace ElysiaHelper;
 	
-	DX12Shadow::DX12Shadow(ElysiaCore::DX12TextureResource* buffer)
+	DX12Shadow::DX12Shadow(DX12TextureResource* buffer)
 		: m_buffer(buffer)
 	{
 		m_width = static_cast<UINT>(m_buffer->GetResourceDesc().Width);
