@@ -1,15 +1,21 @@
 #include "stdafx.h"
 #include "IMGUIHelper.h"
 
+#include "Runtime/Core/DX12Device.h"
+#include "Runtime/Core/SwapChain.h"
+
 namespace ElysiaEditor
 {
     static HWND g_hWnd;
 
-    bool ImGUI_Init(void *hwnd)
+    bool ImGUI_Init(HWND windowHandle, ElysiaCore::DX12Device* pDevice, ElysiaCore::SwapChain& pSwapChain)
     {
-        g_hWnd = (HWND)hwnd;
-
+        g_hWnd = windowHandle;
+        IMGUI_CHECKVERSION();
+        ImGui::CreateContext();
         ImGuiIO& io = ImGui::GetIO();
+        ImGui::StyleColorsDark();
+
         io.KeyMap[ImGuiKey_Tab] = VK_TAB;                       // Keyboard mapping. ImGui will use those indices to peek into the io.KeyDown[] array that we will update during the application lifetime.
         io.KeyMap[ImGuiKey_LeftArrow] = VK_LEFT;
         io.KeyMap[ImGuiKey_RightArrow] = VK_RIGHT;
@@ -29,17 +35,22 @@ namespace ElysiaEditor
         io.KeyMap[ImGuiKey_X] = 'X';
         io.KeyMap[ImGuiKey_Y] = 'Y';
         io.KeyMap[ImGuiKey_Z] = 'Z';
-
-        io.RenderDrawListsFn = NULL;
         io.ImeWindowHandle = g_hWnd;
 
-        return true;
     }
 
     void ImGUI_Shutdown()
     {
-        ImGui::Shutdown();
-        g_hWnd = NULL;
+        ImGui_ImplDX12_Shutdown();
+        ImGui_ImplWin32_Shutdown();
+        ImGui::DestroyContext();
+    }
+
+    void ImGUI_NewFrame()
+    {
+        ImGui_ImplDX12_NewFrame();
+        ImGui_ImplWin32_NewFrame();
+        ImGui::NewFrame();
     }
 
     void ImGUI_UpdateIO()

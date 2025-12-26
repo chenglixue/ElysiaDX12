@@ -5,7 +5,7 @@
 #include "Runtime/Core/DX12TextureBuffer.h"
 #include "Runtime/Core/DX12StagingDescriptorHeap.h"
 
-#include "Runtime/Model/LoadedModel.h"
+#include "Runtime/Resource/Model/LoadedModel.h"
 #include "Runtime/Core/UploadRingBuffer.h"
 #include "Runtime/Core/DX12UploadContext.h"
 #include "Runtime/Core/DX12Device.h"

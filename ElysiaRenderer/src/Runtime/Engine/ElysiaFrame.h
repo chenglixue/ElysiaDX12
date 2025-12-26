@@ -1,8 +1,9 @@
 #pragma once
 #include "FrameworkWindows.h"
 #include "Editor/UI.h"
-#include "imgui/imgui.h"
 #include "Runtime/RenderCore/Renderer.h"
+
+struct ImGuiIO;
 
 namespace ElysiaEngine
 {

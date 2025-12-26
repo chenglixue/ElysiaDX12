@@ -5,6 +5,11 @@
 #include "Runtime/Developer/GPUTimestamps.h"
 #include "Runtime/Engine/FrameContext.h"
 
+namespace ElysiaEditor
+{
+	class IMGUI;
+}
+
 namespace ElysiaCore
 {
 	class SwapChain;
@@ -49,6 +54,7 @@ namespace ElysiaRenderer
 
 	protected:
 		DX12Device*						m_pDevice = nullptr;
+		std::unique_ptr<IMGUI>			m_pImGui = nullptr;
 
 		uint32_t                        m_Width;
 		uint32_t                        m_Height;

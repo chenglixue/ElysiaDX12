@@ -29,7 +29,7 @@
 
 #include "RenderTargetManager.h"
 #include "TonemapUtility.h"
-
+#include "Editor/IMGUI.h"
 
 extern "C" { __declspec(dllexport) extern const UINT D3D12SDKVersion = 618; }
 extern "C" { __declspec(dllexport) extern const char* D3D12SDKPath = ".\\D3D12\\"; }
@@ -45,10 +45,12 @@ namespace ElysiaRenderer
 	void Renderer::OnCreate(DX12Device* pDevice, SwapChain* pSwapChain)
 	{
 		m_pDevice = pDevice;
+		m_pImGui = std::make_unique<IMGUI>();
 		
 		m_graphicsContext = m_pDevice->CreateGraphicsContext();
 		// initialize the GPU time stamps module
 		m_GPUTimer.OnCreate(pDevice, NUM_BACK_BUFFERS);
+		m_pImGui->OnCreate(pDevice, pSwapChain);
 
 		InitPSOHelpers();
 

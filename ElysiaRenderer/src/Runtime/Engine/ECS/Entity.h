@@ -15,9 +15,10 @@ namespace ElysiaEngine
     public:
         eastl::string name;
         Transform transform;
-        std::unique_ptr<MeshRenderer> pMeshRenderer;
+        std::unique_ptr<MeshRenderer> pMeshRenderer = nullptr;
 
-        Entity(eastl::string n) : name(std::move(n)) {}
+        ~Entity();
+        Entity(eastl::string n);
         Entity(const Entity&) = delete;
         Entity& operator=(const Entity&) = delete;
 

@@ -8,7 +8,22 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f31d721d-cfba-4714-b0ce-c46a1a48110d" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.ElysiaRenderer/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.ElysiaRenderer/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Editor/IMGUI.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Editor/IMGUI.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Editor/IMGUIHelper.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Editor/IMGUIHelper.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Engine/ECS/Entity.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Engine/ECS/Entity.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Engine/ECS/Entity.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Engine/ECS/Entity.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Engine/ElysiaFrame.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Engine/ElysiaFrame.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/BufferManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/BufferManager.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Renderer.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Renderer.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Renderer.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Renderer.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/CameraManager.obj" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/CameraManager.obj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/ElysiaRenderer.tlog/CL.command.1.tlog" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/ElysiaRenderer.tlog/CL.command.1.tlog" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/ElysiaRenderer.tlog/CL.read.1.tlog" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/ElysiaRenderer.tlog/CL.read.1.tlog" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/ElysiaRenderer.tlog/CL.write.1.tlog" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/ElysiaRenderer.tlog/CL.write.1.tlog" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/ModelImporter.obj" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/ModelImporter.obj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/SobolSequenceGenerator.obj" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/SobolSequenceGenerator.obj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/Transform.obj" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/Transform.obj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/vc143.idb" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/vc143.idb" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -48,6 +63,7 @@
     <setting file="file://$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/AGS/amd_ags.h" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/vectormath/vectormath.hpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/ElysiaRenderer/magic_enum/magic_enum.hpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/ElysiaRenderer/main.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Engine/ECS/Entity.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Engine/ECS/Entity.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Engine/FrameContext.cpp" root0="FORCE_HIGHLIGHTING" />
@@ -61,6 +77,7 @@
     <setting file="file://$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Resource/Model/SharedTypes.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Resource/Model/SharedTypes.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/EASTL/hashtable.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/imgui/imgui_impl_win32.h" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/packages/Microsoft.Direct3D.D3D12.1.618.1/build/native/include/d3d12.h" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/x64/Debug/Assimp/include/assimp/material.h" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/x64/Debug/Assimp/include/assimp/material.inl" root0="SKIP_HIGHLIGHTING" />
@@ -136,6 +153,7 @@
       <workItem from="1766592012722" duration="5004000" />
       <workItem from="1766643435532" duration="9654000" />
       <workItem from="1766720458341" duration="599000" />
+      <workItem from="1766742335012" duration="2634000" />
     </task>
     <servers />
   </component>
