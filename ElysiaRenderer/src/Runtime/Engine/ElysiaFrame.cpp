@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "ElysiaFrame.h"
 
+
 #include "Editor/IMGUIHelper.h"
 #include "Editor/UserData.h"
 #include "Runtime/RenderCore/BufferManager.h"
@@ -68,7 +69,7 @@ namespace ElysiaEngine
         m_pRenderer = new ElysiaRenderer::Renderer();
         m_pRenderer->OnCreate(m_pDevice, &m_swapChain);
 
-        ElysiaEditor::ImGUI_Init((void*)m_windowHwnd);
+        ElysiaEditor::ImGUI_Init(m_windowHwnd, m_pDevice, m_swapChain);
 
         OnResize();
         OnUpdateDisplay();
@@ -128,8 +129,8 @@ namespace ElysiaEngine
     void ElysiaFrame::OnRender()
     {
         auto frameContext = BeginFrame();
-        ElysiaEditor::ImGUI_UpdateIO();
-        ImGui::NewFrame();
+        ImGUI_UpdateIO();
+        ImGUI_NewFrame();
 
         std::vector<RenderItem> renderList;
         if (m_loadingScene)

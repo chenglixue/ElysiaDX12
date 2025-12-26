@@ -175,17 +175,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="dxc\inc\d3dx12.h" />
-    <ClInclude Include="lib\imgui\imconfig.h" />
-    <ClInclude Include="lib\imgui\imgui.h" />
-    <ClInclude Include="lib\imgui\imgui_impl_dx12.h" />
-    <ClInclude Include="lib\imgui\imgui_impl_win32.h" />
-    <ClInclude Include="lib\imgui\imgui_internal.h" />
-    <ClInclude Include="lib\imgui\imstb_rectpack.h" />
-    <ClInclude Include="lib\imgui\imstb_textedit.h" />
-    <ClInclude Include="lib\imgui\imstb_truetype.h" />
-    <ClInclude Include="lib\imgui\stb_rect_pack.h" />
-    <ClInclude Include="lib\imgui\stb_textedit.h" />
-    <ClInclude Include="lib\imgui\stb_truetype.h" />
     <ClInclude Include="lib\stb\stb_image.h" />
     <ClInclude Include="lib\stb\stb_image_write.h" />
     <ClInclude Include="src\Editor\DX12UI.h" />
@@ -331,24 +320,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="lib\imgui\extra_fonts\binary_to_compressed_c.cpp">
-      <PrecompiledHeaderOutputFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">x64\Debug\ElysiaRenderer.pch</PrecompiledHeaderOutputFile>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="lib\imgui\imgui.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="lib\imgui\imgui_demo.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="lib\imgui\imgui_draw.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="lib\imgui\imgui_impl_dx12.cpp" />
-    <ClCompile Include="lib\imgui\imgui_impl_win32.cpp" />
-    <ClCompile Include="lib\imgui\imgui_tables.cpp" />
-    <ClCompile Include="lib\imgui\imgui_widgets.cpp" />
     <ClCompile Include="src\Editor\DX12UI.cpp">
       <AdditionalIncludeDirectories>C:\Work\ElysiaRenderer\packages\boost.1.87.0\build\..\lib\native\include\;C:\Work\ElysiaRenderer\packages\Microsoft.Direct3D.D3D12.1.618.1\build\native\include;C:\Work\ElysiaRenderer\packages\Microsoft.Direct3D.D3D12.1.618.1\build\native\include\d3dx12;C:\Work\ElysiaRenderer\packages\Microsoft.Direct3D.D3D12.1.618.1\build\native\;C:\Work\ElysiaRenderer\packages\directxtk12_desktop_win10.2025.7.10.1\build\native\..\..\include;C:\Work\ElysiaRenderer\packages\WinPixEventRuntime.1.0.240308001\build\..\Include\WinPixEventRuntime;D:\DX12\ElysiaRenderer\x64\Debug\Shaders;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc\include;D:\DX12\ElysiaDX12\x64\Debug\Assimp\include\assimp;DirectXTK12\Inc;D:\DX12\ElysiaDX12\ElysiaRenderer\AMD\libs\AGS;;C:\Work\ElysiaRenderer\packages\Vcpkg.Nuget.1.5.0\vcpkg_bin\installed\x64-windows\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -6486,17 +6457,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="lib\imgui\extra_fonts\Cousine-Regular.ttf" />
-    <Content Include="lib\imgui\extra_fonts\DroidSans.ttf" />
-    <Content Include="lib\imgui\extra_fonts\Karla-Regular.ttf" />
-    <Content Include="lib\imgui\extra_fonts\ProggyClean.ttf" />
-    <Content Include="lib\imgui\extra_fonts\ProggyTiny.ttf" />
-    <Content Include="lib\imgui\extra_fonts\README.txt" />
-    <Content Include="lib\imgui\extra_fonts\Roboto-Medium.ttf" />
-    <Content Include="lib\imgui\License.txt" />
-    <Content Include="lib\imgui\README.md" />
-    <Content Include="lib\imgui\ReadMe.txt" />
-    <Content Include="lib\imgui\TODO.txt" />
     <Content Include="lib\stb\CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
