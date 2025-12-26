@@ -40,7 +40,7 @@ namespace ElysiaRenderer
 		virtual ~ShadowPass() override;
 
 		virtual void Configure() override;
-		virtual void Render(ElysiaEngine::FrameContext context) override;
+		virtual void Render(ElysiaEngine::FrameContext& context) override;
 		virtual void UpdatePSO() override;
 		virtual void UpdateVariant() override;
 
@@ -50,7 +50,7 @@ namespace ElysiaRenderer
 		std::vector<Vector2> m_sobolSqeuences;
 
 		void UpdateShadowPassVariant(UINT passIndex);
-		void DrawMesh(UINT passIndex);
-		void DrawShadowPass();
+		void DrawMesh(ElysiaEngine::FrameContext& context, UINT passIndex);
+		void DrawShadowPass(ElysiaEngine::FrameContext& context);
 	};
 }

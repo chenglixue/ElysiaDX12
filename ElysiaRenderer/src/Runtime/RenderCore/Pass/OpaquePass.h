@@ -12,7 +12,7 @@ namespace ElysiaRenderer
 		virtual ~OpaquePass() override;
 
 		virtual void Configure() override;
-		virtual void Render(ElysiaEngine::FrameContext context) override;
+		virtual void Render(ElysiaEngine::FrameContext& context) override;
 		virtual void UpdatePSO() override;
 		virtual void UpdateVariant() override;
 
@@ -39,6 +39,6 @@ namespace ElysiaRenderer
 		DXGI_FORMAT m_cameraColorFormat = DXGI_FORMAT_UNKNOWN;
 
 		void UpdateLightingPassVariant(UINT passID);
-		void DrawLightingPass();
+		void DrawLightingPass(ElysiaEngine::FrameContext& context);
 	};
 }

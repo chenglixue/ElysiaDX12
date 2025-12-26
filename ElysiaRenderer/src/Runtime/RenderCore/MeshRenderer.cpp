@@ -8,7 +8,7 @@ namespace ElysiaRenderer
     void MeshRenderer::Init(const std::shared_ptr<ElysiaModel::LoadedModel>& loadedModel)
     {
         m_pModel = loadedModel;
-
+        
         const UINT64 meshCount = m_pModel->meshes.size();
         m_meshBoundingBoxes.resize(meshCount);
         m_meshDrawIndices.resize(meshCount);

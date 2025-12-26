@@ -1,4 +1,5 @@
 #pragma once
+#include "Runtime/Resource/Model/LoadedModel.h"
 #include "Runtime/Resource/Model/SharedTypes.h"
 
 namespace ElysiaRenderer
@@ -15,8 +16,8 @@ namespace ElysiaRenderer
 		// 变换数据
 		DirectX::XMMATRIX worldMatrix;
 
-		// 材质数据 (Bindless 索引)
-		MaterialTextureIndices textureIndices;
+		eastl::vector<MaterialTextureIndices> textureIndices;
+		ElysiaModel::LoadedMaterial loadedMaterial;
 
 		// 排序依据
 		ID3D12PipelineState* pso;

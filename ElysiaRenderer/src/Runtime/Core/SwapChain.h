@@ -31,6 +31,7 @@ namespace ElysiaCore
         void Present();
         void WaitForSwapChain();
 
+        DX12TextureResource& GetCurrBackBuffer();
         ID3D12Resource *GetCurrentBackBufferResource();
         D3D12_CPU_DESCRIPTOR_HANDLE *GetCurrentBackBufferRTV();
         DXGI_FORMAT GetFormat();

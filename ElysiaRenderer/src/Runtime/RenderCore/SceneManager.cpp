@@ -2,6 +2,7 @@
 #include "SceneManager.h"
 
 #include "MeshRenderer.h"
+#include "Editor/UserData.h"
 #include "Runtime/Resource/Model/LoadedModel.h"
 #include "Runtime/Resource/Model/ModelManager.h"
 #include "Runtime/Engine/ECS/Entity.h"
@@ -27,6 +28,12 @@ namespace ElysiaRenderer
         
     }
 
+    void SceneManager::LoadScene(std::vector<RenderItem>& outRenderList)
+    {
+        CreateEntityFromModel(g_ModelPaths[0]);
+        CollectRenderItems(outRenderList);
+    }
+
     Entity* SceneManager::CreateEntityFromModel(const eastl::wstring& modelPath)
     {
         auto model = ModelManager::GetInstance().LoadStaticModel(ToStdWString(modelPath).c_str(), 1);
@@ -37,8 +44,7 @@ namespace ElysiaRenderer
         m_entities.emplace_back(std::move(pEntity));
         return ptr;
     }
-
-    std::unique_ptr<Entity> SceneManager::CreateEntity(const std::shared_ptr<ElysiaModel::LoadedModel>& model)
+    std::unique_ptr<Entity> SceneManager::CreateEntity(const std::shared_ptr<ElysiaModel::LoadedModel>& model) const
     {
         auto pParent = std::make_unique<Entity>(ToEastl(model->name));
         pParent->transform.scale = Vector3(model->scale);
@@ -63,7 +69,7 @@ namespace ElysiaRenderer
         return pParent;
     }
 
-    void SceneManager::CollectRenderItems(std::vector<RenderItem>& outList)
+    void SceneManager::CollectRenderItems(std::vector<RenderItem>& outList) const
     {
         outList.clear();
         
@@ -84,11 +90,11 @@ namespace ElysiaRenderer
                     .ibView = mesh.ibView,
                     .indexCount = mesh.numIndices,
                     .startIndex = mesh.idxOffset,
-                    .baseVertex = (INT)mesh.vtxOffset
+                    .baseVertex = INT(mesh.vtxOffset)
                 };
                 
                 item.worldMatrix = worldMat;
-                item.textureIndices = pEntity->pMeshRenderer->GetTextureIndices(meshIdx);
+                item.loadedMaterial = pModel->materials[mesh.materialIndex];
                 outList.emplace_back(std::move(item));
             }
         }

@@ -8,6 +8,7 @@
 #include "Runtime/Core/DX12Shader.h"
 #include "Runtime/Core/DX12Device.h"
 #include "Runtime/Core/DX12TextureBuffer.h"
+#include "Runtime/Core/SwapChain.h"
 
 #include "Runtime/RenderCore/RenderResource.h"
 #include "Runtime/RenderCore/RenderTexture.h"
@@ -51,7 +52,7 @@ namespace ElysiaRenderer
 
 		UpdateVariant();
 	}
-	void FinalBlitPass::Render(ElysiaEngine::FrameContext context)
+	void FinalBlitPass::Render(ElysiaEngine::FrameContext& context)
 	{
 		PIXHelper pix(m_pCommand->GetCommandList(), "Final Blit Pass");
 
@@ -62,7 +63,7 @@ namespace ElysiaRenderer
 
 	void FinalBlitPass::DoFinalBlit()
 	{
-		auto& backBuffer = m_pDevice->GetCurrBackBuffer();
+		auto& backBuffer = m_pSwaiChain->GetCurrBackBuffer();
 
 		m_pCommand->AddBarrier(backBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET);
 		m_pCommand->ClearRenderTarget(backBuffer, Color::Black);
@@ -114,10 +115,7 @@ namespace ElysiaRenderer
 			m_pCommand->DrawFullScreenTriangle();
 		}
 		
-		if (ImGui::GetDrawData())
-		{
-			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), m_pCommand->GetCommandList());
-		}
+		
 
 		m_pCommand->AddBarrier(backBuffer, D3D12_RESOURCE_STATE_PRESENT);
 	}

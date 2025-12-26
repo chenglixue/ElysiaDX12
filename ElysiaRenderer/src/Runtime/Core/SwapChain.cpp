@@ -87,7 +87,11 @@ namespace ElysiaCore
         }
     }
 
-    ID3D12Resource *SwapChain::GetCurrentBackBufferResource()
+    DX12TextureResource& SwapChain::GetCurrBackBuffer()
+    {
+        return *m_backBuffers[m_pSwapChain->GetCurrentBackBufferIndex()];
+    }
+    ID3D12Resource* SwapChain::GetCurrentBackBufferResource()
     {
         uint32_t backBuffferIndex = m_pSwapChain->GetCurrentBackBufferIndex();
 
@@ -96,7 +100,7 @@ namespace ElysiaCore
         pBackBuffer->Release();
         return pBackBuffer;
     }
-    D3D12_CPU_DESCRIPTOR_HANDLE *SwapChain::GetCurrentBackBufferRTV()
+    D3D12_CPU_DESCRIPTOR_HANDLE* SwapChain::GetCurrentBackBufferRTV()
     {
         uint32_t backBuffferIndex = m_pSwapChain->GetCurrentBackBufferIndex();
         return &m_backBuffers[backBuffferIndex]->GetRTVDescriptor().GetCPUHandle();

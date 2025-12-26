@@ -23,6 +23,8 @@
 
 namespace ElysiaRenderer
 {
+	using namespace ElysiaModel;
+	
 	int GBufferPass::ShaderPassIDs::GBufferPassID = -1;
 	
 	size_t GBufferPass::RenderTextureIDs::GBuffer0ID = PropertyToID("GBuffer_0");
@@ -83,10 +85,10 @@ namespace ElysiaRenderer
 		UpdateVariant();
 	}
 
-	void GBufferPass::Render(ElysiaEngine::FrameContext context)
+	void GBufferPass::Render(ElysiaEngine::FrameContext& context)
 	{
 		PIXHelper pix(m_pCommand->GetCommandList(), "GBuffer Pass");
-
+		
 		UpdatePSO();
 		
 		m_pMaterial->SetFloat4(ShaderIDs::screenSize, GetScreenSize(Vector2(m_renderSize.x, m_renderSize.y)));
@@ -103,7 +105,7 @@ namespace ElysiaRenderer
 		m_pMaterial->SetFloat(ShaderIDs::roughnessIntensity, UserData::GetInstance().RoughnessIntensity);
 		m_pMaterial->SetFloat(ShaderIDs::ambientCubemapIntensity, UserData::GetInstance().AmbientCubemapIntensity);
 
-		DrawGBufferPass();
+		DrawGBufferPass(context);
 	}
 
 	void GBufferPass::Dispose()
@@ -239,45 +241,36 @@ namespace ElysiaRenderer
 		}
 	}
 
-	void GBufferPass::DrawMesh(UINT passIndex)
+	void GBufferPass::DrawMesh(ElysiaEngine::FrameContext& context, UINT passIndex)
 	{
-		m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_renderSize));
 		m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		
 		auto& passData = m_pMaterial->GetPassData(passIndex);
-		SetSpaceResource(passData, PER_PASS_SPACE); 
+		SetSpaceResource(passData, PER_PASS_SPACE);
 		SetSpaceResource(passData, PER_FRAME_SPACE);
 
-		for (UINT i = 0; i < ModelManager::GetInstance().)
-		m_pCommand->SetIndexBuffer(BufferManager::GetInstance().GetIndexBufferView()); 
-		m_pCommand->SetVertexBuffer(0, 1, const_cast<D3D12_VERTEX_BUFFER_VIEW&>(BufferManager::GetInstance().GetVertexBufferView()));
-		for (UINT meshIndex = 0; meshIndex < GetModelImporter()->GetMeshCount(); ++meshIndex)
+		for (auto& renderItem : context.renderList)
 		{
-			const auto& meshRenderer = GetModelImporter()->GetMeshRenderer(meshIndex);
-			const auto& mesh = meshRenderer.m_mesh;
+			m_pCommand->SetIndexBuffer(renderItem.ibView);
+			m_pCommand->SetVertexBuffer(0, 1, renderItem.vbView);
 
-			m_pMaterial->SetMatrix(ShaderIDs::worldMatrix, meshRenderer.m_worldMatrix);
-			m_pMaterial->SetUInt(ShaderIDs::baseColorTexIndex, meshRenderer.m_CBVObjectParameter->baseColorTexIndex);
-			m_pMaterial->SetUInt(ShaderIDs::normalTexIndex, meshRenderer.m_CBVObjectParameter->normalTexIndex);
-			m_pMaterial->SetUInt(ShaderIDs::metallicTexIndex, meshRenderer.m_CBVObjectParameter->metallicTexIndex);
-			m_pMaterial->SetUInt(ShaderIDs::roughnessTexIndex, meshRenderer.m_CBVObjectParameter->roughnessTexIndex);
-			m_pMaterial->SetUInt(ShaderIDs::specularTexIndex, meshRenderer.m_CBVObjectParameter->specularTexIndex);
-			m_pMaterial->SetFloat(ShaderIDs::cutoff, meshRenderer.m_CBVObjectParameter->cutoff);
-			m_pMaterial->SetFloat(ShaderIDs::opacity, meshRenderer.m_CBVObjectParameter->opacity);
-			m_pMaterial->SetBool(ShaderIDs::g_hasNormalTex, meshRenderer.m_CBVObjectParameter->hasNormalTex);
-			
+			auto materialData = renderItem.loadedMaterial;
+
+			m_pMaterial->SetMatrix(ShaderIDs::worldMatrix, renderItem.worldMatrix);
+			m_pMaterial->SetUInt(ShaderIDs::baseColorTexIndex, materialData.textures[UINT64(MaterialTextureType::Albedo)].GetResourceHeapIndex());
+			m_pMaterial->SetUInt(ShaderIDs::normalTexIndex, materialData.textures[UINT64(MaterialTextureType::Normal)].GetResourceHeapIndex());
+			m_pMaterial->SetUInt(ShaderIDs::metallicTexIndex, materialData.textures[UINT64(MaterialTextureType::Metallic)].GetResourceHeapIndex());
+			m_pMaterial->SetUInt(ShaderIDs::roughnessTexIndex, materialData.textures[UINT64(MaterialTextureType::Roughness)].GetResourceHeapIndex());
+			m_pMaterial->SetUInt(ShaderIDs::specularTexIndex, materialData.textures[UINT64(MaterialTextureType::Specular)].GetResourceHeapIndex());
+			m_pMaterial->SetFloat(ShaderIDs::cutoff, 0.5);
+			m_pMaterial->SetFloat(ShaderIDs::opacity, materialData.opacity);
+
 			SetSpaceResource(passData, PER_OBJECT_SPACE);
 			SetSpaceResource(passData, PER_MATERIAL_SPACE);
-
-			auto startIndex = mesh->indexDataOffset / sizeof(UINT16);
-			auto startVertex = mesh->vertexDataOffset / GetModelImporter()->GetVertexStride();
-			auto indexCount = mesh->indexCount;
-
-			m_pCommand->Draw(indexCount, startVertex, static_cast<UINT>(startIndex));
+			m_pCommand->Draw(renderItem.indexCount, renderItem.baseVertex, renderItem.startIndex);
 		}
 	}
 
-	void GBufferPass::DrawGBufferPass()
+	void GBufferPass::DrawGBufferPass(ElysiaEngine::FrameContext& context)
 	{
 		for (auto& RT : m_GBufferRTs)
 		{
@@ -316,7 +309,8 @@ namespace ElysiaRenderer
 			pipelineStateData.m_renderTargets = std::move(GetGBuffers());
 			pipelineStateData.m_depthStencilTarget = m_pCameraDepthRT->GetTexture();
 			m_pCommand->SetPipeline(pipelineStateData);
-			DrawMesh(ShaderPassIDs::GBufferPassID);
+			m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_renderSize));
+			DrawMesh(context, ShaderPassIDs::GBufferPassID);
 		}
 
 		for (auto& RT : m_GBufferRTs)

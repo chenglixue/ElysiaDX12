@@ -27,8 +27,8 @@ namespace ElysiaEditor
 
 	void DX12UI::InitDescriptor(HWND windowHandle, ElysiaCore::DX12Device* device)
 	{
-		auto UIDescriptor0 = device->GetImguiDescriptor(0);
-		auto UIDescriptor1 = device->GetImguiDescriptor(1);
+		// auto UIDescriptor0 = device->GetImguiDescriptor(0);
+		// auto UIDescriptor1 = device->GetImguiDescriptor(1);
 
 		// ImGui_ImplWin32_Init(windowHandle);
 		// ImGui_ImplDX12_Init(device->GetDevice(), NUM_FRAMES_IN_FLIGHT,

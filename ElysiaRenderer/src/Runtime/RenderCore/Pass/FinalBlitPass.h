@@ -1,6 +1,8 @@
 #pragma once
 #include "BasePass.h"
 
+
+
 namespace ElysiaRenderer
 {
 	class RenderTexture;
@@ -13,7 +15,7 @@ namespace ElysiaRenderer
 		virtual ~FinalBlitPass() override;
 
 		virtual void Configure() override;
-		virtual void Render(ElysiaEngine::FrameContext context) override;
+		virtual void Render(ElysiaEngine::FrameContext& context) override;
 		virtual void UpdatePSO() override;
 		virtual void UpdateVariant() override;
 
@@ -28,7 +30,7 @@ namespace ElysiaRenderer
 		{
 			static size_t blitterTextureIndex;
 		};
-		
+
 		DXGI_FORMAT m_backBufferFormat = DXGI_FORMAT_UNKNOWN;
 		void UpdateFinalBlitVariant(UINT passID);
 		void DoFinalBlit();

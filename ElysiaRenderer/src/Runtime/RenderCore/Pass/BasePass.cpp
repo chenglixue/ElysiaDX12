@@ -34,6 +34,7 @@ namespace ElysiaRenderer
 		m_pDevice = renderPassData.pDevice;
 		m_pCameraColorRT = renderPassData.pCameraColorRT;
 		m_pCameraDepthRT = renderPassData.pCameraDepthRT;
+		m_pSwaiChain = renderPassData.pSwapChain;
 
 		Configure();
 	}

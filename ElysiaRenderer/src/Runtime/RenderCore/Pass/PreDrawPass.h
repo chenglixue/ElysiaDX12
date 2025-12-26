@@ -11,7 +11,7 @@ namespace ElysiaRenderer
 
         //virtual void Setup(const RenderPassData& renderPasssData) override;
         virtual void Configure() override;
-        virtual void Render(ElysiaEngine::FrameContext context) override;
+        virtual void Render(ElysiaEngine::FrameContext& context) override;
         virtual void UpdatePSO() override;
         virtual void UpdateVariant() override;
 

@@ -8,6 +8,7 @@ namespace ElysiaCore
 	class DX12Device;
 	class UploadRingBuffer;
 	struct PipelineStateObject;
+	class SwapChain;
 }
 
 namespace ElysiaRenderer
@@ -33,7 +34,7 @@ namespace ElysiaRenderer
 
 		virtual void Setup(const RenderPassData& renderPassData);
 		virtual void Configure() = 0;
-		virtual void Render(ElysiaEngine::FrameContext context) = 0;
+		virtual void Render(ElysiaEngine::FrameContext& context) = 0;
 
 		virtual void Dispose();
 
@@ -51,6 +52,7 @@ namespace ElysiaRenderer
 		Vector2 m_renderSize;
 		DX12Device* m_pDevice = nullptr;
 		DX12GraphicsContext* m_pCommand = nullptr;
+		SwapChain* m_pSwaiChain = nullptr;
 		DX12Camera* m_pCamera = nullptr;
 		RenderTexture* m_pCameraColorRT = nullptr;
 		RenderTexture* m_pCameraDepthRT = nullptr;

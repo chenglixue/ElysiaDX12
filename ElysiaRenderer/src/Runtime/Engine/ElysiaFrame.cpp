@@ -8,6 +8,7 @@
 #include "Runtime/RenderCore/RenderTargetManager.h"
 #include "Runtime/RenderCore/CameraManager.h"
 #include "Runtime/RenderCore/PSOManager.h"
+#include "Runtime/RenderCore/SceneManager.h"
 #include "Runtime/RenderCore/TextureManager.h"
 
 namespace ElysiaEngine
@@ -130,9 +131,11 @@ namespace ElysiaEngine
         ElysiaEditor::ImGUI_UpdateIO();
         ImGui::NewFrame();
 
+        std::vector<RenderItem> renderList;
         if (m_loadingScene)
         {
             static int loadingStage = 0;
+            SceneManager::GetInstance().LoadScene(renderList);
             if (loadingStage == 0)
             {
                 m_time = 0;
@@ -151,7 +154,10 @@ namespace ElysiaEngine
             BufferManager::GetInstance().Update(frameContext);
         }
 
-        m_pRenderer->OnRender(frameContext);
+        if (!m_loadingScene)
+        {
+            m_pRenderer->OnRender(frameContext);
+        }
         EndFrame();
     }
 

@@ -73,7 +73,7 @@ namespace ElysiaRenderer
 		// 	RenderTargetManager::GetInstance().GetRenderTexture("g_AOIndex")->GetResourceHeapIndex());
 	}
 
-	void OpaquePass::Render(ElysiaEngine::FrameContext context)
+	void OpaquePass::Render(ElysiaEngine::FrameContext& context)
 	{
 		PIXHelper pix(m_pCommand->GetCommandList(), "Opaque Light Pass");
 		
@@ -87,9 +87,9 @@ namespace ElysiaRenderer
 		m_pMaterial->SetMatrix(ShaderIDs::viewProjMatrix, m_pCamera->GetViewMat() * m_pCamera->GetProjMat());
 		m_pMaterial->SetMatrix(ShaderIDs::viewProjMatrix_I, (m_pCamera->GetViewMat() * m_pCamera->GetProjMat()).Invert());
 
-		DrawLightingPass();
+		DrawLightingPass(context);
 	}
-	void OpaquePass::DrawLightingPass()
+	void OpaquePass::DrawLightingPass(ElysiaEngine::FrameContext& context)
 	{
 		bool isReady = true;
 		{
@@ -121,13 +121,6 @@ namespace ElysiaRenderer
 			SetSpaceResource(passData, PER_PASS_SPACE);
 			SetSpaceResource(passData, PER_FRAME_SPACE);
 			m_pCommand->DrawFullScreenTriangle();
-			
-			m_pCommand->AddBarrier(m_pCameraColorRT, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-		}
-		else
-		{
-			m_pCommand->AddBarrier(m_pCameraColorRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
-			m_pCommand->ClearRenderTarget(m_pCameraColorRT, Color::Black);
 			
 			m_pCommand->AddBarrier(m_pCameraColorRT, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		}

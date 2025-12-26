@@ -19,6 +19,7 @@ namespace ElysiaRenderer
 		Vector2 RenderSize = Vector2::One;
 		DX12Device* pDevice = nullptr;
 		DX12GraphicsContext* pCommand = nullptr;
+		SwapChain* pSwapChain;
 
 		RenderTexture* pCameraColorRT = nullptr;
 		RenderTexture* pCameraDepthRT = nullptr;

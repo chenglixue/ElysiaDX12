@@ -9,7 +9,7 @@
 #include "Runtime/Core/DX12GraphicsContext.h"
 #include "Runtime/Core/DX12Device.h"
 
-#include "Runtime/Model/ModelManager.h"
+#include "Runtime/Resource/Model/ModelManager.h"
 
 #include "MeshRenderer.h"
 #include "BufferManager.h"
@@ -31,7 +31,6 @@
 #include "TonemapUtility.h"
 
 
-
 extern "C" { __declspec(dllexport) extern const UINT D3D12SDKVersion = 618; }
 extern "C" { __declspec(dllexport) extern const char* D3D12SDKPath = ".\\D3D12\\"; }
 
@@ -51,15 +50,6 @@ namespace ElysiaRenderer
 		// initialize the GPU time stamps module
 		m_GPUTimer.OnCreate(pDevice, NUM_BACK_BUFFERS);
 
-		for (const auto& modelPath : g_ModelPaths)
-		{
-			auto pLoadedModel = ModelManager::GetInstance().LoadStaticModel(modelPath, 1);
-			
-			auto pMeshRenderer = std::make_unique<MeshRenderer>();
-			pMeshRenderer->ShutDown();
-			pMeshRenderer->Init(pLoadedModel);
-		}
-
 		InitPSOHelpers();
 
 		RenderPassData passData
@@ -67,6 +57,7 @@ namespace ElysiaRenderer
 			.RenderSize = {m_Width, m_Height},
 			.pDevice = m_pDevice, 
 			.pCommand = m_graphicsContext.get(),
+			.pSwapChain = pSwapChain,
 			.pCameraColorRT = m_pCameraColorRT,
 			.pCameraDepthRT = m_pCameraDepthRT
 		};
@@ -79,7 +70,6 @@ namespace ElysiaRenderer
 		// m_passes.emplace_back(std::move(std::make_unique<TonemapPass>(m_pCameraManager->GetMainCamera())));
 		// m_passes.emplace_back(std::move(std::make_unique<BloomPass>(m_pCameraManager->GetMainCamera())));
 		m_passes.emplace_back(std::move(std::make_unique<FinalBlitPass>(CameraManager::GetInstance().GetMainCamera())));
-		m_passes.emplace_back(std::move(std::make_unique<UIPass>()));
 		for (auto& pass : m_passes)
 		{ 
 			pass->Setup(passData);

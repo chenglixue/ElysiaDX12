@@ -37,7 +37,7 @@ namespace ElysiaRenderer
 	void PreDrawPass::Configure()
 	{
 	}
-	void PreDrawPass::Render(ElysiaEngine::FrameContext context)
+	void PreDrawPass::Render(ElysiaEngine::FrameContext& context)
 	{
           auto GPUAddress = UploadFrameConstant(m_pDevice,
 			[this, context](CBVFrameVariable* dst)

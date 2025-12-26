@@ -1,4 +1,5 @@
 #pragma once
+#include "Runtime/RenderCore/RenderItem.h"
 
 namespace ElysiaEngine
 {
@@ -6,6 +7,7 @@ namespace ElysiaEngine
 	{
 		UINT frameID;
 		UINT64 frameIndex;
+		std::vector<ElysiaRenderer::RenderItem> renderList;
 	};
 }
 

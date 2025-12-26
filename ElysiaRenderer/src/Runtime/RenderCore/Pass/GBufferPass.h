@@ -26,7 +26,7 @@ namespace ElysiaRenderer
 
 		//virtual void Setup(const RenderPassData& renderPassData) override;
 		virtual void Configure() override;
-		virtual void Render(ElysiaEngine::FrameContext context) override;
+		virtual void Render(ElysiaEngine::FrameContext& context) override;
 		virtual void UpdatePSO() override;
 		virtual void UpdateVariant() override;
 
@@ -74,7 +74,7 @@ namespace ElysiaRenderer
 		std::vector<DX12TextureResource*> GetGBuffers();
 		void CreateRTs();
 		void UpdateGBufferPassVariant(UINT passIndex);
-		void DrawMesh(UINT passIndex);
-		void DrawGBufferPass();
+		void DrawMesh(ElysiaEngine::FrameContext& context, UINT passIndex);
+		void DrawGBufferPass(ElysiaEngine::FrameContext& context);
 	};
 }
