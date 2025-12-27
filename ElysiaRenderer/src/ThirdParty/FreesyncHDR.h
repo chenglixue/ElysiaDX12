@@ -23,6 +23,7 @@
 // Windows Header Files:
 #include <dxgi1_6.h>
 #include "AMD\libs\AGS\amd_ags.h"
+#include <vector>
 
 namespace CAULDRON_DX12
 {

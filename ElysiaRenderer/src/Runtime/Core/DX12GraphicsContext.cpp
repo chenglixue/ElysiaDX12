@@ -276,22 +276,22 @@ namespace ElysiaCore
 		m_commandList->DrawIndexedInstanced(vertexCount, instanceCount, startIndexLocation, vertexStartOffset, startInstanceLocation);
 	}
 
-	void DX12GraphicsContext::Dispatch(size_t groupCountX, size_t groupCountY, size_t groupCountZ)
+	void DX12GraphicsContext::Dispatch(UINT groupCountX, UINT groupCountY, UINT groupCountZ)
 	{
 		m_commandList->Dispatch(groupCountX, groupCountY, groupCountZ);
 	}
 
-	void DX12GraphicsContext::Dispatch1D(size_t threadCountX, size_t groupSizeX)
+	void DX12GraphicsContext::Dispatch1D(UINT threadCountX, UINT groupSizeX)
 	{
 		Dispatch(GetGroupCount(threadCountX, groupSizeX), 1, 1);
 	}
 
-	void DX12GraphicsContext::Dispatch2D(size_t threadCountX, size_t threadCountY, size_t groupSizeX, size_t groupSizeY)
+	void DX12GraphicsContext::Dispatch2D(UINT threadCountX, UINT threadCountY, UINT groupSizeX, UINT groupSizeY)
 	{
 		Dispatch(GetGroupCount(threadCountX, groupSizeX), GetGroupCount(threadCountY, groupSizeY), 1);
 	}
 
-	void DX12GraphicsContext::Dispatch3D(size_t threadCountX, size_t threadCountY, size_t threadCountZ, size_t groupSizeX, size_t groupSizeY, size_t groupSizeZ)
+	void DX12GraphicsContext::Dispatch3D(UINT threadCountX, UINT threadCountY, UINT threadCountZ, UINT groupSizeX, UINT groupSizeY, UINT groupSizeZ)
 	{
 		Dispatch(GetGroupCount(threadCountX, groupSizeX), GetGroupCount(threadCountY, groupSizeY), GetGroupCount(threadCountZ, groupSizeZ));
 	}

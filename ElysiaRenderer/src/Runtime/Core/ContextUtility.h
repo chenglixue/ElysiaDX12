@@ -3,7 +3,7 @@
 
 namespace ElysiaCore
 {
-	inline size_t GetGroupCount(size_t threadCount, size_t groupSize)
+	inline UINT GetGroupCount(UINT threadCount, UINT groupSize)
 	{
 		return (threadCount + groupSize - 1) / groupSize;
 	}

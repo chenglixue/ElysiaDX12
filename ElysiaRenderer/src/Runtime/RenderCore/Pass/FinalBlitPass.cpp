@@ -122,16 +122,16 @@ namespace ElysiaRenderer
 
 	void FinalBlitPass::UpdatePSO()
 	{
-		if(m_backBufferFormat != m_pDevice->GetSwapChainFormat())
+		if(m_backBufferFormat != m_pSwaiChain->GetFormat())
 		{
 			{
 				RenderTargetDesc RTDesc = RenderTargetDesc
 				{
-					.m_renderTargetFormats = m_pDevice->GetSwapChainFormat(),
+					.m_renderTargetFormats = m_pSwaiChain->GetFormat(),
 					.m_numRenderTargets = 1,
 					.m_depthStencilFormat = m_pCameraDepthRT->GetFormat()
 				};
-				m_backBufferFormat = m_pDevice->GetSwapChainFormat();
+				m_backBufferFormat = m_pSwaiChain->GetFormat();
 
 				m_pMaterial->GetPassData(ShaderPassIDs::BlitPassID).pPipelineStateObject = PSOManager::GetInstance().GetGraphicsPipelineState(m_pDevice,
 					m_pMaterial.get(), ShaderPassIDs::BlitPassID, RTDesc);
@@ -163,11 +163,11 @@ namespace ElysiaRenderer
 			{
 				RenderTargetDesc RTDesc = RenderTargetDesc
 				{
-					.m_renderTargetFormats = m_pDevice->GetSwapChainFormat(),
+					.m_renderTargetFormats = m_pSwaiChain->GetFormat(),
 					.m_numRenderTargets = 1,
 					.m_depthStencilFormat = m_pCameraDepthRT->GetFormat()
 				};
-				m_backBufferFormat = m_pDevice->GetSwapChainFormat();
+				m_backBufferFormat = m_pSwaiChain->GetFormat();
 				passData.pPipelineStateObject = PSOManager::GetInstance().GetGraphicsPipelineState(m_pDevice, m_pMaterial.get(), passID, RTDesc);
 
 				emplaceResult.first->second = 

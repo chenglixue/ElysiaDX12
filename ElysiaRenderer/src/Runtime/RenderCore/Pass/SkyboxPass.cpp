@@ -21,7 +21,7 @@ namespace ElysiaRenderer
 
 		CreatePSO();
 	}
-	void SkyboxPass::Render(ElysiaEngine::FrameContext context)
+	void SkyboxPass::Render(ElysiaEngine::FrameContext& frameContext)
 	{
 		/*Execute();
 

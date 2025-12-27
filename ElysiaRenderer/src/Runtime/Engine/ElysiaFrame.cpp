@@ -195,18 +195,20 @@ namespace ElysiaEngine
             m_UIState.ResetLPMSceneDefaults();
     }
 
-    //--------------------------------------------------------------------------------------
-    //
-    // WinMain
-    //
-    //--------------------------------------------------------------------------------------
-    int WINAPI WinMain(HINSTANCE hInstance,
-        HINSTANCE hPrevInstance,
-        LPSTR lpCmdLine,
-        int nCmdShow)
-    {
-        eastl::wstring name(L"Elysia Engine");
+    
+}
 
-        return RunFramework(hInstance, lpCmdLine, nCmdShow, new ElysiaEngine::ElysiaFrame(name));
-    }
+//--------------------------------------------------------------------------------------
+//
+// WinMain
+//
+//--------------------------------------------------------------------------------------
+int WINAPI WinMain(HINSTANCE hInstance,
+    HINSTANCE hPrevInstance,
+    LPSTR lpCmdLine,
+    int nCmdShow)
+{
+    eastl::wstring name(L"Elysia Engine");
+
+    return RunFramework(hInstance, lpCmdLine, nCmdShow, new ElysiaEngine::ElysiaFrame(name));
 }

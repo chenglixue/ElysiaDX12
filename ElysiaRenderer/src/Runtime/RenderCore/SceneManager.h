@@ -19,6 +19,7 @@ namespace ElysiaRenderer
     class SceneManager : IManager
     {
     public:
+        SceneManager();
         ~SceneManager();
         
         static SceneManager& GetInstance()
@@ -41,7 +42,6 @@ namespace ElysiaRenderer
         void ClearScene();
         
     private:
-        SceneManager() = default;
         SceneManager(const SceneManager& rhs) = delete;
         SceneManager& operator=(SceneManager& rhs) = delete;
         SceneManager(SceneManager&& rhs) = default;

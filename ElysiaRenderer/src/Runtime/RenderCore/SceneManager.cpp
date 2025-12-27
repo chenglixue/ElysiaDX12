@@ -11,9 +11,14 @@ namespace ElysiaRenderer
 {
     using namespace ElysiaHelper;
     
-    std::unique_ptr<SceneManager> m_instance;
-    std::once_flag m_initInstanceFlag;
+    std::unique_ptr<SceneManager> SceneManager::m_instance;
+    std::once_flag SceneManager::m_initInstanceFlag;
 
+    SceneManager::SceneManager()
+    {
+        
+    }
+    
     SceneManager::~SceneManager()
     {
         Destory();

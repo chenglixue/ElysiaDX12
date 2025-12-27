@@ -85,22 +85,22 @@ namespace ElysiaCore
 		m_commandList->SetComputeRootDescriptorTable(tableMapping.value(), blockStart.GetGPUHandle());
 	}
 
-	void DX12ComputeContext::Dispatch(size_t groupCountX, size_t groupCountY, size_t groupCountZ)
+	void DX12ComputeContext::Dispatch(UINT groupCountX, UINT groupCountY, UINT groupCountZ)
 	{
 		m_commandList->Dispatch(groupCountX, groupCountY, groupCountZ);
 	}
 
-	void DX12ComputeContext::Dispatch1D(size_t threadCountX, size_t groupSizeX)
+	void DX12ComputeContext::Dispatch1D(UINT threadCountX, UINT groupSizeX)
 	{
 		Dispatch(GetGroupCount(threadCountX, groupSizeX), 1, 1);
 	}
 
-	void DX12ComputeContext::Dispatch2D(size_t threadCountX, size_t threadCountY, size_t groupSizeX, size_t groupSizeY)
+	void DX12ComputeContext::Dispatch2D(UINT threadCountX, UINT threadCountY, UINT groupSizeX, UINT groupSizeY)
 	{
 		Dispatch(GetGroupCount(threadCountX, groupSizeX), GetGroupCount(threadCountY, groupSizeY), 1);
 	}
 
-	void DX12ComputeContext::Dispatch3D(size_t threadCountX, size_t threadCountY, size_t threadCountZ, size_t groupSizeX, size_t groupSizeY, size_t groupSizeZ)
+	void DX12ComputeContext::Dispatch3D(UINT threadCountX, UINT threadCountY, UINT threadCountZ, UINT groupSizeX, UINT groupSizeY, UINT groupSizeZ)
 	{
 		Dispatch(GetGroupCount(threadCountX, groupSizeX), GetGroupCount(threadCountY, groupSizeY), GetGroupCount(threadCountZ, groupSizeZ));
 	}

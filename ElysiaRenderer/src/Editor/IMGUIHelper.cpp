@@ -37,6 +37,7 @@ namespace ElysiaEditor
         io.KeyMap[ImGuiKey_Z] = 'Z';
         io.ImeWindowHandle = g_hWnd;
 
+        return true;
     }
 
     void ImGUI_Shutdown()

@@ -333,5 +333,7 @@ namespace ElysiaModel
         }
         
         std::cout << "Finished loading scene '%ls'" + WstringToString(filePath) << std::endl;
+        
+        return true;
     }
 }

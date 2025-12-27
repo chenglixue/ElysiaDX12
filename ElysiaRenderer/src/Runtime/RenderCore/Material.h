@@ -35,7 +35,7 @@ namespace ElysiaCore
 {
 	class DX12Device;
 	class DX12Shader;
-	class PipelineStateObject;
+	struct PipelineStateObject;
 	class UploadRingBuffer;
 }
 

@@ -19,10 +19,10 @@ namespace ElysiaCore
 
 		void SetPipeline(PipelineInfo& pipelineStateData);
 		void SetPipelineResource(uint8_t spaceID, PipelineResourceSpace* pipelineBindResource);
-		void Dispatch(size_t groupCountX, size_t groupCountY, size_t groupCountZ);
-		void Dispatch1D(size_t threadCountX, size_t groupSizeX);
-		void Dispatch2D(size_t threadCountX, size_t threadCountY, size_t groupSizeX, size_t groupSizeY);
-		void Dispatch3D(size_t threadCountX, size_t threadCountY, size_t threadCountZ, size_t groupSizeX, size_t groupSizeY, size_t groupSizeZ);
+		void Dispatch(UINT groupCountX, UINT groupCountY, UINT groupCountZ);
+		void Dispatch1D(UINT threadCountX, UINT groupSizeX);
+		void Dispatch2D(UINT threadCountX, UINT threadCountY, UINT groupSizeX, UINT groupSizeY);
+		void Dispatch3D(UINT threadCountX, UINT threadCountY, UINT threadCountZ, UINT groupSizeX, UINT groupSizeY, UINT groupSizeZ);
 
 	private:
 		PipelineStateObject* m_pCurrentPipeline = nullptr;

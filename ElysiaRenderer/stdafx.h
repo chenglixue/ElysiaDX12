@@ -22,7 +22,7 @@
 #include "ThirdParty/D3D12MemoryAllocator/D3D12MemAlloc.h"
 #include <dxgidebug.h>
 #include <numeric>
-#include <pix3.h>
+#include <ThirdParty/WinPixEventRuntime/pix3.h>
 #include <unordered_set>
 #include <set>
 #include <map>

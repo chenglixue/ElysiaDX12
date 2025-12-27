@@ -24,6 +24,8 @@ namespace ElysiaRenderer
 					if (!o) return false;
 				}
 			}
+			
+			return o;
 		};
 		switch (type)
 		{
@@ -389,7 +391,7 @@ namespace ElysiaRenderer
 			dst.arrayData.emplace_back(value);
 		}
 		dst.rowCount = 1;
-		dst.colCount = floatArray.size();
+		dst.colCount = UINT(floatArray.size());
 	}
 	void MaterialParameterBlock::SetValue(ParamValue& dst, const std::vector<int>& intArray)
 	{
@@ -399,7 +401,7 @@ namespace ElysiaRenderer
 			dst.arrayData.emplace_back(intArray[i]);
 		}
 		dst.rowCount = 1;
-		dst.colCount = intArray.size();
+		dst.colCount = UINT(intArray.size());
 	}
 	void MaterialParameterBlock::SetValue(ParamValue& dst, const std::vector<UINT>& UINTArray)
 	{
@@ -409,7 +411,7 @@ namespace ElysiaRenderer
 			*reinterpret_cast<UINT*>(&dst.arrayData[i]) = UINTArray[i];
 		}
 		dst.rowCount = 1;
-		dst.colCount = UINTArray.size();
+		dst.colCount = UINT(UINTArray.size());
 	}
 	void MaterialParameterBlock::SetValue(ParamValue& dst, const std::vector<Vector2>& Vector2Array)
 	{
@@ -420,7 +422,7 @@ namespace ElysiaRenderer
 			dst.arrayData.emplace_back(value.y);
 		}
 		dst.rowCount = 1;
-		dst.colCount = dst.arrayData.size();
+		dst.colCount = UINT(dst.arrayData.size());
 	}
 	void MaterialParameterBlock::SetValue(ParamValue& dst, const std::vector<Vector3>& Vector3Array)
 	{
@@ -432,7 +434,7 @@ namespace ElysiaRenderer
 			dst.arrayData.emplace_back(value.z);
 		}
 		dst.rowCount = 1;
-		dst.colCount = dst.arrayData.size();
+		dst.colCount = UINT(dst.arrayData.size());
 	}
 	void MaterialParameterBlock::SetValue(ParamValue& dst, const std::vector<Vector4>& Vector4Array)
 	{

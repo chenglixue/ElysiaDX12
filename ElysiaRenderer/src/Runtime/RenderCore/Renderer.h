@@ -7,7 +7,7 @@
 
 namespace ElysiaEditor
 {
-	class IMGUI;
+	class IMGUIDrawer;
 }
 
 namespace ElysiaCore
@@ -54,7 +54,7 @@ namespace ElysiaRenderer
 
 	protected:
 		DX12Device*						m_pDevice = nullptr;
-		std::unique_ptr<IMGUI>			m_pImGui = nullptr;
+		std::unique_ptr<IMGUIDrawer>			m_pImGui = nullptr;
 
 		uint32_t                        m_Width;
 		uint32_t                        m_Height;

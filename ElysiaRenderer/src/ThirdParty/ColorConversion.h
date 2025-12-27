@@ -18,9 +18,10 @@
 // THE SOFTWARE.
 #pragma once
 
+#include "Metalib.h"
 #include "AMD/libs/vectormath/vectormath.hpp"
 
-enum ColorSpace : UINT
+enum ColorSpace : uint
 {
     ColorSpace_REC709 = 0,
     ColorSpace_P3,

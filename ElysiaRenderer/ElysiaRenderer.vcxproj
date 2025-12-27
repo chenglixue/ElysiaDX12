@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\Microsoft.Direct3D.D3D12.1.618.1\build\native\Microsoft.Direct3D.D3D12.props" Condition="Exists('..\packages\Microsoft.Direct3D.D3D12.1.618.1\build\native\Microsoft.Direct3D.D3D12.props')" />
   <Import Project="..\packages\Vcpkg.Nuget.1.5.0\build\Vcpkg.Nuget.props" Condition="Exists('..\packages\Vcpkg.Nuget.1.5.0\build\Vcpkg.Nuget.props')" />
+  <Import Project="..\packages\Microsoft.Direct3D.D3D12.1.618.1\build\native\Microsoft.Direct3D.D3D12.props" Condition="Exists('..\packages\Microsoft.Direct3D.D3D12.1.618.1\build\native\Microsoft.Direct3D.D3D12.props')" />
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -73,7 +73,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(ProjectDir);$(ProjectDir)/lib;$(ProjectDir)/src;$(ProjectDir)/Include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir);$(ProjectDir)/lib;$(ProjectDir)/src;$(ProjectDir)/Include;$(IncludePath;$(SolutionDir)packages\boost.1.87.0\lib\native\include;</IncludePath>
     <LibraryPath>$(ProjectDir)/lib/AMD/libs/AGS;$(ProjectDir)/lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -115,20 +115,21 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;USE_PIX;PROFILE;PROFILE_BUILD;DBG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc\include;$(ProjectDir);$(ProjectDir)\include;$(ProjectDir)\lib;$(ProjectDir)\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc\include;$(ProjectDir);$(ProjectDir)\include;$(ProjectDir)\lib;$(ProjectDir)\src;$(SolutionDir)packages\boost.1.87.0\lib\native\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>5033;4819;0018;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <AdditionalOptions>/FS</AdditionalOptions>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
       <AdditionalDependencies>d3d12.lib;dxcompiler.lib;dxgi.lib;assimp-vc143-mt.lib;amd_ags_x64.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc\lib\spectre\x64;D:\DX12\ElysiaRenderer\ElysiaRenderer\dxc\lib\x64;D:\DX12\ElysiaDX12\x64\Debug\Assimp\Environment;D:\DX12\ElysiaDX12\ElysiaRenderer\AMD\libs\AGS;C:\Work\ElysiaRenderer\ElysiaRenderer\AMD\libs\AGS;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <EntryPointSymbol></EntryPointSymbol>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy $(ProjectDir)Resource $(TargetDir) /Y /E</Command>
+      <Command>xcopy $(ProjectDir)Assets $(TargetDir) /Y /E</Command>
     </PostBuildEvent>
     <PreBuildEvent>
       <Command>
@@ -178,7 +179,7 @@
     <ClInclude Include="lib\stb\stb_image.h" />
     <ClInclude Include="lib\stb\stb_image_write.h" />
     <ClInclude Include="src\Editor\DX12UI.h" />
-    <ClInclude Include="src\Editor\IMGUI.h" />
+    <ClInclude Include="src\Editor\IMGUIDrawer.h" />
     <ClInclude Include="src\Editor\IMGUIHelper.h" />
     <ClInclude Include="src\Editor\UI.h" />
     <ClInclude Include="src\Editor\UserData.h" />
@@ -283,14 +284,33 @@
     <ClInclude Include="src\ThirdParty\D3D12MemoryAllocator\D3D12MemAlloc.h" />
     <ClInclude Include="src\ThirdParty\d3dx12_resource_helpers.h" />
     <ClInclude Include="src\ThirdParty\DxgiFormatHelper.h" />
+    <ClInclude Include="src\ThirdParty\DXTex\BC.h" />
+    <ClInclude Include="src\ThirdParty\DXTex\BCDirectCompute.h" />
+    <ClInclude Include="src\ThirdParty\DXTex\DDS.h" />
     <ClInclude Include="src\ThirdParty\DXTex\DirectXTex.h" />
+    <ClInclude Include="src\ThirdParty\DXTex\DirectXTex.inl" />
     <ClInclude Include="src\ThirdParty\DXTex\DirectXTexP.h" />
+    <ClInclude Include="src\ThirdParty\DXTex\Filters.h" />
+    <ClInclude Include="src\ThirdParty\DXTex\scoped.h" />
     <ClInclude Include="src\ThirdParty\ffx_a.h" />
     <ClInclude Include="src\ThirdParty\ffx_lpm.h" />
     <ClInclude Include="src\ThirdParty\FreesyncHDR.h" />
+    <ClInclude Include="src\ThirdParty\imgui\imconfig.h" />
+    <ClInclude Include="src\ThirdParty\imgui\imgui.h" />
+    <ClInclude Include="src\ThirdParty\imgui\imgui_impl_dx12.h" />
+    <ClInclude Include="src\ThirdParty\imgui\imgui_impl_win32.h" />
+    <ClInclude Include="src\ThirdParty\imgui\imgui_internal.h" />
+    <ClInclude Include="src\ThirdParty\imgui\imstb_rectpack.h" />
+    <ClInclude Include="src\ThirdParty\imgui\imstb_textedit.h" />
+    <ClInclude Include="src\ThirdParty\imgui\imstb_truetype.h" />
     <ClInclude Include="src\ThirdParty\Metalib.h" />
     <ClInclude Include="src\ThirdParty\Misc.h" />
     <ClInclude Include="src\ThirdParty\stb_image.h" />
+    <ClInclude Include="src\ThirdParty\WinPixEventRuntime\pix3.h" />
+    <ClInclude Include="src\ThirdParty\WinPixEventRuntime\pix3_win.h" />
+    <ClInclude Include="src\ThirdParty\WinPixEventRuntime\PIXEvents.h" />
+    <ClInclude Include="src\ThirdParty\WinPixEventRuntime\PIXEventsCommon.h" />
+    <ClInclude Include="src\ThirdParty\WinPixEventRuntime\PIXEventsLegacy.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
@@ -304,7 +324,6 @@
     <None Include="..\x64\Debug\Shaders\private\SharedCommon.hlsli" />
     <None Include="..\x64\Debug\Shaders\private\Transform.hlsli" />
     <None Include="dxc\bin\x64\dxcompiler.dll" />
-    <None Include="packages.config" />
     <None Include="Assets\Shaders\private\Light.hlsli">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </None>
@@ -318,6 +337,7 @@
       <FileType>Document</FileType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </None>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Editor\DX12UI.cpp">
@@ -396,7 +416,9 @@
       <DisableSpecificWarnings>5033;4819;0018;</DisableSpecificWarnings>
       <LinkCompiled>true</LinkCompiled>
     </ClCompile>
-    <ClCompile Include="src\Editor\IMGUI.cpp" />
+    <ClCompile Include="src\Editor\IMGUIDrawer.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="src\Editor\IMGUIHelper.cpp" />
     <ClCompile Include="src\Editor\UI.cpp" />
     <ClCompile Include="src\Editor\UserData.cpp">
@@ -4908,6 +4930,18 @@
       <DisableSpecificWarnings>5033;4819;0018;</DisableSpecificWarnings>
       <LinkCompiled>true</LinkCompiled>
     </ClCompile>
+    <ClCompile Include="src\ThirdParty\DXTex\BC.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="src\ThirdParty\DXTex\BC4BC5.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="src\ThirdParty\DXTex\BC6HBC7.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="src\ThirdParty\DXTex\BCDirectCompute.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="src\ThirdParty\DXTex\DirectXTexCompress.cpp">
       <AdditionalIncludeDirectories>C:\Work\ElysiaRenderer\packages\boost.1.87.0\build\..\lib\native\include\;C:\Work\ElysiaRenderer\packages\Microsoft.Direct3D.D3D12.1.618.1\build\native\include;C:\Work\ElysiaRenderer\packages\Microsoft.Direct3D.D3D12.1.618.1\build\native\include\d3dx12;C:\Work\ElysiaRenderer\packages\Microsoft.Direct3D.D3D12.1.618.1\build\native\;C:\Work\ElysiaRenderer\packages\directxtk12_desktop_win10.2025.7.10.1\build\native\..\..\include;C:\Work\ElysiaRenderer\packages\WinPixEventRuntime.1.0.240308001\build\..\Include\WinPixEventRuntime;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc\include;C:\Work\ElysiaRenderer\ElysiaRenderer\;C:\Work\ElysiaRenderer\ElysiaRenderer\\include;C:\Work\ElysiaRenderer\ElysiaRenderer\\lib;C:\Work\ElysiaRenderer\ElysiaRenderer\\src;;C:\Work\ElysiaRenderer\packages\Vcpkg.Nuget.1.5.0\vcpkg_bin\installed\x64-windows\include;C:\Work\ElysiaRenderer\packages\Vcpkg.Nuget.1.5.0\vcpkg_bin\installed\x64-windows\installed\x64-windows\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -5668,6 +5702,9 @@
       <DisableSpecificWarnings>5033;4819;0018;</DisableSpecificWarnings>
       <LinkCompiled>true</LinkCompiled>
     </ClCompile>
+    <ClCompile Include="src\ThirdParty\DXTex\DirectXTexPMAlpha.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="src\ThirdParty\DXTex\DirectXTexTGA.cpp">
       <AdditionalIncludeDirectories>C:\Work\ElysiaRenderer\packages\boost.1.87.0\build\..\lib\native\include\;C:\Work\ElysiaRenderer\packages\Microsoft.Direct3D.D3D12.1.618.1\build\native\include;C:\Work\ElysiaRenderer\packages\Microsoft.Direct3D.D3D12.1.618.1\build\native\include\d3dx12;C:\Work\ElysiaRenderer\packages\Microsoft.Direct3D.D3D12.1.618.1\build\native\;C:\Work\ElysiaRenderer\packages\directxtk12_desktop_win10.2025.7.10.1\build\native\..\..\include;C:\Work\ElysiaRenderer\packages\WinPixEventRuntime.1.0.240308001\build\..\Include\WinPixEventRuntime;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc\include;C:\Work\ElysiaRenderer\ElysiaRenderer\;C:\Work\ElysiaRenderer\ElysiaRenderer\\include;C:\Work\ElysiaRenderer\ElysiaRenderer\\lib;C:\Work\ElysiaRenderer\ElysiaRenderer\\src;;C:\Work\ElysiaRenderer\packages\Vcpkg.Nuget.1.5.0\vcpkg_bin\installed\x64-windows\include;C:\Work\ElysiaRenderer\packages\Vcpkg.Nuget.1.5.0\vcpkg_bin\installed\x64-windows\installed\x64-windows\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -6056,6 +6093,28 @@
       <SDLCheck>true</SDLCheck>
       <DisableSpecificWarnings>5033;4819;0018;</DisableSpecificWarnings>
       <LinkCompiled>true</LinkCompiled>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)\packages\boost.1.87.0\lib\native\include;$(SolutionDir)\packages\Microsoft.Direct3D.D3D12.1.618.1\build\native\include;$(SolutionDir)\packages\Microsoft.Direct3D.D3D12.1.618.1\build\native\include\d3dx12;$(SolutionDir)\packages\Microsoft.Direct3D.D3D12.1.618.1\build\native\;$(SolutionDir)\packages\directxtk12_desktop_win10.2025.7.10.1\build\native\..\..\include;$(SolutionDir)\packages\WinPixEventRuntime.1.0.240308001\build\..\Include\WinPixEventRuntime;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc\include;$(SolutionDir)\packages\Vcpkg.Nuget.1.5.0\vcpkg_bin\installed\x64-windows\include;$(SolutionDir)\packages\Vcpkg.Nuget.1.5.0\vcpkg_bin\installed\x64-windows\installed\x64-windows\include</AdditionalIncludeDirectories>
+    </ClCompile>
+    <ClCompile Include="src\ThirdParty\imgui\imgui.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="src\ThirdParty\imgui\imgui_demo.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="src\ThirdParty\imgui\imgui_draw.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="src\ThirdParty\imgui\imgui_impl_dx12.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="src\ThirdParty\imgui\imgui_impl_win32.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="src\ThirdParty\imgui\imgui_tables.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="src\ThirdParty\imgui\imgui_widgets.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="src\ThirdParty\Misc.cpp">
       <AdditionalIncludeDirectories>C:\Work\ElysiaRenderer\packages\boost.1.87.0\build\..\lib\native\include\;C:\Work\ElysiaRenderer\packages\Microsoft.Direct3D.D3D12.1.618.1\build\native\include;C:\Work\ElysiaRenderer\packages\Microsoft.Direct3D.D3D12.1.618.1\build\native\include\d3dx12;C:\Work\ElysiaRenderer\packages\Microsoft.Direct3D.D3D12.1.618.1\build\native\;C:\Work\ElysiaRenderer\packages\directxtk12_desktop_win10.2025.7.10.1\build\native\..\..\include;C:\Work\ElysiaRenderer\packages\WinPixEventRuntime.1.0.240308001\build\..\Include\WinPixEventRuntime;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc\include;C:\Work\ElysiaRenderer\ElysiaRenderer\;C:\Work\ElysiaRenderer\ElysiaRenderer\\include;C:\Work\ElysiaRenderer\ElysiaRenderer\\lib;C:\Work\ElysiaRenderer\ElysiaRenderer\\src;;C:\Work\ElysiaRenderer\packages\Vcpkg.Nuget.1.5.0\vcpkg_bin\installed\x64-windows\include;C:\Work\ElysiaRenderer\packages\Vcpkg.Nuget.1.5.0\vcpkg_bin\installed\x64-windows\installed\x64-windows\include</AdditionalIncludeDirectories>
@@ -6132,6 +6191,7 @@
       <SDLCheck>true</SDLCheck>
       <DisableSpecificWarnings>5033;4819;0018;</DisableSpecificWarnings>
       <LinkCompiled>true</LinkCompiled>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)\packages\boost.1.87.0\lib\native\include;$(SolutionDir)\packages\Microsoft.Direct3D.D3D12.1.618.1\build\native\include;$(SolutionDir)\packages\Microsoft.Direct3D.D3D12.1.618.1\build\native\include\d3dx12;$(SolutionDir)\packages\Microsoft.Direct3D.D3D12.1.618.1\build\native\;$(SolutionDir)\packages\directxtk12_desktop_win10.2025.7.10.1\build\native\..\..\include;$(SolutionDir)\packages\WinPixEventRuntime.1.0.240308001\build\..\Include\WinPixEventRuntime;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc\include;$(SolutionDir)\packages\Vcpkg.Nuget.1.5.0\vcpkg_bin\installed\x64-windows\include;$(SolutionDir)\packages\Vcpkg.Nuget.1.5.0\vcpkg_bin\installed\x64-windows\installed\x64-windows\include</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\ThirdParty\stb_image.cpp">
       <AdditionalIncludeDirectories>C:\Work\ElysiaRenderer\packages\boost.1.87.0\build\..\lib\native\include\;C:\Work\ElysiaRenderer\packages\Microsoft.Direct3D.D3D12.1.618.1\build\native\include;C:\Work\ElysiaRenderer\packages\Microsoft.Direct3D.D3D12.1.618.1\build\native\include\d3dx12;C:\Work\ElysiaRenderer\packages\Microsoft.Direct3D.D3D12.1.618.1\build\native\;C:\Work\ElysiaRenderer\packages\directxtk12_desktop_win10.2025.7.10.1\build\native\..\..\include;C:\Work\ElysiaRenderer\packages\WinPixEventRuntime.1.0.240308001\build\..\Include\WinPixEventRuntime;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc\include;C:\Work\ElysiaRenderer\ElysiaRenderer\;C:\Work\ElysiaRenderer\ElysiaRenderer\\include;C:\Work\ElysiaRenderer\ElysiaRenderer\\lib;C:\Work\ElysiaRenderer\ElysiaRenderer\\src;;C:\Work\ElysiaRenderer\packages\Vcpkg.Nuget.1.5.0\vcpkg_bin\installed\x64-windows\include;C:\Work\ElysiaRenderer\packages\Vcpkg.Nuget.1.5.0\vcpkg_bin\installed\x64-windows\installed\x64-windows\include</AdditionalIncludeDirectories>
@@ -6464,20 +6524,20 @@
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="..\packages\WinPixEventRuntime.1.0.240308001\build\WinPixEventRuntime.targets" Condition="Exists('..\packages\WinPixEventRuntime.1.0.240308001\build\WinPixEventRuntime.targets')" />
+    <Import Project="..\packages\boost.1.87.0\build\boost.targets" Condition="Exists('..\packages\boost.1.87.0\build\boost.targets')" />
     <Import Project="..\packages\directxtk12_desktop_win10.2025.7.10.1\build\native\directxtk12_desktop_win10.targets" Condition="Exists('..\packages\directxtk12_desktop_win10.2025.7.10.1\build\native\directxtk12_desktop_win10.targets')" />
     <Import Project="..\packages\Microsoft.Direct3D.D3D12.1.618.1\build\native\Microsoft.Direct3D.D3D12.targets" Condition="Exists('..\packages\Microsoft.Direct3D.D3D12.1.618.1\build\native\Microsoft.Direct3D.D3D12.targets')" />
-    <Import Project="..\packages\boost.1.87.0\build\boost.targets" Condition="Exists('..\packages\boost.1.87.0\build\boost.targets')" />
+    <Import Project="..\packages\WinPixEventRuntime.1.0.240308001\build\WinPixEventRuntime.targets" Condition="Exists('..\packages\WinPixEventRuntime.1.0.240308001\build\WinPixEventRuntime.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\WinPixEventRuntime.1.0.240308001\build\WinPixEventRuntime.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\WinPixEventRuntime.1.0.240308001\build\WinPixEventRuntime.targets'))" />
+    <Error Condition="!Exists('..\packages\boost.1.87.0\build\boost.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost.1.87.0\build\boost.targets'))" />
     <Error Condition="!Exists('..\packages\directxtk12_desktop_win10.2025.7.10.1\build\native\directxtk12_desktop_win10.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\directxtk12_desktop_win10.2025.7.10.1\build\native\directxtk12_desktop_win10.targets'))" />
-    <Error Condition="!Exists('..\packages\Vcpkg.Nuget.1.5.0\build\Vcpkg.Nuget.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Vcpkg.Nuget.1.5.0\build\Vcpkg.Nuget.props'))" />
     <Error Condition="!Exists('..\packages\Microsoft.Direct3D.D3D12.1.618.1\build\native\Microsoft.Direct3D.D3D12.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Direct3D.D3D12.1.618.1\build\native\Microsoft.Direct3D.D3D12.props'))" />
     <Error Condition="!Exists('..\packages\Microsoft.Direct3D.D3D12.1.618.1\build\native\Microsoft.Direct3D.D3D12.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Direct3D.D3D12.1.618.1\build\native\Microsoft.Direct3D.D3D12.targets'))" />
-    <Error Condition="!Exists('..\packages\boost.1.87.0\build\boost.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost.1.87.0\build\boost.targets'))" />
+    <Error Condition="!Exists('..\packages\Vcpkg.Nuget.1.5.0\build\Vcpkg.Nuget.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Vcpkg.Nuget.1.5.0\build\Vcpkg.Nuget.props'))" />
+    <Error Condition="!Exists('..\packages\WinPixEventRuntime.1.0.240308001\build\WinPixEventRuntime.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\WinPixEventRuntime.1.0.240308001\build\WinPixEventRuntime.targets'))" />
   </Target>
 </Project>
