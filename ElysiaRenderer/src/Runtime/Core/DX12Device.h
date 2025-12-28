@@ -41,9 +41,7 @@ namespace ElysiaCore
 		std::unique_ptr<DX12StagingDescriptorHeap> m_DSVStagingDescriptorHeap;
 		std::unique_ptr<DX12StagingDescriptorHeap> m_SRVStagingDescriptorHeap;
 		std::array<std::unique_ptr<DX12RenderPassDescriptorHeap>, NUM_FRAMES_IN_FLIGHT> m_SRVRenderPassDescriptorHeaps;
-		std::unique_ptr<DX12RenderPassDescriptorHeap> m_CBVRenderPassDescriptorHeap;
 		std::unique_ptr<DX12RenderPassDescriptorHeap> m_samplerRenderPassDescriptorHeap;
-		std::unique_ptr<DX12RenderPassDescriptorHeap> m_UAVRenderPassDescriptorHeap;
 		std::array<DX12DescriptorHeapHandle, NUM_FRAMES_IN_FLIGHT> m_ImguiDescriptors;
 
 	public:
@@ -102,7 +100,7 @@ namespace ElysiaCore
 		void CopyDescriptors(uint32_t numDestDescriptorRanges, const D3D12_CPU_DESCRIPTOR_HANDLE* destDescriptorRangeStarts, const uint32_t* destDescriptorRangeSizes,
 			uint32_t numSrcDescriptorRanges, const D3D12_CPU_DESCRIPTOR_HANDLE* srcDescriptorRangeStarts, const uint32_t* srcDescriptorRangeSizes, D3D12_DESCRIPTOR_HEAP_TYPE descriptorType);
 		void CopyDescriptorFromStageToRenderPass(DX12DescriptorHeapHandle SRVHandle, UINT index);
-		ContextSubmissionResult SubmitContextWork(DX12Context& context, UINT frameID);
+		ContextSubmissionResult SubmitContextWork(DX12Context& context);
 
 		void WaitForIdle();
 

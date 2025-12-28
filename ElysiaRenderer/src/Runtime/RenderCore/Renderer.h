@@ -8,6 +8,7 @@
 namespace ElysiaEditor
 {
 	class IMGUIDrawer;
+	class DX12UI;
 }
 
 namespace ElysiaCore
@@ -15,11 +16,6 @@ namespace ElysiaCore
 	class SwapChain;
 	struct PipelineStateObject;
 	class DX12TextureResource;
-}
-
-namespace ElysiaEditor
-{
-	class DX12UI;
 }
 
 namespace ElysiaRenderer
@@ -46,7 +42,7 @@ namespace ElysiaRenderer
 		void OnDestroyWindowSizeDependentResources();
 		void OnUpdateDisplayDependentResources(SwapChain* pSwapChain);
 
-		void OnCreate(DX12Device* pDevice, SwapChain* pSwapChain);
+		void OnCreate(DX12Device* pDevice, SwapChain* pSwapChain, ElysiaCore::DX12GraphicsContext* context);
 		void OnRender(ElysiaEngine::FrameContext frameContext); 
 		void OnDestory();
 
@@ -54,8 +50,7 @@ namespace ElysiaRenderer
 
 	protected:
 		DX12Device*						m_pDevice = nullptr;
-		std::unique_ptr<IMGUIDrawer>			m_pImGui = nullptr;
-
+		DX12GraphicsContext*			m_pGraphicsContext = nullptr;
 		uint32_t                        m_Width;
 		uint32_t                        m_Height;
 		D3D12_VIEWPORT                  m_viewport;
@@ -64,7 +59,6 @@ namespace ElysiaRenderer
 		GPUTimestamps					m_GPUTimer;
 		std::vector<TimeStamp>          m_TimeStamps;
 
-		std::unique_ptr<ElysiaCore::DX12GraphicsContext> m_graphicsContext = nullptr;
 		std::vector<std::unique_ptr<D3D12_SAMPLER_DESC>> m_samplers{};
 		std::vector<std::unique_ptr<BasePass>> m_passes{};
 		eastl::vector<std::unique_ptr<MeshRenderer>> m_meshRenderers;

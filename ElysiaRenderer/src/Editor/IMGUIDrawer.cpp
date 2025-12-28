@@ -26,6 +26,7 @@ namespace ElysiaEditor
     }
     void IMGUIDrawer::Draw(DX12Context* pCommand)
     {
+        ImGui::ShowDemoWindow();
         ImGui::Render();
         if (ImGui::GetDrawData())
         {

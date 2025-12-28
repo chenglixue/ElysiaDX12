@@ -110,13 +110,10 @@ namespace ElysiaRenderer
 			
 			m_pCommand->SetDefaultViewportAndScissor(UINT2(m_renderSize));
 			m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-			
 
 			m_pCommand->DrawFullScreenTriangle();
 		}
 		
-		
-
 		m_pCommand->AddBarrier(backBuffer, D3D12_RESOURCE_STATE_PRESENT);
 	}
 

@@ -2,8 +2,10 @@
 #include "ElysiaFrame.h"
 
 
+#include "Editor/IMGUIDrawer.h"
 #include "Editor/IMGUIHelper.h"
 #include "Editor/UserData.h"
+#include "Runtime/Core/DX12GraphicsContext.h"
 #include "Runtime/RenderCore/BufferManager.h"
 #include "Runtime/RenderCore/LightManager.h"
 #include "Runtime/RenderCore/RenderTargetManager.h"
@@ -58,7 +60,7 @@ namespace ElysiaEngine
     void ElysiaFrame::OnCreate()
     {
         DeSerializeUserData();
-
+        
         BufferManager::GetInstance().Init(m_pDevice);
         TextureManager::GetInstance().Init(m_pDevice);
         RenderTargetManager::GetInstance().Init(m_pDevice);
@@ -66,22 +68,21 @@ namespace ElysiaEngine
         LightManager::GetInstance().Init(m_pDevice);
         PSOManager::GetInstance().Init(m_pDevice);
         
-        m_pRenderer = new ElysiaRenderer::Renderer();
-        m_pRenderer->OnCreate(m_pDevice, &m_swapChain);
-
+		m_pGraphicsContext = m_pDevice->CreateGraphicsContext();
         ElysiaEditor::ImGUI_Init(m_windowHwnd, m_pDevice, m_swapChain);
+		m_pImGui->OnCreate(m_pDevice, &m_swapChain);
+        
+        m_pRenderer = new ElysiaRenderer::Renderer();
+        m_pRenderer->OnCreate(m_pDevice, &m_swapChain, m_pGraphicsContext.get());
 
         OnResize();
         OnUpdateDisplay();
-
-        
     }
 
     void ElysiaFrame::OnDestroy()
     {
-        ElysiaEditor::ImGUI_Shutdown();
-
         m_pDevice->WaitForIdle();
+		m_pGraphicsContext.release();
         m_pRenderer->OnDestroyWindowSizeDependentResources();
         m_pRenderer->OnDestory();
         delete m_pRenderer;
@@ -106,7 +107,7 @@ namespace ElysiaEngine
 
     bool ElysiaFrame::OnEvent(MSG msg)
     {
-        if (ElysiaEditor::ImGUI_WndProcHandler(msg.hwnd, msg.message, msg.wParam, msg.lParam))
+        if (ImGui_ImplWin32_WndProcHandler(msg.hwnd, msg.message, msg.wParam, msg.lParam))
             return true;
 
         // handle function keys (F1, F2...) here, rest of the input is handled
@@ -129,6 +130,7 @@ namespace ElysiaEngine
     void ElysiaFrame::OnRender()
     {
         auto frameContext = BeginFrame();
+        m_pGraphicsContext->Reset();
         ImGUI_UpdateIO();
         ImGUI_NewFrame();
 
@@ -155,11 +157,12 @@ namespace ElysiaEngine
             BufferManager::GetInstance().Update(frameContext);
         }
 
-        if (!m_loadingScene)
-        {
-            m_pRenderer->OnRender(frameContext);
-        }
+		m_pImGui->Draw(m_pGraphicsContext.get());
+        m_pRenderer->OnRender(frameContext);
+		m_pDevice->SubmitContextWork(*m_pGraphicsContext);
+
         EndFrame();
+        Present();
     }
 
     void ElysiaFrame::OnUpdate()

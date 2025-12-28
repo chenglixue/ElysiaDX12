@@ -42,40 +42,15 @@ namespace ElysiaRenderer
 	Renderer::Renderer() = default;
 	Renderer::~Renderer() = default;
 
-	void Renderer::OnCreate(DX12Device* pDevice, SwapChain* pSwapChain)
+	void Renderer::OnCreate(DX12Device* pDevice, SwapChain* pSwapChain, DX12GraphicsContext* context)
 	{
 		m_pDevice = pDevice;
-		m_pImGui = std::make_unique<IMGUIDrawer>();
+		m_pGraphicsContext = context;
 		
-		m_graphicsContext = m_pDevice->CreateGraphicsContext();
 		// initialize the GPU time stamps module
 		m_GPUTimer.OnCreate(pDevice, NUM_BACK_BUFFERS);
-		m_pImGui->OnCreate(pDevice, pSwapChain);
 
 		InitPSOHelpers();
-
-		RenderPassData passData
-		{
-			.RenderSize = {m_Width, m_Height},
-			.pDevice = m_pDevice, 
-			.pCommand = m_graphicsContext.get(),
-			.pSwapChain = pSwapChain,
-			.pCameraColorRT = m_pCameraColorRT,
-			.pCameraDepthRT = m_pCameraDepthRT
-		};
-
-		m_passes.emplace_back(std::move(std::make_unique<PreDrawPass>(CameraManager::GetInstance().GetMainCamera())));
-		m_passes.emplace_back(std::move(std::make_unique<ShadowPass>(CameraManager::GetInstance().GetMainCamera())));
-		m_passes.emplace_back(std::move(std::make_unique<GBufferPass>(CameraManager::GetInstance().GetMainCamera())));
-		// m_passes.emplace_back(std::move(std::make_unique<AOPass>(m_pCameraManager->GetMainCamera())));
-		m_passes.emplace_back(std::move(std::make_unique<OpaquePass>(CameraManager::GetInstance().GetMainCamera())));
-		// m_passes.emplace_back(std::move(std::make_unique<TonemapPass>(m_pCameraManager->GetMainCamera())));
-		// m_passes.emplace_back(std::move(std::make_unique<BloomPass>(m_pCameraManager->GetMainCamera())));
-		m_passes.emplace_back(std::move(std::make_unique<FinalBlitPass>(CameraManager::GetInstance().GetMainCamera())));
-		for (auto& pass : m_passes)
-		{ 
-			pass->Setup(passData);
-		}
 	}
 
 	void Renderer::OnCreateWindowSizeDependentResources(SwapChain *pSwapChain, uint32_t Width, uint32_t Height)
@@ -123,6 +98,34 @@ namespace ElysiaRenderer
 				}
 			}
 		}
+		m_pCameraDepthRT = RenderTargetManager::GetInstance().CreateRenderTexture(Width, Height,
+				DXGI_FORMAT_D24_UNORM_S8_UINT,
+				true,
+				"Camera Depth RT");
+		
+		RenderPassData passData
+		{
+			.RenderSize = {m_Width, m_Height},
+			.pDevice = m_pDevice, 
+			.pCommand = m_pGraphicsContext,
+			.pSwapChain = pSwapChain,
+			.pCameraColorRT = m_pCameraColorRT,
+			.pCameraDepthRT = m_pCameraDepthRT
+		};
+
+		m_passes.clear();
+		m_passes.emplace_back(std::move(std::make_unique<PreDrawPass>(CameraManager::GetInstance().GetMainCamera())));
+		m_passes.emplace_back(std::move(std::make_unique<ShadowPass>(CameraManager::GetInstance().GetMainCamera())));
+		m_passes.emplace_back(std::move(std::make_unique<GBufferPass>(CameraManager::GetInstance().GetMainCamera())));
+		// m_passes.emplace_back(std::move(std::make_unique<AOPass>(m_pCameraManager->GetMainCamera())));
+		m_passes.emplace_back(std::move(std::make_unique<OpaquePass>(CameraManager::GetInstance().GetMainCamera())));
+		// m_passes.emplace_back(std::move(std::make_unique<TonemapPass>(m_pCameraManager->GetMainCamera())));
+		// m_passes.emplace_back(std::move(std::make_unique<BloomPass>(m_pCameraManager->GetMainCamera())));
+		m_passes.emplace_back(std::move(std::make_unique<FinalBlitPass>(CameraManager::GetInstance().GetMainCamera())));
+		for (auto& pass : m_passes)
+		{
+			pass->Setup(passData);
+		}
 	}
 	void Renderer::OnDestroyWindowSizeDependentResources()
 	{
@@ -135,28 +138,23 @@ namespace ElysiaRenderer
 
 	void Renderer::OnRender(ElysiaEngine::FrameContext frameContext)
 	{
-		m_graphicsContext->Reset();
-
 		LightManager::GetInstance().Update(frameContext);
 		SerializeUserData();
 
 		// Timing values
 		UINT64 gpuTicksPerSecond;
 		m_pDevice->GetDirectQueue()->GetTimestampFrequency(&gpuTicksPerSecond);
-		m_GPUTimer.OnBeginFrame(gpuTicksPerSecond, &m_TimeStamps);
-		m_GPUTimer.GetTimeStamp(m_graphicsContext->GetCommandList(), "Begin Frame");
+		//m_GPUTimer.OnBeginFrame(gpuTicksPerSecond, &m_TimeStamps);
+		//m_GPUTimer.GetTimeStamp(m_graphicsContext->GetCommandList(), "Begin Frame");
 		
 		for (auto& pass : m_passes)
 		{
 			pass->Render(frameContext);
 		}
-		
-		m_pDevice->SubmitContextWork(*m_graphicsContext, frameContext.frameID);
 
-		m_GPUTimer.OnEndFrame();
+		//m_GPUTimer.OnEndFrame();
 	}
 	void Renderer::OnDestory()
 	{
-		m_graphicsContext.release();
 	}
 }            

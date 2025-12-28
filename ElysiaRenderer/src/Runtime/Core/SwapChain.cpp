@@ -149,6 +149,11 @@ namespace ElysiaCore
             assert(!"FS HDR display mode not supported");
             displayMode = DISPLAYMODE_SDR;
         }
+        
+        for(UINT64 i = 0; i < m_BackBufferCount; ++i)
+        {
+            m_backBuffers[i].reset();
+        }
 
         // When going from dxgi hdr mode to ags hdr mode, invalidate dxgi hdr colourspace by falling back to sdr
         // This needs to happen so that driver knows it needs to use AGS colourspace
@@ -201,7 +206,7 @@ namespace ElysiaCore
     
     void SwapChain::CreateRTV()
     {
-        for (UINT currBufferIndex = 0; currBufferIndex < NUM_BACK_BUFFERS; currBufferIndex++)
+        for (UINT currBufferIndex = 0; currBufferIndex < m_BackBufferCount; currBufferIndex++)
         {
             auto currBackBufferRTVHandle = m_pDevice->m_RTVStagingDescriptorHeap->NewDescriptorHeapHandle();
 

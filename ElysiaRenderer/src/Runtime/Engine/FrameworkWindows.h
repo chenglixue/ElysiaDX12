@@ -3,11 +3,14 @@
 #include "ThirdParty/FreesyncHDR.h"
 #include "Runtime/Core/DX12Device.h"
 #include "Runtime/Core/SwapChain.h"
+#include "ThirdParty/imgui/imgui.h"
 
 namespace ElysiaEngine
 {
     class ElysiaCore::DX12Device;
 }
+
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 namespace ElysiaEngine
 {

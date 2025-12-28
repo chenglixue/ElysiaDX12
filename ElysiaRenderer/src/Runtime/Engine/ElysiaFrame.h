@@ -26,6 +26,7 @@ namespace ElysiaEngine
     private:
         bool                        m_bIsBenchmarking;
         bool                        m_loadingScene = false;
+		std::unique_ptr<ElysiaCore::DX12GraphicsContext> m_pGraphicsContext = nullptr;
         ElysiaRenderer::Renderer*   m_pRenderer = NULL;
         float                       m_fontSize;
 
@@ -34,6 +35,7 @@ namespace ElysiaEngine
         bool                        m_bPlay;
 
         ElysiaEditor::UIState       m_UIState;
+		std::unique_ptr<ElysiaEditor::IMGUIDrawer>	m_pImGui = nullptr;
 
     };
 }

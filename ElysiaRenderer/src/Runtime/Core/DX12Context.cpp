@@ -19,6 +19,7 @@ namespace ElysiaCore
 
 		AssertIfFailed(m_device->GetDevice()->
 			CreateCommandList(0, commandType, m_commandAllocators[0], nullptr, IID_PPV_ARGS(&m_commandList)));
+		m_commandList->Close();
 	}
 	DX12Context::~DX12Context()
 	{

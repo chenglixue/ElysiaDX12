@@ -15,6 +15,7 @@ namespace ElysiaEditor
         ImGui::CreateContext();
         ImGuiIO& io = ImGui::GetIO();
         ImGui::StyleColorsDark();
+        ImGui_ImplWin32_Init(windowHandle);
 
         io.KeyMap[ImGuiKey_Tab] = VK_TAB;                       // Keyboard mapping. ImGui will use those indices to peek into the io.KeyDown[] array that we will update during the application lifetime.
         io.KeyMap[ImGuiKey_LeftArrow] = VK_LEFT;

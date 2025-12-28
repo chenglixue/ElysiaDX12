@@ -2,8 +2,8 @@
 #include "FrameworkWindows.h"
 
 #include "FrameContext.h"
+#include "Editor/IMGUIHelper.h"
 #include "Runtime/RenderCore/BufferManager.h"
-
 
 namespace ElysiaEngine
 {
@@ -80,7 +80,7 @@ namespace ElysiaEngine
         SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 
         // Create the window
-        hWnd = CreateWindowEx(NULL,
+        hWnd = CreateWindowEx(WS_EX_APPWINDOW,
             WINDOW_CLASS_NAME,    // name of the window class
             pFramework->GetName().c_str(),
             lwindowStyle,
@@ -181,6 +181,9 @@ namespace ElysiaEngine
     // this is the main message handler for the program
     LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
+        if (ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam))
+            return true;
+        
         // sort through and find what code to run for the message given
         switch (message)
         {
@@ -620,8 +623,6 @@ namespace ElysiaEngine
     // EndFrame will handle Present and other end of frame logic needed
     void FrameworkWindows::EndFrame()
     {
-        m_swapChain.Present();
-
         m_pDevice->EndFrame();
 
         // If we are doing GPU Validation, flush every frame

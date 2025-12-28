@@ -29,52 +29,48 @@ namespace ElysiaCore
 {
 	using namespace ElysiaHelper;
 	
-// 	     
-// 	DX12Device::~DX12Device()
-// 	{
-// 		WaitForIdle();
-//
-// 		for (UINT i = 0; i < NUM_FRAMES_IN_FLIGHT; ++i)
-// 		{
-// 			ProcessDestruction(i);
-// 		}
-//
-// 		
-// 		m_RTVStagingDescriptorHeap = nullptr;
-// 		m_DSVStagingDescriptorHeap = nullptr;
-// 		m_CBVRenderPassDescriptorHeap = nullptr;
-// 		m_samplerRenderPassDescriptorHeap = nullptr;
-// 		m_UAVRenderPassDescriptorHeap = nullptr;
-//
-// 		for (UINT i = 0; i < NUM_FRAMES_IN_FLIGHT; ++i)
-// 		{
-// 			m_SRVRenderPassDescriptorHeaps[i] = nullptr;
-// 			m_uploadContexts[i] = nullptr;
-// 		}
-//
-// 		m_graphicsQueue = nullptr;
-// 		m_computeQueue = nullptr;
-// 		m_copyQueue = nullptr;
-//
-// 		ElysiaHelper::SafeRelease(m_device);
-// 		ElysiaHelper::SafeRelease(m_DXGIFactory);
-// 		ElysiaHelper::SafeRelease(m_swapChain);
-//
-// #ifdef DEBUG
-// 		IDXGIDebug1* pDebug = nullptr;
-// 		if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&pDebug))))
-// 		{
-// 			pDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_FLAGS(DXGI_DEBUG_RLO_SUMMARY | DXGI_DEBUG_RLO_DETAIL | DXGI_DEBUG_RLO_IGNORE_INTERNAL));
-// 			ElysiaHelper::SafeRelease(pDebug);
-// 		}
-// #endif // DEBUG
-//
-// }
 	DX12Device::DX12Device()= default;
-	DX12Device::~DX12Device()= default;
+	DX12Device::~DX12Device()
+	{
+		WaitForIdle();
+
+		for (UINT i = 0; i < NUM_FRAMES_IN_FLIGHT; ++i)
+		{
+			ProcessDestruction(i);
+		}
+		m_RTVStagingDescriptorHeap = nullptr;
+		m_DSVStagingDescriptorHeap = nullptr;
+		m_samplerRenderPassDescriptorHeap = nullptr;
+
+		for (UINT i = 0; i < NUM_FRAMES_IN_FLIGHT; ++i)
+		{
+			m_SRVRenderPassDescriptorHeaps[i] = nullptr;
+			m_uploadContexts[i] = nullptr;
+		}
+
+		m_graphicsQueue = nullptr;
+		m_computeQueue = nullptr;
+		m_copyQueue = nullptr;
+
+#ifdef DEBUG
+		IDXGIDebug1* pDebug = nullptr;
+		if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&pDebug))))
+		{
+			pDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_FLAGS(DXGI_DEBUG_RLO_SUMMARY | DXGI_DEBUG_RLO_DETAIL | DXGI_DEBUG_RLO_IGNORE_INTERNAL));
+			ElysiaHelper::SafeRelease(pDebug);
+		}
+#endif // DEBUG
+	}
 
 	void DX12Device::OnCreate(eastl::wstring appName, bool bCPUValidationEnabled, bool bGpuValidationEnabled)
 	{
+#if defined(_DEBUG)
+		CComPtr<ID3D12Debug> debugController;
+		if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)))) {
+			debugController->EnableDebugLayer();
+		}
+#endif
+		
 		// Enable the D3D12 debug layer
 		//
 		// Note that it turns out the validation and debug layer are known to cause
@@ -527,7 +523,7 @@ namespace ElysiaCore
 		}
 	}
 	
-	ContextSubmissionResult DX12Device::SubmitContextWork(DX12Context& context, UINT frameID)
+	ContextSubmissionResult DX12Device::SubmitContextWork(DX12Context& context)
 	{
 		uint64_t fenceResult = 0;
 
@@ -547,10 +543,10 @@ namespace ElysiaCore
 		}
 
 		ContextSubmissionResult submissionResult;
-		submissionResult.frameID = frameID;
-		submissionResult.submissionIndex = static_cast<UINT>(m_contextSubmissions[frameID].size());
+		submissionResult.frameID = m_frameID;
+		submissionResult.submissionIndex = static_cast<UINT>(m_contextSubmissions[m_frameID].size());
 
-		m_contextSubmissions[frameID].push_back(std::make_pair(fenceResult, context.GetContextType()));
+		m_contextSubmissions[m_frameID].push_back(std::make_pair(fenceResult, context.GetContextType()));
 
 		return submissionResult;
 	}
@@ -572,9 +568,9 @@ namespace ElysiaCore
 		m_destructionQueues[frameID].m_textures.push_back(std::move(texture));
 	}
 	
-	void DX12Device::ProcessDestruction(UINT frameIndex)
+	void DX12Device::ProcessDestruction(UINT frameID)
 	{
-		auto& currFrameDestrctuionQueue = m_destructionQueues[frameIndex];
+		auto& currFrameDestrctuionQueue = m_destructionQueues[frameID];
 
 		(currFrameDestrctuionQueue.m_contexts).clear();
 		(currFrameDestrctuionQueue.m_buffers).clear();
@@ -586,25 +582,25 @@ namespace ElysiaCore
 	{
 		m_frameID = frameID;
 		// wait on fences from 2 frames ago
-		auto& fenceValue = m_endOfFrameFences[frameID];
+		auto& fenceValue = m_endOfFrameFences[m_frameID];
 		m_graphicsQueue->WaitForFenceCPUBlocking(fenceValue.m_graphicsQueueFence);
 		m_copyQueue->WaitForFenceCPUBlocking(fenceValue.m_copyQueueFence);
 		m_computeQueue->WaitForFenceCPUBlocking(fenceValue.m_computeQueueFence);
 		
-		ProcessDestruction(frameID);
+		ProcessDestruction(m_frameID);
 
-		m_uploadContexts[frameID]->ResolveProcessedUploads();
-		m_uploadContexts[frameID]->Reset();
+		m_uploadContexts[m_frameID]->ResolveProcessedUploads();
+		m_uploadContexts[m_frameID]->Reset();
 
-		BufferManager::GetInstance().GetUploadRingBuffer()->Reset(frameID);
+		BufferManager::GetInstance().GetUploadRingBuffer()->Reset(m_frameID);
 
-		m_contextSubmissions[frameID].clear();
+		m_contextSubmissions[m_frameID].clear();
 	}
 
 	void DX12Device::EndFrame()
 	{
 		m_uploadContexts[m_frameID]->ProcessUploads();
-		SubmitContextWork(*m_uploadContexts[m_frameID], m_frameID);
+		SubmitContextWork(*m_uploadContexts[m_frameID]);
 
 		m_endOfFrameFences[m_frameID].m_copyQueueFence = m_copyQueue->SingalFence();
 		m_endOfFrameFences[m_frameID].m_computeQueueFence = m_computeQueue->SingalFence();
