@@ -118,10 +118,7 @@ namespace ElysiaModel
 			IndexType indexType = IndexType::Index16Bit;
 			D3D12_VERTEX_BUFFER_VIEW vbView;
 			D3D12_INDEX_BUFFER_VIEW ibView;
-
-			eastl::vector<MeshVertex> vertices;
-			eastl::vector<UINT16> indices;
-
+			
 			eastl::vector<Vector4> weights;
 			eastl::vector<Vector4> joints;
 

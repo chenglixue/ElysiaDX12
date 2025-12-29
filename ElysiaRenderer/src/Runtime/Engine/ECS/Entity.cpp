@@ -15,7 +15,7 @@ namespace ElysiaEngine
     {
         
     }
-    void Entity::AddChild(std::unique_ptr<Entity> pChild)
+    void Entity::AddChild(std::unique_ptr<Entity>&& pChild)
     {
         pChild->SetParent(this);
         m_childs.emplace_back(std::move(pChild));

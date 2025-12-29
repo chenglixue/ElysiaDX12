@@ -3,7 +3,6 @@
 
 #include <dxgidebug.h>
 
-#include "Editor/DX12UI.h"
 #include "Editor/UserData.h"
 
 #include "Runtime/Core/DX12GraphicsContext.h"
@@ -121,6 +120,7 @@ namespace ElysiaRenderer
 		m_passes.emplace_back(std::move(std::make_unique<OpaquePass>(CameraManager::GetInstance().GetMainCamera())));
 		// m_passes.emplace_back(std::move(std::make_unique<TonemapPass>(m_pCameraManager->GetMainCamera())));
 		// m_passes.emplace_back(std::move(std::make_unique<BloomPass>(m_pCameraManager->GetMainCamera())));
+		m_passes.emplace_back(std::move(std::make_unique<UIPass>()));
 		m_passes.emplace_back(std::move(std::make_unique<FinalBlitPass>(CameraManager::GetInstance().GetMainCamera())));
 		for (auto& pass : m_passes)
 		{
@@ -144,15 +144,15 @@ namespace ElysiaRenderer
 		// Timing values
 		UINT64 gpuTicksPerSecond;
 		m_pDevice->GetDirectQueue()->GetTimestampFrequency(&gpuTicksPerSecond);
-		//m_GPUTimer.OnBeginFrame(gpuTicksPerSecond, &m_TimeStamps);
-		//m_GPUTimer.GetTimeStamp(m_graphicsContext->GetCommandList(), "Begin Frame");
+		m_GPUTimer.OnBeginFrame(gpuTicksPerSecond, &m_TimeStamps);
+		m_GPUTimer.GetTimeStamp(m_pGraphicsContext->GetCommandList(), "Begin Frame");
 		
 		for (auto& pass : m_passes)
 		{
 			pass->Render(frameContext);
 		}
 
-		//m_GPUTimer.OnEndFrame();
+		m_GPUTimer.OnEndFrame();
 	}
 	void Renderer::OnDestory()
 	{

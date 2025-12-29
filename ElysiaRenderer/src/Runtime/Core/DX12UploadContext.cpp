@@ -50,7 +50,6 @@ namespace ElysiaCore
 	{
 		for (auto& bufferUploadInProgress : m_bufferUploadsInProgress)
 		{
-			bufferUploadInProgress->onComplete(bufferUploadInProgress);
 			bufferUploadInProgress->buffer->SetIsReady(true);
 		}
 		for (auto& textureUploadInProgress : m_textureUploadsInProgress)

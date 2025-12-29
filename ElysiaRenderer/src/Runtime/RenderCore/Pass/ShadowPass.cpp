@@ -54,7 +54,7 @@ namespace ElysiaRenderer
 	{
 
 	}
- 
+	
 	void ShadowPass::Configure()
 	{
 		m_pMainLight = LightManager::GetInstance().GetMainLight();

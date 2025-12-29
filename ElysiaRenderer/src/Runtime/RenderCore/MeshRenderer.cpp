@@ -1,51 +1,69 @@
 #include "stdafx.h"
 #include "MeshRenderer.h"
 
+#include "Programs/Helper.h"
 #include "Runtime/Resource/Model/LoadedModel.h"
 
 namespace ElysiaRenderer
 {
-    void MeshRenderer::Init(const std::shared_ptr<ElysiaModel::LoadedModel>& loadedModel)
+    void MeshRenderer::Init(const std::shared_ptr<LoadedModel>& loadedModel, size_t meshIndex)
     {
         m_pModel = loadedModel;
-        
-        const UINT64 meshCount = m_pModel->meshes.size();
-        m_meshBoundingBoxes.resize(meshCount);
-        m_meshDrawIndices.resize(meshCount);
-        
-        for (UINT64 meshIndex = 0; meshIndex < meshCount; ++meshIndex)
+        if (m_pModel == nullptr)
         {
-            const ElysiaModel::LoadedModel::Mesh& mesh = m_pModel->meshes[meshIndex];
-            BoundingBox& boundingBox = m_meshBoundingBoxes[meshIndex];
-            boundingBox.Extents = (mesh.aabbMax - mesh.aabbMin) * 0.5f;
-            boundingBox.Center = mesh.aabbMin + boundingBox.Extents;
+            ThrowRuntimeError("null model pointer");
+        }
+        
+        m_meshIndex = meshIndex;
+        if (m_meshIndex >= loadedModel->meshes.size())
+        {
+            ThrowRuntimeError("mesh index out of range");
+        }
+        
+        m_materialIndex = loadedModel->meshes[m_meshIndex].materialIndex;
+        if (m_materialIndex >= loadedModel->materials.size())
+        {
+            ThrowRuntimeError("material index out of range");
+        }
+
+        {
+            const LoadedModel::Mesh& mesh = m_pModel->meshes[m_meshIndex];
+            m_boundingBox.Extents = (mesh.aabbMax - mesh.aabbMin) * 0.5f;
+            m_boundingBox.Center = mesh.aabbMin + m_boundingBox.Extents;
         }
         
         {
             const auto& materials = m_pModel->materials;
-            const UINT64 materialCount = materials.size();
-            m_textureIndices.resize(materialCount);
-            for (UINT64 materialIndex = 0; materialIndex < materialCount; ++materialIndex)
-            {
-                const auto& material = materials[materialIndex];
-                auto& materialIndices = m_textureIndices[materialIndex];
+            const auto& material = materials[m_materialIndex];
                 
-                materialIndices.Albedo = material.textures[UINT64(ElysiaModel::MaterialTextureType::Albedo)].GetResourceHeapIndex();
-                materialIndices.Normal = material.textures[UINT64(ElysiaModel::MaterialTextureType::Normal)].GetResourceHeapIndex();
-                materialIndices.Metallic = material.textures[UINT64(ElysiaModel::MaterialTextureType::Metallic)].GetResourceHeapIndex();
-                materialIndices.Roughness = material.textures[UINT64(ElysiaModel::MaterialTextureType::Roughness)].GetResourceHeapIndex();
-                materialIndices.Occlusion = material.textures[UINT64(ElysiaModel::MaterialTextureType::Occlusion)].GetResourceHeapIndex();
-                materialIndices.Specular = material.textures[UINT64(ElysiaModel::MaterialTextureType::Specular)].GetResourceHeapIndex();
-                materialIndices.Height = material.textures[UINT64(ElysiaModel::MaterialTextureType::Height)].GetResourceHeapIndex();
-                materialIndices.Emissive = material.textures[UINT64(ElysiaModel::MaterialTextureType::Emissive)].GetResourceHeapIndex();
-            }
+            m_materialTexIndices.Albedo = material.textures[UINT64(MaterialTextureType::Albedo)].GetResourceHeapIndex();
+            m_materialTexIndices.Normal = material.textures[UINT64(MaterialTextureType::Normal)].GetResourceHeapIndex();
+            m_materialTexIndices.Metallic = material.textures[UINT64(MaterialTextureType::Metallic)].GetResourceHeapIndex();
+            m_materialTexIndices.Roughness = material.textures[UINT64(MaterialTextureType::Roughness)].GetResourceHeapIndex();
+            m_materialTexIndices.Occlusion = material.textures[UINT64(MaterialTextureType::Occlusion)].GetResourceHeapIndex();
+            m_materialTexIndices.Specular = material.textures[UINT64(MaterialTextureType::Specular)].GetResourceHeapIndex();
+            m_materialTexIndices.Height = material.textures[UINT64(MaterialTextureType::Height)].GetResourceHeapIndex();
+            m_materialTexIndices.Emissive = material.textures[UINT64(MaterialTextureType::Emissive)].GetResourceHeapIndex();
         }
     }
 
     void MeshRenderer::ShutDown()
     {
-        m_meshDrawIndices.clear();
-        m_textureIndices.clear();
-        m_meshBoundingBoxes.clear();
+        m_pModel.reset();
+        m_meshIndex = UINT_MAX;
+        m_materialIndex = UINT_MAX;
+        m_materialTexIndices = m_materialTexIndices.Invalid();
+    }
+
+    void MeshRenderer::Update()
+    {
+        UpdateAABB();
+    }
+
+    void MeshRenderer::UpdateAABB()
+    {
+        const LoadedModel::Mesh& mesh = m_pModel->meshes[m_meshIndex];
+        m_boundingBox.Extents = (mesh.aabbMax - mesh.aabbMin) * 0.5f;
+        m_boundingBox.Center = mesh.aabbMin + m_boundingBox.Extents;
     }
 }

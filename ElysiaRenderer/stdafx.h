@@ -60,7 +60,5 @@
 using namespace DirectX;
 using namespace DirectX::SimpleMath;
 
-
-
 #pragma comment(lib, "Windowscodecs.lib")
 #pragma comment(lib, "RuntimeObject.lib")

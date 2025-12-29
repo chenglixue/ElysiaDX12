@@ -12,6 +12,10 @@
 
 namespace ElysiaRenderer
 {
+	BasePass::BasePass()
+	{
+		
+	}
 	BasePass::BasePass(DX12Camera* pCamera) :
 		m_renderSize(Vector2::Zero),
 		m_pCamera(pCamera),

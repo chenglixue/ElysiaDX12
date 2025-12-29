@@ -114,6 +114,7 @@ namespace ElysiaRenderer
 		}
 
 		auto pNewBuffer = std::make_shared<DX12BufferResource>(pResource, resourceState, pAllocation);
+		pNewBuffer->SetStride(bufferCreationDesc.stride);
 		pNewBuffer->SetIndex(index);
 		if (isHostVisible)
 		{

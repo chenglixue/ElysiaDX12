@@ -16,7 +16,7 @@ namespace ElysiaRenderer
 		// 变换数据
 		DirectX::XMMATRIX worldMatrix;
 
-		eastl::vector<MaterialTextureIndices> textureIndices;
+		MaterialTextureIndices textureIndices;
 		ElysiaModel::LoadedMaterial loadedMaterial;
 
 		// 排序依据

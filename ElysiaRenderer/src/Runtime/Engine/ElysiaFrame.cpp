@@ -135,10 +135,11 @@ namespace ElysiaEngine
         ImGUI_NewFrame();
 
         std::vector<RenderItem> renderList;
+        SceneManager::GetInstance().LoadScene(renderList);
         if (m_loadingScene)
         {
             static int loadingStage = 0;
-            SceneManager::GetInstance().LoadScene(renderList);
+            
             if (loadingStage == 0)
             {
                 m_time = 0;
@@ -153,12 +154,14 @@ namespace ElysiaEngine
         }
         else
         {
+            frameContext.renderList = renderList;
             OnUpdate();
+            //SceneManager::GetInstance().Update(frameContext);
             BufferManager::GetInstance().Update(frameContext);
         }
 
-		m_pImGui->Draw(m_pGraphicsContext.get());
         m_pRenderer->OnRender(frameContext);
+
 		m_pDevice->SubmitContextWork(*m_pGraphicsContext);
 
         EndFrame();
@@ -197,8 +200,6 @@ namespace ElysiaEngine
         if (fnIsKeyTriggered('R'))
             m_UIState.ResetLPMSceneDefaults();
     }
-
-    
 }
 
 //--------------------------------------------------------------------------------------

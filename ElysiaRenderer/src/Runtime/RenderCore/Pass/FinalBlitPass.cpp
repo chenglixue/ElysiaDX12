@@ -3,6 +3,7 @@
 
 #include "Editor/UserData.h"
 #include "Programs/PIXHelper.h"
+#include "Editor/IMGUIHelper.h"
 
 #include "Runtime/Core/DX12GraphicsContext.h"
 #include "Runtime/Core/DX12Shader.h"
@@ -112,6 +113,12 @@ namespace ElysiaRenderer
 			m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 			m_pCommand->DrawFullScreenTriangle();
+		}
+
+		ImGui::Render();
+		if (ImGui::GetDrawData())
+		{
+			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), m_pCommand->GetCommandList());
 		}
 		
 		m_pCommand->AddBarrier(backBuffer, D3D12_RESOURCE_STATE_PRESENT);

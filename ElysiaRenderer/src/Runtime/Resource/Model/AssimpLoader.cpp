@@ -114,17 +114,31 @@ namespace ElysiaModel
         {
             auto& material = materials[matIdx];
 
-            for (UINT64 texType = 0; texType <= UINT64(MaterialTextureType::Count); texType++)
+            for (UINT64 texType = 0; texType < UINT64(MaterialTextureType::Count); texType++)
             {
                 material.textures[texType] = ElysiaRenderer::TextureManager::Handle::Invalid();
 
-                eastl::wstring path = fileDirectory + material.textureNames[texType];
-                if (material.textureNames[texType].length() <= 0 || FileExists(path.c_str()) == false)
+                eastl::wstring path = fileDirectory;
+                if (material.textureNames[texType].length() <= 0 || FileExists((path + material.textureNames[texType]).c_str()) == false)
                 {
-                    if (texType == UINT64(MaterialTextureType::Albedo) || texType == UINT64(MaterialTextureType::Roughness))
+                    if (texType == UINT64(MaterialTextureType::Albedo) || texType == UINT64(MaterialTextureType::Roughness)
+                        || texType == UINT64(MaterialTextureType::Occlusion))
                     {
-                        path = ToEastlWString(ElysiaRenderer::DefaultWhiteTexturePath);
+                        path += ElysiaRenderer::DefaultWhiteTexturePath;
                     }
+                    else if (texType == UINT64(MaterialTextureType::Height) || texType == UINT64(MaterialTextureType::Emissive) ||
+                        texType == UINT64(MaterialTextureType::Metallic) || texType == UINT64(MaterialTextureType::Specular))
+                    {
+                        path += ElysiaRenderer::DefaultWhiteTexturePath;
+                    }
+                    else if (texType == UINT64(MaterialTextureType::Normal))
+                    {
+                        path += ElysiaRenderer::DefaultNormalTexturePath;
+                    }
+                }
+                else
+                {
+                    path += material.textureNames[texType].c_str();
                 }
 
                 const UINT64 numLoaded = materialTextures.Count();
@@ -189,7 +203,9 @@ namespace ElysiaModel
             vtxOffset += model.meshes[meshIdx].numVertices;
             idxOffset += model.meshes[meshIdx].numIndices;
         }
-        
+
+        vtxOffset = 0;
+        idxOffset = 0;
         model.vertexBuffer = ElysiaRenderer::BufferManager::GetInstance().CreateVertexBuffer(model);
         model.indexBuffer = ElysiaRenderer::BufferManager::GetInstance().CreateIndexBuffer(model);
         for (UINT64 meshIdx = 0; meshIdx < numMeshes; meshIdx++)
@@ -197,8 +213,9 @@ namespace ElysiaModel
             UINT64 vbOffset = vtxOffset * sizeof(MeshVertex);
             UINT64 ibOffset = idxOffset * sizeof(UINT16);
 
-            model.meshes[meshIdx].InitCommon(model.vertexBuffer->GetGPUAddress(), model.indexBuffer->GetGPUAddress(),
-                vbOffset, ibOffset);
+            model.meshes[meshIdx].InitCommon(model.vertexBuffer->GetGPUAddress() + vbOffset,
+                model.indexBuffer->GetGPUAddress() + ibOffset,
+                vtxOffset, idxOffset);
 
             vtxOffset += model.meshes[meshIdx].numVertices;
             idxOffset += model.meshes[meshIdx].numIndices;
@@ -211,9 +228,6 @@ namespace ElysiaModel
         numVertices = assimpMesh.mNumVertices;
         numIndices = assimpMesh.mNumFaces * 3;
         
-        vertices.resize(numVertices);
-        indices.resize(numIndices);
-
         indexType = IndexType::Index16Bit;
         if(numVertices > 0xFFFF)
         {
@@ -231,7 +245,7 @@ namespace ElysiaModel
         {
             if (assimpMesh.HasPositions())
             {
-                Vector3 position = ConvertVec(assimpMesh.mVertices[vertexIdx]) * sceneScale;
+                Vector3 position = ConvertVec(assimpMesh.mVertices[vertexIdx]);
                 
                 aabbMin.x = eastl::min(aabbMin.x, position.x);
                 aabbMin.y = eastl::min(aabbMin.y, position.y);
@@ -241,28 +255,28 @@ namespace ElysiaModel
                 aabbMax.y = eastl::max(aabbMax.y, position.y);
                 aabbMax.z = eastl::max(aabbMax.z, position.z);
                 
-                vertices[vertexIdx].Position = dstVertices[vertexIdx].Position = position;
+                dstVertices[vertexIdx].Position = position;
             }
             if(assimpMesh.HasNormals())
             {
-                vertices[vertexIdx].Normal = dstVertices[vertexIdx].Normal = ConvertVec(assimpMesh.mNormals[vertexIdx]);
+                dstVertices[vertexIdx].Normal = ConvertVec(assimpMesh.mNormals[vertexIdx]);
             }
             if(assimpMesh.HasTextureCoords(0))
             {
-                vertices[vertexIdx].UV = dstVertices[vertexIdx].UV = ConvertVec(assimpMesh.mTextureCoords[0][vertexIdx]).xy();
+                dstVertices[vertexIdx].UV = ConvertVec(assimpMesh.mTextureCoords[0][vertexIdx]).xy();
             }
             if(assimpMesh.HasTangentsAndBitangents())
             {
-                vertices[vertexIdx].Tangent = dstVertices[vertexIdx].Tangent = ConvertVec(assimpMesh.mTangents[vertexIdx]);
+                dstVertices[vertexIdx].Tangent = ConvertVec(assimpMesh.mTangents[vertexIdx]);
             }
         }
 
         const UINT64 numTriangles = assimpMesh.mNumFaces;
         for(uint64 triIdx = 0; triIdx < numTriangles; ++triIdx)
         {
-            indices[triIdx * 3 + 0] = dstIndices[triIdx * 3 + 0] = UINT16(assimpMesh.mFaces[triIdx].mIndices[0]);
-            indices[triIdx * 3 + 1] = dstIndices[triIdx * 3 + 1] = UINT16(assimpMesh.mFaces[triIdx].mIndices[1]);
-            indices[triIdx * 3 + 2] = dstIndices[triIdx * 3 + 2] = UINT16(assimpMesh.mFaces[triIdx].mIndices[2]);
+            dstIndices[triIdx * 3 + 0] = UINT16(assimpMesh.mFaces[triIdx].mIndices[0]);
+            dstIndices[triIdx * 3 + 1] = UINT16(assimpMesh.mFaces[triIdx].mIndices[1]);
+            dstIndices[triIdx * 3 + 2] = UINT16(assimpMesh.mFaces[triIdx].mIndices[2]);
         }
         
         materialIndex = assimpMesh.mMaterialIndex;
@@ -270,8 +284,6 @@ namespace ElysiaModel
 
     void LoadedModel::Mesh::InitCommon(uint64 vbAddress, uint64 ibAddress, uint64 vtxOffset_, uint64 idxOffset_)
     {
-        assert(vertices.size() && indices.size());
-
         vtxOffset = UINT(vtxOffset_);
         idxOffset = UINT(idxOffset_);
 
@@ -323,6 +335,7 @@ namespace ElysiaModel
         {
             flags |= aiProcess_FlipUVs;
         }
+        flags |= aiProcess_PreTransformVertices | aiProcess_OptimizeMeshes;
         pScene = importer.ApplyPostProcessing(flags);
         
         if (bImportMeshes)

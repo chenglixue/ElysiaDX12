@@ -28,6 +28,10 @@ namespace ElysiaRenderer
     {
         m_pDevice = pDevice;
     }
+    void SceneManager::Update(const FrameContext& context)
+    {
+        UpdateEntities();
+    }
     void SceneManager::Destory()
     {
         
@@ -35,10 +39,15 @@ namespace ElysiaRenderer
 
     void SceneManager::LoadScene(std::vector<RenderItem>& outRenderList)
     {
-        CreateEntityFromModel(g_ModelPaths[0]);
+        WCHAR assetsPath[512];
+        GetAssetsPath(assetsPath, _countof(assetsPath));
+
+        for (const auto& modelPath : g_ModelPaths)
+        {
+            CreateEntityFromModel(ElysiaHelper::GetAssetFullPath(assetsPath, modelPath).c_str());
+        }
         CollectRenderItems(outRenderList);
     }
-
     Entity* SceneManager::CreateEntityFromModel(const eastl::wstring& modelPath)
     {
         auto model = ModelManager::GetInstance().LoadStaticModel(ToStdWString(modelPath).c_str(), 1);
@@ -49,12 +58,13 @@ namespace ElysiaRenderer
         m_entities.emplace_back(std::move(pEntity));
         return ptr;
     }
-    std::unique_ptr<Entity> SceneManager::CreateEntity(const std::shared_ptr<ElysiaModel::LoadedModel>& model) const
+    std::unique_ptr<Entity> SceneManager::CreateEntity(const std::shared_ptr<LoadedModel>& model) const
     {
         auto pParent = std::make_unique<Entity>(ToEastl(model->name));
-        pParent->transform.scale = Vector3(model->scale);
+        pParent->transform.scale = Vector3::One * model->scale;
         pParent->transform.position = (model->aabbMin + model->aabbMax) * 0.5f;
 
+        UINT meshIndex = 0;
         for (auto mesh : model->meshes)
         {
             auto pChild = std::make_unique<Entity>(ToEastl(mesh.name));
@@ -66,9 +76,10 @@ namespace ElysiaRenderer
             };
             pChild->pMeshRenderer = std::make_unique<MeshRenderer>();
             pChild->pMeshRenderer->ShutDown();
-            pChild->pMeshRenderer->Init(model);
+            pChild->pMeshRenderer->Init(model, meshIndex);
             
             pParent->AddChild(std::move(pChild));
+            meshIndex++;
         }
 
         return pParent;
@@ -78,34 +89,83 @@ namespace ElysiaRenderer
     {
         outList.clear();
         
-        for(const auto& pEntity : m_entities)
+        for(UINT64 entityIndex = 0; entityIndex < m_entities.size(); entityIndex++)
         {
-            if(!pEntity->pMeshRenderer) continue;
-            
-            const auto* pModel = pEntity->pMeshRenderer->GetModel();
-            const auto& worldMat = pEntity->transform.GetWorldMatrix();
-            
-            for(UINT64 meshIdx = 0; meshIdx < pModel->meshes.size(); meshIdx++)
-            {
-                const auto& mesh = pModel->meshes[meshIdx];
-                
-                RenderItem item
-                {
-                    .vbView = mesh.vbView,
-                    .ibView = mesh.ibView,
-                    .indexCount = mesh.numIndices,
-                    .startIndex = mesh.idxOffset,
-                    .baseVertex = INT(mesh.vtxOffset)
-                };
-                
-                item.worldMatrix = worldMat;
-                item.loadedMaterial = pModel->materials[mesh.materialIndex];
-                outList.emplace_back(std::move(item));
-            }
+            const auto& pEntity = m_entities[entityIndex];
+            CollectRenderItem(pEntity, outList);
         }
     }
+    void SceneManager::CollectRenderItem(const std::unique_ptr<Entity>& pEntity, std::vector<RenderItem>& outList) const
+    {
+        if (pEntity->pMeshRenderer != nullptr)
+        {
+            const auto& worldMat = pEntity->GetParent() ?
+                pEntity->transform.GetWorldMatrix() * pEntity->GetParent()->transform.GetWorldMatrix() :
+                pEntity->transform.GetWorldMatrix();
+
+            const auto& mesh = pEntity->pMeshRenderer->GetMesh();
+            RenderItem item
+            {
+                .vbView = mesh.vbView,
+                .ibView = mesh.ibView,
+                .indexCount = mesh.numIndices,
+                .startIndex = mesh.idxOffset / mesh.IndexSize(),
+                .baseVertex = INT(mesh.vtxOffset / sizeof(MeshVertex)),
+                .worldMatrix = worldMat,
+                .textureIndices = pEntity->pMeshRenderer->GetTextureIndices(),
+                .loadedMaterial = pEntity->pMeshRenderer->GetMaterial()
+            };
+            outList.emplace_back(std::move(item));
+        }
+        for (const auto& childEntity : pEntity->GetChildren())
+        {
+            CollectRenderItem(childEntity, outList);
+        }
+    }
+    
     void SceneManager::ClearScene()
     {
         m_entities.clear();
     }
+
+    void SceneManager::UpdateEntities()
+    {
+        for (auto& entity : m_entities)
+        {
+            UpdateEntity(entity);
+        }
+    }
+    void SceneManager::UpdateEntity(const std::unique_ptr<Entity>& pEntity)
+    {
+        if (pEntity == nullptr) return;
+        
+        const auto& worldMat = pEntity->GetParent() ? pEntity->transform.GetWorldMatrix() * pEntity->GetParent()->transform.GetWorldMatrix() :
+            pEntity->transform.GetWorldMatrix();
+        if (pEntity->pMeshRenderer != nullptr)
+        {
+            auto& mesh = pEntity->pMeshRenderer->GetMesh();
+            for (const auto& vertex : mesh.vertices)
+            {
+                mesh.aabbMin = Vector3(FLT_MAX);
+                mesh.aabbMax = Vector3(-FLT_MAX);
+                Vector3 position = Vector3::Transform(vertex.Position, worldMat);
+
+                mesh.aabbMin.x = eastl::min(mesh.aabbMin.x, position.x);
+                mesh.aabbMin.y = eastl::min(mesh.aabbMin.y, position.y);
+                mesh.aabbMin.z = eastl::min(mesh.aabbMin.z, position.z);
+                
+                mesh.aabbMax.x = eastl::max(mesh.aabbMax.x, position.x);
+                mesh.aabbMax.y = eastl::max(mesh.aabbMax.y, position.y);
+                mesh.aabbMax.z = eastl::max(mesh.aabbMax.z, position.z);
+            }
+
+            pEntity->pMeshRenderer->Update();
+        }
+
+        for (auto& pChild : pEntity->GetChildren())
+        {
+            UpdateEntity(pChild);
+        }
+    }
+
 }
