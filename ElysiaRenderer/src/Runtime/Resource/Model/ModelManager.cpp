@@ -23,12 +23,11 @@ namespace ElysiaRenderer
 	void ModelManager::Destory() 
 	{
 		std::lock_guard<std::mutex> lock(m_mutex);
-		// 挨个手动释放，看是哪个模型出的问题
 		auto it = m_modelCache.begin();
 		while(it != m_modelCache.end())
 		{
 			if (!_CrtCheckMemory()) { __debugbreak(); }
-			it = m_modelCache.erase(it); // 观察这里是否会崩
+			it = m_modelCache.erase(it);
 			if (!_CrtCheckMemory()) { __debugbreak(); }
 		}
 	}
@@ -50,7 +49,8 @@ namespace ElysiaRenderer
 			}
 		}
 		
-		std::shared_ptr<ElysiaModel::LoadedModel> sharedModel = LoadModelFromDisk(filePath, true, true, false, false, scale);
+		std::shared_ptr<ElysiaModel::LoadedModel> sharedModel = LoadModelFromDisk(filePath, true, true, false, false,
+			scale);
 		
 		m_modelCache.emplace(fileHash, sharedModel);
 		return sharedModel;

@@ -60,4 +60,17 @@ namespace ElysiaCore
 		m_bufferUploadsInProgress.clear();
 		m_textureUploadsInProgress.clear();
 	}
+
+	bool DX12UploadContext::HasWork()
+	{
+		if (!m_bufferUploads.size() && !m_textureUploads.size() &&
+			!m_bufferUploadsInProgress.size() && !m_textureUploadsInProgress.size())
+		{
+			return false;
+		}
+		else
+		{
+			return true;
+		}
+	}
 }

@@ -211,13 +211,7 @@ namespace ElysiaModel
             
             const aiMesh* pMesh = pScene->mMeshes[meshIdx];
             
-            if(!_CrtCheckMemory())
-                {
-                // 这里可以打印出具体是哪个 Mesh 出错了
-                printf("CRITICAL: Mesh %llu (%s) corrupted the heap!\n", 
-                       meshIdx, pScene->mMeshes[meshIdx]->mName.C_Str());
-                __debugbreak(); 
-            }
+            if(!_CrtCheckMemory()) {__debugbreak(); }
             
             model.meshes[meshIdx].InitFromAssimpMesh(*pScene->mMeshes[meshIdx], sceneScale,
                 &model.vertices[vtxOffset], &model.indices[idxOffset]);
@@ -382,11 +376,13 @@ namespace ElysiaModel
         if (bImportMeshes)
         {
             LoadMaterials(pScene, model);
-            assert(_CrtCheckMemory() && "Broken after LoadMaterials");
+            if(!_CrtCheckMemory()) {__debugbreak(); }
+            
             LoadMaterialResource(model.materials, fileDirectory, model.materialTextures);
-            assert(_CrtCheckMemory() && "Broken after Load Material Resource");
+            if(!_CrtCheckMemory()) {__debugbreak(); }
+            
             LoadMeshData(filePath, pScene, scale, model);
-            assert(_CrtCheckMemory() && "Broken after Load mesh data");
+            if(!_CrtCheckMemory()) {__debugbreak(); }
         }
         
         std::cout << "Finished loading scene '%ls'" + WstringToString(filePath) << std::endl;

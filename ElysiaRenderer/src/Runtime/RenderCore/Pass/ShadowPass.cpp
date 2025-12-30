@@ -183,13 +183,12 @@ namespace ElysiaRenderer
 			m_pCommand->SetVertexBuffer(0, 1, context.renderList[0].vbView);
 		}
 
-		for (auto& renderItem : context.renderList)
+		for (const auto& renderItem : context.renderList)
 		{
 			auto materialData = renderItem.loadedMaterial;
 
 			m_pMaterial->SetMatrix(ShaderIDs::worldMatrix, renderItem.worldMatrix);
-			m_pMaterial->SetUInt(ShaderIDs::baseColorTexIndex,
-				materialData.textures[UINT64(ElysiaModel::MaterialTextureType::Albedo)].GetResourceHeapIndex());
+			m_pMaterial->SetUInt(ShaderIDs::baseColorTexIndex, renderItem.textureIndices.Albedo);
 			m_pMaterial->SetFloat(ShaderIDs::cutoff, 0.5f);
 			m_pMaterial->SetFloat(ShaderIDs::opacity, materialData.opacity);
 

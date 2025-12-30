@@ -3,6 +3,7 @@
 
 #include "MeshRenderer.h"
 #include "Editor/UserData.h"
+#include "Runtime/Core/DX12UploadContext.h"
 #include "Runtime/Resource/Model/LoadedModel.h"
 #include "Runtime/Resource/Model/ModelManager.h"
 #include "Runtime/Engine/ECS/Entity.h"
@@ -37,28 +38,53 @@ namespace ElysiaRenderer
         
     }
 
-    void SceneManager::LoadScene(std::vector<RenderItem>& outRenderList)
+    void SceneManager::LoadScene(UINT& loadStage)
     {
-        if (!_CrtCheckMemory()) {
-            __debugbreak(); 
-        }
+        if (!_CrtCheckMemory()) {  __debugbreak(); }
         
         WCHAR assetsPath[512];
         GetAssetsPath(assetsPath, _countof(assetsPath));
 
+        std::vector<std::shared_ptr<LoadedModel>> loadedModels;
         for (const auto& modelPath : g_ModelPaths)
         {
-            CreateEntityFromModel(ElysiaHelper::GetAssetFullPath(assetsPath, modelPath).c_str());
+            loadedModels.emplace_back(std::move(CreateModel(ElysiaHelper::GetAssetFullPath(assetsPath, modelPath))));
         }
-        CollectRenderItems(outRenderList);
+
+        if (loadStage == 6)
+        {
+            for (auto& loadedModel : loadedModels)
+            {
+                CreateEntityFromModel(loadedModel);
+            }
+        }
+        if (loadStage == 7)
+        {
+            CollectRenderItems();
+        }
+
+        if (loadStage > 7)
+        {
+            if (!m_pDevice->GetUploadContext()->HasWork())
+            {
+                loadStage = 0;
+                return;
+            }
+        }
+
+        loadStage++;
     }
-    Entity* SceneManager::CreateEntityFromModel(const eastl::wstring& modelPath)
+
+    std::shared_ptr<ElysiaModel::LoadedModel> SceneManager::CreateModel(const std::wstring& modelPath)
     {
-        auto model = ModelManager::GetInstance().LoadStaticModel(ToStdWString(modelPath).c_str(), 1);
-        
-        auto pEntity = CreateEntity(model);
+        return ModelManager::GetInstance().LoadStaticModel(modelPath, 1);
+    }
+    Entity* SceneManager::CreateEntityFromModel(std::shared_ptr<ElysiaModel::LoadedModel> pModel)
+    {
+        auto pEntity = CreateEntity(pModel);
         
         Entity* ptr = pEntity.get();
+        m_entities.clear();
         m_entities.emplace_back(std::move(pEntity));
         return ptr;
     }
@@ -89,17 +115,17 @@ namespace ElysiaRenderer
         return pParent;
     }
 
-    void SceneManager::CollectRenderItems(std::vector<RenderItem>& outList) const
+    void SceneManager::CollectRenderItems()
     {
-        outList.clear();
+        renderList.clear();
         
         for(UINT64 entityIndex = 0; entityIndex < m_entities.size(); entityIndex++)
         {
             const auto& pEntity = m_entities[entityIndex];
-            CollectRenderItem(pEntity, outList);
+            CollectRenderItem(pEntity);
         }
     }
-    void SceneManager::CollectRenderItem(const std::unique_ptr<Entity>& pEntity, std::vector<RenderItem>& outList) const
+    void SceneManager::CollectRenderItem(const std::unique_ptr<Entity>& pEntity)
     {
         if (pEntity->pMeshRenderer != nullptr)
         {
@@ -119,11 +145,11 @@ namespace ElysiaRenderer
                 .textureIndices = pEntity->pMeshRenderer->GetTextureIndices(),
                 .loadedMaterial = pEntity->pMeshRenderer->GetMaterial()
             };
-            outList.emplace_back(std::move(item));
+            renderList.emplace_back(std::move(item));
         }
         for (const auto& childEntity : pEntity->GetChildren())
         {
-            CollectRenderItem(childEntity, outList);
+            CollectRenderItem(childEntity);
         }
     }
     

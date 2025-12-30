@@ -21,6 +21,7 @@ namespace ElysiaRenderer
     public:
         SceneManager();
         ~SceneManager();
+        std::vector<RenderItem> renderList;
         
         static SceneManager& GetInstance()
         {
@@ -36,10 +37,11 @@ namespace ElysiaRenderer
         virtual void Destory() override;
         virtual void Update(const FrameContext& context) override;
 
-        void LoadScene(std::vector<RenderItem>& outRenderList);
-        
-        Entity* CreateEntityFromModel(const eastl::wstring& modelPath);
-        void CollectRenderItems(std::vector<RenderItem>& outList) const;
+        void LoadScene(UINT& );
+
+        std::shared_ptr<ElysiaModel::LoadedModel> CreateModel(const std::wstring& modelPath);
+        Entity* CreateEntityFromModel(std::shared_ptr<ElysiaModel::LoadedModel> pModel);
+        void CollectRenderItems();
         void ClearScene();
 
         void UpdateEntities();
@@ -51,7 +53,7 @@ namespace ElysiaRenderer
         
         std::unique_ptr<Entity> CreateEntity(const std::shared_ptr<ElysiaModel::LoadedModel>& model) const;
         void UpdateEntity(const std::unique_ptr<Entity>& pEntity);
-        void CollectRenderItem(const std::unique_ptr<Entity>& pEntity, std::vector<RenderItem>& outList) const;
+        void CollectRenderItem(const std::unique_ptr<Entity>& pEntity);
         
         ElysiaCore::DX12Device* m_pDevice = nullptr;
         static std::unique_ptr<SceneManager> m_instance;

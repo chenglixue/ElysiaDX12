@@ -70,6 +70,7 @@ namespace ElysiaEngine
         CameraManager::GetInstance().Init(m_pDevice);
         LightManager::GetInstance().Init(m_pDevice);
         PSOManager::GetInstance().Init(m_pDevice);
+        SceneManager::GetInstance().Init(m_pDevice);
         
 		m_pGraphicsContext = m_pDevice->CreateGraphicsContext();
         ElysiaEditor::ImGUI_Init(m_windowHwnd, m_pDevice, m_swapChain);
@@ -80,6 +81,8 @@ namespace ElysiaEngine
 
         OnResize();
         OnUpdateDisplay();
+
+        m_loadingScene = true;
     }
 
     void ElysiaFrame::ReleaseResource()
@@ -141,15 +144,11 @@ namespace ElysiaEngine
         if (!_CrtCheckMemory()) {__debugbreak(); }
         auto frameContext = BeginFrame();
         m_pGraphicsContext->Reset();
-        ImGUI_UpdateIO();
-        ImGUI_NewFrame();
-
-        std::vector<RenderItem> renderList;
-        SceneManager::GetInstance().LoadScene(renderList);
+        
         if (m_loadingScene)
         {
-            static int loadingStage = 0;
-            
+            static UINT loadingStage = 0;
+            SceneManager::GetInstance().LoadScene(loadingStage);
             if (loadingStage == 0)
             {
                 m_time = 0;
@@ -164,13 +163,18 @@ namespace ElysiaEngine
         }
         else
         {
-            frameContext.renderList = renderList;
+            frameContext.renderList = SceneManager::GetInstance().renderList;
+            
             OnUpdate();
-            //SceneManager::GetInstance().Update(frameContext);
             BufferManager::GetInstance().Update(frameContext);
         }
 
-        m_pRenderer->OnRender(frameContext);
+        if (!m_loadingScene)
+        {
+            ImGUI_UpdateIO();
+            ImGUI_NewFrame();
+            m_pRenderer->OnRender(frameContext);
+        }
 
 		m_pDevice->SubmitContextWork(*m_pGraphicsContext);
 

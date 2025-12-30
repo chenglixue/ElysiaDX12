@@ -25,6 +25,8 @@ namespace ElysiaCore
 		void ProcessUploads();
 		void ResolveProcessedUploads();
 
+		bool HasWork();
+
 	private:
 		std::vector<DX12BufferUpload*> m_bufferUploads;
 		std::vector<DX12TextureUpload*> m_textureUploads;
