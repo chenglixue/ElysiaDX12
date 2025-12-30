@@ -59,7 +59,8 @@ namespace ElysiaRenderer
 		m_viewport = { 0.0f, 0.0f, static_cast<float>(Width), static_cast<float>(Height), 0.0f, 1.0f };
 		m_rectScissor = { 0, 0, (LONG)Width, (LONG)Height };
 		
-		CameraManager::GetInstance().CreateMainCamera(Vector3(-11.5f, 200.85f, -0.45f),
+		CameraManager::GetInstance().CreateMainCamera(
+			Vector3(-11.5f, 200.85f, -0.45f),
 			static_cast<float>(Width) / static_cast<float>(Height),
 			3.14159f / 4.0f, 0.1f, 2000.f);
 

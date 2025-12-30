@@ -34,7 +34,6 @@ cbuffer MaterialConstant : register(b0, perMaterialSpace)
     float metallicIntensity;
     float roughnessIntensity;
     float ambientCubemapIntensity;
-    float g_hasNormalTex;
 };
 
 cbuffer PassConstant : register(b0, perPassSpace)
@@ -165,7 +164,7 @@ FEncodeGBufferData GetEncodeGBufferData(FInputParams inputParams, float3 toLight
     o.Roughness = roughness;
     o.Specular = 0.5;
     
-    o.WorldNormal = g_hasNormalTex ? GetNormal(normalTS.rgb, TBN, normalIntensity) : inputParams.NormalWS;
+    o.WorldNormal = GetNormal(normalTS.rgb, TBN, normalIntensity);
     o.WorldTangent = TBN._m00_m01_m02;
     o.PerObjectData = 0.f;
     o.PerComputedShadow = 1.f;

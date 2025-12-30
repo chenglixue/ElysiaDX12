@@ -55,7 +55,6 @@ namespace ElysiaRenderer
 	size_t GBufferPass::ShaderIDs::metallicIntensity = PropertyToID(L"metallicIntensity");
 	size_t GBufferPass::ShaderIDs::roughnessIntensity = PropertyToID(L"roughnessIntensity");
 	size_t GBufferPass::ShaderIDs::ambientCubemapIntensity = PropertyToID(L"ambientCubemapIntensity");
-	size_t GBufferPass::ShaderIDs::g_hasNormalTex = PropertyToID(L"g_hasNormalTex");
 	
 	GBufferPass::GBufferPass(DX12Camera* pCamera) :
 		BasePass(pCamera)

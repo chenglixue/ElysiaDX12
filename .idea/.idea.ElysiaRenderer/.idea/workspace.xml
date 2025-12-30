@@ -9,14 +9,16 @@
   <component name="ChangeListManager">
     <list default="true" id="f31d721d-cfba-4714-b0ce-c46a1a48110d" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.ElysiaRenderer/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.ElysiaRenderer/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/imgui.ini" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/imgui.ini" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Programs/Helper.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Programs/Helper.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/DX12Device.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/DX12Device.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Engine/ElysiaFrame.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Engine/ElysiaFrame.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/public/GBuffer.hlsl" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/public/GBuffer.hlsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Engine/ECS/Transform.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Engine/ECS/Transform.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/GBufferPass.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/GBufferPass.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/GBufferPass.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/GBufferPass.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Renderer.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Renderer.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/CameraManager.obj" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/CameraManager.obj" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/ElysiaRenderer.tlog/CL.command.1.tlog" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/ElysiaRenderer.tlog/CL.command.1.tlog" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/ElysiaRenderer.tlog/CL.read.1.tlog" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/ElysiaRenderer.tlog/CL.read.1.tlog" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/ElysiaRenderer.tlog/CL.write.1.tlog" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/ElysiaRenderer.tlog/CL.write.1.tlog" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/Transform.obj" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/Transform.obj" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/vc143.idb" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/vc143.idb" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -681,7 +683,9 @@
     <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="cidr-memory-view://178" root0="FORCE_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="cidr-memory-view://185" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../Program Files (x86)/Windows Kits/10/Include/10.0.22621.0/ucrt/crtdbg.h" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../Program Files (x86)/Windows Kits/10/Include/10.0.22621.0/um/fileapi.h" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../Program Files (x86)/Windows Kits/10/Include/10.0.22621.0/um/libloaderapi.h" root0="SKIP_HIGHLIGHTING" />
@@ -794,7 +798,7 @@
       <workItem from="1766848690927" duration="18808000" />
       <workItem from="1766938647944" duration="1929000" />
       <workItem from="1766973813856" duration="25185000" />
-      <workItem from="1767059668654" duration="23928000" />
+      <workItem from="1767059668654" duration="25009000" />
     </task>
     <servers />
   </component>

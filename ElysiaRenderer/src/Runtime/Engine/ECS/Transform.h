@@ -12,7 +12,8 @@ namespace ElysiaEngine
 
 		Matrix GetWorldMatrix() const
 		{
-			return Matrix::CreateScale(scale) * Matrix::CreateFromQuaternion(rotation) * Matrix::CreateTranslation(position);
+			// Matrix::CreateTranslation(position) * 
+			return Matrix::CreateFromQuaternion(rotation) * Matrix::CreateScale(scale);
 		}
 
 		void LookAt(Vector3 target)

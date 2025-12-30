@@ -61,7 +61,6 @@ namespace ElysiaRenderer
 			static size_t metallicIntensity;
 			static size_t roughnessIntensity;
 			static size_t ambientCubemapIntensity;
-			static size_t g_hasNormalTex;
 			static size_t GBuffer0Index;
 			static size_t GBuffer1Index;
 			static size_t GBuffer2Index;
