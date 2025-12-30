@@ -38,9 +38,9 @@ namespace ElysiaCore
 	{
 		return m_index;
 	}
-	float DX12BufferResource::GetStride() const noexcept
+	UINT DX12BufferResource::GetStride() const noexcept
 	{
-		return static_cast<float>(m_stride);
+		return m_stride;
 	}
 	DX12DescriptorHeapHandle DX12BufferResource::GetCBVDescriptor() const noexcept
 	{
@@ -63,9 +63,9 @@ namespace ElysiaCore
 	{
 		m_index = index;
 	}
-	void DX12BufferResource::SetStride(float stride)
+	void DX12BufferResource::SetStride(UINT stride)
 	{
-		m_stride = static_cast<size_t>(stride);
+		m_stride = stride;
 	}
 	void DX12BufferResource::SetCBVDescriptor(const DX12DescriptorHeapHandle& CBVDescriptor)
 	{
@@ -123,9 +123,9 @@ namespace ElysiaCore
 		m_resourceDesc.Width = alignSize;
 		m_stride = bufferCreationDesc.stride;
 		
-		if(bufferCreationDesc.name)
+		if(bufferCreationDesc.name.c_str())
 		{
-			m_resource->SetName(bufferCreationDesc.name);
+			m_resource->SetName(bufferCreationDesc.name.c_str());
 		}
 		
 		m_usageState = isHostVisible ? D3D12_RESOURCE_STATE_GENERIC_READ : D3D12_RESOURCE_STATE_COPY_DEST;

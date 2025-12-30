@@ -35,7 +35,7 @@ namespace ElysiaCore
 	
 	struct BufferCreationDesc
 	{
-		LPCWSTR name;
+		std::wstring name;
 		size_t stride = 0;
 		size_t size = 0;
 		GPUResourceFlags viewFlags = GPUResourceFlags::None;

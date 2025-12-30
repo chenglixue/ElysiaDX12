@@ -27,35 +27,35 @@ namespace ElysiaRenderer
 	
 	int GBufferPass::ShaderPassIDs::GBufferPassID = -1;
 	
-	size_t GBufferPass::RenderTextureIDs::GBuffer0ID = PropertyToID("GBuffer_0");
-	size_t GBufferPass::RenderTextureIDs::GBuffer1ID = PropertyToID("GBuffer_1");
-	size_t GBufferPass::RenderTextureIDs::GBuffer2ID = PropertyToID("GBuffer_2");
-	size_t GBufferPass::RenderTextureIDs::GBuffer3ID = PropertyToID("GBuffer_3");
-	size_t GBufferPass::RenderTextureIDs::GBuffer4ID = PropertyToID("GBuffer_4");
-	size_t GBufferPass::RenderTextureIDs::GBuffer5ID = PropertyToID("GBuffer_5");
+	size_t GBufferPass::RenderTextureIDs::GBuffer0ID = PropertyToID(L"GBuffer_0");
+	size_t GBufferPass::RenderTextureIDs::GBuffer1ID = PropertyToID(L"GBuffer_1");
+	size_t GBufferPass::RenderTextureIDs::GBuffer2ID = PropertyToID(L"GBuffer_2");
+	size_t GBufferPass::RenderTextureIDs::GBuffer3ID = PropertyToID(L"GBuffer_3");
+	size_t GBufferPass::RenderTextureIDs::GBuffer4ID = PropertyToID(L"GBuffer_4");
+	size_t GBufferPass::RenderTextureIDs::GBuffer5ID = PropertyToID(L"GBuffer_5");
 
-	size_t GBufferPass::ShaderIDs::screenSize = PropertyToID("screenSize");
-	size_t GBufferPass::ShaderIDs::viewMatrix = PropertyToID("viewMatrix");
-	size_t GBufferPass::ShaderIDs::viewMatrix_I = PropertyToID("viewMatrix_I");
-	size_t GBufferPass::ShaderIDs::projMatrix = PropertyToID("projMatrix");
-	size_t GBufferPass::ShaderIDs::projMatrix_I = PropertyToID("projMatrix_I");
-	size_t GBufferPass::ShaderIDs::viewProjMatrix = PropertyToID("viewProjMatrix");
-	size_t GBufferPass::ShaderIDs::viewProjMatrix_I = PropertyToID("viewProjMatrix_I");
-	size_t GBufferPass::ShaderIDs::worldMatrix = PropertyToID("worldMatrix");
-	size_t GBufferPass::ShaderIDs::opacity = PropertyToID("opacity");
-	size_t GBufferPass::ShaderIDs::cutoff = PropertyToID("cutoff");
-	size_t GBufferPass::ShaderIDs::baseColorTexIndex = PropertyToID("baseColorTexIndex");
-	size_t GBufferPass::ShaderIDs::normalTexIndex = PropertyToID("normalTexIndex");
-	size_t GBufferPass::ShaderIDs::metallicTexIndex = PropertyToID("metallicTexIndex");
-	size_t GBufferPass::ShaderIDs::roughnessTexIndex = PropertyToID("roughnessTexIndex");
-	size_t GBufferPass::ShaderIDs::specularTexIndex = PropertyToID("specularTexIndex");
-	size_t GBufferPass::ShaderIDs::baseColorTint = PropertyToID("baseColorTint");
-	size_t GBufferPass::ShaderIDs::ambientCubemapTint = PropertyToID("ambientCubemapTint");
-	size_t GBufferPass::ShaderIDs::normalIntensity = PropertyToID("normalIntensity");
-	size_t GBufferPass::ShaderIDs::metallicIntensity = PropertyToID("metallicIntensity");
-	size_t GBufferPass::ShaderIDs::roughnessIntensity = PropertyToID("roughnessIntensity");
-	size_t GBufferPass::ShaderIDs::ambientCubemapIntensity = PropertyToID("ambientCubemapIntensity");
-	size_t GBufferPass::ShaderIDs::g_hasNormalTex = PropertyToID("g_hasNormalTex");
+	size_t GBufferPass::ShaderIDs::screenSize = PropertyToID(L"screenSize");
+	size_t GBufferPass::ShaderIDs::viewMatrix = PropertyToID(L"viewMatrix");
+	size_t GBufferPass::ShaderIDs::viewMatrix_I = PropertyToID(L"viewMatrix_I");
+	size_t GBufferPass::ShaderIDs::projMatrix = PropertyToID(L"projMatrix");
+	size_t GBufferPass::ShaderIDs::projMatrix_I = PropertyToID(L"projMatrix_I");
+	size_t GBufferPass::ShaderIDs::viewProjMatrix = PropertyToID(L"viewProjMatrix");
+	size_t GBufferPass::ShaderIDs::viewProjMatrix_I = PropertyToID(L"viewProjMatrix_I");
+	size_t GBufferPass::ShaderIDs::worldMatrix = PropertyToID(L"worldMatrix");
+	size_t GBufferPass::ShaderIDs::opacity = PropertyToID(L"opacity");
+	size_t GBufferPass::ShaderIDs::cutoff = PropertyToID(L"cutoff");
+	size_t GBufferPass::ShaderIDs::baseColorTexIndex = PropertyToID(L"baseColorTexIndex");
+	size_t GBufferPass::ShaderIDs::normalTexIndex = PropertyToID(L"normalTexIndex");
+	size_t GBufferPass::ShaderIDs::metallicTexIndex = PropertyToID(L"metallicTexIndex");
+	size_t GBufferPass::ShaderIDs::roughnessTexIndex = PropertyToID(L"roughnessTexIndex");
+	size_t GBufferPass::ShaderIDs::specularTexIndex = PropertyToID(L"specularTexIndex");
+	size_t GBufferPass::ShaderIDs::baseColorTint = PropertyToID(L"baseColorTint");
+	size_t GBufferPass::ShaderIDs::ambientCubemapTint = PropertyToID(L"ambientCubemapTint");
+	size_t GBufferPass::ShaderIDs::normalIntensity = PropertyToID(L"normalIntensity");
+	size_t GBufferPass::ShaderIDs::metallicIntensity = PropertyToID(L"metallicIntensity");
+	size_t GBufferPass::ShaderIDs::roughnessIntensity = PropertyToID(L"roughnessIntensity");
+	size_t GBufferPass::ShaderIDs::ambientCubemapIntensity = PropertyToID(L"ambientCubemapIntensity");
+	size_t GBufferPass::ShaderIDs::g_hasNormalTex = PropertyToID(L"g_hasNormalTex");
 	
 	GBufferPass::GBufferPass(DX12Camera* pCamera) :
 		BasePass(pCamera)

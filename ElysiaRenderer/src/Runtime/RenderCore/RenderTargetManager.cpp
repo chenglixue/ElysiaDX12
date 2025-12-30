@@ -16,7 +16,14 @@ namespace ElysiaRenderer
 
     void RenderTargetManager::Destory() 
     {
-        
+        for (auto& RT : m_renderTextures)
+        {
+            if (RT.second)
+            {
+                RT.second->ShutDowm();
+                RT.second.reset();
+            }
+        }
     }
     void RenderTargetManager::Init(ElysiaCore::DX12Device* pDevice)
     {
@@ -24,7 +31,7 @@ namespace ElysiaRenderer
         m_pDevice = pDevice;
     }
     
-    RenderTexture* RenderTargetManager::GetRenderTexture(const std::string& name) const
+    RenderTexture* RenderTargetManager::GetRenderTexture(const std::wstring& name) const
     {
         auto nameHash = xxh::GetHash(name);
         if(m_renderTextures.contains(nameHash))
@@ -52,7 +59,7 @@ namespace ElysiaRenderer
         UINT64 width, 
         UINT64 height,
         DXGI_FORMAT format,
-        const std::string& name)
+        const std::wstring& name)
     {
         auto nameHash = xxh::GetHash(name);
         if (m_renderTextures.contains(nameHash))
@@ -72,7 +79,7 @@ namespace ElysiaRenderer
         desc.Width = width;
         desc.Height = height;
         desc.Format = format;
-        desc.Name = stringToLPCWSTR(name);
+        desc.Name = name;
 
         auto newRT = std::make_unique<RenderTexture>();
         
@@ -93,7 +100,7 @@ namespace ElysiaRenderer
         UINT64 height,
         DXGI_FORMAT format,
         bool isDepth,
-        const std::string& name)
+        const std::wstring& name)
     {
         auto nameHash = xxh::GetHash(name);
         
@@ -101,7 +108,7 @@ namespace ElysiaRenderer
         desc.Width = width;
         desc.Height = height;
         desc.Format = format;
-        desc.Name = stringToLPCWSTR(name);
+        desc.Name = name;
         desc.IsDepth = isDepth;
 
         if (m_renderTextures.contains(nameHash))
@@ -135,7 +142,7 @@ namespace ElysiaRenderer
         UINT64 height,
         DXGI_FORMAT format,
         bool enableRandomWrite,
-        const std::string& name)
+        const std::wstring& name)
     {
         auto nameHash = xxh::GetHash(name);
         if (m_renderTextures.contains(nameHash))
@@ -155,7 +162,7 @@ namespace ElysiaRenderer
         desc.Width = width;
         desc.Height = height;
         desc.Format = format;
-        desc.Name = stringToLPCWSTR(name);
+        desc.Name = name;
         desc.EnableRandomWrite = enableRandomWrite;
 
         auto newRT = std::make_unique<RenderTexture>();

@@ -9,7 +9,7 @@ namespace ElysiaHelper
 		
 	}
 
-	File::File(const wchar_t* filePath, FileOpenMode openMode) :
+	File::File(const std::wstring& filePath, FileOpenMode openMode) :
 		m_fileHandle(INVALID_HANDLE_VALUE), m_openMode(FileOpenMode::Read)
 	{
 		Open(filePath, m_openMode);
@@ -21,7 +21,7 @@ namespace ElysiaHelper
 		assert(m_fileHandle == INVALID_HANDLE_VALUE);
 	}
 
-	void File::Open(const wchar_t* filePath, FileOpenMode openMode)
+	void File::Open(const std::wstring& filePath, FileOpenMode openMode)
 	{
 		assert(m_fileHandle == INVALID_HANDLE_VALUE);
 		m_openMode = openMode;
@@ -31,7 +31,7 @@ namespace ElysiaHelper
 			assert(FileExists(filePath));
 
 			//创建或者打开一个文件或者I/O设备
-			m_fileHandle = CreateFile(filePath, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+			m_fileHandle = CreateFile(filePath.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 			if (m_fileHandle == INVALID_HANDLE_VALUE)
 			{
 				std::wstring errPrefix = std::wstring(L"Failed to open file") + filePath + L":\n";
@@ -44,10 +44,10 @@ namespace ElysiaHelper
 			// If the exists, delete it
 			if (FileExists(filePath))
 			{
-				ThrowIfFailed(DeleteFile(filePath));
+				ThrowIfFailed(DeleteFile(filePath.c_str()));
 			}
 
-			m_fileHandle = CreateFile(filePath, GENERIC_WRITE, 0, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
+			m_fileHandle = CreateFile(filePath.c_str(), GENERIC_WRITE, 0, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
 			if (m_fileHandle == INVALID_HANDLE_VALUE)
 			{
 				std::wstring errPrefix = std::wstring(L"Failed to open file") + filePath + L":\n";

@@ -7,6 +7,7 @@
 #include "Runtime/RenderCore/TextureManager.h"
 #include "Runtime/RenderCore/BufferManager.h"
 #include "Programs/Containers.h"
+#include "Runtime/Core/DX12BufferResource.h"
 
 namespace ElysiaModel
 {
@@ -14,7 +15,7 @@ namespace ElysiaModel
 
 	struct MaterialTexture
 	{
-		eastl::wstring name;	// path + name
+		std::wstring name;	// path + name
 		ElysiaRenderer::TextureManager::Handle texture;
 	};
 
@@ -85,7 +86,7 @@ namespace ElysiaModel
 			Blend
 		};
 
-		eastl::string name;
+		std::string name;
 		Alpha alpha;
 		Vector3 albedoFactor;
 		float opacity;
@@ -95,10 +96,13 @@ namespace ElysiaModel
 		float specularFactor;
 		Vector3 emissiveFactor;
 
-		eastl::wstring textureNames[UINT64(MaterialTextureType::Count)];
+		std::wstring textureNames[UINT64(MaterialTextureType::Count)];
 		ElysiaRenderer::TextureManager::Handle textures[uint64(MaterialTextureType::Count)] = { };
 		UINT32 textureIndices[uint64(MaterialTextureType::Count)] = {};
 	};
+
+	constexpr DXGI_FORMAT IndexBufferFormat()  { return DXGI_FORMAT_R16_UINT; }
+	constexpr UINT IndexSize()  { return 2; }
 
 	struct LoadedModel
 	{
@@ -122,15 +126,14 @@ namespace ElysiaModel
 			eastl::vector<Vector4> weights;
 			eastl::vector<Vector4> joints;
 
-			DXGI_FORMAT IndexBufferFormat() const { return DXGI_FORMAT_R16_UINT; }
-			UINT IndexSize() const { return 2; }
-
 			// Init from loaded files
 			void InitFromAssimpMesh(const aiMesh& assimpMesh, float sceneScale,
 									MeshVertex* dstVertices, UINT16* dstIndices);
 
 			void InitCommon(uint64 vbAddress, uint64 ibAddress, uint64 vtxOffset_, uint64 idxOffset_);
 		};
+
+		
 		
 		std::string name;
 		float scale = 1;
@@ -142,9 +145,12 @@ namespace ElysiaModel
 		eastl::vector<Mesh> meshes;
 		eastl::vector<LoadedMaterial> materials;
 		GrowableList<MaterialTexture*> materialTextures;
-		
+
 		ElysiaRenderer::BufferHandle vertexBuffer;
 		ElysiaRenderer::BufferHandle indexBuffer;
+
+		D3D12_VERTEX_BUFFER_VIEW vbView;
+		D3D12_INDEX_BUFFER_VIEW ibView;
 	};
 
 	struct LoadedSkeleton

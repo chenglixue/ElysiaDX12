@@ -62,7 +62,7 @@ namespace ElysiaCore
 #endif // DEBUG
 	}
 
-	void DX12Device::OnCreate(eastl::wstring appName, bool bCPUValidationEnabled, bool bGpuValidationEnabled)
+	void DX12Device::OnCreate(std::wstring appName, bool bCPUValidationEnabled, bool bGpuValidationEnabled)
 	{
 #if defined(_DEBUG)
 		CComPtr<ID3D12Debug> debugController;
@@ -685,7 +685,7 @@ namespace ElysiaCore
 							constantVariableDesc.SpaceID = spaceID;
 							constantVariableDesc.StartOffset = variableDesc.StartOffset;
 							constantVariableDesc.Size = variableDesc.Size;
-							constantVariableDesc.Name = PropertyToID(variableDesc.Name);
+							constantVariableDesc.Name = PropertyToID(StringToWstring(variableDesc.Name));
 // #ifdef DEBUG
 // 							std::cout << "Constant variable name is " << variableDesc.Name << std::endl;
 // 							std::cout << "Space ID is " << constantVariableDesc.SpaceID << std::endl;

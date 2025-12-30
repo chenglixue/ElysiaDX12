@@ -68,7 +68,7 @@ namespace ElysiaRenderer
 			m_pCameraColorRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(Width, Height,
 				DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
 				true,
-				"Camera Color RT");
+				L"Camera Color RT");
 		}
 		else
 		{
@@ -79,7 +79,7 @@ namespace ElysiaRenderer
 					m_pCameraColorRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(Width, Height,
 						DXGI_FORMAT_R11G11B10_FLOAT,
 						true,
-						"Camera Color RT"); 
+						L"Camera Color RT"); 
 					break;  
 				} 
 			case HDRQuality::High:
@@ -87,7 +87,7 @@ namespace ElysiaRenderer
 					m_pCameraColorRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(Width, Height,
 						DXGI_FORMAT_R16G16B16A16_FLOAT,
 						true,
-						"Camera Color RT");
+						L"Camera Color RT");
 					break;
 				}
 			default:
@@ -100,7 +100,7 @@ namespace ElysiaRenderer
 		m_pCameraDepthRT = RenderTargetManager::GetInstance().CreateRenderTexture(Width, Height,
 				DXGI_FORMAT_D24_UNORM_S8_UINT,
 				true,
-				"Camera Depth RT");
+				L"Camera Depth RT");
 		
 		RenderPassData passData
 		{

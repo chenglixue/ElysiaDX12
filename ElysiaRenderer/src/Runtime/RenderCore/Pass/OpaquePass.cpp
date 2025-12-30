@@ -34,15 +34,15 @@ namespace ElysiaRenderer
 	OpaquePass::OpaquePass(DX12Camera* pCamera):
 		BasePass(pCamera)
 	{
-		ShaderIDs::g_AOIndex = PropertyToID("g_AOIndex");
+		ShaderIDs::g_AOIndex = PropertyToID(L"g_AOIndex");
 
-		ShaderIDs::screenSize = PropertyToID("screenSize");
-		ShaderIDs::viewMatrix = PropertyToID("viewMatrix");
-		ShaderIDs::viewMatrix_I = PropertyToID("viewMatrix_I");
-		ShaderIDs::projMatrix = PropertyToID("projMatrix");
-		ShaderIDs::projMatrix_I = PropertyToID("projMatrix_I");
-		ShaderIDs::viewProjMatrix = PropertyToID("viewProjMatrix");
-		ShaderIDs::viewProjMatrix_I = PropertyToID("viewProjMatrix_I");
+		ShaderIDs::screenSize = PropertyToID(L"screenSize");
+		ShaderIDs::viewMatrix = PropertyToID(L"viewMatrix");
+		ShaderIDs::viewMatrix_I = PropertyToID(L"viewMatrix_I");
+		ShaderIDs::projMatrix = PropertyToID(L"projMatrix");
+		ShaderIDs::projMatrix_I = PropertyToID(L"projMatrix_I");
+		ShaderIDs::viewProjMatrix = PropertyToID(L"viewProjMatrix");
+		ShaderIDs::viewProjMatrix_I = PropertyToID(L"viewProjMatrix_I");
 	}
 
 	OpaquePass::~OpaquePass()

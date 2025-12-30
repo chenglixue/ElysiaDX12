@@ -39,19 +39,19 @@ namespace ElysiaModel
             LoadedMaterial material{};
             material.name = aiMaterial->GetName().C_Str();
 
-            aiColor3D diffuse(1.0f, 1.0f, 1.0f);
-            aiColor3D emission(0.0f, 0.0f, 0.0f);
+            aiColor4D diffuse(1.0f, 1.0f, 1.0f, 1.f);
+            aiColor4D emission(0.0f, 0.0f, 0.0f, 0.f);
             float opacity = 1.0f;
             float metallic = 0.0f;
             float roughness = 0.0f;
             float shininess = 0.0f;
 
-            auto loadTexturePath = [&](aiTextureType type, eastl::wstring& outPath)
+            auto loadTexturePath = [&](aiTextureType type, std::wstring& outPath)
             {
                 aiString path;
                 if (aiReturn_SUCCESS == aiMaterial->GetTexture(type, 0, &path))
                 {
-                    outPath = ToEastlWString(GetFileName(StringToWstring(path.C_Str()).c_str()));
+                    outPath = GetFileName(StringToWstring(path.C_Str()).c_str());
                 }
             };
             
@@ -64,7 +64,8 @@ namespace ElysiaModel
             {
                 material.albedoFactor = Vector3(diffuse.r, diffuse.g, diffuse.b);
             }
-
+            assert(_CrtCheckMemory());
+            
             // Metalness Roughness
             if (AI_SUCCESS == aiMaterial->Get(AI_MATKEY_METALLIC_FACTOR, metallic))
             {
@@ -74,39 +75,53 @@ namespace ElysiaModel
             {
                 material.roughnessFactor = roughness;
             }
+            assert(_CrtCheckMemory());
 
             // Emissive
             if (AI_SUCCESS == aiMaterial->Get(AI_MATKEY_COLOR_EMISSIVE, emission))
             {
                 material.emissiveFactor = Vector3{ emission.r, emission.g, emission.b };
             }
+            assert(_CrtCheckMemory());
 
             // opacity
             if (AI_SUCCESS == aiMaterial->Get(AI_MATKEY_OPACITY, opacity))
             {
                 material.opacity = opacity;
             }
+            assert(_CrtCheckMemory());
 
             //specular
             if (AI_SUCCESS == aiMaterial->Get(AI_MATKEY_SPECULAR_FACTOR, shininess))
             {
                 material.specularFactor = shininess;
             }
-
+            assert(_CrtCheckMemory());
+            
             loadTexturePath(aiTextureType_DIFFUSE, material.textureNames[UINT64(MaterialTextureType::Albedo)]);
+            if(!_CrtCheckMemory()) {assert(_CrtCheckMemory());}
             loadTexturePath(aiTextureType_NORMALS, material.textureNames[UINT64(MaterialTextureType::Normal)]);
+            if(!_CrtCheckMemory()) {assert(_CrtCheckMemory());}
             loadTexturePath(aiTextureType_EMISSIVE, material.textureNames[UINT64(MaterialTextureType::Emissive)]);
+            if(!_CrtCheckMemory()) {assert(_CrtCheckMemory());}
             loadTexturePath(aiTextureType_METALNESS, material.textureNames[UINT64(MaterialTextureType::Metallic)]);
+            if(!_CrtCheckMemory()) {assert(_CrtCheckMemory());}
             loadTexturePath(aiTextureType_DIFFUSE_ROUGHNESS, material.textureNames[UINT64(MaterialTextureType::Roughness)]);
+            if(!_CrtCheckMemory()) {assert(_CrtCheckMemory());}
             loadTexturePath(aiTextureType_AMBIENT_OCCLUSION, material.textureNames[UINT64(MaterialTextureType::Occlusion)]);
+            if(!_CrtCheckMemory()) {assert(_CrtCheckMemory());}
             loadTexturePath(aiTextureType_SPECULAR, material.textureNames[UINT64(MaterialTextureType::Specular)]);
+            if(!_CrtCheckMemory()) {assert(_CrtCheckMemory());}
             loadTexturePath(aiTextureType_HEIGHT, material.textureNames[UINT64(MaterialTextureType::Height)]);
+            if(!_CrtCheckMemory()) {assert(_CrtCheckMemory());}
 
+            if(!_CrtCheckMemory()) {assert(_CrtCheckMemory());}
             model.materials.emplace_back(material);
+            if(!_CrtCheckMemory()) {assert(_CrtCheckMemory());}
         }
     }
 
-    void LoadMaterialResource(eastl::vector<LoadedMaterial>& materials, eastl::wstring fileDirectory, GrowableList<MaterialTexture*>& materialTextures)
+    void LoadMaterialResource(eastl::vector<LoadedMaterial>& materials, std::wstring fileDirectory, GrowableList<MaterialTexture*>& materialTextures)
     {
         const UINT64 numMaterials = materials.size();
 
@@ -118,7 +133,7 @@ namespace ElysiaModel
             {
                 material.textures[texType] = ElysiaRenderer::TextureManager::Handle::Invalid();
 
-                eastl::wstring path = fileDirectory;
+                std::wstring path = fileDirectory;
                 if (material.textureNames[texType].length() <= 0 || FileExists((path + material.textureNames[texType]).c_str()) == false)
                 {
                     if (texType == UINT64(MaterialTextureType::Albedo) || texType == UINT64(MaterialTextureType::Roughness)
@@ -157,7 +172,7 @@ namespace ElysiaModel
                     MaterialTexture* newMatTexture = new MaterialTexture();
                     newMatTexture->name = path;
                     bool useSRGB = texType == UINT64(MaterialTextureType::Albedo);
-                    newMatTexture->texture = ElysiaRenderer::TextureManager::GetInstance().LoadDynamicTexture(ToStdWString(path), useSRGB);
+                    newMatTexture->texture = ElysiaRenderer::TextureManager::GetInstance().LoadDynamicTexture((path), useSRGB);
                     
                     UINT64 idx = materialTextures.Add(newMatTexture);
 
@@ -168,7 +183,7 @@ namespace ElysiaModel
         }
     }
 
-    void LoadMeshData(const wchar_t* filePath, const aiScene* pScene, float sceneScale, LoadedModel &model)
+    void LoadMeshData(const std::wstring& filePath, const aiScene* pScene, float sceneScale, LoadedModel &model)
     {
         model.scale = sceneScale;
         const UINT64 numMeshes = pScene->mNumMeshes;
@@ -183,12 +198,27 @@ namespace ElysiaModel
         }
 
         model.vertices.resize(numVertices);
+        assert(_CrtCheckMemory() && "Broken after vertices resize");
         model.indices.resize(numIndices);
+        assert(_CrtCheckMemory() && "Broken after indices resize");
         model.meshes.resize(numMeshes);
+        assert(_CrtCheckMemory() && "Broken after mesh resize");
         uint64 vtxOffset = 0;
         uint64 idxOffset = 0;
         for(UINT64 meshIdx = 0; meshIdx < numMeshes; meshIdx++)
         {
+            assert(_CrtCheckMemory() && "Heap was corrupted BEFORE InitFromAssimpMesh!");
+            
+            const aiMesh* pMesh = pScene->mMeshes[meshIdx];
+            
+            if(!_CrtCheckMemory())
+                {
+                // 这里可以打印出具体是哪个 Mesh 出错了
+                printf("CRITICAL: Mesh %llu (%s) corrupted the heap!\n", 
+                       meshIdx, pScene->mMeshes[meshIdx]->mName.C_Str());
+                __debugbreak(); 
+            }
+            
             model.meshes[meshIdx].InitFromAssimpMesh(*pScene->mMeshes[meshIdx], sceneScale,
                 &model.vertices[vtxOffset], &model.indices[idxOffset]);
             
@@ -208,6 +238,19 @@ namespace ElysiaModel
         idxOffset = 0;
         model.vertexBuffer = ElysiaRenderer::BufferManager::GetInstance().CreateVertexBuffer(model);
         model.indexBuffer = ElysiaRenderer::BufferManager::GetInstance().CreateIndexBuffer(model);
+        model.vbView = D3D12_VERTEX_BUFFER_VIEW
+        {
+            .BufferLocation = model.vertexBuffer->GetGPUAddress(),
+            .SizeInBytes = UINT(numVertices) * model.vertexBuffer->GetStride(),
+            .StrideInBytes = model.vertexBuffer->GetStride()
+        };
+        model.ibView =
+        {
+            .BufferLocation = model.indexBuffer->GetGPUAddress(),
+            .SizeInBytes = UINT(numIndices) * IndexSize(),
+            .Format = IndexBufferFormat(),
+        };
+        
         for (UINT64 meshIdx = 0; meshIdx < numMeshes; meshIdx++)
         {
             UINT64 vbOffset = vtxOffset * sizeof(MeshVertex);
@@ -234,7 +277,7 @@ namespace ElysiaModel
             ShowErrorMessage(L"32-bit indices not currently supported");
         }
         
-        auto ConvertVec = [&](aiVector3D aiVec3)
+        auto ConvertVec = [](aiVector3D& aiVec3)
         {
             return Vector3(aiVec3.x, aiVec3.y, aiVec3.z);
         };
@@ -271,8 +314,8 @@ namespace ElysiaModel
             }
         }
 
-        const UINT64 numTriangles = assimpMesh.mNumFaces;
-        for(uint64 triIdx = 0; triIdx < numTriangles; ++triIdx)
+        const UINT32 numTriangles = assimpMesh.mNumFaces;
+        for(UINT32 triIdx = 0; triIdx < numTriangles; ++triIdx)
         {
             dstIndices[triIdx * 3 + 0] = UINT16(assimpMesh.mFaces[triIdx].mIndices[0]);
             dstIndices[triIdx * 3 + 1] = UINT16(assimpMesh.mFaces[triIdx].mIndices[1]);
@@ -295,9 +338,8 @@ namespace ElysiaModel
         ibView.SizeInBytes = IndexSize() * numIndices;
         ibView.Format = IndexBufferFormat();
     }
-
     
-    bool LoadModel(const wchar_t* filePath, bool bInvertTexcoordY, bool bImportMeshes,
+    bool LoadModel(const std::wstring& filePath, bool bInvertTexcoordY, bool bImportMeshes,
             bool bImportSkeletons, bool bImportAnimations, float scale, LoadedModel &model)
     {
         if (!FileExists(filePath))
@@ -309,9 +351,17 @@ namespace ElysiaModel
         std::string fileNameAnsi = WstringToString(filePath);
         
         Assimp::Importer importer;
-        auto fileDirectory = ToEastlWString(GetDirectoryFromFilePath(filePath));
+        auto fileDirectory = GetDirectoryFromFilePath(filePath);
+
+        unsigned int flags = aiProcess_CalcTangentSpace | aiProcess_Triangulate | aiProcess_JoinIdenticalVertices |
+                    aiProcess_RemoveRedundantMaterials | aiProcess_MakeLeftHanded | aiProcess_FlipWindingOrder;
+        if (bInvertTexcoordY)
+        {
+            flags |= aiProcess_FlipUVs;
+        }
+        flags |= aiProcess_PreTransformVertices | aiProcess_OptimizeMeshes;
         
-        const aiScene* pScene = importer.ReadFile(fileNameAnsi, 0);
+        const aiScene* pScene = importer.ReadFile(fileNameAnsi, flags);
         if(pScene == nullptr || pScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !pScene->mRootNode)
         {
             ShowErrorMessage(L"Failed to load scene " + std::wstring(filePath) +
@@ -329,20 +379,14 @@ namespace ElysiaModel
             return false;
         }
 
-        unsigned int flags = aiProcess_CalcTangentSpace | aiProcess_Triangulate | aiProcess_JoinIdenticalVertices |
-                    aiProcess_RemoveRedundantMaterials | aiProcess_MakeLeftHanded | aiProcess_FlipWindingOrder;
-        if (bInvertTexcoordY)
-        {
-            flags |= aiProcess_FlipUVs;
-        }
-        flags |= aiProcess_PreTransformVertices | aiProcess_OptimizeMeshes;
-        pScene = importer.ApplyPostProcessing(flags);
-        
         if (bImportMeshes)
         {
             LoadMaterials(pScene, model);
+            assert(_CrtCheckMemory() && "Broken after LoadMaterials");
             LoadMaterialResource(model.materials, fileDirectory, model.materialTextures);
+            assert(_CrtCheckMemory() && "Broken after Load Material Resource");
             LoadMeshData(filePath, pScene, scale, model);
+            assert(_CrtCheckMemory() && "Broken after Load mesh data");
         }
         
         std::cout << "Finished loading scene '%ls'" + WstringToString(filePath) << std::endl;

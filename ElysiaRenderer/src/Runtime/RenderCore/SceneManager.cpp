@@ -39,6 +39,10 @@ namespace ElysiaRenderer
 
     void SceneManager::LoadScene(std::vector<RenderItem>& outRenderList)
     {
+        if (!_CrtCheckMemory()) {
+            __debugbreak(); 
+        }
+        
         WCHAR assetsPath[512];
         GetAssetsPath(assetsPath, _countof(assetsPath));
 
@@ -106,11 +110,11 @@ namespace ElysiaRenderer
             const auto& mesh = pEntity->pMeshRenderer->GetMesh();
             RenderItem item
             {
-                .vbView = mesh.vbView,
-                .ibView = mesh.ibView,
+                .vbView = pEntity->pMeshRenderer->GetVertexBufferView(),
+                .ibView = pEntity->pMeshRenderer->GetIndexBufferView(),
                 .indexCount = mesh.numIndices,
-                .startIndex = mesh.idxOffset / mesh.IndexSize(),
-                .baseVertex = INT(mesh.vtxOffset / sizeof(MeshVertex)),
+                .startIndex = mesh.idxOffset,
+                .baseVertex = mesh.vtxOffset,
                 .worldMatrix = worldMat,
                 .textureIndices = pEntity->pMeshRenderer->GetTextureIndices(),
                 .loadedMaterial = pEntity->pMeshRenderer->GetMaterial()
@@ -144,11 +148,11 @@ namespace ElysiaRenderer
         if (pEntity->pMeshRenderer != nullptr)
         {
             auto& mesh = pEntity->pMeshRenderer->GetMesh();
-            for (const auto& vertex : mesh.vertices)
+            for (UINT32 vertexIndex = 0; vertexIndex < mesh.numVertices; vertexIndex++)
             {
                 mesh.aabbMin = Vector3(FLT_MAX);
                 mesh.aabbMax = Vector3(-FLT_MAX);
-                Vector3 position = Vector3::Transform(vertex.Position, worldMat);
+                Vector3 position = Vector3::Transform(pEntity->pMeshRenderer->GetVertices()[vertexIndex].Position, worldMat);
 
                 mesh.aabbMin.x = eastl::min(mesh.aabbMin.x, position.x);
                 mesh.aabbMin.y = eastl::min(mesh.aabbMin.y, position.y);

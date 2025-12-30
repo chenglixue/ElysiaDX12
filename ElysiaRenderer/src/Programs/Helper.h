@@ -65,6 +65,16 @@ namespace ElysiaHelper
 #define D3D_COMPILE_STANDARD_FILE_INCLUDE ((ID3DInclude*)(UINT_PTR)1)
 #define ArraySize_(x) ((sizeof(x) / sizeof(0[x])) / ((size_t)(!(sizeof(x) % sizeof(0[x])))))
 
+#ifdef _DEBUG
+#define Elysia_Assert(expression) \
+if (!(expression)) { \
+printf("Assert failed: %s, file %s, line %d\n", #expression, __FILE__, __LINE__); \
+__debugbreak(); \
+}
+#else
+#define Elysia_Assert(expression) ((void)0)
+#endif
+
     inline void AssertIfFailed(HRESULT hr)
     {
         assert(SUCCEEDED(hr));
@@ -220,16 +230,7 @@ namespace ElysiaHelper
         return str;
     }
 
-    inline static LPCWSTR stringToLPCWSTR(std::string orig)
-    {
-        size_t origsize = orig.length() + 1;
-        const size_t newsize = 100;
-        size_t convertedChars = 0;
-        wchar_t* wcstring = (wchar_t*)malloc(sizeof(wchar_t) * (orig.length() - 1));
-        mbstowcs_s(&convertedChars, wcstring, origsize, orig.c_str(), _TRUNCATE);
-
-        return wcstring;
-    }
+    
 
     inline static WCHAR* concatWcharStr(const WCHAR* str1, const WCHAR* str2) {
         size_t len1 = wcslen(str1) * 2;
@@ -364,12 +365,12 @@ namespace ElysiaHelper
     }
 
     // Returns true if a file exits
-    inline static bool FileExists(const wchar_t* filePath)
+    inline static bool FileExists(const std::wstring& filePath)
     {
-        if (filePath == NULL)
+        if (filePath.c_str() == NULL)
             return false;
 
-        DWORD fileAttr = GetFileAttributes(filePath);
+        DWORD fileAttr = GetFileAttributes(filePath.c_str());
         if (fileAttr == INVALID_FILE_ATTRIBUTES)
             return false;
 
@@ -387,9 +388,9 @@ namespace ElysiaHelper
     }
 
     // Returns the directory containing a file
-    inline static std::wstring GetDirectoryFromFilePath(const wchar_t* filePath_)
+    inline static std::wstring GetDirectoryFromFilePath(const std::wstring& filePath_)
     {
-        assert(filePath_);
+        assert(filePath_.c_str());
 
         std::wstring filePath(filePath_);
         size_t idx = filePath.rfind(L'\\');

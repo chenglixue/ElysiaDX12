@@ -13,10 +13,10 @@ namespace ElysiaHelper
 	{
 	public:
 		File();
-		File(const wchar_t* filePath, FileOpenMode openMode);
+		File(const std::wstring& filePath, FileOpenMode openMode);
 		~File();
 
-		void Open(const wchar_t* filePath, FileOpenMode openMode);
+		void Open(const std::wstring& filePath, FileOpenMode openMode);
 		void Close();
 
 		void Read(UINT64 size, void* data) const;

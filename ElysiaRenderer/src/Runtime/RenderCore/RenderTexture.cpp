@@ -7,7 +7,6 @@ namespace ElysiaRenderer
 {
 	RenderTexture::~RenderTexture()
 	{
-		ShutDowm();
 	}
 
 	void RenderTexture::Init(DX12Device* pDevice, RenderTextureDesc desc)

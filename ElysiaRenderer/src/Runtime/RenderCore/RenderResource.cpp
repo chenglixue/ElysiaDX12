@@ -44,7 +44,7 @@ namespace ElysiaRenderer
 		m_currDisplayMode = newDisplayMode;
 	}
 	
-	size_t RenderResource::AddPropertyID(const std::string& name)
+	size_t RenderResource::AddPropertyID(const std::wstring& name)
 	{
 		auto nameHash = xxh::GetHash(name);
 		auto emplaceResult = m_nameHashs.try_emplace(nameHash);
@@ -55,17 +55,17 @@ namespace ElysiaRenderer
 		return nameHash;
 	}
 	
-	std::string RenderResource::GetPropertyName(size_t hash) const noexcept
+	std::wstring RenderResource::GetPropertyName(size_t hash) const noexcept
 	{
 		if(m_nameHashs.contains(hash))
 		{
 			return m_nameHashs.at(hash);
 		}
 		
-		return "";
+		return L"";
 	}
 
-	size_t PropertyToID(const std::string& name)
+	size_t PropertyToID(const std::wstring& name)
 	{
 		return RenderResource::GetInstance().AddPropertyID(name);
 	}

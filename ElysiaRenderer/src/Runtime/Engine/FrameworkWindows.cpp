@@ -99,6 +99,7 @@ namespace ElysiaEngine
         // Sample create callback
         pFramework->OnCreate();
 
+
         // show the window
         ShowWindow(hWnd, nCmdShow);
         lBorderedStyle = GetWindowLong(hWnd, GWL_STYLE);
@@ -204,6 +205,7 @@ namespace ElysiaEngine
             {
                 if (wParam == VK_ESCAPE)
                 {
+                    pFrameworkInstance->ReleaseResource();
                     PostQuitMessage(0);
                 }
 
@@ -307,7 +309,7 @@ namespace ElysiaEngine
         return strlen(strCPUName) != 0 ? strCPUName : "UNAVAILABLE";
     }
 
-    FrameworkWindows::FrameworkWindows(eastl::wstring name) :
+    FrameworkWindows::FrameworkWindows(std::wstring name) :
         m_Name(name)
         , m_Width(0)
         , m_Height(0)

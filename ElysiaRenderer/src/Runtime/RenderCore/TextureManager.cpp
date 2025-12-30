@@ -25,7 +25,7 @@ namespace ElysiaRenderer
 	}
 	void TextureManager::Destory()
 	{
-
+		ShutDown();
 	}
 
 	TextureManager::Handle TextureManager::LoadDynamicTexture(const std::wstring& filePath, bool isSRGB)
@@ -49,9 +49,6 @@ namespace ElysiaRenderer
 		managed->refCount = 1;
 
 		m_dynamicTextureMap.emplace(nameHash, managed);
-#ifdef DEBUG
-		m_debugTextureMap.emplace(filePath, managed);
-#endif
 
 		return {handle, filePath};
 	}
@@ -86,8 +83,7 @@ namespace ElysiaRenderer
 	{
 		std::lock_guard<std::mutex> lock(m_mutex);
 
-		auto stringName = WstringToString(name);
-		auto nameHash = xxh::GetHash(stringName);
+		auto nameHash = xxh::GetHash(name);
 		auto it = m_dynamicTextureMap.find(nameHash);
 		if (it != m_dynamicTextureMap.end())
 		{
@@ -103,9 +99,6 @@ namespace ElysiaRenderer
 		managed->refCount = 1;
 
 		m_dynamicTextureMap.emplace(nameHash, managed);
-#ifdef DEBUG
-		m_debugTextureMap.emplace(name, managed);
-#endif
 
 		return {handle, name};
 	}

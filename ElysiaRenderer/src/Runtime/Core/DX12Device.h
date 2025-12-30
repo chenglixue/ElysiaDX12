@@ -47,7 +47,7 @@ namespace ElysiaCore
 	public:
 		DX12Device();
 		~DX12Device();
-		void OnCreate(eastl::wstring appName, bool bCPUValidationEnabled, bool bGpuValidationEnabled);
+		void OnCreate(std::wstring appName, bool bCPUValidationEnabled, bool bGpuValidationEnabled);
 		void OnDestroy();
 
 		UINT GetFrameID() const noexcept {return m_frameID;} 

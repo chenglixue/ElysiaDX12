@@ -37,10 +37,10 @@ namespace ElysiaRenderer
 		
 		void SetDisplayMode(CAULDRON_DX12::DisplayMode newDisplayMode);
 		
-		size_t AddPropertyID(const std::string& name);
-		std::string GetPropertyName(size_t hash) const noexcept;
+		size_t AddPropertyID(const std::wstring& name);
+		std::wstring GetPropertyName(size_t hash) const noexcept;
 
-		std::unordered_map<size_t, std::string> m_nameHashs;
+		std::unordered_map<size_t, std::wstring> m_nameHashs;
 		std::array<std::unique_ptr<PipelineResourceSpace>, ElysiaHelper::NUM_FRAMES_IN_FLIGHT> m_perFrameBindResourceSpaces;
 	private:
 		DX12Device* m_device = nullptr;
@@ -52,5 +52,5 @@ namespace ElysiaRenderer
 		CAULDRON_DX12::DisplayMode m_currDisplayMode = CAULDRON_DX12::DisplayMode::DISPLAYMODE_SDR;
 	};
 
-	size_t PropertyToID(const std::string& name);
+	size_t PropertyToID(const std::wstring& name);
 }

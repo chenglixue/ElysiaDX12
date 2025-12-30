@@ -11,7 +11,7 @@ namespace ElysiaRenderer
 		D3D12_INDEX_BUFFER_VIEW  ibView;
 		UINT indexCount;
 		UINT startIndex;
-		INT  baseVertex;
+		UINT  baseVertex;
 		
 		// ±ä»»Êý¾Ý
 		DirectX::XMMATRIX worldMatrix;

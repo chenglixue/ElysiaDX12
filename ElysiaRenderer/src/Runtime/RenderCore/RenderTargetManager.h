@@ -36,28 +36,28 @@ namespace ElysiaRenderer
         virtual void Init(DX12Device* pDevice) override;
         virtual void Destory() override;
         
-        RenderTexture* GetRenderTexture(const std::string& name) const;
+        RenderTexture* GetRenderTexture(const std::wstring& name) const;
         RenderTexture* GetRenderTexture(size_t nameHash) const;
 
         RenderTexture* CreateRenderTexture(
         UINT64 width, 
         UINT64 height,
         DXGI_FORMAT format,
-        const std::string& name);
+        const std::wstring& name);
         
         RenderTexture* CreateRenderTexture(
         UINT64 width,
         UINT64 height,
         DXGI_FORMAT format,
         bool isDepth,
-        const std::string& name);
+        const std::wstring& name);
 
         RenderTexture* CreateRWRenderTexture(
         UINT64 width,
         UINT64 height,
         DXGI_FORMAT format,
         bool enableRandomWrite,
-        const std::string& name);
+        const std::wstring& name);
         
     private:
         DX12Device* m_pDevice = nullptr;

@@ -10,7 +10,7 @@ namespace ElysiaEngine
     class ElysiaFrame : public FrameworkWindows
     {
     public:
-        ElysiaFrame(eastl::wstring name);
+        ElysiaFrame(std::wstring name);
         void OnParseCommandLine(LPSTR lpCmdLine, uint32_t* pWidth, uint32_t* pHeight) override;
         void OnCreate() override;
         void OnDestroy() override;
@@ -18,6 +18,7 @@ namespace ElysiaEngine
         bool OnEvent(MSG msg) override;
         void OnResize() override;
         void OnUpdateDisplay() override;
+        void ReleaseResource() override;
 
         void OnUpdate();
 

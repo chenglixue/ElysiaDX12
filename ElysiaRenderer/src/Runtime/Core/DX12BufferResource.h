@@ -15,14 +15,14 @@ namespace ElysiaCore
 		~DX12BufferResource();
 
 		UINT GetIndex() const noexcept;
-		float GetStride() const noexcept;
+		UINT GetStride() const noexcept;
 		DX12DescriptorHeapHandle GetCBVDescriptor() const noexcept;
 		DX12DescriptorHeapHandle GetSRVDescriptor() const noexcept;
 		DX12DescriptorHeapHandle GetUAVDescriptor() const noexcept;
 		uint8_t* GetMappedBuffer() const noexcept;
 
 		void SetIndex(UINT index);
-		void SetStride(float stride);
+		void SetStride(UINT stride);
 		void SetCBVDescriptor(const DX12DescriptorHeapHandle& CBVDescriptor);
 		void SetSRVDescriptor(const DX12DescriptorHeapHandle& SRVDescriptor);
 		void SetUAVDescriptor(const DX12DescriptorHeapHandle& UAVDescriptor);

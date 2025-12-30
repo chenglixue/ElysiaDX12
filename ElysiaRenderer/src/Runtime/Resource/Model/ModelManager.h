@@ -30,7 +30,7 @@ namespace ElysiaRenderer
 		virtual void Init(DX12Device* pDevice) override;
 		virtual void Destory() override;
 		
-		std::shared_ptr<ElysiaModel::LoadedModel> LoadStaticModel(const wchar_t* filePath, float scale);
+		std::shared_ptr<ElysiaModel::LoadedModel> LoadStaticModel(const std::wstring& filePath, float scale);
 		
 	private:
 		DX12Device* m_pDevice = nullptr;
@@ -38,9 +38,9 @@ namespace ElysiaRenderer
 		static std::once_flag m_initInstanceFlag;
 		
 		std::mutex m_mutex;
-		eastl::hash_map<size_t, std::weak_ptr<ElysiaModel::LoadedModel>> m_modelCache;
+		std::unordered_map<size_t, std::weak_ptr<ElysiaModel::LoadedModel>> m_modelCache;
 		
-		std::unique_ptr<ElysiaModel::LoadedModel> LoadModelFromDisk(const wchar_t* filePath, bool bInvertTexcoordY, bool bImportMeshes,
+		std::unique_ptr<ElysiaModel::LoadedModel> LoadModelFromDisk(const std::wstring& filePath, bool bInvertTexcoordY, bool bImportMeshes,
 			bool bImportSkeletons, bool bImportAnimations, float scale);
 	};
 }

@@ -29,18 +29,18 @@ namespace ElysiaRenderer
 {
 	int ShadowPass::ShaderPassIDs::ShadowCastPassID = -1;
 	
-	size_t ShadowPass::RenderTextureIDs::ShadowRTID = PropertyToID("Shadow RT");
+	size_t ShadowPass::RenderTextureIDs::ShadowRTID = PropertyToID(L"Shadow RT");
 	
-	size_t ShadowPass::ShaderIDs::shadowNearZ = PropertyToID("shadowNearZ");
-	size_t ShadowPass::ShaderIDs::shadowFarZ = PropertyToID("shadowFarZ");
-	size_t ShadowPass::ShaderIDs::shadowDepthBias = PropertyToID("shadowDepthBias");
-	size_t ShadowPass::ShaderIDs::shadowSlopeDepthBias = PropertyToID("shadowSlopeDepthBias");
-	size_t ShadowPass::ShaderIDs::shadowMaxSlopeDepthBias = PropertyToID("shadowMaxSlopeDepthBias");
-	size_t ShadowPass::ShaderIDs::g_sobolSequence = PropertyToID("g_sobolSequence");
-	size_t ShadowPass::ShaderIDs::worldMatrix = PropertyToID("worldMatrix");
-	size_t ShadowPass::ShaderIDs::baseColorTexIndex = PropertyToID("baseColorTexIndex");
-	size_t ShadowPass::ShaderIDs::opacity = PropertyToID("opacity");
-	size_t ShadowPass::ShaderIDs::cutoff = PropertyToID("cutoff");
+	size_t ShadowPass::ShaderIDs::shadowNearZ = PropertyToID(L"shadowNearZ");
+	size_t ShadowPass::ShaderIDs::shadowFarZ = PropertyToID(L"shadowFarZ");
+	size_t ShadowPass::ShaderIDs::shadowDepthBias = PropertyToID(L"shadowDepthBias");
+	size_t ShadowPass::ShaderIDs::shadowSlopeDepthBias = PropertyToID(L"shadowSlopeDepthBias");
+	size_t ShadowPass::ShaderIDs::shadowMaxSlopeDepthBias = PropertyToID(L"shadowMaxSlopeDepthBias");
+	size_t ShadowPass::ShaderIDs::g_sobolSequence = PropertyToID(L"g_sobolSequence");
+	size_t ShadowPass::ShaderIDs::worldMatrix = PropertyToID(L"worldMatrix");
+	size_t ShadowPass::ShaderIDs::baseColorTexIndex = PropertyToID(L"baseColorTexIndex");
+	size_t ShadowPass::ShaderIDs::opacity = PropertyToID(L"opacity");
+	size_t ShadowPass::ShaderIDs::cutoff = PropertyToID(L"cutoff");
 
 	ShadowPass::ShadowPass(DX12Camera* pCamera) :
 		BasePass(pCamera)
@@ -176,12 +176,15 @@ namespace ElysiaRenderer
 		auto& passData = m_pMaterial->GetPassData(passIndex);
 		SetSpaceResource(passData, PER_PASS_SPACE);
 		SetSpaceResource(passData, PER_FRAME_SPACE);
-		
+
+		if (context.renderList.size())
+		{
+			m_pCommand->SetIndexBuffer(context.renderList[0].ibView);
+			m_pCommand->SetVertexBuffer(0, 1, context.renderList[0].vbView);
+		}
+
 		for (auto& renderItem : context.renderList)
 		{
-			m_pCommand->SetIndexBuffer(renderItem.ibView);
-			m_pCommand->SetVertexBuffer(0, 1, renderItem.vbView);
-
 			auto materialData = renderItem.loadedMaterial;
 
 			m_pMaterial->SetMatrix(ShaderIDs::worldMatrix, renderItem.worldMatrix);

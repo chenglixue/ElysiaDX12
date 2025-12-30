@@ -19,7 +19,7 @@ namespace ElysiaEngine
     class FrameworkWindows
     {
     public:
-        FrameworkWindows(eastl::wstring name);
+        FrameworkWindows(std::wstring name);
         virtual ~FrameworkWindows() {};
 
         // Client (Sample) application interface
@@ -30,6 +30,8 @@ namespace ElysiaEngine
         virtual bool OnEvent(MSG msg) = 0;
         virtual void OnResize() = 0;
         virtual void OnUpdateDisplay() = 0;
+        virtual void ReleaseResource() = 0;
+
 
         // Device & swapchain management
         void DeviceInit(HWND WindowsHandle);
@@ -48,7 +50,7 @@ namespace ElysiaEngine
         void HandleResize(uint32_t Width, uint32_t Height) { OnResize(Width, Height, m_forceManualResize); }
 		
         // Getters
-        inline eastl::wstring     GetName() const { return m_Name; }
+        inline std::wstring     GetName() const { return m_Name; }
         inline uint32_t           GetWidth() const { return m_Width; }
         inline uint32_t           GetHeight() const { return m_Height; }
         inline CAULDRON_DX12::DisplayMode        GetCurrentDisplayMode() const { return m_currentDisplayModeNamesIndex; }
@@ -57,7 +59,7 @@ namespace ElysiaEngine
         inline bool               GetLocalDimmingDisableState() const { return m_disableLocalDimming; }
         
     protected:
-        eastl::wstring m_Name; // sample application name
+        std::wstring m_Name; // sample application name
         int m_Width ;  // application window dimensions
         int m_Height;  // application window dimensions
         UINT m_frameID;

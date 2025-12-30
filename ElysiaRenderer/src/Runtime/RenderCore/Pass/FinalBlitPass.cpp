@@ -26,7 +26,7 @@ namespace ElysiaRenderer
 	FinalBlitPass::FinalBlitPass(DX12Camera* pCamera) :
 		BasePass(pCamera)
 	{
-		ShaderIDs::blitterTextureIndex = PropertyToID("blitterTextureIndex");
+		ShaderIDs::blitterTextureIndex = PropertyToID(L"blitterTextureIndex");
 	}
 
 	FinalBlitPass::~FinalBlitPass()

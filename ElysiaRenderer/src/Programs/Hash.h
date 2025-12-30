@@ -54,6 +54,6 @@ namespace xxh
 	}
 	inline size_t GetHash(const std::wstring& str)
 	{
-		return GetHash(str.data(), str.size());
+		return GetHash(str.data(), str.size() * sizeof(wchar_t));
 	}
 }

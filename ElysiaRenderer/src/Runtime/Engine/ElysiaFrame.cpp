@@ -13,6 +13,7 @@
 #include "Runtime/RenderCore/PSOManager.h"
 #include "Runtime/RenderCore/SceneManager.h"
 #include "Runtime/RenderCore/TextureManager.h"
+#include "Runtime/Resource/Model/ModelManager.h"
 
 namespace ElysiaEngine
 {
@@ -20,7 +21,7 @@ namespace ElysiaEngine
     
     static void ToggleBool(bool& b) { b = !b; }
     
-    ElysiaFrame::ElysiaFrame(eastl::wstring name) :
+    ElysiaFrame::ElysiaFrame(std::wstring name) :
         FrameworkWindows(name)
     {
         
@@ -59,7 +60,9 @@ namespace ElysiaEngine
 
     void ElysiaFrame::OnCreate()
     {
+        if (!_CrtCheckMemory()) {__debugbreak(); }
         DeSerializeUserData();
+        if (!_CrtCheckMemory()) {__debugbreak(); }
         
         BufferManager::GetInstance().Init(m_pDevice);
         TextureManager::GetInstance().Init(m_pDevice);
@@ -77,6 +80,12 @@ namespace ElysiaEngine
 
         OnResize();
         OnUpdateDisplay();
+    }
+
+    void ElysiaFrame::ReleaseResource()
+    {
+        ModelManager::GetInstance().Destory();
+        RenderTargetManager::GetInstance().Destory();
     }
 
     void ElysiaFrame::OnDestroy()
@@ -129,6 +138,7 @@ namespace ElysiaEngine
 
     void ElysiaFrame::OnRender()
     {
+        if (!_CrtCheckMemory()) {__debugbreak(); }
         auto frameContext = BeginFrame();
         m_pGraphicsContext->Reset();
         ImGUI_UpdateIO();
@@ -212,7 +222,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
     LPSTR lpCmdLine,
     int nCmdShow)
 {
-    eastl::wstring name(L"Elysia Engine");
+    std::wstring name(L"Elysia Engine");
 
     return RunFramework(hInstance, lpCmdLine, nCmdShow, new ElysiaEngine::ElysiaFrame(name));
 }

@@ -11,7 +11,7 @@ namespace ElysiaHelper
 	class FileReadSerializer
 	{
 	public:
-		explicit FileReadSerializer(const wchar_t* path)
+		explicit FileReadSerializer(const std::wstring& path)
 		{
 			m_file.Open(path, FileOpenMode::Read);
 		}
@@ -37,7 +37,7 @@ namespace ElysiaHelper
 	class FileWriteSerializer
 	{
 	public:
-		explicit FileWriteSerializer(const wchar_t* path)
+		explicit FileWriteSerializer(const std::wstring& path)
 		{
 			m_file.Open(path, FileOpenMode::Write);
 		}

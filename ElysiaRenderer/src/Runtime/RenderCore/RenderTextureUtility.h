@@ -16,7 +16,7 @@ namespace ElysiaRenderer
 		UINT64 MSAASamples = 1;
 		UINT64 ArraySize = 1;
 		UINT16 MipmapLevels = 1;
-		const wchar_t* Name = nullptr;
+		std::wstring Name;
 	};
 
 

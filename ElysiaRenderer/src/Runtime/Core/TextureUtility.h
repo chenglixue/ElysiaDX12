@@ -10,9 +10,9 @@ namespace ElysiaCore
 
 namespace ElysiaCore
 {
-	const eastl::wstring DefaultBlackTexturePath = L"..\\Tex\\Black.png";
-	const eastl::wstring DefaultWhiteTexturePath = L"..\\Tex\\White.png";
-	const eastl::wstring DefaultNormalTexturePath = L"..\\Tex\\DefaultNormalMap.png";
+	const std::wstring DefaultBlackTexturePath = L"..\\Tex\\Black.png";
+	const std::wstring DefaultWhiteTexturePath = L"..\\Tex\\White.png";
+	const std::wstring DefaultNormalTexturePath = L"..\\Tex\\DefaultNormalMap.png";
 
 	enum class TexTypeFlags : uint8_t
 	{

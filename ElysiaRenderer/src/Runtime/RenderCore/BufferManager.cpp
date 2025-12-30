@@ -21,7 +21,6 @@ namespace ElysiaRenderer
 	BufferManager::BufferManager() = default;
 	BufferManager::~BufferManager()
 	{
-		Destory();
 	}
 
 	void BufferManager::Init(ElysiaCore::DX12Device* pDevice)
@@ -108,9 +107,9 @@ namespace ElysiaRenderer
 		CComPtr<ID3D12Resource> pResource = nullptr;
 		ElysiaHelper::ThrowIfFailed(m_pAllocator->CreateResource(&allocationDesc, &resourceDesc, resourceState, nullptr,
 			&pAllocation, IID_PPV_ARGS(&pResource)));
-		if (bufferCreationDesc.name)
+		if (bufferCreationDesc.name.c_str())
 		{
-			pResource->SetName(bufferCreationDesc.name);
+			pResource->SetName(bufferCreationDesc.name.c_str());
 		}
 
 		auto pNewBuffer = std::make_shared<DX12BufferResource>(pResource, resourceState, pAllocation);
@@ -314,7 +313,7 @@ namespace ElysiaRenderer
 	{
 		ElysiaCore::BufferCreationDesc bufferCreationDesc = 
 		{
-			.name = stringToLPCWSTR(model.name + " Vertex Buffer"),
+			.name = StringToWstring(model.name + " Vertex Buffer"),
 			.stride = sizeof(ElysiaModel::MeshVertex),
 			.size = model.vertices.size() * sizeof(ElysiaModel::MeshVertex),
 			.viewFlags = GPUResourceFlags::None,
@@ -338,7 +337,7 @@ namespace ElysiaRenderer
 	{
 		ElysiaCore::BufferCreationDesc bufferCreationDesc
 		{
-			.name = stringToLPCWSTR(model.name+ " Index Buffer"),
+			.name = StringToWstring(model.name + " Index Buffer"),
 			.stride = 0,
 			.size = model.indices.size() * sizeof(UINT16),
 			.viewFlags = GPUResourceFlags::None,
