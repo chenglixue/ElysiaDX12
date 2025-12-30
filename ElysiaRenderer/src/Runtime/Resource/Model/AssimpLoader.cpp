@@ -99,23 +99,15 @@ namespace ElysiaModel
             assert(_CrtCheckMemory());
             
             loadTexturePath(aiTextureType_DIFFUSE, material.textureNames[UINT64(MaterialTextureType::Albedo)]);
-            if(!_CrtCheckMemory()) {assert(_CrtCheckMemory());}
             loadTexturePath(aiTextureType_NORMALS, material.textureNames[UINT64(MaterialTextureType::Normal)]);
-            if(!_CrtCheckMemory()) {assert(_CrtCheckMemory());}
             loadTexturePath(aiTextureType_EMISSIVE, material.textureNames[UINT64(MaterialTextureType::Emissive)]);
-            if(!_CrtCheckMemory()) {assert(_CrtCheckMemory());}
             loadTexturePath(aiTextureType_METALNESS, material.textureNames[UINT64(MaterialTextureType::Metallic)]);
-            if(!_CrtCheckMemory()) {assert(_CrtCheckMemory());}
             loadTexturePath(aiTextureType_DIFFUSE_ROUGHNESS, material.textureNames[UINT64(MaterialTextureType::Roughness)]);
-            if(!_CrtCheckMemory()) {assert(_CrtCheckMemory());}
             loadTexturePath(aiTextureType_AMBIENT_OCCLUSION, material.textureNames[UINT64(MaterialTextureType::Occlusion)]);
-            if(!_CrtCheckMemory()) {assert(_CrtCheckMemory());}
             loadTexturePath(aiTextureType_SPECULAR, material.textureNames[UINT64(MaterialTextureType::Specular)]);
-            if(!_CrtCheckMemory()) {assert(_CrtCheckMemory());}
             loadTexturePath(aiTextureType_HEIGHT, material.textureNames[UINT64(MaterialTextureType::Height)]);
             if(!_CrtCheckMemory()) {assert(_CrtCheckMemory());}
-
-            if(!_CrtCheckMemory()) {assert(_CrtCheckMemory());}
+            
             model.materials.emplace_back(material);
             if(!_CrtCheckMemory()) {assert(_CrtCheckMemory());}
         }
@@ -134,21 +126,45 @@ namespace ElysiaModel
                 material.textures[texType] = ElysiaRenderer::TextureManager::Handle::Invalid();
 
                 std::wstring path = fileDirectory;
+
+                
+                
                 if (material.textureNames[texType].length() <= 0 || FileExists((path + material.textureNames[texType]).c_str()) == false)
                 {
-                    if (texType == UINT64(MaterialTextureType::Albedo) || texType == UINT64(MaterialTextureType::Roughness)
+                    bool hasTex = false;
+                    switch (MaterialTextureType(texType))
+                    {
+                    case MaterialTextureType::Albedo:
+                        {
+                            // if (FileExists((path + RemoveLastUnderscoreAndAfter(material.textureNames[texType]) + L".png").c_str()))
+                            // {
+                            //     
+                            // }
+                            break;
+                        }
+
+                    default:
+                        {
+                            break;
+                        }
+                    }
+
+                    if (!hasTex)
+                    {
+                        if (texType == UINT64(MaterialTextureType::Albedo) || texType == UINT64(MaterialTextureType::Roughness)
                         || texType == UINT64(MaterialTextureType::Occlusion))
-                    {
-                        path += ElysiaRenderer::DefaultWhiteTexturePath;
-                    }
-                    else if (texType == UINT64(MaterialTextureType::Height) || texType == UINT64(MaterialTextureType::Emissive) ||
-                        texType == UINT64(MaterialTextureType::Metallic) || texType == UINT64(MaterialTextureType::Specular))
-                    {
-                        path += ElysiaRenderer::DefaultWhiteTexturePath;
-                    }
-                    else if (texType == UINT64(MaterialTextureType::Normal))
-                    {
-                        path += ElysiaRenderer::DefaultNormalTexturePath;
+                        {
+                            path += ElysiaRenderer::DefaultWhiteTexturePath;
+                        }
+                        else if (texType == UINT64(MaterialTextureType::Height) || texType == UINT64(MaterialTextureType::Emissive) ||
+                            texType == UINT64(MaterialTextureType::Metallic) || texType == UINT64(MaterialTextureType::Specular))
+                        {
+                            path += ElysiaRenderer::DefaultWhiteTexturePath;
+                        }
+                        else if (texType == UINT64(MaterialTextureType::Normal))
+                        {
+                            path += ElysiaRenderer::DefaultNormalTexturePath;
+                        }
                     }
                 }
                 else
