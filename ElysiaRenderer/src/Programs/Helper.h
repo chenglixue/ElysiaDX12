@@ -264,16 +264,22 @@ __debugbreak(); \
     inline static std::wstring StringToWstring(const std::string& str) {
         if (str.empty()) return L"";
 
-        // 方法1：C++11（已弃用，但简单）
 #ifdef _WIN32
-// Windows 下用 Win32 API 更可靠
-        int size = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, nullptr, 0);
-        if (size == 0) return L"";
-        std::wstring wstr(size, 0);
-        MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, &wstr[0], size);
-        return wstr;
+        // 1. 第一次调用：获取转换后所需的有效字符数（不含 \0）
+        // 通过传入 (int)str.size() 明确告诉 API 不要处理结尾的空字符
+        int size_needed = MultiByteToWideChar(CP_UTF8, 0, str.data(), (int)str.size(), NULL, 0);
+    
+        if (size_needed <= 0) return L"";
+
+        // 2. 预分配空间
+        std::wstring wstrTo(size_needed, 0);
+
+        // 3. 第二次调用：执行真正的转换
+        MultiByteToWideChar(CP_UTF8, 0, str.data(), (int)str.size(), &wstrTo[0], size_needed);
+    
+        return wstrTo;
 #else
-// Linux/macOS 使用 C++11（需编译器支持）
+        // Linux/macOS 保持不变，但需注意 codecvt 同样不包含 \0
         std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
         return converter.from_bytes(str);
 #endif

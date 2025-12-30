@@ -686,12 +686,13 @@ namespace ElysiaCore
 							constantVariableDesc.StartOffset = variableDesc.StartOffset;
 							constantVariableDesc.Size = variableDesc.Size;
 							constantVariableDesc.Name = PropertyToID(StringToWstring(variableDesc.Name));
-// #ifdef DEBUG
-// 							std::cout << "Constant variable name is " << variableDesc.Name << std::endl;
-// 							std::cout << "Space ID is " << constantVariableDesc.SpaceID << std::endl;
-// 							std::cout << "Start Offset is " << constantVariableDesc.StartOffset << std::endl;
-// 							std::cout << "Size is " << constantVariableDesc.Size << std::endl;
-// #endif
+#ifdef _DEBUG
+							std::cout << "Constant variable name is " << variableDesc.Name << std::endl;
+							std::cout << "Constant variable name hash is " << constantVariableDesc.Name << std::endl;
+							std::cout << "Space ID is " << constantVariableDesc.SpaceID << std::endl;
+							std::cout << "Start Offset is " << constantVariableDesc.StartOffset << std::endl;
+							std::cout << "Size is " << constantVariableDesc.Size << std::endl;
+#endif
 
 							shaderVariables[temp.spaceID].members.emplace(constantVariableDesc.Name, std::move(constantVariableDesc));
 						}

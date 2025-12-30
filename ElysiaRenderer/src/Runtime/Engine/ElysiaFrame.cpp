@@ -144,6 +144,8 @@ namespace ElysiaEngine
         if (!_CrtCheckMemory()) {__debugbreak(); }
         auto frameContext = BeginFrame();
         m_pGraphicsContext->Reset();
+        ImGUI_UpdateIO();
+        ImGUI_NewFrame();
         
         if (m_loadingScene)
         {
@@ -161,20 +163,15 @@ namespace ElysiaEngine
             std::vector<TimeStamp> timeStamps = m_pRenderer->GetTimingValues();
             // m_time = BenchmarkLoop(timeStamps, &m_camera, m_pRenderer->GetScreenshotFileName());
         }
-        else
-        {
-            frameContext.renderList = SceneManager::GetInstance().renderList;
-            
-            OnUpdate();
-            BufferManager::GetInstance().Update(frameContext);
-        }
 
         if (!m_loadingScene)
         {
-            ImGUI_UpdateIO();
-            ImGUI_NewFrame();
-            m_pRenderer->OnRender(frameContext);
+            frameContext.renderList = SceneManager::GetInstance().renderList;
+            OnUpdate();
+            BufferManager::GetInstance().Update(frameContext);
         }
+        
+        m_pRenderer->OnRender(frameContext);
 
 		m_pDevice->SubmitContextWork(*m_pGraphicsContext);
 
