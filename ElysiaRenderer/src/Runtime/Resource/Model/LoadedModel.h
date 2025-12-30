@@ -42,8 +42,8 @@ namespace ElysiaModel
 	struct MeshVertex
 	{
 		Vector3 Position;
-		Vector3 Normal;
 		Vector2 UV;
+		Vector3 Normal;
 		Vector3 Tangent;
 
 		MeshVertex()
