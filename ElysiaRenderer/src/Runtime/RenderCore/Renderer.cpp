@@ -30,132 +30,142 @@
 #include "TonemapUtility.h"
 #include "Editor/IMGUIDrawer.h"
 
-extern "C" { __declspec(dllexport) extern const UINT D3D12SDKVersion = 618; }
-extern "C" { __declspec(dllexport) extern const char* D3D12SDKPath = ".\\D3D12\\"; }
+extern "C"
+{
+__declspec(dllexport) extern const UINT D3D12SDKVersion = 618;
+}
+
+extern "C"
+{
+__declspec(dllexport) extern const char* D3D12SDKPath = ".\\D3D12\\";
+}
 
 namespace ElysiaRenderer
 {
-	using namespace ElysiaModel;
-	using namespace ElysiaCore;
+    using namespace ElysiaModel;
+    using namespace ElysiaCore;
 
-	Renderer::Renderer() = default;
-	Renderer::~Renderer() = default;
+    Renderer::Renderer() = default;
+    Renderer::~Renderer() = default;
 
-	void Renderer::OnCreate(DX12Device* pDevice, SwapChain* pSwapChain, DX12GraphicsContext* context)
-	{
-		m_pDevice = pDevice;
-		m_pGraphicsContext = context;
-		
-		// initialize the GPU time stamps module
-		m_GPUTimer.OnCreate(pDevice, NUM_BACK_BUFFERS);
+    void Renderer::OnCreate(DX12Device* pDevice, SwapChain* pSwapChain, DX12GraphicsContext* context)
+    {
+        m_pDevice = pDevice;
+        m_pGraphicsContext = context;
 
-		InitPSOHelpers();
-	}
+        // initialize the GPU time stamps module
+        m_GPUTimer.OnCreate(pDevice, NUM_BACK_BUFFERS);
 
-	void Renderer::OnCreateWindowSizeDependentResources(SwapChain *pSwapChain, uint32_t Width, uint32_t Height)
-	{
-		m_Width = Width;
-		m_Height = Height;
-		m_viewport = { 0.0f, 0.0f, static_cast<float>(Width), static_cast<float>(Height), 0.0f, 1.0f };
-		m_rectScissor = { 0, 0, (LONG)Width, (LONG)Height };
-		
-		CameraManager::GetInstance().CreateMainCamera(
-			Vector3(-11.5f, 200.85f, -0.45f),
-			static_cast<float>(Width) / static_cast<float>(Height),
-			3.14159f / 4.0f, 0.1f, 2000.f);
+        InitPSOHelpers();
+    }
 
-		if (!UserData::GetInstance().IsUseHDR)
-		{
-			m_pCameraColorRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(Width, Height,
-				DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
-				true,
-				L"Camera Color RT");
-		}
-		else
-		{
-			switch (UserData::GetInstance().HDRLevel)
-			{
-			case HDRQuality::Low: 
-				{
-					m_pCameraColorRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(Width, Height,
-						DXGI_FORMAT_R11G11B10_FLOAT,
-						true,
-						L"Camera Color RT"); 
-					break;  
-				} 
-			case HDRQuality::High:
-				{ 
-					m_pCameraColorRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(Width, Height,
-						DXGI_FORMAT_R16G16B16A16_FLOAT,
-						true,
-						L"Camera Color RT");
-					break;
-				}
-			default:
-				{ 
-					ThrowRuntimeError("Invalid choose");
-					break;
-				}
-			}
-		}
-		m_pCameraDepthRT = RenderTargetManager::GetInstance().CreateRenderTexture(Width, Height,
-				DXGI_FORMAT_D24_UNORM_S8_UINT,
-				true,
-				L"Camera Depth RT");
-		
-		RenderPassData passData
-		{
-			.RenderSize = {m_Width, m_Height},
-			.pDevice = m_pDevice, 
-			.pCommand = m_pGraphicsContext,
-			.pSwapChain = pSwapChain,
-			.pCameraColorRT = m_pCameraColorRT,
-			.pCameraDepthRT = m_pCameraDepthRT
-		};
+    void Renderer::OnCreateWindowSizeDependentResources(SwapChain* pSwapChain, uint32_t Width, uint32_t Height)
+    {
+        m_Width = Width;
+        m_Height = Height;
+        m_viewport = {0.0f, 0.0f, static_cast<float>(Width), static_cast<float>(Height), 0.0f, 1.0f};
+        m_rectScissor = {0, 0, (LONG)Width, (LONG)Height};
 
-		m_passes.clear();
-		m_passes.emplace_back(std::move(std::make_unique<PreDrawPass>(CameraManager::GetInstance().GetMainCamera())));
-		m_passes.emplace_back(std::move(std::make_unique<ShadowPass>(CameraManager::GetInstance().GetMainCamera())));
-		m_passes.emplace_back(std::move(std::make_unique<GBufferPass>(CameraManager::GetInstance().GetMainCamera())));
-		// m_passes.emplace_back(std::move(std::make_unique<AOPass>(m_pCameraManager->GetMainCamera())));
-		m_passes.emplace_back(std::move(std::make_unique<OpaquePass>(CameraManager::GetInstance().GetMainCamera())));
-		// m_passes.emplace_back(std::move(std::make_unique<TonemapPass>(m_pCameraManager->GetMainCamera())));
-		// m_passes.emplace_back(std::move(std::make_unique<BloomPass>(m_pCameraManager->GetMainCamera())));
-		m_passes.emplace_back(std::move(std::make_unique<UIPass>()));
-		m_passes.emplace_back(std::move(std::make_unique<FinalBlitPass>(CameraManager::GetInstance().GetMainCamera())));
-		for (auto& pass : m_passes)
-		{
-			pass->Setup(passData);
-		}
-	}
-	void Renderer::OnDestroyWindowSizeDependentResources()
-	{
-		
-	}
-	void Renderer::OnUpdateDisplayDependentResources(SwapChain* pSwapChain)
-	{
-		
-	}
+        CameraManager::GetInstance().CreateMainCamera(
+            Vector3(-11.5f, 200.85f, -0.45f),
+            static_cast<float>(Width) / static_cast<float>(Height),
+            3.14159f / 4.0f, 0.1f, 2000.f);
 
-	void Renderer::OnRender(ElysiaEngine::FrameContext frameContext)
-	{
-		LightManager::GetInstance().Update(frameContext);
-		SerializeUserData();
+        if (!UserData::GetInstance().IsUseHDR)
+        {
+            m_pCameraColorRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(Width, Height,
+                DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
+                true,
+                L"Camera Color RT");
+        }
+        else
+        {
+            switch (UserData::GetInstance().HDRLevel)
+            {
+            case HDRQuality::Low:
+            {
+                m_pCameraColorRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(Width, Height,
+                    DXGI_FORMAT_R11G11B10_FLOAT,
+                    true,
+                    L"Camera Color RT");
+                break;
+            }
+            case HDRQuality::High:
+            {
+                m_pCameraColorRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(Width, Height,
+                    DXGI_FORMAT_R16G16B16A16_FLOAT,
+                    true,
+                    L"Camera Color RT");
+                break;
+            }
+            default:
+            {
+                ThrowRuntimeError("Invalid choose");
+                break;
+            }
+            }
+        }
+        m_pCameraDepthRT = RenderTargetManager::GetInstance().CreateRenderTexture(Width, Height,
+            DXGI_FORMAT_D24_UNORM_S8_UINT,
+            true,
+            L"Camera Depth RT");
 
-		// Timing values
-		UINT64 gpuTicksPerSecond;
-		m_pDevice->GetDirectQueue()->GetTimestampFrequency(&gpuTicksPerSecond);
-		m_GPUTimer.OnBeginFrame(gpuTicksPerSecond, &m_TimeStamps);
-		m_GPUTimer.GetTimeStamp(m_pGraphicsContext->GetCommandList(), "Begin Frame");
-		
-		for (auto& pass : m_passes)
-		{
-			pass->Render(frameContext);
-		}
+        RenderPassData passData
+        {
+            .RenderSize = {m_Width, m_Height},
+            .pDevice = m_pDevice,
+            .pCommand = m_pGraphicsContext,
+            .pSwapChain = pSwapChain,
+            .pCameraColorRT = m_pCameraColorRT,
+            .pCameraDepthRT = m_pCameraDepthRT
+        };
 
-		m_GPUTimer.OnEndFrame();
-	}
-	void Renderer::OnDestory()
-	{
-	}
-}            
+        m_passes.clear();
+        m_passes.emplace_back(std::move(std::make_unique<PreDrawPass>(CameraManager::GetInstance().GetMainCamera())));
+        m_passes.emplace_back(std::move(std::make_unique<ShadowPass>(CameraManager::GetInstance().GetMainCamera())));
+        m_passes.emplace_back(std::move(std::make_unique<GBufferPass>(CameraManager::GetInstance().GetMainCamera())));
+        // m_passes.emplace_back(std::move(std::make_unique<AOPass>(m_pCameraManager->GetMainCamera())));
+        m_passes.emplace_back(std::move(std::make_unique<OpaquePass>(CameraManager::GetInstance().GetMainCamera())));
+        m_passes.emplace_back(std::move(std::make_unique<TonemapPass>(CameraManager::GetInstance().GetMainCamera())));
+        // m_passes.emplace_back(std::move(std::make_unique<BloomPass>(m_pCameraManager->GetMainCamera())));
+        m_passes.emplace_back(std::move(std::make_unique<UIPass>()));
+        m_passes.emplace_back(std::move(std::make_unique<FinalBlitPass>(CameraManager::GetInstance().GetMainCamera())));
+        for (auto& pass : m_passes)
+        {
+            pass->Setup(passData);
+        }
+    }
+
+    void Renderer::OnDestroyWindowSizeDependentResources()
+    {
+
+    }
+
+    void Renderer::OnUpdateDisplayDependentResources(SwapChain* pSwapChain)
+    {
+
+    }
+
+    void Renderer::OnRender(ElysiaEngine::FrameContext frameContext)
+    {
+        LightManager::GetInstance().Update(frameContext);
+        SerializeUserData();
+
+        // Timing values
+        UINT64 gpuTicksPerSecond;
+        m_pDevice->GetDirectQueue()->GetTimestampFrequency(&gpuTicksPerSecond);
+        m_GPUTimer.OnBeginFrame(gpuTicksPerSecond, &m_TimeStamps);
+        m_GPUTimer.GetTimeStamp(m_pGraphicsContext->GetCommandList(), "Begin Frame");
+
+        for (auto& pass : m_passes)
+        {
+            pass->Render(frameContext);
+        }
+
+        m_GPUTimer.OnEndFrame();
+    }
+
+    void Renderer::OnDestory()
+    {
+    }
+}

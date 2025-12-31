@@ -41,7 +41,7 @@ MaxEmptyLinesToKeep: 1
 SortIncludes: Never
 
 # 每行最大长度建议设置在 100-120
-ColumnLimit: 160
+ColumnLimit: 120
 
 # 针对构造函数初始化列表的缩进
 ConstructorInitializerIndentWidth: 4
@@ -49,3 +49,6 @@ AlignAfterOpenBracket: Align
 
 # 核心设置：None 表示命名空间内部的代码不缩进
 NamespaceIndentation: All
+
+# extern "C" 内部保持缩进
+IndentExternBlock: AfterExternBlock

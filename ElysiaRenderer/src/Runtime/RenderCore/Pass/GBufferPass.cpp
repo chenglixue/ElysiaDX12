@@ -23,300 +23,313 @@
 
 namespace ElysiaRenderer
 {
-	using namespace ElysiaModel;
-	
-	int GBufferPass::ShaderPassIDs::GBufferPassID = -1;
-	
-	size_t GBufferPass::RenderTextureIDs::GBuffer0ID = PropertyToID(L"GBuffer_0");
-	size_t GBufferPass::RenderTextureIDs::GBuffer1ID = PropertyToID(L"GBuffer_1");
-	size_t GBufferPass::RenderTextureIDs::GBuffer2ID = PropertyToID(L"GBuffer_2");
-	size_t GBufferPass::RenderTextureIDs::GBuffer3ID = PropertyToID(L"GBuffer_3");
-	size_t GBufferPass::RenderTextureIDs::GBuffer4ID = PropertyToID(L"GBuffer_4");
-	size_t GBufferPass::RenderTextureIDs::GBuffer5ID = PropertyToID(L"GBuffer_5");
+    using namespace ElysiaModel;
 
-	size_t GBufferPass::ShaderIDs::screenSize = PropertyToID(L"screenSize");
-	size_t GBufferPass::ShaderIDs::viewMatrix = PropertyToID(L"viewMatrix");
-	size_t GBufferPass::ShaderIDs::viewMatrix_I = PropertyToID(L"viewMatrix_I");
-	size_t GBufferPass::ShaderIDs::projMatrix = PropertyToID(L"projMatrix");
-	size_t GBufferPass::ShaderIDs::projMatrix_I = PropertyToID(L"projMatrix_I");
-	size_t GBufferPass::ShaderIDs::viewProjMatrix = PropertyToID(L"viewProjMatrix");
-	size_t GBufferPass::ShaderIDs::viewProjMatrix_I = PropertyToID(L"viewProjMatrix_I");
-	size_t GBufferPass::ShaderIDs::worldMatrix = PropertyToID(L"worldMatrix");
-	size_t GBufferPass::ShaderIDs::opacity = PropertyToID(L"opacity");
-	size_t GBufferPass::ShaderIDs::cutoff = PropertyToID(L"cutoff");
-	size_t GBufferPass::ShaderIDs::baseColorTexIndex = PropertyToID(L"baseColorTexIndex");
-	size_t GBufferPass::ShaderIDs::normalTexIndex = PropertyToID(L"normalTexIndex");
-	size_t GBufferPass::ShaderIDs::metallicTexIndex = PropertyToID(L"metallicTexIndex");
-	size_t GBufferPass::ShaderIDs::roughnessTexIndex = PropertyToID(L"roughnessTexIndex");
-	size_t GBufferPass::ShaderIDs::specularTexIndex = PropertyToID(L"specularTexIndex");
-	size_t GBufferPass::ShaderIDs::baseColorTint = PropertyToID(L"baseColorTint");
-	size_t GBufferPass::ShaderIDs::ambientCubemapTint = PropertyToID(L"ambientCubemapTint");
-	size_t GBufferPass::ShaderIDs::normalIntensity = PropertyToID(L"normalIntensity");
-	size_t GBufferPass::ShaderIDs::metallicIntensity = PropertyToID(L"metallicIntensity");
-	size_t GBufferPass::ShaderIDs::roughnessIntensity = PropertyToID(L"roughnessIntensity");
-	size_t GBufferPass::ShaderIDs::ambientCubemapIntensity = PropertyToID(L"ambientCubemapIntensity");
-	
-	GBufferPass::GBufferPass(DX12Camera* pCamera) :
-		BasePass(pCamera)
-	{
+    int GBufferPass::ShaderPassIDs::GBufferPassID = -1;
 
-	}
-	GBufferPass::~GBufferPass()
-	{
-		Dispose();
-	}
+    size_t GBufferPass::RenderTextureIDs::GBuffer0ID = PropertyToID(L"GBuffer_0");
+    size_t GBufferPass::RenderTextureIDs::GBuffer1ID = PropertyToID(L"GBuffer_1");
+    size_t GBufferPass::RenderTextureIDs::GBuffer2ID = PropertyToID(L"GBuffer_2");
+    size_t GBufferPass::RenderTextureIDs::GBuffer3ID = PropertyToID(L"GBuffer_3");
+    size_t GBufferPass::RenderTextureIDs::GBuffer4ID = PropertyToID(L"GBuffer_4");
+    size_t GBufferPass::RenderTextureIDs::GBuffer5ID = PropertyToID(L"GBuffer_5");
 
-	void GBufferPass::Configure()
-	{
-		CreateRTs();
-		
-		m_shaderPasses =
-		{
-			ShaderPass
-			{
-				.Name = "GBuffer Pass",
-				.FilePath = L"Shaders\\public\\GBuffer.hlsl",
-			},
-		};
-		m_pMaterial = std::move(std::make_unique<Material>(m_pDevice, m_shaderPasses));
-		ShaderPassIDs::GBufferPassID = m_pMaterial->FindPassIndex("GBuffer Pass");
+    size_t GBufferPass::ShaderIDs::screenSize = PropertyToID(L"screenSize");
+    size_t GBufferPass::ShaderIDs::viewMatrix = PropertyToID(L"viewMatrix");
+    size_t GBufferPass::ShaderIDs::viewMatrix_I = PropertyToID(L"viewMatrix_I");
+    size_t GBufferPass::ShaderIDs::projMatrix = PropertyToID(L"projMatrix");
+    size_t GBufferPass::ShaderIDs::projMatrix_I = PropertyToID(L"projMatrix_I");
+    size_t GBufferPass::ShaderIDs::viewProjMatrix = PropertyToID(L"viewProjMatrix");
+    size_t GBufferPass::ShaderIDs::viewProjMatrix_I = PropertyToID(L"viewProjMatrix_I");
+    size_t GBufferPass::ShaderIDs::worldMatrix = PropertyToID(L"worldMatrix");
+    size_t GBufferPass::ShaderIDs::opacity = PropertyToID(L"opacity");
+    size_t GBufferPass::ShaderIDs::cutoff = PropertyToID(L"cutoff");
+    size_t GBufferPass::ShaderIDs::baseColorTexIndex = PropertyToID(L"baseColorTexIndex");
+    size_t GBufferPass::ShaderIDs::normalTexIndex = PropertyToID(L"normalTexIndex");
+    size_t GBufferPass::ShaderIDs::metallicTexIndex = PropertyToID(L"metallicTexIndex");
+    size_t GBufferPass::ShaderIDs::roughnessTexIndex = PropertyToID(L"roughnessTexIndex");
+    size_t GBufferPass::ShaderIDs::specularTexIndex = PropertyToID(L"specularTexIndex");
+    size_t GBufferPass::ShaderIDs::baseColorTint = PropertyToID(L"baseColorTint");
+    size_t GBufferPass::ShaderIDs::ambientCubemapTint = PropertyToID(L"ambientCubemapTint");
+    size_t GBufferPass::ShaderIDs::normalIntensity = PropertyToID(L"normalIntensity");
+    size_t GBufferPass::ShaderIDs::metallicIntensity = PropertyToID(L"metallicIntensity");
+    size_t GBufferPass::ShaderIDs::roughnessIntensity = PropertyToID(L"roughnessIntensity");
+    size_t GBufferPass::ShaderIDs::ambientCubemapIntensity = PropertyToID(L"ambientCubemapIntensity");
 
-		UpdateVariant();
-	}
+    GBufferPass::GBufferPass(DX12Camera* pCamera) :
+        BasePass(pCamera)
+    {
 
-	void GBufferPass::Render(ElysiaEngine::FrameContext& context)
-	{
-		PIXHelper pix(m_pCommand->GetCommandList(), "GBuffer Pass");
-		
-		UpdatePSO();
-		
-		m_pMaterial->SetFloat4(ShaderIDs::screenSize, GetScreenSize(Vector2(m_renderSize.x, m_renderSize.y)));
-		m_pMaterial->SetMatrix(ShaderIDs::viewMatrix, m_pCamera->GetViewMat());
-		m_pMaterial->SetMatrix(ShaderIDs::viewMatrix_I, m_pCamera->GetViewMat().Invert());
-		m_pMaterial->SetMatrix(ShaderIDs::projMatrix, m_pCamera->GetProjMat());
-		m_pMaterial->SetMatrix(ShaderIDs::projMatrix_I, m_pCamera->GetProjMat().Invert());
-		m_pMaterial->SetMatrix(ShaderIDs::viewProjMatrix, m_pCamera->GetViewMat() * m_pCamera->GetProjMat());
-		m_pMaterial->SetMatrix(ShaderIDs::viewProjMatrix_I, (m_pCamera->GetViewMat() * m_pCamera->GetProjMat()).Invert());
-		m_pMaterial->SetFloat3(ShaderIDs::baseColorTint, UserData::GetInstance().BaseColorTint);
-		m_pMaterial->SetFloat3(ShaderIDs::ambientCubemapTint, UserData::GetInstance().AmbientCubemapTint);
-		m_pMaterial->SetFloat(ShaderIDs::normalIntensity, UserData::GetInstance().NormalIntensity);
-		m_pMaterial->SetFloat(ShaderIDs::metallicIntensity, UserData::GetInstance().MetallicIntensity);
-		m_pMaterial->SetFloat(ShaderIDs::roughnessIntensity, UserData::GetInstance().RoughnessIntensity);
-		m_pMaterial->SetFloat(ShaderIDs::ambientCubemapIntensity, UserData::GetInstance().AmbientCubemapIntensity);
+    }
 
-		DrawGBufferPass(context);
-	}
+    GBufferPass::~GBufferPass()
+    {
+        Dispose();
+    }
 
-	void GBufferPass::Dispose()
-	{
-		m_GBufferRTs.clear();
-	}
+    void GBufferPass::Configure()
+    {
+        CreateRTs();
 
-	void GBufferPass::UpdatePSO()
-	{
-		
-	}
+        m_shaderPasses =
+        {
+            ShaderPass
+            {
+                .Name = "GBuffer Pass",
+                .FilePath = L"Shaders\\public\\GBuffer.hlsl",
+            },
+        };
+        m_pMaterial = std::move(std::make_unique<Material>(m_pDevice, m_shaderPasses));
+        ShaderPassIDs::GBufferPassID = m_pMaterial->FindPassIndex("GBuffer Pass");
 
-	void GBufferPass::CreateRTs()
-	{
-		// Base Color , ShadingModel
-		{
-			auto pGBufferRT = RenderTargetManager::GetInstance().CreateRenderTexture(static_cast<UINT64>(m_renderSize.x),
-				static_cast<UINT64>(m_renderSize.y),
-				DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
-				RenderResource::GetInstance().GetPropertyName(RenderTextureIDs::GBuffer0ID));
+        UpdateVariant();
+    }
 
-			m_GBufferRTs.emplace_back(std::move(pGBufferRT));
-		}
+    void GBufferPass::Render(ElysiaEngine::FrameContext& context)
+    {
+        PIXHelper pix(m_pCommand->GetCommandList(), "GBuffer Pass");
 
-		// Metallic, Specular, Roughness, AO
-		{
-			auto pGBufferRT = RenderTargetManager::GetInstance().CreateRenderTexture(static_cast<UINT64>(m_renderSize.x),
-				static_cast<UINT64>(m_renderSize.y),
-				DXGI_FORMAT_R8G8B8A8_UNORM,
-				RenderResource::GetInstance().GetPropertyName(RenderTextureIDs::GBuffer1ID));
+        UpdatePSO();
 
-			m_GBufferRTs.emplace_back(std::move(pGBufferRT));
-		}
+        m_pMaterial->SetFloat4(ShaderIDs::screenSize, GetScreenSize(Vector2(m_renderSize.x, m_renderSize.y)));
+        m_pMaterial->SetMatrix(ShaderIDs::viewMatrix, m_pCamera->GetViewMat());
+        m_pMaterial->SetMatrix(ShaderIDs::viewMatrix_I, m_pCamera->GetViewMat().Invert());
+        m_pMaterial->SetMatrix(ShaderIDs::projMatrix, m_pCamera->GetProjMat());
+        m_pMaterial->SetMatrix(ShaderIDs::projMatrix_I, m_pCamera->GetProjMat().Invert());
+        m_pMaterial->SetMatrix(ShaderIDs::viewProjMatrix, m_pCamera->GetViewMat() * m_pCamera->GetProjMat());
+        m_pMaterial->SetMatrix(ShaderIDs::viewProjMatrix_I, (m_pCamera->GetViewMat() * m_pCamera->GetProjMat()).Invert());
+        m_pMaterial->SetFloat3(ShaderIDs::baseColorTint, UserData::GetInstance().BaseColorTint);
+        m_pMaterial->SetFloat3(ShaderIDs::ambientCubemapTint, UserData::GetInstance().AmbientCubemapTint);
+        m_pMaterial->SetFloat(ShaderIDs::normalIntensity, UserData::GetInstance().NormalIntensity);
+        m_pMaterial->SetFloat(ShaderIDs::metallicIntensity, UserData::GetInstance().MetallicIntensity);
+        m_pMaterial->SetFloat(ShaderIDs::roughnessIntensity, UserData::GetInstance().RoughnessIntensity);
+        m_pMaterial->SetFloat(ShaderIDs::ambientCubemapIntensity, UserData::GetInstance().AmbientCubemapIntensity);
 
-		// Encode World Tangent, Anisotropy
-		{
-			auto pGBufferRT = RenderTargetManager::GetInstance().CreateRenderTexture(static_cast<UINT64>(m_renderSize.x),
-				static_cast<UINT64>(m_renderSize.y),
-				DXGI_FORMAT_R8G8B8A8_UNORM,
-				RenderResource::GetInstance().GetPropertyName(RenderTextureIDs::GBuffer2ID));
+        DrawGBufferPass(context);
+    }
 
-			m_GBufferRTs.emplace_back(std::move(pGBufferRT));
-		}
+    void GBufferPass::Dispose()
+    {
+        m_GBufferRTs.clear();
+    }
 
-		// Encode World Normal, per object data
-		{
-			auto pGBufferRT = RenderTargetManager::GetInstance().CreateRenderTexture(static_cast<UINT64>(m_renderSize.x),
-				static_cast<UINT64>(m_renderSize.y),
-				DXGI_FORMAT_R10G10B10A2_UNORM,
-				RenderResource::GetInstance().GetPropertyName(RenderTextureIDs::GBuffer3ID));
+    void GBufferPass::UpdatePSO()
+    {
 
-			m_GBufferRTs.emplace_back(std::move(pGBufferRT));
-		}
+    }
 
-		// Emission, opacity
-		{
-			auto pGBufferRT = RenderTargetManager::GetInstance().CreateRenderTexture(static_cast<UINT64>(m_renderSize.x),
-				static_cast<UINT64>(m_renderSize.y),
-				DXGI_FORMAT_R10G10B10A2_UNORM,
-				RenderResource::GetInstance().GetPropertyName(RenderTextureIDs::GBuffer4ID));
+    void GBufferPass::CreateRTs()
+    {
+        // Base Color , ShadingModel
+        {
+            auto pGBufferRT = RenderTargetManager::GetInstance().CreateRenderTexture(static_cast<UINT64>(m_renderSize.x),
+                                                                                     static_cast<UINT64>(m_renderSize.y),
+                                                                                     DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
+                                                                                     RenderResource::GetInstance().
+                                                                                     GetPropertyName(RenderTextureIDs::GBuffer0ID));
 
-			m_GBufferRTs.emplace_back(std::move(pGBufferRT));
-		}
+            m_GBufferRTs.emplace_back(std::move(pGBufferRT));
+        }
 
-		// Velocity
-		{
-			auto pGBufferRT = RenderTargetManager::GetInstance().CreateRenderTexture(static_cast<UINT64>(m_renderSize.x),
-				static_cast<UINT64>(m_renderSize.y),
-				DXGI_FORMAT_R16G16B16A16_SNORM,
-				RenderResource::GetInstance().GetPropertyName(RenderTextureIDs::GBuffer5ID));
+        // Metallic, Specular, Roughness, AO
+        {
+            auto pGBufferRT = RenderTargetManager::GetInstance().CreateRenderTexture(static_cast<UINT64>(m_renderSize.x),
+                                                                                     static_cast<UINT64>(m_renderSize.y),
+                                                                                     DXGI_FORMAT_R8G8B8A8_UNORM,
+                                                                                     RenderResource::GetInstance().
+                                                                                     GetPropertyName(RenderTextureIDs::GBuffer1ID));
 
-			m_GBufferRTs.emplace_back(std::move(pGBufferRT));
-		}
-	}
-	std::vector<DX12TextureResource*> GBufferPass::GetGBuffers()
-	{
-		std::vector<DX12TextureResource*> temp{};
-		temp.reserve(m_GBufferRTs.size());
-		for (auto& RT : m_GBufferRTs)
-		{
-			temp.emplace_back(RT->GetTexture());
-		}
+            m_GBufferRTs.emplace_back(std::move(pGBufferRT));
+        }
 
-		return temp;
-	}
+        // Encode World Tangent, Anisotropy
+        {
+            auto pGBufferRT = RenderTargetManager::GetInstance().CreateRenderTexture(static_cast<UINT64>(m_renderSize.x),
+                                                                                     static_cast<UINT64>(m_renderSize.y),
+                                                                                     DXGI_FORMAT_R8G8B8A8_UNORM,
+                                                                                     RenderResource::GetInstance().
+                                                                                     GetPropertyName(RenderTextureIDs::GBuffer2ID));
 
-	void GBufferPass::UpdateVariant()
-	{
-		UpdateGBufferPassVariant(ShaderPassIDs::GBufferPassID);
-	}
-	void GBufferPass::UpdateGBufferPassVariant(UINT passIndex)
-	{
-		std::vector<std::wstring> enableKeywords{};
-		 
-		auto& passData = m_pMaterial->GetPassData(passIndex);
-		
-		auto emplaceResult = passData.keywords.try_emplace(enableKeywords);
-		if(emplaceResult.second)
-		{
-			auto VariantManager = passData.pShader->GetVariantManager();
-			auto currVariantData = &VariantManager->GetOrCompileVariantByNames(enableKeywords);
-			
-			if(passData.pCurrVariantData == nullptr || passData.pCurrVariantData != currVariantData)
-			{
-				passData.pCurrVariantData = currVariantData;
-			}
-			
-			{
-				RenderTargetDesc RTDesc = RenderTargetDesc
-				{
-					.m_numRenderTargets = static_cast<UINT8>(m_GBufferRTs.size()),
-					.m_depthStencilFormat = m_pCameraDepthRT->GetFormat(),
-				};
-				for (int i = 0; i < m_GBufferRTs.size(); ++i)
-				{
-					RTDesc.m_renderTargetFormats[i] = m_GBufferRTs[i]->GetFormat();
-				}
-				passData.pPipelineStateObject = PSOManager::GetInstance().GetGraphicsPipelineState(m_pDevice, m_pMaterial.get(), passIndex, RTDesc);
+            m_GBufferRTs.emplace_back(std::move(pGBufferRT));
+        }
 
-				emplaceResult.first->second = 
-				{
-					.pCurrVariantData = currVariantData,
-					.pPipelineStateObject = passData.pPipelineStateObject,
-				};
-			}
-		}
-		else
-		{
-			const auto& saveData = passData.keywords.at(enableKeywords);
-			
-			passData.pCurrVariantData = saveData.pCurrVariantData;
-			passData.pPipelineStateObject = saveData.pPipelineStateObject;
-		}
-	}
+        // Encode World Normal, per object data
+        {
+            auto pGBufferRT = RenderTargetManager::GetInstance().CreateRenderTexture(static_cast<UINT64>(m_renderSize.x),
+                                                                                     static_cast<UINT64>(m_renderSize.y),
+                                                                                     DXGI_FORMAT_R10G10B10A2_UNORM,
+                                                                                     RenderResource::GetInstance().
+                                                                                     GetPropertyName(RenderTextureIDs::GBuffer3ID));
 
-	void GBufferPass::DrawMesh(ElysiaEngine::FrameContext& context, UINT passIndex)
-	{
-		m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		auto& passData = m_pMaterial->GetPassData(passIndex);
-		SetSpaceResource(passData, PER_PASS_SPACE);
-		SetSpaceResource(passData, PER_FRAME_SPACE);
+            m_GBufferRTs.emplace_back(std::move(pGBufferRT));
+        }
 
-		for (auto& renderItem : context.renderList)
-		{
-			m_pCommand->SetIndexBuffer(renderItem.ibView);
-			m_pCommand->SetVertexBuffer(0, 1, renderItem.vbView);
+        // Emission, opacity
+        {
+            auto pGBufferRT = RenderTargetManager::GetInstance().CreateRenderTexture(static_cast<UINT64>(m_renderSize.x),
+                                                                                     static_cast<UINT64>(m_renderSize.y),
+                                                                                     DXGI_FORMAT_R10G10B10A2_UNORM,
+                                                                                     RenderResource::GetInstance().
+                                                                                     GetPropertyName(RenderTextureIDs::GBuffer4ID));
 
-			auto materialData = renderItem.loadedMaterial;
+            m_GBufferRTs.emplace_back(std::move(pGBufferRT));
+        }
 
-			m_pMaterial->SetMatrix(ShaderIDs::worldMatrix, renderItem.worldMatrix);
-			m_pMaterial->SetUInt(ShaderIDs::baseColorTexIndex, materialData.textures[UINT64(MaterialTextureType::Albedo)].GetResourceHeapIndex());
-			m_pMaterial->SetUInt(ShaderIDs::normalTexIndex, materialData.textures[UINT64(MaterialTextureType::Normal)].GetResourceHeapIndex());
-			m_pMaterial->SetUInt(ShaderIDs::metallicTexIndex, materialData.textures[UINT64(MaterialTextureType::Metallic)].GetResourceHeapIndex());
-			m_pMaterial->SetUInt(ShaderIDs::roughnessTexIndex, materialData.textures[UINT64(MaterialTextureType::Roughness)].GetResourceHeapIndex());
-			m_pMaterial->SetUInt(ShaderIDs::specularTexIndex, materialData.textures[UINT64(MaterialTextureType::Specular)].GetResourceHeapIndex());
-			m_pMaterial->SetFloat(ShaderIDs::cutoff, 0.5);
-			m_pMaterial->SetFloat(ShaderIDs::opacity, materialData.opacity);
+        // Velocity
+        {
+            auto pGBufferRT = RenderTargetManager::GetInstance().CreateRenderTexture(static_cast<UINT64>(m_renderSize.x),
+                                                                                     static_cast<UINT64>(m_renderSize.y),
+                                                                                     DXGI_FORMAT_R16G16B16A16_SNORM,
+                                                                                     RenderResource::GetInstance().
+                                                                                     GetPropertyName(RenderTextureIDs::GBuffer5ID));
 
-			SetSpaceResource(passData, PER_OBJECT_SPACE);
-			SetSpaceResource(passData, PER_MATERIAL_SPACE);
-			m_pCommand->Draw(renderItem.indexCount, renderItem.baseVertex, renderItem.startIndex);
-		}
-	}
+            m_GBufferRTs.emplace_back(std::move(pGBufferRT));
+        }
+    }
 
-	void GBufferPass::DrawGBufferPass(ElysiaEngine::FrameContext& context)
-	{
-		for (auto& RT : m_GBufferRTs)
-		{
-			m_pCommand->AddBarrier(RT, D3D12_RESOURCE_STATE_RENDER_TARGET, false);
-		}
-		m_pCommand->AddBarrier(m_pCameraDepthRT, D3D12_RESOURCE_STATE_DEPTH_WRITE, false);
-		m_pCommand->FlushBarrier();
-		
-		for (auto& RT : m_GBufferRTs)
-		{
-			m_pCommand->ClearRenderTarget(RT, Color::Black);
-		}
-		m_pCommand->ClearDepthStencilTarget(m_pCameraDepthRT, 1.f, 0);
-		
-		bool isReady = true;
-		{
-			for (auto& RT : m_GBufferRTs)
-			{
-				if (RT->GetTexture() == nullptr)
-				{
-					ThrowRuntimeError("null texture resource");
-				}
-				isReady &= RT->GetTexture()->GetIsReady();
-			}
+    std::vector<DX12TextureResource*> GBufferPass::GetGBuffers()
+    {
+        std::vector<DX12TextureResource*> temp{};
+        temp.reserve(m_GBufferRTs.size());
+        for (auto& RT : m_GBufferRTs)
+        {
+            temp.emplace_back(RT->GetTexture());
+        }
 
-			if (m_pCameraDepthRT->GetTexture() == nullptr)
-			{
-				ThrowRuntimeError("null texture resource");
-			}
-			isReady &= m_pCameraDepthRT->GetTexture()->GetIsReady();
-		}
-		if (isReady)
-		{
-			PipelineInfo pipelineStateData{};
-			pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(ShaderPassIDs::GBufferPassID).pPipelineStateObject;
-			pipelineStateData.m_renderTargets = std::move(GetGBuffers());
-			pipelineStateData.m_depthStencilTarget = m_pCameraDepthRT->GetTexture();
-			m_pCommand->SetPipeline(pipelineStateData);
-			m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_renderSize));
-			DrawMesh(context, ShaderPassIDs::GBufferPassID);
-		}
+        return temp;
+    }
 
-		for (auto& RT : m_GBufferRTs)
-		{
-			m_pCommand->AddBarrier(RT, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, false);
-		}
-		m_pCommand->AddBarrier(m_pCameraDepthRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_DEPTH_READ, false);
-		m_pCommand->FlushBarrier();
-	}
+    void GBufferPass::UpdateVariant()
+    {
+        UpdateGBufferPassVariant(ShaderPassIDs::GBufferPassID);
+    }
+
+    void GBufferPass::UpdateGBufferPassVariant(UINT passIndex)
+    {
+        std::vector<std::wstring> enableKeywords{};
+
+        auto& passData = m_pMaterial->GetPassData(passIndex);
+
+        auto emplaceResult = passData.keywords.try_emplace(enableKeywords);
+        if (emplaceResult.second)
+        {
+            auto VariantManager = passData.pShader->GetVariantManager();
+            auto currVariantData = &VariantManager->GetOrCompileVariantByNames(enableKeywords);
+
+            if (passData.pCurrVariantData == nullptr || passData.pCurrVariantData != currVariantData)
+            {
+                passData.pCurrVariantData = currVariantData;
+            }
+
+            {
+                RenderTargetDesc RTDesc = RenderTargetDesc
+                {
+                    .m_numRenderTargets = static_cast<UINT8>(m_GBufferRTs.size()),
+                    .m_depthStencilFormat = m_pCameraDepthRT->GetFormat(),
+                };
+                for (int i = 0; i < m_GBufferRTs.size(); ++i)
+                {
+                    RTDesc.m_renderTargetFormats[i] = m_GBufferRTs[i]->GetFormat();
+                }
+                passData.pPipelineStateObject = PSOManager::GetInstance().GetGraphicsPipelineState(m_pDevice, m_pMaterial.get(), passIndex, RTDesc);
+
+                emplaceResult.first->second =
+                {
+                    .pCurrVariantData = currVariantData,
+                    .pPipelineStateObject = passData.pPipelineStateObject,
+                };
+            }
+        }
+        else
+        {
+            const auto& saveData = passData.keywords.at(enableKeywords);
+
+            passData.pCurrVariantData = saveData.pCurrVariantData;
+            passData.pPipelineStateObject = saveData.pPipelineStateObject;
+        }
+    }
+
+    void GBufferPass::DrawMesh(ElysiaEngine::FrameContext& context, UINT passIndex)
+    {
+        m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+        auto& passData = m_pMaterial->GetPassData(passIndex);
+        SetSpaceResource(passData, PER_PASS_SPACE);
+        SetSpaceResource(passData, PER_FRAME_SPACE);
+
+        if (context.renderList.size())
+        {
+            m_pCommand->SetIndexBuffer(context.renderList[0].ibView);
+            m_pCommand->SetVertexBuffer(0, 1, context.renderList[0].vbView);
+        }
+
+        for (auto& renderItem : context.renderList)
+        {
+
+            auto materialData = renderItem.loadedMaterial;
+
+            m_pMaterial->SetMatrix(ShaderIDs::worldMatrix, renderItem.worldMatrix);
+            m_pMaterial->SetUInt(ShaderIDs::baseColorTexIndex, renderItem.textureIndices.Albedo);
+            m_pMaterial->SetUInt(ShaderIDs::normalTexIndex, renderItem.textureIndices.Normal);
+            m_pMaterial->SetUInt(ShaderIDs::metallicTexIndex, renderItem.textureIndices.Metallic);
+            m_pMaterial->SetUInt(ShaderIDs::roughnessTexIndex, renderItem.textureIndices.Roughness);
+            m_pMaterial->SetUInt(ShaderIDs::specularTexIndex, renderItem.textureIndices.Specular);
+            m_pMaterial->SetFloat(ShaderIDs::cutoff, 0.5);
+            m_pMaterial->SetFloat(ShaderIDs::opacity, materialData.opacity);
+
+            SetSpaceResource(passData, PER_OBJECT_SPACE);
+            SetSpaceResource(passData, PER_MATERIAL_SPACE);
+            m_pCommand->Draw(renderItem.indexCount, renderItem.baseVertex, renderItem.startIndex);
+        }
+    }
+
+    void GBufferPass::DrawGBufferPass(ElysiaEngine::FrameContext& context)
+    {
+        for (auto& RT : m_GBufferRTs)
+        {
+            m_pCommand->AddBarrier(RT, D3D12_RESOURCE_STATE_RENDER_TARGET, false);
+        }
+        m_pCommand->AddBarrier(m_pCameraDepthRT, D3D12_RESOURCE_STATE_DEPTH_WRITE, false);
+        m_pCommand->FlushBarrier();
+
+        for (auto& RT : m_GBufferRTs)
+        {
+            m_pCommand->ClearRenderTarget(RT, Color::Black);
+        }
+        m_pCommand->ClearDepthStencilTarget(m_pCameraDepthRT, 1.f, 0);
+
+        bool isReady = true;
+        {
+            for (auto& RT : m_GBufferRTs)
+            {
+                if (RT->GetTexture() == nullptr)
+                {
+                    ThrowRuntimeError("null texture resource");
+                }
+                isReady &= RT->GetTexture()->GetIsReady();
+            }
+
+            if (m_pCameraDepthRT->GetTexture() == nullptr)
+            {
+                ThrowRuntimeError("null texture resource");
+            }
+            isReady &= m_pCameraDepthRT->GetTexture()->GetIsReady();
+        }
+        if (isReady)
+        {
+            PipelineInfo pipelineStateData{};
+            pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(ShaderPassIDs::GBufferPassID).pPipelineStateObject;
+            pipelineStateData.m_renderTargets = std::move(GetGBuffers());
+            pipelineStateData.m_depthStencilTarget = m_pCameraDepthRT->GetTexture();
+            m_pCommand->SetPipeline(pipelineStateData);
+            m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_renderSize));
+            DrawMesh(context, ShaderPassIDs::GBufferPassID);
+        }
+
+        for (auto& RT : m_GBufferRTs)
+        {
+            m_pCommand->AddBarrier(RT, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, false);
+        }
+        m_pCommand->AddBarrier(m_pCameraDepthRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_DEPTH_READ, false);
+        m_pCommand->FlushBarrier();
+    }
 }

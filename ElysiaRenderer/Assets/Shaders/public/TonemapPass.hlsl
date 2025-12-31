@@ -1,5 +1,12 @@
 #include "private\Color.hlsl"
 
+#pragma Vertex VS
+#pragma Pixel PS
+
+#pragma Rasterizer NoCullNoMS
+#pragma Blend Disabled
+#pragma Depth Disabled
+
 #define Neutral 0
 #define LMP 1
 #define AMD 2
@@ -34,6 +41,7 @@ cbuffer PassConstant : register(b0, perPassSpace)
 #include "private/ffx_a.h"
 
 #define LPM_NO_SETUP 1
+
 uint4 LpmFilterCtl(uint i)
 {
     return u_ctl[i];
@@ -54,8 +62,8 @@ struct PSOutput
 
 PSInput VS(UINT vertexID : SV_VertexID)
 {
-    PSInput o = (PSInput) 0;
-    
+    PSInput o = (PSInput)0;
+
     if (vertexID == 0)
     {
         o.positionCS = float4(-1.0f, 1.0f, 1.0f, 1.0f);
@@ -71,77 +79,70 @@ PSInput VS(UINT vertexID : SV_VertexID)
         o.positionCS = float4(-1.0f, -3.0f, 1.0f, 1.0f);
         o.uv = float2(0.0f, 2.0f);
     }
-    
+
     return o;
 }
 
 PSOutput PS(PSInput i)
 {
-    PSOutput o = (PSOutput) 0;
-    
+    PSOutput o = (PSOutput)0;
+
     float4 color = SampleTexture2D(blitterTextureIndex, i.uv, ClampLinearSampler);
 
     switch (tonemapMode)
     {
-        case Neutral:
-        {
-            color.rgb = NeutralTonemap(color);
-            break;
-        }
-        case LMP:
-        {
-            color = mul(u_inputToOutputMatrix, color);
-            color.r = max(0, color.r);
-            color.g = max(0, color.g);
-            color.b = max(0, color.b);
-                
-            LpmFilter(color.r, color.g, color.b, u_shoulder, u_con, u_soft, u_con2, u_clip, u_scaleOnly);
-            break;
-        }
-        case AMD:
-        {
-            color.rgb = AMDTonemapper(color);
-            break;
-        }
-        case ACESFilm:
-        {
-            color.rgb = ACESFilmTone(color);
-            break;
-        }
-        case Uncharted2:
-        {
-            color.rgb = Uncharted2Tonemap(color);
-            break;
-        }
-        case DX11DSK:
-        {
-            color.rgb = DX11DSKTone(color);
-            break;
-        }
+    case Neutral:
+    {
+        color.rgb = NeutralTonemap(color);
+        break;
+    }
+    case LMP:
+    {
+        color = mul(u_inputToOutputMatrix, color);
+        color.r = max(0, color.r);
+        color.g = max(0, color.g);
+        color.b = max(0, color.b);
+
+        LpmFilter(color.r, color.g, color.b, u_shoulder, u_con, u_soft, u_con2, u_clip, u_scaleOnly);
+        break;
+    }
+    case AMD:
+    {
+        color.rgb = AMDTonemapper(color);
+        break;
+    }
+    case ACESFilm:
+    {
+        color.rgb = ACESFilmTone(color);
+        break;
+    }
+    case Uncharted2:
+    {
+        color.rgb = Uncharted2Tonemap(color);
+        break;
+    }
+    case DX11DSK:
+    {
+        color.rgb = DX11DSKTone(color);
+        break;
+    }
     }
 
     switch (u_displayMode)
     {
-        case DISPLAYMODE_FSHDR_Gamma22:
-            {
-                color.rgb = ApplyGamma(color);
-                break;
-            }
-        case DISPLAYMODE_HDR10_2084:
-            {
-                color.rgb = ApplyPQ(color);
-                break;
-            }
+    case DISPLAYMODE_FSHDR_Gamma22:
+    {
+        color.rgb = ApplyGamma(color);
+        break;
     }
-    
-    o.target0 = float4(color.rgb, 1.f);
-    
-    return o;
-}
+    case DISPLAYMODE_HDR10_2084:
+    {
+        color.rgb = ApplyPQ(color);
+        break;
+    }
+    }
 
-float4 BlitPS(PSInput i) : SV_TARGET
-{   
-    half4 blitterValue = SampleTexture2D(blitterTextureIndex, i.uv, ClampLinearSampler);
-    
-    return blitterValue;
+    o.target0 = float4(color.rgb, 1.f);
+
+    return o;
 }

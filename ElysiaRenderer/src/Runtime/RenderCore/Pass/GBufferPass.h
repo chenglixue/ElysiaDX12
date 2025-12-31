@@ -29,7 +29,6 @@ namespace ElysiaRenderer
 		virtual void Render(ElysiaEngine::FrameContext& context) override;
 		virtual void UpdatePSO() override;
 		virtual void UpdateVariant() override;
-
 		virtual void Dispose() override;
 
 	private:
