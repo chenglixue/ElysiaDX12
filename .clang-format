@@ -1,46 +1,51 @@
-# LLVM  Google
-BasedOnStyle: Google
+# 基础风格基于 LLVM
+BasedOnStyle: LLVM
 
-# 强制花括号遵循 Allman 风格
+# 核心：花括号换行策略（Allman 风格）
 BreakBeforeBraces: Allman
 
+# 语言设置
 Language: Cpp
 
-# 对齐连续的宏定义
-AlignConsecutiveMacros: AcrossEmptyLinesAndComments
-
-#  对齐尾部注释
-AlignTrailingComments: Leave
- 
-# 访问修饰符偏移 
-AccessModifierOffset: -4 # -4就是public顶格
-
-# 允许短函数在单行上
-AllowShortFunctionsOnASingleLine: Empty
-
-# 允许短语法块在单行上
-AllowShortBlocksOnASingleLine: Empty
-
-
-
-# 允许短匿Lambda函数在单行上
-AllowShortLambdasOnASingleLine: All
-
-# 允许合并短循环到单行上
-AllowShortLoopsOnASingleLine: true
-
-# 对头文件排序
-SortIncludes: Never
- 
-# 控制空格和标点符号风格
-SpaceBeforeParens: ControlStatements  # 控制语句的括号前有空格
-SpaceBeforeAssignmentOperators: true  # 赋值操作符前插入空格
- 
 # 缩进设置
-IndentWidth: 4  # 使用4个空格缩进
- 
-# 控制每行最大空行数（避免空行过多）
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+
+# 指针对齐：左对齐 (int* ptr)
+PointerAlignment: Left
+
+# 连续行对齐设置
+AlignConsecutiveMacros: AcrossEmptyLinesAndComments
+AlignConsecutiveAssignments: None
+AlignConsecutiveDeclarations: None
+
+# 访问修饰符（public/private）偏移
+AccessModifierOffset: -4 
+
+# 允许短代码单行化设置
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortBlocksOnASingleLine: false
+AllowShortLambdasOnASingleLine: All
+AllowShortLoopsOnASingleLine: false
+
+# 括号前后空格设置
+SpaceBeforeParens: ControlStatements
+SpaceInEmptyParentheses: false
+SpacesInContainerLiterals: false
+
+# 强制每行最大空行数
 MaxEmptyLinesToKeep: 1
- 
-# 注释前保留一个空格
-# SpacesBeforeTrailingComments: 1  
+
+# 头文件排序：DX12项目建议关闭
+SortIncludes: Never
+
+# 每行最大长度建议设置在 100-120
+ColumnLimit: 160
+
+# 针对构造函数初始化列表的缩进
+ConstructorInitializerIndentWidth: 4
+AlignAfterOpenBracket: Align
+
+# 核心设置：None 表示命名空间内部的代码不缩进
+NamespaceIndentation: All
