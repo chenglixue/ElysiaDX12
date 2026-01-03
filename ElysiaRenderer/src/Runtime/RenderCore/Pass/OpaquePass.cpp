@@ -68,7 +68,7 @@ namespace ElysiaRenderer
         m_pMaterial = std::make_unique<Material>(m_pDevice, m_shaderPasses);
         ShaderPassIDs::OpaqueLightPassID = m_pMaterial->FindPassIndex("Opaque Light Pass");
 
-        UpdateVariant();
+        UpdatePipeline();
 
         // m_pMaterial->SetUInt(ShaderIDs::g_AOIndex,
         // 	RenderTargetManager::GetInstance().GetRenderTexture("g_AOIndex")->GetResourceHeapIndex());
@@ -78,14 +78,14 @@ namespace ElysiaRenderer
     {
         PIXHelper pix(m_pCommand->GetCommandList(), "Opaque Light Pass");
 
-        UpdatePSO();
-
-        m_pMaterial->SetFloat4(ShaderIDs::screenSize, GetScreenSize(Vector2(m_renderSize.x, m_renderSize.y)));
+        m_pMaterial->SetFloat4(ShaderIDs::screenSize,
+                               GetScreenSize(Vector2(m_renderSize.x, m_renderSize.y)));
         m_pMaterial->SetMatrix(ShaderIDs::viewMatrix, m_pCamera->GetViewMat());
         m_pMaterial->SetMatrix(ShaderIDs::viewMatrix_I, m_pCamera->GetViewMat().Invert());
         m_pMaterial->SetMatrix(ShaderIDs::projMatrix, m_pCamera->GetProjMat());
         m_pMaterial->SetMatrix(ShaderIDs::projMatrix_I, m_pCamera->GetProjMat().Invert());
-        m_pMaterial->SetMatrix(ShaderIDs::viewProjMatrix, m_pCamera->GetViewMat() * m_pCamera->GetProjMat());
+        m_pMaterial->SetMatrix(ShaderIDs::viewProjMatrix,
+                               m_pCamera->GetViewMat() * m_pCamera->GetProjMat());
         m_pMaterial->SetMatrix(ShaderIDs::viewProjMatrix_I,
                                (m_pCamera->GetViewMat() * m_pCamera->GetProjMat()).Invert());
 
@@ -96,7 +96,8 @@ namespace ElysiaRenderer
     {
         bool isReady = true;
         {
-            if (m_pCameraColorRT->GetTexture() == nullptr || m_pCameraDepthRT->GetTexture() == nullptr)
+            if (m_pCameraColorRT->GetTexture() == nullptr || m_pCameraDepthRT->GetTexture() ==
+                nullptr)
             {
                 ThrowRuntimeError("null texture resource");
             }
@@ -129,28 +130,7 @@ namespace ElysiaRenderer
         }
     }
 
-    void OpaquePass::UpdatePSO()
-    {
-        if (m_cameraColorFormat != m_pCameraColorRT->GetFormat())
-        {
-            {
-                RenderTargetDesc RTDesc = RenderTargetDesc
-                {
-                    .m_renderTargetFormats = m_pCameraColorRT->GetFormat(),
-                    .m_numRenderTargets = 1,
-                    .m_depthStencilFormat = m_pCameraDepthRT->GetFormat()
-                };
-                m_cameraColorFormat = m_pCameraColorRT->GetFormat();
-
-                m_pMaterial->GetPassData(ShaderPassIDs::OpaqueLightPassID).pPipelineStateObject =
-                    PSOManager::GetInstance().GetGraphicsPipelineState(m_pDevice,
-                                                                       m_pMaterial.get(),
-                                                                       ShaderPassIDs::OpaqueLightPassID, RTDesc);
-            }
-        }
-    }
-
-    void OpaquePass::UpdateVariant()
+    void OpaquePass::UpdatePipeline()
     {
         UpdateLightingPassVariant(ShaderPassIDs::OpaqueLightPassID);
     }
@@ -197,41 +177,16 @@ namespace ElysiaRenderer
         }
 
         auto& passData = m_pMaterial->GetPassData(passIndex);
+        auto VariantManager = passData.pShader->GetVariantManager();
+        passData.pCurrVariantData = &VariantManager->GetOrCompileVariantByNames(enableKeywords);
 
-        auto emplaceResult = passData.keywords.try_emplace(enableKeywords);
-        if (emplaceResult.second)
+        RenderTargetDesc RTDesc = RenderTargetDesc
         {
-            auto VariantManager = passData.pShader->GetVariantManager();
-            auto currVariantData = &VariantManager->GetOrCompileVariantByNames(enableKeywords);
-
-            if (passData.pCurrVariantData == nullptr || passData.pCurrVariantData != currVariantData)
-            {
-                passData.pCurrVariantData = currVariantData;
-            }
-
-            {
-                RenderTargetDesc RTDesc = RenderTargetDesc
-                {
-                    .m_renderTargetFormats = m_pCameraColorRT->GetFormat(),
-                    .m_numRenderTargets = 1,
-                    .m_depthStencilFormat = m_pCameraDepthRT->GetFormat()
-                };
-                passData.pPipelineStateObject = PSOManager::GetInstance().GetGraphicsPipelineState(
-                    m_pDevice, m_pMaterial.get(), passIndex, RTDesc);
-
-                emplaceResult.first->second =
-                {
-                    .pCurrVariantData = currVariantData,
-                    .pPipelineStateObject = passData.pPipelineStateObject,
-                };
-            }
-        }
-        else
-        {
-            const auto& saveData = passData.keywords.at(enableKeywords);
-
-            passData.pCurrVariantData = saveData.pCurrVariantData;
-            passData.pPipelineStateObject = saveData.pPipelineStateObject;
-        }
+            .m_renderTargetFormats = m_pCameraColorRT->GetFormat(),
+            .m_numRenderTargets = 1,
+            .m_depthStencilFormat = m_pCameraDepthRT->GetFormat()
+        };
+        passData.pPipelineStateObject = PSOManager::GetInstance().GetGraphicsPipelineState(
+            m_pDevice, m_pMaterial.get(), passIndex, RTDesc);
     }
 }

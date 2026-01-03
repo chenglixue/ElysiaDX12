@@ -20,174 +20,132 @@
 
 namespace ElysiaRenderer
 {
-	int FinalBlitPass::ShaderPassIDs::BlitPassID = -1;
-	size_t FinalBlitPass::ShaderIDs::blitterTextureIndex = SIZE_MAX;
+    int FinalBlitPass::ShaderPassIDs::BlitPassID = -1;
+    size_t FinalBlitPass::ShaderIDs::blitterTextureIndex = SIZE_MAX;
 
-	FinalBlitPass::FinalBlitPass(DX12Camera* pCamera) :
-		BasePass(pCamera)
-	{
-		ShaderIDs::blitterTextureIndex = PropertyToID(L"blitterTextureIndex");
-	}
+    FinalBlitPass::FinalBlitPass(DX12Camera* pCamera) :
+        BasePass(pCamera)
+    {
+        ShaderIDs::blitterTextureIndex = PropertyToID(L"blitterTextureIndex");
+    }
 
-	FinalBlitPass::~FinalBlitPass()
-	{
-		Dispose();
-	}
-	void FinalBlitPass::Dispose()
-	{
+    FinalBlitPass::~FinalBlitPass()
+    {
+        Dispose();
+    }
+    void FinalBlitPass::Dispose()
+    {
 
-	}
+    }
 
-	void FinalBlitPass::Configure()
-	{
-		m_shaderPasses = 
-		{
-			ShaderPass
-			{
-				.Name = "Blit Pass",
-				.FilePath = L"Shaders\\public\\Blit.hlsl",
-			},
-		};
-		m_pMaterial = std::make_unique<Material>(m_pDevice, m_shaderPasses);
-		ShaderPassIDs::BlitPassID = m_pMaterial->FindPassIndex("Blit Pass");
+    void FinalBlitPass::Configure()
+    {
+        m_shaderPasses =
+        {
+            ShaderPass
+            {
+                .Name = "Blit Pass",
+                .FilePath = L"Shaders\\public\\Blit.hlsl",
+            },
+        };
+        m_pMaterial = std::make_unique<Material>(m_pDevice, m_shaderPasses);
+        ShaderPassIDs::BlitPassID = m_pMaterial->FindPassIndex("Blit Pass");
 
-		UpdateVariant();
-	}
-	void FinalBlitPass::Render(ElysiaEngine::FrameContext& context)
-	{
-		PIXHelper pix(m_pCommand->GetCommandList(), "Final Blit Pass");
+        UpdatePipeline();
+    }
+    void FinalBlitPass::Render(ElysiaEngine::FrameContext& context)
+    {
+        PIXHelper pix(m_pCommand->GetCommandList(), "Final Blit Pass");
 
-		UpdatePSO();
-		
-		DoFinalBlit();
-	}
+        DoFinalBlit();
+    }
 
-	void FinalBlitPass::DoFinalBlit()
-	{
-		auto& backBuffer = m_pSwaiChain->GetCurrBackBuffer();
+    void FinalBlitPass::DoFinalBlit()
+    {
+        auto& backBuffer = m_pSwaiChain->GetCurrBackBuffer();
 
-		m_pCommand->AddBarrier(backBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET);
-		m_pCommand->ClearRenderTarget(backBuffer, Color::Black);
-		
-		PipelineInfo pipelineStateData{};
-		pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(ShaderPassIDs::BlitPassID).pPipelineStateObject;
-		pipelineStateData.m_renderTargets.emplace_back(&backBuffer);
-		pipelineStateData.m_depthStencilTarget = m_pCameraDepthRT->GetTexture();
-			m_pCommand->SetPipeline(pipelineStateData);
-		
-		auto& passData = m_pMaterial->GetPassData(ShaderPassIDs::BlitPassID);
-		SetSpaceResource(passData, PER_PASS_SPACE);
+        m_pCommand->AddBarrier(backBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET);
+        m_pCommand->ClearRenderTarget(backBuffer, Color::Black);
 
-		bool isReady = true;
-		{
-			if (m_pCameraDepthRT == nullptr)
-			{
-				ThrowRuntimeError("nullptr");
-			} 
-			isReady &= m_pCameraDepthRT->GetTexture()->GetIsReady();
-		}
-		if (isReady) 
-		{ 
-			switch (UserData::GetInstance().debugMode)
-			{
-			case DebugMode::None:
-				{
-					m_pMaterial->SetUInt(ShaderIDs::blitterTextureIndex, m_pCameraColorRT->GetResourceHeapIndex());
+        PipelineInfo pipelineStateData{};
+        pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(
+            ShaderPassIDs::BlitPassID).pPipelineStateObject;
+        pipelineStateData.m_renderTargets.emplace_back(&backBuffer);
+        pipelineStateData.m_depthStencilTarget = m_pCameraDepthRT->GetTexture();
+        m_pCommand->SetPipeline(pipelineStateData);
 
-					break;
-				}
-			case DebugMode::AO:
-				{
-					//m_pMaterial->SetUInt(ShaderIDs::blitterTextureIndex, TextureManager::GetInstance().GetGlobalRT("g_AOIndex"));
-					break;
-				}
-				default:
-				{
-					m_pMaterial->SetUInt(ShaderIDs::blitterTextureIndex, m_pCameraColorRT->GetResourceHeapIndex());
+        auto& passData = m_pMaterial->GetPassData(ShaderPassIDs::BlitPassID);
+        SetSpaceResource(passData, PER_PASS_SPACE);
 
-					break;
-				}
-			}
-			
-			m_pCommand->SetDefaultViewportAndScissor(UINT2(m_renderSize));
-			m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+        bool isReady = true;
+        {
+            if (m_pCameraDepthRT == nullptr)
+            {
+                ThrowRuntimeError("nullptr");
+            }
+            isReady &= m_pCameraDepthRT->GetTexture()->GetIsReady();
+        }
+        if (isReady)
+        {
+            switch (UserData::GetInstance().debugMode)
+            {
+            case DebugMode::None:
+            {
+                m_pMaterial->SetUInt(ShaderIDs::blitterTextureIndex,
+                                     m_pCameraColorRT->GetResourceHeapIndex());
 
-			m_pCommand->DrawFullScreenTriangle();
-		}
+                break;
+            }
+            case DebugMode::AO:
+            {
+                //m_pMaterial->SetUInt(ShaderIDs::blitterTextureIndex, TextureManager::GetInstance().GetGlobalRT("g_AOIndex"));
+                break;
+            }
+            default:
+            {
+                m_pMaterial->SetUInt(ShaderIDs::blitterTextureIndex,
+                                     m_pCameraColorRT->GetResourceHeapIndex());
 
-		ImGui::Render();
-		if (ImGui::GetDrawData())
-		{
-			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), m_pCommand->GetCommandList());
-		}
-		
-		m_pCommand->AddBarrier(backBuffer, D3D12_RESOURCE_STATE_PRESENT);
-	}
+                break;
+            }
+            }
 
-	void FinalBlitPass::UpdatePSO()
-	{
-		if(m_backBufferFormat != m_pSwaiChain->GetFormat())
-		{
-			{
-				RenderTargetDesc RTDesc = RenderTargetDesc
-				{
-					.m_renderTargetFormats = m_pSwaiChain->GetFormat(),
-					.m_numRenderTargets = 1,
-					.m_depthStencilFormat = m_pCameraDepthRT->GetFormat()
-				};
-				m_backBufferFormat = m_pSwaiChain->GetFormat();
+            m_pCommand->SetDefaultViewportAndScissor(UINT2(m_renderSize));
+            m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-				m_pMaterial->GetPassData(ShaderPassIDs::BlitPassID).pPipelineStateObject = PSOManager::GetInstance().GetGraphicsPipelineState(m_pDevice,
-					m_pMaterial.get(), ShaderPassIDs::BlitPassID, RTDesc);
-			} 
-		}
-	}
+            m_pCommand->DrawFullScreenTriangle();
+        }
 
-	void FinalBlitPass::UpdateVariant()
-	{
-		UpdateFinalBlitVariant(ShaderPassIDs::BlitPassID);
-	}
-	void FinalBlitPass::UpdateFinalBlitVariant(UINT passID)
-	{
-		std::vector<std::wstring> enableKeywords{};
-		 
-		auto& passData = m_pMaterial->GetPassData(passID);
-		
-		auto emplaceResult = passData.keywords.try_emplace(enableKeywords);
-		if(emplaceResult.second)
-		{
-			auto VariantManager = passData.pShader->GetVariantManager();
-			auto currVariantData = &VariantManager->GetOrCompileVariantByNames(enableKeywords);
-			
-			if(passData.pCurrVariantData == nullptr || passData.pCurrVariantData != currVariantData)
-			{
-				passData.pCurrVariantData = currVariantData;
-			}
-			
-			{
-				RenderTargetDesc RTDesc = RenderTargetDesc
-				{
-					.m_renderTargetFormats = m_pSwaiChain->GetFormat(),
-					.m_numRenderTargets = 1,
-					.m_depthStencilFormat = m_pCameraDepthRT->GetFormat()
-				};
-				m_backBufferFormat = m_pSwaiChain->GetFormat();
-				passData.pPipelineStateObject = PSOManager::GetInstance().GetGraphicsPipelineState(m_pDevice, m_pMaterial.get(), passID, RTDesc);
+        ImGui::Render();
+        if (ImGui::GetDrawData())
+        {
+            ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), m_pCommand->GetCommandList());
+        }
 
-				emplaceResult.first->second = 
-				{
-					.pCurrVariantData = currVariantData,
-					.pPipelineStateObject = passData.pPipelineStateObject,
-				};
-			}
-		}
-		else
-		{
-			const auto& saveData = passData.keywords.at(enableKeywords);
-			
-			passData.pCurrVariantData = saveData.pCurrVariantData;
-			passData.pPipelineStateObject = saveData.pPipelineStateObject;
-		}
-	}
+        m_pCommand->AddBarrier(backBuffer, D3D12_RESOURCE_STATE_PRESENT);
+    }
+
+    void FinalBlitPass::UpdatePipeline()
+    {
+        UpdateFinalBlitVariant(ShaderPassIDs::BlitPassID);
+    }
+    void FinalBlitPass::UpdateFinalBlitVariant(UINT passID)
+    {
+        std::vector<std::wstring> enableKeywords{};
+        auto& passData = m_pMaterial->GetPassData(passID);
+
+        auto VariantManager = passData.pShader->GetVariantManager();
+        passData.pCurrVariantData = &VariantManager->GetOrCompileVariantByNames(enableKeywords);
+
+        RenderTargetDesc RTDesc = RenderTargetDesc
+        {
+            .m_renderTargetFormats = m_pSwaiChain->GetFormat(),
+            .m_numRenderTargets = 1,
+            .m_depthStencilFormat = m_pCameraDepthRT->GetFormat()
+        };
+        m_backBufferFormat = m_pSwaiChain->GetFormat();
+        passData.pPipelineStateObject = PSOManager::GetInstance().GetGraphicsPipelineState(
+            m_pDevice, m_pMaterial.get(), passID, RTDesc);
+    }
 
 }

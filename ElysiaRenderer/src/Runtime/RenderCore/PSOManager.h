@@ -7,103 +7,113 @@
 
 namespace std
 {
-	template<>
-	struct hash<D3D12_GRAPHICS_PIPELINE_STATE_DESC>
-	{
-		using argument_type = D3D12_GRAPHICS_PIPELINE_STATE_DESC;
-		using result_type = size_t;
+    template <>
+    struct hash<D3D12_GRAPHICS_PIPELINE_STATE_DESC>
+    {
+        using argument_type = D3D12_GRAPHICS_PIPELINE_STATE_DESC;
+        using result_type = size_t;
 
-		size_t operator()(argument_type const& v) const
-		{
-			return xxh::GetHash<argument_type>(v);
-		}
-	};
+        size_t operator()(argument_type const& v) const
+        {
+            return xxh::GetHash<argument_type>(v);
+        }
+    };
 
-	template<>
-	struct equal_to<D3D12_GRAPHICS_PIPELINE_STATE_DESC> 
-	{
-		using argument_type = D3D12_GRAPHICS_PIPELINE_STATE_DESC;
-		using result_type = size_t;
+    template <>
+    struct equal_to<D3D12_GRAPHICS_PIPELINE_STATE_DESC>
+    {
+        using argument_type = D3D12_GRAPHICS_PIPELINE_STATE_DESC;
+        using result_type = size_t;
 
-		bool operator()(argument_type const& a, argument_type const& b) const 
-		{
-			return memcmp(&a, &b, sizeof(argument_type)) == 0;
-		}
-	};
+        bool operator()(argument_type const& a, argument_type const& b) const
+        {
+            return memcmp(&a, &b, sizeof(argument_type)) == 0;
+        }
+    };
 
-	template<>
-	struct hash<D3D12_COMPUTE_PIPELINE_STATE_DESC>
-	{
-		using argument_type = D3D12_COMPUTE_PIPELINE_STATE_DESC;
-		using result_type = size_t;
+    template <>
+    struct hash<D3D12_COMPUTE_PIPELINE_STATE_DESC>
+    {
+        using argument_type = D3D12_COMPUTE_PIPELINE_STATE_DESC;
+        using result_type = size_t;
 
-		size_t operator()(argument_type const& v) const
-		{
-			return xxh::GetHash<argument_type>(v);
-		}
-	};
+        size_t operator()(argument_type const& v) const
+        {
+            return xxh::GetHash<argument_type>(v);
+        }
+    };
 
-	template<>
-	struct equal_to<D3D12_COMPUTE_PIPELINE_STATE_DESC>
-	{
-		using argument_type = D3D12_COMPUTE_PIPELINE_STATE_DESC;
-		using result_type = size_t;
+    template <>
+    struct equal_to<D3D12_COMPUTE_PIPELINE_STATE_DESC>
+    {
+        using argument_type = D3D12_COMPUTE_PIPELINE_STATE_DESC;
+        using result_type = size_t;
 
-		bool operator()(argument_type const& a, argument_type const& b) const
-		{
-			return memcmp(&a, &b, sizeof(argument_type)) == 0;
-		}
-	};
+        bool operator()(argument_type const& a, argument_type const& b) const
+        {
+            return memcmp(&a, &b, sizeof(argument_type)) == 0;
+        }
+    };
 }
 
 namespace ElysiaCore
 {
-	class DX12Device;
+    class DX12Device;
 }
 
 namespace ElysiaRenderer
 {
-	class Material;
+    class Material;
 }
 
 namespace ElysiaRenderer
 {
-	class PSOManager : IManager
-	{
-	public:
-		PSOManager() = default;
-		PSOManager(const PSOManager& rhs) = delete;
-		PSOManager& operator=(PSOManager& rhs) = delete;
-		PSOManager(PSOManager&& rhs) = default;
-		~PSOManager();
+    class PSOManager : IManager
+    {
+    public:
+        PSOManager() = default;
+        PSOManager(const PSOManager& rhs) = delete;
+        PSOManager& operator=(PSOManager& rhs) = delete;
+        PSOManager(PSOManager&& rhs) = default;
+        ~PSOManager();
 
-		static PSOManager& GetInstance()
-		{
-			std::call_once(m_initInstanceFlag, []() {
-				m_instance.reset(new PSOManager());
-				});
+        static PSOManager& GetInstance()
+        {
+            std::call_once(m_initInstanceFlag, []()
+            {
+                m_instance.reset(new PSOManager());
+            });
 
-			return *m_instance;
-		}
+            return *m_instance;
+        }
 
-		virtual void Init(DX12Device* pDevice) override;
-		virtual void Destory() override;
+        virtual void Init(DX12Device* pDevice) override;
+        virtual void Destory() override;
 
-		PipelineStateObject* GetGraphicsPipelineState(DX12Device* pDevice, Material* pMaterial, UINT passIndex,
-			const RenderTargetDesc& renderTargetDesc,
-			D3D12_PRIMITIVE_TOPOLOGY_TYPE topology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+        PipelineStateObject* GetGraphicsPipelineState(DX12Device* pDevice, Material* pMaterial,
+                                                      UINT passIndex,
+                                                      const RenderTargetDesc& renderTargetDesc,
+                                                      D3D12_PRIMITIVE_TOPOLOGY_TYPE topology =
+                                                          D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
 
-		PipelineStateObject* GetComputePipelineState(DX12Device* pDevice, Material* pMaterial, UINT passIndex);
+        PipelineStateObject* GetComputePipelineState(DX12Device* pDevice, Material* pMaterial,
+                                                     UINT passIndex);
 
-	private:
-		DX12Device* m_pDevice = nullptr;
-		static std::unique_ptr<PSOManager> m_instance;
-		static std::once_flag m_initInstanceFlag;
-		
-		std::unordered_map<D3D12_GRAPHICS_PIPELINE_STATE_DESC, std::unique_ptr<PipelineStateObject>> m_graphicsPipelineStates{};
-		std::unordered_map<D3D12_COMPUTE_PIPELINE_STATE_DESC, std::unique_ptr<PipelineStateObject>> m_computePipelineStates{};
+    private:
+        DX12Device* m_pDevice = nullptr;
+        static std::unique_ptr<PSOManager> m_instance;
+        static std::once_flag m_initInstanceFlag;
 
-		PipelineStateObject* GetGraphicsPipelineState(DX12Device* pDevice, const D3D12_GRAPHICS_PIPELINE_STATE_DESC& PSODesc, DX12RootSignature* pRootSignature);
-		PipelineStateObject* GetComputePipelineState(DX12Device* pDevice, const D3D12_COMPUTE_PIPELINE_STATE_DESC& PSODesc, DX12RootSignature* pRootSignature);
-	};
+        std::unordered_map<D3D12_GRAPHICS_PIPELINE_STATE_DESC, std::unique_ptr<PipelineStateObject>>
+        m_graphicsPipelineStates{};
+        std::unordered_map<D3D12_COMPUTE_PIPELINE_STATE_DESC, std::unique_ptr<PipelineStateObject>>
+        m_computePipelineStates{};
+
+        PipelineStateObject* GetGraphicsPipelineState(DX12Device* pDevice,
+                                                      const D3D12_GRAPHICS_PIPELINE_STATE_DESC&
+                                                      PSODesc, DX12RootSignature* pRootSignature);
+        PipelineStateObject* GetComputePipelineState(DX12Device* pDevice,
+                                                     const D3D12_COMPUTE_PIPELINE_STATE_DESC&
+                                                     PSODesc, DX12RootSignature* pRootSignature);
+    };
 }

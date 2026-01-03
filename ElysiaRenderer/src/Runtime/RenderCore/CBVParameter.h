@@ -62,7 +62,7 @@ namespace ElysiaRenderer
 
         Vector4 ZBufferParams;
 
-        UINT64 frameIndex = 0;
+        UINT64 frameIndex = 0; 
         float nearZ = 1;
         float farZ = 1000;
         UINT GGX_E_LUT_Index = 0;

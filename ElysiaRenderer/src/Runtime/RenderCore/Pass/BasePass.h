@@ -38,8 +38,7 @@ namespace ElysiaRenderer
 
         virtual void Dispose();
 
-        virtual void UpdatePSO() = 0;
-        virtual void UpdateVariant() = 0;
+        virtual void UpdatePipeline() = 0;
 
         D3D12_GPU_VIRTUAL_ADDRESS UploadMaterialConstants(
             UploadRingBuffer* pUploadBuffer,

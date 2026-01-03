@@ -5,110 +5,72 @@ namespace ElysiaRenderer
 {
     using namespace ElysiaHelper;
 
-    bool MaterialParameterBlock::ParamValue::operator==(const ParamValue& other) const
-    {
-        return memcmp(data.data(), other.data.data(), sizeof(float) * 16) == 0 &&
-               rowCount == other.rowCount && colCount == other.colCount;
-    }
-
     bool MaterialParameterBlock::ParamValue::Equals(const ParamValue& other, Type type, float tolerance) const
     {
-        auto arrayEqual = [](const std::vector<float>& arrayData, const ParamValue& other, size_t step, float tolerance)
+        if (IsArrayType(type))
         {
-            auto o = true;
-            for (size_t i = 0; i < arrayData.size(); i += step)
+            if (arrayData.size() != other.arrayData.size())
+                return false;
+            if (arrayData.empty())
+                return true;
+
+            if (type == Type::FloatArray || type == Type::Float2Array ||
+                type == Type::Float3Array || type == Type::Float4Array || type == Type::MatrixArray)
             {
-                for (int j = 0; j < i + step; ++j)
+                // 只有浮点数组需要逐元素 tolerance 比较
+                const float* a = reinterpret_cast<const float*>(arrayData.data());
+                const float* b = reinterpret_cast<const float*>(other.arrayData.data());
+                size_t count = arrayData.size() / sizeof(float);
+                for (size_t i = 0; i < count; ++i)
                 {
-                    o &= FloatEqual(arrayData[j], other.data[j], tolerance);
-                    if (!o)
+                    if (std::abs(a[i] - b[i]) > tolerance)
                         return false;
                 }
+                return true;
             }
+            else
+            {
+                // 整数数组直接内存比较
+                return std::memcmp(arrayData.data(), other.arrayData.data(), arrayData.size()) == 0;
+            }
+        }
 
-            return o;
-        };
+        const float* a = reinterpret_cast<const float*>(data.data());
+        const float* b = reinterpret_cast<const float*>(other.data.data());
+
         switch (type)
         {
         case Type::FLOAT:
-            return FloatEqual(data[0], other.data[0], tolerance);
+            return FloatEqual(a[0], b[0], tolerance);
 
-        case Type::INT:
-            return *reinterpret_cast<const int*>(&data[0]) ==
-                   *reinterpret_cast<const int*>(&other.data[0]);
-        case Type::UInt:
-            return FloatEqual(data[0], other.data[0], tolerance) &&
-                   FloatEqual(data[1], other.data[1], tolerance);
-        case Type::BOOL:
-            return FloatEqual(data[0], other.data[0], tolerance);
         case Type::FLOAT2:
-            return FloatEqual(data[0], other.data[0], tolerance) &&
-                   FloatEqual(data[1], other.data[1], tolerance);
+            return FloatEqual(a[0], b[0], tolerance) &&
+                   FloatEqual(a[1], b[1], tolerance);
 
         case Type::FLOAT3:
-            return FloatEqual(data[0], other.data[0], tolerance) &&
-                   FloatEqual(data[1], other.data[1], tolerance) &&
-                   FloatEqual(data[2], other.data[2], tolerance);
+            return FloatEqual(a[0], b[0], tolerance) &&
+                   FloatEqual(a[1], b[1], tolerance) &&
+                   FloatEqual(a[2], b[2], tolerance);
 
         case Type::FLOAT4:
-            return FloatEqual(data[0], other.data[0], tolerance) &&
-                   FloatEqual(data[1], other.data[1], tolerance) &&
-                   FloatEqual(data[2], other.data[2], tolerance) &&
-                   FloatEqual(data[3], other.data[3], tolerance);
+            return FloatEqual(a[0], b[0], tolerance) &&
+                   FloatEqual(a[1], b[1], tolerance) &&
+                   FloatEqual(a[2], b[2], tolerance) &&
+                   FloatEqual(a[3], b[3], tolerance);
 
         case Type::MATRIX4X4:
             for (int i = 0; i < 16; ++i)
             {
-                if (!FloatEqual(data[i], other.data[i], tolerance))
+                if (!FloatEqual(a[i], b[i], tolerance))
                     return false;
             }
             return true;
-        case Type::IntArray:
-        {
-            auto o = true;
-            for (size_t i = 0; i < arrayData.size(); i++)
-            {
-                o &= *reinterpret_cast<const int*>(&data[i]) ==
-                    *reinterpret_cast<const int*>(&other.data[i]);
 
-                if (!o)
-                    return false;
-            }
-            return true;
-        }
-        case Type::UIntArray:
-        {
-            auto o = true;
-            for (size_t i = 0; i < arrayData.size(); i++)
-            {
-                o &= *reinterpret_cast<const UINT*>(&data[i]) ==
-                    *reinterpret_cast<const UINT*>(&other.data[i]);
+        case Type::INT:
+        case Type::UInt:
+        case Type::BOOL:
+            return std::memcmp(data.data(), other.data.data(), sizeof(UINT)) == 0;
 
-                if (!o)
-                    return false;
-            }
-            return true;
-        }
-        case Type::FloatArray:
-        {
-            return arrayEqual(arrayData, other, 1, tolerance);
-        }
-        case Type::Float2Array:
-        {
-            return arrayEqual(arrayData, other, 2, tolerance);
-        }
-        case Type::Float3Array:
-        {
-            return arrayEqual(arrayData, other, 3, tolerance);
-        }
-        case Type::Float4Array:
-        {
-            return arrayEqual(arrayData, other, 4, tolerance);
-        }
-        case Type::MatrixArray:
-        {
-            return arrayEqual(arrayData, other, 16, tolerance);
-        }
         }
 
         return false;
@@ -272,20 +234,18 @@ namespace ElysiaRenderer
 
     void MaterialParameterBlock::SetInt(size_t nameHash, int v, size_t passID)
     {
-        float fv = static_cast<float>(v);
-        SetOrAddWithPassID(nameHash, Type::INT, fv, passID);
+        SetOrAddWithPassID(nameHash, Type::INT, v, passID);
     }
 
     void MaterialParameterBlock::SetUInt(size_t nameHash, unsigned int v, size_t passID)
     {
-        float fv = static_cast<float>(v);
-        SetOrAddWithPassID(nameHash, Type::UInt, fv, passID);
+        SetOrAddWithPassID(nameHash, Type::UInt, v, passID);
     }
 
     void MaterialParameterBlock::SetBool(size_t nameHash, bool v, size_t passID)
     {
-        float fv = v ? 1.f : 0.f;
-        SetOrAddWithPassID(nameHash, Type::BOOL, fv, passID);
+        uint32_t uv = v ? 1 : 0;
+        SetOrAddWithPassID(nameHash, Type::BOOL, uv, passID);
     }
 
     void MaterialParameterBlock::SetFloat2(size_t nameHash, const Vector2& v, size_t passID)
@@ -310,7 +270,7 @@ namespace ElysiaRenderer
 
     void MaterialParameterBlock::SetMatrix(size_t nameHash, const math::Matrix4& m, size_t passID)
     {
-        SetOrAddWithPassID(nameHash, Type::MATRIX4X4, m, passID);
+        SetOrAddWithPassID(nameHash, Type::MATRIX4X4, transpose(m), passID);
     }
 
     void MaterialParameterBlock::SetFloatArray(size_t nameHash, const std::vector<float>& values, size_t passID)
@@ -320,210 +280,133 @@ namespace ElysiaRenderer
 
     void MaterialParameterBlock::SetIntArray(size_t nameHash, const std::vector<int>& values, size_t passID)
     {
-        std::vector<float> tempVec{};
-        tempVec.reserve(values.size());
-        for (size_t i = 0; i < values.size(); ++i)
-        {
-            tempVec.emplace_back(static_cast<float>(values[i]));
-        }
-        SetOrAddArrayWithPassID(nameHash, Type::IntArray, std::move(tempVec), passID);
+        SetOrAddArrayWithPassID(nameHash, Type::IntArray, std::move(values), passID);
     }
 
     void MaterialParameterBlock::SetUINTArray(size_t nameHash, const std::vector<uint32_t>& values, size_t passID)
     {
-        std::vector<float> tempVec{};
-        tempVec.reserve(values.size());
-        for (size_t i = 0; i < values.size(); ++i)
-        {
-            tempVec.emplace_back(static_cast<float>(values[i]));
-        }
-        SetOrAddArrayWithPassID(nameHash, Type::UIntArray, std::move(tempVec), passID);
+        SetOrAddArrayWithPassID(nameHash, Type::UIntArray, std::move(values), passID);
     }
 
     void MaterialParameterBlock::SetVector2Array(size_t nameHash, const std::vector<Vector2>& values, size_t passID)
     {
+        std::vector<uint8_t> byteData(values.size() * sizeof(float));
+        std::memcpy(byteData.data(), values.data(), byteData.size());
         SetOrAddArrayWithPassID(nameHash, Type::Float2Array, values, passID);
     }
 
     void MaterialParameterBlock::SetVector3Array(size_t nameHash, const std::vector<Vector3>& values, size_t passID)
     {
+        std::vector<uint8_t> byteData(values.size() * sizeof(float));
+        std::memcpy(byteData.data(), values.data(), byteData.size());
         SetOrAddArrayWithPassID(nameHash, Type::Float3Array, values, passID);
     }
 
     void MaterialParameterBlock::SetVector4Array(size_t nameHash, const std::vector<Vector4>& values, size_t passID)
     {
+        std::vector<uint8_t> byteData(values.size() * sizeof(float));
+        std::memcpy(byteData.data(), values.data(), byteData.size());
         SetOrAddArrayWithPassID(nameHash, Type::Float4Array, values, passID);
     }
 
     void MaterialParameterBlock::SetMatrixArray(size_t nameHash, const std::vector<Matrix>& values, size_t passID)
     {
+        std::vector<uint8_t> byteData(values.size() * sizeof(float));
+        std::memcpy(byteData.data(), values.data(), byteData.size());
         SetOrAddArrayWithPassID(nameHash, Type::MatrixArray, values, passID);
     }
 
     void MaterialParameterBlock::SetValue(ParamValue& dst, float v)
     {
-        dst.data[0] = v;
-        dst.rowCount = 1;
-        dst.colCount = 1;
+        memset(dst.data.data(), 0, 64);
+        *reinterpret_cast<float*>(dst.data.data()) = v;
     }
 
     void MaterialParameterBlock::SetValue(ParamValue& dst, int v)
     {
-        *reinterpret_cast<int*>(&dst.data[0]) = v;
-        dst.rowCount = 1;
-        dst.colCount = 1;
+        memset(dst.data.data(), 0, 64);
+        memcpy(dst.data.data(), &v, sizeof(int));
     }
 
-    void MaterialParameterBlock::SetValue(ParamValue& dst, unsigned int v)
+    void MaterialParameterBlock::SetValue(ParamValue& dst, UINT v)
     {
-        *reinterpret_cast<unsigned int*>(&dst.data[0]) = v;
-        dst.rowCount = 1;
-        dst.colCount = 1;
+        memset(dst.data.data(), 0, 64);
+        memcpy(dst.data.data(), &v, sizeof(UINT));
     }
 
     void MaterialParameterBlock::SetValue(ParamValue& dst, const Vector2& v)
     {
-        dst.data[0] = v.x;
-        dst.data[1] = v.y;
-        dst.rowCount = 1;
-        dst.colCount = 2;
+        memset(dst.data.data(), 0, 64);
+        *reinterpret_cast<Vector2*>(dst.data.data()) = v;
     }
 
     void MaterialParameterBlock::SetValue(ParamValue& dst, const Vector3& v)
     {
-        dst.data[0] = v.x;
-        dst.data[1] = v.y;
-        dst.data[2] = v.z;
-        dst.rowCount = 1;
-        dst.colCount = 3;
+        memset(dst.data.data(), 0, 64);
+        *reinterpret_cast<Vector3*>(dst.data.data()) = v;
     }
 
     void MaterialParameterBlock::SetValue(ParamValue& dst, const Vector4& v)
     {
-        dst.data[0] = v.x;
-        dst.data[1] = v.y;
-        dst.data[2] = v.z;
-        dst.data[3] = v.w;
-        dst.rowCount = 1;
-        dst.colCount = 4;
+        memset(dst.data.data(), 0, 64);
+        *reinterpret_cast<Vector4*>(dst.data.data()) = v;
     }
 
     void MaterialParameterBlock::SetValue(ParamValue& dst, const Matrix& m)
     {
-        for (int i = 0; i < 4; i++)
-        {
-            for (int j = 0; j < 4; j++)
-            {
-                dst.data[i * 4 + j] = m.m[i][j];
-            }
-        }
-        dst.rowCount = 4;
-        dst.colCount = 4;
+        memset(dst.data.data(), 0, 64);
+        std::memcpy(dst.data.data(), &m, sizeof(Matrix));
     }
 
     void MaterialParameterBlock::SetValue(ParamValue& dst, const math::Matrix4& m)
     {
-        for (int i = 0; i < 4; i++)
-        {
-            for (int j = 0; j < 4; j++)
-            {
-                dst.data[i * 4 + j] = m[i][j];
-            }
-        }
-        dst.rowCount = 4;
-        dst.colCount = 4;
+        memset(dst.data.data(), 0, 64);
+        std::memcpy(dst.data.data(), &m, sizeof(math::Matrix4));
     }
 
     void MaterialParameterBlock::SetValue(ParamValue& dst, const std::vector<float>& floatArray)
     {
-        dst.arrayData.reserve(floatArray.size());
-        for (auto& value : floatArray)
-        {
-            dst.arrayData.emplace_back(value);
-        }
-        dst.rowCount = 1;
-        dst.colCount = UINT(floatArray.size());
+        dst.arrayData.resize(floatArray.size() * sizeof(float));
+        std::memcpy(dst.arrayData.data(), floatArray.data(), dst.arrayData.size());
     }
 
     void MaterialParameterBlock::SetValue(ParamValue& dst, const std::vector<int>& intArray)
     {
-        dst.arrayData.reserve(intArray.size());
-        for (size_t i = 0; i < intArray.size(); i++)
-        {
-            dst.arrayData.emplace_back(intArray[i]);
-        }
-        dst.rowCount = 1;
-        dst.colCount = UINT(intArray.size());
+        dst.arrayData.resize(intArray.size() * sizeof(int));
+        std::memcpy(dst.arrayData.data(), intArray.data(), dst.arrayData.size());
     }
 
     void MaterialParameterBlock::SetValue(ParamValue& dst, const std::vector<UINT>& UINTArray)
     {
-        dst.arrayData.reserve(UINTArray.size());
-        for (size_t i = 0; i < UINTArray.size(); i++)
-        {
-            *reinterpret_cast<UINT*>(&dst.arrayData[i]) = UINTArray[i];
-        }
-        dst.rowCount = 1;
-        dst.colCount = UINT(UINTArray.size());
+        dst.arrayData.resize(UINTArray.size() * sizeof(UINT));
+        std::memcpy(dst.arrayData.data(), UINTArray.data(), dst.arrayData.size());
     }
 
     void MaterialParameterBlock::SetValue(ParamValue& dst, const std::vector<Vector2>& Vector2Array)
     {
-        dst.arrayData.reserve(2 * Vector2Array.size());
-        for (auto& value : Vector2Array)
-        {
-            dst.arrayData.emplace_back(value.x);
-            dst.arrayData.emplace_back(value.y);
-        }
-        dst.rowCount = 1;
-        dst.colCount = UINT(dst.arrayData.size());
+        size_t byteSize = Vector2Array.size() * sizeof(Vector2);
+        dst.arrayData.resize(byteSize);
+        std::memcpy(dst.arrayData.data(), Vector2Array.data(), byteSize);
     }
 
     void MaterialParameterBlock::SetValue(ParamValue& dst, const std::vector<Vector3>& Vector3Array)
     {
-        dst.arrayData.reserve(3 * Vector3Array.size());
-        for (auto& value : Vector3Array)
-        {
-            dst.arrayData.emplace_back(value.x);
-            dst.arrayData.emplace_back(value.y);
-            dst.arrayData.emplace_back(value.z);
-        }
-        dst.rowCount = 1;
-        dst.colCount = UINT(dst.arrayData.size());
+        size_t byteSize = Vector3Array.size() * sizeof(Vector3);
+        dst.arrayData.resize(byteSize);
+        std::memcpy(dst.arrayData.data(), Vector3Array.data(), byteSize);
     }
 
     void MaterialParameterBlock::SetValue(ParamValue& dst, const std::vector<Vector4>& Vector4Array)
     {
-        dst.arrayData.reserve(4 * Vector4Array.size());
-        for (auto& value : Vector4Array)
-        {
-            dst.arrayData.emplace_back(value.x);
-            dst.arrayData.emplace_back(value.y);
-            dst.arrayData.emplace_back(value.z);
-            dst.arrayData.emplace_back(value.w);
-        }
-        dst.rowCount = 1;
-        dst.colCount = dst.arrayData.size();
+        size_t byteSize = Vector4Array.size() * sizeof(Vector4);
+        dst.arrayData.resize(byteSize);
+        std::memcpy(dst.arrayData.data(), Vector4Array.data(), byteSize);
     }
 
     void MaterialParameterBlock::SetValue(ParamValue& dst, const std::vector<Matrix>& MatrixArray)
     {
-        dst.arrayData.reserve(16 * MatrixArray.size());
-        for (auto& value : MatrixArray)
-        {
-            std::vector<float> tempMatrix = {};
-            tempMatrix.reserve(16);
-            for (int i = 0; i < 4; i++)
-            {
-                for (int j = 0; j < 4; j++)
-                {
-                    tempMatrix[i * 4 + j] = value.m[i][j];
-                }
-            }
-            dst.arrayData.insert(dst.arrayData.begin(), tempMatrix.begin(), tempMatrix.end());
-        }
-        dst.rowCount = 4;
-        dst.colCount = MatrixArray.size() * 4;
+        dst.arrayData.resize(MatrixArray.size() * sizeof(Matrix));
+        std::memcpy(dst.arrayData.data(), MatrixArray.data(), dst.arrayData.size());
     }
 
     template void MaterialParameterBlock::SetOrAdd<float>(size_t, Type, const float&);
@@ -571,25 +454,58 @@ namespace ElysiaRenderer
 
     const MaterialParameterBlock::MaterialParam* MaterialParameterBlock::FindParam(size_t nameHash, size_t passID) const
     {
-        auto scopedHash = MixPassAndName(passID, nameHash);
-        auto it = std::find_if(m_params.begin(), m_params.end(),
-                               [scopedHash](const MaterialParam& p)
-                               {
-                                   return p.nameHash == scopedHash;
-                               });
-        return (it != m_params.end()) ? &(*it) : nullptr;
+        // 第一步：查找 Scoped (特定 Pass 的覆盖)
+        // 只有当传入的 passID 不是全局 ID (0) 时才执行
+        if (passID != 0)
+        {
+            auto scopedHash = MixPassAndName(passID, nameHash);
+            auto it = std::find_if(m_params.begin(), m_params.end(),
+                                   [scopedHash](const MaterialParam& p)
+                                   {
+                                       return p.nameHash == scopedHash;
+                                   });
+
+            if (it != m_params.end())
+                return &(*it);
+        }
+
+        // 第二步：回退查找 Global (全局 ID = 0)
+        auto globalHash = MixPassAndName(0, nameHash);
+        auto itGlobal = std::find_if(m_params.begin(), m_params.end(),
+                                     [globalHash](const MaterialParam& p)
+                                     {
+                                         return p.nameHash == globalHash;
+                                     });
+
+        return (itGlobal != m_params.end()) ? &(*itGlobal) : nullptr;
     }
 
     MaterialParameterBlock::MaterialParam* MaterialParameterBlock::FindParam(size_t nameHash, size_t passID)
     {
-        auto scopedHash = MixPassAndName(passID, nameHash);
-        auto it = std::find_if(m_params.begin(), m_params.end(),
-                               [scopedHash](const MaterialParam& p)
-                               {
-                                   return p.nameHash == scopedHash;
-                               });
+        // 第一步：查找 Scoped (特定 Pass 的覆盖)
+        // 只有当传入的 passID 不是全局 ID (0) 时才执行
+        if (passID != 0)
+        {
+            auto scopedHash = MixPassAndName(passID, nameHash);
+            auto it = std::find_if(m_params.begin(), m_params.end(),
+                                   [scopedHash](const MaterialParam& p)
+                                   {
+                                       return p.nameHash == scopedHash;
+                                   });
 
-        return (it != m_params.end()) ? &(*it) : nullptr;
+            if (it != m_params.end())
+                return &(*it);
+        }
+
+        // 第二步：回退查找 Global (全局 ID = 0)
+        auto globalHash = MixPassAndName(0, nameHash);
+        auto itGlobal = std::find_if(m_params.begin(), m_params.end(),
+                                     [globalHash](const MaterialParam& p)
+                                     {
+                                         return p.nameHash == globalHash;
+                                     });
+
+        return (itGlobal != m_params.end()) ? &(*itGlobal) : nullptr;
     }
 
     void MaterialParameterBlock::RemoveParam(size_t nameHash)

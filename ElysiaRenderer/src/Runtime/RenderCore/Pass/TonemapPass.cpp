@@ -82,7 +82,8 @@ namespace ElysiaRenderer
     {
         if (!UserData::GetInstance().IsUseHDR)
         {
-            m_pTempRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(static_cast<UINT64>(m_renderSize.x),
+            m_pTempRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(
+                static_cast<UINT64>(m_renderSize.x),
                 static_cast<UINT64>(m_renderSize.y),
                 DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
                 true,
@@ -94,7 +95,8 @@ namespace ElysiaRenderer
             {
             case HDRQuality::Low:
             {
-                m_pTempRT = RenderTargetManager::GetInstance().CreateRenderTexture(static_cast<UINT64>(m_renderSize.x),
+                m_pTempRT = RenderTargetManager::GetInstance().CreateRenderTexture(
+                    static_cast<UINT64>(m_renderSize.x),
                     static_cast<UINT64>(m_renderSize.y),
                     DXGI_FORMAT_R11G11B10_FLOAT,
                     L"Temp RT");
@@ -102,7 +104,8 @@ namespace ElysiaRenderer
             }
             case HDRQuality::High:
             {
-                m_pTempRT = RenderTargetManager::GetInstance().CreateRenderTexture(static_cast<UINT64>(m_renderSize.x),
+                m_pTempRT = RenderTargetManager::GetInstance().CreateRenderTexture(
+                    static_cast<UINT64>(m_renderSize.x),
                     static_cast<UINT64>(m_renderSize.y),
                     DXGI_FORMAT_R16G16B16A16_FLOAT,
                     L"Temp RT");
@@ -127,14 +130,14 @@ namespace ElysiaRenderer
             {
                 .Name = "Tonemap Pass",
                 .FilePath = L"Shaders\\public\\TonemapPass.hlsl",
-            }
+            },
         };
 
         m_pMaterial = std::move(std::make_unique<Material>(m_pDevice, m_shaderPasses));
         ShaderPasseIDs::BlitPassID = m_pMaterial->FindPassIndex("Blit Pass");
         ShaderPasseIDs::TonemapPassID = m_pMaterial->FindPassIndex("Tonemap Pass");
 
-        UpdateVariant();
+        UpdatePipeline();
     }
 
     void TonemapPass::Render(FrameContext& context)
@@ -309,19 +312,6 @@ namespace ElysiaRenderer
                  m_softGap, m_hdrMax, m_exposure, m_contrast, m_shoulderContrast,
                  m_saturation, m_crosstalk);
 
-        m_pMaterial->SetUInt(ShaderIDs::u_shoulder, m_shoulder, ShaderPasseIDs::TonemapPassID);
-        m_pMaterial->SetUInt(ShaderIDs::u_con2, m_con, ShaderPasseIDs::TonemapPassID);
-        m_pMaterial->SetUInt(ShaderIDs::u_soft, m_soft, ShaderPasseIDs::TonemapPassID);
-        m_pMaterial->SetUInt(ShaderIDs::u_con2, m_con2, ShaderPasseIDs::TonemapPassID);
-        m_pMaterial->SetUInt(ShaderIDs::u_clip, m_clip, ShaderPasseIDs::TonemapPassID);
-        m_pMaterial->SetUInt(ShaderIDs::u_scaleOnly, m_scaleOnly, ShaderPasseIDs::TonemapPassID);
-        m_pMaterial->SetUInt(ShaderIDs::u_displayMode, (UINT)UserData::GetInstance().displayMode,
-                             ShaderPasseIDs::TonemapPassID);
-        m_pMaterial->SetMatrix(ShaderIDs::u_inputToOutputMatrix, m_inputToOutputMatrix, ShaderPasseIDs::TonemapPassID);
-        m_pMaterial->SetUINTArray(ShaderIDs::u_ctl, ctl, ShaderPasseIDs::TonemapPassID);
-        m_pMaterial->SetUInt(ShaderIDs::tonemapMode, (UINT)UserData::GetInstance().tonemapMode,
-                             ShaderPasseIDs::TonemapPassID);
-
         {
             m_pCommand->AddBarrier(m_pTempRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
             m_pCommand->ClearRenderTarget(m_pTempRT, Color::Black);
@@ -338,7 +328,8 @@ namespace ElysiaRenderer
             if (isReady)
             {
                 PipelineInfo pipelineStateData{};
-                pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(ShaderPasseIDs::BlitPassID)
+                pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(
+                                                                         ShaderPasseIDs::BlitPassID)
                                                                      .pPipelineStateObject;
                 pipelineStateData.m_renderTargets = {m_pTempRT->GetTexture()};
                 pipelineStateData.m_depthStencilTarget = m_pCameraDepthRT->GetTexture();
@@ -369,14 +360,16 @@ namespace ElysiaRenderer
             m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
             PipelineInfo pipelineStateData{};
-            pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(ShaderPasseIDs::TonemapPassID)
+            pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(
+                                                                     ShaderPasseIDs::TonemapPassID)
                                                                  .pPipelineStateObject;
             pipelineStateData.m_renderTargets = {m_pCameraColorRT->GetTexture()};
             pipelineStateData.m_depthStencilTarget = m_pCameraDepthRT->GetTexture();
 
             bool isReady = true;
             {
-                if (m_pCameraColorRT->GetTexture() == nullptr || m_pCameraDepthRT->GetTexture() == nullptr)
+                if (m_pCameraColorRT->GetTexture() == nullptr || m_pCameraDepthRT->GetTexture() ==
+                    nullptr)
                 {
                     ThrowRuntimeError("null texture resource");
                 }
@@ -389,7 +382,24 @@ namespace ElysiaRenderer
                 m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_renderSize));
                 m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-                m_pMaterial->SetUInt(PropertyToID(L"blitterTextureIndex"),
+                m_pMaterial->SetBool(ShaderIDs::u_shoulder, m_shoulder,
+                                     ShaderPasseIDs::TonemapPassID);
+                m_pMaterial->SetBool(ShaderIDs::u_con2, m_con, ShaderPasseIDs::TonemapPassID);
+                m_pMaterial->SetBool(ShaderIDs::u_soft, m_soft, ShaderPasseIDs::TonemapPassID);
+                m_pMaterial->SetBool(ShaderIDs::u_con2, m_con2, ShaderPasseIDs::TonemapPassID);
+                m_pMaterial->SetBool(ShaderIDs::u_clip, m_clip, ShaderPasseIDs::TonemapPassID);
+                m_pMaterial->SetBool(ShaderIDs::u_scaleOnly, m_scaleOnly,
+                                     ShaderPasseIDs::TonemapPassID);
+                m_pMaterial->SetUInt(ShaderIDs::u_displayMode,
+                                     (UINT)m_pSwaiChain->GetDisplayMode(),
+                                     ShaderPasseIDs::TonemapPassID);
+                m_pMaterial->SetMatrix(ShaderIDs::u_inputToOutputMatrix, m_inputToOutputMatrix,
+                                       ShaderPasseIDs::TonemapPassID);
+                m_pMaterial->SetUINTArray(ShaderIDs::u_ctl, ctl, ShaderPasseIDs::TonemapPassID);
+                m_pMaterial->SetUInt(ShaderIDs::tonemapMode,
+                                     (UINT)UserData::GetInstance().tonemapMode,
+                                     ShaderPasseIDs::TonemapPassID);
+                m_pMaterial->SetUInt(ShaderIDs::blitterTextureIndex,
                                      m_pTempRT->GetTexture()->GetResourceHeapIndex(),
                                      ShaderPasseIDs::TonemapPassID);
 
@@ -404,89 +414,40 @@ namespace ElysiaRenderer
         }
     }
 
-    void TonemapPass::UpdatePSO()
-    {
-    }
-
-    void TonemapPass::UpdateVariant()
+    void TonemapPass::UpdatePipeline()
     {
         {
             std::vector<std::wstring> enableKeywords{};
 
             auto& passData = m_pMaterial->GetPassData(ShaderPasseIDs::BlitPassID);
 
-            auto emplaceResult = passData.keywords.try_emplace(enableKeywords);
-            if (emplaceResult.second)
+            auto VariantManager = passData.pShader->GetVariantManager();
+            passData.pCurrVariantData = &VariantManager->GetOrCompileVariantByNames(enableKeywords);
+
+            RenderTargetDesc RTDesc = RenderTargetDesc
             {
-                auto VariantManager = passData.pShader->GetVariantManager();
-                auto currVariantData = &VariantManager->GetOrCompileVariantByNames(enableKeywords);
-
-                if (passData.pCurrVariantData == nullptr || passData.pCurrVariantData != currVariantData)
-                {
-                    passData.pCurrVariantData = currVariantData;
-                }
-
-                RenderTargetDesc RTDesc = RenderTargetDesc
-                {
-                    .m_renderTargetFormats = m_pTempRT->GetFormat(),
-                    .m_numRenderTargets = 1,
-                    .m_depthStencilFormat = m_pCameraDepthRT->GetFormat()
-                };
-                passData.pPipelineStateObject = PSOManager::GetInstance().GetGraphicsPipelineState(
-                    m_pDevice, m_pMaterial.get(), ShaderPasseIDs::BlitPassID, RTDesc);
-
-                emplaceResult.first->second =
-                {
-                    .pCurrVariantData = currVariantData,
-                    .pPipelineStateObject = passData.pPipelineStateObject,
-                };
-            }
-            else
-            {
-                const auto& saveData = passData.keywords.at(enableKeywords);
-
-                passData.pCurrVariantData = saveData.pCurrVariantData;
-                passData.pPipelineStateObject = saveData.pPipelineStateObject;
-            }
+                .m_renderTargetFormats = m_pTempRT->GetFormat(),
+                .m_numRenderTargets = 1,
+                .m_depthStencilFormat = m_pCameraDepthRT->GetFormat()
+            };
+            passData.pPipelineStateObject = PSOManager::GetInstance().GetGraphicsPipelineState(
+                m_pDevice, m_pMaterial.get(), ShaderPasseIDs::BlitPassID, RTDesc);
         }
         {
             std::vector<std::wstring> enableKeywords{};
 
             auto& passData = m_pMaterial->GetPassData(ShaderPasseIDs::TonemapPassID);
+            auto VariantManager = passData.pShader->GetVariantManager();
+            passData.pCurrVariantData = &VariantManager->GetOrCompileVariantByNames(enableKeywords);
 
-            auto emplaceResult = passData.keywords.try_emplace(enableKeywords);
-            if (emplaceResult.second)
+            RenderTargetDesc RTDesc = RenderTargetDesc
             {
-                auto VariantManager = passData.pShader->GetVariantManager();
-                auto currVariantData = &VariantManager->GetOrCompileVariantByNames(enableKeywords);
-
-                if (passData.pCurrVariantData == nullptr || passData.pCurrVariantData != currVariantData)
-                {
-                    passData.pCurrVariantData = currVariantData;
-                }
-
-                RenderTargetDesc RTDesc = RenderTargetDesc
-                {
-                    .m_renderTargetFormats = m_pCameraColorRT->GetFormat(),
-                    .m_numRenderTargets = 1,
-                    .m_depthStencilFormat = m_pCameraDepthRT->GetFormat()
-                };
-                passData.pPipelineStateObject = PSOManager::GetInstance().GetGraphicsPipelineState(
-                    m_pDevice, m_pMaterial.get(), ShaderPasseIDs::TonemapPassID, RTDesc);
-
-                emplaceResult.first->second =
-                {
-                    .pCurrVariantData = currVariantData,
-                    .pPipelineStateObject = passData.pPipelineStateObject,
-                };
-            }
-            else
-            {
-                const auto& saveData = passData.keywords.at(enableKeywords);
-
-                passData.pCurrVariantData = saveData.pCurrVariantData;
-                passData.pPipelineStateObject = saveData.pPipelineStateObject;
-            }
+                .m_renderTargetFormats = m_pCameraColorRT->GetFormat(),
+                .m_numRenderTargets = 1,
+                .m_depthStencilFormat = m_pCameraDepthRT->GetFormat()
+            };
+            passData.pPipelineStateObject = PSOManager::GetInstance().GetGraphicsPipelineState(
+                m_pDevice, m_pMaterial.get(), ShaderPasseIDs::TonemapPassID, RTDesc);
         }
     }
 

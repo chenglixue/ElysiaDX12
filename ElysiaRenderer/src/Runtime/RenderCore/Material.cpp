@@ -68,9 +68,12 @@ namespace ElysiaRenderer
             }
 
             newPassData.pShader = std::move(m_pDevice->CreateShader(desc));
-            newPassData.BlendDesc = GetBlendState(newPassData.pShader->GetRenderStates().at(L"Blend"));
-            newPassData.RasterizerDesc = GetRasterizerState(newPassData.pShader->GetRenderStates().at(L"Rasterizer"));
-            newPassData.DepthStencilDesc = GetDepthState(newPassData.pShader->GetRenderStates().at(L"Depth"));
+            newPassData.BlendDesc = GetBlendState(
+                newPassData.pShader->GetRenderStates().at(L"Blend"));
+            newPassData.RasterizerDesc = GetRasterizerState(
+                newPassData.pShader->GetRenderStates().at(L"Rasterizer"));
+            newPassData.DepthStencilDesc = GetDepthState(
+                newPassData.pShader->GetRenderStates().at(L"Depth"));
 
             m_passDatas.emplace_back(std::move(newPassData));
         }
@@ -104,7 +107,7 @@ namespace ElysiaRenderer
 
     void Material::SetBool(size_t nameHash, bool v, size_t passID)
     {
-        m_parameterBlock.SetFloat(nameHash, v ? 1.f : 0.f, passID);
+        m_parameterBlock.SetUInt(nameHash, v ? 1 : 0, passID);
     }
 
     void Material::SetFloat(size_t nameHash, float v, size_t passID)

@@ -38,6 +38,7 @@
 
 #define UINT        uint
 #define int32_t     int
+#define UINT64      uint64_t
 
 cbuffer GlobalConstant : register(b0, perFrameSpace)
 {
@@ -54,7 +55,7 @@ cbuffer GlobalConstant : register(b0, perFrameSpace)
     // w = y/far
     float4 g_ZBufferParams;
 
-	UINT frameIndex;
+	UINT64 frameIndex;
     float nearZ;
     float farZ;
 	UINT GGX_E_LUT_Index;

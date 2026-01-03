@@ -25,12 +25,12 @@ cbuffer PassConstant : register(b0, perPassSpace)
 {
     uint blitterTextureIndex;
     UINT tonemapMode;
-    UINT u_shoulder;
-    UINT u_con;
-    UINT u_soft;
-    UINT u_con2;
-    UINT u_clip;
-    UINT u_scaleOnly;
+    bool u_shoulder;
+    bool u_con;
+    bool u_soft;
+    bool u_con2;
+    bool u_clip;
+    bool u_scaleOnly;
     UINT u_displayMode;
     matrix u_inputToOutputMatrix;
     uint4 u_ctl[24];

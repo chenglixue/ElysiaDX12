@@ -48,7 +48,8 @@ namespace ElysiaRenderer
     Renderer::Renderer() = default;
     Renderer::~Renderer() = default;
 
-    void Renderer::OnCreate(DX12Device* pDevice, SwapChain* pSwapChain, DX12GraphicsContext* context)
+    void Renderer::OnCreate(DX12Device* pDevice, SwapChain* pSwapChain,
+                            DX12GraphicsContext* context)
     {
         m_pDevice = pDevice;
         m_pGraphicsContext = context;
@@ -59,11 +60,13 @@ namespace ElysiaRenderer
         InitPSOHelpers();
     }
 
-    void Renderer::OnCreateWindowSizeDependentResources(SwapChain* pSwapChain, uint32_t Width, uint32_t Height)
+    void Renderer::OnCreateWindowSizeDependentResources(SwapChain* pSwapChain, uint32_t Width,
+                                                        uint32_t Height)
     {
         m_Width = Width;
         m_Height = Height;
-        m_viewport = {0.0f, 0.0f, static_cast<float>(Width), static_cast<float>(Height), 0.0f, 1.0f};
+        m_viewport = {0.0f, 0.0f, static_cast<float>(Width), static_cast<float>(Height), 0.0f,
+                      1.0f};
         m_rectScissor = {0, 0, (LONG)Width, (LONG)Height};
 
         CameraManager::GetInstance().CreateMainCamera(
@@ -73,7 +76,8 @@ namespace ElysiaRenderer
 
         if (!UserData::GetInstance().IsUseHDR)
         {
-            m_pCameraColorRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(Width, Height,
+            m_pCameraColorRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(
+                Width, Height,
                 DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
                 true,
                 L"Camera Color RT");
@@ -84,7 +88,8 @@ namespace ElysiaRenderer
             {
             case HDRQuality::Low:
             {
-                m_pCameraColorRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(Width, Height,
+                m_pCameraColorRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(
+                    Width, Height,
                     DXGI_FORMAT_R11G11B10_FLOAT,
                     true,
                     L"Camera Color RT");
@@ -92,7 +97,8 @@ namespace ElysiaRenderer
             }
             case HDRQuality::High:
             {
-                m_pCameraColorRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(Width, Height,
+                m_pCameraColorRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(
+                    Width, Height,
                     DXGI_FORMAT_R16G16B16A16_FLOAT,
                     true,
                     L"Camera Color RT");
@@ -106,9 +112,9 @@ namespace ElysiaRenderer
             }
         }
         m_pCameraDepthRT = RenderTargetManager::GetInstance().CreateRenderTexture(Width, Height,
-            DXGI_FORMAT_D24_UNORM_S8_UINT,
-            true,
-            L"Camera Depth RT");
+                                                                                  DXGI_FORMAT_D24_UNORM_S8_UINT,
+                                                                                  true,
+                                                                                  L"Camera Depth RT");
 
         RenderPassData passData
         {
@@ -121,15 +127,21 @@ namespace ElysiaRenderer
         };
 
         m_passes.clear();
-        m_passes.emplace_back(std::move(std::make_unique<PreDrawPass>(CameraManager::GetInstance().GetMainCamera())));
-        m_passes.emplace_back(std::move(std::make_unique<ShadowPass>(CameraManager::GetInstance().GetMainCamera())));
-        m_passes.emplace_back(std::move(std::make_unique<GBufferPass>(CameraManager::GetInstance().GetMainCamera())));
+        m_passes.emplace_back(
+            std::move(std::make_unique<PreDrawPass>(CameraManager::GetInstance().GetMainCamera())));
+        m_passes.emplace_back(
+            std::move(std::make_unique<ShadowPass>(CameraManager::GetInstance().GetMainCamera())));
+        m_passes.emplace_back(
+            std::move(std::make_unique<GBufferPass>(CameraManager::GetInstance().GetMainCamera())));
         // m_passes.emplace_back(std::move(std::make_unique<AOPass>(m_pCameraManager->GetMainCamera())));
-        m_passes.emplace_back(std::move(std::make_unique<OpaquePass>(CameraManager::GetInstance().GetMainCamera())));
-        m_passes.emplace_back(std::move(std::make_unique<TonemapPass>(CameraManager::GetInstance().GetMainCamera())));
+        m_passes.emplace_back(
+            std::move(std::make_unique<OpaquePass>(CameraManager::GetInstance().GetMainCamera())));
+        m_passes.emplace_back(
+            std::move(std::make_unique<TonemapPass>(CameraManager::GetInstance().GetMainCamera())));
         // m_passes.emplace_back(std::move(std::make_unique<BloomPass>(m_pCameraManager->GetMainCamera())));
         m_passes.emplace_back(std::move(std::make_unique<UIPass>()));
-        m_passes.emplace_back(std::move(std::make_unique<FinalBlitPass>(CameraManager::GetInstance().GetMainCamera())));
+        m_passes.emplace_back(std::move(
+            std::make_unique<FinalBlitPass>(CameraManager::GetInstance().GetMainCamera())));
         for (auto& pass : m_passes)
         {
             pass->Setup(passData);
@@ -143,7 +155,10 @@ namespace ElysiaRenderer
 
     void Renderer::OnUpdateDisplayDependentResources(SwapChain* pSwapChain)
     {
-
+        for (auto& pass : m_passes)
+        {
+            pass->UpdatePipeline();
+        }
     }
 
     void Renderer::OnRender(ElysiaEngine::FrameContext frameContext)

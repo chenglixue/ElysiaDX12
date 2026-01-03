@@ -45,27 +45,35 @@ namespace ElysiaRenderer
             {
                 *dst = RenderResource::GetInstance().GetCBVFrameVariable();
                 dst->cameraPosWS = CameraManager::GetInstance().GetMainCamera()->GetPosition4();
-                dst->lightData = std::move(LightManager::GetInstance().GetMainLight()->CreateLightData());
+                dst->lightData = std::move(
+                    LightManager::GetInstance().GetMainLight()->CreateLightData());
                 dst->frameIndex = context.frameIndex;
                 dst->nearZ = CameraManager::GetInstance().GetMainCamera()->GetNearZ();
                 dst->farZ = CameraManager::GetInstance().GetMainCamera()->GetFarZ();
-                dst->ZBufferParams = GetZBufferParams(CameraManager::GetInstance().GetMainCamera()->GetNearZ(),
-                                                      CameraManager::GetInstance().GetMainCamera()->GetFarZ());
+                dst->ZBufferParams = GetZBufferParams(
+                    CameraManager::GetInstance().GetMainCamera()->GetNearZ(),
+                    CameraManager::GetInstance().GetMainCamera()->GetFarZ());
                 dst->shadowMatrix = LightManager::GetInstance().GetMainShadow()->GetShadowMat();
-                dst->shadowSize = GetScreenSize(Vector2(LightManager::GetInstance().GetMainShadow()->GetWidth(),
-                                                        LightManager::GetInstance().GetMainShadow()->GetHeight()));
+                dst->shadowSize = GetScreenSize(Vector2(
+                    LightManager::GetInstance().GetMainShadow()->GetWidth(),
+                    LightManager::GetInstance().GetMainShadow()->GetHeight()));
 
-                dst->OpaqueColorIndex = m_pCameraDepthRT->GetResourceHeapIndex();
+                dst->OpaqueColorIndex = m_pCameraColorRT->GetResourceHeapIndex();
                 dst->OpaqueDepthIndex = m_pCameraDepthRT->GetResourceHeapIndex();
                 dst->SkyboxTexIndex =
-                    TextureManager::GetInstance().LoadResidentTexture(L"Tex\\cubemap0.dds").GetResourceHeapIndex();
+                    TextureManager::GetInstance().LoadResidentTexture(L"Tex\\cubemap0.dds").
+                                                  GetResourceHeapIndex();
                 dst->GGX_E_LUT_Index =
-                    TextureManager::GetInstance().LoadResidentTexture(L"Tex\\GGX_E_LUT.dds").GetResourceHeapIndex();
+                    TextureManager::GetInstance().LoadResidentTexture(L"Tex\\GGX_E_LUT.dds").
+                                                  GetResourceHeapIndex();
                 dst->GGX_Eavg_LUT_Index =
-                    TextureManager::GetInstance().LoadResidentTexture(L"Tex\\GGX_Eavg_LUT.dds").GetResourceHeapIndex();
+                    TextureManager::GetInstance().LoadResidentTexture(L"Tex\\GGX_Eavg_LUT.dds").
+                                                  GetResourceHeapIndex();
                 dst->BlueNoiseTexIndex =
-                    TextureManager::GetInstance().LoadResidentTexture(L"Tex\\blue_noise.dds").GetResourceHeapIndex();
-                dst->ShadowTexIndex = LightManager::GetInstance().GetMainShadowRT()->GetResourceHeapIndex();
+                    TextureManager::GetInstance().LoadResidentTexture(L"Tex\\blue_noise.dds").
+                                                  GetResourceHeapIndex();
+                dst->ShadowTexIndex = LightManager::GetInstance().GetMainShadowRT()->
+                                                                  GetResourceHeapIndex();
                 dst->GBuffer0Index = RenderTargetManager::GetInstance()
                                      .GetRenderTexture(GBufferPass::RenderTextureIDs::GBuffer0ID)
                                      ->GetResourceHeapIndex();
@@ -86,17 +94,14 @@ namespace ElysiaRenderer
                                      ->GetResourceHeapIndex();
             });
 
-        auto frameSpace = RenderResource::GetInstance().GetPerFrameBindResourceSpace(m_pDevice->GetFrameID());
+        auto frameSpace = RenderResource::GetInstance().GetPerFrameBindResourceSpace(
+            m_pDevice->GetFrameID());
         frameSpace->Reset();
         frameSpace->SetDynamicCBV(GPUAddress);
         frameSpace->Lock();
     }
 
-    void PreDrawPass::UpdatePSO()
-    {
-    }
-
-    void PreDrawPass::UpdateVariant()
+    void PreDrawPass::UpdatePipeline()
     {
     }
 } // namespace ElysiaRenderer

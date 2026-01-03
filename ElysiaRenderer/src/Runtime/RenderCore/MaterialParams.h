@@ -27,14 +27,12 @@ namespace ElysiaRenderer
 
         struct ParamValue
         {
-            std::array<float, 16> data{}; // 最大支持 mat4x4
-            uint32_t rowCount = 1;
-            uint32_t colCount = 1;
+            std::array<uint8_t, 64> data{}; // 最大支持 mat4x4
 
-            std::vector<float> arrayData{};
+            std::vector<uint8_t> arrayData{};
 
-            bool operator==(const ParamValue& other) const;
             bool Equals(const ParamValue& other, Type type, float tolerance = 1e-6f) const;
+
         };
 
         struct MaterialParam
@@ -132,5 +130,11 @@ namespace ElysiaRenderer
         size_t MixPassAndName(size_t passID, size_t nameHash) const;
     };
 
-
+    inline bool IsArrayType(MaterialParameterBlock::Type type)
+    {
+        return type == MaterialParameterBlock::Type::Float2Array || type == MaterialParameterBlock::Type::Float3Array ||
+               type == MaterialParameterBlock::Type::Float4Array
+               || type == MaterialParameterBlock::Type::MatrixArray
+               || type == MaterialParameterBlock::Type::IntArray || type == MaterialParameterBlock::Type::UIntArray;
+    };
 }

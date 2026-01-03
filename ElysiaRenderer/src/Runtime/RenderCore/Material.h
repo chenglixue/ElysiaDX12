@@ -4,6 +4,7 @@
 #include "Runtime/Core/ShaderUtility.h"
 #include "Programs/Hash.h"
 #include "MaterialParams.h"
+#include "Runtime/Core/DX12RootSignature.h"
 
 namespace std
 {
@@ -49,20 +50,13 @@ namespace ElysiaRenderer
         UINT PassIndex;
         std::string Name;
         std::unique_ptr<DX12Shader> pShader = nullptr;
+        std::unique_ptr<DX12RootSignature> pRootSignature = nullptr;
+        PipelineResourceMapping resourceMapping;
         D3D12_RASTERIZER_DESC RasterizerDesc;
         D3D12_BLEND_DESC BlendDesc;
         D3D12_DEPTH_STENCIL_DESC DepthStencilDesc;
         ShaderVariantData* pCurrVariantData = nullptr;
         PipelineStateObject* pPipelineStateObject = nullptr;
-
-        struct SaveData
-        {
-            ShaderVariantData* pCurrVariantData = nullptr;
-            PipelineStateObject* pPipelineStateObject = nullptr;
-        };
-
-        // enableKeywords : SaveData
-        std::unordered_map<std::vector<std::wstring>, SaveData> keywords;
 
         PipelineResourceLayout* GetMeshResourceLayout()
         {
@@ -99,9 +93,12 @@ namespace ElysiaRenderer
         void SetFloatArray(size_t nameHash, const std::vector<float>& values, size_t passID = 0);
         void SetIntArray(size_t nameHash, const std::vector<int>& values, size_t passID = 0);
         void SetUINTArray(size_t nameHash, const std::vector<UINT>& values, size_t passID = 0);
-        void SetVector2Array(size_t nameHash, const std::vector<Vector2>& values, size_t passID = 0);
-        void SetVector3Array(size_t nameHash, const std::vector<Vector3>& values, size_t passID = 0);
-        void SetVector4Array(size_t nameHash, const std::vector<Vector4>& values, size_t passID = 0);
+        void SetVector2Array(size_t nameHash, const std::vector<Vector2>& values,
+                             size_t passID = 0);
+        void SetVector3Array(size_t nameHash, const std::vector<Vector3>& values,
+                             size_t passID = 0);
+        void SetVector4Array(size_t nameHash, const std::vector<Vector4>& values,
+                             size_t passID = 0);
         void SetMatrixArray(size_t nameHash, const std::vector<Matrix>& values, size_t passID = 0);
 
     private:
