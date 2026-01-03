@@ -7,14 +7,14 @@
 namespace ElysiaRenderer
 {
     using namespace ElysiaHelper;
-    
+
     std::unique_ptr<RenderTargetManager> RenderTargetManager::m_instance;
     std::once_flag RenderTargetManager::m_initInstanceFlag;
 
     RenderTargetManager::RenderTargetManager() = default;
     RenderTargetManager::~RenderTargetManager() = default;
 
-    void RenderTargetManager::Destory() 
+    void RenderTargetManager::Destory()
     {
         for (auto& RT : m_renderTextures)
         {
@@ -30,38 +30,45 @@ namespace ElysiaRenderer
         assert(pDevice);
         m_pDevice = pDevice;
     }
-    
+
     RenderTexture* RenderTargetManager::GetRenderTexture(const std::wstring& name) const
     {
         auto nameHash = xxh::GetHash(name);
-        if(m_renderTextures.contains(nameHash))
+        if (m_renderTextures.contains(nameHash))
         {
             return m_renderTextures.at(nameHash).get();
         }
-        
+
         assert("not find target render texture");
-        
+
         return nullptr;
     }
     RenderTexture* RenderTargetManager::GetRenderTexture(size_t nameHash) const
     {
-        if(m_renderTextures.contains(nameHash))
+        if (m_renderTextures.contains(nameHash))
         {
             return m_renderTextures.at(nameHash).get();
         }
-        
+
         assert("not find target render texture");
-        
+
         return nullptr;
     }
 
     RenderTexture* RenderTargetManager::CreateRenderTexture(
-        UINT64 width, 
+        UINT64 width,
         UINT64 height,
         DXGI_FORMAT format,
         const std::wstring& name)
     {
         auto nameHash = xxh::GetHash(name);
+
+        RenderTextureDesc desc{};
+        desc.Width = width;
+        desc.Height = height;
+        desc.Format = format;
+        desc.Name = name;
+
         if (m_renderTextures.contains(nameHash))
         {
             auto RT = GetRenderTexture(nameHash);
@@ -72,29 +79,21 @@ namespace ElysiaRenderer
             else
             {
                 m_renderTextures.at(nameHash).reset();
+                auto newRT = std::make_unique<RenderTexture>();
+                newRT->Init(m_pDevice, desc);
+                m_renderTextures[nameHash] = std::move(newRT);
             }
         }
-        
-        RenderTextureDesc desc{};
-        desc.Width = width;
-        desc.Height = height;
-        desc.Format = format;
-        desc.Name = name;
-
-        auto newRT = std::make_unique<RenderTexture>();
-        
-        auto emplaceResult = m_renderTextures.try_emplace(xxh::GetHash(name));
-        if(emplaceResult.second)
+        else
         {
+            auto newRT = std::make_unique<RenderTexture>();
             newRT->Init(m_pDevice, desc);
-            emplaceResult.first->second = std::move(newRT);
-            
-            return emplaceResult.first->second.get();
+            m_renderTextures.emplace(nameHash, std::move(newRT));
         }
-        
-        return m_renderTextures.at(xxh::GetHash(name)).get();
+
+        return m_renderTextures.at(nameHash).get();
     }
-        
+
     RenderTexture* RenderTargetManager::CreateRenderTexture(
         UINT64 width,
         UINT64 height,
@@ -103,7 +102,7 @@ namespace ElysiaRenderer
         const std::wstring& name)
     {
         auto nameHash = xxh::GetHash(name);
-        
+
         RenderTextureDesc desc{};
         desc.Width = width;
         desc.Height = height;
@@ -121,20 +120,19 @@ namespace ElysiaRenderer
             else
             {
                 m_renderTextures.at(nameHash).reset();
+                auto newRT = std::make_unique<RenderTexture>();
+                newRT->Init(m_pDevice, desc);
+                m_renderTextures[nameHash] = std::move(newRT);
             }
         }
-
-        auto newRT = std::make_unique<RenderTexture>();
-        auto emplaceResult = m_renderTextures.try_emplace(xxh::GetHash(name));
-        if(emplaceResult.second)
+        else
         {
+            auto newRT = std::make_unique<RenderTexture>();
             newRT->Init(m_pDevice, desc);
-            emplaceResult.first->second = std::move(newRT);
-            
-            return emplaceResult.first->second.get();
+            m_renderTextures.emplace(nameHash, std::move(newRT));
         }
-        
-        return m_renderTextures.at(xxh::GetHash(name)).get();
+
+        return m_renderTextures.at(nameHash).get();
     }
 
     RenderTexture* RenderTargetManager::CreateRWRenderTexture(
@@ -145,6 +143,13 @@ namespace ElysiaRenderer
         const std::wstring& name)
     {
         auto nameHash = xxh::GetHash(name);
+        RenderTextureDesc desc{};
+        desc.Width = width;
+        desc.Height = height;
+        desc.Format = format;
+        desc.Name = name;
+        desc.EnableRandomWrite = enableRandomWrite;
+
         if (m_renderTextures.contains(nameHash))
         {
             auto RT = GetRenderTexture(nameHash);
@@ -155,27 +160,19 @@ namespace ElysiaRenderer
             else
             {
                 m_renderTextures.at(nameHash).reset();
+                auto newRT = std::make_unique<RenderTexture>();
+                newRT->Init(m_pDevice, desc);
+                m_renderTextures[nameHash] = std::move(newRT);
             }
         }
-        
-        RenderTextureDesc desc{};
-        desc.Width = width;
-        desc.Height = height;
-        desc.Format = format;
-        desc.Name = name;
-        desc.EnableRandomWrite = enableRandomWrite;
-
-        auto newRT = std::make_unique<RenderTexture>();
-        auto emplaceResult = m_renderTextures.try_emplace(xxh::GetHash(name));
-        if(emplaceResult.second)
+        else
         {
+            auto newRT = std::make_unique<RenderTexture>();
             newRT->Init(m_pDevice, desc);
-            emplaceResult.first->second = std::move(newRT);
-            
-            return emplaceResult.first->second.get();
+            m_renderTextures.emplace(nameHash, std::move(newRT));
         }
-        
-        return m_renderTextures.at(xxh::GetHash(name)).get();
+
+        return m_renderTextures.at(nameHash).get();
     }
 
 }

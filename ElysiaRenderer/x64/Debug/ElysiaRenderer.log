@@ -1,4 +1,6 @@
 ﻿  Skipping vcpkg. (no packages)
+cl : command line  warning D9014: invalid value '18' for '/wd'; assuming '5999'
+  MaterialParams.cpp
   ElysiaRenderer.vcxproj -> D:\DX12\ElysiaDX12\x64\Debug\ElysiaRenderer.exe
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Mesh\diablo3_pose.obj
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Mesh\LOW_WEPON.fbx

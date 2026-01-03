@@ -12,14 +12,8 @@
 
 namespace ElysiaRenderer
 {
-    BasePass::BasePass()
-    {
-
-    }
-
-    BasePass::BasePass(DX12Camera* pCamera) :
-        m_renderSize(Vector2::Zero),
-        m_pCamera(pCamera)
+    BasePass::BasePass():
+        m_renderSize(Vector2::Zero)
     {
 
     }
@@ -65,7 +59,8 @@ namespace ElysiaRenderer
 
         D3D12_GPU_VIRTUAL_ADDRESS GPUAddress;
         UINT8* CPUAddress = nullptr;
-        if (!pUploadBuffer->AllocateForFrame(m_pDevice->GetFrameID(), totalSize, GPUAddress, CPUAddress))
+        if (!pUploadBuffer->AllocateForFrame(m_pDevice->GetFrameID(), totalSize, GPUAddress,
+                                             CPUAddress))
         {
             assert(false && "UploadRingBuffer is full! Call Reset() at beginning of frame.");
             return 0;
@@ -75,8 +70,10 @@ namespace ElysiaRenderer
         for (const auto& memberPair : CBuffer.members)
         {
             auto& member = memberPair.second;
-            const MaterialParameterBlock::MaterialParam* pMaterialParam = pMaterial->GetParameterBlock().FindParam(
-                member.Name, passID);
+            const MaterialParameterBlock::MaterialParam* pMaterialParam = pMaterial->
+                                                                          GetParameterBlock().
+                                                                          FindParam(
+                                                                              member.Name, passID);
             if (!pMaterialParam)
                 continue;
 
@@ -85,8 +82,9 @@ namespace ElysiaRenderer
             {
                 if (!pMaterialParam->value.arrayData.empty())
                 {
-                    size_t copySize = std::min(pMaterialParam->value.arrayData.size() * sizeof(float),
-                                               size_t(member.Size));
+                    size_t copySize = std::min(
+                        pMaterialParam->value.arrayData.size() * sizeof(float),
+                        size_t(member.Size));
                     memcpy(dest, pMaterialParam->value.arrayData.data(), copySize);
                 }
             }
@@ -117,9 +115,10 @@ namespace ElysiaRenderer
                     pResourceLayout->m_spaces[spaceID] = nullptr;
                 }
 
-                auto GPUAddress = UploadMaterialConstants(BufferManager::GetInstance().GetUploadRingBuffer(), spaceID,
-                                                          m_pMaterial.get(), passData.pCurrVariantData,
-                                                          passData.PassIndex);
+                auto GPUAddress = UploadMaterialConstants(
+                    BufferManager::GetInstance().GetUploadRingBuffer(), spaceID,
+                    m_pMaterial.get(), passData.pCurrVariantData,
+                    passData.PassIndex);
                 auto newSpace = std::make_unique<PipelineResourceSpace>();
                 newSpace->SetDynamicCBV(GPUAddress);
                 newSpace->Lock();
@@ -137,10 +136,12 @@ namespace ElysiaRenderer
 
             if (pResourceLayout->IsValidSpace(spaceID))
             {
-                pResourceLayout->m_spaces[PER_FRAME_SPACE] = RenderResource::GetInstance().GetPerFrameBindResourceSpace(
-                    m_pDevice->GetFrameID());
+                pResourceLayout->m_spaces[PER_FRAME_SPACE] = RenderResource::GetInstance().
+                    GetPerFrameBindResourceSpace(
+                        m_pDevice->GetFrameID());
                 m_pCommand->SetPipelineResource(PER_FRAME_SPACE,
-                                                passData.pCurrVariantData->pMeshResourceLayout->m_spaces[
+                                                passData.pCurrVariantData->pMeshResourceLayout->
+                                                         m_spaces[
                                                     PER_FRAME_SPACE]);
             }
         }

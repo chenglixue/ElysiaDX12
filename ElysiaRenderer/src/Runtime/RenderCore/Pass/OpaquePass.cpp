@@ -31,8 +31,8 @@ namespace ElysiaRenderer
     size_t OpaquePass::ShaderIDs::viewProjMatrix = SIZE_MAX;
     size_t OpaquePass::ShaderIDs::viewProjMatrix_I = SIZE_MAX;
 
-    OpaquePass::OpaquePass(DX12Camera* pCamera):
-        BasePass(pCamera)
+    OpaquePass::OpaquePass():
+        BasePass()
     {
         ShaderIDs::g_AOIndex = PropertyToID(L"g_AOIndex");
 
@@ -76,6 +76,8 @@ namespace ElysiaRenderer
 
     void OpaquePass::Render(ElysiaEngine::FrameContext& context)
     {
+        m_pCamera = context.pCamera;
+
         PIXHelper pix(m_pCommand->GetCommandList(), "Opaque Light Pass");
 
         m_pMaterial->SetFloat4(ShaderIDs::screenSize,
@@ -94,44 +96,34 @@ namespace ElysiaRenderer
 
     void OpaquePass::DrawLightingPass(ElysiaEngine::FrameContext& context)
     {
-        bool isReady = true;
+        auto& passData = m_pMaterial->GetPassData(ShaderPassIDs::OpaqueLightPassID);
+        assert(passData.pPipelineStateObject);
+
+        m_pCommand->AddBarrier(m_pCameraColorRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+        m_pCommand->ClearRenderTarget(m_pCameraColorRT, Color::Black);
+
+        PipelineInfo pipelineStateData
         {
-            if (m_pCameraColorRT->GetTexture() == nullptr || m_pCameraDepthRT->GetTexture() ==
-                nullptr)
-            {
-                ThrowRuntimeError("null texture resource");
-            }
-            isReady &= m_pCameraColorRT->GetTexture()->GetIsReady();
-            isReady &= m_pCameraDepthRT->GetTexture()->GetIsReady();
-        }
-        if (isReady)
-        {
-            auto& passData = m_pMaterial->GetPassData(ShaderPassIDs::OpaqueLightPassID);
-            assert(passData.pPipelineStateObject);
+            .m_pipelineStateObject = passData.pPipelineStateObject,
+            .m_renderTargets = {m_pCameraColorRT->GetTexture()},
+            .m_depthStencilTarget = m_pCameraDepthRT->GetTexture()
+        };
+        m_pCommand->SetPipeline(pipelineStateData);
+        m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_renderSize));
+        m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-            m_pCommand->AddBarrier(m_pCameraColorRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
-            m_pCommand->ClearRenderTarget(m_pCameraColorRT, Color::Black);
+        SetSpaceResource(passData, PER_PASS_SPACE);
+        SetSpaceResource(passData, PER_FRAME_SPACE);
+        m_pCommand->DrawFullScreenTriangle();
 
-            PipelineInfo pipelineStateData
-            {
-                .m_pipelineStateObject = passData.pPipelineStateObject,
-                .m_renderTargets = {m_pCameraColorRT->GetTexture()},
-                .m_depthStencilTarget = m_pCameraDepthRT->GetTexture()
-            };
-            m_pCommand->SetPipeline(pipelineStateData);
-            m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_renderSize));
-            m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-            SetSpaceResource(passData, PER_PASS_SPACE);
-            SetSpaceResource(passData, PER_FRAME_SPACE);
-            m_pCommand->DrawFullScreenTriangle();
-
-            m_pCommand->AddBarrier(m_pCameraColorRT, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-        }
+        m_pCommand->AddBarrier(m_pCameraColorRT, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
     }
 
     void OpaquePass::UpdatePipeline()
     {
+        if (!m_pMaterial)
+            return;
+
         UpdateLightingPassVariant(ShaderPassIDs::OpaqueLightPassID);
     }
 

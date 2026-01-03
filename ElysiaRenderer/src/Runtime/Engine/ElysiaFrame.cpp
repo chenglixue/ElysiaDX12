@@ -189,6 +189,7 @@ namespace ElysiaEngine
             BufferManager::GetInstance().Update(frameContext);
         }
 
+        frameContext.pCamera = CameraManager::GetInstance().GetMainCamera();
         m_pRenderer->OnRender(frameContext);
 
         m_pDevice->SubmitContextWork(*m_pGraphicsContext);

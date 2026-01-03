@@ -23,8 +23,8 @@ namespace ElysiaRenderer
     int FinalBlitPass::ShaderPassIDs::BlitPassID = -1;
     size_t FinalBlitPass::ShaderIDs::blitterTextureIndex = SIZE_MAX;
 
-    FinalBlitPass::FinalBlitPass(DX12Camera* pCamera) :
-        BasePass(pCamera)
+    FinalBlitPass::FinalBlitPass() :
+        BasePass()
     {
         ShaderIDs::blitterTextureIndex = PropertyToID(L"blitterTextureIndex");
     }
@@ -55,6 +55,8 @@ namespace ElysiaRenderer
     }
     void FinalBlitPass::Render(ElysiaEngine::FrameContext& context)
     {
+        m_pCamera = context.pCamera;
+
         PIXHelper pix(m_pCommand->GetCommandList(), "Final Blit Pass");
 
         DoFinalBlit();
@@ -71,21 +73,12 @@ namespace ElysiaRenderer
         pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(
             ShaderPassIDs::BlitPassID).pPipelineStateObject;
         pipelineStateData.m_renderTargets.emplace_back(&backBuffer);
-        pipelineStateData.m_depthStencilTarget = m_pCameraDepthRT->GetTexture();
+        //pipelineStateData.m_depthStencilTarget = m_pCameraDepthRT->GetTexture();
         m_pCommand->SetPipeline(pipelineStateData);
 
         auto& passData = m_pMaterial->GetPassData(ShaderPassIDs::BlitPassID);
         SetSpaceResource(passData, PER_PASS_SPACE);
 
-        bool isReady = true;
-        {
-            if (m_pCameraDepthRT == nullptr)
-            {
-                ThrowRuntimeError("nullptr");
-            }
-            isReady &= m_pCameraDepthRT->GetTexture()->GetIsReady();
-        }
-        if (isReady)
         {
             switch (UserData::GetInstance().debugMode)
             {
@@ -127,6 +120,9 @@ namespace ElysiaRenderer
 
     void FinalBlitPass::UpdatePipeline()
     {
+        if (!m_pMaterial)
+            return;
+
         UpdateFinalBlitVariant(ShaderPassIDs::BlitPassID);
     }
     void FinalBlitPass::UpdateFinalBlitVariant(UINT passID)

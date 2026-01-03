@@ -20,7 +20,7 @@
 
 namespace ElysiaRenderer
 {
-    PreDrawPass::PreDrawPass(DX12Camera* pCamera) : BasePass(pCamera)
+    PreDrawPass::PreDrawPass() : BasePass()
     {
     }
 
@@ -39,6 +39,8 @@ namespace ElysiaRenderer
 
     void PreDrawPass::Render(FrameContext& context)
     {
+        m_pCamera = context.pCamera;
+
         auto GPUAddress = UploadFrameConstant(
             m_pDevice,
             [this, context](CBVFrameVariable* dst)
@@ -103,5 +105,8 @@ namespace ElysiaRenderer
 
     void PreDrawPass::UpdatePipeline()
     {
+        if (!m_pMaterial)
+            return;
+
     }
 } // namespace ElysiaRenderer

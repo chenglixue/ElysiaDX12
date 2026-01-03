@@ -21,7 +21,7 @@ namespace ElysiaRenderer
             static size_t GBuffer5ID;
         };
 
-        GBufferPass(DX12Camera* pCamera);
+        GBufferPass();
         virtual ~GBufferPass() override;
 
         //virtual void Setup(const RenderPassData& renderPassData) override;

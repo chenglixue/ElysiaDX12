@@ -8,7 +8,7 @@ namespace ElysiaRenderer
     class OpaquePass : public BasePass
     {
     public:
-        OpaquePass(DX12Camera* pCamera);
+        OpaquePass();
         virtual ~OpaquePass() override;
 
         virtual void Configure() override;

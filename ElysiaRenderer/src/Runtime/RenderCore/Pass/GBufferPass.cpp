@@ -57,8 +57,7 @@ namespace ElysiaRenderer
     size_t GBufferPass::ShaderIDs::ambientCubemapIntensity = PropertyToID(
         L"ambientCubemapIntensity");
 
-    GBufferPass::GBufferPass(DX12Camera* pCamera) :
-        BasePass(pCamera)
+    GBufferPass::GBufferPass() : BasePass()
     {
 
     }
@@ -88,6 +87,8 @@ namespace ElysiaRenderer
 
     void GBufferPass::Render(ElysiaEngine::FrameContext& context)
     {
+        m_pCamera = context.pCamera;
+
         PIXHelper pix(m_pCommand->GetCommandList(), "GBuffer Pass");
 
         m_pMaterial->SetFloat4(ShaderIDs::screenSize,
@@ -121,6 +122,7 @@ namespace ElysiaRenderer
 
     void GBufferPass::CreateRTs()
     {
+        m_GBufferRTs.clear();
         // Base Color , ShadingModel
         {
             auto pGBufferRT = RenderTargetManager::GetInstance().CreateRenderTexture(
@@ -208,6 +210,8 @@ namespace ElysiaRenderer
 
     void GBufferPass::UpdatePipeline()
     {
+        if (!m_pMaterial)
+            return;
         UpdateGBufferPassVariant(ShaderPassIDs::GBufferPassID);
     }
 
@@ -273,31 +277,12 @@ namespace ElysiaRenderer
         }
         m_pCommand->AddBarrier(m_pCameraDepthRT, D3D12_RESOURCE_STATE_DEPTH_WRITE, false);
         m_pCommand->FlushBarrier();
-
         for (auto& RT : m_GBufferRTs)
         {
             m_pCommand->ClearRenderTarget(RT, Color::Black);
         }
         m_pCommand->ClearDepthStencilTarget(m_pCameraDepthRT, 1.f, 0);
 
-        bool isReady = true;
-        {
-            for (auto& RT : m_GBufferRTs)
-            {
-                if (RT->GetTexture() == nullptr)
-                {
-                    ThrowRuntimeError("null texture resource");
-                }
-                isReady &= RT->GetTexture()->GetIsReady();
-            }
-
-            if (m_pCameraDepthRT->GetTexture() == nullptr)
-            {
-                ThrowRuntimeError("null texture resource");
-            }
-            isReady &= m_pCameraDepthRT->GetTexture()->GetIsReady();
-        }
-        if (isReady)
         {
             PipelineInfo pipelineStateData{};
             pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(

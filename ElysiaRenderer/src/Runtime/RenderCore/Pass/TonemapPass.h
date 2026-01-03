@@ -16,7 +16,6 @@ namespace ElysiaRenderer
     {
     public:
         TonemapPass();
-        TonemapPass(DX12Camera* pCamera);
         virtual ~TonemapPass() override;
 
         virtual void Configure() override;

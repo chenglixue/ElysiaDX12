@@ -9,8 +9,7 @@ namespace ElysiaRenderer
     class FinalBlitPass : public BasePass
     {
     public:
-        FinalBlitPass() = default;
-        FinalBlitPass(DX12Camera* pCamera);
+        FinalBlitPass();
         virtual ~FinalBlitPass() override;
 
         virtual void Configure() override;

@@ -36,7 +36,7 @@ namespace ElysiaRenderer
         };
 
     public:
-        ShadowPass(DX12Camera* pCamera);
+        ShadowPass();
         virtual ~ShadowPass() override;
 
         virtual void Configure() override;

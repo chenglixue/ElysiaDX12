@@ -53,8 +53,8 @@ namespace ElysiaRenderer
     size_t TonemapPass::ShaderIDs::tonemapMode = SIZE_MAX;
     size_t TonemapPass::ShaderIDs::blitterTextureIndex = SIZE_MAX;
 
-    TonemapPass::TonemapPass(DX12Camera* pCamera) :
-        BasePass(pCamera)
+    TonemapPass::TonemapPass() :
+        BasePass()
     {
         ShaderIDs::u_shoulder = PropertyToID(L"u_shoulder");
         ShaderIDs::u_con = PropertyToID(L"u_con");
@@ -142,6 +142,8 @@ namespace ElysiaRenderer
 
     void TonemapPass::Render(FrameContext& context)
     {
+        m_pCamera = context.pCamera;
+
         PIXHelper pix(m_pCommand->GetCommandList(), "Tonemap Pass");
 
         SetupGamutMapperMatrices(
@@ -316,16 +318,6 @@ namespace ElysiaRenderer
             m_pCommand->AddBarrier(m_pTempRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
             m_pCommand->ClearRenderTarget(m_pTempRT, Color::Black);
 
-            bool isReady = true;
-            {
-                if (m_pTempRT->GetTexture() == nullptr || m_pCameraDepthRT->GetTexture() == nullptr)
-                {
-                    ThrowRuntimeError("null texture resource");
-                }
-                isReady &= m_pTempRT->GetTexture()->GetIsReady();
-                isReady &= m_pCameraDepthRT->GetTexture()->GetIsReady();
-            }
-            if (isReady)
             {
                 PipelineInfo pipelineStateData{};
                 pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(
@@ -366,17 +358,6 @@ namespace ElysiaRenderer
             pipelineStateData.m_renderTargets = {m_pCameraColorRT->GetTexture()};
             pipelineStateData.m_depthStencilTarget = m_pCameraDepthRT->GetTexture();
 
-            bool isReady = true;
-            {
-                if (m_pCameraColorRT->GetTexture() == nullptr || m_pCameraDepthRT->GetTexture() ==
-                    nullptr)
-                {
-                    ThrowRuntimeError("null texture resource");
-                }
-                isReady &= m_pCameraColorRT->GetTexture()->GetIsReady();
-                isReady &= m_pCameraDepthRT->GetTexture()->GetIsReady();
-            }
-            if (isReady)
             {
                 m_pCommand->SetPipeline(pipelineStateData);
                 m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_renderSize));
@@ -416,6 +397,9 @@ namespace ElysiaRenderer
 
     void TonemapPass::UpdatePipeline()
     {
+        if (!m_pMaterial)
+            return;
+
         {
             std::vector<std::wstring> enableKeywords{};
 

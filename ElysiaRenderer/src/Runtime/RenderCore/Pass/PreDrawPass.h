@@ -6,7 +6,7 @@ namespace ElysiaRenderer
     class PreDrawPass : public BasePass
     {
     public:
-        PreDrawPass(DX12Camera* pCamera);
+        PreDrawPass();
         virtual ~PreDrawPass() override;
 
         //virtual void Setup(const RenderPassData& renderPasssData) override;

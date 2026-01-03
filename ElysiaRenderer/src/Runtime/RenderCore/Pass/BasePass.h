@@ -29,7 +29,6 @@ namespace ElysiaRenderer
     {
     public:
         BasePass();
-        BasePass(DX12Camera* pCamera);
         virtual ~BasePass();
 
         virtual void Setup(const RenderPassData& renderPassData);

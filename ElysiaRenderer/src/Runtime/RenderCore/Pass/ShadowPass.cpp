@@ -43,10 +43,9 @@ namespace ElysiaRenderer
     size_t ShadowPass::ShaderIDs::opacity = PropertyToID(L"opacity");
     size_t ShadowPass::ShaderIDs::cutoff = PropertyToID(L"cutoff");
 
-    ShadowPass::ShadowPass(DX12Camera* pCamera) :
-        BasePass(pCamera)
+    ShadowPass::ShadowPass() : BasePass()
     {
-    };
+    }
     ShadowPass::~ShadowPass()
     {
         Dispose();
@@ -76,6 +75,8 @@ namespace ElysiaRenderer
     }
     void ShadowPass::Render(ElysiaEngine::FrameContext& context)
     {
+        m_pCamera = context.pCamera;
+
         PIXHelper pix(m_pCommand->GetCommandList(), "Shadow Pass");
 
         m_pMaterial->SetFloat(ShaderIDs::shadowNearZ,
@@ -95,6 +96,9 @@ namespace ElysiaRenderer
 
     void ShadowPass::UpdatePipeline()
     {
+        if (!m_pMaterial)
+            return;
+
         UpdateShadowPassVariant(ShaderPassIDs::ShadowCastPassID);
     }
     void ShadowPass::UpdateShadowPassVariant(UINT passIndex)
@@ -184,7 +188,6 @@ namespace ElysiaRenderer
         m_pCommand->AddBarrier(pShadowRT, D3D12_RESOURCE_STATE_DEPTH_WRITE);
         m_pCommand->ClearDepthStencilTarget(pShadowRT, 1.f, 0);
 
-        if (IsRenderTextureReady({pShadowRT}))
         {
             PipelineInfo pipelineStateData{};
             pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(

@@ -58,6 +58,23 @@ namespace ElysiaRenderer
         m_GPUTimer.OnCreate(pDevice, NUM_BACK_BUFFERS);
 
         InitPSOHelpers();
+
+        m_passes.clear();
+        m_passes.emplace_back(
+            std::move(std::make_unique<PreDrawPass>()));
+        m_passes.emplace_back(
+            std::move(std::make_unique<ShadowPass>()));
+        m_passes.emplace_back(
+            std::move(std::make_unique<GBufferPass>()));
+        // m_passes.emplace_back(std::move(std::make_unique<AOPass>(m_pCameraManager->GetMainCamera())));
+        m_passes.emplace_back(
+            std::move(std::make_unique<OpaquePass>()));
+        m_passes.emplace_back(
+            std::move(std::make_unique<TonemapPass>()));
+        // m_passes.emplace_back(std::move(std::make_unique<BloomPass>(m_pCameraManager->GetMainCamera())));
+        m_passes.emplace_back(std::move(std::make_unique<UIPass>()));
+        m_passes.emplace_back(std::move(
+            std::make_unique<FinalBlitPass>()));
     }
 
     void Renderer::OnCreateWindowSizeDependentResources(SwapChain* pSwapChain, uint32_t Width,
@@ -72,7 +89,7 @@ namespace ElysiaRenderer
         CameraManager::GetInstance().CreateMainCamera(
             Vector3(-11.5f, 200.85f, -0.45f),
             static_cast<float>(Width) / static_cast<float>(Height),
-            3.14159f / 4.0f, 0.1f, 2000.f);
+            AMD_PI_OVER_4, 0.1f, 2000.f);
 
         if (!UserData::GetInstance().IsUseHDR)
         {
@@ -126,22 +143,6 @@ namespace ElysiaRenderer
             .pCameraDepthRT = m_pCameraDepthRT
         };
 
-        m_passes.clear();
-        m_passes.emplace_back(
-            std::move(std::make_unique<PreDrawPass>(CameraManager::GetInstance().GetMainCamera())));
-        m_passes.emplace_back(
-            std::move(std::make_unique<ShadowPass>(CameraManager::GetInstance().GetMainCamera())));
-        m_passes.emplace_back(
-            std::move(std::make_unique<GBufferPass>(CameraManager::GetInstance().GetMainCamera())));
-        // m_passes.emplace_back(std::move(std::make_unique<AOPass>(m_pCameraManager->GetMainCamera())));
-        m_passes.emplace_back(
-            std::move(std::make_unique<OpaquePass>(CameraManager::GetInstance().GetMainCamera())));
-        m_passes.emplace_back(
-            std::move(std::make_unique<TonemapPass>(CameraManager::GetInstance().GetMainCamera())));
-        // m_passes.emplace_back(std::move(std::make_unique<BloomPass>(m_pCameraManager->GetMainCamera())));
-        m_passes.emplace_back(std::move(std::make_unique<UIPass>()));
-        m_passes.emplace_back(std::move(
-            std::make_unique<FinalBlitPass>(CameraManager::GetInstance().GetMainCamera())));
         for (auto& pass : m_passes)
         {
             pass->Setup(passData);
