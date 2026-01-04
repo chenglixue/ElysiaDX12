@@ -8,9 +8,9 @@
 namespace ElysiaEngine
 {
     LRESULT CALLBACK WindowProc(HWND hWnd,
-    UINT message,
-    WPARAM wParam,
-    LPARAM lParam);
+                                UINT message,
+                                WPARAM wParam,
+                                LPARAM lParam);
 
     static const wchar_t* const WINDOW_CLASS_NAME = L"Elysia Engine";
     static FrameworkWindows* pFrameworkInstance = nullptr;
@@ -30,7 +30,7 @@ namespace ElysiaEngine
     static constexpr bool ENABLE_GPU_VALIDATION_DEFAULT = false;
 #endif
 
-    int RunFramework(HINSTANCE hInstance, LPSTR lpCmdLine, int nCmdShow, FrameworkWindows *pFramework)
+    int RunFramework(HINSTANCE hInstance, LPSTR lpCmdLine, int nCmdShow, FrameworkWindows* pFramework)
     {
         // Init logging
         int result = Log::InitLogSystem();
@@ -63,7 +63,8 @@ namespace ElysiaEngine
 
         // If this is null, nothing to do, bail
         assert(pFramework);
-        if (!pFramework) return -1;
+        if (!pFramework)
+            return -1;
         pFrameworkInstance = pFramework;
 
         // Get command line and config file parameters for app run
@@ -73,25 +74,25 @@ namespace ElysiaEngine
 
         // Window setup based on config params
         lwindowStyle = WS_OVERLAPPEDWINDOW;
-        RECT windowRect = { 0, 0, (LONG)Width, (LONG)Height };
-        AdjustWindowRect(&windowRect, lwindowStyle, FALSE);    // adjust the size
+        RECT windowRect = {0, 0, (LONG)Width, (LONG)Height};
+        AdjustWindowRect(&windowRect, lwindowStyle, FALSE); // adjust the size
 
         // This makes sure that in a multi-monitor setup with different resolutions, get monitor info returns correct dimensions
         SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 
         // Create the window
         hWnd = CreateWindowEx(WS_EX_APPWINDOW,
-            WINDOW_CLASS_NAME,    // name of the window class
-            pFramework->GetName().c_str(),
-            lwindowStyle,
-            CW_USEDEFAULT,
-            CW_USEDEFAULT,
-            windowRect.right - windowRect.left,
-            windowRect.bottom - windowRect.top,
-            NULL,    // we have no parent window, NULL
-            NULL,    // we aren't using menus, NULL
-            hInstance,    // application handle
-            NULL);    // used with multiple windows, NULL
+                              WINDOW_CLASS_NAME, // name of the window class
+                              pFramework->GetName().c_str(),
+                              lwindowStyle,
+                              CW_USEDEFAULT,
+                              CW_USEDEFAULT,
+                              windowRect.right - windowRect.left,
+                              windowRect.bottom - windowRect.top,
+                              NULL,      // we have no parent window, NULL
+                              NULL,      // we aren't using menus, NULL
+                              hInstance, // application handle
+                              NULL);     // used with multiple windows, NULL
 
         // Framework owns device and swapchain, so initialize them
         pFramework->DeviceInit(hWnd);
@@ -99,21 +100,20 @@ namespace ElysiaEngine
         // Sample create callback
         pFramework->OnCreate();
 
-
         // show the window
         ShowWindow(hWnd, nCmdShow);
         lBorderedStyle = GetWindowLong(hWnd, GWL_STYLE);
         lBorderlessStyle = lBorderedStyle & ~(WS_CAPTION | WS_THICKFRAME | WS_MINIMIZE | WS_MAXIMIZE | WS_SYSMENU);
 
         // main loop
-        MSG msg = { 0 };
+        MSG msg = {0};
         while (msg.message != WM_QUIT)
         {
             // check to see if any messages are waiting in the queue
             if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
             {
                 TranslateMessage(&msg); // translate keystroke messages into the right format            
-                DispatchMessage(&msg); // send the message to the WindowProc function
+                DispatchMessage(&msg);  // send the message to the WindowProc function
             }
             else if (!bIsMinimized)
                 pFramework->OnRender();
@@ -144,7 +144,8 @@ namespace ElysiaEngine
             GetWindowRect(hWnd, &m_windowRect);
 
             // Make the window borderless so that the client area can fill the screen.
-            SetWindowLong(hWnd, GWL_STYLE, lwindowStyle & ~(WS_CAPTION | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_SYSMENU | WS_THICKFRAME));
+            SetWindowLong(hWnd, GWL_STYLE,
+                          lwindowStyle & ~(WS_CAPTION | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_SYSMENU | WS_THICKFRAME));
 
             MONITORINFO monitorInfo;
             monitorInfo.cbSize = sizeof(monitorInfo);
@@ -184,83 +185,86 @@ namespace ElysiaEngine
     {
         if (ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam))
             return true;
-        
+
         // sort through and find what code to run for the message given
         switch (message)
         {
-            case WM_DESTROY:
-            {
-                PostQuitMessage(0);
-                return 0;
-            }
-
-            // When close button is clicked on window
-            case WM_CLOSE:
-            {
-                PostQuitMessage(0);
-                return 0;
-            }
-
-            case WM_KEYDOWN:
-            {
-                if (wParam == VK_ESCAPE)
-                {
-                    pFrameworkInstance->ReleaseResource();
-                    PostQuitMessage(0);
-                }
-
-                break;
-            }
-
-            case WM_SYSKEYDOWN:
-            {
-                const bool bAltKeyDown = (lParam & (1 << 29));
-                if ((wParam == VK_RETURN) && bAltKeyDown) // For simplicity, alt+enter only toggles in/out windowed and borderless fullscreen
-                    pFrameworkInstance->ToggleFullScreen();
-                break;
-            }
-
-            case WM_SIZE:
-            {
-                if (pFrameworkInstance)
-                {
-                    RECT clientRect = {};
-                    GetClientRect(hWnd, &clientRect);
-                    pFrameworkInstance->HandleResize(clientRect.right - clientRect.left, clientRect.bottom - clientRect.top);
-                    bIsMinimized = (IsIconic(hWnd) == TRUE);
-                    return 0;
-                }
-                break;
-            }
-
-            // When window goes outof focus, use this event to fall back on SDR.
-            // If we don't gracefully fallback to SDR, the renderer will output HDR colours which will look extremely bright and washed out.
-            // However if you want to use breakpoints in HDR mode to inspect/debug values, you will have to comment this function call.
-            case WM_ACTIVATE:
-            {
-                if (pFrameworkInstance)
-                {
-                    pFrameworkInstance->OnActivate(wParam != WA_INACTIVE);
-                }
-
-                break;
-            }
-
-            case WM_MOVE:
-            {
-                if (pFrameworkInstance)
-                {
-                    pFrameworkInstance->OnWindowMove();
-
-                    return 0;
-                }
-                break;
-            }
-
-            // Turn off MessageBeep sound on Alt+Enter
-            case WM_MENUCHAR: return MNC_CLOSE << 16;
+        case WM_DESTROY:
+        {
+            PostQuitMessage(0);
+            return 0;
         }
-        
+
+        // When close button is clicked on window
+        case WM_CLOSE:
+        {
+            PostQuitMessage(0);
+            return 0;
+        }
+
+        case WM_KEYDOWN:
+        {
+            if (wParam == VK_ESCAPE)
+            {
+                pFrameworkInstance->ReleaseResource();
+                PostQuitMessage(0);
+            }
+
+            break;
+        }
+
+        case WM_SYSKEYDOWN:
+        {
+            const bool bAltKeyDown = (lParam & (1 << 29));
+            if ((wParam == VK_RETURN) && bAltKeyDown)
+                // For simplicity, alt+enter only toggles in/out windowed and borderless fullscreen
+                pFrameworkInstance->ToggleFullScreen();
+            break;
+        }
+
+        case WM_SIZE:
+        {
+            if (pFrameworkInstance)
+            {
+                RECT clientRect = {};
+                GetClientRect(hWnd, &clientRect);
+                pFrameworkInstance->HandleResize(clientRect.right - clientRect.left,
+                                                 clientRect.bottom - clientRect.top);
+                bIsMinimized = (IsIconic(hWnd) == TRUE);
+                return 0;
+            }
+            break;
+        }
+
+        // When window goes outof focus, use this event to fall back on SDR.
+        // If we don't gracefully fallback to SDR, the renderer will output HDR colours which will look extremely bright and washed out.
+        // However if you want to use breakpoints in HDR mode to inspect/debug values, you will have to comment this function call.
+        case WM_ACTIVATE:
+        {
+            if (pFrameworkInstance)
+            {
+                pFrameworkInstance->OnActivate(wParam != WA_INACTIVE);
+            }
+
+            break;
+        }
+
+        case WM_MOVE:
+        {
+            if (pFrameworkInstance)
+            {
+                pFrameworkInstance->OnWindowMove();
+
+                return 0;
+            }
+            break;
+        }
+
+        // Turn off MessageBeep sound on Alt+Enter
+        case WM_MENUCHAR:
+            return MNC_CLOSE << 16;
+        }
+
         if (pFrameworkInstance)
         {
             MSG msg;
@@ -270,7 +274,7 @@ namespace ElysiaEngine
             msg.lParam = lParam;
             pFrameworkInstance->OnEvent(msg);
         }
-        
+
         // Handle any messages the switch statement didn't
         return DefWindowProc(hWnd, message, wParam, lParam);
     }
@@ -280,7 +284,7 @@ namespace ElysiaEngine
         int nIDs = 0;
         int nExIDs = 0;
 
-        char strCPUName[0x40] = { };
+        char strCPUName[0x40] = {};
 
         std::array<int, 4> cpuInfo;
         std::vector<std::array<int, 4>> extData;
@@ -337,9 +341,9 @@ namespace ElysiaEngine
         // Display management
         , m_monitor()
         , m_FreesyncHDROptionEnabled(false)
-        , m_currentDisplayMode           (DISPLAYMODE_SDR)
+        , m_currentDisplayMode(DISPLAYMODE_SDR)
         , m_previousDisplayModeNamesIndex(DISPLAYMODE_SDR)
-        , m_currentDisplayModeNamesIndex (DISPLAYMODE_SDR)
+        , m_currentDisplayModeNamesIndex(DISPLAYMODE_SDR)
         , m_displayModesAvailable()
         , m_displayModesNamesAvailable()
         , m_disableLocalDimming(false)
@@ -347,9 +351,9 @@ namespace ElysiaEngine
 
         // System info
         , m_systemInfo() // initialized after device
-        {
+    {
 
-        }
+    }
 
     void FrameworkWindows::DeviceInit(HWND WindowsHandle)
     {
@@ -369,7 +373,9 @@ namespace ElysiaEngine
             {
                 HRESULT reason = m_pDevice->GetDevice()->GetDeviceRemovedReason();
 
-                Trace("Warning: ID3D12Device::SetStablePowerState(TRUE) failed: Reason 0x%x (DXGI_ERROR). Recreating device, setting m_stablePowerState = false.", reason);
+                Trace(
+                    "Warning: ID3D12Device::SetStablePowerState(TRUE) failed: Reason 0x%x (DXGI_ERROR). Recreating device, setting m_stablePowerState = false.",
+                    reason);
 
                 // device removed, so recreate
                 m_pDevice->OnDestroy();
@@ -439,13 +445,13 @@ namespace ElysiaEngine
         // If FS2 modes, always fallback to SDR
         if (m_fullscreenMode == PRESENTATIONMODE_WINDOWED &&
             (m_displayModesAvailable[m_currentDisplayModeNamesIndex] == DISPLAYMODE_FSHDR_Gamma22 ||
-                m_displayModesAvailable[m_currentDisplayModeNamesIndex] == DISPLAYMODE_FSHDR_SCRGB))
+             m_displayModesAvailable[m_currentDisplayModeNamesIndex] == DISPLAYMODE_FSHDR_SCRGB))
         {
             m_currentDisplayModeNamesIndex = DISPLAYMODE_SDR;
         }
         // when hdr10 modes, fall back to SDR unless windowMode hdr is enabled
         else if (m_fullscreenMode == PRESENTATIONMODE_WINDOWED && !CheckIfWindowModeHdrOn() &&
-            (m_displayModesAvailable[m_currentDisplayModeNamesIndex] != DISPLAYMODE_SDR))
+                 (m_displayModesAvailable[m_currentDisplayModeNamesIndex] != DISPLAYMODE_SDR))
         {
             m_currentDisplayModeNamesIndex = DISPLAYMODE_SDR;
         }
@@ -523,7 +529,8 @@ namespace ElysiaEngine
 
             // If resizing but not minimizing the recreate it with the new size
             if (m_Width > 0 && m_Height > 0)
-                m_swapChain.OnCreateWindowSizeDependentResources(m_Width, m_Height, m_VsyncEnabled, m_currentDisplayMode, m_disableLocalDimming);
+                m_swapChain.OnCreateWindowSizeDependentResources(m_Width, m_Height, m_VsyncEnabled,
+                                                                 m_currentDisplayMode, m_disableLocalDimming);
 
             // Call sample defined OnResize()
             OnResize();
@@ -538,7 +545,7 @@ namespace ElysiaEngine
             m_currentDisplayModeNamesIndex = m_previousDisplayModeNamesIndex;
             return;
         }
-        
+
         if (m_currentDisplayMode != displayMode || m_disableLocalDimming != disableLocalDimming)
         {
             // Flush GPU
@@ -549,7 +556,8 @@ namespace ElysiaEngine
             m_currentDisplayMode = (DisplayMode)displayMode;
             m_disableLocalDimming = disableLocalDimming;
 
-            m_swapChain.OnCreateWindowSizeDependentResources(m_Width, m_Height, m_VsyncEnabled, m_currentDisplayMode, m_disableLocalDimming);
+            m_swapChain.OnCreateWindowSizeDependentResources(m_Width, m_Height, m_VsyncEnabled, m_currentDisplayMode,
+                                                             m_disableLocalDimming);
 
             // Call sample defined UpdateDisplay()
             OnUpdateDisplay();
@@ -578,11 +586,13 @@ namespace ElysiaEngine
 
         if (CheckIfWindowModeHdrOn() &&
             (m_displayModesAvailable[m_currentDisplayModeNamesIndex] == DISPLAYMODE_HDR10_2084 ||
-                m_displayModesAvailable[m_currentDisplayModeNamesIndex] == DISPLAYMODE_HDR10_SCRGB))
+             m_displayModesAvailable[m_currentDisplayModeNamesIndex] == DISPLAYMODE_HDR10_SCRGB))
             return;
 
         // Fall back HDR to SDR when window is fullscreen but not the active window or foreground window
-        m_currentDisplayModeNamesIndex = WindowActive && (m_fullscreenMode != PRESENTATIONMODE_WINDOWED) ? m_previousDisplayModeNamesIndex : DisplayMode::DISPLAYMODE_SDR;
+        m_currentDisplayModeNamesIndex = WindowActive && (m_fullscreenMode != PRESENTATIONMODE_WINDOWED)
+                                             ? m_previousDisplayModeNamesIndex
+                                             : DisplayMode::DISPLAYMODE_SDR;
 
         OnResize(m_Width, m_Height, m_forceManualResize);
         UpdateDisplay(m_displayModesAvailable[m_currentDisplayModeNamesIndex], m_disableLocalDimming);
@@ -603,17 +613,17 @@ namespace ElysiaEngine
 
     FrameContext FrameworkWindows::BeginFrame()
     {
-        m_frameIndex++;
+        m_frameIndex ++;
         m_frameID = (m_frameID + 1) % ElysiaHelper::NUM_FRAMES_IN_FLIGHT;
-        
+
         FrameContext frameContext
         {
             .frameID = m_frameID,
             .frameIndex = m_frameIndex,
         };
-        
+
         m_pDevice->BeginFrame(m_frameID);
-        
+
         // Get timings
         double timeNow = MillisecondsNow();
         m_deltaTime = (float)(timeNow - m_lastFrameTime);

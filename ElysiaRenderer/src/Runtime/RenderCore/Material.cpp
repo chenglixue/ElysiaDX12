@@ -62,18 +62,22 @@ namespace ElysiaRenderer
                     ShaderStageDesc
                     {
                         .ShaderType = ShaderType::Compute,
+                        .ShaderName = shaderPasses[passID].FilePath,
                         .EntryPoint = shaderPasses[passID].ComputeEntryPoint,
                     }
                 };
             }
 
             newPassData.pShader = std::move(m_pDevice->CreateShader(desc));
-            newPassData.BlendDesc = GetBlendState(
-                newPassData.pShader->GetRenderStates().at(L"Blend"));
-            newPassData.RasterizerDesc = GetRasterizerState(
-                newPassData.pShader->GetRenderStates().at(L"Rasterizer"));
-            newPassData.DepthStencilDesc = GetDepthState(
-                newPassData.pShader->GetRenderStates().at(L"Depth"));
+            if (!shaderPasses[passID].IsComputeShader)
+            {
+                newPassData.BlendDesc = GetBlendState(
+                    newPassData.pShader->GetRenderStates().at(L"Blend"));
+                newPassData.RasterizerDesc = GetRasterizerState(
+                    newPassData.pShader->GetRenderStates().at(L"Rasterizer"));
+                newPassData.DepthStencilDesc = GetDepthState(
+                    newPassData.pShader->GetRenderStates().at(L"Depth"));
+            }
 
             m_passDatas.emplace_back(std::move(newPassData));
         }

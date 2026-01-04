@@ -150,10 +150,18 @@ namespace ElysiaRenderer
     {
         auto& passData = pMaterial->GetPassData(passIndex);
 
-        auto resourceMapping = PipelineResourceMapping();
-        auto pDX12RootSignature = std::unique_ptr<DX12RootSignature>(
-            pDevice->CreateRootSignature(*passData.pCurrVariantData->pMeshResourceLayout,
-                                         resourceMapping));
+        if (passData.pRootSignature == nullptr)
+        {
+            auto resourceMapping = PipelineResourceMapping();
+            auto pDX12RootSignature = std::unique_ptr<DX12RootSignature>(
+                pDevice->CreateRootSignature(*passData.pCurrVariantData->pMeshResourceLayout,
+                                             resourceMapping));
+            assert(pDX12RootSignature);
+            assert(pDX12RootSignature->GetSignature());
+
+            passData.pRootSignature = std::move(pDX12RootSignature);
+            passData.resourceMapping = std::move(resourceMapping);
+        }
 
         D3D12_COMPUTE_PIPELINE_STATE_DESC PSODesc{};
         PSODesc.CS = D3D12_SHADER_BYTECODE
@@ -163,14 +171,14 @@ namespace ElysiaRenderer
             .BytecodeLength = passData.pCurrVariantData->StageShaders.at(ShaderType::Compute).
                                        bytecode->GetBufferSize(),
         };
-        PSODesc.pRootSignature = pDX12RootSignature->GetSignature();
+        PSODesc.pRootSignature = passData.pRootSignature->GetSignature();
 
         auto pipelineStateObject = GetComputePipelineState(pDevice, PSODesc,
-                                                           pDX12RootSignature.get());
+                                                           passData.pRootSignature.get());
         if (pipelineStateObject != nullptr)
         {
-            pipelineStateObject->m_pipelineResourceMapping = resourceMapping;
-            pipelineStateObject->m_rootSignature = pDX12RootSignature.get();
+            pipelineStateObject->m_pipelineResourceMapping = passData.resourceMapping;
+            pipelineStateObject->m_rootSignature = passData.pRootSignature.get();
         }
 
         return pipelineStateObject;

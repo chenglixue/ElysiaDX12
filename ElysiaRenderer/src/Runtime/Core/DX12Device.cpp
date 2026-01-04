@@ -280,13 +280,14 @@ namespace ElysiaCore
     }
     std::unique_ptr<DX12Shader> DX12Device::CreateShader(ShaderCreateDesc& shaderCreateDesc)
     {
+        assert(shaderCreateDesc.stages.size());
         /// Enable Debug
 #if defined(_DEBUG)
         // Enable better shader debugging with the graphics debugging tools.
         UINT compileFlags =
             D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION | D3DCOMPILE_ENABLE_STRICTNESS;
 #else
-		UINT compileFlags = 0;
+        UINT compileFlags = 0;
 #endif
 
         //
@@ -300,8 +301,8 @@ namespace ElysiaCore
         compileOptions.EnableDebug(true);
         compileOptions.SetOptLevel(0);
 #else
-		compileOptions.EnableDebug(false);
-		compileOptions.SetOptLevel(3);
+        compileOptions.EnableDebug(false);
+        compileOptions.SetOptLevel(3);
 #endif
 
         CComPtr<IDxcUtils> pUtils;
@@ -344,6 +345,14 @@ namespace ElysiaCore
                 stage.EntryPoint = renderStates.at(L"Pixel");
                 break;
             }
+            case ShaderType::Compute:
+            {
+                if (stage.EntryPoint.empty())
+                {
+                    stage.EntryPoint = renderStates.at(L"Compute");
+                }
+                break;
+            }
             }
         }
 
@@ -372,7 +381,8 @@ namespace ElysiaCore
 
         auto o = std::make_unique<DX12Shader>(std::move(variantMgr), std::move(pKeywordSpace));
         o->SetRenderStates(renderStates);
-        o->BakeVertexLayout();
+        if (shaderCreateDesc.stages[0].ShaderType != ShaderType::Compute)
+            o->BakeVertexLayout();
 
         return o;
     }
@@ -717,6 +727,8 @@ namespace ElysiaCore
             D3D12_SHADER_DESC pShaderDesc{};
             pReflection->GetDesc(&pShaderDesc);
 
+            pReflection->GetThreadGroupSize(&o.ThreadGroupSize.X, &o.ThreadGroupSize.Y, &o.ThreadGroupSize.Z);
+
             // Set ConstantBuffer layout & constant buffer member
             {
                 std::unordered_map<UINT32, ShaderReflectionData::ShaderVariable> shaderVariables{};
@@ -883,10 +895,10 @@ namespace ElysiaCore
         //
         CComPtr<IDxcResult> pResults;
         hr = pCompiler->Compile(
-            &sourceBuffer, // Source buffer.
-            pszArgs.data(), // Array of pointers to arguments.
-            (UINT)pszArgs.size(), // Number of arguments.
-            pIncludeHandler, // User-provided interface to handle #include directives (optional).
+            &sourceBuffer,          // Source buffer.
+            pszArgs.data(),         // Array of pointers to arguments.
+            (UINT)pszArgs.size(),   // Number of arguments.
+            pIncludeHandler,        // User-provided interface to handle #include directives (optional).
             IID_PPV_ARGS(&pResults) // Compiler output status, buffer, and errors.
             );
         if (FAILED(hr))
