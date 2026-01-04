@@ -99,6 +99,43 @@ namespace ElysiaHelper
 
     };
 
+    struct UINT2
+    {
+        UINT2(UINT x, UINT y)
+        {
+            this->x = x;
+            this->y = y;
+        }
+        UINT2(const Vector2& rhs)
+        {
+            this->x = static_cast<UINT>(rhs.x);
+            this->y = static_cast<UINT>(rhs.y);
+        }
+        uint32_t x = 0;
+        uint32_t y = 0;
+    };
+
+    struct UINT3
+    {
+        UINT3(UINT x, UINT y, UINT z)
+        {
+            this->x = x;
+            this->y = y;
+            this->z = z;
+        }
+        UINT3(const Vector3& rhs)
+        {
+            this->x = static_cast<UINT>(rhs.x);
+            this->y = static_cast<UINT>(rhs.y);
+            this->z = static_cast<UINT>(rhs.z);
+        }
+        UINT3& operator=(const UINT3& rhs) = default;
+        UINT3(const UINT3& rhs) = default;
+        uint32_t x = 0;
+        uint32_t y = 0;
+        uint32_t z = 0;
+    };
+
     static size_t Absdiff(size_t a, size_t b)
     {
         return a > b ? a - b : b - a;

@@ -63,6 +63,16 @@ namespace ElysiaRenderer
             assert(pCurrVariantData);
             return pCurrVariantData->pMeshResourceLayout.get();
         }
+
+        UINT3 GetKernelThreadGroupSizes()
+        {
+            auto size = pCurrVariantData->MergedReflectionData.ThreadGroupSize;
+            if (!size.IsValid())
+            {
+                ShowErrorMessageBox(L"cur shader pass not support compute shader");
+            }
+            return {size.X, size.Y, size.Z};
+        }
     };
 
     class Material

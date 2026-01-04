@@ -12,26 +12,7 @@
 
 namespace ElysiaHelper
 {
-    struct UINT2
-    {
-        UINT2(UINT x, UINT y)
-        {
-            this->x = x;
-            this->y = y;
-        }
-        UINT2(const Vector2& rhs)
-        {
-            this->x = static_cast<UINT>(rhs.x);
-            this->y = static_cast<UINT>(rhs.y);
-        }
-        uint32_t x = 0;
-        uint32_t y = 0;
-    };
-    struct FLOAT2
-    {
-        float x = 0;
-        float y = 0;
-    };
+
 
     enum EZeroTag { kZero, kOrigin };
 
@@ -87,7 +68,7 @@ __debugbreak(); \
 
     inline void ShowErrorMessage(const std::wstring& message)
     {
-        MessageBox(NULL, message.c_str(), L"Error", MB_OK|MB_ICONERROR);
+        MessageBox(NULL, message.c_str(), L"Error", MB_OK | MB_ICONERROR);
     }
 
     inline void ThrowRuntimeError(std::string output)
@@ -106,12 +87,12 @@ __debugbreak(); \
     {
         char errorString[MAX_PATH];
         ::FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM,
-            0,
-            errorCode,
-            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-            errorString,
-            MAX_PATH,
-            NULL);
+                         0,
+                         errorCode,
+                         MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                         errorString,
+                         MAX_PATH,
+                         NULL);
 
         std::string message = "Win32 Error: ";
         message += errorString;
@@ -121,8 +102,14 @@ __debugbreak(); \
     class HrException : public std::runtime_error
     {
     public:
-        HrException(HRESULT hr) : std::runtime_error(HrToString(hr)), m_hr(hr) {}
-        HRESULT Error() const { return m_hr; }
+        HrException(HRESULT hr) : std::runtime_error(HrToString(hr)), m_hr(hr)
+        {
+        }
+        HRESULT Error() const
+        {
+            return m_hr;
+        }
+
     private:
         const HRESULT m_hr;
     };
@@ -135,19 +122,20 @@ __debugbreak(); \
     inline static void ThrowIfFailed(HRESULT hr)
     {
         if (FAILED(hr))
-    {
-        wchar_t err[256];
-        memset(err, 0, 256);
-        FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM, NULL, hr, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), err, 255, NULL);
-        char errA[256];
-        size_t returnSize;
-        wcstombs_s(&returnSize, errA, 255, err, 255);
-        Trace(errA);
+        {
+            wchar_t err[256];
+            memset(err, 0, 256);
+            FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM, NULL, hr, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), err, 255,
+                           NULL);
+            char errA[256];
+            size_t returnSize;
+            wcstombs_s(&returnSize, errA, 255, err, 255);
+            Trace(errA);
 #ifdef _DEBUG
-        ShowErrorMessageBox(err);
+            ShowErrorMessageBox(err);
 #endif
-        throw 1;
-    }
+            throw 1;
+        }
     }
 
     inline static void ThrowIfFailed(BOOL hr)
@@ -224,22 +212,23 @@ __debugbreak(); \
     inline static std::string GetLastSegmentAfterBackslash(const std::string& str)
     {
         size_t found = str.rfind('\\');
-        if (found != std::string::npos) {
+        if (found != std::string::npos)
+        {
             return str.substr(found + 1);
         }
         return str;
     }
 
-    
 
-    inline static WCHAR* concatWcharStr(const WCHAR* str1, const WCHAR* str2) {
+    inline static WCHAR* concatWcharStr(const WCHAR* str1, const WCHAR* str2)
+    {
         size_t len1 = wcslen(str1) * 2;
         size_t len2 = wcslen(str2) * 2;
         size_t len3 = len1 + len2;
         char* address = (char*)malloc(len3 + 2);
-        for (size_t i = 0; i < len1; i++)
+        for (size_t i = 0; i < len1; i ++)
             address[i] = ((char*)str1)[i];
-        for (size_t i = len1; i < len3; i++)
+        for (size_t i = len1; i < len3; i ++)
             address[i] = ((char*)str2)[i];
 
         address[len3] = '\0';
@@ -248,7 +237,8 @@ __debugbreak(); \
         return (WCHAR*)address;
     }
 
-    inline static LPCWSTR s2ws(const std::string& s) {
+    inline static LPCWSTR s2ws(const std::string& s)
+    {
         int len;
         int slength = (int)s.length() + 1;
         len = MultiByteToWideChar(CP_UTF8, 0, s.c_str(), slength, 0, 0);
@@ -261,22 +251,25 @@ __debugbreak(); \
     }
 
     // Convert std::string to std::wstring
-    inline static std::wstring StringToWstring(const std::string& str) {
-        if (str.empty()) return L"";
+    inline static std::wstring StringToWstring(const std::string& str)
+    {
+        if (str.empty())
+            return L"";
 
 #ifdef _WIN32
         // 1. 第一次调用：获取转换后所需的有效字符数（不含 \0）
         // 通过传入 (int)str.size() 明确告诉 API 不要处理结尾的空字符
         int size_needed = MultiByteToWideChar(CP_UTF8, 0, str.data(), (int)str.size(), NULL, 0);
-    
-        if (size_needed <= 0) return L"";
+
+        if (size_needed <= 0)
+            return L"";
 
         // 2. 预分配空间
         std::wstring wstrTo(size_needed, 0);
 
         // 3. 第二次调用：执行真正的转换
         MultiByteToWideChar(CP_UTF8, 0, str.data(), (int)str.size(), &wstrTo[0], size_needed);
-    
+
         return wstrTo;
 #else
         // Linux/macOS 保持不变，但需注意 codecvt 同样不包含 \0
@@ -288,13 +281,15 @@ __debugbreak(); \
     // Convert std::wstring to std::string
     inline static std::string WstringToString(const std::wstring& wstr)
     {
-        if (wstr.empty()) return "";
+        if (wstr.empty())
+            return "";
 
         // 方法1：C++11（已弃用，但简单）
 #ifdef _WIN32
-// Windows 下用 Win32 API 更可靠
+        // Windows 下用 Win32 API 更可靠
         int size = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, nullptr, 0, nullptr, nullptr);
-        if (size == 0) return "";
+        if (size == 0)
+            return "";
         std::string str(size, 0);
         WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, &str[0], size, nullptr, nullptr);
         return str;
@@ -314,11 +309,12 @@ __debugbreak(); \
     {
         return std::wstring(str.c_str());
     }
-    
+
     /**
      * @brief 接受 std::string, char*, 或 string_view 并转为 eastl::string
      */
-    inline eastl::string ToEastl(std::string_view sv) {
+    inline eastl::string ToEastl(std::string_view sv)
+    {
         return eastl::string(sv.data(), sv.length());
     }
 
@@ -326,15 +322,17 @@ __debugbreak(); \
      * @brief 接受 eastl::string (需手动转 view 或重载), char*, std::string 并转为 std::string
      * 注意：EASTL 默认没有到 std::string_view 的隐式转换，所以我们保留一个重载
      */
-    inline std::string ToStd(std::string_view sv) {
+    inline std::string ToStd(std::string_view sv)
+    {
         return std::string(sv.data(), sv.length());
     }
-    
+
     // 专门针对 eastl::string 的重载，方便直接调用
-    inline std::string ToStd(const eastl::string& str) {
+    inline std::string ToStd(const eastl::string& str)
+    {
         return std::string(str.data(), str.length());
     }
-    
+
     inline static std::wstring RemoveExtension(const std::wstring& filePath)
     {
         return filePath.substr(0, filePath.rfind(L"."));
@@ -353,7 +351,7 @@ __debugbreak(); \
         return RemoveExtension(UTF8ToWideString(std::string(filename)));
     }
 
-    inline static void printWString(LPCWSTR wstr) 
+    inline static void printWString(LPCWSTR wstr)
     {
         std::wcout.imbue(std::locale("zh_CN.UTF-8")); // 设置区域以便正确显示 Unicode 字符
         std::wcout << L"Wide string: " << wstr << std::endl;
@@ -469,11 +467,12 @@ __debugbreak(); \
     }
 
 
-    inline static std::wstring RemoveLastUnderscoreAndAfter(std::wstring str) 
+    inline static std::wstring RemoveLastUnderscoreAndAfter(std::wstring str)
     {
         // 查找最后一个下划线的位置
         size_t lastUnderscorePos = str.rfind(L'_');
-        if (lastUnderscorePos != std::wstring::npos) {
+        if (lastUnderscorePos != std::wstring::npos)
+        {
             // 去除最后一个下划线及其后面的内容
             str.erase(lastUnderscorePos);
         }
@@ -484,7 +483,8 @@ __debugbreak(); \
     {
         // 查找最后一个下划线的位置
         size_t lastUnderscorePos = str.rfind(target);
-        if (lastUnderscorePos != std::wstring::npos) {
+        if (lastUnderscorePos != std::wstring::npos)
+        {
             // 去除最后一个下划线及其后面的内容
             str.erase(lastUnderscorePos);
         }
@@ -493,8 +493,8 @@ __debugbreak(); \
 
     inline static std::vector<const char*> StringViewToChar(const std::string_view* stringViewArray, size_t count)
     {
-        std::vector<const char*> o{ count };
-        for (size_t i = 0; i < count; i++)
+        std::vector<const char*> o{count};
+        for (size_t i = 0; i < count; i ++)
         {
             o[i] = stringViewArray[i].data();
         }
@@ -507,155 +507,157 @@ __debugbreak(); \
     {
         std::vector<wchar_t> buf(Str.size());
         std::use_facet<std::ctype<wchar_t>>(std::locale()).widen(Str.data(),
-            Str.data() + Str.size(),
-            buf.data());
+                                                                 Str.data() + Str.size(),
+                                                                 buf.data());
         return std::wstring(buf.data(), buf.size());
     }
     inline std::string W2S(const std::wstring& wstr)
     {
         std::string Result;
         std::vector<char> Bufer(wstr.size());
-        std::use_facet<std::ctype<wchar_t>>(std::locale()).narrow(wstr.data(), wstr.data() + wstr.size(), '?', Bufer.data());
+        std::use_facet<std::ctype<wchar_t>>(std::locale()).narrow(wstr.data(), wstr.data() + wstr.size(), '?',
+                                                                  Bufer.data());
         Result = std::string(Bufer.data(), Bufer.size());
 
         return Result;
     }
 
     const std::unordered_map<DXGI_FORMAT, const char*> formatMap = {
-    { DXGI_FORMAT_UNKNOWN, "DXGI_FORMAT_UNKNOWN" },
-    { DXGI_FORMAT_R32G32B32A32_TYPELESS, "DXGI_FORMAT_R32G32B32A32_TYPELESS" },
-    { DXGI_FORMAT_R32G32B32A32_FLOAT, "DXGI_FORMAT_R32G32B32A32_FLOAT" },
-    { DXGI_FORMAT_R32G32B32A32_UINT, "DXGI_FORMAT_R32G32B32A32_UINT" },
-    { DXGI_FORMAT_R32G32B32A32_SINT, "DXGI_FORMAT_R32G32B32A32_SINT" },
-    { DXGI_FORMAT_R32G32B32_TYPELESS, "DXGI_FORMAT_R32G32B32_TYPELESS" },
-    { DXGI_FORMAT_R32G32B32_FLOAT, "DXGI_FORMAT_R32G32B32_FLOAT" },
-    { DXGI_FORMAT_R32G32B32_UINT, "DXGI_FORMAT_R32G32B32_UINT" },
-    { DXGI_FORMAT_R32G32B32_SINT, "DXGI_FORMAT_R32G32B32_SINT" },
-    { DXGI_FORMAT_R16G16B16A16_TYPELESS, "DXGI_FORMAT_R16G16B16A16_TYPELESS" },
-    { DXGI_FORMAT_R16G16B16A16_FLOAT, "DXGI_FORMAT_R16G16B16A16_FLOAT" },
-    { DXGI_FORMAT_R16G16B16A16_UNORM, "DXGI_FORMAT_R16G16B16A16_UNORM" },
-    { DXGI_FORMAT_R16G16B16A16_UINT, "DXGI_FORMAT_R16G16B16A16_UINT" },
-    { DXGI_FORMAT_R16G16B16A16_SNORM, "DXGI_FORMAT_R16G16B16A16_SNORM" },
-    { DXGI_FORMAT_R16G16B16A16_SINT, "DXGI_FORMAT_R16G16B16A16_SINT" },
-    { DXGI_FORMAT_R32G32_TYPELESS, "DXGI_FORMAT_R32G32_TYPELESS" },
-    { DXGI_FORMAT_R32G32_FLOAT, "DXGI_FORMAT_R32G32_FLOAT" },
-    { DXGI_FORMAT_R32G32_UINT, "DXGI_FORMAT_R32G32_UINT" },
-    { DXGI_FORMAT_R32G32_SINT, "DXGI_FORMAT_R32G32_SINT" },
-    { DXGI_FORMAT_R32G8X24_TYPELESS, "DXGI_FORMAT_R32G8X24_TYPELESS" },
-    { DXGI_FORMAT_D32_FLOAT_S8X24_UINT, "DXGI_FORMAT_D32_FLOAT_S8X24_UINT" },
-    { DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS, "DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS" },
-    { DXGI_FORMAT_X32_TYPELESS_G8X24_UINT, "DXGI_FORMAT_X32_TYPELESS_G8X24_UINT" },
-    { DXGI_FORMAT_R10G10B10A2_TYPELESS, "DXGI_FORMAT_R10G10B10A2_TYPELESS" },
-    { DXGI_FORMAT_R10G10B10A2_UNORM, "DXGI_FORMAT_R10G10B10A2_UNORM" },
-    { DXGI_FORMAT_R10G10B10A2_UINT, "DXGI_FORMAT_R10G10B10A2_UINT" },
-    { DXGI_FORMAT_R11G11B10_FLOAT, "DXGI_FORMAT_R11G11B10_FLOAT" },
-    { DXGI_FORMAT_R8G8B8A8_TYPELESS, "DXGI_FORMAT_R8G8B8A8_TYPELESS" },
-    { DXGI_FORMAT_R8G8B8A8_UNORM, "DXGI_FORMAT_R8G8B8A8_UNORM" },
-    { DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, "DXGI_FORMAT_R8G8B8A8_UNORM_SRGB" },
-    { DXGI_FORMAT_R8G8B8A8_UINT, "DXGI_FORMAT_R8G8B8A8_UINT" },
-    { DXGI_FORMAT_R8G8B8A8_SNORM, "DXGI_FORMAT_R8G8B8A8_SNORM" },
-    { DXGI_FORMAT_R8G8B8A8_SINT, "DXGI_FORMAT_R8G8B8A8_SINT" },
-    { DXGI_FORMAT_R16G16_TYPELESS, "DXGI_FORMAT_R16G16_TYPELESS" },
-    { DXGI_FORMAT_R16G16_FLOAT, "DXGI_FORMAT_R16G16_FLOAT" },
-    { DXGI_FORMAT_R16G16_UNORM, "DXGI_FORMAT_R16G16_UNORM" },
-    { DXGI_FORMAT_R16G16_UINT, "DXGI_FORMAT_R16G16_UINT" },
-    { DXGI_FORMAT_R16G16_SNORM, "DXGI_FORMAT_R16G16_SNORM" },
-    { DXGI_FORMAT_R16G16_SINT, "DXGI_FORMAT_R16G16_SINT" },
-    { DXGI_FORMAT_R32_TYPELESS, "DXGI_FORMAT_R32_TYPELESS" },
-    { DXGI_FORMAT_D32_FLOAT, "DXGI_FORMAT_D32_FLOAT" },
-    { DXGI_FORMAT_R32_FLOAT, "DXGI_FORMAT_R32_FLOAT" },
-    { DXGI_FORMAT_R32_UINT, "DXGI_FORMAT_R32_UINT" },
-    { DXGI_FORMAT_R32_SINT, "DXGI_FORMAT_R32_SINT" },
-    { DXGI_FORMAT_R24G8_TYPELESS, "DXGI_FORMAT_R24G8_TYPELESS" },
-    { DXGI_FORMAT_D24_UNORM_S8_UINT, "DXGI_FORMAT_D24_UNORM_S8_UINT" },
-    { DXGI_FORMAT_R24_UNORM_X8_TYPELESS, "DXGI_FORMAT_R24_UNORM_X8_TYPELESS" },
-    { DXGI_FORMAT_X24_TYPELESS_G8_UINT, "DXGI_FORMAT_X24_TYPELESS_G8_UINT" },
-    { DXGI_FORMAT_R8G8_TYPELESS, "DXGI_FORMAT_R8G8_TYPELESS" },
-    { DXGI_FORMAT_R8G8_UNORM, "DXGI_FORMAT_R8G8_UNORM" },
-    { DXGI_FORMAT_R8G8_UINT, "DXGI_FORMAT_R8G8_UINT" },
-    { DXGI_FORMAT_R8G8_SNORM, "DXGI_FORMAT_R8G8_SNORM" },
-    { DXGI_FORMAT_R8G8_SINT, "DXGI_FORMAT_R8G8_SINT" },
-    { DXGI_FORMAT_R16_TYPELESS, "DXGI_FORMAT_R16_TYPELESS" },
-    { DXGI_FORMAT_R16_FLOAT, "DXGI_FORMAT_R16_FLOAT" },
-    { DXGI_FORMAT_D16_UNORM, "DXGI_FORMAT_D16_UNORM" },
-    { DXGI_FORMAT_R16_UNORM, "DXGI_FORMAT_R16_UNORM" },
-    { DXGI_FORMAT_R16_UINT, "DXGI_FORMAT_R16_UINT" },
-    { DXGI_FORMAT_R16_SNORM, "DXGI_FORMAT_R16_SNORM" },
-    { DXGI_FORMAT_R16_SINT, "DXGI_FORMAT_R16_SINT" },
-    { DXGI_FORMAT_R8_TYPELESS, "DXGI_FORMAT_R8_TYPELESS" },
-    { DXGI_FORMAT_R8_UNORM, "DXGI_FORMAT_R8_UNORM" },
-    { DXGI_FORMAT_R8_UINT, "DXGI_FORMAT_R8_UINT" },
-    { DXGI_FORMAT_R8_SNORM, "DXGI_FORMAT_R8_SNORM" },
-    { DXGI_FORMAT_R8_SINT, "DXGI_FORMAT_R8_SINT" },
-    { DXGI_FORMAT_A8_UNORM, "DXGI_FORMAT_A8_UNORM" },
-    { DXGI_FORMAT_R1_UNORM, "DXGI_FORMAT_R1_UNORM" },
-    { DXGI_FORMAT_R9G9B9E5_SHAREDEXP, "DXGI_FORMAT_R9G9B9E5_SHAREDEXP" },
-    { DXGI_FORMAT_R8G8_B8G8_UNORM, "DXGI_FORMAT_R8G8_B8G8_UNORM" },
-    { DXGI_FORMAT_G8R8_G8B8_UNORM, "DXGI_FORMAT_G8R8_G8B8_UNORM" },
-    { DXGI_FORMAT_BC1_TYPELESS, "DXGI_FORMAT_BC1_TYPELESS" },
-    { DXGI_FORMAT_BC1_UNORM, "DXGI_FORMAT_BC1_UNORM" },
-    { DXGI_FORMAT_BC1_UNORM_SRGB, "DXGI_FORMAT_BC1_UNORM_SRGB" },
-    { DXGI_FORMAT_BC2_TYPELESS, "DXGI_FORMAT_BC2_TYPELESS" },
-    { DXGI_FORMAT_BC2_UNORM, "DXGI_FORMAT_BC2_UNORM" },
-    { DXGI_FORMAT_BC2_UNORM_SRGB, "DXGI_FORMAT_BC2_UNORM_SRGB" },
-    { DXGI_FORMAT_BC3_TYPELESS, "DXGI_FORMAT_BC3_TYPELESS" },
-    { DXGI_FORMAT_BC3_UNORM, "DXGI_FORMAT_BC3_UNORM" },
-    { DXGI_FORMAT_BC3_UNORM_SRGB, "DXGI_FORMAT_BC3_UNORM_SRGB" },
-    { DXGI_FORMAT_BC4_TYPELESS, "DXGI_FORMAT_BC4_TYPELESS" },
-    { DXGI_FORMAT_BC4_UNORM, "DXGI_FORMAT_BC4_UNORM" },
-    { DXGI_FORMAT_BC4_SNORM, "DXGI_FORMAT_BC4_SNORM" },
-    { DXGI_FORMAT_BC5_TYPELESS, "DXGI_FORMAT_BC5_TYPELESS" },
-    { DXGI_FORMAT_BC5_UNORM, "DXGI_FORMAT_BC5_UNORM" },
-    { DXGI_FORMAT_BC5_SNORM, "DXGI_FORMAT_BC5_SNORM" },
-    { DXGI_FORMAT_B5G6R5_UNORM, "DXGI_FORMAT_B5G6R5_UNORM" },
-    { DXGI_FORMAT_B5G5R5A1_UNORM, "DXGI_FORMAT_B5G5R5A1_UNORM" },
-    { DXGI_FORMAT_B8G8R8A8_UNORM, "DXGI_FORMAT_B8G8R8A8_UNORM" },
-    { DXGI_FORMAT_B8G8R8X8_UNORM, "DXGI_FORMAT_B8G8R8X8_UNORM" },
-    { DXGI_FORMAT_R10G10B10_XR_BIAS_A2_UNORM, "DXGI_FORMAT_R10G10B10_XR_BIAS_A2_UNORM" },
-    { DXGI_FORMAT_B8G8R8A8_TYPELESS, "DXGI_FORMAT_B8G8R8A8_TYPELESS" },
-    { DXGI_FORMAT_B8G8R8A8_UNORM_SRGB, "DXGI_FORMAT_B8G8R8A8_UNORM_SRGB" },
-    { DXGI_FORMAT_B8G8R8X8_TYPELESS, "DXGI_FORMAT_B8G8R8X8_TYPELESS" },
-    { DXGI_FORMAT_B8G8R8X8_UNORM_SRGB, "DXGI_FORMAT_B8G8R8X8_UNORM_SRGB" },
-    { DXGI_FORMAT_BC6H_TYPELESS, "DXGI_FORMAT_BC6H_TYPELESS" },
-    { DXGI_FORMAT_BC6H_UF16, "DXGI_FORMAT_BC6H_UF16" },
-    { DXGI_FORMAT_BC6H_SF16, "DXGI_FORMAT_BC6H_SF16" },
-    { DXGI_FORMAT_BC7_TYPELESS, "DXGI_FORMAT_BC7_TYPELESS" },
-    { DXGI_FORMAT_BC7_UNORM, "DXGI_FORMAT_BC7_UNORM" },
-    { DXGI_FORMAT_BC7_UNORM_SRGB, "DXGI_FORMAT_BC7_UNORM_SRGB" },
-    { DXGI_FORMAT_AYUV, "DXGI_FORMAT_AYUV" },
-    { DXGI_FORMAT_Y410, "DXGI_FORMAT_Y410" },
-    { DXGI_FORMAT_Y416, "DXGI_FORMAT_Y416" },
-    { DXGI_FORMAT_NV12, "DXGI_FORMAT_NV12" },
-    { DXGI_FORMAT_P010, "DXGI_FORMAT_P010" },
-    { DXGI_FORMAT_P016, "DXGI_FORMAT_P016" },
-    { DXGI_FORMAT_420_OPAQUE, "DXGI_FORMAT_420_OPAQUE" },
-    { DXGI_FORMAT_YUY2, "DXGI_FORMAT_YUY2" },
-    { DXGI_FORMAT_Y210, "DXGI_FORMAT_Y210" },
-    { DXGI_FORMAT_Y216, "DXGI_FORMAT_Y216" },
-    { DXGI_FORMAT_NV11, "DXGI_FORMAT_NV11" },
-    { DXGI_FORMAT_AI44, "DXGI_FORMAT_AI44" },
-    { DXGI_FORMAT_IA44, "DXGI_FORMAT_IA44" },
-    { DXGI_FORMAT_P8, "DXGI_FORMAT_P8" },
-    { DXGI_FORMAT_A8P8, "DXGI_FORMAT_A8P8" },
-    { DXGI_FORMAT_B4G4R4A4_UNORM, "DXGI_FORMAT_B4G4R4A4_UNORM" },
-    { DXGI_FORMAT_P208, "DXGI_FORMAT_P208" },
-    { DXGI_FORMAT_V208, "DXGI_FORMAT_V208" },
-    { DXGI_FORMAT_V408, "DXGI_FORMAT_V408" },
-    { DXGI_FORMAT_SAMPLER_FEEDBACK_MIN_MIP_OPAQUE, "DXGI_FORMAT_SAMPLER_FEEDBACK_MIN_MIP_OPAQUE" },
-    { DXGI_FORMAT_SAMPLER_FEEDBACK_MIP_REGION_USED_OPAQUE, "DXGI_FORMAT_SAMPLER_FEEDBACK_MIP_REGION_USED_OPAQUE" },
-    { DXGI_FORMAT_FORCE_UINT, "DXGI_FORMAT_FORCE_UINT" }
+        {DXGI_FORMAT_UNKNOWN, "DXGI_FORMAT_UNKNOWN"},
+        {DXGI_FORMAT_R32G32B32A32_TYPELESS, "DXGI_FORMAT_R32G32B32A32_TYPELESS"},
+        {DXGI_FORMAT_R32G32B32A32_FLOAT, "DXGI_FORMAT_R32G32B32A32_FLOAT"},
+        {DXGI_FORMAT_R32G32B32A32_UINT, "DXGI_FORMAT_R32G32B32A32_UINT"},
+        {DXGI_FORMAT_R32G32B32A32_SINT, "DXGI_FORMAT_R32G32B32A32_SINT"},
+        {DXGI_FORMAT_R32G32B32_TYPELESS, "DXGI_FORMAT_R32G32B32_TYPELESS"},
+        {DXGI_FORMAT_R32G32B32_FLOAT, "DXGI_FORMAT_R32G32B32_FLOAT"},
+        {DXGI_FORMAT_R32G32B32_UINT, "DXGI_FORMAT_R32G32B32_UINT"},
+        {DXGI_FORMAT_R32G32B32_SINT, "DXGI_FORMAT_R32G32B32_SINT"},
+        {DXGI_FORMAT_R16G16B16A16_TYPELESS, "DXGI_FORMAT_R16G16B16A16_TYPELESS"},
+        {DXGI_FORMAT_R16G16B16A16_FLOAT, "DXGI_FORMAT_R16G16B16A16_FLOAT"},
+        {DXGI_FORMAT_R16G16B16A16_UNORM, "DXGI_FORMAT_R16G16B16A16_UNORM"},
+        {DXGI_FORMAT_R16G16B16A16_UINT, "DXGI_FORMAT_R16G16B16A16_UINT"},
+        {DXGI_FORMAT_R16G16B16A16_SNORM, "DXGI_FORMAT_R16G16B16A16_SNORM"},
+        {DXGI_FORMAT_R16G16B16A16_SINT, "DXGI_FORMAT_R16G16B16A16_SINT"},
+        {DXGI_FORMAT_R32G32_TYPELESS, "DXGI_FORMAT_R32G32_TYPELESS"},
+        {DXGI_FORMAT_R32G32_FLOAT, "DXGI_FORMAT_R32G32_FLOAT"},
+        {DXGI_FORMAT_R32G32_UINT, "DXGI_FORMAT_R32G32_UINT"},
+        {DXGI_FORMAT_R32G32_SINT, "DXGI_FORMAT_R32G32_SINT"},
+        {DXGI_FORMAT_R32G8X24_TYPELESS, "DXGI_FORMAT_R32G8X24_TYPELESS"},
+        {DXGI_FORMAT_D32_FLOAT_S8X24_UINT, "DXGI_FORMAT_D32_FLOAT_S8X24_UINT"},
+        {DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS, "DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS"},
+        {DXGI_FORMAT_X32_TYPELESS_G8X24_UINT, "DXGI_FORMAT_X32_TYPELESS_G8X24_UINT"},
+        {DXGI_FORMAT_R10G10B10A2_TYPELESS, "DXGI_FORMAT_R10G10B10A2_TYPELESS"},
+        {DXGI_FORMAT_R10G10B10A2_UNORM, "DXGI_FORMAT_R10G10B10A2_UNORM"},
+        {DXGI_FORMAT_R10G10B10A2_UINT, "DXGI_FORMAT_R10G10B10A2_UINT"},
+        {DXGI_FORMAT_R11G11B10_FLOAT, "DXGI_FORMAT_R11G11B10_FLOAT"},
+        {DXGI_FORMAT_R8G8B8A8_TYPELESS, "DXGI_FORMAT_R8G8B8A8_TYPELESS"},
+        {DXGI_FORMAT_R8G8B8A8_UNORM, "DXGI_FORMAT_R8G8B8A8_UNORM"},
+        {DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, "DXGI_FORMAT_R8G8B8A8_UNORM_SRGB"},
+        {DXGI_FORMAT_R8G8B8A8_UINT, "DXGI_FORMAT_R8G8B8A8_UINT"},
+        {DXGI_FORMAT_R8G8B8A8_SNORM, "DXGI_FORMAT_R8G8B8A8_SNORM"},
+        {DXGI_FORMAT_R8G8B8A8_SINT, "DXGI_FORMAT_R8G8B8A8_SINT"},
+        {DXGI_FORMAT_R16G16_TYPELESS, "DXGI_FORMAT_R16G16_TYPELESS"},
+        {DXGI_FORMAT_R16G16_FLOAT, "DXGI_FORMAT_R16G16_FLOAT"},
+        {DXGI_FORMAT_R16G16_UNORM, "DXGI_FORMAT_R16G16_UNORM"},
+        {DXGI_FORMAT_R16G16_UINT, "DXGI_FORMAT_R16G16_UINT"},
+        {DXGI_FORMAT_R16G16_SNORM, "DXGI_FORMAT_R16G16_SNORM"},
+        {DXGI_FORMAT_R16G16_SINT, "DXGI_FORMAT_R16G16_SINT"},
+        {DXGI_FORMAT_R32_TYPELESS, "DXGI_FORMAT_R32_TYPELESS"},
+        {DXGI_FORMAT_D32_FLOAT, "DXGI_FORMAT_D32_FLOAT"},
+        {DXGI_FORMAT_R32_FLOAT, "DXGI_FORMAT_R32_FLOAT"},
+        {DXGI_FORMAT_R32_UINT, "DXGI_FORMAT_R32_UINT"},
+        {DXGI_FORMAT_R32_SINT, "DXGI_FORMAT_R32_SINT"},
+        {DXGI_FORMAT_R24G8_TYPELESS, "DXGI_FORMAT_R24G8_TYPELESS"},
+        {DXGI_FORMAT_D24_UNORM_S8_UINT, "DXGI_FORMAT_D24_UNORM_S8_UINT"},
+        {DXGI_FORMAT_R24_UNORM_X8_TYPELESS, "DXGI_FORMAT_R24_UNORM_X8_TYPELESS"},
+        {DXGI_FORMAT_X24_TYPELESS_G8_UINT, "DXGI_FORMAT_X24_TYPELESS_G8_UINT"},
+        {DXGI_FORMAT_R8G8_TYPELESS, "DXGI_FORMAT_R8G8_TYPELESS"},
+        {DXGI_FORMAT_R8G8_UNORM, "DXGI_FORMAT_R8G8_UNORM"},
+        {DXGI_FORMAT_R8G8_UINT, "DXGI_FORMAT_R8G8_UINT"},
+        {DXGI_FORMAT_R8G8_SNORM, "DXGI_FORMAT_R8G8_SNORM"},
+        {DXGI_FORMAT_R8G8_SINT, "DXGI_FORMAT_R8G8_SINT"},
+        {DXGI_FORMAT_R16_TYPELESS, "DXGI_FORMAT_R16_TYPELESS"},
+        {DXGI_FORMAT_R16_FLOAT, "DXGI_FORMAT_R16_FLOAT"},
+        {DXGI_FORMAT_D16_UNORM, "DXGI_FORMAT_D16_UNORM"},
+        {DXGI_FORMAT_R16_UNORM, "DXGI_FORMAT_R16_UNORM"},
+        {DXGI_FORMAT_R16_UINT, "DXGI_FORMAT_R16_UINT"},
+        {DXGI_FORMAT_R16_SNORM, "DXGI_FORMAT_R16_SNORM"},
+        {DXGI_FORMAT_R16_SINT, "DXGI_FORMAT_R16_SINT"},
+        {DXGI_FORMAT_R8_TYPELESS, "DXGI_FORMAT_R8_TYPELESS"},
+        {DXGI_FORMAT_R8_UNORM, "DXGI_FORMAT_R8_UNORM"},
+        {DXGI_FORMAT_R8_UINT, "DXGI_FORMAT_R8_UINT"},
+        {DXGI_FORMAT_R8_SNORM, "DXGI_FORMAT_R8_SNORM"},
+        {DXGI_FORMAT_R8_SINT, "DXGI_FORMAT_R8_SINT"},
+        {DXGI_FORMAT_A8_UNORM, "DXGI_FORMAT_A8_UNORM"},
+        {DXGI_FORMAT_R1_UNORM, "DXGI_FORMAT_R1_UNORM"},
+        {DXGI_FORMAT_R9G9B9E5_SHAREDEXP, "DXGI_FORMAT_R9G9B9E5_SHAREDEXP"},
+        {DXGI_FORMAT_R8G8_B8G8_UNORM, "DXGI_FORMAT_R8G8_B8G8_UNORM"},
+        {DXGI_FORMAT_G8R8_G8B8_UNORM, "DXGI_FORMAT_G8R8_G8B8_UNORM"},
+        {DXGI_FORMAT_BC1_TYPELESS, "DXGI_FORMAT_BC1_TYPELESS"},
+        {DXGI_FORMAT_BC1_UNORM, "DXGI_FORMAT_BC1_UNORM"},
+        {DXGI_FORMAT_BC1_UNORM_SRGB, "DXGI_FORMAT_BC1_UNORM_SRGB"},
+        {DXGI_FORMAT_BC2_TYPELESS, "DXGI_FORMAT_BC2_TYPELESS"},
+        {DXGI_FORMAT_BC2_UNORM, "DXGI_FORMAT_BC2_UNORM"},
+        {DXGI_FORMAT_BC2_UNORM_SRGB, "DXGI_FORMAT_BC2_UNORM_SRGB"},
+        {DXGI_FORMAT_BC3_TYPELESS, "DXGI_FORMAT_BC3_TYPELESS"},
+        {DXGI_FORMAT_BC3_UNORM, "DXGI_FORMAT_BC3_UNORM"},
+        {DXGI_FORMAT_BC3_UNORM_SRGB, "DXGI_FORMAT_BC3_UNORM_SRGB"},
+        {DXGI_FORMAT_BC4_TYPELESS, "DXGI_FORMAT_BC4_TYPELESS"},
+        {DXGI_FORMAT_BC4_UNORM, "DXGI_FORMAT_BC4_UNORM"},
+        {DXGI_FORMAT_BC4_SNORM, "DXGI_FORMAT_BC4_SNORM"},
+        {DXGI_FORMAT_BC5_TYPELESS, "DXGI_FORMAT_BC5_TYPELESS"},
+        {DXGI_FORMAT_BC5_UNORM, "DXGI_FORMAT_BC5_UNORM"},
+        {DXGI_FORMAT_BC5_SNORM, "DXGI_FORMAT_BC5_SNORM"},
+        {DXGI_FORMAT_B5G6R5_UNORM, "DXGI_FORMAT_B5G6R5_UNORM"},
+        {DXGI_FORMAT_B5G5R5A1_UNORM, "DXGI_FORMAT_B5G5R5A1_UNORM"},
+        {DXGI_FORMAT_B8G8R8A8_UNORM, "DXGI_FORMAT_B8G8R8A8_UNORM"},
+        {DXGI_FORMAT_B8G8R8X8_UNORM, "DXGI_FORMAT_B8G8R8X8_UNORM"},
+        {DXGI_FORMAT_R10G10B10_XR_BIAS_A2_UNORM, "DXGI_FORMAT_R10G10B10_XR_BIAS_A2_UNORM"},
+        {DXGI_FORMAT_B8G8R8A8_TYPELESS, "DXGI_FORMAT_B8G8R8A8_TYPELESS"},
+        {DXGI_FORMAT_B8G8R8A8_UNORM_SRGB, "DXGI_FORMAT_B8G8R8A8_UNORM_SRGB"},
+        {DXGI_FORMAT_B8G8R8X8_TYPELESS, "DXGI_FORMAT_B8G8R8X8_TYPELESS"},
+        {DXGI_FORMAT_B8G8R8X8_UNORM_SRGB, "DXGI_FORMAT_B8G8R8X8_UNORM_SRGB"},
+        {DXGI_FORMAT_BC6H_TYPELESS, "DXGI_FORMAT_BC6H_TYPELESS"},
+        {DXGI_FORMAT_BC6H_UF16, "DXGI_FORMAT_BC6H_UF16"},
+        {DXGI_FORMAT_BC6H_SF16, "DXGI_FORMAT_BC6H_SF16"},
+        {DXGI_FORMAT_BC7_TYPELESS, "DXGI_FORMAT_BC7_TYPELESS"},
+        {DXGI_FORMAT_BC7_UNORM, "DXGI_FORMAT_BC7_UNORM"},
+        {DXGI_FORMAT_BC7_UNORM_SRGB, "DXGI_FORMAT_BC7_UNORM_SRGB"},
+        {DXGI_FORMAT_AYUV, "DXGI_FORMAT_AYUV"},
+        {DXGI_FORMAT_Y410, "DXGI_FORMAT_Y410"},
+        {DXGI_FORMAT_Y416, "DXGI_FORMAT_Y416"},
+        {DXGI_FORMAT_NV12, "DXGI_FORMAT_NV12"},
+        {DXGI_FORMAT_P010, "DXGI_FORMAT_P010"},
+        {DXGI_FORMAT_P016, "DXGI_FORMAT_P016"},
+        {DXGI_FORMAT_420_OPAQUE, "DXGI_FORMAT_420_OPAQUE"},
+        {DXGI_FORMAT_YUY2, "DXGI_FORMAT_YUY2"},
+        {DXGI_FORMAT_Y210, "DXGI_FORMAT_Y210"},
+        {DXGI_FORMAT_Y216, "DXGI_FORMAT_Y216"},
+        {DXGI_FORMAT_NV11, "DXGI_FORMAT_NV11"},
+        {DXGI_FORMAT_AI44, "DXGI_FORMAT_AI44"},
+        {DXGI_FORMAT_IA44, "DXGI_FORMAT_IA44"},
+        {DXGI_FORMAT_P8, "DXGI_FORMAT_P8"},
+        {DXGI_FORMAT_A8P8, "DXGI_FORMAT_A8P8"},
+        {DXGI_FORMAT_B4G4R4A4_UNORM, "DXGI_FORMAT_B4G4R4A4_UNORM"},
+        {DXGI_FORMAT_P208, "DXGI_FORMAT_P208"},
+        {DXGI_FORMAT_V208, "DXGI_FORMAT_V208"},
+        {DXGI_FORMAT_V408, "DXGI_FORMAT_V408"},
+        {DXGI_FORMAT_SAMPLER_FEEDBACK_MIN_MIP_OPAQUE, "DXGI_FORMAT_SAMPLER_FEEDBACK_MIN_MIP_OPAQUE"},
+        {DXGI_FORMAT_SAMPLER_FEEDBACK_MIP_REGION_USED_OPAQUE, "DXGI_FORMAT_SAMPLER_FEEDBACK_MIP_REGION_USED_OPAQUE"},
+        {DXGI_FORMAT_FORCE_UINT, "DXGI_FORMAT_FORCE_UINT"}
     };
 
     // 函数：将 DXGI_FORMAT 转换为字符串
-    inline const char* DXGIFormatToString(DXGI_FORMAT format) 
+    inline const char* DXGIFormatToString(DXGI_FORMAT format)
     {
         auto it = formatMap.find(format);
-        if (it != formatMap.end()) {
+        if (it != formatMap.end())
+        {
             return it->second;
         }
         return "Unknown";
     }
-    
+
     inline std::wstring FormatHrMessage(HRESULT hr)
     {
         // Try _com_error first
@@ -679,7 +681,7 @@ __debugbreak(); \
         }
         return out;
     }
-    
+
     inline bool FloatEqual(float a, float b, float eps = 1e-6f)
     {
         return std::abs(a - b) <= eps;
@@ -695,8 +697,8 @@ __debugbreak(); \
             OPEN_EXISTING,
             FILE_ATTRIBUTE_NORMAL,
             NULL
-        );
-    
+            );
+
         if (hFile == INVALID_HANDLE_VALUE)
         {
             DWORD error = GetLastError();
@@ -716,20 +718,23 @@ __debugbreak(); \
     {
         // 打印原始路径
         std::wcout << L"Raw path: " << path << std::endl;
-    
+
         // 检查路径长度
         std::wcout << L"Path length: " << path.length() << L" characters" << std::endl;
-    
+
         // 检查路径是否包含特殊字符
         bool hasSpecialChars = false;
-        for (wchar_t c : path) {
-            if (c < 32 || c > 126) {
+        for (wchar_t c : path)
+        {
+            if (c < 32 || c > 126)
+            {
                 hasSpecialChars = true;
                 std::wcout << L"Special character found: U+" << std::hex << static_cast<int>(c) << std::endl;
             }
         }
-    
-        if (!hasSpecialChars) {
+
+        if (!hasSpecialChars)
+        {
             std::wcout << L"No special characters found" << std::endl;
         }
     }
@@ -745,44 +750,50 @@ __debugbreak(); \
             OPEN_EXISTING,
             FILE_ATTRIBUTE_NORMAL,
             NULL
-        );
-    
-        if (hFile == INVALID_HANDLE_VALUE) {
+            );
+
+        if (hFile == INVALID_HANDLE_VALUE)
+        {
             DWORD error = GetLastError();
             std::wcerr << L"CreateFileW failed with error: " << error << std::endl;
             return false;
         }
-    
+
         // 获取文件大小
         LARGE_INTEGER fileSize;
-        if (!GetFileSizeEx(hFile, &fileSize)) {
+        if (!GetFileSizeEx(hFile, &fileSize))
+        {
             DWORD error = GetLastError();
             std::wcerr << L"GetFileSizeEx failed with error: " << error << std::endl;
             CloseHandle(hFile);
             return false;
         }
-    
+
         std::wcout << L"File size: " << fileSize.QuadPart << L" bytes" << std::endl;
-    
+
         // 尝试读取文件头
         BYTE buffer[8];
         DWORD bytesRead;
-        if (!ReadFile(hFile, buffer, sizeof(buffer), &bytesRead, NULL)) {
+        if (!ReadFile(hFile, buffer, sizeof(buffer), &bytesRead, NULL))
+        {
             DWORD error = GetLastError();
             std::wcerr << L"ReadFile failed with error: " << error << std::endl;
             CloseHandle(hFile);
             return false;
         }
-    
+
         // 检查PNG文件头 (89 50 4E 47 0D 0A 1A 0A)
-        if (bytesRead == 8 && 
+        if (bytesRead == 8 &&
             buffer[0] == 0x89 && buffer[1] == 0x50 && buffer[2] == 0x4E && buffer[3] == 0x47 &&
-            buffer[4] == 0x0D && buffer[5] == 0x0A && buffer[6] == 0x1A && buffer[7] == 0x0A) {
+            buffer[4] == 0x0D && buffer[5] == 0x0A && buffer[6] == 0x1A && buffer[7] == 0x0A)
+        {
             std::wcout << L"Valid PNG header detected" << std::endl;
-            } else {
-                std::wcout << L"Invalid PNG header detected" << std::endl;
-            }
-    
+        }
+        else
+        {
+            std::wcout << L"Invalid PNG header detected" << std::endl;
+        }
+
         CloseHandle(hFile);
         return true;
     }
@@ -792,13 +803,15 @@ __debugbreak(); \
         // 创建不含空字符的副本
         std::wstring sanitized;
         sanitized.reserve(path.size());
-    
-        for (wchar_t c : path) {
-            if (c != L'\0') {
+
+        for (wchar_t c : path)
+        {
+            if (c != L'\0')
+            {
                 sanitized += c;
             }
         }
-    
+
         return sanitized;
     }
 
@@ -807,17 +820,17 @@ __debugbreak(); \
     {
         // 将宽字符串转换为UTF-8
         std::string utf8Path = WstringToString(path);
-    
+
         // 使用stb_image加载
         int width, height, channels;
         unsigned char* data = stbi_load(utf8Path.c_str(), &width, &height, &channels, STBI_rgb_alpha);
-    
-        if (!data) 
+
+        if (!data)
         {
             std::cerr << "STB failed to load image: " << stbi_failure_reason() << std::endl;
             return false;
         }
-    
+
         // 创建ScratchImage
         DirectX::TexMetadata metadata;
         metadata.width = width;
@@ -827,24 +840,25 @@ __debugbreak(); \
         metadata.mipLevels = 1;
         metadata.format = DXGI_FORMAT_R8G8B8A8_UNORM;
         metadata.dimension = DirectX::TEX_DIMENSION_TEXTURE2D;
-    
+
         HRESULT hr = image.Initialize(metadata);
-        if (FAILED(hr)) {
+        if (FAILED(hr))
+        {
             stbi_image_free(data);
             return false;
         }
-    
+
         // 复制像素数据
         const DirectX::Image* img = image.GetImage(0, 0, 0);
         memcpy(img->pixels, data, width * height * 4);
-    
+
         stbi_image_free(data);
         return true;
     }
 
     inline void WriteLog(const wchar_t* format, ...)
     {
-        wchar_t buffer[1024] = { 0 };
+        wchar_t buffer[1024] = {0};
         va_list args;
         va_start(args, format);
         vswprintf_s(buffer, ArraySize_(buffer), format, args);
@@ -855,7 +869,7 @@ __debugbreak(); \
 
     inline void WriteLog(const char* format, ...)
     {
-        char buffer[1024] = { 0 };
+        char buffer[1024] = {0};
         va_list args;
         va_start(args, format);
         vsprintf_s(buffer, ArraySize_(buffer), format, args);
@@ -863,11 +877,11 @@ __debugbreak(); \
         OutputDebugStringA(buffer);
         OutputDebugStringA("\n");
     }
-    
-    
+
+
     inline std::wstring MakeString(const wchar_t* format, ...)
     {
-        wchar_t buffer[1024] = { 0 };
+        wchar_t buffer[1024] = {0};
         va_list args;
         va_start(args, format);
         vswprintf_s(buffer, ArraySize_(buffer), format, args);
@@ -876,7 +890,7 @@ __debugbreak(); \
 
     inline std::string MakeString(const char* format, ...)
     {
-        char buffer[1024] = { 0 };
+        char buffer[1024] = {0};
         va_list args;
         va_start(args, format);
         vsprintf_s(buffer, ArraySize_(buffer), format, args);
@@ -894,9 +908,11 @@ namespace eastl
         __debugbreak(); // 触发调试器中断
     }
 
-    
+
 }
 
-void* operator new[](size_t size, const char* /*name*/, int /*flags*/, unsigned /*debugFlags*/, const char* /*file*/, int /*line*/);
+void* operator new[](size_t size, const char* /*name*/, int /*flags*/, unsigned /*debugFlags*/, const char* /*file*/,
+                     int /*line*/);
 
-void* operator new[](size_t size, size_t alignment, size_t alignmentOffset, const char* /*name*/, int /*flags*/, unsigned /*debugFlags*/, const char* /*file*/, int /*line*/);
+void* operator new[](size_t size, size_t alignment, size_t alignmentOffset, const char* /*name*/, int /*flags*/,
+                     unsigned /*debugFlags*/, const char* /*file*/, int /*line*/);

@@ -301,12 +301,9 @@ namespace ElysiaRenderer
             SetSpaceResource(passData, PER_PASS_SPACE);
             SetSpaceResource(passData, PER_FRAME_SPACE);
 
-            const auto& threadGroupSize = passData.pCurrVariantData->MergedReflectionData.ThreadGroupSize;
-            if (threadGroupSize.IsValid())
-            {
-                m_pCommand->Dispatch(CeilDivide(m_pCameraColorRT->GetWidth(), threadGroupSize.X),
-                                     CeilDivide(m_pCameraColorRT->GetHeight(), threadGroupSize.Y), threadGroupSize.Z);
-            }
+            auto threadGroupSize = passData.GetKernelThreadGroupSizes();
+            m_pCommand->Dispatch(CeilDivide(m_pCameraColorRT->GetWidth(), threadGroupSize.x),
+                                 CeilDivide(m_pCameraColorRT->GetHeight(), threadGroupSize.y), threadGroupSize.z);
         }
 
         m_pCommand->AddBarrier(m_pCameraColorRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
