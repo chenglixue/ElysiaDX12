@@ -843,20 +843,6 @@ namespace ElysiaCore
         const std::vector<LPCWSTR>& args,
         const DxcBuffer& sourceBuffer)
     {
-        // std::wostringstream oss;
-        // oss << L"[CompileShaderStage] path=" << path << L", entry=" << entry << L", target=" << target << L"\n";
-        // oss << L"Args (" << args.size() << L"):\n";
-        // for (size_t i = 0; i < args.size(); ++i)
-        // {
-        // 	LPCWSTR a = args[i];
-        // 	if (!a)
-        // 		oss << L"  [" << i << L"] = <nullptr>\n";
-        // 	else
-        // 		oss << L"  [" << i << L"] = " << a << L"\n";
-        // }
-        // OutputDebugStringW(oss.str().c_str());
-        // std::wcout << oss.str();
-
         // Validate args (no null pointers)
         for (size_t i = 0; i < args.size(); ++i)
         {

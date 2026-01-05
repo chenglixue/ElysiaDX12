@@ -92,7 +92,7 @@ namespace ElysiaRenderer
             },
         };
 
-        m_pMaterial = std::move(std::make_unique<Material>(m_pDevice, m_shaderPasses));
+        m_pMaterial = std::make_unique<Material>(m_pDevice, m_shaderPasses);
         ShaderPasseIDs::TonemapPassID = m_pMaterial->FindPassIndex("Tonemap Pass");
 
         UpdatePipeline();

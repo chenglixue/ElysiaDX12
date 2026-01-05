@@ -14,9 +14,9 @@ namespace ElysiaRenderer
 
     struct CBVMainPassParameter
     {
-        Matrix viewMatrix = Matrix::Identity; // 64
+        Matrix viewMatrix = Matrix::Identity;   // 64
         Matrix viewMatrix_I = Matrix::Identity; // 64
-        Matrix projMatrix = Matrix::Identity; // 64
+        Matrix projMatrix = Matrix::Identity;   // 64
         Matrix projMatrix_I = Matrix::Identity; // 64
         Matrix viewProjMatrix = Matrix::Identity;
         Matrix viewProjMatrix_I = Matrix::Identity;
@@ -62,7 +62,7 @@ namespace ElysiaRenderer
 
         Vector4 ZBufferParams;
 
-        UINT64 frameIndex = 0; 
+        UINT64 frameIndex = 0;
         float nearZ = 1;
         float farZ = 1000;
         UINT GGX_E_LUT_Index = 0;
@@ -81,5 +81,7 @@ namespace ElysiaRenderer
         UINT GBuffer5Index = 0;
         UINT OpaqueDepthIndex = 0;
         UINT OpaqueColorIndex = 0;
+
+        UINT AOTexIndex = 0;
     };
 } // namespace ElysiaRenderer

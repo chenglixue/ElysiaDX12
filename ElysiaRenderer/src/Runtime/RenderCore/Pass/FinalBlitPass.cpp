@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "FinalBlitPass.h"
 
+#include "AOPass.h"
 #include "Editor/UserData.h"
 #include "Programs/PIXHelper.h"
 #include "Editor/IMGUIHelper.h"
@@ -91,7 +92,9 @@ namespace ElysiaRenderer
             }
             case DebugMode::AO:
             {
-                //m_pMaterial->SetUInt(ShaderIDs::blitterTextureIndex, TextureManager::GetInstance().GetGlobalRT("g_AOIndex"));
+                m_pMaterial->SetUInt(ShaderIDs::blitterTextureIndex,
+                                     RenderTargetManager::GetInstance().GetRenderTexture(
+                                         AOPass::RenderTextureIDs::AORTID)->GetResourceHeapIndex());
                 break;
             }
             default:

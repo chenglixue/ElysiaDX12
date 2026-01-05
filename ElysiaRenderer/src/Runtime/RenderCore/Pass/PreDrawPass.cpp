@@ -1,6 +1,7 @@
 ﻿#include "stdafx.h"
 #include "PreDrawPass.h"
 
+#include "AOPass.h"
 #include "Runtime/Core/DX12Device.h"
 #include "Runtime/Core/UploadRingBuffer.h"
 
@@ -94,6 +95,8 @@ namespace ElysiaRenderer
                 dst->GBuffer5Index = RenderTargetManager::GetInstance()
                                      .GetRenderTexture(GBufferPass::RenderTextureIDs::GBuffer5ID)
                                      ->GetResourceHeapIndex();
+                dst->AOTexIndex = RenderTargetManager::GetInstance().GetRenderTexture(AOPass::RenderTextureIDs::AORTID)
+                                                                    ->GetResourceHeapIndex();
             });
 
         auto frameSpace = RenderResource::GetInstance().GetPerFrameBindResourceSpace(

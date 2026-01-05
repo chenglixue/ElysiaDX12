@@ -16,21 +16,21 @@ cbuffer ObjectConstant : register(b0, perObjectSpace)
 };
 
 cbuffer MaterialConstant : register(b0, perMaterialSpace)
-{   
+{
     float opacity;
     float cutoff;
     UINT baseColorTexIndex;
     UINT normalTexIndex;
-    
+
     UINT metallicTexIndex;
     UINT roughnessTexIndex;
     UINT specularTexIndex;
-    
+
     Vector3 baseColorTint;
-    
+
     Vector3 ambientCubemapTint;
     float normalIntensity;
-    
+
     float metallicIntensity;
     float roughnessIntensity;
     float ambientCubemapIntensity;
@@ -39,7 +39,7 @@ cbuffer MaterialConstant : register(b0, perMaterialSpace)
 cbuffer PassConstant : register(b0, perPassSpace)
 {
     Vector4 screenSize;
-    
+
     Matrix viewMatrix;
     Matrix viewMatrix_I;
     Matrix projMatrix;
@@ -79,23 +79,23 @@ struct PSOutput
 
 PSInput VS(VSInput i)
 {
-    PSInput o = (PSInput) 0;
+    PSInput o = (PSInput)0;
 
     o.positionWS = mul(float4(i.positionOS, 1.f), worldMatrix);
     o.positionVS = mul(o.positionWS, viewMatrix);
     o.positionCS = mul(o.positionVS, projMatrix);
-    
-    float3 N = normalize(mul(i.normalOS, (float3x3) worldMatrix));
-    float3 T = normalize(mul(i.tangentOS, (float3x3) worldMatrix));
+
+    float3 N = normalize(mul(i.normalOS, (float3x3)worldMatrix));
+    float3 T = normalize(mul(i.tangentOS, (float3x3)worldMatrix));
     o.tangentWS = normalize(T - dot(N, T) * N);
     o.bitTangentWS = (cross(o.tangentWS, N));
     o.normalWS = N;
-    
+
     //float handedness = dot(o.bitTangentWS, cross(o.normalWS, o.tangentWS)) > 0.0f ? 1.0f : -1.0f;
     //o.bitTangentWS *= handedness;
-    
+
     o.uv = i.uv;
-    
+
     return o;
 }
 
@@ -103,9 +103,9 @@ FEncodeGBufferData GetEncodeGBufferData(FInputParams inputParams, float3 toLight
 
 PSOutput PS(PSInput i)
 {
-    PSOutput o = (PSOutput) 0;
-    
-    FInputParams inputParam = (FInputParams) 0;
+    PSOutput o = (PSOutput)0;
+
+    FInputParams inputParam = (FInputParams)0;
     inputParam.PositionWS = i.positionWS;
     inputParam.PositionVS = i.positionVS;
     inputParam.PixelPos = i.positionCS.xy;
@@ -115,13 +115,14 @@ PSOutput PS(PSInput i)
     inputParam.BitTangentWS = i.bitTangentWS;
     inputParam.NormalWS = i.normalWS;
     inputParam.ScreenVector = GetScreenVectorWS(cameraPosWS.xyz, i.positionWS.xyz);
-    
+
     LightData mainLightData = GetMainLight(mainLight);
-    
+
     FEncodeGBufferData encodeGBufferData = GetEncodeGBufferData(inputParam, mainLightData.toLight);
-    
+
     o.target0 = float4(encodeGBufferData.BaseColor, EncodeMaterialFlags(encodeGBufferData.ShadingModelID));
-    o.target1 = float4(encodeGBufferData.Metallic, encodeGBufferData.Specular, encodeGBufferData.Roughness, encodeGBufferData.AO);
+    o.target1 = float4(encodeGBufferData.Metallic, encodeGBufferData.Specular, encodeGBufferData.Roughness,
+                       encodeGBufferData.AO);
     o.target2 = float4(EncodeNormal(encodeGBufferData.WorldTangent), encodeGBufferData.Anisotropy);
     o.target3 = float4(EncodeNormal(encodeGBufferData.WorldNormal), encodeGBufferData.PerObjectData);
     o.target4 = float4(encodeGBufferData.IBL * encodeGBufferData.AO, encodeGBufferData.Opacity);
@@ -132,49 +133,44 @@ PSOutput PS(PSInput i)
 
 FEncodeGBufferData GetEncodeGBufferData(FInputParams inputParams, float3 toLight)
 {
-    FEncodeGBufferData o = (FEncodeGBufferData) 0;
-    
+    FEncodeGBufferData o = (FEncodeGBufferData)0;
+
     float3x3 TBN = float3x3(inputParams.TangentWS, inputParams.BitTangentWS, inputParams.NormalWS);
-    SamplerState warpLinearSampler = SamplerDescriptorHeap[WarpLinearSampler];
-    
-    Texture2D<float4> baseColorTex = ResourceDescriptorHeap[baseColorTexIndex];
-    float4 baseColor = baseColorTex.Sample(warpLinearSampler, inputParams.objectUV)
-            * float4(baseColorTint, opacity);
+
+    float4 baseColor = SampleTexture2D(baseColorTexIndex, inputParams.objectUV, WarpLinearSampler)
+                       * float4(baseColorTint, opacity);
     baseColor.rgb = AMDTonemapInvert(baseColor);
     clip(baseColor.a - cutoff);
 
-    Texture2D<float4> normalTex = ResourceDescriptorHeap[normalTexIndex];
-    float4 normalTS = normalTex.Sample(warpLinearSampler, inputParams.objectUV);
+    float4 normalTS = SampleTexture2D(normalTexIndex, inputParams.objectUV, WarpLinearSampler);
 
-    Texture2D<float> metallicTex = ResourceDescriptorHeap[metallicTexIndex];
-    float metallic = metallicTex.Sample(warpLinearSampler, inputParams.objectUV);
+    float metallic = SampleTexture2D(metallicTexIndex, inputParams.objectUV, WarpLinearSampler);
     metallic = metallic * metallicIntensity;
-    
-    Texture2D<float> roughnessTex = ResourceDescriptorHeap[roughnessTexIndex];
-    float roughness = roughnessTex.Sample(warpLinearSampler, inputParams.objectUV);
+
+    float roughness = SampleTexture2D(roughnessTexIndex, inputParams.objectUV, WarpLinearSampler);
     roughness = roughness * roughnessIntensity;
-    
+
     o.BaseColor = baseColor.rgb;
     o.ShadingModelID = FLT_MAX;
     o.ShadingModelID = Shading_Model_ID_Default_Lit;
     o.Opacity = baseColor.a;
-    
+
     o.AO = 1;
     o.Metallic = metallic;
     o.Roughness = roughness;
     o.Specular = 0.5;
-    
+
     o.WorldNormal = GetNormal(normalTS.rgb, TBN, normalIntensity);
     o.WorldTangent = TBN._m00_m01_m02;
     o.PerObjectData = 0.f;
     o.PerComputedShadow = 1.f;
-    
+
     o.Velocity = 0.f;
-    
+
     o.Anisotropy = 0;
     o.DiffuseColor = o.BaseColor - o.BaseColor * o.Metallic;
     o.SpecularColor = ComputeF0(o.Specular, o.BaseColor, o.Metallic);
     o.IBL = GetIBL(inputParams, o, toLight, ambientCubemapIntensity, ambientCubemapTint);
- 
+
     return o;
 }

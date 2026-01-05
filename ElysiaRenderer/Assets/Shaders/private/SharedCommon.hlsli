@@ -44,10 +44,10 @@ cbuffer GlobalConstant : register(b0, perFrameSpace)
 {
     Vector4 cameraPosWS;
     Light mainLight;
-    
+
     Matrix shadowMatrix;
-	Vector4 shadowSize;
-    
+    Vector4 shadowSize;
+
     // Values used to linearize the Z buffer (http://www.humus.name/temp/Linearize%20depth.txt)
     // x = 1-far/near
     // y = far/near
@@ -55,25 +55,27 @@ cbuffer GlobalConstant : register(b0, perFrameSpace)
     // w = y/far
     float4 g_ZBufferParams;
 
-	UINT64 frameIndex;
+    UINT64 frameIndex;
     float nearZ;
     float farZ;
-	UINT GGX_E_LUT_Index;
+    UINT GGX_E_LUT_Index;
 
-	UINT GGX_Eavg_LUT_Index;
-	UINT SkyboxTexIndex;
-	UINT ShadowTexIndex;
-	UINT BlueNoiseTexIndex;
-    
+    UINT GGX_Eavg_LUT_Index;
+    UINT SkyboxTexIndex;
+    UINT ShadowTexIndex;
+    UINT BlueNoiseTexIndex;
+
     UINT GBuffer0Index;
     UINT GBuffer1Index;
     UINT GBuffer2Index;
     UINT GBuffer3Index;
-    
+
     UINT GBuffer4Index;
     UINT GBuffer5Index;
-	UINT OpaqueDepthIndex;
+    UINT OpaqueDepthIndex;
     UINT OpaqueColorIndex;
+
+    UINT g_AOIndex;
 };
 
 struct DX12Vertex
@@ -85,32 +87,20 @@ struct DX12Vertex
     Vector3 tangent;
 };
 
-struct SamplerData
-{
-    SamplerState warpPointSampler;
-    SamplerState clampPointSampler;
-    SamplerState warpLinearSampler;
-    SamplerState clampLinearSampler;
-    SamplerState warpAnisotropicSampler;
-    SamplerState clampAnisotropicSampler;
-    SamplerComparisonState shadowWarpLinearSampler;
-    SamplerComparisonState shadowClampLinearSampler;
-};
-
 struct FInputParams
 {
     float3 PositionWS;
     float3 PositionVS;
     float2 PixelPos;
-    
+
     float2 objectUV;
     float2 ScreenUV;
-    
+
     float3 TangentWS;
     float3 BitTangentWS;
     float3 NormalWS;
     float3 ScreenVector;
-    
+
     float Linear01Depth;
     float LinearEyeDepth;
 };
@@ -120,7 +110,7 @@ struct MaterialData
     // 0..1, white for SHADINGMODELID_SUBSURFACE_PROFILE and SHADINGMODELID_EYE (apply BaseColor after scattering is more correct and less blurry)
     float3 BaseColor;
     float Opacity;
-    
+
     // 0..1
     float Metallic;
     // 0..1
@@ -129,21 +119,21 @@ struct MaterialData
     float Roughness;
     // 0..1
     float AO;
-    
+
     // normalized
     float3 WorldNormal;
-    
+
     float3 DiffuseColor;
     // 0..1 (derived from BaseColor, Metalness, Specular)
     float3 SpecularColor;
     // 0..1, white for SHADINGMODELID_SUBSURFACE_PROFILE and SHADINGMODELID_EYE (apply BaseColor after scattering is more correct and less blurry)
-    
+
     float Depth;
     float4 Velocity;
-    
+
     // 0..1 (derived from BaseColor, Metalness, Specular)
     float Anisotropy;
-    
+
 };
 
 struct FEncodeGBufferData

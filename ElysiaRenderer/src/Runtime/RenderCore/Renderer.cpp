@@ -66,7 +66,7 @@ namespace ElysiaRenderer
             std::move(std::make_unique<ShadowPass>()));
         m_passes.emplace_back(
             std::move(std::make_unique<GBufferPass>()));
-        // m_passes.emplace_back(std::move(std::make_unique<AOPass>(m_pCameraManager->GetMainCamera())));
+        m_passes.emplace_back(std::move(std::make_unique<AOPass>()));
         m_passes.emplace_back(
             std::move(std::make_unique<OpaquePass>()));
         m_passes.emplace_back(

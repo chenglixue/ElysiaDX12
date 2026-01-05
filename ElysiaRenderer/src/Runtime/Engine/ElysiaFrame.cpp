@@ -391,7 +391,7 @@ namespace ElysiaEngine
             ImGui::Checkbox("Is Enable AO", &pUserData.aoParameter.IsEnableAO);
 
             auto t1 = static_cast<int>(pUserData.aoParameter.SampleCount);
-            ImGui::SliderInt("AO Sample Count", &t1, 0, 256, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+            ImGui::SliderInt("AO Sample Count", &t1, 0, 32, "%.3f", ImGuiSliderFlags_AlwaysClamp);
             pUserData.aoParameter.SampleCount = static_cast<UINT>(t1);
 
             ImGui::SliderFloat("AO Radius", &pUserData.aoParameter.Radius, 0, 10, "%.3f",
@@ -402,6 +402,8 @@ namespace ElysiaEngine
 
             ImGui::SliderFloat("AO Pow", &pUserData.aoParameter.IntensityPow, 0, 2, "%.3f",
                                ImGuiSliderFlags_AlwaysClamp);
+
+            ImGui::SliderFloat("AO Bias", &pUserData.aoParameter.Bias, 0.f, 0.1f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
         }
     }
 }
