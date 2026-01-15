@@ -26,6 +26,8 @@ namespace ElysiaRenderer
         struct ShaderIDs
         {
             static size_t blitterTextureIndex;
+            static size_t mipmapLevel;
+            static size_t g_ScreenSize;
         };
 
         DXGI_FORMAT m_backBufferFormat = DXGI_FORMAT_UNKNOWN;

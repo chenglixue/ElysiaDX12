@@ -1,4 +1,4 @@
-#include "private\SharedCommon.hlsli"
+#include "private\ShadingCommon.hlsl"
 
 #pragma Vertex BlitVS
 #pragma Pixel BlitPS
@@ -10,6 +10,8 @@
 cbuffer PassConstant : register(b0, perPassSpace)
 {
     UINT blitterTextureIndex;
+    UINT mipmapLevel;
+    float4 g_ScreenSize;
 }
 
 struct PSInput
@@ -20,8 +22,8 @@ struct PSInput
 
 PSInput BlitVS(UINT vertexID : SV_VertexID)
 {
-    PSInput o = (PSInput) 0;
-    
+    PSInput o = (PSInput)0;
+
     if (vertexID == 0)
     {
         o.positionCS = float4(-1.0f, 1.0f, 1.0f, 1.0f);
@@ -37,7 +39,7 @@ PSInput BlitVS(UINT vertexID : SV_VertexID)
         o.positionCS = float4(-1.0f, -3.0f, 1.0f, 1.0f);
         o.uv = float2(0.0f, 2.0f);
     }
-    
+
     return o;
 }
 
@@ -45,8 +47,8 @@ float4 BlitPS(PSInput i) : SV_TARGET
 {
     Texture2D blitterTex = ResourceDescriptorHeap[blitterTextureIndex];
     SamplerState linearSampler = SamplerDescriptorHeap[ClampLinearSampler];
-    
-    half4 blitterValue = blitterTex.SampleLevel(linearSampler, i.uv, 0);
-    
+
+    half4 blitterValue = blitterTex.SampleLevel(linearSampler, i.uv, mipmapLevel);
+
     return blitterValue;
 }

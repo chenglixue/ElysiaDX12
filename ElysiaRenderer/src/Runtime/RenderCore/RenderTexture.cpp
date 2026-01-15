@@ -106,14 +106,25 @@ namespace ElysiaRenderer
     {
         return GetTexture()->GetResource();
     }
-    UINT64 RenderTexture::GetSubresourceIndex(UINT64 mipmapLevel, UINT64 arraySlice) const
+    UINT64 RenderTexture::GetSubresourceIndex(UINT64 mipmapLevel, UINT64 arraySlice, UINT64 planeSlice) const
     {
-        return arraySlice * GetTexture()->GetResourceDesc().MipLevels + mipmapLevel;
+        auto desc = GetTexture()->GetResourceDesc();
+        return mipmapLevel + arraySlice * desc.MipLevels + planeSlice * desc.MipLevels * desc.DepthOrArraySize;
     }
     UINT RenderTexture::GetResourceHeapIndex() const noexcept
     {
         return GetTexture()->GetResourceHeapIndex();
     }
+
+    UINT RenderTexture::GetUAVResourceHeapIndex(UINT index) const
+    {
+        return GetTexture()->GetUAVResourceHeapIndex(index);
+    }
+    UINT RenderTexture::GetSRVResourceHeapIndex(UINT index) const
+    {
+        return GetTexture()->GetSRVResourceHeapIndex(index);
+    }
+
 
     bool IsRenderTextureReady(const std::vector<ElysiaRenderer::RenderTexture*> texs)
     {

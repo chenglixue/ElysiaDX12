@@ -656,6 +656,13 @@
     <None Include="Assets\Shaders\public\Bloom.hlsl" />
     <None Include="packages.config" />
     <None Include="Assets\Shaders\public\CS_Tonemap.hlsl" />
+    <None Include="Assets\Shaders\public\CS_SSAO.hlsl" />
+    <None Include="Assets\Shaders\public\PostProcess\CS_Bilateral_Blur.hlsl" />
+    <None Include="Assets\Shaders\public\PostProcess\CS_TwoTwoMinHIZ.hlsl">
+      <Filter>Resource Files\Shader\Public</Filter>
+    </None>
+    <None Include="Assets\Shaders\public\PostProcess\CS_CopyTexture.hlsl" />
+    <None Include="Assets\Shaders\public\CopyTexture.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

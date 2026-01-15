@@ -129,7 +129,7 @@ namespace ElysiaRenderer
             }
         }
         m_pCameraDepthRT = RenderTargetManager::GetInstance().CreateRenderTexture(Width, Height,
-                                                                                  DXGI_FORMAT_D24_UNORM_S8_UINT,
+                                                                                  DXGI_FORMAT_D32_FLOAT_S8X24_UINT,
                                                                                   true,
                                                                                   L"Camera Depth RT");
 

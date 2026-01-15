@@ -26,39 +26,48 @@ namespace ElysiaRenderer
 
         static RenderTargetManager& GetInstance()
         {
-            std::call_once(m_initInstanceFlag, []() {
+            std::call_once(m_initInstanceFlag, []()
+            {
                 m_instance.reset(new RenderTargetManager());
-                });
+            });
 
             return *m_instance;
         }
 
         virtual void Init(DX12Device* pDevice) override;
         virtual void Destory() override;
-        
+
         RenderTexture* GetRenderTexture(const std::wstring& name) const;
         RenderTexture* GetRenderTexture(size_t nameHash) const;
 
         RenderTexture* CreateRenderTexture(
-        UINT64 width, 
-        UINT64 height,
-        DXGI_FORMAT format,
-        const std::wstring& name);
-        
+            UINT64 width,
+            UINT64 height,
+            DXGI_FORMAT format,
+            const std::wstring& name);
+
         RenderTexture* CreateRenderTexture(
-        UINT64 width,
-        UINT64 height,
-        DXGI_FORMAT format,
-        bool isDepth,
-        const std::wstring& name);
+            UINT64 width,
+            UINT64 height,
+            DXGI_FORMAT format,
+            bool isDepth,
+            const std::wstring& name);
 
         RenderTexture* CreateRWRenderTexture(
-        UINT64 width,
-        UINT64 height,
-        DXGI_FORMAT format,
-        bool enableRandomWrite,
-        const std::wstring& name);
-        
+            UINT64 width,
+            UINT64 height,
+            DXGI_FORMAT format,
+            bool enableRandomWrite,
+            const std::wstring& name);
+
+        RenderTexture* CreateRWRenderTexture(
+            UINT64 width,
+            UINT64 height,
+            DXGI_FORMAT format,
+            bool enableRandomWrite,
+            UINT16 mipmapCount,
+            const std::wstring& name);
+
     private:
         DX12Device* m_pDevice = nullptr;
         static std::unique_ptr<RenderTargetManager> m_instance;
@@ -67,4 +76,3 @@ namespace ElysiaRenderer
         std::unordered_map<size_t, std::unique_ptr<RenderTexture>> m_renderTextures;
     };
 }
-

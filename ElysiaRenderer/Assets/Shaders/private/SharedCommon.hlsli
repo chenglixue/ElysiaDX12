@@ -37,6 +37,9 @@
 #define Matrix   float4x4
 
 #define UINT        uint
+#define UINT2       uint2
+#define UINT3       uint3
+#define UINT4       uint4
 #define int32_t     int
 #define UINT64      uint64_t
 

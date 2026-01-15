@@ -26,8 +26,10 @@ namespace ElysiaRenderer
         UINT64 GetHeight() const;
         DXGI_FORMAT GetFormat() const;
         ID3D12Resource* GetResource() const;
-        UINT64 GetSubresourceIndex(UINT64 mipmapLevel, UINT64 arraySlice) const;
+        UINT64 GetSubresourceIndex(UINT64 mipmapLevel, UINT64 arraySlice = 0, UINT64 planeSlice = 0) const;
         UINT GetResourceHeapIndex() const noexcept;
+        UINT GetUAVResourceHeapIndex(UINT index) const;
+        UINT GetSRVResourceHeapIndex(UINT index) const;
 
     private:
         TextureManager::Handle m_handle;

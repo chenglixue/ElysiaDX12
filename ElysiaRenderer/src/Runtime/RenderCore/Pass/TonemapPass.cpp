@@ -90,6 +90,7 @@ namespace ElysiaRenderer
                 .IsComputeShader = true,
                 .ComputeEntryPoint = L"Tonemap",
             },
+
         };
 
         m_pMaterial = std::make_unique<Material>(m_pDevice, m_shaderPasses);

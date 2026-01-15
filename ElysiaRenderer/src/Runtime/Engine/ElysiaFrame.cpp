@@ -42,9 +42,9 @@ namespace ElysiaEngine
         HRESULT hr = ThrowIfFailed(CoInitializeEx(nullptr, COINIT_MULTITHREADED));
         if (FAILED(hr))
         {
-            
+
         }
-            // error
+        // error
 #endif
     }
 
@@ -250,6 +250,9 @@ namespace ElysiaEngine
             debugModeIndex = std::clamp(debugModeIndex, 0,
                                         static_cast<int>(magic_enum::enum_count<DebugMode>()));
             pUserData.debugMode = (DebugMode)debugModeIndex;
+
+            ImGui::SliderInt("mipmap level", &pUserData.mipmapLevel, 0, 10, "%.3f",
+                             ImGuiSliderFlags_AlwaysClamp);
         }
 
         if (ImGui::CollapsingHeader("Light"))
@@ -404,6 +407,21 @@ namespace ElysiaEngine
                                ImGuiSliderFlags_AlwaysClamp);
 
             ImGui::SliderFloat("AO Bias", &pUserData.aoParameter.Bias, 0.f, 0.1f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+
+            int blurQualityIndex = (int)pUserData.aoParameter.BlurQuality;
+            ImGui::Combo("Blur Quality", &blurQualityIndex,
+                         StringViewToChar(magic_enum::enum_names<AOBlurQuality>().data(),
+                                          magic_enum::enum_count<AOBlurQuality>()).data(),
+                         (int)magic_enum::enum_count<AOBlurQuality>());
+            blurQualityIndex = std::clamp(blurQualityIndex, 0,
+                                          static_cast<int>(magic_enum::enum_count<AOBlurQuality>()));
+            pUserData.aoParameter.BlurQuality = (AOBlurQuality)blurQualityIndex;
+
+            ImGui::SliderFloat("AO Sharpness", &pUserData.aoParameter.Sharpness, 1.f, 100.f, "%.3f",
+                               ImGuiSliderFlags_AlwaysClamp);
+
+            ImGui::SliderFloat("Blur Intensity", &pUserData.aoParameter.BlurIntensity, 0.f, 1.f, "%.3f",
+                               ImGuiSliderFlags_AlwaysClamp);
         }
     }
 }

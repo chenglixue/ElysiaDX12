@@ -213,7 +213,7 @@ FDecodeGBufferData GetDecodeGBufferData(float2 uv)
     float4 GBuffer3 = SampleTexture2D(GBuffer3Index, uv, WarpLinearSampler);
     float4 GBuffer4 = SampleTexture2D(GBuffer4Index, uv, WarpLinearSampler);
     float4 GBuffer5 = SampleTexture2D(GBuffer5Index, uv, WarpLinearSampler);
-    float sceneDepth = SampleTexture2D(OpaqueDepthIndex, uv, WarpLinearSampler).r;
+    float sceneDepth = SampleTexture2D(OpaqueDepthIndex, uv, WarpPointSampler).r;
 
     o = DecodeGBufferData(GBuffer0, GBuffer1, GBuffer2, GBuffer3,
                           GBuffer4, GBuffer5, sceneDepth);

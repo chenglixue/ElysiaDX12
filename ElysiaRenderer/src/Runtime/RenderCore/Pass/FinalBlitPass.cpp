@@ -23,11 +23,15 @@ namespace ElysiaRenderer
 {
     int FinalBlitPass::ShaderPassIDs::BlitPassID = -1;
     size_t FinalBlitPass::ShaderIDs::blitterTextureIndex = SIZE_MAX;
+    size_t FinalBlitPass::ShaderIDs::mipmapLevel = SIZE_MAX;
+    size_t FinalBlitPass::ShaderIDs::g_ScreenSize = SIZE_MAX;
 
     FinalBlitPass::FinalBlitPass() :
         BasePass()
     {
         ShaderIDs::blitterTextureIndex = PropertyToID(L"blitterTextureIndex");
+        ShaderIDs::mipmapLevel = PropertyToID(L"mipmapLevel");
+        ShaderIDs::g_ScreenSize = PropertyToID(L"g_ScreenSize");
     }
 
     FinalBlitPass::~FinalBlitPass()
@@ -81,6 +85,11 @@ namespace ElysiaRenderer
         SetSpaceResource(passData, PER_PASS_SPACE);
 
         {
+            m_pMaterial->SetUInt(ShaderIDs::mipmapLevel, 0);
+            m_pMaterial->SetFloat4(ShaderIDs::g_ScreenSize,
+                                   GetScreenSize(
+                                       m_renderSize));
+
             switch (UserData::GetInstance().debugMode)
             {
             case DebugMode::None:
@@ -95,6 +104,17 @@ namespace ElysiaRenderer
                 m_pMaterial->SetUInt(ShaderIDs::blitterTextureIndex,
                                      RenderTargetManager::GetInstance().GetRenderTexture(
                                          AOPass::RenderTextureIDs::AORTID)->GetResourceHeapIndex());
+
+                auto rt = RenderTargetManager::GetInstance().GetRenderTexture(
+                    L"AO HIZ RT");
+                m_pMaterial->SetUInt(ShaderIDs::mipmapLevel, UserData::GetInstance().mipmapLevel);
+                m_pMaterial->SetFloat4(ShaderIDs::g_ScreenSize,
+                                       GetScreenSize(
+                                           rt->GetWidth() * UINT64(pow(2, UserData::GetInstance().mipmapLevel)),
+                                           rt->GetWidth() * UINT64(pow(2, UserData::GetInstance().mipmapLevel))));
+
+                m_pMaterial->SetUInt(ShaderIDs::blitterTextureIndex,
+                                     rt->GetResourceHeapIndex());
                 break;
             }
             default:

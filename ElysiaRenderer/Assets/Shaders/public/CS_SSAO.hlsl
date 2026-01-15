@@ -1,10 +1,10 @@
 #include "private\ShadingCommon.hlsl"
 
-#define _AO_MAX_SAMPLE_COUNT 256
+#define _AO_MAX_SAMPLE_COUNT 32
 
 cbuffer PassConstant : register(b0, perPassSpace)
 {
-    Vector4 g_DestSize;
+    Vector4 g_TargetSize;
 
     Matrix viewMatrix;
     Matrix viewMatrix_I;
@@ -24,20 +24,24 @@ cbuffer PassConstant : register(b0, perPassSpace)
     float2 g_noiseScale;
 }
 
-[numthreads(8, 8, 1)]
+#define AO_GROUP_SIZE 8
+// #define AO_PADDING 4
+// #define CACHE_SIZE (AO_GROUP_SIZE + 2 * AO_PADDING)
+
+[numthreads(AO_GROUP_SIZE, AO_GROUP_SIZE, 1)]
 void SSAO(uint3 dispatchThreadID: SV_DispatchThreadID)
 {
     RWTexture2D<float4> o = ResourceDescriptorHeap[g_AOIndex];
     float3 color = LoadTexture2D(g_AOIndex, dispatchThreadID.xy);
 
-    float2 screenUV = (float2(dispatchThreadID.xy) + 0.5f) * g_DestSize.zw;
+    float2 screenUV = (float2(dispatchThreadID.xy) + 0.5f) * g_TargetSize.zw;
 
     FDecodeGBufferData GBufferData = GetDecodeGBufferData(screenUV);
     float3 positionWS = ComputeWorldSpacePosition(screenUV, GBufferData.Depth, viewProjMatrix_I);
     FInputParams inputParam = (FInputParams)0;
     inputParam.PositionWS = positionWS;
     inputParam.PositionVS = mul(float4(positionWS, 1.f), viewMatrix);
-    inputParam.PixelPos = screenUV * g_DestSize.xy;
+    inputParam.PixelPos = screenUV * g_TargetSize.xy;
     inputParam.ScreenUV = screenUV;
     inputParam.TangentWS = GBufferData.WorldTangent;
     inputParam.NormalWS = GBufferData.WorldNormal;

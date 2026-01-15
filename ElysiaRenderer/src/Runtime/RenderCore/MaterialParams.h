@@ -132,7 +132,8 @@ namespace ElysiaRenderer
 
     inline bool IsArrayType(MaterialParameterBlock::Type type)
     {
-        return type == MaterialParameterBlock::Type::Float2Array || type == MaterialParameterBlock::Type::Float3Array ||
+        return type == MaterialParameterBlock::Type::FloatArray || type == MaterialParameterBlock::Type::Float2Array ||
+               type == MaterialParameterBlock::Type::Float3Array ||
                type == MaterialParameterBlock::Type::Float4Array
                || type == MaterialParameterBlock::Type::MatrixArray
                || type == MaterialParameterBlock::Type::IntArray || type == MaterialParameterBlock::Type::UIntArray;
