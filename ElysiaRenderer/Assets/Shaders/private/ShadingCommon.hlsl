@@ -221,6 +221,15 @@ FDecodeGBufferData GetDecodeGBufferData(float2 uv)
     return o;
 }
 
+float3 SampleNormalWS(float2 uv)
+{
+    float3 encodeNormalWS = SampleTexture2D(GBuffer3Index, uv, WarpLinearSampler);
+    float3 decodeNormalWS = DecodeNormal(encodeNormalWS);
+    decodeNormalWS = normalize(decodeNormalWS);
+
+    return decodeNormalWS;
+}
+
 // Computes world-space position from post-projection depth
 //float3 PositionFromDepth(in float zw, in float2 uv)
 //{

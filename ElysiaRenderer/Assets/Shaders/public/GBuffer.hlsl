@@ -145,10 +145,10 @@ FEncodeGBufferData GetEncodeGBufferData(FInputParams inputParams, float3 toLight
     float4 normalTS = SampleTexture2D(normalTexIndex, inputParams.objectUV, WarpLinearSampler);
 
     float metallic = SampleTexture2D(metallicTexIndex, inputParams.objectUV, WarpLinearSampler);
-    metallic = metallic * metallicIntensity;
+    metallic = saturate(metallic * metallicIntensity);
 
     float roughness = SampleTexture2D(roughnessTexIndex, inputParams.objectUV, WarpLinearSampler);
-    roughness = roughness * roughnessIntensity;
+    roughness = saturate(roughness * roughnessIntensity);
 
     o.BaseColor = baseColor.rgb;
     o.ShadingModelID = FLT_MAX;

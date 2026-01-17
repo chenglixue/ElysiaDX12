@@ -1,8 +1,8 @@
 #include "private\ShadingCommon.hlsl"
 
-#define MAX_BLUR_RADIUS 4
+#define MAX_BLUR_RADIUS 9
 
-#define BLUR_GROUP_SIZE 8
+#define BLUR_GROUP_SIZE 64
 
 cbuffer PassConstant : register(b0, perPassSpace)
 {
@@ -12,7 +12,6 @@ cbuffer PassConstant : register(b0, perPassSpace)
     float4 g_TargetSize;
     float g_Sharpness;
     UINT g_BlurRadius;
-    float g_BlurIntensity;
     float g_Weights[MAX_BLUR_RADIUS + 1];
 }
 
@@ -37,24 +36,23 @@ void HorizionBilateralBlur(uint3 dispatchThreadID : SV_DispatchThreadID)
     inputParam.Linear01Depth = Linear01Depth(GBufferData.Depth, g_ZBufferParams);
     inputParam.LinearEyeDepth = LinearEyeDepth(GBufferData.Depth, g_ZBufferParams);
 
-    float centerAO = SampleTexture2D(g_SourceTexIndex, screenUV, ClampLinearSampler).r;
+    float centerAO = SampleTexture2D(g_SourceTexIndex, screenUV, ClampPointSampler).r;
     float centerEyeDepth = inputParam.LinearEyeDepth;
-    float centerNormal = inputParam.NormalWS;
+    float3 centerNormal = inputParam.NormalWS;
 
     float totalAO = centerAO * g_Weights[0];
     float totalWeight = g_Weights[0];
 
-    [unroll(4)]
+    [unroll(MAX_BLUR_RADIUS)]
     for (UINT i = 1; i <= g_BlurRadius; i ++)
     {
-        float2 offset = g_BlurDir * i * g_TargetSize.zw * g_BlurIntensity;
+        float2 offset = g_BlurDir * i * g_TargetSize.zw;
         float2 uv[2] = {screenUV - offset, screenUV + offset};
 
         for (int j = 0; j < 2; j ++)
         {
-            float sampleAO = SampleTexture2D(g_SourceTexIndex, uv[j], ClampLinearSampler).r;
-            float sampleNormal = DecodeNormal(SampleTexture2D(GBuffer3Index, uv[j], ClampLinearSampler).rgb);
-            sampleNormal = normalize(sampleNormal);
+            float sampleAO = SampleTexture2D(g_SourceTexIndex, uv[j], ClampPointSampler).r;
+            float3 sampleNormal = SampleNormalWS(uv[j]);
             float sampleDepth = SampleTexture2D(OpaqueDepthIndex, uv[j], ClampPointSampler).r;
             float sampleEyeDepth = LinearEyeDepth(sampleDepth, g_ZBufferParams);
 
@@ -62,7 +60,8 @@ void HorizionBilateralBlur(uint3 dispatchThreadID : SV_DispatchThreadID)
             // 深度差越大，weight接近0，保留更多边缘细节
             float depthWeight = exp(-depthDiff * g_Sharpness);
 
-            float normalWeight = pow(saturate(dot(centerNormal, sampleNormal)), 16.f);
+            float normalDiff = 1.f - saturate(dot(centerNormal, sampleNormal));
+            float normalWeight = exp(-Pow2(normalDiff) * g_Sharpness);
 
             float finalWeight = g_Weights[i] * depthWeight * normalWeight;
 
@@ -71,8 +70,8 @@ void HorizionBilateralBlur(uint3 dispatchThreadID : SV_DispatchThreadID)
         }
     }
 
-    float result = totalAO / (totalWeight + 0.0001f);
-    o[dispatchThreadID.xy] = float4(result, 0, 0, 1);
+    float result = totalAO / (totalWeight + 1e-5);
+    o[dispatchThreadID.xy] = result;
 }
 
 [numthreads(1, BLUR_GROUP_SIZE, 1)]
@@ -96,23 +95,23 @@ void VerticalBilateralBlur(uint3 dispatchThreadID : SV_DispatchThreadID)
     inputParam.Linear01Depth = Linear01Depth(GBufferData.Depth, g_ZBufferParams);
     inputParam.LinearEyeDepth = LinearEyeDepth(GBufferData.Depth, g_ZBufferParams);
 
-    float centerAO = SampleTexture2D(g_SourceTexIndex, screenUV, ClampLinearSampler).r;
+    float centerAO = SampleTexture2D(g_SourceTexIndex, screenUV, ClampPointSampler).r;
     float centerEyeDepth = inputParam.LinearEyeDepth;
-    float centerNormal = inputParam.NormalWS;
+    float3 centerNormal = inputParam.NormalWS;
 
     float totalAO = centerAO * g_Weights[0];
     float totalWeight = g_Weights[0];
 
-    [unroll(4)]
+    [unroll(MAX_BLUR_RADIUS)]
     for (UINT i = 1; i <= g_BlurRadius; i ++)
     {
-        float2 offset = g_BlurDir * i * g_TargetSize.zw * g_BlurIntensity;
+        float2 offset = g_BlurDir * i * g_TargetSize.zw;
         float2 uv[2] = {screenUV - offset, screenUV + offset};
 
         for (int j = 0; j < 2; j ++)
         {
-            float sampleAO = SampleTexture2D(g_SourceTexIndex, uv[j], ClampLinearSampler).r;
-            float sampleNormal = DecodeNormal(SampleTexture2D(GBuffer3Index, uv[j], ClampLinearSampler).rgb);
+            float sampleAO = SampleTexture2D(g_SourceTexIndex, uv[j], ClampPointSampler).r;
+            float3 sampleNormal = SampleNormalWS(uv[j]);
             sampleNormal = normalize(sampleNormal);
             float sampleDepth = SampleTexture2D(OpaqueDepthIndex, uv[j], ClampPointSampler).r;
             float sampleEyeDepth = LinearEyeDepth(sampleDepth, g_ZBufferParams);
@@ -121,7 +120,8 @@ void VerticalBilateralBlur(uint3 dispatchThreadID : SV_DispatchThreadID)
             // 深度差越大，weight接近0，保留更多边缘细节
             float depthWeight = exp(-depthDiff * g_Sharpness);
 
-            float normalWeight = pow(saturate(dot(centerNormal, sampleNormal)), 16.f);
+            float normalDiff = 1.f - saturate(dot(centerNormal, sampleNormal));
+            float normalWeight = exp(-Pow2(normalDiff) * g_Sharpness);
 
             float finalWeight = g_Weights[i] * depthWeight * normalWeight;
 
@@ -130,6 +130,6 @@ void VerticalBilateralBlur(uint3 dispatchThreadID : SV_DispatchThreadID)
         }
     }
 
-    float result = totalAO / (totalWeight + 0.0001f);
-    o[dispatchThreadID.xy] = float4(result, 0, 0, 1);
+    float result = totalAO / (totalWeight + 1e-5);
+    o[dispatchThreadID.xy] = result;
 }

@@ -29,6 +29,7 @@
 #include "RenderTargetManager.h"
 #include "TonemapUtility.h"
 #include "Editor/IMGUIDrawer.h"
+#include "Pass/DebugPass.h"
 
 extern "C"
 {
@@ -72,6 +73,7 @@ namespace ElysiaRenderer
         m_passes.emplace_back(
             std::move(std::make_unique<TonemapPass>()));
         // m_passes.emplace_back(std::move(std::make_unique<BloomPass>(m_pCameraManager->GetMainCamera())));
+        m_passes.emplace_back(std::move(std::make_unique<DebugPass>()));
         m_passes.emplace_back(std::move(std::make_unique<UIPass>()));
         m_passes.emplace_back(std::move(
             std::make_unique<FinalBlitPass>()));

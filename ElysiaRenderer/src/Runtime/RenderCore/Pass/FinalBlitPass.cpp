@@ -85,46 +85,8 @@ namespace ElysiaRenderer
         SetSpaceResource(passData, PER_PASS_SPACE);
 
         {
-            m_pMaterial->SetUInt(ShaderIDs::mipmapLevel, 0);
-            m_pMaterial->SetFloat4(ShaderIDs::g_ScreenSize,
-                                   GetScreenSize(
-                                       m_renderSize));
-
-            switch (UserData::GetInstance().debugMode)
-            {
-            case DebugMode::None:
-            {
-                m_pMaterial->SetUInt(ShaderIDs::blitterTextureIndex,
-                                     m_pCameraColorRT->GetResourceHeapIndex());
-
-                break;
-            }
-            case DebugMode::AO:
-            {
-                m_pMaterial->SetUInt(ShaderIDs::blitterTextureIndex,
-                                     RenderTargetManager::GetInstance().GetRenderTexture(
-                                         AOPass::RenderTextureIDs::AORTID)->GetResourceHeapIndex());
-
-                auto rt = RenderTargetManager::GetInstance().GetRenderTexture(
-                    L"AO HIZ RT");
-                m_pMaterial->SetUInt(ShaderIDs::mipmapLevel, UserData::GetInstance().mipmapLevel);
-                m_pMaterial->SetFloat4(ShaderIDs::g_ScreenSize,
-                                       GetScreenSize(
-                                           rt->GetWidth() * UINT64(pow(2, UserData::GetInstance().mipmapLevel)),
-                                           rt->GetWidth() * UINT64(pow(2, UserData::GetInstance().mipmapLevel))));
-
-                m_pMaterial->SetUInt(ShaderIDs::blitterTextureIndex,
-                                     rt->GetResourceHeapIndex());
-                break;
-            }
-            default:
-            {
-                m_pMaterial->SetUInt(ShaderIDs::blitterTextureIndex,
-                                     m_pCameraColorRT->GetResourceHeapIndex());
-
-                break;
-            }
-            }
+            m_pMaterial->SetUInt(ShaderIDs::blitterTextureIndex,
+                                 m_pCameraColorRT->GetResourceHeapIndex());
 
             m_pCommand->SetDefaultViewportAndScissor(UINT2(m_renderSize));
             m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);

@@ -28,7 +28,7 @@ void SphereMaxNoH(inout BxDFContext Context, float SinAlpha, bool bNewtonIterati
     if (SinAlpha > 0)
     {
         float CosAlpha = sqrt(1 - Pow2(SinAlpha));
-	
+
         float RoL = 2 * Context.NoL * Context.NoV - Context.VoL;
         if (RoL >= CosAlpha)
         {
@@ -41,17 +41,19 @@ void SphereMaxNoH(inout BxDFContext Context, float SinAlpha, bool bNewtonIterati
         {
             float rInvLengthT = SinAlpha * rsqrt(1 - RoL * RoL);
             float NoTr = rInvLengthT * (Context.NoV - RoL * Context.NoL);
-// Enable once anisotropic materials support area lights
+            // Enable once anisotropic materials support area lights
 #if 0
-			float XoTr = rInvLengthT * ( Context.XoV - RoL * Context.XoL );
-			float YoTr = rInvLengthT * ( Context.YoV - RoL * Context.YoL );
+            float XoTr = rInvLengthT * (Context.XoV - RoL * Context.XoL);
+            float YoTr = rInvLengthT * (Context.YoV - RoL * Context.YoL);
 #endif
             float VoTr = rInvLengthT * (2 * Context.NoV * Context.NoV - 1 - RoL * Context.VoL);
 
             if (bNewtonIteration)
             {
-				// dot( cross(N,L), V )
-                float NxLoV = sqrt(saturate(1 - Pow2(Context.NoL) - Pow2(Context.NoV) - Pow2(Context.VoL) + 2 * Context.NoL * Context.NoV * Context.VoL));
+                // dot( cross(N,L), V )
+                float NxLoV = sqrt(saturate(
+                    1 - Pow2(Context.NoL) - Pow2(Context.NoV) - Pow2(Context.VoL) + 2 * Context.NoL * Context.NoV *
+                    Context.VoL));
 
                 float NoBr = rInvLengthT * NxLoV;
                 float VoBr = rInvLengthT * NxLoV * 2 * Context.NoV;
@@ -64,7 +66,9 @@ void SphereMaxNoH(inout BxDFContext Context, float SinAlpha, bool bNewtonIterati
                 float s = VoBr * NoLVTr;
 
                 float xNum = q * (-0.5 * p + 0.25 * VoBr * NoLVTr);
-                float xDenom = p * p + s * (s - 2 * p) + NoLVTr * ((Context.NoL * CosAlpha + Context.NoV) * Pow2(VoLVTr) + q * (-0.5 * (VoLVTr + Context.VoL * CosAlpha) - 0.5));
+                float xDenom = p * p + s * (s - 2 * p) + NoLVTr * (
+                                   (Context.NoL * CosAlpha + Context.NoV) * Pow2(VoLVTr) + q * (
+                                       -0.5 * (VoLVTr + Context.VoL * CosAlpha) - 0.5));
                 float TwoX1 = 2 * xNum / (Pow2(xDenom) + Pow2(xNum));
                 float SinTheta = TwoX1 * xDenom;
                 float CosTheta = 1.0 - TwoX1 * xNum;
@@ -73,28 +77,24 @@ void SphereMaxNoH(inout BxDFContext Context, float SinAlpha, bool bNewtonIterati
             }
 
             Context.NoL = Context.NoL * CosAlpha + NoTr; // dot( N, L * CosAlpha + T * SinAlpha )
-// Enable once anisotropic materials support area lights
+            // Enable once anisotropic materials support area lights
 #if 0
-			Context.XoL = Context.XoL * CosAlpha + XoTr;
-			Context.YoL = Context.YoL * CosAlpha + YoTr;
+            Context.XoL = Context.XoL * CosAlpha + XoTr;
+            Context.YoL = Context.YoL * CosAlpha + YoTr;
 #endif
             Context.VoL = Context.VoL * CosAlpha + VoTr;
 
             float InvLenH = rsqrt(2 + 2 * Context.VoL);
             Context.NoH = saturate((Context.NoL + Context.NoV) * InvLenH);
-// Enable once anisotropic materials support area lights
+            // Enable once anisotropic materials support area lights
 #if 0
-			Context.XoH = ((Context.XoL + Context.XoV) * InvLenH);	// dot(X, (L+V)/|L+V|)
-			Context.YoH = ((Context.YoL + Context.YoV) * InvLenH);
+            Context.XoH = ((Context.XoL + Context.XoV) * InvLenH); // dot(X, (L+V)/|L+V|)
+            Context.YoH = ((Context.YoL + Context.YoV) * InvLenH);
 #endif
             Context.VoH = saturate(InvLenH + InvLenH * Context.VoL);
         }
     }
 }
-
-
-
-
 
 
 // ----------------------------------------------------------------------- Diffuse
@@ -135,55 +135,60 @@ float3 Diffuse_Gotanda(float3 DiffuseColor, float Roughness, float NoV, float No
     float Cosri = VoL - NoV * NoL;
 #if 1
     float a2_13 = a2 + 1.36053;
-    float Fr = (1 - (0.542026 * a2 + 0.303573 * a) / a2_13) * (1 - pow(1 - NoV, 5 - 4 * a2) / a2_13) * ((-0.733996 * a2 * a + 1.50912 * a2 - 1.16402 * a) * pow(1 - NoV, 1 + rcp(39 * a2 * a2 + 1)) + 1);
-	//float Fr = ( 1 - 0.36 * a ) * ( 1 - pow( 1 - NoV, 5 - 4*a2 ) / a2_13 ) * ( -2.5 * Roughness * ( 1 - NoV ) + 1 );
+    float Fr = (1 - (0.542026 * a2 + 0.303573 * a) / a2_13) * (1 - pow(1 - NoV, 5 - 4 * a2) / a2_13) * (
+                   (-0.733996 * a2 * a + 1.50912 * a2 - 1.16402 * a) * pow(1 - NoV, 1 + rcp(39 * a2 * a2 + 1)) + 1);
+    //float Fr = ( 1 - 0.36 * a ) * ( 1 - pow( 1 - NoV, 5 - 4*a2 ) / a2_13 ) * ( -2.5 * Roughness * ( 1 - NoV ) + 1 );
     float Lm = (max(1 - 2 * a, 0) * (1 - Pow5(1 - NoL)) + min(2 * a, 1)) * (1 - 0.5 * a * (NoL - 1)) * NoL;
-    float Vd = (a2 / ((a2 + 0.09) * (1.31072 + 0.995584 * NoV))) * (1 - pow(1 - NoL, (1 - 0.3726732 * NoV * NoV) / (0.188566 + 0.38841 * NoV)));
+    float Vd = (a2 / ((a2 + 0.09) * (1.31072 + 0.995584 * NoV))) * (
+                   1 - pow(1 - NoL, (1 - 0.3726732 * NoV * NoV) / (0.188566 + 0.38841 * NoV)));
     float Bp = Cosri < 0 ? 1.4 * NoV * NoL * Cosri : Cosri;
     float Lr = (21.0 / 20.0) * (1 - F0) * (Fr * Lm + Vd + Bp);
     return DiffuseColor / PI * Lr;
 #else
-	float a2_13 = a2 + 1.36053;
-	float Fr = ( 1 - ( 0.542026*a2 + 0.303573*a ) / a2_13 ) * ( 1 - pow( 1 - NoV, 5 - 4*a2 ) / a2_13 ) * ( ( -0.733996*a2*a + 1.50912*a2 - 1.16402*a ) * pow( 1 - NoV, 1 + rcp(39*a2*a2+1) ) + 1 );
-	float Lm = ( max( 1 - 2*a, 0 ) * ( 1 - Pow5( 1 - NoL ) ) + min( 2*a, 1 ) ) * ( 1 - 0.5*a + 0.5*a * NoL );
-	float Vd = ( a2 / ( (a2 + 0.09) * (1.31072 + 0.995584 * NoV) ) ) * ( 1 - pow( 1 - NoL, ( 1 - 0.3726732 * NoV * NoV ) / ( 0.188566 + 0.38841 * NoV ) ) );
-	float Bp = Cosri < 0 ? 1.4 * NoV * Cosri : Cosri / max( NoL, 1e-8 );
-	float Lr = (21.0 / 20.0) * (1 - F0) * ( Fr * Lm + Vd + Bp );
-	return DiffuseColor / PI * Lr;
+    float a2_13 = a2 + 1.36053;
+    float Fr = (1 - (0.542026 * a2 + 0.303573 * a) / a2_13) * (1 - pow(1 - NoV, 5 - 4 * a2) / a2_13) * (
+                   (-0.733996 * a2 * a + 1.50912 * a2 - 1.16402 * a) * pow(1 - NoV, 1 + rcp(39 * a2 * a2 + 1)) + 1);
+    float Lm = (max(1 - 2 * a, 0) * (1 - Pow5(1 - NoL)) + min(2 * a, 1)) * (1 - 0.5 * a + 0.5 * a * NoL);
+    float Vd = (a2 / ((a2 + 0.09) * (1.31072 + 0.995584 * NoV))) * (
+                   1 - pow(1 - NoL, (1 - 0.3726732 * NoV * NoV) / (0.188566 + 0.38841 * NoV)));
+    float Bp = Cosri < 0 ? 1.4 * NoV * Cosri : Cosri / max(NoL, 1e-8);
+    float Lr = (21.0 / 20.0) * (1 - F0) * (Fr * Lm + Vd + Bp);
+    return DiffuseColor / PI * Lr;
 #endif
 }
 
 // [ Chan 2018, "Material Advances in Call of Duty: WWII" ]
 // It has been extended here to fade out retro reflectivity contribution from area light in order to avoid visual artefacts.
-float3 Diffuse_Chan(float3 DiffuseColor, float a2, float NoV, float NoL, float VoH, float NoH, float RetroReflectivityWeight)
+float3 Diffuse_Chan(float3 DiffuseColor, float a2, float NoV, float NoL, float VoH, float NoH,
+                    float RetroReflectivityWeight)
 {
-	// We saturate each input to avoid out of range negative values which would result in weird darkening at the edge of meshes (resulting from tangent space interpolation).
+    // We saturate each input to avoid out of range negative values which would result in weird darkening at the edge of meshes (resulting from tangent space interpolation).
     NoV = saturate(NoV);
     NoL = saturate(NoL);
     VoH = saturate(VoH);
     NoH = saturate(NoH);
 
-	// a2 = 2 / ( 1 + exp2( 18 * g )
+    // a2 = 2 / ( 1 + exp2( 18 * g )
     float g = saturate((1.0 / 18.0) * log2(2 * rcp(a2) - 1));
 
     float F0 = VoH + Pow5(1 - VoH);
     float FdV = 1 - 0.75 * Pow5(1 - NoV);
     float FdL = 1 - 0.75 * Pow5(1 - NoL);
 
-	// Rough (F0) to smooth (FdV * FdL) response interpolation
+    // Rough (F0) to smooth (FdV * FdL) response interpolation
     float Fd = lerp(F0, FdV * FdL, saturate(2.2 * g - 0.5));
 
-	// Retro reflectivity contribution.
+    // Retro reflectivity contribution.
     float Fb = ((34.5 * g - 59) * g + 24.5) * VoH * exp2(-max(73.2 * g - 21.2, 8.9) * sqrt(NoH));
-	// It fades out when lights become area lights in order to avoid visual artefacts.
+    // It fades out when lights become area lights in order to avoid visual artefacts.
     Fb *= RetroReflectivityWeight;
 
     float Lobe = (1 / PI) * (Fd + Fb);
 
-	// We clamp the BRDF lobe value to an arbitrary value of 1 to get some practical benefits at high roughness:
-	// - This is to avoid too bright edges when using normal map on a mesh and the local bases, L, N and V ends up in an top emisphere setup.
-	// - This maintains the full proper rough look of a sphere when not using normal maps.
-	// - This also fixes the furnace test returning too much energy at the edge of a mesh.
+    // We clamp the BRDF lobe value to an arbitrary value of 1 to get some practical benefits at high roughness:
+    // - This is to avoid too bright edges when using normal map on a mesh and the local bases, L, N and V ends up in an top emisphere setup.
+    // - This maintains the full proper rough look of a sphere when not using normal maps.
+    // - This also fixes the furnace test returning too much energy at the edge of a mesh.
     Lobe = min(1.0, Lobe);
 
     return DiffuseColor * Lobe;
@@ -210,18 +215,18 @@ float D_Beckmann(float a2, float NoH)
 float D_GGX(float a2, float NoH)
 {
     float d = (NoH * a2 - NoH) * NoH + 1.f; // 2 mad
-    return a2 / (PI * d * d); // 4 mul, 1 rcp
+    return a2 / (PI * d * d);               // 4 mul, 1 rcp
 }
 
 float D_GGX_Mobile(float Roughness, float NoH)
 {
-	// Walter et al. 2007, "Microfacet Models for Refraction through Rough Surfaces"
+    // Walter et al. 2007, "Microfacet Models for Refraction through Rough Surfaces"
     float OneMinusNoHSqr = 1.0 - NoH * NoH;
     float a = Roughness * Roughness;
     float n = NoH * a;
     float p = a / (OneMinusNoHSqr + n * n);
     float d = (1.0 / PI) * p * p;
-	// clamp to avoid overlfow in a bright env
+    // clamp to avoid overlfow in a bright env
     return min(d, 2048.0);
 }
 
@@ -229,7 +234,7 @@ float D_GGX_Mobile(float Roughness, float NoH)
 // [Burley 2012, "Physically-Based Shading at Disney"]
 float D_GGXaniso(float ax, float ay, float NoH, float XoH, float YoH)
 {
-	// The two formulations are mathematically equivalent
+    // The two formulations are mathematically equivalent
 #if 1
     float a2 = ax * ay;
     float3 V = float3(ay * XoH, ax * YoH, a2 * NoH);
@@ -237,14 +242,10 @@ float D_GGXaniso(float ax, float ay, float NoH, float XoH, float YoH)
 
     return (1.0f / PI) * a2 * Square(a2 / S);
 #else
-	float d = XoH*XoH / (ax*ax) + YoH*YoH / (ay*ay) + NoH*NoH;
-	return 1.0f / ( PI * ax*ay * d*d );
+    float d = XoH * XoH / (ax * ax) + YoH * YoH / (ay * ay) + NoH * NoH;
+    return 1.0f / (PI * ax * ay * d * d);
 #endif
 }
-
-
-
-
 
 
 // ----------------------------------------------------------------------- D
@@ -263,7 +264,7 @@ float Vis_Neumann(float NoV, float NoL)
 // [Kelemen 2001, "A microfacet based coupled specular-matte brdf model with importance sampling"]
 float Vis_Kelemen(float VoH)
 {
-	// constant to prevent NaN
+    // constant to prevent NaN
     return rcp(4 * VoH * VoH + 1e-5);
 }
 
@@ -313,10 +314,6 @@ float Vis_SmithJointAniso(float ax, float ay, float NoV, float NoL, float XoV, f
 }
 
 
-
-
-
-
 // ----------------------------------------------------------------------- F
 
 float3 F_None(float3 SpecularColor)
@@ -328,9 +325,9 @@ float3 F_None(float3 SpecularColor)
 float3 UE_F_Schlick(float3 SpecularColor, float VoH)
 {
     float Fc = Pow5(1. - VoH); // 1 sub, 3 mul
-	//return Fc + (1 - Fc) * SpecularColor;		// 1 add, 3 mad
-	
-	// Anything less than 2% is physically impossible and is instead considered to be shadowing
+    //return Fc + (1 - Fc) * SpecularColor;		// 1 add, 3 mad
+
+    // Anything less than 2% is physically impossible and is instead considered to be shadowing
     return saturate(50.0 * SpecularColor.g) * Fc + (1. - Fc) * SpecularColor;
 }
 
@@ -342,9 +339,9 @@ float3 F_Schlick(float3 F0, float3 F90, float VoH)
 
 float3 F_AdobeF82(float3 F0, float3 F82, float VoH)
 {
-	// [Kutz et al. 2021, "Novel aspects of the Adobe Standard Material" ]
-	// See Section 2.3 (note the formulas in the paper do not match the code, the code is the correct version)
-	// The constants below are derived by just constant folding the terms dependent on CosThetaMax=1/7
+    // [Kutz et al. 2021, "Novel aspects of the Adobe Standard Material" ]
+    // See Section 2.3 (note the formulas in the paper do not match the code, the code is the correct version)
+    // The constants below are derived by just constant folding the terms dependent on CosThetaMax=1/7
     const float Fc = Pow5(1.h - VoH);
     const float K = 49.0 / 46656.0;
     float3 b = (K - K * F82) * (7776.0 + 9031.0 * F0);
@@ -367,27 +364,25 @@ float3 IndirF_Function(float NdotV, float3 F0, float roughness)
 }
 
 
-
-
 // ----------------------------------------------------------------------- Specular
 // [Karis 2013, "Real Shading in Unreal Engine 4" slide 11]
 float3 EnvBRDF(Texture2D BRDFLUT, SamplerState sample, float3 SpecularColor, float Roughness, float NoV)
 {
-	// Importance sampled preintegrated G * F
+    // Importance sampled preintegrated G * F
     float2 AB = BRDFLUT.SampleLevel(sample, float2(NoV, Roughness), 0).rg;
 
-	// Anything less than 2% is physically impossible and is instead considered to be shadowing 
+    // Anything less than 2% is physically impossible and is instead considered to be shadowing 
     float3 GF = SpecularColor * AB.x + saturate(50.0 * SpecularColor.g) * AB.y;
-	
+
     return GF;
 }
 
 float2 EnvBRDFApproxLazarov(float Roughness, float NoV)
 {
-	// [ Lazarov 2013, "Getting More Physical in Call of Duty: Black Ops II" ]
-	// Adaptation to fit our G term.
-    const float4 c0 = { -1., -0.0275, -0.572, 0.022 };
-    const float4 c1 = { 1., 0.0425, 1.04, -0.04 };
+    // [ Lazarov 2013, "Getting More Physical in Call of Duty: Black Ops II" ]
+    // Adaptation to fit our G term.
+    const float4 c0 = {-1., -0.0275, -0.572, 0.022};
+    const float4 c1 = {1., 0.0425, 1.04, -0.04};
     float4 r = Roughness * c0 + c1;
     float a004 = min(r.x * r.x, exp2(-9.28 * NoV)) * r.x + r.y;
     float2 AB = float2(-1.04, 1.04) * a004 + r.zw;
@@ -398,8 +393,8 @@ float3 EnvBRDFApprox(float3 SpecularColor, float Roughness, float NoV)
 {
     float2 AB = EnvBRDFApproxLazarov(Roughness, NoV);
 
-	// Anything less than 2% is physically impossible and is instead considered to be shadowing
-	// Note: this is needed for the 'specular' show flag to work, since it uses a SpecularColor of 0
+    // Anything less than 2% is physically impossible and is instead considered to be shadowing
+    // Note: this is needed for the 'specular' show flag to work, since it uses a SpecularColor of 0
     float F90 = saturate(50.0 * SpecularColor.g);
 
     return SpecularColor * AB.x + F90 * AB.y;
@@ -407,9 +402,9 @@ float3 EnvBRDFApprox(float3 SpecularColor, float Roughness, float NoV)
 
 float EnvBRDFApproxNonMetal(float Roughness, float NoV)
 {
-	// Same as EnvBRDFApprox( 0.04, Roughness, NoV )
-    const float2 c0 = { -1., -0.0275 };
-    const float2 c1 = { 1., 0.0425 };
+    // Same as EnvBRDFApprox( 0.04, Roughness, NoV )
+    const float2 c0 = {-1., -0.0275};
+    const float2 c1 = {1., 0.0425};
     float2 r = Roughness * c0 + c1;
     return min(r.x * r.x, exp2(-9.28 * NoV)) * r.x + r.y;
 }

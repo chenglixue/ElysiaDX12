@@ -3,6 +3,7 @@
 
 #include "Editor/UserData.h"
 #include "Programs/PIXHelper.h"
+#include "Programs/SobolSequenceGenerator.h"
 #include "Runtime/Core/DX12GraphicsContext.h"
 #include "Runtime/Core/DX12Shader.h"
 #include "Runtime/Core/DX12Device.h"
@@ -54,6 +55,8 @@ namespace ElysiaRenderer
     size_t AOPass::ShaderIDs::g_BlurRadius = SIZE_MAX;
     size_t AOPass::ShaderIDs::g_Weights = SIZE_MAX;
     size_t AOPass::ShaderIDs::g_BlurIntensity = SIZE_MAX;
+    size_t AOPass::ShaderIDs::g_HIZMaxMipmap = SIZE_MAX;
+    size_t AOPass::ShaderIDs::g_HIZTextureIndex = SIZE_MAX;
 
     AOPass::AOPass() :
         BasePass()
@@ -83,6 +86,10 @@ namespace ElysiaRenderer
         ShaderIDs::g_AOIntensityPow = PropertyToID(L"g_AOIntensityPow");
         ShaderIDs::g_AOIndex = PropertyToID(L"g_AOIndex");
         ShaderIDs::g_noiseScale = PropertyToID(L"g_noiseScale");
+
+        ShaderIDs::g_HIZMaxMipmap = PropertyToID(L"g_HIZMaxMipmap");
+        ShaderIDs::g_HIZTextureIndex = PropertyToID(L"g_HIZTextureIndex");
+
         ShaderIDs::g_BlurDir = PropertyToID(L"g_BlurDir");
         ShaderIDs::g_Sharpness = PropertyToID(L"g_Sharpness");
         ShaderIDs::g_BlurRadius = PropertyToID(L"g_BlurRadius");
@@ -204,12 +211,36 @@ namespace ElysiaRenderer
 
         UpdatePipeline();
 
-        if (m_kernels.size() <= 0)
+        if (m_kernels.empty())
             m_kernels = GenerateSSAOSampleKernel();
 
         m_lastBlurQuality = UserData::GetInstance().aoParameter.BlurQuality;
-        if (m_blurWeights.size() <= 0)
+        if (m_blurWeights.empty())
+        {
+            switch (UserData::GetInstance().aoParameter.BlurQuality)
+            {
+            case AOBlurQuality::High:
+            {
+                m_blurRadius = 9;
+                m_blurSigma = 3;
+                break;
+            }
+            case AOBlurQuality::Middle:
+            {
+                m_blurRadius = 6;
+                m_blurSigma = 2.2;
+                break;
+            }
+            case AOBlurQuality::Low:
+            {
+                m_blurRadius = 4;
+                m_blurSigma = 1.5;
+                break;
+            }
+            }
             m_blurWeights = GenerateBlurWeights(m_blurRadius, m_blurSigma);
+
+        }
     }
 
     void AOPass::Render(FrameContext& context)
@@ -217,6 +248,32 @@ namespace ElysiaRenderer
         PIXHelper pix(m_pCommand->GetCommandList(), "SSAO Pass");
         m_pCamera = context.pCamera;
 
+        if (UserData::GetInstance().aoParameter.BlurQuality != m_lastBlurQuality)
+        {
+            switch (UserData::GetInstance().aoParameter.BlurQuality)
+            {
+            case AOBlurQuality::High:
+            {
+                m_blurRadius = 9;
+                m_blurSigma = 3;
+                break;
+            }
+            case AOBlurQuality::Middle:
+            {
+                m_blurRadius = 6;
+                m_blurSigma = 2.2;
+                break;
+            }
+            case AOBlurQuality::Low:
+            {
+                m_blurRadius = 4;
+                m_blurSigma = 1.5;
+                break;
+            }
+            }
+
+            m_blurWeights = GenerateBlurWeights(m_blurRadius, m_blurSigma);
+        }
         m_lastBlurQuality = UserData::GetInstance().aoParameter.BlurQuality;
 
         DoHIZ();
@@ -366,37 +423,44 @@ namespace ElysiaRenderer
     void AOPass::DoSSAO()
     {
         PIXHelper pix(m_pCommand->GetCommandList(), "SSAO");
+        auto passID = ShaderPasseIDs::AOPassID;
 
         m_pCommand->AddBarrier(m_pAORT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
         m_pCommand->ClearRenderTarget(m_pAORT, Color::Black);
 
         {
-            auto& passData = m_pMaterial->GetPassData(ShaderPasseIDs::AOPassID);
+            auto& passData = m_pMaterial->GetPassData(passID);
 
             PipelineInfo pipelineStateData{};
             pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(
-                                                                     ShaderPasseIDs::AOPassID)
+                                                                     passID)
                                                                  .pPipelineStateObject;
             m_pCommand->SetPipeline(pipelineStateData);
 
             m_pMaterial->SetFloat4(ShaderIDs::g_TargetSize,
-                                   GetScreenSize(m_pAORT->GetWidth(), m_pAORT->GetHeight()));
-            m_pMaterial->SetMatrix(ShaderIDs::viewMatrix, m_pCamera->GetViewMat());
-            m_pMaterial->SetMatrix(ShaderIDs::viewMatrix_I, m_pCamera->GetViewMat().Invert());
-            m_pMaterial->SetMatrix(ShaderIDs::projMatrix, m_pCamera->GetProjMat());
-            m_pMaterial->SetMatrix(ShaderIDs::projMatrix_I, m_pCamera->GetProjMat().Invert());
-            m_pMaterial->SetMatrix(ShaderIDs::viewProjMatrix, m_pCamera->GetViewMat() * m_pCamera->GetProjMat());
+                                   GetScreenSize(m_pAORT->GetWidth(), m_pAORT->GetHeight()), passID);
+            m_pMaterial->SetMatrix(ShaderIDs::viewMatrix, m_pCamera->GetViewMat(), passID);
+            m_pMaterial->SetMatrix(ShaderIDs::viewMatrix_I, m_pCamera->GetViewMat().Invert(), passID);
+            m_pMaterial->SetMatrix(ShaderIDs::projMatrix, m_pCamera->GetProjMat(), passID);
+            m_pMaterial->SetMatrix(ShaderIDs::projMatrix_I, m_pCamera->GetProjMat().Invert(), passID);
+            m_pMaterial->SetMatrix(ShaderIDs::viewProjMatrix, m_pCamera->GetViewMat() * m_pCamera->GetProjMat(),
+                                   passID);
             m_pMaterial->SetMatrix(ShaderIDs::viewProjMatrix_I,
-                                   (m_pCamera->GetViewMat() * m_pCamera->GetProjMat()).Invert());
-            m_pMaterial->SetUInt(ShaderIDs::g_AOSampleCount, UserData::GetInstance().aoParameter.SampleCount);
-            m_pMaterial->SetFloat(ShaderIDs::g_AORadius, UserData::GetInstance().aoParameter.Radius);
-            m_pMaterial->SetFloat(ShaderIDs::g_AOBias, UserData::GetInstance().aoParameter.Bias);
-            m_pMaterial->SetFloat(ShaderIDs::g_AOIntensityMul, UserData::GetInstance().aoParameter.IntensityMul);
-            m_pMaterial->SetFloat(ShaderIDs::g_AOIntensityPow, UserData::GetInstance().aoParameter.IntensityPow);
-            m_pMaterial->SetVector4Array(ShaderIDs::g_AOSampleKernelArray, m_kernels);
+                                   (m_pCamera->GetViewMat() * m_pCamera->GetProjMat()).Invert(), passID);
+            m_pMaterial->SetUInt(ShaderIDs::g_AOSampleCount, UserData::GetInstance().aoParameter.SampleCount, passID);
+            m_pMaterial->SetFloat(ShaderIDs::g_AORadius, UserData::GetInstance().aoParameter.Radius, passID);
+            m_pMaterial->SetFloat(ShaderIDs::g_AOBias, UserData::GetInstance().aoParameter.Bias, passID);
+            m_pMaterial->SetFloat(ShaderIDs::g_AOIntensityMul, UserData::GetInstance().aoParameter.IntensityMul,
+                                  passID);
+            m_pMaterial->SetFloat(ShaderIDs::g_AOIntensityPow, UserData::GetInstance().aoParameter.IntensityPow,
+                                  passID);
+            m_pMaterial->SetVector4Array(ShaderIDs::g_AOSampleKernelArray, m_kernels, passID);
             m_pMaterial->SetFloat2(ShaderIDs::g_noiseScale, Vector2(
                                        m_renderSize.x / m_blueNoise.GetWidth(),
-                                       m_renderSize.y / m_blueNoise.GetHeight()));
+                                       m_renderSize.y / m_blueNoise.GetHeight()), passID);
+
+            m_pMaterial->SetUInt(ShaderIDs::g_HIZMaxMipmap, MathHelper::Max(m_mipmapCount - 1, UINT(0)), passID);
+            m_pMaterial->SetUInt(ShaderIDs::g_HIZTextureIndex, m_pHIZRT->GetResourceHeapIndex(), passID);
 
             SetSpaceResource(passData, PER_PASS_SPACE);
             SetSpaceResource(passData, PER_FRAME_SPACE);
@@ -431,8 +495,6 @@ namespace ElysiaRenderer
                                    GetScreenSize(m_pBlurHorizionRT->GetWidth(),
                                                  m_pBlurHorizionRT->GetHeight()), passID);
             m_pMaterial->SetFloat(ShaderIDs::g_Sharpness, UserData::GetInstance().aoParameter.Sharpness, passID);
-            m_pMaterial->SetFloat(ShaderIDs::g_BlurIntensity, UserData::GetInstance().aoParameter.BlurIntensity,
-                                  passID);
             m_pMaterial->SetFloatArray(ShaderIDs::g_Weights, m_blurWeights, passID);
 
             SetSpaceResource(passData, PER_PASS_SPACE);
@@ -468,8 +530,6 @@ namespace ElysiaRenderer
                                    GetScreenSize(m_pBlurVerticalRT->GetWidth(),
                                                  m_pBlurVerticalRT->GetHeight()), passID);
             m_pMaterial->SetFloat(ShaderIDs::g_Sharpness, UserData::GetInstance().aoParameter.Sharpness, passID);
-            m_pMaterial->SetFloat(ShaderIDs::g_BlurIntensity, UserData::GetInstance().aoParameter.BlurIntensity,
-                                  passID);
             m_pMaterial->SetFloatArray(ShaderIDs::g_Weights, m_blurWeights, passID);
 
             SetSpaceResource(passData, PER_PASS_SPACE);
@@ -486,43 +546,51 @@ namespace ElysiaRenderer
     std::vector<Vector4> AOPass::GenerateSSAOSampleKernel()
     {
         std::vector<Vector4> o{};
-        UINT maxSampleCount = 32;
+        UINT maxSampleCount = 16;
         maxSampleCount = MathHelper::Min(UserData::GetInstance().aoParameter.SampleCount, maxSampleCount);
-        o.reserve(maxSampleCount);
+        o.resize(maxSampleCount);
 
-        std::random_device rd;
-        std::default_random_engine generator(rd());
-        std::uniform_real_distribution<float> minusOneToOneDistribution(-1.f, 1.f);
-        std::uniform_real_distribution<float> zeroToOneDistribution(0.f, 1.f);
+        SobolSequenceGenerator sobol(2);
+        uint32_t* C = sobol.rightmostZeroBit(maxSampleCount);
 
-        for (UINT i = 0; i < maxSampleCount; i ++)
+        for (UINT32 i = 0; i < maxSampleCount; ++i)
         {
-            auto randomVec = Vector4(minusOneToOneDistribution(generator),
-                                     minusOneToOneDistribution(generator),
-                                     zeroToOneDistribution(generator), 1.f);
+            auto point = sobol.nextPoint(C[i]);
+            float u1 = static_cast<float>(point[0]);
+            float u2 = static_cast<float>(point[1]);
 
-            auto scale = (float)i / maxSampleCount;
-            scale = MathHelper::Lerp(0.1f, 1.f, scale * scale); // 二次函数分布
-            randomVec = randomVec * scale;
+            // 核心：使用余弦加权映射到半球 (Cosine-weighted Hemisphere)
+            float phi = 2.0f * 3.14159265f * u1;
+            float cosTheta = sqrt(1.0f - u2);
+            float sinTheta = sqrt(u2);
 
-            o.emplace_back(randomVec);
+            Vector4 v;
+            v.x = cos(phi) * sinTheta;
+            v.y = sin(phi) * sinTheta;
+            v.z = cosTheta; // Z轴始终为正，保证在半球内
+            v.w = 0.0f;
+
+            // 距离缩放（靠近原点的点权重更高，增强接触阴影）
+            float scale = (float)i / (float)maxSampleCount;
+            scale = 0.1f + 0.9f * (scale * scale); // Lerp(0.1, 1.0, scale^2)
+
+            o[i] = v * scale;
         }
 
         return o;
     }
     std::vector<float> AOPass::GenerateBlurWeights(UINT blurRadius, float sigma)
     {
-        std::vector<float> weights(blurRadius + 1);
+        std::vector<float> weights(blurRadius + 1, 0);
         float sum = 0.0f;
+
+        const float denominator = 2.0f * sigma * sigma;
 
         // 计算权重
         for (int i = 0; i <= blurRadius; ++i)
         {
-            weights[i] = (1.0f / (sqrt(2.0f * 3.14159f) * sigma)) * exp(-(i * i) / (2.0f * sigma * sigma));
-            if (i == 0)
-                sum += weights[i];
-            else
-                sum += 2.0f * weights[i]; // 对称两边的权重
+            weights[i] = expf(-(i * i) / denominator);
+            sum += i == 0 ? weights[i] : 2.0f * weights[i];
         }
 
         // 归一化，确保权重总和为 1

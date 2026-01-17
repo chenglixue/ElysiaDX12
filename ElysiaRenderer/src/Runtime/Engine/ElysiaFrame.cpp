@@ -419,9 +419,6 @@ namespace ElysiaEngine
 
             ImGui::SliderFloat("AO Sharpness", &pUserData.aoParameter.Sharpness, 1.f, 100.f, "%.3f",
                                ImGuiSliderFlags_AlwaysClamp);
-
-            ImGui::SliderFloat("Blur Intensity", &pUserData.aoParameter.BlurIntensity, 0.f, 1.f, "%.3f",
-                               ImGuiSliderFlags_AlwaysClamp);
         }
     }
 }

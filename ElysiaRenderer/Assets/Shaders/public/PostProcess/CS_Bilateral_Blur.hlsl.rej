@@ -1,0 +1,9 @@
+diff a/ElysiaRenderer/Assets/Shaders/public/PostProcess/CS_Bilateral_Blur.hlsl b/ElysiaRenderer/Assets/Shaders/public/PostProcess/CS_Bilateral_Blur.hlsl	(rejected hunks)
+@@ -60,7 +60,6 @@
+ 
+             float depthDiff = abs(centerEyeDepth - sampleEyeDepth);
+             // ��Ȳ�Խ��weight�ӽ�0����������Եϸ��
+-            float depthWeight = exp(-depthDiff * g_Sharpness);
+             float depthWeight = 1.0 / (0.0001 + depthDiff * g_Sharpness);
+ 
+             float normalWeight = pow(saturate(dot(centerNormal, sampleNormal)), 8.f);

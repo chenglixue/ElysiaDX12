@@ -33,8 +33,6 @@ namespace ElysiaRenderer
         virtual void Dispose() override;
         virtual void UpdatePipeline() override;
 
-        void UpdateGBufferPassVariant(UINT passIndex);
-
     private:
         static const UINT m_maxHIZCount = 10;
         UINT m_mipmapCount;
@@ -78,6 +76,9 @@ namespace ElysiaRenderer
             static size_t g_AOIndex;
             static size_t g_noiseScale;
 
+            static size_t g_HIZMaxMipmap;
+            static size_t g_HIZTextureIndex;
+
             static size_t g_BlurDir;
             static size_t g_Sharpness;
             static size_t g_BlurRadius;
@@ -88,8 +89,8 @@ namespace ElysiaRenderer
         std::vector<Vector4> m_kernels;
         std::vector<float> m_blurWeights;
         AOBlurQuality m_lastBlurQuality;
-        const UINT m_blurRadius = 4;
-        const float m_blurSigma = 2;
+        UINT m_blurRadius;
+        float m_blurSigma;
 
         void DoSSAO();
         void DoBlurHorizion();

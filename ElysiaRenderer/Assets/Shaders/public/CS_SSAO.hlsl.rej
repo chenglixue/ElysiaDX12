@@ -1,0 +1,9 @@
+diff a/ElysiaRenderer/Assets/Shaders/public/CS_SSAO.hlsl b/ElysiaRenderer/Assets/Shaders/public/CS_SSAO.hlsl	(rejected hunks)
+@@ -101,7 +101,6 @@
+         float randomEyeDepth = LinearEyeDepth(randomDepth, g_ZBufferParams);
+         float randomZ = randomPosVS.z;
+ 
+-        float range = step(randomEyeDepth, randomZ + g_AOBias);
+         float depthDiff = randomZ - randomEyeDepth;
+         float rangeCheck = saturate((g_AORadius - depthDiff) / g_AORadius);
+ 

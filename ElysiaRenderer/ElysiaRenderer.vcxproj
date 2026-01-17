@@ -276,6 +276,7 @@
     <ClInclude Include="src\Runtime\RenderCore\Pass\AOPass.h" />
     <ClInclude Include="src\Runtime\RenderCore\Pass\BasePass.h" />
     <ClInclude Include="src\Runtime\RenderCore\Pass\BloomPass.h" />
+    <ClInclude Include="src\Runtime\RenderCore\Pass\DebugPass.h" />
     <ClInclude Include="src\Runtime\RenderCore\Pass\FinalBlitPass.h" />
     <ClInclude Include="src\Runtime\RenderCore\Pass\GBufferPass.h" />
     <ClInclude Include="src\Runtime\RenderCore\Pass\OpaquePass.h" />
@@ -377,6 +378,9 @@
       <FileType>Document</FileType>
     </None>
     <None Include="Assets\Shaders\public\CopyTexture.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Assets\Shaders\public\PostProcess\CS_Debug.hlsl">
       <FileType>Document</FileType>
     </None>
     <ClCompile Include="src\Editor\IMGUIDrawer.cpp">
@@ -3521,6 +3525,7 @@
     <ClCompile Include="src\Runtime\RenderCore\Pass\AOPass.cpp" />
     <ClCompile Include="src\Runtime\RenderCore\Pass\BasePass.cpp" />
     <ClCompile Include="src\Runtime\RenderCore\Pass\BloomPass.cpp" />
+    <ClCompile Include="src\Runtime\RenderCore\Pass\DebugPass.cpp" />
     <ClCompile Include="src\Runtime\RenderCore\Pass\FinalBlitPass.cpp" />
     <ClCompile Include="src\Runtime\RenderCore\Pass\GBufferPass.cpp" />
     <ClCompile Include="src\Runtime\RenderCore\Pass\OpaquePass.cpp" />

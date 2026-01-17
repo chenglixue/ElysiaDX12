@@ -10,8 +10,6 @@
 cbuffer PassConstant : register(b0, perPassSpace)
 {
     UINT blitterTextureIndex;
-    UINT mipmapLevel;
-    float4 g_ScreenSize;
 }
 
 struct PSInput
@@ -45,10 +43,7 @@ PSInput BlitVS(UINT vertexID : SV_VertexID)
 
 float4 BlitPS(PSInput i) : SV_TARGET
 {
-    Texture2D blitterTex = ResourceDescriptorHeap[blitterTextureIndex];
-    SamplerState linearSampler = SamplerDescriptorHeap[ClampLinearSampler];
-
-    half4 blitterValue = blitterTex.SampleLevel(linearSampler, i.uv, mipmapLevel);
+    half4 blitterValue = SampleTexture2D(blitterTextureIndex, i.uv, ClampLinearSampler);
 
     return blitterValue;
 }

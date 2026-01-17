@@ -19,20 +19,22 @@ cbuffer PassConstant : register(b0, perPassSpace)
     float g_AOIntensityMul;
     float g_AOIntensityPow;
 
-    float4 g_AOSampleKernelArray[_AO_MAX_SAMPLE_COUNT];
+    float4 g_AOSampleKernelArray[_AO_MAX_SAMPLE_COUNT + 1];
 
     float2 g_noiseScale;
+    UINT g_HIZMaxMipmap;
+    UINT g_HIZTextureIndex;
 }
 
 #define AO_GROUP_SIZE 8
-// #define AO_PADDING 4
-// #define CACHE_SIZE (AO_GROUP_SIZE + 2 * AO_PADDING)
+
+float SampleHiZTrilinear(float2 uv, float mipmapLevel);
+float ComputeSingleAO(float3 randomVec, FInputParams inputParam, float3 normalVS, float radiusScale, float);
 
 [numthreads(AO_GROUP_SIZE, AO_GROUP_SIZE, 1)]
 void SSAO(uint3 dispatchThreadID: SV_DispatchThreadID)
 {
     RWTexture2D<float4> o = ResourceDescriptorHeap[g_AOIndex];
-    float3 color = LoadTexture2D(g_AOIndex, dispatchThreadID.xy);
 
     float2 screenUV = (float2(dispatchThreadID.xy) + 0.5f) * g_TargetSize.zw;
 
@@ -50,43 +52,85 @@ void SSAO(uint3 dispatchThreadID: SV_DispatchThreadID)
     inputParam.Linear01Depth = Linear01Depth(GBufferData.Depth, g_ZBufferParams);
     inputParam.LinearEyeDepth = LinearEyeDepth(GBufferData.Depth, g_ZBufferParams);
 
-    const float3 randomVector = float3(
-        SampleTexture2D(BlueNoiseTexIndex,
-                        inputParam.ScreenUV * g_noiseScale, WarpPointSampler).xy,
-        0.f);
+    const float3 randomVector = SampleTexture2D(BlueNoiseTexIndex,
+                                                inputParam.ScreenUV * g_noiseScale, WarpPointSampler).xyz;
 
     const float3 normalVS = mul(inputParam.NormalWS, viewMatrix);
 
     // 强制让随机向量与法线垂直，得到切线
-    const float3 tangent = normalize(randomVector - normalVS * dot(randomVector, normalVS));
+    float3 tangent = normalize(randomVector - normalVS * dot(randomVector, normalVS));
     const float3 bitTangent = cross(normalVS, tangent);
-    const float3x3 TBN = float3x3(tangent, bitTangent, normalVS);
+    float3x3 TBN = float3x3(tangent, bitTangent, normalVS);
 
-    float AO = 0.f;
-    [unroll(32)]
+    float AO_Small = 0.0f;
+    float AO_Large = 0.0f;
+    [unroll(16)]
     for (UINT sampleIndex = 0; sampleIndex < g_AOSampleCount; ++sampleIndex)
     {
-        float3 randomVec = mul(g_AOSampleKernelArray[sampleIndex].xyz, TBN) * g_AORadius;
+        float3 randomVec = mul(g_AOSampleKernelArray[sampleIndex], TBN);
 
-        float4 randomPosVS = float4(randomVec, 0.f) + float4(inputParam.PositionVS, 1.f);
-        float4 randomPosCS = mul(randomPosVS, projMatrix);
-        float2 randomPosUV = randomPosCS.xy / randomPosCS.w * 0.5f * float2(1.f, -1.f) + 0.5f;
+        float3 vecLarge = randomVec * g_AORadius;
+        AO_Large += ComputeSingleAO(vecLarge, inputParam, normalVS, 1.0, randomVector * 0.5f);
 
-        float randomDepth = SampleTexture2D(OpaqueDepthIndex, randomPosUV, ClampPointSampler);
-        float randomEyeDepth = LinearEyeDepth(randomDepth, g_ZBufferParams);
-        float randomZ = randomPosVS.z;
-
-        float range = step(randomEyeDepth, randomZ + g_AOBias);
-        float rangeCheck = smoothstep(0.f, 1.f, g_AORadius / abs(randomEyeDepth - inputParam.PositionVS.z));
-
-        AO += range * rangeCheck;
+        float3 vecSmall = randomVec * (g_AORadius * 0.2f);
+        AO_Small += ComputeSingleAO(vecSmall, inputParam, normalVS, 0.2, randomVector * 0.5f);
     }
 
-    AO *= rcp((float)g_AOSampleCount);
-    AO *= g_AOIntensityMul;
+    AO_Large /= (float)g_AOSampleCount;
+    AO_Small /= (float)g_AOSampleCount;
 
-    AO = saturate(pow(AO, g_AOIntensityPow));
+    float combinedAO = saturate(AO_Large * 0.3f + AO_Small * 0.7f);
+    combinedAO *= g_AOIntensityMul;
 
-    color += 1 - AO;
-    o[dispatchThreadID.xy] = float4(color, 1);
+    combinedAO = saturate(pow(combinedAO, g_AOIntensityPow));
+
+    float3 result = 1 - combinedAO;
+    o[dispatchThreadID.xy] = float4(result, 1);
+}
+
+float SampleHiZTrilinear(float2 uv, float mipmapLevel)
+{
+    // 获取相邻的两个整数层级
+    uint mip0 = (uint)floor(mipmapLevel);
+    uint mip1 = min(mip0 + 1, g_HIZMaxMipmap);
+
+    // 计算两层之间的混合因子
+    float t = frac(mipmapLevel);
+
+    // 采样低层级（更精细）
+    float depth0 = SampleTexture2D_LOD(g_HIZTextureIndex, uv, ClampLinearSampler, (float)mip0);
+
+    // 采样高层级（更粗糙）
+    float depth1 = SampleTexture2D_LOD(g_HIZTextureIndex, uv, ClampLinearSampler, (float)mip1);
+
+    // 在两层深度之间进行线性插值
+    return lerp(depth0, depth1, t);
+}
+
+float ComputeSingleAO(float3 randomVec, FInputParams inputParam, float3 normalVS, float radiusScale, float jitter)
+{
+    float4 randomPosVS = float4(randomVec, 0.f) + float4(inputParam.PositionVS + normalVS * g_AOBias, 1.f);
+    float4 randomPosCS = mul(randomPosVS, projMatrix);
+    float2 randomPosUV = randomPosCS.xy / randomPosCS.w * 0.5f * float2(1.f, -1.f) + 0.5f;
+
+    // 边界检查
+    if (any(randomPosUV < 0.f) || any(randomPosUV > 1.f))
+        return 0.0f;
+
+    // 计算 Mipmap Level
+    float2 offsetPixel = abs(randomPosUV - inputParam.ScreenUV) * g_TargetSize.xy;
+    float mipmapLevel = clamp(log2(max(offsetPixel.x, offsetPixel.y)) + jitter, 0.f, (float)g_HIZMaxMipmap);
+
+    float randomDepth = SampleHiZTrilinear(randomPosUV, mipmapLevel);
+    float randomEyeDepth = LinearEyeDepth(randomDepth, g_ZBufferParams);
+
+    // 遮蔽判定
+    float range = step(randomEyeDepth, randomPosVS.z + g_AOBias);
+
+    // 范围检测：利用当前尺度的半径进行缩放
+    float currentRadius = g_AORadius * radiusScale;
+    float rangeCheck = smoothstep(0.f, 1.f, currentRadius / (abs(randomEyeDepth - inputParam.PositionVS.z) + 1e-5));
+    rangeCheck = Pow2(rangeCheck);
+
+    return range * rangeCheck;
 }
