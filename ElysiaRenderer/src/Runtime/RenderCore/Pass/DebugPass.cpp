@@ -26,6 +26,7 @@ namespace ElysiaRenderer
     size_t DebugPass::ShaderIDs::g_SourceTexIndex = SIZE_MAX;
     size_t DebugPass::ShaderIDs::g_MipmapLevel = SIZE_MAX;
     size_t DebugPass::ShaderIDs::g_SourceSize = SIZE_MAX;
+    size_t DebugPass::ShaderIDs::g_TargetSize = SIZE_MAX;
 
     DebugPass::DebugPass() :
         BasePass()
@@ -35,6 +36,7 @@ namespace ElysiaRenderer
         ShaderIDs::g_SourceTexIndex = PropertyToID(L"g_SourceTexIndex");
         ShaderIDs::g_MipmapLevel = PropertyToID(L"g_MipmapLevel");
         ShaderIDs::g_SourceSize = PropertyToID(L"g_SourceSize");
+        ShaderIDs::g_TargetSize = PropertyToID(L"g_TargetSize");
     }
     DebugPass::~DebugPass()
     {
@@ -79,6 +81,8 @@ namespace ElysiaRenderer
         m_pMaterial->SetUInt(ShaderIDs::g_DebugMode, static_cast<UINT>(UserData::GetInstance().debugMode));
         m_pMaterial->SetUInt(ShaderIDs::g_TargetTexIndex, m_pCameraColorRT->GetResourceHeapIndex());
         m_pMaterial->SetUInt(ShaderIDs::g_MipmapLevel, UserData::GetInstance().mipmapLevel);
+        m_pMaterial->SetFloat4(ShaderIDs::g_TargetSize,
+                               GetScreenSize(m_pCameraColorRT->GetWidth(), m_pCameraColorRT->GetHeight()));
 
         switch (UserData::GetInstance().debugMode)
         {
@@ -90,6 +94,10 @@ namespace ElysiaRenderer
         {
             auto RT = RenderTargetManager::GetInstance().GetRenderTexture(
                 L"AO RT");
+            // RT = RenderTargetManager::GetInstance().GetRenderTexture(
+            //     L"Half AO RT");
+            // RT = RenderTargetManager::GetInstance().GetRenderTexture(
+            //     L"One Four AO RT");
             m_pMaterial->SetUInt(ShaderIDs::g_SourceTexIndex, RT->GetResourceHeapIndex());
             m_pMaterial->SetFloat4(ShaderIDs::g_SourceSize, GetScreenSize(RT->GetWidth(), RT->GetHeight()));
             break;

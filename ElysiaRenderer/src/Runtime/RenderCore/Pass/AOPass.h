@@ -19,6 +19,8 @@ namespace ElysiaRenderer
         struct RenderTextureIDs
         {
             static size_t AORTID;
+            static size_t HalfAORTID;
+            static size_t OneFourAORTID;
             static size_t BlurHorizionRTID;
             static size_t BlurVerticalRTID;
             static size_t HIZRTID;
@@ -34,10 +36,11 @@ namespace ElysiaRenderer
         virtual void UpdatePipeline() override;
 
     private:
-        static const UINT m_maxHIZCount = 10;
         UINT m_mipmapCount;
 
         RenderTexture* m_pAORT = nullptr;
+        RenderTexture* m_pHalfAORT = nullptr;
+        RenderTexture* m_pOneFourAORT = nullptr;
         RenderTexture* m_pBlurHorizionRT = nullptr;
         RenderTexture* m_pBlurVerticalRT = nullptr;
         std::vector<RenderTexture*> m_pTempRTs;
@@ -68,7 +71,10 @@ namespace ElysiaRenderer
 
             static size_t g_AOSampleKernelArray;
             static size_t g_AOSampleCount;
+            static size_t g_AOSampleStepCount;
             static size_t g_AORadius;
+            static size_t g_AOFadeRadius;
+            static size_t g_AOFadeDistance;
             static size_t g_AOBias;
             static size_t g_AOIntensityMul;
             static size_t g_AOIntensityPow;
@@ -77,6 +83,7 @@ namespace ElysiaRenderer
             static size_t g_noiseScale;
 
             static size_t g_HIZMaxMipmap;
+            static size_t g_HIZMinMipmap;
             static size_t g_HIZTextureIndex;
 
             static size_t g_BlurDir;
@@ -97,6 +104,7 @@ namespace ElysiaRenderer
         void DoBlurVertical();
         void DoHIZ();
         std::vector<Vector4> GenerateSSAOSampleKernel();
+        std::vector<Vector4> GenerateHBAOSampleKernel();
         std::vector<float> GenerateBlurWeights(UINT blurRadius, float sigma);
         DXGI_FORMAT m_cameraColorFormat = DXGI_FORMAT_UNKNOWN;
     };

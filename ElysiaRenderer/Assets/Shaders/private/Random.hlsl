@@ -15,8 +15,8 @@
 float PseudoRandom(float2 xy)
 {
     float2 pos = frac(xy / 128.0f) * 128.0f + float2(-64.340622f, -72.465622f);
-	
-	// found by experimentation
+
+    // found by experimentation
     return frac(dot(pos.xyx * pos.xyy, float3(20.390625f, 60.703125f, 2.4281209f)));
 }
 
@@ -28,7 +28,7 @@ float PseudoRandom(float2 xy)
 // @return 0..1
 float InterleavedGradientNoise(float2 uv, float FrameId)
 {
-	// magic values are found by experimentation
+    // magic values are found by experimentation
     uv += FrameId * (float2(47, 17) * 0.695f);
 
     const float3 magic = float3(0.06711056f, 0.00583715f, 52.9829189f);
@@ -48,9 +48,9 @@ float RandFast(uint2 PixelPos, float Magic = 3571.0)
 uint ElysiaRandomSeed(float2 uv, float2 screenWH)
 {
     return uint(
-        uint(uv.x * screenWH.x) * uint(1973) +
-        uint(uv.y * screenWH.y) * uint(9277) +
-        uint(114514) * uint(26699)) | uint(1);
+               uint(uv.x * screenWH.x) * uint(1973) +
+               uint(uv.y * screenWH.y) * uint(9277) +
+               uint(114514) * uint(26699)) | uint(1);
 }
 
 uint wang_hash(inout uint seed)
@@ -96,27 +96,27 @@ float RandBBSfloat(float seed)
 // ~12 ALU operations for result.xyz (9 mad, 3 >>)
 uint3 Rand3DPCG16(int3 p)
 {
-	// taking a signed int then reinterpreting as unsigned gives good behavior for negatives
+    // taking a signed int then reinterpreting as unsigned gives good behavior for negatives
     uint3 v = uint3(p);
 
-	// Linear congruential step. These LCG constants are from Numerical Recipies
-	// For additional #'s, PCG would do multiple LCG steps and scramble each on output
-	// So v here is the RNG state
+    // Linear congruential step. These LCG constants are from Numerical Recipies
+    // For additional #'s, PCG would do multiple LCG steps and scramble each on output
+    // So v here is the RNG state
     v = v * 1664525u + 1013904223u;
 
-	// PCG uses xorshift for the final shuffle, but it is expensive (and cheap
-	// versions of xorshift have visible artifacts). Instead, use simple MAD Feistel steps
-	//
-	// Feistel ciphers divide the state into separate parts (usually by bits)
-	// then apply a series of permutation steps one part at a time. The permutations
-	// use a reversible operation (usually ^) to part being updated with the result of
-	// a permutation function on the other parts and the key.
-	//
-	// In this case, I'm using v.x, v.y and v.z as the parts, using + instead of ^ for
-	// the combination function, and just multiplying the other two parts (no key) for 
-	// the permutation function.
-	//
-	// That gives a simple mad per round.
+    // PCG uses xorshift for the final shuffle, but it is expensive (and cheap
+    // versions of xorshift have visible artifacts). Instead, use simple MAD Feistel steps
+    //
+    // Feistel ciphers divide the state into separate parts (usually by bits)
+    // then apply a series of permutation steps one part at a time. The permutations
+    // use a reversible operation (usually ^) to part being updated with the result of
+    // a permutation function on the other parts and the key.
+    //
+    // In this case, I'm using v.x, v.y and v.z as the parts, using + instead of ^ for
+    // the combination function, and just multiplying the other two parts (no key) for 
+    // the permutation function.
+    //
+    // That gives a simple mad per round.
     v.x += v.y * v.z;
     v.y += v.z * v.x;
     v.z += v.x * v.y;
@@ -124,7 +124,7 @@ uint3 Rand3DPCG16(int3 p)
     v.y += v.z * v.x;
     v.z += v.x * v.y;
 
-	// only top 16 bits are well shuffled
+    // only top 16 bits are well shuffled
     return v >> 16u;
 }
 
@@ -135,28 +135,27 @@ uint3 Rand3DPCG16(int3 p)
 // @return three elements w/ 32 random bits each (0-0xffffffff).
 uint3 Rand3DPCG32(int3 p)
 {
-	// taking a signed int then reinterpreting as unsigned gives good behavior for negatives
+    // taking a signed int then reinterpreting as unsigned gives good behavior for negatives
     uint3 v = uint3(p);
 
-	// Linear congruential step.
+    // Linear congruential step.
     v = v * 1664525u + 1013904223u;
 
-	// shuffle
+    // shuffle
     v.x += v.y * v.z;
     v.y += v.z * v.x;
     v.z += v.x * v.y;
 
-	// xoring high bits into low bits makes all 32 bits pretty good
+    // xoring high bits into low bits makes all 32 bits pretty good
     v ^= v >> 16u;
 
-	// final shuffle
+    // final shuffle
     v.x += v.y * v.z;
     v.y += v.z * v.x;
     v.z += v.x * v.y;
 
     return v;
 }
-
 
 
 // 4D random number generator inspired by PCGs (permuted congruential generator)
@@ -166,22 +165,22 @@ uint3 Rand3DPCG32(int3 p)
 // @return four elements w/ 32 random bits each (0-0xffffffff).
 uint4 Rand4DPCG32(int4 p)
 {
-	// taking a signed int then reinterpreting as unsigned gives good behavior for negatives
+    // taking a signed int then reinterpreting as unsigned gives good behavior for negatives
     uint4 v = uint4(p);
 
-	// Linear congruential step.
+    // Linear congruential step.
     v = v * 1664525u + 1013904223u;
 
-	// shuffle
+    // shuffle
     v.x += v.y * v.w;
     v.y += v.z * v.x;
     v.z += v.x * v.y;
     v.w += v.y * v.z;
 
-	// xoring high bits into low makes all 32 bits pretty good
+    // xoring high bits into low makes all 32 bits pretty good
     v ^= (v >> 16u);
 
-	// final shuffle
+    // final shuffle
     v.x += v.y * v.w;
     v.y += v.z * v.x;
     v.z += v.x * v.y;
@@ -189,8 +188,6 @@ uint4 Rand4DPCG32(int4 p)
 
     return v;
 }
-
-
 
 
 /**
@@ -201,7 +198,7 @@ void FindBestAxisVectors(float3 In, out float3 Axis1, out float3 Axis2)
 {
     const float3 N = abs(In);
 
-	// Find best basis vectors.
+    // Find best basis vectors.
     if (N.z > N.x && N.z > N.y)
     {
         Axis1 = float3(1, 0, 0);
@@ -240,13 +237,13 @@ void FindBestAxisVectors(float3 In, out float3 Axis1, out float3 Axis2)
  */
 uint2 ScrambleTEA(uint2 v, uint IterationCount = 3)
 {
-	// Start with some random data (numbers can be arbitrary but those have been used by others and seem to work well)
-    uint k[4] = { 0xA341316Cu, 0xC8013EA4u, 0xAD90777Du, 0x7E95761Eu };
-	
+    // Start with some random data (numbers can be arbitrary but those have been used by others and seem to work well)
+    uint k[4] = {0xA341316Cu, 0xC8013EA4u, 0xAD90777Du, 0x7E95761Eu};
+
     uint y = v[0];
     uint z = v[1];
     uint sum = 0;
-	
+
     [UNROLL]
     for (uint i = 0; i < IterationCount; ++i)
     {
@@ -304,8 +301,8 @@ float4 MGradient(int seed, float3 offset)
 // @param seed000-seed111 = hash function seeds for the eight corners
 // @return fractional part of v
 float3 NoiseSeeds(float3 v, bool bTiling, float RepeatSize,
-	out float seed000, out float seed001, out float seed010, out float seed011,
-	out float seed100, out float seed101, out float seed110, out float seed111)
+                  out float seed000, out float seed001, out float seed010, out float seed011,
+                  out float seed100, out float seed101, out float seed110, out float seed111)
 {
     float3 fv = frac(v);
     float3 iv = floor(v);
@@ -313,7 +310,8 @@ float3 NoiseSeeds(float3 v, bool bTiling, float RepeatSize,
     const float3 primes = float3(19, 47, 101);
 
     if (bTiling)
-    { // can't algebraically combine with primes
+    {
+        // can't algebraically combine with primes
         seed000 = dot(primes, NoiseTileWrap(iv, true, RepeatSize));
         seed100 = dot(primes, NoiseTileWrap(iv + float3(1, 0, 0), true, RepeatSize));
         seed010 = dot(primes, NoiseTileWrap(iv + float3(0, 1, 0), true, RepeatSize));
@@ -324,7 +322,8 @@ float3 NoiseSeeds(float3 v, bool bTiling, float RepeatSize,
         seed111 = dot(primes, NoiseTileWrap(iv + float3(1, 1, 1), true, RepeatSize));
     }
     else
-    { // get to combine offsets with multiplication by primes in this case
+    {
+        // get to combine offsets with multiplication by primes in this case
         seed000 = dot(iv, primes);
         seed100 = seed000 + primes.x;
         seed010 = seed000 + primes.y;
@@ -347,7 +346,8 @@ float3 NoiseSeeds(float3 v, bool bTiling, float RepeatSize,
 float GradientNoise3D_ALU(float3 v, bool bTiling, float RepeatSize)
 {
     float seed000, seed001, seed010, seed011, seed100, seed101, seed110, seed111;
-    float3 fv = NoiseSeeds(v, bTiling, RepeatSize, seed000, seed001, seed010, seed011, seed100, seed101, seed110, seed111);
+    float3 fv = NoiseSeeds(v, bTiling, RepeatSize, seed000, seed001, seed010, seed011, seed100, seed101, seed110,
+                           seed111);
 
     float rand000 = MGradient(int(seed000), fv - float3(0, 0, 0)).w;
     float rand100 = MGradient(int(seed100), fv - float3(1, 0, 0)).w;
@@ -371,17 +371,17 @@ float GradientNoise3D_ALU(float3 v, bool bTiling, float RepeatSize)
 // @return 4 corner locations
 float4x3 SimplexCorners(float3 v)
 {
-	// find base corner by skewing to tetrahedral space and back
+    // find base corner by skewing to tetrahedral space and back
     float3 tet = floor(v + v.x / 3 + v.y / 3 + v.z / 3);
     float3 base = tet - tet.x / 6 - tet.y / 6 - tet.z / 6;
     float3 f = v - base;
 
-	// Find offsets to other corners (McEwan did this in tetrahedral space,
-	// but since skew is along x=y=z axis, this works in Euclidean space too.)
+    // Find offsets to other corners (McEwan did this in tetrahedral space,
+    // but since skew is along x=y=z axis, this works in Euclidean space too.)
     float3 g = step(f.yzx, f.xyz), h = 1 - g.zxy;
     float3 a1 = min(g, h) - 1. / 6., a2 = max(g, h) - 1. / 3.;
 
-	// four corners
+    // four corners
     return float4x3(base, base + a1, base + a2, base + 0.5);
 }
 
@@ -407,9 +407,9 @@ float3x4 SimplexDSmooth(float4x3 f)
     s = -12 * scale + s * (24 * scale - s * 12 * scale);
 
     return float3x4(
-		s * float4(f[0][0], f[1][0], f[2][0], f[3][0]),
-		s * float4(f[0][1], f[1][1], f[2][1], f[3][1]),
-		s * float4(f[0][2], f[1][2], f[2][2], f[3][2]));
+        s * float4(f[0][0], f[1][0], f[2][0], f[3][0]),
+        s * float4(f[0][1], f[1][1], f[2][1], f[3][1]),
+        s * float4(f[0][2], f[1][2], f[2][2], f[3][2]));
 }
 
 // Simplex noise and its Jacobian derivative
@@ -429,14 +429,14 @@ float3x4 SimplexDSmooth(float4x3 f)
 // So Grad of X doesn't compute Y or Z components, and VNoise doesn't do any of the derivative computation.
 float3x4 JacobianSimplex_ALU(float3 v, bool bTiling, float RepeatSize)
 {
-	// corners of tetrahedron
+    // corners of tetrahedron
     float4x3 T = SimplexCorners(v);
     uint3 rand;
     float4x3 gvec[3], fv;
     float3x4 grad;
 
-	// processing of tetrahedral vertices, unrolled
-	// to compute gradient at each corner
+    // processing of tetrahedral vertices, unrolled
+    // to compute gradient at each corner
     fv[0] = v - T[0];
     rand = Rand3DPCG16(int3(floor(NoiseTileWrap(6 * T[0] + 0.5, bTiling, RepeatSize))));
     gvec[0][0] = float3(rand.xxx & MGradientMask) * MGradientScale - 1;
@@ -473,7 +473,7 @@ float3x4 JacobianSimplex_ALU(float3 v, bool bTiling, float RepeatSize)
     grad[1][3] = dot(gvec[1][3], fv[3]);
     grad[2][3] = dot(gvec[2][3], fv[3]);
 
-	// blend gradients
+    // blend gradients
     float4 sv = SimplexSmooth(fv);
     float3x4 ds = SimplexDSmooth(fv);
 
@@ -493,7 +493,8 @@ float3x4 JacobianSimplex_ALU(float3 v, bool bTiling, float RepeatSize)
 float ValueNoise3D_ALU(float3 v, bool bTiling, float RepeatSize)
 {
     float seed000, seed001, seed010, seed011, seed100, seed101, seed110, seed111;
-    float3 fv = NoiseSeeds(v, bTiling, RepeatSize, seed000, seed001, seed010, seed011, seed100, seed101, seed110, seed111);
+    float3 fv = NoiseSeeds(v, bTiling, RepeatSize, seed000, seed001, seed010, seed011, seed100, seed101, seed110,
+                           seed111);
 
     float rand000 = RandBBSfloat(seed000) * 2 - 1;
     float rand100 = RandBBSfloat(seed100) * 2 - 1;
@@ -503,9 +504,9 @@ float ValueNoise3D_ALU(float3 v, bool bTiling, float RepeatSize)
     float rand101 = RandBBSfloat(seed101) * 2 - 1;
     float rand011 = RandBBSfloat(seed011) * 2 - 1;
     float rand111 = RandBBSfloat(seed111) * 2 - 1;
-	
+
     float3 Weights = PerlinRamp(float4(fv, 0)).xyz;
-	
+
     float i = lerp(lerp(rand000, rand100, Weights.x), lerp(rand010, rand110, Weights.x), Weights.y);
     float j = lerp(lerp(rand001, rand101, Weights.x), lerp(rand011, rand111, Weights.x), Weights.y);
     return lerp(i, j, Weights.z).x;
@@ -517,24 +518,24 @@ float ValueNoise3D_ALU(float3 v, bool bTiling, float RepeatSize)
 // @return random offsets vector
 float3 VoronoiCornerSample(float3 pos, int Quality)
 {
-	// random values in [-0.5, 0.5]
+    // random values in [-0.5, 0.5]
     float3 noise = float3(Rand3DPCG16(int3(pos))) / 0xffff - 0.5;
 
-	// quality level 1 or 2: searches a 2x2x2 neighborhood with points distributed on a sphere
-	// scale factor to guarantee jittered points will be found within a 2x2x2 search
+    // quality level 1 or 2: searches a 2x2x2 neighborhood with points distributed on a sphere
+    // scale factor to guarantee jittered points will be found within a 2x2x2 search
     if (Quality <= 2)
     {
         return normalize(noise) * 0.2588;
     }
 
-	// quality level 3: searches a 3x3x3 neighborhood with points distributed on a sphere
-	// scale factor to guarantee jittered points will be found within a 3x3x3 search
+    // quality level 3: searches a 3x3x3 neighborhood with points distributed on a sphere
+    // scale factor to guarantee jittered points will be found within a 3x3x3 search
     if (Quality == 3)
     {
         return normalize(noise) * 0.3090;
     }
 
-	// quality level 4: jitter to anywhere in the cell, needs 4x4x4 search
+    // quality level 4: jitter to anywhere in the cell, needs 4x4x4 search
     return noise;
 }
 
@@ -564,11 +565,11 @@ float4 VoronoiNoise3D_ALU(float3 v, int Quality, bool bTiling, float RepeatSize,
     float3 fv = frac(v), fv2 = frac(v + 0.5);
     float3 iv = floor(v), iv2 = floor(v + 0.5);
 
-	// with initial minimum distance = infinity (or at least bigger than 4), first min is optimized away
+    // with initial minimum distance = infinity (or at least bigger than 4), first min is optimized away
     float4 mindist = float4(0, 0, 0, 100);
     float3 p, offset;
 
-	// quality level 3: do a 3x3x3 search
+    // quality level 3: do a 3x3x3 search
     if (Quality == 3)
     {
         [UNROLL(3)]
@@ -587,7 +588,7 @@ float4 VoronoiNoise3D_ALU(float3 v, int Quality, bool bTiling, float RepeatSize,
         }
     }
 
-	// everybody else searches a base 2x2x2 neighborhood
+    // everybody else searches a base 2x2x2 neighborhood
     else
     {
         [UNROLL(2)]
@@ -602,11 +603,12 @@ float4 VoronoiNoise3D_ALU(float3 v, int Quality, bool bTiling, float RepeatSize,
                     p = offset + VoronoiCornerSample(NoiseTileWrap(iv + offset, bTiling, RepeatSize), Quality);
                     mindist = VoronoiCompare(mindist, iv + p, fv - p, bDistanceOnly);
 
-					// quality level 2, do extra set of points, offset by half a cell
+                    // quality level 2, do extra set of points, offset by half a cell
                     if (Quality == 2)
                     {
-						// 467 is just an offset to a different area in the random number field to avoid similar neighbor artifacts
-                        p = offset + VoronoiCornerSample(NoiseTileWrap(iv2 + offset, bTiling, RepeatSize) + 467, Quality);
+                        // 467 is just an offset to a different area in the random number field to avoid similar neighbor artifacts
+                        p = offset + VoronoiCornerSample(NoiseTileWrap(iv2 + offset, bTiling, RepeatSize) + 467,
+                                                         Quality);
                         mindist = VoronoiCompare(mindist, iv2 + p, fv2 - p, bDistanceOnly);
                     }
                 }
@@ -614,7 +616,7 @@ float4 VoronoiNoise3D_ALU(float3 v, int Quality, bool bTiling, float RepeatSize,
         }
     }
 
-	// quality level 4: add extra sets of four cells in each direction
+    // quality level 4: add extra sets of four cells in each direction
     if (Quality >= 4)
     {
         [UNROLL(2)]
@@ -626,15 +628,15 @@ float4 VoronoiNoise3D_ALU(float3 v, int Quality, bool bTiling, float RepeatSize,
                 [UNROLL(2)]
                 for (offset.z = 0; offset.z <= 1; ++offset.z)
                 {
-					// along x axis
+                    // along x axis
                     p = offset.xyz + VoronoiCornerSample(NoiseTileWrap(iv + offset.xyz, bTiling, RepeatSize), Quality);
                     mindist = VoronoiCompare(mindist, iv + p, fv - p, bDistanceOnly);
 
-					// along y axis
+                    // along y axis
                     p = offset.yzx + VoronoiCornerSample(NoiseTileWrap(iv + offset.yzx, bTiling, RepeatSize), Quality);
                     mindist = VoronoiCompare(mindist, iv + p, fv - p, bDistanceOnly);
 
-					// along z axis
+                    // along z axis
                     p = offset.zxy + VoronoiCornerSample(NoiseTileWrap(iv + offset.zxy, bTiling, RepeatSize), Quality);
                     mindist = VoronoiCompare(mindist, iv + p, fv - p, bDistanceOnly);
                 }
@@ -642,7 +644,7 @@ float4 VoronoiNoise3D_ALU(float3 v, int Quality, bool bTiling, float RepeatSize,
         }
     }
 
-	// transform squared distance to real distance
+    // transform squared distance to real distance
     return float4(mindist.xyz, sqrt(mindist.w));
 }
 
@@ -693,14 +695,14 @@ float4 ComputeSimplexWeights3D(float3 OrthogonalPos, out float3 PosA, out float3
     float GB = OrthogonalPos.y - OrthogonalPos.z;
 
     ret.b =
-		  min(max(0, RG), max(0, RB)) // X
-		+ min(max(0, -RG), max(0, GB)) // Y
-		+ min(max(0, -RB), max(0, -GB)); // Z
-	
+        min(max(0, RG), max(0, RB))      // X
+        + min(max(0, -RG), max(0, GB))   // Y
+        + min(max(0, -RB), max(0, -GB)); // Z
+
     ret.a =
-		  min(max(0, -RG), max(0, -RB)) // X
-		+ min(max(0, RG), max(0, -GB)) // Y
-		+ min(max(0, RB), max(0, GB)); // Z
+        min(max(0, -RG), max(0, -RB))  // X
+        + min(max(0, RG), max(0, -GB)) // Y
+        + min(max(0, RB), max(0, GB)); // Z
 
     ret.g = Smallest;
     ret.r = 1.0f - ret.g - ret.b - ret.a;
@@ -754,7 +756,7 @@ inline uint2 hash_int(uint2 x)
 inline float4 GetSobolNumber(float4 sobol, const float4 rng)
 {
     uint4 tmp_rng = hash_int(asuint(rng));
-    float4 shift = tmp_rng * (1.0 / (float) 0xFFFFFFFF);
+    float4 shift = tmp_rng * (1.0 / (float)0xFFFFFFFF);
     return frac(sobol + shift);
 }
 

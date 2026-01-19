@@ -13,31 +13,45 @@ cbuffer PassConstant : register(b0, perPassSpace)
 [numthreads(GROUP_SIZE, GROUP_SIZE, 1)]
 void TwoTwoMinHIZ(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
-    if (dispatchThreadID.x >= UINT(g_TargetSize.x) || dispatchThreadID.y >= UINT(g_TargetSize.y))
-    {
-        return;
-    }
+    // 提前计算并重用
+    const uint2 srcBaseCoord = dispatchThreadID.xy * 2;
+    const uint2 destCoord = dispatchThreadID.xy;
 
-    Texture2D<float> srcTex = ResourceDescriptorHeap[g_SourceTexIndex];
+    // 快速边界检查（先检查x，再检查y，避免乘法和转换）
+    if (destCoord.x >= (uint)g_TargetSize.x || destCoord.y >= (uint)g_TargetSize.y)
+        return;
+
     RWTexture2D<float> o = ResourceDescriptorHeap[g_TargetTexIndex];
 
-    float2 screenUV = (float2(dispatchThreadID.xy) + 0.5f) * g_SourceSize.zw;
-    UINT2 destCoord = dispatchThreadID.xy;
-    UINT2 srcCoord = dispatchThreadID.xy * 2;
-    uint2 maxCoord = (uint2)g_SourceSize.xy - 1;
+    // 使用 GatherRed 一次采样4个深度值（如果支持）
+    // 注意：需要确认 srcTex 是否支持 Gather
+#if 1  // Gather 版本（如果支持）
+    float4 depths = GatherRedTexture2D(g_SourceTexIndex, (float2(srcBaseCoord) + 1.0) * g_SourceSize.zw,
+                                       ClampPointSampler);
 
-    float depthArray[4];
-    depthArray[0] = srcTex[min(srcCoord + UINT2(0, 0), maxCoord)].r;
-    depthArray[1] = srcTex[min(srcCoord + UINT2(0, 1), maxCoord)].r;
-    depthArray[2] = srcTex[min(srcCoord + UINT2(1, 0), maxCoord)].r;
-    depthArray[3] = srcTex[min(srcCoord + UINT2(1, 1), maxCoord)].r;
+    float minDepth = min(min(depths.x, depths.y), min(depths.z, depths.w));
+#else
+    // 优化版的手动采样
+    // 提前计算 UV 和边界
+    const uint2 maxCoord = (uint2)g_SourceSize.xy - 1;
 
-    float minDepth = FLT_MAX;
-    [unroll(4)]
-    for (UINT i = 0; i < 4; i ++)
-    {
-        minDepth = min(minDepth, depthArray[i]);
-    }
+    // 一次读取4个相邻像素（使用局部变量）
+    uint2 coord0 = min(srcBaseCoord + uint2(0, 0), maxCoord);
+    uint2 coord1 = min(srcBaseCoord + uint2(0, 1), maxCoord);
+    uint2 coord2 = min(srcBaseCoord + uint2(1, 0), maxCoord);
+    uint2 coord3 = min(srcBaseCoord + uint2(1, 1), maxCoord);
+
+    // 并行采样（避免依赖）
+    float depth0 = srcTex[coord0];
+    float depth1 = srcTex[coord1];
+    float depth2 = srcTex[coord2];
+    float depth3 = srcTex[coord3];
+
+    // 使用层次化min计算
+    float min01 = min(depth0, depth1);
+    float min23 = min(depth2, depth3);
+    float minDepth = min(min01, min23);
+#endif
 
     o[destCoord] = minDepth;
 }

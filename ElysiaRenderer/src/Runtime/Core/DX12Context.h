@@ -34,6 +34,7 @@ namespace ElysiaCore
         void AddBarrier(DX12GPUResource& resource, std::vector<D3D12_RESOURCE_STATES>& newState, bool isFlush = true);
         void AddBarrier(RenderTexture* resource, D3D12_RESOURCE_STATES newState, bool isFlush = true);
         void AddBarrier(RenderTexture* resource, D3D12_RESOURCE_STATES newState, UINT mipmapNum, bool isFlush = true);
+        void AddUAVBarrier(RenderTexture* pRT, bool isFlush = true);
 
         void FlushBarrier();
         void CopyTextureRegion(DX12GPUResource& destination, ID3D12Resource* source, size_t sourceOffset,

@@ -13,8 +13,11 @@ namespace ElysiaRenderer
     struct AOParameter
     {
         bool IsEnableAO = true;
-        UINT SampleCount = 32;
+        int SampleCount = 16;
+        int SampleStepCount = 4;
         float Radius = 1.f;
+        float FadeRadius = 1.f;
+        float FadeDistance = 1.f;
         float Bias = 0.025f;
         float IntensityMul = 1.f;
         float IntensityPow = 1.f;

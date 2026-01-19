@@ -97,7 +97,7 @@ namespace ElysiaRenderer
         {
             m_pCameraColorRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(
                 Width, Height,
-                DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
+                DXGI_FORMAT_R8G8B8A8_UNORM,
                 true,
                 L"Camera Color RT");
         }

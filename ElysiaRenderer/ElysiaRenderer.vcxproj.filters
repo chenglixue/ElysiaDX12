@@ -667,6 +667,7 @@
     <None Include="Assets\Shaders\public\PostProcess\CS_CopyTexture.hlsl" />
     <None Include="Assets\Shaders\public\CopyTexture.hlsl" />
     <None Include="Assets\Shaders\public\PostProcess\CS_Debug.hlsl" />
+    <None Include="Assets\Shaders\private\SSAOCommon.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

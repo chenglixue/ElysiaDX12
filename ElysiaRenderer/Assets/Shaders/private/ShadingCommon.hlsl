@@ -229,6 +229,22 @@ float3 SampleNormalWS(float2 uv)
 
     return decodeNormalWS;
 }
+float3 SampleNormalWS(float2 uv, UINT samplerIndex)
+{
+    float3 encodeNormalWS = SampleTexture2D(GBuffer3Index, uv, samplerIndex);
+    float3 decodeNormalWS = DecodeNormal(encodeNormalWS);
+    decodeNormalWS = normalize(decodeNormalWS);
+
+    return decodeNormalWS;
+}
+float3 SampleTangentWS(float2 uv, UINT samplerIndex)
+{
+    float3 encodeNormalWS = SampleTexture2D(GBuffer2Index, uv, samplerIndex);
+    float3 decodeNormalWS = DecodeNormal(encodeNormalWS);
+    decodeNormalWS = normalize(decodeNormalWS);
+
+    return decodeNormalWS;
+}
 
 // Computes world-space position from post-projection depth
 //float3 PositionFromDepth(in float zw, in float2 uv)
@@ -254,6 +270,13 @@ float3 ComputeWorldSpacePosition(float2 screenUV, float rawDepth, Matrix invView
     float4 positionCS = ComputeClipSpacePosition(screenUV, rawDepth);
     float4 positionWS = mul(positionCS, invViewProjMatrix);
     return positionWS.xyz / positionWS.w;
+}
+
+float3 ComputeViewSpacePosition(float2 screenUV, float rawDepth, Matrix projMatrix_I)
+{
+    float4 positionCS = ComputeClipSpacePosition(screenUV, rawDepth);
+    float4 viewPos = mul(positionCS, projMatrix_I);
+    return viewPos.xyz / viewPos.w;
 }
 
 // Z buffer to linear 0..1 depth (0 at camera position, 1 at far plane).

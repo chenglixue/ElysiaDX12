@@ -190,6 +190,31 @@ namespace ElysiaCore
         }
     }
 
+    void DX12Context::AddUAVBarrier(RenderTexture* pRT, bool isFlush)
+    {
+        // 1. 检查队列是否已满
+        if (m_numQueuedBarriers >= MAX_QUEUED_BARRIERS)
+        {
+            FlushBarrier();
+        }
+
+        auto resource = pRT->GetTexture();
+
+        // 2. 填充 UAV Barrier 描述符
+        D3D12_RESOURCE_BARRIER& barrierDesc = m_resourceBarriers[m_numQueuedBarriers];
+        m_numQueuedBarriers ++;
+
+        barrierDesc.Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
+        barrierDesc.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+        barrierDesc.UAV.pResource = resource->GetResource(); // 关键：指定需要同步的资源
+
+        // 3. 根据需要立即刷新
+        if (isFlush)
+        {
+            FlushBarrier();
+        }
+    }
+
 
     void DX12Context::FlushBarrier()
     {

@@ -22,7 +22,7 @@ namespace ElysiaHelper
     constexpr UINT32 NUM_DSV_STAGING_DESCRIPTORS = 32;
     constexpr UINT32 NUM_SRV_STAGING_DESCRIPTORS = 4096;
     constexpr UINT32 NUM_SAMPLER_DESCRIPTORS = 8;
-    constexpr UINT32 MAX_QUEUED_BARRIERS = 16;
+    constexpr UINT32 MAX_QUEUED_BARRIERS = 128;
     constexpr UINT8 PER_OBJECT_SPACE = 0;
     constexpr UINT8 PER_MATERIAL_SPACE = 1;
     constexpr UINT8 PER_PASS_SPACE = 2;
@@ -895,6 +895,19 @@ __debugbreak(); \
         va_start(args, format);
         vsprintf_s(buffer, ArraySize_(buffer), format, args);
         return std::string(buffer);
+    }
+
+    inline bool IsDebugLayerEnabled(ID3D12Device* pDevice)
+    {
+#ifdef _DEBUG
+        ID3D12DebugDevice* debugDevice = nullptr;
+        if (SUCCEEDED(pDevice->QueryInterface(IID_PPV_ARGS(&debugDevice))))
+        {
+            debugDevice->Release();
+            return true;
+        }
+#endif
+        return false;
     }
 }
 

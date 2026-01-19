@@ -128,8 +128,8 @@ namespace ElysiaEngine
 
     bool ElysiaFrame::OnEvent(MSG msg)
     {
-        if (ImGui_ImplWin32_WndProcHandler(msg.hwnd, msg.message, msg.wParam, msg.lParam))
-            return true;
+        // if (ImGui_ImplWin32_WndProcHandler(msg.hwnd, msg.message, msg.wParam, msg.lParam))
+        //     return true;
 
         // handle function keys (F1, F2...) here, rest of the input is handled
         // by imGUI later in HandleInput() function
@@ -258,10 +258,8 @@ namespace ElysiaEngine
         if (ImGui::CollapsingHeader("Light"))
         {
             ImGui::ColorEdit3("Color", (float*)&pUserData.lightColor);
-            ImGui::DragFloat3("Direction", (float*)&pUserData.lightDir, 1, -1, 1, "%.3f",
-                              ImGuiSliderFlags_AlwaysClamp);
-            ImGui::SliderFloat("Intensity", &pUserData.lightIntensity, 0, 20, "%.3f",
-                               ImGuiSliderFlags_AlwaysClamp);
+            ImGui::DragFloat3("Direction", (float*)&pUserData.lightDir, 1, -1, 1);
+            ImGui::SliderFloat("Intensity", &pUserData.lightIntensity, 0, 20, "%.3f");
 
             int shadowTypeIndex = (int)pUserData.shadowType;
             ImGui::Combo("Shadow Type", &shadowTypeIndex,
@@ -282,12 +280,10 @@ namespace ElysiaEngine
                                                 ShadowQuality>()));
             pUserData.shadowQuality = (ShadowQuality)shadowQualityIndex;
 
-            ImGui::SliderFloat("Shadow Depth Bias", &pUserData.shadowDepthBias, 0, 10, "%.3f",
-                               ImGuiSliderFlags_AlwaysClamp);
-            ImGui::SliderFloat("Shadow Slope Depth Bias", &pUserData.shadowSlopeDepthBias, 0, 10,
-                               "%.3f", ImGuiSliderFlags_AlwaysClamp);
+            ImGui::SliderFloat("Shadow Depth Bias", &pUserData.shadowDepthBias, 0, 10);
+            ImGui::SliderFloat("Shadow Slope Depth Bias", &pUserData.shadowSlopeDepthBias, 0, 10);
             ImGui::SliderFloat("Shadow Max Slope Depth Bias", &pUserData.shadowMaxSlopeDepthBias, 0,
-                               10, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+                               10);
         }
 
         if (ImGui::CollapsingHeader("PBR Data"))
@@ -295,18 +291,13 @@ namespace ElysiaEngine
             ImGui::ColorEdit3("Base Color Tint", (float*)&pUserData.BaseColorTint,
                               ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_AlphaPreview |
                               ImGuiColorEditFlags_HDR);
-            ImGui::SliderFloat("Opacity", &pUserData.Opacity, 0.f, 1.f, "%.3f",
-                               ImGuiSliderFlags_AlwaysClamp);
-            ImGui::SliderFloat("Cutoff", &pUserData.Cutoff, 0.f, 1.f, "%.3f",
-                               ImGuiSliderFlags_AlwaysClamp);
-            ImGui::SliderFloat("Normal Intensity", &pUserData.NormalIntensity, 0.f, 5.f, "%.3f",
-                               ImGuiSliderFlags_AlwaysClamp);
-            ImGui::SliderFloat("Metallic Intensity", &pUserData.MetallicIntensity, 0.f, 5.f, "%.3f",
-                               ImGuiSliderFlags_AlwaysClamp);
-            ImGui::SliderFloat("Roughness Intensity", &pUserData.RoughnessIntensity, 0.f, 5.f,
-                               "%.3f", ImGuiSliderFlags_AlwaysClamp);
+            ImGui::SliderFloat("Opacity", &pUserData.Opacity, 0.f, 1.f);
+            ImGui::SliderFloat("Cutoff", &pUserData.Cutoff, 0.f, 1.f);
+            ImGui::SliderFloat("Normal Intensity", &pUserData.NormalIntensity, 0.f, 5.f);
+            ImGui::SliderFloat("Metallic Intensity", &pUserData.MetallicIntensity, 0.f, 5.f);
+            ImGui::SliderFloat("Roughness Intensity", &pUserData.RoughnessIntensity, 0.f, 5.f);
             ImGui::SliderFloat("Ambient Cubemap Intensity", &pUserData.AmbientCubemapIntensity, 0.f,
-                               2.f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+                               2.f);
             ImGui::ColorEdit3("Ambient Cubemap Tint", (float*)&pUserData.AmbientCubemapTint);
         }
 
@@ -372,20 +363,13 @@ namespace ElysiaEngine
             pUserData.colorSpace = (ColorSpace)colorSpaceIndex;
 
             ImGui::Checkbox("Shoulder", &pUserData.bShoulder);
-            ImGui::SliderFloat("Soft Gap", &pUserData.SoftGap, 0.0f, 0.5f, "%.3f",
-                               ImGuiSliderFlags_AlwaysClamp);
-            ImGui::SliderFloat("HDR Max", &pUserData.HdrMax, 8.0f, 2048.0f, "%.3f",
-                               ImGuiSliderFlags_AlwaysClamp);
-            ImGui::SliderFloat("LPM Exposure", &pUserData.LpmExposure, 3.0f, 11.0f, "%.3f",
-                               ImGuiSliderFlags_AlwaysClamp);
-            ImGui::SliderFloat("Contrast", &pUserData.Contrast, 0.0f, 1.0f, "%.3f",
-                               ImGuiSliderFlags_AlwaysClamp);
-            ImGui::SliderFloat("Shoulder Contrast", &pUserData.ShoulderContrast, 1.0f, 1.2f, "%.3f",
-                               ImGuiSliderFlags_AlwaysClamp);
-            ImGui::SliderFloat3("Saturation", &pUserData.Saturation[0], 0.0f, 2.0f, "%.3f",
-                                ImGuiSliderFlags_AlwaysClamp);
-            ImGui::SliderFloat3("Crosstalk", &pUserData.Crosstalk[0], 0.0f, 1.0f, "%.3f",
-                                ImGuiSliderFlags_AlwaysClamp);
+            ImGui::SliderFloat("Soft Gap", &pUserData.SoftGap, 0.0f, 0.5f);
+            ImGui::SliderFloat("HDR Max", &pUserData.HdrMax, 8.0f, 2048.0f);
+            ImGui::SliderFloat("LPM Exposure", &pUserData.LpmExposure, 3.0f, 11.0f);
+            ImGui::SliderFloat("Contrast", &pUserData.Contrast, 0.0f, 1.0f);
+            ImGui::SliderFloat("Shoulder Contrast", &pUserData.ShoulderContrast, 1.0f, 1.2f);
+            ImGui::SliderFloat3("Saturation", &pUserData.Saturation[0], 0.0f, 2.0f);
+            ImGui::SliderFloat3("Crosstalk", &pUserData.Crosstalk[0], 0.0f, 1.0f);
         }
 
         if (ImGui::CollapsingHeader("AO"))
@@ -393,20 +377,18 @@ namespace ElysiaEngine
 
             ImGui::Checkbox("Is Enable AO", &pUserData.aoParameter.IsEnableAO);
 
-            auto t1 = static_cast<int>(pUserData.aoParameter.SampleCount);
-            ImGui::SliderInt("AO Sample Count", &t1, 0, 32, "%.3f", ImGuiSliderFlags_AlwaysClamp);
-            pUserData.aoParameter.SampleCount = static_cast<UINT>(t1);
+            ImGui::SliderInt("AO Sample Count", &pUserData.aoParameter.SampleCount, 0, 16);
+            ImGui::SliderInt("AO Sample Step Count", &pUserData.aoParameter.SampleStepCount, 0, 6);
 
-            ImGui::SliderFloat("AO Radius", &pUserData.aoParameter.Radius, 0, 10, "%.3f",
-                               ImGuiSliderFlags_AlwaysClamp);
+            ImGui::SliderFloat("AO Radius", &pUserData.aoParameter.Radius, 0.1, 5);
+            ImGui::SliderFloat("AO Fade Radius", &pUserData.aoParameter.FadeRadius, 1, 20000);
+            ImGui::SliderFloat("AO Fade Distance", &pUserData.aoParameter.FadeDistance, 1, 20000);
 
-            ImGui::SliderFloat("AO Intensity", &pUserData.aoParameter.IntensityMul, 0, 2, "%.3f",
-                               ImGuiSliderFlags_AlwaysClamp);
+            ImGui::SliderFloat("AO Intensity", &pUserData.aoParameter.IntensityMul, 0, 1);
 
-            ImGui::SliderFloat("AO Pow", &pUserData.aoParameter.IntensityPow, 0, 2, "%.3f",
-                               ImGuiSliderFlags_AlwaysClamp);
+            ImGui::SliderFloat("AO Pow", &pUserData.aoParameter.IntensityPow, 0.1, 8);
 
-            ImGui::SliderFloat("AO Bias", &pUserData.aoParameter.Bias, 0.f, 0.1f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+            ImGui::SliderFloat("AO Bias", &pUserData.aoParameter.Bias, 0.f, 0.01f);
 
             int blurQualityIndex = (int)pUserData.aoParameter.BlurQuality;
             ImGui::Combo("Blur Quality", &blurQualityIndex,
@@ -417,8 +399,7 @@ namespace ElysiaEngine
                                           static_cast<int>(magic_enum::enum_count<AOBlurQuality>()));
             pUserData.aoParameter.BlurQuality = (AOBlurQuality)blurQualityIndex;
 
-            ImGui::SliderFloat("AO Sharpness", &pUserData.aoParameter.Sharpness, 1.f, 100.f, "%.3f",
-                               ImGuiSliderFlags_AlwaysClamp);
+            ImGui::SliderFloat("AO Sharpness", &pUserData.aoParameter.Sharpness, 1.f, 100.f);
         }
     }
 }
@@ -433,6 +414,9 @@ int WINAPI WinMain(HINSTANCE hInstance,
                    LPSTR lpCmdLine,
                    int nCmdShow)
 {
+    SetEnvironmentVariable(L"D3D12_DEBUG_LAYER", L"0");
+    SetEnvironmentVariable(L"D3D12_DEBUG_GPU_VALIDATION", L"0");
+    SetEnvironmentVariable(L"DXGI_DEBUG", L"0");
     std::wstring name(L"Elysia Engine");
 
     return RunFramework(hInstance, lpCmdLine, nCmdShow, new ElysiaEngine::ElysiaFrame(name));

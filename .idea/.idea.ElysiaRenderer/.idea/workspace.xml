@@ -8,27 +8,31 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f31d721d-cfba-4714-b0ce-c46a1a48110d" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/public/PostProcess/CS_Debug.hlsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/DebugPass.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/DebugPass.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.ElysiaRenderer/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.ElysiaRenderer/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/private/BRDF.hlsl" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/private/BRDF.hlsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/private/Common.hlsl" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/private/Common.hlsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/private/Random.hlsl" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/private/Random.hlsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/private/ShadingCommon.hlsl" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/private/ShadingCommon.hlsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/private/ShadingModel.hlsl" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/private/ShadingModel.hlsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/public/Blit.hlsl" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/public/Blit.hlsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/public/CS_SSAO.hlsl" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/public/CS_SSAO.hlsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/public/GBuffer.hlsl" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/public/GBuffer.hlsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/public/Opaque.hlsl" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/public/Opaque.hlsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/public/PostProcess/CS_Bilateral_Blur.hlsl" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/public/PostProcess/CS_Bilateral_Blur.hlsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/public/CS_SSAO.hlsl.rej" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/public/CS_SSAO.hlsl.rej" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/public/PostProcess/CS_Debug.hlsl" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/public/PostProcess/CS_Debug.hlsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/public/PostProcess/CS_TwoTwoMinHIZ.hlsl" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/public/PostProcess/CS_TwoTwoMinHIZ.hlsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ElysiaRenderer/ElysiaRenderer.vcxproj" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/ElysiaRenderer.vcxproj" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ElysiaRenderer/ElysiaRenderer.vcxproj.filters" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/ElysiaRenderer.vcxproj.filters" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ElysiaRenderer/imgui.ini" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/imgui.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Editor/IMGUIHelper.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Editor/IMGUIHelper.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Programs/Helper.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Programs/Helper.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/DX12Context.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/DX12Context.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/DX12Context.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/DX12Context.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/DX12Device.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/DX12Device.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Engine/ElysiaFrame.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Engine/ElysiaFrame.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/AOUtility.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/AOUtility.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/DX12Light.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/DX12Light.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/AOPass.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/AOPass.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/AOPass.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/AOPass.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/FinalBlitPass.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/FinalBlitPass.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/DebugPass.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/DebugPass.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/DebugPass.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/DebugPass.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Renderer.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Renderer.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/CameraManager.obj" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/CameraManager.obj" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/ElysiaRenderer.tlog/CL.command.1.tlog" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/ElysiaRenderer.tlog/CL.command.1.tlog" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/ElysiaRenderer.tlog/CL.read.1.tlog" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/ElysiaRenderer.tlog/CL.read.1.tlog" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/ElysiaRenderer.tlog/CL.write.1.tlog" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/ElysiaRenderer.tlog/CL.write.1.tlog" afterDir="false" />
@@ -58,13 +62,30 @@
   }
 }</component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="cidr-memory-view://121" root0="FORCE_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://A:/VS/VC/Tools/MSVC/14.44.35207/atlmfc/include/atlcomcli.h" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://A:/VS/VC/Tools/MSVC/14.44.35207/include/array" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://A:/VS/VC/Tools/MSVC/14.44.35207/include/memory" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://A:/VS/VC/Tools/MSVC/14.44.35207/include/unordered_map" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://A:/VS/VC/Tools/MSVC/14.44.35207/include/vector" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://C:/Program Files (x86)/Windows Kits/10/Include/10.0.26100.0/ucrt/stdlib.h" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://C:/Program Files (x86)/Windows Kits/10/Include/10.0.26100.0/um/DirectXMathConvert.inl" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://C:/Program Files (x86)/Windows Kits/10/Include/10.0.26100.0/um/DirectXMathMatrix.inl" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/public/CS_Tonemap.hlsl" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/ElysiaRenderer/RenderHelper.h" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/ElysiaRenderer/include/EASTL/algorithm.h" root0="SKIP_HIGHLIGHTING" />
@@ -97,6 +118,7 @@
     <setting file="file://$PROJECT_DIR$/packages/Microsoft.Direct3D.D3D12.1.618.1/build/native/include/d3d12.h" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/x64/Debug/Assimp/include/assimp/material.h" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/x64/Debug/Assimp/include/assimp/material.inl" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../FidelityFX-CACAO-v1.2/sample/bin/ShaderLibDX/ffx_cacao.hlsl" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://F:/Unity/Render - 副本/Assets/RenderFeature/BloomRF.cs" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
@@ -205,7 +227,11 @@
       <workItem from="1767537173167" duration="29214000" />
       <workItem from="1767713820661" duration="62380000" />
       <workItem from="1768490931102" duration="45575000" />
-      <workItem from="1768645049618" duration="16408000" />
+      <workItem from="1768645049618" duration="26804000" />
+      <workItem from="1768718633515" duration="2964000" />
+      <workItem from="1768721930506" duration="36581000" />
+      <workItem from="1768807923556" duration="2133000" />
+      <workItem from="1768812675423" duration="23875000" />
     </task>
     <servers />
   </component>

@@ -36,6 +36,7 @@ namespace ElysiaRenderer
             static size_t g_SourceTexIndex;
             static size_t g_MipmapLevel;
             static size_t g_SourceSize;
+            static size_t g_TargetSize;
         };
 
         void DoDebugPass();

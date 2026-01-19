@@ -1,9 +1,11 @@
 diff a/ElysiaRenderer/Assets/Shaders/public/CS_SSAO.hlsl b/ElysiaRenderer/Assets/Shaders/public/CS_SSAO.hlsl	(rejected hunks)
-@@ -101,7 +101,6 @@
-         float randomEyeDepth = LinearEyeDepth(randomDepth, g_ZBufferParams);
-         float randomZ = randomPosVS.z;
+@@ -70,9 +70,6 @@
  
--        float range = step(randomEyeDepth, randomZ + g_AOBias);
-         float depthDiff = randomZ - randomEyeDepth;
-         float rangeCheck = saturate((g_AORadius - depthDiff) / g_AORadius);
+     const float3 randomVector = SampleTexture2D(BlueNoiseTexIndex,
+                                                 inputParam.ScreenUV * g_noiseScale, WarpPointSampler).xyz;
+-    float3 tangent = normalize(randomVector - normalVS * dot(randomVector, normalVS));
+-    const float3 bitTangent = cross(normalVS, tangent);
+-    float3x3 TBN = float3x3(tangent, bitTangent, normalVS);
+     float2x2 rotMat = float2x2(randomVector.x, -randomVector.y, randomVector.y, randomVector.x);
  
+     // ������Ļ�ռ� FovFix�����ڽ�����ռ�뾶ת������Ļ�ռ�
