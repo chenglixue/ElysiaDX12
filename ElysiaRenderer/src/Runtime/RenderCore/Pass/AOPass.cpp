@@ -365,10 +365,10 @@ namespace ElysiaRenderer
         m_pMaterial->SetUInt(ShaderIDs::g_HIZMaxMipmap, MathHelper::Max(m_HIZMipmapCount - 1, UINT(0)), passID);
         m_pMaterial->SetUInt(ShaderIDs::g_HIZTextureIndex, m_pHIZRT->GetResourceHeapIndex(), passID);
         // m_pMaterial->SetUInt(ShaderIDs::g_RandStepTexIndex, m_pRandStepRT->GetResourceHeapIndex(), passID);
-        m_pMaterial->SetFloat(ShaderIDs::g_StepMipFactor, UserData::GetInstance().aoParameter.StepMipFactor, passID);
 
         {
             PIXHelper pix(m_pCommand->GetCommandList(), "One Four SSAO");
+            m_pCommand->SetPipeline(pipelineStateData);
             auto targetRT = m_pOneFourAORT;
             m_pCommand->AddBarrier(targetRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
             m_pCommand->ClearRenderTarget(targetRT, Color::Black);
@@ -402,7 +402,7 @@ namespace ElysiaRenderer
 
             m_pMaterial->SetFloat4(ShaderIDs::g_TargetSize,
                                    GetScreenSize(targetRT->GetWidth(), targetRT->GetHeight()), passID);
-            m_pMaterial->SetFloat4(ShaderIDs::g_TargetSize,
+            m_pMaterial->SetFloat4(ShaderIDs::g_SourceSize,
                                    GetScreenSize(sourceRT->GetWidth(), sourceRT->GetHeight()), passID);
             m_pMaterial->SetUInt(ShaderIDs::g_TargetTexIndex, targetRT->GetResourceHeapIndex(), passID);
             m_pMaterial->SetUInt(ShaderIDs::g_SourceTexIndex, sourceRT->GetResourceHeapIndex(), passID);

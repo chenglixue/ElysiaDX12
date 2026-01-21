@@ -389,7 +389,6 @@ namespace ElysiaEngine
             ImGui::SliderFloat("AO Pow", &pUserData.aoParameter.IntensityPow, 0.1, 8);
 
             ImGui::SliderFloat("AO Bias", &pUserData.aoParameter.Bias, 0.f, 0.01f);
-            ImGui::SliderFloat("AO StepMipFactor", &pUserData.aoParameter.StepMipFactor, 0.f, 2.f);
 
             int blurQualityIndex = (int)pUserData.aoParameter.BlurQuality;
             ImGui::Combo("Blur Quality", &blurQualityIndex,
