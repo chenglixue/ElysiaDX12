@@ -5,3 +5,4 @@
 *.pch
 *.obj
 *.tlog
+*.idb

@@ -31,11 +31,8 @@ void TwoTwoMinHIZ(uint3 dispatchThreadID : SV_DispatchThreadID)
 
     float minDepth = min(min(depths.x, depths.y), min(depths.z, depths.w));
 #else
-    // 优化版的手动采样
-    // 提前计算 UV 和边界
     const uint2 maxCoord = (uint2)g_SourceSize.xy - 1;
 
-    // 一次读取4个相邻像素（使用局部变量）
     uint2 coord0 = min(srcBaseCoord + uint2(0, 0), maxCoord);
     uint2 coord1 = min(srcBaseCoord + uint2(0, 1), maxCoord);
     uint2 coord2 = min(srcBaseCoord + uint2(1, 0), maxCoord);

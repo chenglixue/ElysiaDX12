@@ -21,6 +21,8 @@ namespace ElysiaCore
         DX12GraphicsContext(DX12Device* device);
         ~DX12GraphicsContext() override;
 
+        void Discard(RenderTexture* pRT);
+
         void ClearRenderTarget(RenderTexture* renderTarget, Color color);
         void ClearRenderTarget(const DX12TextureResource& renderTarget, Color color);
         void ClearDepthStencilTarget(const RenderTexture* renderTarget, float depth, uint8_t stencil);

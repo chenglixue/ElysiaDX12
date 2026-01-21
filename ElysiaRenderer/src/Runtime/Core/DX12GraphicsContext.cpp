@@ -23,6 +23,11 @@ namespace ElysiaCore
     {
     }
 
+    void DX12GraphicsContext::Discard(RenderTexture* pRT)
+    {
+        m_commandList->DiscardResource(pRT->GetResource(), nullptr);
+    }
+
     void DX12GraphicsContext::ClearRenderTarget(RenderTexture* renderTarget, Color color)
     {
         auto oldState = renderTarget->GetTexture()->GetUsageState();

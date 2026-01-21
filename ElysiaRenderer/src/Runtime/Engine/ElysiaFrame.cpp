@@ -377,10 +377,10 @@ namespace ElysiaEngine
 
             ImGui::Checkbox("Is Enable AO", &pUserData.aoParameter.IsEnableAO);
 
-            ImGui::SliderInt("AO Sample Count", &pUserData.aoParameter.SampleCount, 0, 16);
+            ImGui::SliderInt("AO Sample Count", &pUserData.aoParameter.SampleCount, 0, 32);
             ImGui::SliderInt("AO Sample Step Count", &pUserData.aoParameter.SampleStepCount, 0, 6);
 
-            ImGui::SliderFloat("AO Radius", &pUserData.aoParameter.Radius, 0.1, 5);
+            ImGui::SliderFloat("AO Radius", &pUserData.aoParameter.Radius, 0.1, 50);
             ImGui::SliderFloat("AO Fade Radius", &pUserData.aoParameter.FadeRadius, 1, 20000);
             ImGui::SliderFloat("AO Fade Distance", &pUserData.aoParameter.FadeDistance, 1, 20000);
 
@@ -389,6 +389,7 @@ namespace ElysiaEngine
             ImGui::SliderFloat("AO Pow", &pUserData.aoParameter.IntensityPow, 0.1, 8);
 
             ImGui::SliderFloat("AO Bias", &pUserData.aoParameter.Bias, 0.f, 0.01f);
+            ImGui::SliderFloat("AO StepMipFactor", &pUserData.aoParameter.StepMipFactor, 0.f, 2.f);
 
             int blurQualityIndex = (int)pUserData.aoParameter.BlurQuality;
             ImGui::Combo("Blur Quality", &blurQualityIndex,

@@ -1,6 +1,7 @@
 #pragma once
 #include "BasePass.h"
 #include "Runtime/RenderCore/AOUtility.h"
+#include "Runtime/RenderCore/RenderResource.h"
 
 namespace ElysiaRenderer
 {
@@ -18,12 +19,10 @@ namespace ElysiaRenderer
     public:
         struct RenderTextureIDs
         {
-            static size_t AORTID;
-            static size_t HalfAORTID;
-            static size_t OneFourAORTID;
-            static size_t BlurHorizionRTID;
-            static size_t BlurVerticalRTID;
-            static size_t HIZRTID;
+            static inline size_t AORTID = SIZE_MAX;
+            static inline size_t HalfAORTID = SIZE_MAX;
+            static inline size_t OneFourAORTID = SIZE_MAX;
+            static inline size_t HIZRTID = SIZE_MAX;
         };
 
     public:
@@ -36,24 +35,20 @@ namespace ElysiaRenderer
         virtual void UpdatePipeline() override;
 
     private:
-        UINT m_mipmapCount;
+        UINT m_HIZMipmapCount;
 
         RenderTexture* m_pAORT = nullptr;
         RenderTexture* m_pHalfAORT = nullptr;
         RenderTexture* m_pOneFourAORT = nullptr;
-        RenderTexture* m_pBlurHorizionRT = nullptr;
-        RenderTexture* m_pBlurVerticalRT = nullptr;
-        std::vector<RenderTexture*> m_pTempRTs;
-        RenderTexture* m_pHIZRT;
+        std::vector<RenderTexture*> m_depthTempRTs;
+        RenderTexture* m_pHIZRT = nullptr;
+        RenderTexture* m_pRandStepRT = nullptr;
         TextureManager::Handle m_blueNoise;
 
         struct ShaderPasseIDs
         {
-            static int AOPassID;
-            static int BlurHorizionPassID;
-            static int BlurVerticalPassID;
-            static int HIZPassID;
-            static int CopyTexturePassID;
+            static inline int AOPassID = -1;
+            static inline int HIZPassID = -1;
         };
         struct ShaderIDs
         {
@@ -78,13 +73,18 @@ namespace ElysiaRenderer
             static size_t g_AOBias;
             static size_t g_AOIntensityMul;
             static size_t g_AOIntensityPow;
+            static size_t g_bLerpAO;
 
             static size_t g_AOIndex;
+            static inline size_t g_RandStepTexIndex = PropertyToID(L"g_RandStepTexIndex");
             static size_t g_noiseScale;
 
             static size_t g_HIZMaxMipmap;
             static size_t g_HIZMinMipmap;
+            static size_t g_MipmapLevel;
+            static inline size_t g_StepMipFactor = PropertyToID(L"g_StepMipFactor");
             static size_t g_HIZTextureIndex;
+            static size_t g_IsNormal;
 
             static size_t g_BlurDir;
             static size_t g_Sharpness;
@@ -94,17 +94,13 @@ namespace ElysiaRenderer
         };
 
         std::vector<Vector4> m_kernels;
-        std::vector<float> m_blurWeights;
-        AOBlurQuality m_lastBlurQuality;
-        UINT m_blurRadius;
-        float m_blurSigma;
+        std::vector<UINT> m_randSteps;
 
         void DoSSAO();
-        void DoBlurHorizion();
-        void DoBlurVertical();
         void DoHIZ();
         std::vector<Vector4> GenerateSSAOSampleKernel();
         std::vector<Vector4> GenerateHBAOSampleKernel();
+        std::vector<UINT> GenerateRandStepData();
         std::vector<float> GenerateBlurWeights(UINT blurRadius, float sigma);
         DXGI_FORMAT m_cameraColorFormat = DXGI_FORMAT_UNKNOWN;
     };

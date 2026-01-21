@@ -1,4 +1,5 @@
 #include "private\ShadingCommon.hlsl"
+#include "private/SSAOCommon.hlsli"
 
 #define GROUP_SIZE 8
 
@@ -30,9 +31,13 @@ void Debug(uint3 dispatchThreadID : SV_DispatchThreadID)
     }
     case DEBUG_AO:
     {
-        // float4 rawDepth = SampleTexture2D_LOD(g_SourceTexIndex, screenUV, ClampPointSampler, g_MipmapLevel);
-        // o[dispatchThreadID.xy] = Linear01Depth(rawDepth, g_ZBufferParams);
-        o[dispatchThreadID.xy] = SampleTexture2D(g_SourceTexIndex, screenUV, ClampPointSampler);
+        // float4 result = 0.f;
+        // float eyeDepth = SampleTexture2D_LOD(g_SourceTexIndex, screenUV, ClampPointSampler, g_MipmapLevel).a;
+        // eyeDepth *= Constant_Float16F_Scale;
+        //
+        // o[dispatchThreadID.xy] = result;
+        // o[dispatchThreadID.xy] = (eyeDepth - nearZ) / (farZ - nearZ);
+        o[dispatchThreadID.xy].rgb = SampleTexture2D_LOD(g_SourceTexIndex, screenUV, ClampPointSampler, g_MipmapLevel);
     }
     }
 }

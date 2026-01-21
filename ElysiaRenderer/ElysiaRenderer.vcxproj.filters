@@ -664,10 +664,13 @@
     <None Include="Assets\Shaders\public\PostProcess\CS_TwoTwoMinHIZ.hlsl">
       <Filter>Resource Files\Shader\Public</Filter>
     </None>
-    <None Include="Assets\Shaders\public\PostProcess\CS_CopyTexture.hlsl" />
     <None Include="Assets\Shaders\public\CopyTexture.hlsl" />
     <None Include="Assets\Shaders\public\PostProcess\CS_Debug.hlsl" />
     <None Include="Assets\Shaders\private\SSAOCommon.hlsli" />
+    <None Include="Assets\Shaders\public\PostProcess\CS_AOCopyTexture.hlsl" />
+    <None Include="Assets\Shaders\public\PostProcess\CS_AOHIZNormal.hlsl">
+      <Filter>Resource Files\Shader\Public</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

@@ -55,7 +55,7 @@ float4 GatherAlphaTexture2D(UINT textureIndex, float2 uv, UINT samplerStateIndex
 
 float4 LoadTexture2D(UINT textureIndex, int2 coord)
 {
-    RWTexture2D<float4> SampleTex = ResourceDescriptorHeap[textureIndex];
+    Texture2D<float4> SampleTex = ResourceDescriptorHeap[textureIndex];
 
     return SampleTex.Load(int3(coord, 0));
 }

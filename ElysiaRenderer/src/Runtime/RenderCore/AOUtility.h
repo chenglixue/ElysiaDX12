@@ -21,6 +21,8 @@ namespace ElysiaRenderer
         float Bias = 0.025f;
         float IntensityMul = 1.f;
         float IntensityPow = 1.f;
+        float StepMipFactor = 1.f;
+
         AOBlurQuality BlurQuality = AOBlurQuality::High;
         float BlurIntensity = 1.f;
         float Sharpness = 10.f;

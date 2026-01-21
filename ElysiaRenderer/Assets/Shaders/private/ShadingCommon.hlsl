@@ -264,6 +264,19 @@ float4 ComputeClipSpacePosition(float2 screenUV, float rawDepth)
 
     return positionCS;
 }
+float4 ComputeClipSpacePosition(float2 ScreenUV, float EyeDepth, Matrix projMatrix)
+{
+    float TanHalfFovX = rcp(projMatrix[0][0]);
+    float TanHalfFovY = rcp(projMatrix[1][1]);
+
+    float2 ScreenNDC = ScreenUV * 2.f - 1.f;
+    ScreenNDC.y = -ScreenNDC.y;
+    float2 ViewRay = ScreenNDC * float2(TanHalfFovX, TanHalfFovY);
+
+    float3 result = float3(ViewRay * EyeDepth, EyeDepth);
+
+    return float4(result, 1.f);
+}
 
 float3 ComputeWorldSpacePosition(float2 screenUV, float rawDepth, Matrix invViewProjMatrix)
 {
