@@ -20,7 +20,7 @@ float ComputeDepthSimilarity(float DepthA, float DepthB)
 
     // 深度感知阈值：如果差距超过基础深度的 5%，权重迅速衰减
     float diff = abs(d1 - d2);
-    float threshold = d2 * 0.05f;
+    float threshold = d2 * 0.003f;
 
     return exp(-diff / (threshold + 1e-5));
 }
@@ -35,7 +35,8 @@ float ComputeDepthSimilarity(float DepthA, float DepthB)
 float4 ComputeUpsampleContribution(UINT SourceTexIndex, float4 SourceSize,
                                    UINT HIZTexIndex, float downSampleDepthMipmapLevel,
                                    float2 ScreenUV,
-                                   float3 CenterWorldNormal)
+                                   float3 CenterWorldNormal,
+                                   float EyeDepth)
 {
     const int SampleCount = 4;
     float2 UV[SampleCount];
@@ -45,27 +46,41 @@ float4 ComputeUpsampleContribution(UINT SourceTexIndex, float4 SourceSize,
     UV[2] = ScreenUV + float2(-0.5f, -0.5f) * SourceSize.zw;
     UV[3] = ScreenUV + float2(0.5f, -0.5f) * SourceSize.zw;
 
-    float SmallValue = 1e-4;
+    // // 低分辨率纹理中周围 4 个邻居纹素（Texel）的中心点，用于后续手动双边滤波
+    // UV[0] = ScreenUV + float2(-1, -1) * SourceSize.zw;
+    // UV[1] = ScreenUV + float2(0, -1) * SourceSize.zw;
+    // UV[2] = ScreenUV + float2(1, -1) * SourceSize.zw;
+    // UV[3] = ScreenUV + float2(-1, 0) * SourceSize.zw;
+    // UV[4] = ScreenUV + float2(0, 0) * SourceSize.zw;
+    // UV[5] = ScreenUV + float2(1, 0) * SourceSize.zw;
+    // UV[6] = ScreenUV + float2(-1, 1) * SourceSize.zw;
+    // UV[7] = ScreenUV + float2(0, 1) * SourceSize.zw;
+    // UV[8] = ScreenUV + float2(1, 1) * SourceSize.zw;
+
+    float SmallValue = 1e-5;
     float WeightSum = SmallValue;
     float4 Ret = float4(SmallValue, 0, 0, 0);
 
-    float MinIteration = 1.0f;
-
-    [unroll(9)]
+    [unroll(SampleCount)]
     for (int i = 0; i < SampleCount; ++i)
     {
-        float SampleUV = UV[i];
+        float2 SampleUV = UV[i];
         float4 DownSampleAO = SampleTexture2D(SourceTexIndex, SampleUV, WarpPointSampler);
 
-        MinIteration = min(MinIteration, DownSampleAO.r);
+        float4 DownSampleNormalDepth =
+            SampleTexture2D_LOD(HIZTexIndex, SampleUV, WarpPointSampler, downSampleDepthMipmapLevel);
+        float SampleEyeDepth = DownSampleNormalDepth.a * Constant_Float16F_Scale;
+        float3 LocalWorldNormal = DecodeNormal(DownSampleNormalDepth.xyz);
 
-        float DownSampleDepth =
-            SampleTexture2D_LOD(HIZTexIndex, ScreenUV, WarpPointSampler, downSampleDepthMipmapLevel);
+        float Weight = ComputeDepthSimilarity(SampleEyeDepth, EyeDepth, 0.003);
+        Weight *= saturate(dot(LocalWorldNormal, CenterWorldNormal));
 
-        //float3 DownSampleNormal = SampleTexture2D_LOD()
+        Ret += float4(DownSampleAO.rgb, 1) * Weight;
+        WeightSum += Weight;
     }
+    Ret /= WeightSum;
 
-    return 0;
+    return Ret;
 }
 
 

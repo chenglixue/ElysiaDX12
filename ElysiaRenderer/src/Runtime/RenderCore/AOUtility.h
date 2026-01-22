@@ -22,6 +22,9 @@ namespace ElysiaRenderer
         float IntensityMul = 1.f;
         float IntensityPow = 1.f;
 
+        bool IsLerpAO = false;
+        float AOLerpFactor = 0.1f;
+
         AOBlurQuality BlurQuality = AOBlurQuality::High;
         float BlurIntensity = 1.f;
         float Sharpness = 10.f;

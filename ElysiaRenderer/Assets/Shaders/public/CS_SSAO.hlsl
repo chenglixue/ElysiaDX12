@@ -33,6 +33,7 @@ cbuffer PassConstant : register(b0, perPassSpace)
     UINT g_HIZTextureIndex;
     UINT g_StepMipFactor;
     bool g_bLerpAO;
+    float g_LerpAOFactor;
 
     UINT g_RandStepTexIndex;
     float4 g_AOSampleKernelArray[_AO_MAX_SAMPLE_COUNT];
@@ -150,7 +151,12 @@ void SSAO(uint3 dispatchThreadID: SV_DispatchThreadID)
 
     if (g_bLerpAO)
     {
+        float4 Filtered = ComputeUpsampleContribution(g_SourceTexIndex, g_SourceSize, g_HIZTextureIndex,
+                                                      g_HIZMinMipmap + 1,
+                                                      inputParam.ScreenUV, inputParam.NormalWS,
+                                                      inputParam.LinearEyeDepth);
 
+        aoResult = lerp(aoResult, Filtered, g_LerpAOFactor);
     }
 
     float fadeRadius = max(1.f, g_AOFadeRadius);

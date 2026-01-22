@@ -74,6 +74,7 @@ namespace ElysiaRenderer
             static size_t g_AOIntensityMul;
             static size_t g_AOIntensityPow;
             static size_t g_bLerpAO;
+            static inline size_t g_LerpAOFactor = PropertyToID(L"g_LerpAOFactor");
 
             static size_t g_AOIndex;
             static inline size_t g_RandStepTexIndex = PropertyToID(L"g_RandStepTexIndex");

@@ -364,6 +364,7 @@ namespace ElysiaRenderer
         m_pMaterial->SetVector4Array(ShaderIDs::g_AOSampleKernelArray, m_kernels, passID);
         m_pMaterial->SetUInt(ShaderIDs::g_HIZMaxMipmap, MathHelper::Max(m_HIZMipmapCount - 1, UINT(0)), passID);
         m_pMaterial->SetUInt(ShaderIDs::g_HIZTextureIndex, m_pHIZRT->GetResourceHeapIndex(), passID);
+        m_pMaterial->SetFloat(ShaderIDs::g_LerpAOFactor, UserData::GetInstance().aoParameter.AOLerpFactor, passID);
         // m_pMaterial->SetUInt(ShaderIDs::g_RandStepTexIndex, m_pRandStepRT->GetResourceHeapIndex(), passID);
 
         {
@@ -410,7 +411,7 @@ namespace ElysiaRenderer
                                        float(targetRT->GetWidth()) / float(m_blueNoise.GetWidth()),
                                        float(targetRT->GetHeight()) / float(m_blueNoise.GetHeight())), passID);
             m_pMaterial->SetUInt(ShaderIDs::g_HIZMinMipmap, 1, passID);
-            m_pMaterial->SetBool(ShaderIDs::g_bLerpAO, true, passID);
+            m_pMaterial->SetBool(ShaderIDs::g_bLerpAO, UserData::GetInstance().aoParameter.IsLerpAO, passID);
 
             SetSpaceResource(passData, PER_PASS_SPACE);
             SetSpaceResource(passData, PER_FRAME_SPACE);
@@ -436,7 +437,7 @@ namespace ElysiaRenderer
                                        float(targetRT->GetWidth()) / float(m_blueNoise.GetWidth()),
                                        float(targetRT->GetHeight()) / float(m_blueNoise.GetHeight())), passID);
             m_pMaterial->SetUInt(ShaderIDs::g_HIZMinMipmap, 0, passID);
-            m_pMaterial->SetBool(ShaderIDs::g_bLerpAO, true, passID);
+            m_pMaterial->SetBool(ShaderIDs::g_bLerpAO, UserData::GetInstance().aoParameter.IsLerpAO, passID);
 
             SetSpaceResource(passData, PER_PASS_SPACE);
             SetSpaceResource(passData, PER_FRAME_SPACE);
