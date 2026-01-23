@@ -93,6 +93,10 @@ namespace ElysiaRenderer
         case DebugMode::AO:
         {
             // auto RT = RenderTargetManager::GetInstance().GetRenderTexture(
+            //     L"AO HIZ RT");
+            // m_pMaterial->SetUInt(ShaderIDs::g_SourceTexIndex, RT->GetResourceHeapIndex());
+            // m_pMaterial->SetFloat4(ShaderIDs::g_SourceSize, GetScreenSize(RT->GetWidth(), RT->GetHeight()));
+            // auto RT = RenderTargetManager::GetInstance().GetRenderTexture(
             //     L"AO RT");
             // RT = RenderTargetManager::GetInstance().GetRenderTexture(
             //     L"Half AO RT");
@@ -125,8 +129,6 @@ namespace ElysiaRenderer
                 break;
             }
             }
-            // m_pMaterial->SetUInt(ShaderIDs::g_SourceTexIndex, RT->GetResourceHeapIndex());
-            // m_pMaterial->SetFloat4(ShaderIDs::g_SourceSize, GetScreenSize(RT->GetWidth(), RT->GetHeight()));
             break;
         }
         }

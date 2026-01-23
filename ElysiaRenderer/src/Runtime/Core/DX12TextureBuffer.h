@@ -21,17 +21,6 @@ namespace ElysiaCore
         DX12TextureResource& operator=(const DX12TextureResource& a) = delete;
         ~DX12TextureResource();
 
-        void SetUAVCount(const UINT UAVCount)
-        {
-            m_UAVDescriptors.resize(UAVCount);
-            m_UAVResourceHeapIndices.resize(UAVCount);
-        }
-        void SetSRVCount(const UINT SRVCount)
-        {
-            m_SRVDescriptors.resize(SRVCount);
-            m_SRVResourceHeapIndices.resize(SRVCount);
-        }
-
         DX12DescriptorHeapHandle GetRTVDescriptor() const
         {
             return m_RTVDescriptor;
@@ -48,15 +37,24 @@ namespace ElysiaCore
         {
             return m_UAVDescriptors[handleIndex];
         }
-        UINT GetUAVResourceHeapIndex(UINT index) const
+        UINT GetUAVHeapIndex(UINT mipmapLevel = 0) const
         {
-            assert(index < m_UAVResourceHeapIndices.size());
-            return m_UAVResourceHeapIndices[index];
+            assert(mipmapLevel < m_UAVDescriptors.size());
+            return m_uavBaseHeapIndex + mipmapLevel;
         }
-        UINT GetSRVResourceHeapIndex(UINT index) const
+        UINT GetSRVHeapIndex(UINT mipmapLevel = 0) const
         {
-            assert(index < m_SRVResourceHeapIndices.size());
-            return m_SRVResourceHeapIndices[index];
+            assert(mipmapLevel < m_SRVDescriptors.size());
+            return m_srvBaseHeapIndex + mipmapLevel;
+        }
+
+        void SetSRVCount(UINT index)
+        {
+            m_SRVDescriptors.resize(index);
+        }
+        void SetUAVCount(UINT index)
+        {
+            m_UAVDescriptors.resize(index);
         }
 
         void SetRTVDescriptor(const DX12DescriptorHeapHandle& handle)
@@ -65,6 +63,7 @@ namespace ElysiaCore
         }
         void SetSRVDescriptor(const DX12DescriptorHeapHandle& handle, UINT index = 0)
         {
+            assert(index < m_SRVDescriptors.size());
             m_SRVDescriptors[index] = handle;
         }
         void SetDSVDescriptor(const DX12DescriptorHeapHandle& handle)
@@ -73,18 +72,24 @@ namespace ElysiaCore
         }
         void SetUAVDescriptor(const DX12DescriptorHeapHandle& handle, UINT handleIndex = 0)
         {
+            assert(handleIndex < m_UAVDescriptors.size());
             m_UAVDescriptors[handleIndex] = handle;
         }
 
-        void SetUAVResourceHeapIndex(UINT index, const UINT UAVResourceHeapIndex)
+        void SetUAVBaseHeapIndex(UINT baseIndex)
         {
-            assert(index < m_UAVResourceHeapIndices.size());
-            m_UAVResourceHeapIndices[index] = UAVResourceHeapIndex;
+            m_uavBaseHeapIndex = baseIndex;
         }
-        void SetSRVResourceHeapIndex(UINT index, const UINT SRVResourceHeapIndex)
+        void SetSRVBaseHeapIndex(UINT baseIndex)
         {
-            assert(index < m_SRVResourceHeapIndices.size());
-            m_SRVResourceHeapIndices[index] = SRVResourceHeapIndex;
+            m_srvBaseHeapIndex = baseIndex;
+        }
+
+        UINT GetSubResourceUAVHeapIndex(UINT mipLevel) const
+        {
+            if (m_uavBaseHeapIndex == INVALID_RESOURCE_TABLE_INDEX)
+                return INVALID_RESOURCE_TABLE_INDEX;
+            return m_uavBaseHeapIndex + mipLevel;
         }
 
     private:
@@ -92,7 +97,7 @@ namespace ElysiaCore
         DX12DescriptorHeapHandle m_DSVDescriptor{};
         std::vector<DX12DescriptorHeapHandle> m_SRVDescriptors{};
         std::vector<DX12DescriptorHeapHandle> m_UAVDescriptors{};
-        std::vector<UINT> m_UAVResourceHeapIndices{};
-        std::vector<UINT> m_SRVResourceHeapIndices{};
+        UINT m_uavBaseHeapIndex = INVALID_RESOURCE_TABLE_INDEX;
+        UINT m_srvBaseHeapIndex = INVALID_RESOURCE_TABLE_INDEX;
     };
 }

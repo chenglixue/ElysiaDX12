@@ -671,6 +671,7 @@
       <Filter>Resource Files\Shader\Public</Filter>
     </None>
     <None Include="packages.config" />
+    <None Include="Assets\Shaders\public\PostProcess\CS_AOTAA.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

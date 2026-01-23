@@ -392,6 +392,7 @@ namespace ElysiaEngine
             ImGui::SliderFloat("AO Bias", &pUserData.aoParameter.Bias, 0.f, 0.01f);
 
             ImGui::SliderFloat("AO Lerp", &pUserData.aoParameter.AOLerpFactor, 0.1f, 1.f);
+            ImGui::SliderFloat("AO TAA Lerp Weight", &pUserData.aoParameter.TAALerpFactor, 0.05f, 0.1f);
 
             int blurQualityIndex = (int)pUserData.aoParameter.BlurQuality;
             ImGui::Combo("Blur Quality", &blurQualityIndex,

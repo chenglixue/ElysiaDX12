@@ -72,7 +72,7 @@ namespace ElysiaCore
         CComPtr<ID3D12Debug> debugController;
         if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController))))
         {
-            debugController->EnableDebugLayer();
+            //debugController->EnableDebugLayer();
         }
 #endif
 
@@ -596,6 +596,65 @@ namespace ElysiaCore
             m_pDevice->CopyDescriptorsSimple(1, targetDescriptor.GetCPUHandle(),
                                              SRVHandle.GetCPUHandle(),
                                              D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+        }
+    }
+
+    UINT DX12Device::AllocateContiguousReservedDescriptorIndices(UINT count)
+    {
+        if (count == 0)
+            return 0;
+        if (m_freeReservedDescriptorIndices.size() < count)
+        {
+            ElysiaHelper::AssertError("Out of reserved descriptors!");
+            return UINT_MAX;
+        }
+
+        // 1. 检查末尾是否连续
+        // m_freeReservedDescriptorIndices 类似于 Stack，back() 是最后一个可用索引
+        // 如果我们需要 3 个，且 vector 是 [..., 10, 11, 12]，则 back 是 12。
+        // 我们需要检查 vector[size-1], vector[size-2]... 是否是连续递减的
+        bool isContiguous = true;
+        size_t size = m_freeReservedDescriptorIndices.size();
+        UINT lastVal = m_freeReservedDescriptorIndices.back();
+
+        // 快速检查：如果 (最后一个值 - count + 1) 等于 (倒数第 count 个值)
+        // 说明这段区间数值是连续的 (前提是列表局部有序，iota 初始化满足此条件)
+        if (m_freeReservedDescriptorIndices[size - count] != (lastVal - count + 1))
+        {
+            isContiguous = false;
+        }
+
+        // 2. 如果不连续（发生了碎片化释放），尝试整理
+        if (!isContiguous)
+        {
+            // 性能警告：Sort 操作较慢，但在纹理创建阶段通常可接受
+            // 如果频繁创建/销毁 Mipmap 纹理，建议改用由 offset 管理的线性分配器
+            std::sort(m_freeReservedDescriptorIndices.begin(), m_freeReservedDescriptorIndices.end());
+
+            // 再次检查
+            lastVal = m_freeReservedDescriptorIndices.back();
+            if (m_freeReservedDescriptorIndices[size - count] != (lastVal - count + 1))
+            {
+                ElysiaHelper::AssertError("Heap Fragmentation: Cannot find contiguous block for Mipmaps!");
+                return UINT_MAX;
+            }
+        }
+
+        // 3. 执行分配
+        // 我们的 BaseIndex应该是这一块中最小的那个数
+        UINT baseIndex = lastVal - count + 1;
+
+        // 移除最后 count 个元素
+        m_freeReservedDescriptorIndices.resize(size - count);
+
+        return baseIndex;
+
+    }
+    void DX12Device::FreeContiguousReservedDescriptorIndices(UINT baseIndex, UINT count)
+    {
+        for (UINT i = 0; i < count; ++i)
+        {
+            m_freeReservedDescriptorIndices.push_back(baseIndex + i);
         }
     }
 

@@ -118,11 +118,11 @@ namespace ElysiaRenderer
 
     UINT RenderTexture::GetUAVResourceHeapIndex(UINT index) const
     {
-        return GetTexture()->GetUAVResourceHeapIndex(index);
+        return GetTexture()->GetUAVHeapIndex(index);
     }
     UINT RenderTexture::GetSRVResourceHeapIndex(UINT index) const
     {
-        return GetTexture()->GetSRVResourceHeapIndex(index);
+        return GetTexture()->GetSRVHeapIndex(index);
     }
 
 

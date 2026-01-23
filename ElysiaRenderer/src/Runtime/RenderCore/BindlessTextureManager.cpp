@@ -327,6 +327,9 @@ namespace ElysiaRenderer
         if (hasSRV)
         {
             newTex->SetSRVCount(desc.MipLevels);
+            auto srvBaseIndex = m_pDevice->AllocateContiguousReservedDescriptorIndices(desc.MipLevels);
+            newTex->SetSRVBaseHeapIndex(srvBaseIndex);
+
             for (UINT i = 0; i < desc.MipLevels; i ++)
             {
                 auto SRVHandle = m_pDevice->GetSRVStageHeap()->NewDescriptorHeapHandle();
@@ -367,20 +370,17 @@ namespace ElysiaRenderer
                 }
 
                 newTex->SetSRVDescriptor(SRVHandle, i);
-                auto newIndex = m_pDevice->m_freeReservedDescriptorIndices.back();
-                m_pDevice->m_freeReservedDescriptorIndices.pop_back();
-                if (i > 0)
+                UINT currentHeapIndex = srvBaseIndex + i;
+                if (i == 0)
                 {
-                    newTex->SetSRVResourceHeapIndex(i, newIndex);
-                }
-                else
-                {
-                    newTex->SetSRVResourceHeapIndex(0, newIndex);
-                    newTex->SetResourceHeapIndex(newIndex);
+                    newTex->SetResourceHeapIndex(currentHeapIndex);
                 }
 
+                // auto newIndex = m_pDevice->m_freeReservedDescriptorIndices.back();
+                // m_pDevice->m_freeReservedDescriptorIndices.pop_back();
+
                 m_pDevice->CopyDescriptorFromStageToRenderPass(newTex->GetSRVDescriptor(),
-                                                               newTex->GetResourceHeapIndex());
+                                                               currentHeapIndex);
             }
         }
 
@@ -411,6 +411,9 @@ namespace ElysiaRenderer
         if (hasUAV)
         {
             newTex->SetUAVCount(desc.MipLevels);
+            auto uavBaseIndex = m_pDevice->AllocateContiguousReservedDescriptorIndices(desc.MipLevels);
+            newTex->SetUAVBaseHeapIndex(uavBaseIndex);
+
             for (UINT i = 0; i < desc.MipLevels; i ++)
             {
                 D3D12_UNORDERED_ACCESS_VIEW_DESC desc{};
@@ -422,11 +425,13 @@ namespace ElysiaRenderer
                 auto newUAVHandle = m_pDevice->GetSRVStageHeap()->NewDescriptorHeapHandle();
                 newTex->SetUAVDescriptor(newUAVHandle, i);
                 m_pDevice->GetDevice()->CreateUnorderedAccessView(newTex->GetResource(), nullptr, &desc,
-                                                                  newTex->GetUAVDescriptor().GetCPUHandle());
-                newTex->SetUAVResourceHeapIndex(i, m_pDevice->m_freeReservedDescriptorIndices.back());
-                m_pDevice->m_freeReservedDescriptorIndices.pop_back();
+                                                                  newTex->GetUAVDescriptor(i).GetCPUHandle());
+
+                UINT currentHeapIndex = uavBaseIndex + i;
+                // newTex->SetUAVResourceHeapIndex(currentHeapIndex, m_pDevice->m_freeReservedDescriptorIndices.back());
+                // m_pDevice->m_freeReservedDescriptorIndices.pop_back();
                 m_pDevice->CopyDescriptorFromStageToRenderPass(newTex->GetUAVDescriptor(i),
-                                                               newTex->GetUAVResourceHeapIndex(i));
+                                                               currentHeapIndex);
             }
         }
 

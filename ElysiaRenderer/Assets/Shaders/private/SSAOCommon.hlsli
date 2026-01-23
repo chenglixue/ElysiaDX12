@@ -25,6 +25,11 @@ float ComputeDepthSimilarity(float DepthA, float DepthB)
     return exp(-diff / (threshold + 1e-5));
 }
 
+float3 ReconstructNormal(float2 In)
+{
+    return float3(In, sqrt(1 - dot(In, In)));
+}
+
 /// 
 /// @param SourceTexIndex Down Sample AO Tex Index
 /// @param SourceSize Down Sample AO Tex Size Params
@@ -83,10 +88,38 @@ float4 ComputeUpsampleContribution(UINT SourceTexIndex, float4 SourceSize,
     return Ret;
 }
 
-float3 ReconstructNormal(float2 In)
+float4 Fast2x2Blur(float4 aoData)
 {
-    return float3(In, sqrt(1 - dot(In, In)));
+    float4 CenterPixel = aoData;
+    float4 PixA = CenterPixel;
+    float4 PixB = QuadReadAcrossX(CenterPixel);
+    float4 PixC = QuadReadAcrossY(CenterPixel);
+
+    float WeightA = 1.0f;
+    float WeightB = 1.0f;
+    float WeightC = 1.0f;
+
+    const float NormalTweak = 4.0f;
+    float3 NormalA = ReconstructNormal(PixA.zw);
+    float3 NormalB = ReconstructNormal(PixB.zw);
+    float3 NormalC = ReconstructNormal(PixC.zw);
+    WeightB *= saturate(pow(saturate(dot(NormalA, NormalB)), NormalTweak));
+    WeightC *= saturate(pow(saturate(dot(NormalA, NormalC)), NormalTweak));
+
+    const float DepthTweak = 1;
+    float InvDepth = 1.0f / PixA.y;
+    WeightB *= 1 - saturate(abs(1 - PixB.y * InvDepth) * DepthTweak);
+    WeightC *= 1 - saturate(abs(1 - PixC.y * InvDepth) * DepthTweak);
+
+    float InvWeightABC = 1.0f / (WeightA + WeightB + WeightC);
+
+    WeightA *= InvWeightABC;
+    WeightB *= InvWeightABC;
+    WeightC *= InvWeightABC;
+
+    return WeightA * PixA.x + WeightB * PixB.x + WeightC * PixC.x;
 }
+
 
 // x = spatial direction / y = temporal direction / z = spatial offset / w = temporal offset
 float4 getNoise(int2 coord, int frame)

@@ -11,6 +11,7 @@ cbuffer PassConstant : register(b0, perPassSpace)
     float4 g_SourceSize;
 
     float g_MipmapLevel;
+    UINT g_HIZMipmapCount;
 }
 
 [numthreads(GROUP_SIZE, GROUP_SIZE, 1)]
@@ -59,16 +60,19 @@ void AOHIZNormal(uint3 dispatchThreadID : SV_DispatchThreadID)
         }
 
         float3 weightedNormalSum = 1e-4;
-        float totalWeight = 0;
-        float weights[4];
-        [unroll(4)]
-        for (int i = 0; i < 4; i ++)
+        if (g_MipmapLevel <= 2)
         {
-            weights[i] = ComputeDepthSimilarity(samples[i].a, minDepth);
-            totalWeight += weights[i];
-            weightedNormalSum += samples[i].rgb * weights[i];
+            float totalWeight = 1e-4;
+            float weights[4];
+            [unroll(4)]
+            for (int i = 0; i < 4; i ++)
+            {
+                weights[i] = ComputeDepthSimilarity(samples[i].a, minDepth);
+                totalWeight += weights[i];
+                weightedNormalSum += samples[i].rgb * weights[i];
+            }
+            weightedNormalSum /= totalWeight;
         }
-        weightedNormalSum /= totalWeight;
 
         result = float4(weightedNormalSum, minDepth);
     }

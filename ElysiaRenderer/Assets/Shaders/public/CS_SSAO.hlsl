@@ -82,8 +82,16 @@ void SSAO(uint3 dispatchThreadID: SV_DispatchThreadID)
     float3 randomVector = SampleTexture2D(BlueNoiseTexIndex,
                                           inputParam.ScreenUV * g_noiseScale, WarpPointSampler).xyz;
     float jitter = randomVector.z;
+    float temporalAngle = (frameIndex % 8) * INV_FOUR_PI;
 
     float2 randomVec = randomVector.xy * 2.f - 1.f;
+    float c = cos(temporalAngle);
+    float s = sin(temporalAngle);
+    float2x2 randomRotationMatrix = float2x2(
+        c, -s,
+        s, c
+        );
+    randomVec = mul(randomVec, randomRotationMatrix);
     float2x2 rotationMatrix = float2x2(
         randomVec.x, randomVec.y,
         -randomVec.y, randomVec.x
@@ -167,36 +175,7 @@ void SSAO(uint3 dispatchThreadID: SV_DispatchThreadID)
     aoResult = lerp(aoResult, 1.0, distFade);
     aoResult = 1.0 - (1.0 - pow(abs(aoResult), g_AOIntensityPow)) * g_AOIntensityMul;
 
-    {
-        float4 CenterPixel = float4(aoResult, inputParam.LinearEyeDepth, normalVS.xy);
-        float4 PixA = CenterPixel;
-        float4 PixB = QuadReadAcrossX(CenterPixel);
-        float4 PixC = QuadReadAcrossY(CenterPixel);
-
-        float WeightA = 1.0f;
-        float WeightB = 1.0f;
-        float WeightC = 1.0f;
-
-        const float NormalTweak = 4.0f;
-        float3 NormalA = ReconstructNormal(PixA.zw);
-        float3 NormalB = ReconstructNormal(PixB.zw);
-        float3 NormalC = ReconstructNormal(PixC.zw);
-        WeightB *= saturate(pow(saturate(dot(NormalA, NormalB)), NormalTweak));
-        WeightC *= saturate(pow(saturate(dot(NormalA, NormalC)), NormalTweak));
-
-        const float DepthTweak = 1;
-        float InvDepth = 1.0f / PixA.y;
-        WeightB *= 1 - saturate(abs(1 - PixB.y * InvDepth) * DepthTweak);
-        WeightC *= 1 - saturate(abs(1 - PixC.y * InvDepth) * DepthTweak);
-
-        float InvWeightABC = 1.0f / (WeightA + WeightB + WeightC);
-
-        WeightA *= InvWeightABC;
-        WeightB *= InvWeightABC;
-        WeightC *= InvWeightABC;
-
-        aoResult = WeightA * PixA.x + WeightB * PixB.x + WeightC * PixC.x;
-    }
+    aoResult = Fast2x2Blur(float4(aoResult, inputParam.LinearEyeDepth, normalVS.xy));
 
     o[dispatchThreadID.xy] = float4(aoResult.rrr, 1);
 }
