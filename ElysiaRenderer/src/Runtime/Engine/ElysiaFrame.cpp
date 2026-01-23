@@ -417,9 +417,6 @@ int WINAPI WinMain(HINSTANCE hInstance,
                    LPSTR lpCmdLine,
                    int nCmdShow)
 {
-    SetEnvironmentVariable(L"D3D12_DEBUG_LAYER", L"0");
-    SetEnvironmentVariable(L"D3D12_DEBUG_GPU_VALIDATION", L"0");
-    SetEnvironmentVariable(L"DXGI_DEBUG", L"0");
     std::wstring name(L"Elysia Engine");
 
     return RunFramework(hInstance, lpCmdLine, nCmdShow, new ElysiaEngine::ElysiaFrame(name));

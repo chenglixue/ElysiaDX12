@@ -89,8 +89,8 @@ namespace ElysiaCore
                 // Enabling GPU Validation without enabling the debug layer does nothing
                 if (bCPUValidationEnabled || bGpuValidationEnabled)
                 {
-                    //pDebugController->EnableDebugLayer();
-                    //pDebugController->SetEnableGPUBasedValidation(bGpuValidationEnabled);
+                    pDebugController->EnableDebugLayer();
+                    pDebugController->SetEnableGPUBasedValidation(bGpuValidationEnabled);
                 }
                 pDebugController->Release();
             }

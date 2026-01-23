@@ -83,6 +83,10 @@ float4 ComputeUpsampleContribution(UINT SourceTexIndex, float4 SourceSize,
     return Ret;
 }
 
+float3 ReconstructNormal(float2 In)
+{
+    return float3(In, sqrt(1 - dot(In, In)));
+}
 
 // x = spatial direction / y = temporal direction / z = spatial offset / w = temporal offset
 float4 getNoise(int2 coord, int frame)

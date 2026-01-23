@@ -9,6 +9,7 @@
 #include "ThirdParty/DxgiFormatHelper.h"
 #include "Programs/Hash.h"
 #include "ThirdParty/stb_image.h"
+#include "ThirdParty/DXTex/DDS.h"
 
 namespace ElysiaHelper
 {

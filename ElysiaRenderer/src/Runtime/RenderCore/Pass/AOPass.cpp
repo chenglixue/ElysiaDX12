@@ -162,11 +162,8 @@ namespace ElysiaRenderer
             GetPropertyName(
                 RenderTextureIDs::OneFourAORTID));
 
-        if (!m_blueNoise.IsValid())
-        {
-            m_blueNoise = TextureManager::GetInstance().LoadResidentTexture(
-                L"Tex\\blue_noise.dds");
-        }
+        m_blueNoise = TextureManager::GetInstance().LoadResidentTexture(
+            L"Tex\\RandomNormalTexture.dds");
 
         m_shaderPasses =
         {
