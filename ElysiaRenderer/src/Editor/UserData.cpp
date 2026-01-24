@@ -3,44 +3,48 @@
 #include "UserData.h"
 #include "Runtime/Resource/Serialization.h"
 
+
 namespace ElysiaRenderer
 {
-	using namespace ElysiaHelper;
-	
-	std::once_flag UserData::m_initInstanceFlag;
-	std::unique_ptr<UserData> UserData::m_instance;
+    using namespace ElysiaHelper;
 
-	void DeSerializeUserData()
-	{
-		if (!_CrtCheckMemory()) {__debugbreak(); }
-		const LPCWSTR filePath = L"D3D12\\UserData.elysia";
+    std::once_flag UserData::m_initInstanceFlag;
+    std::unique_ptr<UserData> UserData::m_instance;
 
-		WCHAR assetsPath[512];
-		ElysiaHelper::GetAssetsPath(assetsPath, _countof(assetsPath));
-		auto userDataFullPath = std::filesystem::path(ElysiaHelper::GetAssetFullPath(assetsPath, filePath).c_str());
-		if (!_CrtCheckMemory()) {__debugbreak(); }
+    void DeSerializeUserData()
+    {
+#ifdef _DEBUG
+        assert(_CrtCheckMemory());
+#endif
+        const LPCWSTR filePath = L"D3D12\\UserData.elysia";
 
-		
-		if (FileExists(userDataFullPath))
-		{
-			FileReadSerializer readSerializer(userDataFullPath);
-			
-			SerializeData(readSerializer, UserData::GetInstance());
-		}
-		else
-		{
-			UserData::GetInstance();
-		}
-	}
+        WCHAR assetsPath[512];
+        ElysiaHelper::GetAssetsPath(assetsPath, _countof(assetsPath));
+        auto userDataFullPath = std::filesystem::path(ElysiaHelper::GetAssetFullPath(assetsPath, filePath).c_str());
+#ifdef _DEBUG
+        assert(_CrtCheckMemory());
+#endif
 
-	void SerializeUserData()
-	{
-		const LPCWSTR filePath = L"D3D12\\UserData.elysia";
-		WCHAR assetsPath[512];
-		ElysiaHelper::GetAssetsPath(assetsPath, _countof(assetsPath));
-		auto userDataFullPath = std::filesystem::path(ElysiaHelper::GetAssetFullPath(assetsPath, filePath));
+        if (FileExists(userDataFullPath))
+        {
+            FileReadSerializer readSerializer(userDataFullPath);
 
-		FileWriteSerializer serializer(userDataFullPath);
-		SerializeData(serializer, UserData::GetInstance());
-	}
+            SerializeData(readSerializer, UserData::GetInstance());
+        }
+        else
+        {
+            UserData::GetInstance();
+        }
+    }
+
+    void SerializeUserData()
+    {
+        const LPCWSTR filePath = L"D3D12\\UserData.elysia";
+        WCHAR assetsPath[512];
+        ElysiaHelper::GetAssetsPath(assetsPath, _countof(assetsPath));
+        auto userDataFullPath = std::filesystem::path(ElysiaHelper::GetAssetFullPath(assetsPath, filePath));
+
+        FileWriteSerializer serializer(userDataFullPath);
+        SerializeData(serializer, UserData::GetInstance());
+    }
 }

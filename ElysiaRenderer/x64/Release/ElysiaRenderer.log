@@ -1,0 +1,1885 @@
+﻿  Skipping vcpkg. (no packages)
+  stdafx.cpp
+  IMGUIDrawer.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Editor/IMGUIDrawer.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Editor/IMGUIDrawer.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Editor/IMGUIDrawer.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Editor/IMGUIDrawer.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Editor/IMGUIDrawer.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Editor/IMGUIDrawer.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\lib\AMD\libs\AGS\amd_ags.h(887,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Editor/IMGUIDrawer.cpp')
+  
+  IMGUIHelper.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Editor/IMGUIHelper.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Editor/IMGUIHelper.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Editor/IMGUIHelper.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Editor/IMGUIHelper.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Editor/IMGUIHelper.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Editor/IMGUIHelper.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\lib\AMD\libs\AGS\amd_ags.h(887,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Editor/IMGUIHelper.cpp')
+  
+  UI.cpp
+  UserData.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Editor/UserData.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Editor/UserData.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Editor/UserData.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Editor/UserData.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Editor/UserData.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Editor/UserData.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\lib\AMD\libs\AGS\amd_ags.h(887,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Editor/UserData.cpp')
+  
+  Containers.cpp
+  Helper.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.cpp(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Programs/Helper.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Programs/Helper.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Programs/Helper.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Programs/Helper.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Programs/Helper.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Programs/Helper.cpp')
+  
+  PIXHelper.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Programs/PIXHelper.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Programs/PIXHelper.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Programs/PIXHelper.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Programs/PIXHelper.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Programs/PIXHelper.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Programs/PIXHelper.cpp')
+  
+  RenderHelper.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Programs/RenderHelper.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Programs/RenderHelper.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Programs/RenderHelper.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Programs/RenderHelper.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Programs/RenderHelper.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Programs/RenderHelper.cpp')
+  
+  SobolSequenceGenerator.cpp
+  UserMarker.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\lib\AMD\libs\AGS\amd_ags.h(887,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Programs/UserMarker.cpp')
+  
+  DX12BufferResource.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/DX12BufferResource.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12BufferResource.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12BufferResource.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12BufferResource.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12BufferResource.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/DX12BufferResource.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\lib\AMD\libs\AGS\amd_ags.h(887,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/DX12BufferResource.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\Core\DX12BufferResource.cpp(44,16): warning C4267: 'return': conversion from 'size_t' to 'UINT', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12BufferResource.cpp')
+  
+  DX12ComputeContext.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/DX12ComputeContext.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12ComputeContext.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12ComputeContext.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12ComputeContext.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12ComputeContext.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/DX12ComputeContext.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\lib\AMD\libs\AGS\amd_ags.h(887,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/DX12ComputeContext.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\Core\DX12PipelineState.h(53,12): warning C4099: 'ElysiaCore::PipelineStateObject': type name first seen using 'class' now seen using 'struct'
+  (compiling source file '/src/Runtime/Core/DX12ComputeContext.cpp')
+      D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\Core\DX12PipelineState.h(53,12):
+      see declaration of 'ElysiaCore::PipelineStateObject'
+  
+  DX12Context.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/DX12Context.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12Context.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12Context.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12Context.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12Context.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/DX12Context.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\lib\AMD\libs\AGS\amd_ags.h(887,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/DX12Context.cpp')
+  
+  DX12DescriptorHeap.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/DX12DescriptorHeap.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12DescriptorHeap.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12DescriptorHeap.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12DescriptorHeap.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12DescriptorHeap.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/DX12DescriptorHeap.cpp')
+  
+  DX12Device.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/DX12Device.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12Device.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12Device.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12Device.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12Device.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/DX12Device.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\lib\AMD\libs\AGS\amd_ags.h(887,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/DX12Device.cpp')
+  
+  DX12GPUResource.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/DX12GPUResource.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12GPUResource.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12GPUResource.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12GPUResource.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12GPUResource.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/DX12GPUResource.cpp')
+  
+  DX12GraphicsContext.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/DX12GraphicsContext.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12GraphicsContext.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12GraphicsContext.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12GraphicsContext.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12GraphicsContext.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/DX12GraphicsContext.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\lib\AMD\libs\AGS\amd_ags.h(887,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/DX12GraphicsContext.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\Core\DX12GraphicsContext.cpp(366,69): warning C4244: '=': conversion from 'UINT64' to 'UINT', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12GraphicsContext.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\Core\DX12GraphicsContext.cpp(371,68): warning C4244: '=': conversion from 'UINT64' to 'UINT', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12GraphicsContext.cpp')
+  
+  DX12PipelineState.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/DX12PipelineState.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12PipelineState.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12PipelineState.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12PipelineState.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12PipelineState.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/DX12PipelineState.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\lib\AMD\libs\AGS\amd_ags.h(887,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/DX12PipelineState.cpp')
+  
+  DX12Queue.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/DX12Queue.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12Queue.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12Queue.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12Queue.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12Queue.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/DX12Queue.cpp')
+  
+  DX12QueueManager.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/DX12QueueManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12QueueManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12QueueManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12QueueManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12QueueManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/DX12QueueManager.cpp')
+  
+  Compiling...
+  DX12RenderPassDescriptorHeap.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/DX12RenderPassDescriptorHeap.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12RenderPassDescriptorHeap.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12RenderPassDescriptorHeap.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12RenderPassDescriptorHeap.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12RenderPassDescriptorHeap.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/DX12RenderPassDescriptorHeap.cpp')
+  
+  DX12RootSignature.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/DX12RootSignature.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12RootSignature.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12RootSignature.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12RootSignature.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12RootSignature.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/DX12RootSignature.cpp')
+  
+  DX12Shader.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/DX12Shader.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12Shader.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12Shader.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12Shader.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12Shader.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/DX12Shader.cpp')
+  
+  DX12StagingDescriptorHeap.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/DX12StagingDescriptorHeap.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12StagingDescriptorHeap.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12StagingDescriptorHeap.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12StagingDescriptorHeap.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12StagingDescriptorHeap.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/DX12StagingDescriptorHeap.cpp')
+  
+A:\VS\VC\Tools\MSVC\14.44.35207\include\xutility(462,64): warning C4267: 'initializing': conversion from 'size_t' to '_Ty', possible loss of data
+A:\VS\VC\Tools\MSVC\14.44.35207\include\xutility(462,64): warning C4267:         with
+A:\VS\VC\Tools\MSVC\14.44.35207\include\xutility(462,64): warning C4267:         [
+A:\VS\VC\Tools\MSVC\14.44.35207\include\xutility(462,64): warning C4267:             _Ty=unsigned int
+A:\VS\VC\Tools\MSVC\14.44.35207\include\xutility(462,64): warning C4267:         ]
+  (compiling source file '/src/Runtime/Core/DX12StagingDescriptorHeap.cpp')
+      A:\VS\VC\Tools\MSVC\14.44.35207\include\xutility(462,64):
+      the template instantiation context (the oldest one first) is
+          D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\Core\DX12StagingDescriptorHeap.cpp(59,27):
+          see reference to function template instantiation 'unsigned int &std::vector<std::seed_seq::result_type,std::allocator<std::seed_seq::result_type>>::emplace_back<uint64_t>(uint64_t &&)' being compiled
+              D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\Core\DX12StagingDescriptorHeap.cpp(59,39):
+              see the first reference to 'std::vector<std::seed_seq::result_type,std::allocator<std::seed_seq::result_type>>::emplace_back' in 'ElysiaCore::DX12StagingDescriptorHeap::FreeDescriptorHeapHandle'
+          A:\VS\VC\Tools\MSVC\14.44.35207\include\vector(924,24):
+          see reference to function template instantiation '_Ty &std::vector<_Ty,std::allocator<_Ty>>::_Emplace_one_at_back<unsigned __int64>(unsigned __int64 &&)' being compiled
+          with
+          [
+              _Ty=std::seed_seq::result_type
+          ]
+          A:\VS\VC\Tools\MSVC\14.44.35207\include\vector(845,20):
+          see reference to function template instantiation '_Ty &std::vector<_Ty,std::allocator<_Ty>>::_Emplace_back_with_unused_capacity<unsigned __int64>(unsigned __int64 &&)' being compiled
+          with
+          [
+              _Ty=std::seed_seq::result_type
+          ]
+          A:\VS\VC\Tools\MSVC\14.44.35207\include\vector(860,18):
+          see reference to function template instantiation 'void std::_Construct_in_place<unsigned int,_Ty>(unsigned int &,_Ty &&) noexcept' being compiled
+          with
+          [
+              _Ty=size_t
+          ]
+          A:\VS\VC\Tools\MSVC\14.44.35207\include\xutility(472,14):
+          see reference to function template instantiation '_Ty *std::construct_at<_Ty,unsigned __int64>(_Ty *const ,unsigned __int64 &&) noexcept(<expr>)' being compiled
+          with
+          [
+              _Ty=unsigned int
+          ]
+  
+A:\VS\VC\Tools\MSVC\14.44.35207\include\xutility(476,61): warning C4267: 'initializing': conversion from 'size_t' to 'unsigned int', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12StagingDescriptorHeap.cpp')
+  
+A:\VS\VC\Tools\MSVC\14.44.35207\include\xutility(463,69): warning C4267: 'initializing': conversion from 'size_t' to '_Ty', possible loss of data
+A:\VS\VC\Tools\MSVC\14.44.35207\include\xutility(463,69): warning C4267:         with
+A:\VS\VC\Tools\MSVC\14.44.35207\include\xutility(463,69): warning C4267:         [
+A:\VS\VC\Tools\MSVC\14.44.35207\include\xutility(463,69): warning C4267:             _Ty=unsigned int
+A:\VS\VC\Tools\MSVC\14.44.35207\include\xutility(463,69): warning C4267:         ]
+  (compiling source file '/src/Runtime/Core/DX12StagingDescriptorHeap.cpp')
+      A:\VS\VC\Tools\MSVC\14.44.35207\include\xutility(463,69):
+      the template instantiation context (the oldest one first) is
+          A:\VS\VC\Tools\MSVC\14.44.35207\include\vector(860,18):
+          see reference to function template instantiation 'void std::_Construct_in_place<unsigned int,_Ty>(unsigned int &,_Ty &&) noexcept' being compiled
+          with
+          [
+              _Ty=size_t
+          ]
+          A:\VS\VC\Tools\MSVC\14.44.35207\include\xutility(472,14):
+          see reference to function template instantiation '_Ty *std::construct_at<_Ty,unsigned __int64>(_Ty *const ,unsigned __int64 &&) noexcept' being compiled
+          with
+          [
+              _Ty=unsigned int
+          ]
+  
+  DX12TextureBuffer.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/DX12TextureBuffer.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12TextureBuffer.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12TextureBuffer.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12TextureBuffer.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12TextureBuffer.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/DX12TextureBuffer.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\lib\AMD\libs\AGS\amd_ags.h(887,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/DX12TextureBuffer.cpp')
+  
+  DX12UploadContext.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/DX12UploadContext.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12UploadContext.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12UploadContext.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12UploadContext.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/DX12UploadContext.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/DX12UploadContext.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\lib\AMD\libs\AGS\amd_ags.h(887,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/DX12UploadContext.cpp')
+  
+  PipelineResourceSpace.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/PipelineResourceSpace.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/PipelineResourceSpace.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/PipelineResourceSpace.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/PipelineResourceSpace.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/PipelineResourceSpace.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/PipelineResourceSpace.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\lib\AMD\libs\AGS\amd_ags.h(887,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/PipelineResourceSpace.cpp')
+  
+  PipelineStateUtility.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/PipelineStateUtility.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/PipelineStateUtility.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/PipelineStateUtility.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/PipelineStateUtility.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/PipelineStateUtility.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/PipelineStateUtility.cpp')
+  
+  PSOHelper.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/PSOHelper.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/PSOHelper.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/PSOHelper.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/PSOHelper.cpp')
+  
+  ShaderCompileOptions.cpp
+  ShaderKeywordSet.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/ShaderKeywordSet.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/ShaderKeywordSet.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/ShaderKeywordSet.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/ShaderKeywordSet.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/ShaderKeywordSet.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/ShaderKeywordSet.cpp')
+  
+  ShaderKeywordSpace.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/ShaderKeywordSpace.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/ShaderKeywordSpace.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/ShaderKeywordSpace.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/ShaderKeywordSpace.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/ShaderKeywordSpace.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/ShaderKeywordSpace.cpp')
+  
+  ShaderUtility.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\Core\ShaderUtility.cpp(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/ShaderUtility.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/ShaderUtility.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/ShaderUtility.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/ShaderUtility.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/ShaderUtility.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/ShaderUtility.cpp')
+  
+  SwapChain.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/SwapChain.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/SwapChain.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/SwapChain.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/SwapChain.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/SwapChain.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/SwapChain.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\lib\AMD\libs\AGS\amd_ags.h(887,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/SwapChain.cpp')
+  
+  UploadRingBuffer.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/UploadRingBuffer.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/UploadRingBuffer.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/UploadRingBuffer.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/UploadRingBuffer.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Core/UploadRingBuffer.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/UploadRingBuffer.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\lib\AMD\libs\AGS\amd_ags.h(887,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Core/UploadRingBuffer.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\Core\UploadRingBuffer.cpp(42,32): warning C4267: 'argument': conversion from 'size_t' to 'uint32_t', possible loss of data
+  (compiling source file '/src/Runtime/Core/UploadRingBuffer.cpp')
+  
+  Benchmark.cpp
+  GPUTimestamps.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Developer/GPUTimestamps.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Developer/GPUTimestamps.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Developer/GPUTimestamps.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Developer/GPUTimestamps.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Developer/GPUTimestamps.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Developer/GPUTimestamps.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\lib\AMD\libs\AGS\amd_ags.h(887,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Developer/GPUTimestamps.cpp')
+  
+  Entity.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Engine/ECS/Entity.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Engine/ECS/Entity.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Engine/ECS/Entity.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Engine/ECS/Entity.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Engine/ECS/Entity.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Engine/ECS/Entity.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\lib\AMD\libs\AGS\amd_ags.h(887,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Engine/ECS/Entity.cpp')
+  
+  Transform.cpp
+  ElysiaFrame.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Engine/ElysiaFrame.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Engine/ElysiaFrame.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Engine/ElysiaFrame.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Engine/ElysiaFrame.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Engine/ElysiaFrame.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Engine/ElysiaFrame.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\lib\AMD\libs\AGS\amd_ags.h(887,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Engine/ElysiaFrame.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\Engine\ElysiaFrame.cpp(381,76): warning C4305: 'argument': truncation from 'double' to 'float'
+  (compiling source file '/src/Runtime/Engine/ElysiaFrame.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\Engine\ElysiaFrame.cpp(387,79): warning C4305: 'argument': truncation from 'double' to 'float'
+  (compiling source file '/src/Runtime/Engine/ElysiaFrame.cpp')
+  
+  Compiling...
+  FrameContext.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Engine/FrameContext.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Engine/FrameContext.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Engine/FrameContext.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Engine/FrameContext.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Engine/FrameContext.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Engine/FrameContext.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\lib\AMD\libs\AGS\amd_ags.h(887,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Engine/FrameContext.cpp')
+  
+  FrameworkWindows.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Engine/FrameworkWindows.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Engine/FrameworkWindows.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Engine/FrameworkWindows.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Engine/FrameworkWindows.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Engine/FrameworkWindows.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Engine/FrameworkWindows.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\lib\AMD\libs\AGS\amd_ags.h(887,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Engine/FrameworkWindows.cpp')
+  
+  BindlessTextureManager.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/BindlessTextureManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/BindlessTextureManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/BindlessTextureManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/BindlessTextureManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/BindlessTextureManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/BindlessTextureManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\lib\AMD\libs\AGS\amd_ags.h(887,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/BindlessTextureManager.cpp')
+  
+  BufferManager.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/BufferManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/BufferManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/BufferManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/BufferManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/BufferManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/BufferManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\lib\AMD\libs\AGS\amd_ags.h(887,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/BufferManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\BufferManager.cpp(116,43): warning C4267: 'argument': conversion from 'size_t' to 'UINT', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/BufferManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\BufferManager.cpp(229,32): warning C4267: 'argument': conversion from 'size_t' to 'uint32_t', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/BufferManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\BufferManager.cpp(257,62): warning C4267: 'argument': conversion from 'size_t' to 'uint32_t', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/BufferManager.cpp')
+  
+  CameraManager.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/CameraManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/CameraManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/CameraManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/CameraManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/CameraManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/CameraManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\lib\AMD\libs\AGS\amd_ags.h(887,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/CameraManager.cpp')
+  
+  DX12Camera.cpp
+  DX12Light.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/DX12Light.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/DX12Light.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/DX12Light.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/DX12Light.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/DX12Light.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/DX12Light.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\lib\AMD\libs\AGS\amd_ags.h(887,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/DX12Light.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\DX12Light.cpp(39,21): warning C4305: 'argument': truncation from 'double' to 'float'
+  (compiling source file '/src/Runtime/RenderCore/DX12Light.cpp')
+  
+  DX12Shadow.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/DX12Shadow.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/DX12Shadow.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/DX12Shadow.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/DX12Shadow.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/DX12Shadow.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/DX12Shadow.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\lib\AMD\libs\AGS\amd_ags.h(887,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/DX12Shadow.cpp')
+  
+  LightManager.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/LightManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/LightManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/LightManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/LightManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/LightManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/LightManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\lib\AMD\libs\AGS\amd_ags.h(887,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/LightManager.cpp')
+  
+  Material.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Material.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/Material.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/Material.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Material.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Material.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Material.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Material.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/Material.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\lib\AMD\libs\AGS\amd_ags.h(887,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/Material.cpp')
+  
+  MaterialParams.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/MaterialParams.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/MaterialParams.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/MaterialParams.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/MaterialParams.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/MaterialParams.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/MaterialParams.cpp')
+  
+  MeshRenderer.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/MeshRenderer.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/MeshRenderer.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/MeshRenderer.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/MeshRenderer.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/MeshRenderer.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/MeshRenderer.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\lib\AMD\libs\AGS\amd_ags.h(887,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/MeshRenderer.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\MeshRenderer.cpp(17,23): warning C4267: '=': conversion from 'size_t' to 'UINT', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/MeshRenderer.cpp')
+  
+  AOPass.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\lib\AMD\libs\AGS\amd_ags.h(887,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Material.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(43,25): warning C4244: 'argument': conversion from 'float' to 'UINT64', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(42,25): warning C4244: 'argument': conversion from 'float' to 'UINT64', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(200,65): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(206,49): warning C4244: 'argument': conversion from 'UINT64' to 'uint32_t', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(207,49): warning C4244: 'argument': conversion from 'UINT64' to 'uint32_t', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(222,65): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(227,49): warning C4244: 'argument': conversion from 'UINT64' to 'uint32_t', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(228,49): warning C4244: 'argument': conversion from 'UINT64' to 'uint32_t', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(289,63): warning C4244: 'argument': conversion from 'UINT64' to 'uint32_t', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(290,64): warning C4244: 'argument': conversion from 'UINT64' to 'uint32_t', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(318,63): warning C4244: 'argument': conversion from 'UINT64' to 'uint32_t', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(319,64): warning C4244: 'argument': conversion from 'UINT64' to 'uint32_t', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(344,63): warning C4244: 'argument': conversion from 'UINT64' to 'uint32_t', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(345,64): warning C4244: 'argument': conversion from 'UINT64' to 'uint32_t', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(415,67): warning C4244: 'argument': conversion from 'UINT64' to 'uint32_t', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(416,68): warning C4244: 'argument': conversion from 'UINT64' to 'uint32_t', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(434,30): warning C4018: '<': signed/unsigned mismatch
+  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(526,27): warning C4018: '<=': signed/unsigned mismatch
+  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(533,27): warning C4018: '<=': signed/unsigned mismatch
+  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
+  
+  BasePass.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/Pass/BasePass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/BasePass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/BasePass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/BasePass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/BasePass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/Pass/BasePass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\lib\AMD\libs\AGS\amd_ags.h(887,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/Pass/BasePass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Material.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/Pass/BasePass.cpp')
+  
+  BloomPass.cpp
+  DebugPass.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/Pass/DebugPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/DebugPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/DebugPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/DebugPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/DebugPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/Pass/DebugPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\lib\AMD\libs\AGS\amd_ags.h(887,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/Pass/DebugPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Material.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/Pass/DebugPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\DebugPass.cpp(151,71): warning C4244: 'argument': conversion from 'UINT64' to 'uint32_t', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/DebugPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\DebugPass.cpp(152,72): warning C4244: 'argument': conversion from 'UINT64' to 'uint32_t', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/DebugPass.cpp')
+  
+  FinalBlitPass.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/Pass/FinalBlitPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/FinalBlitPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/FinalBlitPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/FinalBlitPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/FinalBlitPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/Pass/FinalBlitPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\lib\AMD\libs\AGS\amd_ags.h(887,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/Pass/FinalBlitPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Material.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/Pass/FinalBlitPass.cpp')
+  
+  GBufferPass.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/Pass/GBufferPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/GBufferPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/GBufferPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/GBufferPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/GBufferPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/Pass/GBufferPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\lib\AMD\libs\AGS\amd_ags.h(887,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/Pass/GBufferPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Material.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/Pass/GBufferPass.cpp')
+  
+  OpaquePass.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/Pass/OpaquePass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/OpaquePass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/OpaquePass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/OpaquePass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/OpaquePass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/Pass/OpaquePass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\lib\AMD\libs\AGS\amd_ags.h(887,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/Pass/OpaquePass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Material.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/Pass/OpaquePass.cpp')
+  
+  PreDrawPass.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/Pass/PreDrawPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/PreDrawPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/PreDrawPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/PreDrawPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/PreDrawPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/Pass/PreDrawPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\lib\AMD\libs\AGS\amd_ags.h(887,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/Pass/PreDrawPass.cpp')
+  
+  Compiling...
+  ShadowPass.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/Pass/ShadowPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/ShadowPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/ShadowPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/ShadowPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/ShadowPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/Pass/ShadowPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\lib\AMD\libs\AGS\amd_ags.h(887,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/Pass/ShadowPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Material.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/Pass/ShadowPass.cpp')
+  
+  SkyboxPass.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/Pass/SkyboxPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/SkyboxPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/SkyboxPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/SkyboxPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/SkyboxPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/Pass/SkyboxPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\lib\AMD\libs\AGS\amd_ags.h(887,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/Pass/SkyboxPass.cpp')
+  
+  TonemapPass.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/Pass/TonemapPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/TonemapPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/TonemapPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/TonemapPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/TonemapPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/Pass/TonemapPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\lib\AMD\libs\AGS\amd_ags.h(887,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/Pass/TonemapPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Material.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/Pass/TonemapPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\TonemapPass.cpp(306,71): warning C4244: 'argument': conversion from 'UINT64' to 'uint32_t', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/TonemapPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\TonemapPass.cpp(307,72): warning C4244: 'argument': conversion from 'UINT64' to 'uint32_t', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/TonemapPass.cpp')
+  
+  UIPass.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/Pass/UIPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/UIPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/UIPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/UIPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/UIPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/Pass/UIPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\lib\AMD\libs\AGS\amd_ags.h(887,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/Pass/UIPass.cpp')
+  
+  PSOManager.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/PSOManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/PSOManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/PSOManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/PSOManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/PSOManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/PSOManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\lib\AMD\libs\AGS\amd_ags.h(887,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/PSOManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Material.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/PSOManager.cpp')
+  
+  Renderer.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/Renderer.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Renderer.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Renderer.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Renderer.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Renderer.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/Renderer.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\lib\AMD\libs\AGS\amd_ags.h(887,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/Renderer.cpp')
+  
+  RenderItem.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/RenderItem.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/RenderItem.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/RenderItem.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/RenderItem.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/RenderItem.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/RenderItem.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\lib\AMD\libs\AGS\amd_ags.h(887,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/RenderItem.cpp')
+  
+  RenderResource.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/RenderResource.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/RenderResource.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/RenderResource.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/RenderResource.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/RenderResource.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/RenderResource.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\lib\AMD\libs\AGS\amd_ags.h(887,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/RenderResource.cpp')
+  
+  RenderTargetManager.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/RenderTargetManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/RenderTargetManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/RenderTargetManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/RenderTargetManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/RenderTargetManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/RenderTargetManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\lib\AMD\libs\AGS\amd_ags.h(887,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/RenderTargetManager.cpp')
+  
+  RenderTexture.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/RenderTexture.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/RenderTexture.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/RenderTexture.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/RenderTexture.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/RenderTexture.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/RenderTexture.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\lib\AMD\libs\AGS\amd_ags.h(887,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/RenderTexture.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\RenderTexture.cpp(59,44): warning C4244: '=': conversion from 'UINT64' to 'UINT16', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/RenderTexture.cpp')
+  
+  SceneManager.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/SceneManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/SceneManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/SceneManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/SceneManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/SceneManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/SceneManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\lib\AMD\libs\AGS\amd_ags.h(887,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/SceneManager.cpp')
+  
+  ShaderVariantManager.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/ShaderVariantManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/ShaderVariantManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/ShaderVariantManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/ShaderVariantManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/ShaderVariantManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/ShaderVariantManager.cpp')
+  
+  TextureManager.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/TextureManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/TextureManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/TextureManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/TextureManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/TextureManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/TextureManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\lib\AMD\libs\AGS\amd_ags.h(887,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/RenderCore/TextureManager.cpp')
+  
+  File.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Resource/File.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Resource/File.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Resource/File.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Resource/File.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Resource/File.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Resource/File.cpp')
+  
+  ModelImporter.cpp
+  ModelManager.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Resource/Model/ModelManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Resource/Model/ModelManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Resource/Model/ModelManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Resource/Model/ModelManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Resource/Model/ModelManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Resource/Model/ModelManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\lib\AMD\libs\AGS\amd_ags.h(887,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file '/src/Runtime/Resource/Model/ModelManager.cpp')
+  
+  SharedTypes.cpp
+  d3dx12_resource_helpers.cpp
+  DxgiFormatHelper.cpp
+  fixed_pool.cpp
+  Compiling...
+  hashtable.cpp
+  intrusive_list.cpp
+  numeric_limits.cpp
+  red_black_tree.cpp
+  string.cpp
+  thread_support.cpp
+  Misc.cpp
+  stb_image.cpp
+  xxhash.cpp
+  AssimpLoader.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file 'src/Runtime/Resource/Model/AssimpLoader.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file 'src/Runtime/Resource/Model/AssimpLoader.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file 'src/Runtime/Resource/Model/AssimpLoader.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file 'src/Runtime/Resource/Model/AssimpLoader.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file 'src/Runtime/Resource/Model/AssimpLoader.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file 'src/Runtime/Resource/Model/AssimpLoader.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\lib\AMD\libs\AGS\amd_ags.h(887,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file 'src/Runtime/Resource/Model/AssimpLoader.cpp')
+  
+  ColorConversion.cpp
+  D3D12MemAlloc.cpp
+  BC.cpp
+  BC4BC5.cpp
+  BC6HBC7.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\ThirdParty\DXTex\BC6HBC7.cpp(1000,13): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\ThirdParty\DXTex\BC6HBC7.cpp(1019,13): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\ThirdParty\DXTex\BC6HBC7.cpp(1036,13): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\ThirdParty\DXTex\BC6HBC7.cpp(1261,13): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\ThirdParty\DXTex\BC6HBC7.cpp(1263,17): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\ThirdParty\DXTex\BC6HBC7.cpp(1834,9): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\ThirdParty\DXTex\BC6HBC7.cpp(1886,13): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\ThirdParty\DXTex\BC6HBC7.cpp(1953,9): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\ThirdParty\DXTex\BC6HBC7.cpp(2054,21): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\ThirdParty\DXTex\BC6HBC7.cpp(2185,25): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\ThirdParty\DXTex\BC6HBC7.cpp(2186,25): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\ThirdParty\DXTex\BC6HBC7.cpp(2187,25): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\ThirdParty\DXTex\BC6HBC7.cpp(2225,25): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\ThirdParty\DXTex\BC6HBC7.cpp(2226,25): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\ThirdParty\DXTex\BC6HBC7.cpp(2227,25): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\ThirdParty\DXTex\BC6HBC7.cpp(2254,13): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\ThirdParty\DXTex\BC6HBC7.cpp(2259,13): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\ThirdParty\DXTex\BC6HBC7.cpp(2261,13): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\ThirdParty\DXTex\BC6HBC7.cpp(2460,13): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\ThirdParty\DXTex\BC6HBC7.cpp(2499,9): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\ThirdParty\DXTex\BC6HBC7.cpp(2510,13): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\ThirdParty\DXTex\BC6HBC7.cpp(2515,21): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\ThirdParty\DXTex\BC6HBC7.cpp(2524,13): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\ThirdParty\DXTex\BC6HBC7.cpp(2531,21): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\ThirdParty\DXTex\BC6HBC7.cpp(2540,21): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\ThirdParty\DXTex\BC6HBC7.cpp(2561,5): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\ThirdParty\DXTex\BC6HBC7.cpp(2656,9): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\ThirdParty\DXTex\BC6HBC7.cpp(2667,9): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\ThirdParty\DXTex\BC6HBC7.cpp(2694,9): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\ThirdParty\DXTex\BC6HBC7.cpp(2729,13): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\ThirdParty\DXTex\BC6HBC7.cpp(2766,17): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\ThirdParty\DXTex\BC6HBC7.cpp(2788,17): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\ThirdParty\DXTex\BC6HBC7.cpp(2795,17): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\ThirdParty\DXTex\BC6HBC7.cpp(2797,17): warning C5033: 'register' is no longer a supported storage class
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\ThirdParty\DXTex\BC6HBC7.cpp(2803,9): warning C5033: 'register' is no longer a supported storage class
+  BCDirectCompute.cpp
+  DirectXTexCompress.cpp
+  DirectXTexCompressGPU.cpp
+  DirectXTexConvert.cpp
+  DirectXTexD3D11.cpp
+  DirectXTexDDS.cpp
+  DirectXTexFlipRotate.cpp
+  DirectXTexImage.cpp
+  DirectXTexMipmaps.cpp
+  DirectXTexMisc.cpp
+  DirectXTexNormalMaps.cpp
+  DirectXTexPMAlpha.cpp
+  DirectXTexTGA.cpp
+  DirectXTexUtil.cpp
+  Compiling...
+  DirectXTexWIC.cpp
+  allocator_eastl.cpp
+  atomic.cpp
+  FreesyncHDR.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\lib\AMD\libs\AGS\amd_ags.h(887,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file 'src/ThirdParty/FreesyncHDR.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file 'src/ThirdParty/FreesyncHDR.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file 'src/ThirdParty/FreesyncHDR.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file 'src/ThirdParty/FreesyncHDR.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file 'src/ThirdParty/FreesyncHDR.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file 'src/ThirdParty/FreesyncHDR.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Helper.h(780,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  (compiling source file 'src/ThirdParty/FreesyncHDR.cpp')
+  
+  imgui.cpp
+  imgui_demo.cpp
+  imgui_draw.cpp
+  imgui_impl_dx12.cpp
+  imgui_impl_win32.cpp
+  imgui_tables.cpp
+  imgui_widgets.cpp
+     Creating library D:\DX12\ElysiaDX12\x64\Release\ElysiaRenderer.lib and object D:\DX12\ElysiaDX12\x64\Release\ElysiaRenderer.exp
+  Generating code
+  Previous IPDB not found, fall back to full compilation.
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\Engine\ECS\Transform.h(39): warning C4715: 'ElysiaEngine::Transform::operator==': not all control paths return a value
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Material.cpp(100): warning C4715: 'ElysiaRenderer::Material::FindPassIndex': not all control paths return a value
+  All 12632 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Finished generating code
+DirectXTK12.lib(SimpleMath.obj) : warning LNK4099: PDB 'DirectXTK12.pdb' was not found with 'DirectXTK12.lib(SimpleMath.obj)' or at 'D:\DX12\ElysiaDX12\x64\Release\DirectXTK12.pdb'; linking object as if no debug info
+DirectXTK12.lib(pch.obj) : warning LNK4099: PDB 'DirectXTK12.pdb' was not found with 'DirectXTK12.lib(pch.obj)' or at 'D:\DX12\ElysiaDX12\x64\Release\DirectXTK12.pdb'; linking object as if no debug info
+  ElysiaRenderer.vcxproj -> D:\DX12\ElysiaDX12\x64\Release\ElysiaRenderer.exe
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Mesh\LOW_WEPON.fbx
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Mesh\plane.fbx
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Mesh\Sphere.fbx
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Mesh\UE.fbx
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\private\AmbientCubemap.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\private\AreaLightCommon.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\private\BRDF.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\private\Color.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\private\Common.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\private\DeferredCommon.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\private\EnergyPreservation.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\private\ffx_a.h
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\private\ffx_lpm.h
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\private\Light.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\private\Light.hlsli
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\private\LightAccumulator.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\private\LightCommon.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\private\Macros.hlsli
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\private\Math.hlsli
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\private\MonteCarlo.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\private\Random.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\private\ShadingCommon.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\private\ShadingModel.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\private\ShadowCommon.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\private\SharedCommon.hlsli
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\private\SSAOCommon.hlsli
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\private\Transform.hlsli
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\public\Blit.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\public\Bloom.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\public\CopyTexture.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\public\CS_SSAO.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\public\CS_SSAO.hlsl.rej
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\public\CS_Tonemap.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\public\FullScreenTriangle.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\public\GBuffer.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\public\Opaque.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\public\PBR.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\public\Shadow.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\public\Skybox.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\public\SSAO.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\public\TonemapPass.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\public\PostProcess\CS_AOCopyTexture.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\public\PostProcess\CS_AOHIZNormal.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\public\PostProcess\CS_AOTAA.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\public\PostProcess\CS_Bilateral_Blur.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\public\PostProcess\CS_Bilateral_Blur.hlsl.rej
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\public\PostProcess\CS_Debug.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\public\PostProcess\CS_TwoTwoMinHIZ.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Background_Albedo.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Background_Normal.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Background_Roughness.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\ChainTexture_Albedo.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\ChainTexture_Metallic.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\ChainTexture_Normal.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\ChainTexture_Roughness.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Dielectric_metallic.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\gi_flag.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Lion_Albedo.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Lion_Normal.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Lion_Roughness.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Metallic_metallic.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Sponza.fbx
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Sponza_Arch_diffuse.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Sponza_Arch_normal.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Sponza_Arch_roughness.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Sponza_Bricks_a_Albedo.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Sponza_Bricks_a_Normal.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Sponza_Bricks_a_Roughness.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Sponza_Ceiling_diffuse.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Sponza_Ceiling_normal.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Sponza_Ceiling_roughness.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Sponza_Column_a_diffuse.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Sponza_Column_a_normal.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Sponza_Column_a_roughness.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Sponza_Column_b_diffuse.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Sponza_Column_b_normal.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Sponza_Column_b_roughness.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Sponza_Column_c_diffuse.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Sponza_Column_c_normal.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Sponza_Column_c_roughness.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Sponza_Curtain_Blue_diffuse.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Sponza_Curtain_Blue_normal.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Sponza_Curtain_Green_diffuse.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Sponza_Curtain_Green_normal.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Sponza_Curtain_metallic.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Sponza_Curtain_Red_diffuse.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Sponza_Curtain_Red_normal.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Sponza_Curtain_roughness.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Sponza_Details_diffuse.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Sponza_Details_metallic.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Sponza_Details_normal.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Sponza_Details_roughness.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Sponza_Fabric_Blue_diffuse.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Sponza_Fabric_Blue_normal.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Sponza_Fabric_Green_diffuse.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Sponza_Fabric_Green_normal.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Sponza_Fabric_metallic.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Sponza_Fabric_Red_diffuse.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Sponza_Fabric_Red_normal.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Sponza_Fabric_roughness.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Sponza_FlagPole_diffuse.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Sponza_FlagPole_normal.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Sponza_FlagPole_roughness.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Sponza_Floor_diffuse.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Sponza_Floor_normal.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Sponza_Floor_roughness.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Sponza_Roof_diffuse.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Sponza_Roof_normal.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Sponza_Roof_roughness.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Sponza_Thorn_diffuse.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Sponza_Thorn_normal.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Sponza_Thorn_roughness.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\VaseHanging_diffuse.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\VaseHanging_normal.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\VaseHanging_roughness.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\VasePlant_diffuse.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\VasePlant_normal.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\VasePlant_roughness.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\VaseRound_diffuse.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\VaseRound_normal.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\VaseRound_roughness.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Vase_diffuse.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Vase_normal.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Sponza\Vase_roughness.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Tex\Black.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Tex\blue_noise.dds
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Tex\cubemap0.dds
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Tex\DefaultNormalMap.dds
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Tex\GGX_Eavg_LUT.dds
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Tex\GGX_E_LUT.dds
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Tex\RandomNormalTexture.dds
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Tex\RandomNormalTexture.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Tex\texconv.exe
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Tex\White.png
+  复制了 134 个文件
+  D:\DX12\ElysiaDX12\ElysiaRenderer\bin\amd_ags_x64.dll
+  D:\DX12\ElysiaDX12\ElysiaRenderer\bin\assimp-vc143-mt.dll
+  D:\DX12\ElysiaDX12\ElysiaRenderer\bin\dxcompiler.dll
+  D:\DX12\ElysiaDX12\ElysiaRenderer\bin\dxil.dll
+  D:\DX12\ElysiaDX12\ElysiaRenderer\bin\WinPixEventRuntime.dll
+  复制了 5 个文件

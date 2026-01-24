@@ -23,6 +23,28 @@ namespace ElysiaCore
     {
     }
 
+    void DX12GraphicsContext::SetPushConstants(uint8_t spaceID, const void* data, UINT numValues)
+    {
+        assert(m_graphicsPipelineStateObject);
+    
+        // 从映射中找到该 Space 对应的 RootParameterIndex
+        auto& pushMapping = m_graphicsPipelineStateObject->m_pipelineResourceMapping.m_PushConstantMappings[spaceID];
+    
+        if (pushMapping.has_value())
+        {
+            UINT rootIndex = pushMapping.value();
+        
+            if (m_graphicsPipelineStateObject->m_pipelineType == PipelineType::Compute)
+            {
+                m_commandList->SetComputeRoot32BitConstants(rootIndex, numValues, data, 0);
+            }
+            else
+            {
+                m_commandList->SetGraphicsRoot32BitConstants(rootIndex, numValues, data, 0);
+            }
+        }
+    }
+
     void DX12GraphicsContext::Discard(RenderTexture* pRT)
     {
         m_commandList->DiscardResource(pRT->GetResource(), nullptr);

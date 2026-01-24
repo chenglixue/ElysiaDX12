@@ -40,7 +40,9 @@ namespace ElysiaRenderer
 
     void SceneManager::LoadScene(UINT& loadStage)
     {
-        if (!_CrtCheckMemory()) {  __debugbreak(); }
+#ifdef _DEBUG
+        assert(_CrtCheckMemory());
+#endif
         
         WCHAR assetsPath[512];
         GetAssetsPath(assetsPath, _countof(assetsPath));

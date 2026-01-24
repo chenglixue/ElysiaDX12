@@ -63,15 +63,13 @@ namespace ElysiaEngine
 
     void ElysiaFrame::OnCreate()
     {
-        if (!_CrtCheckMemory())
-        {
-            __debugbreak();
-        }
+#ifdef _DEBUG
+        assert(_CrtCheckMemory());
+#endif
         DeSerializeUserData();
-        if (!_CrtCheckMemory())
-        {
-            __debugbreak();
-        }
+#ifdef _DEBUG
+        assert(_CrtCheckMemory());
+#endif
 
         BufferManager::GetInstance().Init(m_pDevice);
         TextureManager::GetInstance().Init(m_pDevice);
@@ -152,10 +150,9 @@ namespace ElysiaEngine
 
     void ElysiaFrame::OnRender()
     {
-        if (!_CrtCheckMemory())
-        {
-            __debugbreak();
-        }
+#ifdef _DEBUG
+        assert(_CrtCheckMemory());
+#endif
         auto frameContext = BeginFrame();
         m_pGraphicsContext->Reset();
         ImGUI_UpdateIO();
@@ -378,14 +375,14 @@ namespace ElysiaEngine
             ImGui::Checkbox("Is Enable AO", &pUserData.aoParameter.IsEnableAO);
             ImGui::Checkbox("Is IsLerp AO", &pUserData.aoParameter.IsLerpAO);
 
-            ImGui::SliderInt("AO Sample Count", &pUserData.aoParameter.SampleCount, 0, 32);
-            ImGui::SliderInt("AO Sample Step Count", &pUserData.aoParameter.SampleStepCount, 0, 6);
+            ImGui::SliderInt("AO Sample Count", &pUserData.aoParameter.SampleCount, 0, 6);
+            ImGui::SliderInt("AO Sample Step Count", &pUserData.aoParameter.SampleStepCount, 0, 4);
 
             ImGui::SliderFloat("AO Radius", &pUserData.aoParameter.Radius, 0.1, 50);
             ImGui::SliderFloat("AO Fade Radius", &pUserData.aoParameter.FadeRadius, 1, 20000);
             ImGui::SliderFloat("AO Fade Distance", &pUserData.aoParameter.FadeDistance, 1, 20000);
 
-            ImGui::SliderFloat("AO Intensity", &pUserData.aoParameter.IntensityMul, 0, 1);
+            ImGui::SliderFloat("AO Intensity", &pUserData.aoParameter.IntensityMul, 0, 2);
 
             ImGui::SliderFloat("AO Pow", &pUserData.aoParameter.IntensityPow, 0.1, 8);
 

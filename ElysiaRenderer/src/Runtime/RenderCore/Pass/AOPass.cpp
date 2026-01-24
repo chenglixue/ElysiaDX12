@@ -35,8 +35,8 @@ namespace ElysiaRenderer
 
     void AOPass::Configure()
     {
-
         m_HIZMipmapCount = UINT(std::floor(std::log2(std::max(m_renderSize.x, m_renderSize.y)))) + 1;
+        m_HIZMipmapCount /= 2;
 
         m_pHIZRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(
             m_renderSize.x,
@@ -97,9 +97,9 @@ namespace ElysiaRenderer
             ShaderPass
             {
                 .Name = "AO Pass",
-                .FilePath = L"Shaders\\public\\CS_SSAO.hlsl",
+                .FilePath = L"Shaders\\public\\PostProcess\\CS_AO.hlsl",
                 .IsComputeShader = true,
-                .ComputeEntryPoint = L"SSAO",
+                .ComputeEntryPoint = L"HBAOPlus",
             },
             ShaderPass
             {
@@ -180,11 +180,6 @@ namespace ElysiaRenderer
     {
         PIXHelper pix(m_pCommand->GetCommandList(), "HIZ");
 
-        UINT64 currWidth = m_pHIZRT->GetWidth();
-        UINT64 currHeight = m_pHIZRT->GetHeight();
-
-        m_pCommand->AddBarrier(m_pHIZRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-
         auto passID = ShaderPasseIDs::HIZPassID;
         auto& passData = m_pMaterial->GetPassData(passID);
         PipelineInfo pipelineStateData{};
@@ -192,15 +187,34 @@ namespace ElysiaRenderer
         m_pCommand->SetPipeline(pipelineStateData);
         SetSpaceResource(passData, PER_FRAME_SPACE);
 
+        m_pCommand->AddBarrier(m_pHIZRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+
+        UINT64 currWidth = m_pHIZRT->GetWidth();
+        UINT64 currHeight = m_pHIZRT->GetHeight();
+
+        struct alignas(16)
+        {
+            Vector4 g_TargetSize;
+            Vector4 g_SourceSize;
+            UINT g_TargetTexIndex;
+            UINT g_SourceTexIndex;
+            float g_MipmapLevel;
+        } constantData;
+        constexpr UINT constantSize = sizeof(constantData) / 4;
+
         for (UINT i = 0; i < m_HIZMipmapCount; ++i)
         {
             if (i == 0)
             {
-                m_pMaterial->SetUInt(ShaderIDs::g_TargetTexIndex, m_pHIZRT->GetUAVResourceHeapIndex(i), passID);
-                m_pMaterial->SetFloat(ShaderIDs::g_MipmapLevel, i, passID);
-                m_pMaterial->SetFloat4(ShaderIDs::g_TargetSize, GetScreenSize(currWidth, currHeight), passID);
-
-                SetSpaceResource(passData, PER_PASS_SPACE);
+                constantData =
+                {
+                    GetScreenSize(currWidth, currHeight),
+                    Vector4::Zero,
+                    m_pHIZRT->GetUAVResourceHeapIndex(i),
+                    UINT_MAX,
+                    (float)i,
+                };
+                m_pCommand->SetPushConstants(PER_MATERIAL_SPACE, &constantData, constantSize);
 
                 auto threadGroupSize = passData.GetKernelThreadGroupSizes();
                 m_pCommand->Dispatch(CeilDivide(currWidth, threadGroupSize.x),
@@ -214,14 +228,15 @@ namespace ElysiaRenderer
                 currWidth = MathHelper::Max(UINT64(1), currWidth >> 1);
                 currHeight = MathHelper::Max(UINT64(1), currHeight >> 1);
 
-                m_pMaterial->SetUInt(ShaderIDs::g_TargetTexIndex, m_pHIZRT->GetUAVResourceHeapIndex(i), passID);
-                m_pMaterial->SetUInt(ShaderIDs::g_SourceTexIndex, m_pHIZRT->GetUAVResourceHeapIndex(i - 1),
-                                     passID);
-                m_pMaterial->SetFloat4(ShaderIDs::g_TargetSize, GetScreenSize(currWidth, currHeight), passID);
-                m_pMaterial->SetFloat4(ShaderIDs::g_SourceSize, GetScreenSize(lastWidth, lastHeight), passID);
-                m_pMaterial->SetFloat(ShaderIDs::g_MipmapLevel, i, passID);
-
-                SetSpaceResource(passData, PER_PASS_SPACE);
+                constantData =
+                {
+                    GetScreenSize(currWidth, currHeight),
+                    GetScreenSize(lastWidth, lastHeight),
+                    m_pHIZRT->GetUAVResourceHeapIndex(i),
+                    m_pHIZRT->GetUAVResourceHeapIndex(i - 1),
+                    (float)i,
+                };
+                m_pCommand->SetPushConstants(PER_MATERIAL_SPACE, &constantData, constantSize);
 
                 auto threadGroupSize = passData.GetKernelThreadGroupSizes();
                 m_pCommand->Dispatch(CeilDivide(currWidth, threadGroupSize.x),
@@ -240,6 +255,7 @@ namespace ElysiaRenderer
         pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(
                                                                  passID)
                                                              .pPipelineStateObject;
+        m_pCommand->SetPipeline(pipelineStateData);
 
         m_pMaterial->SetMatrix(ShaderIDs::viewMatrix, m_pCamera->GetViewMat(), passID);
         m_pMaterial->SetMatrix(ShaderIDs::viewMatrix_I, m_pCamera->GetViewMat().Invert(), passID);
@@ -265,13 +281,12 @@ namespace ElysiaRenderer
         m_pMaterial->SetUInt(ShaderIDs::g_HIZMaxMipmap, MathHelper::Max(m_HIZMipmapCount - 1, UINT(0)), passID);
         m_pMaterial->SetUInt(ShaderIDs::g_HIZTextureIndex, m_pHIZRT->GetResourceHeapIndex(), passID);
         m_pMaterial->SetFloat(ShaderIDs::g_LerpAOFactor, UserData::GetInstance().aoParameter.AOLerpFactor, passID);
+        SetSpaceResource(passData, PER_FRAME_SPACE);
 
         {
             PIXHelper pix(m_pCommand->GetCommandList(), "One Four SSAO");
-            m_pCommand->SetPipeline(pipelineStateData);
             auto targetRT = m_pOneFourAORT;
             m_pCommand->AddBarrier(targetRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-            m_pCommand->ClearRenderTarget(targetRT, Color::Black);
 
             m_pMaterial->SetFloat4(ShaderIDs::g_TargetSize,
                                    GetScreenSize(targetRT->GetWidth(), targetRT->GetHeight()), passID);
@@ -283,21 +298,18 @@ namespace ElysiaRenderer
             m_pMaterial->SetBool(ShaderIDs::g_bLerpAO, false, passID);
 
             SetSpaceResource(passData, PER_PASS_SPACE);
-            SetSpaceResource(passData, PER_FRAME_SPACE);
 
             auto threadGroupSize = passData.GetKernelThreadGroupSizes();
             m_pCommand->Dispatch(CeilDivide(targetRT->GetWidth(), threadGroupSize.x),
                                  CeilDivide(targetRT->GetHeight(), threadGroupSize.y), threadGroupSize.z);
-            m_pCommand->AddBarrier(targetRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+            m_pCommand->AddBarrier(targetRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, false);
         }
 
         {
             PIXHelper pix(m_pCommand->GetCommandList(), "Half SSAO");
-            m_pCommand->SetPipeline(pipelineStateData);
             auto targetRT = m_pHalfAORT;
             auto sourceRT = m_pOneFourAORT;
             m_pCommand->AddBarrier(targetRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-            m_pCommand->ClearRenderTarget(targetRT, Color::Black);
 
             m_pMaterial->SetFloat4(ShaderIDs::g_TargetSize,
                                    GetScreenSize(targetRT->GetWidth(), targetRT->GetHeight()), passID);
@@ -312,25 +324,26 @@ namespace ElysiaRenderer
             m_pMaterial->SetBool(ShaderIDs::g_bLerpAO, UserData::GetInstance().aoParameter.IsLerpAO, passID);
 
             SetSpaceResource(passData, PER_PASS_SPACE);
-            SetSpaceResource(passData, PER_FRAME_SPACE);
 
             auto threadGroupSize = passData.GetKernelThreadGroupSizes();
             m_pCommand->Dispatch(CeilDivide(targetRT->GetWidth(), threadGroupSize.x),
                                  CeilDivide(targetRT->GetHeight(), threadGroupSize.y), threadGroupSize.z);
-            m_pCommand->AddBarrier(targetRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+            m_pCommand->AddBarrier(targetRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, false);
 
         }
 
         {
             PIXHelper pix(m_pCommand->GetCommandList(), "Full SSAO");
-            m_pCommand->SetPipeline(pipelineStateData);
             auto targetRT = m_pAORT;
+            auto sourceRT = m_pHalfAORT;
             m_pCommand->AddBarrier(targetRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-            m_pCommand->ClearRenderTarget(targetRT, Color::Black);
 
             m_pMaterial->SetFloat4(ShaderIDs::g_TargetSize,
                                    GetScreenSize(targetRT->GetWidth(), targetRT->GetHeight()), passID);
             m_pMaterial->SetUInt(ShaderIDs::g_TargetTexIndex, targetRT->GetResourceHeapIndex(), passID);
+            m_pMaterial->SetFloat4(ShaderIDs::g_SourceSize,
+                                   GetScreenSize(sourceRT->GetWidth(), sourceRT->GetHeight()), passID);
+            m_pMaterial->SetUInt(ShaderIDs::g_SourceTexIndex, sourceRT->GetResourceHeapIndex(), passID);
             m_pMaterial->SetFloat2(ShaderIDs::g_noiseScale, Vector2(
                                        float(targetRT->GetWidth()) / float(m_blueNoise.GetWidth()),
                                        float(targetRT->GetHeight()) / float(m_blueNoise.GetHeight())), passID);
@@ -338,14 +351,13 @@ namespace ElysiaRenderer
             m_pMaterial->SetBool(ShaderIDs::g_bLerpAO, UserData::GetInstance().aoParameter.IsLerpAO, passID);
 
             SetSpaceResource(passData, PER_PASS_SPACE);
-            SetSpaceResource(passData, PER_FRAME_SPACE);
 
             auto threadGroupSize = passData.GetKernelThreadGroupSizes();
             m_pCommand->Dispatch(CeilDivide(targetRT->GetWidth(), threadGroupSize.x),
                                  CeilDivide(targetRT->GetHeight(), threadGroupSize.y), threadGroupSize.z);
-            m_pCommand->AddBarrier(targetRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+            m_pCommand->AddBarrier(targetRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
         }
-
+        m_pCommand->FlushBarrier();
     }
     void AOPass::DoTAA()
     {

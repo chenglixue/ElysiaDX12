@@ -34,7 +34,11 @@ namespace ElysiaCore
 		m_UAVs.clear();
 		m_expectedBindings.clear();
 	}
-	
+
+    void PipelineResourceSpace::ExpectPushConstant(UINT registerIndex)
+	{
+	    m_expectedBindings[registerIndex] = ResourceType::PushConstant;
+	}
 	void PipelineResourceSpace::ExpectCBV(UINT registerIndex)
 	{
 		m_expectedBindings[registerIndex] = ResourceType::CBV;
@@ -55,6 +59,11 @@ namespace ElysiaCore
 	bool PipelineResourceSpace::HasDynamicCBV() const noexcept
 	{
 		return m_hasDynamicCBV;
+	}
+    bool PipelineResourceSpace::IsPushConstantSpace() const noexcept
+	{
+	    return std::any_of(m_expectedBindings.begin(), m_expectedBindings.end(),
+            [](const auto& kv) { return kv.second == ResourceType::PushConstant; });
 	}
 
 	DX12BufferResource* PipelineResourceSpace::GetStaticCBV() const

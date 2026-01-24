@@ -25,15 +25,12 @@ cbuffer MaterialConstant : register(b0, perMaterialSpace)
     UINT metallicTexIndex;
     UINT roughnessTexIndex;
     UINT specularTexIndex;
+    float metallicIntensity;
 
     Vector3 baseColorTint;
-
-    Vector3 ambientCubemapTint;
-    float normalIntensity;
-
-    float metallicIntensity;
     float roughnessIntensity;
-    float ambientCubemapIntensity;
+
+    float normalIntensity;
 };
 
 cbuffer PassConstant : register(b0, perPassSpace)
@@ -170,7 +167,7 @@ FEncodeGBufferData GetEncodeGBufferData(FInputParams inputParams, float3 toLight
     o.Anisotropy = 0;
     o.DiffuseColor = o.BaseColor - o.BaseColor * o.Metallic;
     o.SpecularColor = ComputeF0(o.Specular, o.BaseColor, o.Metallic);
-    o.IBL = GetIBL(inputParams, o, toLight, ambientCubemapIntensity, ambientCubemapTint);
+    o.IBL = GetIBL(inputParams, o, toLight, 1, 1);
 
     return o;
 }

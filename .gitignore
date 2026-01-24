@@ -6,3 +6,5 @@
 *.obj
 *.tlog
 *.idb
+ElysiaRenderer/x64/Release/ElysiaRenderer.ipdb
+ElysiaRenderer/x64/Release/ElysiaRenderer.iobj

@@ -23,7 +23,7 @@ namespace ElysiaCore
 			return m_spaceID;
 		}
 
-
+	    void InitAsConstants(UINT num32BitValues, UINT slotIndex, UINT space = 0, D3D12_SHADER_VISIBILITY shaderVisibility = D3D12_SHADER_VISIBILITY_ALL);
 		void InitAsConstantBufferView(UINT slotIndex, D3D12_SHADER_VISIBILITY shaderVisibility = D3D12_SHADER_VISIBILITY_ALL, UINT Space = 0);
 		/*void InitAsDescriptorRange(D3D12_DESCRIPTOR_RANGE_TYPE rangeType, UINT numDescriptors, UINT slotIndex, 
 			const D3D12_DESCRIPTOR_RANGE1* descriptorRangeData, D3D12_DESCRIPTOR_RANGE_FLAGS flags, D3D12_SHADER_VISIBILITY shaderVisibility = D3D12_SHADER_VISIBILITY_ALL);*/

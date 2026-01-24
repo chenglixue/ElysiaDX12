@@ -26,13 +26,17 @@ namespace ElysiaCore
 		void ExpectCBV(UINT registerIndex);
 		void ExpectSRV(UINT registerIndex);
 		void ExpectUAV(UINT registerIndex);
+	    void ExpectPushConstant(UINT registerIndex);
 		bool HasExpectedCBV() const noexcept;
 		bool HasDynamicCBV() const noexcept;
+	    bool IsPushConstantSpace() const noexcept;
 		
 		DX12BufferResource* GetStaticCBV() const;
 		D3D12_GPU_VIRTUAL_ADDRESS GetDynamicCBV() const;
 		std::vector<PipelineResourceBinding*>& GetSRVs() ;
 		std::vector<PipelineResourceBinding*>& GetUAVs() ;
+	    UINT GetPushConstantNumDWORDs() const noexcept { return m_pushConstantNumDWORDs; }
+	    void SetPushConstantNumDWORDs(UINT count) { m_pushConstantNumDWORDs = count; }
 
 		void SetStaticCBV(DX12BufferResource* CBVResource);
 		void SetDynamicCBV(D3D12_GPU_VIRTUAL_ADDRESS GPUVA);
@@ -44,7 +48,7 @@ namespace ElysiaCore
 
 	private:
 		UINT GetIndexOfBindingIndex(const std::vector<PipelineResourceBinding*>& bindResources, UINT bindingIndex);
-		enum class ResourceType { CBV, SRV, UAV };
+		enum class ResourceType { CBV, SRV, UAV, PushConstant };
 		std::map<UINT, ResourceType> m_expectedBindings;
 
 		DX12BufferResource* m_pStaticCBV = nullptr;
@@ -53,6 +57,7 @@ namespace ElysiaCore
 		std::vector<PipelineResourceBinding*> m_UAVs;
 		bool m_isLocked = false;
 		bool m_hasDynamicCBV = false;
+	    UINT m_pushConstantNumDWORDs = 0;
 	};
 }
 

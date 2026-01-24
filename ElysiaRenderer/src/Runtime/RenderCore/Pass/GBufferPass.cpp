@@ -101,16 +101,7 @@ namespace ElysiaRenderer
                                m_pCamera->GetViewMat() * m_pCamera->GetProjMat());
         m_pMaterial->SetMatrix(ShaderIDs::viewProjMatrix_I,
                                (m_pCamera->GetViewMat() * m_pCamera->GetProjMat()).Invert());
-        m_pMaterial->SetFloat3(ShaderIDs::baseColorTint, UserData::GetInstance().BaseColorTint);
-        m_pMaterial->SetFloat3(ShaderIDs::ambientCubemapTint,
-                               UserData::GetInstance().AmbientCubemapTint);
-        m_pMaterial->SetFloat(ShaderIDs::normalIntensity, UserData::GetInstance().NormalIntensity);
-        m_pMaterial->SetFloat(ShaderIDs::metallicIntensity,
-                              UserData::GetInstance().MetallicIntensity);
-        m_pMaterial->SetFloat(ShaderIDs::roughnessIntensity,
-                              UserData::GetInstance().RoughnessIntensity);
-        m_pMaterial->SetFloat(ShaderIDs::ambientCubemapIntensity,
-                              UserData::GetInstance().AmbientCubemapIntensity);
+        
 
         DrawGBufferPass(context);
     }
@@ -249,22 +240,51 @@ namespace ElysiaRenderer
             m_pCommand->SetVertexBuffer(0, 1, context.renderList[0].vbView);
         }
 
+        struct alignas(16)
+        {
+            float opacity;
+            float cutoff;
+            UINT baseColorTexIndex;
+            UINT normalTexIndex;
+
+            UINT metallicTexIndex;
+            UINT roughnessTexIndex;
+            UINT specularTexIndex;
+            float metallicIntensity;
+
+            Vector3 baseColorTint;
+            float roughnessIntensity;
+
+            float normalIntensity;
+        }constantData;
+        constexpr UINT constantSize = sizeof(constantData) / 4;
+
         for (auto& renderItem : context.renderList)
         {
-
             auto materialData = renderItem.loadedMaterial;
 
+            constantData =
+            {
+                materialData.opacity,
+                0.5,
+                renderItem.textureIndices.Albedo,
+                renderItem.textureIndices.Normal,
+
+                renderItem.textureIndices.Metallic,
+                renderItem.textureIndices.Roughness,
+                renderItem.textureIndices.Specular,
+                UserData::GetInstance().MetallicIntensity,
+                
+                UserData::GetInstance().BaseColorTint,
+                UserData::GetInstance().RoughnessIntensity,
+
+                UserData::GetInstance().NormalIntensity,
+            };
+            m_pCommand->SetPushConstants(PER_MATERIAL_SPACE, &constantData, constantSize);
+
             m_pMaterial->SetMatrix(ShaderIDs::worldMatrix, renderItem.worldMatrix);
-            m_pMaterial->SetUInt(ShaderIDs::baseColorTexIndex, renderItem.textureIndices.Albedo);
-            m_pMaterial->SetUInt(ShaderIDs::normalTexIndex, renderItem.textureIndices.Normal);
-            m_pMaterial->SetUInt(ShaderIDs::metallicTexIndex, renderItem.textureIndices.Metallic);
-            m_pMaterial->SetUInt(ShaderIDs::roughnessTexIndex, renderItem.textureIndices.Roughness);
-            m_pMaterial->SetUInt(ShaderIDs::specularTexIndex, renderItem.textureIndices.Specular);
-            m_pMaterial->SetFloat(ShaderIDs::cutoff, 0.5);
-            m_pMaterial->SetFloat(ShaderIDs::opacity, materialData.opacity);
 
             SetSpaceResource(passData, PER_OBJECT_SPACE);
-            SetSpaceResource(passData, PER_MATERIAL_SPACE);
             m_pCommand->Draw(renderItem.indexCount, renderItem.baseVertex, renderItem.startIndex);
         }
     }

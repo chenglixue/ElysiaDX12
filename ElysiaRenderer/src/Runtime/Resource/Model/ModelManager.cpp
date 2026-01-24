@@ -26,9 +26,13 @@ namespace ElysiaRenderer
 		auto it = m_modelCache.begin();
 		while(it != m_modelCache.end())
 		{
-			if (!_CrtCheckMemory()) { __debugbreak(); }
+#ifdef _DEBUG
+            assert(_CrtCheckMemory());
+#endif
 			it = m_modelCache.erase(it);
-			if (!_CrtCheckMemory()) { __debugbreak(); }
+#ifdef _DEBUG
+            assert(_CrtCheckMemory());
+#endif
 		}
 	}
 	

@@ -3,13 +3,6 @@
   <component name="UserContentModel">
     <attachedFolders />
     <explicitIncludes />
-    <explicitExcludes>
-      <Path>ElysiaRenderer/Assets/Tex</Path>
-      <Path>ElysiaRenderer/dxc</Path>
-      <Path>ElysiaRenderer/lib</Path>
-      <Path>x64/Debug/Shaders/private</Path>
-      <Path>x64/Debug/Shaders/public</Path>
-      <Path>x64/Debug/Tex</Path>
-    </explicitExcludes>
+    <explicitExcludes />
   </component>
 </project>

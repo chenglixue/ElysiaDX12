@@ -1,18 +1,19 @@
 #include "private\ShadingCommon.hlsl"
-#include "private/SSAOCommon.hlsli"
+#include <private\SSAOCommon.hlsli>
 
 #define GROUP_SIZE 8
 
-cbuffer PassConstant : register(b0, perPassSpace)
+cbuffer PassConstant : register(b0, perMaterialSpace)
 {
-    UINT g_TargetTexIndex;
-    UINT g_SourceTexIndex;
     float4 g_TargetSize;
     float4 g_SourceSize;
-
+    
+    UINT g_TargetTexIndex;
+    UINT g_SourceTexIndex;
     float g_MipmapLevel;
-    UINT g_HIZMipmapCount;
 }
+
+
 
 [numthreads(GROUP_SIZE, GROUP_SIZE, 1)]
 void AOHIZNormal(uint3 dispatchThreadID : SV_DispatchThreadID)
@@ -26,6 +27,7 @@ void AOHIZNormal(uint3 dispatchThreadID : SV_DispatchThreadID)
     RWTexture2D<float4> o = ResourceDescriptorHeap[g_TargetTexIndex];
 
     float4 result;
+    [branch]
     if (g_MipmapLevel == 0)
     {
         float2 screenUV = (float2(dispatchThreadID.xy) + 0.5f) * g_TargetSize.zw;

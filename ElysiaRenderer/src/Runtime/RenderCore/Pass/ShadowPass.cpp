@@ -168,17 +168,28 @@ namespace ElysiaRenderer
             m_pCommand->SetVertexBuffer(0, 1, context.renderList[0].vbView);
         }
 
+        struct alignas(16)
+        {
+            UINT baseColorTexIndex;
+            float opacity;
+            float cutoff;
+        }constantData;
+        constexpr UINT constantSize = sizeof(constantData) / 4;
+
         for (const auto& renderItem : context.renderList)
         {
             auto materialData = renderItem.loadedMaterial;
 
             m_pMaterial->SetMatrix(ShaderIDs::worldMatrix, renderItem.worldMatrix);
-            m_pMaterial->SetUInt(ShaderIDs::baseColorTexIndex, renderItem.textureIndices.Albedo);
-            m_pMaterial->SetFloat(ShaderIDs::cutoff, 0.5f);
-            m_pMaterial->SetFloat(ShaderIDs::opacity, materialData.opacity);
+            constantData =
+            {
+                renderItem.textureIndices.Albedo,
+                materialData.opacity,
+                0.5f,
+            };
+            m_pCommand->SetPushConstants(PER_MATERIAL_SPACE, &constantData, constantSize);
 
             SetSpaceResource(passData, PER_OBJECT_SPACE);
-            SetSpaceResource(passData, PER_MATERIAL_SPACE);
             m_pCommand->Draw(renderItem.indexCount, renderItem.baseVertex, renderItem.startIndex);
         }
     }

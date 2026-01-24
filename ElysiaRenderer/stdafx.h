@@ -1,8 +1,20 @@
 #pragma once
 
+#ifdef NDEBUG
+#ifndef _ITERATOR_DEBUG_LEVEL
+#define _ITERATOR_DEBUG_LEVEL 0
+#endif
+#endif
+
+#ifdef _DEBUG
+#ifndef _ITERATOR_DEBUG_LEVEL
+	#define _ITERATOR_DEBUG_LEVEL 2
+#endif
+#endif
+
 #include <SDKDDKVer.h>
 #define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
- 
+
 #include <windows.h>
 #include <windowsx.h>
 #include <wrl.h>
@@ -40,7 +52,7 @@
 #include <bitset>
 #include <functional>
 #include "ThirdParty/Metalib.h"
-#include <boost/container/stable_vector.hpp>
+//#include <boost/container/stable_vector.hpp>
 
 #include <EASTL/internal/config.h>
 #include "include/EASTL/string.h"
@@ -55,7 +67,7 @@
 #include "ThirdParty/SimpleMath/SimpleMath.h"
 #include <atlbase.h>        // Common COM helpers.
 
-#include <WICTextureLoader.h>
+//#include <WICTextureLoader.h>
 
 using namespace DirectX;
 using namespace DirectX::SimpleMath;

@@ -1,7 +1,7 @@
 #include "private\SSAOCommon.hlsli"
 
-#define _AO_MAX_SAMPLE_COUNT 32
-#define _AO_MAX_SAMPLE_STEP_COUNT 6
+#define _AO_MAX_SAMPLE_COUNT 6
+#define _AO_MAX_SAMPLE_STEP_COUNT 4
 
 cbuffer PassConstant : register(b0, perPassSpace)
 {
@@ -49,7 +49,7 @@ float3 GetMultiScaleBlueNoise(UINT blueNoiseTexIndex, float2 uv);
 float ComputeMipLevel(UINT sampleID, float step);
 
 [numthreads(AO_GROUP_SIZE, AO_GROUP_SIZE, 1)]
-void SSAO(uint3 dispatchThreadID: SV_DispatchThreadID)
+void HBAO(uint3 dispatchThreadID: SV_DispatchThreadID)
 {
     RWTexture2D<float4> o = ResourceDescriptorHeap[g_TargetTexIndex];
 
@@ -90,64 +90,70 @@ void SSAO(uint3 dispatchThreadID: SV_DispatchThreadID)
         );
 
     float radius = g_AORadius;
+    float pixelRadius = radius * projScale.x / max(inputParam.LinearEyeDepth, 1.f);
+    pixelRadius *= 0.5f;
 
-    float2 WeightAccumulator = 0.0001f; // x: �ڵ����ף�y: ������Ȩ��
+    float2 WeightAccumulator = 0.0001f;
     [unroll(_AO_MAX_SAMPLE_COUNT)]
-    for (UINT i = 0; i < g_AOSampleCount; i ++)
+    for (UINT dir = 0; dir < _AO_MAX_SAMPLE_COUNT; dir ++)
     {
-        float2 unrotatedRandomDir = g_AOSampleKernelArray[i].xy;
+        float2 unrotatedRandomDir = g_AOSampleKernelArray[dir].xy;
         float2 randomDirUV = mul(rotationMatrix, unrotatedRandomDir);
         randomDirUV *= g_TargetSize.zw * g_TargetSize.xx;
 
-        // �������߽�
-        // ������Ļ�����
         float3 randomDirVS = float3(randomDirUV.x,
                                     randomDirUV.y, 0.0f);
         float3 tangentVS = randomDirVS - normalVS * dot(randomDirVS, normalVS);
 
         float maxSin = dot(tangentVS, normalVS) + sin(g_AOBias);
         [unroll(_AO_MAX_SAMPLE_STEP_COUNT)]
-        for (UINT step = 0; step < g_AOSampleStepCount; ++step) // ÿ�������ڲ�����
+        for (UINT step = 0; step < g_AOSampleStepCount; ++step)
         {
-            float stepDistance = ((float)step + jitter + 1) / g_AOSampleStepCount; // ��������
+            float stepDistance = ((float)step + jitter + 1) / g_AOSampleStepCount;
             stepDistance *= stepDistance;
 
             //  world space to uv space
-            float2 offsetUV = randomDirUV * stepDistance * radius * projScale.x * 0.5f / max(
-                                  inputParam.PositionVS.z, 1.0f);
+            float2 offsetUV = randomDirUV * stepDistance * pixelRadius;
             float2 vSampleUV = inputParam.ScreenUV + offsetUV;
 
             if (any(vSampleUV < 0) || any(vSampleUV > 1))
                 continue;
 
-            float MipLevel = ComputeMipLevel(radius, inputParam.PositionVS.z, stepDistance, jitter);
-            // float localEyeDepth = SampleHiZTrilinear(vSampleUV, MipLevel);
-            float localEyeDepth = SampleTexture2D_LOD(g_HIZTextureIndex, vSampleUV, ClampPointSampler, MipLevel).a * Constant_Float16F_Scale;
+            float MipLevel = ComputeMipLevel(radius, inputParam.PositionVS.z, stepDistance, jitter * 0.5f);
+            MipLevel = floor(MipLevel);
+            float localEyeDepth = SampleTexture2D_LOD(g_HIZTextureIndex, vSampleUV, ClampLinearSampler, MipLevel).a *
+                                  Constant_Float16F_Scale;
             float3 localPosVS = ComputeClipSpacePosition(vSampleUV, localEyeDepth, projMatrix);
 
             float3 v = localPosVS - inputParam.PositionVS;
             float distSq = dot(v, v);
             float dist = sqrt(distSq);
 
-            // ����˥��
             float falloff = saturate(1.0 - distSq / (radius * radius));
 
             float3 V_norm = v / (dist + 1e-6);
             float sampleHorizonSin = dot(V_norm, normalVS);
 
-            // �����ǰ�߶Ƚǳ�����֪���ǣ������ڵ�
             if (sampleHorizonSin > maxSin)
             {
                 maxSin = lerp(maxSin, sampleHorizonSin, falloff);
             }
         }
 
-        // �ۼ��ڵ���Ȩ��
         float occlusion = Square(1.0 - saturate(maxSin));
         WeightAccumulator.x += occlusion;
         WeightAccumulator.y += 1;
     }
     float aoResult = WeightAccumulator.x / WeightAccumulator.y;
+
+    aoResult = saturate(aoResult * g_AOIntensityMul);
+    aoResult = pow(abs(aoResult), g_AOIntensityPow);
+    float fadeRadius = max(1.f, g_AOFadeRadius);
+    float invFadeRadius = 1.f / fadeRadius;
+    float mul = invFadeRadius;
+    float add = -(g_AOFadeDistance - fadeRadius) * invFadeRadius;
+    float distFade = saturate(inputParam.LinearEyeDepth * mul + add);
+    aoResult = lerp(aoResult, 1.0, distFade);
 
     if (g_bLerpAO)
     {
@@ -159,13 +165,119 @@ void SSAO(uint3 dispatchThreadID: SV_DispatchThreadID)
         aoResult = lerp(aoResult, Filtered, g_LerpAOFactor);
     }
 
+    aoResult = Fast2x2Blur(float4(aoResult, inputParam.LinearEyeDepth, normalVS.xy));
+
+    o[dispatchThreadID.xy] = float4(aoResult.rrr, 1);
+}
+
+[numthreads(AO_GROUP_SIZE, AO_GROUP_SIZE, 1)]
+void HBAOPlus(uint3 dispatchThreadID: SV_DispatchThreadID)
+{
+    RWTexture2D<float4> o = ResourceDescriptorHeap[g_TargetTexIndex];
+
+    float2 screenUV = (float2(dispatchThreadID.xy) + 0.5f) * g_TargetSize.zw;
+
+    float4 AOData = SampleTexture2D_LOD(g_HIZTextureIndex, screenUV, ClampPointSampler, g_HIZMinMipmap);
+    float eyeDepth = AOData.a * Constant_Float16F_Scale;
+    float3 normalWS = DecodeNormal(AOData.rgb);
+
+    FInputParams inputParam = (FInputParams)0;
+    inputParam.PositionVS = ComputeClipSpacePosition(screenUV, eyeDepth, projMatrix);
+    inputParam.NormalWS = normalWS;
+    inputParam.ScreenUV = screenUV;
+    inputParam.LinearEyeDepth = eyeDepth;
+
+    // projMatrix[0][0] = 1/tan(fovX/2), projMatrix[1][1] = 1/tan(fovY/2)
+    float2 projScale = float2(projMatrix[0][0], projMatrix[1][1]);
+
+    const float3 normalVS = normalize(mul(inputParam.NormalWS, viewMatrix));
+    inputParam.PositionVS += normalVS * g_AOBias * eyeDepth;
+
+    float3 randomVector = SampleTexture2D(BlueNoiseTexIndex,
+                                          inputParam.ScreenUV * g_noiseScale, WarpPointSampler).xyz;
+    float jitter = randomVector.z;
+    float temporalAngle = (frameIndex % 8) * INV_FOUR_PI;
+    float randomAngle = randomVector.x * TWO_PI + temporalAngle;
+
+    const int NUM_DIRECTIONS = 4;
+    const int NUM_STEPS = g_AOSampleStepCount;
+    float radius = g_AORadius;
+    float pixelRadius = radius * projScale.x / max(inputParam.LinearEyeDepth, 1.f);
+    pixelRadius *= 0.5f * g_TargetSize.y;
+    float stepPixel = pixelRadius / (NUM_STEPS + 1);
+
+    float occlusion = 0.f;
+    [unroll(4)]
+    for (UINT dir = 0; dir < NUM_DIRECTIONS; dir ++)
+    {
+        float angle = float(dir) / float(NUM_DIRECTIONS) * TWO_PI + randomAngle;
+
+        float2 dirUV;
+        sincos(angle, dirUV.y, dirUV.x);
+        dirUV *= g_TargetSize.zw * g_TargetSize.xx;
+
+        float2 texelSize = g_TargetSize.zw;
+        float2 deltaUV = float2(dirUV.x * texelSize.x, dirUV.y * texelSize.y) * stepPixel;
+
+        float rayJitter = randomVector.y;
+        float2 currentUV = inputParam.ScreenUV + deltaUV * rayJitter;
+
+        float angleBias = g_AOBias;
+        float topOcclusionAngle = 1e-4;
+
+        [unroll(_AO_MAX_SAMPLE_STEP_COUNT)]
+        for (UINT step = 0; step < NUM_STEPS; ++step)
+        {
+            currentUV += deltaUV;
+
+            if (any(currentUV < 0) || any(currentUV > 1))
+                continue;
+
+            float MipLevel = ComputeMipLevel(radius, inputParam.PositionVS.z, stepPixel, jitter * 0.5f);
+            MipLevel = floor(MipLevel);
+            float localEyeDepth = SampleTexture2D_LOD(g_HIZTextureIndex, currentUV, ClampLinearSampler, MipLevel).a *
+                                  Constant_Float16F_Scale;
+            float3 localPosVS = ComputeClipSpacePosition(currentUV, localEyeDepth, projMatrix);
+
+            float3 v = localPosVS - inputParam.PositionVS;
+            float distSq = dot(v, v);
+            float dist = sqrt(distSq);
+
+            float falloff = saturate(1.0 - distSq / (radius * radius));
+
+            float3 V_norm = v / (dist + 1e-6);
+            float sampleHorizonSin = dot(V_norm, normalVS);
+
+            if (sampleHorizonSin > (topOcclusionAngle + angleBias))
+            {
+                float diff = sampleHorizonSin - max(topOcclusionAngle, 1e-4);
+                occlusion += diff * falloff;
+
+                topOcclusionAngle = sampleHorizonSin;
+                // topOcclusionAngle = lerp(topOcclusionAngle, sampleHorizonSin, falloff);
+            }
+        }
+    }
+    float aoResult = occlusion / NUM_DIRECTIONS;
+
+    aoResult = saturate(1.0 - aoResult * g_AOIntensityMul);
+    aoResult = pow(abs(aoResult), g_AOIntensityPow);
     float fadeRadius = max(1.f, g_AOFadeRadius);
     float invFadeRadius = 1.f / fadeRadius;
     float mul = invFadeRadius;
     float add = -(g_AOFadeDistance - fadeRadius) * invFadeRadius;
     float distFade = saturate(inputParam.LinearEyeDepth * mul + add);
     aoResult = lerp(aoResult, 1.0, distFade);
-    aoResult = 1.0 - (1.0 - pow(abs(aoResult), g_AOIntensityPow)) * g_AOIntensityMul;
+
+    if (g_bLerpAO)
+    {
+        float4 Filtered = ComputeUpsampleContribution(g_SourceTexIndex, g_SourceSize, g_HIZTextureIndex,
+                                                      g_HIZMinMipmap + 1,
+                                                      inputParam.ScreenUV, inputParam.NormalWS,
+                                                      inputParam.LinearEyeDepth);
+
+        aoResult = lerp(aoResult, Filtered, g_LerpAOFactor);
+    }
 
     aoResult = Fast2x2Blur(float4(aoResult, inputParam.LinearEyeDepth, normalVS.xy));
 
@@ -201,29 +313,24 @@ float3 GetWorldSpaceNormalFromAOInput(float2 screenUV)
 
 float SampleHiZTrilinear(float2 uv, float mipmapLevel)
 {
-    // ��ȡ���ڵ����������㼶
     uint mip0 = (uint)floor(mipmapLevel);
     uint mip1 = min(mip0 + 1, g_HIZMaxMipmap);
 
-    // ��������֮��Ļ������
     float t = frac(mipmapLevel);
 
-    // �����Ͳ㼶������ϸ��
     float depth0 = SampleTexture2D_LOD(g_HIZTextureIndex, uv, ClampLinearSampler, (float)mip0).a *
                    Constant_Float16F_Scale;
 
-    // �����߲㼶�����ֲڣ�
     float depth1 = SampleTexture2D_LOD(g_HIZTextureIndex, uv, ClampLinearSampler, (float)mip1).a *
                    Constant_Float16F_Scale;
 
-    // ���������֮��������Բ�ֵ
     return lerp(depth0, depth1, t);
 }
 
 float ComputeMipLevel(float radius, float sceneDepth, float step, float jitter)
 {
     float screenRadius = (radius / sceneDepth) * g_TargetSize.x * step;
-    float mipmapLevel = log2(screenRadius / 16.f + 1e-5);
+    float mipmapLevel = log2(screenRadius / 16.f + 1e-5) + jitter;
     mipmapLevel = clamp(mipmapLevel, g_HIZMinMipmap, g_HIZMaxMipmap);
 
     return mipmapLevel;
@@ -243,11 +350,9 @@ float ComputeSingleAO(float3 randomVec, FInputParams inputParam, float3 normalVS
     float4 randomPosCS = mul(randomPosVS, projMatrix);
     float2 randomPosUV = randomPosCS.xy / randomPosCS.w * 0.5f * float2(1.f, -1.f) + 0.5f;
 
-    // �߽���
     if (any(randomPosUV < 0.f) || any(randomPosUV > 1.f))
         return 0.0f;
 
-    // ���� Mipmap Level
     float2 offsetPixel = abs(randomPosUV - inputParam.ScreenUV) * g_TargetSize.xy;
     float screenRadius = (g_AORadius * radiusScale / inputParam.PositionVS.z) * g_TargetSize.x;
     float mipmapLevel = clamp(log2(max(offsetPixel.x, offsetPixel.y)) + jitter, (float)g_HIZMinMipmap,
@@ -257,25 +362,22 @@ float ComputeSingleAO(float3 randomVec, FInputParams inputParam, float3 normalVS
     float randomDepth = SampleHiZTrilinear(randomPosUV, mipmapLevel);
     float randomEyeDepth = LinearEyeDepth(randomDepth, g_ZBufferParams);
 
-    // �ڱ��ж�
     float isOccluded = step(randomEyeDepth, randomPosVS.z);
 
-    // ��Χ��⣺���õ�ǰ�߶ȵİ뾶��������
     float distDiff = abs(randomEyeDepth - inputParam.PositionVS.z);
     float currentRadius = g_AORadius * radiusScale;
     float rangeCheck = smoothstep(0.f, 1.f, currentRadius / (distDiff + 1e-5));
     float3 v = normalize(randomVec);
-    float angleFactor = saturate(dot(v, normalVS) - 0.1); // ��ȥһ��Сֵ��Ϊ���� Bias
+    float angleFactor = saturate(dot(v, normalVS) - 0.1);
 
     return isOccluded * rangeCheck * angleFactor;
 }
 
 float3 GetMultiScaleBlueNoise(UINT blueNoiseTexIndex, float2 uv)
 {
-    // ���������ż���
-#define NOISE_SCALE_LARGE   1.0    // ��߶ȣ���Ƶ
-#define NOISE_SCALE_MEDIUM  4.0    // �г߶ȣ���Ƶ  
-#define NOISE_SCALE_SMALL   16.0   // С�߶ȣ���Ƶ
+#define NOISE_SCALE_LARGE   1.0
+#define NOISE_SCALE_MEDIUM  4.0
+#define NOISE_SCALE_SMALL   16.0
 
     float3 noiseLarge = SampleTexture2D(BlueNoiseTexIndex,
                                         uv * NOISE_SCALE_LARGE,
@@ -290,9 +392,9 @@ float3 GetMultiScaleBlueNoise(UINT blueNoiseTexIndex, float2 uv)
                                         WarpPointSampler).xyz;
 
     float3 multiScaleNoise =
-        noiseLarge * 0.3 +  // ��Ƶ����߶Ƚṹ
-        noiseMedium * 0.4 + // ��Ƶ��ϸ��
-        noiseSmall * 0.3;   // ��Ƶ��ϸ��
+        noiseLarge * 0.3 +
+        noiseMedium * 0.4 +
+        noiseSmall * 0.3;
 
     return multiScaleNoise;
 }

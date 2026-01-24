@@ -27,6 +27,15 @@ namespace ElysiaCore
 			delete[]m_rootParamter.DescriptorTable.pDescriptorRanges;
 		}
 	}
+    
+    void DX12RootParameter::InitAsConstants(UINT num32BitValues, UINT slotIndex, UINT space, D3D12_SHADER_VISIBILITY shaderVisibility)
+	{
+	    m_rootParamter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+	    m_rootParamter.ShaderVisibility = shaderVisibility;
+	    m_rootParamter.Constants.Num32BitValues = num32BitValues;
+	    m_rootParamter.Constants.ShaderRegister = slotIndex;
+	    m_rootParamter.Constants.RegisterSpace = m_spaceID = space;
+	}
 
 	void DX12RootParameter::InitAsConstantBufferView(UINT slotIndex, D3D12_SHADER_VISIBILITY shaderVisibility, UINT Space)
 	{

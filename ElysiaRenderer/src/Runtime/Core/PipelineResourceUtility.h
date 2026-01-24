@@ -12,6 +12,7 @@ namespace ElysiaCore
 		// space id : root paramter index
 		std::array<std::optional<UINT>, NUM_RESOURCE_SPACES> m_CBVMappings{};
 		std::array<std::optional<UINT>, NUM_RESOURCE_SPACES> m_TableMappings{};
+		std::array<std::optional<UINT>, NUM_RESOURCE_SPACES> m_PushConstantMappings{};
 	};
 
 	struct PipelineResourceBinding

@@ -65,7 +65,9 @@ void LoadMaterials(const aiScene* pScene, LoadedModel& model)
         {
             material.albedoFactor = Vector3(diffuse.r, diffuse.g, diffuse.b);
         }
+#ifdef _DEBUG
         assert(_CrtCheckMemory());
+#endif
 
         // Metalness Roughness
         if (AI_SUCCESS == aiMaterial->Get(AI_MATKEY_METALLIC_FACTOR, metallic))
@@ -76,7 +78,10 @@ void LoadMaterials(const aiScene* pScene, LoadedModel& model)
         {
             material.roughnessFactor = roughness;
         }
+#ifdef _DEBUG
         assert(_CrtCheckMemory());
+#endif
+
 
         // Emissive
         if (AI_SUCCESS == aiMaterial->Get(AI_MATKEY_COLOR_EMISSIVE, emission))
@@ -84,21 +89,27 @@ void LoadMaterials(const aiScene* pScene, LoadedModel& model)
             material.emissiveFactor = Vector3{emission.r, emission.g,
                                               emission.b};
         }
+#ifdef _DEBUG
         assert(_CrtCheckMemory());
+#endif
 
         // opacity
         if (AI_SUCCESS == aiMaterial->Get(AI_MATKEY_OPACITY, opacity))
         {
             material.opacity = opacity;
         }
+#ifdef _DEBUG
         assert(_CrtCheckMemory());
+#endif
 
         //specular
         if (AI_SUCCESS == aiMaterial->Get(AI_MATKEY_SPECULAR_FACTOR, shininess))
         {
             material.specularFactor = shininess;
         }
+#ifdef _DEBUG
         assert(_CrtCheckMemory());
+#endif
 
         if (aiMaterial->GetTextureCount(aiTextureType_DIFFUSE) > 0)
         {
@@ -123,16 +134,14 @@ void LoadMaterials(const aiScene* pScene, LoadedModel& model)
         loadTexturePath(aiTextureType_AMBIENT_OCCLUSION,material.textureNames[static_cast<UINT64>(MaterialTextureType::Occlusion)]);
         loadTexturePath(aiTextureType_SPECULAR,material.textureNames[static_cast<UINT64>(MaterialTextureType::Specular)]);
         loadTexturePath(aiTextureType_HEIGHT,material.textureNames[static_cast<UINT64>(MaterialTextureType::Height)]);
-        if (!_CrtCheckMemory())
-        {
-            assert(_CrtCheckMemory());
-        }
+#ifdef _DEBUG
+        assert(_CrtCheckMemory());
+#endif
 
         model.materials.emplace_back(material);
-        if (!_CrtCheckMemory())
-        {
-            assert(_CrtCheckMemory());
-        }
+#ifdef _DEBUG
+        assert(_CrtCheckMemory());
+#endif
     }
 }
 
@@ -283,25 +292,30 @@ void LoadMeshData(const std::wstring& filePath, const aiScene* pScene,
     }
 
     model.vertices.resize(numVertices);
-    assert(_CrtCheckMemory() && "Broken after vertices resize");
+#ifdef _DEBUG
+    assert(_CrtCheckMemory());
+#endif
     model.indices.resize(numIndices);
-    assert(_CrtCheckMemory() && "Broken after indices resize");
+#ifdef _DEBUG
+    assert(_CrtCheckMemory());
+#endif
     model.meshes.resize(numMeshes);
-    assert(_CrtCheckMemory() && "Broken after mesh resize");
+#ifdef _DEBUG
+    assert(_CrtCheckMemory());
+#endif
     uint64 vtxOffset = 0;
     uint64 idxOffset = 0;
     for (UINT64 meshIdx = 0; meshIdx < numMeshes; meshIdx ++)
     {
-        assert(
-            _CrtCheckMemory() &&
-            "Heap was corrupted BEFORE InitFromAssimpMesh!");
+#ifdef _DEBUG
+        assert(_CrtCheckMemory());
+#endif
 
         const aiMesh* pMesh = pScene->mMeshes[meshIdx];
 
-        if (!_CrtCheckMemory())
-        {
-            __debugbreak();
-        }
+#ifdef _DEBUG
+        assert(_CrtCheckMemory());
+#endif
 
         model.meshes[meshIdx].InitFromAssimpMesh(
             *pScene->mMeshes[meshIdx], sceneScale,
@@ -494,23 +508,20 @@ bool LoadModel(const std::wstring& filePath, bool bInvertTexcoordY,
     if (bImportMeshes)
     {
         LoadMaterials(pScene, model);
-        if (!_CrtCheckMemory())
-        {
-            __debugbreak();
-        }
+#ifdef _DEBUG
+        assert(_CrtCheckMemory());
+#endif
 
         LoadMaterialResource(model.materials, fileDirectory,
                              model.materialTextures);
-        if (!_CrtCheckMemory())
-        {
-            __debugbreak();
-        }
+#ifdef _DEBUG
+        assert(_CrtCheckMemory());
+#endif
 
         LoadMeshData(filePath, pScene, scale, model);
-        if (!_CrtCheckMemory())
-        {
-            __debugbreak();
-        }
+#ifdef _DEBUG
+        assert(_CrtCheckMemory());
+#endif
     }
 
     std::cout << "Finished loading scene '%ls'" + WstringToString(filePath) <<

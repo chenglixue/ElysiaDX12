@@ -21,6 +21,8 @@ namespace ElysiaCore
         DX12GraphicsContext(DX12Device* device);
         ~DX12GraphicsContext() override;
 
+        void SetPushConstants(uint8_t spaceID, const void* data, UINT numValues);
+
         void Discard(RenderTexture* pRT);
 
         void ClearRenderTarget(RenderTexture* renderTarget, Color color);

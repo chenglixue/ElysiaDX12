@@ -14,11 +14,9 @@ float ComputeDepthSimilarity(float DepthA, float DepthB, float TweakScale)
 // 0: not similar .. 1:very similar
 float ComputeDepthSimilarity(float DepthA, float DepthB)
 {
-    // 计算线性深度差
     float d1 = LinearEyeDepth(DepthA, g_ZBufferParams);
     float d2 = LinearEyeDepth(DepthB, g_ZBufferParams);
 
-    // 深度感知阈值：如果差距超过基础深度的 5%，权重迅速衰减
     float diff = abs(d1 - d2);
     float threshold = d2 * 0.003f;
 
@@ -51,7 +49,6 @@ float4 ComputeUpsampleContribution(UINT SourceTexIndex, float4 SourceSize,
     UV[2] = ScreenUV + float2(-0.5f, -0.5f) * SourceSize.zw;
     UV[3] = ScreenUV + float2(0.5f, -0.5f) * SourceSize.zw;
 
-    // // 低分辨率纹理中周围 4 个邻居纹素（Texel）的中心点，用于后续手动双边滤波
     // UV[0] = ScreenUV + float2(-1, -1) * SourceSize.zw;
     // UV[1] = ScreenUV + float2(0, -1) * SourceSize.zw;
     // UV[2] = ScreenUV + float2(1, -1) * SourceSize.zw;

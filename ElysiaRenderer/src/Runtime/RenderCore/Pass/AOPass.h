@@ -38,6 +38,7 @@ namespace ElysiaRenderer
     private:
         UINT m_HIZMipmapCount;
         static inline bool m_isFirstFrame = true;
+        static constexpr UINT NUM_DIRECTIONS = 4;
 
         RenderTexture* m_pAORT = nullptr;
         RenderTexture* m_pHalfAORT = nullptr;
@@ -48,8 +49,8 @@ namespace ElysiaRenderer
 
         struct ShaderPasseIDs
         {
-            static inline int AOPassID = -1;
             static inline int HIZPassID = -1;
+            static inline int AOPassID = -1;
             static inline int TAAPassID = -1;
         };
         struct ShaderIDs

@@ -72,7 +72,7 @@ namespace ElysiaCore
         CComPtr<ID3D12Debug> debugController;
         if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController))))
         {
-            //debugController->EnableDebugLayer();
+            debugController->EnableDebugLayer();
         }
 #endif
 
@@ -89,8 +89,8 @@ namespace ElysiaCore
                 // Enabling GPU Validation without enabling the debug layer does nothing
                 if (bCPUValidationEnabled || bGpuValidationEnabled)
                 {
-                    pDebugController->EnableDebugLayer();
-                    pDebugController->SetEnableGPUBasedValidation(bGpuValidationEnabled);
+                    // pDebugController->EnableDebugLayer();
+                    // pDebugController->SetEnableGPUBasedValidation(bGpuValidationEnabled);
                 }
                 pDebugController->Release();
             }
@@ -491,6 +491,17 @@ namespace ElysiaCore
             auto currSpace = resourceLayout.m_spaces[currSpaceID];
             if (!currSpace)
                 continue;
+
+            if (currSpace->IsPushConstantSpace() && (currSpaceID == PER_MATERIAL_SPACE || currSpaceID == PER_OBJECT_SPACE)) 
+            {
+                DX12RootParameter* rootParameter = new DX12RootParameter();
+                rootParameter->InitAsConstants(16, 0, currSpaceID, D3D12_SHADER_VISIBILITY_ALL);
+
+                resourceMapping.m_PushConstantMappings[currSpaceID] = static_cast<UINT>(rootParameters.size());
+                rootParameters.emplace_back(std::move(rootParameter));
+                continue; // å¤„ç†å®Œå¸¸é‡åè·³è¿‡åç»­ Table å¤„ç†
+            }
+            
             std::vector<D3D12_DESCRIPTOR_RANGE1>& currDescriptorRange = desciptorRanges[
                 currSpaceID];
 
@@ -609,29 +620,29 @@ namespace ElysiaCore
             return UINT_MAX;
         }
 
-        // 1. ¼ì²éÄ©Î²ÊÇ·ñÁ¬Ğø
-        // m_freeReservedDescriptorIndices ÀàËÆÓÚ Stack£¬back() ÊÇ×îºóÒ»¸ö¿ÉÓÃË÷Òı
-        // Èç¹ûÎÒÃÇĞèÒª 3 ¸ö£¬ÇÒ vector ÊÇ [..., 10, 11, 12]£¬Ôò back ÊÇ 12¡£
-        // ÎÒÃÇĞèÒª¼ì²é vector[size-1], vector[size-2]... ÊÇ·ñÊÇÁ¬Ğøµİ¼õµÄ
+        // 1. ï¿½ï¿½ï¿½Ä©Î²ï¿½Ç·ï¿½ï¿½ï¿½ï¿½ï¿½
+        // m_freeReservedDescriptorIndices ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Stackï¿½ï¿½back() ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òª 3 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ vector ï¿½ï¿½ [..., 10, 11, 12]ï¿½ï¿½ï¿½ï¿½ back ï¿½ï¿½ 12ï¿½ï¿½
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ vector[size-1], vector[size-2]... ï¿½Ç·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½İ¼ï¿½ï¿½ï¿½
         bool isContiguous = true;
         size_t size = m_freeReservedDescriptorIndices.size();
         UINT lastVal = m_freeReservedDescriptorIndices.back();
 
-        // ¿ìËÙ¼ì²é£ºÈç¹û (×îºóÒ»¸öÖµ - count + 1) µÈÓÚ (µ¹ÊıµÚ count ¸öÖµ)
-        // ËµÃ÷Õâ¶ÎÇø¼äÊıÖµÊÇÁ¬ĞøµÄ (Ç°ÌáÊÇÁĞ±í¾Ö²¿ÓĞĞò£¬iota ³õÊ¼»¯Âú×ã´ËÌõ¼ş)
+        // ï¿½ï¿½ï¿½Ù¼ï¿½é£ºï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½Ò»ï¿½ï¿½Öµ - count + 1) ï¿½ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ count ï¿½ï¿½Öµ)
+        // Ëµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ (Ç°ï¿½ï¿½ï¿½ï¿½ï¿½Ğ±ï¿½Ö²ï¿½ï¿½ï¿½ï¿½ï¿½iota ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)
         if (m_freeReservedDescriptorIndices[size - count] != (lastVal - count + 1))
         {
             isContiguous = false;
         }
 
-        // 2. Èç¹û²»Á¬Ğø£¨·¢ÉúÁËËéÆ¬»¯ÊÍ·Å£©£¬³¢ÊÔÕûÀí
+        // 2. ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ¬ï¿½ï¿½ï¿½Í·Å£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         if (!isContiguous)
         {
-            // ĞÔÄÜ¾¯¸æ£ºSort ²Ù×÷½ÏÂı£¬µ«ÔÚÎÆÀí´´½¨½×¶ÎÍ¨³£¿É½ÓÊÜ
-            // Èç¹ûÆµ·±´´½¨/Ïú»Ù Mipmap ÎÆÀí£¬½¨Òé¸ÄÓÃÓÉ offset ¹ÜÀíµÄÏßĞÔ·ÖÅäÆ÷
+            // ï¿½ï¿½ï¿½Ü¾ï¿½ï¿½æ£ºSort ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×¶ï¿½Í¨ï¿½ï¿½ï¿½É½ï¿½ï¿½ï¿½
+            // ï¿½ï¿½ï¿½Æµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½/ï¿½ï¿½ï¿½ï¿½ Mipmap ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ offset ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô·ï¿½ï¿½ï¿½ï¿½ï¿½
             std::sort(m_freeReservedDescriptorIndices.begin(), m_freeReservedDescriptorIndices.end());
 
-            // ÔÙ´Î¼ì²é
+            // ï¿½Ù´Î¼ï¿½ï¿½
             lastVal = m_freeReservedDescriptorIndices.back();
             if (m_freeReservedDescriptorIndices[size - count] != (lastVal - count + 1))
             {
@@ -640,11 +651,11 @@ namespace ElysiaCore
             }
         }
 
-        // 3. Ö´ĞĞ·ÖÅä
-        // ÎÒÃÇµÄ BaseIndexÓ¦¸ÃÊÇÕâÒ»¿éÖĞ×îĞ¡µÄÄÇ¸öÊı
+        // 3. Ö´ï¿½Ğ·ï¿½ï¿½ï¿½
+        // ï¿½ï¿½ï¿½Çµï¿½ BaseIndexÓ¦ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğ¡ï¿½ï¿½ï¿½Ç¸ï¿½ï¿½ï¿½
         UINT baseIndex = lastVal - count + 1;
 
-        // ÒÆ³ı×îºó count ¸öÔªËØ
+        // ï¿½Æ³ï¿½ï¿½ï¿½ï¿½ count ï¿½ï¿½Ôªï¿½ï¿½
         m_freeReservedDescriptorIndices.resize(size - count);
 
         return baseIndex;
@@ -1016,7 +1027,7 @@ namespace ElysiaCore
         CComPtr<IDxcBlob> pPDB = nullptr;
         CComPtr<IDxcBlobUtf16> pPDBName = nullptr;
         pResults->GetOutput(DXC_OUT_PDB, IID_PPV_ARGS(&pPDB), &pPDBName);
-        //if(pPDB != nullptr && pPDBName != nullptr)
+        if(pPDB != nullptr && pPDBName != nullptr)
         {
             FILE* fp = NULL;
 
@@ -1159,29 +1170,30 @@ namespace ElysiaCore
         for (auto& shaderVariable : o.MergedReflectionData.cbuffers)
         {
             auto currVariable = shaderVariable.second;
+            UINT spaceID = currVariable.spaceID;
 
-            std::unique_ptr<PipelineResourceSpace> pPipelineResourceSpace = std::make_unique<
-                PipelineResourceSpace>();
-            switch (currVariable.type)
+            PipelineResourceSpace* pSpace = o.pMeshResourceLayout->m_spaces[spaceID];
+            if (!pSpace)
             {
-            case D3D_SIT_CBUFFER:
+                pSpace = new PipelineResourceSpace();
+                o.pMeshResourceLayout->SetSpace(spaceID, pSpace);
+            }
+            if (spaceID == PER_MATERIAL_SPACE && currVariable.type == D3D_SIT_CBUFFER) 
             {
-                pPipelineResourceSpace->ExpectCBV(currVariable.bindPoint);
-                break;
+                pSpace->ExpectPushConstant(currVariable.bindPoint);
+                // è®¡ç®—éœ€è¦çš„ DWORD æ•°é‡ (Size æ˜¯å­—èŠ‚ï¼Œéœ€é™¤ä»¥ 4)
+                pSpace->SetPushConstantNumDWORDs(CeilDivide(currVariable.size, 4));
             }
-            case D3D_SIT_TEXTURE:
+            else 
             {
-                pPipelineResourceSpace->ExpectSRV(currVariable.bindPoint);
-                break;
+                // åŸæœ‰é€»è¾‘ï¼šå¤„ç†æ™®é€šèµ„æº
+                switch (currVariable.type)
+                {
+                case D3D_SIT_CBUFFER:   pSpace->ExpectCBV(currVariable.bindPoint); break;
+                case D3D_SIT_TEXTURE:   pSpace->ExpectSRV(currVariable.bindPoint); break;
+                case D3D_SIT_STRUCTURED: pSpace->ExpectUAV(currVariable.bindPoint); break;
+                }
             }
-            case D3D_SIT_STRUCTURED:
-            {
-                pPipelineResourceSpace->ExpectUAV(currVariable.bindPoint);
-                break;
-            }
-            }
-            o.pMeshResourceLayout->m_spaces[currVariable.spaceID] = pPipelineResourceSpace.
-                release();
         }
 
         return o;

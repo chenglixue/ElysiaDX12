@@ -7,9 +7,56 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f31d721d-cfba-4714-b0ce-c46a1a48110d" name="Changes" comment="">
+    <list default="true" id="8b3b7ff4-a89d-421a-96b5-2ce4c5675e77" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/public/PostProcess/CS_AO.hlsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.ElysiaRenderer/.idea/codeStyles/codeStyleConfig.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.ElysiaRenderer/.idea/encodings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.ElysiaRenderer/.idea/encodings.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.ElysiaRenderer/.idea/indexLayout.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.ElysiaRenderer/.idea/indexLayout.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.ElysiaRenderer/.idea/projectSettingsUpdater.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.ElysiaRenderer/.idea/projectSettingsUpdater.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.ElysiaRenderer/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.ElysiaRenderer/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea_backup/.idea.ElysiaRenderer/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea_backup/.idea.ElysiaRenderer/.idea/encodings.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea_backup/.idea.ElysiaRenderer/.idea/indexLayout.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea_backup/.idea.ElysiaRenderer/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer.sln" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer.sln" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/private/SSAOCommon.hlsli" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/private/SSAOCommon.hlsli" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/public/CS_SSAO.hlsl" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/public/CS_SSAO.hlsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/public/GBuffer.hlsl" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/public/GBuffer.hlsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/public/PostProcess/CS_AOHIZNormal.hlsl" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/public/PostProcess/CS_AOHIZNormal.hlsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/ElysiaRenderer.vcxproj" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/ElysiaRenderer.vcxproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/ElysiaRenderer.vcxproj.filters" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/ElysiaRenderer.vcxproj.filters" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/bin/imgui.ini" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/bin/imgui.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/imgui.ini" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/imgui.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Editor/UserData.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Editor/UserData.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/DX12Device.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/DX12Device.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/DX12GraphicsContext.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/DX12GraphicsContext.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/DX12GraphicsContext.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/DX12GraphicsContext.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/DX12RootSignature.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/DX12RootSignature.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/DX12RootSignature.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/DX12RootSignature.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/PipelineResourceSpace.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/PipelineResourceSpace.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/PipelineResourceSpace.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/PipelineResourceSpace.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/PipelineResourceUtility.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Core/PipelineResourceUtility.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Engine/ElysiaFrame.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Engine/ElysiaFrame.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/AOPass.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/AOPass.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/AOPass.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/AOPass.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/GBufferPass.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/GBufferPass.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/ShadowPass.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/ShadowPass.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/SceneManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/SceneManager.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Resource/Model/AssimpLoader.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Resource/Model/AssimpLoader.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Resource/Model/ModelManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Resource/Model/ModelManager.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/D3D12MemoryAllocator/D3D12MemAlloc.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/D3D12MemoryAllocator/D3D12MemAlloc.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/stdafx.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/stdafx.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/CameraManager.obj" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/CameraManager.obj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/ElysiaRenderer.Build.CppClean.log" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/ElysiaRenderer.log" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/ElysiaRenderer.log" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/ElysiaRenderer.tlog/CL.command.1.tlog" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/ElysiaRenderer.tlog/CL.command.1.tlog" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/ElysiaRenderer.tlog/CL.read.1.tlog" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/ElysiaRenderer.tlog/CL.read.1.tlog" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/ElysiaRenderer.tlog/CL.write.1.tlog" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/ElysiaRenderer.tlog/CL.write.1.tlog" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/ElysiaRenderer.vcxproj.FileListAbsolute.txt" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/ElysiaRenderer.vcxproj.FileListAbsolute.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/ModelImporter.obj" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/ModelImporter.obj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/SobolSequenceGenerator.obj" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/SobolSequenceGenerator.obj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/Transform.obj" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/Transform.obj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/vc143.idb" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/vc143.idb" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -22,90 +69,37 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory">{
-  &quot;lastFilter&quot;: {
-    &quot;state&quot;: &quot;OPEN&quot;,
-    &quot;assignee&quot;: &quot;chenglixue&quot;
-  }
-}</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/chenglixue/ElysiaDX12.git&quot;,
-    &quot;accountId&quot;: &quot;bd0bbad0-97f8-4513-9a04-f0f1c650a31f&quot;
-  }
-}</component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://A:/VS/VC/Tools/MSVC/14.44.35207/atlmfc/include/atlcomcli.h" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://A:/VS/VC/Tools/MSVC/14.44.35207/include/array" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://A:/VS/VC/Tools/MSVC/14.44.35207/include/memory" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://A:/VS/VC/Tools/MSVC/14.44.35207/include/random" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://A:/VS/VC/Tools/MSVC/14.44.35207/include/unordered_map" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://A:/VS/VC/Tools/MSVC/14.44.35207/include/vector" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://C:/Program Files (x86)/Windows Kits/10/Include/10.0.26100.0/ucrt/stdlib.h" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://C:/Program Files (x86)/Windows Kits/10/Include/10.0.26100.0/um/DirectXMathConvert.inl" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://C:/Program Files (x86)/Windows Kits/10/Include/10.0.26100.0/um/DirectXMathMatrix.inl" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/public/CS_Tonemap.hlsl" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/ElysiaRenderer/RenderHelper.h" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/ElysiaRenderer/include/EASTL/algorithm.h" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/ElysiaRenderer/include/EASTL/internal/function_detail.h" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/ElysiaRenderer/include/EASTL/internal/hashtable.h" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/ElysiaRenderer/include/EASTL/string.h" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/ElysiaRenderer/include/EASTL/vector.h" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/AGS/amd_ags.h" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/ElysiaRenderer/lib/AMD/libs/vectormath/vectormath.hpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/ElysiaRenderer/magic_enum/magic_enum.hpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/ElysiaRenderer/main.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Engine/ECS/Entity.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Engine/ECS/Entity.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Engine/FrameContext.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Engine/FrameContext.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/BasePass.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/DebugPass.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/DebugPass.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/GBufferPass.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/GBufferPass.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/PreDrawPass.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Resource/Model/ModelManager.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Resource/Model/ModelManager.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Resource/Model/SharedTypes.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Resource/Model/SharedTypes.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/EASTL/hashtable.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/SimpleMath/SimpleMath.h" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/SimpleMath/SimpleMath.inl" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/ElysiaRenderer/src/ThirdParty/imgui/imgui_impl_win32.h" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../FidelityFX-CACAO-v1.2/sample/bin/ShaderLibDX/ffx_cacao.hlsl" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../VEngine2-master/Game/assets/shaders/src/gtao_cs.hlsl" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://F:/Unity/Render - 副本/Assets/RenderFeature/BloomRF.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../FidelityFX-SDK-v1.1.4/samples/spd/shaders/spd_cs_downsampler.hlsl" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../FidelityFX-SDK-v1.1.4/samples/spd/shaders/spd_verify_results.hlsl" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../FidelityFX-SDK-v1.1.4/samples/spd/spdrendermodule.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../FidelityFX-SDK-v1.1.4/samples/spd/spdrendermodule.h" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../FidelityFX-SPD-master/sample/src/DX12/CSDownsampler.hlsl" root0="SKIP_HIGHLIGHTING" />
   </component>
-  <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 8
 }</component>
-  <component name="ProjectId" id="36rgvwKynBBUzKDftDoh1ryihiq" />
+  <component name="ProjectId" id="38h7xPgn424BOFAxNjoBUbft3Ln" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;C/C++ Project.ElysiaRenderer.executor&quot;: &quot;Debug&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;last_opened_file_path&quot;: &quot;D:/DX12/ElysiaDX12/ElysiaRenderer/Assets/Shaders/public/PostProcess/GenerateNormalMipmap.hlsl&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;rider.code.cleanup.on.save&quot;: &quot;true&quot;,
-    &quot;rider.code.cleanup.on.save.profile&quot;: &quot;Built-in: Reformat Code&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;configurable.group.editor&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "C/C++ Project.ElysiaRenderer.executor": "Debug",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "master",
+    "last_opened_file_path": "D:/DX12/ElysiaDX12/.clang-format",
+    "rider.code.cleanup.on.save": "true",
+    "rider.code.cleanup.on.save.profile": "Built-in: Reformat Code",
+    "settings.editor.selected.configurable": "preferences.sourceCode.C/C++"
   }
-}</component>
+}]]></component>
   <component name="RunManager">
     <configuration name="ElysiaRenderer" type="CppProject" factoryName="C++ Project">
       <configuration_1 setup="1">
@@ -120,6 +114,18 @@
         <option name="TERMINAL_INTERACTION_BEHAVIOR" value="AUTO_DETECT" />
         <option name="PROJECT_FILE_PATH" value="$PROJECT_DIR$/ElysiaRenderer/ElysiaRenderer.vcxproj" />
       </configuration_1>
+      <configuration_2 setup="1">
+        <option name="CONFIGURATION" value="Release" />
+        <option name="PLATFORM" value="x64" />
+        <option name="CURRENT_LAUNCH_PROFILE" value="Local" />
+        <option name="EXE_PATH" value="$(LocalDebuggerCommand)" />
+        <option name="PROGRAM_PARAMETERS" value="$(LocalDebuggerCommandArguments)" />
+        <option name="WORKING_DIRECTORY" value="$(LocalDebuggerWorkingDirectory)" />
+        <option name="PASS_PARENT_ENVS" value="1" />
+        <option name="USE_EXTERNAL_CONSOLE" value="0" />
+        <option name="TERMINAL_INTERACTION_BEHAVIOR" value="AUTO_DETECT" />
+        <option name="PROJECT_FILE_PATH" value="$PROJECT_DIR$/ElysiaRenderer/ElysiaRenderer.vcxproj" />
+      </configuration_2>
       <option name="DEFAULT_PROJECT_PATH" value="$PROJECT_DIR$/ElysiaRenderer/ElysiaRenderer.vcxproj" />
       <option name="PROJECT_FILE_PATH" value="$PROJECT_DIR$/ElysiaRenderer/ElysiaRenderer.vcxproj" />
       <option name="AUTO_SELECT_PRIORITY" value="0" />
@@ -131,85 +137,23 @@
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="f31d721d-cfba-4714-b0ce-c46a1a48110d" name="Changes" comment="" />
-      <created>1765770338933</created>
+      <changelist id="8b3b7ff4-a89d-421a-96b5-2ce4c5675e77" name="Changes" comment="" />
+      <created>1769240194320</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1765770338933</updated>
-      <workItem from="1765770340034" duration="123000" />
-      <workItem from="1765770483025" duration="2420000" />
-      <workItem from="1765778851087" duration="5883000" />
-      <workItem from="1765785951312" duration="9211000" />
-      <workItem from="1765852050150" duration="8687000" />
-      <workItem from="1765892118699" duration="512000" />
-      <workItem from="1765892655468" duration="9726000" />
-      <workItem from="1765937047408" duration="25129000" />
-      <workItem from="1766027753363" duration="16472000" />
-      <workItem from="1766114781661" duration="7995000" />
-      <workItem from="1766225204693" duration="1616000" />
-      <workItem from="1766369594263" duration="11309000" />
-      <workItem from="1766387329881" duration="10046000" />
-      <workItem from="1766455954963" duration="26065000" />
-      <workItem from="1766592012722" duration="5004000" />
-      <workItem from="1766643435532" duration="9654000" />
-      <workItem from="1766720458341" duration="599000" />
-      <workItem from="1766742335012" duration="2634000" />
-      <workItem from="1766848690927" duration="18808000" />
-      <workItem from="1766938647944" duration="1929000" />
-      <workItem from="1766973813856" duration="25185000" />
-      <workItem from="1767059668654" duration="27194000" />
-      <workItem from="1767104951269" duration="766000" />
-      <workItem from="1767105728326" duration="33000" />
-      <workItem from="1767106006510" duration="2244000" />
-      <workItem from="1767146149481" duration="386000" />
-      <workItem from="1767146556216" duration="447000" />
-      <workItem from="1767147013888" duration="186000" />
-      <workItem from="1767147211630" duration="380000" />
-      <workItem from="1767147652207" duration="675000" />
-      <workItem from="1767148343433" duration="106000" />
-      <workItem from="1767148457930" duration="295000" />
-      <workItem from="1767148763043" duration="153000" />
-      <workItem from="1767148926904" duration="163000" />
-      <workItem from="1767149103572" duration="197000" />
-      <workItem from="1767149354041" duration="284000" />
-      <workItem from="1767149649394" duration="344000" />
-      <workItem from="1767150010400" duration="262000" />
-      <workItem from="1767150322211" duration="141000" />
-      <workItem from="1767150471643" duration="36000" />
-      <workItem from="1767150515820" duration="4795000" />
-      <workItem from="1767202061289" duration="427000" />
-      <workItem from="1767257926076" duration="4694000" />
-      <workItem from="1767332903301" duration="32223000" />
-      <workItem from="1767460596234" duration="3662000" />
-      <workItem from="1767520775324" duration="144000" />
-      <workItem from="1767520933790" duration="3391000" />
-      <workItem from="1767537173167" duration="29214000" />
-      <workItem from="1767713820661" duration="62380000" />
-      <workItem from="1768490931102" duration="45575000" />
-      <workItem from="1768645049618" duration="26804000" />
-      <workItem from="1768718633515" duration="2964000" />
-      <workItem from="1768721930506" duration="36581000" />
-      <workItem from="1768807923556" duration="2133000" />
-      <workItem from="1768812675423" duration="42350000" />
-      <workItem from="1768913087705" duration="395000" />
-      <workItem from="1768914297908" duration="29247000" />
-      <workItem from="1768992440580" duration="34026000" />
-      <workItem from="1769143549750" duration="3260000" />
-      <workItem from="1769147631991" duration="213000" />
-      <workItem from="1769151339662" duration="2762000" />
+      <updated>1769240194320</updated>
+      <workItem from="1769240195638" duration="186000" />
+      <workItem from="1769240415741" duration="11658000" />
+      <workItem from="1769257127564" duration="98000" />
+      <workItem from="1769257267700" duration="26000" />
+      <workItem from="1769257311514" duration="246000" />
+      <workItem from="1769257582267" duration="843000" />
+      <workItem from="1769258434501" duration="14111000" />
     </task>
     <servers />
   </component>
-  <component name="TypeScriptGeneratedFilesManager">
-    <option name="version" value="3" />
-  </component>
-  <component name="UnityCheckinConfiguration" checkUnsavedScenes="true" />
   <component name="UnityProjectConfiguration" hasMinimizedUI="false" />
   <component name="VcsManagerConfiguration">
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-  </component>
-  <component name="XSLT-Support.FileAssociations.UIState">
-    <expand />
-    <select />
   </component>
 </project>
