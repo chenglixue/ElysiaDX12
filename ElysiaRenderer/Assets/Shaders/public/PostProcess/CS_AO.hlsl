@@ -57,7 +57,7 @@ void HBAO(uint3 dispatchThreadID: SV_DispatchThreadID)
 
     float4 AOData = SampleTexture2D_LOD(g_HIZTextureIndex, screenUV, ClampPointSampler, g_HIZMinMipmap);
     float eyeDepth = AOData.a * Constant_Float16F_Scale;
-    float3 normalWS = DecodeNormal(AOData.rgb);
+    float3 normalWS = AOData.rgb;
 
     FInputParams inputParam = (FInputParams)0;
     inputParam.PositionVS = ComputeClipSpacePosition(screenUV, eyeDepth, projMatrix);
@@ -179,7 +179,7 @@ void HBAOPlus(uint3 dispatchThreadID: SV_DispatchThreadID)
 
     float4 AOData = SampleTexture2D_LOD(g_HIZTextureIndex, screenUV, ClampPointSampler, g_HIZMinMipmap);
     float eyeDepth = AOData.a * Constant_Float16F_Scale;
-    float3 normalWS = DecodeNormal(AOData.rgb);
+    float3 normalWS = AOData.rgb;
 
     FInputParams inputParam = (FInputParams)0;
     inputParam.PositionVS = ComputeClipSpacePosition(screenUV, eyeDepth, projMatrix);
@@ -187,19 +187,19 @@ void HBAOPlus(uint3 dispatchThreadID: SV_DispatchThreadID)
     inputParam.ScreenUV = screenUV;
     inputParam.LinearEyeDepth = eyeDepth;
 
-    // projMatrix[0][0] = 1/tan(fovX/2), projMatrix[1][1] = 1/tan(fovY/2)
-    float2 projScale = float2(projMatrix[0][0], projMatrix[1][1]);
-
-    const float3 normalVS = normalize(mul(inputParam.NormalWS, viewMatrix));
+    const float3 normalVS = normalize(mul(inputParam.NormalWS, viewMatrix_I));
     inputParam.PositionVS += normalVS * g_AOBias * eyeDepth;
 
     float3 randomVector = SampleTexture2D(BlueNoiseTexIndex,
                                           inputParam.ScreenUV * g_noiseScale, WarpPointSampler).xyz;
     float jitter = randomVector.z;
-    float temporalAngle = (frameIndex % 8) * INV_FOUR_PI;
+    float temporalAngle = frameIndex % 8 * INV_FOUR_PI;
     float randomAngle = randomVector.x * TWO_PI + temporalAngle;
 
-    const int NUM_DIRECTIONS = 4;
+    // projMatrix[0][0] = 1/tan(fovX/2), projMatrix[1][1] = 1/tan(fovY/2)
+    const float2 projScale = float2(projMatrix[0][0], projMatrix[1][1]);
+
+    const int NUM_DIRECTIONS = 3 * g_AOSampleCount;
     const int NUM_STEPS = g_AOSampleStepCount;
     float radius = g_AORadius;
     float pixelRadius = radius * projScale.x / max(inputParam.LinearEyeDepth, 1.f);
@@ -207,17 +207,15 @@ void HBAOPlus(uint3 dispatchThreadID: SV_DispatchThreadID)
     float stepPixel = pixelRadius / (NUM_STEPS + 1);
 
     float occlusion = 0.f;
-    [unroll(4)]
+    [unroll(8)]
     for (UINT dir = 0; dir < NUM_DIRECTIONS; dir ++)
     {
         float angle = float(dir) / float(NUM_DIRECTIONS) * TWO_PI + randomAngle;
 
         float2 dirUV;
         sincos(angle, dirUV.y, dirUV.x);
-        dirUV *= g_TargetSize.zw * g_TargetSize.xx;
 
-        float2 texelSize = g_TargetSize.zw;
-        float2 deltaUV = float2(dirUV.x * texelSize.x, dirUV.y * texelSize.y) * stepPixel;
+        float2 deltaUV = dirUV * g_TargetSize.zw * stepPixel;
 
         float rayJitter = randomVector.y;
         float2 currentUV = inputParam.ScreenUV + deltaUV * rayJitter;

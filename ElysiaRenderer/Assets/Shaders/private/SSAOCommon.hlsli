@@ -72,7 +72,7 @@ float4 ComputeUpsampleContribution(UINT SourceTexIndex, float4 SourceSize,
         float4 DownSampleNormalDepth =
             SampleTexture2D_LOD(HIZTexIndex, SampleUV, WarpPointSampler, downSampleDepthMipmapLevel);
         float SampleEyeDepth = DownSampleNormalDepth.a * Constant_Float16F_Scale;
-        float3 LocalWorldNormal = DecodeNormal(DownSampleNormalDepth.xyz);
+        float3 LocalWorldNormal = DownSampleNormalDepth.xyz;
 
         float Weight = ComputeDepthSimilarity(SampleEyeDepth, EyeDepth, 0.003);
         Weight *= saturate(dot(LocalWorldNormal, CenterWorldNormal));
