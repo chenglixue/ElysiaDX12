@@ -23,7 +23,10 @@ namespace ElysiaRenderer
             static inline size_t HalfAORTID = PropertyToID(L"Half AO RT");
             static inline size_t OneFourAORTID = PropertyToID(L"One Four AO RT");
             static inline size_t HIZRTID = PropertyToID(L"AO HIZ RT");
-            static inline size_t TAARTID = PropertyToID(L"AO TAA RT");
+            static inline size_t TAA0RTID = PropertyToID(L"AO TAA0 RT");
+            static inline size_t TAA1RTID = PropertyToID(L"AO TAA1 RT");
+            static inline size_t AOBlurHorizonRTID = PropertyToID(L"AO Blur Horizon RT");
+            static inline size_t AOBlurVerticalRTID = PropertyToID(L"AO Blur Vertical RT");
         };
 
     public:
@@ -38,13 +41,17 @@ namespace ElysiaRenderer
     private:
         UINT m_HIZMipmapCount;
         static inline bool m_isFirstFrame = true;
-        static constexpr UINT NUM_DIRECTIONS = 4;
+        int m_currHistoryIndex = 0;
+        static constexpr UINT MAX_BLUR_RADIUS = 10;
 
         RenderTexture* m_pAORT = nullptr;
         RenderTexture* m_pHalfAORT = nullptr;
         RenderTexture* m_pOneFourAORT = nullptr;
         RenderTexture* m_pHIZRT = nullptr;
-        RenderTexture* m_pHistoryRT = nullptr;
+        RenderTexture* m_pTAA0RT = nullptr;
+        RenderTexture* m_pTAA1RT = nullptr;
+        RenderTexture* m_pBlurHorizonRT = nullptr;
+        RenderTexture* m_pBlurVerticalRT = nullptr;
         TextureManager::Handle m_blueNoise;
 
         struct ShaderPasseIDs
@@ -52,6 +59,8 @@ namespace ElysiaRenderer
             static inline int HIZPassID = -1;
             static inline int AOPassID = -1;
             static inline int TAAPassID = -1;
+            static inline int BlurHorizonPassID = -1;
+            static inline int BlurVerticalPassID = -1;
         };
         struct ShaderIDs
         {
@@ -67,6 +76,7 @@ namespace ElysiaRenderer
             static inline size_t projMatrix_I = PropertyToID(L"projMatrix_I");
             static inline size_t viewProjMatrix = PropertyToID(L"viewProjMatrix");
             static inline size_t viewProjMatrix_I = PropertyToID(L"viewProjMatrix_I");
+            static inline size_t g_ProjectScale = PropertyToID(L"g_ProjectScale");
 
             static inline size_t pre_viewMatrix = PropertyToID(L"pre_viewMatrix");
             static inline size_t pre_viewMatrix_I = PropertyToID(L"pre_viewMatrix_I");
@@ -115,12 +125,15 @@ namespace ElysiaRenderer
         };
 
         std::vector<Vector4> m_kernels;
+        std::vector<float> m_blurWeights;
 
         void DoSSAO();
         void DoHIZ();
         void DoTAA();
+        void DoBilateralBlurHorizon();
+        void DoBilateralBlurVerical();
         std::vector<Vector4> GenerateSSAOSampleKernel();
         std::vector<Vector4> GenerateHBAOSampleKernel();
-        std::vector<float> GenerateBlurWeights(UINT blurRadius, float sigma);
+        std::vector<float> GenerateBlurWeights(UINT blurRadius);
     };
 }

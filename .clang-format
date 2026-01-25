@@ -40,8 +40,8 @@ MaxEmptyLinesToKeep: 1
 # 头文件排序：DX12项目建议关闭
 SortIncludes: Never
 
-# 每行最大长度建议设置在 100-120
-ColumnLimit: 120
+# 每行最大长度
+ColumnLimit: 120  # 增加到120，为长参数列表留出空间
 
 # 针对构造函数初始化列表的缩进
 ConstructorInitializerIndentWidth: 4
@@ -52,3 +52,48 @@ NamespaceIndentation: All
 
 # extern "C" 内部保持缩进
 IndentExternBlock: AfterExternBlock
+
+# ========== 以下是新增的"一个参数一行"配置 ==========
+
+# 函数调用参数：不打包，每个参数单独一行
+BinPackArguments: false
+
+# 函数声明参数：不打包，每个参数单独一行  
+BinPackParameters: false
+
+# 模板参数：不打包，每个参数单独一行
+BinPackTemplateParameters: false
+
+# 构造函数初始化列表：每个初始化单独一行
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+
+# 允许所有声明参数在下一行：关闭（强制每个参数单独一行）
+AllowAllParametersOfDeclarationOnNextLine: false
+
+# 允许所有函数调用参数在下一行：关闭（强制每个参数单独一行）
+AllowAllArgumentsOnNextLine: false
+
+# 换行惩罚设置（降低单行参数列表的优先级）
+PenaltyExcessCharacter: 100  # 增加行长的惩罚
+PenaltyReturnTypeOnItsOwnLine: 200
+PenaltyBreakBeforeFirstCallParameter: 300
+
+# 模板声明总是换行
+AlwaysBreakTemplateDeclarations: Yes
+
+# 保留已有的花括号换行设置
+BraceWrapping:
+  AfterClass: true
+  AfterControlStatement: true
+  AfterEnum: true
+  AfterFunction: true
+  AfterNamespace: true
+  AfterStruct: true
+  AfterUnion: true
+  BeforeCatch: true
+  BeforeElse: true
+  BeforeLambdaBody: false
+  BeforeWhile: true
+  SplitEmptyFunction: true
+  SplitEmptyRecord: true
+  SplitEmptyNamespace: true

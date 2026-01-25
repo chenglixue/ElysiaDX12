@@ -374,6 +374,7 @@ namespace ElysiaEngine
 
             ImGui::Checkbox("Is Enable AO", &pUserData.aoParameter.IsEnableAO);
             ImGui::Checkbox("Is IsLerp AO", &pUserData.aoParameter.IsLerpAO);
+            ImGui::Checkbox("Is Blur", &pUserData.aoParameter.IsBlur);
 
             ImGui::SliderInt("AO Sample Count", &pUserData.aoParameter.SampleCount, 0, 6);
             ImGui::SliderInt("AO Sample Step Count", &pUserData.aoParameter.SampleStepCount, 0, 4);
@@ -400,6 +401,7 @@ namespace ElysiaEngine
                                           static_cast<int>(magic_enum::enum_count<AOBlurQuality>()));
             pUserData.aoParameter.BlurQuality = (AOBlurQuality)blurQualityIndex;
 
+            ImGui::SliderInt("AO Blur Radius", &pUserData.aoParameter.BlurIntensity, 1, 10);
             ImGui::SliderFloat("AO Sharpness", &pUserData.aoParameter.Sharpness, 1.f, 100.f);
         }
     }
