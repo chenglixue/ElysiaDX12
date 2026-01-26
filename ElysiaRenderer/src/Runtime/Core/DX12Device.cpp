@@ -62,7 +62,7 @@ namespace ElysiaCore
                                           DXGI_DEBUG_RLO_IGNORE_INTERNAL));
             ElysiaHelper::SafeRelease(pDebug);
         }
-#endif // DEBUG
+#endif
     }
 
     void DX12Device::OnCreate(std::wstring appName, bool bCPUValidationEnabled,

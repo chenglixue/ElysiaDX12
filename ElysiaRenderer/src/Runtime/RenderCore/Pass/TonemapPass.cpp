@@ -53,8 +53,8 @@ namespace ElysiaRenderer
     size_t TonemapPass::ShaderIDs::g_DestSize = SIZE_MAX;
     size_t TonemapPass::ShaderIDs::g_DestTextureIndex = SIZE_MAX;
 
-    TonemapPass::TonemapPass() :
-        BasePass()
+    TonemapPass::TonemapPass()
+        : BasePass()
     {
         ShaderIDs::u_shoulder = PropertyToID(L"u_shoulder");
         ShaderIDs::u_con = PropertyToID(L"u_con");
@@ -102,8 +102,12 @@ namespace ElysiaRenderer
     void TonemapPass::Render(FrameContext& context)
     {
         m_pCamera = context.pCamera;
+        m_pGPUTimer = context.pGPUTimer;
 
-        PIXHelper pix(m_pCommand->GetCommandList(), "Tonemap Pass");
+        auto passID = ShaderPasseIDs::TonemapPassID;
+        auto& passData = m_pMaterial->GetPassData(passID);
+        auto passName = passData.Name.c_str();
+        PIXHelper pix(m_pCommand->GetCommandList(), passName);
 
         SetupGamutMapperMatrices(
             ColorSpace_REC709,
@@ -265,13 +269,32 @@ namespace ElysiaRenderer
         }
         }
 
-        LpmSetup(m_shoulder, m_con, m_soft, m_con2, m_clip, m_scaleOnly,
-                 m_xyRedW, m_xyGreenW, m_xyBlueW, m_xyWhiteW,
-                 m_xyRedO, m_xyGreenO, m_xyBlueO, m_xyWhiteO,
-                 m_xyRedC, m_xyGreenC, m_xyBlueC, m_xyWhiteC,
+        LpmSetup(m_shoulder,
+                 m_con,
+                 m_soft,
+                 m_con2,
+                 m_clip,
+                 m_scaleOnly,
+                 m_xyRedW,
+                 m_xyGreenW,
+                 m_xyBlueW,
+                 m_xyWhiteW,
+                 m_xyRedO,
+                 m_xyGreenO,
+                 m_xyBlueO,
+                 m_xyWhiteO,
+                 m_xyRedC,
+                 m_xyGreenC,
+                 m_xyBlueC,
+                 m_xyWhiteC,
                  m_scaleC,
-                 m_softGap, m_hdrMax, m_exposure, m_contrast, m_shoulderContrast,
-                 m_saturation, m_crosstalk);
+                 m_softGap,
+                 m_hdrMax,
+                 m_exposure,
+                 m_contrast,
+                 m_shoulderContrast,
+                 m_saturation,
+                 m_crosstalk);
 
         m_pCommand->AddBarrier(m_pCameraColorRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
@@ -304,10 +327,12 @@ namespace ElysiaRenderer
 
             auto threadGroupSize = passData.GetKernelThreadGroupSizes();
             m_pCommand->Dispatch(CeilDivide(m_pCameraColorRT->GetWidth(), threadGroupSize.x),
-                                 CeilDivide(m_pCameraColorRT->GetHeight(), threadGroupSize.y), threadGroupSize.z);
+                                 CeilDivide(m_pCameraColorRT->GetHeight(), threadGroupSize.y),
+                                 threadGroupSize.z);
         }
 
         m_pCommand->AddBarrier(m_pCameraColorRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
     }
 
     void TonemapPass::UpdatePipeline()
@@ -323,7 +348,9 @@ namespace ElysiaRenderer
             passData.pCurrVariantData = &VariantManager->GetOrCompileVariantByNames(enableKeywords);
 
             passData.pPipelineStateObject = PSOManager::GetInstance().GetComputePipelineState(
-                m_pDevice, m_pMaterial.get(), ShaderPasseIDs::TonemapPassID);
+                m_pDevice,
+                m_pMaterial.get(),
+                ShaderPasseIDs::TonemapPassID);
         }
     }
 
@@ -337,9 +364,18 @@ namespace ElysiaRenderer
     }
 
     void TonemapPass::SetLPMColors(
-        float xyRedW[2], float xyGreenW[2], float xyBlueW[2], float xyWhiteW[2],
-        float xyRedO[2], float xyGreenO[2], float xyBlueO[2], float xyWhiteO[2],
-        float xyRedC[2], float xyGreenC[2], float xyBlueC[2], float xyWhiteC[2],
+        float xyRedW[2],
+        float xyGreenW[2],
+        float xyBlueW[2],
+        float xyWhiteW[2],
+        float xyRedO[2],
+        float xyGreenO[2],
+        float xyBlueO[2],
+        float xyWhiteO[2],
+        float xyRedC[2],
+        float xyGreenC[2],
+        float xyBlueC[2],
+        float xyWhiteC[2],
         float scaleC
         )
     {

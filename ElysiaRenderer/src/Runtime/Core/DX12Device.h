@@ -118,7 +118,8 @@ namespace ElysiaCore
                              const uint32_t* destDescriptorRangeSizes,
                              uint32_t numSrcDescriptorRanges,
                              const D3D12_CPU_DESCRIPTOR_HANDLE* srcDescriptorRangeStarts,
-                             const uint32_t* srcDescriptorRangeSizes, D3D12_DESCRIPTOR_HEAP_TYPE descriptorType);
+                             const uint32_t* srcDescriptorRangeSizes,
+                             D3D12_DESCRIPTOR_HEAP_TYPE descriptorType);
         void CopyDescriptorFromStageToRenderPass(DX12DescriptorHeapHandle SRVHandle, UINT index);
         ContextSubmissionResult SubmitContextWork(DX12Context& context);
 

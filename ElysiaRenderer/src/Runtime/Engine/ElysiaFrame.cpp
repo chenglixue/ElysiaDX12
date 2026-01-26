@@ -24,8 +24,8 @@ namespace ElysiaEngine
         b = !b;
     }
 
-    ElysiaFrame::ElysiaFrame(std::wstring name) :
-        FrameworkWindows(name)
+    ElysiaFrame::ElysiaFrame(std::wstring name)
+        : FrameworkWindows(name)
     {
 
         m_time = 0;
@@ -240,15 +240,21 @@ namespace ElysiaEngine
         if (ImGui::CollapsingHeader("Debug"))
         {
             int debugModeIndex = (int)pUserData.debugMode;
-            ImGui::Combo("Debug Mode", &debugModeIndex,
+            ImGui::Combo("Debug Mode",
+                         &debugModeIndex,
                          StringViewToChar(magic_enum::enum_names<DebugMode>().data(),
                                           magic_enum::enum_count<DebugMode>()).data(),
                          (int)magic_enum::enum_count<DebugMode>());
-            debugModeIndex = std::clamp(debugModeIndex, 0,
+            debugModeIndex = std::clamp(debugModeIndex,
+                                        0,
                                         static_cast<int>(magic_enum::enum_count<DebugMode>()));
             pUserData.debugMode = (DebugMode)debugModeIndex;
 
-            ImGui::SliderInt("mipmap level", &pUserData.mipmapLevel, 0, 10, "%.3f",
+            ImGui::SliderInt("mipmap level",
+                             &pUserData.mipmapLevel,
+                             0,
+                             10,
+                             "%.3f",
                              ImGuiSliderFlags_AlwaysClamp);
         }
 
@@ -259,33 +265,40 @@ namespace ElysiaEngine
             ImGui::SliderFloat("Intensity", &pUserData.lightIntensity, 0, 20, "%.3f");
 
             int shadowTypeIndex = (int)pUserData.shadowType;
-            ImGui::Combo("Shadow Type", &shadowTypeIndex,
+            ImGui::Combo("Shadow Type",
+                         &shadowTypeIndex,
                          StringViewToChar(magic_enum::enum_names<ShadowType>().data(),
                                           magic_enum::enum_count<ShadowType>()).data(),
                          (int)magic_enum::enum_count<ShadowType>());
-            shadowTypeIndex = std::clamp(shadowTypeIndex, 0,
+            shadowTypeIndex = std::clamp(shadowTypeIndex,
+                                         0,
                                          static_cast<int>(magic_enum::enum_count<ShadowType>()));
             pUserData.shadowType = (ShadowType)shadowTypeIndex;
 
             int shadowQualityIndex = (int)pUserData.shadowQuality;
-            ImGui::Combo("Shadow Quality", &shadowQualityIndex,
+            ImGui::Combo("Shadow Quality",
+                         &shadowQualityIndex,
                          StringViewToChar(magic_enum::enum_names<ShadowQuality>().data(),
                                           magic_enum::enum_count<ShadowQuality>()).data(),
                          (int)magic_enum::enum_count<ShadowQuality>());
-            shadowQualityIndex = std::clamp(shadowQualityIndex, 0,
+            shadowQualityIndex = std::clamp(shadowQualityIndex,
+                                            0,
                                             static_cast<int>(magic_enum::enum_count<
                                                 ShadowQuality>()));
             pUserData.shadowQuality = (ShadowQuality)shadowQualityIndex;
 
             ImGui::SliderFloat("Shadow Depth Bias", &pUserData.shadowDepthBias, 0, 10);
             ImGui::SliderFloat("Shadow Slope Depth Bias", &pUserData.shadowSlopeDepthBias, 0, 10);
-            ImGui::SliderFloat("Shadow Max Slope Depth Bias", &pUserData.shadowMaxSlopeDepthBias, 0,
+            ImGui::SliderFloat("Shadow Max Slope Depth Bias",
+                               &pUserData.shadowMaxSlopeDepthBias,
+                               0,
                                10);
         }
 
         if (ImGui::CollapsingHeader("PBR Data"))
         {
-            ImGui::ColorEdit3("Base Color Tint", (float*)&pUserData.BaseColorTint,
+            ImGui::ColorEdit3("Base Color Tint",
+                              (float*)&pUserData.BaseColorTint,
                               ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_AlphaPreview |
                               ImGuiColorEditFlags_HDR);
             ImGui::SliderFloat("Opacity", &pUserData.Opacity, 0.f, 1.f);
@@ -293,7 +306,9 @@ namespace ElysiaEngine
             ImGui::SliderFloat("Normal Intensity", &pUserData.NormalIntensity, 0.f, 5.f);
             ImGui::SliderFloat("Metallic Intensity", &pUserData.MetallicIntensity, 0.f, 5.f);
             ImGui::SliderFloat("Roughness Intensity", &pUserData.RoughnessIntensity, 0.f, 5.f);
-            ImGui::SliderFloat("Ambient Cubemap Intensity", &pUserData.AmbientCubemapIntensity, 0.f,
+            ImGui::SliderFloat("Ambient Cubemap Intensity",
+                               &pUserData.AmbientCubemapIntensity,
+                               0.f,
                                2.f);
             ImGui::ColorEdit3("Ambient Cubemap Tint", (float*)&pUserData.AmbientCubemapTint);
         }
@@ -303,26 +318,32 @@ namespace ElysiaEngine
             ImGui::Checkbox("Is Enable HDR", &pUserData.IsUseHDR);
 
             int HDRQualityIndex = (int)pUserData.HDRLevel;
-            ImGui::Combo("HDR Quality", &HDRQualityIndex,
+            ImGui::Combo("HDR Quality",
+                         &HDRQualityIndex,
                          StringViewToChar(magic_enum::enum_names<HDRQuality>().data(),
                                           magic_enum::enum_count<HDRQuality>()).data(),
                          (int)magic_enum::enum_count<HDRQuality>());
-            HDRQualityIndex = std::clamp(HDRQualityIndex, 0,
+            HDRQualityIndex = std::clamp(HDRQualityIndex,
+                                         0,
                                          static_cast<int>(magic_enum::enum_count<HDRQuality>()));
             pUserData.HDRLevel = (HDRQuality)HDRQualityIndex;
 
             int tonemapModeIndex = (int)pUserData.tonemapMode;
-            ImGui::Combo("Tonemap Mode", &tonemapModeIndex,
+            ImGui::Combo("Tonemap Mode",
+                         &tonemapModeIndex,
                          StringViewToChar(magic_enum::enum_names<TonemapMode>().data(),
                                           magic_enum::enum_count<TonemapMode>()).data(),
                          (int)magic_enum::enum_count<TonemapMode>());
-            tonemapModeIndex = std::clamp(tonemapModeIndex, 0,
+            tonemapModeIndex = std::clamp(tonemapModeIndex,
+                                          0,
                                           static_cast<int>(magic_enum::enum_count<TonemapMode>()));
             pUserData.tonemapMode = (TonemapMode)tonemapModeIndex;
 
             const char** displayModeNames = &m_displayModesNamesAvailable[0];
-            if (ImGui::Combo("Display Mode", (int*)&m_currentDisplayModeNamesIndex,
-                             displayModeNames, (int)m_displayModesNamesAvailable.size()))
+            if (ImGui::Combo("Display Mode",
+                             (int*)&m_currentDisplayModeNamesIndex,
+                             displayModeNames,
+                             (int)m_displayModesNamesAvailable.size()))
             {
                 if (m_fullscreenMode != PRESENTATIONMODE_WINDOWED)
                 {
@@ -351,11 +372,13 @@ namespace ElysiaEngine
             }
 
             int colorSpaceIndex = (int)pUserData.colorSpace;
-            ImGui::Combo("Color space", &colorSpaceIndex,
+            ImGui::Combo("Color space",
+                         &colorSpaceIndex,
                          StringViewToChar(magic_enum::enum_names<ColorSpace>().data(),
                                           magic_enum::enum_count<ColorSpace>()).data(),
                          (int)magic_enum::enum_count<ColorSpace>());
-            colorSpaceIndex = std::clamp(colorSpaceIndex, 0,
+            colorSpaceIndex = std::clamp(colorSpaceIndex,
+                                         0,
                                          static_cast<int>(magic_enum::enum_count<ColorSpace>()));
             pUserData.colorSpace = (ColorSpace)colorSpaceIndex;
 
@@ -393,16 +416,26 @@ namespace ElysiaEngine
             ImGui::SliderFloat("AO TAA Lerp Weight", &pUserData.aoParameter.TAALerpFactor, 0.05f, 0.1f);
 
             int blurQualityIndex = (int)pUserData.aoParameter.BlurQuality;
-            ImGui::Combo("Blur Quality", &blurQualityIndex,
+            ImGui::Combo("Blur Quality",
+                         &blurQualityIndex,
                          StringViewToChar(magic_enum::enum_names<AOBlurQuality>().data(),
                                           magic_enum::enum_count<AOBlurQuality>()).data(),
                          (int)magic_enum::enum_count<AOBlurQuality>());
-            blurQualityIndex = std::clamp(blurQualityIndex, 0,
+            blurQualityIndex = std::clamp(blurQualityIndex,
+                                          0,
                                           static_cast<int>(magic_enum::enum_count<AOBlurQuality>()));
             pUserData.aoParameter.BlurQuality = (AOBlurQuality)blurQualityIndex;
 
             ImGui::SliderInt("AO Blur Radius", &pUserData.aoParameter.BlurIntensity, 1, 10);
             ImGui::SliderFloat("AO Sharpness", &pUserData.aoParameter.Sharpness, 1.f, 100.f);
+        }
+
+        if (ImGui::CollapsingHeader("Timing"))
+        {
+            for (const auto& ts : m_pRenderer->GetTimingValues())
+            {
+                ImGui::Text("%s: %.2f us", ts.m_label.c_str(), ts.m_microseconds);
+            }
         }
     }
 }

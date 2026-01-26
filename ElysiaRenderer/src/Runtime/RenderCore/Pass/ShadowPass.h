@@ -50,7 +50,7 @@ namespace ElysiaRenderer
         std::vector<Vector2> m_sobolSqeuences;
 
         void UpdateShadowPassVariant(UINT passIndex);
-        void DrawMesh(ElysiaEngine::FrameContext& context, UINT passIndex);
+        void DrawMesh(ElysiaEngine::FrameContext& context, PassData& passData);
         void DrawShadowPass(ElysiaEngine::FrameContext& context);
     };
 }

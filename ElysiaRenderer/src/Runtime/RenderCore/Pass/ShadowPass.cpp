@@ -43,7 +43,8 @@ namespace ElysiaRenderer
     size_t ShadowPass::ShaderIDs::opacity = PropertyToID(L"opacity");
     size_t ShadowPass::ShaderIDs::cutoff = PropertyToID(L"cutoff");
 
-    ShadowPass::ShadowPass() : BasePass()
+    ShadowPass::ShadowPass()
+        : BasePass()
     {
     }
     ShadowPass::~ShadowPass()
@@ -76,20 +77,7 @@ namespace ElysiaRenderer
     void ShadowPass::Render(ElysiaEngine::FrameContext& context)
     {
         m_pCamera = context.pCamera;
-
-        PIXHelper pix(m_pCommand->GetCommandList(), "Shadow Pass");
-
-        m_pMaterial->SetFloat(ShaderIDs::shadowNearZ,
-                              LightManager::GetInstance().GetMainShadow()->GetNearZ());
-        m_pMaterial->SetFloat(ShaderIDs::shadowFarZ,
-                              LightManager::GetInstance().GetMainShadow()->GetFarZ());
-        m_pMaterial->SetFloat(ShaderIDs::shadowDepthBias,
-                              UserData::GetInstance().shadowDepthBias / 100);
-        m_pMaterial->SetFloat(ShaderIDs::shadowSlopeDepthBias,
-                              UserData::GetInstance().shadowSlopeDepthBias / 100);
-        m_pMaterial->SetFloat(ShaderIDs::shadowMaxSlopeDepthBias,
-                              UserData::GetInstance().shadowMaxSlopeDepthBias / 100);
-        m_pMaterial->SetVector2Array(ShaderIDs::g_sobolSequence, m_sobolSqeuences);
+        m_pGPUTimer = context.pGPUTimer;
 
         DrawShadowPass(context);
     }
@@ -152,29 +140,33 @@ namespace ElysiaRenderer
         RTDesc.m_depthStencilFormat = LightManager::GetInstance().GetMainShadowRT()->
                                                                   GetFormat();
         passData.pPipelineStateObject = PSOManager::GetInstance().GetGraphicsPipelineState(
-            m_pDevice, m_pMaterial.get(), passIndex, RTDesc);
+            m_pDevice,
+            m_pMaterial.get(),
+            passIndex,
+            RTDesc);
     }
 
-    void ShadowPass::DrawMesh(ElysiaEngine::FrameContext& context, UINT passIndex)
+    void ShadowPass::DrawMesh(ElysiaEngine::FrameContext& context, PassData& passData)
     {
-        m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-        auto& passData = m_pMaterial->GetPassData(passIndex);
-        SetSpaceResource(passData, PER_PASS_SPACE);
-        SetSpaceResource(passData, PER_FRAME_SPACE);
-
-        if (context.renderList.size())
-        {
-            m_pCommand->SetIndexBuffer(context.renderList[0].ibView);
-            m_pCommand->SetVertexBuffer(0, 1, context.renderList[0].vbView);
-        }
-
         struct alignas(16)
         {
             UINT baseColorTexIndex;
             float opacity;
             float cutoff;
-        }constantData;
+        } constantData;
         constexpr UINT constantSize = sizeof(constantData) / 4;
+
+        m_pMaterial->SetFloat(ShaderIDs::shadowNearZ,
+                              LightManager::GetInstance().GetMainShadow()->GetNearZ());
+        m_pMaterial->SetFloat(ShaderIDs::shadowFarZ,
+                              LightManager::GetInstance().GetMainShadow()->GetFarZ());
+        m_pMaterial->SetFloat(ShaderIDs::shadowDepthBias,
+                              UserData::GetInstance().shadowDepthBias / 100);
+        m_pMaterial->SetFloat(ShaderIDs::shadowSlopeDepthBias,
+                              UserData::GetInstance().shadowSlopeDepthBias / 100);
+        m_pMaterial->SetFloat(ShaderIDs::shadowMaxSlopeDepthBias,
+                              UserData::GetInstance().shadowMaxSlopeDepthBias / 100);
+        m_pMaterial->SetVector2Array(ShaderIDs::g_sobolSequence, m_sobolSqeuences);
 
         for (const auto& renderItem : context.renderList)
         {
@@ -195,27 +187,40 @@ namespace ElysiaRenderer
     }
     void ShadowPass::DrawShadowPass(ElysiaEngine::FrameContext& context)
     {
+        auto passID = ShaderPassIDs::ShadowCastPassID;
+        auto& passData = m_pMaterial->GetPassData(passID);
+        auto passName = passData.Name.c_str();
+        PIXHelper pix(m_pCommand->GetCommandList(), passName);
+
         auto pShadowRT = LightManager::GetInstance().GetMainShadowRT();
+        PipelineInfo pipelineStateData{};
+        pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(
+            passID).pPipelineStateObject;
+        pipelineStateData.m_renderTargets = {};
+        pipelineStateData.m_depthStencilTarget = pShadowRT->GetTexture();
+        m_pCommand->SetPipeline(pipelineStateData);
+        SetSpaceResource(passData, PER_PASS_SPACE);
+        SetSpaceResource(passData, PER_FRAME_SPACE);
+
         m_pCommand->AddBarrier(pShadowRT, D3D12_RESOURCE_STATE_DEPTH_WRITE);
         m_pCommand->ClearDepthStencilTarget(pShadowRT, 1.f, 0);
-
+        m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+        m_pCommand->SetViewport(
+            reinterpret_cast<DX12DirectionLight*>(m_pMainLight)->GetMainShadow()->
+                                                                 GetViewport());
+        m_pCommand->SetScissorRect(
+            reinterpret_cast<DX12DirectionLight*>(m_pMainLight)->GetMainShadow()->
+                                                                 GetScissorRect());
+        if (context.renderList.size())
         {
-            PipelineInfo pipelineStateData{};
-            pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(
-                ShaderPassIDs::ShadowCastPassID).pPipelineStateObject;
-            pipelineStateData.m_renderTargets = {};
-            pipelineStateData.m_depthStencilTarget = pShadowRT->GetTexture();
-            m_pCommand->SetPipeline(pipelineStateData);
-
-            m_pCommand->SetViewport(
-                reinterpret_cast<DX12DirectionLight*>(m_pMainLight)->GetMainShadow()->
-                                                                     GetViewport());
-            m_pCommand->SetScissorRect(
-                reinterpret_cast<DX12DirectionLight*>(m_pMainLight)->GetMainShadow()->
-                                                                     GetScissorRect());
-            DrawMesh(context, ShaderPassIDs::ShadowCastPassID);
+            m_pCommand->SetIndexBuffer(context.renderList[0].ibView);
+            m_pCommand->SetVertexBuffer(0, 1, context.renderList[0].vbView);
         }
 
+        DrawMesh(context, passData);
+
         m_pCommand->AddBarrier(pShadowRT, D3D12_RESOURCE_STATE_DEPTH_READ);
+
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
     }
 }

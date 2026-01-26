@@ -20,10 +20,13 @@ void AOHIZNormal(uint3 dispatchThreadID : SV_DispatchThreadID)
     const uint2 srcBaseCoord = dispatchThreadID.xy * 2;
     const uint2 destCoord = dispatchThreadID.xy;
 
-    if (destCoord.x >= (uint)g_TargetSize.x || destCoord.y >= (uint)g_TargetSize.y)
-        return;
-
     RWTexture2D<float4> o = ResourceDescriptorHeap[g_TargetTexIndex];
+
+    float2 screenUV = (float2(dispatchThreadID.xy) + 0.5f) * g_TargetSize.zw;
+    float3 normalWS = SampleNormalWS(screenUV,ClampPointSampler);
+    float rawDepth = SampleTexture2D(OpaqueDepthIndex, screenUV, ClampPointSampler);
+    float eyeDepth = LinearEyeDepth(rawDepth, g_ZBufferParams);
+    eyeDepth /= Constant_Float16F_Scale;
 
     float4 result;
     [branch]
@@ -61,17 +64,20 @@ void AOHIZNormal(uint3 dispatchThreadID : SV_DispatchThreadID)
         }
 
         float3 weightedNormalSum = 1e-4;
-        float totalWeight = 1e-4;
-        float weights[4];
-        [unroll(4)]
-        for (int i = 0; i < 4; i ++)
+        if (g_MipmapLevel <= 2)
         {
-            weights[i] = ComputeDepthSimilarity(samples[i].a, minDepth, 0.003f);
-            totalWeight += weights[i];
-            weightedNormalSum += samples[i].rgb * weights[i];
+            float totalWeight = 1e-4;
+            float weights[4];
+            [unroll(4)]
+            for (int i = 0; i < 4; i ++)
+            {
+                weights[i] = ComputeDepthSimilarity(samples[i].a, minDepth, 0.003f);
+                totalWeight += weights[i];
+                weightedNormalSum += samples[i].rgb * weights[i];
+            }
+            weightedNormalSum /= totalWeight;
+            weightedNormalSum = normalize(weightedNormalSum);
         }
-        weightedNormalSum /= totalWeight;
-        weightedNormalSum = normalize(weightedNormalSum);
 
         result = float4(weightedNormalSum, minDepth);
     }

@@ -52,6 +52,7 @@ namespace ElysiaRenderer
         DX12Device* m_pDevice = nullptr;
         DX12GraphicsContext* m_pCommand = nullptr;
         SwapChain* m_pSwaiChain = nullptr;
+        ElysiaHelper::GPUTimestamps* m_pGPUTimer = nullptr;
         DX12Camera* m_pCamera = nullptr;
         RenderTexture* m_pCameraColorRT = nullptr;
         RenderTexture* m_pCameraDepthRT = nullptr;

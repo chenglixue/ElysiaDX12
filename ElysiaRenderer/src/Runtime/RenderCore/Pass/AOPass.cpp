@@ -123,28 +123,28 @@ namespace ElysiaRenderer
             },
             ShaderPass
             {
-                .Name = "AO Pass",
+                .Name = "Calc AO Pass",
                 .FilePath = L"Shaders\\public\\PostProcess\\CS_AO.hlsl",
                 .IsComputeShader = true,
                 .ComputeEntryPoint = L"HBAOPlus",
             },
             ShaderPass
             {
-                .Name = "TAA Pass",
+                .Name = "AO TAA Pass",
                 .FilePath = L"Shaders\\public\\PostProcess\\CS_AOTAA.hlsl",
                 .IsComputeShader = true,
                 .ComputeEntryPoint = L"TAA",
             },
             ShaderPass
             {
-                .Name = "Blur Horizon Pass",
+                .Name = "AO Bilateral Blur Horizon Pass",
                 .FilePath = L"Shaders\\public\\PostProcess\\CS_Bilateral_Blur.hlsl",
                 .IsComputeShader = true,
                 .ComputeEntryPoint = L"HorizionBilateralBlur",
             },
             ShaderPass
             {
-                .Name = "Blur Vertical Pass",
+                .Name = "AO Bilateral Blur Vertical Pass",
                 .FilePath = L"Shaders\\public\\PostProcess\\CS_Bilateral_Blur.hlsl",
                 .IsComputeShader = true,
                 .ComputeEntryPoint = L"VerticalBilateralBlur",
@@ -152,10 +152,10 @@ namespace ElysiaRenderer
         };
         m_pMaterial = std::make_unique<Material>(m_pDevice, m_shaderPasses);
         ShaderPasseIDs::HIZPassID = m_pMaterial->FindPassIndex("HIZ Pass");
-        ShaderPasseIDs::AOPassID = m_pMaterial->FindPassIndex("AO Pass");
-        ShaderPasseIDs::TAAPassID = m_pMaterial->FindPassIndex("TAA Pass");
-        ShaderPasseIDs::BlurHorizonPassID = m_pMaterial->FindPassIndex("Blur Horizon Pass");
-        ShaderPasseIDs::BlurVerticalPassID = m_pMaterial->FindPassIndex("Blur Vertical Pass");
+        ShaderPasseIDs::AOPassID = m_pMaterial->FindPassIndex("Calc AO Pass");
+        ShaderPasseIDs::TAAPassID = m_pMaterial->FindPassIndex("AO TAA Pass");
+        ShaderPasseIDs::BlurHorizonPassID = m_pMaterial->FindPassIndex("AO Bilateral Blur Horizon Pass");
+        ShaderPasseIDs::BlurVerticalPassID = m_pMaterial->FindPassIndex("AO Bilateral Blur Vertical Pass");
 
         UpdatePipeline();
 
@@ -170,6 +170,7 @@ namespace ElysiaRenderer
     {
         PIXHelper pix(m_pCommand->GetCommandList(), "AO Pass");
         m_pCamera = context.pCamera;
+        m_pGPUTimer = context.pGPUTimer;
 
         IsDebugLayerEnabled(m_pDevice->GetDevice());
 
@@ -257,10 +258,11 @@ namespace ElysiaRenderer
 
     void AOPass::DoHIZ()
     {
-        PIXHelper pix(m_pCommand->GetCommandList(), "HIZ");
-
         auto passID = ShaderPasseIDs::HIZPassID;
         auto& passData = m_pMaterial->GetPassData(passID);
+        auto passName = passData.Name.c_str();
+        PIXHelper pix(m_pCommand->GetCommandList(), passName);
+
         PipelineInfo pipelineStateData{};
         pipelineStateData.m_pipelineStateObject = passData.pPipelineStateObject;
         m_pCommand->SetPipeline(pipelineStateData);
@@ -326,12 +328,16 @@ namespace ElysiaRenderer
         }
 
         m_pCommand->AddBarrier(m_pHIZRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
     }
     void AOPass::DoSSAO()
     {
-        PIXHelper pix(m_pCommand->GetCommandList(), "Calc AO Pass");
         auto passID = ShaderPasseIDs::AOPassID;
         auto& passData = m_pMaterial->GetPassData(passID);
+        auto passName = passData.Name.c_str();
+
+        PIXHelper pix(m_pCommand->GetCommandList(), passName);
         PipelineInfo pipelineStateData{};
         pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(
                                                                  passID)
@@ -461,12 +467,16 @@ namespace ElysiaRenderer
             m_pCommand->AddBarrier(targetRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
         }
         m_pCommand->FlushBarrier();
+
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
     }
     void AOPass::DoTAA()
     {
-        PIXHelper pix(m_pCommand->GetCommandList(), "TAA Pass");
         auto passID = ShaderPasseIDs::TAAPassID;
         auto& passData = m_pMaterial->GetPassData(passID);
+        auto passName = passData.Name.c_str();
+
+        PIXHelper pix(m_pCommand->GetCommandList(), passName);
         PipelineInfo pipelineStateData{};
         pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(
                                                                  passID)
@@ -559,12 +569,14 @@ namespace ElysiaRenderer
             m_currHistoryIndex = (m_currHistoryIndex + 1) % 2;
         }
 
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
     }
     void AOPass::DoBilateralBlurHorizon()
     {
-        PIXHelper pix(m_pCommand->GetCommandList(), "Blur Horizon Pass");
         auto passID = ShaderPasseIDs::BlurHorizonPassID;
         auto& passData = m_pMaterial->GetPassData(passID);
+        auto passName = passData.Name.c_str();
+        PIXHelper pix(m_pCommand->GetCommandList(), passName);
         PipelineInfo pipelineStateData{};
         pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(
                                                                  passID)
@@ -595,12 +607,15 @@ namespace ElysiaRenderer
             m_pCommand->AddBarrier(targetRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
         }
 
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
     }
     void AOPass::DoBilateralBlurVerical()
     {
-        PIXHelper pix(m_pCommand->GetCommandList(), "Blur Vertical Pass");
         auto passID = ShaderPasseIDs::BlurVerticalPassID;
         auto& passData = m_pMaterial->GetPassData(passID);
+        auto passName = passData.Name.c_str();
+        PIXHelper pix(m_pCommand->GetCommandList(), passName);
+
         PipelineInfo pipelineStateData{};
         pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(
                                                                  passID)
@@ -632,6 +647,8 @@ namespace ElysiaRenderer
             m_pCommand->AddUAVBarrier(targetRT, false);
             m_pCommand->AddBarrier(targetRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
         }
+
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
     }
 
     std::vector<Vector4> AOPass::GenerateSSAOSampleKernel()

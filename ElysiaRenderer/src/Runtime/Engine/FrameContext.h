@@ -1,4 +1,5 @@
 #pragma once
+#include "Runtime/Developer/GPUTimestamps.h"
 #include "Runtime/RenderCore/RenderItem.h"
 
 namespace ElysiaRenderer
@@ -15,5 +16,6 @@ namespace ElysiaEngine
         std::vector<ElysiaRenderer::RenderItem> renderList;
         std::function<void()> buildUI;
         ElysiaRenderer::DX12Camera* pCamera;
+        ElysiaHelper::GPUTimestamps* pGPUTimer;
     };
 }

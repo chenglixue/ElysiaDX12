@@ -49,14 +49,16 @@ namespace ElysiaRenderer
     Renderer::Renderer() = default;
     Renderer::~Renderer() = default;
 
-    void Renderer::OnCreate(DX12Device* pDevice, SwapChain* pSwapChain,
+    void Renderer::OnCreate(DX12Device* pDevice,
+                            SwapChain* pSwapChain,
                             DX12GraphicsContext* context)
     {
         m_pDevice = pDevice;
         m_pGraphicsContext = context;
 
+        m_pGPUTimer = std::make_unique<GPUTimestamps>();
         // initialize the GPU time stamps module
-        m_GPUTimer.OnCreate(pDevice, NUM_BACK_BUFFERS);
+        m_pGPUTimer->OnCreate(pDevice, NUM_BACK_BUFFERS);
 
         InitPSOHelpers();
 
@@ -79,7 +81,8 @@ namespace ElysiaRenderer
             std::make_unique<FinalBlitPass>()));
     }
 
-    void Renderer::OnCreateWindowSizeDependentResources(SwapChain* pSwapChain, uint32_t Width,
+    void Renderer::OnCreateWindowSizeDependentResources(SwapChain* pSwapChain,
+                                                        uint32_t Width,
                                                         uint32_t Height)
     {
         m_Width = Width;
@@ -91,12 +94,15 @@ namespace ElysiaRenderer
         CameraManager::GetInstance().CreateMainCamera(
             Vector3(-11.5f, 200.85f, -0.45f),
             static_cast<float>(Width) / static_cast<float>(Height),
-            AMD_PI_OVER_4, 0.1f, 2000.f);
+            AMD_PI_OVER_4,
+            0.1f,
+            2000.f);
 
         if (!UserData::GetInstance().IsUseHDR)
         {
             m_pCameraColorRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(
-                Width, Height,
+                Width,
+                Height,
                 DXGI_FORMAT_R8G8B8A8_UNORM,
                 true,
                 L"Camera Color RT");
@@ -108,7 +114,8 @@ namespace ElysiaRenderer
             case HDRQuality::Low:
             {
                 m_pCameraColorRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(
-                    Width, Height,
+                    Width,
+                    Height,
                     DXGI_FORMAT_R11G11B10_FLOAT,
                     true,
                     L"Camera Color RT");
@@ -117,7 +124,8 @@ namespace ElysiaRenderer
             case HDRQuality::High:
             {
                 m_pCameraColorRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(
-                    Width, Height,
+                    Width,
+                    Height,
                     DXGI_FORMAT_R16G16B16A16_FLOAT,
                     true,
                     L"Camera Color RT");
@@ -130,7 +138,8 @@ namespace ElysiaRenderer
             }
             }
         }
-        m_pCameraDepthRT = RenderTargetManager::GetInstance().CreateRenderTexture(Width, Height,
+        m_pCameraDepthRT = RenderTargetManager::GetInstance().CreateRenderTexture(Width,
+                                                                                  Height,
                                                                                   DXGI_FORMAT_D32_FLOAT_S8X24_UINT,
                                                                                   true,
                                                                                   L"Camera Depth RT");
@@ -169,21 +178,24 @@ namespace ElysiaRenderer
         LightManager::GetInstance().Update(frameContext);
         SerializeUserData();
 
-        // Timing values
+        frameContext.pGPUTimer = m_pGPUTimer.get();
+
         UINT64 gpuTicksPerSecond;
         m_pDevice->GetDirectQueue()->GetTimestampFrequency(&gpuTicksPerSecond);
-        m_GPUTimer.OnBeginFrame(gpuTicksPerSecond, &m_TimeStamps);
-        m_GPUTimer.GetTimeStamp(m_pGraphicsContext->GetCommandList(), "Begin Frame");
+        m_pGPUTimer->OnBeginFrame(gpuTicksPerSecond, &m_TimeStamps);
+        m_pGPUTimer->GetTimeStamp(m_pGraphicsContext->GetCommandList(), "Begin Frame");
 
         for (auto& pass : m_passes)
         {
             pass->Render(frameContext);
         }
 
-        m_GPUTimer.OnEndFrame();
+        m_pGPUTimer->OnEndFrame();
+        m_pGPUTimer->CollectTimings(m_pGraphicsContext->GetCommandList());
     }
 
     void Renderer::OnDestory()
     {
+        m_pGPUTimer->OnDestroy();
     }
 }
