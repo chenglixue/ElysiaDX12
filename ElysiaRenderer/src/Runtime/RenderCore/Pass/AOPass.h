@@ -43,6 +43,7 @@ namespace ElysiaRenderer
         static inline bool m_isFirstFrame = true;
         int m_currHistoryIndex = 0;
         static constexpr UINT MAX_BLUR_RADIUS = 10;
+        static constexpr UINT DEINTERLEAVED_DEPTH_COUNT = 16;
 
         RenderTexture* m_pAORT = nullptr;
         RenderTexture* m_pHalfAORT = nullptr;
@@ -52,6 +53,10 @@ namespace ElysiaRenderer
         RenderTexture* m_pTAA1RT = nullptr;
         RenderTexture* m_pBlurHorizonRT = nullptr;
         RenderTexture* m_pBlurVerticalRT = nullptr;
+        std::vector<RenderTexture*> m_DeinterleavedDepthRTs;
+        std::vector<RenderTexture*> m_DeinterleavedAORTs;
+        std::vector<UINT> m_DeinterleavedDepthIndices;
+        std::vector<UINT> m_DeinterleavedAOIndices;
         TextureManager::Handle m_blueNoise;
 
         struct ShaderPasseIDs
@@ -61,13 +66,19 @@ namespace ElysiaRenderer
             static inline int TAAPassID = -1;
             static inline int BlurHorizonPassID = -1;
             static inline int BlurVerticalPassID = -1;
+            static inline int DeinterleavePassID = 0;
+            static inline int LayeredAOPassID = 0;
+            static inline int ReinterleavePassID = 0;
         };
         struct ShaderIDs
         {
             static inline size_t g_TargetSize = PropertyToID(L"g_TargetSize");
             static inline size_t g_SourceSize = PropertyToID(L"g_SourceSize");
+            static inline size_t g_FullScreenSize = PropertyToID(L"g_FullScreenSize");
             static inline size_t g_TargetTexIndex = PropertyToID(L"g_TargetTexIndex");
+            static inline size_t g_TargetTexIndices = PropertyToID(L"g_TargetTexIndices");
             static inline size_t g_SourceTexIndex = PropertyToID(L"g_SourceTexIndex");
+            static inline size_t g_SourceTexIndices = PropertyToID(L"g_SourceTexIndices");
             static inline size_t g_TargetMipmapLevel = PropertyToID(L"g_TargetMipmapLevel");
 
             static inline size_t viewMatrix = PropertyToID(L"viewMatrix");
@@ -132,6 +143,10 @@ namespace ElysiaRenderer
         void DoTAA();
         void DoBilateralBlurHorizon();
         void DoBilateralBlurVerical();
+        void DoDeinterleave();
+        void DoLayeredAO();
+        void DoReinterleave();
+
         std::vector<Vector4> GenerateSSAOSampleKernel();
         std::vector<Vector4> GenerateHBAOSampleKernel();
         std::vector<float> GenerateBlurWeights(UINT blurRadius);

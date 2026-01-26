@@ -207,7 +207,7 @@ void HBAOPlus(uint3 dispatchThreadID: SV_DispatchThreadID)
     // projMatrix[0][0] = 1/tan(fovX/2), projMatrix[1][1] = 1/tan(fovY/2)
     const float2 projScale = float2(projMatrix[0][0], projMatrix[1][1]);
 
-    const int NUM_DIRECTIONS = 3 * g_AOSampleCount;
+    const int NUM_DIRECTIONS = 4 * g_AOSampleCount;
     const int NUM_STEPS = g_AOSampleStepCount;
     float radius = g_AORadius;
     float pixelRadius = radius * projScale.x / max(inputParam.LinearEyeDepth, 1.f);
@@ -216,7 +216,7 @@ void HBAOPlus(uint3 dispatchThreadID: SV_DispatchThreadID)
     float stepPixel = pixelRadius / (NUM_STEPS + 1);
 
     float occlusion = 0.f;
-    [unroll(8)]
+    [unroll(12)]
     for (UINT dir = 0; dir < NUM_DIRECTIONS; dir ++)
     {
         float angle = float(dir) / float(NUM_DIRECTIONS) * TWO_PI + randomAngle;
@@ -264,6 +264,7 @@ void HBAOPlus(uint3 dispatchThreadID: SV_DispatchThreadID)
             }
         }
     }
+
     float aoResult = occlusion / NUM_DIRECTIONS;
     aoResult = saturate(1.0 - aoResult * g_AOIntensityMul);
     aoResult = pow(abs(aoResult), g_AOIntensityPow);

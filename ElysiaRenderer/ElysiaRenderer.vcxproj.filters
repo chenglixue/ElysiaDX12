@@ -578,54 +578,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\x64\Debug\Shaders\private\Light.hlsli">
-      <Filter>X64\private</Filter>
-    </None>
-    <None Include="..\x64\Debug\Shaders\private\Macros.hlsli">
-      <Filter>X64\private</Filter>
-    </None>
-    <None Include="..\x64\Debug\Shaders\private\Math.hlsli">
-      <Filter>X64\private</Filter>
-    </None>
-    <None Include="..\x64\Debug\Shaders\private\SharedCommon.hlsli">
-      <Filter>X64\private</Filter>
-    </None>
-    <None Include="..\x64\Debug\Shaders\private\Transform.hlsli">
-      <Filter>X64\private</Filter>
-    </None>
-    <None Include="..\x64\Debug\Shaders\public\DrawTriangle.hlsl">
-      <Filter>X64\public</Filter>
-    </None>
-    <None Include="..\x64\Debug\Shaders\public\Skybox.hlsl">
-      <Filter>X64\public</Filter>
-    </None>
-    <None Include="..\x64\Debug\Shaders\private\AreaLightCommon.hlsl">
-      <Filter>X64\private</Filter>
-    </None>
-    <None Include="..\x64\Debug\Shaders\private\BRDF.hlsl">
-      <Filter>X64\private</Filter>
-    </None>
-    <None Include="..\x64\Debug\Shaders\private\Common.hlsl">
-      <Filter>X64\private</Filter>
-    </None>
-    <None Include="..\x64\Debug\Shaders\private\EnergyPreservation.hlsl">
-      <Filter>X64\private</Filter>
-    </None>
-    <None Include="..\x64\Debug\Shaders\private\Light.hlsl">
-      <Filter>X64\private</Filter>
-    </None>
-    <None Include="..\x64\Debug\Shaders\private\LightAccumulator.hlsl">
-      <Filter>X64\private</Filter>
-    </None>
-    <None Include="..\x64\Debug\Shaders\private\LightCommon.hlsl">
-      <Filter>X64\private</Filter>
-    </None>
-    <None Include="..\x64\Debug\Shaders\private\ShadingCommon.hlsl">
-      <Filter>X64\private</Filter>
-    </None>
-    <None Include="..\x64\Debug\Shaders\private\ShadingModel.hlsl">
-      <Filter>X64\private</Filter>
-    </None>
     <None Include="dxc\bin\x64\dxcompiler.dll" />
     <None Include="Assets\Shaders\private\Light.hlsli" />
     <None Include="Assets\Shaders\private\Macros.hlsli" />
@@ -672,6 +624,8 @@
     </None>
     <None Include="packages.config" />
     <None Include="Assets\Shaders\public\PostProcess\CS_AOTAA.hlsl" />
+    <None Include="Assets\Shaders\public\PostProcess\CS_AO.hlsl" />
+    <None Include="Assets\Shaders\public\PostProcess\CS_LayeredAO.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -1042,30 +996,6 @@
     <CopyFileToFolders Include="dxc\bin\x64\dxil.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\x64\Debug\Tex\CyborgWeapon_BaseColor.dds">
-      <Filter>Resource Files\Tex</Filter>
-    </Image>
-    <Image Include="..\x64\Debug\Tex\CyborgWeapon_Metallic.dds">
-      <Filter>Resource Files\Tex</Filter>
-    </Image>
-    <Image Include="..\x64\Debug\Tex\CyborgWeapon_Normal.dds">
-      <Filter>Resource Files\Tex</Filter>
-    </Image>
-    <Image Include="..\x64\Debug\Tex\CyborgWeapon_Roughness.dds">
-      <Filter>Resource Files\Tex</Filter>
-    </Image>
-    <Image Include="..\x64\Debug\Tex\GGX_E_LUT.dds">
-      <Filter>Resource Files\Tex</Filter>
-    </Image>
-    <Image Include="..\x64\Debug\Tex\GGX_Eavg_LUT.dds">
-      <Filter>Resource Files\Tex</Filter>
-    </Image>
-    <Image Include="..\x64\Debug\Tex\Skybox.dds">
-      <Filter>Resource Files\Tex</Filter>
-    </Image>
-    <Image Include="..\x64\Debug\Tex\Wood.dds">
-      <Filter>Resource Files\Tex</Filter>
-    </Image>
     <Image Include="Assets\Tex\cubemap0.dds" />
   </ItemGroup>
 </Project>

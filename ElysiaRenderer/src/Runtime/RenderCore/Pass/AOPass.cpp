@@ -23,6 +23,15 @@ namespace ElysiaRenderer
     AOPass::AOPass()
         : BasePass()
     {
+        // m_DeinterleavedDepthRTs.resize(16, nullptr);
+        // m_DeinterleavedAORTs.resize(16, nullptr);
+        // m_DeinterleavedDepthIndices.resize(16, UINT_MAX);
+        // m_DeinterleavedAOIndices.resize(16, UINT_MAX);
+
+        m_DeinterleavedDepthRTs = std::vector<RenderTexture*>(16, nullptr);
+        m_DeinterleavedAORTs = std::vector<RenderTexture*>(16, nullptr);
+        m_DeinterleavedDepthIndices = std::vector<UINT>(16, UINT_MAX);
+        m_DeinterleavedAOIndices = std::vector<UINT>(16, UINT_MAX);
     }
     AOPass::~AOPass()
     {
@@ -48,9 +57,46 @@ namespace ElysiaRenderer
             GetPropertyName(
                 RenderTextureIDs::HIZRTID));
 
+        UINT quarterWidth = m_renderSize.x / 4;
+        UINT quarterHeight = m_renderSize.y / 4;
+        for (UINT i = 0; i < DEINTERLEAVED_DEPTH_COUNT; ++i)
+        {
+            m_DeinterleavedDepthRTs[i] = RenderTargetManager::GetInstance().CreateRWRenderTexture(
+                quarterWidth,
+                quarterHeight,
+#ifdef _DEBUG
+                DXGI_FORMAT_R16_UNORM,
+#else
+                DXGI_FORMAT_R16_UNORM,
+#endif
+                true,
+                RenderResource::GetInstance().
+                GetPropertyName(
+                    PropertyToID(L"Deinterleaved Depth RT" + std::to_wstring(i))));
+            m_DeinterleavedDepthIndices[i] = m_DeinterleavedDepthRTs[i]->GetResourceHeapIndex();
+
+            m_DeinterleavedAORTs[i] = RenderTargetManager::GetInstance().CreateRWRenderTexture(
+                quarterWidth,
+                quarterHeight,
+#ifdef _DEBUG
+                DXGI_FORMAT_R16G16B16A16_FLOAT,
+#else
+                DXGI_FORMAT_R8_UNORM,
+#endif
+                true,
+                RenderResource::GetInstance().
+                GetPropertyName(
+                    PropertyToID(L"Deinterleaved AO RT" + std::to_wstring(i))));
+            m_DeinterleavedAOIndices[i] = m_DeinterleavedAORTs[i]->GetResourceHeapIndex();
+        }
+
         m_pAORT = RenderTargetManager::GetInstance().CreateRWRenderTexture(static_cast<UINT64>(m_renderSize.x),
                                                                            static_cast<UINT64>(m_renderSize.y),
+#ifdef _DEBUG
                                                                            DXGI_FORMAT_R16G16B16A16_FLOAT,
+#else
+DXGI_FORMAT_R8_UNORM,
+#endif
                                                                            true,
                                                                            RenderResource::GetInstance().
                                                                            GetPropertyName(
@@ -58,7 +104,11 @@ namespace ElysiaRenderer
 
         m_pHalfAORT = RenderTargetManager::GetInstance().CreateRWRenderTexture(static_cast<UINT64>(m_renderSize.x) / 2,
                                                                                static_cast<UINT64>(m_renderSize.y) / 2,
+#ifdef _DEBUG
                                                                                DXGI_FORMAT_R16G16B16A16_FLOAT,
+#else
+DXGI_FORMAT_R8_UNORM,
+#endif
                                                                                true,
                                                                                RenderResource::GetInstance().
                                                                                GetPropertyName(
@@ -67,7 +117,11 @@ namespace ElysiaRenderer
         m_pOneFourAORT = RenderTargetManager::GetInstance().CreateRWRenderTexture(
             static_cast<UINT64>(m_renderSize.x) / 4,
             static_cast<UINT64>(m_renderSize.y) / 4,
+#ifdef _DEBUG
             DXGI_FORMAT_R16G16B16A16_FLOAT,
+#else
+    DXGI_FORMAT_R8_UNORM,
+#endif
             true,
             RenderResource::GetInstance().
             GetPropertyName(
@@ -76,7 +130,11 @@ namespace ElysiaRenderer
         m_pTAA0RT = RenderTargetManager::GetInstance().CreateRWRenderTexture(
             static_cast<UINT64>(m_renderSize.x),
             static_cast<UINT64>(m_renderSize.y),
+#ifdef _DEBUG
             DXGI_FORMAT_R16G16B16A16_FLOAT,
+#else
+    DXGI_FORMAT_R8_UNORM,
+#endif
             true,
             RenderResource::GetInstance().
             GetPropertyName(
@@ -85,7 +143,11 @@ namespace ElysiaRenderer
         m_pTAA1RT = RenderTargetManager::GetInstance().CreateRWRenderTexture(
             static_cast<UINT64>(m_renderSize.x),
             static_cast<UINT64>(m_renderSize.y),
+#ifdef _DEBUG
             DXGI_FORMAT_R16G16B16A16_FLOAT,
+#else
+    DXGI_FORMAT_R8_UNORM,
+#endif
             true,
             RenderResource::GetInstance().
             GetPropertyName(
@@ -94,7 +156,11 @@ namespace ElysiaRenderer
         m_pBlurHorizonRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(
             static_cast<UINT64>(m_renderSize.x),
             static_cast<UINT64>(m_renderSize.y),
+#ifdef _DEBUG
             DXGI_FORMAT_R16G16B16A16_FLOAT,
+#else
+    DXGI_FORMAT_R8_UNORM,
+#endif
             true,
             RenderResource::GetInstance().
             GetPropertyName(
@@ -103,7 +169,11 @@ namespace ElysiaRenderer
         m_pBlurVerticalRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(
             static_cast<UINT64>(m_renderSize.x),
             static_cast<UINT64>(m_renderSize.y),
+#ifdef _DEBUG
             DXGI_FORMAT_R16G16B16A16_FLOAT,
+#else
+    DXGI_FORMAT_R8_UNORM,
+#endif
             true,
             RenderResource::GetInstance().
             GetPropertyName(
@@ -120,6 +190,27 @@ namespace ElysiaRenderer
                 .FilePath = L"Shaders\\public\\PostProcess\\CS_AOHIZNormal.hlsl",
                 .IsComputeShader = true,
                 .ComputeEntryPoint = L"AOHIZNormal",
+            },
+            ShaderPass
+            {
+                .Name = "Deinterleaved Pass",
+                .FilePath = L"Shaders\\public\\PostProcess\\CS_LayeredAO.hlsl",
+                .IsComputeShader = true,
+                .ComputeEntryPoint = L"DeinterleaveMain",
+            },
+            ShaderPass
+            {
+                .Name = "Layered AO Pass",
+                .FilePath = L"Shaders\\public\\PostProcess\\CS_LayeredAO.hlsl",
+                .IsComputeShader = true,
+                .ComputeEntryPoint = L"LayeredHBAOMain",
+            },
+            ShaderPass
+            {
+                .Name = "Reinterleave Pass",
+                .FilePath = L"Shaders\\public\\PostProcess\\CS_LayeredAO.hlsl",
+                .IsComputeShader = true,
+                .ComputeEntryPoint = L"ReinterleaveMain",
             },
             ShaderPass
             {
@@ -156,6 +247,9 @@ namespace ElysiaRenderer
         ShaderPasseIDs::TAAPassID = m_pMaterial->FindPassIndex("AO TAA Pass");
         ShaderPasseIDs::BlurHorizonPassID = m_pMaterial->FindPassIndex("AO Bilateral Blur Horizon Pass");
         ShaderPasseIDs::BlurVerticalPassID = m_pMaterial->FindPassIndex("AO Bilateral Blur Vertical Pass");
+        ShaderPasseIDs::DeinterleavePassID = m_pMaterial->FindPassIndex("Deinterleaved Pass");
+        ShaderPasseIDs::LayeredAOPassID = m_pMaterial->FindPassIndex("Layered AO Pass");
+        ShaderPasseIDs::ReinterleavePassID = m_pMaterial->FindPassIndex("Reinterleave Pass");
 
         UpdatePipeline();
 
@@ -175,7 +269,10 @@ namespace ElysiaRenderer
         IsDebugLayerEnabled(m_pDevice->GetDevice());
 
         DoHIZ();
-        DoSSAO();
+        //DoSSAO();
+        DoDeinterleave();
+        DoLayeredAO();
+        DoReinterleave();
         DoTAA();
         if (UserData::GetInstance().aoParameter.IsBlur)
         {
@@ -247,6 +344,42 @@ namespace ElysiaRenderer
             std::vector<std::wstring> enableKeywords{};
 
             auto passID = ShaderPasseIDs::BlurVerticalPassID;
+            auto& passData = m_pMaterial->GetPassData(passID);
+            auto VariantManager = passData.pShader->GetVariantManager();
+            passData.pCurrVariantData = &VariantManager->GetOrCompileVariantByNames(enableKeywords);
+
+            passData.pPipelineStateObject =
+                PSOManager::GetInstance().GetComputePipelineState(m_pDevice, m_pMaterial.get(), passID);
+        }
+
+        {
+            std::vector<std::wstring> enableKeywords{};
+
+            auto passID = ShaderPasseIDs::DeinterleavePassID;
+            auto& passData = m_pMaterial->GetPassData(passID);
+            auto VariantManager = passData.pShader->GetVariantManager();
+            passData.pCurrVariantData = &VariantManager->GetOrCompileVariantByNames(enableKeywords);
+
+            passData.pPipelineStateObject =
+                PSOManager::GetInstance().GetComputePipelineState(m_pDevice, m_pMaterial.get(), passID);
+        }
+
+        {
+            std::vector<std::wstring> enableKeywords{};
+
+            auto passID = ShaderPasseIDs::LayeredAOPassID;
+            auto& passData = m_pMaterial->GetPassData(passID);
+            auto VariantManager = passData.pShader->GetVariantManager();
+            passData.pCurrVariantData = &VariantManager->GetOrCompileVariantByNames(enableKeywords);
+
+            passData.pPipelineStateObject =
+                PSOManager::GetInstance().GetComputePipelineState(m_pDevice, m_pMaterial.get(), passID);
+        }
+
+        {
+            std::vector<std::wstring> enableKeywords{};
+
+            auto passID = ShaderPasseIDs::ReinterleavePassID;
             auto& passData = m_pMaterial->GetPassData(passID);
             auto VariantManager = passData.pShader->GetVariantManager();
             passData.pCurrVariantData = &VariantManager->GetOrCompileVariantByNames(enableKeywords);
@@ -595,7 +728,7 @@ namespace ElysiaRenderer
             m_pMaterial->SetUInt(ShaderIDs::g_BlurRadius, UserData::GetInstance().aoParameter.BlurIntensity);
             m_pMaterial->SetFloat4(ShaderIDs::g_TargetSize, GetScreenSize(targetRT->GetWidth(), targetRT->GetHeight()));
             m_pMaterial->SetFloat(ShaderIDs::g_Sharpness, UserData::GetInstance().aoParameter.Sharpness);
-            m_pMaterial->SetFloatArray(ShaderIDs::g_Weights, m_blurWeights);
+            //m_pMaterial->SetFloatArray(ShaderIDs::g_Weights, m_blurWeights);
 
             SetSpaceResource(passData, PER_PASS_SPACE);
 
@@ -603,7 +736,6 @@ namespace ElysiaRenderer
             m_pCommand->Dispatch(CeilDivide(targetRT->GetWidth(), threadGroupSize.x),
                                  CeilDivide(targetRT->GetHeight(), threadGroupSize.y),
                                  threadGroupSize.z);
-            m_pCommand->AddUAVBarrier(targetRT, false);
             m_pCommand->AddBarrier(targetRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
         }
 
@@ -635,7 +767,7 @@ namespace ElysiaRenderer
             m_pMaterial->SetUInt(ShaderIDs::g_BlurRadius, UserData::GetInstance().aoParameter.BlurIntensity);
             m_pMaterial->SetFloat4(ShaderIDs::g_TargetSize, GetScreenSize(targetRT->GetWidth(), targetRT->GetHeight()));
             m_pMaterial->SetFloat(ShaderIDs::g_Sharpness, UserData::GetInstance().aoParameter.Sharpness);
-            m_pMaterial->SetFloatArray(ShaderIDs::g_Weights, m_blurWeights);
+            //m_pMaterial->SetFloatArray(ShaderIDs::g_Weights, m_blurWeights);
 
             SetSpaceResource(passData, PER_PASS_SPACE);
 
@@ -644,9 +776,164 @@ namespace ElysiaRenderer
                                  CeilDivide(targetRT->GetHeight(), threadGroupSize.y),
                                  threadGroupSize.z);
 
-            m_pCommand->AddUAVBarrier(targetRT, false);
             m_pCommand->AddBarrier(targetRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
         }
+
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
+    }
+    void AOPass::DoDeinterleave()
+    {
+        auto passID = ShaderPasseIDs::DeinterleavePassID;
+        auto& passData = m_pMaterial->GetPassData(passID);
+        auto passName = passData.Name.c_str();
+        PIXHelper pix(m_pCommand->GetCommandList(), passName);
+
+        PipelineInfo pipelineStateData{};
+        pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(
+                                                                 passID)
+                                                             .pPipelineStateObject;
+        m_pCommand->SetPipeline(pipelineStateData);
+        SetSpaceResource(passData, PER_FRAME_SPACE);
+
+        for (auto pRT : m_DeinterleavedDepthRTs)
+        {
+            m_pCommand->AddBarrier(pRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, false);
+        }
+        m_pCommand->FlushBarrier();
+
+        {
+            m_pMaterial->SetUInt(ShaderIDs::g_SourceTexIndex, m_pHIZRT->GetResourceHeapIndex(), passID);
+            m_pMaterial->SetUINTArray(ShaderIDs::g_TargetTexIndices, m_DeinterleavedDepthIndices, passID);
+            m_pMaterial->SetFloat4(ShaderIDs::g_TargetSize, GetScreenSize(m_renderSize));
+            SetSpaceResource(passData, PER_PASS_SPACE);
+
+            auto threadGroupSize = passData.GetKernelThreadGroupSizes();
+            m_pCommand->Dispatch(CeilDivide(m_renderSize.x, threadGroupSize.x),
+                                 CeilDivide(m_renderSize.y, threadGroupSize.y),
+                                 threadGroupSize.z);
+        }
+
+        for (auto pRT : m_DeinterleavedDepthRTs)
+        {
+            m_pCommand->AddBarrier(pRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, false);
+        }
+        m_pCommand->FlushBarrier();
+
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
+    }
+    void AOPass::DoLayeredAO()
+    {
+        auto passID = ShaderPasseIDs::LayeredAOPassID;
+        auto& passData = m_pMaterial->GetPassData(passID);
+        auto passName = passData.Name.c_str();
+        PIXHelper pix(m_pCommand->GetCommandList(), passName);
+
+        PipelineInfo pipelineStateData{};
+        pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(
+                                                                 passID)
+                                                             .pPipelineStateObject;
+        m_pCommand->SetPipeline(pipelineStateData);
+        SetSpaceResource(passData, PER_FRAME_SPACE);
+
+        for (auto pRT : m_DeinterleavedAORTs)
+        {
+            m_pCommand->AddBarrier(pRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, false);
+        }
+        m_pCommand->FlushBarrier();
+
+        {
+            m_pMaterial->SetMatrix(ShaderIDs::viewMatrix, m_pCamera->GetViewMat(), passID);
+            m_pMaterial->SetMatrix(ShaderIDs::viewMatrix_I, m_pCamera->GetViewMat().Invert(), passID);
+            m_pMaterial->SetMatrix(ShaderIDs::projMatrix, m_pCamera->GetProjMat(), passID);
+            m_pMaterial->SetMatrix(ShaderIDs::projMatrix_I, m_pCamera->GetProjMat().Invert(), passID);
+            m_pMaterial->SetMatrix(ShaderIDs::viewProjMatrix,
+                                   m_pCamera->GetViewMat() * m_pCamera->GetProjMat(),
+                                   passID);
+            m_pMaterial->SetMatrix(ShaderIDs::viewProjMatrix_I,
+                                   (m_pCamera->GetViewMat() * m_pCamera->GetProjMat()).Invert(),
+                                   passID);
+            m_pMaterial->SetFloat2(ShaderIDs::g_ProjectScale,
+                                   Vector2(1.f / tan(m_pCamera->GetFOVY() * 0.5f),
+                                           1.0f / tan((m_pCamera->GetFOVY() / m_pCamera->GetAspect()) * 0.5f)));
+
+            m_pMaterial->SetUInt(ShaderIDs::g_AOSampleCount, UserData::GetInstance().aoParameter.SampleCount, passID);
+            m_pMaterial->SetUInt(ShaderIDs::g_AOSampleStepCount,
+                                 UserData::GetInstance().aoParameter.SampleStepCount,
+                                 passID);
+            m_pMaterial->SetFloat(ShaderIDs::g_AORadius, UserData::GetInstance().aoParameter.Radius, passID);
+            m_pMaterial->SetFloat(ShaderIDs::g_AOFadeRadius, UserData::GetInstance().aoParameter.FadeRadius, passID);
+            m_pMaterial->SetFloat(ShaderIDs::g_AOFadeDistance,
+                                  UserData::GetInstance().aoParameter.FadeDistance,
+                                  passID);
+            m_pMaterial->SetFloat(ShaderIDs::g_AOBias, UserData::GetInstance().aoParameter.Bias, passID);
+            m_pMaterial->SetFloat(ShaderIDs::g_AOIntensityMul,
+                                  UserData::GetInstance().aoParameter.IntensityMul,
+                                  passID);
+            m_pMaterial->SetFloat(ShaderIDs::g_AOIntensityPow,
+                                  UserData::GetInstance().aoParameter.IntensityPow,
+                                  passID);
+            m_pMaterial->SetVector4Array(ShaderIDs::g_AOSampleKernelArray, m_kernels, passID);
+            m_pMaterial->SetUInt(ShaderIDs::g_HIZMaxMipmap, MathHelper::Max(m_HIZMipmapCount - 1, UINT(0)), passID);
+            m_pMaterial->SetUInt(ShaderIDs::g_HIZTextureIndex, m_pHIZRT->GetResourceHeapIndex(), passID);
+            m_pMaterial->SetFloat(ShaderIDs::g_LerpAOFactor, UserData::GetInstance().aoParameter.AOLerpFactor, passID);
+            m_pMaterial->SetFloat2(ShaderIDs::g_noiseScale,
+                                   Vector2(
+                                       float(m_pAORT->GetWidth()) / float(m_blueNoise.GetWidth()),
+                                       float(m_pAORT->GetHeight()) / float(m_blueNoise.GetHeight())),
+                                   passID);
+
+            UINT qW = m_renderSize.x / 4;
+            UINT qH = m_renderSize.y / 4;
+            m_pMaterial->SetFloat4(ShaderIDs::g_TargetSize, GetScreenSize(qW, qH), passID);
+            m_pMaterial->SetFloat4(ShaderIDs::g_FullScreenSize, GetScreenSize(m_renderSize), passID);
+            m_pMaterial->SetUINTArray(ShaderIDs::g_TargetTexIndices, m_DeinterleavedAOIndices, passID);
+            m_pMaterial->SetUINTArray(ShaderIDs::g_SourceTexIndices, m_DeinterleavedDepthIndices, passID);
+            SetSpaceResource(passData, PER_PASS_SPACE);
+
+            auto threadGroupSize = passData.GetKernelThreadGroupSizes();
+            m_pCommand->Dispatch(CeilDivide(qW, threadGroupSize.x),
+                                 CeilDivide(qH, threadGroupSize.y),
+                                 16);
+        }
+
+        for (auto pRT : m_DeinterleavedAORTs)
+        {
+            m_pCommand->AddBarrier(pRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, false);
+        }
+        m_pCommand->FlushBarrier();
+
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
+    }
+    void AOPass::DoReinterleave()
+    {
+        auto passID = ShaderPasseIDs::ReinterleavePassID;
+        auto& passData = m_pMaterial->GetPassData(passID);
+        auto passName = passData.Name.c_str();
+        PIXHelper pix(m_pCommand->GetCommandList(), passName);
+
+        PipelineInfo pipelineStateData{};
+        pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(
+                                                                 passID)
+                                                             .pPipelineStateObject;
+        m_pCommand->SetPipeline(pipelineStateData);
+        SetSpaceResource(passData, PER_FRAME_SPACE);
+
+        m_pCommand->AddBarrier(m_pAORT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+        {
+            m_pMaterial->SetUINTArray(ShaderIDs::g_SourceTexIndices, m_DeinterleavedAOIndices, passID);
+            m_pMaterial->SetUInt(ShaderIDs::g_TargetTexIndex, m_pAORT->GetResourceHeapIndex(), passID);
+            m_pMaterial->SetFloat4(ShaderIDs::g_TargetSize,
+                                   GetScreenSize(m_pAORT->GetWidth(), m_pAORT->GetHeight()),
+                                   passID);
+
+            SetSpaceResource(passData, PER_PASS_SPACE);
+
+            auto threadGroupSize = passData.GetKernelThreadGroupSizes();
+            m_pCommand->Dispatch(CeilDivide(m_renderSize.x, threadGroupSize.x),
+                                 CeilDivide(m_renderSize.y, threadGroupSize.y),
+                                 threadGroupSize.z);
+        }
+        m_pCommand->AddBarrier(m_pAORT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 
         m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
     }
