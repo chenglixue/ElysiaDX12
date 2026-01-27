@@ -19,6 +19,7 @@ namespace ElysiaRenderer
     public:
         struct RenderTextureIDs
         {
+            static inline size_t AOImportanceID = PropertyToID(L"AO Importance RT");
             static inline size_t AORTID = PropertyToID(L"AO RT");
             static inline size_t HalfAORTID = PropertyToID(L"Half AO RT");
             static inline size_t OneFourAORTID = PropertyToID(L"One Four AO RT");
@@ -46,6 +47,7 @@ namespace ElysiaRenderer
         static constexpr UINT DEINTERLEAVED_DEPTH_COUNT = 16;
 
         RenderTexture* m_pAORT = nullptr;
+        RenderTexture* m_pImportanceRT = nullptr;
         RenderTexture* m_pHalfAORT = nullptr;
         RenderTexture* m_pOneFourAORT = nullptr;
         RenderTexture* m_pHIZRT = nullptr;
@@ -62,6 +64,7 @@ namespace ElysiaRenderer
         struct ShaderPasseIDs
         {
             static inline int HIZPassID = -1;
+            static inline int ImportancePassID = -1;
             static inline int AOPassID = -1;
             static inline int TAAPassID = -1;
             static inline int BlurHorizonPassID = -1;
@@ -124,6 +127,15 @@ namespace ElysiaRenderer
             static inline size_t g_BlurRadius = PropertyToID(L"g_BlurRadius");
             static inline size_t g_Weights = PropertyToID(L"g_Weights");
             static inline size_t g_BlurIntensity = PropertyToID(L"g_BlurIntensity");
+
+            static inline size_t g_bImportance = PropertyToID(L"g_bImportance");
+            static inline size_t g_SampleImportanceThreshold = PropertyToID(L"g_SampleImportanceThreshold");
+            static inline size_t g_DepthImportanceThreshold = PropertyToID(L"g_DepthImportanceThreshold");
+            static inline size_t g_NormalImportanceThreshold = PropertyToID(L"g_NormalImportanceThreshold");
+            static inline size_t g_AOImportanceTexIndex = PropertyToID(L"g_AOImportanceTexIndex");
+
+            static inline size_t g_bDebugImportance = PropertyToID(L"g_bDebugImportance");
+            static inline size_t g_bDebugSample = PropertyToID(L"g_bDebugSample");
         };
         struct TAAData
         {
@@ -138,6 +150,7 @@ namespace ElysiaRenderer
         std::vector<Vector4> m_kernels;
         std::vector<float> m_blurWeights;
 
+        void DoImportance();
         void DoSSAO();
         void DoHIZ();
         void DoTAA();

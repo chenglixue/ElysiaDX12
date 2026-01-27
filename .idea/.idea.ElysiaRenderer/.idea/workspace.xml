@@ -8,17 +8,23 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8b3b7ff4-a89d-421a-96b5-2ce4c5675e77" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/public/PostProcess/CS_LayeredAO.hlsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/public/PostProcess/CS_GenerateAOImportance.hlsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/public/Warmup/CS_Warmup.hlsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/public/Warmup/Warmup.hlsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.clang-format" beforeDir="false" afterPath="$PROJECT_DIR$/.clang-format" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.ElysiaRenderer/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.ElysiaRenderer/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/public/PostProcess/CS_AO.hlsl" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/public/PostProcess/CS_AO.hlsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/public/PostProcess/CS_AOHIZNormal.hlsl" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/public/PostProcess/CS_AOHIZNormal.hlsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/public/PostProcess/CS_Bilateral_Blur.hlsl" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/public/PostProcess/CS_Bilateral_Blur.hlsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/public/PostProcess/CS_LayeredAO.hlsl" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/Assets/Shaders/public/PostProcess/CS_LayeredAO.hlsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ElysiaRenderer/ElysiaRenderer.vcxproj" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/ElysiaRenderer.vcxproj" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ElysiaRenderer/ElysiaRenderer.vcxproj.filters" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/ElysiaRenderer.vcxproj.filters" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/bin/Cauldron.log" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/bin/Cauldron.log" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ElysiaRenderer/bin/imgui.ini" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/bin/imgui.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Engine/ElysiaFrame.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/Engine/ElysiaFrame.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/AOUtility.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/AOUtility.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/AOPass.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/AOPass.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/AOPass.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/AOPass.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/BasePass.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/BasePass.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/BasePass.h" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/BasePass.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/DebugPass.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/src/Runtime/RenderCore/Pass/DebugPass.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/ElysiaRenderer.tlog/CL.command.1.tlog" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/ElysiaRenderer.tlog/CL.command.1.tlog" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/ElysiaRenderer.tlog/CL.read.1.tlog" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/ElysiaRenderer.tlog/CL.read.1.tlog" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/ElysiaRenderer.tlog/CL.write.1.tlog" beforeDir="false" afterPath="$PROJECT_DIR$/ElysiaRenderer/x64/Debug/ElysiaRenderer.tlog/CL.write.1.tlog" afterDir="false" />
@@ -36,33 +42,6 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
@@ -149,7 +128,9 @@
       <workItem from="1769257311514" duration="246000" />
       <workItem from="1769257582267" duration="843000" />
       <workItem from="1769258434501" duration="46704000" />
-      <workItem from="1769360944661" duration="39048000" />
+      <workItem from="1769360944661" duration="40377000" />
+      <workItem from="1769497427246" duration="8372000" />
+      <workItem from="1769526523585" duration="8115000" />
     </task>
     <servers />
   </component>

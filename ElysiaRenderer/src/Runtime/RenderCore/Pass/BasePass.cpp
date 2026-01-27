@@ -3,19 +3,23 @@
 
 #include "Runtime/Core/DX12Device.h"
 #include "Runtime/Core/DX12GraphicsContext.h"
+#include "Runtime/Core/DX12Shader.h"
 #include "Runtime/Core/UploadRingBuffer.h"
 
 #include "Runtime/RenderCore/RenderResource.h"
 #include "Runtime/RenderCore/Material.h"
 #include "Runtime/RenderCore/BufferManager.h"
+#include "Runtime/RenderCore/PSOManager.h"
+#include "Runtime/RenderCore/RenderTargetManager.h"
+#include "Runtime/RenderCore/RenderTexture.h"
+#include "Runtime/RenderCore/ShaderVariantManager.h"
 #include "Runtime/RenderCore/Pass/RenderPassData.h"
 
 namespace ElysiaRenderer
 {
-    BasePass::BasePass():
-        m_renderSize(Vector2::Zero)
+    BasePass::BasePass()
+        : m_renderSize(Vector2::Zero)
     {
-
     }
 
     BasePass::~BasePass()
@@ -31,6 +35,35 @@ namespace ElysiaRenderer
         m_pCameraColorRT = renderPassData.pCameraColorRT;
         m_pCameraDepthRT = renderPassData.pCameraDepthRT;
         m_pSwaiChain = renderPassData.pSwapChain;
+
+        m_pWarmUPRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(
+            1,
+            1,
+            DXGI_FORMAT_R8_UNORM,
+            true,
+            RenderResource::GetInstance().
+            GetPropertyName(
+                PropertyToID(L"Warmup RT")));
+
+        m_WarmUPShaderPasses =
+        {
+            // ShaderPass
+            // {
+            //     .Name = "Warm Up Graphics Pass",
+            //     .FilePath = L"Shaders\\public\\PostProcess\\CS_AOHIZNormal.hlsl",
+            //     .ComputeEntryPoint = L"WarmUpGraphics",
+            // },
+            ShaderPass
+            {
+                .Name = "Warm Up Compute Pass",
+                .FilePath = L"Shaders\\public\\Warmup\\CS_Warmup.hlsl",
+                .IsComputeShader = true,
+                .ComputeEntryPoint = L"WarmUpCompute",
+            },
+        };
+        m_pWarmUPMaterial = std::make_unique<Material>(m_pDevice, m_WarmUPShaderPasses);
+        //m_warmUpGraphicsPasseID = m_pWarmUPMaterial->FindPassIndex("WarmUpGraphics");
+        m_warmUpComputePasseID = m_pWarmUPMaterial->FindPassIndex("Warm Up Compute Pass");
 
         Configure();
     }
@@ -59,7 +92,9 @@ namespace ElysiaRenderer
 
         D3D12_GPU_VIRTUAL_ADDRESS GPUAddress;
         UINT8* CPUAddress = nullptr;
-        if (!pUploadBuffer->AllocateForFrame(m_pDevice->GetFrameID(), totalSize, GPUAddress,
+        if (!pUploadBuffer->AllocateForFrame(m_pDevice->GetFrameID(),
+                                             totalSize,
+                                             GPUAddress,
                                              CPUAddress))
         {
             assert(false && "UploadRingBuffer is full! Call Reset() at beginning of frame.");
@@ -73,7 +108,8 @@ namespace ElysiaRenderer
             const MaterialParameterBlock::MaterialParam* pMaterialParam = pMaterial->
                                                                           GetParameterBlock().
                                                                           FindParam(
-                                                                              member.Name, passID);
+                                                                              member.Name,
+                                                                              passID);
             if (!pMaterialParam)
                 continue;
 
@@ -116,8 +152,10 @@ namespace ElysiaRenderer
                 }
 
                 auto GPUAddress = UploadMaterialConstants(
-                    BufferManager::GetInstance().GetUploadRingBuffer(), spaceID,
-                    m_pMaterial.get(), passData.pCurrVariantData,
+                    BufferManager::GetInstance().GetUploadRingBuffer(),
+                    spaceID,
+                    m_pMaterial.get(),
+                    passData.pCurrVariantData,
                     passData.PassIndex);
                 auto newSpace = std::make_unique<PipelineResourceSpace>();
                 newSpace->SetDynamicCBV(GPUAddress);
@@ -146,5 +184,46 @@ namespace ElysiaRenderer
             }
         }
 
+    }
+
+    void BasePass::WarmUPCompute()
+    {
+        m_pCommand->AddBarrier(m_pWarmUPRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+
+        {
+            std::vector<std::wstring> enableKeywords{};
+
+            auto passID = m_warmUpComputePasseID;
+            auto& passData = m_pWarmUPMaterial->GetPassData(passID);
+            auto VariantManager = passData.pShader->GetVariantManager();
+            passData.pCurrVariantData = &VariantManager->GetOrCompileVariantByNames(enableKeywords);
+
+            passData.pPipelineStateObject = PSOManager::GetInstance().GetComputePipelineState(
+                m_pDevice,
+                m_pWarmUPMaterial.get(),
+                passID);
+
+            PipelineInfo pipelineStateData{};
+            pipelineStateData.m_pipelineStateObject = m_pWarmUPMaterial->GetPassData(
+                                                                           passID)
+                                                                       .pPipelineStateObject;
+            m_pCommand->SetPipeline(pipelineStateData);
+
+            struct alignas(16)
+            {
+                UINT g_TargetTexIndex;
+            } constantData;
+            constexpr UINT constantSize = sizeof(constantData) / 4;
+
+            constantData.g_TargetTexIndex = m_pWarmUPRT->GetResourceHeapIndex();
+            m_pCommand->SetPushConstants(PER_MATERIAL_SPACE, &constantData, constantSize);
+
+            auto threadGroupSize = passData.GetKernelThreadGroupSizes();
+            m_pCommand->Dispatch(CeilDivide(m_pWarmUPRT->GetWidth(), threadGroupSize.x),
+                                 CeilDivide(m_pWarmUPRT->GetHeight(), threadGroupSize.y),
+                                 threadGroupSize.z);
+        }
+
+        m_pCommand->AddBarrier(m_pWarmUPRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
     }
 }

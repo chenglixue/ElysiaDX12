@@ -8,12 +8,24 @@ cbuffer PassConstant : register(b0, perPassSpace)
 {
     UINT g_TargetTexIndex;
     UINT g_SourceTexIndex;
-    UINT g_HIZTextureIndex;
     float4 g_TargetSize;
     float g_Sharpness;
     UINT g_BlurRadius;
-    float g_Weights[MAX_BLUR_RADIUS + 1];
 }
+static const float GAUSSIAN_WEIGHTS[MAX_BLUR_RADIUS + 1] = {
+    1.000000, // 中心权重 (r=0)
+    0.939413, // r=1
+    0.778801, // r=2  
+    0.569783, // r=3
+    0.367879, // r=4
+    0.209611, // r=5
+    0.105399, // r=6
+    0.046771, // r=7
+    0.018316, // r=8
+    0.006383, // r=9
+    0.001930  // r=10
+};
+
 
 const static float Constant_Float16F_Scale = 4096.0f * 32.0f;
 
@@ -52,15 +64,12 @@ void HorizionBilateralBlur(uint3 dispatchThreadID : SV_DispatchThreadID)
 
     float2 screenUV = (float2(dispatchThreadID.xy) + 0.5f) * g_TargetSize.zw;
 
-    float4 HIZNormal = SampleTexture2D_LOD(g_HIZTextureIndex,
-                                           screenUV,
-                                           ClampPointSampler,
-                                           0);
+    float rawDepth = SampleTexture2D(OpaqueDepthIndex, screenUV, ClampPointSampler).r;
 
     FInputParams inputParam = (FInputParams)0;
     inputParam.ScreenUV = screenUV;
-    inputParam.NormalWS = HIZNormal.rgb;
-    inputParam.LinearEyeDepth = HIZNormal.a * Constant_Float16F_Scale;
+    inputParam.NormalWS = SampleNormalWS(screenUV, ClampPointSampler);
+    inputParam.LinearEyeDepth = LinearEyeDepth(rawDepth, g_ZBufferParams);
 
     float centerAO = SampleTexture2D(g_SourceTexIndex,
                                      screenUV,
@@ -104,14 +113,12 @@ void VerticalBilateralBlur(uint3 dispatchThreadID : SV_DispatchThreadID)
     RWTexture2D<float4> o = ResourceDescriptorHeap[g_TargetTexIndex];
 
     float2 screenUV = (float2(dispatchThreadID.xy) + 0.5f) * g_TargetSize.zw;
-    float4 HIZNormal = SampleTexture2D_LOD(g_HIZTextureIndex,
-                                           screenUV,
-                                           ClampPointSampler,
-                                           0);
+    float rawDepth = SampleTexture2D(OpaqueDepthIndex, screenUV, ClampPointSampler).r;
 
     FInputParams inputParam = (FInputParams)0;
-    inputParam.NormalWS = HIZNormal.rgb;
-    inputParam.LinearEyeDepth = HIZNormal.a * Constant_Float16F_Scale;
+    inputParam.ScreenUV = screenUV;
+    inputParam.NormalWS = SampleNormalWS(screenUV, ClampPointSampler);
+    inputParam.LinearEyeDepth = LinearEyeDepth(rawDepth, g_ZBufferParams);
 
     float centerAO = SampleTexture2D(g_SourceTexIndex,
                                      screenUV,
@@ -224,14 +231,14 @@ void ComputeBlur(float2 centerUV,
 
         float2 uv1 = centerUV + distance * direction * texelSize;
         float2 uv2 = centerUV + (distance + 1.0) * direction * texelSize;
-        float4 HIZNormal1 = SampleTexture2D_LOD(g_HIZTextureIndex, uv1, ClampPointSampler, LOD);
-        float4 HIZNormal2 = SampleTexture2D_LOD(g_HIZTextureIndex, uv2, ClampPointSampler, LOD);
-        float eyeDepth1 = HIZNormal1.a * Constant_Float16F_Scale;
-        float eyeDepth2 = HIZNormal2.a * Constant_Float16F_Scale;
+        float rawDepth1 = SampleTexture2D(OpaqueDepthIndex, uv1, ClampPointSampler).r;
+        float rawDepth2 = SampleTexture2D(OpaqueDepthIndex, uv2, ClampPointSampler).r;
+        float eyeDepth1 = LinearEyeDepth(rawDepth1, g_ZBufferParams);
+        float eyeDepth2 = LinearEyeDepth(rawDepth2, g_ZBufferParams);
         sampleEyeDepth = (eyeDepth1 + eyeDepth2) * 0.5;
 
-        float3 normal1 = HIZNormal1.xyz;
-        float3 normal2 = HIZNormal2.xyz;
+        float3 normal1 = SampleNormalWS(uv1, ClampPointSampler);
+        float3 normal2 = SampleNormalWS(uv1, ClampPointSampler);
         sampleNormal = normalize(normal1 + normal2);
     }
     else
@@ -240,9 +247,9 @@ void ComputeBlur(float2 centerUV,
         sampleAO = SampleTexture2D(g_SourceTexIndex,
                                    sampleUV,
                                    ClampPointSampler).r;
-        float4 HIZNormal = SampleTexture2D_LOD(g_HIZTextureIndex, sampleUV, ClampPointSampler, LOD);
-        sampleEyeDepth = HIZNormal.a * Constant_Float16F_Scale;
-        sampleNormal = HIZNormal.rgb;
+        float rawDepth = SampleTexture2D(OpaqueDepthIndex, sampleUV, ClampPointSampler).r;
+        sampleEyeDepth = LinearEyeDepth(rawDepth, g_ZBufferParams);
+        sampleNormal = SampleNormalWS(sampleUV, ClampPointSampler);
     }
 
     float weight = ComputeWeight(sampleEyeDepth, sampleNormal, centerEyeDepth, centerNormal, distance);
@@ -256,9 +263,7 @@ float ComputeWeight(float sampleEyeDepth,
                     float3 centerNormal,
                     float blurRadius)
 {
-    float sigma = g_BlurRadius * 0.5;
-    float spatialWeight;
-    spatialWeight = exp(-blurRadius * blurRadius / (2.0 * sigma * sigma));
+    float spatialWeight = GAUSSIAN_WEIGHTS[blurRadius];
 
     float depthDiff = abs(centerEyeDepth - sampleEyeDepth);
     float depthScale = 10.0f / max(1.0f, centerEyeDepth);

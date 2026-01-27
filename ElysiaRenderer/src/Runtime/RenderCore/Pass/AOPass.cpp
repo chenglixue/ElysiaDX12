@@ -90,6 +90,15 @@ namespace ElysiaRenderer
             m_DeinterleavedAOIndices[i] = m_DeinterleavedAORTs[i]->GetResourceHeapIndex();
         }
 
+        m_pImportanceRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(
+            m_renderSize.x,
+            m_renderSize.y,
+            DXGI_FORMAT_R8_UNORM,
+            true,
+            RenderResource::GetInstance().
+            GetPropertyName(
+                RenderTextureIDs::AOImportanceID));
+
         m_pAORT = RenderTargetManager::GetInstance().CreateRWRenderTexture(static_cast<UINT64>(m_renderSize.x),
                                                                            static_cast<UINT64>(m_renderSize.y),
 #ifdef _DEBUG
@@ -200,6 +209,13 @@ DXGI_FORMAT_R8_UNORM,
             },
             ShaderPass
             {
+                .Name = "Generate AO Importance Pass",
+                .FilePath = L"Shaders\\public\\PostProcess\\CS_GenerateAOImportance.hlsl",
+                .IsComputeShader = true,
+                .ComputeEntryPoint = L"GenerateAOImportance",
+            },
+            ShaderPass
+            {
                 .Name = "Layered AO Pass",
                 .FilePath = L"Shaders\\public\\PostProcess\\CS_LayeredAO.hlsl",
                 .IsComputeShader = true,
@@ -250,6 +266,7 @@ DXGI_FORMAT_R8_UNORM,
         ShaderPasseIDs::DeinterleavePassID = m_pMaterial->FindPassIndex("Deinterleaved Pass");
         ShaderPasseIDs::LayeredAOPassID = m_pMaterial->FindPassIndex("Layered AO Pass");
         ShaderPasseIDs::ReinterleavePassID = m_pMaterial->FindPassIndex("Reinterleave Pass");
+        ShaderPasseIDs::ImportancePassID = m_pMaterial->FindPassIndex("Generate AO Importance Pass");
 
         UpdatePipeline();
 
@@ -270,6 +287,7 @@ DXGI_FORMAT_R8_UNORM,
 
         DoHIZ();
         //DoSSAO();
+        DoImportance();
         DoDeinterleave();
         DoLayeredAO();
         DoReinterleave();
@@ -292,6 +310,20 @@ DXGI_FORMAT_R8_UNORM,
             std::vector<std::wstring> enableKeywords{};
 
             auto passID = ShaderPasseIDs::HIZPassID;
+            auto& passData = m_pMaterial->GetPassData(passID);
+            auto VariantManager = passData.pShader->GetVariantManager();
+            passData.pCurrVariantData = &VariantManager->GetOrCompileVariantByNames(enableKeywords);
+
+            passData.pPipelineStateObject = PSOManager::GetInstance().GetComputePipelineState(
+                m_pDevice,
+                m_pMaterial.get(),
+                passID);
+        }
+
+        {
+            std::vector<std::wstring> enableKeywords{};
+
+            auto passID = ShaderPasseIDs::ImportancePassID;
             auto& passData = m_pMaterial->GetPassData(passID);
             auto VariantManager = passData.pShader->GetVariantManager();
             passData.pCurrVariantData = &VariantManager->GetOrCompileVariantByNames(enableKeywords);
@@ -461,6 +493,42 @@ DXGI_FORMAT_R8_UNORM,
         }
 
         m_pCommand->AddBarrier(m_pHIZRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
+    }
+    void AOPass::DoImportance()
+    {
+        auto passID = ShaderPasseIDs::ImportancePassID;
+        auto& passData = m_pMaterial->GetPassData(passID);
+        auto passName = passData.Name.c_str();
+        PIXHelper pix(m_pCommand->GetCommandList(), passName);
+
+        PipelineInfo pipelineStateData{};
+        pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(
+                                                                 passID)
+                                                             .pPipelineStateObject;
+        m_pCommand->SetPipeline(pipelineStateData);
+        SetSpaceResource(passData, PER_FRAME_SPACE);
+
+        auto targetRT = m_pImportanceRT;
+        m_pCommand->AddBarrier(targetRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+
+        {
+            m_pMaterial->SetUInt(ShaderIDs::g_TargetTexIndex, targetRT->GetResourceHeapIndex());
+            m_pMaterial->SetFloat4(ShaderIDs::g_TargetSize, GetScreenSize(targetRT->GetWidth(), targetRT->GetHeight()));
+            m_pMaterial->SetFloat(ShaderIDs::g_DepthImportanceThreshold,
+                                  UserData::GetInstance().aoParameter.DepthImportanceThreshold);
+            m_pMaterial->SetFloat(ShaderIDs::g_NormalImportanceThreshold,
+                                  UserData::GetInstance().aoParameter.NormalImportanceThreshold);
+            SetSpaceResource(passData, PER_PASS_SPACE);
+
+            auto threadGroupSize = passData.GetKernelThreadGroupSizes();
+            m_pCommand->Dispatch(CeilDivide(m_renderSize.x, threadGroupSize.x),
+                                 CeilDivide(m_renderSize.y, threadGroupSize.y),
+                                 threadGroupSize.z);
+        }
+
+        m_pCommand->AddBarrier(targetRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 
         m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
     }
@@ -856,6 +924,9 @@ DXGI_FORMAT_R8_UNORM,
                                    Vector2(1.f / tan(m_pCamera->GetFOVY() * 0.5f),
                                            1.0f / tan((m_pCamera->GetFOVY() / m_pCamera->GetAspect()) * 0.5f)));
 
+            m_pMaterial->SetUInt(ShaderIDs::g_AOImportanceTexIndex, m_pImportanceRT->GetResourceHeapIndex(), passID);
+            m_pMaterial->SetFloat(ShaderIDs::g_SampleImportanceThreshold, UserData::GetInstance().aoParameter.sampleImportanceThreshold, passID);
+
             m_pMaterial->SetUInt(ShaderIDs::g_AOSampleCount, UserData::GetInstance().aoParameter.SampleCount, passID);
             m_pMaterial->SetUInt(ShaderIDs::g_AOSampleStepCount,
                                  UserData::GetInstance().aoParameter.SampleStepCount,
@@ -881,6 +952,35 @@ DXGI_FORMAT_R8_UNORM,
                                        float(m_pAORT->GetWidth()) / float(m_blueNoise.GetWidth()),
                                        float(m_pAORT->GetHeight()) / float(m_blueNoise.GetHeight())),
                                    passID);
+
+            m_pMaterial->SetUInt(ShaderIDs::g_bImportance, UserData::GetInstance().aoParameter.IsImportance, passID);
+            switch (UserData::GetInstance().aoParameter.debugTarget)
+            {
+            case AODebugTarget::Importance:
+            {
+                m_pMaterial->SetUInt(ShaderIDs::g_bDebugImportance, true, passID);
+                m_pMaterial->SetUInt(ShaderIDs::g_bDebugSample, false, passID);
+                break;
+            }
+            case AODebugTarget::Sample:
+            {
+                m_pMaterial->SetUInt(ShaderIDs::g_bDebugImportance, false, passID);
+                m_pMaterial->SetUInt(ShaderIDs::g_bDebugSample, true, passID);
+                break;
+            }
+            case AODebugTarget::AO:
+            {
+                m_pMaterial->SetUInt(ShaderIDs::g_bDebugImportance, false, passID);
+                m_pMaterial->SetUInt(ShaderIDs::g_bDebugSample, false, passID);
+                break;
+            }
+            default:
+            {
+                m_pMaterial->SetUInt(ShaderIDs::g_bDebugImportance, false, passID);
+                m_pMaterial->SetUInt(ShaderIDs::g_bDebugSample, false, passID);
+                break;
+            }
+            }
 
             UINT qW = m_renderSize.x / 4;
             UINT qH = m_renderSize.y / 4;

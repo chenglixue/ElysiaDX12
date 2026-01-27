@@ -60,6 +60,15 @@ namespace ElysiaRenderer
         std::vector<ShaderPass> m_shaderPasses;
         std::unique_ptr<Material> m_pMaterial = nullptr;
 
+        RenderTexture* m_pWarmUPRT = nullptr;
+
         void SetSpaceResource(PassData& passData, UINT8 spaceID);
+        void WarmUPCompute();
+
+    private:
+        std::unique_ptr<Material> m_pWarmUPMaterial = nullptr;
+        std::vector<ShaderPass> m_WarmUPShaderPasses;
+        int m_warmUpGraphicsPasseID = -1;
+        int m_warmUpComputePasseID = -1;
     };
 }

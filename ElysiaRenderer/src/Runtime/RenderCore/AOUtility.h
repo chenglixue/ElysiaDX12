@@ -10,6 +10,13 @@ namespace ElysiaRenderer
         High
     };
 
+    enum class AODebugTarget : int
+    {
+        Importance,
+        Sample,
+        AO
+    };
+
     struct AOParameter
     {
         bool IsEnableAO = true;
@@ -30,5 +37,12 @@ namespace ElysiaRenderer
         AOBlurQuality BlurQuality = AOBlurQuality::High;
         int BlurIntensity = 1;
         float Sharpness = 10.f;
+
+        bool IsImportance = true;
+        float DepthImportanceThreshold = 0.1f;
+        float NormalImportanceThreshold = 0.1f;
+        float sampleImportanceThreshold = 0.1f;
+
+        AODebugTarget debugTarget = AODebugTarget::AO;
     };
 }

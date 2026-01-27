@@ -28,8 +28,8 @@ namespace ElysiaRenderer
     size_t DebugPass::ShaderIDs::g_SourceSize = SIZE_MAX;
     size_t DebugPass::ShaderIDs::g_TargetSize = SIZE_MAX;
 
-    DebugPass::DebugPass() :
-        BasePass()
+    DebugPass::DebugPass()
+        : BasePass()
     {
         ShaderIDs::g_DebugMode = PropertyToID(L"g_DebugMode");
         ShaderIDs::g_TargetTexIndex = PropertyToID(L"g_TargetTexIndex");
@@ -149,7 +149,8 @@ namespace ElysiaRenderer
 
             auto threadGroupSize = passData.GetKernelThreadGroupSizes();
             m_pCommand->Dispatch(CeilDivide(m_pCameraColorRT->GetWidth(), threadGroupSize.x),
-                                 CeilDivide(m_pCameraColorRT->GetHeight(), threadGroupSize.y), threadGroupSize.z);
+                                 CeilDivide(m_pCameraColorRT->GetHeight(), threadGroupSize.y),
+                                 threadGroupSize.z);
         }
 
         m_pCommand->AddBarrier(m_pCameraColorRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
@@ -169,7 +170,9 @@ namespace ElysiaRenderer
             passData.pCurrVariantData = &VariantManager->GetOrCompileVariantByNames(enableKeywords);
 
             passData.pPipelineStateObject = PSOManager::GetInstance().GetComputePipelineState(
-                m_pDevice, m_pMaterial.get(), passID);
+                m_pDevice,
+                m_pMaterial.get(),
+                passID);
         }
     }
 }

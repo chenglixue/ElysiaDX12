@@ -4,7 +4,7 @@
 #define GROUP_SIZE 8
 static const UINT DEINTERLEAVED_DEPTH_COUNT = 16;
 #define _AO_MAX_SAMPLE_COUNT 6
-#define _AO_MAX_SAMPLE_STEP_COUNT 4
+#define _AO_MAX_SAMPLE_STEP_COUNT 6
 
 cbuffer PassConstant : register(b0, perPassSpace)
 {
@@ -43,6 +43,16 @@ cbuffer PassConstant : register(b0, perPassSpace)
     UINT g_StepMipFactor;
     bool g_bLerpAO;
     float g_LerpAOFactor;
+
+    bool g_bDebugImportance;
+    bool g_bDebugSample;
+
+    bool g_bImportance;
+
+    float g_SampleImportanceThreshold;
+    UINT g_AOImportanceTexIndex;
+    UINT g_AOSampleCountLow;
+    UINT g_AOSampleCountHigh;
 
     UINT g_RandStepTexIndex;
     float4 g_AOSampleKernelArray[_AO_MAX_SAMPLE_COUNT];
@@ -97,6 +107,14 @@ void LayeredHBAOMain(UINT3 id : SV_DispatchThreadID)
     uint offsetY = layerIndex / 4;
     float2 fullScreenUV = (float2(id.xy * 4 + uint2(offsetX, offsetY)) + 0.5f) * g_FullScreenSize.zw;
 
+    float importance = SampleTexture2D(g_AOImportanceTexIndex, fullScreenUV, ClampPointSampler).r;
+    [branch]
+    if (g_bDebugImportance)
+    {
+        o[id.xy] = importance;
+        return;
+    }
+
     // full screen data
     FInputParams inputParam;
     inputParam.PositionVS = ComputeClipSpacePosition(fullScreenUV, eyeDepth, projMatrix);
@@ -113,20 +131,38 @@ void LayeredHBAOMain(UINT3 id : SV_DispatchThreadID)
     float randomAngle = randomVector.x * TWO_PI + temporalAngle;
 
     float2 projScale = float2(projMatrix[0][0], projMatrix[1][1]);
-    float radius = g_AORadius;
+    float radius = g_AORadius * 100;
 
-    const int NUM_DIRECTIONS = 4 * g_AOSampleCount;
-    const int NUM_STEPS = g_AOSampleStepCount;
+    int dirSampleCount = 4 * g_AOSampleCount;
+    int stepSampleCount = g_AOSampleStepCount;
+    if (g_bImportance)
+    {
+        dirSampleCount = importance > g_SampleImportanceThreshold ? g_AOSampleCount * 4 : 4;
+        dirSampleCount = max(dirSampleCount, 4);
+
+        stepSampleCount = importance > g_SampleImportanceThreshold ? g_AOSampleStepCount : 2;
+        stepSampleCount = max(stepSampleCount, 2);
+    }
+
+    [branch]
+    if (g_bDebugSample)
+    {
+        o[id.xy] = dirSampleCount / (g_AOSampleCount * 4) + stepSampleCount / g_AOSampleStepCount;
+        return;
+    }
+
+    const int NUM_DIRECTIONS = dirSampleCount;
+    const int NUM_STEPS = stepSampleCount;
     float fullPixelRadius = radius * projScale.x / max(eyeDepth, 1.f) * 0.5f;
     float localPixelRadius = fullPixelRadius * 0.25f;
     float stepPixel = localPixelRadius / (g_AOSampleStepCount + 1.0f);
 
     float occlusion = 0.f;
-    [unroll(12)]
+    [unroll(24)]
     for (UINT dir = 0; dir < NUM_DIRECTIONS; dir ++)
     {
         float angle = float(dir) / float(NUM_DIRECTIONS) * TWO_PI + randomAngle;
-        angle = float(dir) * 2.399963229728653f + randomAngle;
+        // angle = float(dir) * 2.399963229728653f + randomAngle;
 
         float2 dirUV;
         sincos(angle, dirUV.y, dirUV.x);
@@ -179,7 +215,7 @@ void LayeredHBAOMain(UINT3 id : SV_DispatchThreadID)
     float distFade = saturate(inputParam.LinearEyeDepth * mul + add);
     aoResult = lerp(aoResult, 1.0, distFade);
 
-    aoResult = Fast2x2Blur(float4(aoResult, inputParam.LinearEyeDepth, normalVS.xy));
+    // aoResult = Fast2x2Blur(float4(aoResult, inputParam.LinearEyeDepth, normalVS.xy));
 
     o[id.xy] = aoResult;
 }

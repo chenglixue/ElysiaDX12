@@ -250,6 +250,20 @@ namespace ElysiaEngine
                                         static_cast<int>(magic_enum::enum_count<DebugMode>()));
             pUserData.debugMode = (DebugMode)debugModeIndex;
 
+            if (pUserData.debugMode == DebugMode::AO)
+            {
+                int debugModeIndex = (int)pUserData.aoParameter.debugTarget;
+                ImGui::Combo("AO Debug",
+                             &debugModeIndex,
+                             StringViewToChar(magic_enum::enum_names<AODebugTarget>().data(),
+                                              magic_enum::enum_count<AODebugTarget>()).data(),
+                             (int)magic_enum::enum_count<AODebugTarget>());
+                debugModeIndex = std::clamp(debugModeIndex,
+                                            0,
+                                            static_cast<int>(magic_enum::enum_count<AODebugTarget>()));
+                pUserData.aoParameter.debugTarget = (AODebugTarget)debugModeIndex;
+            }
+
             ImGui::SliderInt("mipmap level",
                              &pUserData.mipmapLevel,
                              0,
@@ -400,9 +414,9 @@ namespace ElysiaEngine
             ImGui::Checkbox("Is Blur", &pUserData.aoParameter.IsBlur);
 
             ImGui::SliderInt("AO Sample Count", &pUserData.aoParameter.SampleCount, 0, 6);
-            ImGui::SliderInt("AO Sample Step Count", &pUserData.aoParameter.SampleStepCount, 0, 4);
+            ImGui::SliderInt("AO Sample Step Count", &pUserData.aoParameter.SampleStepCount, 0, 6);
 
-            ImGui::SliderFloat("AO Radius", &pUserData.aoParameter.Radius, 0.1, 50);
+            ImGui::SliderFloat("AO Radius", &pUserData.aoParameter.Radius, 0.1, 2);
             ImGui::SliderFloat("AO Fade Radius", &pUserData.aoParameter.FadeRadius, 1, 20000);
             ImGui::SliderFloat("AO Fade Distance", &pUserData.aoParameter.FadeDistance, 1, 20000);
 
@@ -428,6 +442,20 @@ namespace ElysiaEngine
 
             ImGui::SliderInt("AO Blur Radius", &pUserData.aoParameter.BlurIntensity, 1, 10);
             ImGui::SliderFloat("AO Sharpness", &pUserData.aoParameter.Sharpness, 1.f, 100.f);
+
+            ImGui::Checkbox("Is Enable Importance", &pUserData.aoParameter.IsImportance);
+            ImGui::SliderFloat("Depth Importance",
+                               &pUserData.aoParameter.DepthImportanceThreshold,
+                               0.001f,
+                               0.05f);
+            ImGui::SliderFloat("Normal Importance",
+                               &pUserData.aoParameter.NormalImportanceThreshold,
+                               0.1f,
+                               5.f);
+            ImGui::SliderFloat("Sample Importance Threshold",
+                               &pUserData.aoParameter.sampleImportanceThreshold,
+                               0.f,
+                               1.f);
         }
 
         if (ImGui::CollapsingHeader("Timing"))
