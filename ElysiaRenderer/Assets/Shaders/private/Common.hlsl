@@ -21,36 +21,36 @@ float4 SampleTexture2D_LOD(UINT textureIndex, float2 uv, UINT samplerStateIndex,
     return SampleTex.SampleLevel(Sampler, uv, LOD);
 }
 
-float4 GatherRedTexture2D(UINT textureIndex, float2 uv, UINT samplerStateIndex)
+float4 GatherRedTexture2D(UINT textureIndex, float2 uv, UINT samplerStateIndex, uint2 offset = 0)
 {
     Texture2D<float4> SampleTex = ResourceDescriptorHeap[textureIndex];
     SamplerState Sampler = SamplerDescriptorHeap[samplerStateIndex];
 
-    return SampleTex.GatherRed(Sampler, uv);
+    return SampleTex.GatherRed(Sampler, uv, offset);
 }
 
-float4 GatherGreenTexture2D(UINT textureIndex, float2 uv, UINT samplerStateIndex)
+float4 GatherGreenTexture2D(UINT textureIndex, float2 uv, UINT samplerStateIndex, uint2 offset = 0)
 {
     Texture2D<float4> SampleTex = ResourceDescriptorHeap[textureIndex];
     SamplerState Sampler = SamplerDescriptorHeap[samplerStateIndex];
 
-    return SampleTex.GatherGreen(Sampler, uv);
+    return SampleTex.GatherGreen(Sampler, uv, offset);
 }
 
-float4 GatherBlueTexture2D(UINT textureIndex, float2 uv, UINT samplerStateIndex)
+float4 GatherBlueTexture2D(UINT textureIndex, float2 uv, UINT samplerStateIndex, uint2 offset = 0)
 {
     Texture2D<float4> SampleTex = ResourceDescriptorHeap[textureIndex];
     SamplerState Sampler = SamplerDescriptorHeap[samplerStateIndex];
 
-    return SampleTex.GatherBlue(Sampler, uv);
+    return SampleTex.GatherBlue(Sampler, uv, offset);
 }
 
-float4 GatherAlphaTexture2D(UINT textureIndex, float2 uv, UINT samplerStateIndex)
+float4 GatherAlphaTexture2D(UINT textureIndex, float2 uv, UINT samplerStateIndex, uint2 offset = 0)
 {
     Texture2D<float4> SampleTex = ResourceDescriptorHeap[textureIndex];
     SamplerState Sampler = SamplerDescriptorHeap[samplerStateIndex];
 
-    return SampleTex.GatherAlpha(Sampler, uv);
+    return SampleTex.GatherAlpha(Sampler, uv, offset);
 }
 
 float4 LoadTexture2D(UINT textureIndex, int2 coord)

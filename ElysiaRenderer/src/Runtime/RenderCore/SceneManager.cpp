@@ -79,7 +79,7 @@ namespace ElysiaRenderer
 
     std::shared_ptr<ElysiaModel::LoadedModel> SceneManager::CreateModel(const std::wstring& modelPath)
     {
-        return ModelManager::GetInstance().LoadStaticModel(modelPath, 1);
+        return ModelManager::GetInstance().LoadStaticModel(modelPath, 0.1);
     }
     Entity* SceneManager::CreateEntityFromModel(std::shared_ptr<ElysiaModel::LoadedModel> pModel)
     {

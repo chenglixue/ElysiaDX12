@@ -3,78 +3,56 @@
 
 #define GROUP_SIZE 8
 
-cbuffer PassConstant : register(b0, perMaterialSpace)
+cbuffer PassConstant : register(b0, perPassSpace)
 {
     float4 g_TargetSize;
     float4 g_SourceSize;
 
-    UINT g_TargetTexIndex;
-    UINT g_SourceTexIndex;
-    float g_MipmapLevel;
+    Vector4 g_TargetTexIndices;
+    Vector4 g_SourceTexIndices;
+
+    float g_AORadius;
 }
 
+float MipSmartAverage(float4 depths, float effectRadius);
 
 [numthreads(GROUP_SIZE, GROUP_SIZE, 1)]
-void AOHIZNormal(uint3 dispatchThreadID : SV_DispatchThreadID)
+void AOHIZNormal(UINT3 id : SV_DispatchThreadID)
 {
-    const uint2 srcBaseCoord = dispatchThreadID.xy * 2;
-    const uint2 destCoord = dispatchThreadID.xy;
+    const UINT layerIndex = id.z;
+    const UINT2 targetCoord = id.xy;
+    const UINT2 srcCoord = id.xy * 2;
 
-    RWTexture2D<float4> o = ResourceDescriptorHeap[g_TargetTexIndex];
+    if (targetCoord.x >= (uint)g_TargetSize.x || targetCoord.y >= (uint)g_TargetSize.y)
+        return;
 
-    float4 result;
-    [branch]
-    if (g_MipmapLevel == 0)
+    UINT2 offset[4] =
     {
-        float2 screenUV = (float2(dispatchThreadID.xy) + 0.5f) * g_TargetSize.zw;
-        float3 normalWS = SampleNormalWS(screenUV,ClampPointSampler);
-        float rawDepth = SampleTexture2D(OpaqueDepthIndex, screenUV, ClampPointSampler);
-        float eyeDepth = LinearEyeDepth(rawDepth, g_ZBufferParams);
-        eyeDepth /= Constant_Float16F_Scale;
+        uint2(0, 0),
+        uint2(1, 0),
+        uint2(0, 1),
+        uint2(1, 1),
+    };
 
-        result = float4(normalWS, eyeDepth);
-    }
-    else
+    float4 depths;
+    for (UINT i = 0; i < 4; i ++)
     {
-        const uint2 maxCoord = (uint2)g_SourceSize.xy - 1;
-
-        uint2 sampleUV[4];
-        sampleUV[0] = min(srcBaseCoord + uint2(0, 0), maxCoord);
-        sampleUV[1] = min(srcBaseCoord + uint2(0, 1), maxCoord);
-        sampleUV[2] = min(srcBaseCoord + uint2(1, 0), maxCoord);
-        sampleUV[3] = min(srcBaseCoord + uint2(1, 1), maxCoord);
-
-        float4 samples[4];
-        samples[0] = LoadTexture2D(g_SourceTexIndex, sampleUV[0]);
-        samples[1] = LoadTexture2D(g_SourceTexIndex, sampleUV[1]);
-        samples[2] = LoadTexture2D(g_SourceTexIndex, sampleUV[2]);
-        samples[3] = LoadTexture2D(g_SourceTexIndex, sampleUV[3]);
-
-        float minDepth = FLT_MAX;
-        [unroll(4)]
-        for (int i = 0; i < 4; i ++)
-        {
-            minDepth = min(minDepth, samples[i].a);
-        }
-
-        float3 weightedNormalSum = 1e-4;
-        if (g_MipmapLevel <= 2)
-        {
-            float totalWeight = 1e-4;
-            float weights[4];
-            [unroll(4)]
-            for (int i = 0; i < 4; i ++)
-            {
-                weights[i] = ComputeDepthSimilarity(samples[i].a, minDepth, 0.003f);
-                totalWeight += weights[i];
-                weightedNormalSum += samples[i].rgb * weights[i];
-            }
-            weightedNormalSum /= totalWeight;
-            weightedNormalSum = normalize(weightedNormalSum);
-        }
-
-        result = float4(weightedNormalSum, minDepth);
+        depths[i] = LoadTexture2D(g_SourceTexIndices[layerIndex], srcCoord + offset[i]) *
+                    Constant_Float16F_Scale;
     }
 
-    o[destCoord] = result;
+    RWTexture2D<float4> o = ResourceDescriptorHeap[g_TargetTexIndices[layerIndex]];
+
+    o[id.xy] = MipSmartAverage(depths, g_AORadius) / Constant_Float16F_Scale;
+}
+
+float MipSmartAverage(float4 depths, float effectRadius)
+{
+    float closest = min(min(depths[0], depths[1]), min(depths[2], depths[3]));
+    float falloffCalcMulSq = -1.0f / (effectRadius * effectRadius);
+
+    float4 dists = depths - closest.xxxx;
+    float4 weights = saturate(dists * dists * falloffCalcMulSq + 1.0);
+
+    return dot(weights, depths) / dot(weights, float4(1, 1, 1, 1));
 }

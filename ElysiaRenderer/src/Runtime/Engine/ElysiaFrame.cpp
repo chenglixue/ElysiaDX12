@@ -260,7 +260,8 @@ namespace ElysiaEngine
                              (int)magic_enum::enum_count<AODebugTarget>());
                 debugModeIndex = std::clamp(debugModeIndex,
                                             0,
-                                            static_cast<int>(magic_enum::enum_count<AODebugTarget>()));
+                                            static_cast<int>(magic_enum::enum_count<
+                                                AODebugTarget>()));
                 pUserData.aoParameter.debugTarget = (AODebugTarget)debugModeIndex;
             }
 
@@ -275,7 +276,7 @@ namespace ElysiaEngine
         if (ImGui::CollapsingHeader("Light"))
         {
             ImGui::ColorEdit3("Color", (float*)&pUserData.lightColor);
-            ImGui::DragFloat3("Direction", (float*)&pUserData.lightDir, 1, -1, 1);
+            ImGui::SliderFloat3("Direction", (float*)&pUserData.lightDir, -1, 1);
             ImGui::SliderFloat("Intensity", &pUserData.lightIntensity, 0, 20, "%.3f");
 
             int shadowTypeIndex = (int)pUserData.shadowType;
@@ -408,7 +409,6 @@ namespace ElysiaEngine
 
         if (ImGui::CollapsingHeader("AO"))
         {
-
             ImGui::Checkbox("Is Enable AO", &pUserData.aoParameter.IsEnableAO);
             ImGui::Checkbox("Is IsLerp AO", &pUserData.aoParameter.IsLerpAO);
             ImGui::Checkbox("Is Blur", &pUserData.aoParameter.IsBlur);
@@ -425,9 +425,13 @@ namespace ElysiaEngine
             ImGui::SliderFloat("AO Pow", &pUserData.aoParameter.IntensityPow, 0.1, 8);
 
             ImGui::SliderFloat("AO Bias", &pUserData.aoParameter.Bias, 0.f, 0.01f);
+            ImGui::SliderFloat("AO HIZ Mip Factor", &pUserData.aoParameter.HIZMipFactor, 0.f, 1.f);
 
             ImGui::SliderFloat("AO Lerp", &pUserData.aoParameter.AOLerpFactor, 0.1f, 1.f);
-            ImGui::SliderFloat("AO TAA Lerp Weight", &pUserData.aoParameter.TAALerpFactor, 0.05f, 0.1f);
+            ImGui::SliderFloat("AO TAA Lerp Weight",
+                               &pUserData.aoParameter.TAALerpFactor,
+                               0.05f,
+                               0.1f);
 
             int blurQualityIndex = (int)pUserData.aoParameter.BlurQuality;
             ImGui::Combo("Blur Quality",
@@ -437,25 +441,24 @@ namespace ElysiaEngine
                          (int)magic_enum::enum_count<AOBlurQuality>());
             blurQualityIndex = std::clamp(blurQualityIndex,
                                           0,
-                                          static_cast<int>(magic_enum::enum_count<AOBlurQuality>()));
+                                          static_cast<int>(magic_enum::enum_count<
+                                              AOBlurQuality>()));
             pUserData.aoParameter.BlurQuality = (AOBlurQuality)blurQualityIndex;
 
             ImGui::SliderInt("AO Blur Radius", &pUserData.aoParameter.BlurIntensity, 1, 10);
             ImGui::SliderFloat("AO Sharpness", &pUserData.aoParameter.Sharpness, 1.f, 100.f);
 
+            ImGui::SliderFloat("HIZ Radius", &pUserData.aoParameter.HIZRadius, 1e-4, 10.f);
+
             ImGui::Checkbox("Is Enable Importance", &pUserData.aoParameter.IsImportance);
-            ImGui::SliderFloat("Depth Importance",
-                               &pUserData.aoParameter.DepthImportanceThreshold,
-                               0.001f,
-                               0.05f);
-            ImGui::SliderFloat("Normal Importance",
-                               &pUserData.aoParameter.NormalImportanceThreshold,
-                               0.1f,
-                               5.f);
-            ImGui::SliderFloat("Sample Importance Threshold",
-                               &pUserData.aoParameter.sampleImportanceThreshold,
-                               0.f,
-                               1.f);
+            ImGui::SliderFloat("Importance Intensity",
+                               &pUserData.aoParameter.importanceIntensity,
+                               1.f,
+                               10.f);
+            ImGui::SliderInt("Sample Mipmap",
+                             &pUserData.aoParameter.HIZMipmap,
+                             0,
+                             10);
         }
 
         if (ImGui::CollapsingHeader("Timing"))

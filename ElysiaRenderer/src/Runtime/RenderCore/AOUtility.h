@@ -13,8 +13,14 @@ namespace ElysiaRenderer
     enum class AODebugTarget : int
     {
         Importance,
-        Sample,
+        HIZMipmap,
         AO
+    };
+
+    enum class AOType : int
+    {
+        Soft,
+        Hard
     };
 
     struct AOParameter
@@ -38,11 +44,14 @@ namespace ElysiaRenderer
         int BlurIntensity = 1;
         float Sharpness = 10.f;
 
-        bool IsImportance = true;
-        float DepthImportanceThreshold = 0.1f;
-        float NormalImportanceThreshold = 0.1f;
-        float sampleImportanceThreshold = 0.1f;
 
         AODebugTarget debugTarget = AODebugTarget::AO;
+
+        float HIZMipFactor = 1.f;
+        int HIZMipmap = 1;
+
+        bool IsImportance = true;
+        float importanceIntensity = 2.f;
+        float HIZRadius = 1.f;
     };
 }

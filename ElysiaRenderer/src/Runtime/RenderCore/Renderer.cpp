@@ -92,11 +92,11 @@ namespace ElysiaRenderer
         m_rectScissor = {0, 0, (LONG)Width, (LONG)Height};
 
         CameraManager::GetInstance().CreateMainCamera(
-            Vector3(-11.5f, 200.85f, -0.45f),
+            Vector3(-11.5f, 200.85f, -0.45f) * 0.1f,
             static_cast<float>(Width) / static_cast<float>(Height),
             AMD_PI_OVER_4,
             0.1f,
-            2000.f);
+            1000.f);
 
         if (!UserData::GetInstance().IsUseHDR)
         {

@@ -5,9 +5,9 @@
 cbuffer PassConstant : register(b0, perPassSpace)
 {
     float4 g_TargetSize;
+    Vector4 g_DeinterleaveAOTexIndices;
     UINT g_TargetTexIndex;
-    float g_DepthImportanceThreshold;
-    float g_NormalImportanceThreshold;
+    float g_ImportanceIntensity;
 }
 
 [numthreads(GROUP_SIZE, GROUP_SIZE, 1)]
@@ -16,40 +16,52 @@ void GenerateAOImportance(UINT3 id : SV_DispatchThreadID)
     if (id.x >= g_TargetSize.x || id.y >= g_TargetSize.y)
         return;
 
-    float2 screenUV = (float2(id.xy) + 0.5f) * g_TargetSize.zw;
-    float centerRawDepth = SampleTexture2D(OpaqueDepthIndex, screenUV, ClampPointSampler).r;
-    float centerEyeDepth = LinearEyeDepth(centerRawDepth, g_ZBufferParams);
-    //float3 centerNormal = SampleNormalWS(screenUV, ClampPointSampler);
+    float sliceAO[4];
+    sliceAO[0] = LoadTexture2D(g_DeinterleaveAOTexIndices[0], id);
+    sliceAO[1] = LoadTexture2D(g_DeinterleaveAOTexIndices[1], id);
+    sliceAO[2] = LoadTexture2D(g_DeinterleaveAOTexIndices[2], id);
+    sliceAO[3] = LoadTexture2D(g_DeinterleaveAOTexIndices[3], id);
 
-    float2 texelOffsets[4] =
+    float maxAO = FLT_MIN;
+    float minAO = FLT_MAX;
+    [unroll(4)]
+    for (int i = 0; i < 4; ++i)
     {
-        float2(g_TargetSize.z, 0),
-        float2(-g_TargetSize.z, 0),
-        float2(0, g_TargetSize.w),
-        float2(0, -g_TargetSize.w)
+        maxAO = max(maxAO, sliceAO[i]);
+        minAO = min(minAO, sliceAO[i]);
+    }
+
+    float diff = abs(maxAO - minAO);
+    float importance = saturate(diff * g_ImportanceIntensity);
+
+    RWTexture2D<float4> o = ResourceDescriptorHeap[g_TargetTexIndex];
+    o[id.xy] = importance;
+}
+
+[numthreads(GROUP_SIZE, GROUP_SIZE, 1)]
+void MaxAOImportance(UINT3 id : SV_DispatchThreadID)
+{
+    if (id.x >= g_TargetSize.x || id.y >= g_TargetSize.y)
+        return;
+
+    float2 centerUV = (id.xy + 0.5f) * g_TargetSize.zw;
+    float center = LoadTexture2D(g_TargetTexIndex, id);
+
+    float2 offsetUV[4] =
+    {
+        float2(-1.5f, -0.5f),
+        float2(0.5, -1.5),
+        float2(1.5, 0.5),
+        float2(-0.5, 1.5),
     };
 
-    float eyeDepths[4];
-    float3 eyeNormal[4];
-    float depthDiff = 0.f;
-    float normalDiff = 0.f;
-    [unroll(4)]
-    for (int i = 0; i < 4; i ++)
+    float maxImportance = center;
+    for (int i = 0; i < 4; ++i)
     {
-        eyeDepths[i] = SampleTexture2D(OpaqueDepthIndex, screenUV + texelOffsets[i], ClampPointSampler);
-        eyeDepths[i] = LinearEyeDepth(eyeDepths[i], g_ZBufferParams);
-        //eyeNormal[i] = SampleNormalWS(screenUV + texelOffsets[i], ClampPointSampler);
-
-        depthDiff += abs(centerEyeDepth - eyeDepths[i]);
-        // float normalDot = dot(eyeNormal[i], centerNormal);
-        // normalDiff += 1 - normalDot;
+        float sample = LoadTexture2D(g_TargetTexIndex, id.xy + offsetUV[i]);
+        maxImportance = max(maxImportance, sample);
     }
-    depthDiff /= max(centerEyeDepth, 1e-4);
 
-    float depthImportance = smoothstep(g_DepthImportanceThreshold * 0.5f, g_DepthImportanceThreshold, depthDiff);
-    //float normalImportance = smoothstep(g_NormalImportanceThreshold * 0.5f, g_NormalImportanceThreshold, normalDiff);
-    float importance = depthImportance;
-
-    RWTexture2D<float> o = ResourceDescriptorHeap[g_TargetTexIndex];
-    o[id.xy] = importance;
+    RWTexture2D<float4> o = ResourceDescriptorHeap[g_TargetTexIndex];
+    o[id.xy] = maxImportance;
 }

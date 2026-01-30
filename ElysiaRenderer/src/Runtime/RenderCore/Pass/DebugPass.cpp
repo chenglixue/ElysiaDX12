@@ -78,11 +78,13 @@ namespace ElysiaRenderer
     {
         PIXHelper pix(m_pCommand->GetCommandList(), "Debug Pass");
 
-        m_pMaterial->SetUInt(ShaderIDs::g_DebugMode, static_cast<UINT>(UserData::GetInstance().debugMode));
+        m_pMaterial->SetUInt(ShaderIDs::g_DebugMode,
+                             static_cast<UINT>(UserData::GetInstance().debugMode));
         m_pMaterial->SetUInt(ShaderIDs::g_TargetTexIndex, m_pCameraColorRT->GetResourceHeapIndex());
         m_pMaterial->SetUInt(ShaderIDs::g_MipmapLevel, UserData::GetInstance().mipmapLevel);
         m_pMaterial->SetFloat4(ShaderIDs::g_TargetSize,
-                               GetScreenSize(m_pCameraColorRT->GetWidth(), m_pCameraColorRT->GetHeight()));
+                               GetScreenSize(m_pCameraColorRT->GetWidth(),
+                                             m_pCameraColorRT->GetHeight()));
 
         switch (UserData::GetInstance().debugMode)
         {
@@ -92,43 +94,20 @@ namespace ElysiaRenderer
         }
         case DebugMode::AO:
         {
-            // auto RT = RenderTargetManager::GetInstance().GetRenderTexture(
-            //     L"AO HIZ RT");
-            // m_pMaterial->SetUInt(ShaderIDs::g_SourceTexIndex, RT->GetResourceHeapIndex());
-            // m_pMaterial->SetFloat4(ShaderIDs::g_SourceSize, GetScreenSize(RT->GetWidth(), RT->GetHeight()));
+            auto clampValue = std::ranges::clamp(UserData::GetInstance().mipmapLevel, 0, 3);
+            auto RT = RenderTargetManager::GetInstance().GetRenderTexture(
+                L"Deinterleaved AO RT" + std::to_wstring(clampValue));
+            // RT = RenderTargetManager::GetInstance().GetRenderTexture(
+            //     L"Deinterleaved AO RT" + std::to_wstring(clampValue));
+            m_pMaterial->SetUInt(ShaderIDs::g_SourceTexIndex, RT->GetResourceHeapIndex());
+            m_pMaterial->SetFloat4(ShaderIDs::g_SourceSize,
+                                   GetScreenSize(RT->GetWidth(), RT->GetHeight()));
             // auto RT = RenderTargetManager::GetInstance().GetRenderTexture(
             //     L"AO RT");
             // RT = RenderTargetManager::GetInstance().GetRenderTexture(
             //     L"Half AO RT");
             // RT = RenderTargetManager::GetInstance().GetRenderTexture(
             //     L"One Four AO RT");
-            switch (UserData::GetInstance().mipmapLevel)
-            {
-            case 0:
-            {
-                auto RT = RenderTargetManager::GetInstance().GetRenderTexture(
-                    L"AO RT");
-                m_pMaterial->SetUInt(ShaderIDs::g_SourceTexIndex, RT->GetResourceHeapIndex());
-                m_pMaterial->SetFloat4(ShaderIDs::g_SourceSize, GetScreenSize(RT->GetWidth(), RT->GetHeight()));
-                break;
-            }
-            case 1:
-            {
-                auto RT = RenderTargetManager::GetInstance().GetRenderTexture(
-                    L"Half AO RT");
-                m_pMaterial->SetUInt(ShaderIDs::g_SourceTexIndex, RT->GetResourceHeapIndex());
-                m_pMaterial->SetFloat4(ShaderIDs::g_SourceSize, GetScreenSize(RT->GetWidth(), RT->GetHeight()));
-                break;
-            }
-            case 2:
-            {
-                auto RT = RenderTargetManager::GetInstance().GetRenderTexture(
-                    L"One Four AO RT");
-                m_pMaterial->SetUInt(ShaderIDs::g_SourceTexIndex, RT->GetResourceHeapIndex());
-                m_pMaterial->SetFloat4(ShaderIDs::g_SourceSize, GetScreenSize(RT->GetWidth(), RT->GetHeight()));
-                break;
-            }
-            }
             break;
         }
         }

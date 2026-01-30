@@ -629,7 +629,7 @@
     <None Include="Assets\Shaders\public\Warmup\CS_Warmup.hlsl" />
     <None Include="Assets\Shaders\public\Warmup\Warmup.hlsl" />
     <None Include="Assets\Shaders\public\PostProcess\CS_GenerateAOImportance.hlsl" />
-    <None Include="Assets\Shaders\public\PostProcess\CS_Importance.hlsl" />
+    <None Include="Assets\Shaders\public\PostProcess\AO\CS_PrepareDepth.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

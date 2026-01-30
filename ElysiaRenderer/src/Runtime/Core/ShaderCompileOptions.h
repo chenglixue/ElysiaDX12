@@ -71,7 +71,11 @@ namespace ElysiaCore
         std::wstring m_path = L"";
         std::wstring m_entry = L"PS";
         std::wstring m_target = L"ps_6_1";
+#ifdef _DEBUG
+        bool m_debug = true;
+#else
         bool m_debug = false;
+#endif
         int m_optLevel = 3;
 
         std::vector<ShaderMacro> m_macros;

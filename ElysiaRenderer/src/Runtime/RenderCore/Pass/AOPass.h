@@ -19,11 +19,10 @@ namespace ElysiaRenderer
     public:
         struct RenderTextureIDs
         {
+            static inline size_t PrePareDepthID = PropertyToID(L"PrePare Depth RT");
+            static inline size_t HIZRTID = PropertyToID(L"AO HIZ RT");
             static inline size_t AOImportanceID = PropertyToID(L"AO Importance RT");
             static inline size_t AORTID = PropertyToID(L"AO RT");
-            static inline size_t HalfAORTID = PropertyToID(L"Half AO RT");
-            static inline size_t OneFourAORTID = PropertyToID(L"One Four AO RT");
-            static inline size_t HIZRTID = PropertyToID(L"AO HIZ RT");
             static inline size_t TAA0RTID = PropertyToID(L"AO TAA0 RT");
             static inline size_t TAA1RTID = PropertyToID(L"AO TAA1 RT");
             static inline size_t AOBlurHorizonRTID = PropertyToID(L"AO Blur Horizon RT");
@@ -44,7 +43,7 @@ namespace ElysiaRenderer
         static inline bool m_isFirstFrame = true;
         int m_currHistoryIndex = 0;
         static constexpr UINT MAX_BLUR_RADIUS = 10;
-        static constexpr UINT DEINTERLEAVED_DEPTH_COUNT = 16;
+        static constexpr UINT DEINTERLEAVED_DEPTH_COUNT = 4;
 
         RenderTexture* m_pAORT = nullptr;
         RenderTexture* m_pImportanceRT = nullptr;
@@ -63,14 +62,16 @@ namespace ElysiaRenderer
 
         struct ShaderPasseIDs
         {
+            static inline int PrepareDepthPassID = -1;
             static inline int HIZPassID = -1;
             static inline int ImportancePassID = -1;
+            static inline int CrossMaxImportancePassID = -1;
             static inline int AOPassID = -1;
             static inline int TAAPassID = -1;
             static inline int BlurHorizonPassID = -1;
             static inline int BlurVerticalPassID = -1;
-            static inline int DeinterleavePassID = 0;
-            static inline int LayeredAOPassID = 0;
+            static inline int DeinterleaveHIZPassID = 0;
+            static inline int DeinterleaveAOPassID = 0;
             static inline int ReinterleavePassID = 0;
         };
         struct ShaderIDs
@@ -82,6 +83,10 @@ namespace ElysiaRenderer
             static inline size_t g_TargetTexIndices = PropertyToID(L"g_TargetTexIndices");
             static inline size_t g_SourceTexIndex = PropertyToID(L"g_SourceTexIndex");
             static inline size_t g_SourceTexIndices = PropertyToID(L"g_SourceTexIndices");
+            static inline size_t g_DeinterleaveDepthTexIndices = PropertyToID(
+                L"g_DeinterleaveDepthTexIndices");
+            static inline size_t g_DeinterleaveAOTexIndices = PropertyToID(
+                L"g_DeinterleaveAOTexIndices");
             static inline size_t g_TargetMipmapLevel = PropertyToID(L"g_TargetMipmapLevel");
 
             static inline size_t viewMatrix = PropertyToID(L"viewMatrix");
@@ -120,7 +125,9 @@ namespace ElysiaRenderer
             static inline size_t g_HIZMinMipmap = PropertyToID(L"g_HIZMinMipmap");
             static inline size_t g_MipmapLevel = PropertyToID(L"g_MipmapLevel");
             static inline size_t g_StepMipFactor = PropertyToID(L"g_StepMipFactor");
+            static inline size_t g_HIZMipmap = PropertyToID(L"g_HIZMipmap");
             static inline size_t g_HIZTextureIndex = PropertyToID(L"g_HIZTextureIndex");
+            static inline size_t g_HIZRadius = PropertyToID(L"g_HIZRadius");
 
             static inline size_t g_BlurDir = PropertyToID(L"g_BlurDir");
             static inline size_t g_Sharpness = PropertyToID(L"g_Sharpness");
@@ -129,13 +136,12 @@ namespace ElysiaRenderer
             static inline size_t g_BlurIntensity = PropertyToID(L"g_BlurIntensity");
 
             static inline size_t g_bImportance = PropertyToID(L"g_bImportance");
-            static inline size_t g_SampleImportanceThreshold = PropertyToID(L"g_SampleImportanceThreshold");
-            static inline size_t g_DepthImportanceThreshold = PropertyToID(L"g_DepthImportanceThreshold");
-            static inline size_t g_NormalImportanceThreshold = PropertyToID(L"g_NormalImportanceThreshold");
+            static inline size_t g_ImportanceIntensity = PropertyToID(
+                L"g_ImportanceIntensity");
             static inline size_t g_AOImportanceTexIndex = PropertyToID(L"g_AOImportanceTexIndex");
 
             static inline size_t g_bDebugImportance = PropertyToID(L"g_bDebugImportance");
-            static inline size_t g_bDebugSample = PropertyToID(L"g_bDebugSample");
+            static inline size_t g_bDebugHIZMipmap = PropertyToID(L"g_bDebugHIZMipmap");
         };
         struct TAAData
         {
@@ -150,16 +156,20 @@ namespace ElysiaRenderer
         std::vector<Vector4> m_kernels;
         std::vector<float> m_blurWeights;
 
-        void DoImportance();
-        void DoSSAO();
         void DoHIZ();
+        void DoDeinterleaveDepth();
+        void DoDeinterleaveAO();
+        void DoImportance();
+        void DoCrossMaxImportance();
+
+        void DoSSAO();
         void DoTAA();
         void DoBilateralBlurHorizon();
         void DoBilateralBlurVerical();
-        void DoDeinterleave();
         void DoLayeredAO();
         void DoReinterleave();
 
+        std::vector<Vector4> GenerateBaseAOSampleKernel();
         std::vector<Vector4> GenerateSSAOSampleKernel();
         std::vector<Vector4> GenerateHBAOSampleKernel();
         std::vector<float> GenerateBlurWeights(UINT blurRadius);

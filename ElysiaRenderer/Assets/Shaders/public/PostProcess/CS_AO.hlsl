@@ -45,7 +45,11 @@ cbuffer PassConstant : register(b0, perPassSpace)
 float3 GetWorldSpaceNormalFromAOInput(float2 uv);
 float SampleHiZTrilinear(float2 uv, float mipmapLevel);
 float ComputeMipLevel(float radius, float sceneDepth, float step, float jitter);
-float ComputeSingleAO(float3 randomVec, FInputParams inputParam, float3 normalVS, float radiusScale, float);
+float ComputeSingleAO(float3 randomVec,
+                      FInputParams inputParam,
+                      float3 normalVS,
+                      float radiusScale,
+                      float);
 float3 GetMultiScaleBlueNoise(UINT blueNoiseTexIndex, float2 uv);
 float ComputeMipLevel(UINT sampleID, float step);
 
@@ -56,7 +60,10 @@ void HBAO(uint3 dispatchThreadID: SV_DispatchThreadID)
 
     float2 screenUV = (float2(dispatchThreadID.xy) + 0.5f) * g_TargetSize.zw;
 
-    float4 AOData = SampleTexture2D_LOD(g_HIZTextureIndex, screenUV, ClampPointSampler, g_HIZMinMipmap);
+    float4 AOData = SampleTexture2D_LOD(g_HIZTextureIndex,
+                                        screenUV,
+                                        ClampPointSampler,
+                                        g_HIZMinMipmap);
     float eyeDepth = AOData.a * Constant_Float16F_Scale;
     float3 normalWS = AOData.rgb;
 
@@ -125,8 +132,14 @@ void HBAO(uint3 dispatchThreadID: SV_DispatchThreadID)
             if (any(vSampleUV < 0) || any(vSampleUV > 1))
                 continue;
 
-            float MipLevel = ComputeMipLevel(radius, inputParam.PositionVS.z, stepDistance, jitter * 0.5f);
-            float localEyeDepth = SampleTexture2D_LOD(g_HIZTextureIndex, vSampleUV, ClampLinearSampler, MipLevel).a *
+            float MipLevel = ComputeMipLevel(radius,
+                                             inputParam.PositionVS.z,
+                                             stepDistance,
+                                             jitter * 0.5f);
+            float localEyeDepth = SampleTexture2D_LOD(g_HIZTextureIndex,
+                                                      vSampleUV,
+                                                      ClampLinearSampler,
+                                                      MipLevel).a *
                                   Constant_Float16F_Scale;
             float3 localPosVS = ComputeClipSpacePosition(vSampleUV, localEyeDepth, projMatrix);
 
@@ -184,7 +197,10 @@ void HBAOPlus(uint3 dispatchThreadID: SV_DispatchThreadID)
 
     float2 screenUV = (float2(dispatchThreadID.xy) + 0.5f) * g_TargetSize.zw;
 
-    float4 AOData = SampleTexture2D_LOD(g_HIZTextureIndex, screenUV, ClampPointSampler, g_HIZMinMipmap);
+    float4 AOData = SampleTexture2D_LOD(g_HIZTextureIndex,
+                                        screenUV,
+                                        ClampPointSampler,
+                                        g_HIZMinMipmap);
     float eyeDepth = AOData.a * Constant_Float16F_Scale;
     float3 normalWS = AOData.rgb;
 
@@ -240,8 +256,14 @@ void HBAOPlus(uint3 dispatchThreadID: SV_DispatchThreadID)
             if (any(currentUV < 0) || any(currentUV > 1))
                 continue;
 
-            float MipLevel = ComputeMipLevel(radius, inputParam.PositionVS.z, stepPixel, jitter * 0.5f);
-            float localEyeDepth = SampleTexture2D_LOD(g_HIZTextureIndex, currentUV, ClampLinearSampler, MipLevel).a *
+            float MipLevel = ComputeMipLevel(radius,
+                                             inputParam.PositionVS.z,
+                                             stepPixel,
+                                             jitter * 0.5f);
+            float localEyeDepth = SampleTexture2D_LOD(g_HIZTextureIndex,
+                                                      currentUV,
+                                                      ClampLinearSampler,
+                                                      MipLevel).a *
                                   Constant_Float16F_Scale;
             float3 localPosVS = ComputeClipSpacePosition(currentUV, localEyeDepth, projMatrix);
 
@@ -299,7 +321,10 @@ float3 GetWorldSpaceNormalFromAOInput(float2 screenUV)
     float4 gNormalG = GatherGreenTexture2D(GBuffer3Index, screenUV, WarpPointSampler);
     float4 gNormalB = GatherBlueTexture2D(GBuffer3Index, screenUV, WarpPointSampler);
 
-    float sceneDepth = SampleTexture2D_LOD(g_HIZTextureIndex, screenUV, WarpPointSampler, g_HIZMinMipmap).r;
+    float sceneDepth = SampleTexture2D_LOD(g_HIZTextureIndex,
+                                           screenUV,
+                                           WarpPointSampler,
+                                           g_HIZMinMipmap).r;
 
     float3 weightedNormalSum = 0;
     float totalWeight = 0;
@@ -337,7 +362,7 @@ float SampleHiZTrilinear(float2 uv, float mipmapLevel)
 
 float ComputeMipLevel(float radius, float sceneDepth, float step, float jitter)
 {
-    float screenRadius = (radius / sceneDepth) * g_TargetSize.x * step;
+    float screenRadius = (radius / sceneDepth) * step * 0.5f;
     float mipmapLevel = log2(screenRadius / 16.f + 1e-5) + jitter;
     mipmapLevel = clamp(mipmapLevel, g_HIZMinMipmap, g_HIZMaxMipmap);
 
@@ -351,7 +376,11 @@ float ComputeMipLevel(UINT sampleID, float step)
     return clamp(mipmapLevel, g_HIZMinMipmap, g_HIZMaxMipmap);
 }
 
-float ComputeSingleAO(float3 randomVec, FInputParams inputParam, float3 normalVS, float radiusScale, float jitter)
+float ComputeSingleAO(float3 randomVec,
+                      FInputParams inputParam,
+                      float3 normalVS,
+                      float radiusScale,
+                      float jitter)
 {
     float3 offsetPosVS = inputParam.PositionVS;
     float4 randomPosVS = float4(randomVec + offsetPosVS, 1.f);
@@ -366,7 +395,9 @@ float ComputeSingleAO(float3 randomVec, FInputParams inputParam, float3 normalVS
     float mipmapLevel = clamp(log2(max(offsetPixel.x, offsetPixel.y)) + jitter,
                               (float)g_HIZMinMipmap,
                               (float)g_HIZMaxMipmap);
-    mipmapLevel = clamp(log2(screenRadius / 16.f) + jitter, (float)g_HIZMinMipmap, (float)g_HIZMaxMipmap);
+    mipmapLevel = clamp(log2(screenRadius / 16.f) + jitter,
+                        (float)g_HIZMinMipmap,
+                        (float)g_HIZMaxMipmap);
 
     float randomDepth = SampleHiZTrilinear(randomPosUV, mipmapLevel);
     float randomEyeDepth = LinearEyeDepth(randomDepth, g_ZBufferParams);
