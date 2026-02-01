@@ -413,8 +413,8 @@ namespace ElysiaEngine
             ImGui::Checkbox("Is IsLerp AO", &pUserData.aoParameter.IsLerpAO);
             ImGui::Checkbox("Is Blur", &pUserData.aoParameter.IsBlur);
 
-            ImGui::SliderInt("AO Sample Count", &pUserData.aoParameter.SampleCount, 0, 6);
-            ImGui::SliderInt("AO Sample Step Count", &pUserData.aoParameter.SampleStepCount, 0, 6);
+            ImGui::SliderInt("AO Sample Count", &pUserData.aoParameter.SampleCount, 2, 6);
+            ImGui::SliderInt("AO Sample Step Count", &pUserData.aoParameter.SampleStepCount, 2, 6);
 
             ImGui::SliderFloat("AO Radius", &pUserData.aoParameter.Radius, 0.1, 2);
             ImGui::SliderFloat("AO Fade Radius", &pUserData.aoParameter.FadeRadius, 1, 20000);
@@ -445,8 +445,9 @@ namespace ElysiaEngine
                                               AOBlurQuality>()));
             pUserData.aoParameter.BlurQuality = (AOBlurQuality)blurQualityIndex;
 
+            ImGui::SliderInt("AO Blur Count", &pUserData.aoParameter.BlurCount, 1, 4);
             ImGui::SliderInt("AO Blur Radius", &pUserData.aoParameter.BlurIntensity, 1, 10);
-            ImGui::SliderFloat("AO Sharpness", &pUserData.aoParameter.Sharpness, 1.f, 100.f);
+            ImGui::SliderFloat("AO Sharpness", &pUserData.aoParameter.Sharpness, 0.f, 1.f);
 
             ImGui::SliderFloat("HIZ Radius", &pUserData.aoParameter.HIZRadius, 1e-4, 10.f);
 

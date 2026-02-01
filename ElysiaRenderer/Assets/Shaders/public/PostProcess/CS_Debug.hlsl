@@ -35,7 +35,6 @@ void Debug(uint3 dispatchThreadID : SV_DispatchThreadID)
         //                                      screenUV,
         //                                      ClampPointSampler,
         //                                      g_MipmapLevel).r;
-        // eyeDepth *= Constant_Float16F_Scale;
         //
         // o[dispatchThreadID.xy] = (eyeDepth - nearZ) / (farZ - nearZ);
         o[dispatchThreadID.xy].rgb = SampleTexture2D_LOD(g_SourceTexIndex,

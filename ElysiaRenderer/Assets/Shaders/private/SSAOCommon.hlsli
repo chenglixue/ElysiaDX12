@@ -5,6 +5,7 @@
 
 const static float Constant_Float16F_Scale = 4096.0f * 32.0f;
 
+
 // 0: not similar .. 1:very similar
 float ComputeDepthSimilarity(float DepthA, float DepthB, float TweakScale)
 {
@@ -35,8 +36,10 @@ float3 ReconstructNormal(float2 In)
 /// @param ScreenUV 
 /// @param CenterWorldNormal 
 /// @return 
-float4 ComputeUpsampleContribution(UINT SourceTexIndex, float4 SourceSize,
-                                   UINT HIZTexIndex, float downSampleDepthMipmapLevel,
+float4 ComputeUpsampleContribution(UINT SourceTexIndex,
+                                   float4 SourceSize,
+                                   UINT HIZTexIndex,
+                                   float downSampleDepthMipmapLevel,
                                    float2 ScreenUV,
                                    float3 CenterWorldNormal,
                                    float EyeDepth)
@@ -70,7 +73,10 @@ float4 ComputeUpsampleContribution(UINT SourceTexIndex, float4 SourceSize,
         float4 DownSampleAO = SampleTexture2D(SourceTexIndex, SampleUV, WarpPointSampler);
 
         float4 DownSampleNormalDepth =
-            SampleTexture2D_LOD(HIZTexIndex, SampleUV, WarpPointSampler, downSampleDepthMipmapLevel);
+            SampleTexture2D_LOD(HIZTexIndex,
+                                SampleUV,
+                                WarpPointSampler,
+                                downSampleDepthMipmapLevel);
         float SampleEyeDepth = DownSampleNormalDepth.a * Constant_Float16F_Scale;
         float3 LocalWorldNormal = DownSampleNormalDepth.xyz;
 

@@ -40,10 +40,10 @@ namespace ElysiaRenderer
         float TAALerpFactor = 0.5f;
 
         bool IsBlur = true;
+        int BlurCount = 1;
         AOBlurQuality BlurQuality = AOBlurQuality::High;
         int BlurIntensity = 1;
         float Sharpness = 10.f;
-
 
         AODebugTarget debugTarget = AODebugTarget::AO;
 

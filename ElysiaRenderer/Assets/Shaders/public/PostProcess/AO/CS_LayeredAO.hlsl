@@ -10,15 +10,12 @@ cbuffer PassConstant : register(b0, perPassSpace)
 {
     float4 g_TargetSize;
     float4 g_FullScreenSize;
-    UINT g_SourceTexIndex;
-    UINT g_TargetTexIndex;
+    float4 g_DeinterleavedAOSize;
 
     Vector4 g_TargetTexIndices;
     Vector4 g_SourceTexIndices;
     Vector4 g_DeinterleaveDepthTexIndices;
     Vector4 g_DeinterleaveAOTexIndices;
-
-    Vector4 g_SourceSize;
 
     Matrix viewMatrix;
     Matrix viewMatrix_I;
@@ -26,6 +23,13 @@ cbuffer PassConstant : register(b0, perPassSpace)
     Matrix projMatrix_I;
     Matrix viewProjMatrix;
     Matrix viewProjMatrix_I;
+
+    UINT g_SourceTexIndex;
+    UINT g_TargetTexIndex;
+
+    float2 g_NDCToViewMul;
+    float2 g_NDCToViewAdd;
+    float2 g_DepthUnpackConsts;
 
     UINT g_AOSampleCount;
     UINT g_AOSampleStepCount;
@@ -39,28 +43,20 @@ cbuffer PassConstant : register(b0, perPassSpace)
     float2 g_noiseScale;
 
     UINT g_HIZMaxMipmap;
-    UINT g_HIZMinMipmap;
     UINT g_HIZTextureIndex;
-    float g_StepMipFactor;
-    UINT g_HIZMipmap;
-    float g_HIZRadius;
-
-    bool g_bLerpAO;
-    float g_LerpAOFactor;
 
     bool g_bDebugImportance;
     bool g_bDebugHIZMipmap;
-
     bool g_bImportance;
 
     float g_SampleImportanceThreshold;
     UINT g_AOImportanceTexIndex;
-    UINT g_AOSampleCountLow;
-    UINT g_AOSampleCountHigh;
 
-    UINT g_RandStepTexIndex;
     float4 g_AOSampleKernelArray[_AO_MAX_SAMPLE_COUNT];
 }
+
+static const UINT ELYSIA_HBAO_BASE_SAMPLE_COUNT = 1;
+static const UINT ELYSIA_HBAO_BASE_STEP_SAMPLE_COUNT = 2;
 
 static const float4 g_BasoAOSampleArrays[] =
 {
@@ -97,40 +93,34 @@ void CalcBaseAOTap(
     const float3 positionVS,
     const float3 normalVS,
     const float2 localUV,
-    const float2 fullUV,
-    const float2 sampleOffset,
+    const float falloffCalcMulSq,
+    const float2 samplingUV,
     const float mipmapLevel,
     const float tapWeight,
     inout float obscuranceSum,
     inout float weightSum);
-
-float CalcAO(UINT layerHeapIndex,
+float CalcAO(UINT DepthLayerHeapIndex,
+             UINT sampleCount,
+             UINT stepSampleCount,
              float2 localUV,
-             float2 fullUV,
              float radius,
+             float screenPixelRadius,
+             float mipmap,
              FInputParams input,
              float3 normalVS,
              float randomAngle,
              float jitter);
-
 float4 CalcEdges(float centerZ, float leftZ, float rightZ, float topZ, float bottomZ);
 float PackEdges(float4 edgesLRTB);
-float3 UVToViewSpace(float2 pos, float viewspaceDepth)
-{
-    float3 ret;
-    ret.xy = (float2(2.0 / projMatrix[0][0], -2.0 / projMatrix[1][1]) * pos.xy + float2(
-                  -1.0 / projMatrix[0][0],
-                  1.0 / projMatrix[1][1])) * viewspaceDepth;
-    ret.z = viewspaceDepth;
-    return ret;
-}
+float3 NDCToViewSpace(float2 pos, float viewspaceDepth);
+float ScreenSpaceToViewSpaceDepth(float screenDepth);
+void Elysia_CalcAO_StoreOutput(UINT index, UINT2 id, float2 val);
+float Elysia_Sample_Importance(float2 uv);
 
 [numthreads(GROUP_SIZE, GROUP_SIZE, 1)]
 void DeinterleaveMain(UINT3 id : SV_DispatchThreadID)
 {
     float2 screenUV = (float2(id.xy) + 0.5f) * g_TargetSize.zw;
-    if (screenUV.x > 1.0f || screenUV.y > 1.0f)
-        return;
 
     UINT2 pixelOffset = id.xy % 2;
     UINT layerIndex = pixelOffset.x + pixelOffset.y * 2;
@@ -140,8 +130,7 @@ void DeinterleaveMain(UINT3 id : SV_DispatchThreadID)
     float eyeDepth = SampleTexture2D(g_SourceTexIndex,
                                      screenUV,
                                      ClampPointSampler).r;
-    eyeDepth = LinearEyeDepth(eyeDepth, g_ZBufferParams);
-    eyeDepth /= Constant_Float16F_Scale;
+    eyeDepth = ScreenSpaceToViewSpaceDepth(eyeDepth);
 
     RWTexture2D<float> o = ResourceDescriptorHeap[g_TargetTexIndices[layerIndex]];
     o[writePos] = eyeDepth;
@@ -150,9 +139,6 @@ void DeinterleaveMain(UINT3 id : SV_DispatchThreadID)
 [numthreads(GROUP_SIZE, GROUP_SIZE, 1)]
 void CalcBaseAO(UINT3 id : SV_DispatchThreadID)
 {
-    if (id.x >= (uint)g_TargetSize.x || id.y >= (uint)g_TargetSize.y)
-        return;
-
     uint layerIndex = id.z;
     RWTexture2D<float2> o = ResourceDescriptorHeap[g_TargetTexIndices[layerIndex]];
     uint layerHeapIndex = g_SourceTexIndices[layerIndex];
@@ -162,19 +148,19 @@ void CalcBaseAO(UINT3 id : SV_DispatchThreadID)
     float4 valuesUL = GatherRedTexture2D(layerHeapIndex,
                                          localScreenUV,
                                          ClampPointSampler,
-                                         int2(-1, -1)) * Constant_Float16F_Scale;
-    float4 valuesBR = GatherRedTexture2D(layerHeapIndex,
-                                         localScreenUV,
-                                         ClampPointSampler,
-                                         int2(0, 0)) * Constant_Float16F_Scale;
+                                         int2(-1, -1));
+    // float4 valuesBR = GatherRedTexture2D(layerHeapIndex,
+    //                                      localScreenUV,
+    //                                      ClampPointSampler,
+    //                                      int2(0, 0));
 
     float pixZ = valuesUL.y;
-    float pixLZ = valuesUL.x;
-    float pixTZ = valuesUL.z;
-    float pixRZ = valuesBR.z;
-    float pixBZ = valuesBR.x;
+    // float pixLZ = valuesUL.x;
+    // float pixTZ = valuesUL.z;
+    // float pixRZ = valuesBR.z;
+    // float pixBZ = valuesBR.x;
 
-    float4 edgeWeight = CalcEdges(pixZ, pixLZ, pixRZ, pixTZ, pixBZ);
+    //float4 edgeWeight = CalcEdges(pixZ, pixLZ, pixRZ, pixTZ, pixBZ);
     float eyeDepth = pixZ;
 
     uint offsetX = layerIndex % 2;
@@ -183,91 +169,93 @@ void CalcBaseAO(UINT3 id : SV_DispatchThreadID)
                           g_FullScreenSize.zw;
 
     FInputParams inputParam;
-    inputParam.PositionVS = ComputeClipSpacePosition(
-        fullScreenUV,
-        eyeDepth,
-        projMatrix);
-    inputParam.LinearEyeDepth = eyeDepth;
+    inputParam.PositionVS = NDCToViewSpace(
+        localScreenUV,
+        eyeDepth);
     inputParam.NormalWS = SampleNormalWS(fullScreenUV, ClampPointSampler);
 
     float3 normalVS = normalize(mul(inputParam.NormalWS, (float3x3)viewMatrix));
-    inputParam.PositionVS += normalVS * g_AOBias * eyeDepth;
 
-    float3 nL = normalize(mul(
-        SampleNormalWS(fullScreenUV + float2(-1, 0) * g_FullScreenSize.zw, ClampPointSampler),
-        (float3x3)viewMatrix));
-    float3 nR = normalize(mul(
-        SampleNormalWS(fullScreenUV + float2(1, 0) * g_FullScreenSize.zw, ClampPointSampler),
-        (float3x3)viewMatrix));
-    float3 nT = normalize(mul(
-        SampleNormalWS(fullScreenUV + float2(0, -1) * g_FullScreenSize.zw, ClampPointSampler),
-        (float3x3)viewMatrix));
-    float3 nB = normalize(mul(
-        SampleNormalWS(fullScreenUV + float2(0, 1) * g_FullScreenSize.zw, ClampPointSampler),
-        (float3x3)viewMatrix));
+    // float3 nL = normalize(mul(
+    //     SampleNormalWS(fullScreenUV + float2(-1, 0) * g_FullScreenSize.zw, ClampPointSampler),
+    //     (float3x3)viewMatrix));
+    // float3 nR = normalize(mul(
+    //     SampleNormalWS(fullScreenUV + float2(1, 0) * g_FullScreenSize.zw, ClampPointSampler),
+    //     (float3x3)viewMatrix));
+    // float3 nT = normalize(mul(
+    //     SampleNormalWS(fullScreenUV + float2(0, -1) * g_FullScreenSize.zw, ClampPointSampler),
+    //     (float3x3)viewMatrix));
+    // float3 nB = normalize(mul(
+    //     SampleNormalWS(fullScreenUV + float2(0, 1) * g_FullScreenSize.zw, ClampPointSampler),
+    //     (float3x3)viewMatrix));
 
-    const float dotThreshold = 0.5f;
+    //const float dotThreshold = 0.5f;
 
-    float4 normalEdgesLRTB;
-    normalEdgesLRTB.x = saturate(dot(normalVS, nL) + dotThreshold);
-    normalEdgesLRTB.y = saturate(dot(normalVS, nR) + dotThreshold);
-    normalEdgesLRTB.z = saturate(dot(normalVS, nT) + dotThreshold);
-    normalEdgesLRTB.w = saturate(dot(normalVS, nB) + dotThreshold);
-    edgeWeight *= normalEdgesLRTB;
+    // float4 normalEdgesLRTB;
+    // normalEdgesLRTB.x = saturate(dot(normalVS, nL) + dotThreshold);
+    // normalEdgesLRTB.y = saturate(dot(normalVS, nR) + dotThreshold);
+    // normalEdgesLRTB.z = saturate(dot(normalVS, nT) + dotThreshold);
+    // normalEdgesLRTB.w = saturate(dot(normalVS, nB) + dotThreshold);
+    // edgeWeight *= normalEdgesLRTB;
 
-    float radius = g_AORadius * 10;
+    float radius = g_AORadius;
+    const float EffectSamplingRadiusNearLimitRec = rcp(radius * 1.2f / rcp(projMatrix[1][1]));
+    const float tooCloseLimitMod = saturate(length(inputParam.PositionVS) *
+                                            EffectSamplingRadiusNearLimitRec) * 0.8 + 0.2;
+    radius *= tooCloseLimitMod;
+    float falloffCalcMulSq = -1.0f / (radius * radius);
 
-    const float2 g_NDCToViewMul = float2(1.0f / projMatrix[0][0], 1.0f / projMatrix[1][1]);
     const float2 pixelDirRBViewspaceSizeAtCenterZ =
-        pixZ * g_NDCToViewMul * g_FullScreenSize.zw;
+        inputParam.PositionVS.z * g_NDCToViewMul * g_TargetSize.zw;
     float pixLookupRadiusMod = (0.85f * radius) / pixelDirRBViewspaceSizeAtCenterZ.x;
 
     float nearScreenBorder = min(min(fullScreenUV.x, 1.0 - fullScreenUV.x),
                                  min(fullScreenUV.y, 1.0 - fullScreenUV.y));
     nearScreenBorder = saturate(10.0 * nearScreenBorder + 0.6);
     pixLookupRadiusMod *= nearScreenBorder;
-    float deinterleavedRadius = pixLookupRadiusMod * 0.5f;
 
     uint pseudoRandomIndex = uint(id.y * 2 + id.x) % 5;
     float4 rs = g_PatternRotScaleMatrices[pseudoRandomIndex];
     float2x2 rotationMatrix = float2x2(
-        rs.x * deinterleavedRadius,
-        rs.y * deinterleavedRadius,
-        rs.z * deinterleavedRadius,
-        rs.w * deinterleavedRadius
+        rs.x * pixLookupRadiusMod,
+        rs.y * pixLookupRadiusMod,
+        rs.z * pixLookupRadiusMod,
+        rs.w * pixLookupRadiusMod
         );
 
-    float mipLevel = max(0.0f, log2(deinterleavedRadius) - 4.3f);
+    float mipLevel = max(0.0f, log2(pixLookupRadiusMod) - 4.3f);
 
     float obscuranceSum = 0.0f;
     float weightSum = 0.0f;
-    uint numberOfTaps = 32;
+    uint numberOfTaps = 5;
     [unroll]
     for (uint i = 0; i < numberOfTaps; i ++)
     {
         float4 kernel = g_BasoAOSampleArrays[i];
         float2 kernelDir = mul(kernel.xy, rotationMatrix);
+        kernelDir = round(kernelDir);
         float2 sampleOffset = kernelDir * g_TargetSize.zw;
 
-        float tapMipLevel = clamp(mipLevel + kernel.w, g_HIZMinMipmap, g_HIZMaxMipmap);
+        float tapMipLevel = clamp(mipLevel + kernel.w, 0, g_HIZMaxMipmap);
 
         CalcBaseAOTap(layerHeapIndex,
                       radius,
                       inputParam.PositionVS,
                       normalVS,
                       localScreenUV,
-                      fullScreenUV,
+                      falloffCalcMulSq,
                       sampleOffset,
                       tapMipLevel,
                       kernel.z,
                       obscuranceSum,
                       weightSum);
+
         CalcBaseAOTap(layerHeapIndex,
                       radius,
                       inputParam.PositionVS,
                       normalVS,
                       localScreenUV,
-                      fullScreenUV,
+                      falloffCalcMulSq,
                       -sampleOffset,
                       tapMipLevel,
                       kernel.z,
@@ -277,7 +265,7 @@ void CalcBaseAO(UINT3 id : SV_DispatchThreadID)
 
     float finalObscurance = obscuranceSum / (weightSum + 1e-6);
     float normalizedWeight = weightSum * 0.05f;
-    normalizedWeight *= PackEdges(edgeWeight);
+    // normalizedWeight *= PackEdges(edgeWeight);
 
     o[id.xy].rg = float2(finalObscurance, normalizedWeight);
 }
@@ -285,65 +273,121 @@ void CalcBaseAO(UINT3 id : SV_DispatchThreadID)
 [numthreads(GROUP_SIZE, GROUP_SIZE, 1)]
 void LayeredHBAOMain(UINT3 id : SV_DispatchThreadID)
 {
-    if (id.x > g_TargetSize.x || id.y > g_TargetSize.y)
-        return;
-
     UINT layerIndex = id.z;
-    RWTexture2D<float4> o = ResourceDescriptorHeap[g_TargetTexIndices[layerIndex]];
-    UINT layerHeapIndex = g_SourceTexIndices[layerIndex];
+    UINT AOLayerHeapIndex = g_DeinterleaveAOTexIndices[layerIndex];
+    UINT DepthLayerHeapIndex = g_DeinterleaveDepthTexIndices[layerIndex];
+    float2 localScreenUV = (float2(id.xy) + 0.5f) * g_DeinterleavedAOSize.zw;
 
-    float2 localScreenUV = (float2(id.xy) + 0.5f) * g_TargetSize.zw;
-    float eyeDepth = SampleTexture2D(layerHeapIndex,
-                                     localScreenUV,
-                                     ClampPointSampler).r * Constant_Float16F_Scale;
+    float4 valuesUL = GatherRedTexture2D(DepthLayerHeapIndex,
+                                         localScreenUV,
+                                         ClampPointSampler,
+                                         int2(-1, -1));
+    float4 valuesBR = GatherRedTexture2D(DepthLayerHeapIndex,
+                                         localScreenUV,
+                                         ClampPointSampler,
+                                         int2(0, 0));
+    float eyeDepth = valuesUL.y;
 
-    // get uv in full screen
+    float importance = Elysia_Sample_Importance(localScreenUV);
+    UINT fixDirSampleCount = max(0, g_AOSampleCount - ELYSIA_HBAO_BASE_SAMPLE_COUNT);
+    UINT dirSampleCount = ELYSIA_HBAO_BASE_SAMPLE_COUNT + round(fixDirSampleCount * importance);
+    dirSampleCount = max(dirSampleCount, ELYSIA_HBAO_BASE_SAMPLE_COUNT) * 4;
+    UINT stepSampleCount = ELYSIA_HBAO_BASE_STEP_SAMPLE_COUNT +
+                           round((g_AOSampleStepCount - ELYSIA_HBAO_BASE_STEP_SAMPLE_COUNT)
+                                 * importance);
+    stepSampleCount = max(stepSampleCount, ELYSIA_HBAO_BASE_STEP_SAMPLE_COUNT);
+
     uint offsetX = layerIndex % 2;
     uint offsetY = layerIndex / 2;
-    float2 fullScreenUV = (float2(id.xy * 2 + uint2(offsetX, offsetY)) + 0.5f) *
-                          g_FullScreenSize.zw;
 
-    // full screen data
     FInputParams inputParam;
-    inputParam.PositionVS = ComputeClipSpacePosition(
-        fullScreenUV,
-        eyeDepth,
-        projMatrix);
+    inputParam.PositionVS = NDCToViewSpace(
+        localScreenUV,
+        eyeDepth);
     inputParam.LinearEyeDepth = eyeDepth;
-    inputParam.NormalWS = SampleNormalWS(fullScreenUV, ClampPointSampler);
+    inputParam.NormalWS = SampleNormalWS(localScreenUV, ClampPointSampler);
 
     const float3 normalVS = normalize(mul(inputParam.NormalWS, viewMatrix));
-    inputParam.PositionVS += normalVS * g_AOBias * eyeDepth;
+
+    float pixZ = valuesUL.y;
+    float pixLZ = valuesUL.x;
+    float pixTZ = valuesUL.z;
+    float pixRZ = valuesBR.z;
+    float pixBZ = valuesBR.x;
+    float4 edgeWeight = CalcEdges(pixZ, pixLZ, pixRZ, pixTZ, pixBZ);
+    float3 nL = normalize(mul(
+        SampleNormalWS(localScreenUV + float2(-1, 0) * g_FullScreenSize.zw, ClampPointSampler),
+        (float3x3)viewMatrix));
+    float3 nR = normalize(mul(
+        SampleNormalWS(localScreenUV + float2(1, 0) * g_FullScreenSize.zw, ClampPointSampler),
+        (float3x3)viewMatrix));
+    float3 nT = normalize(mul(
+        SampleNormalWS(localScreenUV + float2(0, -1) * g_FullScreenSize.zw, ClampPointSampler),
+        (float3x3)viewMatrix));
+    float3 nB = normalize(mul(
+        SampleNormalWS(localScreenUV + float2(0, 1) * g_FullScreenSize.zw, ClampPointSampler),
+        (float3x3)viewMatrix));
+
+    const float dotThreshold = 0.5f;
+    float4 normalEdgesLRTB;
+    normalEdgesLRTB.x = saturate(dot(normalVS, nL) + dotThreshold);
+    normalEdgesLRTB.y = saturate(dot(normalVS, nR) + dotThreshold);
+    normalEdgesLRTB.z = saturate(dot(normalVS, nT) + dotThreshold);
+    normalEdgesLRTB.w = saturate(dot(normalVS, nB) + dotThreshold);
+    edgeWeight *= normalEdgesLRTB;
+    float edgeFadeoutFactor = saturate((1.0 - edgeWeight.x - edgeWeight.y) * 0.35) + saturate(
+                                  (1.0 - edgeWeight.z - edgeWeight.w) * 0.35);
+    edgeFadeoutFactor = 1 - edgeFadeoutFactor;
 
     float3 randomVector = SampleTexture2D(BlueNoiseTexIndex,
-                                          fullScreenUV * g_noiseScale,
+                                          localScreenUV * g_noiseScale,
                                           WarpPointSampler).xyz;
     float temporalAngle = frameIndex % 8 * INV_FOUR_PI;
     float randomAngle = randomVector.x * TWO_PI + temporalAngle;
 
     float radius = g_AORadius;
+    const float EffectSamplingRadiusNearLimitRec = rcp(radius * 1.2f / rcp(projMatrix[1][1]));
+    const float tooCloseLimitMod = saturate(length(inputParam.PositionVS) *
+                                            EffectSamplingRadiusNearLimitRec) * 0.8 + 0.2;
+    radius *= tooCloseLimitMod;
+
+    const float2 pixelDirRBViewspaceSizeAtCenterZ =
+        inputParam.PositionVS.z * g_NDCToViewMul * g_DeinterleavedAOSize.zw;
+    float pixLookupRadiusMod = (0.85f * radius) / pixelDirRBViewspaceSizeAtCenterZ.x;
+
+    float nearScreenBorder = min(min(localScreenUV.x, 1.0 - localScreenUV.x),
+                                 min(localScreenUV.y, 1.0 - localScreenUV.y));
+    nearScreenBorder = saturate(10.0 * nearScreenBorder + 0.6);
+    pixLookupRadiusMod *= nearScreenBorder;
+
+    float mipLevel = max(0.0f, log2(pixLookupRadiusMod) - 4.3f);
+    mipLevel = clamp(mipLevel, 0, g_HIZMaxMipmap);
 
     float occlusion = 0.f;
-    occlusion += CalcAO(layerHeapIndex,
+    occlusion += CalcAO(DepthLayerHeapIndex,
+                        dirSampleCount,
+                        stepSampleCount,
                         localScreenUV,
-                        fullScreenUV,
                         radius,
+                        pixLookupRadiusMod,
+                        mipLevel,
                         inputParam,
                         normalVS,
                         randomAngle,
                         randomVector.y);
 
-    float aoResult = occlusion;
-    // aoResult = saturate(1.0 - aoResult * g_AOIntensityMul);
-    // aoResult = pow(abs(aoResult), g_AOIntensityPow);
-    // float fadeRadius = max(1.f, g_AOFadeRadius);
-    // float invFadeRadius = 1.f / fadeRadius;
-    // float mul = invFadeRadius;
-    // float add = -(g_AOFadeDistance - fadeRadius) * invFadeRadius;
-    // float distFade = saturate(inputParam.LinearEyeDepth * mul + add);
-    // aoResult = lerp(aoResult, 1.0, distFade);
+    float aoResult = occlusion * edgeFadeoutFactor;
+    aoResult = saturate(1.0 - aoResult * g_AOIntensityMul);
+    aoResult = pow(abs(aoResult), g_AOIntensityPow);
+    float fadeRadius = max(1.f, radius);
+    float invFadeRadius = 1.f / fadeRadius;
+    float mul = invFadeRadius;
+    float add = -(g_AOFadeDistance - fadeRadius) * invFadeRadius;
+    float distFade = saturate(inputParam.LinearEyeDepth * mul + add);
+    aoResult = lerp(aoResult, 1.0, distFade);
+    float outEdge = PackEdges(edgeWeight);
 
-    o[id.xy] = aoResult;
+    Elysia_CalcAO_StoreOutput(AOLayerHeapIndex, id, float2(aoResult, outEdge));
 }
 
 [numthreads(GROUP_SIZE, GROUP_SIZE, 1)]
@@ -390,15 +434,6 @@ void ReinterleaveMain(UINT3 id : SV_DispatchThreadID)
     o[id.xy] = sample;
 }
 
-uint ComputeMipLevel(UINT stepID, float stepPixelSize)
-{
-    float distanceInPixels = (stepID + 1.0f) * stepPixelSize;
-
-    float mip = log2(distanceInPixels * g_StepMipFactor + 1e-5);
-
-    return (uint)clamp(mip, (float)g_HIZMinMipmap, (float)g_HIZMaxMipmap);
-}
-
 float4 CalcEdges(float centerZ, float leftZ, float rightZ, float topZ, float bottomZ)
 {
     float4 edgesLRTB = float4(leftZ, rightZ, topZ, bottomZ) - centerZ;
@@ -414,53 +449,57 @@ float PackEdges(float4 edgesLRTB)
     return dot(edgesLRTB, float4(64.0 / 255.0, 16.0 / 255.0, 4.0 / 255.0, 1.0 / 255.0));
 }
 
+float3 UVToViewSpace(float2 pos, float viewspaceDepth)
+{
+    float3 ret;
+    ret.xy = (g_NDCToViewMul * pos.xy + g_NDCToViewAdd) * viewspaceDepth;
+    ret.z = viewspaceDepth;
+    return ret;
+}
+
 void CalcBaseAOTap(
     const uint layerHeapIndex,
     const float radius,
     const float3 positionVS,
     const float3 normalVS,
     const float2 localUV,
-    const float2 fullUV,
+    const float falloffCalcMulSq,
     const float2 sampleOffset,
     const float mipmapLevel,
     const float tapWeight,
     inout float obscuranceSum,
     inout float weightSum)
 {
-    float2 uvOffset = sampleOffset;
-    float2 samplingUV = localUV + uvOffset;
+    float2 sampleUV = localUV + sampleOffset;
     float eyeDepth = SampleTexture2D_LOD(
-                         layerHeapIndex,
-                         samplingUV,
-                         ClampPointSampler,
-                         mipmapLevel).r * Constant_Float16F_Scale;
+        layerHeapIndex,
+        sampleUV,
+        ClampPointSampler,
+        mipmapLevel).r;
 
-    float2 fullSamplingUV = fullUV + uvOffset;
-
-    float3 hitPos = ComputeClipSpacePosition(fullSamplingUV, eyeDepth, projMatrix);
+    float3 hitPos = UVToViewSpace(sampleUV, eyeDepth);
     float3 hitDelta = hitPos - positionVS;
 
     float lengthSq = dot(hitDelta, hitDelta);
-
     float NdotD = dot(normalVS, hitDelta) * rsqrt(lengthSq + 1e-6);
-
-    float falloff = saturate(1.0f - lengthSq * rcp(radius * radius));
-
-    float obscurance = saturate(NdotD - 0.1f) * falloff;
+    float falloff = max(0.0, lengthSq * falloffCalcMulSq + 1.0);
+    float obscurance = max(0, NdotD - g_AOBias * 10) * falloff;
 
     float reduct = max(0.0, -hitDelta.z);
     reduct = saturate(reduct * rcp(-radius) + 2.0f);
-    float haloReduction = reduct * 0.6f + (1.0f - 0.6f);
-    float weight = haloReduction * tapWeight;
+    float weight = reduct * tapWeight;
 
     obscuranceSum += obscurance * weight;
     weightSum += weight;
 }
 
-float CalcAO(UINT layerHeapIndex,
+float CalcAO(UINT DepthLayerHeapIndex,
+             UINT dirSampleCount,
+             UINT stepSampleCount,
              float2 localUV,
-             float2 fullUV,
              float radius,
+             float screenPixelRadius,
+             float mipmap,
              FInputParams input,
              float3 normalVS,
              float randomAngle,
@@ -468,14 +507,10 @@ float CalcAO(UINT layerHeapIndex,
 {
     float o = 0.f;
 
-    uint dirSampleCount = g_AOSampleCount * 4;
-    uint stepSampleCount = g_AOSampleStepCount;
-
-    float2 projScale = float2(projMatrix[0][0], projMatrix[1][1]);
-    float fullPixelRadius = radius * projScale.x /
-                            max(input.LinearEyeDepth, 1.f) * 0.5f;
-    float localPixelRadius = fullPixelRadius * 0.5f;
-    float stepPixel = localPixelRadius / (stepSampleCount + 1.0f);
+    if (dirSampleCount == 0)
+        return 0.0f;
+    float2 localPixelSize = g_DeinterleavedAOSize.zw;
+    float stepSizeUV = (screenPixelRadius * localPixelSize.x) / (stepSampleCount + 1.0f);
 
     [loop]
     for (UINT dir = 0; dir < dirSampleCount; dir ++)
@@ -486,14 +521,14 @@ float CalcAO(UINT layerHeapIndex,
         float2 dirUV;
         sincos(angle, dirUV.y, dirUV.x);
 
-        float2 deltaUV = dirUV * stepPixel;
+        float2 deltaUV = dirUV * stepSizeUV;
 
         float rayJitter = jitter;
         float2 currentUV = localUV + deltaUV * rayJitter;
 
         float angleBias = g_AOBias;
         float topOcclusionAngle = 1e-4;
-        [unroll(_AO_MAX_SAMPLE_STEP_COUNT)]
+        [loop]
         for (UINT step = 0; step < stepSampleCount; ++step)
         {
             currentUV += deltaUV;
@@ -501,22 +536,19 @@ float CalcAO(UINT layerHeapIndex,
             if (any(currentUV < 0) || any(currentUV > 1))
                 continue;
 
-            float2 sampleFullUV = fullUV + (currentUV - localUV);
-            float sampleEyeDepth;
-            {
-                sampleEyeDepth = SampleTexture2D(layerHeapIndex,
-                                                 currentUV,
-                                                 ClampPointSampler) * Constant_Float16F_Scale;
-            }
+            float sampleEyeDepth = SampleTexture2D_LOD(DepthLayerHeapIndex,
+                                                       currentUV,
+                                                       ClampPointSampler,
+                                                       mipmap);
 
-            float3 localPosVS = ComputeClipSpacePosition(
-                sampleFullUV,
-                sampleEyeDepth,
-                projMatrix);
+            float3 localPosVS = UVToViewSpace(currentUV, sampleEyeDepth);
 
             float3 v = localPosVS - input.PositionVS;
             float distSq = dot(v, v);
             float dist = sqrt(distSq);
+
+            if (distSq > Pow2(radius))
+                continue;
 
             float falloff = saturate(1.0 - distSq / Pow2(radius));
 
@@ -534,4 +566,34 @@ float CalcAO(UINT layerHeapIndex,
     o /= dirSampleCount;
 
     return o;
+}
+
+float3 NDCToViewSpace(float2 pos, float viewspaceDepth)
+{
+    float3 ret;
+
+    ret.xy = (g_NDCToViewMul * pos.xy + g_NDCToViewAdd) * viewspaceDepth;
+
+    ret.z = viewspaceDepth;
+
+    return ret;
+}
+
+float ScreenSpaceToViewSpaceDepth(float screenDepth)
+{
+    float depthLinearizeMul = g_DepthUnpackConsts.x;
+    float depthLinearizeAdd = g_DepthUnpackConsts.y;
+
+    return depthLinearizeMul / (depthLinearizeAdd - screenDepth);
+}
+
+void Elysia_CalcAO_StoreOutput(UINT index, UINT2 id, float2 val)
+{
+    RWTexture2D<float2> o = ResourceDescriptorHeap[index];
+    o[id.xy] = val;
+}
+
+float Elysia_Sample_Importance(float2 uv)
+{
+    return SampleTexture2D(g_AOImportanceTexIndex, uv, ClampPointSampler);
 }

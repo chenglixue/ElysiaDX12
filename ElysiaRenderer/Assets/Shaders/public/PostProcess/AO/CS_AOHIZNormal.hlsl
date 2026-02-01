@@ -26,29 +26,21 @@ void AOHIZNormal(UINT3 id : SV_DispatchThreadID)
     if (targetCoord.x >= (uint)g_TargetSize.x || targetCoord.y >= (uint)g_TargetSize.y)
         return;
 
-    UINT2 offset[4] =
-    {
-        uint2(0, 0),
-        uint2(1, 0),
-        uint2(0, 1),
-        uint2(1, 1),
-    };
+    float2 screenUV = (srcCoord + 0.5f) * g_SourceSize.zw;
 
-    float4 depths;
-    for (UINT i = 0; i < 4; i ++)
-    {
-        depths[i] = LoadTexture2D(g_SourceTexIndices[layerIndex], srcCoord + offset[i]) *
-                    Constant_Float16F_Scale;
-    }
+    float4 depths = GatherRedTexture2D(g_SourceTexIndices[layerIndex],
+                                       screenUV,
+                                       ClampPointSampler);
 
     RWTexture2D<float4> o = ResourceDescriptorHeap[g_TargetTexIndices[layerIndex]];
 
-    o[id.xy] = MipSmartAverage(depths, g_AORadius) / Constant_Float16F_Scale;
+    o[id.xy] = MipSmartAverage(depths, g_AORadius);
+    // o[id.xy] = min(min(depths.x, depths.y), min(depths.z, depths.w)) / Constant_Float16F_Scale;
 }
 
 float MipSmartAverage(float4 depths, float effectRadius)
 {
-    float closest = min(min(depths[0], depths[1]), min(depths[2], depths[3]));
+    float closest = min(min(depths.x, depths.y), min(depths.z, depths.w));
     float falloffCalcMulSq = -1.0f / (effectRadius * effectRadius);
 
     float4 dists = depths - closest.xxxx;
