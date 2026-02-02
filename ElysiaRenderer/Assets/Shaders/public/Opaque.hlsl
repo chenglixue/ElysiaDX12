@@ -83,7 +83,6 @@ PSOutput PS(PSInput i)
     LightData mainLightData = GetMainLight(mainLight);
 
     float AO = SampleTexture2D(g_AOIndex, inputParam.ScreenUV, WarpPointSampler);
-    AO = 1;
 
     float4 lighting = GetDynamicLighting(inputParam, GBufferData, mainLightData, AO);
     lighting += float4(GBufferData.SceneColor, 1.f) * AO;

@@ -75,10 +75,8 @@ PASS(AO_TAA_PASS,                       "public\\PostProcess\\CS_AOTAA.hlsl",   
         RenderTexture* m_pTAA1RT = nullptr;
         std::vector<RenderTexture*> m_DeinterleavedDepthRTs;
         std::vector<RenderTexture*> m_DeinterleavedAORTs;
-        std::vector<RenderTexture*> m_DeinterleavedBlurRTs;
         std::vector<UINT> m_DeinterleavedDepthIndices;
         std::vector<UINT> m_DeinterleavedAOIndices;
-        std::vector<UINT> m_DeinterleavedBlurIndices;
         TextureManager::Handle m_blueNoise;
 
         enum PassID
@@ -112,6 +110,8 @@ PASS(AO_TAA_PASS,                       "public\\PostProcess\\CS_AOTAA.hlsl",   
             static inline size_t g_TargetTexIndex = PropertyToID(L"g_TargetTexIndex");
             static inline size_t g_TargetTexIndices = PropertyToID(L"g_TargetTexIndices");
             static inline size_t g_SourceTexIndex = PropertyToID(L"g_SourceTexIndex");
+            static inline size_t g_ReinterleaveAOTexIndex = PropertyToID(
+                L"g_ReinterleaveAOTexIndex");
             static inline size_t g_SourceTexIndices = PropertyToID(L"g_SourceTexIndices");
             static inline size_t g_DeinterleaveDepthTexIndices = PropertyToID(
                 L"g_DeinterleaveDepthTexIndices");
@@ -119,7 +119,8 @@ PASS(AO_TAA_PASS,                       "public\\PostProcess\\CS_AOTAA.hlsl",   
                 L"g_DeinterleaveAOTexIndices");
             static inline size_t g_DeinterleaveBlurTexIndices = PropertyToID(
                 L"g_DeinterleaveBlurTexIndices");
-            static inline size_t g_TargetMipmapLevel = PropertyToID(L"g_TargetMipmapLevel");
+            static inline size_t g_BlurTexIndex = PropertyToID(
+                L"g_BlurTexIndex");
 
             static inline size_t viewMatrix = PropertyToID(L"viewMatrix");
             static inline size_t viewMatrix_I = PropertyToID(L"viewMatrix_I");
@@ -163,7 +164,6 @@ PASS(AO_TAA_PASS,                       "public\\PostProcess\\CS_AOTAA.hlsl",   
             static inline size_t g_Sharpness_Inv = PropertyToID(L"g_Sharpness_Inv");
             static inline size_t g_BlurRadius = PropertyToID(L"g_BlurRadius");
             static inline size_t g_Weights = PropertyToID(L"g_Weights");
-            static inline size_t g_BlurIntensity = PropertyToID(L"g_BlurIntensity");
 
             static inline size_t g_bImportance = PropertyToID(L"g_bImportance");
             static inline size_t g_AOImportanceTexIndex = PropertyToID(L"g_AOImportanceTexIndex");
@@ -187,16 +187,14 @@ PASS(AO_TAA_PASS,                       "public\\PostProcess\\CS_AOTAA.hlsl",   
 
         void DoHIZ();
         void DoDeinterleaveDepth();
-        void DoDeinterleaveAO();
+        void DoDeinterleaveBaseAO();
         void DoImportance();
-        void DoCalcAO();
+        void DoDeinterleaveCalcAO();
         void DoBilateralBlur();
-
-
-        void DoTAA();
         void DoReinterleave();
 
-        std::vector<Vector4> GenerateBaseAOSampleKernel();
+        void DoTAA();
+
         std::vector<Vector4> GenerateSSAOSampleKernel();
         std::vector<Vector4> GenerateHBAOSampleKernel();
         std::vector<float> GenerateBlurWeights(UINT blurRadius);

@@ -96,9 +96,16 @@ namespace ElysiaRenderer
         {
             auto clampValue = std::ranges::clamp(UserData::GetInstance().mipmapLevel, 0, 3);
             auto RT = RenderTargetManager::GetInstance().GetRenderTexture(
-                L"AO Importance RT");
+                L"AO RT");
+            if (UserData::GetInstance().aoParameter.debugTarget == AODebugTarget::Importance)
+            {
+                RT = RenderTargetManager::GetInstance().GetRenderTexture(
+                    L"AO Importance RT");
+
+            }
             RT = RenderTargetManager::GetInstance().GetRenderTexture(
-                L"Deinterleaved Blur RT" + std::to_wstring(clampValue));
+                L"Deinterleaved AO RT" + std::to_wstring(clampValue));
+
             m_pMaterial->SetUInt(ShaderIDs::g_SourceTexIndex, RT->GetResourceHeapIndex());
             m_pMaterial->SetFloat4(ShaderIDs::g_SourceSize,
                                    GetScreenSize(RT->GetWidth(), RT->GetHeight()));

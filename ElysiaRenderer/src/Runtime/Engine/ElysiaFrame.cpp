@@ -449,17 +449,7 @@ namespace ElysiaEngine
             ImGui::SliderInt("AO Blur Radius", &pUserData.aoParameter.BlurIntensity, 1, 10);
             ImGui::SliderFloat("AO Sharpness", &pUserData.aoParameter.Sharpness, 0.f, 1.f);
 
-            ImGui::SliderFloat("HIZ Radius", &pUserData.aoParameter.HIZRadius, 1e-4, 10.f);
-
-            ImGui::Checkbox("Is Enable Importance", &pUserData.aoParameter.IsImportance);
-            ImGui::SliderFloat("Importance Intensity",
-                               &pUserData.aoParameter.importanceIntensity,
-                               1.f,
-                               10.f);
-            ImGui::SliderInt("Sample Mipmap",
-                             &pUserData.aoParameter.HIZMipmap,
-                             0,
-                             10);
+            ImGui::Checkbox("Is Enable TAA", &pUserData.aoParameter.IsTAA);
         }
 
         if (ImGui::CollapsingHeader("Timing"))

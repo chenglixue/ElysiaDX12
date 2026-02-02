@@ -30,8 +30,8 @@ void GenerateAOImportance(UINT3 id : SV_DispatchThreadID)
     UINT2 basePos = id * 2;
     float2 baseUV = (basePos + 0.5f) * g_DeinterleavedAOSize.zw;
     float avg = 0.f;
-    float minV = FLT_MAX;
-    float maxV = FLT_MIN;
+    float minV = 1.f;
+    float maxV = 0.f;
 
     [unroll]
     for (int i = 0; i < 4; i ++)
@@ -53,12 +53,12 @@ void GenerateAOImportance(UINT3 id : SV_DispatchThreadID)
         minV = min(minV, min(min(vals.x, vals.y), min(vals.z, vals.w)));
     }
 
-    float minMaxDiff = (maxV - minV);
+    float minMaxDiff = maxV - minV;
 
     Elysia_AOImportance_StoreOutput(id, pow(saturate(minMaxDiff * 2.0), 0.8));
 }
 
-static const float Smooth_Importance = 1.f;
+static const float Smooth_Importance = 0.5f;
 
 [numthreads(GROUP_SIZE, GROUP_SIZE, 1)]
 void PostAOImportanceA(UINT3 id : SV_DispatchThreadID)

@@ -50,7 +50,7 @@ namespace ElysiaRenderer
         float HIZMipFactor = 1.f;
         int HIZMipmap = 1;
 
-        bool IsImportance = true;
+        bool IsTAA = true;
         float importanceIntensity = 2.f;
         float HIZRadius = 1.f;
     };

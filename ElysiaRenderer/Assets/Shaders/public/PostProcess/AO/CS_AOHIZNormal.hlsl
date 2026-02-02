@@ -35,7 +35,6 @@ void AOHIZNormal(UINT3 id : SV_DispatchThreadID)
     RWTexture2D<float4> o = ResourceDescriptorHeap[g_TargetTexIndices[layerIndex]];
 
     o[id.xy] = MipSmartAverage(depths, g_AORadius);
-    // o[id.xy] = min(min(depths.x, depths.y), min(depths.z, depths.w)) / Constant_Float16F_Scale;
 }
 
 float MipSmartAverage(float4 depths, float effectRadius)

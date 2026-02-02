@@ -4,9 +4,14 @@
 
 cbuffer PassConstant : register(b0, perPassSpace)
 {
-    Vector4 g_DeinterleaveBlurTexIndices;
-    Vector4 g_DeinterleaveAOTexIndices;
+    float4 g_FullScreenSize;
+
+    UINT g_BlurTexIndex;
+    UINT g_ReinterleaveAOTexIndex;
+    UINT g_AOImportanceTexIndex;
     float g_Sharpness_Inv;
+
+    UINT g_BlurRadius;
     bool g_IsBlur;
 }
 
@@ -32,18 +37,17 @@ float4 UnpackEdges(float _packedVal)
 [numthreads(GROUP_SIZE, GROUP_SIZE, 1)]
 void AOEdgeSensitiveBlur(uint3 id : SV_DispatchThreadID)
 {
-    UINT layerIndex = id.z;
-    UINT AOLayerHeapIndex = g_DeinterleaveAOTexIndices[layerIndex];
-    UINT BlurLayerHeapIndex = g_DeinterleaveBlurTexIndices[layerIndex];
+    UINT AOIndex = g_ReinterleaveAOTexIndex;
+    UINT BlurIndex = g_BlurTexIndex;
 
-    float2 centerData = LoadTexture2D(AOLayerHeapIndex, id);
+    float2 centerData = LoadTexture2D(AOIndex, id);
     float centerAO = centerData.r;
     float4 centerEdge = UnpackEdges(centerData.g);
 
-    float L = LoadTexture2D(AOLayerHeapIndex, id + int2(-1, 0)).r;
-    float R = LoadTexture2D(AOLayerHeapIndex, id + int2(1, 0)).r;
-    float T = LoadTexture2D(AOLayerHeapIndex, id + int2(0, -1)).r;
-    float B = LoadTexture2D(AOLayerHeapIndex, id + int2(0, 1)).r;
+    float L = LoadTexture2D(AOIndex, id + int2(-1, 0) * g_BlurRadius).r;
+    float R = LoadTexture2D(AOIndex, id + int2(1, 0) * g_BlurRadius).r;
+    float T = LoadTexture2D(AOIndex, id + int2(0, -1) * g_BlurRadius).r;
+    float B = LoadTexture2D(AOIndex, id + int2(0, 1) * g_BlurRadius).r;
 
     float weightSum = 1.0;
     float totalAO = centerAO;
@@ -59,7 +63,22 @@ void AOEdgeSensitiveBlur(uint3 id : SV_DispatchThreadID)
 
     float blurredAO = totalAO / weightSum;
 
-    Elysia_BlurAO_StoreOutput(BlurLayerHeapIndex,
-                              id,
-                              float2(g_IsBlur ? blurredAO : centerData.x, centerData.y));
+    [branch]
+    if (g_BlurRadius == 1)
+    {
+        float2 uv = (id.xy + 0.5) * g_FullScreenSize.zw;
+        float importance = SampleTexture2D(g_AOImportanceTexIndex, uv, ClampLinearSampler).r;
+        float mixFactor = smoothstep(0.2, 0.8, importance);
+        float finalAO = lerp(blurredAO, centerAO, mixFactor);
+        Elysia_BlurAO_StoreOutput(BlurIndex,
+                                  id,
+                                  float2(g_IsBlur ? finalAO : centerData.x, centerData.y));
+    }
+    else
+    {
+        Elysia_BlurAO_StoreOutput(BlurIndex,
+                                  id,
+                                  float2(g_IsBlur ? blurredAO : centerData.x, centerData.y));
+    }
+
 }
