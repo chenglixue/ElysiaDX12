@@ -55,6 +55,15 @@ namespace ElysiaRenderer
         return nullptr;
     }
 
+    void RenderTargetManager::ReleaseRT(std::unique_ptr<RenderTexture>& pRT)
+    {
+        if (!pRT)
+            return;
+
+        pRT->ShutDowm();
+        pRT.reset();
+    }
+
     RenderTexture* RenderTargetManager::CreateRenderTexture(
         UINT64 width,
         UINT64 height,
@@ -78,7 +87,7 @@ namespace ElysiaRenderer
             }
             else
             {
-                m_renderTextures.at(nameHash).reset();
+                ReleaseRT(m_renderTextures.at(nameHash));
                 auto newRT = std::make_unique<RenderTexture>();
                 newRT->Init(m_pDevice, desc);
                 m_renderTextures[nameHash] = std::move(newRT);
@@ -119,7 +128,7 @@ namespace ElysiaRenderer
             }
             else
             {
-                m_renderTextures.at(nameHash).reset();
+                ReleaseRT(m_renderTextures.at(nameHash));
                 auto newRT = std::make_unique<RenderTexture>();
                 newRT->Init(m_pDevice, desc);
                 m_renderTextures[nameHash] = std::move(newRT);
@@ -159,7 +168,7 @@ namespace ElysiaRenderer
             }
             else
             {
-                m_renderTextures.at(nameHash).reset();
+                ReleaseRT(m_renderTextures.at(nameHash));
                 auto newRT = std::make_unique<RenderTexture>();
                 newRT->Init(m_pDevice, desc);
                 m_renderTextures[nameHash] = std::move(newRT);
@@ -201,7 +210,7 @@ namespace ElysiaRenderer
             }
             else
             {
-                m_renderTextures.at(nameHash).reset();
+                ReleaseRT(m_renderTextures.at(nameHash));
                 auto newRT = std::make_unique<RenderTexture>();
                 newRT->Init(m_pDevice, desc);
                 m_renderTextures[nameHash] = std::move(newRT);

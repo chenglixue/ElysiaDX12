@@ -12,9 +12,12 @@ namespace ElysiaCore
 
 namespace ElysiaEditor
 {
-    bool ImGUI_Init(HWND windowHandle, ElysiaCore::DX12Device* pDevice, ElysiaCore::SwapChain& pSwapChain);
+    bool ImGUI_Init(HWND windowHandle,
+                    ElysiaCore::DX12Device* pDevice,
+                    ElysiaCore::SwapChain& pSwapChain);
     void ImGUI_Shutdown();
     void ImGUI_UpdateIO();
     void ImGUI_NewFrame();
+    void ImGUI_EndFrame();
     LRESULT ImGUI_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 }

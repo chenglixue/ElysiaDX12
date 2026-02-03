@@ -30,6 +30,7 @@
 #include "TonemapUtility.h"
 #include "Editor/IMGUIDrawer.h"
 #include "Pass/DebugPass.h"
+#include "Runtime/Engine/ECS/Entity.h"
 
 extern "C"
 {
@@ -178,6 +179,8 @@ namespace ElysiaRenderer
         LightManager::GetInstance().Update(frameContext);
         SerializeUserData();
 
+        OnUpdateConstantBuffer(frameContext.renderList);
+
         frameContext.pGPUTimer = m_pGPUTimer.get();
 
         UINT64 gpuTicksPerSecond;
@@ -197,5 +200,28 @@ namespace ElysiaRenderer
     void Renderer::OnDestory()
     {
         m_pGPUTimer->OnDestroy();
+    }
+
+    void Renderer::OnUpdateConstantBuffer(std::vector<ElysiaRenderer::RenderItem>& renderList)
+    {
+        for (auto& ri : renderList)
+        {
+            Entity* entity = ri.pAssociatedEntity;
+            if (!entity)
+                continue;
+
+            if (entity->IsDirty())
+            {
+                ri.NumFramesDirty = NUM_FRAMES_IN_FLIGHT;
+                entity->ClearDirty();
+            }
+
+            if (ri.NumFramesDirty > 0)
+            {
+                ri.worldMatrix = entity->transform.GetWorldMatrix();
+
+                ri.NumFramesDirty --;
+            }
+        }
     }
 }

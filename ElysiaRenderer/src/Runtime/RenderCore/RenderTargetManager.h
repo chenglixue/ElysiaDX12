@@ -26,10 +26,11 @@ namespace ElysiaRenderer
 
         static RenderTargetManager& GetInstance()
         {
-            std::call_once(m_initInstanceFlag, []()
-            {
-                m_instance.reset(new RenderTargetManager());
-            });
+            std::call_once(m_initInstanceFlag,
+                           []()
+                           {
+                               m_instance.reset(new RenderTargetManager());
+                           });
 
             return *m_instance;
         }
@@ -67,6 +68,8 @@ namespace ElysiaRenderer
             bool enableRandomWrite,
             UINT16 mipmapCount,
             const std::wstring& name);
+
+        void ReleaseRT(std::unique_ptr<RenderTexture>& pRT);
 
     private:
         DX12Device* m_pDevice = nullptr;

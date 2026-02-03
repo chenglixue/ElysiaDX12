@@ -6,6 +6,8 @@
 #include "Editor/IMGUIHelper.h"
 #include "Editor/UserData.h"
 #include "Runtime/Core/DX12GraphicsContext.h"
+#include "Runtime/Core/DX12RenderPassDescriptorHeap.h"
+#include "Runtime/Core/DX12StagingDescriptorHeap.h"
 #include "Runtime/RenderCore/BufferManager.h"
 #include "Runtime/RenderCore/LightManager.h"
 #include "Runtime/RenderCore/RenderTargetManager.h"
@@ -14,6 +16,9 @@
 #include "Runtime/RenderCore/SceneManager.h"
 #include "Runtime/RenderCore/TextureManager.h"
 #include "Runtime/Resource/Model/ModelManager.h"
+#include "ECS/Entity.h"
+#include "Runtime/RenderCore/RenderTexture.h"
+#include "ThirdParty/imgui/imgui_internal.h"
 
 namespace ElysiaEngine
 {
@@ -150,9 +155,6 @@ namespace ElysiaEngine
 
     void ElysiaFrame::OnRender()
     {
-#ifdef _DEBUG
-        assert(_CrtCheckMemory());
-#endif
         auto frameContext = BeginFrame();
         m_pGraphicsContext->Reset();
         ImGUI_UpdateIO();
@@ -188,20 +190,7 @@ namespace ElysiaEngine
 
         frameContext.pCamera = CameraManager::GetInstance().GetMainCamera();
         m_pRenderer->OnRender(frameContext);
-        ImGuiIO& io = ImGui::GetIO();
-        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-        {
-            // 1. 更新平台窗口（这是报错直接要求的）
-            ImGui::UpdatePlatformWindows();
-
-            // 2. 渲染所有子窗口的渲染数据
-            ImGui::RenderPlatformWindowsDefault();
-
-            // 3. (重要) 恢复你当前的渲染上下文（比如 Direct11/12 或 OpenGL 的 Context）
-            // 因为 RenderPlatformWindowsDefault 可能会改变当前的渲染上下文状态
-            // 如果你是 DirectX 12，通常不需要额外恢复，但 OpenGL 必须恢复当前 Window
-            // YourGraphicsAPI_MakeContextCurrent(yourWindow); 
-        }
+        ImGUI_EndFrame();
 
         m_pDevice->SubmitContextWork(*m_pGraphicsContext);
 
@@ -249,23 +238,168 @@ namespace ElysiaEngine
 
     void ElysiaFrame::BuildUI()
     {
+        SetupDockSpace();
+        BuildUISceneHierarchy();
+        BuildUIViewport();
+        BuildUIInspector();
         BuildUIRenderSetting();
     }
+    void ElysiaFrame::SetupDockSpace()
+    {
+        ImGuiViewport* viewport = ImGui::GetMainViewport();
+        // 窗口始终完美覆盖主渲染窗口
+        ImGui::SetNextWindowPos(viewport->Pos);
+        ImGui::SetNextWindowSize(viewport->Size);
+        ImGui::SetNextWindowViewport(viewport->ID);
 
+        // 样式设置：无边框、无标题栏、不可移动
+        ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+        window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse |
+            ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+        window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+        // window_flags |= ImGuiWindowFlags_NoBackground;
+
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+
+        ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
+        ImGui::Begin("MainDockHost", nullptr, window_flags);
+        ImGui::PopStyleVar(3);
+
+        static bool layout_initialized = true;
+        if (layout_initialized)
+        {
+            layout_initialized = false;
+
+            ImGui::DockBuilderRemoveNode(dockspace_id);
+            ImGui::DockBuilderAddNode(dockspace_id, ImGuiDockNodeFlags_None);
+            ImGui::DockBuilderSetNodeSize(dockspace_id, viewport->Size);
+
+            ImGuiViewport* viewport = ImGui::GetMainViewport();
+            ImGui::DockBuilderSetNodeSize(dockspace_id, viewport->Size);
+
+            ImGuiID dock_id_left;
+            ImGuiID dock_id_center;
+            ImGuiID dock_id_right;
+
+            ImGui::DockBuilderSplitNode(dockspace_id,
+                                        ImGuiDir_Left,
+                                        0.10f,
+                                        &dock_id_left,
+                                        &dock_id_center);
+
+            ImGui::DockBuilderSplitNode(dock_id_center,
+                                        ImGuiDir_Right,
+                                        0.2f,
+                                        &dock_id_right,
+                                        &dock_id_center);
+
+            ImGuiID dock_id_inspector;
+            ImGuiID dock_id_render_settings;
+            ImGui::DockBuilderSplitNode(dock_id_right,
+                                        ImGuiDir_Up,
+                                        0.50f,
+                                        &dock_id_inspector,
+                                        &dock_id_render_settings);
+
+            ImGui::DockBuilderDockWindow("Scene Hierarchy", dock_id_left);
+            ImGui::DockBuilderDockWindow("Render Settings", dock_id_render_settings);
+            ImGui::DockBuilderDockWindow("Viewport", dock_id_center);
+            ImGui::DockBuilderDockWindow("Inspector", dock_id_inspector);
+
+            ImGui::DockBuilderFinish(dockspace_id);
+        }
+
+        ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
+        ImGui::End();
+    }
     void ElysiaFrame::BuildUISceneHierarchy()
     {
+        ImGui::Begin("Scene Hierarchy");
 
+        if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !
+            ImGui::IsAnyItemHovered())
+        {
+            m_pSelectedObject = nullptr;
+        }
+
+        auto& entities = SceneManager::GetInstance().GetEntities();
+
+        for (auto& objPtr : entities)
+        {
+            Entity* obj = objPtr.get();
+            DrawEntityNode(obj);
+        }
+
+        ImGui::End();
     }
     void ElysiaFrame::BuildUIViewport()
     {
+        ImGui::Begin("Viewport",
+                     nullptr,
+                     ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 
+        static ImVec2 lastSize = {0, 0};
+        ImVec2 viewportSize = ImGui::GetContentRegionAvail();
+        if (viewportSize.x != lastSize.x || viewportSize.y != lastSize.y)
+        {
+            lastSize = viewportSize;
+            if (viewportSize.x > 0 && viewportSize.y > 0)
+            {
+                m_pRenderer->OnCreateWindowSizeDependentResources(
+                    &m_swapChain,
+                    viewportSize.x,
+                    viewportSize.y);
+            }
+        }
+
+        auto cameraRT = m_pRenderer->GetCameraColorRT();
+        if (cameraRT)
+        {
+            auto srcCPUHandle = cameraRT->GetTexture()->GetSRVDescriptor().GetCPUHandle();
+            auto dstDescriptor = m_pDevice->GetImguiDescriptor();
+            m_pDevice->GetDevice()->CopyDescriptorsSimple(
+                1,
+                dstDescriptor.GetCPUHandle(),
+                srcCPUHandle,
+                D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV
+                );
+
+            ImTextureID sceneTexID = (ImTextureID)dstDescriptor.GetGPUHandle().ptr;
+            ImGui::Image(sceneTexID, viewportSize, ImVec2(0, 0), ImVec2(1, 1));
+        }
+
+        ImGui::End();
     }
     void ElysiaFrame::BuildUIInspector()
     {
+        ImGui::Begin("Inspector");
 
+        if (m_pSelectedObject == nullptr)
+        {
+            ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f),
+                               "Select an object to view its properties.");
+            ImGui::End();
+            return;
+        }
+
+        char nameBuffer[256];
+        strncpy_s(nameBuffer, m_pSelectedObject->name.c_str(), sizeof(nameBuffer));
+        if (ImGui::InputText("##ObjectName", nameBuffer, sizeof(nameBuffer)))
+        {
+            m_pSelectedObject->SetName(nameBuffer);
+        }
+
+        ImGui::Separator();
+
+        DrawTransformComponent(m_pSelectedObject);
+
+        ImGui::End();
     }
     void ElysiaFrame::BuildUIRenderSetting()
     {
+        ImGui::Begin("Render Settings");
         auto& pUserData = UserData::GetInstance();
 
         if (ImGui::CollapsingHeader("Debug"))
@@ -488,6 +622,74 @@ namespace ElysiaEngine
             for (const auto& ts : m_pRenderer->GetTimingValues())
             {
                 ImGui::Text("%s: %.2f us", ts.m_label.c_str(), ts.m_microseconds);
+            }
+        }
+        ImGui::End();
+    }
+
+    void ElysiaFrame::DrawEntityNode(Entity* entity)
+    {
+        if (!entity)
+            return;
+
+        // 1. 准备节点标志
+        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow |
+                                   ImGuiTreeNodeFlags_SpanAvailWidth;
+
+        // 如果被选中，加上高亮标志
+        if (m_pSelectedObject == entity)
+            flags |= ImGuiTreeNodeFlags_Selected;
+
+        // 如果没有子节点，标记为叶子节点（不显示箭头）
+        bool hasChildren = !entity->GetChildren().empty();
+        if (!hasChildren)
+            flags |= ImGuiTreeNodeFlags_Leaf;
+
+        // 2. 渲染节点
+        // 使用指针作为唯一 ID，节点显示名称
+        bool opened = ImGui::TreeNodeEx((void*)entity, flags, entity->name.c_str());
+
+        // 3. 处理点击交互
+        if (ImGui::IsItemClicked())
+        {
+            m_pSelectedObject = entity;
+        }
+
+        // 4. 如果节点被展开，递归绘制子节点
+        if (opened)
+        {
+            for (auto& child : entity->GetChildren()) // 假设 children 存储的是原始指针或 smart ptr
+            {
+                DrawEntityNode(child.get());
+            }
+            ImGui::TreePop(); // 必须与打开的节点配对
+        }
+    }
+    void ElysiaFrame::DrawTransformComponent(Entity* entity)
+    {
+        if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            auto& transform = entity->transform;
+
+            auto pos = transform.position;
+            if (ImGui::DragFloat3("Position", (float*)&pos, 0.1f))
+            {
+                transform.position = pos;
+                entity->OnTransformChanged();
+            }
+
+            auto rot = transform.rotation; // 欧拉角
+            if (ImGui::DragFloat3("Rotation", (float*)&rot, 0.5f))
+            {
+                transform.rotation = rot;
+                entity->OnTransformChanged();
+            }
+
+            auto scale = transform.scale;
+            if (ImGui::DragFloat3("Scale", (float*)&scale, 0.1f))
+            {
+                transform.scale = scale;
+                entity->OnTransformChanged();
             }
         }
     }

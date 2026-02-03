@@ -197,6 +197,15 @@ namespace ElysiaRenderer
 
         for (auto pRT : m_DeinterleavedDepthRTs)
         {
+            m_pCommand->AddBarrier(pRT, D3D12_RESOURCE_STATE_RENDER_TARGET, false);
+        }
+        m_pCommand->FlushBarrier();
+        for (auto pRT : m_DeinterleavedDepthRTs)
+        {
+            m_pCommand->Discard(pRT);
+        }
+        for (auto pRT : m_DeinterleavedDepthRTs)
+        {
             m_pCommand->AddBarrier(pRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, false);
         }
         m_pCommand->FlushBarrier();
@@ -771,9 +780,17 @@ namespace ElysiaRenderer
 
         if (m_isFirstFrame)
         {
-            m_pCommand->AddBarrier(AORT, D3D12_RESOURCE_STATE_COPY_SOURCE);
-            m_pCommand->CopyTexture(AORT, currTAART);
-            m_pCommand->CopyTexture(AORT, historyTAART);
+            // m_pCommand->ClearRenderTarget(currTAART, Color::Black);
+            // m_pCommand->ClearRenderTarget(historyTAART, Color::Black);
+            m_pCommand->AddBarrier(currTAART, D3D12_RESOURCE_STATE_RENDER_TARGET, false);
+            m_pCommand->AddBarrier(historyTAART, D3D12_RESOURCE_STATE_RENDER_TARGET);
+            m_pCommand->Discard(currTAART);
+            m_pCommand->Discard(historyTAART);
+            m_pCommand->AddBarrier(AORT, D3D12_RESOURCE_STATE_COPY_SOURCE, false);
+            m_pCommand->AddBarrier(currTAART, D3D12_RESOURCE_STATE_COPY_DEST, false);
+            m_pCommand->AddBarrier(historyTAART, D3D12_RESOURCE_STATE_COPY_DEST);
+            m_pCommand->CopyTextureRegion(AORT, currTAART);
+            m_pCommand->CopyTextureRegion(AORT, historyTAART);
             m_pCommand->AddBarrier(AORT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 
             TAAData::Pre_View_M = m_pCamera->GetViewMat();

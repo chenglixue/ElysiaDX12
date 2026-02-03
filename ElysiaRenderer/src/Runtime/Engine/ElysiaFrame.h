@@ -7,6 +7,7 @@ struct ImGuiIO;
 
 namespace ElysiaEngine
 {
+    struct Entity;
     class ElysiaFrame : public FrameworkWindows
     {
     public:
@@ -39,10 +40,15 @@ namespace ElysiaEngine
 
         ElysiaEditor::UIState m_UIState;
         std::unique_ptr<ElysiaEditor::IMGUIDrawer> m_pImGui = nullptr;
+        Entity* m_pSelectedObject;
 
+        void SetupDockSpace();
         void BuildUISceneHierarchy();
         void BuildUIViewport();
         void BuildUIInspector();
         void BuildUIRenderSetting();
+
+        void DrawEntityNode(Entity* entity);
+        void DrawTransformComponent(Entity* entity);
     };
 }

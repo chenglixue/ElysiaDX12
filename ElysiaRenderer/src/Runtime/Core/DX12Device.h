@@ -40,9 +40,11 @@ namespace ElysiaCore
         std::unique_ptr<DX12StagingDescriptorHeap> m_RTVStagingDescriptorHeap;
         std::unique_ptr<DX12StagingDescriptorHeap> m_DSVStagingDescriptorHeap;
         std::unique_ptr<DX12StagingDescriptorHeap> m_SRVStagingDescriptorHeap;
-        std::array<std::unique_ptr<DX12RenderPassDescriptorHeap>, NUM_FRAMES_IN_FLIGHT> m_SRVRenderPassDescriptorHeaps;
+        std::array<std::unique_ptr<DX12RenderPassDescriptorHeap>, NUM_FRAMES_IN_FLIGHT>
+        m_SRVRenderPassDescriptorHeaps;
         std::unique_ptr<DX12RenderPassDescriptorHeap> m_samplerRenderPassDescriptorHeap;
-        std::array<DX12DescriptorHeapHandle, NUM_FRAMES_IN_FLIGHT> m_ImguiDescriptors;
+        std::unique_ptr<DX12RenderPassDescriptorHeap> m_ImGUIRenderPassDescriptorHeap;
+        DX12DescriptorHeapHandle m_ImguiDescriptor;
 
     public:
         DX12Device();
@@ -83,9 +85,13 @@ namespace ElysiaCore
         {
             return *m_samplerRenderPassDescriptorHeap;
         }
-        DX12DescriptorHeapHandle& GetImguiDescriptor(uint32_t index)
+        DX12RenderPassDescriptorHeap& GetImGUIRenderHeap() const noexcept
         {
-            return m_ImguiDescriptors[index];
+            return *m_ImGUIRenderPassDescriptorHeap;
+        }
+        DX12DescriptorHeapHandle& GetImguiDescriptor()
+        {
+            return m_ImguiDescriptor;
         }
         DX12UploadContext* GetUploadContext() const noexcept
         {
@@ -104,7 +110,8 @@ namespace ElysiaCore
         std::unique_ptr<DX12GraphicsContext> CreateGraphicsContext();
         std::unique_ptr<DX12Shader> CreateShader(ShaderCreateDesc& shaderCreateDesc);
         void CreateSamplers(D3D12_SHADER_VISIBILITY shaderVisibility = D3D12_SHADER_VISIBILITY_ALL);
-        void CreateRootParameters(DX12RootSignature* rootSignature, std::vector<DX12RootParameter*>& rootParamters);
+        void CreateRootParameters(DX12RootSignature* rootSignature,
+                                  std::vector<DX12RootParameter*>& rootParamters);
         DX12RootSignature* CreateRootSignature(const PipelineResourceLayout& resourceLayout,
                                                PipelineResourceMapping& resourceMapping);
 
@@ -176,7 +183,8 @@ namespace ElysiaCore
         void InitializeDeviceResources();
         void ProcessDestruction(UINT frameIndex);
 
-        ShaderReflectionData ReflectShaderStage(CComPtr<IDxcResult> pResults, CComPtr<IDxcUtils> pUtils);
+        ShaderReflectionData ReflectShaderStage(CComPtr<IDxcResult> pResults,
+                                                CComPtr<IDxcUtils> pUtils);
         ShaderBytecode CompileShaderStage(
             const std::wstring& path,
             const std::wstring& entry,

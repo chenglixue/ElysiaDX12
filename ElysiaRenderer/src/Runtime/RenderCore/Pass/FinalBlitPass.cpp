@@ -9,6 +9,7 @@
 #include "Runtime/Core/DX12GraphicsContext.h"
 #include "Runtime/Core/DX12Shader.h"
 #include "Runtime/Core/DX12Device.h"
+#include "Runtime/Core/DX12RenderPassDescriptorHeap.h"
 #include "Runtime/Core/DX12TextureBuffer.h"
 #include "Runtime/Core/SwapChain.h"
 
@@ -26,8 +27,8 @@ namespace ElysiaRenderer
     size_t FinalBlitPass::ShaderIDs::mipmapLevel = SIZE_MAX;
     size_t FinalBlitPass::ShaderIDs::g_ScreenSize = SIZE_MAX;
 
-    FinalBlitPass::FinalBlitPass() :
-        BasePass()
+    FinalBlitPass::FinalBlitPass()
+        : BasePass()
     {
         ShaderIDs::blitterTextureIndex = PropertyToID(L"blitterTextureIndex");
         ShaderIDs::mipmapLevel = PropertyToID(L"mipmapLevel");
@@ -97,6 +98,9 @@ namespace ElysiaRenderer
         ImGui::Render();
         if (ImGui::GetDrawData())
         {
+            ID3D12DescriptorHeap* currentHeap = m_pDevice->GetImGUIRenderHeap()
+                                                         .GetDescriptorHeap();
+            m_pCommand->GetCommandList()->SetDescriptorHeaps(1, &currentHeap);
             ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), m_pCommand->GetCommandList());
         }
 
@@ -126,7 +130,10 @@ namespace ElysiaRenderer
         };
         m_backBufferFormat = m_pSwaiChain->GetFormat();
         passData.pPipelineStateObject = PSOManager::GetInstance().GetGraphicsPipelineState(
-            m_pDevice, m_pMaterial.get(), passID, RTDesc);
+            m_pDevice,
+            m_pMaterial.get(),
+            passID,
+            RTDesc);
     }
 
 }

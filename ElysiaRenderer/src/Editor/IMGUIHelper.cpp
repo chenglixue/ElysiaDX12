@@ -2,6 +2,7 @@
 #include "IMGUIHelper.h"
 
 #include "Runtime/Core/DX12Device.h"
+#include "Runtime/Core/DX12RenderPassDescriptorHeap.h"
 #include "Runtime/Core/SwapChain.h"
 
 namespace ElysiaEditor
@@ -21,15 +22,17 @@ namespace ElysiaEditor
 
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // 启用键盘控制
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;     // 启用Docking
-        io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;   // 启用多视口
+        // io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // 启用多视口
+
+        io.ConfigDockingWithShift = true;
 
         // 当启用多视口时，需要设置平台后端
-        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-        {
-            // Docking分支需要启用平台渲染器
-            io.BackendFlags |= ImGuiBackendFlags_PlatformHasViewports;
-            io.BackendFlags |= ImGuiBackendFlags_RendererHasViewports;
-        }
+        // if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        // {
+        //     // Docking分支需要启用平台渲染器
+        //     io.BackendFlags |= ImGuiBackendFlags_PlatformHasViewports;
+        //     io.BackendFlags |= ImGuiBackendFlags_RendererHasViewports;
+        // }
 
         // 2. 设置样式（docking分支可能使用不同的默认样式）
         ImGui::StyleColorsDark();
@@ -84,7 +87,6 @@ namespace ElysiaEditor
         ImGuiIO& io = ImGui::GetIO();
         if (!io.Fonts->IsBuilt())
         {
-            // 强制构建字体图集
             unsigned char* pixels;
             int width, height;
             io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
@@ -93,7 +95,17 @@ namespace ElysiaEditor
         ImGui_ImplDX12_NewFrame();
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
+    }
 
+    void ImGUI_EndFrame()
+    {
+        ImGuiIO& io = ImGui::GetIO();
+        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        {
+            ImGui::UpdatePlatformWindows();
+            ImGui::RenderPlatformWindowsDefault(nullptr, nullptr);
+
+        }
     }
 
     void ImGUI_UpdateIO()

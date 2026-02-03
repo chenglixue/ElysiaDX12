@@ -65,7 +65,8 @@ namespace ElysiaCore
 #endif
     }
 
-    void DX12Device::OnCreate(std::wstring appName, bool bCPUValidationEnabled,
+    void DX12Device::OnCreate(std::wstring appName,
+                              bool bCPUValidationEnabled,
                               bool bGpuValidationEnabled)
     {
 #if defined(_DEBUG)
@@ -119,8 +120,12 @@ namespace ElysiaCore
             if (bAMDGPU)
             {
                 AGSReturnCode result = agsInitialize(
-                    AGS_MAKE_VERSION(AMD_AGS_VERSION_MAJOR, AMD_AGS_VERSION_MINOR,
-                                     AMD_AGS_VERSION_PATCH), nullptr, &m_agsContext, &m_agsGPUInfo);
+                    AGS_MAKE_VERSION(AMD_AGS_VERSION_MAJOR,
+                                     AMD_AGS_VERSION_MINOR,
+                                     AMD_AGS_VERSION_PATCH),
+                    nullptr,
+                    &m_agsContext,
+                    &m_agsGPUInfo);
                 if (result == AGS_SUCCESS)
                 {
                     UserMarker::SetAgsContext(m_agsContext);
@@ -136,7 +141,10 @@ namespace ElysiaCore
                     // Create AGS Device
                     //
                     AGSReturnCode rc = agsDriverExtensionsDX12_CreateDevice(
-                        m_agsContext, &creationParams, &extensionParams, &returnedParams);
+                        m_agsContext,
+                        &creationParams,
+                        &extensionParams,
+                        &returnedParams);
                     if (rc == AGS_SUCCESS)
                     {
                         m_pDevice = returnedParams.pDevice;
@@ -155,7 +163,8 @@ namespace ElysiaCore
 
         if (!m_pDevice)
         {
-            ThrowIfFailed(D3D12CreateDevice(m_pAdapter, D3D_FEATURE_LEVEL_12_0,
+            ThrowIfFailed(D3D12CreateDevice(m_pAdapter,
+                                            D3D_FEATURE_LEVEL_12_0,
                                             IID_PPV_ARGS(&m_pDevice)));
 
             if (bCPUValidationEnabled || bGpuValidationEnabled)
@@ -224,29 +233,40 @@ namespace ElysiaCore
         // Create Descriptor Heap
         {
             m_RTVStagingDescriptorHeap = std::make_unique<DX12StagingDescriptorHeap>(
-                m_pDevice, D3D12_DESCRIPTOR_HEAP_TYPE_RTV,
+                m_pDevice,
+                D3D12_DESCRIPTOR_HEAP_TYPE_RTV,
                 NUM_RTV_STAGING_DESCRIPTORS);
             m_SRVStagingDescriptorHeap = std::make_unique<DX12StagingDescriptorHeap>(
-                m_pDevice, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
+                m_pDevice,
+                D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
                 NUM_SRV_STAGING_DESCRIPTORS);
             m_DSVStagingDescriptorHeap = std::make_unique<DX12StagingDescriptorHeap>(
-                m_pDevice, D3D12_DESCRIPTOR_HEAP_TYPE_DSV,
+                m_pDevice,
+                D3D12_DESCRIPTOR_HEAP_TYPE_DSV,
                 NUM_DSV_STAGING_DESCRIPTORS);
+
+            m_ImGUIRenderPassDescriptorHeap = std::make_unique<DX12RenderPassDescriptorHeap>(
+                m_pDevice,
+                D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
+                NUM_RESERVED_SRV_DESCRIPTORS,
+                NUM_SRV_RENDER_PASS_USER_DESCRIPTORS);
+            m_ImguiDescriptor = m_ImGUIRenderPassDescriptorHeap->GetReservedDescriptor(
+                IMGUI_RESERVED_DESCRIPTOR_INDEX + 1);
 
             for (UINT currFrameIndex = 0; currFrameIndex < NUM_FRAMES_IN_FLIGHT; ++currFrameIndex)
             {
                 m_SRVRenderPassDescriptorHeaps[currFrameIndex] = std::make_unique<
-                    DX12RenderPassDescriptorHeap>(m_pDevice, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
+                    DX12RenderPassDescriptorHeap>(m_pDevice,
+                                                  D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
                                                   NUM_RESERVED_SRV_DESCRIPTORS,
                                                   NUM_SRV_RENDER_PASS_USER_DESCRIPTORS);
-
-                m_ImguiDescriptors[currFrameIndex] = m_SRVRenderPassDescriptorHeaps[currFrameIndex]
-                    ->GetReservedDescriptor(IMGUI_RESERVED_DESCRIPTOR_INDEX);
             }
 
             m_samplerRenderPassDescriptorHeap = std::make_unique<DX12RenderPassDescriptorHeap>(
-                m_pDevice, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER,
-                0, NUM_SAMPLER_DESCRIPTORS);
+                m_pDevice,
+                D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER,
+                0,
+                NUM_SAMPLER_DESCRIPTORS);
         }
 
         // Create Upload Context
@@ -268,7 +288,8 @@ namespace ElysiaCore
         CreateSamplers();
 
         m_freeReservedDescriptorIndices.resize(NUM_RESERVED_SRV_DESCRIPTORS - 1);
-        std::iota(m_freeReservedDescriptorIndices.begin(), m_freeReservedDescriptorIndices.end(),
+        std::iota(m_freeReservedDescriptorIndices.begin(),
+                  m_freeReservedDescriptorIndices.end(),
                   1);
     }
 
@@ -320,7 +341,9 @@ namespace ElysiaCore
         ThrowIfFailed(pUtils->LoadFile(
             ElysiaHelper::GetAssetFullPath(assetsPath,
                                            shaderCreateDesc.stages.begin()->ShaderName.c_str()).
-            c_str(), nullptr, &pSource));
+            c_str(),
+            nullptr,
+            &pSource));
         DxcBuffer Source
         {
             .Ptr = pSource->GetBufferPointer(),
@@ -492,16 +515,18 @@ namespace ElysiaCore
             if (!currSpace)
                 continue;
 
-            if (currSpace->IsPushConstantSpace() && (currSpaceID == PER_MATERIAL_SPACE || currSpaceID == PER_OBJECT_SPACE)) 
+            if (currSpace->IsPushConstantSpace() && (
+                    currSpaceID == PER_MATERIAL_SPACE || currSpaceID == PER_OBJECT_SPACE))
             {
                 DX12RootParameter* rootParameter = new DX12RootParameter();
                 rootParameter->InitAsConstants(16, 0, currSpaceID, D3D12_SHADER_VISIBILITY_ALL);
 
-                resourceMapping.m_PushConstantMappings[currSpaceID] = static_cast<UINT>(rootParameters.size());
+                resourceMapping.m_PushConstantMappings[currSpaceID] = static_cast<UINT>(
+                    rootParameters.size());
                 rootParameters.emplace_back(std::move(rootParameter));
                 continue; // 处理完常量后跳过后续 Table 处理
             }
-            
+
             std::vector<D3D12_DESCRIPTOR_RANGE1>& currDescriptorRange = desciptorRanges[
                 currSpaceID];
 
@@ -587,9 +612,12 @@ namespace ElysiaCore
                                      const uint32_t* srcDescriptorRangeSizes,
                                      D3D12_DESCRIPTOR_HEAP_TYPE descriptorType)
     {
-        m_pDevice->CopyDescriptors(numDestDescriptorRanges, destDescriptorRangeStarts,
-                                   destDescriptorRangeSizes, numSrcDescriptorRanges,
-                                   srcDescriptorRangeStarts, srcDescriptorRangeSizes,
+        m_pDevice->CopyDescriptors(numDestDescriptorRanges,
+                                   destDescriptorRangeStarts,
+                                   destDescriptorRangeSizes,
+                                   numSrcDescriptorRanges,
+                                   srcDescriptorRangeStarts,
+                                   srcDescriptorRangeSizes,
                                    descriptorType);
     }
     /// <summary>
@@ -604,7 +632,8 @@ namespace ElysiaCore
         {
             auto targetDescriptor = m_SRVRenderPassDescriptorHeaps[currFrameIndex]->
                 GetReservedDescriptor(index);
-            m_pDevice->CopyDescriptorsSimple(1, targetDescriptor.GetCPUHandle(),
+            m_pDevice->CopyDescriptorsSimple(1,
+                                             targetDescriptor.GetCPUHandle(),
                                              SRVHandle.GetCPUHandle(),
                                              D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
         }
@@ -640,13 +669,15 @@ namespace ElysiaCore
         {
             // ���ܾ��棺Sort ���������������������׶�ͨ���ɽ���
             // ���Ƶ������/���� Mipmap ������������� offset ��������Է�����
-            std::sort(m_freeReservedDescriptorIndices.begin(), m_freeReservedDescriptorIndices.end());
+            std::sort(m_freeReservedDescriptorIndices.begin(),
+                      m_freeReservedDescriptorIndices.end());
 
             // �ٴμ��
             lastVal = m_freeReservedDescriptorIndices.back();
             if (m_freeReservedDescriptorIndices[size - count] != (lastVal - count + 1))
             {
-                ElysiaHelper::AssertError("Heap Fragmentation: Cannot find contiguous block for Mipmaps!");
+                ElysiaHelper::AssertError(
+                    "Heap Fragmentation: Cannot find contiguous block for Mipmaps!");
                 return UINT_MAX;
             }
         }
@@ -777,7 +808,8 @@ namespace ElysiaCore
         //
         CComPtr<IDxcBlob> pReflectionData;
         CComPtr<ID3D12ShaderReflection> pReflection;
-        ThrowIfFailed(pResults->GetOutput(DXC_OUT_REFLECTION, IID_PPV_ARGS(&pReflectionData),
+        ThrowIfFailed(pResults->GetOutput(DXC_OUT_REFLECTION,
+                                          IID_PPV_ARGS(&pReflectionData),
                                           nullptr));
         if (pReflectionData != nullptr)
         {
@@ -797,7 +829,9 @@ namespace ElysiaCore
             D3D12_SHADER_DESC pShaderDesc{};
             pReflection->GetDesc(&pShaderDesc);
 
-            pReflection->GetThreadGroupSize(&o.ThreadGroupSize.X, &o.ThreadGroupSize.Y, &o.ThreadGroupSize.Z);
+            pReflection->GetThreadGroupSize(&o.ThreadGroupSize.X,
+                                            &o.ThreadGroupSize.Y,
+                                            &o.ThreadGroupSize.Z);
 
             // Set ConstantBuffer layout & constant buffer member
             {
@@ -851,7 +885,8 @@ namespace ElysiaCore
                             // #endif
 
                             shaderVariables[temp.spaceID].members.emplace(
-                                constantVariableDesc.Name, std::move(constantVariableDesc));
+                                constantVariableDesc.Name,
+                                std::move(constantVariableDesc));
                         }
                     }
                 }
@@ -951,10 +986,14 @@ namespace ElysiaCore
         //
         CComPtr<IDxcResult> pResults;
         hr = pCompiler->Compile(
-            &sourceBuffer,          // Source buffer.
-            pszArgs.data(),         // Array of pointers to arguments.
-            (UINT)pszArgs.size(),   // Number of arguments.
-            pIncludeHandler,        // User-provided interface to handle #include directives (optional).
+            &sourceBuffer,
+            // Source buffer.
+            pszArgs.data(),
+            // Array of pointers to arguments.
+            (UINT)pszArgs.size(),
+            // Number of arguments.
+            pIncludeHandler,
+            // User-provided interface to handle #include directives (optional).
             IID_PPV_ARGS(&pResults) // Compiler output status, buffer, and errors.
             );
         if (FAILED(hr))
@@ -1027,7 +1066,7 @@ namespace ElysiaCore
         CComPtr<IDxcBlob> pPDB = nullptr;
         CComPtr<IDxcBlobUtf16> pPDBName = nullptr;
         pResults->GetOutput(DXC_OUT_PDB, IID_PPV_ARGS(&pPDB), &pPDBName);
-        if(pPDB != nullptr && pPDBName != nullptr)
+        if (pPDB != nullptr && pPDBName != nullptr)
         {
             FILE* fp = NULL;
 
@@ -1162,7 +1201,11 @@ namespace ElysiaCore
             auto pszArgs = newCompileOptions.BuildArguments();
 
             o.StageShaders[stage.ShaderType] = CompileShaderStage(
-                stage.ShaderName, stage.EntryPoint, target, pszArgs, source);
+                stage.ShaderName,
+                stage.EntryPoint,
+                target,
+                pszArgs,
+                source);
             o.MergedReflectionData.Merge(o.StageShaders[stage.ShaderType].ReflectionData);
         }
 
@@ -1178,20 +1221,26 @@ namespace ElysiaCore
                 pSpace = new PipelineResourceSpace();
                 o.pMeshResourceLayout->SetSpace(spaceID, pSpace);
             }
-            if (spaceID == PER_MATERIAL_SPACE && currVariable.type == D3D_SIT_CBUFFER) 
+            if (spaceID == PER_MATERIAL_SPACE && currVariable.type == D3D_SIT_CBUFFER)
             {
                 pSpace->ExpectPushConstant(currVariable.bindPoint);
                 // 计算需要的 DWORD 数量 (Size 是字节，需除以 4)
                 pSpace->SetPushConstantNumDWORDs(CeilDivide(currVariable.size, 4));
             }
-            else 
+            else
             {
                 // 原有逻辑：处理普通资源
                 switch (currVariable.type)
                 {
-                case D3D_SIT_CBUFFER:   pSpace->ExpectCBV(currVariable.bindPoint); break;
-                case D3D_SIT_TEXTURE:   pSpace->ExpectSRV(currVariable.bindPoint); break;
-                case D3D_SIT_STRUCTURED: pSpace->ExpectUAV(currVariable.bindPoint); break;
+                case D3D_SIT_CBUFFER:
+                    pSpace->ExpectCBV(currVariable.bindPoint);
+                    break;
+                case D3D_SIT_TEXTURE:
+                    pSpace->ExpectSRV(currVariable.bindPoint);
+                    break;
+                case D3D_SIT_STRUCTURED:
+                    pSpace->ExpectUAV(currVariable.bindPoint);
+                    break;
                 }
             }
         }

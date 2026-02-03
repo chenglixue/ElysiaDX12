@@ -38,17 +38,27 @@ namespace ElysiaRenderer
         Renderer();
         ~Renderer();
 
-        void OnCreateWindowSizeDependentResources(SwapChain* pSwapChain, uint32_t Width, uint32_t Height);
+        void OnCreateWindowSizeDependentResources(SwapChain* pSwapChain,
+                                                  uint32_t Width,
+                                                  uint32_t Height);
         void OnDestroyWindowSizeDependentResources();
         void OnUpdateDisplayDependentResources(SwapChain* pSwapChain);
 
-        void OnCreate(DX12Device* pDevice, SwapChain* pSwapChain, ElysiaCore::DX12GraphicsContext* context);
+        void OnCreate(DX12Device* pDevice,
+                      SwapChain* pSwapChain,
+                      ElysiaCore::DX12GraphicsContext* context);
         void OnRender(ElysiaEngine::FrameContext frameContext);
         void OnDestory();
+        void OnUpdateConstantBuffer(std::vector<RenderItem>& renderList);
 
         const std::vector<TimeStamp>& GetTimingValues()
         {
             return m_TimeStamps;
+        }
+
+        RenderTexture* GetCameraColorRT() const
+        {
+            return m_pCameraColorRT;
         }
 
     protected:
