@@ -40,5 +40,9 @@ namespace ElysiaEngine
         ElysiaEditor::UIState m_UIState;
         std::unique_ptr<ElysiaEditor::IMGUIDrawer> m_pImGui = nullptr;
 
+        void BuildUISceneHierarchy();
+        void BuildUIViewport();
+        void BuildUIInspector();
+        void BuildUIRenderSetting();
     };
 }

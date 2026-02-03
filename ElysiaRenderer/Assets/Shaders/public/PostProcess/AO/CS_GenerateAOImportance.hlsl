@@ -41,10 +41,10 @@ void GenerateAOImportance(UINT3 id : SV_DispatchThreadID)
                                          baseUV,
                                          ClampPointSampler);
 
-        vals *= g_AOIntensityMul;
+        //vals *= g_AOIntensityMul;
         vals = 1 - vals;
 
-        vals = pow(saturate(vals), g_AOIntensityPow);
+        //vals = pow(saturate(vals), g_AOIntensityPow);
 
         avg += dot(float4(vals.x, vals.y, vals.z, vals.w),
                    float4(1.0 / 16.0, 1.0 / 16.0, 1.0 / 16.0, 1.0 / 16.0));

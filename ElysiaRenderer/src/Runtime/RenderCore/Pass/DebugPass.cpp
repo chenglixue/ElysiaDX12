@@ -103,8 +103,8 @@ namespace ElysiaRenderer
                     L"AO Importance RT");
 
             }
-            RT = RenderTargetManager::GetInstance().GetRenderTexture(
-                L"Deinterleaved AO RT" + std::to_wstring(clampValue));
+            // RT = RenderTargetManager::GetInstance().GetRenderTexture(
+            //     L"Deinterleaved AO RT" + std::to_wstring(clampValue));
 
             m_pMaterial->SetUInt(ShaderIDs::g_SourceTexIndex, RT->GetResourceHeapIndex());
             m_pMaterial->SetFloat4(ShaderIDs::g_SourceSize,

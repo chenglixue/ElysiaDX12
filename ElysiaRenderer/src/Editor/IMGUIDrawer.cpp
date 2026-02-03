@@ -4,25 +4,31 @@
 #include "IMGUIHelper.h"
 #include "Runtime/Core/DX12Context.h"
 #include "Runtime/Core/DX12Device.h"
+#include "Runtime/Core/DX12StagingDescriptorHeap.h"
 #include "Runtime/Core/SwapChain.h"
 
 namespace ElysiaEditor
 {
     void IMGUIDrawer::OnCreate(DX12Device* pDevice, SwapChain* pSwapChain)
     {
+
         auto UIDescriptor0 = pDevice->GetImguiDescriptor(0);
         auto UIDescriptor1 = pDevice->GetImguiDescriptor(1);
-        ImGui_ImplDX12_Init(pDevice->GetDevice(), NUM_FRAMES_IN_FLIGHT,
-        	pSwapChain->GetFormat(), nullptr,
-        	UIDescriptor0.GetCPUHandle(), UIDescriptor0.GetGPUHandle(), UIDescriptor1.GetCPUHandle(), UIDescriptor1.GetGPUHandle());
+        ImGui_ImplDX12_Init(pDevice->GetDevice(),
+                            NUM_FRAMES_IN_FLIGHT,
+                            pSwapChain->GetFormat(),
+                            //pDevice->GetSRVStageHeap()->GetDescriptorHeap(),
+                            nullptr,
+                            UIDescriptor0.GetCPUHandle(),
+                            UIDescriptor0.GetGPUHandle());
     }
     void IMGUIDrawer::OnDestory()
     {
-        
+
     }
     void IMGUIDrawer::UpdatePipeline()
     {
-        
+
     }
     void IMGUIDrawer::Draw(DX12Context* pCommand)
     {

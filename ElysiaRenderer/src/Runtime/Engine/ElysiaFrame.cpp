@@ -188,6 +188,20 @@ namespace ElysiaEngine
 
         frameContext.pCamera = CameraManager::GetInstance().GetMainCamera();
         m_pRenderer->OnRender(frameContext);
+        ImGuiIO& io = ImGui::GetIO();
+        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        {
+            // 1. 更新平台窗口（这是报错直接要求的）
+            ImGui::UpdatePlatformWindows();
+
+            // 2. 渲染所有子窗口的渲染数据
+            ImGui::RenderPlatformWindowsDefault();
+
+            // 3. (重要) 恢复你当前的渲染上下文（比如 Direct11/12 或 OpenGL 的 Context）
+            // 因为 RenderPlatformWindowsDefault 可能会改变当前的渲染上下文状态
+            // 如果你是 DirectX 12，通常不需要额外恢复，但 OpenGL 必须恢复当前 Window
+            // YourGraphicsAPI_MakeContextCurrent(yourWindow); 
+        }
 
         m_pDevice->SubmitContextWork(*m_pGraphicsContext);
 
@@ -213,27 +227,44 @@ namespace ElysiaEngine
 
     void ElysiaFrame::HandleInput(const ImGuiIO& io)
     {
-        auto fnIsKeyTriggered = [&io](char key)
-        {
-            return io.KeysDown[key] && io.KeysDownDuration[key] == 0.0f;
-        };
-
-        // Handle Keyboard/Mouse input here
-
-        /* MAGNIFIER CONTROLS */
-        if (fnIsKeyTriggered('L'))
-            m_UIState.ToggleMagnifierLock();
-        if (fnIsKeyTriggered('M') || io.MouseClicked[2])
-            ToggleBool(m_UIState.bUseMagnifier); // middle mouse / M key toggles magnifier
-
-        if (io.MouseClicked[1] && m_UIState.bUseMagnifier) // right mouse click
-            m_UIState.ToggleMagnifierLock();
-
-        if (fnIsKeyTriggered('R'))
-            m_UIState.ResetLPMSceneDefaults();
+        // auto fnIsKeyTriggered = [&io](char key)
+        // {
+        //     return io.KeysDown[key] && io.KeysDownDuration[key] == 0.0f;
+        // };
+        //
+        // // Handle Keyboard/Mouse input here
+        //
+        // /* MAGNIFIER CONTROLS */
+        // if (fnIsKeyTriggered('L'))
+        //     m_UIState.ToggleMagnifierLock();
+        // if (fnIsKeyTriggered('M') || io.MouseClicked[2])
+        //     ToggleBool(m_UIState.bUseMagnifier); // middle mouse / M key toggles magnifier
+        //
+        // if (io.MouseClicked[1] && m_UIState.bUseMagnifier) // right mouse click
+        //     m_UIState.ToggleMagnifierLock();
+        //
+        // if (fnIsKeyTriggered('R'))
+        //     m_UIState.ResetLPMSceneDefaults();
     }
 
     void ElysiaFrame::BuildUI()
+    {
+        BuildUIRenderSetting();
+    }
+
+    void ElysiaFrame::BuildUISceneHierarchy()
+    {
+
+    }
+    void ElysiaFrame::BuildUIViewport()
+    {
+
+    }
+    void ElysiaFrame::BuildUIInspector()
+    {
+
+    }
+    void ElysiaFrame::BuildUIRenderSetting()
     {
         auto& pUserData = UserData::GetInstance();
 

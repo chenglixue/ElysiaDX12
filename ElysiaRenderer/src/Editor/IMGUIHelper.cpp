@@ -8,7 +8,9 @@ namespace ElysiaEditor
 {
     static HWND g_hWnd;
 
-    bool ImGUI_Init(HWND windowHandle, ElysiaCore::DX12Device* pDevice, ElysiaCore::SwapChain& pSwapChain)
+    bool ImGUI_Init(HWND windowHandle,
+                    ElysiaCore::DX12Device* pDevice,
+                    ElysiaCore::SwapChain& pSwapChain)
     {
         g_hWnd = windowHandle;
         IMGUI_CHECKVERSION();
@@ -17,27 +19,55 @@ namespace ElysiaEditor
         ImGui::StyleColorsDark();
         ImGui_ImplWin32_Init(windowHandle);
 
-        io.KeyMap[ImGuiKey_Tab] = VK_TAB;
-        // Keyboard mapping. ImGui will use those indices to peek into the io.KeyDown[] array that we will update during the application lifetime.
-        io.KeyMap[ImGuiKey_LeftArrow] = VK_LEFT;
-        io.KeyMap[ImGuiKey_RightArrow] = VK_RIGHT;
-        io.KeyMap[ImGuiKey_UpArrow] = VK_UP;
-        io.KeyMap[ImGuiKey_DownArrow] = VK_DOWN;
-        io.KeyMap[ImGuiKey_PageUp] = VK_PRIOR;
-        io.KeyMap[ImGuiKey_PageDown] = VK_NEXT;
-        io.KeyMap[ImGuiKey_Home] = VK_HOME;
-        io.KeyMap[ImGuiKey_End] = VK_END;
-        io.KeyMap[ImGuiKey_Delete] = VK_DELETE;
-        io.KeyMap[ImGuiKey_Backspace] = VK_BACK;
-        io.KeyMap[ImGuiKey_Enter] = VK_RETURN;
-        io.KeyMap[ImGuiKey_Escape] = VK_ESCAPE;
-        io.KeyMap[ImGuiKey_A] = 'A';
-        io.KeyMap[ImGuiKey_C] = 'C';
-        io.KeyMap[ImGuiKey_V] = 'V';
-        io.KeyMap[ImGuiKey_X] = 'X';
-        io.KeyMap[ImGuiKey_Y] = 'Y';
-        io.KeyMap[ImGuiKey_Z] = 'Z';
-        io.ImeWindowHandle = g_hWnd;
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // 启用键盘控制
+        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;     // 启用Docking
+        io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;   // 启用多视口
+
+        // 当启用多视口时，需要设置平台后端
+        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        {
+            // Docking分支需要启用平台渲染器
+            io.BackendFlags |= ImGuiBackendFlags_PlatformHasViewports;
+            io.BackendFlags |= ImGuiBackendFlags_RendererHasViewports;
+        }
+
+        // 2. 设置样式（docking分支可能使用不同的默认样式）
+        ImGui::StyleColorsDark();
+
+        // 3. 调整docking分支的样式以支持多视口
+        ImGuiStyle& style = ImGui::GetStyle();
+        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        {
+            style.WindowRounding = 0.0f;
+            style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+        }
+
+        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        {
+            ImGui_ImplWin32_EnableDpiAwareness();
+        }
+
+        // io.KeyMap[ImGuiKey_Tab] = VK_TAB;
+        // // Keyboard mapping. ImGui will use those indices to peek into the io.KeyDown[] array that we will update during the application lifetime.
+        // io.KeyMap[ImGuiKey_LeftArrow] = VK_LEFT;
+        // io.KeyMap[ImGuiKey_RightArrow] = VK_RIGHT;
+        // io.KeyMap[ImGuiKey_UpArrow] = VK_UP;
+        // io.KeyMap[ImGuiKey_DownArrow] = VK_DOWN;
+        // io.KeyMap[ImGuiKey_PageUp] = VK_PRIOR;
+        // io.KeyMap[ImGuiKey_PageDown] = VK_NEXT;
+        // io.KeyMap[ImGuiKey_Home] = VK_HOME;
+        // io.KeyMap[ImGuiKey_End] = VK_END;
+        // io.KeyMap[ImGuiKey_Delete] = VK_DELETE;
+        // io.KeyMap[ImGuiKey_Backspace] = VK_BACK;
+        // io.KeyMap[ImGuiKey_Enter] = VK_RETURN;
+        // io.KeyMap[ImGuiKey_Escape] = VK_ESCAPE;
+        // io.KeyMap[ImGuiKey_A] = 'A';
+        // io.KeyMap[ImGuiKey_C] = 'C';
+        // io.KeyMap[ImGuiKey_V] = 'V';
+        // io.KeyMap[ImGuiKey_X] = 'X';
+        // io.KeyMap[ImGuiKey_Y] = 'Y';
+        // io.KeyMap[ImGuiKey_Z] = 'Z';
+        // io.ImeWindowHandle = g_hWnd;
 
         return true;
     }
@@ -51,9 +81,19 @@ namespace ElysiaEditor
 
     void ImGUI_NewFrame()
     {
+        ImGuiIO& io = ImGui::GetIO();
+        if (!io.Fonts->IsBuilt())
+        {
+            // 强制构建字体图集
+            unsigned char* pixels;
+            int width, height;
+            io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
+        }
+
         ImGui_ImplDX12_NewFrame();
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
+
     }
 
     void ImGUI_UpdateIO()

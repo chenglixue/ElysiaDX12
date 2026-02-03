@@ -336,8 +336,6 @@ void LayeredHBAOMain(UINT3 id : SV_DispatchThreadID)
 
     float mipLevel = max(0.0f, log2(pixLookupRadiusMod) - 4.3f);
     mipLevel = clamp(mipLevel, 0, g_HIZMaxMipmap);
-    Elysia_CalcAO_StoreOutput(AOLayerHeapIndex, id, mipLevel);
-    return;
 
     float importance = Elysia_Sample_Importance(
         (trunc(id.xy / 2) + 0.5f) * g_ImportanceBufferSize.zw);
@@ -393,6 +391,8 @@ void ReinterleaveMain(UINT3 id : SV_DispatchThreadID)
     float2 centerData = Elysia_Reinterleave_LoadAO(AOCenterHeapIndex, readPos);
     float4 edgeLRTB = UnpackEdges(centerData.g);
 
+    float2 simpleUV = (float2(readPos) + 0.5f) * g_DeinterleavedAOSize.zw;
+
     float fmx = (float)pixelOffset.x;
     float fmy = (float)pixelOffset.y;
     float fmxe = (edgeLRTB.y - edgeLRTB.x);
@@ -410,9 +410,9 @@ void ReinterleaveMain(UINT3 id : SV_DispatchThreadID)
     float2 uvD = (float2(pixPos) + float2(fmx - 0.5 + fmxe, fmy - 0.5 + fmye)) * 0.5 *
                  g_DeinterleavedAOSize.zw;
 
-    float rightData = Elysia_Reinterleave_SampleAO(AORightHeapIndex, uvH);
-    float bottomData = Elysia_Reinterleave_SampleAO(AOBottomHeapIndex, uvV);
-    float rightBottomData = Elysia_Reinterleave_SampleAO(AORightBottomHeapIndex, uvD);
+    float rightData = Elysia_Reinterleave_SampleAO(AORightHeapIndex, simpleUV);
+    float bottomData = Elysia_Reinterleave_SampleAO(AOBottomHeapIndex, simpleUV);
+    float rightBottomData = Elysia_Reinterleave_SampleAO(AORightBottomHeapIndex, simpleUV);
 
     float4 weight;
     weight.x = 1.f;
@@ -540,7 +540,7 @@ float CalcAO(UINT DepthLayerHeapIndex,
             if (distSq > Pow2(radius))
                 continue;
 
-            float falloff = saturate(1.0 - distSq / Pow2(radius));
+            float falloff = max(0, 1.0 - distSq / Pow2(radius));
 
             float3 V_norm = v / (dist + 1e-6);
             float sampleHorizonSin = dot(V_norm, normalVS);
