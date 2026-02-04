@@ -3,6 +3,11 @@
 #include "Editor/UI.h"
 #include "Runtime/RenderCore/Renderer.h"
 
+namespace ElysiaRenderer
+{
+    class FirstPersonCamera;
+}
+
 struct ImGuiIO;
 
 namespace ElysiaEngine

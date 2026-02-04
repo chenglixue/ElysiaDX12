@@ -65,10 +65,8 @@ namespace ElysiaEngine
                 {
                     fpCam->SyncFromTransform();
                 }
-                else
-                {
-                    pAttachedCamera->UpdateViewMatrix();
-                }
+                pAttachedCamera->UpdateViewMatrix();
+
             }
 
         }

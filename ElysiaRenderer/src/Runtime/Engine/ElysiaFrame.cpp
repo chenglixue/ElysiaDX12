@@ -218,39 +218,55 @@ namespace ElysiaEngine
     {
         ImGuiIO& io = ImGui::GetIO();
 
-        //If the mouse was not used by the GUI then it's for the camera
-        if (io.WantCaptureMouse)
-        {
-            io.MouseDelta.x = 0;
-            io.MouseDelta.y = 0;
-            io.MouseWheel = 0;
-        }
-
-        // Keyboard & Mouse
         HandleInput(io);
-
     }
 
     void ElysiaFrame::HandleInput(const ImGuiIO& io)
     {
-        // auto fnIsKeyTriggered = [&io](char key)
-        // {
-        //     return io.KeysDown[key] && io.KeysDownDuration[key] == 0.0f;
-        // };
-        //
-        // // Handle Keyboard/Mouse input here
-        //
-        // /* MAGNIFIER CONTROLS */
-        // if (fnIsKeyTriggered('L'))
-        //     m_UIState.ToggleMagnifierLock();
-        // if (fnIsKeyTriggered('M') || io.MouseClicked[2])
-        //     ToggleBool(m_UIState.bUseMagnifier); // middle mouse / M key toggles magnifier
-        //
-        // if (io.MouseClicked[1] && m_UIState.bUseMagnifier) // right mouse click
-        //     m_UIState.ToggleMagnifierLock();
-        //
-        // if (fnIsKeyTriggered('R'))
-        //     m_UIState.ResetLPMSceneDefaults();
+        auto pCamera = CameraManager::GetInstance().GetMainCamera();
+        if (!pCamera)
+            return;
+        auto pFirstPersonCam = dynamic_cast<FirstPersonCamera*>(pCamera);
+        if (!pFirstPersonCam)
+            return;
+
+        const float sensitivity = 0.002f;
+
+        if (ImGui::IsMouseDown(ImGuiMouseButton_Right))
+        {
+            Vector3 moveDir = Vector3::Zero;
+            if (ImGui::IsKeyDown(ImGuiKey_W))
+                moveDir.z += 1.0f; // 前
+            if (ImGui::IsKeyDown(ImGuiKey_S))
+                moveDir.z -= 1.0f; // 后
+            if (ImGui::IsKeyDown(ImGuiKey_A))
+                moveDir.x -= 1.0f; // 左
+            if (ImGui::IsKeyDown(ImGuiKey_D))
+                moveDir.x += 1.0f; // 右
+            if (ImGui::IsKeyDown(ImGuiKey_E))
+                moveDir.y += 1.0f; // 上 (可选)
+            if (ImGui::IsKeyDown(ImGuiKey_Q))
+                moveDir.y -= 1.0f; // 下 (可选)
+            if (moveDir != Vector3::Zero)
+            {
+                moveDir.Normalize();
+                pFirstPersonCam->Move(moveDir, io.DeltaTime);
+            }
+
+            float x = pFirstPersonCam->GetXRotation();
+            float y = pFirstPersonCam->GetYRotation();
+            x += io.MouseDelta.y * sensitivity;
+            y += io.MouseDelta.x * sensitivity;
+            pFirstPersonCam->SetXRotation(x);
+            pFirstPersonCam->SetYRotation(y);
+
+            if (m_pSelectedObject && m_pSelectedObject->pAttachedCamera == pFirstPersonCam)
+            {
+                m_pSelectedObject->transform.rotation = pFirstPersonCam->m_transform.rotation;
+                m_pSelectedObject->transform.position = pFirstPersonCam->m_transform.position;
+            }
+        }
+
     }
 
     void ElysiaFrame::BuildUI()
@@ -714,6 +730,10 @@ namespace ElysiaEngine
 
                 changed = true;
             }
+            // }// if (ImGui::DragFloat3("Rotation", (float*)&transform.rotation))
+            //            // {
+            //            //     changed = true;
+            //            // }
 
             if (ImGui::DragFloat3("Scale", (float*)&transform.scale, 0.1f))
             {
@@ -723,11 +743,6 @@ namespace ElysiaEngine
             if (changed)
             {
                 entity->OnTransformChanged();
-                auto mainCam = CameraManager::GetInstance().GetMainCamera();
-                if (entity->pAttachedCamera == mainCam)
-                {
-                    mainCam->UpdateViewMatrix();
-                }
             }
         }
     }

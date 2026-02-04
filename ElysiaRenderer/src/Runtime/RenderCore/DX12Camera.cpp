@@ -89,6 +89,13 @@ namespace ElysiaRenderer
         UpdateViewMatrix();
     }
 
+    void DX12Camera::SetRotation(Quaternion rotation) noexcept
+    {
+        m_transform.rotation = rotation;
+
+        UpdateViewMatrix();
+    }
+
     void DX12Camera::SetNearZ(float nearZ) noexcept
     {
         m_nearZ = nearZ;
@@ -132,9 +139,18 @@ namespace ElysiaRenderer
 
     void DX12Camera::UpdateViewMatrix() noexcept
     {
-        Matrix R = Matrix::CreateFromQuaternion(m_transform.rotation).Invert();
-        Matrix T = Matrix::CreateTranslation(-m_transform.position);
-        m_viewMatrix = T * R;
+        // 1. 根据当前 transform 的旋转创建一个旋转矩阵
+        Matrix R = Matrix::CreateFromQuaternion(m_transform.rotation);
+
+        // 2. 在左手坐标系中，默认 Forward 是 (0, 0, 1)
+        // 转换到当前相机的方向
+        Vector3 forward = Vector3::Transform(Vector3(0, 0, 1), R);
+        Vector3 up = Vector3::Transform(Vector3(0, 1, 0), R);
+
+        // 3. 构建 LookAt 矩阵：从当前位置看向 (位置 + 方向)
+        m_viewMatrix = Matrix::CreateLookAt(m_transform.position,
+                                            m_transform.position + forward,
+                                            up);
     }
 
     Quaternion DX12Camera::CreateFromAxisAngle(const Vector3& axis, float angle)
@@ -222,6 +238,15 @@ namespace ElysiaRenderer
     //=================================================================================================
     // FirstPersonCamera
     //=================================================================================================
+    FirstPersonCamera::FirstPersonCamera(float nearZ,
+                                         float farZ,
+                                         float aspectRatio,
+                                         float fovY)
+        : PerspectiveCamera(nearZ, farZ, aspectRatio, fovY)
+    {
+        m_yaw = 0.0f;
+        m_pitch = 0.0f;
+    }
     void FirstPersonCamera::AddYawPitch(float yawDelta, float pitchDelta) noexcept
     {
         m_yaw += yawDelta;
@@ -237,21 +262,27 @@ namespace ElysiaRenderer
     {
         float s = m_speed * deltaTime;
 
-        // 获取相机当前的本地坐标轴
+        // 获取相机的世界矩阵
         Matrix invView = m_viewMatrix.Invert();
-        Vector3 right = invView.Right();
-        Vector3 forward = invView.Forward();
 
-        // direction.x = 左右, direction.z = 前后
-        m_transform.position += right * direction.x * s;
-        m_transform.position += forward * direction.z * s;
+        // 在左手坐标系（DX默认）中：
+        // invView.Right()   通常是 (1, 0, 0) 变换后的向量
+        // invView.Up()      通常是 (0, 1, 0) 变换后的向量
+        // 关键点：手动获取第3列（或行），即 Z 轴方向
+        Vector3 worldRight = Vector3(invView._11, invView._12, invView._13);
+        Vector3 worldForward = Vector3(invView._31, invView._32, invView._33);
+
+        // 或者使用更直观的 SimpleMath 属性，但要明确正负：
+        // Vector3 right = invView.Right(); 
+        // Vector3 forward = -invView.Forward(); // 如果 Forward 返回 (0,0,-1)，取反即为 (0,0,1)
+
+        m_transform.position += worldRight * direction.x * s;
+        m_transform.position += worldForward * direction.z * s;
 
         UpdateViewMatrix();
     }
     void FirstPersonCamera::SyncFromTransform()
     {
-        UpdateViewMatrix();
-        GetPitchYaw(m_transform.rotation, m_pitch, m_yaw);
+        SetRotation(Quaternion(XMQuaternionRotationRollPitchYaw(m_pitch, m_yaw, 0)));
     }
-
 }

@@ -32,6 +32,7 @@ namespace ElysiaRenderer
 
         void SetPosition(const Vector3& cameraPos) noexcept;
         void SetRotation(const float x, const float y, const float z) noexcept;
+        void SetRotation(Quaternion rotation) noexcept;
         void SetNearZ(float nearZ) noexcept;
         void SetFarz(float farZ) noexcept;
 
@@ -92,7 +93,10 @@ namespace ElysiaRenderer
     class FirstPersonCamera : public PerspectiveCamera
     {
     public:
-        using PerspectiveCamera::PerspectiveCamera;
+        FirstPersonCamera(float nearZ,
+                          float farZ,
+                          float aspectRatio,
+                          float fovY);
         float GetCameraSpeed() const noexcept
         {
             return m_speed;
@@ -101,6 +105,26 @@ namespace ElysiaRenderer
         {
             m_speed = speed;
         }
+
+        void SetXRotation(float xRotation)
+        {
+            m_pitch = std::clamp(xRotation, -XM_PIDIV2, XM_PIDIV2);
+            SetRotation(Quaternion(XMQuaternionRotationRollPitchYaw(m_pitch, m_yaw, 0)));
+        }
+        float GetXRotation() const
+        {
+            return m_pitch;
+        };
+
+        void SetYRotation(float yRotation)
+        {
+            m_yaw = DirectX::XMScalarModAngle(yRotation);
+            SetRotation(Quaternion(XMQuaternionRotationRollPitchYaw(m_pitch, m_yaw, 0)));
+        }
+        float GetYRotation() const
+        {
+            return m_yaw;
+        };
 
         void AddYawPitch(float yawDelta, float pitchDelta) noexcept;
         void Move(const Vector3& direction, float deltaTime) noexcept;

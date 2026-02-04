@@ -53,7 +53,7 @@ namespace ElysiaRenderer
             m_mainCamera = std::make_unique<FirstPersonCamera>(nearZ, farZ, aspectRatio, fovy);
 
         }
-        m_mainCamera->SetPosition(position);
-        m_mainCamera->SetRotation(0, 0.7071f, 0);
+        dynamic_cast<FirstPersonCamera*>(m_mainCamera.get())->SetPosition(position);
+        dynamic_cast<FirstPersonCamera*>(m_mainCamera.get())->SetYRotation(45);
     }
 }
