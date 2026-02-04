@@ -2,6 +2,7 @@
 #include "SceneManager.h"
 
 #include "CameraManager.h"
+#include "DX12Camera.h"
 #include "MeshRenderer.h"
 #include "Editor/UserData.h"
 #include "Runtime/Core/DX12UploadContext.h"
@@ -32,7 +33,7 @@ namespace ElysiaRenderer
     }
     void SceneManager::Update(const FrameContext& context)
     {
-        UpdateEntities();
+        // UpdateEntities();
     }
     void SceneManager::Destory()
     {
@@ -58,6 +59,10 @@ namespace ElysiaRenderer
                 CreateEntityFromModel(loadedModel);
             }
 
+            // auto cameraEntity = std::make_unique<Entity>("Main Camera");
+            // cameraEntity->Init(cameraEntity->transform);
+            // cameraEntity->pAttachedCamera = CameraManager::GetInstance().GetMainCamera();
+            // m_entities.emplace_back(std::move(cameraEntity));
         }
         if (loadStage == 7)
         {
@@ -87,7 +92,6 @@ namespace ElysiaRenderer
 
         Entity* ptr = pEntity.get();
         ptr->transform.position = Vector3::Zero;
-        m_entities.clear();
         m_entities.emplace_back(std::move(pEntity));
         return ptr;
     }

@@ -92,13 +92,6 @@ namespace ElysiaRenderer
                       1.0f};
         m_rectScissor = {0, 0, (LONG)Width, (LONG)Height};
 
-        CameraManager::GetInstance().CreateMainCamera(
-            Vector3(-11.5f - 1000.f, 200.85f, -0.45f) * 0.01f,
-            static_cast<float>(Width) / static_cast<float>(Height),
-            AMD_PI_OVER_4,
-            0.1f,
-            1000.f);
-
         if (!UserData::GetInstance().IsUseHDR)
         {
             m_pCameraColorRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(

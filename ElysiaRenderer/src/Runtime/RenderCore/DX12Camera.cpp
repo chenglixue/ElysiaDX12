@@ -3,28 +3,27 @@
 
 namespace ElysiaRenderer
 {
-    DX12Camera::DX12Camera(const Transform& transform,
-                           float aspectRatio,
-                           float fovy,
-                           float nearZ,
+    //=================================================================================================
+    // Base Camera
+    //=================================================================================================
+    DX12Camera::DX12Camera(float nearZ,
                            float farZ) noexcept
-        : m_transform(transform),
-          m_aspectRatio(aspectRatio),
-          m_fovy(fovy),
-          m_nearZ(nearZ),
+        : m_nearZ(nearZ),
           m_farZ(farZ)
     {
-        UpdateViewMatrix();
-        UpdateProjMatrix();
+        m_viewMatrix = DirectX::XMMatrixIdentity();
+        m_projMatrix = DirectX::XMMatrixIdentity();
+        m_transform =
+        {
+            .position = Vector3::Zero,
+            .rotation = Quaternion::Identity,
+            .scale = Vector3::One
+        };
+
     }
     DX12Camera::~DX12Camera()
     {
 
-    }
-
-    float DX12Camera::GetCameraSpeed() const noexcept
-    {
-        return m_speed;
     }
 
     Vector3 DX12Camera::GetPosition() const noexcept
@@ -52,16 +51,6 @@ namespace ElysiaRenderer
         return m_farZ;
     }
 
-    float DX12Camera::GetFOVY() const noexcept
-    {
-        return m_fovy;
-    }
-
-    float DX12Camera::GetAspect() const noexcept
-    {
-        return m_aspectRatio;
-    }
-
     Matrix DX12Camera::GetViewMat() const noexcept
     {
         return m_viewMatrix;
@@ -87,27 +76,17 @@ namespace ElysiaRenderer
         return m_viewMatrix.Right();
     }
 
-    void DX12Camera::SetCameraSpeed(float speed) noexcept
-    {
-        m_speed = speed;
-    }
-
     void DX12Camera::SetPosition(const Vector3& cameraPos) noexcept
     {
         m_transform.position = cameraPos;
         UpdateViewMatrix();
     }
 
-    void DX12Camera::SetRotation(const Quaternion& rotation) noexcept
+    void DX12Camera::SetRotation(const float x, const float y, const float z) noexcept
     {
-        m_transform.rotation = rotation;
-        UpdateViewMatrix();
-    }
+        m_transform.rotation = Euler(0, 90, 0);
 
-    void DX12Camera::SetAspectRatio(float aspectRatio) noexcept
-    {
-        m_aspectRatio = aspectRatio;
-        UpdateProjMatrix();
+        UpdateViewMatrix();
     }
 
     void DX12Camera::SetNearZ(float nearZ) noexcept
@@ -122,20 +101,11 @@ namespace ElysiaRenderer
         UpdateProjMatrix();
     }
 
-    void DX12Camera::Setfovy(float fovy) noexcept
-    {
-        m_fovy = fovy;
-        UpdateProjMatrix();
-    }
-
     void DX12Camera::LookAt(const Vector3& targetPos) noexcept
     {
-        Vector3 up = Vector3::Up;
-
-        m_viewMatrix = Matrix::CreateLookAt(m_transform.position, targetPos, up);
-        auto inverseQuaternion = Quaternion::CreateFromRotationMatrix(m_viewMatrix.Invert());
-        //m_transform.m_rotation.Inverse(inverseQuaternion);
-        m_transform.rotation = inverseQuaternion;
+        m_viewMatrix = Matrix::CreateLookAt(m_transform.position, targetPos, Vector3::Up);
+        Matrix invView = m_viewMatrix.Invert();
+        m_transform.rotation = Quaternion::CreateFromRotationMatrix(invView);
     }
 
     void DX12Camera::Rotate(const Vector3& pitchYawRollOffset) noexcept
@@ -162,15 +132,126 @@ namespace ElysiaRenderer
 
     void DX12Camera::UpdateViewMatrix() noexcept
     {
-        //m_viewMatrix = Matrix::CreateTranslation(-m_transform.m_position) * Matrix::CreateFromQuaternion(m_transform.m_rotation);
-
-        LookAt(m_transform.position + Vector3(300.f, 0.f, 0.f));
-
-        //m_viewMatrix = Matrix::CreateLookAt(m_transform.m_position, Vector3::Zero, Vector3::Up);
+        Matrix R = Matrix::CreateFromQuaternion(m_transform.rotation).Invert();
+        Matrix T = Matrix::CreateTranslation(-m_transform.position);
+        m_viewMatrix = T * R;
     }
 
-    void DX12Camera::UpdateProjMatrix() noexcept
+    Quaternion DX12Camera::CreateFromAxisAngle(const Vector3& axis, float angle)
+    {
+        // 1. 计算半角
+        float halfAngle = angle * 0.5f;
+        float s = std::sin(halfAngle);
+        float c = std::cos(halfAngle);
+
+        // 2. 根据公式计算分量
+        // x, y, z 分别是轴分量乘以 sin(theta/2)
+        // w 分量是 cos(theta/2)
+        return Quaternion(
+            axis.x * s,
+            axis.y * s,
+            axis.z * s,
+            c
+            );
+    }
+    Quaternion DX12Camera::Euler(float x, float y, float z)
+    {
+        // 1. 将角度转换为弧度
+        // DirectXMath 提供了 XMConvertToRadians 宏
+        float pitch = XMConvertToRadians(x); // 绕 X 轴
+        float yaw = XMConvertToRadians(y);   // 绕 Y 轴
+        float roll = XMConvertToRadians(z);  // 绕 Z 轴
+
+        // 2. 使用 DirectXMath 的内置函数计算
+        // 注意：DirectX 的顺序通常是 Yaw-Pitch-Roll (Y-X-Z)
+        XMVECTOR qVec = XMQuaternionRotationRollPitchYaw(pitch, yaw, roll);
+
+        // 3. 返回你的 Quaternion 类对象
+        return Quaternion(qVec);
+    }
+    void GetPitchYaw(const Quaternion& q, float& pitch, float& yaw)
+    {
+        // 1. 计算 Pitch (绕 X 轴)
+        // 我们需要将 sinPitch 限制在 [-1, 1] 之间，防止 asin 报错
+        float sinPitch = 2.0f * (q.w * q.x - q.y * q.z);
+
+        // 处理万向锁情况（Pitch 接近 +/- 90度）
+        if (std::abs(sinPitch) >= 1.0f)
+        {
+            // 如果 sinPitch 溢出，直接取 +/- 90 度 (PI/2)
+            pitch = std::copysign(1.570796f, sinPitch);
+        }
+        else
+        {
+            pitch = std::asin(sinPitch);
+        }
+
+        // 2. 计算 Yaw (绕 Y 轴)
+        float sinYaw = 2.0f * (q.w * q.y + q.z * q.x);
+        float cosYaw = 1.0f - 2.0f * (q.x * q.x + q.y * q.y);
+        yaw = std::atan2(sinYaw, cosYaw);
+
+        // 如果需要角度制，可以在此转换
+        // pitch = XMConvertToDegrees(pitch);
+        // yaw = XMConvertToDegrees(yaw);
+    }
+
+    //=================================================================================================
+    // PerspectiveCamera
+    //=================================================================================================
+    PerspectiveCamera::PerspectiveCamera(float nearZ,
+                                         float farZ,
+                                         float aspectRatio,
+                                         float fovY)
+        : DX12Camera(nearZ, farZ),
+          m_aspectRatio(aspectRatio),
+          m_fovy(fovY)
+    {
+        assert(aspectRatio > 0.f);
+        assert(fovY > 0.f && fovY <= XM_PI);
+
+        UpdateViewMatrix();
+        UpdateProjMatrix();
+    }
+
+    void PerspectiveCamera::UpdateProjMatrix() noexcept
     {
         m_projMatrix = Matrix::CreatePerspectiveFieldOfView(m_fovy, m_aspectRatio, m_nearZ, m_farZ);
     }
+
+    //=================================================================================================
+    // FirstPersonCamera
+    //=================================================================================================
+    void FirstPersonCamera::AddYawPitch(float yawDelta, float pitchDelta) noexcept
+    {
+        m_yaw += yawDelta;
+        m_pitch += pitchDelta;
+
+        m_pitch = std::clamp(m_pitch, -XM_PIDIV2 + 0.01f, XM_PIDIV2 - 0.01f);
+
+        m_transform.rotation = Quaternion::CreateFromYawPitchRoll(m_yaw, m_pitch, 0.0f);
+
+        UpdateViewMatrix();
+    }
+    void FirstPersonCamera::Move(const Vector3& direction, float deltaTime) noexcept
+    {
+        float s = m_speed * deltaTime;
+
+        // 获取相机当前的本地坐标轴
+        Matrix invView = m_viewMatrix.Invert();
+        Vector3 right = invView.Right();
+        Vector3 forward = invView.Forward();
+
+        // direction.x = 左右, direction.z = 前后
+        m_transform.position += right * direction.x * s;
+        m_transform.position += forward * direction.z * s;
+
+        UpdateViewMatrix();
+    }
+    void FirstPersonCamera::SyncFromTransform()
+    {
+        UpdateViewMatrix();
+        GetPitchYaw(m_transform.rotation, m_pitch, m_yaw);
+    }
+
 }

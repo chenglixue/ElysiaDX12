@@ -46,10 +46,13 @@ namespace ElysiaRenderer
         void ClearScene();
 
         void UpdateEntities();
-
         std::vector<std::unique_ptr<Entity>>& GetEntities()
         {
             return m_entities;
+        }
+        void AddEntity(std::unique_ptr<Entity> pEntity)
+        {
+            m_entities.emplace_back(std::move(pEntity));
         }
 
     private:

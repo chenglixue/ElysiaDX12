@@ -17,6 +17,7 @@
 #include "Runtime/RenderCore/TextureManager.h"
 #include "Runtime/Resource/Model/ModelManager.h"
 #include "ECS/Entity.h"
+#include "Runtime/RenderCore/DX12Camera.h"
 #include "Runtime/RenderCore/RenderTexture.h"
 #include "ThirdParty/imgui/imgui_internal.h"
 
@@ -55,8 +56,8 @@ namespace ElysiaEngine
 
     void ElysiaFrame::OnParseCommandLine(LPSTR lpCmdLine, uint32_t* pWidth, uint32_t* pHeight)
     {
-        *pWidth = 1920;
-        *pHeight = 1080;
+        // *pWidth = 1920;
+        // *pHeight = 1080;
 
         m_VsyncEnabled = false;
         m_bIsBenchmarking = false;
@@ -116,6 +117,22 @@ namespace ElysiaEngine
     {
         if (m_Width && m_Height && m_pRenderer)
         {
+            auto hasMainCamera = CameraManager::GetInstance().GetMainCamera() != nullptr;
+            CameraManager::GetInstance().CreateMainCamera(
+                Vector3(-11.5f - 1000.f, 200.85f, -0.45f) * 0.01f,
+                static_cast<float>(m_Width) / static_cast<float>(m_Height),
+                AMD_PI_OVER_4,
+                0.1f,
+                1000.f);
+            if (!hasMainCamera)
+            {
+                auto pCamera = CameraManager::GetInstance().GetMainCamera();
+                auto camEntity = std::make_unique<Entity>("Main Camera");
+                camEntity->Init(pCamera->m_transform);
+                camEntity->pAttachedCamera = pCamera;
+                SceneManager::GetInstance().AddEntity(std::move(camEntity));
+            }
+
             m_pRenderer->OnDestroyWindowSizeDependentResources();
             m_pRenderer->OnCreateWindowSizeDependentResources(&m_swapChain, m_Width, m_Height);
         }
@@ -211,6 +228,7 @@ namespace ElysiaEngine
 
         // Keyboard & Mouse
         HandleInput(io);
+
     }
 
     void ElysiaFrame::HandleInput(const ImGuiIO& io)
@@ -678,27 +696,38 @@ namespace ElysiaEngine
     {
         if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
         {
+            bool changed = false;
             auto& transform = entity->transform;
 
-            auto pos = transform.position;
-            if (ImGui::DragFloat3("Position", (float*)&pos, 0.1f))
+            if (ImGui::DragFloat3("Position", (float*)&transform.position, 0.1f))
             {
-                transform.position = pos;
-                entity->OnTransformChanged();
+                changed = true;
             }
 
-            auto rot = transform.rotation; // 欧拉角
-            if (ImGui::DragFloat3("Rotation", (float*)&rot, 0.5f))
+            Vector3 currentEuler = transform.GetEulerDegrees();
+            if (ImGui::SliderFloat3("Rotation", (float*)&currentEuler, -180.f, 180.f))
             {
-                transform.rotation = rot;
-                entity->OnTransformChanged();
+                float p = XMConvertToRadians(currentEuler.x);
+                float y = XMConvertToRadians(currentEuler.y);
+                float r = XMConvertToRadians(currentEuler.z);
+                transform.rotation = Quaternion::CreateFromYawPitchRoll(y, p, r);
+
+                changed = true;
             }
 
-            auto scale = transform.scale;
-            if (ImGui::DragFloat3("Scale", (float*)&scale, 0.1f))
+            if (ImGui::DragFloat3("Scale", (float*)&transform.scale, 0.1f))
             {
-                transform.scale = scale;
+                changed = true;
+            }
+
+            if (changed)
+            {
                 entity->OnTransformChanged();
+                auto mainCam = CameraManager::GetInstance().GetMainCamera();
+                if (entity->pAttachedCamera == mainCam)
+                {
+                    mainCam->UpdateViewMatrix();
+                }
             }
         }
     }
