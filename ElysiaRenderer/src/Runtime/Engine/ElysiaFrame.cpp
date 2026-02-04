@@ -343,14 +343,24 @@ namespace ElysiaEngine
         ImVec2 viewportSize = ImGui::GetContentRegionAvail();
         if (viewportSize.x != lastSize.x || viewportSize.y != lastSize.y)
         {
-            lastSize = viewportSize;
-            if (viewportSize.x > 0 && viewportSize.y > 0)
+            if (ImGui::IsMouseDown(ImGuiMouseButton_Left))
             {
-                m_pRenderer->OnCreateWindowSizeDependentResources(
-                    &m_swapChain,
-                    viewportSize.x,
-                    viewportSize.y);
+                // 这里可以画一个临时的占位符，或者让旧图拉伸显示
             }
+
+            if (ImGui::IsMouseReleased(ImGuiMouseButton_Left))
+            {
+                if (viewportSize.x > 0 && viewportSize.y > 0)
+                {
+                    m_pRenderer->OnCreateWindowSizeDependentResources(
+                        &m_swapChain,
+                        viewportSize.x,
+                        viewportSize.y);
+
+                    lastSize = viewportSize;
+                }
+            }
+
         }
 
         auto cameraRT = m_pRenderer->GetCameraColorRT();

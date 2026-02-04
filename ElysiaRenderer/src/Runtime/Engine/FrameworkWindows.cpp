@@ -35,6 +35,8 @@ namespace ElysiaEngine
                      int nCmdShow,
                      FrameworkWindows* pFramework)
     {
+        SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+
         // Init logging
         int result = Log::InitLogSystem();
         assert(!result);
@@ -71,17 +73,19 @@ namespace ElysiaEngine
         pFrameworkInstance = pFramework;
 
         // Get command line and config file parameters for app run
-        uint32_t Width = 1920;
-        uint32_t Height = 1080;
+        RECT workAreaRect;
+        SystemParametersInfo(SPI_GETWORKAREA, 0, &workAreaRect, 0);
+        uint32_t Width = workAreaRect.right - workAreaRect.left;
+        uint32_t Height = workAreaRect.bottom - workAreaRect.top;
         pFramework->OnParseCommandLine(lpCmdLine, &Width, &Height);
 
         // Window setup based on config params
         lwindowStyle = WS_OVERLAPPEDWINDOW;
-        RECT windowRect = {0, 0, (LONG)Width, (LONG)Height};
-        AdjustWindowRect(&windowRect, lwindowStyle, FALSE); // adjust the size
+        // RECT windowRect = {0, 0, (LONG)Width, (LONG)Height};
+        // AdjustWindowRect(&windowRect, lwindowStyle, FALSE); // adjust the size
 
         // This makes sure that in a multi-monitor setup with different resolutions, get monitor info returns correct dimensions
-        SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+        // SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 
         // Create the window
         hWnd = CreateWindowEx(WS_EX_APPWINDOW,
@@ -89,10 +93,10 @@ namespace ElysiaEngine
                               // name of the window class
                               pFramework->GetName().c_str(),
                               lwindowStyle,
-                              CW_USEDEFAULT,
-                              CW_USEDEFAULT,
-                              windowRect.right - windowRect.left,
-                              windowRect.bottom - windowRect.top,
+                              workAreaRect.left,
+                              workAreaRect.top,
+                              Width,
+                              Height,
                               NULL,
                               // we have no parent window, NULL
                               NULL,
@@ -108,7 +112,7 @@ namespace ElysiaEngine
         pFramework->OnCreate();
 
         // show the window
-        ShowWindow(hWnd, nCmdShow);
+        ShowWindow(hWnd, SW_SHOWMAXIMIZED);
         lBorderedStyle = GetWindowLong(hWnd, GWL_STYLE);
         lBorderlessStyle = lBorderedStyle & ~(
                                WS_CAPTION | WS_THICKFRAME | WS_MINIMIZE | WS_MAXIMIZE | WS_SYSMENU);
