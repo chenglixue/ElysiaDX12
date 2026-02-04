@@ -70,7 +70,6 @@ PASS(AO_TAA_PASS,                       "public\\PostProcess\\CS_AOTAA.hlsl",   
 
         RenderTexture* m_pAORT = nullptr;
         RenderTexture* m_pImportanceRT = nullptr;
-        RenderTexture* m_pHIZRT = nullptr;
         RenderTexture* m_pTAA0RT = nullptr;
         RenderTexture* m_pTAA1RT = nullptr;
         std::vector<RenderTexture*> m_DeinterleavedDepthRTs;

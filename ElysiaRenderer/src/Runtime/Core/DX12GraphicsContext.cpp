@@ -13,8 +13,8 @@ namespace ElysiaCore
 {
     using namespace ElysiaRenderer;
 
-    DX12GraphicsContext::DX12GraphicsContext(DX12Device* device) :
-        DX12Context(device, D3D12_COMMAND_LIST_TYPE_DIRECT)
+    DX12GraphicsContext::DX12GraphicsContext(DX12Device* device)
+        : DX12Context(device, D3D12_COMMAND_LIST_TYPE_DIRECT)
     {
 
     }
@@ -26,14 +26,15 @@ namespace ElysiaCore
     void DX12GraphicsContext::SetPushConstants(uint8_t spaceID, const void* data, UINT numValues)
     {
         assert(m_graphicsPipelineStateObject);
-    
-        // ´ÓÓ³ÉäÖÐÕÒµ½¸Ã Space ¶ÔÓ¦µÄ RootParameterIndex
-        auto& pushMapping = m_graphicsPipelineStateObject->m_pipelineResourceMapping.m_PushConstantMappings[spaceID];
-    
+
+        // ï¿½ï¿½Ó³ï¿½ï¿½ï¿½ï¿½ï¿½Òµï¿½ï¿½ï¿½ Space ï¿½ï¿½Ó¦ï¿½ï¿½ RootParameterIndex
+        auto& pushMapping = m_graphicsPipelineStateObject->m_pipelineResourceMapping.
+                                                           m_PushConstantMappings[spaceID];
+
         if (pushMapping.has_value())
         {
             UINT rootIndex = pushMapping.value();
-        
+
             if (m_graphicsPipelineStateObject->m_pipelineType == PipelineType::Compute)
             {
                 m_commandList->SetComputeRoot32BitConstants(rootIndex, numValues, data, 0);
@@ -58,8 +59,11 @@ namespace ElysiaCore
             AddBarrier(renderTarget, D3D12_RESOURCE_STATE_RENDER_TARGET);
         }
 
-        m_commandList->ClearRenderTargetView(renderTarget->GetTexture()->GetRTVDescriptor().GetCPUHandle(),
-                                             color, 0, nullptr);
+        m_commandList->ClearRenderTargetView(
+            renderTarget->GetTexture()->GetRTVDescriptor().GetCPUHandle(),
+            color,
+            0,
+            nullptr);
 
         if (oldState != D3D12_RESOURCE_STATE_RENDER_TARGET)
         {
@@ -67,41 +71,57 @@ namespace ElysiaCore
         }
     }
 
-    void DX12GraphicsContext::ClearRenderTarget(const DX12TextureResource& renderTarget, Color color)
+    void DX12GraphicsContext::ClearRenderTarget(const DX12TextureResource& renderTarget,
+                                                Color color)
     {
         m_commandList->ClearRenderTargetView(renderTarget.GetRTVDescriptor().GetCPUHandle(),
-                                             color, 0, nullptr);
+                                             color,
+                                             0,
+                                             nullptr);
     }
-    void DX12GraphicsContext::ClearDepthStencilTarget(const RenderTexture* renderTarget, float depth, uint8_t stencil)
+    void DX12GraphicsContext::ClearDepthStencilTarget(const RenderTexture* renderTarget,
+                                                      float depth,
+                                                      uint8_t stencil)
     {
-        m_commandList->ClearDepthStencilView(renderTarget->GetTexture()->GetDSVDescriptor().GetCPUHandle(),
-                                             D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL,
-                                             depth, stencil, 0, nullptr);
+        m_commandList->ClearDepthStencilView(
+            renderTarget->GetTexture()->GetDSVDescriptor().GetCPUHandle(),
+            D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL,
+            depth,
+            stencil,
+            0,
+            nullptr);
     }
 
     void DX12GraphicsContext::SetPipeline(PipelineInfo& pipelineBind)
     {
+        assert(pipelineBind.m_pipelineStateObject);
         m_graphicsPipelineStateObject = pipelineBind.m_pipelineStateObject;
         auto pipelineState = m_graphicsPipelineStateObject->m_pipelineState.get();
         auto& renderTargets = pipelineBind.m_renderTargets;
         const bool pipelineExpectedBoundExternally = !m_graphicsPipelineStateObject; //imgui
+
+        assert(pipelineState);
 
         if (!pipelineExpectedBoundExternally)
         {
             m_commandList->SetPipelineState(pipelineState->GetPipelineState());
             if (m_graphicsPipelineStateObject->m_pipelineType == PipelineType::Compute)
             {
-                m_commandList->SetComputeRootSignature(pipelineState->GetRootSignature()->GetSignature());
+                m_commandList->SetComputeRootSignature(
+                    m_graphicsPipelineStateObject->m_rootSignature->GetSignature());
             }
             else
             {
-                m_commandList->SetGraphicsRootSignature(pipelineState->GetRootSignature()->GetSignature());
+                m_commandList->SetGraphicsRootSignature(
+                    m_graphicsPipelineStateObject->m_rootSignature->GetSignature());
             }
         }
 
-        if (pipelineExpectedBoundExternally || pipelineState->GetPipelineType() == PipelineType::Graphics)
+        if (pipelineExpectedBoundExternally || pipelineState->GetPipelineType() ==
+            PipelineType::Graphics)
         {
-            D3D12_CPU_DESCRIPTOR_HANDLE renderTargetHandles[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT]{};
+            D3D12_CPU_DESCRIPTOR_HANDLE renderTargetHandles[D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT]
+                {};
             D3D12_CPU_DESCRIPTOR_HANDLE depthStencilHandle{0};
             auto numTarget = renderTargets.size();
 
@@ -111,13 +131,15 @@ namespace ElysiaCore
             }
             if (pipelineBind.m_depthStencilTarget != nullptr)
             {
-                depthStencilHandle = pipelineBind.m_depthStencilTarget->GetDSVDescriptor().GetCPUHandle();
+                depthStencilHandle = pipelineBind.m_depthStencilTarget->GetDSVDescriptor().
+                                                  GetCPUHandle();
             }
             SetRenderTargets(static_cast<UINT>(numTarget), renderTargetHandles, depthStencilHandle);
         }
 
     }
-    void DX12GraphicsContext::SetPipelineResource(uint8_t spaceID, PipelineResourceSpace* pipelineBindResourceSpace)
+    void DX12GraphicsContext::SetPipelineResource(uint8_t spaceID,
+                                                  PipelineResourceSpace* pipelineBindResourceSpace)
     {
         assert(m_graphicsPipelineStateObject);
         assert(pipelineBindResourceSpace->IsLocked());
@@ -129,7 +151,8 @@ namespace ElysiaCore
             auto SRVResources = pipelineBindResourceSpace->GetSRVs();
 
             static const uint32_t maxNumHandlesBinding = 16;
-            const UINT numTableHandles = static_cast<UINT>(SRVResources.size() + UAVResources.size());
+            const UINT numTableHandles = static_cast<UINT>(
+                SRVResources.size() + UAVResources.size());
             assert(numTableHandles <= maxNumHandlesBinding);
 
             static const uint32_t singleDescriptorRangeCopyArray[maxNumHandlesBinding]{
@@ -139,9 +162,11 @@ namespace ElysiaCore
 
             assert(numTableHandles <= maxNumHandlesBinding);
 
-            if (pipelineBindResourceSpace->GetStaticCBV() || pipelineBindResourceSpace->HasDynamicCBV())
+            if (pipelineBindResourceSpace->GetStaticCBV() || pipelineBindResourceSpace->
+                HasDynamicCBV())
             {
-                auto& rootParameterIndex = m_graphicsPipelineStateObject->m_pipelineResourceMapping.m_CBVMappings[
+                auto& rootParameterIndex = m_graphicsPipelineStateObject->m_pipelineResourceMapping.
+                                                                          m_CBVMappings[
                     spaceID];
                 if (rootParameterIndex.has_value())
                 {
@@ -152,12 +177,14 @@ namespace ElysiaCore
                         if (pipelineBindResourceSpace->HasDynamicCBV())
                         {
                             m_commandList->SetGraphicsRootConstantBufferView(
-                                rootParameterIndex.value(), pipelineBindResourceSpace->GetDynamicCBV());
+                                rootParameterIndex.value(),
+                                pipelineBindResourceSpace->GetDynamicCBV());
                         }
                         else if (pipelineBindResourceSpace->GetStaticCBV())
                         {
                             m_commandList->SetGraphicsRootConstantBufferView(
-                                rootParameterIndex.value(), pipelineBindResourceSpace->GetStaticCBV()->GetGPUAddress());
+                                rootParameterIndex.value(),
+                                pipelineBindResourceSpace->GetStaticCBV()->GetGPUAddress());
                         }
                         break;
                     }
@@ -166,12 +193,14 @@ namespace ElysiaCore
                         if (pipelineBindResourceSpace->HasDynamicCBV())
                         {
                             m_commandList->SetComputeRootConstantBufferView(
-                                rootParameterIndex.value(), pipelineBindResourceSpace->GetDynamicCBV());
+                                rootParameterIndex.value(),
+                                pipelineBindResourceSpace->GetDynamicCBV());
                         }
                         else if (pipelineBindResourceSpace->GetStaticCBV())
                         {
                             m_commandList->SetComputeRootConstantBufferView(
-                                rootParameterIndex.value(), pipelineBindResourceSpace->GetStaticCBV()->GetGPUAddress());
+                                rootParameterIndex.value(),
+                                pipelineBindResourceSpace->GetStaticCBV()->GetGPUAddress());
                         }
                         break;
                     }
@@ -193,13 +222,15 @@ namespace ElysiaCore
             {
                 if (UAV->m_resource->GetBufferType() == GPUResourceType::Texture)
                 {
-                    handles[currentHandleIndex ++] = static_cast<DX12TextureResource*>(UAV->m_resource)->
-                                                     GetUAVDescriptor().GetCPUHandle();
+                    handles[currentHandleIndex ++] =
+                        static_cast<DX12TextureResource*>(UAV->m_resource)->
+                        GetUAVDescriptor().GetCPUHandle();
                 }
                 else
                 {
-                    handles[currentHandleIndex ++] = static_cast<DX12BufferResource*>(UAV->m_resource)->
-                                                     GetUAVDescriptor().GetCPUHandle();
+                    handles[currentHandleIndex ++] =
+                        static_cast<DX12BufferResource*>(UAV->m_resource)->
+                        GetUAVDescriptor().GetCPUHandle();
                 }
             }
 
@@ -207,32 +238,45 @@ namespace ElysiaCore
             {
                 if (SRV->m_resource->GetBufferType() == GPUResourceType::Texture)
                 {
-                    handles[currentHandleIndex ++] = static_cast<DX12TextureResource*>(SRV->m_resource)->
-                                                     GetSRVDescriptor().GetCPUHandle();
+                    handles[currentHandleIndex ++] =
+                        static_cast<DX12TextureResource*>(SRV->m_resource)->
+                        GetSRVDescriptor().GetCPUHandle();
                 }
                 else
                 {
-                    handles[currentHandleIndex ++] = static_cast<DX12BufferResource*>(SRV->m_resource)->
-                                                     GetSRVDescriptor().GetCPUHandle();
+                    handles[currentHandleIndex ++] =
+                        static_cast<DX12BufferResource*>(SRV->m_resource)->
+                        GetSRVDescriptor().GetCPUHandle();
                 }
             }
-            DX12DescriptorHeapHandle blockStart = m_currSRVHeap->AllocateRenderPassDescriptorBlock(numTableHandles);
-            m_device->CopyDescriptors(1, &blockStart.GetCPUHandle(), &numTableHandles, numTableHandles, handles,
-                                      singleDescriptorRangeCopyArray, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+            DX12DescriptorHeapHandle blockStart = m_currSRVHeap->AllocateRenderPassDescriptorBlock(
+                numTableHandles);
+            m_device->CopyDescriptors(1,
+                                      &blockStart.GetCPUHandle(),
+                                      &numTableHandles,
+                                      numTableHandles,
+                                      handles,
+                                      singleDescriptorRangeCopyArray,
+                                      D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
-            auto& tableMapping = m_graphicsPipelineStateObject->m_pipelineResourceMapping.m_TableMappings[spaceID];
+            auto& tableMapping = m_graphicsPipelineStateObject->m_pipelineResourceMapping.
+                                                                m_TableMappings[spaceID];
             assert(tableMapping.has_value());
 
             switch (m_graphicsPipelineStateObject->m_pipelineType)
             {
             case PipelineType::Graphics:
             {
-                m_commandList->SetGraphicsRootDescriptorTable(tableMapping.value(), blockStart.GetGPUHandle());
+                m_commandList->SetGraphicsRootDescriptorTable(
+                    tableMapping.value(),
+                    blockStart.GetGPUHandle());
                 break;
             }
             case PipelineType::Compute:
             {
-                m_commandList->SetComputeRootDescriptorTable(tableMapping.value(), blockStart.GetGPUHandle());
+                m_commandList->SetComputeRootDescriptorTable(
+                    tableMapping.value(),
+                    blockStart.GetGPUHandle());
                 break;
             }
             default:
@@ -245,11 +289,16 @@ namespace ElysiaCore
         }
     }
     void DX12GraphicsContext::SetRenderTargets(UINT numRenderTargets,
-                                               const D3D12_CPU_DESCRIPTOR_HANDLE renderTargetHandle[],
+                                               const D3D12_CPU_DESCRIPTOR_HANDLE renderTargetHandle
+                                               [],
                                                const D3D12_CPU_DESCRIPTOR_HANDLE depthStencilHandle)
     {
-        m_commandList->OMSetRenderTargets(numRenderTargets, renderTargetHandle, false,
-                                          depthStencilHandle.ptr != 0 ? &depthStencilHandle : nullptr);
+        m_commandList->OMSetRenderTargets(numRenderTargets,
+                                          renderTargetHandle,
+                                          false,
+                                          depthStencilHandle.ptr != 0
+                                              ? &depthStencilHandle
+                                              : nullptr);
     }
     void DX12GraphicsContext::SetDefaultViewportAndScissor(const ElysiaHelper::UINT2 screenSize)
     {
@@ -282,7 +331,8 @@ namespace ElysiaCore
     {
         m_commandList->IASetPrimitiveTopology(topology);
     }
-    void DX12GraphicsContext::SetVertexBuffer(UINT startIndex, UINT numVertexBuffer,
+    void DX12GraphicsContext::SetVertexBuffer(UINT startIndex,
+                                              UINT numVertexBuffer,
                                               D3D12_VERTEX_BUFFER_VIEW& vertexBufferView)
     {
         m_commandList->IASetVertexBuffers(startIndex, numVertexBuffer, &vertexBufferView);
@@ -302,19 +352,32 @@ namespace ElysiaCore
     {
         DrawInstanced(vertexCount, 1, vertexStartOffset, 0);
     }
-    void DX12GraphicsContext::Draw(UINT vertexCount, UINT vertexStartOffset, UINT startIndexLocation)
+    void DX12GraphicsContext::Draw(UINT vertexCount,
+                                   UINT vertexStartOffset,
+                                   UINT startIndexLocation)
     {
         DrawInstanced(vertexCount, 1, startIndexLocation, vertexStartOffset, 0);
     }
-    void DX12GraphicsContext::DrawInstanced(UINT vertexCount, UINT instanceCount, UINT vertexStartOffset,
+    void DX12GraphicsContext::DrawInstanced(UINT vertexCount,
+                                            UINT instanceCount,
+                                            UINT vertexStartOffset,
                                             UINT startInstanceLocation)
     {
-        m_commandList->DrawInstanced(vertexCount, instanceCount, vertexStartOffset, startInstanceLocation);
+        m_commandList->DrawInstanced(vertexCount,
+                                     instanceCount,
+                                     vertexStartOffset,
+                                     startInstanceLocation);
     }
-    void DX12GraphicsContext::DrawInstanced(UINT vertexCount, UINT instanceCount, UINT startIndexLocation,
-                                            UINT vertexStartOffset, UINT startInstanceLocation)
+    void DX12GraphicsContext::DrawInstanced(UINT vertexCount,
+                                            UINT instanceCount,
+                                            UINT startIndexLocation,
+                                            UINT vertexStartOffset,
+                                            UINT startInstanceLocation)
     {
-        m_commandList->DrawIndexedInstanced(vertexCount, instanceCount, startIndexLocation, vertexStartOffset,
+        m_commandList->DrawIndexedInstanced(vertexCount,
+                                            instanceCount,
+                                            startIndexLocation,
+                                            vertexStartOffset,
                                             startInstanceLocation);
     }
 
@@ -328,15 +391,25 @@ namespace ElysiaCore
         Dispatch(GetGroupCount(threadCountX, groupSizeX), 1, 1);
     }
 
-    void DX12GraphicsContext::Dispatch2D(UINT threadCountX, UINT threadCountY, UINT groupSizeX, UINT groupSizeY)
+    void DX12GraphicsContext::Dispatch2D(UINT threadCountX,
+                                         UINT threadCountY,
+                                         UINT groupSizeX,
+                                         UINT groupSizeY)
     {
-        Dispatch(GetGroupCount(threadCountX, groupSizeX), GetGroupCount(threadCountY, groupSizeY), 1);
+        Dispatch(GetGroupCount(threadCountX, groupSizeX),
+                 GetGroupCount(threadCountY, groupSizeY),
+                 1);
     }
 
-    void DX12GraphicsContext::Dispatch3D(UINT threadCountX, UINT threadCountY, UINT threadCountZ, UINT groupSizeX,
-                                         UINT groupSizeY, UINT groupSizeZ)
+    void DX12GraphicsContext::Dispatch3D(UINT threadCountX,
+                                         UINT threadCountY,
+                                         UINT threadCountZ,
+                                         UINT groupSizeX,
+                                         UINT groupSizeY,
+                                         UINT groupSizeZ)
     {
-        Dispatch(GetGroupCount(threadCountX, groupSizeX), GetGroupCount(threadCountY, groupSizeY),
+        Dispatch(GetGroupCount(threadCountX, groupSizeX),
+                 GetGroupCount(threadCountY, groupSizeY),
                  GetGroupCount(threadCountZ, groupSizeZ));
     }
 
@@ -357,18 +430,20 @@ namespace ElysiaCore
 
         GetCommandList()->CopyResource(destRT->GetResource(), sourceRT->GetResource());
 
-        if (sourceRT->GetTexture()->GetUsageState() != sourceOldState)
-        {
-            AddBarrier(*sourceRT->GetTexture(), sourceOldState, false);
-        }
-        if (destRT->GetTexture()->GetUsageState() != destOldState)
-        {
-            AddBarrier(*destRT->GetTexture(), destOldState, false);
-        }
-        FlushBarrier();
+        // if (sourceRT->GetTexture()->GetUsageState() != sourceOldState)
+        // {
+        //     AddBarrier(*sourceRT->GetTexture(), sourceOldState, false);
+        // }
+        // if (destRT->GetTexture()->GetUsageState() != destOldState)
+        // {
+        //     AddBarrier(*destRT->GetTexture(), destOldState, false);
+        // }
+        // FlushBarrier();
     }
 
-    void DX12GraphicsContext::CopyTextureRegion(RenderTexture* sourceRT, RenderTexture* destRT, UINT64 mipmapLevel)
+    void DX12GraphicsContext::CopyTextureRegion(RenderTexture* sourceRT,
+                                                RenderTexture* destRT,
+                                                UINT64 mipmapLevel)
     {
         auto sourceOldState = sourceRT->GetTexture()->GetUsageState();
         auto destOldState = destRT->GetTexture()->GetUsageState();
@@ -393,15 +468,5 @@ namespace ElysiaCore
         destLocation.SubresourceIndex = destRT->GetSubresourceIndex(mipmapLevel);
 
         m_commandList->CopyTextureRegion(&destLocation, 0, 0, 0, &srcLocation, nullptr);
-
-        if (sourceRT->GetTexture()->GetUsageState() != sourceOldState)
-        {
-            AddBarrier(*sourceRT->GetTexture(), sourceOldState, false);
-        }
-        if (destRT->GetTexture()->GetUsageState() != destOldState)
-        {
-            AddBarrier(*destRT->GetTexture(), destOldState, false);
-        }
-        FlushBarrier();
     }
 }

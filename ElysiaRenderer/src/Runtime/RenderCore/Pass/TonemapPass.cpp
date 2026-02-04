@@ -109,6 +109,13 @@ namespace ElysiaRenderer
         auto passName = passData.Name.c_str();
         PIXHelper pix(m_pCommand->GetCommandList(), passName);
 
+        PipelineInfo pipelineStateData{};
+        pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(
+                                                                 passID)
+                                                             .pPipelineStateObject;
+        m_pCommand->SetPipeline(pipelineStateData);
+        SetSpaceResource(passData, PER_PASS_SPACE);
+
         SetupGamutMapperMatrices(
             ColorSpace_REC709,
             UserData::GetInstance().colorSpace,
@@ -299,12 +306,6 @@ namespace ElysiaRenderer
         m_pCommand->AddBarrier(m_pCameraColorRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
         {
-            PipelineInfo pipelineStateData{};
-            pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(
-                                                                     ShaderPasseIDs::TonemapPassID)
-                                                                 .pPipelineStateObject;
-            m_pCommand->SetPipeline(pipelineStateData);
-
             m_pMaterial->SetBool(ShaderIDs::u_shoulder, m_shoulder);
             m_pMaterial->SetBool(ShaderIDs::u_con2, m_con);
             m_pMaterial->SetBool(ShaderIDs::u_soft, m_soft);
@@ -319,10 +320,10 @@ namespace ElysiaRenderer
                                  (UINT)UserData::GetInstance().tonemapMode);
             m_pMaterial->SetFloat4(ShaderIDs::g_DestSize,
                                    GetScreenSize(Vector2(m_renderSize.x, m_renderSize.y)));
-            m_pMaterial->SetUInt(ShaderIDs::g_DestTextureIndex, m_pCameraColorRT->GetResourceHeapIndex());
+            m_pMaterial->SetUInt(ShaderIDs::g_DestTextureIndex,
+                                 m_pCameraColorRT->GetResourceHeapIndex());
 
             auto& passData = m_pMaterial->GetPassData(ShaderPasseIDs::TonemapPassID);
-            SetSpaceResource(passData, PER_PASS_SPACE);
             SetSpaceResource(passData, PER_FRAME_SPACE);
 
             auto threadGroupSize = passData.GetKernelThreadGroupSizes();

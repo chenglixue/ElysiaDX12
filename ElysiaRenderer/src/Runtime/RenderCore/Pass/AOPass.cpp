@@ -55,18 +55,8 @@ namespace ElysiaRenderer
         m_ImportanceHeight = m_quarterHeight;
 
         m_HIZMipmapCount = UINT(std::floor(std::log2(std::max(
-            m_DeinterleavedDepthWidth,
-            m_DeinterleavedDepthHeight))));
-
-        m_pHIZRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(
-            UINT(m_renderSize.x),
-            UINT(m_renderSize.y),
-            DXGI_FORMAT_R16_FLOAT,
-            true,
-            m_HIZMipmapCount,
-            RenderResource::GetInstance().
-            GetPropertyName(
-                RenderTextureIDs::HIZRTID));
+                               m_DeinterleavedDepthWidth,
+                               m_DeinterleavedDepthHeight)))) / 2;
 
         for (UINT i = 0; i < DEINTERLEAVED_DEPTH_COUNT; ++i)
         {
@@ -147,6 +137,29 @@ namespace ElysiaRenderer
         m_pCamera = context.pCamera;
         m_pGPUTimer = context.pGPUTimer;
         m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), "AO Begin");
+
+        for (UINT i = 0; i < DEINTERLEAVED_DEPTH_COUNT; ++i)
+        {
+            m_pCommand->AddBarrier(m_DeinterleavedDepthRTs[i],
+                                   D3D12_RESOURCE_STATE_RENDER_TARGET,
+                                   false);
+            m_pCommand->AddBarrier(m_DeinterleavedAORTs[i],
+                                   D3D12_RESOURCE_STATE_RENDER_TARGET,
+                                   false);
+        }
+        m_pCommand->AddBarrier(m_pImportanceRT, D3D12_RESOURCE_STATE_RENDER_TARGET, false);
+        m_pCommand->AddBarrier(m_pAORT, D3D12_RESOURCE_STATE_RENDER_TARGET, false);
+        m_pCommand->AddBarrier(m_pTAA0RT, D3D12_RESOURCE_STATE_RENDER_TARGET, false);
+        m_pCommand->AddBarrier(m_pTAA1RT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+        for (UINT i = 0; i < DEINTERLEAVED_DEPTH_COUNT; ++i)
+        {
+            m_pCommand->Discard(m_DeinterleavedDepthRTs[i]);
+            m_pCommand->Discard(m_DeinterleavedAORTs[i]);
+        }
+        m_pCommand->Discard(m_pImportanceRT);
+        m_pCommand->Discard(m_pAORT);
+        m_pCommand->Discard(m_pTAA0RT);
+        m_pCommand->Discard(m_pTAA1RT);
 
         DoDeinterleaveDepth();
         DoHIZ();
@@ -371,9 +384,6 @@ namespace ElysiaRenderer
                                   passID);
             m_pMaterial->SetUInt(ShaderIDs::g_HIZMaxMipmap,
                                  MathHelper::Max(m_HIZMipmapCount - 1, UINT(0)),
-                                 passID);
-            m_pMaterial->SetUInt(ShaderIDs::g_HIZTextureIndex,
-                                 m_pHIZRT->GetResourceHeapIndex(),
                                  passID);
 
             m_pMaterial->SetFloat4(ShaderIDs::g_TargetSize,
@@ -618,9 +628,6 @@ namespace ElysiaRenderer
             m_pMaterial->SetUInt(ShaderIDs::g_HIZMaxMipmap,
                                  MathHelper::Max(m_HIZMipmapCount - 1, UINT(0)),
                                  passID);
-            m_pMaterial->SetUInt(ShaderIDs::g_HIZTextureIndex,
-                                 m_pHIZRT->GetResourceHeapIndex(),
-                                 passID);
             m_pMaterial->SetUInt(ShaderIDs::g_AOImportanceTexIndex,
                                  m_pImportanceRT->GetResourceHeapIndex(),
                                  passID);
@@ -780,17 +787,11 @@ namespace ElysiaRenderer
 
         if (m_isFirstFrame)
         {
-            // m_pCommand->ClearRenderTarget(currTAART, Color::Black);
-            // m_pCommand->ClearRenderTarget(historyTAART, Color::Black);
-            m_pCommand->AddBarrier(currTAART, D3D12_RESOURCE_STATE_RENDER_TARGET, false);
-            m_pCommand->AddBarrier(historyTAART, D3D12_RESOURCE_STATE_RENDER_TARGET);
-            m_pCommand->Discard(currTAART);
-            m_pCommand->Discard(historyTAART);
             m_pCommand->AddBarrier(AORT, D3D12_RESOURCE_STATE_COPY_SOURCE, false);
             m_pCommand->AddBarrier(currTAART, D3D12_RESOURCE_STATE_COPY_DEST, false);
             m_pCommand->AddBarrier(historyTAART, D3D12_RESOURCE_STATE_COPY_DEST);
-            m_pCommand->CopyTextureRegion(AORT, currTAART);
-            m_pCommand->CopyTextureRegion(AORT, historyTAART);
+            m_pCommand->CopyTexture(AORT, currTAART);
+            m_pCommand->CopyTexture(AORT, historyTAART);
             m_pCommand->AddBarrier(AORT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 
             TAAData::Pre_View_M = m_pCamera->GetViewMat();

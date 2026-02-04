@@ -25,7 +25,8 @@ namespace ElysiaRenderer
     }
 
     BindlessTextureManager::TextureHandle BindlessTextureManager::CreateTextureFromFile(
-        const std::wstring& filePath, bool isSRGB)
+        const std::wstring& filePath,
+        bool isSRGB)
     {
         std::lock_guard<std::mutex> lock(m_mutex);
 
@@ -49,7 +50,9 @@ namespace ElysiaRenderer
     }
 
     BindlessTextureManager::TextureHandle BindlessTextureManager::CreateTexture(
-        const D3D12_RESOURCE_DESC& resourceDesc, TexTypeFlags flag, std::wstring name)
+        const D3D12_RESOURCE_DESC& resourceDesc,
+        TexTypeFlags flag,
+        std::wstring name)
     {
         std::lock_guard<std::mutex> lock(m_mutex);
 
@@ -92,14 +95,16 @@ namespace ElysiaRenderer
     }
 
     std::unique_ptr<DX12TextureResource> BindlessTextureManager::LoadTextureFromFile_L(
-        const std::wstring& filePath, bool isSRGB)
+        const std::wstring& filePath,
+        bool isSRGB)
     {
         auto texturePath = filePath;
         IsFileLocked(texturePath);
 
         const std::wstring extension = GetFileExtension(texturePath.c_str());
         /// Load DDS
-        std::unique_ptr<DirectX::ScratchImage> imageData = std::make_unique<DirectX::ScratchImage>();
+        std::unique_ptr<DirectX::ScratchImage> imageData = std::make_unique<
+            DirectX::ScratchImage>();
         if (extension == L"DDS" || extension == L"dds")
         {
             auto s2ws = [](const std::string& s)
@@ -124,8 +129,10 @@ namespace ElysiaRenderer
             }
 
             imageData = std::make_unique<DirectX::ScratchImage>();
-            auto loadResult = DirectX::LoadFromDDSFile((assetsPath + texturePath).c_str(), DirectX::DDS_FLAGS_NONE,
-                                                       nullptr, *imageData);
+            auto loadResult = DirectX::LoadFromDDSFile((assetsPath + texturePath).c_str(),
+                                                       DirectX::DDS_FLAGS_NONE,
+                                                       nullptr,
+                                                       *imageData);
             if (loadResult != S_OK)
             {
                 std::cout << WstringToString(texturePath) + " not found" << std::endl;
@@ -140,7 +147,10 @@ namespace ElysiaRenderer
             }
             DirectX::ScratchImage tempImage;
             auto loadResult =
-                DirectX::LoadFromWICFile(texturePath.c_str(), DirectX::WIC_FLAGS_NONE, nullptr, tempImage);
+                DirectX::LoadFromWICFile(texturePath.c_str(),
+                                         DirectX::WIC_FLAGS_NONE,
+                                         nullptr,
+                                         tempImage);
             if (loadResult != S_OK)
             {
                 if (!LoadWithSTB(texturePath, tempImage))
@@ -152,8 +162,11 @@ namespace ElysiaRenderer
                 }
 
             }
-            ThrowIfFailed(DirectX::GenerateMipMaps(*tempImage.GetImage(0, 0, 0), DirectX::TEX_FILTER_DEFAULT, 0,
-                                                   *imageData, false));
+            ThrowIfFailed(DirectX::GenerateMipMaps(*tempImage.GetImage(0, 0, 0),
+                                                   DirectX::TEX_FILTER_DEFAULT,
+                                                   0,
+                                                   *imageData,
+                                                   false));
         }
         ///
 
@@ -168,11 +181,15 @@ namespace ElysiaRenderer
         D3D12_RESOURCE_DESC texDesc{};
         texDesc.Width = texMetaData.width;
         texDesc.Height = static_cast<UINT>(texMetaData.height);
-        texDesc.Dimension = is3DTex ? D3D12_RESOURCE_DIMENSION_TEXTURE3D : D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+        texDesc.Dimension = is3DTex
+                                ? D3D12_RESOURCE_DIMENSION_TEXTURE3D
+                                : D3D12_RESOURCE_DIMENSION_TEXTURE2D;
         texDesc.Format = texFormat;
         texDesc.MipLevels = static_cast<UINT16>(texMetaData.mipLevels);
         texDesc.Alignment = 0;
-        texDesc.DepthOrArraySize = static_cast<UINT16>(is3DTex ? texMetaData.depth : texMetaData.arraySize);
+        texDesc.DepthOrArraySize = static_cast<UINT16>(is3DTex
+                                                           ? texMetaData.depth
+                                                           : texMetaData.arraySize);
         texDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
         texDesc.SampleDesc.Count = 1;
         texDesc.SampleDesc.Quality = 0;
@@ -182,15 +199,21 @@ namespace ElysiaRenderer
 
         auto textureUpload = new DX12TextureUpload();
         textureUpload->pTextureBuffer = newTex.get();
-        textureUpload->numSubResources = static_cast<UINT>(texMetaData.mipLevels * texMetaData.arraySize);
+        textureUpload->numSubResources = static_cast<UINT>(
+            texMetaData.mipLevels * texMetaData.arraySize);
 
         UINT numRows[MAX_TEXTURE_SUBRESOURCE_COUNT];
         uint64_t rowSizesInBytes[MAX_TEXTURE_SUBRESOURCE_COUNT];
 
         auto resourceDesc = textureUpload->pTextureBuffer->GetResourceDesc();
-        m_pDevice->GetDevice()->GetCopyableFootprints(&resourceDesc, 0, textureUpload->numSubResources, 0,
-                                                      textureUpload->subResourceLayouts.data(), numRows,
-                                                      rowSizesInBytes, &textureUpload->textureDataSize);
+        m_pDevice->GetDevice()->GetCopyableFootprints(&resourceDesc,
+                                                      0,
+                                                      textureUpload->numSubResources,
+                                                      0,
+                                                      textureUpload->subResourceLayouts.data(),
+                                                      numRows,
+                                                      rowSizesInBytes,
+                                                      &textureUpload->textureDataSize);
 
         textureUpload->pTextureData = std::make_unique<uint8_t[]>(textureUpload->textureDataSize);
 
@@ -200,13 +223,16 @@ namespace ElysiaRenderer
             {
                 const uint64_t subResourceIndex = mipIndex + (arrayIndex * texMetaData.mipLevels);
 
-                const D3D12_PLACED_SUBRESOURCE_FOOTPRINT& subResourcelayout = textureUpload->subResourceLayouts[
-                    subResourceIndex];
+                const D3D12_PLACED_SUBRESOURCE_FOOTPRINT& subResourcelayout = textureUpload->
+                    subResourceLayouts[
+                        subResourceIndex];
                 const uint64_t subResourceHeight = numRows[subResourceIndex];
                 const uint64_t subResourcePitch = ElysiaHelper::AlignU32(
-                    subResourcelayout.Footprint.RowPitch, D3D12_TEXTURE_DATA_PITCH_ALIGNMENT);
+                    subResourcelayout.Footprint.RowPitch,
+                    D3D12_TEXTURE_DATA_PITCH_ALIGNMENT);
                 const uint64_t subResourceDepth = subResourcelayout.Footprint.Depth;
-                uint8_t* destSubResourceMemory = textureUpload->pTextureData.get() + subResourcelayout.Offset;
+                uint8_t* destSubResourceMemory =
+                    textureUpload->pTextureData.get() + subResourcelayout.Offset;
 
                 for (uint64_t sliceIndex = 0; sliceIndex < subResourceDepth; sliceIndex ++)
                 {
@@ -214,7 +240,8 @@ namespace ElysiaRenderer
                     const uint8_t* sourceSubResourceMemory = subImage->pixels;
                     for (uint64_t height = 0; height < subResourceHeight; ++height)
                     {
-                        memcpy(destSubResourceMemory, sourceSubResourceMemory,
+                        memcpy(destSubResourceMemory,
+                               sourceSubResourceMemory,
                                (std::min)(subResourcePitch, subImage->rowPitch));
                         destSubResourceMemory += subResourcePitch;
                         sourceSubResourceMemory += subImage->rowPitch;
@@ -229,7 +256,9 @@ namespace ElysiaRenderer
     }
 
     std::unique_ptr<DX12TextureResource> BindlessTextureManager::CreateTexture_L(
-        const D3D12_RESOURCE_DESC& desc, TexTypeFlags typeFlag, std::wstring name)
+        const D3D12_RESOURCE_DESC& desc,
+        TexTypeFlags typeFlag,
+        std::wstring name)
     {
         auto resourceDesc = desc;
 
@@ -286,7 +315,8 @@ namespace ElysiaRenderer
 
             resourceDesc.Flags |= D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
             //usageState = D3D12_RESOURCE_STATE_DEPTH_WRITE;
-            usageState = D3D12_RESOURCE_STATE_DEPTH_READ | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE;
+            usageState = D3D12_RESOURCE_STATE_DEPTH_READ |
+                         D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE;
         }
 
         if (hasUAV)
@@ -313,11 +343,17 @@ namespace ElysiaRenderer
         /// Create default heap for tex
         D3D12MA::ALLOCATION_DESC allocationDesc{};
         allocationDesc.HeapType = D3D12_HEAP_TYPE_DEFAULT;
+        allocationDesc.Flags = D3D12MA::ALLOCATION_FLAG_NONE;
+        allocationDesc.ExtraHeapFlags = D3D12_HEAP_FLAG_NONE;
         CComPtr<ID3D12Resource> texResource = nullptr;
         CComPtr<D3D12MA::Allocation> allocation = nullptr;
         ElysiaHelper::ThrowIfFailed(BufferManager::GetInstance().GetAllocator()->CreateResource(
-            &allocationDesc, &resourceDesc, usageState, (!hasRTV && !hasDSV) ? nullptr : &clearValue,
-            &allocation, IID_PPV_ARGS(&texResource)));
+            &allocationDesc,
+            &resourceDesc,
+            usageState,
+            (!hasRTV && !hasDSV) ? nullptr : &clearValue,
+            &allocation,
+            IID_PPV_ARGS(&texResource)));
         texResource->SetName(name.c_str());
         /// 
 
@@ -327,7 +363,8 @@ namespace ElysiaRenderer
         if (hasSRV)
         {
             newTex->SetSRVCount(desc.MipLevels);
-            auto srvBaseIndex = m_pDevice->AllocateContiguousReservedDescriptorIndices(desc.MipLevels);
+            auto srvBaseIndex = m_pDevice->AllocateContiguousReservedDescriptorIndices(
+                desc.MipLevels);
             newTex->SetSRVBaseHeapIndex(srvBaseIndex);
 
             for (UINT i = 0; i < desc.MipLevels; i ++)
@@ -345,7 +382,8 @@ namespace ElysiaRenderer
                     SRV.Texture2D.ResourceMinLODClamp = 0;
                     SRV.Texture2D.PlaneSlice = 0;
 
-                    m_pDevice->GetDevice()->CreateShaderResourceView(newTex->GetResource(), &SRV,
+                    m_pDevice->GetDevice()->CreateShaderResourceView(newTex->GetResource(),
+                                                                     &SRV,
                                                                      SRVHandle.GetCPUHandle());
                 }
                 else
@@ -353,7 +391,8 @@ namespace ElysiaRenderer
                     D3D12_SHADER_RESOURCE_VIEW_DESC* srvDescPointer = nullptr;
                     D3D12_SHADER_RESOURCE_VIEW_DESC SRV = {};
 
-                    bool isCubeMap = resourceDesc.Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE2D && resourceDesc.
+                    bool isCubeMap = resourceDesc.Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE2D &&
+                                     resourceDesc.
                                      DepthOrArraySize == 6;
                     if (isCubeMap)
                     {
@@ -365,7 +404,8 @@ namespace ElysiaRenderer
                         srvDescPointer = &SRV;
                     }
 
-                    m_pDevice->GetDevice()->CreateShaderResourceView(newTex->GetResource(), srvDescPointer,
+                    m_pDevice->GetDevice()->CreateShaderResourceView(newTex->GetResource(),
+                                                                     srvDescPointer,
                                                                      SRVHandle.GetCPUHandle());
                 }
 
@@ -389,8 +429,10 @@ namespace ElysiaRenderer
             auto RTVHandle = m_pDevice->GetRTVStageHeap()->NewDescriptorHeapHandle();
 
             newTex->SetRTVDescriptor(RTVHandle);
-            m_pDevice->GetDevice()->CreateRenderTargetView(newTex->GetResource(), nullptr,
-                                                           newTex->GetRTVDescriptor().GetCPUHandle());
+            m_pDevice->GetDevice()->CreateRenderTargetView(newTex->GetResource(),
+                                                           nullptr,
+                                                           newTex->GetRTVDescriptor().
+                                                                   GetCPUHandle());
 
         }
 
@@ -404,14 +446,17 @@ namespace ElysiaRenderer
 
             auto newDSVHandle = m_pDevice->GetDSVStageHeap()->NewDescriptorHeapHandle();
             newTex->SetDSVDescriptor(newDSVHandle);
-            m_pDevice->GetDevice()->CreateDepthStencilView(newTex->GetResource(), &dsvDesc,
-                                                           newTex->GetDSVDescriptor().GetCPUHandle());
+            m_pDevice->GetDevice()->CreateDepthStencilView(newTex->GetResource(),
+                                                           &dsvDesc,
+                                                           newTex->GetDSVDescriptor().
+                                                                   GetCPUHandle());
         }
 
         if (hasUAV)
         {
             newTex->SetUAVCount(desc.MipLevels);
-            auto uavBaseIndex = m_pDevice->AllocateContiguousReservedDescriptorIndices(desc.MipLevels);
+            auto uavBaseIndex = m_pDevice->AllocateContiguousReservedDescriptorIndices(
+                desc.MipLevels);
             newTex->SetUAVBaseHeapIndex(uavBaseIndex);
 
             for (UINT i = 0; i < desc.MipLevels; i ++)
@@ -424,8 +469,11 @@ namespace ElysiaRenderer
 
                 auto newUAVHandle = m_pDevice->GetSRVStageHeap()->NewDescriptorHeapHandle();
                 newTex->SetUAVDescriptor(newUAVHandle, i);
-                m_pDevice->GetDevice()->CreateUnorderedAccessView(newTex->GetResource(), nullptr, &desc,
-                                                                  newTex->GetUAVDescriptor(i).GetCPUHandle());
+                m_pDevice->GetDevice()->CreateUnorderedAccessView(newTex->GetResource(),
+                                                                  nullptr,
+                                                                  &desc,
+                                                                  newTex->GetUAVDescriptor(i).
+                                                                          GetCPUHandle());
 
                 UINT currentHeapIndex = uavBaseIndex + i;
                 // newTex->SetUAVResourceHeapIndex(currentHeapIndex, m_pDevice->m_freeReservedDescriptorIndices.back());

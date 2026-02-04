@@ -45,7 +45,6 @@ cbuffer PassConstant : register(b0, perPassSpace)
     float2 g_noiseScale;
 
     UINT g_HIZMaxMipmap;
-    UINT g_HIZTextureIndex;
     float g_Sharpness_Inv;
 
     bool g_bDebugImportance;
