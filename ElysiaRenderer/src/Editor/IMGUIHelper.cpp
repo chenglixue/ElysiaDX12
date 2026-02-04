@@ -22,9 +22,12 @@ namespace ElysiaEditor
 
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // 启用键盘控制
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;     // 启用Docking
-        // io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // 启用多视口
 
         io.ConfigDockingWithShift = true;
+        io.BackendFlags &= ~ImGuiBackendFlags_PlatformHasViewports;
+        io.BackendFlags &= ~ImGuiBackendFlags_RendererHasViewports;
+
+        // io.ConfigDockingWithShift = true;
 
         // 当启用多视口时，需要设置平台后端
         // if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
@@ -36,6 +39,7 @@ namespace ElysiaEditor
 
         // 2. 设置样式（docking分支可能使用不同的默认样式）
         ImGui::StyleColorsDark();
+        // ImGui::StyleColorsDark();
 
         // 3. 调整docking分支的样式以支持多视口
         ImGuiStyle& style = ImGui::GetStyle();
@@ -49,6 +53,17 @@ namespace ElysiaEditor
         {
             ImGui_ImplWin32_EnableDpiAwareness();
         }
+        // ImGuiStyle& style = ImGui::GetStyle();
+        // if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        // {
+        //     style.WindowRounding = 0.0f;
+        //     style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+        // }
+        //
+        // if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        // {
+        //     ImGui_ImplWin32_EnableDpiAwareness();
+        // }
 
         // io.KeyMap[ImGuiKey_Tab] = VK_TAB;
         // // Keyboard mapping. ImGui will use those indices to peek into the io.KeyDown[] array that we will update during the application lifetime.
@@ -97,15 +112,14 @@ namespace ElysiaEditor
         ImGui::NewFrame();
     }
 
-    void ImGUI_EndFrame()
+    void ImGUI_EndFrame(ElysiaCore::DX12Device* pDevice)
     {
-        ImGuiIO& io = ImGui::GetIO();
-        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-        {
-            ImGui::UpdatePlatformWindows();
-            ImGui::RenderPlatformWindowsDefault(nullptr, nullptr);
-
-        }
+        // ImGuiIO& io = ImGui::GetIO();
+        // if (io.ConfigFlags)
+        // {
+        //     ImGui::UpdatePlatformWindows();
+        //     ImGui::RenderPlatformWindowsDefault(nullptr, (void*)pDevice->GetDevice());
+        // }
     }
 
     void ImGUI_UpdateIO()

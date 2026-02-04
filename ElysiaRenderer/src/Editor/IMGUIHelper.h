@@ -18,6 +18,6 @@ namespace ElysiaEditor
     void ImGUI_Shutdown();
     void ImGUI_UpdateIO();
     void ImGUI_NewFrame();
-    void ImGUI_EndFrame();
+    void ImGUI_EndFrame(ElysiaCore::DX12Device* pDevice);
     LRESULT ImGUI_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 }

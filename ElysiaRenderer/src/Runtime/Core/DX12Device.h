@@ -44,7 +44,7 @@ namespace ElysiaCore
         m_SRVRenderPassDescriptorHeaps;
         std::unique_ptr<DX12RenderPassDescriptorHeap> m_samplerRenderPassDescriptorHeap;
         std::unique_ptr<DX12RenderPassDescriptorHeap> m_ImGUIRenderPassDescriptorHeap;
-        DX12DescriptorHeapHandle m_ImguiDescriptor;
+        std::array<DX12DescriptorHeapHandle, NUM_FRAMES_IN_FLIGHT> m_ImguiDescriptors;
 
     public:
         DX12Device();
@@ -91,7 +91,7 @@ namespace ElysiaCore
         }
         DX12DescriptorHeapHandle& GetImguiDescriptor()
         {
-            return m_ImguiDescriptor;
+            return m_ImguiDescriptors[m_frameID];
         }
         DX12UploadContext* GetUploadContext() const noexcept
         {

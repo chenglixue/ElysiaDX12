@@ -157,7 +157,7 @@ namespace ElysiaEngine
     {
         auto frameContext = BeginFrame();
         m_pGraphicsContext->Reset();
-        ImGUI_UpdateIO();
+        //ImGUI_UpdateIO();
         ImGUI_NewFrame();
 
         if (m_loadingScene)
@@ -190,7 +190,6 @@ namespace ElysiaEngine
 
         frameContext.pCamera = CameraManager::GetInstance().GetMainCamera();
         m_pRenderer->OnRender(frameContext);
-        ImGUI_EndFrame();
 
         m_pDevice->SubmitContextWork(*m_pGraphicsContext);
 

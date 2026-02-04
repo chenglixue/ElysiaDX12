@@ -9,8 +9,8 @@ namespace ElysiaCore
 {
     SwapChain::SwapChain() = default;
     SwapChain::~SwapChain() = default;
-    
-    void SwapChain::OnCreate(DX12Device *pDevice, HWND hWnd)
+
+    void SwapChain::OnCreate(DX12Device* pDevice, HWND hWnd)
     {
         m_hWnd = hWnd;
         m_pDevice = pDevice;
@@ -34,19 +34,22 @@ namespace ElysiaCore
         m_descSwapChain.SampleDesc.Count = 1;
 
         ThrowIfFailed(m_pFactory->CheckFeatureSupport(
-            DXGI_FEATURE_PRESENT_ALLOW_TEARING, &m_bTearingSupport, sizeof(m_bTearingSupport)));
+            DXGI_FEATURE_PRESENT_ALLOW_TEARING,
+            &m_bTearingSupport,
+            sizeof(m_bTearingSupport)));
 
         m_descSwapChain.Flags = m_bTearingSupport ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0;
 
-        IDXGISwapChain1 *pSwapChain;
+        IDXGISwapChain1* pSwapChain;
         ThrowIfFailed(m_pFactory->CreateSwapChainForHwnd(
-            m_pDevice->GetDirectQueue(),        // Swap chain needs the queue so that it can force a flush on it.
+            m_pDevice->GetDirectQueue(),
+            // Swap chain needs the queue so that it can force a flush on it.
             m_hWnd,
             &m_descSwapChain,
             nullptr,
             nullptr,
             &pSwapChain
-        ));
+            ));
 
         ThrowIfFailed(m_pFactory->MakeWindowAssociation(m_hWnd, DXGI_MWA_NO_ALT_ENTER));
         ThrowIfFailed(pSwapChain->QueryInterface(__uuidof(IDXGISwapChain4), (void**)&m_pSwapChain));
@@ -64,7 +67,7 @@ namespace ElysiaCore
     {
         m_pSwapChain->Release();
         m_pFactory->Release();
-        
+
         fsHdrDestroy();
     }
 
@@ -72,10 +75,12 @@ namespace ElysiaCore
     {
         std::vector<DisplayMode> displayModesAvailable;
         EnumerateDisplayModes(&displayModesAvailable);
-        
-        return  std::find(displayModesAvailable.begin(), displayModesAvailable.end(), displayMode) != displayModesAvailable.end();
+
+        return std::find(displayModesAvailable.begin(), displayModesAvailable.end(), displayMode) !=
+               displayModesAvailable.end();
     }
-    void SwapChain::EnumerateDisplayModes(std::vector<DisplayMode> *pModes, std::vector<const char *> *pNames)
+    void SwapChain::EnumerateDisplayModes(std::vector<DisplayMode>* pModes,
+                                          std::vector<const char*>* pNames)
     {
         fsHdrEnumerateDisplayModes(pModes);
 
@@ -95,7 +100,7 @@ namespace ElysiaCore
     {
         uint32_t backBuffferIndex = m_pSwapChain->GetCurrentBackBufferIndex();
 
-        ID3D12Resource *pBackBuffer;
+        ID3D12Resource* pBackBuffer;
         ThrowIfFailed(m_pSwapChain->GetBuffer(backBuffferIndex, IID_PPV_ARGS(&pBackBuffer)));
         pBackBuffer->Release();
         return pBackBuffer;
@@ -114,8 +119,11 @@ namespace ElysiaCore
         }
         else
         {
-            UINT presentFlags = m_bTearingSupport && !m_bIsFullScreenExclusive ? DXGI_PRESENT_ALLOW_TEARING : 0;
+            UINT presentFlags = m_bTearingSupport && !m_bIsFullScreenExclusive
+                                    ? DXGI_PRESENT_ALLOW_TEARING
+                                    : 0;
             ThrowIfFailed(m_pSwapChain->Present(0, presentFlags));
+
         }
     }
 
@@ -140,7 +148,11 @@ namespace ElysiaCore
         return m_displayMode;
     }
 
-    void SwapChain::OnCreateWindowSizeDependentResources(uint32_t dwWidth, uint32_t dwHeight, bool bVSyncOn, DisplayMode displayMode, bool disableLocalDimming)
+    void SwapChain::OnCreateWindowSizeDependentResources(uint32_t dwWidth,
+                                                         uint32_t dwHeight,
+                                                         bool bVSyncOn,
+                                                         DisplayMode displayMode,
+                                                         bool disableLocalDimming)
     {
         // check whether the requested mode is supported and fall back to SDR if not supported
         bool bIsModeSupported = IsModeSupported(displayMode);
@@ -149,8 +161,8 @@ namespace ElysiaCore
             assert(!"FS HDR display mode not supported");
             displayMode = DISPLAYMODE_SDR;
         }
-        
-        for(UINT64 i = 0; i < m_BackBufferCount; ++i)
+
+        for (UINT64 i = 0; i < m_BackBufferCount; ++i)
         {
             m_backBuffers[i].reset();
         }
@@ -159,7 +171,7 @@ namespace ElysiaCore
         // This needs to happen so that driver knows it needs to use AGS colourspace
         if ((m_displayMode == DISPLAYMODE_HDR10_2084 ||
              m_displayMode == DISPLAYMODE_HDR10_SCRGB)
-             &&
+            &&
             (displayMode == DISPLAYMODE_FSHDR_Gamma22 ||
              displayMode == DISPLAYMODE_FSHDR_SCRGB))
         {
@@ -171,7 +183,7 @@ namespace ElysiaCore
                     dwHeight,
                     DXGI_FORMAT_B8G8R8A8_UNORM,
                     m_descSwapChain.Flags)
-            );
+                );
 
             ThrowIfFailed(m_pSwapChain->SetColorSpace1(DXGI_COLOR_SPACE_RGB_FULL_G22_NONE_P709));
         }
@@ -188,7 +200,7 @@ namespace ElysiaCore
                 dwHeight,
                 m_swapChainFormat,
                 m_descSwapChain.Flags)
-        );
+            );
 
         fsHdrSetDisplayMode(displayMode, disableLocalDimming, m_pSwapChain);
 
@@ -203,15 +215,17 @@ namespace ElysiaCore
     void SwapChain::OnDestroyWindowSizeDependentResources()
     {
     }
-    
+
     void SwapChain::CreateRTV()
     {
-        for (UINT currBufferIndex = 0; currBufferIndex < m_BackBufferCount; currBufferIndex++)
+        for (UINT currBufferIndex = 0; currBufferIndex < m_BackBufferCount; currBufferIndex ++)
         {
-            auto currBackBufferRTVHandle = m_pDevice->m_RTVStagingDescriptorHeap->NewDescriptorHeapHandle();
+            auto currBackBufferRTVHandle = m_pDevice->m_RTVStagingDescriptorHeap->
+                                                      NewDescriptorHeapHandle();
 
             ID3D12Resource* backBufferResource = nullptr;
-            ElysiaHelper::AssertIfFailed(m_pSwapChain->GetBuffer(currBufferIndex, IID_PPV_ARGS(&backBufferResource)));
+            ElysiaHelper::AssertIfFailed(
+                m_pSwapChain->GetBuffer(currBufferIndex, IID_PPV_ARGS(&backBufferResource)));
             backBufferResource->SetName(L"Swap Chain");
 
             D3D12_RENDER_TARGET_VIEW_DESC RTVDecs = {};
@@ -219,10 +233,13 @@ namespace ElysiaCore
             RTVDecs.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
             RTVDecs.Texture2D.MipSlice = 0;
             RTVDecs.Texture2D.PlaneSlice = 0;
-            m_pDevice->GetDevice()->CreateRenderTargetView(backBufferResource, &RTVDecs, currBackBufferRTVHandle.GetCPUHandle());
+            m_pDevice->GetDevice()->CreateRenderTargetView(backBufferResource,
+                                                           &RTVDecs,
+                                                           currBackBufferRTVHandle.GetCPUHandle());
 
             m_backBuffers[currBufferIndex] = std::make_unique<DX12TextureResource>(
-                backBufferResource, D3D12_RESOURCE_STATE_PRESENT);
+                backBufferResource,
+                D3D12_RESOURCE_STATE_PRESENT);
             m_backBuffers[currBufferIndex]->SetResourceDesc(backBufferResource->GetDesc());
             m_backBuffers[currBufferIndex]->SetRTVDescriptor(currBackBufferRTVHandle);
             backBufferResource->Release();

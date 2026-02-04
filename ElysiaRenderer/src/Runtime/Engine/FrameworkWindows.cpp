@@ -30,7 +30,10 @@ namespace ElysiaEngine
     static constexpr bool ENABLE_GPU_VALIDATION_DEFAULT = false;
 #endif
 
-    int RunFramework(HINSTANCE hInstance, LPSTR lpCmdLine, int nCmdShow, FrameworkWindows* pFramework)
+    int RunFramework(HINSTANCE hInstance,
+                     LPSTR lpCmdLine,
+                     int nCmdShow,
+                     FrameworkWindows* pFramework)
     {
         // Init logging
         int result = Log::InitLogSystem();
@@ -82,17 +85,21 @@ namespace ElysiaEngine
 
         // Create the window
         hWnd = CreateWindowEx(WS_EX_APPWINDOW,
-                              WINDOW_CLASS_NAME, // name of the window class
+                              WINDOW_CLASS_NAME,
+                              // name of the window class
                               pFramework->GetName().c_str(),
                               lwindowStyle,
                               CW_USEDEFAULT,
                               CW_USEDEFAULT,
                               windowRect.right - windowRect.left,
                               windowRect.bottom - windowRect.top,
-                              NULL,      // we have no parent window, NULL
-                              NULL,      // we aren't using menus, NULL
-                              hInstance, // application handle
-                              NULL);     // used with multiple windows, NULL
+                              NULL,
+                              // we have no parent window, NULL
+                              NULL,
+                              // we aren't using menus, NULL
+                              hInstance,
+                              // application handle
+                              NULL); // used with multiple windows, NULL
 
         // Framework owns device and swapchain, so initialize them
         pFramework->DeviceInit(hWnd);
@@ -103,7 +110,8 @@ namespace ElysiaEngine
         // show the window
         ShowWindow(hWnd, nCmdShow);
         lBorderedStyle = GetWindowLong(hWnd, GWL_STYLE);
-        lBorderlessStyle = lBorderedStyle & ~(WS_CAPTION | WS_THICKFRAME | WS_MINIMIZE | WS_MAXIMIZE | WS_SYSMENU);
+        lBorderlessStyle = lBorderedStyle & ~(
+                               WS_CAPTION | WS_THICKFRAME | WS_MINIMIZE | WS_MAXIMIZE | WS_SYSMENU);
 
         // main loop
         MSG msg = {0};
@@ -112,8 +120,9 @@ namespace ElysiaEngine
             // check to see if any messages are waiting in the queue
             if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
             {
-                TranslateMessage(&msg); // translate keystroke messages into the right format            
-                DispatchMessage(&msg);  // send the message to the WindowProc function
+                TranslateMessage(&msg);
+                // translate keystroke messages into the right format            
+                DispatchMessage(&msg); // send the message to the WindowProc function
             }
             else if (!bIsMinimized)
                 pFramework->OnRender();
@@ -144,8 +153,11 @@ namespace ElysiaEngine
             GetWindowRect(hWnd, &m_windowRect);
 
             // Make the window borderless so that the client area can fill the screen.
-            SetWindowLong(hWnd, GWL_STYLE,
-                          lwindowStyle & ~(WS_CAPTION | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_SYSMENU | WS_THICKFRAME));
+            SetWindowLong(hWnd,
+                          GWL_STYLE,
+                          lwindowStyle & ~(
+                              WS_CAPTION | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_SYSMENU |
+                              WS_THICKFRAME));
 
             MONITORINFO monitorInfo;
             monitorInfo.cbSize = sizeof(monitorInfo);
@@ -313,44 +325,49 @@ namespace ElysiaEngine
         return strlen(strCPUName) != 0 ? strCPUName : "UNAVAILABLE";
     }
 
-    FrameworkWindows::FrameworkWindows(std::wstring name) :
-        m_Name(name)
-        , m_Width(0)
-        , m_Height(0)
-        , m_frameID(0)
-        , m_frameIndex(0)
+    FrameworkWindows::FrameworkWindows(std::wstring name)
+        : m_Name(name),
+          m_Width(0),
+          m_Height(0),
+          m_frameID(0),
+          m_frameIndex(0)
 
-        // Simulation management
-        , m_lastFrameTime(MillisecondsNow())
-        , m_deltaTime(0.0)
+          // Simulation management
+          ,
+          m_lastFrameTime(MillisecondsNow()),
+          m_deltaTime(0.0)
 
-        // Device management
-        , m_windowHwnd(NULL)
-        , m_pDevice(new ElysiaCore::DX12Device())
-        , m_stablePowerState(false)
-        , m_isCpuValidationLayerEnabled(ENABLE_CPU_VALIDATION_DEFAULT)
-        , m_isGpuValidationLayerEnabled(ENABLE_GPU_VALIDATION_DEFAULT)
-        , m_initializeAGS(false)
+          // Device management
+          ,
+          m_windowHwnd(NULL),
+          m_pDevice(new ElysiaCore::DX12Device()),
+          m_stablePowerState(false),
+          m_isCpuValidationLayerEnabled(ENABLE_CPU_VALIDATION_DEFAULT),
+          m_isGpuValidationLayerEnabled(ENABLE_GPU_VALIDATION_DEFAULT),
+          m_initializeAGS(false)
 
-        // Swapchain management
-        , m_swapChain()
-        , m_VsyncEnabled(false)
-        , m_fullscreenMode(PRESENTATIONMODE_WINDOWED)
-        , m_previousFullscreenMode(PRESENTATIONMODE_WINDOWED)
+          // Swapchain management
+          ,
+          m_swapChain(),
+          m_VsyncEnabled(false),
+          m_fullscreenMode(PRESENTATIONMODE_WINDOWED),
+          m_previousFullscreenMode(PRESENTATIONMODE_WINDOWED)
 
-        // Display management
-        , m_monitor()
-        , m_FreesyncHDROptionEnabled(false)
-        , m_currentDisplayMode(DISPLAYMODE_SDR)
-        , m_previousDisplayModeNamesIndex(DISPLAYMODE_SDR)
-        , m_currentDisplayModeNamesIndex(DISPLAYMODE_SDR)
-        , m_displayModesAvailable()
-        , m_displayModesNamesAvailable()
-        , m_disableLocalDimming(false)
-        , m_forceManualResize(false)
+          // Display management
+          ,
+          m_monitor(),
+          m_FreesyncHDROptionEnabled(false),
+          m_currentDisplayMode(DISPLAYMODE_SDR),
+          m_previousDisplayModeNamesIndex(DISPLAYMODE_SDR),
+          m_currentDisplayModeNamesIndex(DISPLAYMODE_SDR),
+          m_displayModesAvailable(),
+          m_displayModesNamesAvailable(),
+          m_disableLocalDimming(false),
+          m_forceManualResize(false)
 
-        // System info
-        , m_systemInfo() // initialized after device
+          // System info
+          ,
+          m_systemInfo() // initialized after device
     {
 
     }
@@ -379,7 +396,9 @@ namespace ElysiaEngine
 
                 // device removed, so recreate
                 m_pDevice->OnDestroy();
-                m_pDevice->OnCreate(m_Name, m_isCpuValidationLayerEnabled, m_isGpuValidationLayerEnabled);
+                m_pDevice->OnCreate(m_Name,
+                                    m_isCpuValidationLayerEnabled,
+                                    m_isGpuValidationLayerEnabled);
                 m_stablePowerState = false;
             }
         }
@@ -413,7 +432,12 @@ namespace ElysiaEngine
 
         // Fall back to SDR when app closes
         if (m_currentDisplayMode != DISPLAYMODE_SDR)
-            m_swapChain.OnCreateWindowSizeDependentResources(m_Width, m_Height, m_VsyncEnabled, DISPLAYMODE_SDR, false);
+            m_swapChain.OnCreateWindowSizeDependentResources(
+                m_Width,
+                m_Height,
+                m_VsyncEnabled,
+                DISPLAYMODE_SDR,
+                false);
 
         m_swapChain.OnDestroyWindowSizeDependentResources();
         m_swapChain.OnDestroy();
@@ -508,8 +532,11 @@ namespace ElysiaEngine
 
         RECT clientRect = {};
         GetClientRect(m_windowHwnd, &clientRect);
-        OnResize(clientRect.right - clientRect.left, clientRect.bottom - clientRect.top, m_forceManualResize);
-        UpdateDisplay(m_displayModesAvailable[m_currentDisplayModeNamesIndex], m_disableLocalDimming);
+        OnResize(clientRect.right - clientRect.left,
+                 clientRect.bottom - clientRect.top,
+                 m_forceManualResize);
+        UpdateDisplay(m_displayModesAvailable[m_currentDisplayModeNamesIndex],
+                      m_disableLocalDimming);
         m_forceManualResize = false;
     }
 
@@ -529,8 +556,11 @@ namespace ElysiaEngine
 
             // If resizing but not minimizing the recreate it with the new size
             if (m_Width > 0 && m_Height > 0)
-                m_swapChain.OnCreateWindowSizeDependentResources(m_Width, m_Height, m_VsyncEnabled,
-                                                                 m_currentDisplayMode, m_disableLocalDimming);
+                m_swapChain.OnCreateWindowSizeDependentResources(m_Width,
+                                                                 m_Height,
+                                                                 m_VsyncEnabled,
+                                                                 m_currentDisplayMode,
+                                                                 m_disableLocalDimming);
 
             // Call sample defined OnResize()
             OnResize();
@@ -556,7 +586,10 @@ namespace ElysiaEngine
             m_currentDisplayMode = (DisplayMode)displayMode;
             m_disableLocalDimming = disableLocalDimming;
 
-            m_swapChain.OnCreateWindowSizeDependentResources(m_Width, m_Height, m_VsyncEnabled, m_currentDisplayMode,
+            m_swapChain.OnCreateWindowSizeDependentResources(m_Width,
+                                                             m_Height,
+                                                             m_VsyncEnabled,
+                                                             m_currentDisplayMode,
                                                              m_disableLocalDimming);
 
             // Call sample defined UpdateDisplay()
@@ -566,6 +599,11 @@ namespace ElysiaEngine
 
     void FrameworkWindows::OnActivate(bool WindowActive)
     {
+        static bool s_lastActiveState = false;
+        if (WindowActive == s_lastActiveState)
+            return;
+        s_lastActiveState = WindowActive;
+
         // *********************************************************************************
         // Edge case for handling Fullscreen Exclusive (FSE) mode 
         // FSE<->FSB transitions are handled here and at the end of EndFrame().
@@ -580,8 +618,10 @@ namespace ElysiaEngine
         }
         // *********************************************************************************
 
-        if (m_displayModesAvailable[m_currentDisplayModeNamesIndex] == DisplayMode::DISPLAYMODE_SDR &&
-            m_displayModesAvailable[m_previousDisplayModeNamesIndex] == DisplayMode::DISPLAYMODE_SDR)
+        if (m_displayModesAvailable[m_currentDisplayModeNamesIndex] == DisplayMode::DISPLAYMODE_SDR
+            &&
+            m_displayModesAvailable[m_previousDisplayModeNamesIndex] ==
+            DisplayMode::DISPLAYMODE_SDR)
             return;
 
         if (CheckIfWindowModeHdrOn() &&
@@ -590,12 +630,14 @@ namespace ElysiaEngine
             return;
 
         // Fall back HDR to SDR when window is fullscreen but not the active window or foreground window
-        m_currentDisplayModeNamesIndex = WindowActive && (m_fullscreenMode != PRESENTATIONMODE_WINDOWED)
+        m_currentDisplayModeNamesIndex = WindowActive && (
+                                             m_fullscreenMode != PRESENTATIONMODE_WINDOWED)
                                              ? m_previousDisplayModeNamesIndex
                                              : DisplayMode::DISPLAYMODE_SDR;
 
         OnResize(m_Width, m_Height, m_forceManualResize);
-        UpdateDisplay(m_displayModesAvailable[m_currentDisplayModeNamesIndex], m_disableLocalDimming);
+        UpdateDisplay(m_displayModesAvailable[m_currentDisplayModeNamesIndex],
+                      m_disableLocalDimming);
     }
 
     void FrameworkWindows::OnWindowMove()
@@ -604,10 +646,12 @@ namespace ElysiaEngine
         HMONITOR currentMonitor = MonitorFromWindow(m_windowHwnd, MONITOR_DEFAULTTONEAREST);
         if (m_monitor != currentMonitor)
         {
-            m_swapChain.EnumerateDisplayModes(&m_displayModesAvailable, &m_displayModesNamesAvailable);
+            m_swapChain.EnumerateDisplayModes(&m_displayModesAvailable,
+                                              &m_displayModesNamesAvailable);
             m_monitor = currentMonitor;
             m_previousDisplayModeNamesIndex = m_currentDisplayModeNamesIndex = DISPLAYMODE_SDR;
-            UpdateDisplay(m_displayModesAvailable[m_currentDisplayModeNamesIndex], m_disableLocalDimming);
+            UpdateDisplay(m_displayModesAvailable[m_currentDisplayModeNamesIndex],
+                          m_disableLocalDimming);
         }
     }
 

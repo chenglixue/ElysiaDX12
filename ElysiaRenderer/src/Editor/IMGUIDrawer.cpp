@@ -16,7 +16,7 @@ namespace ElysiaEditor
             IMGUI_RESERVED_DESCRIPTOR_INDEX);
 
         ImGui_ImplDX12_Init(pDevice->GetDevice(),
-                            1,
+                            NUM_FRAMES_IN_FLIGHT,
                             pSwapChain->GetFormat(),
                             pDevice->GetImGUIRenderHeap().GetDescriptorHeap(),
                             UIDescriptor0.GetCPUHandle(),

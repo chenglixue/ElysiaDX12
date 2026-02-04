@@ -90,8 +90,8 @@ namespace ElysiaCore
                 // Enabling GPU Validation without enabling the debug layer does nothing
                 if (bCPUValidationEnabled || bGpuValidationEnabled)
                 {
-                    // pDebugController->EnableDebugLayer();
-                    // pDebugController->SetEnableGPUBasedValidation(bGpuValidationEnabled);
+                    pDebugController->EnableDebugLayer();
+                    pDebugController->SetEnableGPUBasedValidation(bGpuValidationEnabled);
                 }
                 pDebugController->Release();
             }
@@ -250,8 +250,6 @@ namespace ElysiaCore
                 D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
                 NUM_RESERVED_SRV_DESCRIPTORS,
                 NUM_SRV_RENDER_PASS_USER_DESCRIPTORS);
-            m_ImguiDescriptor = m_ImGUIRenderPassDescriptorHeap->GetReservedDescriptor(
-                IMGUI_RESERVED_DESCRIPTOR_INDEX + 1);
 
             for (UINT currFrameIndex = 0; currFrameIndex < NUM_FRAMES_IN_FLIGHT; ++currFrameIndex)
             {
@@ -260,6 +258,10 @@ namespace ElysiaCore
                                                   D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
                                                   NUM_RESERVED_SRV_DESCRIPTORS,
                                                   NUM_SRV_RENDER_PASS_USER_DESCRIPTORS);
+
+                m_ImguiDescriptors[currFrameIndex] = m_ImGUIRenderPassDescriptorHeap->
+                    GetReservedDescriptor(
+                        IMGUI_RESERVED_DESCRIPTOR_INDEX + 1 + currFrameIndex);
             }
 
             m_samplerRenderPassDescriptorHeap = std::make_unique<DX12RenderPassDescriptorHeap>(
