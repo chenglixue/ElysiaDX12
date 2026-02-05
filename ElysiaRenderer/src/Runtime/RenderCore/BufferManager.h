@@ -8,79 +8,85 @@
 
 namespace ElysiaModel
 {
-	struct LoadedModel;
+    struct LoadedModel;
 }
 
 namespace ElysiaCore
 {
-	struct DX12TextureUpload;
-	class UploadRingBuffer;
-	class DX12UploadContext;
-	struct BufferCreationDesc;
+    struct DX12TextureUpload;
+    class UploadRingBuffer;
+    class DX12UploadContext;
+    struct BufferCreationDesc;
 }
 
 namespace ElysiaRenderer
 {
-	using namespace ElysiaHelper;
-	using namespace ElysiaCore;
+    using namespace ElysiaHelper;
+    using namespace ElysiaCore;
 
-	class BufferManager : public IManager, IUpdate
-	{
-	public:
-		
-		
-	public:
-		BufferManager();
-		BufferManager(const BufferManager& rhs) = delete;
-		BufferManager& operator=(BufferManager& rhs) = delete;
-		BufferManager(BufferManager&& rhs) = default;
-		~BufferManager();
+    class BufferManager : public IManager, IUpdate
+    {
+    public:
 
-		static BufferManager& GetInstance()
-		{
-			std::call_once(m_initInstanceFlag, []() {
-				m_instance.reset(new BufferManager());
-				});
 
-			return *m_instance;
-		}
+    public:
+        BufferManager();
+        BufferManager(const BufferManager& rhs) = delete;
+        BufferManager& operator=(BufferManager& rhs) = delete;
+        BufferManager(BufferManager&& rhs) = default;
+        ~BufferManager();
 
-		virtual void Init(DX12Device* pDevice) override;
-		virtual void Destory() override;
-		virtual void Update(const ElysiaEngine::FrameContext& context) override;
+        static BufferManager& GetInstance()
+        {
+            std::call_once(m_initInstanceFlag,
+                           []()
+                           {
+                               m_instance.reset(new BufferManager());
+                           });
 
-		D3D12MA::Allocator* GetAllocator() const noexcept;
-		UploadRingBuffer* GetUploadRingBuffer() const noexcept;
+            return *m_instance;
+        }
 
-		BufferHandle CreateBuffer(const BufferCreationDesc& bufferCreationDesc);
-		void DestoryBuffer(const BufferHandle handle);
-		void Release(BufferHandle handle);
-		void ProcessGarbage(uint64_t currentFrameIndex);
+        virtual void Init(DX12Device* pDevice) override;
+        virtual void Destory() override;
+        virtual void Update(const ElysiaEngine::FrameContext& context) override;
 
-		void UploadBufferData(DX12UploadContext* uploadContext, std::vector<DX12BufferUpload*>& bufferUploads) ;
-		void UploadTextureData(DX12UploadContext* uploadContext, std::vector<DX12TextureUpload*>& textureUploads) ;
+        D3D12MA::Allocator* GetAllocator() const noexcept;
+        UploadRingBuffer* GetUploadRingBuffer() const noexcept;
 
-		BufferHandle CreateVertexBuffer(const ElysiaModel::LoadedModel& model);
-		BufferHandle CreateIndexBuffer(const ElysiaModel::LoadedModel& model);
+        BufferHandle CreateBuffer(const BufferCreationDesc& bufferCreationDesc);
+        void DestoryBuffer(const BufferHandle handle);
+        void Release(BufferHandle handle);
+        void ProcessGarbage(uint64_t currentFrameIndex);
 
-	private:
-		UINT m_frameID;
-		UINT64 m_frameIndex;
-		static std::unique_ptr<BufferManager> m_instance;
-		static std::once_flag m_initInstanceFlag;
+        void UploadBufferData(DX12UploadContext* uploadContext,
+                              std::vector<DX12BufferUpload*>& bufferUploads);
+        void UploadTextureData(DX12UploadContext* uploadContext,
+                               std::vector<DX12TextureUpload*>& textureUploads);
 
-		DX12Device* m_pDevice = nullptr;
-		D3D12MA::Allocator* m_pAllocator = nullptr;
-		
-		std::mutex m_createMutex;
-		std::mutex m_garbageMutex;
-		
-		std::vector<BufferHandle> m_bufferPools;
-		std::queue<uint32_t> m_freeBufferIndices;
-		std::vector<std::pair<uint64_t, BufferHandle>> m_grbageQueue;
+        BufferHandle CreateVertexBuffer(const ElysiaModel::LoadedModel& model);
+        BufferHandle CreateIndexBuffer(const ElysiaModel::LoadedModel& model);
+        BufferHandle CreateVertexBuffer(const BufferCreationDesc& desc);
+        BufferHandle CreateIndexBuffer(const BufferCreationDesc& desc);
 
-		std::unique_ptr<UploadRingBuffer> m_pUploadBuffer;
-	};
+    private:
+        UINT m_frameID;
+        UINT64 m_frameIndex;
+        static std::unique_ptr<BufferManager> m_instance;
+        static std::once_flag m_initInstanceFlag;
 
-	
+        DX12Device* m_pDevice = nullptr;
+        D3D12MA::Allocator* m_pAllocator = nullptr;
+
+        std::mutex m_createMutex;
+        std::mutex m_garbageMutex;
+
+        std::vector<BufferHandle> m_bufferPools;
+        std::queue<uint32_t> m_freeBufferIndices;
+        std::vector<std::pair<uint64_t, BufferHandle>> m_grbageQueue;
+
+        std::unique_ptr<UploadRingBuffer> m_pUploadBuffer;
+    };
+
+
 }

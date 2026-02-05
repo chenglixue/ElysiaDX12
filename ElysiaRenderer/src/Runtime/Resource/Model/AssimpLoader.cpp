@@ -351,30 +351,14 @@ namespace ElysiaModel
         }
 
         model.vertices.resize(numVertices);
-#ifdef _DEBUG
-        assert(_CrtCheckMemory());
-#endif
         model.indices.resize(numIndices);
-#ifdef _DEBUG
-        assert(_CrtCheckMemory());
-#endif
         model.meshes.resize(numMeshes);
-#ifdef _DEBUG
-        assert(_CrtCheckMemory());
-#endif
+
         uint64 vtxOffset = 0;
         uint64 idxOffset = 0;
         for (UINT64 meshIdx = 0; meshIdx < numMeshes; meshIdx ++)
         {
-#ifdef _DEBUG
-            assert(_CrtCheckMemory());
-#endif
-
             const aiMesh* pMesh = pScene->mMeshes[meshIdx];
-
-#ifdef _DEBUG
-            assert(_CrtCheckMemory());
-#endif
 
             model.meshes[meshIdx].InitFromAssimpMesh(
                 *pScene->mMeshes[meshIdx],
@@ -578,21 +562,12 @@ namespace ElysiaModel
         if (bImportMeshes)
         {
             LoadMaterials(pScene, model);
-#ifdef _DEBUG
-            assert(_CrtCheckMemory());
-#endif
 
             LoadMaterialResource(model.materials,
                                  fileDirectory,
                                  model.materialTextures);
-#ifdef _DEBUG
-            assert(_CrtCheckMemory());
-#endif
 
             LoadMeshData(filePath, pScene, scale, model);
-#ifdef _DEBUG
-            assert(_CrtCheckMemory());
-#endif
         }
 
         std::cout << "Finished loading scene '%ls'" + WstringToString(filePath) <<

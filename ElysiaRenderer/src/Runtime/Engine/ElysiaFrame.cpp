@@ -231,6 +231,7 @@ namespace ElysiaEngine
             return;
 
         const float sensitivity = 0.002f;
+        const float moveSpeed = 2.f;
 
         if (ImGui::IsMouseDown(ImGuiMouseButton_Right))
         {
@@ -318,13 +319,13 @@ namespace ElysiaEngine
 
             ImGui::DockBuilderSplitNode(dockspace_id,
                                         ImGuiDir_Left,
-                                        0.10f,
+                                        0.05f,
                                         &dock_id_left,
                                         &dock_id_center);
 
             ImGui::DockBuilderSplitNode(dock_id_center,
                                         ImGuiDir_Right,
-                                        0.2f,
+                                        0.1f,
                                         &dock_id_right,
                                         &dock_id_center);
 

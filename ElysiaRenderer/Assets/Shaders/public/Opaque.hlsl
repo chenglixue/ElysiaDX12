@@ -8,7 +8,7 @@
 
 #pragma Rasterizer NoCullNoMS
 #pragma Blend Disabled
-#pragma Depth Disabled
+#pragma Depth Reversed
 
 #pragma shader_feature SHADOW_QUALITY_LOW SHADOW_QUALITY_MIDDLE SHADOW_QUALITY_HIGH SHADOW_QUALITY_VERYHIGH
 #pragma shader_feature HARD_SHADOW SOFT_SHADOW
@@ -40,21 +40,24 @@ PSInput VS(UINT vertexID : SV_VertexID)
 {
     PSInput o = (PSInput)0;
 
-    if (vertexID == 0)
-    {
-        o.positionCS = float4(-1.0f, 1.0f, 1.0f, 1.0f);
-        o.uv = float2(0.0f, 0.0f);
-    }
-    else if (vertexID == 1)
-    {
-        o.positionCS = float4(3.0f, 1.0f, 1.0f, 1.0f);
-        o.uv = float2(2.0f, 0.0f);
-    }
-    else
-    {
-        o.positionCS = float4(-1.0f, -3.0f, 1.0f, 1.0f);
-        o.uv = float2(0.0f, 2.0f);
-    }
+    o.uv = float2((vertexID << 1) & 2, vertexID & 2);
+    o.positionCS = float4(o.uv.x * 2.0f - 1.0f, 1.0f - o.uv.y * 2.0f, 1.0f, 1.0f);
+
+    // if (vertexID == 0)
+    // {
+    //     o.positionCS = float4(-1.0f, 1.0f, 1.0f, 1.0f);
+    //     o.uv = float2(0.0f, 0.0f);
+    // }
+    // else if (vertexID == 1)
+    // {
+    //     o.positionCS = float4(3.0f, 1.0f, 0.0f, 1.0f);
+    //     o.uv = float2(2.0f, 0.0f);
+    // }
+    // else
+    // {
+    //     o.positionCS = float4(-1.0f, -3.0f, 0.0f, 1.0f);
+    //     o.uv = float2(0.0f, 2.0f);
+    // }
 
     return o;
 }

@@ -1,28 +1,27 @@
-#include <private\ShadingCommon.hlsl>
-#include <private\Light.hlsl>
-#include <private\LightCommon.hlsl>
-#include <private\ShadowCommon.hlsl>
+#include "private\ShadingCommon.hlsl"
+
+#pragma Vertex VS
+#pragma Pixel PS
+
+#pragma Rasterizer NoCullNoMS
+#pragma Blend Disabled
+#pragma Depth Enabled
+
+cbuffer PassConstant : register(b0, perPassSpace)
+{
+    Matrix viewProjMatrix;
+    Matrix viewProjMatrix_I;
+}
 
 struct VSInput
 {
     float3 positionOS : POSITION;
-    float3 color : COLOR;
-    float2 uv : TEXCOORD0;
-    float3 normalOS : NORMAL;
-    float3 tangentOS : TANGENT;
 };
 
 struct PSInput
 {
-    float4 positionOS : POSITION;
     float4 positionCS : SV_POSITION;
-    float4 positionVS : VIEW_POSITION;
-    float4 positionWS : WORLD_POSITION;
-    float3 normalWS : NORMAL;
-    float3 tangentWS : TANGENT;
-    float3 bitTangentWS : BITTANGENT;
-    float2 uv : TEXCOORD;
-    float3 color : COLOR;
+    float3 uv : TEXCOORD;
 };
 
 struct PSOutput
@@ -32,43 +31,19 @@ struct PSOutput
 
 PSInput VS(VSInput i)
 {
-    PSInput o = (PSInput) 0;
+    PSInput o = (PSInput)0;
 
+    o.positionCS = mul(float4(i.positionOS, 1.f), viewProjMatrix).xyww;;
 
-    o.positionOS = float4(i.positionOS, 1.f);
-    o.positionWS = mul(float4(i.positionOS, 1.f), M_World);
-    o.positionWS.xyz += CameraPosWS;
-    o.positionVS = mul(o.positionWS, M_View);
-    o.positionCS = mul(o.positionVS, M_Proj).xyww;
-    
-    float3 N = normalize(mul(i.normalOS, (float3x3)M_World));
-    float3 T = normalize(mul(i.tangentOS, (float3x3)M_World));
-    
-    o.tangentWS = normalize(T - dot(N, T) * N);
-    o.bitTangentWS = cross(o.tangentWS, N);
-    o.normalWS = N;
-    
-    o.uv = i.uv;
-    o.color = i.color;
-    
+    o.uv = i.positionOS.xyz;
+
     return o;
 }
 
 PSOutput PS(PSInput i)
 {
-    PSOutput o = (PSOutput) 0;
-    
-    FInputParams inputParam = (FInputParams) 0;
-    inputParam.PositionWS = i.positionWS;
-    inputParam.PositionVS = i.positionVS;
-    inputParam.PixelPos = i.positionCS.xy;
-    inputParam.objectUV = i.uv;
-    inputParam.ScreenUV = i.positionCS.xy / ScreenSize.xy;
-    inputParam.TangentWS = i.tangentWS;
-    inputParam.BitTangentWS = i.bitTangentWS;
-    inputParam.NormalWS = i.normalWS;
-    inputParam.ScreenVector = GetScreenVectorWS(CameraPosWS.xyz, i.positionWS.xyz);
-    
-    o.target0 = g_SkyboxTex.Sample(g_Sampler_WarpU_WarpV_Linear, i.positionOS.xyz);
+    PSOutput o = (PSOutput)0;
+
+    o.target0 = SampleTextureCube(SkyboxTexIndex, i.uv.xyz, WarpLinearSampler);
     return o;
 }

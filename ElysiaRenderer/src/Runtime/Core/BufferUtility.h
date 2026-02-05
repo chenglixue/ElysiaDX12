@@ -41,6 +41,7 @@ namespace ElysiaCore
 		GPUResourceFlags viewFlags = GPUResourceFlags::None;
 		BufferAccessFlags accessFlags = BufferAccessFlags::GPUOnly;
 		bool isRawAccess = false;
+	    const void* InitData = nullptr;
 	};
 
 	struct DX12BufferUpload

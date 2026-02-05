@@ -131,7 +131,7 @@ namespace ElysiaRenderer
         void SyncFromTransform();
 
     private:
-        float m_speed = 1.f;
+        float m_speed = 2.f;
         float m_yaw = 0.0f;
         float m_pitch = 0.0f;
     };

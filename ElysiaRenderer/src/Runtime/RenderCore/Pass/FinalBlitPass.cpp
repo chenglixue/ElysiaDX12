@@ -98,9 +98,9 @@ namespace ElysiaRenderer
         ImGui::Render();
         if (ImGui::GetDrawData() && ImGui::GetDrawData()->CmdListsCount > 0)
         {
-            // ID3D12DescriptorHeap* currentHeap = m_pDevice->GetImGUIRenderHeap()
-            //                                              .GetDescriptorHeap();
-            // m_pCommand->GetCommandList()->SetDescriptorHeaps(1, &currentHeap);
+            ID3D12DescriptorHeap* currentHeap = m_pDevice->GetImGUIRenderHeap()
+                                                         .GetDescriptorHeap();
+            m_pCommand->GetCommandList()->SetDescriptorHeaps(1, &currentHeap);
             ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), m_pCommand->GetCommandList());
         }
 

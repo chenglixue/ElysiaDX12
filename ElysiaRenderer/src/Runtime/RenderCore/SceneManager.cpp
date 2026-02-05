@@ -58,11 +58,6 @@ namespace ElysiaRenderer
             {
                 CreateEntityFromModel(loadedModel);
             }
-
-            // auto cameraEntity = std::make_unique<Entity>("Main Camera");
-            // cameraEntity->Init(cameraEntity->transform);
-            // cameraEntity->pAttachedCamera = CameraManager::GetInstance().GetMainCamera();
-            // m_entities.emplace_back(std::move(cameraEntity));
         }
         if (loadStage == 7)
         {

@@ -21,6 +21,14 @@ float4 SampleTexture2D_LOD(UINT textureIndex, float2 uv, UINT samplerStateIndex,
     return SampleTex.SampleLevel(Sampler, uv, LOD);
 }
 
+float4 SampleTextureCube(UINT textureIndex, float3 dir, UINT samplerStateIndex)
+{
+    TextureCube<float4> SampleTex = ResourceDescriptorHeap[textureIndex];
+    SamplerState Sampler = SamplerDescriptorHeap[samplerStateIndex];
+
+    return SampleTex.Sample(Sampler, dir);
+}
+
 float4 GatherRedTexture2D(UINT textureIndex, float2 uv, UINT samplerStateIndex, uint2 offset = 0)
 {
     Texture2D<float4> SampleTex = ResourceDescriptorHeap[textureIndex];
