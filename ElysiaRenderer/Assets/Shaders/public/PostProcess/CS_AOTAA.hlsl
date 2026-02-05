@@ -38,19 +38,21 @@ void TAA(uint3 id: SV_DispatchThreadID)
     float2 screenUV = (float2(id.xy) + 0.5f) * g_TargetSize.zw;
 
     float rawDepth = LoadTexture2D(OpaqueDepthIndex, id);
-    float3 worldPos = ComputeWorldSpacePosition(screenUV, rawDepth, viewProjMatrix_I);
-
-    float4 preClipPos = mul(float4(worldPos, 1.f), pre_viewProjMatrix);
-    preClipPos /= preClipPos.w;
-
-    float2 preScreenUV = preClipPos.xy * 0.5f * float2(1.f, -1.f) + 0.5f;
-    if (any(preScreenUV < 0.f) || any(preScreenUV > 1.f))
-    {
-        o[id.xy] = LoadTexture2D(g_AOIndex, id);
-        return;
-    }
-
-    float2 velocity = screenUV - preScreenUV;
+    // float3 worldPos = ComputeWorldSpacePosition(screenUV, rawDepth, viewProjMatrix_I);
+    //
+    // float4 preClipPos = mul(float4(worldPos, 1.f), pre_viewProjMatrix);
+    // preClipPos /= preClipPos.w;
+    //
+    // float2 preScreenUV = preClipPos.xy * 0.5f * float2(1.f, -1.f) + 0.5f;
+    // if (any(preScreenUV < 0.f) || any(preScreenUV > 1.f))
+    // {
+    //     o[id.xy] = LoadTexture2D(g_AOIndex, id);
+    //     return;
+    // }
+    //
+    // float2 velocity = screenUV - preScreenUV;
+    float2 velocity = SampleTexture2D(GBuffer5Index, screenUV, ClampPointSampler);
+    float2 preScreenUV = screenUV - velocity;
     if (rawDepth >= 0.999f)
     {
         preScreenUV = screenUV;

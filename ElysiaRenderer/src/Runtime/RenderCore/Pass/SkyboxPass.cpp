@@ -137,7 +137,6 @@ namespace ElysiaRenderer
         m_pCommand->SetVertexBuffer(0, 1, m_vertexView);
 
         m_pCommand->AddBarrier(m_pCameraColorRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
-        // m_pCommand->ClearRenderTarget(m_pCameraColorRT, Color::Black);
         {
             Matrix viewNoTranslate = m_pCamera->GetViewMat();
             viewNoTranslate.Translation(Vector3::Zero); // 抹除位移

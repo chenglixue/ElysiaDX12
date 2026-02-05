@@ -1,5 +1,6 @@
 #pragma once
 #include "BasePass.h"
+#include "Runtime/RenderCore/RenderResource.h"
 
 namespace ElysiaCore
 {
@@ -45,6 +46,12 @@ namespace ElysiaRenderer
             static size_t projMatrix_I;
             static size_t viewProjMatrix;
             static size_t viewProjMatrix_I;
+            static inline size_t pre_viewMatrix = PropertyToID(L"pre_viewMatrix");
+            static inline size_t pre_viewMatrix_I = PropertyToID(L"pre_viewMatrix_I");
+            static inline size_t pre_projMatrix = PropertyToID(L"pre_projMatrix");
+            static inline size_t pre_projMatrix_I = PropertyToID(L"pre_projMatrix_I");
+            static inline size_t pre_viewProjMatrix = PropertyToID(L"pre_viewProjMatrix");
+            static inline size_t pre_viewProjMatrix_I = PropertyToID(L"pre_viewProjMatrix_I");
             static size_t worldMatrix;
             static size_t opacity;
             static size_t cutoff;
@@ -66,7 +73,18 @@ namespace ElysiaRenderer
             static size_t GBuffer4Index;
             static size_t GBuffer5Index;
         };
+
+        struct TAAData
+        {
+            static inline Matrix Pre_View_M;
+            static inline Matrix Pre_Proj_M;
+            static inline Matrix Pre_ViewProj_M;
+            static inline Matrix Pre_View_I_M;
+            static inline Matrix Pre_Proj_I_M;
+            static inline Matrix Pre_ViewProj_I_M;
+        };
         std::vector<RenderTexture*> m_GBufferRTs{};
+        static inline bool m_isFirstFrame = true;
 
         std::vector<DX12TextureResource*> GetGBuffers();
         void CreateRTs();

@@ -43,6 +43,13 @@ cbuffer PassConstant : register(b0, perPassSpace)
     Matrix projMatrix_I;
     Matrix viewProjMatrix;
     Matrix viewProjMatrix_I;
+
+    Matrix pre_viewMatrix;
+    Matrix pre_viewMatrix_I;
+    Matrix pre_projMatrix;
+    Matrix pre_projMatrix_I;
+    Matrix pre_viewProjMatrix;
+    Matrix pre_viewProjMatrix_I;
 }
 
 struct VSInput
@@ -117,11 +124,15 @@ PSOutput PS(PSInput i)
 
     FEncodeGBufferData encodeGBufferData = GetEncodeGBufferData(inputParam, mainLightData.toLight);
 
-    o.target0 = float4(encodeGBufferData.BaseColor, EncodeMaterialFlags(encodeGBufferData.ShadingModelID));
-    o.target1 = float4(encodeGBufferData.Metallic, encodeGBufferData.Specular, encodeGBufferData.Roughness,
+    o.target0 = float4(encodeGBufferData.BaseColor,
+                       EncodeMaterialFlags(encodeGBufferData.ShadingModelID));
+    o.target1 = float4(encodeGBufferData.Metallic,
+                       encodeGBufferData.Specular,
+                       encodeGBufferData.Roughness,
                        encodeGBufferData.AO);
     o.target2 = float4(EncodeNormal(encodeGBufferData.WorldTangent), encodeGBufferData.Anisotropy);
-    o.target3 = float4(EncodeNormal(encodeGBufferData.WorldNormal), encodeGBufferData.PerObjectData);
+    o.target3 = float4(EncodeNormal(encodeGBufferData.WorldNormal),
+                       encodeGBufferData.PerObjectData);
     o.target4 = float4(encodeGBufferData.IBL * encodeGBufferData.AO, encodeGBufferData.Opacity);
     o.target5 = float4(encodeGBufferData.Velocity, 0.f, 0.f);
 
@@ -162,7 +173,11 @@ FEncodeGBufferData GetEncodeGBufferData(FInputParams inputParams, float3 toLight
     o.PerObjectData = 0.f;
     o.PerComputedShadow = 1.f;
 
-    o.Velocity = 0.f;
+    float4 preClipPos = mul(float4(inputParams.PositionWS, 1.f), pre_viewProjMatrix);
+    preClipPos /= preClipPos.w;
+    float2 preScreenUV = preClipPos.xy * 0.5f * float2(1.f, -1.f) + 0.5f;
+
+    o.Velocity = inputParams.ScreenUV - preScreenUV;
 
     o.Anisotropy = 0;
     o.DiffuseColor = o.BaseColor - o.BaseColor * o.Metallic;

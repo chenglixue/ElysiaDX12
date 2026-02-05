@@ -92,6 +92,14 @@ namespace ElysiaRenderer
         m_pGPUTimer = context.pGPUTimer;
 
         DrawGBufferPass(context);
+
+        TAAData::Pre_View_M = m_pCamera->GetViewMat();
+        TAAData::Pre_View_I_M = m_pCamera->GetViewMat().Invert();
+        TAAData::Pre_Proj_M = m_pCamera->GetProjMat();
+        TAAData::Pre_Proj_I_M = m_pCamera->GetProjMat().Invert();
+        TAAData::Pre_ViewProj_M = m_pCamera->GetViewMat() * m_pCamera->GetProjMat();
+        TAAData::Pre_ViewProj_I_M = (m_pCamera->GetViewMat() * m_pCamera->GetProjMat()).
+            Invert();
     }
 
     void GBufferPass::Dispose()
@@ -314,6 +322,16 @@ namespace ElysiaRenderer
                                m_pCamera->GetViewMat() * m_pCamera->GetProjMat());
         m_pMaterial->SetMatrix(ShaderIDs::viewProjMatrix_I,
                                (m_pCamera->GetViewMat() * m_pCamera->GetProjMat()).Invert());
+        m_pMaterial->SetMatrix(ShaderIDs::pre_viewMatrix, TAAData::Pre_View_M, passID);
+        m_pMaterial->SetMatrix(ShaderIDs::pre_viewMatrix_I, TAAData::Pre_View_I_M, passID);
+        m_pMaterial->SetMatrix(ShaderIDs::pre_projMatrix, TAAData::Pre_Proj_M, passID);
+        m_pMaterial->SetMatrix(ShaderIDs::pre_projMatrix_I, TAAData::Pre_Proj_I_M, passID);
+        m_pMaterial->SetMatrix(ShaderIDs::pre_viewProjMatrix,
+                               TAAData::Pre_ViewProj_M,
+                               passID);
+        m_pMaterial->SetMatrix(ShaderIDs::pre_viewProjMatrix_I,
+                               TAAData::Pre_ViewProj_I_M,
+                               passID);
 
         SetSpaceResource(passData, PER_PASS_SPACE);
         SetSpaceResource(passData, PER_FRAME_SPACE);
