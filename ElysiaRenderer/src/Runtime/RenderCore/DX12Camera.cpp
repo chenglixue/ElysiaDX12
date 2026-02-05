@@ -75,6 +75,10 @@ namespace ElysiaRenderer
     {
         return m_viewMatrix.Right();
     }
+    BoundingFrustum DX12Camera::GetFrustum() const noexcept
+    {
+        return m_worldFrustum;
+    }
 
     void DX12Camera::SetPosition(const Vector3& cameraPos) noexcept
     {
@@ -152,6 +156,13 @@ namespace ElysiaRenderer
                                             m_transform.position + forward,
                                             up);
     }
+    void DX12Camera::UpdateFrustum()
+    {
+        BoundingFrustum::CreateFromMatrix(m_localFrustum, m_projMatrix);
+
+        m_localFrustum.Transform(m_worldFrustum, m_viewMatrix.Invert());
+    }
+
 
     Quaternion DX12Camera::CreateFromAxisAngle(const Vector3& axis, float angle)
     {

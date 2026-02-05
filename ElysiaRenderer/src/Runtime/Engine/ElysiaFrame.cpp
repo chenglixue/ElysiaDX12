@@ -219,6 +219,8 @@ namespace ElysiaEngine
         ImGuiIO& io = ImGui::GetIO();
 
         HandleInput(io);
+        // CameraManager::GetInstance().GetMainCamera()->UpdateFrustum();
+        SceneManager::GetInstance().CollectRenderItems();
     }
 
     void ElysiaFrame::HandleInput(const ImGuiIO& io)
@@ -428,12 +430,21 @@ namespace ElysiaEngine
             return;
         }
 
-        char nameBuffer[256];
-        strncpy_s(nameBuffer, m_pSelectedObject->name.c_str(), sizeof(nameBuffer));
-        if (ImGui::InputText("##ObjectName", nameBuffer, sizeof(nameBuffer)))
-        {
-            m_pSelectedObject->SetName(nameBuffer);
-        }
+        // char nameBuffer[256];
+        // const char* pName = m_pSelectedObject->name.c_str();
+        // if (pName)
+        // {
+        //     strncpy_s(nameBuffer, m_pSelectedObject->name.c_str(), sizeof(nameBuffer));
+        //     nameBuffer[sizeof(nameBuffer) - 1] = '\0';
+        // }
+        // else
+        // {
+        //     strcpy_s(nameBuffer, "None"); // 如果没有选中物体，赋予默认值
+        // }
+        // if (ImGui::InputText("##ObjectName", nameBuffer, sizeof(nameBuffer)))
+        // {
+        //     m_pSelectedObject->SetName(nameBuffer);
+        // }
 
         ImGui::Separator();
 

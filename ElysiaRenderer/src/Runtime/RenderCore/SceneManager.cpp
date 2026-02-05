@@ -87,6 +87,7 @@ namespace ElysiaRenderer
 
         Entity* ptr = pEntity.get();
         ptr->transform.position = Vector3::Zero;
+
         m_entities.emplace_back(std::move(pEntity));
         return ptr;
     }
@@ -112,6 +113,7 @@ namespace ElysiaRenderer
             pChild->pMeshRenderer = std::make_unique<MeshRenderer>();
             pChild->pMeshRenderer->ShutDown();
             pChild->pMeshRenderer->Init(model, meshIndex);
+            pChild->UpdateWorldAABB();
 
             pParent->AddChild(std::move(pChild));
             meshIndex ++;
@@ -124,36 +126,52 @@ namespace ElysiaRenderer
     {
         renderList.clear();
 
-        for (UINT64 entityIndex = 0; entityIndex < m_entities.size(); entityIndex ++)
+        auto viewFrustum = CameraManager::GetInstance().GetMainCamera()->GetFrustum();
+        for (const auto& pEntity : m_entities)
         {
-            const auto& pEntity = m_entities[entityIndex];
-            CollectRenderItem(pEntity);
+            CollectRenderItem(pEntity, viewFrustum);
         }
     }
-    void SceneManager::CollectRenderItem(const std::unique_ptr<Entity>& pEntity)
+    void SceneManager::CollectRenderItem(const std::unique_ptr<Entity>& pEntity,
+                                         BoundingFrustum& cameraFrustum)
     {
-        if (pEntity->pMeshRenderer != nullptr)
+        switch (cameraFrustum.Contains(pEntity->GetWorldAABB()))
         {
-            const auto& worldMat = pEntity->transform.GetWorldMatrix();
-
-            const auto& mesh = pEntity->pMeshRenderer->GetMesh();
-            RenderItem item
-            {
-                .vbView = pEntity->pMeshRenderer->GetVertexBufferView(),
-                .ibView = pEntity->pMeshRenderer->GetIndexBufferView(),
-                .indexCount = mesh.numIndices,
-                .startIndex = mesh.idxOffset,
-                .baseVertex = mesh.vtxOffset,
-                .pAssociatedEntity = pEntity.get(),
-                .worldMatrix = worldMat,
-                .textureIndices = pEntity->pMeshRenderer->GetTextureIndices(),
-                .loadedMaterial = pEntity->pMeshRenderer->GetMaterial()
-            };
-            renderList.emplace_back(std::move(item));
+        case CONTAINS:
+            std::cout << "CONTAINS" << std::endl;
+            break;
+        case DISJOINT:
+            std::cout << "DISJOINT" << std::endl;
+            break;
+        case INTERSECTS:
+            std::cout << "INTERSECTS" << std::endl;
+            break;
         }
-        for (const auto& childEntity : pEntity->GetChildren())
+        if (cameraFrustum.Contains(pEntity->GetWorldAABB()) != DISJOINT)
         {
-            CollectRenderItem(childEntity);
+            if (pEntity->pMeshRenderer != nullptr)
+            {
+                const auto& worldMat = pEntity->transform.GetWorldMatrix();
+
+                const auto& mesh = pEntity->pMeshRenderer->GetMesh();
+                RenderItem item
+                {
+                    .vbView = pEntity->pMeshRenderer->GetVertexBufferView(),
+                    .ibView = pEntity->pMeshRenderer->GetIndexBufferView(),
+                    .indexCount = mesh.numIndices,
+                    .startIndex = mesh.idxOffset,
+                    .baseVertex = mesh.vtxOffset,
+                    .pAssociatedEntity = pEntity.get(),
+                    .worldMatrix = worldMat,
+                    .textureIndices = pEntity->pMeshRenderer->GetTextureIndices(),
+                    .loadedMaterial = pEntity->pMeshRenderer->GetMaterial()
+                };
+                renderList.emplace_back(std::move(item));
+            }
+            for (const auto& childEntity : pEntity->GetChildren())
+            {
+                CollectRenderItem(childEntity, cameraFrustum);
+            }
         }
     }
 
@@ -198,8 +216,6 @@ namespace ElysiaRenderer
                 mesh.aabbMax.y = eastl::max(mesh.aabbMax.y, position.y);
                 mesh.aabbMax.z = eastl::max(mesh.aabbMax.z, position.z);
             }
-
-            pEntity->pMeshRenderer->Update();
         }
 
         for (auto& pChild : pEntity->GetChildren())

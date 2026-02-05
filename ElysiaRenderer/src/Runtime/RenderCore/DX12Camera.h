@@ -29,6 +29,7 @@ namespace ElysiaRenderer
         Vector3 GetForwardDir() const noexcept;
         Vector3 GetUpDir() const noexcept;
         Vector3 GetRightDir() const noexcept;
+        BoundingFrustum GetFrustum() const noexcept;
 
         void SetPosition(const Vector3& cameraPos) noexcept;
         void SetRotation(const float x, const float y, const float z) noexcept;
@@ -38,10 +39,11 @@ namespace ElysiaRenderer
 
         void Rotate(const Vector3& pitchYawRollOffset) noexcept;
         void Translate(const Vector3& translateOffset) noexcept;
-
         void LookAt(const Vector3& targetPos) noexcept;
+
         void UpdateViewMatrix() noexcept;
         virtual void UpdateProjMatrix() noexcept = 0;
+        void UpdateFrustum();
 
         Quaternion CreateFromAxisAngle(const Vector3& axis, float angle);
         Quaternion Euler(float x, float y, float z);
@@ -49,6 +51,9 @@ namespace ElysiaRenderer
     protected:
         Matrix m_viewMatrix = Matrix::Identity;
         Matrix m_projMatrix = Matrix::Identity;
+
+        BoundingFrustum m_localFrustum;
+        BoundingFrustum m_worldFrustum;
 
         float m_nearZ = 0.01f;
         float m_farZ = 1000.f;

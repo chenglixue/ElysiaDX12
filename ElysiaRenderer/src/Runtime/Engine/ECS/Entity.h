@@ -14,7 +14,7 @@ namespace ElysiaEngine
     struct Entity
     {
     public:
-        eastl::string name;
+        eastl::string name = "";
         Transform transform;
         std::unique_ptr<MeshRenderer> pMeshRenderer = nullptr;
         DX12Camera* pAttachedCamera = nullptr;
@@ -27,10 +27,16 @@ namespace ElysiaEngine
         void Init(Transform transform)
         {
             this->transform = transform;
+
+            UpdateWorldAABB();
         }
 
-        void AddChild(std::unique_ptr<Entity>&& child);
+        void SetName(eastl::string name)
+        {
+            this->name = name;
+        }
         void SetParent(Entity* pParent);
+
         const std::vector<std::unique_ptr<Entity>>& GetChildren()
         {
             return m_childs;
@@ -39,11 +45,12 @@ namespace ElysiaEngine
         {
             return m_pParent;
         }
-
-        void SetName(eastl::string name)
+        BoundingBox GetWorldAABB() const noexcept
         {
-            this->name = name;
+            return m_worldAABB;
         }
+
+        void AddChild(std::unique_ptr<Entity>&& child);
 
         bool IsDirty() const
         {
@@ -53,27 +60,17 @@ namespace ElysiaEngine
         {
             m_IsDirty = false;
         }
-        void OnTransformChanged()
-        {
-            m_IsDirty = true;
-            if (pAttachedCamera)
-            {
-                pAttachedCamera->m_transform = transform;
+        void OnTransformChanged();
 
-                auto fpCam = dynamic_cast<FirstPersonCamera*>(pAttachedCamera);
-                if (fpCam)
-                {
-                    fpCam->SyncFromTransform();
-                }
-                pAttachedCamera->UpdateViewMatrix();
-
-            }
-
-        }
+        void UpdateWorldAABB();
 
     private:
         bool m_IsDirty = true;
         Entity* m_pParent = nullptr;
         std::vector<std::unique_ptr<Entity>> m_childs;
+        BoundingBox m_worldAABB;
+
+        BoundingBox LocalAABB() const noexcept;
+        bool HasMeshRenderer() const noexcept;
     };
 }
