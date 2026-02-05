@@ -79,14 +79,13 @@ namespace ElysiaRenderer
     std::shared_ptr<ElysiaModel::LoadedModel> SceneManager::CreateModel(
         const std::wstring& modelPath)
     {
-        return ModelManager::GetInstance().LoadStaticModel(modelPath, 0.01);
+        return ModelManager::GetInstance().LoadStaticModel(modelPath, 0.01f);
     }
     Entity* SceneManager::CreateEntityFromModel(std::shared_ptr<ElysiaModel::LoadedModel> pModel)
     {
         auto pEntity = CreateEntity(pModel);
 
         Entity* ptr = pEntity.get();
-        ptr->transform.position = Vector3::Zero;
 
         m_entities.emplace_back(std::move(pEntity));
         return ptr;
@@ -95,21 +94,25 @@ namespace ElysiaRenderer
         const std::shared_ptr<LoadedModel>& model) const
     {
         auto pParent = std::make_unique<Entity>(ToEastl(model->name));
-        pParent->transform.scale = Vector3::One * model->scale;
-        if (pParent->GetParent())
-            pParent->transform.position = (model->aabbMin + model->aabbMax) * 0.5f;
+        pParent->transform.scale = Vector3::One;
+        // if (pParent->GetParent())
+        // pParent->transform.position = (model->aabbMin + model->aabbMax) * 0.5f * pParent->transform.
+        //                                                                                   scale;
+        pParent->transform.position = Vector3::Zero;
 
         UINT meshIndex = 0;
         for (auto mesh : model->meshes)
         {
             auto pChild = std::make_unique<Entity>(ToEastl(mesh.name));
-            pChild->transform =
+            pChild->transform = Transform
             {
                 .position = Vector3::Zero,
                 .rotation = Quaternion::Identity,
-                .scale = Vector3::One,
+                .scale = Vector3::One
             };
             pChild->transform.m_pParent = &pParent->transform;
+            pChild->GetLocalAABB().Center = mesh.logicalCenter;
+            pChild->GetLocalAABB().Extents = (mesh.aabbMax - mesh.aabbMin) * 0.5f;
             pChild->pMeshRenderer = std::make_unique<MeshRenderer>();
             pChild->pMeshRenderer->ShutDown();
             pChild->pMeshRenderer->Init(model, meshIndex);
@@ -131,6 +134,7 @@ namespace ElysiaRenderer
         {
             CollectRenderItem(pEntity, viewFrustum);
         }
+        SortRenderItems();
     }
     void SceneManager::CollectRenderItem(const std::unique_ptr<Entity>& pEntity,
                                          BoundingFrustum& cameraFrustum)
@@ -152,8 +156,9 @@ namespace ElysiaRenderer
             if (pEntity->pMeshRenderer != nullptr)
             {
                 const auto& worldMat = pEntity->transform.GetWorldMatrix();
-
                 const auto& mesh = pEntity->pMeshRenderer->GetMesh();
+                Vector3 worldCenter = Vector3::Transform(mesh.logicalCenter, worldMat);
+
                 RenderItem item
                 {
                     .vbView = pEntity->pMeshRenderer->GetVertexBufferView(),
@@ -164,7 +169,10 @@ namespace ElysiaRenderer
                     .pAssociatedEntity = pEntity.get(),
                     .worldMatrix = worldMat,
                     .textureIndices = pEntity->pMeshRenderer->GetTextureIndices(),
-                    .loadedMaterial = pEntity->pMeshRenderer->GetMaterial()
+                    .loadedMaterial = pEntity->pMeshRenderer->GetMaterial(),
+                    .distanceToCameraSq = Vector3::DistanceSquared(
+                        worldCenter,
+                        CameraManager::GetInstance().GetMainCamera()->GetPosition())
                 };
                 renderList.emplace_back(std::move(item));
             }
@@ -200,10 +208,10 @@ namespace ElysiaRenderer
         if (pEntity->pMeshRenderer != nullptr)
         {
             auto& mesh = pEntity->pMeshRenderer->GetMesh();
+            mesh.aabbMin = Vector3(FLT_MAX);
+            mesh.aabbMax = Vector3(-FLT_MAX);
             for (UINT32 vertexIndex = 0; vertexIndex < mesh.numVertices; vertexIndex ++)
             {
-                mesh.aabbMin = Vector3(FLT_MAX);
-                mesh.aabbMax = Vector3(-FLT_MAX);
                 Vector3 position = Vector3::Transform(
                     pEntity->pMeshRenderer->GetVertices()[vertexIndex].Position,
                     worldMat);
@@ -224,4 +232,14 @@ namespace ElysiaRenderer
         }
     }
 
+    void SceneManager::SortRenderItems()
+    {
+        std::sort(renderList.begin(),
+                  renderList.end(),
+                  [](const RenderItem& a, const RenderItem& b)
+                  {
+                      // 按深度从前到后排序（Early-Z）
+                      return a.distanceToCameraSq < b.distanceToCameraSq;
+                  });
+    }
 }

@@ -56,9 +56,7 @@ namespace ElysiaEngine
 
     void Entity::UpdateWorldAABB()
     {
-        if (!HasMeshRenderer())
-            return;
         auto world_M = transform.GetWorldMatrix();
-        LocalAABB().Transform(m_worldAABB, world_M);
+        m_localAABB.Transform(m_worldAABB, world_M);
     }
 }

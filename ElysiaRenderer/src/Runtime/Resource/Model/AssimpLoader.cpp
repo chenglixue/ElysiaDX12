@@ -338,7 +338,6 @@ namespace ElysiaModel
                       float sceneScale,
                       LoadedModel& model)
     {
-        model.scale = sceneScale;
         const UINT64 numMeshes = pScene->mNumMeshes;
         UINT64 numVertices = 0;
         UINT64 numIndices = 0;
@@ -356,6 +355,8 @@ namespace ElysiaModel
 
         uint64 vtxOffset = 0;
         uint64 idxOffset = 0;
+        model.aabbMin = Vector3(FLT_MAX);
+        model.aabbMax = Vector3(-FLT_MAX);
         for (UINT64 meshIdx = 0; meshIdx < numMeshes; meshIdx ++)
         {
             const aiMesh* pMesh = pScene->mMeshes[meshIdx];
@@ -367,19 +368,11 @@ namespace ElysiaModel
                 &model.indices[idxOffset]);
             model.meshes[meshIdx].name = pMesh->mName.C_Str();
 
-            model.aabbMin.x = eastl::min(model.aabbMin.x,
-                                         model.meshes[meshIdx].aabbMin.x);
-            model.aabbMin.y = eastl::min(model.aabbMin.y,
-                                         model.meshes[meshIdx].aabbMin.y);
-            model.aabbMin.z = eastl::min(model.aabbMin.z,
-                                         model.meshes[meshIdx].aabbMin.z);
+            model.aabbMin = Vector3::Min(model.aabbMin,
+                                         model.meshes[meshIdx].aabbMin);
 
-            model.aabbMax.x = eastl::max(model.aabbMax.x,
-                                         model.meshes[meshIdx].aabbMax.x);
-            model.aabbMax.y = eastl::max(model.aabbMax.y,
-                                         model.meshes[meshIdx].aabbMax.y);
-            model.aabbMax.z = eastl::max(model.aabbMax.z,
-                                         model.meshes[meshIdx].aabbMax.z);
+            model.aabbMax = Vector3::Max(model.aabbMax,
+                                         model.meshes[meshIdx].aabbMax);
 
             vtxOffset += model.meshes[meshIdx].numVertices;
             idxOffset += model.meshes[meshIdx].numIndices;
@@ -446,15 +439,10 @@ namespace ElysiaModel
         {
             if (assimpMesh.HasPositions())
             {
-                Vector3 position = ConvertVec(assimpMesh.mVertices[vertexIdx]);
+                Vector3 position = ConvertVec(assimpMesh.mVertices[vertexIdx]) * sceneScale;
 
-                aabbMin.x = eastl::min(aabbMin.x, position.x);
-                aabbMin.y = eastl::min(aabbMin.y, position.y);
-                aabbMin.z = eastl::min(aabbMin.z, position.z);
-
-                aabbMax.x = eastl::max(aabbMax.x, position.x);
-                aabbMax.y = eastl::max(aabbMax.y, position.y);
-                aabbMax.z = eastl::max(aabbMax.z, position.z);
+                aabbMin = Vector3::Min(aabbMin, position);
+                aabbMax = Vector3::Max(aabbMax, position);
 
                 dstVertices[vertexIdx].Position = position;
             }
@@ -487,6 +475,7 @@ namespace ElysiaModel
         }
 
         materialIndex = assimpMesh.mMaterialIndex;
+        logicalCenter = (aabbMax + aabbMin) * 0.5f;
     }
 
     void LoadedModel::Mesh::InitCommon(uint64 vbAddress,

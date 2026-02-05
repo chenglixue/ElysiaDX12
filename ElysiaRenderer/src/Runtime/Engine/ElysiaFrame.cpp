@@ -220,7 +220,7 @@ namespace ElysiaEngine
 
         HandleInput(io);
         // CameraManager::GetInstance().GetMainCamera()->UpdateFrustum();
-        SceneManager::GetInstance().CollectRenderItems();
+        //SceneManager::GetInstance().CollectRenderItems();
     }
 
     void ElysiaFrame::HandleInput(const ImGuiIO& io)

@@ -27,5 +27,7 @@ namespace ElysiaRenderer
         ID3D12PipelineState* pso;
 
         mutable UINT NumFramesDirty = 3;
+
+        float distanceToCameraSq = 0.f;
     };
 }

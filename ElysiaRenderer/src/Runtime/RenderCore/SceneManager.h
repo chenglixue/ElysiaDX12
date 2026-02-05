@@ -55,6 +55,8 @@ namespace ElysiaRenderer
             m_entities.emplace_back(std::move(pEntity));
         }
 
+        void SortRenderItems();
+
     private:
         SceneManager(const SceneManager& rhs) = delete;
         SceneManager& operator=(SceneManager& rhs) = delete;
@@ -63,7 +65,8 @@ namespace ElysiaRenderer
         std::unique_ptr<Entity> CreateEntity(
             const std::shared_ptr<ElysiaModel::LoadedModel>& model) const;
         void UpdateEntity(const std::unique_ptr<Entity>& pEntity);
-        void CollectRenderItem(const std::unique_ptr<Entity>& pEntity, BoundingFrustum& boundingFrustum);
+        void CollectRenderItem(const std::unique_ptr<Entity>& pEntity,
+                               BoundingFrustum& boundingFrustum);
 
         ElysiaCore::DX12Device* m_pDevice = nullptr;
         static std::unique_ptr<SceneManager> m_instance;

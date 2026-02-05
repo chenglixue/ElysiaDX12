@@ -13,6 +13,14 @@ namespace ElysiaEngine
         Vector3 scale = Vector3::One;
 
         Matrix GetWorldMatrix() const;
+        Vector3 GetLocalPosition() const noexcept
+        {
+            return position;
+        }
+        Vector3 GetPosition() const
+        {
+            return m_pParent ? m_pParent->GetPosition() + position : position;
+        }
 
         void LookAt(Vector3 target);
 

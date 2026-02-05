@@ -45,6 +45,10 @@ namespace ElysiaEngine
         {
             return m_pParent;
         }
+        BoundingBox GetLocalAABB() const noexcept
+        {
+            return m_localAABB;
+        }
         BoundingBox GetWorldAABB() const noexcept
         {
             return m_worldAABB;
@@ -69,6 +73,7 @@ namespace ElysiaEngine
         Entity* m_pParent = nullptr;
         std::vector<std::unique_ptr<Entity>> m_childs;
         BoundingBox m_worldAABB;
+        BoundingBox m_localAABB;
 
         BoundingBox LocalAABB() const noexcept;
         bool HasMeshRenderer() const noexcept;
