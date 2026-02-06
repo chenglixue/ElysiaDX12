@@ -89,8 +89,8 @@ PSInput VS(VSInput i)
     o.positionVS = mul(o.positionWS, viewMatrix);
     o.positionCS = mul(o.positionVS, projMatrix);
 
-    float3 N = normalize(mul(i.normalOS, (float3x3)worldMatrix));
-    float3 T = normalize(mul(i.tangentOS, (float3x3)worldMatrix));
+    float3 N = normalize(mul((float3x3)worldMatrix, i.normalOS));
+    float3 T = normalize(mul((float3x3)worldMatrix, i.tangentOS));
     o.tangentWS = normalize(T - dot(N, T) * N);
     o.bitTangentWS = (cross(o.tangentWS, N));
     o.normalWS = N;
@@ -166,7 +166,7 @@ FEncodeGBufferData GetEncodeGBufferData(FInputParams inputParams, float3 toLight
     o.AO = 1;
     o.Metallic = metallic;
     o.Roughness = roughness;
-    o.Specular = 0.5;
+    o.Specular = 0.f;
 
     o.WorldNormal = GetNormal(normalTS.rgb, TBN, normalIntensity);
     o.WorldTangent = TBN._m00_m01_m02;
@@ -182,7 +182,7 @@ FEncodeGBufferData GetEncodeGBufferData(FInputParams inputParams, float3 toLight
     o.Anisotropy = 0;
     o.DiffuseColor = o.BaseColor - o.BaseColor * o.Metallic;
     o.SpecularColor = ComputeF0(o.Specular, o.BaseColor, o.Metallic);
-    o.IBL = GetIBL(inputParams, o, toLight, 1, 1);
+    // o.IBL = GetIBL(inputParams, o, toLight, 1, 1);
 
     return o;
 }

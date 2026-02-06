@@ -461,17 +461,17 @@ namespace ElysiaRenderer
 
             for (UINT i = 0; i < desc.MipLevels; i ++)
             {
-                D3D12_UNORDERED_ACCESS_VIEW_DESC desc{};
-                desc.Format = shaderResourceViewFormat;
-                desc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
-                desc.Texture2D.MipSlice = i;
-                desc.Texture2D.PlaneSlice = 0;
+                D3D12_UNORDERED_ACCESS_VIEW_DESC UAVDesc{};
+                UAVDesc.Format = shaderResourceViewFormat;
+                UAVDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
+                UAVDesc.Texture2D.MipSlice = i;
+                UAVDesc.Texture2D.PlaneSlice = 0;
 
                 auto newUAVHandle = m_pDevice->GetSRVStageHeap()->NewDescriptorHeapHandle();
                 newTex->SetUAVDescriptor(newUAVHandle, i);
                 m_pDevice->GetDevice()->CreateUnorderedAccessView(newTex->GetResource(),
                                                                   nullptr,
-                                                                  &desc,
+                                                                  &UAVDesc,
                                                                   newTex->GetUAVDescriptor(i).
                                                                           GetCPUHandle());
 

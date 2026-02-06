@@ -30,6 +30,7 @@
 #include "TonemapUtility.h"
 #include "Editor/IMGUIDrawer.h"
 #include "Pass/DebugPass.h"
+#include "Pass/GIPass.h"
 #include "Pass/SkyboxPass.h"
 #include "Runtime/Engine/ECS/Entity.h"
 
@@ -69,7 +70,8 @@ namespace ElysiaRenderer
             std::move(std::make_unique<PreDrawPass>()));
         m_passes.emplace_back(
             std::move(std::make_unique<ShadowPass>()));
-
+        m_passes.emplace_back(
+            std::move(std::make_unique<GIPass>()));
         m_passes.emplace_back(
             std::move(std::make_unique<GBufferPass>()));
 

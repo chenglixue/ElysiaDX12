@@ -99,14 +99,19 @@ namespace ElysiaRenderer
 
         bool isHostVisible = ((bufferCreationDesc.accessFlags & BufferAccessFlags::HostWritable) ==
                               BufferAccessFlags::HostWritable);
-        bool isHasCBV = ((bufferCreationDesc.viewFlags & GPUResourceFlags::CBV) ==
-                         GPUResourceFlags::CBV);
-        bool isHasSRV = ((bufferCreationDesc.viewFlags & GPUResourceFlags::SRV) ==
-                         GPUResourceFlags::SRV);
-        bool isHasUAV = ((bufferCreationDesc.viewFlags & GPUResourceFlags::UAV) ==
-                         GPUResourceFlags::UAV);
+        bool hasCBV = ((bufferCreationDesc.viewFlags & GPUResourceFlags::CBV) ==
+                       GPUResourceFlags::CBV);
+        bool hasSRV = ((bufferCreationDesc.viewFlags & GPUResourceFlags::SRV) ==
+                       GPUResourceFlags::SRV);
+        bool hasUAV = ((bufferCreationDesc.viewFlags & GPUResourceFlags::UAV) ==
+                       GPUResourceFlags::UAV);
 
-        D3D12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(alignSize);
+        D3D12_RESOURCE_FLAGS resFlags = D3D12_RESOURCE_FLAG_NONE;
+        if (hasUAV)
+        {
+            resFlags |= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
+        }
+        D3D12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(alignSize, resFlags);
 
         D3D12_RESOURCE_STATES resourceState = isHostVisible
                                                   ? D3D12_RESOURCE_STATE_GENERIC_READ
@@ -140,7 +145,7 @@ namespace ElysiaRenderer
                                            reinterpret_cast<void**>(&pNewBuffer->m_mappedBuffer));
         }
 
-        if (isHasCBV)
+        if (hasCBV)
         {
             D3D12_CONSTANT_BUFFER_VIEW_DESC CBVDesc{};
             CBVDesc.SizeInBytes = static_cast<UINT>(pNewBuffer->GetResourceDesc().Width);
@@ -152,7 +157,7 @@ namespace ElysiaRenderer
                 pNewBuffer->GetCBVDescriptor().GetCPUHandle());
         }
 
-        if (isHasSRV)
+        if (hasSRV)
         {
             D3D12_SHADER_RESOURCE_VIEW_DESC SRVDesc{};
             SRVDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
@@ -187,7 +192,7 @@ namespace ElysiaRenderer
                                                            pNewBuffer->GetResourceHeapIndex());
         }
 
-        if (isHasUAV)
+        if (hasUAV)
         {
             D3D12_UNORDERED_ACCESS_VIEW_DESC UAVDesc{};
 

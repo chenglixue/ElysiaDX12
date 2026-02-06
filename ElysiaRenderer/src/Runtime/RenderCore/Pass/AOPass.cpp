@@ -210,15 +210,6 @@ namespace ElysiaRenderer
 
         for (auto pRT : m_DeinterleavedDepthRTs)
         {
-            m_pCommand->AddBarrier(pRT, D3D12_RESOURCE_STATE_RENDER_TARGET, false);
-        }
-        m_pCommand->FlushBarrier();
-        for (auto pRT : m_DeinterleavedDepthRTs)
-        {
-            m_pCommand->Discard(pRT);
-        }
-        for (auto pRT : m_DeinterleavedDepthRTs)
-        {
             m_pCommand->AddBarrier(pRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, false);
         }
         m_pCommand->FlushBarrier();

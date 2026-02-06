@@ -36,6 +36,14 @@ namespace ElysiaEngine
             this->name = name;
         }
         void SetParent(Entity* pParent);
+        void SetLocalAABB(Vector3 aabbMin, Vector3 aabbMax) noexcept
+        {
+            Vector3 center = (aabbMin + aabbMax) * 0.5f;
+            Vector3 extents = (aabbMax - aabbMin) * 0.5f;
+
+            m_localAABB.Center = center;
+            m_localAABB.Extents = extents;
+        }
 
         const std::vector<std::unique_ptr<Entity>>& GetChildren()
         {
@@ -65,7 +73,6 @@ namespace ElysiaEngine
             m_IsDirty = false;
         }
         void OnTransformChanged();
-
         void UpdateWorldAABB();
 
     private:

@@ -99,6 +99,8 @@ namespace ElysiaRenderer
         // pParent->transform.position = (model->aabbMin + model->aabbMax) * 0.5f * pParent->transform.
         //                                                                                   scale;
         pParent->transform.position = Vector3::Zero;
+        pParent->SetLocalAABB(model->aabbMin, model->aabbMax);
+        pParent->UpdateWorldAABB();
 
         UINT meshIndex = 0;
         for (auto mesh : model->meshes)
@@ -111,8 +113,7 @@ namespace ElysiaRenderer
                 .scale = Vector3::One
             };
             pChild->transform.m_pParent = &pParent->transform;
-            pChild->GetLocalAABB().Center = mesh.logicalCenter;
-            pChild->GetLocalAABB().Extents = (mesh.aabbMax - mesh.aabbMin) * 0.5f;
+            pChild->SetLocalAABB(mesh.aabbMin, mesh.aabbMax);
             pChild->pMeshRenderer = std::make_unique<MeshRenderer>();
             pChild->pMeshRenderer->ShutDown();
             pChild->pMeshRenderer->Init(model, meshIndex);

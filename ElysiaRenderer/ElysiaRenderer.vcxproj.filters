@@ -576,6 +576,10 @@
     <ClInclude Include="src\Runtime\RenderCore\Pass\DebugPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Assets\Shaders\private\DDGICommon.hlsli" />
+    <ClInclude Include="src\Runtime\RenderCore\Pass\GIPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="dxc\bin\x64\dxcompiler.dll" />
@@ -618,18 +622,19 @@
     <None Include="Assets\Shaders\public\CopyTexture.hlsl" />
     <None Include="Assets\Shaders\public\PostProcess\CS_Debug.hlsl" />
     <None Include="Assets\Shaders\private\SSAOCommon.hlsli" />
-    <None Include="Assets\Shaders\public\PostProcess\CS_AOCopyTexture.hlsl" />
-    <None Include="Assets\Shaders\public\PostProcess\CS_AOHIZNormal.hlsl">
-      <Filter>Resource Files\Shader\Public</Filter>
-    </None>
     <None Include="packages.config" />
     <None Include="Assets\Shaders\public\PostProcess\CS_AOTAA.hlsl" />
     <None Include="Assets\Shaders\public\PostProcess\CS_AO.hlsl" />
-    <None Include="Assets\Shaders\public\PostProcess\CS_LayeredAO.hlsl" />
     <None Include="Assets\Shaders\public\Warmup\CS_Warmup.hlsl" />
     <None Include="Assets\Shaders\public\Warmup\Warmup.hlsl" />
-    <None Include="Assets\Shaders\public\PostProcess\CS_GenerateAOImportance.hlsl" />
     <None Include="Assets\Shaders\public\PostProcess\AO\CS_PrepareDepth.hlsl" />
+    <None Include="Assets\Shaders\public\PostProcess\AO\CS_AOEdgeSensitiveBlur.hlsl" />
+    <None Include="Assets\Shaders\public\PostProcess\AO\CS_AOHIZNormal.hlsl" />
+    <None Include="Assets\Shaders\public\PostProcess\AO\CS_GenerateAOImportance.hlsl" />
+    <None Include="Assets\Shaders\public\PostProcess\AO\CS_LayeredAO.hlsl" />
+    <None Include="Assets\Shaders\public\GI\CS_DDGI.hlsl" />
+    <None Include="Assets\Shaders\public\GI\GI_Debug.hlsl" />
+    <None Include="Assets\Shaders\public\PostProcess\Debug.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -993,6 +998,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Editor\UserData.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Runtime\RenderCore\Pass\GIPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

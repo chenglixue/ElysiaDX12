@@ -102,7 +102,6 @@ namespace ElysiaRenderer
         RTDesc.m_numRenderTargets = 1;
         RTDesc.m_renderTargetFormats = {m_pCameraColorRT->GetFormat()};
         RTDesc.m_depthStencilFormat = m_pCameraDepthRT->GetFormat();
-        passData.RasterizerDesc.DepthClipEnable = false;
         passData.pPipelineStateObject = PSOManager::GetInstance().GetGraphicsPipelineState(
             m_pDevice,
             m_pMaterial.get(),

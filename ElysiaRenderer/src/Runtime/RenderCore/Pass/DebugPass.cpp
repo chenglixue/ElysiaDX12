@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "DebugPass.h"
 
+#include "GIPass.h"
 #include "Editor/UserData.h"
 #include "Programs/PIXHelper.h"
 #include "Runtime/Core/DX12GraphicsContext.h"
@@ -51,12 +52,17 @@ namespace ElysiaRenderer
     {
         m_shaderPasses =
         {
+            // ShaderPass
+            // {
+            //     .Name = "Debug Pass",
+            //     .FilePath = L"Shaders\\public\\PostProcess\\CS_Debug.hlsl",
+            //     .IsComputeShader = true,
+            //     .ComputeEntryPoint = L"Debug",
+            // },
             ShaderPass
             {
                 .Name = "Debug Pass",
-                .FilePath = L"Shaders\\public\\PostProcess\\CS_Debug.hlsl",
-                .IsComputeShader = true,
-                .ComputeEntryPoint = L"Debug",
+                .FilePath = L"Shaders\\public\\PostProcess\\Debug.hlsl",
             },
         };
 
@@ -76,7 +82,19 @@ namespace ElysiaRenderer
 
     void DebugPass::DoDebugPass()
     {
+        auto passID = ShaderPasseIDs::DebugPassID;
+        auto& passData = m_pMaterial->GetPassData(passID);
         PIXHelper pix(m_pCommand->GetCommandList(), "Debug Pass");
+
+        PipelineInfo pipelineStateData{};
+        pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(
+            passID).pPipelineStateObject;
+        pipelineStateData.m_renderTargets = {m_pCameraColorRT->GetTexture()};
+        pipelineStateData.m_depthStencilTarget = m_pCameraDepthRT->GetTexture();
+        m_pCommand->SetPipeline(pipelineStateData);
+        SetSpaceResource(passData, PER_FRAME_SPACE);
+        m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_renderSize));
+        m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
         m_pMaterial->SetUInt(ShaderIDs::g_DebugMode,
                              static_cast<UINT>(UserData::GetInstance().debugMode));
@@ -109,37 +127,65 @@ namespace ElysiaRenderer
             m_pMaterial->SetUInt(ShaderIDs::g_SourceTexIndex, RT->GetResourceHeapIndex());
             m_pMaterial->SetFloat4(ShaderIDs::g_SourceSize,
                                    GetScreenSize(RT->GetWidth(), RT->GetHeight()));
-            // auto RT = RenderTargetManager::GetInstance().GetRenderTexture(
-            //     L"AO RT");
-            // RT = RenderTargetManager::GetInstance().GetRenderTexture(
-            //     L"Half AO RT");
-            // RT = RenderTargetManager::GetInstance().GetRenderTexture(
-            //     L"One Four AO RT");
+            break;
+        }
+        case DebugMode::GI:
+        {
+            if (!GIPass::m_vertexBuffer->GetIsReady() || !GIPass::m_indexBuffer->GetIsReady())
+                return;
+
+            m_pCommand->SetVertexBuffer(0, 1, GIPass::m_vertexView);
+            m_pCommand->SetIndexBuffer(GIPass::m_indexView);
+
+            m_pCommand->AddBarrier(m_pCameraColorRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+            {
+                m_pMaterial->SetUInt(GIPass::ShaderIDs::g_IrradianceTexIndex,
+                                     RenderTargetManager::GetInstance().GetRenderTexture(
+                                                                           GIPass::RenderTextureIDs::IrradianceRTID)
+                                                                       ->GetResourceHeapIndex());
+                m_pMaterial->SetFloat4(ShaderIDs::screenSize,
+                                       GetScreenSize(Vector2(m_renderSize.x, m_renderSize.y)));
+                m_pMaterial->SetMatrix(ShaderIDs::viewMatrix, m_pCamera->GetViewMat());
+                m_pMaterial->SetMatrix(ShaderIDs::viewMatrix_I, m_pCamera->GetViewMat().Invert());
+                m_pMaterial->SetMatrix(ShaderIDs::projMatrix, m_pCamera->GetProjMat());
+                m_pMaterial->SetMatrix(ShaderIDs::projMatrix_I, m_pCamera->GetProjMat().Invert());
+                m_pMaterial->SetMatrix(ShaderIDs::viewProjMatrix,
+                                       m_pCamera->GetViewMat() * m_pCamera->GetProjMat());
+                m_pMaterial->SetMatrix(ShaderIDs::viewProjMatrix_I,
+                                       (m_pCamera->GetViewMat() * m_pCamera->GetProjMat()).
+                                       Invert());
+
+                m_pMaterial->SetFloat3(GIPass::ShaderIDs::g_GridDimensions,
+                                       Vector3(GIPass::Grid_Dimensions.x,
+                                               GIPass::Grid_Dimensions.y,
+                                               GIPass::Grid_Dimensions.z));
+                m_pMaterial->SetFloat3(GIPass::ShaderIDs::g_GridOrigin, GIPass::m_gridOrigin);
+                m_pMaterial->SetFloat3(GIPass::ShaderIDs::g_GridSpacing, GIPass::m_gridSpacing);
+                m_pMaterial->SetFloat(GIPass::ShaderIDs::g_ProbeRadius, 0.5f);
+                SetSpaceResource(passData, PER_PASS_SPACE);
+
+                m_pCommand->DrawInstanced(GIPass::NumIndices, GIPass::Probe_Count, 0, 0, 0);
+            }
+            m_pCommand->AddBarrier(m_pCameraColorRT,
+                                   D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+            return;
             break;
         }
         }
 
-        m_pCommand->AddBarrier(m_pCameraColorRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-        auto passID = ShaderPasseIDs::DebugPassID;
-
-        {
-            auto& passData = m_pMaterial->GetPassData(passID);
-
-            PipelineInfo pipelineStateData{};
-            pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(passID)
-                                                                 .pPipelineStateObject;
-            m_pCommand->SetPipeline(pipelineStateData);
-
-            SetSpaceResource(passData, PER_PASS_SPACE);
-            SetSpaceResource(passData, PER_FRAME_SPACE);
-
-            auto threadGroupSize = passData.GetKernelThreadGroupSizes();
-            m_pCommand->Dispatch(CeilDivide(m_pCameraColorRT->GetWidth(), threadGroupSize.x),
-                                 CeilDivide(m_pCameraColorRT->GetHeight(), threadGroupSize.y),
-                                 threadGroupSize.z);
-        }
-
-        m_pCommand->AddBarrier(m_pCameraColorRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+        // m_pCommand->AddBarrier(m_pCameraColorRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+        //
+        // {
+        //
+        //     SetSpaceResource(passData, PER_PASS_SPACE);
+        //
+        //     auto threadGroupSize = passData.GetKernelThreadGroupSizes();
+        //     m_pCommand->Dispatch(CeilDivide(m_pCameraColorRT->GetWidth(), threadGroupSize.x),
+        //                          CeilDivide(m_pCameraColorRT->GetHeight(), threadGroupSize.y),
+        //                          threadGroupSize.z);
+        // }
+        //
+        // m_pCommand->AddBarrier(m_pCameraColorRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
     }
 
     void DebugPass::UpdatePipeline()
@@ -155,10 +201,22 @@ namespace ElysiaRenderer
             auto VariantManager = passData.pShader->GetVariantManager();
             passData.pCurrVariantData = &VariantManager->GetOrCompileVariantByNames(enableKeywords);
 
-            passData.pPipelineStateObject = PSOManager::GetInstance().GetComputePipelineState(
+            // passData.pPipelineStateObject = PSOManager::GetInstance().GetComputePipelineState(
+            //     m_pDevice,
+            //     m_pMaterial.get(),
+            //     passID);
+
+            const RenderTargetDesc desc =
+            {
+                .m_renderTargetFormats = {m_pCameraColorRT->GetFormat()},
+                .m_numRenderTargets = 1,
+                .m_depthStencilFormat = m_pCameraDepthRT->GetFormat(),
+            };
+            passData.pPipelineStateObject = PSOManager::GetInstance().GetGraphicsPipelineState(
                 m_pDevice,
                 m_pMaterial.get(),
-                passID);
+                passID,
+                desc);
         }
     }
 }

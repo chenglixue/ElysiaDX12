@@ -124,14 +124,14 @@ namespace ElysiaEngine
                 AMD_PI_OVER_4,
                 0.1f,
                 1000.f);
-            if (!hasMainCamera)
-            {
-                auto pCamera = CameraManager::GetInstance().GetMainCamera();
-                auto camEntity = std::make_unique<Entity>("Main Camera");
-                camEntity->Init(pCamera->m_transform);
-                camEntity->pAttachedCamera = pCamera;
-                SceneManager::GetInstance().AddEntity(std::move(camEntity));
-            }
+            // if (!hasMainCamera)
+            // {
+            //     auto pCamera = CameraManager::GetInstance().GetMainCamera();
+            //     auto camEntity = std::make_unique<Entity>("Main Camera");
+            //     camEntity->Init(pCamera->m_transform);
+            //     camEntity->pAttachedCamera = pCamera;
+            //     SceneManager::GetInstance().AddEntity(std::move(camEntity));
+            // }
 
             m_pRenderer->OnDestroyWindowSizeDependentResources();
             m_pRenderer->OnCreateWindowSizeDependentResources(&m_swapChain, m_Width, m_Height);

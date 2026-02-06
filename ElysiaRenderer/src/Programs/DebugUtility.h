@@ -3,9 +3,10 @@
 
 namespace ElysiaRenderer
 {
-	enum class DebugMode : UINT
-	{
-		None,
-		AO
-	};
+    enum class DebugMode : UINT
+    {
+        None,
+        AO,
+        GI
+    };
 }
