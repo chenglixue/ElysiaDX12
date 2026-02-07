@@ -7,6 +7,8 @@ namespace ElysiaRenderer
     {
         None,
         AO,
-        GI
+        GI,
+        Normal,
+        AABB,
     };
 }

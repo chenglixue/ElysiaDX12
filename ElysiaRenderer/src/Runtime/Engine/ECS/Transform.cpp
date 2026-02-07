@@ -5,7 +5,8 @@ namespace ElysiaEngine
 {
     Matrix Transform::GetWorldMatrix() const
     {
-        auto localMat = Matrix::CreateScale(scale) * Matrix::CreateFromQuaternion(rotation) *
+        auto localMat = Matrix::CreateScale(scale) * Matrix::CreateFromQuaternion(
+                            rotation) *
                         Matrix::CreateTranslation(position);
         if (m_pParent)
         {
@@ -16,20 +17,6 @@ namespace ElysiaEngine
             return localMat;
         }
 
-    }
-
-    void Transform::LookAt(Vector3 target)
-    {
-        Matrix lookAt = Matrix::CreateLookAt(position, target, Vector3::Up);
-
-        Vector3 trashScale;
-        Vector3 trashTranslation;
-        lookAt.Invert().Decompose(trashScale, rotation, trashTranslation);
-    }
-
-    void Transform::RotateAxis(Vector3 axis, float angle)
-    {
-        rotation *= Quaternion::CreateFromAxisAngle(axis, angle);
     }
 
     Vector3 Transform::GetEulerDegrees() const

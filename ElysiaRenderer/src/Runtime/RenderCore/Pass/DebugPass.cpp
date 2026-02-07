@@ -20,24 +20,44 @@
 
 namespace ElysiaRenderer
 {
-    int DebugPass::ShaderPasseIDs::DebugPassID = -1;
-
-    size_t DebugPass::ShaderIDs::g_DebugMode = SIZE_MAX;
-    size_t DebugPass::ShaderIDs::g_TargetTexIndex = SIZE_MAX;
-    size_t DebugPass::ShaderIDs::g_SourceTexIndex = SIZE_MAX;
-    size_t DebugPass::ShaderIDs::g_MipmapLevel = SIZE_MAX;
-    size_t DebugPass::ShaderIDs::g_SourceSize = SIZE_MAX;
-    size_t DebugPass::ShaderIDs::g_TargetSize = SIZE_MAX;
-
     DebugPass::DebugPass()
         : BasePass()
     {
-        ShaderIDs::g_DebugMode = PropertyToID(L"g_DebugMode");
-        ShaderIDs::g_TargetTexIndex = PropertyToID(L"g_TargetTexIndex");
-        ShaderIDs::g_SourceTexIndex = PropertyToID(L"g_SourceTexIndex");
-        ShaderIDs::g_MipmapLevel = PropertyToID(L"g_MipmapLevel");
-        ShaderIDs::g_SourceSize = PropertyToID(L"g_SourceSize");
-        ShaderIDs::g_TargetSize = PropertyToID(L"g_TargetSize");
+        BufferCreationDesc vertexBufferDesc =
+        {
+            .name = L"Debug Vertex Buffer",
+            .stride = sizeof(Vector3),
+            .size = sizeof(Vector3) * NumVertices,
+            .viewFlags = GPUResourceFlags::None,
+            .accessFlags = BufferAccessFlags::GPUOnly,
+            .isRawAccess = false,
+            .InitData = m_vertices
+        };
+        BufferCreationDesc indexBufferDesc =
+        {
+            .name = L"Debug Index Buffer",
+            .stride = 0,
+            .size = sizeof(INDEX_FORMAT) * NumIndices,
+            .viewFlags = GPUResourceFlags::None,
+            .accessFlags = BufferAccessFlags::GPUOnly,
+            .isRawAccess = false,
+            .InitData = m_indices
+        };
+        m_vertexBuffer = BufferManager::GetInstance().CreateVertexBuffer(vertexBufferDesc);
+        m_indexBuffer = BufferManager::GetInstance().CreateIndexBuffer(indexBufferDesc);
+
+        m_vertexView = D3D12_VERTEX_BUFFER_VIEW
+        {
+            .BufferLocation = m_vertexBuffer->GetGPUAddress(),
+            .SizeInBytes = static_cast<UINT>(NumVertices) * m_vertexBuffer->GetStride(),
+            .StrideInBytes = m_vertexBuffer->GetStride()
+        };
+        m_indexView =
+        {
+            .BufferLocation = m_indexBuffer->GetGPUAddress(),
+            .SizeInBytes = NumIndices * ElysiaModel::IndexSize(),
+            .Format = ElysiaModel::IndexBufferFormat(),
+        };
     }
     DebugPass::~DebugPass()
     {
@@ -103,32 +123,25 @@ namespace ElysiaRenderer
         m_pMaterial->SetFloat4(ShaderIDs::g_TargetSize,
                                GetScreenSize(m_pCameraColorRT->GetWidth(),
                                              m_pCameraColorRT->GetHeight()));
+        m_pMaterial->SetFloat4(ShaderIDs::screenSize,
+                               GetScreenSize(Vector2(m_renderSize.x, m_renderSize.y)));
+        m_pMaterial->SetMatrix(ShaderIDs::viewMatrix, m_pCamera->GetViewMat());
+        m_pMaterial->SetMatrix(ShaderIDs::viewMatrix_I, m_pCamera->GetViewMat().Invert());
+        m_pMaterial->SetMatrix(ShaderIDs::projMatrix, m_pCamera->GetProjMat());
+        m_pMaterial->SetMatrix(ShaderIDs::projMatrix_I, m_pCamera->GetProjMat().Invert());
+        m_pMaterial->SetMatrix(ShaderIDs::viewProjMatrix,
+                               m_pCamera->GetViewMat() * m_pCamera->GetProjMat());
+        m_pMaterial->SetMatrix(ShaderIDs::viewProjMatrix_I,
+                               (m_pCamera->GetViewMat() * m_pCamera->GetProjMat()).
+                               Invert());
 
         switch (UserData::GetInstance().debugMode)
         {
         case DebugMode::None:
         {
-            return;
-        }
-        case DebugMode::AO:
-        {
-            auto clampValue = std::ranges::clamp(UserData::GetInstance().mipmapLevel, 0, 3);
-            auto RT = RenderTargetManager::GetInstance().GetRenderTexture(
-                L"AO RT");
-            if (UserData::GetInstance().aoParameter.debugTarget == AODebugTarget::Importance)
-            {
-                RT = RenderTargetManager::GetInstance().GetRenderTexture(
-                    L"AO Importance RT");
-
-            }
-            // RT = RenderTargetManager::GetInstance().GetRenderTexture(
-            //     L"Deinterleaved AO RT" + std::to_wstring(clampValue));
-
-            m_pMaterial->SetUInt(ShaderIDs::g_SourceTexIndex, RT->GetResourceHeapIndex());
-            m_pMaterial->SetFloat4(ShaderIDs::g_SourceSize,
-                                   GetScreenSize(RT->GetWidth(), RT->GetHeight()));
             break;
         }
+
         case DebugMode::GI:
         {
             if (!GIPass::m_vertexBuffer->GetIsReady() || !GIPass::m_indexBuffer->GetIsReady())
@@ -143,17 +156,6 @@ namespace ElysiaRenderer
                                      RenderTargetManager::GetInstance().GetRenderTexture(
                                                                            GIPass::RenderTextureIDs::IrradianceRTID)
                                                                        ->GetResourceHeapIndex());
-                m_pMaterial->SetFloat4(ShaderIDs::screenSize,
-                                       GetScreenSize(Vector2(m_renderSize.x, m_renderSize.y)));
-                m_pMaterial->SetMatrix(ShaderIDs::viewMatrix, m_pCamera->GetViewMat());
-                m_pMaterial->SetMatrix(ShaderIDs::viewMatrix_I, m_pCamera->GetViewMat().Invert());
-                m_pMaterial->SetMatrix(ShaderIDs::projMatrix, m_pCamera->GetProjMat());
-                m_pMaterial->SetMatrix(ShaderIDs::projMatrix_I, m_pCamera->GetProjMat().Invert());
-                m_pMaterial->SetMatrix(ShaderIDs::viewProjMatrix,
-                                       m_pCamera->GetViewMat() * m_pCamera->GetProjMat());
-                m_pMaterial->SetMatrix(ShaderIDs::viewProjMatrix_I,
-                                       (m_pCamera->GetViewMat() * m_pCamera->GetProjMat()).
-                                       Invert());
 
                 m_pMaterial->SetFloat3(GIPass::ShaderIDs::g_GridDimensions,
                                        Vector3(GIPass::Grid_Dimensions.x,
@@ -168,24 +170,24 @@ namespace ElysiaRenderer
             }
             m_pCommand->AddBarrier(m_pCameraColorRT,
                                    D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+            break;
+        }
+
+        case DebugMode::AO:
+        case DebugMode::Normal:
+        {
+            m_pCommand->AddBarrier(m_pCameraColorRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+            {
+                SetSpaceResource(passData, PER_PASS_SPACE);
+                m_pCommand->DrawFullScreenTriangle();
+            }
+            m_pCommand->AddBarrier(m_pCameraColorRT,
+                                   D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
             return;
             break;
         }
-        }
 
-        // m_pCommand->AddBarrier(m_pCameraColorRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-        //
-        // {
-        //
-        //     SetSpaceResource(passData, PER_PASS_SPACE);
-        //
-        //     auto threadGroupSize = passData.GetKernelThreadGroupSizes();
-        //     m_pCommand->Dispatch(CeilDivide(m_pCameraColorRT->GetWidth(), threadGroupSize.x),
-        //                          CeilDivide(m_pCameraColorRT->GetHeight(), threadGroupSize.y),
-        //                          threadGroupSize.z);
-        // }
-        //
-        // m_pCommand->AddBarrier(m_pCameraColorRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+        }
     }
 
     void DebugPass::UpdatePipeline()

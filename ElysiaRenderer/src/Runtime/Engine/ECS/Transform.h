@@ -21,6 +21,23 @@ namespace ElysiaEngine
         {
             return m_pParent ? m_pParent->GetPosition() + position : position;
         }
+        Vector3 GetLocalScale() const noexcept
+        {
+            return scale;
+        }
+        Vector3 GetScale() const noexcept
+        {
+            return m_pParent ? m_pParent->GetScale() * scale : scale;
+        }
+        Quaternion GetLocalRotation() const noexcept
+        {
+            return rotation;
+        }
+        Quaternion GetRotation() const noexcept
+        {
+            return m_pParent ? m_pParent->GetRotation() * rotation : rotation;
+        }
+
 
         void LookAt(Vector3 target);
 

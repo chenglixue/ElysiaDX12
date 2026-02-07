@@ -79,7 +79,7 @@ namespace ElysiaRenderer
     std::shared_ptr<ElysiaModel::LoadedModel> SceneManager::CreateModel(
         const std::wstring& modelPath)
     {
-        return ModelManager::GetInstance().LoadStaticModel(modelPath, 0.01f);
+        return ModelManager::GetInstance().LoadStaticModel(modelPath, 1.f);
     }
     Entity* SceneManager::CreateEntityFromModel(std::shared_ptr<ElysiaModel::LoadedModel> pModel)
     {
@@ -94,7 +94,7 @@ namespace ElysiaRenderer
         const std::shared_ptr<LoadedModel>& model) const
     {
         auto pParent = std::make_unique<Entity>(ToEastl(model->name));
-        pParent->transform.scale = Vector3::One * 0.01f;
+        pParent->transform.scale = Vector3::One * 0.0001f;
         pParent->transform.rotation = MathHelper::Euler(90, 0, 180);
         pParent->SetLocalAABB(model->aabbMin, model->aabbMax);
         pParent->UpdateWorldAABB();
@@ -149,14 +149,12 @@ namespace ElysiaRenderer
             std::cout << "INTERSECTS" << std::endl;
             break;
         }
-        //if (cameraFrustum.Contains(pEntity->GetWorldAABB()) != DISJOINT)
+        // if (cameraFrustum.Contains(pEntity->GetWorldAABB()) != DISJOINT)
         {
             if (pEntity->pMeshRenderer != nullptr)
             {
                 const auto& worldMat = pEntity->transform.GetWorldMatrix();
                 const auto& mesh = pEntity->pMeshRenderer->GetMesh();
-                Vector3 worldCenter = Vector3::Transform((mesh.aabbMin + mesh.aabbMax) * 0.5f,
-                                                         worldMat);
 
                 RenderItem item
                 {
@@ -170,7 +168,7 @@ namespace ElysiaRenderer
                     .textureIndices = pEntity->pMeshRenderer->GetTextureIndices(),
                     .loadedMaterial = pEntity->pMeshRenderer->GetMaterial(),
                     .distanceToCameraSq = Vector3::DistanceSquared(
-                        worldCenter,
+                        pEntity->transform.GetPosition(),
                         CameraManager::GetInstance().GetMainCamera()->GetPosition())
                 };
                 renderList.emplace_back(std::move(item));

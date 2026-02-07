@@ -54,7 +54,7 @@ namespace ElysiaRenderer
 
         }
         dynamic_cast<FirstPersonCamera*>(m_mainCamera.get())->SetPosition(position);
-        dynamic_cast<FirstPersonCamera*>(m_mainCamera.get())->SetYRotation(45);
+        // dynamic_cast<FirstPersonCamera*>(m_mainCamera.get())->SetYRotation(45);
         m_mainCamera->UpdateFrustum();
     }
 }

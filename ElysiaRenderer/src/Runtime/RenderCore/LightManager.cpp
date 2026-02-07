@@ -11,68 +11,74 @@
 
 namespace ElysiaRenderer
 {
-	std::unique_ptr<LightManager> LightManager::m_instance;
-	std::once_flag LightManager::m_initInstanceFlag;
+    std::unique_ptr<LightManager> LightManager::m_instance;
+    std::once_flag LightManager::m_initInstanceFlag;
 
-	LightManager::LightManager() = default;
-	LightManager::~LightManager()
-	{
-		Destory();
-	}
+    LightManager::LightManager() = default;
+    LightManager::~LightManager()
+    {
+        Destory();
+    }
 
-	void LightManager::Init(ElysiaCore::DX12Device* pDevice)
-	{
-		assert(pDevice);
-		m_pDevice = pDevice;
-		CreatMainLight();
-		
-	}
+    void LightManager::Init(ElysiaCore::DX12Device* pDevice)
+    {
+        assert(pDevice);
+        m_pDevice = pDevice;
+        CreatMainLight();
 
-	void LightManager::Destory()
-	{
+    }
 
-	}
+    void LightManager::Destory()
+    {
 
-	void LightManager::Update(const ElysiaEngine::FrameContext& context)
-	{
-		m_frameID = context.frameID;
-		m_frameIndex = context.frameIndex;
-		
-		auto& pUsetData = UserData::GetInstance();
+    }
 
-		m_pMainLight->m_lightColor = pUsetData.lightColor;
-		m_pMainLight->m_lightDir = pUsetData.lightDir;
-		m_pMainLight->m_lightIntensity = pUsetData.lightIntensity;
+    void LightManager::Update(const ElysiaEngine::FrameContext& context)
+    {
+        m_frameID = context.frameID;
+        m_frameIndex = context.frameIndex;
 
-		m_pMainLight->GetMainShadow()->UpdateShadowTransform(m_pMainLight.get());
-	}
+        auto& pUsetData = UserData::GetInstance();
 
-	DX12DirectionLight* LightManager::GetMainLight()
-	{
-		return m_pMainLight.get();
-	}
-	DX12Shadow* LightManager::GetMainShadow()
-	{
-		return m_pMainLight->GetMainShadow();
-	}
-	RenderTexture* LightManager::GetMainShadowRT() const
-	{
-		return m_pMainLight->GetMainShadowRT();
-	}
+        m_pMainLight->m_lightColor = pUsetData.lightColor;
+        m_pMainLight->m_lightDir = pUsetData.lightDir;
+        m_pMainLight->m_lightIntensity = pUsetData.lightIntensity;
 
-	void LightManager::CreatMainLight()
-	{
-		auto& pUserData = UserData::GetInstance();
-		if (m_pMainLight != nullptr)
-		{
-			m_pMainLight.reset();
-			m_pMainLight = std::make_unique<DX12DirectionLight>(pUserData.lightColor, pUserData.lightDir, pUserData.lightIntensity);
-		}
-		else
-		{
-			m_pMainLight = std::make_unique<DX12DirectionLight>(pUserData.lightColor, pUserData.lightDir, pUserData.lightIntensity);
-		}
-		
-		m_pMainLight->CreateMainShadow(1000, DXGI_FORMAT_D24_UNORM_S8_UINT);
-	}
+        m_pMainLight->GetMainShadow()->UpdateShadowTransform(m_pMainLight.get());
+    }
+
+    DX12DirectionLight* LightManager::GetMainLight()
+    {
+        return m_pMainLight.get();
+    }
+    DX12Shadow* LightManager::GetMainShadow()
+    {
+        return m_pMainLight->GetMainShadow();
+    }
+    RenderTexture* LightManager::GetMainShadowRT() const
+    {
+        return m_pMainLight->GetMainShadowRT();
+    }
+
+    void LightManager::CreatMainLight()
+    {
+        auto& pUserData = UserData::GetInstance();
+        if (m_pMainLight != nullptr)
+        {
+            m_pMainLight.reset();
+            m_pMainLight = std::make_unique<DX12DirectionLight>(
+                pUserData.lightColor,
+                pUserData.lightDir,
+                pUserData.lightIntensity);
+        }
+        else
+        {
+            m_pMainLight = std::make_unique<DX12DirectionLight>(
+                pUserData.lightColor,
+                pUserData.lightDir,
+                pUserData.lightIntensity);
+        }
+
+        m_pMainLight->CreateMainShadow(20, DXGI_FORMAT_D24_UNORM_S8_UINT);
+    }
 }

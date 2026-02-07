@@ -576,7 +576,6 @@ namespace ElysiaModel
             LoadMeshData(filePath, pScene, scale, model);
 
             CalculateModelTransformFromBounds(model);
-
         }
 
         std::cout << "Finished loading scene '%ls'" + WstringToString(filePath) <<
