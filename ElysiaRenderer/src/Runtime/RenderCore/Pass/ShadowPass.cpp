@@ -79,6 +79,7 @@ namespace ElysiaRenderer
         m_pCamera = context.pCamera;
         m_pGPUTimer = context.pGPUTimer;
 
+        return;
         DrawShadowPass(context);
     }
 

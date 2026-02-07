@@ -9,6 +9,7 @@
 #include "Runtime/Core/DX12Device.h"
 #include "Runtime/Core/DX12TextureBuffer.h"
 #include "Runtime/Core/SwapChain.h"
+#include "Runtime/Engine/ECS/Entity.h"
 #include "Runtime/RenderCore/DX12Camera.h"
 
 #include "Runtime/RenderCore/RenderResource.h"
@@ -16,48 +17,16 @@
 #include "Runtime/RenderCore/Material.h"
 #include "Runtime/RenderCore/PSOManager.h"
 #include "Runtime/RenderCore/RenderTargetManager.h"
+#include "Runtime/RenderCore/SceneManager.h"
 #include "Runtime/RenderCore/ShaderVariantManager.h"
 
 namespace ElysiaRenderer
 {
     DebugPass::DebugPass()
-        : BasePass()
+        : BasePass(),
+          m_aabbDrawer()
     {
-        BufferCreationDesc vertexBufferDesc =
-        {
-            .name = L"Debug Vertex Buffer",
-            .stride = sizeof(Vector3),
-            .size = sizeof(Vector3) * NumVertices,
-            .viewFlags = GPUResourceFlags::None,
-            .accessFlags = BufferAccessFlags::GPUOnly,
-            .isRawAccess = false,
-            .InitData = m_vertices
-        };
-        BufferCreationDesc indexBufferDesc =
-        {
-            .name = L"Debug Index Buffer",
-            .stride = 0,
-            .size = sizeof(INDEX_FORMAT) * NumIndices,
-            .viewFlags = GPUResourceFlags::None,
-            .accessFlags = BufferAccessFlags::GPUOnly,
-            .isRawAccess = false,
-            .InitData = m_indices
-        };
-        m_vertexBuffer = BufferManager::GetInstance().CreateVertexBuffer(vertexBufferDesc);
-        m_indexBuffer = BufferManager::GetInstance().CreateIndexBuffer(indexBufferDesc);
-
-        m_vertexView = D3D12_VERTEX_BUFFER_VIEW
-        {
-            .BufferLocation = m_vertexBuffer->GetGPUAddress(),
-            .SizeInBytes = static_cast<UINT>(NumVertices) * m_vertexBuffer->GetStride(),
-            .StrideInBytes = m_vertexBuffer->GetStride()
-        };
-        m_indexView =
-        {
-            .BufferLocation = m_indexBuffer->GetGPUAddress(),
-            .SizeInBytes = NumIndices * ElysiaModel::IndexSize(),
-            .Format = ElysiaModel::IndexBufferFormat(),
-        };
+        m_aabbDrawer.Init();
     }
     DebugPass::~DebugPass()
     {
@@ -94,6 +63,7 @@ namespace ElysiaRenderer
 
     void DebugPass::Render(FrameContext& context)
     {
+        UpdatePipeline();
         PIXHelper pix(m_pCommand->GetCommandList(), "Debug Pass");
         m_pCamera = context.pCamera;
 
@@ -141,38 +111,17 @@ namespace ElysiaRenderer
         {
             break;
         }
-
-        case DebugMode::GI:
+        case DebugMode::AABB:
         {
-            if (!GIPass::m_vertexBuffer->GetIsReady() || !GIPass::m_indexBuffer->GetIsReady())
-                return;
-
-            m_pCommand->SetVertexBuffer(0, 1, GIPass::m_vertexView);
-            m_pCommand->SetIndexBuffer(GIPass::m_indexView);
-
-            m_pCommand->AddBarrier(m_pCameraColorRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
-            {
-                m_pMaterial->SetUInt(GIPass::ShaderIDs::g_IrradianceTexIndex,
-                                     RenderTargetManager::GetInstance().GetRenderTexture(
-                                                                           GIPass::RenderTextureIDs::IrradianceRTID)
-                                                                       ->GetResourceHeapIndex());
-
-                m_pMaterial->SetFloat3(GIPass::ShaderIDs::g_GridDimensions,
-                                       Vector3(GIPass::Grid_Dimensions.x,
-                                               GIPass::Grid_Dimensions.y,
-                                               GIPass::Grid_Dimensions.z));
-                m_pMaterial->SetFloat3(GIPass::ShaderIDs::g_GridOrigin, GIPass::m_gridOrigin);
-                m_pMaterial->SetFloat3(GIPass::ShaderIDs::g_GridSpacing, GIPass::m_gridSpacing);
-                m_pMaterial->SetFloat(GIPass::ShaderIDs::g_ProbeRadius, 0.5f);
-                SetSpaceResource(passData, PER_PASS_SPACE);
-
-                m_pCommand->DrawInstanced(GIPass::NumIndices, GIPass::Probe_Count, 0, 0, 0);
-            }
-            m_pCommand->AddBarrier(m_pCameraColorRT,
-                                   D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+            DoAABBPass();
             break;
         }
-
+        case DebugMode::GI:
+        {
+            DoGIPass();
+            DoAABBPass();
+            break;
+        }
         case DebugMode::AO:
         case DebugMode::Normal:
         {
@@ -188,6 +137,120 @@ namespace ElysiaRenderer
         }
 
         }
+    }
+
+    void DebugPass::DoAABBPass()
+    {
+        auto passID = ShaderPasseIDs::DebugPassID;
+        auto& passData = m_pMaterial->GetPassData(passID);
+
+        if (!m_pMaterial)
+            return;
+
+        {
+            std::vector<std::wstring> enableKeywords{};
+
+            auto passID = ShaderPasseIDs::DebugPassID;
+            auto& passData = m_pMaterial->GetPassData(passID);
+            auto VariantManager = passData.pShader->GetVariantManager();
+            passData.pCurrVariantData = &VariantManager->GetOrCompileVariantByNames(enableKeywords);
+
+            // passData.pPipelineStateObject = PSOManager::GetInstance().GetComputePipelineState(
+            //     m_pDevice,
+            //     m_pMaterial.get(),
+            //     passID);
+
+            const RenderTargetDesc desc =
+            {
+                .m_renderTargetFormats = {m_pCameraColorRT->GetFormat()},
+                .m_numRenderTargets = 1,
+                .m_depthStencilFormat = m_pCameraDepthRT->GetFormat(),
+            };
+            passData.pPipelineStateObject = PSOManager::GetInstance().GetGraphicsPipelineState(
+                m_pDevice,
+                m_pMaterial.get(),
+                passID,
+                desc,
+                D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE);
+        }
+
+        m_aabbDrawer.Clear();
+        if (!m_aabbDrawer.IsReady() || SceneManager::GetInstance().GetEntities().empty())
+            return;
+
+        auto& entities = SceneManager::GetInstance().GetEntities()[0];
+        auto instanceID = UserData::GetInstance().instanceID;
+        instanceID = MathHelper::Max(0, instanceID);
+        if (instanceID < entities->GetChildren().size())
+        {
+            const auto entity = entities->GetChildren()[instanceID].get();
+            const auto AABB = entity->GetWorldAABB();
+            const auto min = AABB.Center - AABB.Extents;
+            const auto max = AABB.Center + AABB.Extents;
+            m_aabbDrawer.AddAABB(min, max, instanceID);
+        }
+        else
+        {
+            m_aabbDrawer.m_instanceCpuData.reserve(entities->GetChildren().size());
+            for (UINT i = 0; i < entities->GetChildren().size(); i ++)
+            {
+                const auto entity = entities->GetChildren()[i].get();
+                const auto AABB = entity->GetWorldAABB();
+                const auto min = AABB.Center - AABB.Extents;
+                const auto max = AABB.Center + AABB.Extents;
+                m_aabbDrawer.AddAABB(min, max, instanceID);
+            }
+        }
+
+        m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
+        m_pCommand->SetVertexBuffer(0, 1, m_aabbDrawer.vertexView);
+        m_pCommand->SetIndexBuffer(m_aabbDrawer.indexView);
+
+        m_pCommand->AddBarrier(m_pCameraColorRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+        {
+            m_pMaterial->SetUInt(ShaderIDs::g_DebugMode,
+                                 static_cast<UINT>(DebugMode::AABB));
+            m_pMaterial->SetMatrix(ShaderIDs::viewProjMatrix,
+                                   m_pCamera->GetViewMat() * m_pCamera->GetProjMat());
+            m_aabbDrawer.Bind(m_pMaterial.get());
+            SetSpaceResource(passData, PER_PASS_SPACE);
+            m_aabbDrawer.Draw(m_pCommand);
+        }
+        m_pCommand->AddBarrier(m_pCameraColorRT,
+                               D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+    }
+
+    void DebugPass::DoGIPass()
+    {
+        auto passID = ShaderPasseIDs::DebugPassID;
+        auto& passData = m_pMaterial->GetPassData(passID);
+
+        if (!GIPass::m_vertexBuffer->GetIsReady() || !GIPass::m_indexBuffer->GetIsReady())
+            return;
+
+        m_pCommand->SetVertexBuffer(0, 1, GIPass::m_vertexView);
+        m_pCommand->SetIndexBuffer(GIPass::m_indexView);
+
+        m_pCommand->AddBarrier(m_pCameraColorRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+        {
+            m_pMaterial->SetUInt(GIPass::ShaderIDs::g_IrradianceTexIndex,
+                                 RenderTargetManager::GetInstance().GetRenderTexture(
+                                                                       GIPass::RenderTextureIDs::IrradianceRTID)
+                                                                   ->GetResourceHeapIndex());
+
+            m_pMaterial->SetFloat3(GIPass::ShaderIDs::g_GridDimensions,
+                                   Vector3(GIPass::Grid_Dimensions.x,
+                                           GIPass::Grid_Dimensions.y,
+                                           GIPass::Grid_Dimensions.z));
+            m_pMaterial->SetFloat3(GIPass::ShaderIDs::g_GridOrigin, GIPass::m_gridOrigin);
+            m_pMaterial->SetFloat3(GIPass::ShaderIDs::g_GridSpacing, GIPass::m_gridSpacing);
+            m_pMaterial->SetFloat(GIPass::ShaderIDs::g_ProbeRadius, 0.5f);
+            SetSpaceResource(passData, PER_PASS_SPACE);
+
+            m_pCommand->DrawInstanced(GIPass::NumIndices, GIPass::Probe_Count, 0, 0, 0);
+        }
+        m_pCommand->AddBarrier(m_pCameraColorRT,
+                               D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
     }
 
     void DebugPass::UpdatePipeline()
@@ -218,7 +281,116 @@ namespace ElysiaRenderer
                 m_pDevice,
                 m_pMaterial.get(),
                 passID,
-                desc);
+                desc,
+                UserData::GetInstance().debugMode == DebugMode::AABB
+                    ? D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE
+                    : D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
         }
+    }
+
+    void DebugPass::AABBDrawer::Init()
+    {
+        UploadVertexIndex();
+    }
+
+    void DebugPass::AABBDrawer::UploadVertexIndex()
+    {
+        BufferCreationDesc vertexBufferDesc =
+        {
+            .name = L"AABB Vertex Buffer",
+            .stride = sizeof(Vector3),
+            .size = sizeof(Vector3) * NumVertices,
+            .viewFlags = GPUResourceFlags::None,
+            .accessFlags = BufferAccessFlags::GPUOnly,
+            .isRawAccess = false,
+            .InitData = vertices
+        };
+        BufferCreationDesc indexBufferDesc =
+        {
+            .name = L"AABB Index Buffer",
+            .stride = 0,
+            .size = sizeof(INDEX_FORMAT) * NumIndices,
+            .viewFlags = GPUResourceFlags::None,
+            .accessFlags = BufferAccessFlags::GPUOnly,
+            .isRawAccess = false,
+            .InitData = indices
+        };
+        vertexBuffer = BufferManager::GetInstance().CreateVertexBuffer(vertexBufferDesc);
+        indexBuffer = BufferManager::GetInstance().CreateIndexBuffer(indexBufferDesc);
+
+        vertexView = D3D12_VERTEX_BUFFER_VIEW
+        {
+            .BufferLocation = vertexBuffer->GetGPUAddress(),
+            .SizeInBytes = static_cast<UINT>(NumVertices) * vertexBuffer->GetStride(),
+            .StrideInBytes = vertexBuffer->GetStride()
+        };
+        indexView =
+        {
+            .BufferLocation = indexBuffer->GetGPUAddress(),
+            .SizeInBytes = NumIndices * ElysiaModel::IndexSize(),
+            .Format = ElysiaModel::IndexBufferFormat(),
+        };
+    }
+
+    void DebugPass::AABBDrawer::AddAABB(const Vector3& min,
+                                        const Vector3& max,
+                                        const Vector4& color)
+    {
+        AABBInstanceData data
+        {
+            .Min = min,
+            .Max = max,
+            .Color = color
+        };
+        m_instanceCpuData.emplace_back(data);
+    }
+
+    void DebugPass::AABBDrawer::AddAABB(const Vector3& min,
+                                        const Vector3& max,
+                                        const UINT index)
+    {
+        AABBInstanceData data
+        {
+            .Min = min,
+            .Max = max,
+            .Color = GetDebugColor(index)
+        };
+        m_instanceCpuData.emplace_back(data);
+    }
+
+    void DebugPass::AABBDrawer::Clear()
+    {
+        m_instanceCpuData.clear();
+    }
+
+    void DebugPass::AABBDrawer::Bind(Material* pMaterail)
+    {
+        BufferCreationDesc instanceDataDesc =
+        {
+            .name = L"AABB Data Buffer",
+            .stride = sizeof(AABBInstanceData),
+            .size = sizeof(AABBInstanceData) * m_instanceCpuData.size(),
+            .viewFlags = GPUResourceFlags::SRV,
+            .accessFlags = BufferAccessFlags::HostWritable,
+            .isRawAccess = false,
+            .InitData = m_instanceCpuData.data()
+        };
+        if (instanceDataBuffer)
+            BufferManager::GetInstance().DestoryBuffer(instanceDataBuffer);
+        instanceDataBuffer = BufferManager::GetInstance().CreateBuffer(instanceDataDesc);
+        pMaterail->SetUInt(ShaderIDs::g_AABBInstanceDatasIndex,
+                           instanceDataBuffer->GetResourceHeapIndex());
+    }
+    void DebugPass::AABBDrawer::Draw(DX12GraphicsContext* context)
+    {
+        context->DrawInstanced(NumIndices, m_instanceCpuData.size(), 0, 0, 0);
+    }
+
+    Color DebugPass::AABBDrawer::GetDebugColor(uint32_t id)
+    {
+        float r = ((id * 183L + 123L) % 255) / 255.0f;
+        float g = ((id * 592L + 456L) % 255) / 255.0f;
+        float b = ((id * 721L + 789L) % 255) / 255.0f;
+        return Color(r, g, b, 1.0f);
     }
 }

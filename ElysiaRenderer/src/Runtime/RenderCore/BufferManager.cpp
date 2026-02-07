@@ -77,25 +77,25 @@ namespace ElysiaRenderer
         auto alignSize = AlignU32((UINT)bufferCreationDesc.size,
                                   D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
 
-        UINT32 index;
-        if (!m_freeBufferIndices.empty())
-        {
-            index = m_freeBufferIndices.front();
-            m_freeBufferIndices.pop();
-            if (m_bufferPools[index] && m_bufferPools[index]->IsFree() && index < m_bufferPools.
-                size() && m_bufferPools[index]->GetResourceDesc().Width < alignSize)
-            {
-                if (m_bufferPools[index]->ReInit(m_pDevice, bufferCreationDesc))
-                {
-                    return m_bufferPools[index];
-                }
-            }
-        }
-        else
-        {
-            index = static_cast<UINT32>(m_bufferPools.size());
-            m_bufferPools.emplace_back();
-        }
+        // UINT32 index;
+        // if (!m_freeBufferIndices.empty())
+        // {
+        //     index = m_freeBufferIndices.front();
+        //     m_freeBufferIndices.pop();
+        //     if (m_bufferPools[index] && m_bufferPools[index]->IsFree() && index < m_bufferPools.
+        //         size() && m_bufferPools[index]->GetResourceDesc().Width < alignSize)
+        //     {
+        //         if (m_bufferPools[index]->ReInit(m_pDevice, bufferCreationDesc))
+        //         {
+        //             return m_bufferPools[index];
+        //         }
+        //     }
+        // }
+        // else
+        // {
+        //     index = static_cast<UINT32>(m_bufferPools.size());
+        //     m_bufferPools.emplace_back();
+        // }
 
         bool isHostVisible = ((bufferCreationDesc.accessFlags & BufferAccessFlags::HostWritable) ==
                               BufferAccessFlags::HostWritable);
@@ -137,12 +137,18 @@ namespace ElysiaRenderer
             resourceState,
             pAllocation);
         pNewBuffer->SetStride(bufferCreationDesc.stride);
-        pNewBuffer->SetIndex(index);
+        // pNewBuffer->SetIndex(index);
         if (isHostVisible)
         {
             pNewBuffer->GetResource()->Map(0,
                                            nullptr,
                                            reinterpret_cast<void**>(&pNewBuffer->m_mappedBuffer));
+            if (bufferCreationDesc.InitData != nullptr)
+            {
+                memcpy(pNewBuffer->m_mappedBuffer,
+                       bufferCreationDesc.InitData,
+                       bufferCreationDesc.size);
+            }
         }
 
         if (hasCBV)
@@ -224,21 +230,45 @@ namespace ElysiaRenderer
                 pNewBuffer->GetUAVDescriptor().GetCPUHandle());
         }
 
-        if (index < m_bufferPools.size())
-        {
-            m_bufferPools[index] = pNewBuffer;
-        }
-        else
-        {
-            m_bufferPools.emplace_back(pNewBuffer);
-        }
+        // if (index<m_bufferPools.size())
+        //           {
+        //               m_bufferPools[index] = pNewBuffer;
+        //           }
+        // else
+        //           {
+        //               m_bufferPools.emplace_back(pNewBuffer);
+        //           }
 
         return pNewBuffer;
+
     }
     void BufferManager::DestoryBuffer(const BufferHandle handle)
     {
         if (!handle)
             return;
+
+        if (handle->GetCBVDescriptor().IsValid())
+        {
+            m_pDevice->GetSRVStageHeap()->FreeDescriptorHeapHandle(
+                handle->GetCBVDescriptor());
+            handle->GetCBVDescriptor().Reset();
+
+        }
+        if (handle->GetSRVDescriptor().IsValid())
+        {
+            m_pDevice->GetSRVStageHeap()->FreeDescriptorHeapHandle(
+                handle->GetSRVDescriptor());
+            handle->GetSRVDescriptor().Reset();
+
+            m_pDevice->FreeContiguousReservedDescriptorIndices(handle->GetResourceHeapIndex(), 1);
+
+        }
+        if (handle->GetUAVDescriptor().IsValid())
+        {
+            m_pDevice->GetSRVStageHeap()->FreeDescriptorHeapHandle(
+                handle->GetUAVDescriptor());
+            handle->GetUAVDescriptor().Reset();
+        }
 
         UINT64 deleteFrameIndex = m_frameIndex + NUM_FRAMES_IN_FLIGHT;
         m_grbageQueue.push_back({deleteFrameIndex, handle});
@@ -265,6 +295,25 @@ namespace ElysiaRenderer
         {
             if (it->first <= currentFrameIndex)
             {
+                auto pBuffer = it->second;
+                if (pBuffer->GetCBVDescriptor().IsValid())
+                {
+                    pBuffer->GetCBVDescriptor().Reset();
+                    m_pDevice->GetSRVStageHeap()->FreeDescriptorHeapHandle(
+                        pBuffer->GetCBVDescriptor());
+                }
+                if (pBuffer->GetSRVDescriptor().IsValid())
+                {
+                    pBuffer->GetSRVDescriptor().Reset();
+                    m_pDevice->GetSRVStageHeap()->FreeDescriptorHeapHandle(
+                        pBuffer->GetSRVDescriptor());
+                }
+                if (pBuffer->GetUAVDescriptor().IsValid())
+                {
+                    pBuffer->GetUAVDescriptor().Reset();
+                    m_pDevice->GetSRVStageHeap()->FreeDescriptorHeapHandle(
+                        pBuffer->GetUAVDescriptor());
+                }
                 it = m_grbageQueue.erase(it);
             }
             else

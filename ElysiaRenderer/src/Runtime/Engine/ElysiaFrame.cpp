@@ -219,8 +219,8 @@ namespace ElysiaEngine
         ImGuiIO& io = ImGui::GetIO();
 
         HandleInput(io);
-        // CameraManager::GetInstance().GetMainCamera()->UpdateFrustum();
-        //SceneManager::GetInstance().CollectRenderItems();
+        CameraManager::GetInstance().GetMainCamera()->UpdateFrustum();
+        SceneManager::GetInstance().CollectRenderItems();
     }
 
     void ElysiaFrame::HandleInput(const ImGuiIO& io)
@@ -483,12 +483,20 @@ namespace ElysiaEngine
                                             static_cast<int>(magic_enum::enum_count<
                                                 AODebugTarget>()));
                 pUserData.aoParameter.debugTarget = (AODebugTarget)debugModeIndex;
+
+                ImGui::SliderInt("mipmap level",
+                                 &pUserData.mipmapLevel,
+                                 0,
+                                 10);
+            }
+            if (pUserData.debugMode == DebugMode::AABB || pUserData.debugMode == DebugMode::GI)
+            {
+                ImGui::SliderInt("mipmap level",
+                                 &pUserData.instanceID,
+                                 0,
+                                 380);
             }
 
-            ImGui::SliderInt("mipmap level",
-                             &pUserData.mipmapLevel,
-                             0,
-                             10);
         }
 
         if (ImGui::CollapsingHeader("Light"))

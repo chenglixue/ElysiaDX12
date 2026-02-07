@@ -5,7 +5,7 @@
 
 #pragma Rasterizer NoCullNoMS
 #pragma Blend Disabled
-#pragma Depth Enabled
+#pragma Depth Disabled
 
 cbuffer PassConstant : register(b0, perPassSpace)
 {

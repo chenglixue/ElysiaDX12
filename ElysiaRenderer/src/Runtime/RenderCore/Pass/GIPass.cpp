@@ -108,11 +108,26 @@ namespace ElysiaRenderer
 
     void GIPass::Render(FrameContext& context)
     {
-        static bool isCalcSceneSize = false;
-        if (!SceneManager::GetInstance().GetEntities().empty() && !isCalcSceneSize)
+        // static bool isCalcSceneSize = false;
+        if (!SceneManager::GetInstance().GetEntities().empty())
         {
+            auto& entities = SceneManager::GetInstance().GetEntities()[0];
+            auto instanceID = UserData::GetInstance().instanceID;
+            instanceID = MathHelper::Max(0, instanceID);
+            const Entity* pEntity = nullptr;
+            if (instanceID < entities->GetChildren().size())
+            {
+                pEntity = entities->GetChildren()[instanceID].get();
+            }
+            else
+            {
+                pEntity = entities.get();
+            }
+
             auto sceneAABB = SceneManager::GetInstance().GetEntities()[0]->
                 GetWorldAABB();
+            sceneAABB = pEntity->GetWorldAABB();
+
             auto sceneMin = sceneAABB.Center - sceneAABB.Extents;
             auto sceneMax = sceneAABB.Center + sceneAABB.Extents;
 
@@ -130,10 +145,10 @@ namespace ElysiaRenderer
             m_gridSpacing = Vector3(spacingX, spacingY, spacingZ);
             m_gridOrigin = effectiveMin;
 
-            isCalcSceneSize = true;
+            // isCalcSceneSize = true;
         }
-        if (!isCalcSceneSize)
-            return;
+        // if (!isCalcSceneSize)
+        //     return;
         if (!m_vertexBuffer->GetIsReady() || !m_indexBuffer->GetIsReady())
             return;
 

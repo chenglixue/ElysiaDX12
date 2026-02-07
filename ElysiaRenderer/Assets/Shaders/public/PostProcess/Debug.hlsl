@@ -11,6 +11,7 @@
 cbuffer PassConstant : register(b0, perPassSpace)
 {
     UINT g_IrradianceTexIndex;
+    UINT g_AABBInstanceDatasIndex;
     UINT g_DebugMode;
 
     Vector4 screenSize;
@@ -26,6 +27,17 @@ cbuffer PassConstant : register(b0, perPassSpace)
     Vector4 g_GridDimensions;
     float g_ProbeRadius;
 }
+
+struct AABBInstanceData
+{
+    Vector3 Min;
+    float pad0;
+
+    Vector3 Max;
+    float pad1;
+
+    Vector4 Color;
+};
 
 #define DEBUG_NONE 0
 #define DEBUG_AO 1
@@ -46,6 +58,7 @@ struct PSInput
     float3 probeCenterWS : TEXCOORD0;
     float2 uv : TEXCOORD1;
     uint instanceID : SV_InstanceID;
+    float4 color : COLOR;
 };
 
 struct PSOutput
@@ -85,7 +98,19 @@ PSInput VS(VSInput i, UINT vertexID : SV_VertexID)
         o.positionCS = mul(float4(o.positionWS, 1.f), viewProjMatrix);
         break;
     }
+    case DEBUG_AABB:
+    {
+        StructuredBuffer<AABBInstanceData> AABBDatas = ResourceDescriptorHeap[
+            g_AABBInstanceDatasIndex];
+        AABBInstanceData AABBData = AABBDatas[i.instanceID];
+        float3 size = AABBData.Max - AABBData.Min;
+        float3 center = (AABBData.Max + AABBData.Min) * 0.5f;
 
+        o.positionWS = (i.positionOS * 0.5f) * size + center;
+        o.positionCS = mul(float4(o.positionWS, 1.0f), viewProjMatrix);
+        o.color = AABBData.Color;
+        break;
+    }
     case DEBUG_AO:
     case DEBUG_NORMAL:
         o.uv = float2((vertexID << 1) & 2, vertexID & 2);
@@ -112,6 +137,11 @@ PSOutput PS(PSInput i)
     {
         float3 normal = SampleNormalWS(i.uv);
         o.target0 = float4(normal, 1.f);
+        break;
+    }
+    case DEBUG_AABB:
+    {
+        o.target0 = i.color;
         break;
     }
     case DEBUG_GI:
