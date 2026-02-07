@@ -495,6 +495,26 @@ namespace ElysiaModel
         ibView.Format = IndexBufferFormat();
     }
 
+    void CalculateModelTransformFromBounds(LoadedModel& model)
+    {
+        if (model.meshes.empty())
+            return;
+
+        // 计算所有网格的总体包围盒（局部空间）
+        Vector3 overallMin(FLT_MAX);
+        Vector3 overallMax(-FLT_MAX);
+
+        for (const auto& mesh : model.meshes)
+        {
+            overallMin = Vector3::Min(overallMin, mesh.aabbMin); // 需要存储局部AABB
+            overallMax = Vector3::Max(overallMax, mesh.aabbMax);
+        }
+
+        // 存储包围盒信息
+        model.aabbMin = overallMin;
+        model.aabbMax = overallMax;
+    }
+
     bool LoadModel(const std::wstring& filePath,
                    bool bInvertTexcoordY,
                    bool bImportMeshes,
@@ -516,15 +536,12 @@ namespace ElysiaModel
         auto fileDirectory = GetDirectoryFromFilePath(filePath);
 
         unsigned int flags = aiProcess_CalcTangentSpace | aiProcess_Triangulate |
-                             aiProcess_JoinIdenticalVertices |
-                             aiProcess_RemoveRedundantMaterials |
                              aiProcess_MakeLeftHanded | aiProcess_FlipWindingOrder;
         if (bInvertTexcoordY)
         {
             flags |= aiProcess_FlipUVs;
         }
-        flags |= aiProcess_PreTransformVertices | aiProcess_OptimizeMeshes;
-
+        flags |= aiProcess_OptimizeMeshes;
         const aiScene* pScene = importer.ReadFile(fileNameAnsi, flags);
         model.name = WstringToString(
             GetFileName(RemoveExt(WstringToString(filePath).c_str()).c_str()));
@@ -557,6 +574,9 @@ namespace ElysiaModel
                                  model.materialTextures);
 
             LoadMeshData(filePath, pScene, scale, model);
+
+            CalculateModelTransformFromBounds(model);
+
         }
 
         std::cout << "Finished loading scene '%ls'" + WstringToString(filePath) <<

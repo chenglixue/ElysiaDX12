@@ -94,11 +94,8 @@ namespace ElysiaRenderer
         const std::shared_ptr<LoadedModel>& model) const
     {
         auto pParent = std::make_unique<Entity>(ToEastl(model->name));
-        pParent->transform.scale = Vector3::One;
-        // if (pParent->GetParent())
-        // pParent->transform.position = (model->aabbMin + model->aabbMax) * 0.5f * pParent->transform.
-        //                                                                                   scale;
-        pParent->transform.position = Vector3::Zero;
+        pParent->transform.scale = Vector3::One * 0.01f;
+        pParent->transform.rotation = MathHelper::Euler(90, 0, 180);
         pParent->SetLocalAABB(model->aabbMin, model->aabbMax);
         pParent->UpdateWorldAABB();
 
@@ -113,10 +110,10 @@ namespace ElysiaRenderer
                 .scale = Vector3::One
             };
             pChild->transform.m_pParent = &pParent->transform;
-            pChild->SetLocalAABB(mesh.aabbMin, mesh.aabbMax);
             pChild->pMeshRenderer = std::make_unique<MeshRenderer>();
             pChild->pMeshRenderer->ShutDown();
             pChild->pMeshRenderer->Init(model, meshIndex);
+            pChild->SetLocalAABB(mesh.aabbMin, mesh.aabbMax);
             pChild->UpdateWorldAABB();
 
             pParent->AddChild(std::move(pChild));
@@ -152,13 +149,14 @@ namespace ElysiaRenderer
             std::cout << "INTERSECTS" << std::endl;
             break;
         }
-        if (cameraFrustum.Contains(pEntity->GetWorldAABB()) != DISJOINT)
+        //if (cameraFrustum.Contains(pEntity->GetWorldAABB()) != DISJOINT)
         {
             if (pEntity->pMeshRenderer != nullptr)
             {
                 const auto& worldMat = pEntity->transform.GetWorldMatrix();
                 const auto& mesh = pEntity->pMeshRenderer->GetMesh();
-                Vector3 worldCenter = Vector3::Transform(mesh.logicalCenter, worldMat);
+                Vector3 worldCenter = Vector3::Transform((mesh.aabbMin + mesh.aabbMax) * 0.5f,
+                                                         worldMat);
 
                 RenderItem item
                 {

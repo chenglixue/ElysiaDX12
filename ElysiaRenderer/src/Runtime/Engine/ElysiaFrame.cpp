@@ -488,9 +488,7 @@ namespace ElysiaEngine
             ImGui::SliderInt("mipmap level",
                              &pUserData.mipmapLevel,
                              0,
-                             10,
-                             "%.3f",
-                             ImGuiSliderFlags_AlwaysClamp);
+                             10);
         }
 
         if (ImGui::CollapsingHeader("Light"))
@@ -522,7 +520,7 @@ namespace ElysiaEngine
                                                 ShadowQuality>()));
             pUserData.shadowQuality = (ShadowQuality)shadowQualityIndex;
 
-            ImGui::SliderFloat("Shadow Depth Bias", &pUserData.shadowDepthBias, 0, 10);
+            ImGui::SliderFloat("Shadow Depth Bias", &pUserData.shadowDepthBias, 0, 1);
             ImGui::SliderFloat("Shadow Slope Depth Bias", &pUserData.shadowSlopeDepthBias, 0, 10);
             ImGui::SliderFloat("Shadow Max Slope Depth Bias",
                                &pUserData.shadowMaxSlopeDepthBias,

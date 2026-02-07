@@ -152,7 +152,7 @@ namespace ElysiaModel
 
 
         std::string name;
-        float scale = 1;
+        float scale = 1.f;
         Vector3 aabbMin = Vector3(FLT_MAX);
         Vector3 aabbMax = Vector3(-FLT_MAX);
         eastl::vector<MeshVertex> vertices;

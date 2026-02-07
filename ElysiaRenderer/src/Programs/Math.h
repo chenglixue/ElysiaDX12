@@ -52,7 +52,21 @@ namespace ElysiaHelper
             return (value + divisor - 1) / divisor;
         }
 
+        static Quaternion Euler(float x, float y, float z)
+        {
+            // 1. 将角度转换为弧度
+            // DirectXMath 提供了 XMConvertToRadians 宏
+            float pitch = XMConvertToRadians(x); // 绕 X 轴
+            float yaw = XMConvertToRadians(y);   // 绕 Y 轴
+            float roll = XMConvertToRadians(z);  // 绕 Z 轴
 
+            // 2. 使用 DirectXMath 的内置函数计算
+            // 注意：DirectX 的顺序通常是 Yaw-Pitch-Roll (Y-X-Z)
+            XMVECTOR qVec = XMQuaternionRotationRollPitchYaw(pitch, yaw, roll);
+
+            // 3. 返回你的 Quaternion 类对象
+            return Quaternion(qVec);
+        }
     };
 
     struct UINT2
@@ -101,4 +115,6 @@ namespace ElysiaHelper
     {
         return (value + divisor - 1) / divisor;
     }
+
+
 }

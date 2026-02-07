@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "DX12Camera.h"
 
+#include "Programs/Math.h"
+
 namespace ElysiaRenderer
 {
     //=================================================================================================
@@ -88,7 +90,7 @@ namespace ElysiaRenderer
 
     void DX12Camera::SetRotation(const float x, const float y, const float z) noexcept
     {
-        m_transform.rotation = Euler(0, 90, 0);
+        m_transform.rotation = ElysiaHelper::MathHelper::Euler(0, 90, 0);
 
         UpdateViewMatrix();
     }
@@ -181,21 +183,7 @@ namespace ElysiaRenderer
             c
             );
     }
-    Quaternion DX12Camera::Euler(float x, float y, float z)
-    {
-        // 1. 将角度转换为弧度
-        // DirectXMath 提供了 XMConvertToRadians 宏
-        float pitch = XMConvertToRadians(x); // 绕 X 轴
-        float yaw = XMConvertToRadians(y);   // 绕 Y 轴
-        float roll = XMConvertToRadians(z);  // 绕 Z 轴
 
-        // 2. 使用 DirectXMath 的内置函数计算
-        // 注意：DirectX 的顺序通常是 Yaw-Pitch-Roll (Y-X-Z)
-        XMVECTOR qVec = XMQuaternionRotationRollPitchYaw(pitch, yaw, roll);
-
-        // 3. 返回你的 Quaternion 类对象
-        return Quaternion(qVec);
-    }
     void GetPitchYaw(const Quaternion& q, float& pitch, float& yaw)
     {
         // 1. 计算 Pitch (绕 X 轴)

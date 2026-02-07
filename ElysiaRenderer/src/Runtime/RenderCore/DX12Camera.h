@@ -46,7 +46,6 @@ namespace ElysiaRenderer
         void UpdateFrustum();
 
         Quaternion CreateFromAxisAngle(const Vector3& axis, float angle);
-        Quaternion Euler(float x, float y, float z);
 
     protected:
         Matrix m_viewMatrix = Matrix::Identity;

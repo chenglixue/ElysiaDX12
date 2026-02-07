@@ -111,7 +111,8 @@ namespace ElysiaRenderer
         static bool isCalcSceneSize = false;
         if (!SceneManager::GetInstance().GetEntities().empty() && !isCalcSceneSize)
         {
-            auto sceneAABB = SceneManager::GetInstance().GetEntities()[0]->GetWorldAABB();
+            auto sceneAABB = SceneManager::GetInstance().GetEntities()[0]->
+                GetWorldAABB();
             auto sceneMin = sceneAABB.Center - sceneAABB.Extents;
             auto sceneMax = sceneAABB.Center + sceneAABB.Extents;
 
