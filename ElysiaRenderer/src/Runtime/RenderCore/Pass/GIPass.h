@@ -97,11 +97,19 @@ namespace ElysiaRenderer
         RenderTexture* m_pIrradianceRT = nullptr;
         RenderTexture* m_pDistanceRT = nullptr;
 
+        /// --------------------------------------------
+        /// DXR
+        /// -------------------------------------------- 
         SBTHelper m_stbHelper;
         CComPtr<IDxcBlob> m_DXRBlob;
         CComPtr<ID3D12RootSignature> m_pGlobalRootSig;
         CComPtr<ID3D12StateObject> m_pRTPSO;
         mutable std::vector<std::wstring> m_tempStrings;
+        BufferHandle m_pBLASBuffer;
+        BufferHandle m_pScratchBuffer;
+        BufferHandle m_pTLASBuffer;
+        BufferHandle m_pTLASScratchBuffer;
+        BufferHandle m_pTLASUploadBuffer;
 
         struct alignas(16) RayData
         {
@@ -135,9 +143,12 @@ namespace ElysiaRenderer
 #pragma endregion
 
         void GenerateRay();
+
         CComPtr<IDxcBlob> CompileRaytracingLibrary(const std::wstring& fileName);
         void CreateRaytracingPipeline(ID3D12Device* pDevice,
                                       ID3D12RootSignature* pRootSignature);
         void CreateDXRRootSignature(ID3D12Device* pDevice);
+        void GenerateBLAS(ElysiaEngine::FrameContext& context);
+        void GenerateTLAS(ElysiaEngine::FrameContext& context);
     };
 }

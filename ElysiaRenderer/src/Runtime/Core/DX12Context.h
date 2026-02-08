@@ -1,4 +1,5 @@
 #pragma once
+#include "BufferUtility.h"
 #include "Programs/Helper.h"
 
 namespace ElysiaCore
@@ -35,6 +36,8 @@ namespace ElysiaCore
         void AddBarrier(RenderTexture* resource, D3D12_RESOURCE_STATES newState, bool isFlush = true);
         void AddBarrier(RenderTexture* resource, D3D12_RESOURCE_STATES newState, UINT mipmapNum, bool isFlush = true);
         void AddUAVBarrier(RenderTexture* pRT, bool isFlush = true);
+        void AddUAVBarrier(BufferHandle pBuffer, bool isFlush = true);
+
 
         void FlushBarrier();
         void CopyTextureRegion(DX12GPUResource& destination, ID3D12Resource* source, size_t sourceOffset,

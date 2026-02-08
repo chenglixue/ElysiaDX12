@@ -8,17 +8,23 @@
 
 namespace ElysiaCore
 {
-    DX12Context::DX12Context(DX12Device* device, D3D12_COMMAND_LIST_TYPE commandType) :
-        m_device(device), m_contextType(commandType)
+    DX12Context::DX12Context(DX12Device* device, D3D12_COMMAND_LIST_TYPE commandType)
+        : m_device(device),
+          m_contextType(commandType)
     {
         for (int i = 0; i < NUM_FRAMES_IN_FLIGHT; ++i)
         {
             AssertIfFailed(m_device->GetDevice()->
-                                     CreateCommandAllocator(commandType, IID_PPV_ARGS(&m_commandAllocators[i])));
+                                     CreateCommandAllocator(
+                                         commandType,
+                                         IID_PPV_ARGS(&m_commandAllocators[i])));
         }
 
         AssertIfFailed(m_device->GetDevice()->
-                                 CreateCommandList(0, commandType, m_commandAllocators[0], nullptr,
+                                 CreateCommandList(0,
+                                                   commandType,
+                                                   m_commandAllocators[0],
+                                                   nullptr,
                                                    IID_PPV_ARGS(&m_commandList)));
         m_commandList->Close();
     }
@@ -70,7 +76,9 @@ namespace ElysiaCore
     }
 
 
-    void DX12Context::AddBarrier(DX12GPUResource& resource, D3D12_RESOURCE_STATES newState, bool isFlush)
+    void DX12Context::AddBarrier(DX12GPUResource& resource,
+                                 D3D12_RESOURCE_STATES newState,
+                                 bool isFlush)
     {
         if (m_numQueuedBarriers >= MAX_QUEUED_BARRIERS)
         {
@@ -86,7 +94,8 @@ namespace ElysiaCore
             // Describes the transition of subresources between different usages
             barrierDesc.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
             barrierDesc.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-            barrierDesc.Transition = {resource.GetResource(), D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES, oldState,
+            barrierDesc.Transition = {resource.GetResource(),
+                                      D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES, oldState,
                                       newState};
 
             resource.SetUsageState(newState);
@@ -98,7 +107,9 @@ namespace ElysiaCore
         }
     }
 
-    void DX12Context::AddBarrier(DX12GPUResource& resource, std::vector<D3D12_RESOURCE_STATES>& newStates, bool isFlush)
+    void DX12Context::AddBarrier(DX12GPUResource& resource,
+                                 std::vector<D3D12_RESOURCE_STATES>& newStates,
+                                 bool isFlush)
     {
         if (m_numQueuedBarriers >= MAX_QUEUED_BARRIERS)
         {
@@ -116,7 +127,8 @@ namespace ElysiaCore
                 // Describes the transition of subresources between different usages
                 barrierDesc.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
                 barrierDesc.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-                barrierDesc.Transition = {resource.GetResource(), D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES, oldState,
+                barrierDesc.Transition = {resource.GetResource(),
+                                          D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES, oldState,
                                           newStates[i]};
 
                 resource.SetUsageState(newStates[i]);
@@ -147,7 +159,8 @@ namespace ElysiaCore
             // Describes the transition of subresources between different usages
             barrierDesc.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
             barrierDesc.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-            barrierDesc.Transition = {resource->GetResource(), D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES, oldState,
+            barrierDesc.Transition = {resource->GetResource(),
+                                      D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES, oldState,
                                       newState};
 
             resource->SetUsageState(newState);
@@ -159,7 +172,10 @@ namespace ElysiaCore
         }
     }
 
-    void DX12Context::AddBarrier(RenderTexture* RT, D3D12_RESOURCE_STATES newState, UINT mipmapNum, bool isFlush)
+    void DX12Context::AddBarrier(RenderTexture* RT,
+                                 D3D12_RESOURCE_STATES newState,
+                                 UINT mipmapNum,
+                                 bool isFlush)
     {
         if (m_numQueuedBarriers >= MAX_QUEUED_BARRIERS)
         {
@@ -192,7 +208,6 @@ namespace ElysiaCore
 
     void DX12Context::AddUAVBarrier(RenderTexture* pRT, bool isFlush)
     {
-        // 1. 检查队列是否已满
         if (m_numQueuedBarriers >= MAX_QUEUED_BARRIERS)
         {
             FlushBarrier();
@@ -200,15 +215,35 @@ namespace ElysiaCore
 
         auto resource = pRT->GetTexture();
 
-        // 2. 填充 UAV Barrier 描述符
         D3D12_RESOURCE_BARRIER& barrierDesc = m_resourceBarriers[m_numQueuedBarriers];
         m_numQueuedBarriers ++;
 
         barrierDesc.Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
         barrierDesc.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-        barrierDesc.UAV.pResource = resource->GetResource(); // 关键：指定需要同步的资源
+        barrierDesc.UAV.pResource = resource->GetResource();
 
-        // 3. 根据需要立即刷新
+        if (isFlush)
+        {
+            FlushBarrier();
+        }
+    }
+
+    void DX12Context::AddUAVBarrier(BufferHandle pBuffer, bool isFlush)
+    {
+        if (m_numQueuedBarriers >= MAX_QUEUED_BARRIERS)
+        {
+            FlushBarrier();
+        }
+
+        auto resource = pBuffer;
+
+        D3D12_RESOURCE_BARRIER& barrierDesc = m_resourceBarriers[m_numQueuedBarriers];
+        m_numQueuedBarriers ++;
+
+        barrierDesc.Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
+        barrierDesc.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+        barrierDesc.UAV.pResource = resource->GetResource();
+
         if (isFlush)
         {
             FlushBarrier();
@@ -226,10 +261,14 @@ namespace ElysiaCore
         }
     }
 
-    void DX12Context::CopyTextureRegion(DX12GPUResource& dest, ID3D12Resource* source, size_t sourceOffset,
-                                        SubResourceLayouts subResourceLayouts, UINT numSubResources)
+    void DX12Context::CopyTextureRegion(DX12GPUResource& dest,
+                                        ID3D12Resource* source,
+                                        size_t sourceOffset,
+                                        SubResourceLayouts subResourceLayouts,
+                                        UINT numSubResources)
     {
-        for (UINT currSubResourceIndex = 0; currSubResourceIndex < numSubResources; ++currSubResourceIndex)
+        for (UINT currSubResourceIndex = 0; currSubResourceIndex < numSubResources; ++
+             currSubResourceIndex)
         {
             // if (dest.GetResource()->GetDesc().Format != source.GetResource()->GetDesc().Format) 
             // {
@@ -254,10 +293,16 @@ namespace ElysiaCore
         }
     }
 
-    void DX12Context::CopyBufferRegion(DX12GPUResource& destination, UINT64 destOffset,
-                                       DX12GPUResource& source, UINT64 sourceOffset, UINT64 numBytes)
+    void DX12Context::CopyBufferRegion(DX12GPUResource& destination,
+                                       UINT64 destOffset,
+                                       DX12GPUResource& source,
+                                       UINT64 sourceOffset,
+                                       UINT64 numBytes)
     {
-        m_commandList->CopyBufferRegion(destination.GetResource(), destOffset, source.GetResource(), sourceOffset,
+        m_commandList->CopyBufferRegion(destination.GetResource(),
+                                        destOffset,
+                                        source.GetResource(),
+                                        sourceOffset,
                                         numBytes);
     }
 

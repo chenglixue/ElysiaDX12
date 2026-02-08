@@ -496,7 +496,7 @@ namespace ElysiaEngine
                 ImGui::SliderInt("mipmap level",
                                  &pUserData.instanceID,
                                  0,
-                                 380);
+                                 400);
             }
 
         }

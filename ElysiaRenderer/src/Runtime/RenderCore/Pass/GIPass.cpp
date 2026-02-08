@@ -121,8 +121,10 @@ namespace ElysiaRenderer
 
     void GIPass::Render(FrameContext& context)
     {
+
         if (!SceneManager::GetInstance().GetEntities().empty())
         {
+            GenerateBLAS(context);
             auto& entities = SceneManager::GetInstance().GetEntities()[0];
             auto instanceID = UserData::GetInstance().instanceID;
             instanceID = MathHelper::Max(0, instanceID);
@@ -253,6 +255,175 @@ namespace ElysiaRenderer
                                D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 
         m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), "Generate Ray");
+    }
+    void GIPass::GenerateBLAS(ElysiaEngine::FrameContext& context)
+    {
+        static bool hasGenBLAS = false;
+        if (hasGenBLAS)
+            return;
+
+        CComPtr<ID3D12Device5> pDevice5;
+        ThrowIfFailed(m_pDevice->GetDevice()->QueryInterface(IID_PPV_ARGS(&pDevice5)));
+
+        auto& rootRenderItem = context.renderList[0];
+        auto rootVBView = rootRenderItem.vbView;
+        auto rootIBView = rootRenderItem.ibView;
+
+        D3D12_RAYTRACING_GEOMETRY_DESC geometryDesc = {};
+        geometryDesc.Type = D3D12_RAYTRACING_GEOMETRY_TYPE_TRIANGLES;
+        geometryDesc.Flags = D3D12_RAYTRACING_GEOMETRY_FLAG_OPAQUE;
+
+        // describe vertex、index
+        auto& triangles = geometryDesc.Triangles;
+        triangles.VertexBuffer.StartAddress = rootVBView.BufferLocation;
+        triangles.VertexBuffer.StrideInBytes = rootVBView.StrideInBytes;
+        triangles.VertexCount = rootVBView.SizeInBytes / rootVBView.StrideInBytes;
+        triangles.VertexFormat = DXGI_FORMAT_R32G32B32_FLOAT;
+
+        triangles.IndexBuffer = rootIBView.BufferLocation;
+        triangles.IndexCount = rootIBView.SizeInBytes / ElysiaModel::IndexSize();
+        triangles.IndexFormat = rootIBView.Format;
+
+        triangles.Transform3x4 = 0;
+
+        // Prebuild Info
+        D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS buildInputs =
+        {
+            .Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL,
+            .Flags = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PREFER_FAST_TRACE,
+            .NumDescs = 1,
+            .pGeometryDescs = &geometryDesc,
+            .DescsLayout = D3D12_ELEMENTS_LAYOUT_ARRAY
+        };
+
+        D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO prebuildInfo = {};
+        pDevice5->GetRaytracingAccelerationStructurePrebuildInfo(&buildInputs, &prebuildInfo);
+
+        // allocate GPU Buffer
+        m_pBLASBuffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc
+        {
+            .name = L"DXR BLAS Result Buffer",
+            .stride = 0,
+            .size = prebuildInfo.ResultDataMaxSizeInBytes,
+            .viewFlags = GPUResourceFlags::UAV,
+            .accessFlags = BufferAccessFlags::GPUOnly,
+            .isRawAccess = true,
+            .InitData = nullptr,
+        });
+        m_pScratchBuffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc
+        {
+            .name = L"DXR BLAS Scratch Buffer",
+            .stride = 0,
+            .size = prebuildInfo.ScratchDataSizeInBytes,
+            .viewFlags = GPUResourceFlags::UAV,
+            .accessFlags = BufferAccessFlags::GPUOnly,
+            .isRawAccess = true,
+            .InitData = nullptr,
+        });
+        m_pCommand->AddBarrier(*m_pBLASBuffer,
+                               D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE,
+                               false);
+        m_pCommand->AddBarrier(*m_pScratchBuffer,
+                               D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
+                               false);
+        m_pCommand->FlushBarrier();
+
+        // Build
+        D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC buildDesc =
+        {
+            .Inputs = buildInputs,
+            .DestAccelerationStructureData = m_pBLASBuffer->GetGPUAddress(),
+            .ScratchAccelerationStructureData = m_pScratchBuffer->GetGPUAddress(),
+            .SourceAccelerationStructureData = 0 // 仅在更新（Update）时使用
+        };
+
+        m_pCommand->GetCommandList()->BuildRaytracingAccelerationStructure(&buildDesc, 0, nullptr);
+        m_pCommand->AddUAVBarrier(m_pBLASBuffer);
+
+        hasGenBLAS = true;
+    }
+    void GIPass::GenerateTLAS(ElysiaEngine::FrameContext& context)
+    {
+        CComPtr<ID3D12Device5> pDevice5;
+        ThrowIfFailed(m_pDevice->GetDevice()->QueryInterface(IID_PPV_ARGS(&pDevice5)));
+        auto& rootRenderItem = context.renderList[0];
+
+        // 定义实例描述符 (Instance Desc)
+        D3D12_RAYTRACING_INSTANCE_DESC instanceDesc =
+        {
+            .Transform[0][0] = 1.f,
+            .Transform[1][1] = 1.f,
+            .Transform[2][2] = 1.f,
+            .InstanceMask = 0xFF,                     // 与 TraceRay 的 mask 匹配
+            .InstanceID = 0,                          // 对应 HLSL 中的 InstanceID()
+            .InstanceContributionToHitGroupIndex = 0, // 对应 HitGroup 偏移
+            .Flags = D3D12_RAYTRACING_INSTANCE_FLAG_NONE,
+        };
+        memcpy(instanceDesc.Transform, &rootRenderItem.worldMatrix, sizeof(instanceDesc.Transform));
+
+        // 关联我们之前创建的 BLAS
+        instanceDesc.AccelerationStructure = m_pBLASBuffer->GetGPUAddress();
+
+        // 创建并填充 Instance Upload Buffer
+        if (m_pTLASUploadBuffer)
+            BufferManager::GetInstance().DestoryBuffer(m_pTLASUploadBuffer);
+        m_pTLASUploadBuffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc
+        {
+            .name = L"DXR TLAS Instance Upload Buffer",
+            .stride = sizeof(D3D12_RAYTRACING_INSTANCE_DESC),
+            .size = sizeof(D3D12_RAYTRACING_INSTANCE_DESC),
+            .viewFlags = GPUResourceFlags::None,
+            .accessFlags = BufferAccessFlags::HostWritable,
+            .isRawAccess = false,
+            .InitData = &instanceDesc,
+        });
+
+        // 获取 TLAS Prebuild Info
+        D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS buildInputs =
+        {
+            .Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL,
+            .Flags = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PREFER_FAST_TRACE,
+            .NumDescs = 1,
+            .DescsLayout = D3D12_ELEMENTS_LAYOUT_ARRAY,
+            .InstanceDescs = m_pTLASUploadBuffer->GetGPUAddress()
+        };
+        D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO prebuildInfo = {};
+        pDevice5->GetRaytracingAccelerationStructurePrebuildInfo(&buildInputs, &prebuildInfo);
+
+        // 分配 TLAS 结果和 Scratch 空间
+        m_pTLASBuffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc
+        {
+            .name = L"DXR TLAS Result Buffer",
+            .size = prebuildInfo.ResultDataMaxSizeInBytes,
+            .viewFlags = GPUResourceFlags::UAV,
+            .accessFlags = BufferAccessFlags::GPUOnly,
+            .isRawAccess = true
+        });
+
+        m_pTLASScratchBuffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc
+        {
+            .name = L"DXR TLAS Scratch Buffer",
+            .size = prebuildInfo.ScratchDataSizeInBytes,
+            .viewFlags = GPUResourceFlags::UAV,
+            .accessFlags = BufferAccessFlags::GPUOnly,
+            .isRawAccess = true
+        });
+
+        m_pCommand->AddBarrier(*m_pTLASBuffer,
+                               D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE,
+                               false);
+        m_pCommand->AddBarrier(*m_pTLASScratchBuffer, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+        m_pCommand->FlushBarrier();
+
+        // Build
+        D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC buildDesc =
+        {
+            .Inputs = buildInputs,
+            .DestAccelerationStructureData = m_pTLASBuffer->GetGPUAddress(),
+            .ScratchAccelerationStructureData = m_pTLASScratchBuffer->GetGPUAddress(),
+        };
+        m_pCommand->GetCommandList()->BuildRaytracingAccelerationStructure(&buildDesc, 0, nullptr);
+        m_pCommand->AddUAVBarrier(m_pTLASBuffer);
     }
 
     CComPtr<IDxcBlob> GIPass::CompileRaytracingLibrary(const std::wstring& fileName)
