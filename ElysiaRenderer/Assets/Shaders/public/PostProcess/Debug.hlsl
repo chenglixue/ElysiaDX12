@@ -8,6 +8,9 @@
 #pragma Blend Disabled
 #pragma Depth Enabled
 
+#define PROBE_COUNT 1024
+#define Rays_Per_Probe 32
+
 cbuffer PassConstant : register(b0, perPassSpace)
 {
     UINT g_IrradianceTexIndex;
@@ -26,6 +29,7 @@ cbuffer PassConstant : register(b0, perPassSpace)
     Vector4 g_GridSpacing;
     Vector4 g_GridDimensions;
     float g_ProbeRadius;
+    UINT g_RayDataBufferIndex;
 }
 
 struct AABBInstanceData
@@ -38,6 +42,12 @@ struct AABBInstanceData
 
     Vector4 Color;
 };
+
+RayData Elysia_DDGI_LoadRayData(uint readIndex)
+{
+    RWStructuredBuffer<RayData> rayDatas = ResourceDescriptorHeap[g_RayDataBufferIndex];
+    return rayDatas[readIndex];
+}
 
 #define DEBUG_NONE 0
 #define DEBUG_AO 1
@@ -146,12 +156,14 @@ PSOutput PS(PSInput i)
     }
     case DEBUG_GI:
     {
-        float3 N = normalize(i.positionWS - i.probeCenterWS);
-        float2 octUV = OctEncode(N);
-        float2 uv = GetProbeUV(i.instanceID, octUV, g_GridDimensions.xyz, 6.0);
-
-        float3 irradiance = SampleTexture2D(g_IrradianceTexIndex, uv, ClampPointSampler);
-        o.target0 = float4(irradiance, 1.f);
+        // float3 N = normalize(i.positionWS - i.probeCenterWS);
+        // float2 octUV = OctEncode(N);
+        // float2 uv = GetProbeUV(i.instanceID, octUV, g_GridDimensions.xyz, 6.0);
+        //
+        // float3 irradiance = SampleTexture2D(g_IrradianceTexIndex, uv, ClampPointSampler);
+        uint rayIndex = i.instanceID * Rays_Per_Probe;
+        RayData rayData = Elysia_DDGI_LoadRayData(rayIndex);
+        o.target0 = float4(rayData.Radiance, 1.f);
         break;
     }
     }

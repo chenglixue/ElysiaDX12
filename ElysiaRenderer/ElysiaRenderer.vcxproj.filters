@@ -580,6 +580,9 @@
     <ClInclude Include="src\Runtime\RenderCore\Pass\GIPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Programs\SBTHelper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="dxc\bin\x64\dxcompiler.dll" />
@@ -632,9 +635,10 @@
     <None Include="Assets\Shaders\public\PostProcess\AO\CS_AOHIZNormal.hlsl" />
     <None Include="Assets\Shaders\public\PostProcess\AO\CS_GenerateAOImportance.hlsl" />
     <None Include="Assets\Shaders\public\PostProcess\AO\CS_LayeredAO.hlsl" />
-    <None Include="Assets\Shaders\public\GI\CS_DDGI.hlsl" />
-    <None Include="Assets\Shaders\public\GI\GI_Debug.hlsl" />
     <None Include="Assets\Shaders\public\PostProcess\Debug.hlsl" />
+    <None Include="Assets\Shaders\public\GI\CS_DDGI_RayGen.hlsl" />
+    <None Include="Assets\Shaders\public\GI\CS_DDGI.hlsl" />
+    <None Include="Assets\Shaders\public\GI\DDGI_Library.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -1001,6 +1005,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Runtime\RenderCore\Pass\GIPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Programs\SBTHelper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

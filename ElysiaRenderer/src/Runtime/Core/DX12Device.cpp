@@ -304,15 +304,6 @@ namespace ElysiaCore
     std::unique_ptr<DX12Shader> DX12Device::CreateShader(ShaderCreateDesc& shaderCreateDesc)
     {
         assert(shaderCreateDesc.stages.size());
-        /// Enable Debug
-#if defined(_DEBUG)
-        // Enable better shader debugging with the graphics debugging tools.
-        UINT compileFlags =
-            D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION | D3DCOMPILE_ENABLE_STRICTNESS;
-#else
-        UINT compileFlags = 0;
-#endif
-
         //
         // Get x64 path
         WCHAR assetsPath[512];

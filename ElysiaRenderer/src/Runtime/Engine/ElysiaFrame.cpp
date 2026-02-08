@@ -90,7 +90,9 @@ namespace ElysiaEngine
         m_pImGui->OnCreate(m_pDevice, &m_swapChain);
 
         m_pRenderer = new ElysiaRenderer::Renderer();
-        m_pRenderer->OnCreate(m_pDevice, &m_swapChain, m_pGraphicsContext.get());
+        m_pRenderer->OnCreate(m_pDevice,
+                              &m_swapChain,
+                              m_pGraphicsContext.get());
 
         OnResize();
         OnUpdateDisplay();

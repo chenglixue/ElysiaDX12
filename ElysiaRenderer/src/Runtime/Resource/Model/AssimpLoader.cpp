@@ -536,7 +536,8 @@ namespace ElysiaModel
         auto fileDirectory = GetDirectoryFromFilePath(filePath);
 
         unsigned int flags = aiProcess_CalcTangentSpace | aiProcess_Triangulate |
-                             aiProcess_MakeLeftHanded | aiProcess_FlipWindingOrder;
+                             aiProcess_MakeLeftHanded | aiProcess_FlipWindingOrder
+                             | aiProcess_RemoveRedundantMaterials | aiProcess_JoinIdenticalVertices;
         if (bInvertTexcoordY)
         {
             flags |= aiProcess_FlipUVs;

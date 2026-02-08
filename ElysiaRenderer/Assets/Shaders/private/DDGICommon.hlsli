@@ -2,6 +2,11 @@
 #define DDGI_COMMON_H
 #include "ShadingCommon.hlsl"
 
+struct RayData
+{
+    float3 Radiance;
+    float Distance;
+};
 
 float2 SignNotZero(float2 v)
 {
