@@ -84,7 +84,9 @@ namespace ElysiaRenderer
         m_pCommand->SetPipeline(pipelineStateData);
         SetSpaceResource(passData, PER_FRAME_SPACE);
         m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_renderSize));
-        m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+        m_pCommand->SetPrimitiveTopology(UserData::GetInstance().debugMode == DebugMode::AABB
+                                             ? D3D_PRIMITIVE_TOPOLOGY_LINELIST
+                                             : D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
         m_pMaterial->SetUInt(ShaderIDs::g_DebugMode,
                              static_cast<UINT>(UserData::GetInstance().debugMode));
@@ -173,6 +175,15 @@ namespace ElysiaRenderer
                 desc,
                 D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE);
         }
+        PipelineInfo pipelineStateData{};
+        pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(
+            passID).pPipelineStateObject;
+        pipelineStateData.m_renderTargets = {m_pCameraColorRT->GetTexture()};
+        pipelineStateData.m_depthStencilTarget = m_pCameraDepthRT->GetTexture();
+        m_pCommand->SetPipeline(pipelineStateData);
+        SetSpaceResource(passData, PER_FRAME_SPACE);
+        m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_renderSize));
+        m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
 
         m_aabbDrawer.Clear();
         if (!m_aabbDrawer.IsReady() || SceneManager::GetInstance().GetEntities().empty())
@@ -202,7 +213,6 @@ namespace ElysiaRenderer
             }
         }
 
-        m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
         m_pCommand->SetVertexBuffer(0, 1, m_aabbDrawer.vertexView);
         m_pCommand->SetIndexBuffer(m_aabbDrawer.indexView);
 

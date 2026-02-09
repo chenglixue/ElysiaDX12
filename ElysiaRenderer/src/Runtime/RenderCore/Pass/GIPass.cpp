@@ -73,7 +73,6 @@ namespace ElysiaRenderer
         });
 
         m_DXRBlob = CompileRaytracingLibrary(L"Shaders\\public\\GI\\DDGI_Library.hlsl");
-        ThrowIfFailed(m_pDevice->GetDevice()->QueryInterface(IID_PPV_ARGS(&m_pDevice5)));
     }
 
     GIPass::~GIPass()
@@ -86,20 +85,13 @@ namespace ElysiaRenderer
 
     void GIPass::Configure()
     {
+        if (!m_pDevice5)
+            ThrowIfFailed(m_pDevice->GetDevice()->QueryInterface(IID_PPV_ARGS(&m_pDevice5)));
+
         m_halfWidth = UINT(m_renderSize.x) >> 1;
         m_halfHeight = UINT(m_renderSize.y) >> 1;
         m_quarterWidth = UINT(m_renderSize.x) >> 2;
         m_quarterHeight = UINT(m_renderSize.y) >> 2;
-
-        m_pRayDataBuffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc
-        {
-            .name = L"Ray Data Buffer",
-            .stride = sizeof(RayData),
-            .size = sizeof(RayData) * Probe_Count * Rays_Per_Probe,
-            .viewFlags = GPUResourceFlags::SRV | GPUResourceFlags::UAV,
-            .accessFlags = BufferAccessFlags::GPUOnly,
-            .isRawAccess = false
-        });
 
         m_pIrradianceRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(
             Grid_Dimensions.x * 8,
@@ -152,11 +144,11 @@ namespace ElysiaRenderer
             const Entity* pEntity = nullptr;
             if (instanceID < entityCount)
             {
-                pEntity = context.renderList[instanceID + 1].pAssociatedEntity;
+                pEntity = SceneManager::GetInstance().GetEntities()[0]->GetChildren()[
+                    instanceID].get();
             }
             else
             {
-
                 pEntity = context.renderList[0].pAssociatedEntity;
             }
 
@@ -340,7 +332,8 @@ namespace ElysiaRenderer
                 .size = prebuildInfo.ResultDataMaxSizeInBytes,
                 .viewFlags = GPUResourceFlags::UAV,
                 .accessFlags = BufferAccessFlags::GPUOnly,
-                .isRawAccess = true
+                .isRawAccess = true,
+                .isAccelerationStructure = true
             });
         }
 
@@ -358,17 +351,13 @@ namespace ElysiaRenderer
             });
         }
 
-        m_pCommand->AddBarrier(*m_pTLASBuffer,
-                               D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE,
-                               false);
         m_pCommand->AddBarrier(*m_pTLASScratchBuffer, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-        m_pCommand->FlushBarrier();
 
         // Build
         D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC buildDesc =
         {
-            .Inputs = buildInputs,
             .DestAccelerationStructureData = m_pTLASBuffer->GetGPUAddress(),
+            .Inputs = buildInputs,
             .ScratchAccelerationStructureData = m_pTLASScratchBuffer->GetGPUAddress(),
         };
         m_pCommand->GetCommandList()->BuildRaytracingAccelerationStructure(&buildDesc, 0, nullptr);

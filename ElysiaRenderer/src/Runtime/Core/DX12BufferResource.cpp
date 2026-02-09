@@ -7,14 +7,16 @@
 
 namespace ElysiaCore
 {
-    DX12BufferResource::DX12BufferResource(CComPtr<ID3D12Resource> resource, D3D12_RESOURCE_STATES usageState)
+    DX12BufferResource::DX12BufferResource(CComPtr<ID3D12Resource> resource,
+                                           D3D12_RESOURCE_STATES usageState)
         : DX12GPUResource(resource, usageState),
           m_isDirty(false),
           m_mappedBuffer(nullptr)
     {
 
     }
-    DX12BufferResource::DX12BufferResource(CComPtr<ID3D12Resource> resource, D3D12_RESOURCE_STATES usageState,
+    DX12BufferResource::DX12BufferResource(CComPtr<ID3D12Resource> resource,
+                                           D3D12_RESOURCE_STATES usageState,
                                            CComPtr<D3D12MA::Allocation> allocation)
         : DX12GPUResource(resource, usageState),
           m_isDirty(false),
@@ -28,9 +30,10 @@ namespace ElysiaCore
 
     DX12BufferResource::~DX12BufferResource()
     {
-        if (m_resource != nullptr)
+        if (m_resource != nullptr && m_mappedBuffer != nullptr)
         {
             m_resource->Unmap(0, nullptr);
+            m_mappedBuffer = nullptr;
         }
         Destory();
     }
@@ -83,11 +86,13 @@ namespace ElysiaCore
     void DX12BufferResource::SetMappedData(const void* bufferData, size_t bufferSize)
     {
         assert(
-            m_mappedBuffer != nullptr && bufferData != nullptr && bufferSize > 0 && bufferSize <= m_resourceDesc.Width);
+            m_mappedBuffer != nullptr && bufferData != nullptr && bufferSize > 0 && bufferSize <=
+            m_resourceDesc.Width);
         memcpy_s(m_mappedBuffer, m_resourceDesc.Width, bufferData, bufferSize);
     }
 
-    bool DX12BufferResource::ReInit(DX12Device* pDevice, const BufferCreationDesc& bufferCreationDesc)
+    bool DX12BufferResource::ReInit(DX12Device* pDevice,
+                                    const BufferCreationDesc& bufferCreationDesc)
     {
         if (!m_resource || !m_allocation)
         {
@@ -95,13 +100,17 @@ namespace ElysiaCore
         }
 
         UINT numElements = static_cast<UINT>(bufferCreationDesc.stride > 0
-                                                 ? bufferCreationDesc.size / bufferCreationDesc.stride
+                                                 ? bufferCreationDesc.size / bufferCreationDesc.
+                                                   stride
                                                  : 1);
         bool isHostVisible = ((bufferCreationDesc.accessFlags & BufferAccessFlags::HostWritable) ==
                               BufferAccessFlags::HostWritable);
-        bool isHasCBV = ((bufferCreationDesc.viewFlags & GPUResourceFlags::CBV) == GPUResourceFlags::CBV);
-        bool isHasSRV = ((bufferCreationDesc.viewFlags & GPUResourceFlags::SRV) == GPUResourceFlags::SRV);
-        bool isHasUAV = ((bufferCreationDesc.viewFlags & GPUResourceFlags::UAV) == GPUResourceFlags::UAV);
+        bool isHasCBV = ((bufferCreationDesc.viewFlags & GPUResourceFlags::CBV) ==
+                         GPUResourceFlags::CBV);
+        bool isHasSRV = ((bufferCreationDesc.viewFlags & GPUResourceFlags::SRV) ==
+                         GPUResourceFlags::SRV);
+        bool isHasUAV = ((bufferCreationDesc.viewFlags & GPUResourceFlags::UAV) ==
+                         GPUResourceFlags::UAV);
 
         if (isHasCBV && m_CBVDescriptor.IsValid())
         {
@@ -120,7 +129,8 @@ namespace ElysiaCore
         }
         m_state = GPUResourceState::InUse;
 
-        auto alignSize = AlignU32((UINT)bufferCreationDesc.size, D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
+        auto alignSize = AlignU32((UINT)bufferCreationDesc.size,
+                                  D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
         if (alignSize > m_resourceDesc.Width)
         {
             return false;
@@ -135,7 +145,9 @@ namespace ElysiaCore
 
         for (auto& usageState : m_usageStates)
         {
-            usageState = isHostVisible ? D3D12_RESOURCE_STATE_GENERIC_READ : D3D12_RESOURCE_STATE_COPY_DEST;
+            usageState = isHostVisible
+                             ? D3D12_RESOURCE_STATE_GENERIC_READ
+                             : D3D12_RESOURCE_STATE_COPY_DEST;
         }
         pDevice->GetUploadContext()->AddBarrier(*this, m_usageStates, true);
 
@@ -146,7 +158,8 @@ namespace ElysiaCore
             CBVDesc.BufferLocation = m_GPUAddress;
 
             SetCBVDescriptor(pDevice->GetSRVStageHeap()->NewDescriptorHeapHandle());
-            pDevice->GetDevice()->CreateConstantBufferView(&CBVDesc, GetCBVDescriptor().GetCPUHandle());
+            pDevice->GetDevice()->CreateConstantBufferView(&CBVDesc,
+                                                           GetCBVDescriptor().GetCPUHandle());
         }
 
         if (isHasSRV)
@@ -154,23 +167,30 @@ namespace ElysiaCore
             D3D12_SHADER_RESOURCE_VIEW_DESC SRVDesc{};
             SRVDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
             SRVDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
-            SRVDesc.Format = bufferCreationDesc.isRawAccess ? DXGI_FORMAT_R32_TYPELESS : DXGI_FORMAT_UNKNOWN;
+            SRVDesc.Format = bufferCreationDesc.isRawAccess
+                                 ? DXGI_FORMAT_R32_TYPELESS
+                                 : DXGI_FORMAT_UNKNOWN;
             SRVDesc.Buffer.FirstElement = 0;
             SRVDesc.Buffer.NumElements = static_cast<UINT>(bufferCreationDesc.isRawAccess
                                                                ? bufferCreationDesc.size / 4
                                                                : numElements);
-            SRVDesc.Buffer.StructureByteStride = bufferCreationDesc.stride > 0 ? static_cast<UINT>(GetStride()) : 0;
+            SRVDesc.Buffer.StructureByteStride = bufferCreationDesc.stride > 0
+                                                     ? static_cast<UINT>(GetStride())
+                                                     : 0;
             SRVDesc.Buffer.Flags = bufferCreationDesc.isRawAccess
                                        ? D3D12_BUFFER_SRV_FLAG_RAW
                                        : D3D12_BUFFER_SRV_FLAG_NONE;
 
             SetSRVDescriptor(pDevice->GetSRVStageHeap()->NewDescriptorHeapHandle());
-            pDevice->GetDevice()->CreateShaderResourceView(GetResource(), &SRVDesc, GetSRVDescriptor().GetCPUHandle());
+            pDevice->GetDevice()->CreateShaderResourceView(GetResource(),
+                                                           &SRVDesc,
+                                                           GetSRVDescriptor().GetCPUHandle());
 
             SetResourceHeapIndex(pDevice->m_freeReservedDescriptorIndices.back());
             pDevice->m_freeReservedDescriptorIndices.pop_back();
 
-            pDevice->CopyDescriptorFromStageToRenderPass(GetSRVDescriptor(), GetResourceHeapIndex());
+            pDevice->CopyDescriptorFromStageToRenderPass(GetSRVDescriptor(),
+                                                         GetResourceHeapIndex());
         }
 
         if (isHasUAV)
@@ -178,20 +198,26 @@ namespace ElysiaCore
             D3D12_UNORDERED_ACCESS_VIEW_DESC UAVDesc{};
 
             UAVDesc.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
-            UAVDesc.Format = bufferCreationDesc.isRawAccess ? DXGI_FORMAT_R32_TYPELESS : DXGI_FORMAT_UNKNOWN;
+            UAVDesc.Format = bufferCreationDesc.isRawAccess
+                                 ? DXGI_FORMAT_R32_TYPELESS
+                                 : DXGI_FORMAT_UNKNOWN;
             UAVDesc.Buffer.CounterOffsetInBytes = 0;
             UAVDesc.Buffer.FirstElement = 0;
             UAVDesc.Buffer.NumElements = static_cast<UINT>(bufferCreationDesc.isRawAccess
                                                                ? bufferCreationDesc.size / 4
                                                                : numElements);
-            UAVDesc.Buffer.StructureByteStride = bufferCreationDesc.isRawAccess ? 0 : static_cast<UINT>(GetStride());
+            UAVDesc.Buffer.StructureByteStride = bufferCreationDesc.isRawAccess
+                                                     ? 0
+                                                     : static_cast<UINT>(GetStride());
             UAVDesc.Buffer.Flags = bufferCreationDesc.isRawAccess
                                        ? D3D12_BUFFER_UAV_FLAG_RAW
                                        : D3D12_BUFFER_UAV_FLAG_NONE;
 
             SetUAVDescriptor(pDevice->GetSRVStageHeap()->NewDescriptorHeapHandle());
 
-            pDevice->GetDevice()->CreateUnorderedAccessView(GetResource(), nullptr, &UAVDesc,
+            pDevice->GetDevice()->CreateUnorderedAccessView(GetResource(),
+                                                            nullptr,
+                                                            &UAVDesc,
                                                             GetUAVDescriptor().GetCPUHandle());
         }
 

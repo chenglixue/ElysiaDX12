@@ -116,6 +116,9 @@ namespace ElysiaRenderer
         D3D12_RESOURCE_STATES resourceState = isHostVisible
                                                   ? D3D12_RESOURCE_STATE_GENERIC_READ
                                                   : D3D12_RESOURCE_STATE_COPY_DEST;
+        resourceState = bufferCreationDesc.isAccelerationStructure
+                            ? D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE
+                            : resourceState;
         D3D12MA::ALLOCATION_DESC allocationDesc{};
         allocationDesc.HeapType = isHostVisible ? D3D12_HEAP_TYPE_UPLOAD : D3D12_HEAP_TYPE_DEFAULT;
 
@@ -167,7 +170,16 @@ namespace ElysiaRenderer
         {
             D3D12_SHADER_RESOURCE_VIEW_DESC SRVDesc{};
             SRVDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-            SRVDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+
+            if (bufferCreationDesc.isAccelerationStructure)
+            {
+                SRVDesc.ViewDimension = D3D12_SRV_DIMENSION_RAYTRACING_ACCELERATION_STRUCTURE;
+                SRVDesc.RaytracingAccelerationStructure.Location = pNewBuffer->GetGPUAddress();
+            }
+            else
+            {
+                SRVDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+            }
 
             if (bufferCreationDesc.isRawAccess)
             {

@@ -61,7 +61,7 @@ namespace ElysiaEngine
         m_localAABB.Transform(m_worldAABB, world_M);
     }
 
-    void Entity::GenerateBLAS(ID3D12Device5* pDevice, ElysiaCore::DX12GraphicsContext* pCommand)
+    void Entity::GenerateBLAS(ID3D12Device5* pDevice, DX12GraphicsContext* pCommand)
     {
         if (m_pBLASBuffer && m_pBLASScratchBuffer)
             return;
@@ -93,8 +93,8 @@ namespace ElysiaEngine
             .Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL,
             .Flags = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PREFER_FAST_TRACE,
             .NumDescs = 1,
+            .DescsLayout = D3D12_ELEMENTS_LAYOUT_ARRAY,
             .pGeometryDescs = &geometryDesc,
-            .DescsLayout = D3D12_ELEMENTS_LAYOUT_ARRAY
         };
 
         D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO prebuildInfo = {};
@@ -113,7 +113,7 @@ namespace ElysiaEngine
             .viewFlags = GPUResourceFlags::UAV,
             .accessFlags = BufferAccessFlags::GPUOnly,
             .isRawAccess = true,
-            .InitData = nullptr,
+            .isAccelerationStructure = true
         });
         m_pBLASScratchBuffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc
         {
@@ -123,23 +123,18 @@ namespace ElysiaEngine
             .viewFlags = GPUResourceFlags::UAV,
             .accessFlags = BufferAccessFlags::GPUOnly,
             .isRawAccess = true,
-            .InitData = nullptr,
+            .isAccelerationStructure = false
         });
-        pCommand->AddBarrier(*m_pBLASBuffer,
-                             D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE,
-                             false);
         pCommand->AddBarrier(*m_pBLASScratchBuffer,
-                             D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
-                             false);
-        pCommand->FlushBarrier();
+                             D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
         // Build
         D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC buildDesc =
         {
-            .Inputs = buildInputs,
             .DestAccelerationStructureData = m_pBLASBuffer->GetGPUAddress(),
+            .Inputs = buildInputs,
+            .SourceAccelerationStructureData = 0, // 仅在更新（Update）时使用
             .ScratchAccelerationStructureData = m_pBLASScratchBuffer->GetGPUAddress(),
-            .SourceAccelerationStructureData = 0 // 仅在更新（Update）时使用
         };
 
         pCommand->GetCommandList()->BuildRaytracingAccelerationStructure(&buildDesc, 0, nullptr);
