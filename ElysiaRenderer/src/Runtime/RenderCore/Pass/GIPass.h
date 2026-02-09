@@ -15,7 +15,7 @@ namespace ElysiaRenderer
     using namespace ElysiaHelper;
 
 #define GI_PASS_LIST \
-    PASS(RAY_GENERATE_PASS,         "public\\GI\\CS_DDGI.hlsl",               true,  DDGI)
+    PASS(RELOCATE_PROBES_PASS,         "public\\GI\\CS_DDGI.hlsl",               true,  RelocateProbes)
 
     class GIPass : public BasePass
     {
@@ -37,6 +37,7 @@ namespace ElysiaRenderer
             static inline size_t g_GridDimensions = PropertyToID(L"g_GridDimensions");
             static inline size_t g_ProbeRadius = PropertyToID(L"g_ProbeRadius");
             static inline size_t g_RandomRotation = PropertyToID(L"g_RandomRotation");
+            static inline size_t g_ProbeOffsetsIndex = PropertyToID(L"g_ProbeOffsetsIndex");
         };
 
         static inline D3D12_VERTEX_BUFFER_VIEW m_vertexView;
@@ -46,6 +47,8 @@ namespace ElysiaRenderer
         static inline BufferHandle m_vertexBuffer;
         static inline BufferHandle m_indexBuffer;
         static inline BufferHandle m_pRayDataBuffer;
+        static inline BufferHandle m_pInstanceDataBuffer;
+        static inline BufferHandle m_pProbeOffsetBuffer;
         static inline constexpr UINT NumVertices = 12;
         static inline constexpr UINT NumIndices = 60;
         static inline constexpr UINT Probe_Count = 1024;
@@ -100,6 +103,23 @@ namespace ElysiaRenderer
         /// --------------------------------------------
         /// DXR
         /// --------------------------------------------
+        struct alignas(16) RayData
+        {
+            Vector3 Radiance;
+            float Distance;
+        };
+        struct alignas(16) InstanceData
+        {
+            UINT BaseColorTexIndex;
+            UINT NormalTexIndex;
+            UINT MetallicTexIndex;
+            UINT RoughnessTexIndex;
+
+            UINT VertexOffset;
+            UINT IndexOffset;
+            UINT VertexBufferIndex;
+            UINT IndexBufferIndex;
+        };
         CComPtr<ID3D12Device5> m_pDevice5;
         SBTHelper m_stbHelper;
         CComPtr<IDxcBlob> m_DXRBlob;
@@ -109,16 +129,13 @@ namespace ElysiaRenderer
         BufferHandle m_pTLASBuffer;
         BufferHandle m_pTLASScratchBuffer;
         BufferHandle m_pTLASUploadBuffer;
+        std::vector<InstanceData> m_instanceDatas;
 
-        struct alignas(16) RayData
-        {
-            Vector3 Radiance;
-            float Distance;
-        };
 
 #pragma region Vertices
         // 常量 X = 0.525731f, Z = 0.850651f 来自黄金分割比例，用于构建单位球体
-        const float X = 0.525731f;
+        const
+        float X = 0.525731f;
         const float Z = 0.850651f;
         const float N = 0.0f;
         const Vector3 m_probeVertices[NumVertices] =
@@ -142,11 +159,12 @@ namespace ElysiaRenderer
 #pragma endregion
 
         void GenerateRay();
+        void RelocateProbes();
 
         CComPtr<IDxcBlob> CompileRaytracingLibrary(const std::wstring& fileName);
-        void CreateRaytracingPipeline(ID3D12Device* pDevice,
-                                      ID3D12RootSignature* pRootSignature);
+        void CreateRaytracingPipeline(ID3D12RootSignature* pRootSignature);
         void CreateDXRRootSignature(ID3D12Device* pDevice);
         void GenerateTLAS(const std::vector<RenderItem>& renderItems);
+        std::vector<D3D12_SAMPLER_DESC> GenerateSampler();
     };
 }

@@ -7,7 +7,7 @@
 #define PROBE_COUNT 1024
 #define Rays_Per_Probe 32
 
-cbuffer PassConstant : register(b0, space2)
+cbuffer PassConstant : register(b0, perPassSpace)
 {
     float4 g_GridSpacing;
     float4 g_GridOrigin;
@@ -17,6 +17,17 @@ cbuffer PassConstant : register(b0, space2)
     float g_RandomRotation;
 }
 
+RaytracingAccelerationStructure g_SceneTLAS : register(t0);
+StructuredBuffer<InstanceData> g_InstanceDataBuffer : register(t1);
+
+SamplerState g_WarpPointSampler : register(s0);
+SamplerState g_ClampPointSampler : register(s1);
+SamplerState g_WarpLinearSampler : register(s2);
+SamplerState g_ClampLinearSampler : register(s3);
+SamplerState g_WarpAnisotropicSampler : register(s4);
+SamplerState g_ClampAnisotropicSampler : register(s5);
+SamplerState g_ShadowWarpLinearSampler : register(s6);
+SamplerState g_ShadowClampLinearSampler : register(s7);
 
 // void Elysia_DDGI_StoreIrradiance(uint2 id, float3 val)
 // {
@@ -43,14 +54,81 @@ void GenerateRayMain()
 {
     uint probeIndex = DispatchRaysIndex().x;
     uint rayIndex = DispatchRaysIndex().y;
+    UINT2 dimension = DispatchRaysDimensions().xy;
 
+    Vector3 rayOrigin = GetProbeWorldPosition(probeIndex,
+                                              g_GridOrigin,
+                                              g_GridSpacing,
+                                              g_GridDimensions);
     float3 rayDir = SphericalFibonacci(rayIndex, Rays_Per_Probe, g_RandomRotation);
 
-    float3 fakeRadiance = rayDir * 0.5f + 0.5f;
-    float fakeDistance = 10.0f;
+    RayDesc rayDesc;
+    rayDesc.Origin = rayOrigin;
+    rayDesc.Direction = rayDir;
+    rayDesc.TMin = 1e-4;
+    rayDesc.TMax = 10000;
+
+    RayData rayData;
+    rayData.Radiance = 0.f;
+    rayData.Distance = 0.f;
+
+    TraceRay(g_SceneTLAS,
+             RAY_FLAG_NONE,
+             0xFF,
+             0,
+             1,
+             0,
+             rayDesc,
+             rayData);
 
     uint writeIndex = probeIndex * Rays_Per_Probe + rayIndex;
-    Elysia_DDGI_StoreRayData(writeIndex, fakeRadiance, fakeDistance);
+    Elysia_DDGI_StoreRayData(writeIndex, rayData.Radiance, rayData.Distance);
+}
+
+[shader("miss")]
+void RayMiss(inout RayData rayData)
+{
+    rayData.Radiance = 0.f;
+    rayData.Distance = 0.f;
+}
+
+[shader("closesthit")]
+void RayClosestHit(inout RayData rayData,
+                   in BuiltInTriangleIntersectionAttributes attr)
+{
+    UINT instanceID = InstanceID();
+    uint primIdx = PrimitiveIndex();
+
+    InstanceData instanceData = g_InstanceDataBuffer[instanceID];
+
+    StructuredBuffer<Vertex> vertices = ResourceDescriptorHeap[instanceData.VertexBufferIndex];
+    StructuredBuffer<uint> indices = ResourceDescriptorHeap[instanceData.IndexBufferIndex];
+    UINT vertexOffset = instanceData.VertexOffset;
+    UINT indexOffset = instanceData.IndexOffset;
+
+    UINT i0 = indices[indexOffset + primIdx * 3 + 0];
+    UINT i1 = indices[indexOffset + primIdx * 3 + 1];
+    UINT i2 = indices[indexOffset + primIdx * 3 + 2];
+    Vertex v0 = vertices[vertexOffset + i0];
+    Vertex v1 = vertices[vertexOffset + i1];
+    Vertex v2 = vertices[vertexOffset + i2];
+
+    float2 uv0 = v0.uv;
+    float2 uv1 = v1.uv;
+    float2 uv2 = v2.uv;
+
+    // 重心坐标插值
+    float2 bary = attr.barycentrics; // 这是 (u, v)
+    float w = 1.0 - bary.x - bary.y;
+    float2 finalUV = uv0 * w + uv1 * bary.x + uv2 * bary.y;
+
+    float4 baseColorAlpha = SampleTexture2D_LOD(instanceData.BaseColorTexIndex,
+                                                finalUV,
+                                                g_WarpLinearSampler,
+                                                0);
+
+    rayData.Radiance.rg = finalUV;
+    rayData.Distance = RayTCurrent();
 }
 
 float3 SphericalFibonacci(uint sampleIndex, uint numSamples, float rotation)

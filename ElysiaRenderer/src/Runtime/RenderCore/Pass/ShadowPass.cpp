@@ -213,8 +213,10 @@ namespace ElysiaRenderer
                                                                  GetScissorRect());
         if (context.renderList.size())
         {
-            m_pCommand->SetIndexBuffer(context.renderList[0].ibView);
-            m_pCommand->SetVertexBuffer(0, 1, context.renderList[0].vbView);
+            m_pCommand->SetIndexBuffer(BufferManager::GetInstance().GetGlobalIndexBufferView());
+            m_pCommand->SetVertexBuffer(0,
+                                        1,
+                                        BufferManager::GetInstance().GetGlobalVertexBufferView());
         }
 
         DrawMesh(context, passData);

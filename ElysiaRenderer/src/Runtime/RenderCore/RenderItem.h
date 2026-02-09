@@ -1,11 +1,7 @@
 #pragma once
+#include "Runtime/Engine/ECS/Entity.h"
 #include "Runtime/Resource/Model/LoadedModel.h"
 #include "Runtime/Resource/Model/SharedTypes.h"
-
-namespace ElysiaEngine
-{
-    struct Entity;
-}
 
 namespace ElysiaRenderer
 {

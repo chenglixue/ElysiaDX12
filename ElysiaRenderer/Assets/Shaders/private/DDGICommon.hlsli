@@ -2,10 +2,31 @@
 #define DDGI_COMMON_H
 #include "ShadingCommon.hlsl"
 
+struct Vertex
+{
+    float3 positionOS;
+    float2 uv;
+    float3 normalOS;
+    float3 tangentOS;
+};
+
 struct RayData
 {
     float3 Radiance;
     float Distance;
+};
+
+struct InstanceData
+{
+    UINT BaseColorTexIndex;
+    UINT NormalTexIndex;
+    UINT MetallicTexIndex;
+    UINT RoughnessTexIndex;
+
+    UINT VertexOffset;
+    UINT IndexOffset;
+    UINT VertexBufferIndex;
+    UINT IndexBufferIndex;
 };
 
 float2 SignNotZero(float2 v)
@@ -52,5 +73,23 @@ float2 GetProbeUV(uint probeIndex, float2 octUV, float3 gridDims, float probeRes
     // 5. 转换到全局 UV 空间
     float2 atlasSize = float2(gridDims.x, gridDims.y * gridDims.z) * (probeRes + 2.0);
     return pixelPos / atlasSize;
+}
+
+uint3 GetProbeGridCoord(uint probeIndex, Vector3 gridDimensions)
+{
+    uint3 gridCoord;
+    gridCoord.x = probeIndex % gridDimensions.x;
+    gridCoord.y = (probeIndex / gridDimensions.x) % gridDimensions.y;
+    gridCoord.z = probeIndex / (gridDimensions.x * gridDimensions.y);
+    return gridCoord;
+}
+float3 GetProbeWorldPosition(uint probeIndex,
+                             Vector3 gridOrigin,
+                             Vector3 gridSpacing,
+                             Vector3 gridDimensions)
+{
+    uint3 coord = GetProbeGridCoord(probeIndex, gridDimensions);
+    // 位置 = 起点 + 索引 * 步长
+    return gridOrigin + (float3(coord) * gridSpacing);
 }
 #endif

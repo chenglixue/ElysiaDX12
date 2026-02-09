@@ -121,7 +121,7 @@ namespace ElysiaRenderer
         case DebugMode::GI:
         {
             DoGIPass();
-            DoAABBPass();
+            // DoAABBPass();
             break;
         }
         case DebugMode::AO:

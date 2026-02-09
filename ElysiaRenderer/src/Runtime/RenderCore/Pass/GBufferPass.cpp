@@ -19,6 +19,7 @@
 #include "Runtime/RenderCore/RenderTargetManager.h"
 #include "Runtime/RenderCore/CameraManager.h"
 #include "Runtime/RenderCore/PSOManager.h"
+#include "Runtime/RenderCore/SceneManager.h"
 #include "Runtime/RenderCore/ShaderVariantManager.h"
 
 namespace ElysiaRenderer
@@ -308,8 +309,10 @@ namespace ElysiaRenderer
 
         if (context.renderList.size())
         {
-            m_pCommand->SetIndexBuffer(context.renderList[0].ibView);
-            m_pCommand->SetVertexBuffer(0, 1, context.renderList[0].vbView);
+            m_pCommand->SetIndexBuffer(BufferManager::GetInstance().GetGlobalIndexBufferView());
+            m_pCommand->SetVertexBuffer(0,
+                                        1,
+                                        BufferManager::GetInstance().GetGlobalVertexBufferView());
         }
 
         m_pMaterial->SetFloat4(ShaderIDs::screenSize,

@@ -76,22 +76,6 @@ struct PSOutput
     float4 target0 : SV_TARGET0;
 };
 
-
-uint3 GetProbeGridCoord(uint probeIndex)
-{
-    uint3 gridCoord;
-    gridCoord.x = probeIndex % 16;
-    gridCoord.y = (probeIndex / 16) % 4;
-    gridCoord.z = probeIndex / (16 * 4);
-    return gridCoord;
-}
-float3 GetProbeWorldPosition(uint probeIndex)
-{
-    uint3 coord = GetProbeGridCoord(probeIndex);
-    // 位置 = 起点 + 索引 * 步长
-    return g_GridOrigin + (float3(coord) * g_GridSpacing);
-}
-
 PSInput VS(VSInput i, UINT vertexID : SV_VertexID)
 {
     PSInput o = (PSInput)0;
@@ -101,7 +85,10 @@ PSInput VS(VSInput i, UINT vertexID : SV_VertexID)
     case DEBUG_GI:
     {
         o.instanceID = i.instanceID;
-        o.probeCenterWS = GetProbeWorldPosition(i.instanceID);
+        o.probeCenterWS = GetProbeWorldPosition(i.instanceID,
+                                                g_GridOrigin,
+                                                g_GridSpacing,
+                                                g_GridDimensions);
 
         o.positionWS = i.positionOS * g_ProbeRadius + o.probeCenterWS;
 
@@ -156,14 +143,17 @@ PSOutput PS(PSInput i)
     }
     case DEBUG_GI:
     {
-        // float3 N = normalize(i.positionWS - i.probeCenterWS);
-        // float2 octUV = OctEncode(N);
-        // float2 uv = GetProbeUV(i.instanceID, octUV, g_GridDimensions.xyz, 6.0);
-        //
-        // float3 irradiance = SampleTexture2D(g_IrradianceTexIndex, uv, ClampPointSampler);
-        uint rayIndex = i.instanceID * Rays_Per_Probe;
-        RayData rayData = Elysia_DDGI_LoadRayData(rayIndex);
-        o.target0 = float4(rayData.Radiance, 1.f);
+        float4 result = 0.f;
+        [unroll]
+        for (int rayIndex = 0; rayIndex < Rays_Per_Probe; rayIndex ++)
+        {
+            uint rayDataIndex = i.instanceID * Rays_Per_Probe + rayIndex;
+            RayData rayData = Elysia_DDGI_LoadRayData(rayDataIndex);
+            result += float4(rayData.Radiance, rayData.Distance);
+        }
+        result /= Rays_Per_Probe;
+
+        o.target0 = result;
         break;
     }
     }

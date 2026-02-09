@@ -12,6 +12,12 @@ float4 SampleTexture2D(UINT textureIndex, float2 uv, UINT samplerStateIndex)
 
     return SampleTex.Sample(Sampler, uv);
 }
+float4 SampleTexture2D(UINT textureIndex, float2 uv, SamplerState samplerState)
+{
+    Texture2D<float4> SampleTex = ResourceDescriptorHeap[textureIndex];
+
+    return SampleTex.Sample(samplerState, uv);
+}
 
 float4 SampleTexture2D_LOD(UINT textureIndex, float2 uv, UINT samplerStateIndex, float LOD)
 {
@@ -19,6 +25,12 @@ float4 SampleTexture2D_LOD(UINT textureIndex, float2 uv, UINT samplerStateIndex,
     SamplerState Sampler = SamplerDescriptorHeap[samplerStateIndex];
 
     return SampleTex.SampleLevel(Sampler, uv, LOD);
+}
+float4 SampleTexture2D_LOD(UINT textureIndex, float2 uv, SamplerState sampler, float LOD)
+{
+    Texture2D<float4> SampleTex = ResourceDescriptorHeap[textureIndex];
+
+    return SampleTex.SampleLevel(sampler, uv, LOD);
 }
 
 float4 SampleTextureCube(UINT textureIndex, float3 dir, UINT samplerStateIndex)

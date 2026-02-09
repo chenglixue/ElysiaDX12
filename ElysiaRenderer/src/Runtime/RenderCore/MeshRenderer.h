@@ -41,11 +41,11 @@ namespace ElysiaRenderer
         }
         const D3D12_VERTEX_BUFFER_VIEW& GetVertexBufferView() const
         {
-            return m_pModel->vbView;
+            return m_pModel->meshes[m_meshIndex].vbView;
         }
         const D3D12_INDEX_BUFFER_VIEW& GetIndexBufferView() const
         {
-            return m_pModel->ibView;
+            return m_pModel->meshes[m_meshIndex].ibView;
         }
 
     private:

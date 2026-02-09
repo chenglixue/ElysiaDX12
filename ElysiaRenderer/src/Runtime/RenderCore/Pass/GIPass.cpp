@@ -72,6 +72,15 @@ namespace ElysiaRenderer
             .isRawAccess = false
         });
 
+        m_pProbeOffsetBuffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc
+        {
+            .name = L"Probe Offset Buffer",
+            .stride = sizeof(Vector3),
+            .size = sizeof(Vector3) * Probe_Count,
+            .viewFlags = GPUResourceFlags::UAV,
+            .accessFlags = BufferAccessFlags::GPUOnly,
+        });
+
         m_DXRBlob = CompileRaytracingLibrary(L"Shaders\\public\\GI\\DDGI_Library.hlsl");
     }
 
@@ -122,36 +131,62 @@ namespace ElysiaRenderer
 
         if (!context.renderList.empty())
         {
+            auto renderListCount = context.renderList.size();
+            m_instanceDatas.clear();
+            m_instanceDatas.resize(renderListCount);
             bool needFlushBarrier = false;
             // first is root list
-            for (UINT i = 1; i < context.renderList.size(); i ++)
+            for (UINT i = 0; i < renderListCount; i ++)
             {
                 auto currRenderList = context.renderList[i];
                 if (!currRenderList.pAssociatedEntity->GetBLASBuffer())
                     needFlushBarrier = true;
                 currRenderList.pAssociatedEntity->GenerateBLAS(m_pDevice5, m_pCommand);
+                m_instanceDatas[i] =
+                {
+                    .BaseColorTexIndex = currRenderList.textureIndices.Albedo,
+                    .NormalTexIndex = currRenderList.textureIndices.Normal,
+                    .MetallicTexIndex = currRenderList.textureIndices.Metallic,
+                    .RoughnessTexIndex = currRenderList.textureIndices.Roughness,
+
+                    .VertexOffset = currRenderList.baseVertex,
+                    .IndexOffset = currRenderList.startIndex,
+                    .VertexBufferIndex = BufferManager::GetInstance().GetGlobalVertexBuffer()->
+                                                                      GetResourceHeapIndex(),
+                    .IndexBufferIndex = BufferManager::GetInstance().GetGlobalIndexBuffer()->
+                                                                     GetResourceHeapIndex()
+                };
             }
             if (needFlushBarrier)
             {
                 m_pCommand->FlushBarrier();
             }
-            auto childRenderList = context.renderList;
-            childRenderList.erase(childRenderList.begin());
-            GenerateTLAS(childRenderList);
 
-            auto entityCount = SceneManager::GetInstance().GetEntities()[0]->GetChildren().size();
-            auto instanceID = MathHelper::Max(0, UserData::GetInstance().instanceID);
-            const Entity* pEntity = nullptr;
-            if (instanceID < entityCount)
+            if (!m_pInstanceDataBuffer || m_pInstanceDataBuffer->GetResourceDesc().Width < sizeof(
+                    InstanceData) * renderListCount)
             {
-                pEntity = SceneManager::GetInstance().GetEntities()[0]->GetChildren()[
-                    instanceID].get();
+                if (m_pInstanceDataBuffer)
+                    BufferManager::GetInstance().DestoryBuffer(m_pInstanceDataBuffer);
+                m_pInstanceDataBuffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc
+                {
+                    .name = L"GI Instance Data",
+                    .stride = sizeof(InstanceData),
+                    .size = sizeof(InstanceData) * renderListCount,
+                    .viewFlags = GPUResourceFlags::SRV,
+                    .accessFlags = BufferAccessFlags::HostWritable,
+                    .isRawAccess = false,
+                    .InitData = m_instanceDatas.data(),
+                });
             }
             else
             {
-                pEntity = context.renderList[0].pAssociatedEntity;
+                memcpy(m_pInstanceDataBuffer->GetMappedBuffer(),
+                       m_instanceDatas.data(),
+                       sizeof(InstanceData) * renderListCount);
             }
+            GenerateTLAS(context.renderList);
 
+            const Entity* pEntity = SceneManager::GetInstance().GetEntities()[0].get();
             auto sceneAABB = pEntity->GetWorldAABB();
             auto sceneMin = sceneAABB.Center - sceneAABB.Extents;
             auto sceneMax = sceneAABB.Center + sceneAABB.Extents;
@@ -163,17 +198,19 @@ namespace ElysiaRenderer
             Vector3 effectiveSize = effectiveMax - effectiveMin;
 
             // 计算间距 (注意是 数量-1)
-            float spacingX = effectiveSize.x / (16 - 1);
-            float spacingY = effectiveSize.y / (4 - 1);
-            float spacingZ = effectiveSize.z / (16 - 1);
+            float spacingX = effectiveSize.x / (Grid_Dimensions.x - 1);
+            float spacingY = effectiveSize.y / (Grid_Dimensions.y - 1);
+            float spacingZ = effectiveSize.z / (Grid_Dimensions.z - 1);
 
             m_gridSpacing = Vector3(spacingX, spacingY, spacingZ);
             m_gridOrigin = effectiveMin;
         }
-        if (!m_vertexBuffer->GetIsReady() || !m_indexBuffer->GetIsReady())
+        if (!m_vertexBuffer->GetIsReady() || !m_indexBuffer->GetIsReady() || !m_pTLASBuffer || !
+            m_pRayDataBuffer)
             return;
 
         GenerateRay();
+        RelocateProbes();
     }
 
     void GIPass::UpdatePipeline()
@@ -202,7 +239,7 @@ namespace ElysiaRenderer
             assert(m_DXRBlob && m_pDevice->GetDevice());
             {
                 CreateDXRRootSignature(m_pDevice->GetDevice());
-                CreateRaytracingPipeline(m_pDevice->GetDevice(), m_pGlobalRootSig);
+                CreateRaytracingPipeline(m_pGlobalRootSig);
                 m_stbHelper.Build(m_pDevice->GetDevice(), m_pRTPSO);
             }
         }
@@ -250,17 +287,59 @@ namespace ElysiaRenderer
                 &constantData,
                 0);
 
+            m_pCommand->GetCommandList()->SetComputeRootShaderResourceView(
+                1,
+                m_pTLASBuffer->GetGPUAddress());
+            m_pCommand->GetCommandList()->SetComputeRootShaderResourceView(
+                2,
+                m_pInstanceDataBuffer->GetGPUAddress());
+
             D3D12_DISPATCH_RAYS_DESC dispatchDesc = {};
             dispatchDesc.Width = Probe_Count;
             dispatchDesc.Height = Rays_Per_Probe;
             dispatchDesc.Depth = 1;
             dispatchDesc.RayGenerationShaderRecord = m_stbHelper.GetRayGenRange();
+            dispatchDesc.MissShaderTable = m_stbHelper.GetMissRange();
+            dispatchDesc.HitGroupTable = m_stbHelper.GetHitGroupRange();
             m_pCommand->GetCommandList()->DispatchRays(&dispatchDesc);
         }
         m_pCommand->AddBarrier(*m_pRayDataBuffer,
                                D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 
         m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), "Generate Ray");
+    }
+    void GIPass::RelocateProbes()
+    {
+        if (!m_pProbeOffsetBuffer)
+            return;
+
+        auto passID = RELOCATE_PROBES_PASS;
+        auto& passData = m_pMaterial->GetPassData(passID);
+        PIXHelper pix(m_pCommand->GetCommandList(), m_PassData[RELOCATE_PROBES_PASS].Name.c_str());
+
+        PipelineInfo pipelineStateData{};
+        pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(
+            passID).pPipelineStateObject;
+        m_pCommand->SetPipeline(pipelineStateData);
+        SetSpaceResource(passData, PER_FRAME_SPACE);
+
+        m_pCommand->AddBarrier(*m_pProbeOffsetBuffer, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+        {
+            m_pMaterial->SetUInt(ShaderIDs::g_ProbeOffsetsIndex,
+                                 m_pProbeOffsetBuffer->GetResourceHeapIndex());
+            m_pMaterial->SetUInt(ShaderIDs::g_RayDataBufferIndex,
+                                 m_pRayDataBuffer->GetResourceHeapIndex());
+            SetSpaceResource(passData, PER_PASS_SPACE);
+
+            auto threadGroupSize = passData.GetKernelThreadGroupSizes();
+            m_pCommand->Dispatch(CeilDivide(Probe_Count, threadGroupSize.x),
+                                 threadGroupSize.y,
+                                 threadGroupSize.z);
+        }
+        m_pCommand->AddBarrier(*m_pProbeOffsetBuffer,
+                               D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(),
+                                  m_PassData[RELOCATE_PROBES_PASS].Name.c_str());
     }
     void GIPass::GenerateTLAS(const std::vector<RenderItem>& renderItems)
     {
@@ -533,8 +612,7 @@ namespace ElysiaRenderer
         assert(pShader);
         return pShader;
     }
-    void GIPass::CreateRaytracingPipeline(ID3D12Device* pDevice,
-                                          ID3D12RootSignature* pRootSignature)
+    void GIPass::CreateRaytracingPipeline(ID3D12RootSignature* pRootSignature)
     {
         CD3DX12_STATE_OBJECT_DESC pipelineDesc(D3D12_STATE_OBJECT_TYPE_RAYTRACING_PIPELINE);
 
@@ -547,8 +625,18 @@ namespace ElysiaRenderer
         auto lib = pipelineDesc.CreateSubobject<CD3DX12_DXIL_LIBRARY_SUBOBJECT>();
         D3D12_SHADER_BYTECODE libBytecode = rayGenBytecode;
         lib->SetDXILLibrary(&libBytecode);
-        // 导出你在 HLSL 中定义的入口点名称
         lib->DefineExport(L"GenerateRayMain");
+        lib->DefineExport(L"RayMiss");
+        lib->DefineExport(L"RayClosestHit");
+
+        // 创建 Hit Group 子对象
+        auto hitGroup = pipelineDesc.CreateSubobject<CD3DX12_HIT_GROUP_SUBOBJECT>();
+        // 必须匹配 HLSL 中 [shader("closesthit")] 标注的函数名
+        hitGroup->SetClosestHitShaderImport(L"RayClosestHit");
+        // 给这个 Hit Group 取一个名字，后续用于 GetShaderIdentifier
+        hitGroup->SetHitGroupExport(L"ElysiaHitGroup");
+        // 指定几何体类型为三角形
+        hitGroup->SetHitGroupType(D3D12_HIT_GROUP_TYPE_TRIANGLES);
 
         auto shaderConfig = pipelineDesc.CreateSubobject<
             CD3DX12_RAYTRACING_SHADER_CONFIG_SUBOBJECT>();
@@ -566,20 +654,7 @@ namespace ElysiaRenderer
         // DDGI 通常是一次射出，不需要递归
         pipelineConfig->Config(1);
 
-        D3D12_FEATURE_DATA_D3D12_OPTIONS5 options5 = {};
-        HRESULT hr = pDevice->CheckFeatureSupport(
-            D3D12_FEATURE_D3D12_OPTIONS5,
-            &options5,
-            sizeof(options5));
-        if (FAILED(hr) || options5.RaytracingTier == D3D12_RAYTRACING_TIER_NOT_SUPPORTED)
-        {
-            ThrowRuntimeError("unsupported ray tracing");
-        }
-        CComPtr<ID3D12Device5> pDevice5;
-        ThrowIfFailed(pDevice->QueryInterface(IID_PPV_ARGS(&pDevice5)));
-
-        hr = pDevice5->CreateStateObject(pipelineDesc, IID_PPV_ARGS(&m_pRTPSO));
-
+        auto hr = m_pDevice5->CreateStateObject(pipelineDesc, IID_PPV_ARGS(&m_pRTPSO));
         if (SUCCEEDED(hr))
         {
             // 构建成功后，提取 Shader ID 用于你的 SBTHelper
@@ -587,19 +662,49 @@ namespace ElysiaRenderer
             m_pRTPSO->QueryInterface(IID_PPV_ARGS(&pRTProps));
 
             void* rayGenID = pRTProps->GetShaderIdentifier(L"GenerateRayMain");
+            void* missID = pRTProps->GetShaderIdentifier(L"RayMiss");
+            void* hitGroupID = pRTProps->GetShaderIdentifier(L"ElysiaHitGroup");
 
             // 将这些 ID 存入你的 SBTHelper 即可开始 DispatchRays
             m_stbHelper.AddRayGen(rayGenID);
+            m_stbHelper.AddMiss(missID);
+            m_stbHelper.AddHitGroup(hitGroupID);
         }
     }
     void GIPass::CreateDXRRootSignature(ID3D12Device* pDevice)
     {
         // 1. 定义根参数：对于 Bindless 方案，我们通常只需要“根常量 (Root Constants)”
         // 用来传递诸如 g_RayDataUAVIndex 或 DDGI 配置结构体的索引
-        CD3DX12_ROOT_PARAMETER1 rootParameters[1];
+        CD3DX12_ROOT_PARAMETER1 rootParameters[3];
 
         // 假设我们需要 16 个 32位常量 (比如一个 ViewProj 矩阵或一组索引)
         rootParameters[0].InitAsConstants(16, 0, 2);
+
+        rootParameters[1].InitAsShaderResourceView(0, 0);
+        rootParameters[2].InitAsShaderResourceView(1, 0);
+
+        auto samplerDescs = GenerateSampler();
+        CD3DX12_STATIC_SAMPLER_DESC staticSamplers[NUM_SAMPLER_DESCRIPTORS];
+        for (UINT i = 0; i < NUM_SAMPLER_DESCRIPTORS; ++i)
+        {
+            // CD3DX12_STATIC_SAMPLER_DESC 的构造函数支持直接传入常见的参数
+            staticSamplers[i].Init(
+                i,
+                // shaderRegister: 对应 HLSL 中的 s0, s1, s2...
+                samplerDescs[i].Filter,
+                samplerDescs[i].AddressU,
+                samplerDescs[i].AddressV,
+                samplerDescs[i].AddressW,
+                samplerDescs[i].MipLODBias,
+                samplerDescs[i].MaxAnisotropy,
+                samplerDescs[i].ComparisonFunc,
+                D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK,
+                // 静态采样器对边界色有特殊枚举限制
+                samplerDescs[i].MinLOD,
+                samplerDescs[i].MaxLOD,
+                D3D12_SHADER_VISIBILITY_ALL // DXR 通常使用 ALL
+                );
+        }
 
         // 2. 核心标志位：必须包含直接索引堆的标志
         D3D12_ROOT_SIGNATURE_FLAGS rsFlags =
@@ -607,7 +712,11 @@ namespace ElysiaRenderer
             D3D12_ROOT_SIGNATURE_FLAG_SAMPLER_HEAP_DIRECTLY_INDEXED;
 
         CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rsDesc;
-        rsDesc.Init_1_1(_countof(rootParameters), rootParameters, 0, nullptr, rsFlags);
+        rsDesc.Init_1_1(_countof(rootParameters),
+                        rootParameters,
+                        NUM_SAMPLER_DESCRIPTORS,
+                        staticSamplers,
+                        rsFlags);
 
         // 3. 序列化并创建
         CComPtr<ID3DBlob> signature;
@@ -629,5 +738,80 @@ namespace ElysiaRenderer
             signature->GetBufferSize(),
             IID_PPV_ARGS(&m_pGlobalRootSig)));
     }
+    std::vector<D3D12_SAMPLER_DESC> GIPass::GenerateSampler()
+    {
+        std::vector<D3D12_SAMPLER_DESC> samplerDescs(NUM_SAMPLER_DESCRIPTORS);
+        for (size_t i = 0; i < NUM_SAMPLER_DESCRIPTORS; ++i)
+        {
+            samplerDescs[0].BorderColor[0] =
+                samplerDescs[0].BorderColor[1] =
+                samplerDescs[0].BorderColor[2] = samplerDescs[0].BorderColor[3] = 0.0f;
+            samplerDescs[i].MipLODBias = 0;
+            samplerDescs[i].MaxAnisotropy = 16;
+            samplerDescs[i].ComparisonFunc = D3D12_COMPARISON_FUNC_NONE;
+            samplerDescs[i].MinLOD = 0;
+            samplerDescs[i].MaxLOD = D3D12_FLOAT32_MAX;
+        }
+        UINT samplerIndex = 0;
+        samplerDescs[samplerIndex].Filter = D3D12_FILTER_MIN_MAG_MIP_POINT;
+        samplerDescs[samplerIndex].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+        samplerDescs[samplerIndex].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+        samplerDescs[samplerIndex].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+        //rootSignature->InitStaticSamplers(samplerIndex, samplerDescs[samplerIndex], shaderVisibility);
+        samplerIndex ++;
 
+        samplerDescs[samplerIndex].Filter = D3D12_FILTER_MIN_MAG_MIP_POINT;
+        samplerDescs[samplerIndex].AddressU = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+        samplerDescs[samplerIndex].AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+        samplerDescs[samplerIndex].AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+        //rootSignature->InitStaticSamplers(samplerIndex, samplerDescs[samplerIndex], shaderVisibility);
+        samplerIndex ++;
+
+        samplerDescs[samplerIndex].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+        samplerDescs[samplerIndex].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+        samplerDescs[samplerIndex].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+        samplerDescs[samplerIndex].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+        //rootSignature->InitStaticSamplers(samplerIndex, samplerDescs[samplerIndex], shaderVisibility);
+        samplerIndex ++;
+
+        samplerDescs[samplerIndex].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+        samplerDescs[samplerIndex].AddressU = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+        samplerDescs[samplerIndex].AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+        samplerDescs[samplerIndex].AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+        //rootSignature->InitStaticSamplers(samplerIndex, samplerDescs[samplerIndex], shaderVisibility);
+        samplerIndex ++;
+
+        samplerDescs[samplerIndex].Filter = D3D12_FILTER_ANISOTROPIC;
+        samplerDescs[samplerIndex].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+        samplerDescs[samplerIndex].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+        samplerDescs[samplerIndex].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+        //rootSignature->InitStaticSamplers(samplerIndex, samplerDescs[samplerIndex], shaderVisibility);
+        samplerIndex ++;
+
+        samplerDescs[samplerIndex].Filter = D3D12_FILTER_ANISOTROPIC;
+        samplerDescs[samplerIndex].AddressU = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+        samplerDescs[samplerIndex].AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+        samplerDescs[samplerIndex].AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+        samplerDescs[samplerIndex].ComparisonFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+        //rootSignature->InitStaticSamplers(samplerIndex, samplerDescs[samplerIndex], shaderVisibility);
+        samplerIndex ++;
+
+        samplerDescs[samplerIndex].Filter = D3D12_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
+        samplerDescs[samplerIndex].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+        samplerDescs[samplerIndex].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+        samplerDescs[samplerIndex].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+        samplerDescs[samplerIndex].ComparisonFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+        //rootSignature->InitStaticSamplers(samplerIndex, samplerDescs[samplerIndex], shaderVisibility);
+        samplerIndex ++;
+
+        samplerDescs[samplerIndex].Filter = D3D12_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
+        samplerDescs[samplerIndex].AddressU = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+        samplerDescs[samplerIndex].AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+        samplerDescs[samplerIndex].AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+        samplerDescs[samplerIndex].ComparisonFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+        //rootSignature->InitStaticSamplers(samplerIndex, samplerDescs[samplerIndex], shaderVisibility);
+        samplerIndex ++;
+
+        return samplerDescs;
+    }
 }

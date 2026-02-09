@@ -53,6 +53,39 @@ namespace ElysiaRenderer
 
         D3D12MA::Allocator* GetAllocator() const noexcept;
         UploadRingBuffer* GetUploadRingBuffer() const noexcept;
+        BufferHandle GetGlobalVertexBuffer() const noexcept
+        {
+            return m_globalVertexBuffer;
+        }
+        BufferHandle GetGlobalIndexBuffer() const noexcept
+        {
+            return m_globalIndexBuffer;
+        }
+        D3D12_VERTEX_BUFFER_VIEW& GetGlobalVertexBufferView() noexcept
+        {
+            return m_globalVertexView;
+        }
+        D3D12_INDEX_BUFFER_VIEW& GetGlobalIndexBufferView() noexcept
+        {
+            return m_globalIndexView;
+        }
+
+        void SetGlobalVertexBuffer(BufferHandle&& bufferHandle)
+        {
+            m_globalVertexBuffer = bufferHandle;
+        }
+        void SetGlobalIndexBuffer(BufferHandle&& bufferHandle)
+        {
+            m_globalIndexBuffer = bufferHandle;
+        }
+        void SetGlobalVertexBufferView(D3D12_VERTEX_BUFFER_VIEW&& view)
+        {
+            m_globalVertexView = view;
+        }
+        void SetGlobalIndexBufferView(D3D12_INDEX_BUFFER_VIEW&& view)
+        {
+            m_globalIndexView = view;
+        }
 
         BufferHandle CreateBuffer(const BufferCreationDesc& bufferCreationDesc);
         void DestoryBuffer(const BufferHandle handle);
@@ -86,6 +119,11 @@ namespace ElysiaRenderer
         std::vector<std::pair<uint64_t, BufferHandle>> m_grbageQueue;
 
         std::unique_ptr<UploadRingBuffer> m_pUploadBuffer;
+
+        BufferHandle m_globalVertexBuffer;
+        BufferHandle m_globalIndexBuffer;
+        D3D12_VERTEX_BUFFER_VIEW m_globalVertexView;
+        D3D12_INDEX_BUFFER_VIEW m_globalIndexView;
     };
 
 

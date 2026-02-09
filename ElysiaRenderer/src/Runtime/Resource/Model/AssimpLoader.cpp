@@ -380,20 +380,20 @@ namespace ElysiaModel
 
         vtxOffset = 0;
         idxOffset = 0;
-        model.vertexBuffer = ElysiaRenderer::BufferManager::GetInstance().
+        auto vertexBuffer = ElysiaRenderer::BufferManager::GetInstance().
             CreateVertexBuffer(model);
-        model.indexBuffer = ElysiaRenderer::BufferManager::GetInstance().
+        auto indexBuffer = ElysiaRenderer::BufferManager::GetInstance().
             CreateIndexBuffer(model);
-        model.vbView = D3D12_VERTEX_BUFFER_VIEW
+        auto vbView = D3D12_VERTEX_BUFFER_VIEW
         {
-            .BufferLocation = model.vertexBuffer->GetGPUAddress(),
-            .SizeInBytes = static_cast<UINT>(numVertices) * model.vertexBuffer->
-                                                                  GetStride(),
-            .StrideInBytes = model.vertexBuffer->GetStride()
+            .BufferLocation = vertexBuffer->GetGPUAddress(),
+            .SizeInBytes = static_cast<UINT>(numVertices) * vertexBuffer->
+                           GetStride(),
+            .StrideInBytes = vertexBuffer->GetStride()
         };
-        model.ibView =
+        auto ibView = D3D12_INDEX_BUFFER_VIEW
         {
-            .BufferLocation = model.indexBuffer->GetGPUAddress(),
+            .BufferLocation = indexBuffer->GetGPUAddress(),
             .SizeInBytes = static_cast<UINT>(numIndices) * IndexSize(),
             .Format = IndexBufferFormat(),
         };
@@ -404,14 +404,21 @@ namespace ElysiaModel
             UINT64 ibOffset = idxOffset * sizeof(UINT16);
 
             model.meshes[meshIdx].InitCommon(
-                model.vertexBuffer->GetGPUAddress() + vbOffset,
-                model.indexBuffer->GetGPUAddress() + ibOffset,
+                vertexBuffer->GetGPUAddress() + vbOffset,
+                indexBuffer->GetGPUAddress() + ibOffset,
                 vtxOffset,
                 idxOffset);
 
             vtxOffset += model.meshes[meshIdx].numVertices;
             idxOffset += model.meshes[meshIdx].numIndices;
         }
+
+        ElysiaRenderer::BufferManager::GetInstance().SetGlobalVertexBuffer(std::move(vertexBuffer));
+        ElysiaRenderer::BufferManager::GetInstance().SetGlobalIndexBuffer(std::move(indexBuffer));
+        ElysiaRenderer::BufferManager::GetInstance().SetGlobalVertexBufferView(
+            std::move(vbView));
+        ElysiaRenderer::BufferManager::GetInstance().SetGlobalIndexBufferView(
+            std::move(ibView));
     };
 
     void LoadedModel::Mesh::InitFromAssimpMesh(const aiMesh& assimpMesh,

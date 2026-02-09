@@ -162,11 +162,11 @@ namespace ElysiaModel
         eastl::vector<LoadedMaterial> materials;
         GrowableList<MaterialTexture*> materialTextures;
 
-        ElysiaRenderer::BufferHandle vertexBuffer;
-        ElysiaRenderer::BufferHandle indexBuffer;
+        // ElysiaRenderer::BufferHandle vertexBuffer;
+        // ElysiaRenderer::BufferHandle indexBuffer;
 
-        D3D12_VERTEX_BUFFER_VIEW vbView;
-        D3D12_INDEX_BUFFER_VIEW ibView;
+        // D3D12_VERTEX_BUFFER_VIEW vbView;
+        // D3D12_INDEX_BUFFER_VIEW ibView;
     };
 
     struct LoadedSkeleton

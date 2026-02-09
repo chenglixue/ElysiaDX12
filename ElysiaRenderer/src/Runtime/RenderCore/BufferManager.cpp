@@ -471,7 +471,7 @@ namespace ElysiaRenderer
             .name = StringToWstring(model.name + " Vertex Buffer"),
             .stride = sizeof(ElysiaModel::MeshVertex),
             .size = model.vertices.size() * sizeof(ElysiaModel::MeshVertex),
-            .viewFlags = GPUResourceFlags::None,
+            .viewFlags = GPUResourceFlags::SRV,
             .accessFlags = BufferAccessFlags::GPUOnly,
             .isRawAccess = false
         };
@@ -495,7 +495,7 @@ namespace ElysiaRenderer
             .name = StringToWstring(model.name + " Index Buffer"),
             .stride = 0,
             .size = model.indices.size() * sizeof(UINT16),
-            .viewFlags = GPUResourceFlags::None,
+            .viewFlags = GPUResourceFlags::SRV,
             .accessFlags = BufferAccessFlags::GPUOnly,
             .isRawAccess = true
         };
