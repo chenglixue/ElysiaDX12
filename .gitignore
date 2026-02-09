@@ -8,3 +8,4 @@
 *.idb
 ElysiaRenderer/x64/Release/ElysiaRenderer.ipdb
 ElysiaRenderer/x64/Release/ElysiaRenderer.iobj
+.idea/.idea.ElysiaRenderer/.idea/workspace.xml
