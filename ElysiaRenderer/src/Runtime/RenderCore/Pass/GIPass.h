@@ -99,14 +99,13 @@ namespace ElysiaRenderer
 
         /// --------------------------------------------
         /// DXR
-        /// -------------------------------------------- 
+        /// --------------------------------------------
+        CComPtr<ID3D12Device5> m_pDevice5;
         SBTHelper m_stbHelper;
         CComPtr<IDxcBlob> m_DXRBlob;
         CComPtr<ID3D12RootSignature> m_pGlobalRootSig;
         CComPtr<ID3D12StateObject> m_pRTPSO;
         mutable std::vector<std::wstring> m_tempStrings;
-        BufferHandle m_pBLASBuffer;
-        BufferHandle m_pScratchBuffer;
         BufferHandle m_pTLASBuffer;
         BufferHandle m_pTLASScratchBuffer;
         BufferHandle m_pTLASUploadBuffer;
@@ -148,7 +147,6 @@ namespace ElysiaRenderer
         void CreateRaytracingPipeline(ID3D12Device* pDevice,
                                       ID3D12RootSignature* pRootSignature);
         void CreateDXRRootSignature(ID3D12Device* pDevice);
-        void GenerateBLAS(ElysiaEngine::FrameContext& context);
-        void GenerateTLAS(ElysiaEngine::FrameContext& context);
+        void GenerateTLAS(const std::vector<RenderItem>& renderItems);
     };
 }

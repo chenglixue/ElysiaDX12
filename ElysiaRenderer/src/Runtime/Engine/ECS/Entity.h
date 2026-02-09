@@ -1,6 +1,12 @@
 #pragma once
 #include "Transform.h"
+#include "Runtime/Core/BufferUtility.h"
 #include "Runtime/RenderCore/DX12Camera.h"
+
+namespace ElysiaCore
+{
+    class DX12GraphicsContext;
+}
 
 namespace ElysiaRenderer
 {
@@ -10,6 +16,7 @@ namespace ElysiaRenderer
 namespace ElysiaEngine
 {
     using namespace ElysiaRenderer;
+    using namespace ElysiaCore;
 
     struct Entity
     {
@@ -61,6 +68,10 @@ namespace ElysiaEngine
         {
             return m_worldAABB;
         }
+        BufferHandle GetBLASBuffer() const noexcept
+        {
+            return m_pBLASBuffer;
+        }
 
         void AddChild(std::unique_ptr<Entity>&& child);
 
@@ -74,6 +85,7 @@ namespace ElysiaEngine
         }
         void OnTransformChanged();
         void UpdateWorldAABB();
+        void GenerateBLAS(ID3D12Device5* pDevice, ElysiaCore::DX12GraphicsContext* pCommand);
 
     private:
         bool m_IsDirty = true;
@@ -81,6 +93,8 @@ namespace ElysiaEngine
         std::vector<std::unique_ptr<Entity>> m_childs;
         BoundingBox m_worldAABB;
         BoundingBox m_localAABB;
+        BufferHandle m_pBLASBuffer;
+        BufferHandle m_pBLASScratchBuffer;
 
         BoundingBox LocalAABB() const noexcept;
         bool HasMeshRenderer() const noexcept;
