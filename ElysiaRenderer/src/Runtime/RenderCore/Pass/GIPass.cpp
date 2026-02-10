@@ -27,6 +27,7 @@ namespace ElysiaRenderer
     GIPass::GIPass()
         : BasePass()
     {
+
         BufferCreationDesc vertexBufferDesc =
         {
             .name = L"GI Vertex Buffer",
@@ -281,10 +282,14 @@ namespace ElysiaRenderer
                                             Grid_Dimensions.y,
                                             Grid_Dimensions.z,
                                             0.f),
-                .g_RayDataBufferIndex = m_pRayDataBuffer->GetResourceHeapIndex(),
-                .g_RandomRotation = m_RandomRotation = fmodf(
-                                        static_cast<float>(m_frameIndex) * k_GoldenAngle,
-                                        2.0f * 3.14159265f),
+                .g_RayDataBufferIndex = m_pRayDataBuffer->GetUAVResourceHeapIndex(),
+                .g_RandomRotation = m_RandomRotation = UserData::GetInstance().GIParameter.
+                                                                               enableLine
+                                                           ? 0
+                                                           : fmodf(
+                                                               static_cast<float>(m_frameIndex) *
+                                                               k_GoldenAngle,
+                                                               2.0f * 3.14159265f),
             };
 
             m_pCommand->GetCommandList()->SetComputeRoot32BitConstants(

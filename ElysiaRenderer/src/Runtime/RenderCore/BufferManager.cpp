@@ -107,7 +107,7 @@ namespace ElysiaRenderer
                        GPUResourceFlags::UAV);
 
         D3D12_RESOURCE_FLAGS resFlags = D3D12_RESOURCE_FLAG_NONE;
-        if (hasUAV)
+        if (hasUAV || bufferCreationDesc.isIndirectBuffer)
         {
             resFlags |= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
         }
@@ -116,9 +116,14 @@ namespace ElysiaRenderer
         D3D12_RESOURCE_STATES resourceState = isHostVisible
                                                   ? D3D12_RESOURCE_STATE_GENERIC_READ
                                                   : D3D12_RESOURCE_STATE_COPY_DEST;
-        resourceState = bufferCreationDesc.isAccelerationStructure
-                            ? D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE
-                            : resourceState;
+        if (bufferCreationDesc.isAccelerationStructure)
+        {
+            resourceState = D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE;
+        }
+        else if (bufferCreationDesc.isIndirectBuffer)
+        {
+            resourceState = D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT;
+        }
         D3D12MA::ALLOCATION_DESC allocationDesc{};
         allocationDesc.HeapType = isHostVisible ? D3D12_HEAP_TYPE_UPLOAD : D3D12_HEAP_TYPE_DEFAULT;
 
@@ -210,12 +215,13 @@ namespace ElysiaRenderer
                                                            pNewBuffer->GetResourceHeapIndex());
         }
 
-        if (hasUAV)
+        if (hasUAV || (bufferCreationDesc.isIndirectBuffer && bufferCreationDesc.isRawAccess))
         {
             D3D12_UNORDERED_ACCESS_VIEW_DESC UAVDesc{};
 
             UAVDesc.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
 
+            // 间接参数缓冲通常作为 Raw Buffer 处理
             if (bufferCreationDesc.isRawAccess)
             {
                 UAVDesc.Format = DXGI_FORMAT_R32_TYPELESS;

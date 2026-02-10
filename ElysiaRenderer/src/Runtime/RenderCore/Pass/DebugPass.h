@@ -41,6 +41,8 @@ namespace ElysiaRenderer
             static inline size_t g_MipmapLevel = PropertyToID(L"g_MipmapLevel");
             static inline size_t g_SourceSize = PropertyToID(L"g_SourceSize");
             static inline size_t g_TargetSize = PropertyToID(L"g_TargetSize");
+            static inline size_t g_IsEnableGILine = PropertyToID(L"g_IsEnableGILine");
+            static inline size_t g_DebugLineScale = PropertyToID(L"g_DebugLineScale");
 
 
             static inline size_t screenSize = PropertyToID(L"screenSize");

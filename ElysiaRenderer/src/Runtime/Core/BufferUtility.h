@@ -43,6 +43,7 @@ namespace ElysiaCore
         bool isRawAccess = false;
         const void* InitData = nullptr;
         bool isAccelerationStructure = false;
+        bool isIndirectBuffer = false;
     };
 
     struct DX12BufferUpload

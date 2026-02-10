@@ -10,27 +10,10 @@
 #pragma Blend Disabled
 #pragma Depth WritesEnabled
 
-cbuffer ObjectConstant : register(b0, perObjectSpace)
-{
-    Matrix worldMatrix;
-};
-
 cbuffer MaterialConstant : register(b0, perMaterialSpace)
 {
-    float opacity;
-    float cutoff;
-    UINT baseColorTexIndex;
-    UINT normalTexIndex;
-
-    UINT metallicTexIndex;
-    UINT roughnessTexIndex;
-    UINT specularTexIndex;
-    float metallicIntensity;
-
-    Vector3 baseColorTint;
-    float roughnessIntensity;
-
-    float normalIntensity;
+    UINT meshDataBufferIndex;
+    UINT meshDataIndex;
 };
 
 cbuffer PassConstant : register(b0, perPassSpace)
@@ -51,6 +34,29 @@ cbuffer PassConstant : register(b0, perPassSpace)
     Matrix pre_viewProjMatrix;
     Matrix pre_viewProjMatrix_I;
 }
+
+struct MeshData
+{
+    Matrix world_M;
+
+    float opacity;
+    float cutoff;
+    UINT baseColorTexIndex;
+    UINT normalTexIndex;
+
+    UINT metallicTexIndex;
+    UINT roughnessTexIndex;
+    UINT specularTexIndex;
+    float metallicIntensity;
+
+    Vector3 baseColorTint;
+    float roughnessIntensity;
+
+    float normalIntensity;
+    UINT vertexOffset;
+    UINT indexOffset;
+    UINT pad;
+};
 
 struct VSInput
 {
@@ -85,6 +91,8 @@ PSInput VS(VSInput i)
 {
     PSInput o = (PSInput)0;
 
+    StructuredBuffer<MeshData> meshDataBuffer = ResourceDescriptorHeap[meshDataBufferIndex];
+    Matrix worldMatrix = meshDataBuffer[meshDataIndex].world_M;
     o.positionWS = mul(float4(i.positionOS, 1.f), worldMatrix);
     o.positionVS = mul(o.positionWS, viewMatrix);
     o.positionCS = mul(o.positionVS, projMatrix);
@@ -145,18 +153,29 @@ FEncodeGBufferData GetEncodeGBufferData(FInputParams inputParams, float3 toLight
 
     float3x3 TBN = float3x3(inputParams.TangentWS, inputParams.BitTangentWS, inputParams.NormalWS);
 
-    float4 baseColor = SampleTexture2D(baseColorTexIndex, inputParams.objectUV, WarpLinearSampler)
-                       * float4(baseColorTint, opacity);
+    StructuredBuffer<MeshData> meshDataBuffer = ResourceDescriptorHeap[meshDataBufferIndex];
+    MeshData currMeshData = meshDataBuffer[meshDataIndex];
+
+    float4 baseColor = SampleTexture2D(currMeshData.baseColorTexIndex,
+                                       inputParams.objectUV,
+                                       WarpLinearSampler)
+                       * float4(currMeshData.baseColorTint, currMeshData.opacity);
     baseColor.rgb = AMDTonemapInvert(baseColor);
-    clip(baseColor.a - cutoff);
+    clip(baseColor.a - currMeshData.cutoff);
 
-    float4 normalTS = SampleTexture2D(normalTexIndex, inputParams.objectUV, WarpLinearSampler);
+    float4 normalTS = SampleTexture2D(currMeshData.normalTexIndex,
+                                      inputParams.objectUV,
+                                      WarpLinearSampler);
 
-    float metallic = SampleTexture2D(metallicTexIndex, inputParams.objectUV, WarpLinearSampler);
-    metallic = saturate(metallic * metallicIntensity);
+    float metallic = SampleTexture2D(currMeshData.metallicTexIndex,
+                                     inputParams.objectUV,
+                                     WarpLinearSampler);
+    metallic = saturate(metallic * currMeshData.metallicIntensity);
 
-    float roughness = SampleTexture2D(roughnessTexIndex, inputParams.objectUV, WarpLinearSampler);
-    roughness = saturate(roughness * roughnessIntensity);
+    float roughness = SampleTexture2D(currMeshData.roughnessTexIndex,
+                                      inputParams.objectUV,
+                                      WarpLinearSampler);
+    roughness = saturate(roughness * currMeshData.roughnessIntensity);
 
     o.BaseColor = baseColor.rgb;
     o.ShadingModelID = FLT_MAX;
@@ -168,7 +187,7 @@ FEncodeGBufferData GetEncodeGBufferData(FInputParams inputParams, float3 toLight
     o.Roughness = roughness;
     o.Specular = 0.f;
 
-    o.WorldNormal = GetNormal(normalTS.rgb, TBN, normalIntensity);
+    o.WorldNormal = GetNormal(normalTS.rgb, TBN, currMeshData.normalIntensity);
     o.WorldTangent = TBN._m00_m01_m02;
     o.PerObjectData = 0.f;
     o.PerComputedShadow = 1.f;

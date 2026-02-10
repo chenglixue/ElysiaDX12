@@ -8,9 +8,6 @@
 #pragma Blend Disabled
 #pragma Depth Enabled
 
-#define PROBE_COUNT 1024
-#define Rays_Per_Probe 32
-
 cbuffer PassConstant : register(b0, perPassSpace)
 {
     UINT g_IrradianceTexIndex;
@@ -29,8 +26,11 @@ cbuffer PassConstant : register(b0, perPassSpace)
     Vector4 g_GridSpacing;
     Vector4 g_GridDimensions;
     float g_ProbeRadius;
+    float g_RandomRotation;
     UINT g_RayDataBufferIndex;
     UINT g_ProbeOffsetsIndex;
+    bool g_IsEnableGILine;
+    float g_DebugLineScale;
 }
 
 struct AABBInstanceData
@@ -84,16 +84,67 @@ PSInput VS(VSInput i, UINT vertexID : SV_VertexID, uint instanceID : SV_Instance
     {
     case DEBUG_GI:
     {
-        o.instanceID = instanceID;
-        StructuredBuffer<float3> probeOffsetBuffer = ResourceDescriptorHeap[g_ProbeOffsetsIndex];
-        o.probeCenterWS = GetProbeWorldPosition(instanceID,
-                                                g_GridOrigin,
-                                                g_GridSpacing,
-                                                g_GridDimensions) + probeOffsetBuffer[instanceID];
+        if (g_IsEnableGILine)
+        {
+            uint totalVerticesPerProbe = Rays_Per_Probe * 2;
+            uint probeIdx = vertexID / totalVerticesPerProbe;
+            uint rayInProbeIdx = (vertexID / 2) % Rays_Per_Probe;
+            uint isEndPoint = vertexID % 2; // 0 为起点，1 为终点
 
-        o.positionWS = i.positionOS * g_ProbeRadius + o.probeCenterWS;
+            StructuredBuffer<float3> probeOffsetBuffer = ResourceDescriptorHeap[
+                g_ProbeOffsetsIndex];
+            float3 probeWorldPos = GetProbeWorldPosition(probeIdx,
+                                                         g_GridOrigin,
+                                                         g_GridSpacing,
+                                                         g_GridDimensions) +
+                                   probeOffsetBuffer[probeIdx];
 
-        o.positionCS = mul(float4(o.positionWS, 1.f), viewProjMatrix);
+            StructuredBuffer<RayData> rayDataBuffer = ResourceDescriptorHeap[g_RayDataBufferIndex];
+            uint rayDataIdx = probeIdx * Rays_Per_Probe + rayInProbeIdx;
+            RayData data = rayDataBuffer[rayDataIdx];
+            float3 dir = SphericalFibonacci(rayInProbeIdx, Rays_Per_Probe, g_RandomRotation);
+
+            float3 finalPos = probeWorldPos;
+            float3 finalColor = data.Radiance;
+
+            if (isEndPoint)
+            {
+                // 根据 Distance 收缩
+                // 如果是背面碰撞 (Distance < 0)，我们可以特殊标记
+                float actualDist = abs(data.Distance);
+                finalPos += dir * actualDist * g_DebugLineScale;
+
+                // 如果撞击背面，将线段末端显示为红色或暗灰色以方便 Debug
+                if (data.Distance < 0.0f)
+                {
+                    finalColor = float3(1.0f, 0.0f, 0.0f);
+                }
+            }
+            else
+            {
+                // 起点颜色可以稍微暗一点，形成渐变感
+                finalColor *= 0.2f;
+            }
+            o.positionCS = mul(float4(finalPos, 1.0f), viewProjMatrix);
+            o.color.rgb = finalColor * 2;
+            return o;
+        }
+        else
+        {
+            o.instanceID = instanceID;
+            StructuredBuffer<float3> probeOffsetBuffer = ResourceDescriptorHeap[
+                g_ProbeOffsetsIndex];
+            o.probeCenterWS = GetProbeWorldPosition(instanceID,
+                                                    g_GridOrigin,
+                                                    g_GridSpacing,
+                                                    g_GridDimensions) + probeOffsetBuffer[
+                                  instanceID];
+
+            o.positionWS = i.positionOS * g_ProbeRadius + o.probeCenterWS;
+
+            o.positionCS = mul(float4(o.positionWS, 1.f), viewProjMatrix);
+        }
+
         break;
     }
     case DEBUG_AABB:
@@ -145,14 +196,21 @@ PSOutput PS(PSInput i)
     case DEBUG_GI:
     {
         float4 result = 0.f;
-        [unroll]
-        for (int rayIndex = 0; rayIndex < Rays_Per_Probe; rayIndex ++)
+        if (g_IsEnableGILine)
         {
-            uint rayDataIndex = i.instanceID * Rays_Per_Probe + rayIndex;
-            RayData rayData = Elysia_DDGI_LoadRayData(rayDataIndex);
-            result += float4(rayData.Radiance, rayData.Distance);
+            result.rgb = i.color;
         }
-        result /= Rays_Per_Probe;
+        else
+        {
+            [unroll]
+            for (int rayIndex = 0; rayIndex < Rays_Per_Probe; rayIndex ++)
+            {
+                uint rayDataIndex = i.instanceID * Rays_Per_Probe + rayIndex;
+                RayData rayData = Elysia_DDGI_LoadRayData(rayDataIndex);
+                result += float4(rayData.Radiance, rayData.Distance);
+            }
+            result /= Rays_Per_Probe;
+        }
 
         o.target0 = result;
         break;

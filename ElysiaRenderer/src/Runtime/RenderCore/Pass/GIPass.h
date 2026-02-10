@@ -55,6 +55,7 @@ namespace ElysiaRenderer
         static inline constexpr UINT Probe_Count = 1024;
         static inline const UINT3 Grid_Dimensions = UINT3(16, 4, 16);
         static inline constexpr UINT Rays_Per_Probe = 32;
+        static inline float m_RandomRotation;
 
     public:
         GIPass();
@@ -90,7 +91,6 @@ namespace ElysiaRenderer
 #pragma endregion
 
         static constexpr float k_GoldenAngle = 2.39996322972865332f;
-        float m_RandomRotation;
 
         UINT m_frameIndex;
         UINT m_halfWidth;

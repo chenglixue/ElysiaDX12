@@ -125,7 +125,7 @@ void RayClosestHit(inout RayData rayData,
                                                 g_WarpLinearSampler,
                                                 0);
 
-    rayData.Radiance.rg = finalUV;
+    rayData.Radiance = baseColorAlpha.rgb;
     rayData.Distance = RayTCurrent();
 
     bool isBackFace = (HitKind() == HIT_KIND_TRIANGLE_BACK_FACE);

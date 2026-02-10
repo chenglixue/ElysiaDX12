@@ -251,6 +251,8 @@ namespace ElysiaRenderer
                                  GIPass::m_pRayDataBuffer->GetResourceHeapIndex());
             m_pMaterial->SetUInt(GIPass::ShaderIDs::g_ProbeOffsetsIndex,
                                  GIPass::m_pProbeOffsetBuffer->GetResourceHeapIndex());
+            m_pMaterial->SetBool(ShaderIDs::g_IsEnableGILine,
+                                 false);
 
             m_pMaterial->SetFloat3(GIPass::ShaderIDs::g_GridDimensions,
                                    Vector3(GIPass::Grid_Dimensions.x,
@@ -265,6 +267,75 @@ namespace ElysiaRenderer
         }
         m_pCommand->AddBarrier(m_pCameraColorRT,
                                D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+
+        if (UserData::GetInstance().GIParameter.enableLine)
+        {
+            {
+                std::vector<std::wstring> enableKeywords{};
+
+                auto passID = ShaderPasseIDs::DebugPassID;
+                auto& passData = m_pMaterial->GetPassData(passID);
+                auto VariantManager = passData.pShader->GetVariantManager();
+                passData.pCurrVariantData = &VariantManager->GetOrCompileVariantByNames(
+                    enableKeywords);
+                const RenderTargetDesc desc =
+                {
+                    .m_renderTargetFormats = {m_pCameraColorRT->GetFormat()},
+                    .m_numRenderTargets = 1,
+                    .m_depthStencilFormat = m_pCameraDepthRT->GetFormat(),
+                };
+                passData.pPipelineStateObject = PSOManager::GetInstance().GetGraphicsPipelineState(
+                    m_pDevice,
+                    m_pMaterial.get(),
+                    passID,
+                    desc,
+                    D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE);
+
+                PipelineInfo pipelineStateData{};
+                pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(
+                    passID).pPipelineStateObject;
+                pipelineStateData.m_renderTargets = {m_pCameraColorRT->GetTexture()};
+                pipelineStateData.m_depthStencilTarget = m_pCameraDepthRT->GetTexture();
+                m_pCommand->SetPipeline(pipelineStateData);
+                SetSpaceResource(passData, PER_FRAME_SPACE);
+            }
+            m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_renderSize));
+            m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
+
+            m_pCommand->GetCommandList()->IASetVertexBuffers(0, 0, nullptr);
+            m_pCommand->GetCommandList()->IASetIndexBuffer(nullptr);
+
+            m_pCommand->AddBarrier(m_pCameraColorRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+            {
+                m_pMaterial->SetUInt(GIPass::ShaderIDs::g_RayDataBufferIndex,
+                                     GIPass::m_pRayDataBuffer->GetResourceHeapIndex());
+                m_pMaterial->SetUInt(GIPass::ShaderIDs::g_ProbeOffsetsIndex,
+                                     GIPass::m_pProbeOffsetBuffer->GetResourceHeapIndex());
+                m_pMaterial->SetFloat3(GIPass::ShaderIDs::g_GridDimensions,
+                                       Vector3(GIPass::Grid_Dimensions.x,
+                                               GIPass::Grid_Dimensions.y,
+                                               GIPass::Grid_Dimensions.z));
+                m_pMaterial->SetFloat3(GIPass::ShaderIDs::g_GridOrigin, GIPass::m_gridOrigin);
+                m_pMaterial->SetFloat3(GIPass::ShaderIDs::g_GridSpacing, GIPass::m_gridSpacing);
+                m_pMaterial->SetFloat(GIPass::ShaderIDs::g_RandomRotation,
+                                      GIPass::m_RandomRotation);
+                m_pMaterial->SetMatrix(ShaderIDs::viewProjMatrix,
+                                       m_pCamera->GetViewMat() * m_pCamera->GetProjMat());
+
+                m_pMaterial->SetUInt(ShaderIDs::g_DebugMode,
+                                     static_cast<UINT>(UserData::GetInstance().debugMode));
+                m_pMaterial->SetBool(ShaderIDs::g_IsEnableGILine, true);
+                m_pMaterial->SetFloat(ShaderIDs::g_DebugLineScale,
+                                      UserData::GetInstance().GIParameter.lineWidth);
+
+                SetSpaceResource(passData, PER_PASS_SPACE);
+                uint32_t totalVertexCount = GIPass::Probe_Count * GIPass::Rays_Per_Probe * 2;
+                m_pCommand->DrawInstanced(totalVertexCount, 1, 0, 0);
+            }
+            m_pCommand->AddBarrier(m_pCameraColorRT,
+                                   D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+        }
+
     }
 
     void DebugPass::UpdatePipeline()

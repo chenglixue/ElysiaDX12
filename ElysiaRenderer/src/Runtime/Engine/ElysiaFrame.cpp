@@ -493,10 +493,15 @@ namespace ElysiaEngine
             }
             if (pUserData.debugMode == DebugMode::AABB || pUserData.debugMode == DebugMode::GI)
             {
-                ImGui::SliderInt("mipmap level",
+                ImGui::SliderInt("Instance GI",
                                  &pUserData.instanceID,
                                  0,
                                  400);
+            }
+            if (pUserData.debugMode == DebugMode::GI)
+            {
+                ImGui::Checkbox("Enable Line", &pUserData.GIParameter.enableLine);
+                ImGui::SliderFloat("Line Thicness", &pUserData.GIParameter.lineWidth, 0.f, 5.f);
             }
 
         }

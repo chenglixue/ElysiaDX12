@@ -61,7 +61,18 @@ namespace ElysiaRenderer
     GBufferPass::GBufferPass()
         : BasePass()
     {
-
+        m_pIndirectDataBuffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc
+        {
+            .name = L"GBuffer Indirect Buffer",
+            .stride = sizeof(IndirectCommand),
+            .size = sizeof(IndirectCommand) * Max_RenderItem_Count,
+            .viewFlags = GPUResourceFlags::SRV | GPUResourceFlags::UAV,
+            .accessFlags = BufferAccessFlags::HostWritable,
+            .isRawAccess = true,
+            .InitData = nullptr,
+            .isAccelerationStructure = false,
+            .isIndirectBuffer = true
+        });
     }
 
     GBufferPass::~GBufferPass()
@@ -92,6 +103,11 @@ namespace ElysiaRenderer
         m_pCamera = context.pCamera;
         m_pGPUTimer = context.pGPUTimer;
 
+        if (context.renderList.empty())
+            return;
+        UploadMeshData(context.renderList);
+        if (!m_pMeshDataBuffer)
+            return;
         DrawGBufferPass(context);
 
         TAAData::Pre_View_M = m_pCamera->GetViewMat();
@@ -106,6 +122,59 @@ namespace ElysiaRenderer
     void GBufferPass::Dispose()
     {
         m_GBufferRTs.clear();
+    }
+
+    void GBufferPass::UploadMeshData(const std::vector<RenderItem>& renderItems)
+    {
+        const auto renderItemCount = renderItems.size();
+        UINT bufferSize = Max_RenderItem_Count * sizeof(MeshData);
+
+        m_meshDatas.clear();
+        m_meshDatas.resize(Max_RenderItem_Count);
+
+        for (UINT64 i = 0; i < renderItemCount; i ++)
+        {
+            const auto& materialData = renderItems[i].loadedMaterial;
+            const auto& textureIndices = renderItems[i].textureIndices;
+            m_meshDatas[i] =
+            {
+                .world_M = renderItems[i].worldMatrix,
+                .opacity = materialData.opacity,
+                .cutoff = 0.5,
+                .baseColorTexIndex = textureIndices.Albedo,
+                .normalTexIndex = textureIndices.Normal,
+
+                .metallicTexIndex = textureIndices.Metallic,
+                .roughnessTexIndex = textureIndices.Roughness,
+                .specularTexIndex = textureIndices.Specular,
+                .metallicIntensity = UserData::GetInstance().MetallicIntensity,
+
+                .baseColorTint = UserData::GetInstance().BaseColorTint,
+                .roughnessIntensity = UserData::GetInstance().RoughnessIntensity,
+
+                .normalIntensity = UserData::GetInstance().NormalIntensity,
+                .vertexOffset = renderItems[i].baseVertex,
+                .indexOffset = renderItems[i].startIndex
+            };
+        }
+
+        if (!m_pMeshDataBuffer)
+        {
+            m_pMeshDataBuffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc
+            {
+                .name = L"Mesh Data Buffer",
+                .stride = sizeof(MeshData),
+                .size = bufferSize,
+                .viewFlags = GPUResourceFlags::SRV,
+                .accessFlags = BufferAccessFlags::HostWritable,
+                .isRawAccess = false,
+                .InitData = m_meshDatas.data()
+            });
+        }
+        else
+        {
+            memcpy(m_pMeshDataBuffer->GetMappedBuffer(), m_meshDatas.data(), bufferSize);
+        }
     }
 
     void GBufferPass::CreateRTs()
@@ -201,6 +270,7 @@ namespace ElysiaRenderer
         if (!m_pMaterial)
             return;
         UpdateGBufferPassVariant(ShaderPassIDs::GBufferPassID);
+
     }
 
     void GBufferPass::UpdateGBufferPassVariant(UINT passIndex)
@@ -225,59 +295,62 @@ namespace ElysiaRenderer
             m_pMaterial.get(),
             passIndex,
             RTDesc);
+
+        // 对应 IndirectCommand::pushConstants
+        D3D12_INDIRECT_ARGUMENT_DESC args[2] = {};
+        args[0].Type = D3D12_INDIRECT_ARGUMENT_TYPE_CONSTANT;
+        args[0].Constant.RootParameterIndex = 1; // 对应 PER_MATERIAL_SPACE 的槽位
+        args[0].Constant.DestOffsetIn32BitValues = 0;
+        args[0].Constant.Num32BitValuesToSet = 2; // 两个 UINT
+
+        // 对应 IndirectCommand::drawArguments
+        args[1].Type = D3D12_INDIRECT_ARGUMENT_TYPE_DRAW_INDEXED;
+
+        D3D12_COMMAND_SIGNATURE_DESC desc = {};
+        desc.ByteStride = sizeof(IndirectCommand);
+        desc.NumArgumentDescs = 2;
+        desc.pArgumentDescs = args;
+
+        m_pDevice->GetDevice()->CreateCommandSignature(&desc,
+                                                       passData.pRootSignature->GetSignature(),
+                                                       IID_PPV_ARGS(&m_pCommandSignature));
     }
 
     void GBufferPass::DrawMesh(ElysiaEngine::FrameContext& context, UINT passIndex)
     {
         auto& passData = m_pMaterial->GetPassData(passIndex);
 
-        struct alignas(16)
-        {
-            float opacity;
-            float cutoff;
-            UINT baseColorTexIndex;
-            UINT normalTexIndex;
-
-            UINT metallicTexIndex;
-            UINT roughnessTexIndex;
-            UINT specularTexIndex;
-            float metallicIntensity;
-
-            Vector3 baseColorTint;
-            float roughnessIntensity;
-
-            float normalIntensity;
-        } constantData;
-        constexpr UINT constantSize = sizeof(constantData) / 4;
-
+        m_pCommand->AddBarrier(*m_pIndirectDataBuffer, D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT);
+        UINT renderItemIndex = 0;
         for (auto& renderItem : context.renderList)
         {
-            auto materialData = renderItem.loadedMaterial;
-
-            constantData =
+            m_indirectCommands[renderItemIndex].pushConstants =
             {
-                materialData.opacity,
-                0.5,
-                renderItem.textureIndices.Albedo,
-                renderItem.textureIndices.Normal,
-
-                renderItem.textureIndices.Metallic,
-                renderItem.textureIndices.Roughness,
-                renderItem.textureIndices.Specular,
-                UserData::GetInstance().MetallicIntensity,
-
-                UserData::GetInstance().BaseColorTint,
-                UserData::GetInstance().RoughnessIntensity,
-
-                UserData::GetInstance().NormalIntensity,
+                .meshDataBufferIndex = m_pMeshDataBuffer->GetResourceHeapIndex(),
+                .meshDataIndex = renderItemIndex
             };
-            m_pCommand->SetPushConstants(PER_MATERIAL_SPACE, &constantData, constantSize);
-
-            m_pMaterial->SetMatrix(ShaderIDs::worldMatrix, renderItem.worldMatrix);
-
-            SetSpaceResource(passData, PER_OBJECT_SPACE);
-            m_pCommand->Draw(renderItem.indexCount, renderItem.baseVertex, renderItem.startIndex);
+            m_indirectCommands[renderItemIndex].drawArguments = D3D12_DRAW_INDEXED_ARGUMENTS
+            {
+                .IndexCountPerInstance = renderItem.indexCount,
+                .InstanceCount = 1,
+                .StartIndexLocation = renderItem.startIndex,
+                .BaseVertexLocation = int(renderItem.baseVertex),
+                .StartInstanceLocation = 0,
+            };
+            renderItemIndex ++;
         }
+        memcpy(m_pIndirectDataBuffer->GetMappedBuffer(),
+               m_indirectCommands.data(),
+               sizeof(IndirectCommand) * Max_RenderItem_Count);
+        m_pCommand->GetCommandList()->ExecuteIndirect(m_pCommandSignature,
+                                                      // 执行多少次命令
+                                                      renderItemIndex,
+                                                      m_pIndirectDataBuffer->GetResource(),
+                                                      // 从 Buffer 的开头开始
+                                                      0,
+                                                      // 如果没有 CountBuffer，则固定执行指定的次数
+                                                      nullptr,
+                                                      0);
     }
 
     void GBufferPass::DrawGBufferPass(ElysiaEngine::FrameContext& context)
@@ -307,13 +380,10 @@ namespace ElysiaRenderer
         m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_renderSize));
         m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-        if (context.renderList.size())
-        {
-            m_pCommand->SetIndexBuffer(BufferManager::GetInstance().GetGlobalIndexBufferView());
-            m_pCommand->SetVertexBuffer(0,
-                                        1,
-                                        BufferManager::GetInstance().GetGlobalVertexBufferView());
-        }
+        m_pCommand->SetIndexBuffer(BufferManager::GetInstance().GetGlobalIndexBufferView());
+        m_pCommand->SetVertexBuffer(0,
+                                    1,
+                                    BufferManager::GetInstance().GetGlobalVertexBufferView());
 
         m_pMaterial->SetFloat4(ShaderIDs::screenSize,
                                GetScreenSize(Vector2(m_renderSize.x, m_renderSize.y)));
