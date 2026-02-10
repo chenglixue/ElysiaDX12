@@ -30,6 +30,7 @@ cbuffer PassConstant : register(b0, perPassSpace)
     Vector4 g_GridDimensions;
     float g_ProbeRadius;
     UINT g_RayDataBufferIndex;
+    UINT g_ProbeOffsetsIndex;
 }
 
 struct AABBInstanceData
@@ -58,7 +59,6 @@ RayData Elysia_DDGI_LoadRayData(uint readIndex)
 struct VSInput
 {
     float3 positionOS : POSITION;
-    uint instanceID : SV_InstanceID;
 };
 
 struct PSInput
@@ -76,7 +76,7 @@ struct PSOutput
     float4 target0 : SV_TARGET0;
 };
 
-PSInput VS(VSInput i, UINT vertexID : SV_VertexID)
+PSInput VS(VSInput i, UINT vertexID : SV_VertexID, uint instanceID : SV_InstanceID)
 {
     PSInput o = (PSInput)0;
 
@@ -84,11 +84,12 @@ PSInput VS(VSInput i, UINT vertexID : SV_VertexID)
     {
     case DEBUG_GI:
     {
-        o.instanceID = i.instanceID;
-        o.probeCenterWS = GetProbeWorldPosition(i.instanceID,
+        o.instanceID = instanceID;
+        StructuredBuffer<float3> probeOffsetBuffer = ResourceDescriptorHeap[g_ProbeOffsetsIndex];
+        o.probeCenterWS = GetProbeWorldPosition(instanceID,
                                                 g_GridOrigin,
                                                 g_GridSpacing,
-                                                g_GridDimensions);
+                                                g_GridDimensions) + probeOffsetBuffer[instanceID];
 
         o.positionWS = i.positionOS * g_ProbeRadius + o.probeCenterWS;
 
@@ -99,7 +100,7 @@ PSInput VS(VSInput i, UINT vertexID : SV_VertexID)
     {
         StructuredBuffer<AABBInstanceData> AABBDatas = ResourceDescriptorHeap[
             g_AABBInstanceDatasIndex];
-        AABBInstanceData AABBData = AABBDatas[i.instanceID];
+        AABBInstanceData AABBData = AABBDatas[instanceID];
         float3 size = AABBData.Max - AABBData.Min;
         float3 center = (AABBData.Max + AABBData.Min) * 0.5f;
 

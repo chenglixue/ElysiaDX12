@@ -15,7 +15,8 @@ namespace ElysiaRenderer
     using namespace ElysiaHelper;
 
 #define GI_PASS_LIST \
-    PASS(RELOCATE_PROBES_PASS,         "public\\GI\\CS_DDGI.hlsl",               true,  RelocateProbes)
+    PASS(RELOCATE_PROBES_PASS,         "public\\GI\\CS_DDGI.hlsl",               true,  RelocateProbes)\
+    PASS(Clear_Probe_Offset_PASS,      "public\\GI\\CS_DDGI.hlsl",               true,  ClearProbeOffsetBuffer)
 
     class GIPass : public BasePass
     {
@@ -89,6 +90,7 @@ namespace ElysiaRenderer
 #pragma endregion
 
         static constexpr float k_GoldenAngle = 2.39996322972865332f;
+        float m_RandomRotation;
 
         UINT m_frameIndex;
         UINT m_halfWidth;
@@ -159,12 +161,13 @@ namespace ElysiaRenderer
 #pragma endregion
 
         void GenerateRay();
+        void ClearProbeOffset();
         void RelocateProbes();
 
         CComPtr<IDxcBlob> CompileRaytracingLibrary(const std::wstring& fileName);
         void CreateRaytracingPipeline(ID3D12RootSignature* pRootSignature);
         void CreateDXRRootSignature(ID3D12Device* pDevice);
-        void GenerateTLAS(const std::vector<RenderItem>& renderItems);
+        void GenerateTLAS(const std::vector<std::unique_ptr<Entity>>& entityies);
         std::vector<D3D12_SAMPLER_DESC> GenerateSampler();
     };
 }

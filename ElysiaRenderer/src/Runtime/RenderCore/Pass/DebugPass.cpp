@@ -249,6 +249,8 @@ namespace ElysiaRenderer
                                                                    ->GetResourceHeapIndex());
             m_pMaterial->SetUInt(GIPass::ShaderIDs::g_RayDataBufferIndex,
                                  GIPass::m_pRayDataBuffer->GetResourceHeapIndex());
+            m_pMaterial->SetUInt(GIPass::ShaderIDs::g_ProbeOffsetsIndex,
+                                 GIPass::m_pProbeOffsetBuffer->GetResourceHeapIndex());
 
             m_pMaterial->SetFloat3(GIPass::ShaderIDs::g_GridDimensions,
                                    Vector3(GIPass::Grid_Dimensions.x,

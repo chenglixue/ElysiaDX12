@@ -2,6 +2,9 @@
 #define DDGI_COMMON_H
 #include "ShadingCommon.hlsl"
 
+#define PROBE_COUNT 1024
+#define Rays_Per_Probe 32
+
 struct Vertex
 {
     float3 positionOS;
@@ -91,5 +94,17 @@ float3 GetProbeWorldPosition(uint probeIndex,
     uint3 coord = GetProbeGridCoord(probeIndex, gridDimensions);
     // 位置 = 起点 + 索引 * 步长
     return gridOrigin + (float3(coord) * gridSpacing);
+}
+
+float3 SphericalFibonacci(uint sampleIndex, uint numSamples, float rotation)
+{
+    float b = (sqrt(5.0) * 0.5 + 0.5) - 1.0;
+    float phi = 2.0 * 3.1415926f * b;
+
+    float theta = phi * sampleIndex + rotation;
+    float cosPhi = 1.0 - (float(sampleIndex) + 0.5) / float(numSamples) * 2.0;
+    float sinPhi = sqrt(saturate(1.0 - cosPhi * cosPhi));
+
+    return float3(cos(theta) * sinPhi, cosPhi, sin(theta) * sinPhi);
 }
 #endif

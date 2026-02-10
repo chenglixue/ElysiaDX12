@@ -4,8 +4,7 @@
 #define GROUP_SIZE 8
 #define IRRADIANCE_GROUP_SIZE 8
 #define DISTANCE_GROUP_SIZE 8
-#define PROBE_COUNT 1024
-#define Rays_Per_Probe 32
+#define DXR_Max 10000
 
 cbuffer PassConstant : register(b0, perPassSpace)
 {
@@ -19,6 +18,7 @@ cbuffer PassConstant : register(b0, perPassSpace)
 
 RaytracingAccelerationStructure g_SceneTLAS : register(t0);
 StructuredBuffer<InstanceData> g_InstanceDataBuffer : register(t1);
+StructuredBuffer<Vector3> g_ProbeOffsetBuffer : register(t2);
 
 SamplerState g_WarpPointSampler : register(s0);
 SamplerState g_ClampPointSampler : register(s1);
@@ -47,8 +47,6 @@ RayData Elysia_DDGI_LoadRayData(uint readIndex)
     return rayDatas[readIndex];
 }
 
-float3 SphericalFibonacci(uint sampleIndex, uint numSamples, float rotation);
-
 [shader("raygeneration")]
 void GenerateRayMain()
 {
@@ -59,14 +57,14 @@ void GenerateRayMain()
     Vector3 rayOrigin = GetProbeWorldPosition(probeIndex,
                                               g_GridOrigin,
                                               g_GridSpacing,
-                                              g_GridDimensions);
+                                              g_GridDimensions) + g_ProbeOffsetBuffer[probeIndex];
     float3 rayDir = SphericalFibonacci(rayIndex, Rays_Per_Probe, g_RandomRotation);
 
     RayDesc rayDesc;
     rayDesc.Origin = rayOrigin;
     rayDesc.Direction = rayDir;
     rayDesc.TMin = 1e-4;
-    rayDesc.TMax = 10000;
+    rayDesc.TMax = DXR_Max;
 
     RayData rayData;
     rayData.Radiance = 0.f;
@@ -89,7 +87,7 @@ void GenerateRayMain()
 void RayMiss(inout RayData rayData)
 {
     rayData.Radiance = 0.f;
-    rayData.Distance = 0.f;
+    rayData.Distance = DXR_Max;
 }
 
 [shader("closesthit")]
@@ -129,16 +127,11 @@ void RayClosestHit(inout RayData rayData,
 
     rayData.Radiance.rg = finalUV;
     rayData.Distance = RayTCurrent();
-}
 
-float3 SphericalFibonacci(uint sampleIndex, uint numSamples, float rotation)
-{
-    float b = (sqrt(5.0) * 0.5 + 0.5) - 1.0;
-    float phi = 2.0 * 3.1415926f * b;
-
-    float theta = phi * sampleIndex + rotation;
-    float cosPhi = 1.0 - (float(sampleIndex) + 0.5) / float(numSamples) * 2.0;
-    float sinPhi = sqrt(saturate(1.0 - cosPhi * cosPhi));
-
-    return float3(cos(theta) * sinPhi, cosPhi, sin(theta) * sinPhi);
+    bool isBackFace = (HitKind() == HIT_KIND_TRIANGLE_BACK_FACE);
+    if (isBackFace)
+    {
+        rayData.Distance *= -1.0f; // 用负数标记背面撞击
+        rayData.Radiance = 0.0f;
+    }
 }

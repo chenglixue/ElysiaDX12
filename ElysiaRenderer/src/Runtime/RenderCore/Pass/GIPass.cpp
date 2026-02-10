@@ -15,6 +15,7 @@
 #include "Runtime/RenderCore/RenderResource.h"
 #include "Runtime/RenderCore/RenderTexture.h"
 #include "Runtime/RenderCore/Material.h"
+#include "Runtime/RenderCore/MeshRenderer.h"
 #include "Runtime/RenderCore/PSOManager.h"
 #include "Runtime/RenderCore/RenderTargetManager.h"
 #include "Runtime/RenderCore/SceneManager.h"
@@ -77,7 +78,7 @@ namespace ElysiaRenderer
             .name = L"Probe Offset Buffer",
             .stride = sizeof(Vector3),
             .size = sizeof(Vector3) * Probe_Count,
-            .viewFlags = GPUResourceFlags::UAV,
+            .viewFlags = GPUResourceFlags::SRV | GPUResourceFlags::UAV,
             .accessFlags = BufferAccessFlags::GPUOnly,
         });
 
@@ -129,28 +130,30 @@ namespace ElysiaRenderer
         m_frameIndex = context.frameIndex;
         m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), "GI Begin");
 
-        if (!context.renderList.empty())
+        if (!SceneManager::GetInstance().GetEntities().empty() && !SceneManager::GetInstance().
+            GetEntities()[0]->GetChildren().empty())
         {
-            auto renderListCount = context.renderList.size();
+            auto& allEntities = SceneManager::GetInstance().GetEntities()[0]->GetChildren();
+            auto entityCount = allEntities.size();
             m_instanceDatas.clear();
-            m_instanceDatas.resize(renderListCount);
+            m_instanceDatas.resize(entityCount);
             bool needFlushBarrier = false;
             // first is root list
-            for (UINT i = 0; i < renderListCount; i ++)
+            for (UINT i = 0; i < entityCount; i ++)
             {
-                auto currRenderList = context.renderList[i];
-                if (!currRenderList.pAssociatedEntity->GetBLASBuffer())
+                auto currEntity = allEntities[i].get();
+                if (!currEntity->GetBLASBuffer())
                     needFlushBarrier = true;
-                currRenderList.pAssociatedEntity->GenerateBLAS(m_pDevice5, m_pCommand);
+                currEntity->GenerateBLAS(m_pDevice5, m_pCommand);
                 m_instanceDatas[i] =
                 {
-                    .BaseColorTexIndex = currRenderList.textureIndices.Albedo,
-                    .NormalTexIndex = currRenderList.textureIndices.Normal,
-                    .MetallicTexIndex = currRenderList.textureIndices.Metallic,
-                    .RoughnessTexIndex = currRenderList.textureIndices.Roughness,
+                    .BaseColorTexIndex = currEntity->pMeshRenderer->GetTextureIndices().Albedo,
+                    .NormalTexIndex = currEntity->pMeshRenderer->GetTextureIndices().Normal,
+                    .MetallicTexIndex = currEntity->pMeshRenderer->GetTextureIndices().Metallic,
+                    .RoughnessTexIndex = currEntity->pMeshRenderer->GetTextureIndices().Roughness,
 
-                    .VertexOffset = currRenderList.baseVertex,
-                    .IndexOffset = currRenderList.startIndex,
+                    .VertexOffset = currEntity->pMeshRenderer->GetMesh().vtxOffset,
+                    .IndexOffset = currEntity->pMeshRenderer->GetMesh().idxOffset,
                     .VertexBufferIndex = BufferManager::GetInstance().GetGlobalVertexBuffer()->
                                                                       GetResourceHeapIndex(),
                     .IndexBufferIndex = BufferManager::GetInstance().GetGlobalIndexBuffer()->
@@ -163,7 +166,7 @@ namespace ElysiaRenderer
             }
 
             if (!m_pInstanceDataBuffer || m_pInstanceDataBuffer->GetResourceDesc().Width < sizeof(
-                    InstanceData) * renderListCount)
+                    InstanceData) * entityCount)
             {
                 if (m_pInstanceDataBuffer)
                     BufferManager::GetInstance().DestoryBuffer(m_pInstanceDataBuffer);
@@ -171,7 +174,7 @@ namespace ElysiaRenderer
                 {
                     .name = L"GI Instance Data",
                     .stride = sizeof(InstanceData),
-                    .size = sizeof(InstanceData) * renderListCount,
+                    .size = sizeof(InstanceData) * entityCount,
                     .viewFlags = GPUResourceFlags::SRV,
                     .accessFlags = BufferAccessFlags::HostWritable,
                     .isRawAccess = false,
@@ -182,9 +185,9 @@ namespace ElysiaRenderer
             {
                 memcpy(m_pInstanceDataBuffer->GetMappedBuffer(),
                        m_instanceDatas.data(),
-                       sizeof(InstanceData) * renderListCount);
+                       sizeof(InstanceData) * entityCount);
             }
-            GenerateTLAS(context.renderList);
+            GenerateTLAS(allEntities);
 
             const Entity* pEntity = SceneManager::GetInstance().GetEntities()[0].get();
             auto sceneAABB = pEntity->GetWorldAABB();
@@ -209,6 +212,7 @@ namespace ElysiaRenderer
             m_pRayDataBuffer)
             return;
 
+        ClearProbeOffset();
         GenerateRay();
         RelocateProbes();
     }
@@ -258,6 +262,7 @@ namespace ElysiaRenderer
             Vector4 g_GridDimensions;
 
             uint g_RayDataBufferIndex;
+            uint g_ProbeOffsetsIndex;
             float g_RandomRotation;
         } constantData;
         constexpr UINT constantSize = sizeof(constantData) / 4;
@@ -277,8 +282,9 @@ namespace ElysiaRenderer
                                             Grid_Dimensions.z,
                                             0.f),
                 .g_RayDataBufferIndex = m_pRayDataBuffer->GetResourceHeapIndex(),
-                .g_RandomRotation = fmodf(static_cast<float>(m_frameIndex) * k_GoldenAngle,
-                                          2.0f * 3.14159265f),
+                .g_RandomRotation = m_RandomRotation = fmodf(
+                                        static_cast<float>(m_frameIndex) * k_GoldenAngle,
+                                        2.0f * 3.14159265f),
             };
 
             m_pCommand->GetCommandList()->SetComputeRoot32BitConstants(
@@ -293,6 +299,9 @@ namespace ElysiaRenderer
             m_pCommand->GetCommandList()->SetComputeRootShaderResourceView(
                 2,
                 m_pInstanceDataBuffer->GetGPUAddress());
+            m_pCommand->GetCommandList()->SetComputeRootShaderResourceView(
+                3,
+                m_pProbeOffsetBuffer->GetGPUAddress());
 
             D3D12_DISPATCH_RAYS_DESC dispatchDesc = {};
             dispatchDesc.Width = Probe_Count;
@@ -308,14 +317,48 @@ namespace ElysiaRenderer
 
         m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), "Generate Ray");
     }
+    void GIPass::ClearProbeOffset()
+    {
+        static bool hasClear = false;
+        if (!m_pProbeOffsetBuffer || hasClear)
+            return;
+
+        auto passID = Clear_Probe_Offset_PASS;
+        auto passName = m_PassData[passID].Name.c_str();
+        auto& passData = m_pMaterial->GetPassData(passID);
+        PIXHelper pix(m_pCommand->GetCommandList(), passName);
+
+        PipelineInfo pipelineStateData{};
+        pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(
+            passID).pPipelineStateObject;
+        m_pCommand->SetPipeline(pipelineStateData);
+
+        m_pCommand->AddBarrier(*m_pProbeOffsetBuffer, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+        {
+            m_pMaterial->SetUInt(ShaderIDs::g_ProbeOffsetsIndex,
+                                 m_pProbeOffsetBuffer->GetResourceHeapIndex());
+            SetSpaceResource(passData, PER_PASS_SPACE);
+
+            auto threadGroupSize = passData.GetKernelThreadGroupSizes();
+            m_pCommand->Dispatch(CeilDivide(Probe_Count, threadGroupSize.x),
+                                 threadGroupSize.y,
+                                 threadGroupSize.z);
+        }
+        m_pCommand->AddBarrier(*m_pProbeOffsetBuffer,
+                               D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+
+        hasClear = true;
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
+    }
     void GIPass::RelocateProbes()
     {
         if (!m_pProbeOffsetBuffer)
             return;
 
         auto passID = RELOCATE_PROBES_PASS;
+        auto passName = m_PassData[passID].Name.c_str();
         auto& passData = m_pMaterial->GetPassData(passID);
-        PIXHelper pix(m_pCommand->GetCommandList(), m_PassData[RELOCATE_PROBES_PASS].Name.c_str());
+        PIXHelper pix(m_pCommand->GetCommandList(), passName);
 
         PipelineInfo pipelineStateData{};
         pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(
@@ -326,46 +369,49 @@ namespace ElysiaRenderer
         m_pCommand->AddBarrier(*m_pProbeOffsetBuffer, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
         {
             m_pMaterial->SetUInt(ShaderIDs::g_ProbeOffsetsIndex,
-                                 m_pProbeOffsetBuffer->GetResourceHeapIndex());
+                                 m_pProbeOffsetBuffer->GetUAVResourceHeapIndex());
             m_pMaterial->SetUInt(ShaderIDs::g_RayDataBufferIndex,
                                  m_pRayDataBuffer->GetResourceHeapIndex());
+            m_pMaterial->SetFloat(ShaderIDs::g_RandomRotation, m_RandomRotation);
+            m_pMaterial->SetFloat3(ShaderIDs::g_GridSpacing, m_gridSpacing);
+
             SetSpaceResource(passData, PER_PASS_SPACE);
 
             auto threadGroupSize = passData.GetKernelThreadGroupSizes();
             m_pCommand->Dispatch(CeilDivide(Probe_Count, threadGroupSize.x),
                                  threadGroupSize.y,
                                  threadGroupSize.z);
+            m_pCommand->AddUAVBarrier(m_pProbeOffsetBuffer, false);
         }
         m_pCommand->AddBarrier(*m_pProbeOffsetBuffer,
                                D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
-        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(),
-                                  m_PassData[RELOCATE_PROBES_PASS].Name.c_str());
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
     }
-    void GIPass::GenerateTLAS(const std::vector<RenderItem>& renderItems)
+    void GIPass::GenerateTLAS(const std::vector<std::unique_ptr<Entity>>& entityies)
     {
-        UINT64 renderItemCount = renderItems.size();
-        if (!renderItemCount)
+        UINT64 entityCount = entityies.size();
+        if (!entityCount)
             return;
 
         // 定义实例描述符 (Instance Desc)
-        std::vector<D3D12_RAYTRACING_INSTANCE_DESC> instanceDescs(renderItemCount);
-        for (UINT64 i = 0; i < renderItemCount; ++i)
+        std::vector<D3D12_RAYTRACING_INSTANCE_DESC> instanceDescs(entityCount);
+        for (UINT64 i = 0; i < entityCount; ++i)
         {
-            const auto& renderItem = renderItems[i];
+            const auto& entity = entityies[i];
             instanceDescs[i].InstanceMask = 0xFF;                     // 与 TraceRay 的 mask 匹配
             instanceDescs[i].InstanceID = UINT(i);                    // 对应 HLSL 中的 InstanceID()
             instanceDescs[i].InstanceContributionToHitGroupIndex = 0; // 对应 HitGroup 偏移
             instanceDescs[i].Flags = D3D12_RAYTRACING_INSTANCE_FLAG_NONE;
+            auto entityWorld_M = entity->transform.GetWorldMatrix();
             memcpy(instanceDescs[i].Transform,
-                   &renderItem.worldMatrix,
+                   &entityWorld_M,
                    sizeof(instanceDescs[i].Transform));
 
             // 关联BLAS
-            instanceDescs[i].AccelerationStructure = renderItem.pAssociatedEntity->GetBLASBuffer()->
-                                                                GetGPUAddress();
+            instanceDescs[i].AccelerationStructure = entity->GetBLASBuffer()->GetGPUAddress();
         }
 
-        size_t bufferSize = sizeof(D3D12_RAYTRACING_INSTANCE_DESC) * renderItemCount;
+        size_t bufferSize = sizeof(D3D12_RAYTRACING_INSTANCE_DESC) * entityCount;
 
         // 创建并填充 Instance Upload Buffer
         if (!m_pTLASUploadBuffer || m_pTLASUploadBuffer->GetResourceDesc().Width < bufferSize)
@@ -393,7 +439,7 @@ namespace ElysiaRenderer
         {
             .Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL,
             .Flags = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PREFER_FAST_TRACE,
-            .NumDescs = UINT(renderItemCount),
+            .NumDescs = UINT(entityCount),
             .DescsLayout = D3D12_ELEMENTS_LAYOUT_ARRAY,
             .InstanceDescs = m_pTLASUploadBuffer->GetGPUAddress()
         };
@@ -675,13 +721,16 @@ namespace ElysiaRenderer
     {
         // 1. 定义根参数：对于 Bindless 方案，我们通常只需要“根常量 (Root Constants)”
         // 用来传递诸如 g_RayDataUAVIndex 或 DDGI 配置结构体的索引
-        CD3DX12_ROOT_PARAMETER1 rootParameters[3];
+        CD3DX12_ROOT_PARAMETER1 rootParameters[4];
 
         // 假设我们需要 16 个 32位常量 (比如一个 ViewProj 矩阵或一组索引)
-        rootParameters[0].InitAsConstants(16, 0, 2);
+        UINT rootParameterIndex = 0;
+        rootParameters[rootParameterIndex ++].InitAsConstants(16, 0, 2);
 
-        rootParameters[1].InitAsShaderResourceView(0, 0);
-        rootParameters[2].InitAsShaderResourceView(1, 0);
+        UINT SRVIndex = 0;
+        rootParameters[rootParameterIndex ++].InitAsShaderResourceView(SRVIndex ++, 0);
+        rootParameters[rootParameterIndex ++].InitAsShaderResourceView(SRVIndex ++, 0);
+        rootParameters[rootParameterIndex ++].InitAsShaderResourceView(SRVIndex ++, 0);
 
         auto samplerDescs = GenerateSampler();
         CD3DX12_STATIC_SAMPLER_DESC staticSamplers[NUM_SAMPLER_DESCRIPTORS];

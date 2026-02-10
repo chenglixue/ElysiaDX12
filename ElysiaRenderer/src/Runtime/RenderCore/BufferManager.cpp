@@ -240,6 +240,12 @@ namespace ElysiaRenderer
                 nullptr,
                 &UAVDesc,
                 pNewBuffer->GetUAVDescriptor().GetCPUHandle());
+
+            pNewBuffer->SetUAVResourceHeapIndex(m_pDevice->m_freeReservedDescriptorIndices.back());
+            m_pDevice->m_freeReservedDescriptorIndices.pop_back();
+
+            m_pDevice->CopyDescriptorFromStageToRenderPass(pNewBuffer->GetUAVDescriptor(),
+                                                           pNewBuffer->GetUAVResourceHeapIndex());
         }
 
         // if (index<m_bufferPools.size())
