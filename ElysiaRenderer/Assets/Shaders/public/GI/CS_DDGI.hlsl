@@ -11,7 +11,7 @@ cbuffer PassConstant : register(b0, perPassSpace)
     float g_RandomRotation;
 }
 
-static const float PROBE_MIN_FRONTFACE_DIST = 0.6f; // 保持距离墙面 0.2 单位
+static const float PROBE_MIN_FRONTFACE_DIST = 0.4f; // 保持距离墙面 0.2 单位
 static const float PROBE_RETURN_HOME_HYSTERESIS = 0.05f;
 static const float PROBE_BACKFACE_THRESHOLD = 0.25f;  // % 射线撞背面视为在内部
 static const float PROBE_MAX_OFFSET_FRACTION = 0.45f; // 最大允许偏移量 (相对于Grid间距的比例, 0.5是边界, 0.45是安全区)

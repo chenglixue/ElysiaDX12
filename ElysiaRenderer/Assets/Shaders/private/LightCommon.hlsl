@@ -61,7 +61,8 @@ FLightAccumulator AccumulateDynamicLighting(FInputParams inputData,
                                        inputData.ScreenUV,
                                        shadowSize,
                                        shadowMatrix);
-    shadow = 1;
+    if (!g_EnableShadow)
+        shadow = 1;
     Shadow.SurfaceShadow = AO * shadow;
 
     FDirectLighting directLight = (FDirectLighting)0;

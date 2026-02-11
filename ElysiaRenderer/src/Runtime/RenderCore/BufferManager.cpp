@@ -10,6 +10,7 @@
 #include "Runtime/Core/DX12UploadContext.h"
 #include "Runtime/Core/DX12Device.h"
 #include "Runtime/Core/BufferUtility.h"
+#include "Runtime/Core/DX12GraphicsContext.h"
 #include "Runtime/Engine/FrameContext.h"
 
 
@@ -351,6 +352,72 @@ namespace ElysiaRenderer
         }
     }
 
+    void BufferManager::UploadBufferData(DX12GraphicsContext* uploadContext,
+                                         std::vector<DX12BufferUpload*>& bufferUploads)
+    {
+        const auto numBufferUploads = static_cast<UINT>(bufferUploads.size());
+        size_t bufferUploadHeapOffset = 0;
+        UINT numBuffersProcessed = 0;
+
+        if (numBufferUploads <= 0)
+            return;
+
+        size_t totalSize = 0;
+        for (const auto& upload : bufferUploads)
+        {
+            totalSize += AlignU32(upload->bufferDataSize,
+                                  D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
+        }
+
+        D3D12_GPU_VIRTUAL_ADDRESS gpuAddress;
+        UINT8* cpuAddress;
+        if (m_pUploadBuffer->AllocateForFrame(m_pDevice->GetFrameID(),
+                                              totalSize,
+                                              gpuAddress,
+                                              cpuAddress))
+        {
+            for (numBuffersProcessed; numBuffersProcessed < numBufferUploads; numBuffersProcessed
+                 ++)
+            {
+                auto bufferUpload = bufferUploads[numBuffersProcessed];
+                if (bufferUploadHeapOffset + bufferUpload->bufferDataSize > totalSize)
+                {
+                    break;
+                }
+
+                // uploadContext->AddBarrier(*bufferUpload->buffer,
+                //                           D3D12_RESOURCE_STATE_COPY_DEST,
+                //                           false);
+                memcpy(cpuAddress + bufferUploadHeapOffset,
+                       bufferUpload->pBufferData.get(),
+                       bufferUpload->bufferDataSize);
+                D3D12_SUBRESOURCE_DATA subData =
+                {
+                    bufferUpload->pBufferData.get(),
+                    static_cast<UINT>(bufferUpload->bufferDataSize),
+                    static_cast<UINT>(bufferUpload->bufferDataSize)
+                };
+                // uploadContext->CopyBufferRegion(*bufferUpload->buffer, 0, m_pUploadBuffer->GetResource(), 
+                // 	gpuAddress - m_pUploadBuffer->GetResource()->GetGPUVirtualAddress(), bufferUpload->bufferDataSize);
+                UpdateSubresources(uploadContext->GetCommandList(),
+                                   bufferUpload->buffer->GetResource(),
+                                   m_pUploadBuffer->GetResource(),
+                                   gpuAddress - m_pUploadBuffer->GetResource()->
+                                                                 GetGPUVirtualAddress() +
+                                   bufferUploadHeapOffset,
+                                   0,
+                                   1,
+                                   &subData);
+                // uploadContext->AddBarrier(*bufferUpload->buffer,
+                //                           D3D12_RESOURCE_STATE_COMMON,
+                //                           false);
+                bufferUploadHeapOffset = AlignU32(
+                    bufferUploadHeapOffset + bufferUpload->bufferDataSize,
+                    D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
+            }
+            uploadContext->FlushBarrier();
+        }
+    }
     void BufferManager::UploadBufferData(DX12UploadContext* uploadContext,
                                          std::vector<DX12BufferUpload*>& bufferUploads,
                                          bool isErase)
@@ -549,7 +616,7 @@ namespace ElysiaRenderer
             .name = StringToWstring(model.name + " Vertex Buffer"),
             .stride = sizeof(ElysiaModel::MeshVertex),
             .size = model.vertices.size() * sizeof(ElysiaModel::MeshVertex),
-            .viewFlags = GPUResourceFlags::SRV,
+            .viewFlags = GPUResourceFlags::SRV | GPUResourceFlags::UAV,
             .accessFlags = BufferAccessFlags::GPUOnly,
             .isRawAccess = false
         };
@@ -573,7 +640,7 @@ namespace ElysiaRenderer
             .name = StringToWstring(model.name + " Index Buffer"),
             .stride = 0,
             .size = model.indices.size() * sizeof(UINT16),
-            .viewFlags = GPUResourceFlags::SRV,
+            .viewFlags = GPUResourceFlags::SRV | GPUResourceFlags::UAV,
             .accessFlags = BufferAccessFlags::GPUOnly,
             .isRawAccess = true
         };

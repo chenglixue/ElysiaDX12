@@ -1,7 +1,17 @@
 ﻿#pragma once
+#include "src/Programs/Log.h"
 
-struct GIDebugParameter
+namespace ElysiaRenderer
 {
-    bool enableLine;
-    float lineWidth;
-};
+    using namespace ElysiaHelper;
+
+    struct GIDebugParameter
+    {
+        bool enableLine;
+        float lineWidth;
+    };
+
+    void DebugDumpTLASInstances(
+        const std::vector<D3D12_RAYTRACING_INSTANCE_DESC>& instanceDescs,
+        const std::vector<std::string>& instanceNames);
+}

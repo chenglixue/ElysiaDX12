@@ -27,31 +27,6 @@ namespace ElysiaRenderer
         std::array<Vector2, 64> sobolSequence;
     };
 
-    struct CBVObjectParameter
-    {
-        Matrix worldMatrix = Matrix::Identity;
-
-        Vector3 baseColorTint = Vector3::One;
-        float opacity = 1.f;
-
-        float normalIntensity = 1.f;
-        float metallicIntensity = 1.f;
-        float roughnessIntensity = 1.f;
-        float ambientCubemapIntensity = 1.f;
-
-        Vector3 ambientCubemapTint = Vector3::One;
-        UINT baseColorTexIndex;
-
-        UINT normalTexIndex;
-        UINT metallicTexIndex;
-        UINT roughnessTexIndex;
-        UINT specularTexIndex;
-
-        float cutoff = 0.5;
-
-        bool hasNormalTex = false;
-    };
-
     struct CBVFrameVariable
     {
         Vector4 cameraPosWS = Vector4::Zero;
@@ -83,5 +58,7 @@ namespace ElysiaRenderer
         UINT OpaqueColorIndex = 0;
 
         UINT AOTexIndex = 0;
+        UINT g_EnableAO = true;
+        UINT g_EnableShadow = true;
     };
 } // namespace ElysiaRenderer

@@ -73,16 +73,8 @@ namespace ElysiaRenderer
     {
         CreateRTs();
 
-        m_shaderPasses =
-        {
-            ShaderPass
-            {
-                .Name = "GBuffer Pass",
-                .FilePath = L"Shaders\\public\\GBuffer.hlsl",
-            },
-        };
-        m_pMaterial = std::move(std::make_unique<Material>(m_pDevice, m_shaderPasses));
-        ShaderPassIDs::GBufferPassID = m_pMaterial->FindPassIndex("GBuffer Pass");
+        m_shaderPasses.assign(std::begin(m_PassData), std::end(m_PassData));
+        m_pMaterial = std::make_unique<Material>(m_pDevice, m_shaderPasses);
 
         UpdatePipeline();
     }
@@ -280,7 +272,7 @@ namespace ElysiaRenderer
     {
         if (!m_pMaterial)
             return;
-        UpdateGBufferPassVariant(ShaderPassIDs::GBufferPassID);
+        UpdateGBufferPassVariant(DRAW_GBUFFER_PASS);
 
     }
 
@@ -332,38 +324,16 @@ namespace ElysiaRenderer
 
     }
 
-    void GBufferPass::DrawMesh(ElysiaEngine::FrameContext& context, UINT passIndex)
-    {
-        auto& passData = m_pMaterial->GetPassData(passIndex);
-
-        m_pCommand->AddBarrier(*m_pIndirectDataBuffer, D3D12_RESOURCE_STATE_COMMON);
-        BufferManager::GetInstance().UploadBufferData(m_pDevice->GetUploadContext(),
-                                                      m_uploads,
-                                                      false);
-        m_pCommand->AddBarrier(*m_pIndirectDataBuffer, D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT);
-
-        m_pCommand->GetCommandList()->ExecuteIndirect(m_pCommandSignature,
-                                                      // 执行多少次命令
-                                                      context.renderList.size(),
-                                                      m_pIndirectDataBuffer->GetResource(),
-                                                      // 从 Buffer 的开头开始
-                                                      0,
-                                                      // 如果没有 CountBuffer，则固定执行指定的次数
-                                                      nullptr,
-                                                      0);
-
-    }
-
     void GBufferPass::DrawGBufferPass(ElysiaEngine::FrameContext& context)
     {
-        auto passID = ShaderPassIDs::GBufferPassID;
+        auto passID = DRAW_GBUFFER_PASS;
         auto& passData = m_pMaterial->GetPassData(passID);
         auto passName = passData.Name.c_str();
         PIXHelper pix(m_pCommand->GetCommandList(), passName);
 
         PipelineInfo pipelineStateData{};
-        pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(
-            ShaderPassIDs::GBufferPassID).pPipelineStateObject;
+        pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(passID).
+                                                               pPipelineStateObject;
         pipelineStateData.m_renderTargets = std::move(GetGBuffers());
         pipelineStateData.m_depthStencilTarget = m_pCameraDepthRT->GetTexture();
         m_pCommand->SetPipeline(pipelineStateData);
@@ -409,7 +379,7 @@ namespace ElysiaRenderer
 
         SetSpaceResource(passData, PER_PASS_SPACE);
         SetSpaceResource(passData, PER_FRAME_SPACE);
-        DrawMesh(context, ShaderPassIDs::GBufferPassID);
+        DrawMesh(context, passID);
 
         for (auto& RT : m_GBufferRTs)
         {
@@ -421,4 +391,43 @@ namespace ElysiaRenderer
 
         m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
     }
+
+    void GBufferPass::DrawMesh(ElysiaEngine::FrameContext& context, UINT passIndex)
+    {
+        auto& passData = m_pMaterial->GetPassData(passIndex);
+
+        CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+            m_pIndirectDataBuffer->GetResource(),
+            D3D12_RESOURCE_STATE_COMMON,
+            D3D12_RESOURCE_STATE_COPY_DEST
+            );
+        m_pCommand->GetCommandList()->ResourceBarrier(1, &barrier);
+
+        BufferManager::GetInstance().UploadBufferData(m_pCommand, m_uploads);
+
+        barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+            m_pIndirectDataBuffer->GetResource(),
+            D3D12_RESOURCE_STATE_COPY_DEST,
+            D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT
+            );
+        m_pCommand->GetCommandList()->ResourceBarrier(1, &barrier);
+
+        m_pCommand->GetCommandList()->ExecuteIndirect(m_pCommandSignature,
+                                                      // 执行多少次命令
+                                                      context.renderList.size(),
+                                                      m_pIndirectDataBuffer->GetResource(),
+                                                      // 从 Buffer 的开头开始
+                                                      0,
+                                                      // 如果没有 CountBuffer，则固定执行指定的次数
+                                                      nullptr,
+                                                      0);
+
+        barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+            m_pIndirectDataBuffer->GetResource(),
+            D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT,
+            D3D12_RESOURCE_STATE_COMMON
+            );
+        m_pCommand->GetCommandList()->ResourceBarrier(1, &barrier);
+    }
+
 }

@@ -228,6 +228,7 @@
 		<ClInclude Include="src\Programs\Helper.h"/>
 		<ClInclude Include="src\Programs\IManager.h"/>
 		<ClInclude Include="src\Programs\IUpdate.h"/>
+		<ClInclude Include="src\Programs\Log.h"/>
 		<ClInclude Include="src\Programs\Math.h"/>
 		<ClInclude Include="src\Programs\PIXHelper.h"/>
 		<ClInclude Include="src\Programs\RenderHelper.h"/>
@@ -438,6 +439,7 @@
 		<ClCompile Include="src\Editor\UserData.cpp"/>
 		<ClCompile Include="src\Programs\Containers.cpp"/>
 		<ClCompile Include="src\Programs\Helper.cpp"/>
+		<ClCompile Include="src\Programs\Log.cpp"/>
 		<ClCompile Include="src\Programs\PIXHelper.cpp"/>
 		<ClCompile Include="src\Programs\RenderHelper.cpp"/>
 		<ClCompile Include="src\Programs\SBTHelper.cpp"/>

@@ -79,6 +79,8 @@ cbuffer GlobalConstant : register(b0, perFrameSpace)
     UINT OpaqueColorIndex;
 
     UINT g_AOIndex;
+    bool g_EnableAO;
+    bool g_EnableShadow;
 };
 
 struct DX12Vertex

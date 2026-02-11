@@ -34,7 +34,6 @@ namespace ElysiaRenderer
             static inline size_t viewProjMatrix_I = PropertyToID(L"viewProjMatrix_I");
 
             static inline size_t g_AOIndex = PropertyToID(L"g_AOIndex");
-            static inline size_t g_EnableAO = PropertyToID(L"g_EnableAO");
         };
 
         DXGI_FORMAT m_cameraColorFormat = DXGI_FORMAT_UNKNOWN;

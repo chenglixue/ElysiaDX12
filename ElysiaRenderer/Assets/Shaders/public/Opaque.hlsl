@@ -23,8 +23,6 @@ cbuffer PassConstant : register(b0, perPassSpace)
     Matrix projMatrix_I;
     Matrix viewProjMatrix;
     Matrix viewProjMatrix_I;
-
-    bool g_EnableAO;
 }
 
 struct PSInput

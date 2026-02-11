@@ -84,9 +84,7 @@ namespace ElysiaRenderer
         m_pCommand->SetPipeline(pipelineStateData);
         SetSpaceResource(passData, PER_FRAME_SPACE);
         m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_renderSize));
-        m_pCommand->SetPrimitiveTopology(UserData::GetInstance().debugMode == DebugMode::AABB
-                                             ? D3D_PRIMITIVE_TOPOLOGY_LINELIST
-                                             : D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+        m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
         m_pMaterial->SetUInt(ShaderIDs::g_DebugMode,
                              static_cast<UINT>(UserData::GetInstance().debugMode));
@@ -251,7 +249,7 @@ namespace ElysiaRenderer
                                  GIPass::m_pRayDataBuffer->GetResourceHeapIndex());
             m_pMaterial->SetUInt(GIPass::ShaderIDs::g_ProbeOffsetsIndex,
                                  GIPass::m_pProbeOffsetBuffer->GetResourceHeapIndex());
-            m_pMaterial->SetBool(ShaderIDs::g_IsEnableGILine,
+            m_pMaterial->SetUInt(ShaderIDs::g_IsEnableGILine,
                                  false);
 
             m_pMaterial->SetFloat3(GIPass::ShaderIDs::g_GridDimensions,
@@ -324,7 +322,7 @@ namespace ElysiaRenderer
 
                 m_pMaterial->SetUInt(ShaderIDs::g_DebugMode,
                                      static_cast<UINT>(UserData::GetInstance().debugMode));
-                m_pMaterial->SetBool(ShaderIDs::g_IsEnableGILine, true);
+                m_pMaterial->SetUInt(ShaderIDs::g_IsEnableGILine, 1);
                 m_pMaterial->SetFloat(ShaderIDs::g_DebugLineScale,
                                       UserData::GetInstance().GIParameter.lineWidth);
 
@@ -367,9 +365,7 @@ namespace ElysiaRenderer
                 m_pMaterial.get(),
                 passID,
                 desc,
-                UserData::GetInstance().debugMode == DebugMode::AABB
-                    ? D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE
-                    : D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+                D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
         }
     }
 

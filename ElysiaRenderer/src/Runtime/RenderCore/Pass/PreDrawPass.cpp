@@ -17,11 +17,13 @@
 #include "Programs/RenderHelper.h"
 
 #include "GBufferPass.h"
+#include "Editor/UserData.h"
 #include "Runtime/RenderCore/TextureManager.h"
 
 namespace ElysiaRenderer
 {
-    PreDrawPass::PreDrawPass() : BasePass()
+    PreDrawPass::PreDrawPass()
+        : BasePass()
     {
     }
 
@@ -95,8 +97,11 @@ namespace ElysiaRenderer
                 dst->GBuffer5Index = RenderTargetManager::GetInstance()
                                      .GetRenderTexture(GBufferPass::RenderTextureIDs::GBuffer5ID)
                                      ->GetResourceHeapIndex();
-                dst->AOTexIndex = RenderTargetManager::GetInstance().GetRenderTexture(AOPass::RenderTextureIDs::AORTID)
+                dst->AOTexIndex = RenderTargetManager::GetInstance().GetRenderTexture(
+                                                                        AOPass::RenderTextureIDs::AORTID)
                                                                     ->GetResourceHeapIndex();
+                dst->g_EnableAO = UserData::GetInstance().aoParameter.IsEnableAO;
+                dst->g_EnableShadow = UserData::GetInstance().EnableShadow;
             });
 
         auto frameSpace = RenderResource::GetInstance().GetPerFrameBindResourceSpace(

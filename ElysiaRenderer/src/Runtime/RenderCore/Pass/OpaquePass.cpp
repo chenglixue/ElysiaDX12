@@ -86,7 +86,6 @@ namespace ElysiaRenderer
                                m_pCamera->GetViewMat() * m_pCamera->GetProjMat());
         m_pMaterial->SetMatrix(ShaderIDs::viewProjMatrix_I,
                                (m_pCamera->GetViewMat() * m_pCamera->GetProjMat()).Invert());
-        m_pMaterial->SetBool(ShaderIDs::g_EnableAO, UserData::GetInstance().aoParameter.IsEnableAO);
 
         SetSpaceResource(passData, PER_PASS_SPACE);
         SetSpaceResource(passData, PER_FRAME_SPACE);

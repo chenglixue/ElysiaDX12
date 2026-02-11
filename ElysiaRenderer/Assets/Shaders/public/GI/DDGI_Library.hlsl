@@ -1,5 +1,7 @@
 #include "private\ShadingCommon.hlsl"
 #include "private\DDGICommon.hlsli"
+#include <private\Light.hlsl>
+#include <private\LightCommon.hlsl>
 
 #define GROUP_SIZE 8
 #define IRRADIANCE_GROUP_SIZE 8
@@ -63,7 +65,7 @@ void GenerateRayMain()
     RayDesc rayDesc;
     rayDesc.Origin = rayOrigin;
     rayDesc.Direction = rayDir;
-    rayDesc.TMin = 1e-4;
+    rayDesc.TMin = 0.01f;
     rayDesc.TMax = DXR_Max;
 
     RayData rayData;
@@ -99,6 +101,7 @@ void RayClosestHit(inout RayData rayData,
 
     InstanceData instanceData = g_InstanceDataBuffer[instanceID];
 
+    bool isBackFace = (HitKind() == HIT_KIND_TRIANGLE_BACK_FACE);
     StructuredBuffer<Vertex> vertices = ResourceDescriptorHeap[instanceData.VertexBufferIndex];
     StructuredBuffer<uint> indices = ResourceDescriptorHeap[instanceData.IndexBufferIndex];
     UINT vertexOffset = instanceData.VertexOffset;
@@ -124,11 +127,27 @@ void RayClosestHit(inout RayData rayData,
                                                 finalUV,
                                                 g_WarpLinearSampler,
                                                 0);
+    float3 normalOS = v0.normalOS * w + v1.normalOS * bary.x + v2.normalOS * bary.y;
+    float3 N = normalize(mul((float3x3)ObjectToWorld3x4(), normalOS));
+    // float3 T = normalize(mul((float3x3)ObjectToWorld3x4(), tangentOS));
+    // float3 tangentWS = normalize(T - dot(N, T) * N);
+    // float3 bitTangentWS = (cross(tangentWS, N));
+    // float3 normalWS = N;
 
-    rayData.Radiance = baseColorAlpha.rgb;
+    if (isBackFace)
+    {
+        N = -N;
+    }
+
+    LightData mainLightData = GetMainLight(mainLight);
+    float3 toLight = mainLightData.toLight;
+    float NoL = max(0.f, dot(N, toLight));
+
+    float3 directRadiance = baseColorAlpha.rgb * mainLightData.color;
+
+    rayData.Radiance = directRadiance;
     rayData.Distance = RayTCurrent();
 
-    bool isBackFace = (HitKind() == HIT_KIND_TRIANGLE_BACK_FACE);
     if (isBackFace)
     {
         rayData.Distance *= -1.0f; // 用负数标记背面撞击

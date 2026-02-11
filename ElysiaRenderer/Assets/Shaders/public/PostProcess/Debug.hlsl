@@ -67,8 +67,9 @@ struct PSInput
     float3 positionWS : WORLD_POSITION;
     float3 probeCenterWS : TEXCOORD0;
     float2 uv : TEXCOORD1;
-    uint instanceID : SV_InstanceID;
     float4 color : COLOR;
+    float3 normalWS : TEXCOORD2;
+    uint instanceID : SV_InstanceID;
 };
 
 struct PSOutput
@@ -126,7 +127,7 @@ PSInput VS(VSInput i, UINT vertexID : SV_VertexID, uint instanceID : SV_Instance
                 finalColor *= 0.2f;
             }
             o.positionCS = mul(float4(finalPos, 1.0f), viewProjMatrix);
-            o.color.rgb = finalColor * 2;
+            o.color.rgb = finalColor * 5;
             return o;
         }
         else
@@ -143,6 +144,9 @@ PSInput VS(VSInput i, UINT vertexID : SV_VertexID, uint instanceID : SV_Instance
             o.positionWS = i.positionOS * g_ProbeRadius + o.probeCenterWS;
 
             o.positionCS = mul(float4(o.positionWS, 1.f), viewProjMatrix);
+
+            float3 normalOS = i.positionOS;
+            o.normalWS = normalize(normalOS);
         }
 
         break;
@@ -202,19 +206,42 @@ PSOutput PS(PSInput i)
         }
         else
         {
-            [unroll]
-            for (int rayIndex = 0; rayIndex < Rays_Per_Probe; rayIndex ++)
+            float3 N = normalize(i.normalWS); // 这里的 N 决定了当前像素“看向”哪个方向
+            float3 finalRadiance = 0.0f;
+            float totalWeight = 0.0f;
+
+            for (uint r = 0; r < 32; r ++)
             {
-                uint rayDataIndex = i.instanceID * Rays_Per_Probe + rayIndex;
-                RayData rayData = Elysia_DDGI_LoadRayData(rayDataIndex);
-                result += float4(rayData.Radiance, rayData.Distance);
+                // 1. 恢复该射线的发射方向
+                float3 rayDir = SphericalFibonacci(r, 32, g_RandomRotation);
+
+                // 2. 计算权重：使用高次幂（如 16 或 32）来获取清晰的细节
+                float weight = max(0.0f, dot(N, rayDir));
+                weight = pow(weight, 16.0f);
+
+                // 3. 加权累加辐射度
+                RayData rayData = Elysia_DDGI_LoadRayData(i.instanceID * 32 + r);
+
+                // 排除 Miss 的射线（Distance=10000），防止球体变黑
+                if (rayData.Distance < 10000.0f)
+                {
+                    finalRadiance += rayData.Radiance * weight;
+                    totalWeight += weight;
+                }
             }
-            result /= Rays_Per_Probe;
+
+            // 4. 归一化并输出颜色
+            float3 color = (totalWeight > 0.0f)
+                               ? (finalRadiance / totalWeight)
+                               : float3(0.1f, 0.1f, 0.1f);
+            result.rgb = color;
         }
 
         o.target0 = result;
         break;
     }
     }
+
+    o.target0.a = 1;
     return o;
 }

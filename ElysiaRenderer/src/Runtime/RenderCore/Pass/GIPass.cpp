@@ -292,20 +292,27 @@ namespace ElysiaRenderer
                                                                2.0f * 3.14159265f),
             };
 
+            UINT rootParameterIndex = 0;
             m_pCommand->GetCommandList()->SetComputeRoot32BitConstants(
-                0,
+                rootParameterIndex ++,
                 constantSize,
                 &constantData,
                 0);
+            m_pCommand->GetCommandList()->
+                        SetComputeRootConstantBufferView(rootParameterIndex ++,
+                                                         RenderResource::GetInstance().
+                                                         GetPerFrameBindResourceSpace(
+                                                             m_pDevice->GetFrameID())->
+                                                         GetDynamicCBV());
 
             m_pCommand->GetCommandList()->SetComputeRootShaderResourceView(
-                1,
+                rootParameterIndex ++,
                 m_pTLASBuffer->GetGPUAddress());
             m_pCommand->GetCommandList()->SetComputeRootShaderResourceView(
-                2,
+                rootParameterIndex ++,
                 m_pInstanceDataBuffer->GetGPUAddress());
             m_pCommand->GetCommandList()->SetComputeRootShaderResourceView(
-                3,
+                rootParameterIndex ++,
                 m_pProbeOffsetBuffer->GetGPUAddress());
 
             D3D12_DISPATCH_RAYS_DESC dispatchDesc = {};
@@ -399,19 +406,19 @@ namespace ElysiaRenderer
             return;
 
         // 定义实例描述符 (Instance Desc)
+        std::vector<std::string> instanceNames(entityCount);
         std::vector<D3D12_RAYTRACING_INSTANCE_DESC> instanceDescs(entityCount);
         for (UINT64 i = 0; i < entityCount; ++i)
         {
             const auto& entity = entityies[i];
+            instanceNames[i] = std::string(entity->name.c_str());
             instanceDescs[i].InstanceMask = 0xFF;                     // 与 TraceRay 的 mask 匹配
             instanceDescs[i].InstanceID = UINT(i);                    // 对应 HLSL 中的 InstanceID()
             instanceDescs[i].InstanceContributionToHitGroupIndex = 0; // 对应 HitGroup 偏移
             instanceDescs[i].Flags = D3D12_RAYTRACING_INSTANCE_FLAG_NONE;
             auto entityWorld_M = entity->transform.GetWorldMatrix();
-            memcpy(instanceDescs[i].Transform,
-                   &entityWorld_M,
-                   sizeof(instanceDescs[i].Transform));
-
+            auto transporse_M = entityWorld_M.Transpose();
+            memcpy(instanceDescs[i].Transform, &transporse_M, sizeof(instanceDescs[i].Transform));
             // 关联BLAS
             instanceDescs[i].AccelerationStructure = entity->GetBLASBuffer()->GetGPUAddress();
         }
@@ -492,6 +499,8 @@ namespace ElysiaRenderer
         };
         m_pCommand->GetCommandList()->BuildRaytracingAccelerationStructure(&buildDesc, 0, nullptr);
         m_pCommand->AddUAVBarrier(m_pTLASBuffer);
+
+        //DebugDumpTLASInstances(instanceDescs, instanceNames);
     }
 
     CComPtr<IDxcBlob> GIPass::CompileRaytracingLibrary(const std::wstring& fileName)
@@ -726,11 +735,12 @@ namespace ElysiaRenderer
     {
         // 1. 定义根参数：对于 Bindless 方案，我们通常只需要“根常量 (Root Constants)”
         // 用来传递诸如 g_RayDataUAVIndex 或 DDGI 配置结构体的索引
-        CD3DX12_ROOT_PARAMETER1 rootParameters[4];
+        CD3DX12_ROOT_PARAMETER1 rootParameters[5];
 
         // 假设我们需要 16 个 32位常量 (比如一个 ViewProj 矩阵或一组索引)
         UINT rootParameterIndex = 0;
         rootParameters[rootParameterIndex ++].InitAsConstants(16, 0, 2);
+        rootParameters[rootParameterIndex ++].InitAsConstantBufferView(0, PER_FRAME_SPACE);
 
         UINT SRVIndex = 0;
         rootParameters[rootParameterIndex ++].InitAsShaderResourceView(SRVIndex ++, 0);

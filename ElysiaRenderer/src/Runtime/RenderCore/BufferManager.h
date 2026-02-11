@@ -13,6 +13,7 @@ namespace ElysiaModel
 
 namespace ElysiaCore
 {
+    class DX12GraphicsContext;
     struct DX12TextureUpload;
     class UploadRingBuffer;
     class DX12UploadContext;
@@ -93,13 +94,18 @@ namespace ElysiaRenderer
         void ProcessGarbage(uint64_t currentFrameIndex);
 
         void UploadBufferData(DX12UploadContext* uploadContext,
-                              std::vector<DX12BufferUpload*>& bufferUploads, bool isErase = true);
+                              std::vector<DX12BufferUpload*>& bufferUploads,
+                              bool isErase = true);
         void UploadTextureData(DX12UploadContext* uploadContext,
                                std::vector<DX12TextureUpload*>& textureUploads);
         void UploadBufferData(DX12UploadContext* uploadContext,
                               DX12BufferUpload* bufferUpload);
+        void UploadBufferData(DX12GraphicsContext* uploadContext,
+                              std::vector<DX12BufferUpload*>& bufferUploads);
 
-        BufferHandle CreateVertexBuffer(const ElysiaModel::LoadedModel& model);
+        BufferHandle CreateVertexBuffer(
+            const ElysiaModel::LoadedModel& model
+            );
         BufferHandle CreateIndexBuffer(const ElysiaModel::LoadedModel& model);
         BufferHandle CreateVertexBuffer(const BufferCreationDesc& desc);
         BufferHandle CreateIndexBuffer(const BufferCreationDesc& desc);

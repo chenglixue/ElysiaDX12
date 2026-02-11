@@ -9,6 +9,9 @@ namespace ElysiaCore
 
 namespace ElysiaRenderer
 {
+#define GBUFFER_PASS_LIST \
+PASS(DRAW_GBUFFER_PASS,         "public\\GBuffer.hlsl", false, PS)
+
     class GBufferPass : public BasePass
     {
     public:
@@ -31,12 +34,29 @@ namespace ElysiaRenderer
         virtual void Dispose() override;
 
     private:
+#pragma region Pass
+        enum PassID
+        {
+#define PASS(id, file, isCS, entry) id,
+            GBUFFER_PASS_LIST
+#undef PASS
+            GBUFFER_PASS_COUNT
+        };
+        static inline const ShaderPass m_PassData[] =
+        {
+#define PASS(id, file, isCS, entry) \
+{ \
+.Name = #id, \
+.FilePath = L"Shaders\\" L##file, \
+.IsComputeShader = isCS, \
+.ComputeEntryPoint = L#entry \
+},
+            GBUFFER_PASS_LIST
+#undef PASS
+        };
+#pragma endregion
         static constexpr auto Max_RenderItem_Count = 1024;
 
-        struct ShaderPassIDs
-        {
-            static inline int GBufferPassID = -1;
-        };
         struct ShaderIDs
         {
             static inline size_t screenSize = PropertyToID(L"screenSize");
