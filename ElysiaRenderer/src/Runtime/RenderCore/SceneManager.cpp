@@ -149,7 +149,7 @@ namespace ElysiaRenderer
             std::cout << "INTERSECTS" << std::endl;
             break;
         }
-        if (cameraFrustum.Contains(pEntity->GetWorldAABB()) != DISJOINT)
+        // if (cameraFrustum.Contains(pEntity->GetWorldAABB()) != DISJOINT)
         {
             if (pEntity->pMeshRenderer != nullptr)
             {

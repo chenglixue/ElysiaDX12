@@ -82,6 +82,8 @@ namespace ElysiaRenderer
         int mipmapLevel = 0;
         int instanceID = 0;
 
+        bool EnableShadow = true;
+
     private:
         static std::unique_ptr<UserData> m_instance;
         static std::once_flag m_initInstanceFlag;

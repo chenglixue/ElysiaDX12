@@ -1,5 +1,6 @@
 #pragma once
 #include "BasePass.h"
+#include "Runtime/RenderCore/RenderResource.h"
 
 namespace ElysiaRenderer
 {
@@ -20,19 +21,20 @@ namespace ElysiaRenderer
     private:
         struct ShaderPassIDs
         {
-            static int OpaqueLightPassID;
+            static inline int OpaqueLightPassID = -1;
         };
         struct ShaderIDs
         {
-            static size_t g_AOIndex;
+            static inline size_t screenSize = PropertyToID(L"screenSize");
+            static inline size_t viewMatrix = PropertyToID(L"viewMatrix");
+            static inline size_t viewMatrix_I = PropertyToID(L"viewMatrix_I");
+            static inline size_t projMatrix = PropertyToID(L"projMatrix");
+            static inline size_t projMatrix_I = PropertyToID(L"projMatrix_I");
+            static inline size_t viewProjMatrix = PropertyToID(L"viewProjMatrix");
+            static inline size_t viewProjMatrix_I = PropertyToID(L"viewProjMatrix_I");
 
-            static size_t screenSize;
-            static size_t viewMatrix;
-            static size_t viewMatrix_I;
-            static size_t projMatrix;
-            static size_t projMatrix_I;
-            static size_t viewProjMatrix;
-            static size_t viewProjMatrix_I;
+            static inline size_t g_AOIndex = PropertyToID(L"g_AOIndex");
+            static inline size_t g_EnableAO = PropertyToID(L"g_EnableAO");
         };
 
         DXGI_FORMAT m_cameraColorFormat = DXGI_FORMAT_UNKNOWN;

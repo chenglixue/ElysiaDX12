@@ -107,22 +107,24 @@ namespace ElysiaRenderer
                        GPUResourceFlags::UAV);
 
         D3D12_RESOURCE_FLAGS resFlags = D3D12_RESOURCE_FLAG_NONE;
-        if (hasUAV || bufferCreationDesc.isIndirectBuffer)
+        if (!isHostVisible)
         {
-            resFlags |= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
+            if (hasUAV || bufferCreationDesc.isIndirectBuffer)
+            {
+                resFlags |= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
+            }
         }
         D3D12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(alignSize, resFlags);
 
         D3D12_RESOURCE_STATES resourceState = isHostVisible
                                                   ? D3D12_RESOURCE_STATE_GENERIC_READ
                                                   : D3D12_RESOURCE_STATE_COPY_DEST;
-        if (bufferCreationDesc.isAccelerationStructure)
+        if (!isHostVisible)
         {
-            resourceState = D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE;
-        }
-        else if (bufferCreationDesc.isIndirectBuffer)
-        {
-            resourceState = D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT;
+            if (bufferCreationDesc.isAccelerationStructure)
+                resourceState = D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE;
+            else if (bufferCreationDesc.isIndirectBuffer)
+                resourceState = D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT;
         }
         D3D12MA::ALLOCATION_DESC allocationDesc{};
         allocationDesc.HeapType = isHostVisible ? D3D12_HEAP_TYPE_UPLOAD : D3D12_HEAP_TYPE_DEFAULT;
@@ -215,7 +217,9 @@ namespace ElysiaRenderer
                                                            pNewBuffer->GetResourceHeapIndex());
         }
 
-        if (hasUAV || (bufferCreationDesc.isIndirectBuffer && bufferCreationDesc.isRawAccess))
+        if (!isHostVisible && (hasUAV || (
+                                   bufferCreationDesc.isIndirectBuffer && bufferCreationDesc.
+                                   isRawAccess)))
         {
             D3D12_UNORDERED_ACCESS_VIEW_DESC UAVDesc{};
 

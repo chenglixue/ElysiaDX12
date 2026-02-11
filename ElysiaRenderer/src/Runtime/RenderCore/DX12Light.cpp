@@ -103,7 +103,6 @@ namespace ElysiaRenderer
         default:
         {
             resolution = 1024;
-            ThrowRuntimeError("inivalid shadow quality");
             break;
         }
         }

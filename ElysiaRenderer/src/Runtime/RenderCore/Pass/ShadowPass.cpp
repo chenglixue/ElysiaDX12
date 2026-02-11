@@ -27,25 +27,23 @@
 
 namespace ElysiaRenderer
 {
-    int ShadowPass::ShaderPassIDs::ShadowCastPassID = -1;
-
-    size_t ShadowPass::RenderTextureIDs::ShadowRTID = PropertyToID(L"Shadow RT");
-
-    size_t ShadowPass::ShaderIDs::shadowNearZ = PropertyToID(L"shadowNearZ");
-    size_t ShadowPass::ShaderIDs::shadowFarZ = PropertyToID(L"shadowFarZ");
-    size_t ShadowPass::ShaderIDs::shadowDepthBias = PropertyToID(L"shadowDepthBias");
-    size_t ShadowPass::ShaderIDs::shadowSlopeDepthBias = PropertyToID(L"shadowSlopeDepthBias");
-    size_t ShadowPass::ShaderIDs::shadowMaxSlopeDepthBias =
-        PropertyToID(L"shadowMaxSlopeDepthBias");
-    size_t ShadowPass::ShaderIDs::g_sobolSequence = PropertyToID(L"g_sobolSequence");
-    size_t ShadowPass::ShaderIDs::worldMatrix = PropertyToID(L"worldMatrix");
-    size_t ShadowPass::ShaderIDs::baseColorTexIndex = PropertyToID(L"baseColorTexIndex");
-    size_t ShadowPass::ShaderIDs::opacity = PropertyToID(L"opacity");
-    size_t ShadowPass::ShaderIDs::cutoff = PropertyToID(L"cutoff");
-
     ShadowPass::ShadowPass()
         : BasePass()
     {
+        m_meshDatas.reserve(Max_RenderItem_Count);
+        m_indirectCommands.reserve(Max_RenderItem_Count);
+        m_pIndirectDataBuffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc
+        {
+            .name = L"Shadow Indirect Buffer",
+            .stride = sizeof(IndirectCommand),
+            .size = sizeof(IndirectCommand) * Max_RenderItem_Count,
+            .viewFlags = GPUResourceFlags::SRV,
+            .accessFlags = BufferAccessFlags::HostWritable,
+            .isRawAccess = true,
+            .InitData = nullptr,
+            .isAccelerationStructure = false,
+            .isIndirectBuffer = true
+        });
     }
     ShadowPass::~ShadowPass()
     {
@@ -79,6 +77,14 @@ namespace ElysiaRenderer
         m_pCamera = context.pCamera;
         m_pGPUTimer = context.pGPUTimer;
 
+        if (!UserData::GetInstance().EnableShadow)
+            return;
+
+        if (context.renderList.empty())
+            return;
+        UploadMeshData(context.renderList);
+        if (!m_pMeshDataBuffer)
+            return;
         DrawShadowPass(context);
     }
 
@@ -144,46 +150,68 @@ namespace ElysiaRenderer
             m_pMaterial.get(),
             passIndex,
             RTDesc);
+
+        if (!m_pCommandSignature)
+        {
+            // 对应 IndirectCommand::pushConstants
+            D3D12_INDIRECT_ARGUMENT_DESC args[2] = {};
+            args[0].Type = D3D12_INDIRECT_ARGUMENT_TYPE_CONSTANT;
+            args[0].Constant.RootParameterIndex = PER_MATERIAL_SPACE - 1;
+            args[0].Constant.DestOffsetIn32BitValues = 0;
+            args[0].Constant.Num32BitValuesToSet = 2; // 两个 UINT
+
+            // 对应 IndirectCommand::drawArguments
+            args[1].Type = D3D12_INDIRECT_ARGUMENT_TYPE_DRAW_INDEXED;
+
+            D3D12_COMMAND_SIGNATURE_DESC desc = {};
+            desc.ByteStride = sizeof(IndirectCommand);
+            desc.NumArgumentDescs = 2;
+            desc.pArgumentDescs = args;
+
+            m_pDevice->GetDevice()->CreateCommandSignature(&desc,
+                                                           passData.pRootSignature->GetSignature(),
+                                                           IID_PPV_ARGS(&m_pCommandSignature));
+        }
     }
 
     void ShadowPass::DrawMesh(ElysiaEngine::FrameContext& context, PassData& passData)
     {
-        struct alignas(16)
+        m_indirectCommands.clear();
+        UINT renderItemIndex = 0;
+        UINT meshDataBufferIndex = m_pMeshDataBuffer->GetResourceHeapIndex();
+        for (auto& renderItem : context.renderList)
         {
-            UINT baseColorTexIndex;
-            float opacity;
-            float cutoff;
-        } constantData;
-        constexpr UINT constantSize = sizeof(constantData) / 4;
-
-        m_pMaterial->SetFloat(ShaderIDs::shadowNearZ,
-                              LightManager::GetInstance().GetMainShadow()->GetNearZ());
-        m_pMaterial->SetFloat(ShaderIDs::shadowFarZ,
-                              LightManager::GetInstance().GetMainShadow()->GetFarZ());
-        m_pMaterial->SetFloat(ShaderIDs::shadowDepthBias,
-                              UserData::GetInstance().shadowDepthBias / 100);
-        m_pMaterial->SetFloat(ShaderIDs::shadowSlopeDepthBias,
-                              UserData::GetInstance().shadowSlopeDepthBias / 100);
-        m_pMaterial->SetFloat(ShaderIDs::shadowMaxSlopeDepthBias,
-                              UserData::GetInstance().shadowMaxSlopeDepthBias / 100);
-        m_pMaterial->SetVector2Array(ShaderIDs::g_sobolSequence, m_sobolSqeuences);
-
-        for (const auto& renderItem : context.renderList)
-        {
-            auto materialData = renderItem.loadedMaterial;
-
-            m_pMaterial->SetMatrix(ShaderIDs::worldMatrix, renderItem.worldMatrix);
-            constantData =
+            IndirectCommand indirectCommand{};
+            indirectCommand.pushConstants =
             {
-                renderItem.textureIndices.Albedo,
-                materialData.opacity,
-                0.5f,
+                .meshDataBufferIndex = meshDataBufferIndex,
+                .meshDataIndex = renderItemIndex
             };
-            m_pCommand->SetPushConstants(PER_MATERIAL_SPACE, &constantData, constantSize);
-
-            SetSpaceResource(passData, PER_OBJECT_SPACE);
-            m_pCommand->Draw(renderItem.indexCount, renderItem.baseVertex, renderItem.startIndex);
+            indirectCommand.drawArguments = D3D12_DRAW_INDEXED_ARGUMENTS
+            {
+                .IndexCountPerInstance = renderItem.indexCount,
+                .InstanceCount = 1,
+                .StartIndexLocation = renderItem.startIndex,
+                .BaseVertexLocation = int(renderItem.baseVertex),
+                .StartInstanceLocation = 0,
+            };
+            m_indirectCommands.emplace_back(indirectCommand);
+            renderItemIndex ++;
         }
+        memcpy(m_pIndirectDataBuffer->GetMappedBuffer(),
+               m_indirectCommands.data(),
+               sizeof(IndirectCommand) * Max_RenderItem_Count);
+
+        m_pCommand->GetCommandList()->ExecuteIndirect(m_pCommandSignature,
+                                                      // 执行多少次命令
+                                                      renderItemIndex,
+                                                      m_pIndirectDataBuffer->GetResource(),
+                                                      // 从 Buffer 的开头开始
+                                                      0,
+                                                      // 如果没有 CountBuffer，则固定执行指定的次数
+                                                      nullptr,
+                                                      0);
+
     }
     void ShadowPass::DrawShadowPass(ElysiaEngine::FrameContext& context)
     {
@@ -199,7 +227,6 @@ namespace ElysiaRenderer
         pipelineStateData.m_renderTargets = {};
         pipelineStateData.m_depthStencilTarget = pShadowRT->GetTexture();
         m_pCommand->SetPipeline(pipelineStateData);
-        SetSpaceResource(passData, PER_PASS_SPACE);
         SetSpaceResource(passData, PER_FRAME_SPACE);
 
         m_pCommand->AddBarrier(pShadowRT, D3D12_RESOURCE_STATE_DEPTH_WRITE);
@@ -219,10 +246,68 @@ namespace ElysiaRenderer
                                         BufferManager::GetInstance().GetGlobalVertexBufferView());
         }
 
+        m_pMaterial->SetFloat(ShaderIDs::shadowNearZ,
+                              LightManager::GetInstance().GetMainShadow()->GetNearZ());
+        m_pMaterial->SetFloat(ShaderIDs::shadowFarZ,
+                              LightManager::GetInstance().GetMainShadow()->GetFarZ());
+        m_pMaterial->SetFloat(ShaderIDs::shadowDepthBias,
+                              UserData::GetInstance().shadowDepthBias / 100);
+        m_pMaterial->SetFloat(ShaderIDs::shadowSlopeDepthBias,
+                              UserData::GetInstance().shadowSlopeDepthBias / 100);
+        m_pMaterial->SetFloat(ShaderIDs::shadowMaxSlopeDepthBias,
+                              UserData::GetInstance().shadowMaxSlopeDepthBias / 100);
+        m_pMaterial->SetVector2Array(ShaderIDs::g_sobolSequence, m_sobolSqeuences);
+        SetSpaceResource(passData, PER_PASS_SPACE);
+
         DrawMesh(context, passData);
 
         m_pCommand->AddBarrier(pShadowRT, D3D12_RESOURCE_STATE_DEPTH_READ);
 
         m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
+    }
+
+    void ShadowPass::UploadMeshData(const std::vector<RenderItem>& renderItems)
+    {
+        const auto renderItemCount = renderItems.size();
+        UINT bufferSize = Max_RenderItem_Count * sizeof(MeshData);
+
+        m_meshDatas.clear();
+
+        for (UINT64 i = 0; i < renderItemCount; i ++)
+        {
+            const auto& materialData = renderItems[i].loadedMaterial;
+            const auto& textureIndices = renderItems[i].textureIndices;
+            auto meshData = MeshData
+            {
+                .world_M = renderItems[i].worldMatrix,
+
+                .opacity = materialData.opacity,
+                .cutoff = 0.5,
+                .baseColorTexIndex = textureIndices.Albedo,
+                .vertexOffset = renderItems[i].baseVertex,
+
+                .indexOffset = renderItems[i].startIndex,
+                .pad = UINT3(0, 0, 0)
+            };
+            m_meshDatas.emplace_back(meshData);
+        }
+
+        if (!m_pMeshDataBuffer)
+        {
+            m_pMeshDataBuffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc
+            {
+                .name = L"Shadow Mesh Data Buffer",
+                .stride = sizeof(MeshData),
+                .size = bufferSize,
+                .viewFlags = GPUResourceFlags::SRV,
+                .accessFlags = BufferAccessFlags::HostWritable,
+                .isRawAccess = false,
+                .InitData = m_meshDatas.data()
+            });
+        }
+        else
+        {
+            memcpy(m_pMeshDataBuffer->GetMappedBuffer(), m_meshDatas.data(), bufferSize);
+        }
     }
 }

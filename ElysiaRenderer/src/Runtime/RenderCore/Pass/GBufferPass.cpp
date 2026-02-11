@@ -26,47 +26,16 @@ namespace ElysiaRenderer
 {
     using namespace ElysiaModel;
 
-    int GBufferPass::ShaderPassIDs::GBufferPassID = -1;
-
-    size_t GBufferPass::RenderTextureIDs::GBuffer0ID = PropertyToID(L"GBuffer_0");
-    size_t GBufferPass::RenderTextureIDs::GBuffer1ID = PropertyToID(L"GBuffer_1");
-    size_t GBufferPass::RenderTextureIDs::GBuffer2ID = PropertyToID(L"GBuffer_2");
-    size_t GBufferPass::RenderTextureIDs::GBuffer3ID = PropertyToID(L"GBuffer_3");
-    size_t GBufferPass::RenderTextureIDs::GBuffer4ID = PropertyToID(L"GBuffer_4");
-    size_t GBufferPass::RenderTextureIDs::GBuffer5ID = PropertyToID(L"GBuffer_5");
-
-    size_t GBufferPass::ShaderIDs::screenSize = PropertyToID(L"screenSize");
-    size_t GBufferPass::ShaderIDs::viewMatrix = PropertyToID(L"viewMatrix");
-    size_t GBufferPass::ShaderIDs::viewMatrix_I = PropertyToID(L"viewMatrix_I");
-    size_t GBufferPass::ShaderIDs::projMatrix = PropertyToID(L"projMatrix");
-    size_t GBufferPass::ShaderIDs::projMatrix_I = PropertyToID(L"projMatrix_I");
-    size_t GBufferPass::ShaderIDs::viewProjMatrix = PropertyToID(L"viewProjMatrix");
-    size_t GBufferPass::ShaderIDs::viewProjMatrix_I = PropertyToID(L"viewProjMatrix_I");
-    size_t GBufferPass::ShaderIDs::worldMatrix = PropertyToID(L"worldMatrix");
-    size_t GBufferPass::ShaderIDs::opacity = PropertyToID(L"opacity");
-    size_t GBufferPass::ShaderIDs::cutoff = PropertyToID(L"cutoff");
-    size_t GBufferPass::ShaderIDs::baseColorTexIndex = PropertyToID(L"baseColorTexIndex");
-    size_t GBufferPass::ShaderIDs::normalTexIndex = PropertyToID(L"normalTexIndex");
-    size_t GBufferPass::ShaderIDs::metallicTexIndex = PropertyToID(L"metallicTexIndex");
-    size_t GBufferPass::ShaderIDs::roughnessTexIndex = PropertyToID(L"roughnessTexIndex");
-    size_t GBufferPass::ShaderIDs::specularTexIndex = PropertyToID(L"specularTexIndex");
-    size_t GBufferPass::ShaderIDs::baseColorTint = PropertyToID(L"baseColorTint");
-    size_t GBufferPass::ShaderIDs::ambientCubemapTint = PropertyToID(L"ambientCubemapTint");
-    size_t GBufferPass::ShaderIDs::normalIntensity = PropertyToID(L"normalIntensity");
-    size_t GBufferPass::ShaderIDs::metallicIntensity = PropertyToID(L"metallicIntensity");
-    size_t GBufferPass::ShaderIDs::roughnessIntensity = PropertyToID(L"roughnessIntensity");
-    size_t GBufferPass::ShaderIDs::ambientCubemapIntensity = PropertyToID(
-        L"ambientCubemapIntensity");
-
     GBufferPass::GBufferPass()
         : BasePass()
     {
+        m_indirectCommands.reserve(Max_RenderItem_Count);
         m_pIndirectDataBuffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc
         {
             .name = L"GBuffer Indirect Buffer",
             .stride = sizeof(IndirectCommand),
             .size = sizeof(IndirectCommand) * Max_RenderItem_Count,
-            .viewFlags = GPUResourceFlags::SRV | GPUResourceFlags::UAV,
+            .viewFlags = GPUResourceFlags::SRV,
             .accessFlags = BufferAccessFlags::HostWritable,
             .isRawAccess = true,
             .InitData = nullptr,
@@ -162,7 +131,7 @@ namespace ElysiaRenderer
         {
             m_pMeshDataBuffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc
             {
-                .name = L"Mesh Data Buffer",
+                .name = L"GBuffer Mesh Data Buffer",
                 .stride = sizeof(MeshData),
                 .size = bufferSize,
                 .viewFlags = GPUResourceFlags::SRV,
@@ -296,24 +265,29 @@ namespace ElysiaRenderer
             passIndex,
             RTDesc);
 
-        // 对应 IndirectCommand::pushConstants
-        D3D12_INDIRECT_ARGUMENT_DESC args[2] = {};
-        args[0].Type = D3D12_INDIRECT_ARGUMENT_TYPE_CONSTANT;
-        args[0].Constant.RootParameterIndex = 1; // 对应 PER_MATERIAL_SPACE 的槽位
-        args[0].Constant.DestOffsetIn32BitValues = 0;
-        args[0].Constant.Num32BitValuesToSet = 2; // 两个 UINT
+        if (!m_pCommandSignature)
+        {
+            // 对应 IndirectCommand::pushConstants
+            D3D12_INDIRECT_ARGUMENT_DESC args[2] = {};
+            args[0].Type = D3D12_INDIRECT_ARGUMENT_TYPE_CONSTANT;
+            args[0].Constant.RootParameterIndex = PER_MATERIAL_SPACE - 1;
+            // 对应 PER_MATERIAL_SPACE 的槽位
+            args[0].Constant.DestOffsetIn32BitValues = 0;
+            args[0].Constant.Num32BitValuesToSet = 2; // 两个 UINT
 
-        // 对应 IndirectCommand::drawArguments
-        args[1].Type = D3D12_INDIRECT_ARGUMENT_TYPE_DRAW_INDEXED;
+            // 对应 IndirectCommand::drawArguments
+            args[1].Type = D3D12_INDIRECT_ARGUMENT_TYPE_DRAW_INDEXED;
 
-        D3D12_COMMAND_SIGNATURE_DESC desc = {};
-        desc.ByteStride = sizeof(IndirectCommand);
-        desc.NumArgumentDescs = 2;
-        desc.pArgumentDescs = args;
+            D3D12_COMMAND_SIGNATURE_DESC desc = {};
+            desc.ByteStride = sizeof(IndirectCommand);
+            desc.NumArgumentDescs = 2;
+            desc.pArgumentDescs = args;
 
-        m_pDevice->GetDevice()->CreateCommandSignature(&desc,
-                                                       passData.pRootSignature->GetSignature(),
-                                                       IID_PPV_ARGS(&m_pCommandSignature));
+            m_pDevice->GetDevice()->CreateCommandSignature(&desc,
+                                                           passData.pRootSignature->GetSignature(),
+                                                           IID_PPV_ARGS(&m_pCommandSignature));
+        }
+
     }
 
     void GBufferPass::DrawMesh(ElysiaEngine::FrameContext& context, UINT passIndex)
@@ -321,15 +295,18 @@ namespace ElysiaRenderer
         auto& passData = m_pMaterial->GetPassData(passIndex);
 
         m_pCommand->AddBarrier(*m_pIndirectDataBuffer, D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT);
+        m_indirectCommands.clear();
         UINT renderItemIndex = 0;
+        UINT meshDataBufferIndex = m_pMeshDataBuffer->GetResourceHeapIndex();
         for (auto& renderItem : context.renderList)
         {
-            m_indirectCommands[renderItemIndex].pushConstants =
+            IndirectCommand indirectCommand{};
+            indirectCommand.pushConstants =
             {
-                .meshDataBufferIndex = m_pMeshDataBuffer->GetResourceHeapIndex(),
+                .meshDataBufferIndex = meshDataBufferIndex,
                 .meshDataIndex = renderItemIndex
             };
-            m_indirectCommands[renderItemIndex].drawArguments = D3D12_DRAW_INDEXED_ARGUMENTS
+            indirectCommand.drawArguments = D3D12_DRAW_INDEXED_ARGUMENTS
             {
                 .IndexCountPerInstance = renderItem.indexCount,
                 .InstanceCount = 1,
@@ -337,6 +314,7 @@ namespace ElysiaRenderer
                 .BaseVertexLocation = int(renderItem.baseVertex),
                 .StartInstanceLocation = 0,
             };
+            m_indirectCommands.emplace_back(indirectCommand);
             renderItemIndex ++;
         }
         memcpy(m_pIndirectDataBuffer->GetMappedBuffer(),

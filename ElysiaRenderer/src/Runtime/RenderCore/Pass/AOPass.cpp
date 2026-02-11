@@ -133,6 +133,8 @@ namespace ElysiaRenderer
 
     void AOPass::Render(FrameContext& context)
     {
+        if (!UserData::GetInstance().aoParameter.IsEnableAO)
+            return;
         PIXHelper pix(m_pCommand->GetCommandList(), "AO Pass");
         m_pCamera = context.pCamera;
         m_pGPUTimer = context.pGPUTimer;

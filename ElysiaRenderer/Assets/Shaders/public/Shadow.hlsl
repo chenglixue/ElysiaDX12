@@ -13,18 +13,23 @@
 #pragma shader_feature SHADOW_QUALITY_LOW SHADOW_QUALITY_MIDDLE SHADOW_QUALITY_HIGH SHADOW_QUALITY_VERYHIGH
 #pragma shader_feature HARD_SHADOW SOFT_SHADOW
 
-
-cbuffer ObjectConstant : register(b0, perObjectSpace)
+struct MeshData
 {
-    row_major Matrix worldMatrix;
+    Matrix world_M;
+
+    float opacity;
+    float cutoff;
+    UINT baseColorTexIndex;
+    UINT vertexOffset;
+
+    UINT indexOffset;
+    UINT3 pad;
 };
 
 cbuffer MaterialConstant : register(b0, perMaterialSpace)
 {
-    UINT baseColorTexIndex;
-    
-    float opacity;
-    float cutoff;
+    UINT meshDataBufferIndex;
+    UINT meshDataIndex;
 };
 
 cbuffer PassConstant : register(b0, perPassSpace)
@@ -34,7 +39,7 @@ cbuffer PassConstant : register(b0, perPassSpace)
     float shadowDepthBias;
     float shadowSlopeDepthBias;
     float shadowMaxSlopeDepthBias;
-    
+
     Vector2 g_sobolSequence[64];
 };
 
@@ -65,34 +70,45 @@ struct PSOutput
 
 PSInput VS(VSInput i)
 {
-    PSInput o = (PSInput) 0;
-    
-    o.normalWS = normalize(mul(i.normalOS, (float3x3) worldMatrix));
+    PSInput o = (PSInput)0;
+
+    StructuredBuffer<MeshData> meshDataBuffer = ResourceDescriptorHeap[meshDataBufferIndex];
+    Matrix worldMatrix = meshDataBuffer[meshDataIndex].world_M;
+
+    o.normalWS = normalize(mul(i.normalOS, (float3x3)worldMatrix));
 
     o.positionWS = mul(float4(i.positionOS, 1.f), worldMatrix);
     o.positionCS = mul(o.positionWS, shadowMatrix);
-    
+
     LightData mainLightData = GetMainLight(mainLight);
-    
+
     float3 lightDirWS = mainLightData.toLight;
     const float NoL = dot(o.normalWS, lightDirWS);
-    
-    o.positionWS.rgb += GetShadowDepthOffset(NoL, o.positionCS, shadowSize.x, shadowDepthBias, shadowSlopeDepthBias, shadowMaxSlopeDepthBias);
-    
+
+    o.positionWS.rgb += GetShadowDepthOffset(NoL,
+                                             o.positionCS,
+                                             shadowSize.x,
+                                             shadowDepthBias,
+                                             shadowSlopeDepthBias,
+                                             shadowMaxSlopeDepthBias);
+
     o.uv = i.uv;
-    
+
     return o;
 }
 
 PSOutput PS(PSInput i)
 {
-    PSOutput o = (PSOutput) 0;
-    
+    PSOutput o = (PSOutput)0;
+
     SamplerState warpLinearSampler = SamplerDescriptorHeap[WarpLinearSampler];
     Texture2D<float4> baseColorTex = ResourceDescriptorHeap[GBuffer4Index];
-    
-    float4 baseColor = baseColorTex.Sample(warpLinearSampler, i.uv) * opacity;
-    clip(baseColor.a - cutoff);
-    
+
+    StructuredBuffer<MeshData> meshDataBuffer = ResourceDescriptorHeap[meshDataBufferIndex];
+    MeshData currMeshData = meshDataBuffer[meshDataIndex];
+
+    float4 baseColor = baseColorTex.Sample(warpLinearSampler, i.uv) * currMeshData.opacity;
+    clip(baseColor.a - currMeshData.cutoff);
+
     return o;
 }

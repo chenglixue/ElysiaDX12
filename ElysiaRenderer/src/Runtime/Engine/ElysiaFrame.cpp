@@ -221,8 +221,8 @@ namespace ElysiaEngine
         ImGuiIO& io = ImGui::GetIO();
 
         HandleInput(io);
-        CameraManager::GetInstance().GetMainCamera()->UpdateFrustum();
-        SceneManager::GetInstance().CollectRenderItems();
+        // CameraManager::GetInstance().GetMainCamera()->UpdateFrustum();
+        // SceneManager::GetInstance().CollectRenderItems();
     }
 
     void ElysiaFrame::HandleInput(const ImGuiIO& io)
@@ -512,6 +512,7 @@ namespace ElysiaEngine
             ImGui::SliderFloat3("Direction", (float*)&pUserData.lightDir, -1, 1);
             ImGui::SliderFloat("Intensity", &pUserData.lightIntensity, 0, 20, "%.3f");
 
+            ImGui::Checkbox("Enable Shadow", &pUserData.EnableShadow);
             int shadowTypeIndex = (int)pUserData.shadowType;
             ImGui::Combo("Shadow Type",
                          &shadowTypeIndex,

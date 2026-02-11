@@ -20,29 +20,9 @@
 
 namespace ElysiaRenderer
 {
-    int OpaquePass::ShaderPassIDs::OpaqueLightPassID = -1;
-
-    size_t OpaquePass::ShaderIDs::g_AOIndex = SIZE_MAX;
-    size_t OpaquePass::ShaderIDs::screenSize = SIZE_MAX;
-    size_t OpaquePass::ShaderIDs::viewMatrix = SIZE_MAX;
-    size_t OpaquePass::ShaderIDs::viewMatrix_I = SIZE_MAX;
-    size_t OpaquePass::ShaderIDs::projMatrix = SIZE_MAX;
-    size_t OpaquePass::ShaderIDs::projMatrix_I = SIZE_MAX;
-    size_t OpaquePass::ShaderIDs::viewProjMatrix = SIZE_MAX;
-    size_t OpaquePass::ShaderIDs::viewProjMatrix_I = SIZE_MAX;
-
     OpaquePass::OpaquePass()
         : BasePass()
     {
-        ShaderIDs::g_AOIndex = PropertyToID(L"g_AOIndex");
-
-        ShaderIDs::screenSize = PropertyToID(L"screenSize");
-        ShaderIDs::viewMatrix = PropertyToID(L"viewMatrix");
-        ShaderIDs::viewMatrix_I = PropertyToID(L"viewMatrix_I");
-        ShaderIDs::projMatrix = PropertyToID(L"projMatrix");
-        ShaderIDs::projMatrix_I = PropertyToID(L"projMatrix_I");
-        ShaderIDs::viewProjMatrix = PropertyToID(L"viewProjMatrix");
-        ShaderIDs::viewProjMatrix_I = PropertyToID(L"viewProjMatrix_I");
     }
 
     OpaquePass::~OpaquePass()
@@ -106,12 +86,12 @@ namespace ElysiaRenderer
                                m_pCamera->GetViewMat() * m_pCamera->GetProjMat());
         m_pMaterial->SetMatrix(ShaderIDs::viewProjMatrix_I,
                                (m_pCamera->GetViewMat() * m_pCamera->GetProjMat()).Invert());
+        m_pMaterial->SetBool(ShaderIDs::g_EnableAO, UserData::GetInstance().aoParameter.IsEnableAO);
 
         SetSpaceResource(passData, PER_PASS_SPACE);
         SetSpaceResource(passData, PER_FRAME_SPACE);
 
         m_pCommand->AddBarrier(m_pCameraColorRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
-        m_pCommand->ClearRenderTarget(m_pCameraColorRT, Color::Black);
 
         m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_renderSize));
         m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -181,6 +161,7 @@ namespace ElysiaRenderer
             .m_numRenderTargets = 1,
             .m_depthStencilFormat = m_pCameraDepthRT->GetFormat()
         };
+        passData.DepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_GREATER;
         passData.pPipelineStateObject = PSOManager::GetInstance().GetGraphicsPipelineState(
             m_pDevice,
             m_pMaterial.get(),

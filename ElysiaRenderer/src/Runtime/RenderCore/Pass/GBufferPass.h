@@ -14,18 +14,17 @@ namespace ElysiaRenderer
     public:
         struct RenderTextureIDs
         {
-            static size_t GBuffer0ID;
-            static size_t GBuffer1ID;
-            static size_t GBuffer2ID;
-            static size_t GBuffer3ID;
-            static size_t GBuffer4ID;
-            static size_t GBuffer5ID;
+            static inline size_t GBuffer0ID = PropertyToID(L"GBuffer0");
+            static inline size_t GBuffer1ID = PropertyToID(L"GBuffer1");
+            static inline size_t GBuffer2ID = PropertyToID(L"GBuffer2");
+            static inline size_t GBuffer3ID = PropertyToID(L"GBuffer3");
+            static inline size_t GBuffer4ID = PropertyToID(L"GBuffer4");
+            static inline size_t GBuffer5ID = PropertyToID(L"GBuffer5");
         };
 
         GBufferPass();
         virtual ~GBufferPass() override;
 
-        //virtual void Setup(const RenderPassData& renderPassData) override;
         virtual void Configure() override;
         virtual void Render(ElysiaEngine::FrameContext& context) override;
         virtual void UpdatePipeline() override;
@@ -36,43 +35,43 @@ namespace ElysiaRenderer
 
         struct ShaderPassIDs
         {
-            static int GBufferPassID;
+            static inline int GBufferPassID = -1;
         };
         struct ShaderIDs
         {
-            static size_t screenSize;
-            static size_t viewMatrix;
-            static size_t viewMatrix_I;
-            static size_t projMatrix;
-            static size_t projMatrix_I;
-            static size_t viewProjMatrix;
-            static size_t viewProjMatrix_I;
+            static inline size_t screenSize = PropertyToID(L"screenSize");
+            static inline size_t viewMatrix = PropertyToID(L"viewMatrix");
+            static inline size_t viewMatrix_I = PropertyToID(L"viewMatrix_I");
+            static inline size_t projMatrix = PropertyToID(L"projMatrix");
+            static inline size_t projMatrix_I = PropertyToID(L"projMatrix_I");
+            static inline size_t viewProjMatrix = PropertyToID(L"viewProjMatrix");
+            static inline size_t viewProjMatrix_I = PropertyToID(L"viewProjMatrix_I");
             static inline size_t pre_viewMatrix = PropertyToID(L"pre_viewMatrix");
             static inline size_t pre_viewMatrix_I = PropertyToID(L"pre_viewMatrix_I");
             static inline size_t pre_projMatrix = PropertyToID(L"pre_projMatrix");
             static inline size_t pre_projMatrix_I = PropertyToID(L"pre_projMatrix_I");
             static inline size_t pre_viewProjMatrix = PropertyToID(L"pre_viewProjMatrix");
             static inline size_t pre_viewProjMatrix_I = PropertyToID(L"pre_viewProjMatrix_I");
-            static size_t worldMatrix;
-            static size_t opacity;
-            static size_t cutoff;
-            static size_t baseColorTexIndex;
-            static size_t normalTexIndex;
-            static size_t metallicTexIndex;
-            static size_t roughnessTexIndex;
-            static size_t specularTexIndex;
-            static size_t baseColorTint;
-            static size_t ambientCubemapTint;
-            static size_t normalIntensity;
-            static size_t metallicIntensity;
-            static size_t roughnessIntensity;
-            static size_t ambientCubemapIntensity;
-            static size_t GBuffer0Index;
-            static size_t GBuffer1Index;
-            static size_t GBuffer2Index;
-            static size_t GBuffer3Index;
-            static size_t GBuffer4Index;
-            static size_t GBuffer5Index;
+            static inline size_t worldMatrix = PropertyToID(L"worldMatrix");
+            static inline size_t opacity = PropertyToID(L"opacity");
+            static inline size_t cutoff = PropertyToID(L"cutoff");
+            static inline size_t baseColorTexIndex = PropertyToID(L"baseColorTexIndex");
+            static inline size_t normalTexIndex = PropertyToID(L"normalTexIndex");
+            static inline size_t metallicTexIndex = PropertyToID(L"metallicTexIndex");
+            static inline size_t roughnessTexIndex = PropertyToID(L"roughnessTexIndex");
+            static inline size_t specularTexIndex = PropertyToID(L"specularTexIndex");
+            static inline size_t baseColorTint = PropertyToID(L"baseColorTint");
+            static inline size_t ambientCubemapTint = PropertyToID(L"ambientCubemapTint");
+            static inline size_t normalIntensity = PropertyToID(L"normalIntensity");
+            static inline size_t metallicIntensity = PropertyToID(L"metallicIntensity");
+            static inline size_t roughnessIntensity = PropertyToID(L"roughnessIntensity");
+            static inline size_t ambientCubemapIntensity = PropertyToID(L"ambientCubemapIntensity");
+            static inline size_t GBuffer0Index = PropertyToID(L"GBuffer_0");
+            static inline size_t GBuffer1Index = PropertyToID(L"GBuffer_1");
+            static inline size_t GBuffer2Index = PropertyToID(L"GBuffer_2");
+            static inline size_t GBuffer3Index = PropertyToID(L"GBuffer_3");
+            static inline size_t GBuffer4Index = PropertyToID(L"GBuffer_4");
+            static inline size_t GBuffer5Index = PropertyToID(L"GBuffer_5");
         };
         struct TAAData
         {

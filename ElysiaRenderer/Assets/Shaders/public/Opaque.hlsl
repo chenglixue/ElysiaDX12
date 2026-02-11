@@ -23,6 +23,8 @@ cbuffer PassConstant : register(b0, perPassSpace)
     Matrix projMatrix_I;
     Matrix viewProjMatrix;
     Matrix viewProjMatrix_I;
+
+    bool g_EnableAO;
 }
 
 struct PSInput
@@ -86,7 +88,10 @@ PSOutput PS(PSInput i)
     LightData mainLightData = GetMainLight(mainLight);
 
     float AO = SampleTexture2D(g_AOIndex, inputParam.ScreenUV, WarpPointSampler);
-
+    if (!g_EnableAO)
+    {
+        AO = 1;
+    }
     float4 lighting = GetDynamicLighting(inputParam, GBufferData, mainLightData, AO);
     lighting += float4(GBufferData.SceneColor, 1.f) * AO;
 
