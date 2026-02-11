@@ -352,7 +352,8 @@ namespace ElysiaRenderer
     }
 
     void BufferManager::UploadBufferData(DX12UploadContext* uploadContext,
-                                         std::vector<DX12BufferUpload*>& bufferUploads)
+                                         std::vector<DX12BufferUpload*>& bufferUploads,
+                                         bool isErase)
     {
         const auto numBufferUploads = static_cast<UINT>(bufferUploads.size());
         size_t bufferUploadHeapOffset = 0;
@@ -417,7 +418,7 @@ namespace ElysiaRenderer
             }
             uploadContext->FlushBarrier();
 
-            if (numBuffersProcessed > 0)
+            if (numBuffersProcessed > 0 && isErase)
             {
                 bufferUploads.erase(bufferUploads.begin(),
                                     bufferUploads.begin() + numBuffersProcessed);
@@ -477,6 +478,67 @@ namespace ElysiaRenderer
                 textureUploads.erase(textureUploads.begin(),
                                      textureUploads.begin() + numTexsProcessed);
             }
+        }
+    }
+
+    void BufferManager::UploadBufferData(DX12UploadContext* uploadContext,
+                                         DX12BufferUpload* bufferUpload)
+    {
+        const auto numBufferUploads = 1;
+        size_t bufferUploadHeapOffset = 0;
+        UINT numBuffersProcessed = 0;
+
+        size_t totalSize = 0;
+        totalSize += AlignU32(bufferUpload->bufferDataSize,
+                              D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
+
+        D3D12_GPU_VIRTUAL_ADDRESS gpuAddress;
+        UINT8* cpuAddress;
+        if (m_pUploadBuffer->AllocateForFrame(m_pDevice->GetFrameID(),
+                                              totalSize,
+                                              gpuAddress,
+                                              cpuAddress))
+        {
+            for (numBuffersProcessed; numBuffersProcessed < numBufferUploads; numBuffersProcessed
+                 ++)
+            {
+                if (bufferUploadHeapOffset + bufferUpload->bufferDataSize > totalSize)
+                {
+                    break;
+                }
+
+                uploadContext->AddBarrier(*bufferUpload->buffer,
+                                          D3D12_RESOURCE_STATE_COPY_DEST,
+                                          false);
+                memcpy(cpuAddress + bufferUploadHeapOffset,
+                       bufferUpload->pBufferData.get(),
+                       bufferUpload->bufferDataSize);
+                D3D12_SUBRESOURCE_DATA subData =
+                {
+                    bufferUpload->pBufferData.get(),
+                    static_cast<UINT>(bufferUpload->bufferDataSize),
+                    static_cast<UINT>(bufferUpload->bufferDataSize)
+                };
+                // uploadContext->CopyBufferRegion(*bufferUpload->buffer, 0, m_pUploadBuffer->GetResource(), 
+                // 	gpuAddress - m_pUploadBuffer->GetResource()->GetGPUVirtualAddress(), bufferUpload->bufferDataSize);
+                UpdateSubresources(uploadContext->GetCommandList(),
+                                   bufferUpload->buffer->GetResource(),
+                                   m_pUploadBuffer->GetResource(),
+                                   gpuAddress - m_pUploadBuffer->GetResource()->
+                                                                 GetGPUVirtualAddress() +
+                                   bufferUploadHeapOffset,
+                                   0,
+                                   1,
+                                   &subData);
+                uploadContext->AddBarrier(*bufferUpload->buffer,
+                                          D3D12_RESOURCE_STATE_COMMON,
+                                          false);
+                bufferUploadHeapOffset = AlignU32(
+                    bufferUploadHeapOffset + bufferUpload->bufferDataSize,
+                    D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
+                uploadContext->AddBufferProcess(bufferUpload);
+            }
+            uploadContext->FlushBarrier();
         }
     }
 

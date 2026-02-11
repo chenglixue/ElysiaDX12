@@ -289,8 +289,7 @@ namespace ElysiaCore
         }
     }
     void DX12GraphicsContext::SetRenderTargets(UINT numRenderTargets,
-                                               const D3D12_CPU_DESCRIPTOR_HANDLE renderTargetHandle
-                                               [],
+                                               const D3D12_CPU_DESCRIPTOR_HANDLE renderTargetHandle[],
                                                const D3D12_CPU_DESCRIPTOR_HANDLE depthStencilHandle)
     {
         m_commandList->OMSetRenderTargets(numRenderTargets,

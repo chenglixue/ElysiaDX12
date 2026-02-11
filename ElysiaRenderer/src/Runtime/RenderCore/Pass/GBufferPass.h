@@ -116,6 +116,7 @@ namespace ElysiaRenderer
         };
 
         std::vector<RenderTexture*> m_GBufferRTs{};
+        std::vector<DX12BufferUpload*> m_uploads;
         std::vector<MeshData> m_meshDatas;
         std::vector<IndirectCommand> m_indirectCommands;
         BufferHandle m_pMeshDataBuffer;

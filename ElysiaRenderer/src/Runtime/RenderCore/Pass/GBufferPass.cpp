@@ -7,6 +7,7 @@
 #include "Runtime/Core/DX12GraphicsContext.h"
 #include "Runtime/Core/DX12TextureBuffer.h"
 #include "Runtime/Core/DX12Shader.h"
+#include "Runtime/Core/DX12UploadContext.h"
 
 #include "Runtime/Resource/Model/ModelManager.h"
 
@@ -30,18 +31,37 @@ namespace ElysiaRenderer
         : BasePass()
     {
         m_indirectCommands.reserve(Max_RenderItem_Count);
-        m_pIndirectDataBuffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc
+        m_meshDatas.reserve(Max_RenderItem_Count);
+
         {
-            .name = L"GBuffer Indirect Buffer",
-            .stride = sizeof(IndirectCommand),
-            .size = sizeof(IndirectCommand) * Max_RenderItem_Count,
-            .viewFlags = GPUResourceFlags::SRV,
-            .accessFlags = BufferAccessFlags::HostWritable,
-            .isRawAccess = true,
-            .InitData = nullptr,
-            .isAccelerationStructure = false,
-            .isIndirectBuffer = true
-        });
+            auto bufferSize = sizeof(IndirectCommand) * Max_RenderItem_Count;
+            m_pIndirectDataBuffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc
+            {
+                .name = L"GBuffer Indirect Buffer",
+                .stride = sizeof(IndirectCommand),
+                .size = bufferSize,
+                .viewFlags = GPUResourceFlags::SRV | GPUResourceFlags::UAV,
+                .accessFlags = BufferAccessFlags::GPUOnly,
+                .isRawAccess = true,
+                .isIndirectBuffer = true
+            });
+
+            m_uploads.reserve(2);
+            auto pUpload = new DX12BufferUpload();
+            pUpload->buffer = nullptr;
+            pUpload->bufferDataSize = sizeof(MeshData) * Max_RenderItem_Count;
+            pUpload->pBufferData = std::make_unique<uint8_t[]>(
+                sizeof(MeshData) * Max_RenderItem_Count);
+            m_uploads.emplace_back(pUpload);
+
+            pUpload = new DX12BufferUpload();
+            pUpload->buffer = nullptr;
+            pUpload->bufferDataSize = sizeof(IndirectCommand) * Max_RenderItem_Count;
+            pUpload->pBufferData = std::make_unique<uint8_t[]>(
+                sizeof(IndirectCommand) * Max_RenderItem_Count);
+            m_uploads.emplace_back(pUpload);
+        }
+
     }
 
     GBufferPass::~GBufferPass()
@@ -75,8 +95,6 @@ namespace ElysiaRenderer
         if (context.renderList.empty())
             return;
         UploadMeshData(context.renderList);
-        if (!m_pMeshDataBuffer)
-            return;
         DrawGBufferPass(context);
 
         TAAData::Pre_View_M = m_pCamera->GetViewMat();
@@ -96,16 +114,13 @@ namespace ElysiaRenderer
     void GBufferPass::UploadMeshData(const std::vector<RenderItem>& renderItems)
     {
         const auto renderItemCount = renderItems.size();
-        UINT bufferSize = Max_RenderItem_Count * sizeof(MeshData);
 
         m_meshDatas.clear();
-        m_meshDatas.resize(Max_RenderItem_Count);
-
         for (UINT64 i = 0; i < renderItemCount; i ++)
         {
             const auto& materialData = renderItems[i].loadedMaterial;
             const auto& textureIndices = renderItems[i].textureIndices;
-            m_meshDatas[i] =
+            auto meshData = MeshData
             {
                 .world_M = renderItems[i].worldMatrix,
                 .opacity = materialData.opacity,
@@ -125,6 +140,7 @@ namespace ElysiaRenderer
                 .vertexOffset = renderItems[i].baseVertex,
                 .indexOffset = renderItems[i].startIndex
             };
+            m_meshDatas.emplace_back(meshData);
         }
 
         if (!m_pMeshDataBuffer)
@@ -133,17 +149,43 @@ namespace ElysiaRenderer
             {
                 .name = L"GBuffer Mesh Data Buffer",
                 .stride = sizeof(MeshData),
-                .size = bufferSize,
-                .viewFlags = GPUResourceFlags::SRV,
-                .accessFlags = BufferAccessFlags::HostWritable,
+                .size = Max_RenderItem_Count * sizeof(MeshData),
+                .viewFlags = GPUResourceFlags::SRV | GPUResourceFlags::UAV,
+                .accessFlags = BufferAccessFlags::GPUOnly,
                 .isRawAccess = false,
-                .InitData = m_meshDatas.data()
             });
         }
-        else
+        m_uploads[0]->buffer = m_pMeshDataBuffer;
+        memcpy(m_uploads[0]->pBufferData.get(),
+               m_meshDatas.data(),
+               Max_RenderItem_Count * sizeof(MeshData));
+
+        m_indirectCommands.clear();
+        UINT renderItemIndex = 0;
+        UINT meshDataBufferIndex = m_pMeshDataBuffer->GetResourceHeapIndex();
+        for (auto& renderItem : renderItems)
         {
-            memcpy(m_pMeshDataBuffer->GetMappedBuffer(), m_meshDatas.data(), bufferSize);
+            IndirectCommand indirectCommand{};
+            indirectCommand.pushConstants =
+            {
+                .meshDataBufferIndex = meshDataBufferIndex,
+                .meshDataIndex = renderItemIndex
+            };
+            indirectCommand.drawArguments = D3D12_DRAW_INDEXED_ARGUMENTS
+            {
+                .IndexCountPerInstance = renderItem.indexCount,
+                .InstanceCount = 1,
+                .StartIndexLocation = renderItem.startIndex,
+                .BaseVertexLocation = int(renderItem.baseVertex),
+                .StartInstanceLocation = 0,
+            };
+            m_indirectCommands.emplace_back(indirectCommand);
+            renderItemIndex ++;
         }
+        m_uploads[1]->buffer = m_pIndirectDataBuffer;
+        memcpy(m_uploads[1]->pBufferData.get(),
+               m_indirectCommands.data(),
+               Max_RenderItem_Count * sizeof(IndirectCommand));
     }
 
     void GBufferPass::CreateRTs()
@@ -294,41 +336,22 @@ namespace ElysiaRenderer
     {
         auto& passData = m_pMaterial->GetPassData(passIndex);
 
+        m_pCommand->AddBarrier(*m_pIndirectDataBuffer, D3D12_RESOURCE_STATE_COMMON);
+        BufferManager::GetInstance().UploadBufferData(m_pDevice->GetUploadContext(),
+                                                      m_uploads,
+                                                      false);
         m_pCommand->AddBarrier(*m_pIndirectDataBuffer, D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT);
-        m_indirectCommands.clear();
-        UINT renderItemIndex = 0;
-        UINT meshDataBufferIndex = m_pMeshDataBuffer->GetResourceHeapIndex();
-        for (auto& renderItem : context.renderList)
-        {
-            IndirectCommand indirectCommand{};
-            indirectCommand.pushConstants =
-            {
-                .meshDataBufferIndex = meshDataBufferIndex,
-                .meshDataIndex = renderItemIndex
-            };
-            indirectCommand.drawArguments = D3D12_DRAW_INDEXED_ARGUMENTS
-            {
-                .IndexCountPerInstance = renderItem.indexCount,
-                .InstanceCount = 1,
-                .StartIndexLocation = renderItem.startIndex,
-                .BaseVertexLocation = int(renderItem.baseVertex),
-                .StartInstanceLocation = 0,
-            };
-            m_indirectCommands.emplace_back(indirectCommand);
-            renderItemIndex ++;
-        }
-        memcpy(m_pIndirectDataBuffer->GetMappedBuffer(),
-               m_indirectCommands.data(),
-               sizeof(IndirectCommand) * Max_RenderItem_Count);
+
         m_pCommand->GetCommandList()->ExecuteIndirect(m_pCommandSignature,
                                                       // 执行多少次命令
-                                                      renderItemIndex,
+                                                      context.renderList.size(),
                                                       m_pIndirectDataBuffer->GetResource(),
                                                       // 从 Buffer 的开头开始
                                                       0,
                                                       // 如果没有 CountBuffer，则固定执行指定的次数
                                                       nullptr,
                                                       0);
+
     }
 
     void GBufferPass::DrawGBufferPass(ElysiaEngine::FrameContext& context)

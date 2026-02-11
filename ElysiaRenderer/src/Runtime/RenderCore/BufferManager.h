@@ -93,9 +93,11 @@ namespace ElysiaRenderer
         void ProcessGarbage(uint64_t currentFrameIndex);
 
         void UploadBufferData(DX12UploadContext* uploadContext,
-                              std::vector<DX12BufferUpload*>& bufferUploads);
+                              std::vector<DX12BufferUpload*>& bufferUploads, bool isErase = true);
         void UploadTextureData(DX12UploadContext* uploadContext,
                                std::vector<DX12TextureUpload*>& textureUploads);
+        void UploadBufferData(DX12UploadContext* uploadContext,
+                              DX12BufferUpload* bufferUpload);
 
         BufferHandle CreateVertexBuffer(const ElysiaModel::LoadedModel& model);
         BufferHandle CreateIndexBuffer(const ElysiaModel::LoadedModel& model);
