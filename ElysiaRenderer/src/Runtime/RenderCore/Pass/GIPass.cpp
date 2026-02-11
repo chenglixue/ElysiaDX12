@@ -216,6 +216,7 @@ namespace ElysiaRenderer
         ClearProbeOffset();
         GenerateRay();
         RelocateProbes();
+        ProbeBlend();
     }
 
     void GIPass::UpdatePipeline()
@@ -335,7 +336,7 @@ namespace ElysiaRenderer
         if (!m_pProbeOffsetBuffer || hasClear)
             return;
 
-        auto passID = Clear_Probe_Offset_PASS;
+        auto passID = CLEAR_PROBE_OFFSET_PASS;
         auto passName = m_PassData[passID].Name.c_str();
         auto& passData = m_pMaterial->GetPassData(passID);
         PIXHelper pix(m_pCommand->GetCommandList(), passName);
@@ -397,6 +398,44 @@ namespace ElysiaRenderer
         }
         m_pCommand->AddBarrier(*m_pProbeOffsetBuffer,
                                D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
+    }
+    void GIPass::ProbeBlend()
+    {
+        auto passID = PROBE_BLENDING_PASS;
+        auto passName = m_PassData[passID].Name.c_str();
+        auto& passData = m_pMaterial->GetPassData(passID);
+        PIXHelper pix(m_pCommand->GetCommandList(), passName);
+
+        PipelineInfo pipelineStateData{};
+        pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(
+            passID).pPipelineStateObject;
+        m_pCommand->SetPipeline(pipelineStateData);
+        SetSpaceResource(passData, PER_FRAME_SPACE);
+
+        m_pCommand->AddBarrier(m_pIrradianceRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+        {
+            m_pMaterial->SetUInt(ShaderIDs::g_RayDataBufferIndex,
+                                 m_pRayDataBuffer->GetResourceHeapIndex());
+            m_pMaterial->SetUInt(ShaderIDs::g_IrradianceTexIndex,
+                                 m_pIrradianceRT->GetResourceHeapIndex());
+            m_pMaterial->SetFloat(ShaderIDs::g_RandomRotation, m_RandomRotation);
+            // m_pMaterial->SetFloat3(ShaderIDs::g_GridSpacing, m_gridSpacing);
+            m_pMaterial->SetFloat3(ShaderIDs::g_GridDimensions,
+                                   Vector3(Grid_Dimensions.x,
+                                           Grid_Dimensions.y,
+                                           Grid_Dimensions.z));
+
+            SetSpaceResource(passData, PER_PASS_SPACE);
+
+            m_pCommand->Dispatch(Grid_Dimensions.x,
+                                 Grid_Dimensions.y * Grid_Dimensions.z,
+                                 1);
+            m_pCommand->AddUAVBarrier(m_pIrradianceRT, false);
+        }
+        m_pCommand->AddBarrier(m_pIrradianceRT,
+                               D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+
         m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
     }
     void GIPass::GenerateTLAS(const std::vector<std::unique_ptr<Entity>>& entityies)

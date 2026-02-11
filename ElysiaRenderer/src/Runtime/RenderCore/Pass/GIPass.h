@@ -15,8 +15,9 @@ namespace ElysiaRenderer
     using namespace ElysiaHelper;
 
 #define GI_PASS_LIST \
-    PASS(RELOCATE_PROBES_PASS,         "public\\GI\\CS_DDGI.hlsl",               true,  RelocateProbes)\
-    PASS(Clear_Probe_Offset_PASS,      "public\\GI\\CS_DDGI.hlsl",               true,  ClearProbeOffsetBuffer)
+    PASS(RELOCATE_PROBES_PASS,          "public\\GI\\CS_DDGI.hlsl",               true,  RelocateProbes)\
+    PASS(CLEAR_PROBE_OFFSET_PASS,       "public\\GI\\CS_DDGI.hlsl",               true,  ClearProbeOffsetBuffer)\
+    PASS(PROBE_BLENDING_PASS,           "public\\GI\\CS_DDGI.hlsl",               true,  ProbeBlending)
 
     class GIPass : public BasePass
     {
@@ -163,6 +164,7 @@ namespace ElysiaRenderer
         void GenerateRay();
         void ClearProbeOffset();
         void RelocateProbes();
+        void ProbeBlend();
 
         CComPtr<IDxcBlob> CompileRaytracingLibrary(const std::wstring& fileName);
         void CreateRaytracingPipeline(ID3D12RootSignature* pRootSignature);

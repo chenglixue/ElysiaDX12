@@ -31,11 +31,6 @@ SamplerState g_ClampAnisotropicSampler : register(s5);
 SamplerState g_ShadowWarpLinearSampler : register(s6);
 SamplerState g_ShadowClampLinearSampler : register(s7);
 
-// void Elysia_DDGI_StoreIrradiance(uint2 id, float3 val)
-// {
-//     RWTexture2D<float4> o = ResourceDescriptorHeap[g_IrradianceTexIndex];
-//     o[id].rgb = val;
-// }
 
 void Elysia_DDGI_StoreRayData(uint writeIndex, float3 radiance, float distance)
 {
@@ -129,10 +124,6 @@ void RayClosestHit(inout RayData rayData,
                                                 0);
     float3 normalOS = v0.normalOS * w + v1.normalOS * bary.x + v2.normalOS * bary.y;
     float3 N = normalize(mul((float3x3)ObjectToWorld3x4(), normalOS));
-    // float3 T = normalize(mul((float3x3)ObjectToWorld3x4(), tangentOS));
-    // float3 tangentWS = normalize(T - dot(N, T) * N);
-    // float3 bitTangentWS = (cross(tangentWS, N));
-    // float3 normalWS = N;
 
     if (isBackFace)
     {
@@ -143,7 +134,7 @@ void RayClosestHit(inout RayData rayData,
     float3 toLight = mainLightData.toLight;
     float NoL = max(0.f, dot(N, toLight));
 
-    float3 directRadiance = baseColorAlpha.rgb * mainLightData.color;
+    float3 directRadiance = baseColorAlpha.rgb * mainLightData.color * NoL;
 
     rayData.Radiance = directRadiance;
     rayData.Distance = RayTCurrent();
