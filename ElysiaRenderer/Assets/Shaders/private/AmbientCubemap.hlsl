@@ -1,14 +1,13 @@
 #ifndef AMBIENTCUBEMAP
 #define AMBIENTCUBEMAP
 
-#pragma once
-
 #include "SharedCommon.hlsli"
 #include "MonteCarlo.hlsl"
 #include "BRDF.hlsl"
 #include "Random.hlsl"
 #include "LightAccumulator.hlsl"
 #include "Color.hlsl"
+#include "DDGICommon.hlsli"
 
 #define IBLNumSamples 12
 
@@ -309,5 +308,4 @@ float3 GetIBL(FInputParams inputParams,
 
     return o;
 }
-
 #endif

@@ -32,6 +32,7 @@ namespace ElysiaRenderer
         {
             static inline size_t g_TargetTexIndex = PropertyToID(L"g_TargetTexIndex");
             static inline size_t g_IrradianceTexIndex = PropertyToID(L"g_IrradianceTexIndex");
+            static inline size_t g_IrradianceTexSize = PropertyToID(L"g_IrradianceTexSize");
             static inline size_t g_RayDataBufferIndex = PropertyToID(L"g_RayDataBufferIndex");
 
             static inline size_t g_GridSpacing = PropertyToID(L"g_GridSpacing");
@@ -51,6 +52,7 @@ namespace ElysiaRenderer
         static inline BufferHandle m_pRayDataBuffer;
         static inline BufferHandle m_pInstanceDataBuffer;
         static inline BufferHandle m_pProbeOffsetBuffer;
+        static inline RenderTexture* m_pIrradianceRT = nullptr;
         static inline constexpr UINT NumVertices = 12;
         static inline constexpr UINT NumIndices = 60;
         static inline constexpr UINT Probe_Count = 1024;
@@ -100,7 +102,6 @@ namespace ElysiaRenderer
         UINT m_quarterHeight;
 
         RenderTexture* m_pGIRT = nullptr;
-        RenderTexture* m_pIrradianceRT = nullptr;
         RenderTexture* m_pDistanceRT = nullptr;
 
         /// --------------------------------------------

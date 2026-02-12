@@ -2,6 +2,7 @@
 #include <private\Light.hlsl>
 #include <private\LightCommon.hlsl>
 #include <private\ShadowCommon.hlsl>
+#include <public\GI\Irradiance.hlsl>
 
 #pragma Vertex VS
 #pragma Pixel PS
@@ -33,6 +34,12 @@ cbuffer PassConstant : register(b0, perPassSpace)
     Matrix pre_projMatrix_I;
     Matrix pre_viewProjMatrix;
     Matrix pre_viewProjMatrix_I;
+
+    float3 g_GridDimensions;
+    float3 g_GridOrigin;
+    float3 g_GridSpacing;
+    UINT g_IrradianceTexIndex;
+    float4 g_IrradianceTexSize;
 }
 
 struct MeshData
@@ -201,7 +208,15 @@ FEncodeGBufferData GetEncodeGBufferData(FInputParams inputParams, float3 toLight
     o.Anisotropy = 0;
     o.DiffuseColor = o.BaseColor - o.BaseColor * o.Metallic;
     o.SpecularColor = ComputeF0(o.Specular, o.BaseColor, o.Metallic);
-    // o.IBL = GetIBL(inputParams, o, toLight, 1, 1);
+    o.IBL = SampleDDGI(inputParams.PositionWS,
+                       o.WorldNormal,
+                       g_GridOrigin,
+                       g_GridSpacing,
+                       g_GridDimensions,
+                       g_IrradianceTexSize,
+                       g_IrradianceTexIndex,
+                       ClampLinearSampler
+        );
 
     return o;
 }

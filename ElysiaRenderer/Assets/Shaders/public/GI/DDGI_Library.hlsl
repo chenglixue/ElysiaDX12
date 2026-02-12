@@ -134,7 +134,8 @@ void RayClosestHit(inout RayData rayData,
     float3 toLight = mainLightData.toLight;
     float NoL = max(0.f, dot(N, toLight));
 
-    float3 directRadiance = baseColorAlpha.rgb * mainLightData.color * NoL;
+    float3 directRadiance = baseColorAlpha.rgb * mainLightData.color * mainLightData.intensity *
+                            NoL;
 
     rayData.Radiance = directRadiance;
     rayData.Distance = RayTCurrent();

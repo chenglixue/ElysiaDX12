@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "GBufferPass.h"
 
+#include "GIPass.h"
 #include "Editor/UserData.h"
 #include "Programs/PIXHelper.h"
 
@@ -375,6 +376,24 @@ namespace ElysiaRenderer
                                passID);
         m_pMaterial->SetMatrix(ShaderIDs::pre_viewProjMatrix_I,
                                TAAData::Pre_ViewProj_I_M,
+                               passID);
+        m_pMaterial->SetFloat3(GIPass::ShaderIDs::g_GridDimensions,
+                               Vector3(GIPass::Grid_Dimensions.x,
+                                       GIPass::Grid_Dimensions.y,
+                                       GIPass::Grid_Dimensions.z),
+                               passID);
+        m_pMaterial->SetFloat3(GIPass::ShaderIDs::g_GridOrigin,
+                               GIPass::m_gridOrigin,
+                               passID);
+        m_pMaterial->SetFloat3(GIPass::ShaderIDs::g_GridSpacing,
+                               GIPass::m_gridSpacing,
+                               passID);
+        m_pMaterial->SetUInt(GIPass::ShaderIDs::g_IrradianceTexIndex,
+                             GIPass::m_pIrradianceRT->GetResourceHeapIndex(),
+                             passID);
+        m_pMaterial->SetFloat4(GIPass::ShaderIDs::g_IrradianceTexSize,
+                               GetScreenSize(GIPass::m_pIrradianceRT->GetWidth(),
+                                             GIPass::m_pIrradianceRT->GetHeight()),
                                passID);
 
         SetSpaceResource(passData, PER_PASS_SPACE);

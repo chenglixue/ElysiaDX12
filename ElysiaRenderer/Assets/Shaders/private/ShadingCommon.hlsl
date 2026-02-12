@@ -1,10 +1,8 @@
 #ifndef SHADING_COMMON_H
 #define SHADING_COMMON_H
 
-#pragma once
-
 #include "SharedCommon.hlsli"
-#include "AmbientCubemap.hlsl"
+#include "private/AmbientCubemap.hlsl"
 #include "Color.hlsl"
 
 ///////////////////////////////////////////////////////////////////////////////

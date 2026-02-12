@@ -6,7 +6,7 @@
 cbuffer PassConstant : register(b0, perPassSpace)
 {
     float4 g_GridSpacing;
-    UINT3 g_GridDimensions;
+    float3 g_GridDimensions;
     UINT g_ProbeOffsetsIndex;
     UINT g_RayDataBufferIndex;
     UINT g_IrradianceTexIndex;

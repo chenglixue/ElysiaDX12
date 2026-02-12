@@ -428,6 +428,9 @@
 		<None Include="Assets\Shaders\public\GI\DDGI_Library.hlsl">
 			<FileType>Document</FileType>
 		</None>
+		<None Include="Assets\Shaders\public\GI\Irradiance.hlsl">
+			<FileType>Document</FileType>
+		</None>
 		<ClCompile Include="src\Editor\IMGUIDrawer.cpp">
 			<PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
 		</ClCompile>

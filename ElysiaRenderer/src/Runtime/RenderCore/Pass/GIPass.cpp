@@ -264,7 +264,6 @@ namespace ElysiaRenderer
             Vector4 g_GridDimensions;
 
             uint g_RayDataBufferIndex;
-            uint g_ProbeOffsetsIndex;
             float g_RandomRotation;
         } constantData;
         constexpr UINT constantSize = sizeof(constantData) / 4;
