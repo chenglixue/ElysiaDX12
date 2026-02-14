@@ -10,10 +10,12 @@ cbuffer PassConstant : register(b0, perPassSpace)
     UINT g_ProbeOffsetsIndex;
     UINT g_RayDataBufferIndex;
     UINT g_IrradianceTexIndex;
+    UINT g_DistanceTexIndex;
     float g_RandomRotation;
+    float g_DDGIBlendWeight;
 }
 
-static const float PROBE_MIN_FRONTFACE_DIST = 0.4f; // 保持距离墙面 0.2 单位
+static const float PROBE_MIN_FRONTFACE_DIST = 0.3f; // 距离墙面多远
 static const float PROBE_RETURN_HOME_HYSTERESIS = 0.05f;
 static const float PROBE_BACKFACE_THRESHOLD = 0.25f;  // % 射线撞背面视为在内部
 static const float PROBE_MAX_OFFSET_FRACTION = 0.45f; // 最大允许偏移量 (相对于Grid间距的比例, 0.5是边界, 0.45是安全区)
@@ -38,6 +40,17 @@ void Elysia_DDGI_StoreIrradiance(uint2 id, float3 val)
 float4 Elysia_DDGI_LoadIrradiance(uint2 id)
 {
     RWTexture2D<float4> o = ResourceDescriptorHeap[g_IrradianceTexIndex];
+    return o[id];
+}
+
+void Elysia_DDGI_StoreDist(uint2 id, float2 val)
+{
+    RWTexture2D<float2> o = ResourceDescriptorHeap[g_DistanceTexIndex];
+    o[id].rg = val;
+}
+float2 Elysia_DDGI_LoadDist(uint2 id)
+{
+    RWTexture2D<float2> o = ResourceDescriptorHeap[g_DistanceTexIndex];
     return o[id];
 }
 
@@ -114,11 +127,11 @@ void RelocateProbes(uint3 id : SV_DispatchThreadID)
         float3 backfaceDir = SphericalFibonacci(closestBackfaceIndex,
                                                 Rays_Per_Probe,
                                                 g_RandomRotation);
-        float escapeDist = closestBackfaceRealDist + PROBE_MIN_FRONTFACE_DIST + 0.05f;
+        float escapeDist = closestBackfaceRealDist + PROBE_MIN_FRONTFACE_DIST * 0.5f;
         targetOffset = currentOffset + (backfaceDir * escapeDist);
     }
     // === 逻辑 B: 寻找空地 (Avoid Clutter) ===
-    else if (closestFrontfaceIndex != -1 && closestFrontfaceDist < PROBE_MIN_FRONTFACE_DIST)
+    else if (closestFrontfaceDist < PROBE_MIN_FRONTFACE_DIST)
     {
         float3 closeDir = SphericalFibonacci(closestFrontfaceIndex,
                                              Rays_Per_Probe,
@@ -162,7 +175,7 @@ void RelocateProbes(uint3 id : SV_DispatchThreadID)
     }
 }
 
-[numthreads(GROUP_SIZE, GROUP_SIZE, 1)]
+[numthreads(DDGI_PROBE_NUM_TEXELS, DDGI_PROBE_NUM_TEXELS, 1)]
 void ProbeBlending(uint3 id : SV_DispatchThreadID,
                    uint3 GroupThreadID : SV_GroupThreadID,
                    uint3 GroupID : SV_GroupID)
@@ -170,44 +183,60 @@ void ProbeBlending(uint3 id : SV_DispatchThreadID,
     UINT probeIndex = GroupID.x + (GroupID.y * g_GridDimensions.x);
 
     // 将 [1, 6] 映射到八面体坐标的 [-1, 1]
-    bool isBorder = (GroupThreadID.x == 0 || GroupThreadID.x == 7 ||
-                     GroupThreadID.y == 0 || GroupThreadID.y == 7);
+    bool isBorder = (GroupThreadID.x == 0 || GroupThreadID.x == (DDGI_PROBE_NUM_TEXELS - 1) ||
+                     GroupThreadID.y == 0 || GroupThreadID.y == (DDGI_PROBE_NUM_TEXELS - 1));
     if (!isBorder)
     {
-        float2 uv = (float2(GroupThreadID.xy) - 1.f + 0.5f) / (float)(GROUP_SIZE - 2);
+        float2 uv = (float2(GroupThreadID.xy) - 1.f + 0.5f) / (float)(DDGI_PROBE_NUM_TEXELS - 2);
         float2 octUV = uv * 2.0f - 1.0f;
         float3 probeDirection = OctDecode(octUV);
 
-        float4 accumulatedResult = 0.0f;
+        float4 accumulatedIrradiance = 0.0f;
+        float2 accumulatedDist = 0.0f;
+        float distSumWeight = 0.f;
         for (int r = 0; r < Rays_Per_Probe; r ++)
         {
             float3 rayDir = SphericalFibonacci(r, Rays_Per_Probe, g_RandomRotation);
             RayData rayData = Elysia_DDGI_LoadRayData(probeIndex * Rays_Per_Probe + r);
 
+            // 方向越接近，权重越高
+            float weight = max(0.f, dot(probeDirection, rayDir));
+
             // 只处理正面碰撞
-            if (rayData.Distance >= 0.f)
+            if (rayData.Distance >= 0.f && weight > 0.f)
             {
-                // 方向越接近，权重越高
-                float weight = max(0.f, dot(probeDirection, rayDir));
-                if (weight > 0.0f)
-                {
-                    // 对于 Irradiance，累加 (Radiance * w, w)
-                    accumulatedResult += float4(rayData.Radiance * weight, weight);
-                }
+                // 对于 Irradiance，累加 (Radiance * w, w)
+                accumulatedIrradiance += float4(rayData.Radiance * weight, weight);
+            }
+
+            if (weight > 0.f)
+            {
+                // NVIDIA 建议：距离权重的指数通常更高（如 16.0），这能让遮挡判定更锐利
+                float distWeight = pow(weight, 16.0f);
+                float absDist = abs(rayData.Distance);
+
+                accumulatedDist += float2(absDist * distWeight, (absDist * absDist) * distWeight);
+                distSumWeight += distWeight;
             }
         }
 
         // NVIDIA 建议除以 (2.0 * sumWeight) 以匹配漫反射积分
-        float3 netIrradiance = accumulatedResult.rgb / (2.0f * max(accumulatedResult.a, 1e-6f));
-        float3 history = Elysia_DDGI_LoadIrradiance(id.xy).rgb;
-        float hysteresis = 0.97f; // 历史权重
+        float3 netIrradiance = accumulatedIrradiance.rgb /
+                               (2.0f * max(accumulatedIrradiance.a, 1e-6f));
+        float2 netDist = accumulatedDist / max(distSumWeight, 1e-6f);
+
+        float4 historyIrradiance = Elysia_DDGI_LoadIrradiance(id.xy);
+        float2 historyDist = Elysia_DDGI_LoadDist(id.xy);
+        float hysteresis = saturate(g_DDGIBlendWeight); // 历史权重
 
         // 如果历史是黑的，直接覆盖（防止冷启动过慢）
-        if (dot(history, history) == 0.0f)
+        if (dot(historyIrradiance, historyIrradiance) == 0.0f)
             hysteresis = 0.0f;
 
-        float3 finalColor = lerp(netIrradiance, history, hysteresis);
+        float3 finalColor = lerp(netIrradiance, historyIrradiance, hysteresis);
+        float2 finalDist = lerp(netDist, historyDist, hysteresis);
         Elysia_DDGI_StoreIrradiance(id.xy, finalColor);
+        Elysia_DDGI_StoreDist(id.xy, finalDist);
     }
 
 }

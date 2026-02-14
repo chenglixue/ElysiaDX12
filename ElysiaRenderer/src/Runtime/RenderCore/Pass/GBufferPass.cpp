@@ -391,10 +391,32 @@ namespace ElysiaRenderer
         m_pMaterial->SetUInt(GIPass::ShaderIDs::g_IrradianceTexIndex,
                              GIPass::m_pIrradianceRT->GetResourceHeapIndex(),
                              passID);
+        m_pMaterial->SetUInt(GIPass::ShaderIDs::g_DistanceTexIndex,
+                             GIPass::m_pDistanceRT->GetResourceHeapIndex(),
+                             passID);
         m_pMaterial->SetFloat4(GIPass::ShaderIDs::g_IrradianceTexSize,
                                GetScreenSize(GIPass::m_pIrradianceRT->GetWidth(),
                                              GIPass::m_pIrradianceRT->GetHeight()),
                                passID);
+        m_pMaterial->SetFloat4(GIPass::ShaderIDs::g_DistanceTexSize,
+                               GetScreenSize(GIPass::m_pDistanceRT->GetWidth(),
+                                             GIPass::m_pDistanceRT->GetHeight()),
+                               passID);
+        m_pMaterial->SetFloat(GIPass::ShaderIDs::g_ProbeNormalBias,
+                              UserData::GetInstance().GIParameter.normalBias,
+                              passID);
+        m_pMaterial->SetFloat(GIPass::ShaderIDs::g_ProbeViewBias,
+                              UserData::GetInstance().GIParameter.viewBias,
+                              passID);
+        m_pMaterial->SetFloat3(ShaderIDs::g_AmbientTint,
+                               UserData::GetInstance().AmbientCubemapTint,
+                               passID);
+        m_pMaterial->SetUInt(GIPass::ShaderIDs::g_ProbeOffsetsIndex,
+                             GIPass::m_pProbeOffsetBuffer->GetResourceHeapIndex(),
+                             passID);
+        m_pMaterial->SetFloat(GIPass::ShaderIDs::g_DDGIEncodingGamma,
+                              UserData::GetInstance().GIParameter.gamma,
+                              passID);
 
         SetSpaceResource(passData, PER_PASS_SPACE);
         SetSpaceResource(passData, PER_FRAME_SPACE);

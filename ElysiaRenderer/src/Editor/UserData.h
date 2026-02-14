@@ -76,7 +76,7 @@ namespace ElysiaRenderer
         float Crosstalk[3]; // One channel must be 1.0, the rest can be <= 1.0 but not zero.
 
         AOParameter aoParameter{};
-        GIDebugParameter GIParameter{};
+        GIParameter GIParameter{};
 
         DebugMode debugMode = DebugMode::None;
         int mipmapLevel = 0;

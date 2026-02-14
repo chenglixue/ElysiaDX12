@@ -560,6 +560,16 @@ namespace ElysiaEngine
                                0.f,
                                2.f);
             ImGui::ColorEdit3("Ambient Cubemap Tint", (float*)&pUserData.AmbientCubemapTint);
+            ImGui::SliderFloat("GI Normal Bias", (float*)&pUserData.GIParameter.normalBias, 0, 1);
+            ImGui::SliderFloat("GI View Bias", (float*)&pUserData.GIParameter.viewBias, 0, 1);
+            ImGui::SliderFloat("GI Blend Weight",
+                               (float*)&pUserData.GIParameter.blendWeight,
+                               0.9,
+                               0.99);
+            ImGui::SliderFloat("GI Encoding Gamma",
+                               (float*)&pUserData.GIParameter.gamma,
+                               1.f,
+                               10.f);
         }
 
         if (ImGui::CollapsingHeader("HDR"))

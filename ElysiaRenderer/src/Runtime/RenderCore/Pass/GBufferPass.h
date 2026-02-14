@@ -92,6 +92,8 @@ PASS(DRAW_GBUFFER_PASS,         "public\\GBuffer.hlsl", false, PS)
             static inline size_t GBuffer3Index = PropertyToID(L"GBuffer_3");
             static inline size_t GBuffer4Index = PropertyToID(L"GBuffer_4");
             static inline size_t GBuffer5Index = PropertyToID(L"GBuffer_5");
+            static inline size_t g_AmbientTint = PropertyToID(L"g_AmbientTint");
+
         };
         struct TAAData
         {

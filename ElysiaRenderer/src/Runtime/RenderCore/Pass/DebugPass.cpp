@@ -258,7 +258,7 @@ namespace ElysiaRenderer
                                            GIPass::Grid_Dimensions.z));
             m_pMaterial->SetFloat3(GIPass::ShaderIDs::g_GridOrigin, GIPass::m_gridOrigin);
             m_pMaterial->SetFloat3(GIPass::ShaderIDs::g_GridSpacing, GIPass::m_gridSpacing);
-            m_pMaterial->SetFloat(GIPass::ShaderIDs::g_ProbeRadius, 0.5f);
+            m_pMaterial->SetFloat(GIPass::ShaderIDs::g_ProbeRadius, 0.1f);
             SetSpaceResource(passData, PER_PASS_SPACE);
 
             m_pCommand->DrawInstanced(GIPass::NumIndices, GIPass::Probe_Count, 0, 0, 0);

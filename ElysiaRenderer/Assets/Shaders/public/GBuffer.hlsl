@@ -36,10 +36,17 @@ cbuffer PassConstant : register(b0, perPassSpace)
     Matrix pre_viewProjMatrix_I;
 
     float3 g_GridDimensions;
+    float g_ProbeNormalBias;
+    float g_ProbeViewBias;
+    float g_DDGIEncodingGamma;
     float3 g_GridOrigin;
     float3 g_GridSpacing;
     UINT g_IrradianceTexIndex;
+    UINT g_DistanceTexIndex;
+    UINT g_ProbeOffsetsIndex;
     float4 g_IrradianceTexSize;
+    float4 g_DistanceTexSize;
+    float3 g_AmbientTint;
 }
 
 struct MeshData
@@ -210,13 +217,21 @@ FEncodeGBufferData GetEncodeGBufferData(FInputParams inputParams, float3 toLight
     o.SpecularColor = ComputeF0(o.Specular, o.BaseColor, o.Metallic);
     o.IBL = SampleDDGI(inputParams.PositionWS,
                        o.WorldNormal,
+                       DDGIGetSurfaceBias(o.WorldNormal,
+                                          inputParams.ScreenVector,
+                                          g_ProbeNormalBias,
+                                          g_ProbeViewBias),
                        g_GridOrigin,
                        g_GridSpacing,
                        g_GridDimensions,
+                       g_DDGIEncodingGamma,
                        g_IrradianceTexSize,
                        g_IrradianceTexIndex,
+                       g_DistanceTexSize,
+                       g_DistanceTexIndex,
+                       g_ProbeOffsetsIndex,
                        ClampLinearSampler
-        );
+                ) * g_AmbientTint;
 
     return o;
 }

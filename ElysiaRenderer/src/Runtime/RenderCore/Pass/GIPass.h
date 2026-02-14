@@ -32,7 +32,9 @@ namespace ElysiaRenderer
         {
             static inline size_t g_TargetTexIndex = PropertyToID(L"g_TargetTexIndex");
             static inline size_t g_IrradianceTexIndex = PropertyToID(L"g_IrradianceTexIndex");
+            static inline size_t g_DistanceTexIndex = PropertyToID(L"g_DistanceTexIndex");
             static inline size_t g_IrradianceTexSize = PropertyToID(L"g_IrradianceTexSize");
+            static inline size_t g_DistanceTexSize = PropertyToID(L"g_DistanceTexSize");
             static inline size_t g_RayDataBufferIndex = PropertyToID(L"g_RayDataBufferIndex");
 
             static inline size_t g_GridSpacing = PropertyToID(L"g_GridSpacing");
@@ -41,6 +43,10 @@ namespace ElysiaRenderer
             static inline size_t g_ProbeRadius = PropertyToID(L"g_ProbeRadius");
             static inline size_t g_RandomRotation = PropertyToID(L"g_RandomRotation");
             static inline size_t g_ProbeOffsetsIndex = PropertyToID(L"g_ProbeOffsetsIndex");
+            static inline size_t g_ProbeNormalBias = PropertyToID(L"g_ProbeNormalBias");
+            static inline size_t g_ProbeViewBias = PropertyToID(L"g_ProbeViewBias");
+            static inline size_t g_DDGIBlendWeight = PropertyToID(L"g_DDGIBlendWeight");
+            static inline size_t g_DDGIEncodingGamma = PropertyToID(L"g_DDGIEncodingGamma");
         };
 
         static inline D3D12_VERTEX_BUFFER_VIEW m_vertexView;
@@ -53,11 +59,12 @@ namespace ElysiaRenderer
         static inline BufferHandle m_pInstanceDataBuffer;
         static inline BufferHandle m_pProbeOffsetBuffer;
         static inline RenderTexture* m_pIrradianceRT = nullptr;
+        static inline RenderTexture* m_pDistanceRT = nullptr;
         static inline constexpr UINT NumVertices = 12;
         static inline constexpr UINT NumIndices = 60;
-        static inline constexpr UINT Probe_Count = 1024;
-        static inline const UINT3 Grid_Dimensions = UINT3(16, 4, 16);
-        static inline constexpr UINT Rays_Per_Probe = 32;
+        static inline constexpr UINT Probe_Count = 10648;
+        static inline const UINT3 Grid_Dimensions = UINT3(22, 22, 22);
+        static inline constexpr UINT Rays_Per_Probe = 64;
         static inline float m_RandomRotation;
 
     public:
@@ -102,7 +109,6 @@ namespace ElysiaRenderer
         UINT m_quarterHeight;
 
         RenderTexture* m_pGIRT = nullptr;
-        RenderTexture* m_pDistanceRT = nullptr;
 
         /// --------------------------------------------
         /// DXR

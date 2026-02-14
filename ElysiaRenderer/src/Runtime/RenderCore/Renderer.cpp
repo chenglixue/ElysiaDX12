@@ -171,7 +171,7 @@ namespace ElysiaRenderer
     {
         for (auto& pass : m_passes)
         {
-            pass->UpdatePipeline();
+            //pass->UpdatePipeline();
         }
     }
 

@@ -210,17 +210,17 @@ PSOutput PS(PSInput i)
             float3 finalRadiance = 0.0f;
             float totalWeight = 0.0f;
 
-            for (uint r = 0; r < 32; r ++)
+            for (uint r = 0; r < Rays_Per_Probe; r ++)
             {
                 // 1. 恢复该射线的发射方向
-                float3 rayDir = SphericalFibonacci(r, 32, g_RandomRotation);
+                float3 rayDir = SphericalFibonacci(r, Rays_Per_Probe, g_RandomRotation);
 
                 // 2. 计算权重：使用高次幂（如 16 或 32）来获取清晰的细节
                 float weight = max(0.0f, dot(N, rayDir));
                 weight = pow(weight, 16.0f);
 
                 // 3. 加权累加辐射度
-                RayData rayData = Elysia_DDGI_LoadRayData(i.instanceID * 32 + r);
+                RayData rayData = Elysia_DDGI_LoadRayData(i.instanceID * Rays_Per_Probe + r);
 
                 // 排除 Miss 的射线（Distance=10000），防止球体变黑
                 if (rayData.Distance < 10000.0f)

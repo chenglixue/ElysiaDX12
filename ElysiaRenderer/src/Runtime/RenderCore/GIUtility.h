@@ -5,10 +5,15 @@ namespace ElysiaRenderer
 {
     using namespace ElysiaHelper;
 
-    struct GIDebugParameter
+    struct GIParameter
     {
         bool enableLine;
         float lineWidth;
+
+        float normalBias;
+        float viewBias;
+        float blendWeight = 0.97f;
+        float gamma = 5.f;
     };
 
     void DebugDumpTLASInstances(

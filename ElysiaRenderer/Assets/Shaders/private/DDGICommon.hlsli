@@ -2,8 +2,9 @@
 #define DDGI_COMMON_H
 #include "ShadingCommon.hlsl"
 
-#define PROBE_COUNT 1024
-#define Rays_Per_Probe 32
+#define PROBE_COUNT 10648
+#define Rays_Per_Probe 64
+#define DDGI_PROBE_NUM_TEXELS 8
 
 struct Vertex
 {
@@ -107,4 +108,6 @@ float3 SphericalFibonacci(uint sampleIndex, uint numSamples, float rotation)
 
     return float3(cos(theta) * sinPhi, cosPhi, sin(theta) * sinPhi);
 }
+
+
 #endif

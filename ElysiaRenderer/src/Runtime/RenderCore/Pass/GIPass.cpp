@@ -111,8 +111,8 @@ namespace ElysiaRenderer
             true,
             RenderResource::GetInstance().GetPropertyName(RenderTextureIDs::IrradianceRTID));
         m_pDistanceRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(
-            Grid_Dimensions.x * 16,
-            Grid_Dimensions.y * Grid_Dimensions.z * 16,
+            Grid_Dimensions.x * 8,
+            Grid_Dimensions.y * Grid_Dimensions.z * 8,
             DXGI_FORMAT_R16G16_FLOAT,
             true,
             RenderResource::GetInstance().GetPropertyName(RenderTextureIDs::DistanceRTID));
@@ -412,18 +412,28 @@ namespace ElysiaRenderer
         m_pCommand->SetPipeline(pipelineStateData);
         SetSpaceResource(passData, PER_FRAME_SPACE);
 
-        m_pCommand->AddBarrier(m_pIrradianceRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+        m_pCommand->AddBarrier(m_pIrradianceRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, false);
+        m_pCommand->AddBarrier(m_pDistanceRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
         {
             m_pMaterial->SetUInt(ShaderIDs::g_RayDataBufferIndex,
-                                 m_pRayDataBuffer->GetResourceHeapIndex());
+                                 m_pRayDataBuffer->GetResourceHeapIndex(),
+                                 passID);
             m_pMaterial->SetUInt(ShaderIDs::g_IrradianceTexIndex,
-                                 m_pIrradianceRT->GetResourceHeapIndex());
-            m_pMaterial->SetFloat(ShaderIDs::g_RandomRotation, m_RandomRotation);
+                                 m_pIrradianceRT->GetResourceHeapIndex(),
+                                 passID);
+            m_pMaterial->SetUInt(ShaderIDs::g_DistanceTexIndex,
+                                 m_pDistanceRT->GetResourceHeapIndex(),
+                                 passID);
+            m_pMaterial->SetFloat(ShaderIDs::g_RandomRotation, m_RandomRotation, passID);
+            m_pMaterial->SetFloat(ShaderIDs::g_DDGIBlendWeight,
+                                  UserData::GetInstance().GIParameter.blendWeight,
+                                  passID);
             // m_pMaterial->SetFloat3(ShaderIDs::g_GridSpacing, m_gridSpacing);
             m_pMaterial->SetFloat3(ShaderIDs::g_GridDimensions,
                                    Vector3(Grid_Dimensions.x,
                                            Grid_Dimensions.y,
-                                           Grid_Dimensions.z));
+                                           Grid_Dimensions.z),
+                                   passID);
 
             SetSpaceResource(passData, PER_PASS_SPACE);
 
@@ -431,9 +441,12 @@ namespace ElysiaRenderer
                                  Grid_Dimensions.y * Grid_Dimensions.z,
                                  1);
             m_pCommand->AddUAVBarrier(m_pIrradianceRT, false);
+            m_pCommand->AddUAVBarrier(m_pDistanceRT, false);
         }
         m_pCommand->AddBarrier(m_pIrradianceRT,
-                               D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+                               D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,
+                               false);
+        m_pCommand->AddBarrier(m_pDistanceRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 
         m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
     }
