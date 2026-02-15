@@ -87,9 +87,9 @@ PSInput VS(VSInput i, UINT vertexID : SV_VertexID, uint instanceID : SV_Instance
     {
         if (g_IsEnableGILine)
         {
-            uint totalVerticesPerProbe = Rays_Per_Probe * 2;
+            uint totalVerticesPerProbe = RAYS_PER_PROBE * 2;
             uint probeIdx = vertexID / totalVerticesPerProbe;
-            uint rayInProbeIdx = (vertexID / 2) % Rays_Per_Probe;
+            uint rayInProbeIdx = (vertexID / 2) % RAYS_PER_PROBE;
             uint isEndPoint = vertexID % 2; // 0 为起点，1 为终点
 
             StructuredBuffer<float3> probeOffsetBuffer = ResourceDescriptorHeap[
@@ -101,9 +101,9 @@ PSInput VS(VSInput i, UINT vertexID : SV_VertexID, uint instanceID : SV_Instance
                                    probeOffsetBuffer[probeIdx];
 
             StructuredBuffer<RayData> rayDataBuffer = ResourceDescriptorHeap[g_RayDataBufferIndex];
-            uint rayDataIdx = probeIdx * Rays_Per_Probe + rayInProbeIdx;
+            uint rayDataIdx = probeIdx * RAYS_PER_PROBE + rayInProbeIdx;
             RayData data = rayDataBuffer[rayDataIdx];
-            float3 dir = SphericalFibonacci(rayInProbeIdx, Rays_Per_Probe, g_RandomRotation);
+            float3 dir = SphericalFibonacci(rayInProbeIdx, RAYS_PER_PROBE, g_RandomRotation);
 
             float3 finalPos = probeWorldPos;
             float3 finalColor = data.Radiance;
@@ -210,17 +210,17 @@ PSOutput PS(PSInput i)
             float3 finalRadiance = 0.0f;
             float totalWeight = 0.0f;
 
-            for (uint r = 0; r < Rays_Per_Probe; r ++)
+            for (uint r = 0; r < RAYS_PER_PROBE; r ++)
             {
                 // 1. 恢复该射线的发射方向
-                float3 rayDir = SphericalFibonacci(r, Rays_Per_Probe, g_RandomRotation);
+                float3 rayDir = SphericalFibonacci(r, RAYS_PER_PROBE, g_RandomRotation);
 
                 // 2. 计算权重：使用高次幂（如 16 或 32）来获取清晰的细节
                 float weight = max(0.0f, dot(N, rayDir));
                 weight = pow(weight, 16.0f);
 
                 // 3. 加权累加辐射度
-                RayData rayData = Elysia_DDGI_LoadRayData(i.instanceID * Rays_Per_Probe + r);
+                RayData rayData = Elysia_DDGI_LoadRayData(i.instanceID * RAYS_PER_PROBE + r);
 
                 // 排除 Miss 的射线（Distance=10000），防止球体变黑
                 if (rayData.Distance < 10000.0f)

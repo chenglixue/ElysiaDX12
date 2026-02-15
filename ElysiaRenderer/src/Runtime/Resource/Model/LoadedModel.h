@@ -105,6 +105,7 @@ namespace ElysiaModel
         ElysiaRenderer::TextureManager::Handle textures[uint64(MaterialTextureType::Count)] = {};
         UINT32 textureIndices[uint64(MaterialTextureType::Count)] = {};
     };
+
 #define INDEX_FORMAT UINT16
     constexpr DXGI_FORMAT IndexBufferFormat()
     {
@@ -131,7 +132,7 @@ namespace ElysiaModel
             UINT32 numIndices = 0;
             UINT32 vtxOffset = 0;
             UINT32 idxOffset = 0;
-            IndexType indexType = IndexType::Index16Bit;
+            IndexType indexType = IndexType::Index32Bit;
             D3D12_VERTEX_BUFFER_VIEW vbView;
             D3D12_INDEX_BUFFER_VIEW ibView;
 
@@ -142,7 +143,7 @@ namespace ElysiaModel
             void InitFromAssimpMesh(const aiMesh& assimpMesh,
                                     float sceneScale,
                                     MeshVertex* dstVertices,
-                                    UINT16* dstIndices);
+                                    UINT32* dstIndices);
 
             void InitCommon(uint64 vbAddress,
                             uint64 ibAddress,
@@ -156,7 +157,7 @@ namespace ElysiaModel
         Vector3 aabbMin = Vector3(FLT_MAX);
         Vector3 aabbMax = Vector3(-FLT_MAX);
         eastl::vector<MeshVertex> vertices;
-        eastl::vector<UINT16> indices;
+        eastl::vector<UINT32> indices;
 
         eastl::vector<Mesh> meshes;
         eastl::vector<LoadedMaterial> materials;

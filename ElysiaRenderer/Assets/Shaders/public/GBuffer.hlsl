@@ -183,12 +183,12 @@ FEncodeGBufferData GetEncodeGBufferData(FInputParams inputParams, float3 toLight
 
     float metallic = SampleTexture2D(currMeshData.metallicTexIndex,
                                      inputParams.objectUV,
-                                     WarpLinearSampler);
+                                     WarpLinearSampler).b;
     metallic = saturate(metallic * currMeshData.metallicIntensity);
 
     float roughness = SampleTexture2D(currMeshData.roughnessTexIndex,
                                       inputParams.objectUV,
-                                      WarpLinearSampler);
+                                      WarpLinearSampler).g;
     roughness = saturate(roughness * currMeshData.roughnessIntensity);
 
     o.BaseColor = baseColor.rgb;

@@ -79,7 +79,9 @@ namespace ElysiaRenderer
     std::shared_ptr<ElysiaModel::LoadedModel> SceneManager::CreateModel(
         const std::wstring& modelPath)
     {
-        return ModelManager::GetInstance().LoadStaticModel(modelPath, 1.f);
+        auto pModel = ModelManager::GetInstance().LoadStaticModel(modelPath, 1.f);
+
+        return pModel;
     }
     Entity* SceneManager::CreateEntityFromModel(std::shared_ptr<ElysiaModel::LoadedModel> pModel)
     {
@@ -94,8 +96,8 @@ namespace ElysiaRenderer
         const std::shared_ptr<LoadedModel>& model) const
     {
         auto pParent = std::make_unique<Entity>(ToEastl(model->name));
-        pParent->transform.scale = Vector3::One * 0.0001f;
-        pParent->transform.rotation = MathHelper::Euler(90, 0, 180);
+        pParent->transform.scale = Vector3::One * 1.f;
+        // pParent->transform.rotation = MathHelper::Euler(90, 0, 180);
         pParent->SetLocalAABB(model->aabbMin, model->aabbMax);
         pParent->UpdateWorldAABB();
 

@@ -10,6 +10,9 @@ namespace ElysiaRenderer
     class MeshRenderer
     {
     public:
+        std::shared_ptr<LoadedModel> m_pModel = nullptr;
+
+    public:
         MeshRenderer() = default;
 
         void Init(const std::shared_ptr<LoadedModel>& loadedModel, size_t meshIndex);
@@ -35,7 +38,7 @@ namespace ElysiaRenderer
         {
             return m_pModel->vertices.data() + GetMesh().vtxOffset;
         }
-        const UINT16* GetIndices() const
+        const UINT32* GetIndices() const
         {
             return m_pModel->indices.data() + GetMesh().idxOffset;
         }
@@ -49,7 +52,6 @@ namespace ElysiaRenderer
         }
 
     private:
-        std::shared_ptr<LoadedModel> m_pModel = nullptr;
         UINT m_meshIndex;
         UINT m_materialIndex;
         BoundingBox m_boundingBox;

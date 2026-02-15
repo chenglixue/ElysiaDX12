@@ -334,6 +334,9 @@
 		<ClInclude Include="src\ThirdParty\ffx_a.h"/>
 		<ClInclude Include="src\ThirdParty\ffx_lpm.h"/>
 		<ClInclude Include="src\ThirdParty\FreesyncHDR.h"/>
+		<ClInclude Include="src\ThirdParty\GLTF\json.hpp"/>
+		<ClInclude Include="src\ThirdParty\GLTF\stb_image_write.h"/>
+		<ClInclude Include="src\ThirdParty\GLTF\tiny_gltf.h"/>
 		<ClInclude Include="src\ThirdParty\imgui\imconfig.h"/>
 		<ClInclude Include="src\ThirdParty\imgui\imgui.h"/>
 		<ClInclude Include="src\ThirdParty\imgui\imgui_impl_dx12.h"/>

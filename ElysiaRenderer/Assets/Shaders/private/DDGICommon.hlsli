@@ -3,8 +3,11 @@
 #include "ShadingCommon.hlsl"
 
 #define PROBE_COUNT 10648
-#define Rays_Per_Probe 64
+#define RAYS_PER_PROBE 64
 #define DDGI_PROBE_NUM_TEXELS 8
+#define DXR_MAX 10000
+#define DXR_SHADOW_MAX 1e27f
+
 
 struct Vertex
 {
@@ -18,6 +21,11 @@ struct RayData
 {
     float3 Radiance;
     float Distance;
+};
+
+struct ShadowRayload
+{
+    bool isHit;
 };
 
 struct InstanceData
@@ -109,5 +117,34 @@ float3 SphericalFibonacci(uint sampleIndex, uint numSamples, float rotation)
     return float3(cos(theta) * sinPhi, cosPhi, sin(theta) * sinPhi);
 }
 
+float DDGI_Shadow_Visibity(float3 PositionWS,
+                           float3 normalWS,
+                           float3 ToLight,
+                           RaytracingAccelerationStructure sceneTLAS)
+{
+    RayDesc shadowRayDesc;
+    shadowRayDesc.Origin = PositionWS + normalWS * 0.001f;
+    shadowRayDesc.Direction = ToLight;
+    shadowRayDesc.TMin = 0.f;
+    shadowRayDesc.TMax = DXR_SHADOW_MAX;
 
+    ShadowRayload shadowPayload;
+    shadowPayload.isHit = true;
+
+    TraceRay(sceneTLAS,
+             // 找到第一个遮挡就停止
+             RAY_FLAG_ACCEPT_FIRST_HIT_AND_END_SEARCH |
+             // 只跑 AnyHit 或 Miss
+             RAY_FLAG_SKIP_CLOSEST_HIT_SHADER |
+             RAY_FLAG_CULL_BACK_FACING_TRIANGLES,
+             0xFF,
+             0,
+             1,
+             0,
+             shadowRayDesc,
+             shadowPayload
+        );
+
+    return shadowPayload.isHit ? 0.f : 1.f;
+}
 #endif

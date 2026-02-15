@@ -6,7 +6,6 @@
 #define GROUP_SIZE 8
 #define IRRADIANCE_GROUP_SIZE 8
 #define DISTANCE_GROUP_SIZE 8
-#define DXR_Max 10000
 
 cbuffer PassConstant : register(b0, perPassSpace)
 {
@@ -55,13 +54,13 @@ void GenerateRayMain()
                                               g_GridOrigin,
                                               g_GridSpacing,
                                               g_GridDimensions) + g_ProbeOffsetBuffer[probeIndex];
-    float3 rayDir = SphericalFibonacci(rayIndex, Rays_Per_Probe, g_RandomRotation);
+    float3 rayDir = SphericalFibonacci(rayIndex, RAYS_PER_PROBE, g_RandomRotation);
 
     RayDesc rayDesc;
     rayDesc.Origin = rayOrigin;
     rayDesc.Direction = rayDir;
     rayDesc.TMin = 0.01f;
-    rayDesc.TMax = DXR_Max;
+    rayDesc.TMax = DXR_MAX;
 
     RayData rayData;
     rayData.Radiance = 0.f;
@@ -71,12 +70,12 @@ void GenerateRayMain()
              RAY_FLAG_NONE,
              0xFF,
              0,
-             1,
+             0,
              0,
              rayDesc,
              rayData);
 
-    uint writeIndex = probeIndex * Rays_Per_Probe + rayIndex;
+    uint writeIndex = probeIndex * RAYS_PER_PROBE + rayIndex;
     Elysia_DDGI_StoreRayData(writeIndex, rayData.Radiance, rayData.Distance);
 }
 
@@ -84,7 +83,13 @@ void GenerateRayMain()
 void RayMiss(inout RayData rayData)
 {
     rayData.Radiance = 0.f;
-    rayData.Distance = DXR_Max;
+    rayData.Distance = DXR_MAX;
+}
+
+[shader("miss")]
+void ShadowMiss(inout ShadowRayload shadowRayload)
+{
+    shadowRayload.isHit = false;
 }
 
 [shader("closesthit")]
@@ -94,7 +99,9 @@ void RayClosestHit(inout RayData rayData,
     UINT instanceID = InstanceID();
     uint primIdx = PrimitiveIndex();
 
-    InstanceData instanceData = g_InstanceDataBuffer[instanceID];
+    InstanceData instanceData = g_InstanceDataBuffer[globalGeometryIdx];
+    uint globalGeometryIdx = instanceData.BaseGeometryOffset + GeometryIndex();
+    // InstanceData instanceData = g_InstanceDataBuffer[instanceID];
 
     bool isBackFace = (HitKind() == HIT_KIND_TRIANGLE_BACK_FACE);
     StructuredBuffer<Vertex> vertices = ResourceDescriptorHeap[instanceData.VertexBufferIndex];
@@ -132,10 +139,17 @@ void RayClosestHit(inout RayData rayData,
 
     LightData mainLightData = GetMainLight(mainLight);
     float3 toLight = mainLightData.toLight;
-    float NoL = max(0.f, dot(N, toLight));
+    float NoL = dot(N, toLight);
 
-    float3 directRadiance = baseColorAlpha.rgb * mainLightData.color * mainLightData.intensity *
-                            NoL;
+    float3 directRadiance = 0.f;
+    if (NoL > 0.f)
+    {
+        float3 positionWS = WorldRayOrigin() + WorldRayDirection() * RayTCurrent();
+        // float shadow = DDGI_Shadow_Visibity(positionWS, N, toLight, g_SceneTLAS);
+        float shadow = 1;
+        directRadiance = baseColorAlpha.rgb * mainLightData.color * mainLightData.intensity * NoL *
+                         shadow;
+    }
 
     rayData.Radiance = directRadiance;
     rayData.Distance = RayTCurrent();

@@ -136,6 +136,7 @@ namespace ElysiaRenderer
         {
             auto& allEntities = SceneManager::GetInstance().GetEntities()[0]->GetChildren();
             auto entityCount = allEntities.size();
+
             m_instanceDatas.clear();
             m_instanceDatas.resize(entityCount);
             bool needFlushBarrier = false;
@@ -144,8 +145,10 @@ namespace ElysiaRenderer
             {
                 auto currEntity = allEntities[i].get();
                 if (!currEntity->GetBLASBuffer())
+                {
                     needFlushBarrier = true;
-                currEntity->GenerateBLAS(m_pDevice5, m_pCommand);
+                    currEntity->GenerateBLAS(m_pDevice5, m_pCommand);
+                }
                 m_instanceDatas[i] =
                 {
                     .BaseColorTexIndex = currEntity->pMeshRenderer->GetTextureIndices().Albedo,
@@ -208,6 +211,10 @@ namespace ElysiaRenderer
 
             m_gridSpacing = Vector3(spacingX, spacingY, spacingZ);
             m_gridOrigin = effectiveMin;
+        }
+        else
+        {
+            return;
         }
         if (!m_vertexBuffer->GetIsReady() || !m_indexBuffer->GetIsReady() || !m_pTLASBuffer || !
             m_pRayDataBuffer)
@@ -467,9 +474,15 @@ namespace ElysiaRenderer
             instanceDescs[i].InstanceID = UINT(i);                    // 对应 HLSL 中的 InstanceID()
             instanceDescs[i].InstanceContributionToHitGroupIndex = 0; // 对应 HitGroup 偏移
             instanceDescs[i].Flags = D3D12_RAYTRACING_INSTANCE_FLAG_NONE;
+
             auto entityWorld_M = entity->transform.GetWorldMatrix();
-            auto transporse_M = entityWorld_M.Transpose();
-            memcpy(instanceDescs[i].Transform, &transporse_M, sizeof(instanceDescs[i].Transform));
+            for (int row = 0; row < 3; ++row)
+            {
+                for (int col = 0; col < 4; ++col)
+                {
+                    instanceDescs[i].Transform[row][col] = entityWorld_M.m[row][col];
+                }
+            }
             // 关联BLAS
             instanceDescs[i].AccelerationStructure = entity->GetBLASBuffer()->GetGPUAddress();
         }
@@ -539,7 +552,8 @@ namespace ElysiaRenderer
             });
         }
 
-        m_pCommand->AddBarrier(*m_pTLASScratchBuffer, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+        m_pCommand->AddBarrier(*m_pTLASScratchBuffer, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, false);
+        m_pCommand->AddUAVBarrier(m_pTLASScratchBuffer);
 
         // Build
         D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC buildDesc =
@@ -739,47 +753,45 @@ namespace ElysiaRenderer
         lib->DefineExport(L"GenerateRayMain");
         lib->DefineExport(L"RayMiss");
         lib->DefineExport(L"RayClosestHit");
+        lib->DefineExport(L"ShadowMiss");
 
         // 创建 Hit Group 子对象
-        auto hitGroup = pipelineDesc.CreateSubobject<CD3DX12_HIT_GROUP_SUBOBJECT>();
+        auto opaqueHitGroup = pipelineDesc.CreateSubobject<CD3DX12_HIT_GROUP_SUBOBJECT>();
         // 必须匹配 HLSL 中 [shader("closesthit")] 标注的函数名
-        hitGroup->SetClosestHitShaderImport(L"RayClosestHit");
+        opaqueHitGroup->SetClosestHitShaderImport(L"RayClosestHit");
         // 给这个 Hit Group 取一个名字，后续用于 GetShaderIdentifier
-        hitGroup->SetHitGroupExport(L"ElysiaHitGroup");
+        opaqueHitGroup->SetHitGroupExport(L"OpaqueHitGroup");
         // 指定几何体类型为三角形
-        hitGroup->SetHitGroupType(D3D12_HIT_GROUP_TYPE_TRIANGLES);
+        opaqueHitGroup->SetHitGroupType(D3D12_HIT_GROUP_TYPE_TRIANGLES);
 
         auto shaderConfig = pipelineDesc.CreateSubobject<
             CD3DX12_RAYTRACING_SHADER_CONFIG_SUBOBJECT>();
-        // float4 color + float distance = 20 bytes, 建议稍微预留一点空间
+        // float4 color + float distance = 20 bytes
         uint32_t maxPayloadSize = 32;
         uint32_t maxAttributeSize = 8; // float2 barycentrics
         shaderConfig->Config(maxPayloadSize, maxAttributeSize);
+
+        auto pipelineConfig = pipelineDesc.CreateSubobject<
+            CD3DX12_RAYTRACING_PIPELINE_CONFIG_SUBOBJECT>();
+        pipelineConfig->Config(2);
 
         auto globalRootSig = pipelineDesc.CreateSubobject<
             CD3DX12_GLOBAL_ROOT_SIGNATURE_SUBOBJECT>();
         globalRootSig->SetRootSignature(pRootSignature);
 
-        auto pipelineConfig = pipelineDesc.CreateSubobject<
-            CD3DX12_RAYTRACING_PIPELINE_CONFIG_SUBOBJECT>();
-        // DDGI 通常是一次射出，不需要递归
-        pipelineConfig->Config(1);
-
         auto hr = m_pDevice5->CreateStateObject(pipelineDesc, IID_PPV_ARGS(&m_pRTPSO));
         if (SUCCEEDED(hr))
         {
-            // 构建成功后，提取 Shader ID 用于你的 SBTHelper
+            // 构建成功后，提取 Shader ID 用于SBTHelper
             CComPtr<ID3D12StateObjectProperties> pRTProps;
             m_pRTPSO->QueryInterface(IID_PPV_ARGS(&pRTProps));
 
-            void* rayGenID = pRTProps->GetShaderIdentifier(L"GenerateRayMain");
-            void* missID = pRTProps->GetShaderIdentifier(L"RayMiss");
-            void* hitGroupID = pRTProps->GetShaderIdentifier(L"ElysiaHitGroup");
+            m_stbHelper.AddRayGen(pRTProps->GetShaderIdentifier(L"GenerateRayMain"));
 
-            // 将这些 ID 存入你的 SBTHelper 即可开始 DispatchRays
-            m_stbHelper.AddRayGen(rayGenID);
-            m_stbHelper.AddMiss(missID);
-            m_stbHelper.AddHitGroup(hitGroupID);
+            m_stbHelper.AddMiss(pRTProps->GetShaderIdentifier(L"RayMiss"));
+            m_stbHelper.AddMiss(pRTProps->GetShaderIdentifier(L"ShadowMiss"));
+
+            m_stbHelper.AddHitGroup(pRTProps->GetShaderIdentifier(L"OpaqueHitGroup"));
         }
     }
     void GIPass::CreateDXRRootSignature(ID3D12Device* pDevice)

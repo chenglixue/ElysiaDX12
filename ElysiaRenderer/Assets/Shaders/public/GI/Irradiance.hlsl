@@ -99,7 +99,7 @@ float3 SampleDDGI(float3 positionWS,
             chebyshevWeight = max(chebyshevWeight * chebyshevWeight * chebyshevWeight, 0.0f);
         }
         // 避免权重完全为 0 导致全黑，设定一个极小的底值
-        weight *= max(0.05f, chebyshevWeight);
+        //weight *= max(0.05f, chebyshevWeight);
         weight = max(1e-6f, weight);
 
         // A small amount of light is visible due to logarithmic perception, so

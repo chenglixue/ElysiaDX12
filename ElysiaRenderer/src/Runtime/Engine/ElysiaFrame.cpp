@@ -119,21 +119,12 @@ namespace ElysiaEngine
     {
         if (m_Width && m_Height && m_pRenderer)
         {
-            auto hasMainCamera = CameraManager::GetInstance().GetMainCamera() != nullptr;
             CameraManager::GetInstance().CreateMainCamera(
-                Vector3(-11.5f - 1000.f, 200.85f, -0.45f) * 0.01f,
+                Vector3(-0.48, 5.2f, -0.31),
                 static_cast<float>(m_Width) / static_cast<float>(m_Height),
                 AMD_PI_OVER_4,
                 0.1f,
                 1000.f);
-            // if (!hasMainCamera)
-            // {
-            //     auto pCamera = CameraManager::GetInstance().GetMainCamera();
-            //     auto camEntity = std::make_unique<Entity>("Main Camera");
-            //     camEntity->Init(pCamera->m_transform);
-            //     camEntity->pAttachedCamera = pCamera;
-            //     SceneManager::GetInstance().AddEntity(std::move(camEntity));
-            // }
 
             m_pRenderer->OnDestroyWindowSizeDependentResources();
             m_pRenderer->OnCreateWindowSizeDependentResources(&m_swapChain, m_Width, m_Height);

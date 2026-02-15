@@ -41,7 +41,7 @@ MaxEmptyLinesToKeep: 1
 SortIncludes: Never
 
 # 每行最大长度
-ColumnLimit: 100  # 增加到120，为长参数列表留出空间
+ColumnLimit: 120  # 增加到120，为长参数列表留出空间
 
 # 针对构造函数初始化列表的缩进
 ConstructorInitializerIndentWidth: 4

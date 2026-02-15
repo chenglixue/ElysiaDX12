@@ -103,7 +103,9 @@ __debugbreak(); \
     class HrException : public std::runtime_error
     {
     public:
-        HrException(HRESULT hr) : std::runtime_error(HrToString(hr)), m_hr(hr)
+        HrException(HRESULT hr)
+            : std::runtime_error(HrToString(hr)),
+              m_hr(hr)
         {
         }
         HRESULT Error() const
@@ -126,7 +128,12 @@ __debugbreak(); \
         {
             wchar_t err[256];
             memset(err, 0, 256);
-            FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM, NULL, hr, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), err, 255,
+            FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM,
+                           NULL,
+                           hr,
+                           MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                           err,
+                           255,
                            NULL);
             char errA[256];
             size_t returnSize;
@@ -159,7 +166,8 @@ __debugbreak(); \
         return (uint64_t)((valueToAlign + alignment) & ~alignment);
     }
 
-    template <class T> void SafeRelease(T& ppT)
+    template <class T>
+    void SafeRelease(T& ppT)
     {
         if (ppT != nullptr)
         {
@@ -516,7 +524,9 @@ __debugbreak(); \
     {
         std::string Result;
         std::vector<char> Bufer(wstr.size());
-        std::use_facet<std::ctype<wchar_t>>(std::locale()).narrow(wstr.data(), wstr.data() + wstr.size(), '?',
+        std::use_facet<std::ctype<wchar_t>>(std::locale()).narrow(wstr.data(),
+                                                                  wstr.data() + wstr.size(),
+                                                                  '?',
                                                                   Bufer.data());
         Result = std::string(Bufer.data(), Bufer.size());
 
@@ -671,8 +681,12 @@ __debugbreak(); \
         LPWSTR buffer = nullptr;
         DWORD size = FormatMessageW(
             FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-            nullptr, hr, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-            (LPWSTR)&buffer, 0, nullptr);
+            nullptr,
+            hr,
+            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+            (LPWSTR)&buffer,
+            0,
+            nullptr);
 
         std::wstring out;
         if (size && buffer)
@@ -693,7 +707,8 @@ __debugbreak(); \
         HANDLE hFile = CreateFileW(
             path.c_str(),
             GENERIC_READ,
-            0, // 不共享
+            0,
+            // 不共享
             NULL,
             OPEN_EXISTING,
             FILE_ATTRIBUTE_NORMAL,
@@ -925,8 +940,18 @@ namespace eastl
 
 }
 
-void* operator new[](size_t size, const char* /*name*/, int /*flags*/, unsigned /*debugFlags*/, const char* /*file*/,
+void* operator new[](size_t size,
+                     const char* /*name*/,
+                     int /*flags*/,
+                     unsigned /*debugFlags*/,
+                     const char* /*file*/,
                      int /*line*/);
 
-void* operator new[](size_t size, size_t alignment, size_t alignmentOffset, const char* /*name*/, int /*flags*/,
-                     unsigned /*debugFlags*/, const char* /*file*/, int /*line*/);
+void* operator new[](size_t size,
+                     size_t alignment,
+                     size_t alignmentOffset,
+                     const char* /*name*/,
+                     int /*flags*/,
+                     unsigned /*debugFlags*/,
+                     const char* /*file*/,
+                     int /*line*/);

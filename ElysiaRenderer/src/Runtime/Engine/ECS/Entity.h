@@ -95,6 +95,7 @@ namespace ElysiaEngine
         BoundingBox m_localAABB;
         BufferHandle m_pBLASBuffer;
         BufferHandle m_pBLASScratchBuffer;
+        BufferHandle m_pBLASDescBuffer;
 
         BoundingBox LocalAABB() const noexcept;
         bool HasMeshRenderer() const noexcept;

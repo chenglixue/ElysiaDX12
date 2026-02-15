@@ -68,13 +68,13 @@ namespace ElysiaRenderer
     {
         std::unique_ptr<ElysiaModel::LoadedModel> loadedModel = std::make_unique<
             ElysiaModel::LoadedModel>();
-        ElysiaModel::LoadModel(filePath,
-                               bInvertTexcoordY,
-                               bImportMeshes,
-                               bImportSkeletons,
-                               bImportAnimations,
-                               scale,
-                               *loadedModel);
+        ElysiaModel::LoadGLTFModel(filePath,
+                                   bInvertTexcoordY,
+                                   bImportMeshes,
+                                   bImportSkeletons,
+                                   bImportAnimations,
+                                   scale,
+                                   *loadedModel);
 
         return loadedModel;
     }

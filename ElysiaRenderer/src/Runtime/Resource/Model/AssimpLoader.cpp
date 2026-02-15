@@ -1,12 +1,22 @@
 #include "stdafx.h"
 #include "AssimpLoader.h"
 
+#define ASSIMP_LOADER 1
+#define GLTF_LOADER 1
+
+#if ASSIMP_LOADER == 1
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+#endif
+
 #include "iosfwd"
 #include "LoadedModel.h"
 #include "Runtime/Core/DX12BufferResource.h"
+
+#define TINYGLTF_IMPLEMENTATION
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "src/ThirdParty/GLTF/tiny_gltf.h"
 
 namespace ElysiaModel
 {
@@ -30,6 +40,43 @@ namespace ElysiaModel
         eastl::vector<eastl::vector<int>> jointMap; // one per skeleton
     };
 
+    struct GltfAccessorView
+    {
+        const uint8_t* dataPtr = nullptr;
+        size_t stride = 0;
+        size_t count = 0;
+
+        bool IsValid() const
+        {
+            return dataPtr != nullptr;
+        }
+
+        template <typename T>
+        T Get(size_t index) const
+        {
+            // 使用 Stride 跳转到正确位置
+            return *reinterpret_cast<const T*>(dataPtr + (index * stride));
+        }
+    };
+
+    GltfAccessorView GetAccessorView(const tinygltf::Model& model, int accessorIdx)
+    {
+        if (accessorIdx < 0)
+            return {};
+        const auto& acc = model.accessors[accessorIdx];
+        const auto& view = model.bufferViews[acc.bufferView];
+        GltfAccessorView res;
+        res.count = acc.count;
+        // 如果 glTF 未指定 stride，则默认为紧凑排列
+        res.stride = view.byteStride == 0
+                         ? tinygltf::GetComponentSizeInBytes(acc.componentType) * tinygltf::GetNumComponentsInType(
+                               acc.type)
+                         : view.byteStride;
+        res.dataPtr = model.buffers[view.buffer].data.data() + acc.byteOffset + view.byteOffset;
+        return res;
+    }
+
+#if ASSIMP_LOADER == 1
     void LoadMaterials(const aiScene* pScene, LoadedModel& model)
     {
         model.materials.reserve(pScene->mNumMaterials);
@@ -179,153 +226,64 @@ namespace ElysiaModel
             {
                 material.textures[texType] = ElysiaRenderer::TextureManager::Handle::Invalid();
 
-                std::wstring path = fileDirectory;
+                std::wstring textureFileName = material.textureNames[texType];
+                std::wstring fullPath;
 
-                if (material.textureNames[texType].length() <= 0 || FileExists(
-                        path + material.textureNames[texType]) == false)
+                if (textureFileName.empty())
                 {
-                    bool hasTex = false;
+                    // 如果 glTF 没提供该贴图，根据类型分配默认兜底图
+                    fullPath = fileDirectory;
                     switch (static_cast<MaterialTextureType>(texType))
                     {
-                    case MaterialTextureType::Normal:
-                    {
-                        if (FileExists(
-                            path + RemoveLastUnderscoreAndAfter(
-                                material.textureNames[UINT64(MaterialTextureType::Albedo)]) +
-                            L"_Normal" + L".png"))
-                        {
-                            path += RemoveLastUnderscoreAndAfter(
-                                    material.textureNames[UINT64(MaterialTextureType::Albedo)]) +
-                                L"_Normal" + L".png";
-                            hasTex = true;
-                        }
-                        else if (FileExists(
-                            path + RemoveLastUnderscoreAndAfter(
-                                material.textureNames[UINT64(MaterialTextureType::Albedo)]) +
-                            L"_normal" + L".png"))
-                        {
-                            path += RemoveLastUnderscoreAndAfter(
-                                    material.textureNames[UINT64(MaterialTextureType::Albedo)]) +
-                                L"_normal" + L".png";
-                            hasTex = true;
-                        }
-                        break;
-                    }
-                    case MaterialTextureType::Metallic:
-                    {
-                        if (FileExists(
-                            path + RemoveLastUnderscoreAndAfter(
-                                material.textureNames[UINT64(MaterialTextureType::Albedo)]) +
-                            L"_Metallic" + L".png"))
-                        {
-                            path += RemoveLastUnderscoreAndAfter(
-                                    material.textureNames[UINT64(MaterialTextureType::Albedo)]) +
-                                L"_Metallic" + L".png";
-                            hasTex = true;
-                        }
-                        else if (FileExists(
-                            path + RemoveLastUnderscoreAndAfter(
-                                material.textureNames[UINT64(MaterialTextureType::Albedo)]) +
-                            L"_metallic" + L".png"))
-                        {
-                            path += RemoveLastUnderscoreAndAfter(
-                                    material.textureNames[UINT64(MaterialTextureType::Albedo)]) +
-                                L"_metallic" + L".png";
-                            hasTex = true;
-                        }
-                        break;
-                    }
+                    case MaterialTextureType::Albedo:
                     case MaterialTextureType::Roughness:
-                    {
-                        if (FileExists(
-                            path + RemoveLastUnderscoreAndAfter(
-                                material.textureNames[UINT64(MaterialTextureType::Albedo)]) +
-                            L"_Roughness" + L".png"))
-                        {
-                            path += RemoveLastUnderscoreAndAfter(
-                                    material.textureNames[UINT64(MaterialTextureType::Albedo)]) +
-                                L"_Roughness" + L".png";
-                            hasTex = true;
-                        }
-                        else if (FileExists(
-                            path + RemoveLastUnderscoreAndAfter(
-                                material.textureNames[UINT64(MaterialTextureType::Albedo)]) +
-                            L"_roughness" + L".png"))
-                        {
-                            path += RemoveLastUnderscoreAndAfter(
-                                    material.textureNames[UINT64(MaterialTextureType::Albedo)]) +
-                                L"_roughness" + L".png";
-                            hasTex = true;
-                        }
-                        break;
-                    }
                     case MaterialTextureType::Occlusion:
-                    {
-                        if (FileExists(
-                            path + RemoveLastUnderscoreAndAfter(material.textureNames[texType]) +
-                            L"_AO" + L".png"))
-                        {
-                            path += RemoveLastUnderscoreAndAfter(material.textureNames[texType]) +
-                                L"_AO" + L".png";
-                            hasTex = true;
-                        }
+                        fullPath += ElysiaRenderer::DefaultWhiteTexturePath;
                         break;
-                    }
-
+                    case MaterialTextureType::Normal:
+                        fullPath += ElysiaRenderer::DefaultNormalTexturePath;
+                        break;
                     default:
-                    {
+                        fullPath += ElysiaRenderer::DefaultBlackTexturePath;
                         break;
-                    }
-                    }
-                    if (!hasTex)
-                    {
-                        if (texType == static_cast<UINT64>(MaterialTextureType::Albedo) || texType
-                            == static_cast<UINT64>(MaterialTextureType::Roughness)
-                            || texType == static_cast<UINT64>(MaterialTextureType::Occlusion))
-                        {
-                            path += ElysiaRenderer::DefaultWhiteTexturePath;
-                        }
-                        else if (texType == static_cast<UINT64>(MaterialTextureType::Height) ||
-                                 texType == static_cast<UINT64>(MaterialTextureType::Emissive)
-                                 || texType == static_cast<UINT64>(MaterialTextureType::Metallic) ||
-                                 texType == static_cast<UINT64>(MaterialTextureType::Specular))
-                        {
-                            path += ElysiaRenderer::DefaultBlackTexturePath;
-                        }
-                        else if (texType == static_cast<UINT64>(MaterialTextureType::Normal))
-                        {
-                            path += ElysiaRenderer::DefaultNormalTexturePath;
-                        }
                     }
                 }
                 else
                 {
-                    path += material.textureNames[texType].c_str();
+                    // glTF 的路径解析逻辑：目录 + 文件名
+                    fullPath = textureFileName;
                 }
 
+                // 2. 资源去重检查 (防止 Metallic 和 Roughness 重复加载同一张 ORM 图)
+                bool alreadyLoaded = false;
                 const UINT64 numLoaded = materialTextures.Count();
                 for (UINT64 i = 0; i < numLoaded; i ++)
                 {
-                    if (materialTextures[i]->name == path)
+                    if (materialTextures[i]->name == fullPath)
                     {
                         material.textures[texType] = materialTextures[i]->texture;
                         material.textureIndices[texType] = static_cast<UINT32>(i);
+                        alreadyLoaded = true;
                         break;
                     }
                 }
 
-                if (!material.textures[texType].IsValid())
+                // 3. 执行动态加载
+                if (!alreadyLoaded)
                 {
                     auto newMatTexture = new MaterialTexture();
-                    newMatTexture->name = path;
-                    bool useSRGB = texType == static_cast<UINT64>(
-                                       MaterialTextureType::Albedo);
-                    newMatTexture->texture =
-                        ElysiaRenderer::TextureManager::GetInstance().
-                        LoadDynamicTexture((path), useSRGB);
+                    newMatTexture->name = fullPath;
+
+                    // glTF 规范：只有 BaseColor (Albedo) 和 Emissive 通常使用 sRGB
+                    // Normal, Metallic, Roughness, Occlusion 必须作为线性数据处理
+                    bool useSRGB = (texType == static_cast<UINT64>(MaterialTextureType::Albedo) ||
+                                    texType == static_cast<UINT64>(MaterialTextureType::Emissive));
+
+                    newMatTexture->texture = ElysiaRenderer::TextureManager::GetInstance().LoadDynamicTexture(
+                        fullPath,
+                        useSRGB);
 
                     UINT64 idx = materialTextures.Add(newMatTexture);
-
                     material.textures[texType] = newMatTexture->texture;
                     material.textureIndices[texType] = static_cast<UINT32>(idx);
                 }
@@ -424,7 +382,7 @@ namespace ElysiaModel
     void LoadedModel::Mesh::InitFromAssimpMesh(const aiMesh& assimpMesh,
                                                float sceneScale,
                                                MeshVertex* dstVertices,
-                                               UINT16* dstIndices)
+                                               UINT32* dstIndices)
     {
         numVertices = assimpMesh.mNumVertices;
         numIndices = assimpMesh.mNumFaces * 3;
@@ -543,13 +501,12 @@ namespace ElysiaModel
         auto fileDirectory = GetDirectoryFromFilePath(filePath);
 
         unsigned int flags = aiProcess_CalcTangentSpace | aiProcess_Triangulate |
-                             aiProcess_MakeLeftHanded | aiProcess_FlipWindingOrder
-                             | aiProcess_RemoveRedundantMaterials | aiProcess_JoinIdenticalVertices;
+                             aiProcess_MakeLeftHanded | aiProcess_JoinIdenticalVertices |
+                             aiProcess_GenSmoothNormals;
         if (bInvertTexcoordY)
         {
             flags |= aiProcess_FlipUVs;
         }
-        flags |= aiProcess_OptimizeMeshes;
         const aiScene* pScene = importer.ReadFile(fileNameAnsi, flags);
         model.name = WstringToString(
             GetFileName(RemoveExt(WstringToString(filePath).c_str()).c_str()));
@@ -591,4 +548,315 @@ namespace ElysiaModel
 
         return true;
     }
+#endif
+
+#if GLTF_LOADER == 1
+    void FillNodeData(
+        const tinygltf::Model& gltfModel,
+        int nodeIdx,
+        const Matrix& parentTransform,
+        float sceneScale,
+        bool bInvertY,
+        uint32_t& vtxOffset,
+        // 全局顶点计数器 (引用)
+        uint32_t& idxOffset,
+        // 全局索引计数器 (引用)
+        LoadedModel& model)
+    {
+        const auto& node = gltfModel.nodes[nodeIdx];
+
+        // 1. 计算变换矩阵
+        Matrix localTransform = Matrix::Identity;
+        if (node.matrix.size() == 16)
+        {
+            localTransform = Matrix((float*)node.matrix.data());
+        }
+        else
+        {
+            Vector3 S = node.scale.size() == 3
+                            ? Vector3((float)node.scale[0], (float)node.scale[1], (float)node.scale[2])
+                            : Vector3::One;
+            Quaternion R = node.rotation.size() == 4
+                               ? Quaternion((float)node.rotation[0],
+                                            (float)node.rotation[1],
+                                            (float)node.rotation[2],
+                                            (float)node.rotation[3])
+                               : Quaternion::Identity;
+            Vector3 T = node.translation.size() == 3
+                            ? Vector3((float)node.translation[0],
+                                      (float)node.translation[1],
+                                      (float)node.translation[2])
+                            : Vector3::Zero;
+            localTransform = Matrix::CreateScale(S) * Matrix::CreateFromQuaternion(R) * Matrix::CreateTranslation(T);
+        }
+
+        Matrix worldTransform = localTransform * parentTransform;
+
+        // 法线变换矩阵 (逆转置)，防止非均匀缩放导致法线错误
+        Matrix invTranspose = worldTransform;
+        invTranspose.Invert();
+        invTranspose.Transpose();
+
+        // 2. 处理几何数据
+        if (node.mesh >= 0)
+        {
+            const auto& gltfMesh = gltfModel.meshes[node.mesh];
+            for (const auto& prim : gltfMesh.primitives)
+            {
+                LoadedModel::Mesh newElysiaMesh;
+
+                // 修复名称：优先使用 Node 名，并附加全局唯一 ID，解决“全是 Mesh0”的问题
+                std::string baseName = node.name.empty() ? (gltfMesh.name.empty() ? "Mesh" : gltfMesh.name) : node.name;
+                newElysiaMesh.name = baseName + "_" + std::to_string(model.meshes.size());
+
+                newElysiaMesh.materialIndex = prim.material >= 0 ? prim.material : 0;
+
+                // 获取 Accessor Views
+                auto posView = GetAccessorView(gltfModel, prim.attributes.at("POSITION"));
+                auto normView = GetAccessorView(gltfModel,
+                                                prim.attributes.count("NORMAL") ? prim.attributes.at("NORMAL") : -1);
+                auto uvView = GetAccessorView(gltfModel,
+                                              prim.attributes.count("TEXCOORD_0")
+                                                  ? prim.attributes.at("TEXCOORD_0")
+                                                  : -1);
+                auto tanView = GetAccessorView(gltfModel,
+                                               prim.attributes.count("TANGENT") ? prim.attributes.at("TANGENT") : -1);
+
+                uint32_t vCount = (uint32_t)posView.count;
+
+                // 警告检查：16位索引限制
+                if (vCount > 0xFFFF)
+                {
+                    std::string msg = "WARNING: Mesh " + newElysiaMesh.name + " has " + std::to_string(vCount) +
+                                      " vertices. UINT16 Index Overflow imminent!\n";
+                    OutputDebugStringA(msg.c_str());
+                }
+
+                // -------------------------------------------------------
+                // 填充顶点
+                // -------------------------------------------------------
+                for (size_t v = 0; v < vCount; ++v)
+                {
+                    // 直接写入全局 buffer 的指定位置
+                    MeshVertex& vtx = model.vertices[vtxOffset + v];
+
+                    vtx.Position = Vector3::Transform(posView.Get<Vector3>(v) * sceneScale, worldTransform);
+
+                    if (normView.IsValid())
+                    {
+                        vtx.Normal = Vector3::TransformNormal(normView.Get<Vector3>(v), invTranspose);
+                        vtx.Normal.Normalize();
+                    }
+
+                    if (uvView.IsValid())
+                    {
+                        Vector2 uv = uvView.Get<Vector2>(v);
+                        vtx.UV = bInvertY ? Vector2(uv.x, 1.0f - uv.y) : uv;
+                    }
+
+                    if (tanView.IsValid())
+                    {
+                        // glTF切线是vec4
+                        Vector4 t = tanView.Get<Vector4>(v);
+                        vtx.Tangent = Vector3::TransformNormal(Vector3(t.x, t.y, t.z), worldTransform);
+                        vtx.Tangent.Normalize();
+                    }
+
+                    // 更新 AABB
+                    newElysiaMesh.aabbMin = Vector3::Min(newElysiaMesh.aabbMin, vtx.Position);
+                    newElysiaMesh.aabbMax = Vector3::Max(newElysiaMesh.aabbMax, vtx.Position);
+                }
+
+                // -------------------------------------------------------
+                // 填充索引 (核心修复区)
+                // -------------------------------------------------------
+                if (prim.indices >= 0)
+                {
+                    auto idxAcc = gltfModel.accessors[prim.indices];
+                    auto idxView = GetAccessorView(gltfModel, prim.indices);
+                    uint32_t iCount = (uint32_t)idxView.count;
+
+                    for (size_t i = 0; i < iCount; ++i)
+                    {
+                        // 读取原始索引值
+                        uint32_t localIdx = 0;
+                        if (idxAcc.componentType == 5123)               // unsigned short
+                            localIdx = ((uint16_t*)idxView.dataPtr)[i]; // 这里不需要 Stride，因为索引是紧凑的
+                        else if (idxAcc.componentType == 5125)          // unsigned int
+                            localIdx = ((uint32_t*)idxView.dataPtr)[i];
+                        else if (idxAcc.componentType == 5121) // unsigned byte
+                            localIdx = ((uint8_t*)idxView.dataPtr)[i];
+
+                        // 【核心修正】
+                        // 因为你在 InitCommon 里使用了 vb->GetGPUAddress() + vtxOffset
+                        // 所以这里的索引必须是【局部索引】(从 0 开始)。
+                        // 之前代码加了 vtxOffset，导致了双重偏移，所以画面炸裂。
+                        model.indices[idxOffset + i] = (uint32_t)(localIdx);
+                    }
+
+                    newElysiaMesh.numIndices = iCount;
+                    newElysiaMesh.idxOffset = idxOffset;
+                    idxOffset += iCount;
+                }
+
+                newElysiaMesh.numVertices = vCount;
+                newElysiaMesh.vtxOffset = vtxOffset;
+                vtxOffset += vCount; // 累加全局偏移
+
+                model.meshes.push_back(newElysiaMesh);
+            }
+        }
+
+        for (int child : node.children)
+            FillNodeData(gltfModel, child, worldTransform, sceneScale, bInvertY, vtxOffset, idxOffset, model);
+    }
+
+    bool LoadGLTFModel(const std::wstring& filePath,
+                       bool bInvertTexcoordY,
+                       bool bImportMeshes,
+                       bool bImportSkeletons,
+                       bool bImportAnimations,
+                       float scale,
+                       LoadedModel& model)
+    {
+        tinygltf::Model gltfModel;
+        tinygltf::TinyGLTF loader;
+        std::string err, warn;
+
+        std::string fileName = WstringToString(filePath);
+        if (!loader.LoadASCIIFromFile(&gltfModel, &err, &warn, fileName))
+        {
+            // 尝试加载二进制
+            if (!loader.LoadBinaryFromFile(&gltfModel, &err, &warn, fileName))
+                return false;
+        }
+
+        auto fileDir = GetDirectoryFromFilePath(filePath);
+
+        // 1. 加载材质与 Alpha 模式
+        for (const auto& gMat : gltfModel.materials)
+        {
+            LoadedMaterial elysiaMat;
+            elysiaMat.name = gMat.name;
+
+            // 自动分类 Alpha 模式，用于 SBT 绑定
+            if (gMat.alphaMode == "MASK")
+                elysiaMat.alpha = LoadedMaterial::Alpha::Masked;
+            else if (gMat.alphaMode == "BLEND")
+                elysiaMat.alpha = LoadedMaterial::Alpha::Blend;
+            else
+                elysiaMat.alpha = LoadedMaterial::Alpha::Opaque;
+
+            auto pbr = gMat.pbrMetallicRoughness;
+            elysiaMat.albedoFactor = Vector3((float)pbr.baseColorFactor[0],
+                                             (float)pbr.baseColorFactor[1],
+                                             (float)pbr.baseColorFactor[2]);
+            elysiaMat.normalFactor = gMat.normalTexture.scale;
+            elysiaMat.metallicFactor = (float)pbr.metallicFactor;
+            elysiaMat.roughnessFactor = (float)pbr.roughnessFactor;
+            elysiaMat.emissiveFactor = Vector3((float)gMat.emissiveFactor[0],
+                                               (float)gMat.emissiveFactor[1],
+                                               (float)gMat.emissiveFactor[2]);
+            elysiaMat.opacity = (float)pbr.baseColorFactor[3];
+            elysiaMat.specularFactor = 0.04f;
+
+            // 纹理映射逻辑
+            auto getTexPath = [&](int texIdx) -> std::wstring
+            {
+                if (texIdx < 0)
+                    return L"";
+                int imgIdx = gltfModel.textures[texIdx].source;
+                std::string uri = gltfModel.images[imgIdx].uri;
+                // 防止 uri 为空 (glb 内部纹理) 的情况，这里暂不处理 glb 纹理提取
+                if (uri.empty())
+                    return L"";
+                return fileDir + StringToWstring(uri);
+            };
+
+            elysiaMat.textureNames[(int)MaterialTextureType::Albedo] = getTexPath(pbr.baseColorTexture.index);
+            elysiaMat.textureNames[(int)MaterialTextureType::Normal] = getTexPath(gMat.normalTexture.index);
+            elysiaMat.textureNames[(int)MaterialTextureType::Emissive] = getTexPath(gMat.emissiveTexture.index);
+            int mrTexIdx = pbr.metallicRoughnessTexture.index;
+            if (mrTexIdx >= 0)
+            {
+                std::wstring mrPath = getTexPath(mrTexIdx);
+                elysiaMat.textureNames[(int)MaterialTextureType::Roughness] = mrPath;
+                elysiaMat.textureNames[(int)MaterialTextureType::Metallic] = mrPath;
+            }
+            int ocTexIdx = gMat.occlusionTexture.index;
+            if (ocTexIdx >= 0)
+            {
+                elysiaMat.textureNames[(int)MaterialTextureType::Occlusion] = getTexPath(ocTexIdx);
+            }
+
+            model.materials.push_back(elysiaMat);
+        }
+
+        LoadMaterialResource(model.materials, fileDir, model.materialTextures);
+
+        uint32_t totalV = 0, totalI = 0;
+        std::function<void(int)> preCount = [&](int n)
+        {
+            const auto& node = gltfModel.nodes[n];
+            if (node.mesh >= 0)
+            {
+                for (const auto& p : gltfModel.meshes[node.mesh].primitives)
+                {
+                    totalV += (uint32_t)gltfModel.accessors[p.attributes.at("POSITION")].count;
+                    if (p.indices >= 0)
+                        totalI += (uint32_t)gltfModel.accessors[p.indices].count;
+                }
+            }
+            for (int c : node.children)
+                preCount(c);
+        };
+        const auto& scene = gltfModel.scenes[gltfModel.defaultScene >= 0 ? gltfModel.defaultScene : 0];
+        for (int r : scene.nodes)
+            preCount(r);
+
+        model.vertices.resize(totalV);
+        model.indices.resize(totalI);
+        model.meshes.clear();
+
+        uint32_t currentV = 0, currentI = 0;
+        for (int r : scene.nodes)
+            FillNodeData(gltfModel, r, Matrix::Identity, scale, bInvertTexcoordY, currentV, currentI, model);
+
+        // 3. 构建 GPU 资源
+        auto vb = ElysiaRenderer::BufferManager::GetInstance().CreateVertexBuffer(model);
+        auto ib = ElysiaRenderer::BufferManager::GetInstance().CreateIndexBuffer({
+            .name = StringToWstring(model.name + " Index Buffer"),
+            .stride = 0,
+            .size = model.indices.size() * sizeof(UINT32),
+            .viewFlags = ElysiaCore::GPUResourceFlags::SRV | ElysiaCore::GPUResourceFlags::UAV,
+            .accessFlags = ElysiaCore::BufferAccessFlags::GPUOnly,
+            .isRawAccess = true,
+            .InitData = model.indices.data()
+        });
+
+        // 映射回 Mesh 结构
+        for (auto& mesh : model.meshes)
+        {
+            // 注意：InitCommon 使用了偏移后的地址
+            mesh.InitCommon(vb->GetGPUAddress() + (uint64)mesh.vtxOffset * sizeof(MeshVertex),
+                            ib->GetGPUAddress() + (uint64)mesh.idxOffset * sizeof(UINT32),
+                            mesh.vtxOffset,
+                            mesh.idxOffset);
+        }
+
+        auto vbView = D3D12_VERTEX_BUFFER_VIEW{vb->GetGPUAddress(), (UINT)totalV * (UINT)sizeof(MeshVertex),
+                                               (UINT)sizeof(MeshVertex)};
+        auto ibView = D3D12_INDEX_BUFFER_VIEW{ib->GetGPUAddress(), (UINT)totalI * (UINT)sizeof(UINT32),
+                                              DXGI_FORMAT_R32_UINT};
+
+        ElysiaRenderer::BufferManager::GetInstance().SetGlobalVertexBuffer(std::move(vb));
+        ElysiaRenderer::BufferManager::GetInstance().SetGlobalIndexBuffer(std::move(ib));
+        ElysiaRenderer::BufferManager::GetInstance().SetGlobalVertexBufferView(std::move(vbView));
+        ElysiaRenderer::BufferManager::GetInstance().SetGlobalIndexBufferView(std::move(ibView));
+
+        CalculateModelTransformFromBounds(model);
+
+        return true;
+    }
+#endif
 }

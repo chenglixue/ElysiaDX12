@@ -63,39 +63,61 @@ namespace ElysiaEngine
 
     void Entity::GenerateBLAS(ID3D12Device5* pDevice, DX12GraphicsContext* pCommand)
     {
-        if (m_pBLASBuffer && m_pBLASScratchBuffer)
+        if (m_pBLASBuffer && m_pBLASScratchBuffer || !pMeshRenderer)
             return;
 
-        auto mesh = pMeshRenderer->GetMesh();
-        auto rootVBView = mesh.vbView;
-        auto rootIBView = mesh.ibView;
+        // auto mesh = pMeshRenderer->GetMesh();
+        auto& model = pMeshRenderer->m_pModel;
+        UINT64 numSubMeshes = model->meshes.size();
+        if (numSubMeshes == 0)
+            return;
 
-        D3D12_RAYTRACING_GEOMETRY_DESC geometryDesc = {};
-        geometryDesc.Type = D3D12_RAYTRACING_GEOMETRY_TYPE_TRIANGLES;
-        geometryDesc.Flags = D3D12_RAYTRACING_GEOMETRY_FLAG_OPAQUE;
+        std::vector<D3D12_RAYTRACING_GEOMETRY_DESC> tempGeometryDescs;
+        tempGeometryDescs.reserve(numSubMeshes);
 
-        // describe vertex、index
-        auto& triangles = geometryDesc.Triangles;
-        triangles.VertexBuffer.StartAddress = rootVBView.BufferLocation;
-        triangles.VertexBuffer.StrideInBytes = rootVBView.StrideInBytes;
-        triangles.VertexCount = rootVBView.SizeInBytes / rootVBView.StrideInBytes;
-        triangles.VertexFormat = DXGI_FORMAT_R32G32B32_FLOAT;
-
-        triangles.IndexBuffer = rootIBView.BufferLocation;
-        triangles.IndexCount = rootIBView.SizeInBytes / ElysiaModel::IndexSize();
-        triangles.IndexFormat = rootIBView.Format;
-
-        triangles.Transform3x4 = 0;
-
-        // Prebuild Info
-        D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS buildInputs =
+        for (const auto& subMesh : model->meshes)
         {
-            .Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL,
-            .Flags = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PREFER_FAST_TRACE,
-            .NumDescs = 1,
-            .DescsLayout = D3D12_ELEMENTS_LAYOUT_ARRAY,
-            .pGeometryDescs = &geometryDesc,
-        };
+            D3D12_RAYTRACING_GEOMETRY_DESC gd = {};
+            gd.Type = D3D12_RAYTRACING_GEOMETRY_TYPE_TRIANGLES;
+
+            // 判定材质是否不透明 (Opaque)
+            // Sponza 的旗帜等 Mask 材质不能带此 Flag，否则 AnyHit 不起作用
+            auto& material = model->materials[subMesh.materialIndex];
+            gd.Flags = D3D12_RAYTRACING_GEOMETRY_FLAG_OPAQUE;
+            // if (material.alpha == LoadedMaterial::Alpha::Opaque)
+            // {
+            //     gd.Flags = D3D12_RAYTRACING_GEOMETRY_FLAG_OPAQUE;
+            // }
+            // else
+            // {
+            //     gd.Flags = D3D12_RAYTRACING_GEOMETRY_FLAG_NONE;
+            // }
+
+            auto& triangles = gd.Triangles;
+            auto rootVBView = subMesh.vbView;
+            auto rootIBView = subMesh.ibView;
+
+            // 直接使用 subMesh 在 InitCommon 中已经计算好的 GPU 地址
+            triangles.VertexBuffer.StartAddress = rootVBView.BufferLocation;
+            triangles.VertexBuffer.StrideInBytes = rootVBView.StrideInBytes;
+            triangles.VertexCount = subMesh.numVertices;
+            triangles.VertexFormat = DXGI_FORMAT_R32G32B32_FLOAT;
+
+            triangles.IndexBuffer = rootIBView.BufferLocation;
+            triangles.IndexCount = subMesh.numIndices;
+            triangles.IndexFormat = DXGI_FORMAT_R32_UINT;
+
+            triangles.Transform3x4 = 0; // 局部空间无需变换
+
+            tempGeometryDescs.emplace_back(gd);
+        }
+
+        D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS buildInputs = {};
+        buildInputs.Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL;
+        buildInputs.Flags = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PREFER_FAST_TRACE;
+        buildInputs.NumDescs = static_cast<UINT>(tempGeometryDescs.size());
+        buildInputs.DescsLayout = D3D12_ELEMENTS_LAYOUT_ARRAY;
+        buildInputs.pGeometryDescs = tempGeometryDescs.data();
 
         D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO prebuildInfo = {};
         pDevice->GetRaytracingAccelerationStructurePrebuildInfo(&buildInputs, &prebuildInfo);
