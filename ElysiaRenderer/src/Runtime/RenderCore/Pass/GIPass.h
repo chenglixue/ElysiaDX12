@@ -64,7 +64,7 @@ namespace ElysiaRenderer
         static inline constexpr UINT NumIndices = 60;
         static inline constexpr UINT Probe_Count = 10648;
         static inline const UINT3 Grid_Dimensions = UINT3(22, 22, 22);
-        static inline constexpr UINT Rays_Per_Probe = 64;
+        static inline constexpr UINT Rays_Per_Probe = 32;
         static inline float m_RandomRotation;
 
     public:
@@ -174,7 +174,8 @@ namespace ElysiaRenderer
         void ProbeBlend();
 
         CComPtr<IDxcBlob> CompileRaytracingLibrary(const std::wstring& fileName);
-        void CreateRaytracingPipeline(ID3D12RootSignature* pRootSignature);
+        void CreateRaytracingPipeline(ID3D12RootSignature* pRootSignature,
+                                      const std::vector<std::unique_ptr<Entity>>& entities);
         void CreateDXRRootSignature(ID3D12Device* pDevice);
         void GenerateTLAS(const std::vector<std::unique_ptr<Entity>>& entityies);
         std::vector<D3D12_SAMPLER_DESC> GenerateSampler();

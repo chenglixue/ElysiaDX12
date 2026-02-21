@@ -70,7 +70,7 @@ void GenerateRayMain()
              RAY_FLAG_NONE,
              0xFF,
              0,
-             0,
+             1,
              0,
              rayDesc,
              rayData);
@@ -99,9 +99,8 @@ void RayClosestHit(inout RayData rayData,
     UINT instanceID = InstanceID();
     uint primIdx = PrimitiveIndex();
 
+    uint globalGeometryIdx = instanceID + GeometryIndex();
     InstanceData instanceData = g_InstanceDataBuffer[globalGeometryIdx];
-    uint globalGeometryIdx = instanceData.BaseGeometryOffset + GeometryIndex();
-    // InstanceData instanceData = g_InstanceDataBuffer[instanceID];
 
     bool isBackFace = (HitKind() == HIT_KIND_TRIANGLE_BACK_FACE);
     StructuredBuffer<Vertex> vertices = ResourceDescriptorHeap[instanceData.VertexBufferIndex];
@@ -145,8 +144,7 @@ void RayClosestHit(inout RayData rayData,
     if (NoL > 0.f)
     {
         float3 positionWS = WorldRayOrigin() + WorldRayDirection() * RayTCurrent();
-        // float shadow = DDGI_Shadow_Visibity(positionWS, N, toLight, g_SceneTLAS);
-        float shadow = 1;
+        float shadow = DDGI_Shadow_Visibity(positionWS, N, toLight, g_SceneTLAS);
         directRadiance = baseColorAlpha.rgb * mainLightData.color * mainLightData.intensity * NoL *
                          shadow;
     }

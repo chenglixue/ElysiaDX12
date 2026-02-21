@@ -3,7 +3,7 @@
 #include "ShadingCommon.hlsl"
 
 #define PROBE_COUNT 10648
-#define RAYS_PER_PROBE 64
+#define RAYS_PER_PROBE 32
 #define DDGI_PROBE_NUM_TEXELS 8
 #define DXR_MAX 10000
 #define DXR_SHADOW_MAX 1e27f

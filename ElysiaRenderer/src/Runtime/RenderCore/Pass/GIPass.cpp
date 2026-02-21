@@ -136,9 +136,10 @@ namespace ElysiaRenderer
         {
             auto& allEntities = SceneManager::GetInstance().GetEntities()[0]->GetChildren();
             auto entityCount = allEntities.size();
+            auto instanceSize = entityCount * allEntities[0]->pMeshRenderer->m_pModel->meshes.size();
 
             m_instanceDatas.clear();
-            m_instanceDatas.resize(entityCount);
+            m_instanceDatas.reserve(instanceSize);
             bool needFlushBarrier = false;
             // first is root list
             for (UINT i = 0; i < entityCount; i ++)
@@ -149,20 +150,28 @@ namespace ElysiaRenderer
                     needFlushBarrier = true;
                     currEntity->GenerateBLAS(m_pDevice5, m_pCommand);
                 }
-                m_instanceDatas[i] =
+                const auto& materials = currEntity->pMeshRenderer->m_pModel->materials;
+                for (auto& mesh : currEntity->pMeshRenderer->m_pModel->meshes)
                 {
-                    .BaseColorTexIndex = currEntity->pMeshRenderer->GetTextureIndices().Albedo,
-                    .NormalTexIndex = currEntity->pMeshRenderer->GetTextureIndices().Normal,
-                    .MetallicTexIndex = currEntity->pMeshRenderer->GetTextureIndices().Metallic,
-                    .RoughnessTexIndex = currEntity->pMeshRenderer->GetTextureIndices().Roughness,
+                    m_instanceDatas.emplace_back(InstanceData
+                    {
+                        .BaseColorTexIndex = materials[mesh.materialIndex].
+                        textures[UINT64(MaterialTextureType::Albedo)].GetResourceHeapIndex(),
+                        .NormalTexIndex = materials[mesh.materialIndex].
+                        textures[UINT64(MaterialTextureType::Normal)].GetResourceHeapIndex(),
+                        .MetallicTexIndex = materials[mesh.materialIndex].
+                        textures[UINT64(MaterialTextureType::Metallic)].GetResourceHeapIndex(),
+                        .RoughnessTexIndex = materials[mesh.materialIndex].
+                        textures[UINT64(MaterialTextureType::Roughness)].GetResourceHeapIndex(),
 
-                    .VertexOffset = currEntity->pMeshRenderer->GetMesh().vtxOffset,
-                    .IndexOffset = currEntity->pMeshRenderer->GetMesh().idxOffset,
-                    .VertexBufferIndex = BufferManager::GetInstance().GetGlobalVertexBuffer()->
-                                                                      GetResourceHeapIndex(),
-                    .IndexBufferIndex = BufferManager::GetInstance().GetGlobalIndexBuffer()->
-                                                                     GetResourceHeapIndex()
-                };
+                        .VertexOffset = mesh.vtxOffset,
+                        .IndexOffset = mesh.idxOffset,
+                        .VertexBufferIndex = BufferManager::GetInstance().GetGlobalVertexBuffer()->
+                                                                          GetResourceHeapIndex(),
+                        .IndexBufferIndex = BufferManager::GetInstance().GetGlobalIndexBuffer()->
+                                                                         GetResourceHeapIndex()
+                    });
+                }
             }
             if (needFlushBarrier)
             {
@@ -178,7 +187,7 @@ namespace ElysiaRenderer
                 {
                     .name = L"GI Instance Data",
                     .stride = sizeof(InstanceData),
-                    .size = sizeof(InstanceData) * entityCount,
+                    .size = instanceSize * sizeof(InstanceData),
                     .viewFlags = GPUResourceFlags::SRV,
                     .accessFlags = BufferAccessFlags::HostWritable,
                     .isRawAccess = false,
@@ -189,9 +198,14 @@ namespace ElysiaRenderer
             {
                 memcpy(m_pInstanceDataBuffer->GetMappedBuffer(),
                        m_instanceDatas.data(),
-                       sizeof(InstanceData) * entityCount);
+                       instanceSize * sizeof(InstanceData));
             }
             GenerateTLAS(allEntities);
+            if (!m_pRTPSO || !m_pGlobalRootSig)
+            {
+                CreateRaytracingPipeline(m_pGlobalRootSig, allEntities);
+                m_stbHelper.Build(m_pDevice->GetDevice(), m_pRTPSO);
+            }
 
             const Entity* pEntity = SceneManager::GetInstance().GetEntities()[0].get();
             auto sceneAABB = pEntity->GetWorldAABB();
@@ -252,8 +266,6 @@ namespace ElysiaRenderer
             assert(m_DXRBlob && m_pDevice->GetDevice());
             {
                 CreateDXRRootSignature(m_pDevice->GetDevice());
-                CreateRaytracingPipeline(m_pGlobalRootSig);
-                m_stbHelper.Build(m_pDevice->GetDevice(), m_pRTPSO);
             }
         }
 
@@ -466,13 +478,14 @@ namespace ElysiaRenderer
         // 定义实例描述符 (Instance Desc)
         std::vector<std::string> instanceNames(entityCount);
         std::vector<D3D12_RAYTRACING_INSTANCE_DESC> instanceDescs(entityCount);
+        uint32_t currentHitGroupOffset = 0;
         for (UINT64 i = 0; i < entityCount; ++i)
         {
             const auto& entity = entityies[i];
             instanceNames[i] = std::string(entity->name.c_str());
-            instanceDescs[i].InstanceMask = 0xFF;                     // 与 TraceRay 的 mask 匹配
-            instanceDescs[i].InstanceID = UINT(i);                    // 对应 HLSL 中的 InstanceID()
-            instanceDescs[i].InstanceContributionToHitGroupIndex = 0; // 对应 HitGroup 偏移
+            instanceDescs[i].InstanceMask = 0xFF;                                         // 与 TraceRay 的 mask 匹配
+            instanceDescs[i].InstanceID = currentHitGroupOffset;                          // 对应 HLSL 中的 InstanceID()
+            instanceDescs[i].InstanceContributionToHitGroupIndex = currentHitGroupOffset; // 对应 HitGroup 偏移
             instanceDescs[i].Flags = D3D12_RAYTRACING_INSTANCE_FLAG_NONE;
 
             auto entityWorld_M = entity->transform.GetWorldMatrix();
@@ -485,6 +498,8 @@ namespace ElysiaRenderer
             }
             // 关联BLAS
             instanceDescs[i].AccelerationStructure = entity->GetBLASBuffer()->GetGPUAddress();
+
+            currentHitGroupOffset += entity->pMeshRenderer->m_pModel->meshes.size();
         }
 
         size_t bufferSize = sizeof(D3D12_RAYTRACING_INSTANCE_DESC) * entityCount;
@@ -737,7 +752,8 @@ namespace ElysiaRenderer
         assert(pShader);
         return pShader;
     }
-    void GIPass::CreateRaytracingPipeline(ID3D12RootSignature* pRootSignature)
+    void GIPass::CreateRaytracingPipeline(ID3D12RootSignature* pRootSignature,
+                                          const std::vector<std::unique_ptr<Entity>>& entities)
     {
         CD3DX12_STATE_OBJECT_DESC pipelineDesc(D3D12_STATE_OBJECT_TYPE_RAYTRACING_PIPELINE);
 
@@ -791,7 +807,14 @@ namespace ElysiaRenderer
             m_stbHelper.AddMiss(pRTProps->GetShaderIdentifier(L"RayMiss"));
             m_stbHelper.AddMiss(pRTProps->GetShaderIdentifier(L"ShadowMiss"));
 
-            m_stbHelper.AddHitGroup(pRTProps->GetShaderIdentifier(L"OpaqueHitGroup"));
+            for (auto& entity : entities)
+            {
+                auto& pModel = entity->pMeshRenderer->m_pModel;
+                for (size_t meshIndex = 0; meshIndex < pModel->meshes.size(); meshIndex ++)
+                {
+                    m_stbHelper.AddHitGroup(pRTProps->GetShaderIdentifier(L"OpaqueHitGroup"));
+                }
+            }
         }
     }
     void GIPass::CreateDXRRootSignature(ID3D12Device* pDevice)
