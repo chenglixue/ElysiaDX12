@@ -2,6 +2,7 @@
 #include "private\DDGICommon.hlsli"
 #include <private\Light.hlsl>
 #include <private\LightCommon.hlsl>
+#include "public\GI\Irradiance.hlsl"
 
 #define GROUP_SIZE 8
 #define IRRADIANCE_GROUP_SIZE 8
@@ -12,9 +13,17 @@ cbuffer PassConstant : register(b0, perPassSpace)
     float4 g_GridSpacing;
     float4 g_GridOrigin;
     float4 g_GridDimensions;
+    float4 g_IrradianceTexSize;
+    float4 g_DistanceTexSize;
 
-    uint g_RayDataBufferIndex;
+    UINT g_RayDataBufferIndex;
+    UINT g_IrradianceTexIndex;
+    UINT g_DistanceTexIndex;
     float g_RandomRotation;
+
+    float g_ProbeNormalBias;
+    float g_ProbeViewBias;
+    float g_DDGIEncodingGamma;
 }
 
 RaytracingAccelerationStructure g_SceneTLAS : register(t0);
@@ -141,15 +150,36 @@ void RayClosestHit(inout RayData rayData,
     float NoL = dot(N, toLight);
 
     float3 directRadiance = 0.f;
+    float3 positionWS = WorldRayOrigin() + WorldRayDirection() * RayTCurrent();
     if (NoL > 0.f)
     {
-        float3 positionWS = WorldRayOrigin() + WorldRayDirection() * RayTCurrent();
         float shadow = DDGI_Shadow_Visibity(positionWS, N, toLight, g_SceneTLAS);
         directRadiance = baseColorAlpha.rgb * mainLightData.color * mainLightData.intensity * NoL *
                          shadow;
     }
 
-    rayData.Radiance = directRadiance;
+    float3 indirectIrradiance = SampleDDGI(
+        positionWS,
+        N,
+        DDGIGetSurfaceBias(N,
+                           WorldRayDirection(),
+                           g_ProbeNormalBias,
+                           g_ProbeViewBias),
+        g_GridOrigin,
+        g_GridSpacing,
+        g_GridDimensions,
+        g_DDGIEncodingGamma,
+        g_IrradianceTexSize,
+        g_IrradianceTexIndex,
+        g_DistanceTexSize,
+        g_DistanceTexIndex,
+        g_ProbeOffsetBuffer,
+        g_ClampLinearSampler
+        );
+    float maxAlbedo = 0.9f;
+    float3 indirectRadiance = min(baseColorAlpha.rgb, maxAlbedo) / PI * indirectIrradiance;
+
+    rayData.Radiance = directRadiance + indirectRadiance;
     rayData.Distance = RayTCurrent();
 
     if (isBackFace)

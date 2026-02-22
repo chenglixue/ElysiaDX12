@@ -3,10 +3,11 @@
 #include "ShadingCommon.hlsl"
 
 #define PROBE_COUNT 10648
-#define RAYS_PER_PROBE 32
+#define RAYS_PER_PROBE 64
 #define DDGI_PROBE_NUM_TEXELS 8
 #define DXR_MAX 10000
 #define DXR_SHADOW_MAX 1e27f
+#define RTXGI_DDGI_NUM_VOLUMES 6
 
 
 struct Vertex
@@ -118,12 +119,12 @@ float3 SphericalFibonacci(uint sampleIndex, uint numSamples, float rotation)
 }
 
 float DDGI_Shadow_Visibity(float3 PositionWS,
-                           float3 normalWS,
+                           float3 NormalWS,
                            float3 ToLight,
-                           RaytracingAccelerationStructure sceneTLAS)
+                           RaytracingAccelerationStructure SceneTLAS)
 {
     RayDesc shadowRayDesc;
-    shadowRayDesc.Origin = PositionWS + normalWS * 0.001f;
+    shadowRayDesc.Origin = PositionWS + NormalWS * 0.001f;
     shadowRayDesc.Direction = ToLight;
     shadowRayDesc.TMin = 0.f;
     shadowRayDesc.TMax = DXR_SHADOW_MAX;
@@ -131,7 +132,7 @@ float DDGI_Shadow_Visibity(float3 PositionWS,
     ShadowRayload shadowPayload;
     shadowPayload.isHit = true;
 
-    TraceRay(sceneTLAS,
+    TraceRay(SceneTLAS,
              // 找到第一个遮挡就停止
              RAY_FLAG_ACCEPT_FIRST_HIT_AND_END_SEARCH |
              // 只跑 AnyHit 或 Miss
@@ -146,5 +147,24 @@ float DDGI_Shadow_Visibity(float3 PositionWS,
         );
 
     return shadowPayload.isHit ? 0.f : 1.f;
+}
+
+float CalculateDDGIWeight(float3 PositionWS,
+                          float3 NormalWS,
+                          float3 probePosWS)
+{
+    float weight = 1.f;
+
+    // Normal Weight
+    // 防止探针在表面背面却贡献了光照
+    float3 dirToProbe = normalize(probePosWS - PositionWS);
+    float cosTheta = dot(dirToProbe, NormalWS);
+
+    weight *= pow(saturate(cosTheta * 0.5f + 0.5f), 2.0f);
+
+    float3 v = probePosWS - PositionWS;
+    float dist = length(v);
+
+    return max(weight, 0.0001f);
 }
 #endif

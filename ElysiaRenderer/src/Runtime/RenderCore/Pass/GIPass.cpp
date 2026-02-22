@@ -281,9 +281,17 @@ namespace ElysiaRenderer
             Vector4 g_GridSpacing;
             Vector4 g_GridOrigin;
             Vector4 g_GridDimensions;
+            Vector4 g_IrradianceTexSize;
+            Vector4 g_DistanceTexSize;
 
             uint g_RayDataBufferIndex;
+            UINT g_IrradianceTexIndex;
+            UINT g_DistanceTexIndex;
             float g_RandomRotation;
+
+            float g_ProbeNormalBias;
+            float g_ProbeViewBias;
+            float g_DDGIEncodingGamma;
         } constantData;
         constexpr UINT constantSize = sizeof(constantData) / 4;
 
@@ -301,7 +309,12 @@ namespace ElysiaRenderer
                                             Grid_Dimensions.y,
                                             Grid_Dimensions.z,
                                             0.f),
+                .g_IrradianceTexSize = GetScreenSize(m_pIrradianceRT->GetWidth(), m_pIrradianceRT->GetHeight()),
+                .g_DistanceTexSize = GetScreenSize(m_pDistanceRT->GetWidth(), m_pDistanceRT->GetHeight()),
+
                 .g_RayDataBufferIndex = m_pRayDataBuffer->GetUAVResourceHeapIndex(),
+                .g_IrradianceTexIndex = m_pIrradianceRT->GetUAVResourceHeapIndex(),
+                .g_DistanceTexIndex = m_pDistanceRT->GetUAVResourceHeapIndex(),
                 .g_RandomRotation = m_RandomRotation = UserData::GetInstance().GIParameter.
                                                                                enableLine
                                                            ? 0
@@ -309,6 +322,9 @@ namespace ElysiaRenderer
                                                                static_cast<float>(m_frameIndex) *
                                                                k_GoldenAngle,
                                                                2.0f * 3.14159265f),
+                .g_ProbeNormalBias = UserData::GetInstance().GIParameter.normalBias,
+                .g_ProbeViewBias = UserData::GetInstance().GIParameter.viewBias,
+                .g_DDGIEncodingGamma = UserData::GetInstance().GIParameter.gamma,
             };
 
             UINT rootParameterIndex = 0;
@@ -825,7 +841,7 @@ namespace ElysiaRenderer
 
         // 假设我们需要 16 个 32位常量 (比如一个 ViewProj 矩阵或一组索引)
         UINT rootParameterIndex = 0;
-        rootParameters[rootParameterIndex ++].InitAsConstants(16, 0, 2);
+        rootParameters[rootParameterIndex ++].InitAsConstants(28, 0, 2);
         rootParameters[rootParameterIndex ++].InitAsConstantBufferView(0, PER_FRAME_SPACE);
 
         UINT SRVIndex = 0;

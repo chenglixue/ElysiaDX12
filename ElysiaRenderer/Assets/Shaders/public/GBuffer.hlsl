@@ -215,6 +215,7 @@ FEncodeGBufferData GetEncodeGBufferData(FInputParams inputParams, float3 toLight
     o.Anisotropy = 0;
     o.DiffuseColor = o.BaseColor - o.BaseColor * o.Metallic;
     o.SpecularColor = ComputeF0(o.Specular, o.BaseColor, o.Metallic);
+
     o.IBL = SampleDDGI(inputParams.PositionWS,
                        o.WorldNormal,
                        DDGIGetSurfaceBias(o.WorldNormal,
@@ -232,6 +233,7 @@ FEncodeGBufferData GetEncodeGBufferData(FInputParams inputParams, float3 toLight
                        g_ProbeOffsetsIndex,
                        ClampLinearSampler
                 ) * g_AmbientTint;
+    o.IBL = SRGBToLinear(baseColor.rgb) / PI * o.IBL;
 
     return o;
 }
