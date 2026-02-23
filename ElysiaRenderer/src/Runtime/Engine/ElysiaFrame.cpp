@@ -120,7 +120,9 @@ namespace ElysiaEngine
         if (m_Width && m_Height && m_pRenderer)
         {
             CameraManager::GetInstance().CreateMainCamera(
-                Vector3(-0.48, 5.2f, -0.31),
+                SceneManager::GetInstance().GetEntities().empty()
+                    ? Vector3(-0.48, 5.2f, -0.31)
+                    : SceneManager::GetInstance().GetEntities()[0]->GetWorldAABB().Center,
                 static_cast<float>(m_Width) / static_cast<float>(m_Height),
                 AMD_PI_OVER_4,
                 0.1f,
@@ -561,6 +563,14 @@ namespace ElysiaEngine
                                (float*)&pUserData.GIParameter.gamma,
                                1.f,
                                10.f);
+            ImGui::SliderFloat("GI Irradiance Threshold",
+                               (float*)&pUserData.GIParameter.probeIrradianceThreshold,
+                               0.001f,
+                               0.5f);
+            ImGui::SliderFloat("GI Brightness Threshold",
+                               (float*)&pUserData.GIParameter.probeBrightnessThreshold,
+                               1.f,
+                               5.f);
         }
 
         if (ImGui::CollapsingHeader("HDR"))

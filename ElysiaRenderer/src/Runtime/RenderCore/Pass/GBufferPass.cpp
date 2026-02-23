@@ -116,6 +116,16 @@ namespace ElysiaRenderer
             auto meshData = MeshData
             {
                 .world_M = renderItems[i].worldMatrix,
+
+                .baseColorUVTransform = TextureTransformToVector4(
+                    materialData.textureTransforms[(UINT)MaterialTextureType::Albedo]),
+                .normalUVTransform = TextureTransformToVector4(
+                    materialData.textureTransforms[(UINT)MaterialTextureType::Normal]),
+                .occlusionUVTransform = TextureTransformToVector4(
+                    materialData.textureTransforms[(UINT)MaterialTextureType::Occlusion]),
+                .metallicRoughnessUVTransform = TextureTransformToVector4(
+                    materialData.textureTransforms[(UINT)MaterialTextureType::Metallic]),
+
                 .opacity = materialData.opacity,
                 .cutoff = 0.5,
                 .baseColorTexIndex = textureIndices.Albedo,

@@ -16,6 +16,7 @@
 
 #define TINYGLTF_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "Programs/Log.h"
 #include "src/ThirdParty/GLTF/tiny_gltf.h"
 
 namespace ElysiaModel
@@ -59,6 +60,87 @@ namespace ElysiaModel
         }
     };
 
+    static float ByteToFloat(int8_t b)
+    {
+        return fmaxf(b / 127.0f, -1.0f);
+    }
+    static float UByteToFloat(uint8_t b)
+    {
+        return b / 255.0f;
+    }
+    static float ShortToFloat(int16_t b)
+    {
+        return fmaxf(b / 32767.0f, -1.0f);
+    }
+    static float UShortToFloat(uint16_t b)
+    {
+        return b / 65535.0f;
+    }
+    static float IntToFloat(int32_t b)
+    {
+        return fmaxf(b / (float)INT32_MAX, -1.0f);
+    }
+    static float UIntToFloat(uint32_t b)
+    {
+        return b / (float)UINT32_MAX;
+    }
+
+    template <typename T>
+    static const T* GetBufferDataPtr(const tinygltf::Accessor& accessor,
+                                     const tinygltf::BufferView& bufferView,
+                                     const tinygltf::Buffer& buffer,
+                                     size_t componentCount,
+                                     size_t elementIndex,
+                                     size_t componentIndex)
+    {
+        const size_t compSize = sizeof(T);
+        const size_t stride = bufferView.byteStride == 0 ? componentCount * compSize : bufferView.byteStride;
+        return (T*)&buffer.data[accessor.byteOffset + bufferView.byteOffset + elementIndex * stride + componentIndex *
+                                compSize];
+    }
+
+    static Matrix GetLocalNodeTransform(const tinygltf::Node& node)
+    {
+        if (!node.matrix.empty())
+        {
+            return Matrix((float*)node.matrix.data());
+        }
+
+        Vector3 scale = node.scale.size() == 3
+                            ? Vector3((float)node.scale[0], (float)node.scale[1], (float)node.scale[2])
+                            : Vector3::One;
+
+        Quaternion rot = node.rotation.size() == 4
+                             ? Quaternion((float)node.rotation[0],
+                                          (float)node.rotation[1],
+                                          (float)node.rotation[2],
+                                          (float)node.rotation[3])
+                             : Quaternion::Identity;
+
+        Vector3 trans = node.translation.size() == 3
+                            ? Vector3((float)node.translation[0],
+                                      (float)node.translation[1],
+                                      (float)node.translation[2])
+                            : Vector3::Zero;
+
+        return Matrix::CreateScale(scale) * Matrix::CreateFromQuaternion(rot) * Matrix::CreateTranslation(trans);
+    }
+
+    inline D3D12_TEXTURE_ADDRESS_MODE GetDxAddressMode(int gltfWrap)
+    {
+        switch (gltfWrap)
+        {
+        case 10497:
+            return D3D12_TEXTURE_ADDRESS_MODE_WRAP; // REPEAT
+        case 33648:
+            return D3D12_TEXTURE_ADDRESS_MODE_MIRROR; // MIRRORED_REPEAT
+        case 33071:
+            return D3D12_TEXTURE_ADDRESS_MODE_CLAMP; // CLAMP_TO_EDGE
+        default:
+            return D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+        }
+    }
+
     GltfAccessorView GetAccessorView(const tinygltf::Model& model, int accessorIdx)
     {
         if (accessorIdx < 0)
@@ -74,6 +156,26 @@ namespace ElysiaModel
                          : view.byteStride;
         res.dataPtr = model.buffers[view.buffer].data.data() + acc.byteOffset + view.byteOffset;
         return res;
+    }
+
+    float NormalizeComponent(const unsigned char* ptr, int componentType)
+    {
+        switch (componentType)
+        {
+        case TINYGLTF_COMPONENT_TYPE_FLOAT:
+            return *(const float*)ptr;
+        case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT: // 5123
+            return *(const uint16_t*)ptr / 65535.0f;
+        case TINYGLTF_COMPONENT_TYPE_SHORT: // 5122 <--- 重点检查这里！
+            // AMD 做法：fmaxf(val / 32767.0f, -1.0f)
+            return fmaxf(*(const int16_t*)ptr / 32767.0f, -1.0f);
+        case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE: // 5121
+            return *(const uint8_t*)ptr / 255.0f;
+        case TINYGLTF_COMPONENT_TYPE_BYTE: // 5120
+            return fmaxf(*(const int8_t*)ptr / 127.0f, -1.0f);
+        default:
+            return 0.0f;
+        }
     }
 
 #if ASSIMP_LOADER == 1
@@ -566,30 +668,7 @@ namespace ElysiaModel
         const auto& node = gltfModel.nodes[nodeIdx];
 
         // 1. 计算变换矩阵
-        Matrix localTransform = Matrix::Identity;
-        if (node.matrix.size() == 16)
-        {
-            localTransform = Matrix((float*)node.matrix.data());
-        }
-        else
-        {
-            Vector3 S = node.scale.size() == 3
-                            ? Vector3((float)node.scale[0], (float)node.scale[1], (float)node.scale[2])
-                            : Vector3::One;
-            Quaternion R = node.rotation.size() == 4
-                               ? Quaternion((float)node.rotation[0],
-                                            (float)node.rotation[1],
-                                            (float)node.rotation[2],
-                                            (float)node.rotation[3])
-                               : Quaternion::Identity;
-            Vector3 T = node.translation.size() == 3
-                            ? Vector3((float)node.translation[0],
-                                      (float)node.translation[1],
-                                      (float)node.translation[2])
-                            : Vector3::Zero;
-            localTransform = Matrix::CreateScale(S) * Matrix::CreateFromQuaternion(R) * Matrix::CreateTranslation(T);
-        }
-
+        Matrix localTransform = GetLocalNodeTransform(node);
         Matrix worldTransform = localTransform * parentTransform;
 
         // 法线变换矩阵 (逆转置)，防止非均匀缩放导致法线错误
@@ -603,12 +682,17 @@ namespace ElysiaModel
             const auto& gltfMesh = gltfModel.meshes[node.mesh];
             for (const auto& prim : gltfMesh.primitives)
             {
+                if (prim.mode != TINYGLTF_MODE_TRIANGLES)
+                    continue;
+
+                float minU = 1e10f, maxU = -1e10f;
+                float minV = 1e10f, maxV = -1e10f;
+
                 LoadedModel::Mesh newElysiaMesh;
 
                 // 修复名称：优先使用 Node 名，并附加全局唯一 ID，解决“全是 Mesh0”的问题
                 std::string baseName = node.name.empty() ? (gltfMesh.name.empty() ? "Mesh" : gltfMesh.name) : node.name;
                 newElysiaMesh.name = baseName + "_" + std::to_string(model.meshes.size());
-
                 newElysiaMesh.materialIndex = prim.material >= 0 ? prim.material : 0;
 
                 // 获取 Accessor Views
@@ -623,14 +707,22 @@ namespace ElysiaModel
                                                prim.attributes.count("TANGENT") ? prim.attributes.at("TANGENT") : -1);
 
                 uint32_t vCount = (uint32_t)posView.count;
-
-                // 警告检查：16位索引限制
-                if (vCount > 0xFFFF)
+                // --- 自适应倍率计算逻辑 ---
+                if (uvView.IsValid())
                 {
-                    std::string msg = "WARNING: Mesh " + newElysiaMesh.name + " has " + std::to_string(vCount) +
-                                      " vertices. UINT16 Index Overflow imminent!\n";
-                    OutputDebugStringA(msg.c_str());
+                    for (size_t v = 0; v < vCount; ++v)
+                    {
+                        Vector2 uv = uvView.Get<Vector2>(v);
+                        minU = fminf(minU, uv.x);
+                        maxU = fmaxf(maxU, uv.x);
+                        minV = fminf(minV, uv.y);
+                        maxV = fmaxf(maxV, uv.y);
+                    }
                 }
+                float rangeU = maxU - minU;
+                float rangeV = maxV - minV;
+                bool bNeedsNormalizationU = (rangeU > 0.001f && rangeU < 0.7f);
+                bool bNeedsNormalizationV = (rangeV > 0.001f && rangeV < 0.7f);
 
                 // -------------------------------------------------------
                 // 填充顶点
@@ -639,7 +731,6 @@ namespace ElysiaModel
                 {
                     // 直接写入全局 buffer 的指定位置
                     MeshVertex& vtx = model.vertices[vtxOffset + v];
-
                     vtx.Position = Vector3::Transform(posView.Get<Vector3>(v) * sceneScale, worldTransform);
 
                     if (normView.IsValid())
@@ -648,9 +739,24 @@ namespace ElysiaModel
                         vtx.Normal.Normalize();
                     }
 
+                    // --- 第二遍填充数据 ---
+                    // ... 前面的 Position 计算 ...
                     if (uvView.IsValid())
                     {
                         Vector2 uv = uvView.Get<Vector2>(v);
+
+                        // 如果 U 被压缩了，将其映射回 0..1
+                        if (bNeedsNormalizationU)
+                        {
+                            uv.x = (uv.x - minU) / rangeU;
+                        }
+                        // 如果 V 被压缩了，将其映射回 0..1
+                        if (bNeedsNormalizationV)
+                        {
+                            uv.y = (uv.y - minV) / rangeV;
+                        }
+
+                        // 最后应用 DX 翻转
                         vtx.UV = bInvertY ? Vector2(uv.x, 1.0f - uv.y) : uv;
                     }
 

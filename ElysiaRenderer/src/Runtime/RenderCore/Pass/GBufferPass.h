@@ -108,6 +108,12 @@ PASS(DRAW_GBUFFER_PASS,         "public\\GBuffer.hlsl", false, PS)
         {
             Matrix world_M;
 
+            Vector4 baseColorUVTransform;
+            Vector4 normalUVTransform;
+            Vector4 emissiveUVTransform;
+            Vector4 occlusionUVTransform;
+            Vector4 metallicRoughnessUVTransform;
+
             float opacity;
             float cutoff;
             UINT baseColorTexIndex;

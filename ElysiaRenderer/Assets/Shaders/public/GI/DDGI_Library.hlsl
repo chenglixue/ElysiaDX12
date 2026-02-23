@@ -158,28 +158,34 @@ void RayClosestHit(inout RayData rayData,
                          shadow;
     }
 
-    float3 indirectIrradiance = SampleDDGI(
-        positionWS,
-        N,
-        DDGIGetSurfaceBias(N,
-                           WorldRayDirection(),
-                           g_ProbeNormalBias,
-                           g_ProbeViewBias),
-        g_GridOrigin,
-        g_GridSpacing,
-        g_GridDimensions,
-        g_DDGIEncodingGamma,
-        g_IrradianceTexSize,
-        g_IrradianceTexIndex,
-        g_DistanceTexSize,
-        g_DistanceTexIndex,
-        g_ProbeOffsetBuffer,
-        g_ClampLinearSampler
-        );
-    float maxAlbedo = 0.9f;
-    float3 indirectRadiance = min(baseColorAlpha.rgb, maxAlbedo) / PI * indirectIrradiance;
+    float blendWeight = DDGIGetVolumeBlendWeight(positionWS, g_GridOrigin, g_GridSpacing, 0, float4(0, 0, 0, 1));
 
-    rayData.Radiance = directRadiance + indirectRadiance;
+    if (blendWeight > 0.f)
+    {
+        float3 indirectIrradiance = SampleDDGI(
+            positionWS,
+            N,
+            DDGIGetSurfaceBias(N,
+                               -WorldRayDirection(),
+                               g_ProbeNormalBias,
+                               g_ProbeViewBias),
+            g_GridOrigin,
+            g_GridSpacing,
+            g_GridDimensions,
+            g_DDGIEncodingGamma,
+            g_IrradianceTexSize,
+            g_IrradianceTexIndex,
+            g_DistanceTexSize,
+            g_DistanceTexIndex,
+            g_ProbeOffsetBuffer,
+            g_WarpLinearSampler
+            );
+        float maxAlbedo = 0.9f;
+        float3 indirectRadiance = min(baseColorAlpha.rgb, maxAlbedo) / PI * indirectIrradiance;
+        indirectRadiance *= blendWeight;
+        rayData.Radiance += indirectRadiance;
+    }
+    rayData.Radiance += directRadiance;
     rayData.Distance = RayTCurrent();
 
     if (isBackFace)

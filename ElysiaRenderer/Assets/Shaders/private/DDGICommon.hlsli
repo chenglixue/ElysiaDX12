@@ -118,6 +118,41 @@ float3 SphericalFibonacci(uint sampleIndex, uint numSamples, float rotation)
     return float3(cos(theta) * sinPhi, cosPhi, sin(theta) * sinPhi);
 }
 
+/**
+ * Returns the largest component of the vector.
+ */
+float DDGIMaxComponent(float3 a)
+{
+    return max(a.x, max(a.y, a.z));
+}
+
+
+/**
+ * Rotate vector v with quaternion q.
+ */
+float3 DDGIQuaternionRotate(float3 v, float4 q)
+{
+    float3 b = q.xyz;
+    float b2 = dot(b, b);
+    return (v * (q.w * q.w - b2) + b * (dot(v, b) * 2.f) + cross(b, v) * (q.w * 2.f));
+}
+
+/**
+ * Quaternion conjugate.
+ * For unit quaternions, conjugate equals inverse.
+ * Use this to create a quaternion that rotates in the opposite direction.
+ */
+float4 DDGIQuaternionConjugate(float4 q)
+{
+    return float4(-q.xyz, q.w);
+}
+
+float DDGILinearRGBToLuminance(float3 rgb)
+{
+    const float3 LuminanceWeights = float3(0.2126, 0.7152, 0.0722);
+    return dot(rgb, LuminanceWeights);
+}
+
 float DDGI_Shadow_Visibity(float3 PositionWS,
                            float3 NormalWS,
                            float3 ToLight,
@@ -166,5 +201,32 @@ float CalculateDDGIWeight(float3 PositionWS,
     float dist = length(v);
 
     return max(weight, 0.0001f);
+}
+
+float DDGIGetVolumeBlendWeight(float3 positionWS,
+                               float3 gridOrigin,
+                               float3 gridSpacing,
+                               int3 probeScrollOffsets,
+                               float4 rotation)
+{
+    // Get the volume's origin and extent
+    float3 origin = gridOrigin + (probeScrollOffsets * gridSpacing);
+    float3 extent = (gridSpacing * (PROBE_COUNT - 1)) * 0.5f;
+
+    // Get the delta between the (rotated volume) and the world-space position
+    float3 position = (positionWS - origin);
+    position = abs(DDGIQuaternionRotate(position, DDGIQuaternionConjugate(rotation)));
+
+    float3 delta = position - extent;
+    if (all(delta < 0))
+        return 1.f;
+
+    // Adjust the blend weight for each axis
+    float volumeBlendWeight = 1.f;
+    volumeBlendWeight *= (1.f - saturate(delta.x / gridSpacing.x));
+    volumeBlendWeight *= (1.f - saturate(delta.y / gridSpacing.y));
+    volumeBlendWeight *= (1.f - saturate(delta.z / gridSpacing.z));
+
+    return volumeBlendWeight;
 }
 #endif

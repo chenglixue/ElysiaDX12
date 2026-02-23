@@ -14,6 +14,8 @@ namespace ElysiaRenderer
         float viewBias;
         float blendWeight = 0.97f;
         float gamma = 5.f;
+        float probeIrradianceThreshold;
+        float probeBrightnessThreshold;
     };
 
     void DebugDumpTLASInstances(

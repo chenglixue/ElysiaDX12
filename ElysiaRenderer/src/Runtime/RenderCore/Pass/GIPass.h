@@ -47,6 +47,8 @@ namespace ElysiaRenderer
             static inline size_t g_ProbeViewBias = PropertyToID(L"g_ProbeViewBias");
             static inline size_t g_DDGIBlendWeight = PropertyToID(L"g_DDGIBlendWeight");
             static inline size_t g_DDGIEncodingGamma = PropertyToID(L"g_DDGIEncodingGamma");
+            static inline size_t g_ProbeIrradianceThreshold = PropertyToID(L"g_ProbeIrradianceThreshold");
+            static inline size_t g_ProbeBrightnessThreshold = PropertyToID(L"g_ProbeBrightnessThreshold");
         };
 
         static inline D3D12_VERTEX_BUFFER_VIEW m_vertexView;

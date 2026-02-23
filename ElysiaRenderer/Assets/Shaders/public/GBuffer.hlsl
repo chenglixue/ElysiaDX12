@@ -53,6 +53,12 @@ struct MeshData
 {
     Matrix world_M;
 
+    Vector4 baseColorUVTransform;
+    Vector4 normalUVTransform;
+    Vector4 emissiveUVTransform;
+    Vector4 occlusionUVTransform;
+    Vector4 metallicRoughnessUVTransform;
+
     float opacity;
     float cutoff;
     UINT baseColorTexIndex;
@@ -171,23 +177,31 @@ FEncodeGBufferData GetEncodeGBufferData(FInputParams inputParams, float3 toLight
     MeshData currMeshData = meshDataBuffer[meshDataIndex];
 
     float4 baseColor = SampleTexture2D(currMeshData.baseColorTexIndex,
-                                       inputParams.objectUV,
+                                       inputParams.objectUV * currMeshData.baseColorUVTransform.xy + currMeshData.
+                                                                                                     baseColorUVTransform
+                                                                                                     .zw,
                                        WarpLinearSampler)
                        * float4(currMeshData.baseColorTint, currMeshData.opacity);
     baseColor.rgb = AMDTonemapInvert(baseColor);
     clip(baseColor.a - currMeshData.cutoff);
 
     float4 normalTS = SampleTexture2D(currMeshData.normalTexIndex,
-                                      inputParams.objectUV,
+                                      inputParams.objectUV * currMeshData.baseColorUVTransform.xy + currMeshData.
+                                                                                                    normalUVTransform
+                                                                                                    .zw,
                                       WarpLinearSampler);
 
     float metallic = SampleTexture2D(currMeshData.metallicTexIndex,
-                                     inputParams.objectUV,
+                                     inputParams.objectUV * currMeshData.baseColorUVTransform.xy + currMeshData.
+                                                                                                   metallicRoughnessUVTransform
+                                                                                                   .zw,
                                      WarpLinearSampler).b;
     metallic = saturate(metallic * currMeshData.metallicIntensity);
 
     float roughness = SampleTexture2D(currMeshData.roughnessTexIndex,
-                                      inputParams.objectUV,
+                                      inputParams.objectUV * currMeshData.baseColorUVTransform.xy + currMeshData.
+                                                                                                    metallicRoughnessUVTransform
+                                                                                                    .zw,
                                       WarpLinearSampler).g;
     roughness = saturate(roughness * currMeshData.roughnessIntensity);
 
@@ -216,24 +230,32 @@ FEncodeGBufferData GetEncodeGBufferData(FInputParams inputParams, float3 toLight
     o.DiffuseColor = o.BaseColor - o.BaseColor * o.Metallic;
     o.SpecularColor = ComputeF0(o.Specular, o.BaseColor, o.Metallic);
 
-    o.IBL = SampleDDGI(inputParams.PositionWS,
-                       o.WorldNormal,
-                       DDGIGetSurfaceBias(o.WorldNormal,
-                                          inputParams.ScreenVector,
-                                          g_ProbeNormalBias,
-                                          g_ProbeViewBias),
-                       g_GridOrigin,
-                       g_GridSpacing,
-                       g_GridDimensions,
-                       g_DDGIEncodingGamma,
-                       g_IrradianceTexSize,
-                       g_IrradianceTexIndex,
-                       g_DistanceTexSize,
-                       g_DistanceTexIndex,
-                       g_ProbeOffsetsIndex,
-                       ClampLinearSampler
-                ) * g_AmbientTint;
-    o.IBL = SRGBToLinear(baseColor.rgb) / PI * o.IBL;
+    float blendWeight = DDGIGetVolumeBlendWeight(inputParams.PositionWS,
+                                                 g_GridOrigin,
+                                                 g_GridSpacing,
+                                                 0,
+                                                 float4(0, 0, 0, 1));
+    if (blendWeight > 0.f)
+    {
+        o.IBL = SampleDDGI(inputParams.PositionWS,
+                           o.WorldNormal,
+                           DDGIGetSurfaceBias(o.WorldNormal,
+                                              inputParams.ScreenVector,
+                                              g_ProbeNormalBias,
+                                              g_ProbeViewBias),
+                           g_GridOrigin,
+                           g_GridSpacing,
+                           g_GridDimensions,
+                           g_DDGIEncodingGamma,
+                           g_IrradianceTexSize,
+                           g_IrradianceTexIndex,
+                           g_DistanceTexSize,
+                           g_DistanceTexIndex,
+                           g_ProbeOffsetsIndex,
+                           WarpLinearSampler
+                    ) * g_AmbientTint;
+        o.IBL = baseColor.rgb / PI * o.IBL;
+    }
 
     return o;
 }

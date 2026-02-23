@@ -13,6 +13,9 @@ cbuffer PassConstant : register(b0, perPassSpace)
     UINT g_DistanceTexIndex;
     float g_RandomRotation;
     float g_DDGIBlendWeight;
+    float g_ProbeIrradianceThreshold;
+    float g_ProbeBrightnessThreshold;
+    float g_DDGIEncodingGamma;
 }
 
 static const float PROBE_MIN_FRONTFACE_DIST = 0.3f; // 距离墙面多远
@@ -183,6 +186,9 @@ void ProbeBlending(uint3 id : SV_DispatchThreadID,
     UINT probeIndex = GroupID.x + (GroupID.y * g_GridDimensions.x);
     uint N = DDGI_PROBE_NUM_TEXELS;
 
+    if (probeIndex >= PROBE_COUNT || probeIndex < 0)
+        return;
+
     // 将 [1, 6] 映射到八面体坐标的 [-1, 1]
     bool isBorder = (GroupThreadID.x == 0 || GroupThreadID.x == (DDGI_PROBE_NUM_TEXELS - 1) ||
                      GroupThreadID.y == 0 || GroupThreadID.y == (DDGI_PROBE_NUM_TEXELS - 1));
@@ -195,6 +201,7 @@ void ProbeBlending(uint3 id : SV_DispatchThreadID,
         float4 accumulatedIrradiance = 0.0f;
         float2 accumulatedDist = 0.0f;
         float distSumWeight = 0.f;
+        float probeMaxRayDistance = length(g_GridSpacing) * 1.5f;
         for (int r = 0; r < RAYS_PER_PROBE; r ++)
         {
             float3 rayDir = SphericalFibonacci(r, RAYS_PER_PROBE, g_RandomRotation);
@@ -213,29 +220,62 @@ void ProbeBlending(uint3 id : SV_DispatchThreadID,
             if (weight > 0.f)
             {
                 // NVIDIA 建议：距离权重的指数通常更高（如 16.0），这能让遮挡判定更锐利
-                float distWeight = pow(weight, 16.0f);
-                float absDist = abs(rayData.Distance);
+                float distWeight = pow(weight, 50.0f);
+                float absDist = min(abs(rayData.Distance), probeMaxRayDistance);
 
                 accumulatedDist += float2(absDist * distWeight, (absDist * absDist) * distWeight);
                 distSumWeight += distWeight;
             }
         }
+        float epsilon = float(RAYS_PER_PROBE) * 1e-9f;
+        float invGamma = 1.0f / g_DDGIEncodingGamma;
 
         // NVIDIA 建议除以 (2.0 * sumWeight) 以匹配漫反射积分
         float3 netIrradiance = accumulatedIrradiance.rgb /
-                               (2.0f * max(accumulatedIrradiance.a, 1e-6f));
-        float2 netDist = accumulatedDist / max(distSumWeight, 1e-6f);
+                               (2.0f * max(accumulatedIrradiance.a, epsilon));
+        netIrradiance = pow(netIrradiance, invGamma);
+        float2 netDist = accumulatedDist / max(distSumWeight, epsilon);
 
         float4 historyIrradiance = Elysia_DDGI_LoadIrradiance(id.xy);
         float2 historyDist = Elysia_DDGI_LoadDist(id.xy);
         float hysteresis = saturate(g_DDGIBlendWeight); // 历史权重
+        float3 delta = (netIrradiance - historyIrradiance);
 
         // 如果历史是黑的，直接覆盖（防止冷启动过慢）
         if (dot(historyIrradiance, historyIrradiance) == 0.0f)
+        {
             hysteresis = 0.0f;
+        }
 
-        float3 finalColor = lerp(netIrradiance, historyIrradiance, hysteresis);
-        float2 finalDist = lerp(netDist, historyDist, hysteresis);
+        // 亮度剧变检测 (Irradiance Thresholding)
+        // 如果新旧颜色分量差异过大，认为光源发生了剧烈移动，强行降低滞后，加快刷新
+        if (DDGIMaxComponent(historyIrradiance - netIrradiance) > g_ProbeIrradianceThreshold)
+        {
+            hysteresis = max(0.0f, hysteresis - 0.75f); // 瞬间变得非常“敏锐”
+        }
+
+        // 亮度增幅限制 (Brightness Thresholding)
+        // 防止由于 Ray Tracing 噪声产生的极亮像素导致探针闪烁
+        float luminanceDelta = DDGILinearRGBToLuminance(historyIrradiance - netIrradiance);
+        if (luminanceDelta > g_ProbeBrightnessThreshold)
+        {
+            delta *= 0.25f; // 限制本次更新的步长
+        }
+
+        // 能量收敛优化 (Darkening Convergence)
+        // 解决在低亮度下（UNORM 格式）由于混合精度不足导致的颜色“卡住”不消失的问题
+        static const float c_threshold = 1.f / 1024.f;
+        float3 lerpDelta = (1.f - hysteresis) * delta;
+        // 如果是在变暗，确保至少步进一个最小单位
+        if (DDGIMaxComponent(netIrradiance) < DDGIMaxComponent(historyIrradiance))
+        {
+            lerpDelta = min(max(c_threshold, abs(lerpDelta)), abs(delta)) * sign(lerpDelta);
+        }
+
+        float2 distDelta = (netDist - historyDist);
+
+        float3 finalColor = historyIrradiance + lerpDelta;
+        float2 finalDist = historyDist + (1.0f - hysteresis) * distDelta; // 共享由亮度触发的 hysteresis
         Elysia_DDGI_StoreIrradiance(id.xy, finalColor);
         Elysia_DDGI_StoreDist(id.xy, finalDist);
     }

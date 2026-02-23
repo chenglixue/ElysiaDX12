@@ -463,6 +463,15 @@ namespace ElysiaRenderer
             m_pMaterial->SetFloat(ShaderIDs::g_DDGIBlendWeight,
                                   UserData::GetInstance().GIParameter.blendWeight,
                                   passID);
+            m_pMaterial->SetFloat(ShaderIDs::g_ProbeIrradianceThreshold,
+                                  UserData::GetInstance().GIParameter.probeIrradianceThreshold,
+                                  passID);
+            m_pMaterial->SetFloat(ShaderIDs::g_ProbeBrightnessThreshold,
+                                  UserData::GetInstance().GIParameter.probeBrightnessThreshold,
+                                  passID);
+            m_pMaterial->SetFloat(ShaderIDs::g_DDGIEncodingGamma,
+                                  UserData::GetInstance().GIParameter.gamma,
+                                  passID);
             // m_pMaterial->SetFloat3(ShaderIDs::g_GridSpacing, m_gridSpacing);
             m_pMaterial->SetFloat3(ShaderIDs::g_GridDimensions,
                                    Vector3(Grid_Dimensions.x,

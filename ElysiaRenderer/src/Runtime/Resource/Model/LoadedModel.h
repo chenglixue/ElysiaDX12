@@ -39,6 +39,21 @@ namespace ElysiaModel
         Count
     };
 
+    struct TextureTransform
+    {
+        Vector2 offset = {0.0f, 0.0f};
+        Vector2 scale = {1.0f, 1.0f};
+        int texCoord = 0; // glTF 支持 TEXCOORD_0, TEXCOORD_1 等
+    };
+
+    inline Vector4 TextureTransformToVector4(const TextureTransform& tran)
+    {
+        return Vector4(tran.scale.x,
+                       tran.scale.y,
+                       tran.offset.x,
+                       tran.offset.y);
+    }
+
     struct MeshVertex
     {
         Vector3 Position;
@@ -104,6 +119,7 @@ namespace ElysiaModel
         std::wstring textureNames[UINT64(MaterialTextureType::Count)];
         ElysiaRenderer::TextureManager::Handle textures[uint64(MaterialTextureType::Count)] = {};
         UINT32 textureIndices[uint64(MaterialTextureType::Count)] = {};
+        TextureTransform textureTransforms[static_cast<size_t>(MaterialTextureType::Count)];
     };
 
 #define INDEX_FORMAT UINT16

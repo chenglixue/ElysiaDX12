@@ -23,6 +23,7 @@ float3 DDGIGetSurfaceBias(float3 surfaceNormal,
     return (surfaceNormal * probeNormalBias) + (-cameraDirection * probeViewBias);
 }
 
+// GBuffer调用
 float3 SampleDDGI(float3 positionWS,
                   float3 normalWS,
                   float3 surfaceBias,
@@ -74,8 +75,8 @@ float3 SampleDDGI(float3 positionWS,
         // 方向性权重 (Wrap Shading)
         // NVIDIA 方案：让侧面探针有贡献，完全背面的权重降为 0
         // 平方使权重分布更“陡峭”，减少来自背后的渗漏
-        // float wrapShading = (dot(positionWSToAdjProbe, normalWS) + 1.f) * 0.5f;
-        // weight *= (wrapShading * wrapShading) + 0.2f; // 留一点底色，防止在极端转角处全黑
+        float wrapShading = (dot(positionWSToAdjProbe, normalWS) + 1.f) * 0.5f;
+        weight *= (wrapShading * wrapShading) + 0.2f; // 留一点底色，防止在极端转角处全黑
 
         // 计算当前探针的采样 UV
         // 使用物体表面的世界法线作为观察方向
@@ -99,16 +100,16 @@ float3 SampleDDGI(float3 positionWS,
             chebyshevWeight = max(chebyshevWeight * chebyshevWeight * chebyshevWeight, 0.0f);
         }
         // 避免权重完全为 0 导致全黑，设定一个极小的底值
-        //weight *= max(0.05f, chebyshevWeight);
+        weight *= max(0.05f, chebyshevWeight);
         weight = max(1e-6f, weight);
 
         // A small amount of light is visible due to logarithmic perception, so
         // crush tiny weights but keep the curve continuous
-        // const float crushThreshold = 0.2f;
-        // if (weight < crushThreshold)
-        // {
-        //     weight *= (weight * weight) * (1.f / (crushThreshold * crushThreshold));
-        // }
+        const float crushThreshold = 0.2f;
+        if (weight < crushThreshold)
+        {
+            weight *= (weight * weight) * (1.f / (crushThreshold * crushThreshold));
+        }
         weight *= trilinearWeight;
 
         float2 octantCoordsIrr = OctEncode(normalWS);
@@ -133,6 +134,7 @@ float3 SampleDDGI(float3 positionWS,
     return finalIrradiance;
 }
 
+// closesthit调用
 float3 SampleDDGI(float3 positionWS,
                   float3 normalWS,
                   float3 surfaceBias,

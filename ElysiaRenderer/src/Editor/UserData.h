@@ -14,7 +14,7 @@ namespace ElysiaRenderer
 
     const std::vector<LPCWSTR> g_ModelPaths
     {
-        L"glTF\\Sponza\\Sponza.gltf"
+        L"glTF\\Sponza\\Sponza.gltf",
     };
 
     class UserData
