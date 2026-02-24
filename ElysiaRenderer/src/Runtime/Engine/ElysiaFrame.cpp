@@ -566,7 +566,7 @@ namespace ElysiaEngine
             ImGui::SliderFloat("GI Irradiance Threshold",
                                (float*)&pUserData.GIParameter.probeIrradianceThreshold,
                                0.001f,
-                               0.5f);
+                               1.0f);
             ImGui::SliderFloat("GI Brightness Threshold",
                                (float*)&pUserData.GIParameter.probeBrightnessThreshold,
                                1.f,

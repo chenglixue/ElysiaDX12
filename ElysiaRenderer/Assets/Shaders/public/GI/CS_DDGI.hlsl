@@ -18,8 +18,7 @@ cbuffer PassConstant : register(b0, perPassSpace)
     float g_DDGIEncodingGamma;
 }
 
-static const float PROBE_MIN_FRONTFACE_DIST = 0.3f; // 距离墙面多远
-static const float PROBE_RETURN_HOME_HYSTERESIS = 0.f;
+static const float PROBE_MIN_FRONTFACE_DIST = 0.3f;   // 距离墙面多远
 static const float PROBE_BACKFACE_THRESHOLD = 0.25f;  // % 射线撞背面视为在内部
 static const float PROBE_MAX_OFFSET_FRACTION = 0.45f; // 最大允许偏移量 (相对于Grid间距的比例, 0.5是边界, 0.45是安全区)
 
@@ -73,6 +72,7 @@ void RelocateProbes(uint3 id : SV_DispatchThreadID)
     uint probeIndex = id.x;
     if (probeIndex >= PROBE_COUNT)
         return;
+    uint3 gridIdx = GetProbeGridCoord(probeIndex, g_GridDimensions);
 
     RWStructuredBuffer<float3> probeOffsetBuffer = ResourceDescriptorHeap[g_ProbeOffsetsIndex];
     StructuredBuffer<RayData> rayDataBuffer = ResourceDescriptorHeap[g_RayDataBufferIndex];
@@ -81,39 +81,37 @@ void RelocateProbes(uint3 id : SV_DispatchThreadID)
     int closestFrontfaceIndex = -1;
     int farthestFrontfaceIndex = -1;
     float backFaceCount = 0;
-    float closestBackfaceRealDist = 0.0f;
-    float closestBackfaceScaledDist = 1e27f;
+    float closestBackfaceDist = 1e27f;
     float closestFrontfaceDist = 1e27f;
     float farthestFrontfaceDist = 0.0f;
 
-    for (UINT i = 0; i < RAYS_PER_PROBE; ++i)
+    const uint RELOCATE_RAY_COUNT = 32;
+    for (UINT i = 0; i < RELOCATE_RAY_COUNT; ++i)
     {
         UINT rayIndex = probeIndex * RAYS_PER_PROBE + i;
         RayData rayData = rayDataBuffer[rayIndex];
-        float dist = rayData.Distance;
-        // float3 dir = SphericalFibonacci(i, Rays_Per_Probe, g_RandomRotation);
+        float hitDistance = rayData.Distance;
 
-        if (dist < 0.f)
+        if (hitDistance < 0.f)
         {
             backFaceCount += 1.0f;
-            float scaledDist = dist * -5.0f;
-            if (scaledDist < closestBackfaceScaledDist)
+            hitDistance = hitDistance * -5.0f;
+            if (hitDistance < closestBackfaceDist)
             {
-                closestBackfaceScaledDist = scaledDist;
-                closestBackfaceIndex = i;
-                closestBackfaceRealDist = abs(dist);
+                closestBackfaceIndex = (int)i;
+                closestBackfaceDist = hitDistance;
             }
         }
         else
         {
-            if (dist < closestFrontfaceDist)
+            if (hitDistance < closestFrontfaceDist)
             {
-                closestFrontfaceDist = dist;
+                closestFrontfaceDist = hitDistance;
                 closestFrontfaceIndex = i;
             }
-            if (dist > farthestFrontfaceDist)
+            if (hitDistance > farthestFrontfaceDist)
             {
-                farthestFrontfaceDist = dist;
+                farthestFrontfaceDist = hitDistance;
                 farthestFrontfaceIndex = i;
             }
         }
@@ -125,56 +123,38 @@ void RelocateProbes(uint3 id : SV_DispatchThreadID)
     // 2. 决策阶段 (Logic Phase)
     // === 逻辑 A: 穿墙逃逸 (Punch Through) ===
     // 如果背面击中过多，说明在内部。
-    if (closestBackfaceIndex != -1 && (backFaceCount / RAYS_PER_PROBE) > PROBE_BACKFACE_THRESHOLD)
+    if (closestBackfaceIndex != -1 && (backFaceCount / RELOCATE_RAY_COUNT) > PROBE_BACKFACE_THRESHOLD)
     {
-        float3 backfaceDir = SphericalFibonacci(closestBackfaceIndex,
-                                                RAYS_PER_PROBE,
-                                                g_RandomRotation);
-        float escapeDist = closestBackfaceRealDist + PROBE_MIN_FRONTFACE_DIST * 0.5f;
-        targetOffset = currentOffset + (backfaceDir * escapeDist);
+        float3 backfaceDir = DDGIGetProbeRayDir(closestBackfaceIndex, RAYS_PER_PROBE, gridIdx, frameIndex, true);
+        targetOffset = currentOffset + (backfaceDir * (closestBackfaceDist + PROBE_MIN_FRONTFACE_DIST * 0.5f));
     }
     // === 逻辑 B: 寻找空地 (Avoid Clutter) ===
     else if (closestFrontfaceDist < PROBE_MIN_FRONTFACE_DIST)
     {
-        float3 closeDir = SphericalFibonacci(closestFrontfaceIndex,
-                                             RAYS_PER_PROBE,
-                                             g_RandomRotation);
-        float3 farDir =
-            SphericalFibonacci(farthestFrontfaceIndex, RAYS_PER_PROBE, g_RandomRotation);
+        float3 closeDir = DDGIGetProbeRayDir(closestFrontfaceIndex, RAYS_PER_PROBE, gridIdx, frameIndex, true);
+        float3 farDir = DDGIGetProbeRayDir(farthestFrontfaceIndex, RAYS_PER_PROBE, gridIdx, frameIndex, true);
 
         if (dot(closeDir, farDir) <= 0.0f)
         {
             targetOffset = currentOffset + (farDir * min(farthestFrontfaceDist, 1.0f));
         }
     }
-    // === 逻辑 C: 回家 (Return Home) - 修复抖动的关键 ===
-    // 只有当距离 大于 (最小安全距离 + 滞后死区) 时，才允许被拉回。
-    // 例如：只有距离 > 0.25m 时，才会被拉回。
-    // 如果距离在 0.20m ~ 0.25m 之间，既不推也不拉，保持静止！
-    else if (closestFrontfaceDist > (PROBE_MIN_FRONTFACE_DIST + PROBE_RETURN_HOME_HYSTERESIS))
+    else if (closestFrontfaceDist > PROBE_MIN_FRONTFACE_DIST)
     {
-        if (length(currentOffset) > 0.001f)
-        {
-            // 注意：我们只把探针拉回到死区边缘，而不是拉回到 0.2
-            // 这样可以防止拉过头
-            float safeDist = PROBE_MIN_FRONTFACE_DIST + PROBE_RETURN_HOME_HYSTERESIS;
-            float moveBackMargin = min(closestFrontfaceDist - safeDist, length(currentOffset));
-
-            float3 moveBackDir = normalize(-currentOffset);
-            targetOffset = currentOffset + (moveBackDir * moveBackMargin);
-        }
+        // 注意：我们只把探针拉回到死区边缘，而不是拉回到 0.2
+        // 这样可以防止拉过头
+        float moveBackMargin = min(closestFrontfaceDist - PROBE_MIN_FRONTFACE_DIST, length(currentOffset));
+        float3 moveBackDir = normalize(-currentOffset);
+        targetOffset = currentOffset + (moveBackDir * moveBackMargin);
     }
 
     // 3. 验证阶段 (Conservative Validation)
 
     // 只有当计算出了新的 targetOffset 且不为哨兵值时，才应用。
-    if (targetOffset.x < 1e26f)
+    float3 normalized = targetOffset / g_GridSpacing.xyz;
+    if (dot(normalized, normalized) < (PROBE_MAX_OFFSET_FRACTION * PROBE_MAX_OFFSET_FRACTION))
     {
-        float3 normalized = targetOffset / g_GridSpacing.xyz;
-        if (dot(normalized, normalized) < (PROBE_MAX_OFFSET_FRACTION * PROBE_MAX_OFFSET_FRACTION))
-        {
-            probeOffsetBuffer[probeIndex] = targetOffset;
-        }
+        probeOffsetBuffer[probeIndex] = targetOffset;
     }
 }
 
@@ -189,6 +169,7 @@ void ProbeBlending(uint3 id : SV_DispatchThreadID,
     if (probeIndex >= PROBE_COUNT || probeIndex < 0)
         return;
 
+    uint3 gridIdx = GetProbeGridCoord(probeIndex, g_GridDimensions);
     // 将 [1, 6] 映射到八面体坐标的 [-1, 1]
     bool isBorder = (GroupThreadID.x == 0 || GroupThreadID.x == (DDGI_PROBE_NUM_TEXELS - 1) ||
                      GroupThreadID.y == 0 || GroupThreadID.y == (DDGI_PROBE_NUM_TEXELS - 1));
@@ -204,17 +185,29 @@ void ProbeBlending(uint3 id : SV_DispatchThreadID,
         float probeMaxRayDistance = length(g_GridSpacing) * 1.5f;
         for (int r = 0; r < RAYS_PER_PROBE; r ++)
         {
-            float3 rayDir = SphericalFibonacci(r, RAYS_PER_PROBE, g_RandomRotation);
+            float3 rayDir = DDGIGetProbeRayDir(r, RAYS_PER_PROBE, gridIdx, frameIndex, false);
             RayData rayData = Elysia_DDGI_LoadRayData(probeIndex * RAYS_PER_PROBE + r);
+
+            if (rayData.Distance < 0.0f)
+            {
+                continue;
+            }
+
+            float3 radiance = rayData.Radiance;
+            float rayLuma = dot(radiance, float3(0.2126, 0.7152, 0.0722));
+            float maxRayBrightness = 10.0f; // 这里的阈值可以根据场景曝光调整
+            if (rayLuma > maxRayBrightness)
+            {
+                radiance *= (maxRayBrightness / rayLuma);
+            }
 
             // 方向越接近，权重越高
             float weight = max(0.f, dot(probeDirection, rayDir));
-
             // 只处理正面碰撞
-            if (rayData.Distance >= 0.f && weight > 0.f)
+            if (weight > 0.f)
             {
                 // 对于 Irradiance，累加 (Radiance * w, w)
-                accumulatedIrradiance += float4(rayData.Radiance * weight, weight);
+                accumulatedIrradiance += float4(radiance * weight, weight);
             }
 
             if (weight > 0.f)

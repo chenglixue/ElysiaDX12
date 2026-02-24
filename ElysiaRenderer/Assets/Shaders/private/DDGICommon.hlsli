@@ -1,6 +1,7 @@
 ﻿#ifndef DDGI_COMMON_H
 #define DDGI_COMMON_H
 #include "ShadingCommon.hlsl"
+#include "private/Random.hlsl"
 
 #define PROBE_COUNT 10648
 #define RAYS_PER_PROBE 64
@@ -106,26 +107,12 @@ float3 GetProbeWorldPosition(uint probeIndex,
     return gridOrigin + (float3(coord) * gridSpacing);
 }
 
-float3 SphericalFibonacci(uint sampleIndex, uint numSamples, float rotation)
+float4 QuaternionFromAxisAngle(float3 axis, float angle)
 {
-    float b = (sqrt(5.0) * 0.5 + 0.5) - 1.0;
-    float phi = 2.0 * 3.1415926f * b;
-
-    float theta = phi * sampleIndex + rotation;
-    float cosPhi = 1.0 - (float(sampleIndex) + 0.5) / float(numSamples) * 2.0;
-    float sinPhi = sqrt(saturate(1.0 - cosPhi * cosPhi));
-
-    return float3(cos(theta) * sinPhi, cosPhi, sin(theta) * sinPhi);
+    float s, c;
+    sincos(angle * 0.5f, s, c);
+    return float4(axis * s, c);
 }
-
-/**
- * Returns the largest component of the vector.
- */
-float DDGIMaxComponent(float3 a)
-{
-    return max(a.x, max(a.y, a.z));
-}
-
 
 /**
  * Rotate vector v with quaternion q.
@@ -146,6 +133,102 @@ float4 DDGIQuaternionConjugate(float4 q)
 {
     return float4(-q.xyz, q.w);
 }
+
+float3x3 GetPerProbeRotation(uint probeIdx, uint frameIdx)
+{
+    // 1. 基于帧序号的全局基础旋转
+    float globalAngle = float(frameIdx % 64) * (6.283185f / 64.0f);
+
+    // 2. 基于探针索引的伪随机轴
+    // 这里使用 hash 产生三个方向的随机量来构成旋转轴
+    float3 rand;
+    rand.x = frac(sin(float(probeIdx) * 1.0f) * 43758.5453f);
+    rand.y = frac(sin(float(probeIdx) * 2.0f) * 43758.5453f);
+    rand.z = frac(sin(float(probeIdx) * 3.0f) * 43758.5453f);
+    float3 axis = normalize(rand * 2.0f - 1.0f);
+
+    // 3. 构建旋转四元数并转为矩阵
+    float4 q = QuaternionFromAxisAngle(axis, globalAngle);
+
+    // 四元数转 3x3 矩阵
+    float3x3 rot;
+    rot[0] = float3(1 - 2 * q.y * q.y - 2 * q.z * q.z, 2 * q.x * q.y - 2 * q.w * q.z, 2 * q.x * q.z + 2 * q.w * q.y);
+    rot[1] = float3(2 * q.x * q.y + 2 * q.w * q.z, 1 - 2 * q.x * q.x - 2 * q.z * q.z, 2 * q.y * q.z - 2 * q.w * q.x);
+    rot[2] = float3(2 * q.x * q.z - 2 * q.w * q.y, 2 * q.y * q.z + 2 * q.w * q.x, 1 - 2 * q.x * q.x - 2 * q.y * q.y);
+
+    return rot;
+}
+
+float3 SphericalFibonacci(uint sampleIndex, uint numSamples)
+{
+    float b = (sqrt(5.0) * 0.5 + 0.5) - 1.0;
+    float phi = TWO_PI * b;
+
+    float theta = phi * sampleIndex;
+    float cosPhi = 1.0 - (float(sampleIndex) + 0.5) / float(numSamples) * 2.0;
+    float sinPhi = sqrt(saturate(1.0 - cosPhi * cosPhi));
+
+    return float3(cos(theta) * sinPhi, cosPhi, sin(theta) * sinPhi);
+}
+
+float ProbeHash(uint3 gridIdx)
+{
+    // 将 3D 坐标映射到一个大的素数空间
+    uint h = gridIdx.x * 1664525u + gridIdx.y * 1013904223u + gridIdx.z * 1103515245u;
+    return float(h & 0x00FFFFFFu) / float(0x01000000u);
+}
+
+float3 RotateVectorByQuaternion(float3 v, float4 q)
+{
+    // 标准四元数旋转公式优化版：v' = v + 2.0 * q.xyz x (q.xyz x v + q.w * v)
+    float3 t = 2.0 * cross(q.xyz, v);
+    return v + q.w * t + cross(q.xyz, t);
+}
+
+float3 DDGIGetProbeRayDir(uint sampleIndex,
+                          uint numSamples,
+                          uint3 probeGridIdx,
+                          UINT frameIndex,
+                          bool bIsRelocationPass)
+{
+    float globalRotation = fmod(float(frameIndex) * 2.399963f, 6.283185f);
+
+    float h1 = ProbeHash(probeGridIdx);
+    float h2 = ProbeHash(probeGridIdx + uint3(17, 31, 7));
+    float h3 = ProbeHash(probeGridIdx + uint3(3, 11, 23));
+
+    // 3. 最终旋转量
+    float3 rotationAxis = normalize(float3(h1, h2, h3) * 2.0f - 1.0f);
+    float finalAngle = globalRotation + h1 * 6.283185f;
+
+    bool isFixedRay = false;
+    if (bIsRelocationPass)
+    {
+        isFixedRay = sampleIndex < 32;
+        sampleIndex = isFixedRay ? sampleIndex : sampleIndex - 32;
+        numSamples = isFixedRay ? 32 : numSamples - 32;
+    }
+
+    // 4. 判断是否为固定光线 (参考 NVIDIA 策略)
+    // 0-31 条光线不参与随机旋转，用于几何定位
+    float3 dir = SphericalFibonacci(sampleIndex, numSamples);
+    if (isFixedRay)
+    {
+        return normalize(dir);
+    }
+
+    float4 q = QuaternionFromAxisAngle(rotationAxis, finalAngle);
+    return normalize(RotateVectorByQuaternion(dir, q));
+}
+
+/**
+ * Returns the largest component of the vector.
+ */
+float DDGIMaxComponent(float3 a)
+{
+    return max(a.x, max(a.y, a.z));
+}
+
 
 float DDGILinearRGBToLuminance(float3 rgb)
 {
@@ -182,25 +265,6 @@ float DDGI_Shadow_Visibity(float3 PositionWS,
         );
 
     return shadowPayload.isHit ? 0.f : 1.f;
-}
-
-float CalculateDDGIWeight(float3 PositionWS,
-                          float3 NormalWS,
-                          float3 probePosWS)
-{
-    float weight = 1.f;
-
-    // Normal Weight
-    // 防止探针在表面背面却贡献了光照
-    float3 dirToProbe = normalize(probePosWS - PositionWS);
-    float cosTheta = dot(dirToProbe, NormalWS);
-
-    weight *= pow(saturate(cosTheta * 0.5f + 0.5f), 2.0f);
-
-    float3 v = probePosWS - PositionWS;
-    float dist = length(v);
-
-    return max(weight, 0.0001f);
 }
 
 float DDGIGetVolumeBlendWeight(float3 positionWS,

@@ -58,12 +58,13 @@ void GenerateRayMain()
     uint probeIndex = DispatchRaysIndex().x;
     uint rayIndex = DispatchRaysIndex().y;
     UINT2 dimension = DispatchRaysDimensions().xy;
+    uint3 gridIdx = GetProbeGridCoord(probeIndex, g_GridDimensions);
 
     Vector3 rayOrigin = GetProbeWorldPosition(probeIndex,
                                               g_GridOrigin,
                                               g_GridSpacing,
                                               g_GridDimensions) + g_ProbeOffsetBuffer[probeIndex];
-    float3 rayDir = SphericalFibonacci(rayIndex, RAYS_PER_PROBE, g_RandomRotation);
+    float3 rayDir = DDGIGetProbeRayDir(rayIndex, RAYS_PER_PROBE, gridIdx, frameIndex, false);
 
     RayDesc rayDesc;
     rayDesc.Origin = rayOrigin;
@@ -166,7 +167,7 @@ void RayClosestHit(inout RayData rayData,
             positionWS,
             N,
             DDGIGetSurfaceBias(N,
-                               -WorldRayDirection(),
+                               WorldRayDirection(),
                                g_ProbeNormalBias,
                                g_ProbeViewBias),
             g_GridOrigin,
@@ -182,6 +183,8 @@ void RayClosestHit(inout RayData rayData,
             );
         float maxAlbedo = 0.9f;
         float3 indirectRadiance = min(baseColorAlpha.rgb, maxAlbedo) / PI * indirectIrradiance;
+
+        blendWeight = Pow2(blendWeight);
         indirectRadiance *= blendWeight;
         rayData.Radiance += indirectRadiance;
     }
