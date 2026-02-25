@@ -95,7 +95,7 @@ void RelocateProbes(uint3 id : SV_DispatchThreadID)
         if (hitDistance < 0.f)
         {
             backFaceCount += 1.0f;
-            hitDistance = hitDistance * -5.0f;
+            hitDistance = abs(hitDistance) * 5.0f;
             if (hitDistance < closestBackfaceDist)
             {
                 closestBackfaceIndex = (int)i;
@@ -118,41 +118,44 @@ void RelocateProbes(uint3 id : SV_DispatchThreadID)
     }
 
     float3 currentOffset = probeOffsetBuffer[probeIndex];
-    float3 targetOffset = float3(1e27f, 1e27f, 1e27f); // 哨兵值
+    float3 targetOffset = float3(FLT_INF, FLT_INF, FLT_INF);
+    // A maximum offset computed from the probe grid spacing
+    float3 offsetLimit = g_GridSpacing.xyz * PROBE_MAX_OFFSET_FRACTION;
 
-    // 2. 决策阶段 (Logic Phase)
-    // === 逻辑 A: 穿墙逃逸 (Punch Through) ===
-    // 如果背面击中过多，说明在内部。
+    // If there’s a close backface AND you see more than 25% backfaces, assume you’re inside something.
     if (closestBackfaceIndex != -1 && (backFaceCount / RELOCATE_RAY_COUNT) > PROBE_BACKFACE_THRESHOLD)
     {
+        // direction to closest backface scaled by distance
         float3 backfaceDir = DDGIGetProbeRayDir(closestBackfaceIndex, RAYS_PER_PROBE, gridIdx, frameIndex, true);
-        targetOffset = currentOffset + (backfaceDir * (closestBackfaceDist + PROBE_MIN_FRONTFACE_DIST * 0.5f));
-    }
-    // === 逻辑 B: 寻找空地 (Avoid Clutter) ===
-    else if (closestFrontfaceDist < PROBE_MIN_FRONTFACE_DIST)
-    {
-        float3 closeDir = DDGIGetProbeRayDir(closestFrontfaceIndex, RAYS_PER_PROBE, gridIdx, frameIndex, true);
-        float3 farDir = DDGIGetProbeRayDir(farthestFrontfaceIndex, RAYS_PER_PROBE, gridIdx, frameIndex, true);
+        float3 closestBackfaceVector = backfaceDir * closestBackfaceDist;
 
-        if (dot(closeDir, farDir) <= 0.0f)
+        float scaleFactor = 2.0;
+        [unroll]
+        for (int i = 1; i <= 100; ++i)
         {
-            targetOffset = currentOffset + (farDir * min(farthestFrontfaceDist, 1.0f));
+            if (!all(abs(targetOffset) < offsetLimit))
+            {
+                targetOffset = currentOffset + closestBackfaceVector * (scaleFactor - i * 0.01f);
+            }
         }
     }
-    else if (closestFrontfaceDist > PROBE_MIN_FRONTFACE_DIST)
+    // === 逻辑 B: 寻找空地 (Avoid Clutter) ===
+    // else if (closestFrontfaceDist < PROBE_MIN_FRONTFACE_DIST)
+    else if (closestFrontfaceIndex != -1 && farthestFrontfaceIndex != -1)
     {
-        // 注意：我们只把探针拉回到死区边缘，而不是拉回到 0.2
-        // 这样可以防止拉过头
-        float moveBackMargin = min(closestFrontfaceDist - PROBE_MIN_FRONTFACE_DIST, length(currentOffset));
-        float3 moveBackDir = normalize(-currentOffset);
-        targetOffset = currentOffset + (moveBackDir * moveBackMargin);
+        // direction to closest frontface scaled by distance
+        float3 closeDir = DDGIGetProbeRayDir(closestFrontfaceIndex, RAYS_PER_PROBE, gridIdx, frameIndex, true);
+        // direction to farthest frontface scaled by distance
+        float3 farDir = DDGIGetProbeRayDir(farthestFrontfaceIndex, RAYS_PER_PROBE, gridIdx, frameIndex, true);
+
+        if (!(dot(closeDir, farDir) > 0.5f))
+        {
+            float3 farestDir = min(0.2f, farthestFrontfaceDist) * farDir;
+            targetOffset = currentOffset + farestDir;
+        }
     }
 
-    // 3. 验证阶段 (Conservative Validation)
-
-    // 只有当计算出了新的 targetOffset 且不为哨兵值时，才应用。
-    float3 normalized = targetOffset / g_GridSpacing.xyz;
-    if (dot(normalized, normalized) < (PROBE_MAX_OFFSET_FRACTION * PROBE_MAX_OFFSET_FRACTION))
+    if (all(abs(targetOffset) < offsetLimit))
     {
         probeOffsetBuffer[probeIndex] = targetOffset;
     }
@@ -190,16 +193,18 @@ void ProbeBlending(uint3 id : SV_DispatchThreadID,
 
             if (rayData.Distance < 0.0f)
             {
-                continue;
+                rayData.Radiance = 0.0f;
+                // 深度缩短 80%：强制让均值和方差向“极近距离”偏移，增强遮挡判定
+                rayData.Distance = abs(rayData.Distance) * 0.2f;
             }
 
             float3 radiance = rayData.Radiance;
-            float rayLuma = dot(radiance, float3(0.2126, 0.7152, 0.0722));
-            float maxRayBrightness = 10.0f; // 这里的阈值可以根据场景曝光调整
-            if (rayLuma > maxRayBrightness)
-            {
-                radiance *= (maxRayBrightness / rayLuma);
-            }
+            // float rayLuma = dot(radiance, float3(0.2126, 0.7152, 0.0722));
+            // float maxRayBrightness = 10.0f; // 这里的阈值可以根据场景曝光调整
+            // if (rayLuma > maxRayBrightness)
+            // {
+            //     radiance *= (maxRayBrightness / rayLuma);
+            // }
 
             // 方向越接近，权重越高
             float weight = max(0.f, dot(probeDirection, rayDir));
@@ -208,11 +213,7 @@ void ProbeBlending(uint3 id : SV_DispatchThreadID,
             {
                 // 对于 Irradiance，累加 (Radiance * w, w)
                 accumulatedIrradiance += float4(radiance * weight, weight);
-            }
 
-            if (weight > 0.f)
-            {
-                // NVIDIA 建议：距离权重的指数通常更高（如 16.0），这能让遮挡判定更锐利
                 float distWeight = pow(weight, 50.0f);
                 float absDist = min(abs(rayData.Distance), probeMaxRayDistance);
 
@@ -221,17 +222,17 @@ void ProbeBlending(uint3 id : SV_DispatchThreadID,
             }
         }
         float epsilon = float(RAYS_PER_PROBE) * 1e-9f;
-        float invGamma = 1.0f / g_DDGIEncodingGamma;
 
         // NVIDIA 建议除以 (2.0 * sumWeight) 以匹配漫反射积分
         float3 netIrradiance = accumulatedIrradiance.rgb /
                                (2.0f * max(accumulatedIrradiance.a, epsilon));
-        netIrradiance = pow(netIrradiance, invGamma);
+        netIrradiance = pow(netIrradiance, 1.0f / g_DDGIEncodingGamma);
         float2 netDist = accumulatedDist / max(distSumWeight, epsilon);
 
         float4 historyIrradiance = Elysia_DDGI_LoadIrradiance(id.xy);
         float2 historyDist = Elysia_DDGI_LoadDist(id.xy);
         float hysteresis = saturate(g_DDGIBlendWeight); // 历史权重
+        float distHysteresis = hysteresis;
         float3 delta = (netIrradiance - historyIrradiance);
 
         // 如果历史是黑的，直接覆盖（防止冷启动过慢）
@@ -240,16 +241,29 @@ void ProbeBlending(uint3 id : SV_DispatchThreadID,
             hysteresis = 0.0f;
         }
 
+        float significantChangeThreshold = 0.25f;
+        float newDistributionChangeThreshold = 0.8f;
+
+        float changeMagnitude = DDGIMaxComponent(abs(netIrradiance - historyIrradiance));
+        if (changeMagnitude > significantChangeThreshold)
+        {
+            hysteresis = max(0, hysteresis - 0.15f);
+        }
+        if (changeMagnitude > newDistributionChangeThreshold)
+        {
+            hysteresis = 0.f;
+        }
+
         // 亮度剧变检测 (Irradiance Thresholding)
         // 如果新旧颜色分量差异过大，认为光源发生了剧烈移动，强行降低滞后，加快刷新
-        if (DDGIMaxComponent(historyIrradiance - netIrradiance) > g_ProbeIrradianceThreshold)
-        {
-            hysteresis = max(0.0f, hysteresis - 0.75f); // 瞬间变得非常“敏锐”
-        }
+        // if (DDGIMaxComponent(historyIrradiance - netIrradiance) > g_ProbeIrradianceThreshold)
+        // {
+        //     hysteresis = max(0.0f, hysteresis - 0.75f); // 瞬间变得非常“敏锐”
+        // }
 
         // 亮度增幅限制 (Brightness Thresholding)
         // 防止由于 Ray Tracing 噪声产生的极亮像素导致探针闪烁
-        float luminanceDelta = DDGILinearRGBToLuminance(historyIrradiance - netIrradiance);
+        float luminanceDelta = DDGILinearRGBToLuminance(abs(historyIrradiance - netIrradiance));
         if (luminanceDelta > g_ProbeBrightnessThreshold)
         {
             delta *= 0.25f; // 限制本次更新的步长
@@ -268,7 +282,7 @@ void ProbeBlending(uint3 id : SV_DispatchThreadID,
         float2 distDelta = (netDist - historyDist);
 
         float3 finalColor = historyIrradiance + lerpDelta;
-        float2 finalDist = historyDist + (1.0f - hysteresis) * distDelta; // 共享由亮度触发的 hysteresis
+        float2 finalDist = historyDist + (1.0f - distHysteresis) * distDelta; // 共享由亮度触发的 hysteresis
         Elysia_DDGI_StoreIrradiance(id.xy, finalColor);
         Elysia_DDGI_StoreDist(id.xy, finalDist);
     }

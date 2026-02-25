@@ -3,6 +3,8 @@
 
 #include "private\ShadingCommon.hlsl"
 
+#define MIN_DISTANCE_BETWEEN_PROBES 1.f
+
 // 计算世界空间点对应的网格坐标
 float3 GetGridCoord(float3 positionWS,
                     float3 gridOrigin,
@@ -20,7 +22,9 @@ float3 DDGIGetSurfaceBias(float3 surfaceNormal,
                           float3 probeNormalBias,
                           float3 probeViewBias)
 {
-    return (surfaceNormal * probeNormalBias) + (-cameraDirection * probeViewBias);
+    float3 o = (surfaceNormal * probeNormalBias) + (-cameraDirection * probeViewBias);
+    o *= 0.3f * (0.75f * MIN_DISTANCE_BETWEEN_PROBES);
+    return o;
 }
 
 // GBuffer调用
@@ -89,12 +93,16 @@ float3 SampleDDGI(float3 positionWS,
 
         // 采样平均距离 (R) 和距离平方 (G)
         float2 moments = SampleTexture2D_LOD(distanceTexIndex, finalUV, samplerIndex, 0).rg;
+        float mean = moments.x;
+        float mean2 = moments.y;
         float chebyshevWeight = 1.0f;
-        if (biasPositionWSToAdjProbeDist > moments.x) // 如果点到探针的距离超过了探针记录的平均遮挡深度
+        if (biasPositionWSToAdjProbeDist > mean) // 如果点到探针的距离超过了探针记录的平均遮挡深度
         {
-            float variance = abs(moments.x * moments.x - moments.y);
-            float d = biasPositionWSToAdjProbeDist - moments.x;
-            chebyshevWeight = variance / (variance + d * d);
+            // 防止浮点精度误差导致负数
+            float variance = abs(Pow2(mean) - mean2);
+
+            // Chebyshev Visibility
+            chebyshevWeight = variance / (variance + Pow2(biasPositionWSToAdjProbeDist - mean));
 
             // 增强对比度，使遮挡边缘更锐利，减少颜色渗漏
             chebyshevWeight = max(chebyshevWeight * chebyshevWeight * chebyshevWeight, 0.0f);
@@ -183,7 +191,7 @@ float3 SampleDDGI(float3 positionWS,
         float weight = 1.f;
 
         // 方向性权重 (Wrap Shading)
-        // NVIDIA 方案：让侧面探针有贡献，完全背面的权重降为 0
+        // 侧面探针有贡献，完全背面的权重降为 0
         // 平方使权重分布更“陡峭”，减少来自背后的渗漏
         float wrapShading = (dot(positionWSToAdjProbe, normalWS) + 1.f) * 0.5f;
         weight *= (wrapShading * wrapShading) + 0.2f; // 留一点底色，防止在极端转角处全黑
@@ -199,12 +207,16 @@ float3 SampleDDGI(float3 positionWS,
 
         // 采样平均距离 (R) 和距离平方 (G)
         float2 moments = SampleTexture2D_LOD(distanceTexIndex, finalUV, linearClampSampler, 0).rg;
+        float mean = moments.x;
+        float mean2 = moments.y;
         float chebyshevWeight = 1.0f;
-        if (biasPositionWSToAdjProbeDist > moments.x) // 如果点到探针的距离超过了探针记录的平均遮挡深度
+        if (biasPositionWSToAdjProbeDist > mean) // 如果点到探针的距离超过了探针记录的平均遮挡深度
         {
-            float variance = abs(moments.x * moments.x - moments.y);
-            float d = biasPositionWSToAdjProbeDist - moments.x;
-            chebyshevWeight = variance / (variance + d * d);
+            // 防止浮点精度误差导致负数
+            float variance = abs(Pow2(mean) - mean2);
+
+            // Chebyshev Visibility
+            chebyshevWeight = variance / (variance + Pow2(biasPositionWSToAdjProbeDist - mean));
 
             // 增强对比度，使遮挡边缘更锐利，减少颜色渗漏
             chebyshevWeight = max(chebyshevWeight * chebyshevWeight * chebyshevWeight, 0.0f);
@@ -226,11 +238,8 @@ float3 SampleDDGI(float3 positionWS,
         uv = (octantCoordsIrr * 0.5f + 0.5f) * (DDGI_PROBE_NUM_TEXELS - 2.f) + 1.0f;
         finalUV = (float2(atlasPos * DDGI_PROBE_NUM_TEXELS) + uv) * irradianceTexSize.zw;
         float3 probeColor = SampleTexture2D_LOD(irradianceTexIndex, finalUV, linearClampSampler, 0).rgb;
+        probeColor = pow(probeColor, gamma * 0.5f);
 
-        float3 exponent = gamma * 0.5f;
-        probeColor = pow(probeColor, exponent);
-
-        // NVIDIA 建议在累加前平方，以保持线性感
         sumIrradiance += probeColor * weight;
         sumWeight += weight;
     }
@@ -239,7 +248,7 @@ float3 SampleDDGI(float3 positionWS,
         return 0.f;
 
     float3 finalIrradiance = sumIrradiance / sumWeight;
-    finalIrradiance *= finalIrradiance;
+    finalIrradiance *= finalIrradiance; // 还原回线性空间
     finalIrradiance *= TWO_PI;
     return finalIrradiance;
 }

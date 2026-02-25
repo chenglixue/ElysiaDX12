@@ -167,7 +167,7 @@ void RayClosestHit(inout RayData rayData,
             positionWS,
             N,
             DDGIGetSurfaceBias(N,
-                               WorldRayDirection(),
+                               -WorldRayDirection(),
                                g_ProbeNormalBias,
                                g_ProbeViewBias),
             g_GridOrigin,
@@ -193,7 +193,7 @@ void RayClosestHit(inout RayData rayData,
 
     if (isBackFace)
     {
-        rayData.Distance *= -1.0f; // 用负数标记背面撞击
+        rayData.Distance = -rayData.Distance * 0.2f; // 用负数标记背面撞击
         rayData.Radiance = 0.0f;
     }
 }
