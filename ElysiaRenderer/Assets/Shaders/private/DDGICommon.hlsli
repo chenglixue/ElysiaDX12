@@ -4,7 +4,7 @@
 #include "private/Random.hlsl"
 
 #define PROBE_COUNT 10648
-#define RAYS_PER_PROBE 64
+#define RAYS_PER_PROBE 128
 #define DDGI_PROBE_NUM_TEXELS 8
 #define DXR_MAX 10000
 #define DXR_SHADOW_MAX 1e27f
@@ -53,6 +53,24 @@ struct AABBData
     Vector3 Max;
     float pad1;
 };
+
+Vertex InterpolateVertex(Vertex vertices[3], float3 barycentrics)
+{
+    Vertex o = (Vertex)0;
+
+    for (UINT i = 0; i < 3; i ++)
+    {
+        o.positionOS += barycentrics * vertices[i].positionOS;
+        o.normalOS += barycentrics * vertices[i].normalOS;
+        o.tangentOS += barycentrics * vertices[i].tangentOS;
+        o.uv = barycentrics * vertices[i].uv;
+    }
+
+    o.normalOS = normalize(o.normalOS);
+    o.tangentOS.xyz = normalize(o.tangentOS.xyz);
+
+    return o;
+}
 
 bool IsPointInAABB(float3 position, AABBData aabb, float margin)
 {
@@ -265,7 +283,7 @@ float DDGI_Shadow_Visibity(float3 PositionWS,
     RayDesc shadowRayDesc;
     shadowRayDesc.Origin = PositionWS + NormalWS * normalBias;
     shadowRayDesc.Direction = ToLight;
-    shadowRayDesc.TMin = 0.f;
+    shadowRayDesc.TMin = 0.001f;
     shadowRayDesc.TMax = DXR_SHADOW_MAX;
 
     ShadowRayload shadowPayload;

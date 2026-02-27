@@ -47,7 +47,6 @@ namespace ElysiaRenderer
             static inline size_t g_ProbeOffsetsIndex = PropertyToID(L"g_ProbeOffsetsIndex");
             static inline size_t g_ProbeStatesIndex = PropertyToID(L"g_ProbeStatesIndex");
             static inline size_t g_StaticAABBIndex = PropertyToID(L"g_StaticAABBIndex");
-            static inline size_t g_ProbeFrameBufferIndex = PropertyToID(L"g_ProbeFrameBufferIndex");
             static inline size_t g_ProbeNormalBias = PropertyToID(L"g_ProbeNormalBias");
             static inline size_t g_ProbeViewBias = PropertyToID(L"g_ProbeViewBias");
             static inline size_t g_DDGIBlendWeight = PropertyToID(L"g_DDGIBlendWeight");
@@ -73,7 +72,7 @@ namespace ElysiaRenderer
         static inline constexpr UINT NumIndices = 60;
         static inline constexpr UINT Probe_Count = 10648;
         static inline const UINT3 Grid_Dimensions = UINT3(22, 22, 22);
-        static inline constexpr UINT Rays_Per_Probe = 64;
+        static inline constexpr UINT Rays_Per_Probe = 128;
         static inline float m_RandomRotation;
 
     public:
@@ -156,12 +155,10 @@ namespace ElysiaRenderer
         BufferHandle m_pTLASBuffer;
         BufferHandle m_pTLASScratchBuffer;
         BufferHandle m_pTLASUploadBuffer;
-        BufferHandle m_pProbeFrameBuffer;
         BufferHandle m_pStaticAABBDataBuffer;
         std::vector<InstanceData> m_instanceDatas;
         std::vector<AABBData> m_AABBDatas;
         std::vector<UINT> m_probeStates = std::vector<UINT>(Probe_Count, 1);
-        std::vector<UINT> m_probeFrames = std::vector<UINT>(Probe_Count, 0);
 
 
 #pragma region Vertices

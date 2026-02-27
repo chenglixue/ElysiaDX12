@@ -92,15 +92,6 @@ namespace ElysiaRenderer
             .accessFlags = BufferAccessFlags::GPUOnly,
         });
 
-        m_pProbeFrameBuffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc
-        {
-            .name = L"Probe Init Frame Buffer",
-            .stride = sizeof(UINT),
-            .size = sizeof(UINT) * Probe_Count,
-            .viewFlags = GPUResourceFlags::UAV,
-            .accessFlags = BufferAccessFlags::GPUOnly,
-        });
-
         m_pStaticAABBDataBuffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc
         {
             .name = L"Static AABB Buffer",
@@ -169,20 +160,6 @@ namespace ElysiaRenderer
                 .bufferDataSize = sizeof(UINT) * Probe_Count
             };
             memcpy(pBufferData.pBufferData.get(), m_probeStates.data(), sizeof(UINT) * Probe_Count);
-            BufferManager::GetInstance().UploadBufferData(m_pDevice->GetUploadContext(), &pBufferData);
-        }
-
-        static bool isInitProbeFrame = false;
-        if (!isInitProbeFrame)
-        {
-            isInitProbeFrame = true;
-            auto pBufferData = DX12BufferUpload
-            {
-                .buffer = m_pProbeFrameBuffer,
-                .pBufferData = std::make_unique<uint8_t[]>(sizeof(UINT) * Probe_Count),
-                .bufferDataSize = sizeof(UINT) * Probe_Count
-            };
-            memcpy(pBufferData.pBufferData.get(), m_probeFrames.data(), sizeof(UINT) * Probe_Count);
             BufferManager::GetInstance().UploadBufferData(m_pDevice->GetUploadContext(), &pBufferData);
         }
 
@@ -392,9 +369,6 @@ namespace ElysiaRenderer
             m_pMaterial->SetUInt(ShaderIDs::g_ProbeStatesIndex,
                                  m_pProbeStateBuffer->GetResourceHeapIndex(),
                                  passID);
-            m_pMaterial->SetUInt(ShaderIDs::g_ProbeFrameBufferIndex,
-                                 m_pProbeFrameBuffer->GetUAVResourceHeapIndex(),
-                                 passID);
             m_pMaterial->SetUInt(ShaderIDs::g_StaticAABBIndex,
                                  m_pStaticAABBDataBuffer->GetResourceHeapIndex(),
                                  passID);
@@ -582,9 +556,6 @@ namespace ElysiaRenderer
             m_pMaterial->SetUInt(ShaderIDs::g_ProbeStatesIndex,
                                  m_pProbeStateBuffer->GetResourceHeapIndex(),
                                  passID);
-            m_pMaterial->SetUInt(ShaderIDs::g_ProbeFrameBufferIndex,
-                                 m_pProbeFrameBuffer->GetUAVResourceHeapIndex(),
-                                 passID);
             m_pMaterial->SetFloat(ShaderIDs::g_RandomRotation,
                                   m_RandomRotation,
                                   passID);
@@ -642,7 +613,12 @@ namespace ElysiaRenderer
             m_pMaterial->SetFloat(ShaderIDs::g_DDGIEncodingGamma,
                                   UserData::GetInstance().GIParameter.gamma,
                                   passID);
-            // m_pMaterial->SetFloat3(ShaderIDs::g_GridSpacing, m_gridSpacing);
+            m_pMaterial->SetFloat4(ShaderIDs::g_GridSpacing,
+                                   Vector4(m_gridSpacing.x,
+                                           m_gridSpacing.y,
+                                           m_gridSpacing.z,
+                                           0.f),
+                                   passID);
             m_pMaterial->SetFloat4(ShaderIDs::g_GridDimensions,
                                    Vector4(Grid_Dimensions.x,
                                            Grid_Dimensions.y,

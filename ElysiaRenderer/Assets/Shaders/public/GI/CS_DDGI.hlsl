@@ -10,7 +10,6 @@ cbuffer PassConstant : register(b0, perPassSpace)
     float4 g_GridDimensions;
     UINT g_ProbeOffsetsIndex;
     UINT g_ProbeStatesIndex;
-    UINT g_ProbeFrameBufferIndex;
     UINT g_StaticAABBIndex;
     UINT g_RayDataBufferIndex;
     UINT g_IrradianceTexIndex;
@@ -23,8 +22,9 @@ cbuffer PassConstant : register(b0, perPassSpace)
     UINT g_StaticAABBCount;
 }
 
-static const float PROBE_BACKFACE_THRESHOLD = 0.25f;  // % 射线撞背面视为在内部
-static const float PROBE_MAX_OFFSET_FRACTION = 0.45f; // 最大允许偏移量 (相对于Grid间距的比例, 0.5是边界, 0.45是安全区)
+static const float PROBE_BACKFACE_THRESHOLD = 0.25f;    // % 射线撞背面视为在内部
+static const float PROBE_MIN_FRONTFACE_DISTANCE = 0.3f; // % 射线撞背面视为在内部
+static const float PROBE_MAX_OFFSET_FRACTION = 0.45f;   // 最大允许偏移量 (相对于Grid间距的比例, 0.5是边界, 0.45是安全区)
 
 
 AABBData Elysia_DDGI_LoadeStaticAABB(UINT id)
@@ -173,7 +173,6 @@ void RelocateProbes(UINT3 id : SV_DispatchThreadID)
     RWStructuredBuffer<float3> probeOffsetBuffer = ResourceDescriptorHeap[g_ProbeOffsetsIndex];
     StructuredBuffer<RayData> rayDataBuffer = ResourceDescriptorHeap[g_RayDataBufferIndex];
     RWStructuredBuffer<UINT> probeStateBuffer = ResourceDescriptorHeap[g_ProbeStatesIndex];
-    RWStructuredBuffer<UINT> probeFrameBuffer = ResourceDescriptorHeap[g_ProbeFrameBufferIndex];
 
     int closestBackfaceIndex = -1;
     int closestFrontfaceIndex = -1;
@@ -216,7 +215,7 @@ void RelocateProbes(UINT3 id : SV_DispatchThreadID)
     }
 
     float3 currentOffset = probeOffsetBuffer[probeIndex];
-    float3 targetOffset = currentOffset;
+    float3 fullOffset = currentOffset;
     // A maximum offset computed from the probe grid spacing
     float3 offsetLimit = g_GridSpacing.xyz * PROBE_MAX_OFFSET_FRACTION;
 
@@ -230,61 +229,66 @@ void RelocateProbes(UINT3 id : SV_DispatchThreadID)
     {
         // direction to closest backface scaled by distance
         float3 backfaceDir = DDGIGetProbeRayDir(closestBackfaceIndex, RAYS_PER_PROBE, gridIdx, frameIndex);
+        fullOffset = currentOffset + (backfaceDir * (
+                                          closestBackfaceDist + PROBE_MIN_FRONTFACE_DISTANCE * 0.5f));
 
-        float scaleFactor = 2.0;
-        [unroll]
-        for (int i = 1; i <= 100; ++i)
+        // float scaleFactor = 2.0;
+        // [unroll]
+        // for (int i = 1; i <= 100; ++i)
+        // {
+        //     float3 testOffset = currentOffset + backfaceDir * (scaleFactor - i * 0.01f);
+        //     if (all(abs(testOffset) < offsetLimit))
+        //     {
+        //         fullOffset = testOffset;
+        //         break;
+        //     }
+        // }
+    }
+    else if (closestFrontfaceDist < PROBE_MIN_FRONTFACE_DISTANCE)
+    {
+        if (dot(closeDir, farDir) <= 0.f)
         {
-            float3 testOffset = currentOffset + backfaceDir * (scaleFactor - i * 0.01f);
-            if (all(abs(testOffset) < offsetLimit))
-            {
-                targetOffset = testOffset;
-                break;
-            }
+            // Ensures the probe never moves through the farthest frontface
+            farDir *= min(farthestFrontfaceDist, 1.f);
+            fullOffset = currentOffset + farDir;
         }
+    }
+    else if (closestFrontfaceDist > PROBE_MIN_FRONTFACE_DISTANCE)
+    {
+        float moveBackMargin = min(closestFrontfaceDist - PROBE_MIN_FRONTFACE_DISTANCE, length(currentOffset));
+        float3 moveBackDirection = normalize(-currentOffset);
+        fullOffset = currentOffset + (moveBackMargin * moveBackDirection);
     }
     // === 逻辑 B: 寻找空地 (Avoid Clutter) ===
-    else if (closestFrontfaceIndex != -1 && farthestFrontfaceIndex != -1)
-    {
-        float minSafeDist = length(g_GridSpacing) * 0.2f;
-
-        if (closestFrontfaceDist < minSafeDist)
-        {
-
-            if (!(dot(closeDir, farDir) > 0.5f))
-            {
-                float moveStep = min(0.2f, farthestFrontfaceDist * 0.5f);
-                float3 farestDir = moveStep * farDir;
-                targetOffset = currentOffset + farestDir;
-            }
-        }
-    }
-
-    float moveDist = length(targetOffset - currentOffset);
-    float minMoveThreshold = length(g_GridSpacing) * 0.001f; // 极小的死区防止微小震荡
-
-    // 只要有明显的位移趋势，就执行平滑移动
-    if (moveDist > minMoveThreshold)
-    {
-        probeOffsetBuffer[probeIndex] = targetOffset;
-    }
-
-    // if (probeFrameBuffer[probeIndex] < 5)
+    // else if (closestFrontfaceIndex != -1 && farthestFrontfaceIndex != -1)
     // {
-    //     probeFrameBuffer[probeIndex] += 1;
-    //     if (probeFrameBuffer[probeIndex] >= 5)
+    //     float minSafeDist = length(g_GridSpacing) * 0.2f;
+    //
+    //     if (closestFrontfaceDist < minSafeDist)
     //     {
-    //         // still in wall -> OFF
-    //         if ((backFaceCount / RELOCATE_RAY_COUNT) > PROBE_BACKFACE_THRESHOLD)
+    //
+    //         if (!(dot(closeDir, farDir) > 0.5f))
     //         {
-    //             probeStateBuffer[probeIndex] = PROBE_STATE_INACTIVE;
-    //             probeFrameBuffer[probeIndex] = 255;
-    //         }
-    //         else
-    //         {
-    //             probeStateBuffer[probeIndex] = PROBE_STATE_ACTIVE;
+    //             float moveStep = min(0.2f, farthestFrontfaceDist * 0.5f);
+    //             float3 farestDir = moveStep * farDir;
+    //             fullOffset = currentOffset + farestDir;
     //         }
     //     }
+    // }
+
+    float3 normalizedOffset = fullOffset / g_GridSpacing;
+    if (dot(normalizedOffset, normalizedOffset) < 0.2025f) // 0.45 * 0.45 == 0.2025
+    {
+        probeOffsetBuffer[probeIndex] = fullOffset;
+    }
+
+    // float moveDist = length(fullOffset - currentOffset);
+    // float minMoveThreshold = length(g_GridSpacing) * 0.001f; // 极小的死区防止微小震荡
+    //
+    // // 只要有明显的位移趋势，就执行平滑移动
+    // if (moveDist > minMoveThreshold)
+    // {
+    //     probeOffsetBuffer[probeIndex] = fullOffset;
     // }
 }
 
@@ -361,20 +365,20 @@ void ProbeBlending(uint3 id : SV_DispatchThreadID,
         float significantChangeThreshold = 0.25f;
         float newDistributionChangeThreshold = 0.8f;
 
-        float changeMagnitude = DDGIMaxComponent(abs(delta));
-        if (changeMagnitude > significantChangeThreshold)
-        {
-            hysteresis = max(0, hysteresis - 0.15f);
-        }
-        if (changeMagnitude > newDistributionChangeThreshold)
-        {
-            hysteresis = 0.f;
-        }
-
-        // if (DDGIMaxComponent(historyIrradiance - netIrradiance) > g_ProbeIrradianceThreshold)
+        // float changeMagnitude = DDGIMaxComponent(abs(delta));
+        // if (changeMagnitude > significantChangeThreshold)
         // {
-        //     hysteresis = max(0, hysteresis - 0.75f);
+        //     hysteresis = max(0, hysteresis - 0.15f);
         // }
+        // if (changeMagnitude > newDistributionChangeThreshold)
+        // {
+        //     hysteresis = 0.f;
+        // }
+
+        if (DDGIMaxComponent(historyIrradiance - netIrradiance) > g_ProbeIrradianceThreshold)
+        {
+            hysteresis = max(0, hysteresis - 0.75f);
+        }
         // 亮度增幅限制 (Brightness Thresholding)
         // 防止由于 Ray Tracing 噪声产生的极亮像素导致探针闪烁
         float luminanceDelta = DDGILinearRGBToLuminance(delta);

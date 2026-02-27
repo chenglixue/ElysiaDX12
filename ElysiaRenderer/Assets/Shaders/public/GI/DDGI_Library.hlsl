@@ -121,51 +121,63 @@ void RayClosestHit(inout RayData rayData,
     InstanceData instanceData = g_InstanceDataBuffer[globalGeometryIdx];
 
     bool isBackFace = (HitKind() == HIT_KIND_TRIANGLE_BACK_FACE);
-    StructuredBuffer<Vertex> vertices = ResourceDescriptorHeap[instanceData.VertexBufferIndex];
-    StructuredBuffer<uint> indices = ResourceDescriptorHeap[instanceData.IndexBufferIndex];
+    StructuredBuffer<Vertex> verticesBuffer = ResourceDescriptorHeap[instanceData.VertexBufferIndex];
+    StructuredBuffer<uint> indicesBuffer = ResourceDescriptorHeap[instanceData.IndexBufferIndex];
     UINT vertexOffset = instanceData.VertexOffset;
     UINT indexOffset = instanceData.IndexOffset;
 
-    UINT i0 = indices[indexOffset + primIdx * 3 + 0];
-    UINT i1 = indices[indexOffset + primIdx * 3 + 1];
-    UINT i2 = indices[indexOffset + primIdx * 3 + 2];
-    Vertex v0 = vertices[vertexOffset + i0];
-    Vertex v1 = vertices[vertexOffset + i1];
-    Vertex v2 = vertices[vertexOffset + i2];
+    UINT i0 = indicesBuffer[indexOffset + primIdx * 3 + 0];
+    UINT i1 = indicesBuffer[indexOffset + primIdx * 3 + 1];
+    UINT i2 = indicesBuffer[indexOffset + primIdx * 3 + 2];
 
-    float2 uv0 = v0.uv;
-    float2 uv1 = v1.uv;
-    float2 uv2 = v2.uv;
+    Vertex vertices[3];
+    vertices[0] = verticesBuffer[vertexOffset + i0];
+    vertices[1] = verticesBuffer[vertexOffset + i1];
+    vertices[2] = verticesBuffer[vertexOffset + i2];
+    float3 bary = float3(1.0 - attr.barycentrics.x - attr.barycentrics.y, attr.barycentrics.x, attr.barycentrics.y);
+    Vertex v = InterpolateVertex(vertices, bary);
 
     // 重心坐标插值
-    float2 bary = attr.barycentrics; // 这是 (u, v)
-    float w = 1.0 - bary.x - bary.y;
-    float2 finalUV = uv0 * w + uv1 * bary.x + uv2 * bary.y;
+    float2 sampleUV = v.uv;
+    float3 normalOS = v.normalOS;
+    float3 tangentOS = v.tangentOS;
 
-    float4 baseColorAlpha = SampleTexture2D_LOD(instanceData.BaseColorTexIndex,
-                                                finalUV,
-                                                g_WarpLinearSampler,
-                                                0);
-    float3 normalOS = v0.normalOS * w + v1.normalOS * bary.x + v2.normalOS * bary.y;
-    float3 N = normalize(mul((float3x3)ObjectToWorld3x4(), normalOS));
+    float4 baseColorAlpha = 1.f;
+    if (instanceData.BaseColorTexIndex > 0)
+    {
+        baseColorAlpha = SampleTexture2D_LOD(instanceData.BaseColorTexIndex,
+                                             sampleUV,
+                                             g_WarpLinearSampler,
+                                             0);
+    }
 
+    float3 N = normalize(mul(ObjectToWorld3x4(), float4(normalOS, 0.f)));
+    if (instanceData.NormalTexIndex > 0)
+    {
+        float3 T = normalize(mul(ObjectToWorld3x4(), float4(tangentOS, 0.f)));
+        float3 B = cross(N, T);
+
+        float3x3 TBN = {T, B, N};
+        N = SampleTexture2D_LOD(instanceData.NormalTexIndex, sampleUV, g_WarpLinearSampler, 0);
+        N = N * 2.f - 1.f;
+        N = mul(N, TBN);
+    }
     if (isBackFace)
     {
         N = -N;
     }
 
     LightData mainLightData = GetMainLight(mainLight);
-    float3 toLight = mainLightData.toLight;
-    float NoL = dot(N, toLight);
+    float3 toLight = normalize(mainLightData.toLight);
+    float NoL = max(0, dot(N, toLight));
 
-    float3 directRadiance = 0.f;
     float3 positionWS = WorldRayOrigin() + WorldRayDirection() * RayTCurrent();
-    if (NoL > 0.f)
-    {
-        float shadow = DDGI_Shadow_Visibity(positionWS, N, g_ProbeNormalBias, toLight, g_SceneTLAS);
-        directRadiance = baseColorAlpha.rgb * mainLightData.color * mainLightData.intensity * NoL *
-                         shadow;
-    }
+    float shadow = DDGI_Shadow_Visibity(positionWS,
+                                        normalize(mul(ObjectToWorld3x4(), float4(normalOS, 0.f))),
+                                        g_ProbeNormalBias,
+                                        toLight,
+                                        g_SceneTLAS);
+    float3 directRadiance = baseColorAlpha.rgb / PI * mainLightData.color * mainLightData.intensity * NoL * shadow;
 
     float blendWeight = DDGIGetVolumeBlendWeight(positionWS, g_GridOrigin, g_GridSpacing, 0, float4(0, 0, 0, 1));
 
