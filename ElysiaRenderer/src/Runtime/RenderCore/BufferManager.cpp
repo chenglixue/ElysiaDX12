@@ -574,9 +574,9 @@ namespace ElysiaRenderer
                     break;
                 }
 
-                uploadContext->AddBarrier(*bufferUpload->buffer,
-                                          D3D12_RESOURCE_STATE_COPY_DEST,
-                                          false);
+                // uploadContext->AddBarrier(*bufferUpload->buffer,
+                //                           D3D12_RESOURCE_STATE_COPY_DEST,
+                //                           false);
                 memcpy(cpuAddress + bufferUploadHeapOffset,
                        bufferUpload->pBufferData.get(),
                        bufferUpload->bufferDataSize);
@@ -597,13 +597,12 @@ namespace ElysiaRenderer
                                    0,
                                    1,
                                    &subData);
-                uploadContext->AddBarrier(*bufferUpload->buffer,
-                                          D3D12_RESOURCE_STATE_COMMON,
-                                          false);
+                // uploadContext->AddBarrier(*bufferUpload->buffer,
+                //                           D3D12_RESOURCE_STATE_COMMON,
+                //                           false);
                 bufferUploadHeapOffset = AlignU32(
                     bufferUploadHeapOffset + bufferUpload->bufferDataSize,
                     D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
-                uploadContext->AddBufferProcess(bufferUpload);
             }
             uploadContext->FlushBarrier();
         }

@@ -424,6 +424,9 @@ namespace ElysiaRenderer
         m_pMaterial->SetUInt(GIPass::ShaderIDs::g_ProbeOffsetsIndex,
                              GIPass::m_pProbeOffsetBuffer->GetResourceHeapIndex(),
                              passID);
+        m_pMaterial->SetUInt(GIPass::ShaderIDs::g_ProbeStatesIndex,
+                             GIPass::m_pProbeStateBuffer->GetResourceHeapIndex(),
+                             passID);
         m_pMaterial->SetFloat(GIPass::ShaderIDs::g_DDGIEncodingGamma,
                               UserData::GetInstance().GIParameter.gamma,
                               passID);
@@ -464,12 +467,9 @@ namespace ElysiaRenderer
         m_pCommand->GetCommandList()->ResourceBarrier(1, &barrier);
 
         m_pCommand->GetCommandList()->ExecuteIndirect(m_pCommandSignature,
-                                                      // 执行多少次命令
                                                       context.renderList.size(),
                                                       m_pIndirectDataBuffer->GetResource(),
-                                                      // 从 Buffer 的开头开始
                                                       0,
-                                                      // 如果没有 CountBuffer，则固定执行指定的次数
                                                       nullptr,
                                                       0);
 

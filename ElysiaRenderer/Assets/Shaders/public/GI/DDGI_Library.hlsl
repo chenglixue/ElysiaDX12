@@ -29,6 +29,7 @@ cbuffer PassConstant : register(b0, perPassSpace)
 RaytracingAccelerationStructure g_SceneTLAS : register(t0);
 StructuredBuffer<InstanceData> g_InstanceDataBuffer : register(t1);
 StructuredBuffer<Vector3> g_ProbeOffsetBuffer : register(t2);
+StructuredBuffer<UINT> g_ProbeStatesBuffer : register(t3);
 
 SamplerState g_WarpPointSampler : register(s0);
 SamplerState g_ClampPointSampler : register(s1);
@@ -38,7 +39,6 @@ SamplerState g_WarpAnisotropicSampler : register(s4);
 SamplerState g_ClampAnisotropicSampler : register(s5);
 SamplerState g_ShadowWarpLinearSampler : register(s6);
 SamplerState g_ShadowClampLinearSampler : register(s7);
-
 
 void Elysia_DDGI_StoreRayData(uint writeIndex, float3 radiance, float distance)
 {
@@ -51,7 +51,10 @@ RayData Elysia_DDGI_LoadRayData(uint readIndex)
     RWStructuredBuffer<RayData> rayDatas = ResourceDescriptorHeap[g_RayDataBufferIndex];
     return rayDatas[readIndex];
 }
-
+UINT Elysia_DDGI_LoadeProbeState(UINT probeIndex)
+{
+    return g_ProbeStatesBuffer[probeIndex];
+}
 [shader("raygeneration")]
 void GenerateRayMain()
 {
@@ -59,25 +62,30 @@ void GenerateRayMain()
     uint rayIndex = DispatchRaysIndex().y;
     UINT2 dimension = DispatchRaysDimensions().xy;
     uint3 gridIdx = GetProbeGridCoord(probeIndex, g_GridDimensions);
+    UINT probeState = Elysia_DDGI_LoadeProbeState(probeIndex);
+
+    if (probeState == PROBE_STATE_INACTIVE && rayIndex >= RELOCATE_RAY_COUNT)
+        return;
 
     Vector3 rayOrigin = GetProbeWorldPosition(probeIndex,
                                               g_GridOrigin,
                                               g_GridSpacing,
                                               g_GridDimensions) + g_ProbeOffsetBuffer[probeIndex];
-    float3 rayDir = DDGIGetProbeRayDir(rayIndex, RAYS_PER_PROBE, gridIdx, frameIndex, false);
+    float3 rayDir = DDGIGetProbeRayDir(rayIndex, RAYS_PER_PROBE, gridIdx, frameIndex);
 
     RayDesc rayDesc;
     rayDesc.Origin = rayOrigin;
     rayDesc.Direction = rayDir;
-    rayDesc.TMin = 0.01f;
+    rayDesc.TMin = 0.f;
     rayDesc.TMax = DXR_MAX;
 
     RayData rayData;
     rayData.Radiance = 0.f;
     rayData.Distance = 0.f;
 
+    UINT rayFlag = RAY_FLAG_NONE;
     TraceRay(g_SceneTLAS,
-             RAY_FLAG_NONE,
+             rayFlag,
              0xFF,
              0,
              1,
@@ -154,7 +162,7 @@ void RayClosestHit(inout RayData rayData,
     float3 positionWS = WorldRayOrigin() + WorldRayDirection() * RayTCurrent();
     if (NoL > 0.f)
     {
-        float shadow = DDGI_Shadow_Visibity(positionWS, N, toLight, g_SceneTLAS);
+        float shadow = DDGI_Shadow_Visibity(positionWS, N, g_ProbeNormalBias, toLight, g_SceneTLAS);
         directRadiance = baseColorAlpha.rgb * mainLightData.color * mainLightData.intensity * NoL *
                          shadow;
     }
@@ -179,6 +187,7 @@ void RayClosestHit(inout RayData rayData,
             g_DistanceTexSize,
             g_DistanceTexIndex,
             g_ProbeOffsetBuffer,
+            g_ProbeStatesBuffer,
             g_WarpLinearSampler
             );
         float maxAlbedo = 0.9f;
@@ -188,7 +197,7 @@ void RayClosestHit(inout RayData rayData,
         indirectRadiance *= blendWeight;
         rayData.Radiance += indirectRadiance;
     }
-    rayData.Radiance += directRadiance;
+    rayData.Radiance = saturate(rayData.Radiance + directRadiance);
     rayData.Distance = RayTCurrent();
 
     if (isBackFace)

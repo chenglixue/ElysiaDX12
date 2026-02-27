@@ -10,6 +10,9 @@
 #define DXR_SHADOW_MAX 1e27f
 #define RTXGI_DDGI_NUM_VOLUMES 6
 
+#define PROBE_STATE_INACTIVE 0
+#define PROBE_STATE_ACTIVE   1
+#define RELOCATE_RAY_COUNT 32
 
 struct Vertex
 {
@@ -42,6 +45,22 @@ struct InstanceData
     UINT VertexBufferIndex;
     UINT IndexBufferIndex;
 };
+
+struct AABBData
+{
+    Vector3 Min;
+    float pad0;
+    Vector3 Max;
+    float pad1;
+};
+
+bool IsPointInAABB(float3 position, AABBData aabb, float margin)
+{
+    // 将包围盒向外扩充一个 margin (通常是探针间距)
+    return (position.x >= aabb.Min.x - margin && position.x <= aabb.Max.x + margin) &&
+           (position.y >= aabb.Min.y - margin && position.y <= aabb.Max.y + margin) &&
+           (position.z >= aabb.Min.z - margin && position.z <= aabb.Max.z + margin);
+}
 
 float2 SignNotZero(float2 v)
 {
@@ -188,8 +207,7 @@ float3 RotateVectorByQuaternion(float3 v, float4 q)
 float3 DDGIGetProbeRayDir(uint sampleIndex,
                           uint numSamples,
                           uint3 probeGridIdx,
-                          UINT frameIndex,
-                          bool bIsRelocationPass)
+                          UINT frameIndex)
 {
     float globalRotation = fmod(float(frameIndex) * 2.399963f, 6.283185f);
 
@@ -202,11 +220,13 @@ float3 DDGIGetProbeRayDir(uint sampleIndex,
     float finalAngle = globalRotation + h1 * 6.283185f;
 
     bool isFixedRay = false;
-    if (bIsRelocationPass)
+    if (true)
     {
-        isFixedRay = sampleIndex < 32;
-        sampleIndex = isFixedRay ? sampleIndex : sampleIndex - 32;
-        numSamples = isFixedRay ? 32 : numSamples - 32;
+        isFixedRay = sampleIndex < RELOCATE_RAY_COUNT;
+        sampleIndex = isFixedRay ? sampleIndex : sampleIndex - RELOCATE_RAY_COUNT;
+        numSamples = isFixedRay
+                         ? RELOCATE_RAY_COUNT
+                         : numSamples - RELOCATE_RAY_COUNT;
     }
 
     // 4. 判断是否为固定光线 (参考 NVIDIA 策略)
@@ -238,11 +258,12 @@ float DDGILinearRGBToLuminance(float3 rgb)
 
 float DDGI_Shadow_Visibity(float3 PositionWS,
                            float3 NormalWS,
+                           float3 normalBias,
                            float3 ToLight,
                            RaytracingAccelerationStructure SceneTLAS)
 {
     RayDesc shadowRayDesc;
-    shadowRayDesc.Origin = PositionWS + NormalWS * 0.001f;
+    shadowRayDesc.Origin = PositionWS + NormalWS * normalBias;
     shadowRayDesc.Direction = ToLight;
     shadowRayDesc.TMin = 0.f;
     shadowRayDesc.TMax = DXR_SHADOW_MAX;

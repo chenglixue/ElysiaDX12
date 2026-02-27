@@ -17,7 +17,9 @@ namespace ElysiaRenderer
 #define GI_PASS_LIST \
     PASS(RELOCATE_PROBES_PASS,          "public\\GI\\CS_DDGI.hlsl",               true,  RelocateProbes)\
     PASS(CLEAR_PROBE_OFFSET_PASS,       "public\\GI\\CS_DDGI.hlsl",               true,  ClearProbeOffsetBuffer)\
-    PASS(PROBE_BLENDING_PASS,           "public\\GI\\CS_DDGI.hlsl",               true,  ProbeBlending)
+    PASS(PROBE_BLENDING_PASS,           "public\\GI\\CS_DDGI.hlsl",               true,  ProbeBlending)\
+    PASS(UPDATE_PROBE_STATES,           "public\\GI\\CS_DDGI.hlsl",               true,  UpdateProbeStates)\
+    PASS(RESET_PROBE_STATES,           "public\\GI\\CS_DDGI.hlsl",               true,  ResetProbeStates)
 
     class GIPass : public BasePass
     {
@@ -43,12 +45,16 @@ namespace ElysiaRenderer
             static inline size_t g_ProbeRadius = PropertyToID(L"g_ProbeRadius");
             static inline size_t g_RandomRotation = PropertyToID(L"g_RandomRotation");
             static inline size_t g_ProbeOffsetsIndex = PropertyToID(L"g_ProbeOffsetsIndex");
+            static inline size_t g_ProbeStatesIndex = PropertyToID(L"g_ProbeStatesIndex");
+            static inline size_t g_StaticAABBIndex = PropertyToID(L"g_StaticAABBIndex");
+            static inline size_t g_ProbeFrameBufferIndex = PropertyToID(L"g_ProbeFrameBufferIndex");
             static inline size_t g_ProbeNormalBias = PropertyToID(L"g_ProbeNormalBias");
             static inline size_t g_ProbeViewBias = PropertyToID(L"g_ProbeViewBias");
             static inline size_t g_DDGIBlendWeight = PropertyToID(L"g_DDGIBlendWeight");
             static inline size_t g_DDGIEncodingGamma = PropertyToID(L"g_DDGIEncodingGamma");
             static inline size_t g_ProbeIrradianceThreshold = PropertyToID(L"g_ProbeIrradianceThreshold");
             static inline size_t g_ProbeBrightnessThreshold = PropertyToID(L"g_ProbeBrightnessThreshold");
+            static inline size_t g_StaticAABBCount = PropertyToID(L"g_StaticAABBCount");
         };
 
         static inline D3D12_VERTEX_BUFFER_VIEW m_vertexView;
@@ -60,6 +66,7 @@ namespace ElysiaRenderer
         static inline BufferHandle m_pRayDataBuffer;
         static inline BufferHandle m_pInstanceDataBuffer;
         static inline BufferHandle m_pProbeOffsetBuffer;
+        static inline BufferHandle m_pProbeStateBuffer;
         static inline RenderTexture* m_pIrradianceRT = nullptr;
         static inline RenderTexture* m_pDistanceRT = nullptr;
         static inline constexpr UINT NumVertices = 12;
@@ -103,6 +110,7 @@ namespace ElysiaRenderer
 #pragma endregion
 
         static constexpr float k_GoldenAngle = 2.39996322972865332f;
+        static constexpr auto Max_RenderItem_Count = 10240;
 
         UINT m_frameIndex;
         UINT m_halfWidth;
@@ -132,6 +140,13 @@ namespace ElysiaRenderer
             UINT VertexBufferIndex;
             UINT IndexBufferIndex;
         };
+        struct alignas(16) AABBData
+        {
+            Vector3 Min;
+            float pad0;
+            Vector3 Max;
+            float pad1;
+        };
         CComPtr<ID3D12Device5> m_pDevice5;
         SBTHelper m_stbHelper;
         CComPtr<IDxcBlob> m_DXRBlob;
@@ -141,7 +156,12 @@ namespace ElysiaRenderer
         BufferHandle m_pTLASBuffer;
         BufferHandle m_pTLASScratchBuffer;
         BufferHandle m_pTLASUploadBuffer;
+        BufferHandle m_pProbeFrameBuffer;
+        BufferHandle m_pStaticAABBDataBuffer;
         std::vector<InstanceData> m_instanceDatas;
+        std::vector<AABBData> m_AABBDatas;
+        std::vector<UINT> m_probeStates = std::vector<UINT>(Probe_Count, 1);
+        std::vector<UINT> m_probeFrames = std::vector<UINT>(Probe_Count, 0);
 
 
 #pragma region Vertices
@@ -170,6 +190,8 @@ namespace ElysiaRenderer
         };
 #pragma endregion
 
+        void ResetProbeStates();
+        void UpdateProbeStates();
         void GenerateRay();
         void ClearProbeOffset();
         void RelocateProbes();

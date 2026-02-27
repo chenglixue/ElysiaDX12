@@ -285,7 +285,7 @@ float3 GetIBL(FInputParams inputParams,
                                              GBufferData.Roughness,
                                              N,
                                              V);
-    NonSpecularContribution = AMDTonemapInvert(NonSpecularContribution);
+    // NonSpecularContribution = AMDTonemapInvert(NonSpecularContribution);
     SpecularContribution += ApproximateSpecularIBL(Random,
                                                    GBufferData.SpecularColor,
                                                    GBufferData.Roughness,

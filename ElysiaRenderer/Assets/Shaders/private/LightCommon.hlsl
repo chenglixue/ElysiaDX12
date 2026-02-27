@@ -149,7 +149,7 @@ float4 GetDynamicLighting(FInputParams inputData,
     FLightingSplit lighting = (FLightingSplit)0;
     lighting = GetDynamicLightingSplit(inputData, GBufferData, lightData, AO);
 
-    o += float4(AMDTonemapInvert(lighting.DiffuseLighting), lighting.DiffuseLighting.a);
+    o += lighting.DiffuseLighting;
     o += lighting.SpecularLighting;
     o.a = GBufferData.Opacity;
 

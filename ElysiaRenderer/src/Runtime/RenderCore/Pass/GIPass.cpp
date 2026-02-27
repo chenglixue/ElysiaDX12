@@ -83,6 +83,33 @@ namespace ElysiaRenderer
             .accessFlags = BufferAccessFlags::GPUOnly,
         });
 
+        m_pProbeStateBuffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc
+        {
+            .name = L"Probe State Buffer",
+            .stride = sizeof(UINT),
+            .size = sizeof(UINT) * Probe_Count,
+            .viewFlags = GPUResourceFlags::UAV | GPUResourceFlags::SRV,
+            .accessFlags = BufferAccessFlags::GPUOnly,
+        });
+
+        m_pProbeFrameBuffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc
+        {
+            .name = L"Probe Init Frame Buffer",
+            .stride = sizeof(UINT),
+            .size = sizeof(UINT) * Probe_Count,
+            .viewFlags = GPUResourceFlags::UAV,
+            .accessFlags = BufferAccessFlags::GPUOnly,
+        });
+
+        m_pStaticAABBDataBuffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc
+        {
+            .name = L"Static AABB Buffer",
+            .stride = sizeof(AABBData),
+            .size = sizeof(AABBData) * Max_RenderItem_Count,
+            .viewFlags = GPUResourceFlags::SRV,
+            .accessFlags = BufferAccessFlags::HostWritable,
+        });
+
         m_DXRBlob = CompileRaytracingLibrary(L"Shaders\\public\\GI\\DDGI_Library.hlsl");
     }
 
@@ -131,6 +158,36 @@ namespace ElysiaRenderer
         m_frameIndex = context.frameIndex;
         m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), "GI Begin");
 
+        static bool isInitProbeState = false;
+        if (!isInitProbeState)
+        {
+            isInitProbeState = true;
+            auto pBufferData = DX12BufferUpload
+            {
+                .buffer = m_pProbeStateBuffer,
+                .pBufferData = std::make_unique<uint8_t[]>(sizeof(UINT) * Probe_Count),
+                .bufferDataSize = sizeof(UINT) * Probe_Count
+            };
+            memcpy(pBufferData.pBufferData.get(), m_probeStates.data(), sizeof(UINT) * Probe_Count);
+            BufferManager::GetInstance().UploadBufferData(m_pDevice->GetUploadContext(), &pBufferData);
+        }
+
+        static bool isInitProbeFrame = false;
+        if (!isInitProbeFrame)
+        {
+            isInitProbeFrame = true;
+            auto pBufferData = DX12BufferUpload
+            {
+                .buffer = m_pProbeFrameBuffer,
+                .pBufferData = std::make_unique<uint8_t[]>(sizeof(UINT) * Probe_Count),
+                .bufferDataSize = sizeof(UINT) * Probe_Count
+            };
+            memcpy(pBufferData.pBufferData.get(), m_probeFrames.data(), sizeof(UINT) * Probe_Count);
+            BufferManager::GetInstance().UploadBufferData(m_pDevice->GetUploadContext(), &pBufferData);
+        }
+
+        static bool isInitStaticAABB = false;
+
         if (!SceneManager::GetInstance().GetEntities().empty() && !SceneManager::GetInstance().
             GetEntities()[0]->GetChildren().empty())
         {
@@ -139,12 +196,21 @@ namespace ElysiaRenderer
             auto instanceSize = entityCount * allEntities[0]->pMeshRenderer->m_pModel->meshes.size();
 
             m_instanceDatas.clear();
+            m_AABBDatas.clear();
             m_instanceDatas.reserve(instanceSize);
+            m_AABBDatas.reserve(Max_RenderItem_Count);
             bool needFlushBarrier = false;
             // first is root list
             for (UINT i = 0; i < entityCount; i ++)
             {
                 auto currEntity = allEntities[i].get();
+
+                auto AABB = currEntity->GetWorldAABB();
+                m_AABBDatas.emplace_back(AABBData
+                {
+                    .Min = AABB.Center - AABB.Extents,
+                    .Max = AABB.Center + AABB.Extents,
+                });
                 if (!currEntity->GetBLASBuffer())
                 {
                     needFlushBarrier = true;
@@ -176,6 +242,14 @@ namespace ElysiaRenderer
             if (needFlushBarrier)
             {
                 m_pCommand->FlushBarrier();
+            }
+
+            if (!isInitStaticAABB)
+            {
+                isInitStaticAABB = true;
+                memcpy(m_pStaticAABBDataBuffer->GetMappedBuffer(),
+                       m_AABBDatas.data(),
+                       sizeof(AABBData) * Max_RenderItem_Count);
             }
 
             if (!m_pInstanceDataBuffer || m_pInstanceDataBuffer->GetResourceDesc().Width < sizeof(
@@ -236,8 +310,9 @@ namespace ElysiaRenderer
 
         ClearProbeOffset();
         GenerateRay();
-        RelocateProbes();
         ProbeBlend();
+        RelocateProbes();
+        UpdateProbeStates();
     }
 
     void GIPass::UpdatePipeline()
@@ -271,6 +346,86 @@ namespace ElysiaRenderer
 
     }
 
+    void GIPass::ResetProbeStates()
+    {
+        auto passID = RESET_PROBE_STATES;
+        auto passName = m_PassData[passID].Name.c_str();
+        auto& passData = m_pMaterial->GetPassData(passID);
+        PIXHelper pix(m_pCommand->GetCommandList(), passName);
+
+        PipelineInfo pipelineStateData{};
+        pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(
+            passID).pPipelineStateObject;
+        m_pCommand->SetPipeline(pipelineStateData);
+
+        m_pCommand->AddBarrier(*m_pProbeStateBuffer, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+        {
+            m_pMaterial->SetUInt(ShaderIDs::g_ProbeStatesIndex,
+                                 m_pProbeStateBuffer->GetResourceHeapIndex(),
+                                 passID);
+
+            SetSpaceResource(passData, PER_PASS_SPACE);
+            auto threadGroupSize = passData.GetKernelThreadGroupSizes();
+            m_pCommand->Dispatch(CeilDivide(Probe_Count, threadGroupSize.x),
+                                 threadGroupSize.y,
+                                 threadGroupSize.z);
+        }
+        m_pCommand->AddBarrier(*m_pProbeStateBuffer,
+                               D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
+    }
+    void GIPass::UpdateProbeStates()
+    {
+        auto passID = UPDATE_PROBE_STATES;
+        auto passName = m_PassData[passID].Name.c_str();
+        auto& passData = m_pMaterial->GetPassData(passID);
+        PIXHelper pix(m_pCommand->GetCommandList(), passName);
+
+        PipelineInfo pipelineStateData{};
+        pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(
+            passID).pPipelineStateObject;
+        m_pCommand->SetPipeline(pipelineStateData);
+
+        m_pCommand->AddBarrier(*m_pProbeStateBuffer, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+        {
+            m_pMaterial->SetUInt(ShaderIDs::g_ProbeStatesIndex,
+                                 m_pProbeStateBuffer->GetResourceHeapIndex(),
+                                 passID);
+            m_pMaterial->SetUInt(ShaderIDs::g_ProbeFrameBufferIndex,
+                                 m_pProbeFrameBuffer->GetUAVResourceHeapIndex(),
+                                 passID);
+            m_pMaterial->SetUInt(ShaderIDs::g_StaticAABBIndex,
+                                 m_pStaticAABBDataBuffer->GetResourceHeapIndex(),
+                                 passID);
+            m_pMaterial->SetUInt(ShaderIDs::g_RayDataBufferIndex,
+                                 m_pRayDataBuffer->GetResourceHeapIndex(),
+                                 passID);
+            m_pMaterial->SetFloat4(ShaderIDs::g_GridOrigin,
+                                   Vector4(m_gridOrigin.x, m_gridOrigin.y, m_gridOrigin.z, 0.f),
+                                   passID);
+            m_pMaterial->SetFloat4(ShaderIDs::g_GridSpacing,
+                                   Vector4(m_gridSpacing.x, m_gridSpacing.y, m_gridSpacing.z, 0.f),
+                                   passID);
+            m_pMaterial->SetFloat4(ShaderIDs::g_GridDimensions,
+                                   Vector4(Grid_Dimensions.x,
+                                           Grid_Dimensions.y,
+                                           Grid_Dimensions.z,
+                                           0.f),
+                                   passID);
+            m_pMaterial->SetUInt(ShaderIDs::g_StaticAABBCount, m_AABBDatas.size(), passID);
+            SetSpaceResource(passData, PER_PASS_SPACE);
+
+            auto threadGroupSize = passData.GetKernelThreadGroupSizes();
+            m_pCommand->Dispatch(CeilDivide(Probe_Count, threadGroupSize.x),
+                                 threadGroupSize.y,
+                                 threadGroupSize.z);
+        }
+        m_pCommand->AddBarrier(*m_pProbeStateBuffer,
+                               D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
+    }
     void GIPass::GenerateRay()
     {
         PIXHelper pix(m_pCommand->GetCommandList(), "Generate Ray");
@@ -349,6 +504,9 @@ namespace ElysiaRenderer
             m_pCommand->GetCommandList()->SetComputeRootShaderResourceView(
                 rootParameterIndex ++,
                 m_pProbeOffsetBuffer->GetGPUAddress());
+            m_pCommand->GetCommandList()->SetComputeRootShaderResourceView(
+                rootParameterIndex ++,
+                m_pProbeStateBuffer->GetGPUAddress());
 
             D3D12_DISPATCH_RAYS_DESC dispatchDesc = {};
             dispatchDesc.Width = Probe_Count;
@@ -416,11 +574,23 @@ namespace ElysiaRenderer
         m_pCommand->AddBarrier(*m_pProbeOffsetBuffer, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
         {
             m_pMaterial->SetUInt(ShaderIDs::g_ProbeOffsetsIndex,
-                                 m_pProbeOffsetBuffer->GetUAVResourceHeapIndex());
+                                 m_pProbeOffsetBuffer->GetUAVResourceHeapIndex(),
+                                 passID);
             m_pMaterial->SetUInt(ShaderIDs::g_RayDataBufferIndex,
-                                 m_pRayDataBuffer->GetResourceHeapIndex());
-            m_pMaterial->SetFloat(ShaderIDs::g_RandomRotation, m_RandomRotation);
-            m_pMaterial->SetFloat3(ShaderIDs::g_GridSpacing, m_gridSpacing);
+                                 m_pRayDataBuffer->GetResourceHeapIndex(),
+                                 passID);
+            m_pMaterial->SetUInt(ShaderIDs::g_ProbeStatesIndex,
+                                 m_pProbeStateBuffer->GetResourceHeapIndex(),
+                                 passID);
+            m_pMaterial->SetUInt(ShaderIDs::g_ProbeFrameBufferIndex,
+                                 m_pProbeFrameBuffer->GetUAVResourceHeapIndex(),
+                                 passID);
+            m_pMaterial->SetFloat(ShaderIDs::g_RandomRotation,
+                                  m_RandomRotation,
+                                  passID);
+            m_pMaterial->SetFloat4(ShaderIDs::g_GridSpacing,
+                                   Vector4(m_gridSpacing.x, m_gridSpacing.y, m_gridSpacing.z, 0.f),
+                                   passID);
 
             SetSpaceResource(passData, PER_PASS_SPACE);
 
@@ -473,10 +643,11 @@ namespace ElysiaRenderer
                                   UserData::GetInstance().GIParameter.gamma,
                                   passID);
             // m_pMaterial->SetFloat3(ShaderIDs::g_GridSpacing, m_gridSpacing);
-            m_pMaterial->SetFloat3(ShaderIDs::g_GridDimensions,
-                                   Vector3(Grid_Dimensions.x,
+            m_pMaterial->SetFloat4(ShaderIDs::g_GridDimensions,
+                                   Vector4(Grid_Dimensions.x,
                                            Grid_Dimensions.y,
-                                           Grid_Dimensions.z),
+                                           Grid_Dimensions.z,
+                                           0.f),
                                    passID);
 
             SetSpaceResource(passData, PER_PASS_SPACE);
@@ -846,7 +1017,7 @@ namespace ElysiaRenderer
     {
         // 1. 定义根参数：对于 Bindless 方案，我们通常只需要“根常量 (Root Constants)”
         // 用来传递诸如 g_RayDataUAVIndex 或 DDGI 配置结构体的索引
-        CD3DX12_ROOT_PARAMETER1 rootParameters[5];
+        CD3DX12_ROOT_PARAMETER1 rootParameters[6];
 
         // 假设我们需要 16 个 32位常量 (比如一个 ViewProj 矩阵或一组索引)
         UINT rootParameterIndex = 0;
@@ -854,6 +1025,7 @@ namespace ElysiaRenderer
         rootParameters[rootParameterIndex ++].InitAsConstantBufferView(0, PER_FRAME_SPACE);
 
         UINT SRVIndex = 0;
+        rootParameters[rootParameterIndex ++].InitAsShaderResourceView(SRVIndex ++, 0);
         rootParameters[rootParameterIndex ++].InitAsShaderResourceView(SRVIndex ++, 0);
         rootParameters[rootParameterIndex ++].InitAsShaderResourceView(SRVIndex ++, 0);
         rootParameters[rootParameterIndex ++].InitAsShaderResourceView(SRVIndex ++, 0);

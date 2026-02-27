@@ -44,6 +44,7 @@ cbuffer PassConstant : register(b0, perPassSpace)
     UINT g_IrradianceTexIndex;
     UINT g_DistanceTexIndex;
     UINT g_ProbeOffsetsIndex;
+    UINT g_ProbeStatesIndex;
     float4 g_IrradianceTexSize;
     float4 g_DistanceTexSize;
     float3 g_AmbientTint;
@@ -182,7 +183,6 @@ FEncodeGBufferData GetEncodeGBufferData(FInputParams inputParams, float3 toLight
                                                                                                      .zw,
                                        WarpLinearSampler)
                        * float4(currMeshData.baseColorTint, currMeshData.opacity);
-    baseColor.rgb = AMDTonemapInvert(baseColor);
     clip(baseColor.a - currMeshData.cutoff);
 
     float4 normalTS = SampleTexture2D(currMeshData.normalTexIndex,
@@ -252,6 +252,7 @@ FEncodeGBufferData GetEncodeGBufferData(FInputParams inputParams, float3 toLight
                            g_DistanceTexSize,
                            g_DistanceTexIndex,
                            g_ProbeOffsetsIndex,
+                           g_ProbeStatesIndex,
                            WarpLinearSampler
                     ) * g_AmbientTint;
         o.IBL = baseColor.rgb / PI * o.IBL;

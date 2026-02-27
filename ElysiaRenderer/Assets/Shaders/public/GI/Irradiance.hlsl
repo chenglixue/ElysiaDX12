@@ -23,7 +23,7 @@ float3 DDGIGetSurfaceBias(float3 surfaceNormal,
                           float3 probeViewBias)
 {
     float3 o = (surfaceNormal * probeNormalBias) + (-cameraDirection * probeViewBias);
-    o *= 0.3f * (0.75f * MIN_DISTANCE_BETWEEN_PROBES);
+    // o *= 0.3f * (0.75f * MIN_DISTANCE_BETWEEN_PROBES);
     return o;
 }
 
@@ -40,6 +40,7 @@ float3 SampleDDGI(float3 positionWS,
                   float4 distanceTexSize,
                   UINT distanceTexIndex,
                   UINT ProbeOffsetsIndex,
+                  UINT ProbeStatesIndex,
                   UINT samplerIndex)
 {
     float3 biasPositionWS = positionWS + surfaceBias;
@@ -51,6 +52,7 @@ float3 SampleDDGI(float3 positionWS,
     float3 sumIrradiance = 0.f;
     float sumWeight = 0.f;
     StructuredBuffer<float3> probeOffsets = ResourceDescriptorHeap[ProbeOffsetsIndex];
+    StructuredBuffer<UINT> probeStates = ResourceDescriptorHeap[ProbeStatesIndex];
 
     [unroll(8)]
     for (int i = 0; i < 8; ++i)
@@ -62,6 +64,10 @@ float3 SampleDDGI(float3 positionWS,
         // 映射到线性索引
         uint adjProbeIdx = adjCoords.x + adjCoords.y * gridDimensions.x + adjCoords.z * (
                                gridDimensions.x * gridDimensions.y);
+        UINT probeState = probeStates[adjProbeIdx];
+        if (probeState == PROBE_STATE_INACTIVE)
+            continue;
+
         float3 posOffset = probeOffsets[adjProbeIdx];
         // 获取相邻探针的世界坐标
         float3 adjProbeWorldPos = gridOrigin + adjCoords * gridSpacing + posOffset;
@@ -123,7 +129,7 @@ float3 SampleDDGI(float3 positionWS,
         float2 octantCoordsIrr = OctEncode(normalWS);
         uv = (octantCoordsIrr * 0.5f + 0.5f) * (DDGI_PROBE_NUM_TEXELS - 2.f) + 1.0f;
         finalUV = (float2(atlasPos * DDGI_PROBE_NUM_TEXELS) + uv) * irradianceTexSize.zw;
-        float3 probeColor = SampleTexture2D_LOD(irradianceTexIndex, finalUV, samplerIndex, 0).rgb;
+        float3 probeColor = SampleTexture2D(irradianceTexIndex, finalUV, samplerIndex).rgb;
 
         float3 exponent = gamma * 0.5f;
         probeColor = pow(probeColor, exponent);
@@ -155,6 +161,7 @@ float3 SampleDDGI(float3 positionWS,
                   float4 distanceTexSize,
                   UINT distanceTexIndex,
                   StructuredBuffer<float3> ProbeOffsets,
+                  StructuredBuffer<UINT> ProbeStates,
                   SamplerState linearClampSampler)
 {
     float3 biasPositionWS = positionWS + surfaceBias;
@@ -176,6 +183,10 @@ float3 SampleDDGI(float3 positionWS,
         // 映射到线性索引
         uint adjProbeIdx = adjCoords.x + adjCoords.y * gridDimensions.x + adjCoords.z * (
                                gridDimensions.x * gridDimensions.y);
+        UINT probeState = ProbeStates[adjProbeIdx];
+        if (probeState == PROBE_STATE_INACTIVE)
+            continue;
+
         float3 posOffset = ProbeOffsets[adjProbeIdx];
         // 获取相邻探针的世界坐标
         float3 adjProbeWorldPos = gridOrigin + adjCoords * gridSpacing + posOffset;
@@ -186,7 +197,7 @@ float3 SampleDDGI(float3 positionWS,
         float biasPositionWSToAdjProbeDist = length(adjProbeWorldPos - biasPositionWS);
 
         // 三线性插值权重
-        float3 trilinear = lerp(1.0 - alpha, alpha, (float3)offset);
+        float3 trilinear = max(0.001f, lerp(1.0 - alpha, alpha, (float3)offset));
         float trilinearWeight = trilinear.x * trilinear.y * trilinear.z;
         float weight = 1.f;
 
