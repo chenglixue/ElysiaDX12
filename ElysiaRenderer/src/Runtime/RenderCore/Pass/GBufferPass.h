@@ -124,13 +124,12 @@ PASS(DRAW_GBUFFER_PASS,         "public\\GBuffer.hlsl", false, PS)
             UINT specularTexIndex;
             float metallicIntensity;
 
-            Vector3 baseColorTint;
-            float roughnessIntensity;
+            Vector4 baseColorTint;
 
+            float roughnessIntensity;
             float normalIntensity;
             UINT vertexOffset;
             UINT indexOffset;
-            UINT pad;
         };
         struct alignas(16) IndirectCommand
         {

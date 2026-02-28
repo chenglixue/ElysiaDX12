@@ -149,13 +149,14 @@ void RayClosestHit(inout RayData rayData,
                                              sampleUV,
                                              g_WarpLinearSampler,
                                              0);
+        baseColorAlpha.rgb = SRGBToLinear(baseColorAlpha.rgb);
     }
 
     float3 N = normalize(mul(ObjectToWorld3x4(), float4(normalOS, 0.f)));
     if (instanceData.NormalTexIndex > 0)
     {
         float3 T = normalize(mul(ObjectToWorld3x4(), float4(tangentOS, 0.f)));
-        float3 B = cross(N, T);
+        float3 B = cross(N, T) * v.tangentOS.w;
 
         float3x3 TBN = {T, B, N};
         N = SampleTexture2D_LOD(instanceData.NormalTexIndex, sampleUV, g_WarpLinearSampler, 0);
@@ -209,7 +210,9 @@ void RayClosestHit(inout RayData rayData,
         indirectRadiance *= blendWeight;
         rayData.Radiance += indirectRadiance;
     }
-    rayData.Radiance = saturate(rayData.Radiance + directRadiance);
+    rayData.Radiance = (rayData.Radiance + directRadiance);
+    rayData.Radiance = LinearToSRGB(rayData.Radiance);
+    rayData.Radiance = saturate(rayData.Radiance);
     rayData.Distance = RayTCurrent();
 
     if (isBackFace)

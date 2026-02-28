@@ -99,10 +99,15 @@ namespace ElysiaModel
                                      size_t elementIndex,
                                      size_t componentIndex)
     {
-        const size_t compSize = sizeof(T);
-        const size_t stride = bufferView.byteStride == 0 ? componentCount * compSize : bufferView.byteStride;
-        return (T*)&buffer.data[accessor.byteOffset + bufferView.byteOffset + elementIndex * stride + componentIndex *
-                                compSize];
+        const size_t compSizeInBytes = tinygltf::GetComponentSizeInBytes(accessor.componentType);
+        // 关键修复
+        const size_t stride = (bufferView.byteStride == 0) ? (componentCount * compSizeInBytes) : bufferView.byteStride;
+
+        // 严格遵循 glTF 物理偏移公式 
+        size_t offset = bufferView.byteOffset + accessor.byteOffset +
+                        (elementIndex * stride) + (componentIndex * compSizeInBytes);
+
+        return reinterpret_cast<const T*>(&buffer.data[offset]);
     }
 
     static bool getFloatBufferData(const tinygltf::Model& gltfModel,
@@ -339,6 +344,7 @@ namespace ElysiaModel
                     (float)node.matrix[14],
                     (float)node.matrix[15]
                     );
+                localTransform = localTransform.Transpose();
             }
             else if (!node.scale.empty() || !node.rotation.empty() || !node.translation.empty())
             {
@@ -463,7 +469,29 @@ namespace ElysiaModel
         }
     }
 
+    void CalculateModelTransformFromBounds(LoadedModel& model)
+    {
+        if (model.meshes.empty())
+            return;
+
+        // 计算所有网格的总体包围盒（局部空间）
+        Vector3 overallMin(FLT_MAX);
+        Vector3 overallMax(-FLT_MAX);
+
+        for (const auto& mesh : model.meshes)
+        {
+            overallMin = Vector3::Min(overallMin, mesh.aabbMin); // 需要存储局部AABB
+            overallMax = Vector3::Max(overallMax, mesh.aabbMax);
+        }
+
+        // 存储包围盒信息
+        model.aabbMin = overallMin;
+        model.aabbMax = overallMax;
+    }
+
 #if ASSIMP_LOADER == 1
+
+
     void LoadMaterials(const aiScene* pScene, LoadedModel& model)
     {
         model.materials.reserve(pScene->mNumMaterials);
@@ -613,6 +641,421 @@ namespace ElysiaModel
             {
                 material.textures[texType] = ElysiaRenderer::TextureManager::Handle::Invalid();
 
+                std::wstring path = fileDirectory;
+
+                if (material.textureNames[texType].length() <= 0 || FileExists(
+                        path + material.textureNames[texType]) == false)
+                {
+                    bool hasTex = false;
+                    switch (static_cast<MaterialTextureType>(texType))
+                    {
+                    case MaterialTextureType::Normal:
+                    {
+                        if (FileExists(
+                            path + RemoveLastUnderscoreAndAfter(
+                                material.textureNames[UINT64(MaterialTextureType::Albedo)]) +
+                            L"_Normal" + L".png"))
+                        {
+                            path += RemoveLastUnderscoreAndAfter(
+                                    material.textureNames[UINT64(MaterialTextureType::Albedo)]) +
+                                L"_Normal" + L".png";
+                            hasTex = true;
+                        }
+                        else if (FileExists(
+                            path + RemoveLastUnderscoreAndAfter(
+                                material.textureNames[UINT64(MaterialTextureType::Albedo)]) +
+                            L"_normal" + L".png"))
+                        {
+                            path += RemoveLastUnderscoreAndAfter(
+                                    material.textureNames[UINT64(MaterialTextureType::Albedo)]) +
+                                L"_normal" + L".png";
+                            hasTex = true;
+                        }
+                        break;
+                    }
+                    case MaterialTextureType::Metallic:
+                    {
+                        if (FileExists(
+                            path + RemoveLastUnderscoreAndAfter(
+                                material.textureNames[UINT64(MaterialTextureType::Albedo)]) +
+                            L"_Metallic" + L".png"))
+                        {
+                            path += RemoveLastUnderscoreAndAfter(
+                                    material.textureNames[UINT64(MaterialTextureType::Albedo)]) +
+                                L"_Metallic" + L".png";
+                            hasTex = true;
+                        }
+                        else if (FileExists(
+                            path + RemoveLastUnderscoreAndAfter(
+                                material.textureNames[UINT64(MaterialTextureType::Albedo)]) +
+                            L"_metallic" + L".png"))
+                        {
+                            path += RemoveLastUnderscoreAndAfter(
+                                    material.textureNames[UINT64(MaterialTextureType::Albedo)]) +
+                                L"_metallic" + L".png";
+                            hasTex = true;
+                        }
+                        break;
+                    }
+                    case MaterialTextureType::Roughness:
+                    {
+                        if (FileExists(
+                            path + RemoveLastUnderscoreAndAfter(
+                                material.textureNames[UINT64(MaterialTextureType::Albedo)]) +
+                            L"_Roughness" + L".png"))
+                        {
+                            path += RemoveLastUnderscoreAndAfter(
+                                    material.textureNames[UINT64(MaterialTextureType::Albedo)]) +
+                                L"_Roughness" + L".png";
+                            hasTex = true;
+                        }
+                        else if (FileExists(
+                            path + RemoveLastUnderscoreAndAfter(
+                                material.textureNames[UINT64(MaterialTextureType::Albedo)]) +
+                            L"_roughness" + L".png"))
+                        {
+                            path += RemoveLastUnderscoreAndAfter(
+                                    material.textureNames[UINT64(MaterialTextureType::Albedo)]) +
+                                L"_roughness" + L".png";
+                            hasTex = true;
+                        }
+                        break;
+                    }
+                    case MaterialTextureType::Occlusion:
+                    {
+                        if (FileExists(
+                            path + RemoveLastUnderscoreAndAfter(material.textureNames[texType]) +
+                            L"_AO" + L".png"))
+                        {
+                            path += RemoveLastUnderscoreAndAfter(material.textureNames[texType]) +
+                                L"_AO" + L".png";
+                            hasTex = true;
+                        }
+                        break;
+                    }
+
+                    default:
+                    {
+                        break;
+                    }
+                    }
+                    if (!hasTex)
+                    {
+                        if (texType == static_cast<UINT64>(MaterialTextureType::Albedo) || texType
+                            == static_cast<UINT64>(MaterialTextureType::Roughness)
+                            || texType == static_cast<UINT64>(MaterialTextureType::Occlusion))
+                        {
+                            path += ElysiaRenderer::DefaultWhiteTexturePath;
+                        }
+                        else if (texType == static_cast<UINT64>(MaterialTextureType::Height) ||
+                                 texType == static_cast<UINT64>(MaterialTextureType::Emissive)
+                                 || texType == static_cast<UINT64>(MaterialTextureType::Metallic) ||
+                                 texType == static_cast<UINT64>(MaterialTextureType::Specular))
+                        {
+                            path += ElysiaRenderer::DefaultBlackTexturePath;
+                        }
+                        else if (texType == static_cast<UINT64>(MaterialTextureType::Normal))
+                        {
+                            path += ElysiaRenderer::DefaultNormalTexturePath;
+                        }
+                    }
+                }
+                else
+                {
+                    path += material.textureNames[texType].c_str();
+                }
+
+                const UINT64 numLoaded = materialTextures.Count();
+                for (UINT64 i = 0; i < numLoaded; i ++)
+                {
+                    if (materialTextures[i]->name == path)
+                    {
+                        material.textures[texType] = materialTextures[i]->texture;
+                        material.textureIndices[texType] = static_cast<UINT32>(i);
+                        break;
+                    }
+                }
+
+                if (!material.textures[texType].IsValid())
+                {
+                    auto newMatTexture = new MaterialTexture();
+                    newMatTexture->name = path;
+                    bool useSRGB = texType == static_cast<UINT64>(
+                                       MaterialTextureType::Albedo);
+                    newMatTexture->texture =
+                        ElysiaRenderer::TextureManager::GetInstance().
+                        LoadDynamicTexture((path), useSRGB);
+
+                    UINT64 idx = materialTextures.Add(newMatTexture);
+
+                    material.textures[texType] = newMatTexture->texture;
+                    material.textureIndices[texType] = static_cast<UINT32>(idx);
+
+                    ElysiaHelper::Log("Success Load Texture: ", WstringToString(newMatTexture->name));
+                }
+            }
+        }
+    }
+
+    void LoadMeshData(const std::wstring& filePath,
+                      const aiScene* pScene,
+                      float sceneScale,
+                      LoadedModel& model)
+    {
+        const UINT64 numMeshes = pScene->mNumMeshes;
+        UINT64 numVertices = 0;
+        UINT64 numIndices = 0;
+        for (UINT64 meshIdx = 0; meshIdx < numMeshes; meshIdx ++)
+        {
+            const aiMesh& pMesh = *pScene->mMeshes[meshIdx];
+
+            numVertices += pMesh.mNumVertices;
+            numIndices += pMesh.mNumFaces * 3;
+        }
+
+        model.vertices.resize(numVertices);
+        model.indices.resize(numIndices);
+        model.meshes.resize(numMeshes);
+
+        uint64 vtxOffset = 0;
+        uint64 idxOffset = 0;
+        model.aabbMin = Vector3(FLT_MAX);
+        model.aabbMax = Vector3(-FLT_MAX);
+        for (UINT64 meshIdx = 0; meshIdx < numMeshes; meshIdx ++)
+        {
+            const aiMesh* pMesh = pScene->mMeshes[meshIdx];
+
+            model.meshes[meshIdx].InitFromAssimpMesh(
+                *pScene->mMeshes[meshIdx],
+                sceneScale,
+                &model.vertices[vtxOffset],
+                &model.indices[idxOffset]);
+            model.meshes[meshIdx].name = pMesh->mName.C_Str();
+
+            model.aabbMin = Vector3::Min(model.aabbMin,
+                                         model.meshes[meshIdx].aabbMin);
+
+            model.aabbMax = Vector3::Max(model.aabbMax,
+                                         model.meshes[meshIdx].aabbMax);
+
+            vtxOffset += model.meshes[meshIdx].numVertices;
+            idxOffset += model.meshes[meshIdx].numIndices;
+        }
+
+        vtxOffset = 0;
+        idxOffset = 0;
+        auto vb = ElysiaRenderer::BufferManager::GetInstance().CreateVertexBuffer(model);
+        auto ib = ElysiaRenderer::BufferManager::GetInstance().CreateIndexBuffer({
+            .name = StringToWstring(model.name + " Index Buffer"),
+            .stride = 0,
+            .size = model.indices.size() * sizeof(UINT32),
+            .viewFlags = ElysiaCore::GPUResourceFlags::SRV | ElysiaCore::GPUResourceFlags::UAV,
+            .accessFlags = ElysiaCore::BufferAccessFlags::GPUOnly,
+            .isRawAccess = true,
+            .InitData = model.indices.data()
+        });
+        auto vbView = D3D12_VERTEX_BUFFER_VIEW
+        {
+            .BufferLocation = vb->GetGPUAddress(),
+            .SizeInBytes = static_cast<UINT>(numVertices) * vb->
+                           GetStride(),
+            .StrideInBytes = vb->GetStride()
+        };
+        auto ibView = D3D12_INDEX_BUFFER_VIEW
+        {
+            .BufferLocation = ib->GetGPUAddress(),
+            .SizeInBytes = static_cast<UINT>(numIndices) * (UINT)sizeof(UINT32),
+            .Format = DXGI_FORMAT_R32_UINT
+        };
+
+        for (UINT64 meshIdx = 0; meshIdx < numMeshes; meshIdx ++)
+        {
+            UINT64 vbOffset = vtxOffset * sizeof(MeshVertex);
+            UINT64 ibOffset = idxOffset * sizeof(UINT32);
+
+            model.meshes[meshIdx].InitCommon(
+                vb->GetGPUAddress() + vbOffset,
+                ib->GetGPUAddress() + ibOffset,
+                vtxOffset,
+                idxOffset);
+
+            vtxOffset += model.meshes[meshIdx].numVertices;
+            idxOffset += model.meshes[meshIdx].numIndices;
+        }
+
+        ElysiaRenderer::BufferManager::GetInstance().SetGlobalVertexBuffer(std::move(vb));
+        ElysiaRenderer::BufferManager::GetInstance().SetGlobalIndexBuffer(std::move(ib));
+        ElysiaRenderer::BufferManager::GetInstance().SetGlobalVertexBufferView(
+            std::move(vbView));
+        ElysiaRenderer::BufferManager::GetInstance().SetGlobalIndexBufferView(
+            std::move(ibView));
+    };
+
+    void LoadedModel::Mesh::InitFromAssimpMesh(const aiMesh& assimpMesh,
+                                               float sceneScale,
+                                               MeshVertex* dstVertices,
+                                               UINT32* dstIndices)
+    {
+        numVertices = assimpMesh.mNumVertices;
+        numIndices = assimpMesh.mNumFaces * 3;
+
+        auto ConvertVec = [](aiVector3D& aiVec3)
+        {
+            return Vector3(aiVec3.x, aiVec3.y, aiVec3.z);
+        };
+
+        aabbMin = Vector3(FLT_MAX);
+        aabbMax = Vector3(-FLT_MAX);
+        for (UINT32 vertexIdx = 0; vertexIdx < numVertices; vertexIdx ++)
+        {
+            if (assimpMesh.HasPositions())
+            {
+                Vector3 position = ConvertVec(assimpMesh.mVertices[vertexIdx]) * sceneScale;
+
+                aabbMin = Vector3::Min(aabbMin, position);
+                aabbMax = Vector3::Max(aabbMax, position);
+
+                dstVertices[vertexIdx].Position = position;
+            }
+            if (assimpMesh.HasNormals())
+            {
+                dstVertices[vertexIdx].Normal = ConvertVec(
+                    assimpMesh.mNormals[vertexIdx]);
+            }
+            if (assimpMesh.HasTextureCoords(0))
+            {
+                dstVertices[vertexIdx].UV = ConvertVec(
+                    assimpMesh.mTextureCoords[0][vertexIdx]).xy();
+            }
+            if (assimpMesh.HasTangentsAndBitangents())
+            {
+                dstVertices[vertexIdx].Tangent = Vector4(assimpMesh.mTangents[vertexIdx].x,
+                                                         assimpMesh.mTangents[vertexIdx].y,
+                                                         assimpMesh.mTangents[vertexIdx].z,
+                                                         1.f);
+            }
+        }
+
+        const UINT32 numTriangles = assimpMesh.mNumFaces;
+        for (UINT32 triIdx = 0; triIdx < numTriangles; ++triIdx)
+        {
+            dstIndices[triIdx * 3 + 0] = static_cast<UINT32>(assimpMesh.mFaces[
+                triIdx].mIndices[0]);
+            dstIndices[triIdx * 3 + 1] = static_cast<UINT32>(assimpMesh.mFaces[
+                triIdx].mIndices[1]);
+            dstIndices[triIdx * 3 + 2] = static_cast<UINT32>(assimpMesh.mFaces[
+                triIdx].mIndices[2]);
+        }
+
+        materialIndex = assimpMesh.mMaterialIndex;
+        logicalCenter = (aabbMax + aabbMin) * 0.5f;
+    }
+
+    void LoadedModel::Mesh::InitCommon(uint64 vbAddress,
+                                       uint64 ibAddress,
+                                       uint64 vtxOffset_,
+                                       uint64 idxOffset_)
+    {
+        vtxOffset = static_cast<UINT>(vtxOffset_);
+        idxOffset = static_cast<UINT>(idxOffset_);
+
+        vbView.BufferLocation = vbAddress;
+        vbView.SizeInBytes = sizeof(MeshVertex) * numVertices;
+        vbView.StrideInBytes = sizeof(MeshVertex);
+
+        ibView.BufferLocation = ibAddress;
+        ibView.SizeInBytes = 4 * numIndices;
+        ibView.Format = DXGI_FORMAT_R32_UINT;
+    }
+
+
+    bool LoadModel(const std::wstring& filePath,
+                   bool bInvertTexcoordY,
+                   bool bImportMeshes,
+                   bool bImportSkeletons,
+                   bool bImportAnimations,
+                   float scale,
+                   LoadedModel& model)
+    {
+        if (!FileExists(filePath))
+        {
+            ShowErrorMessage(
+                MakeString(L"Model file with path '%ls' does not exist", filePath));
+            return false;
+        }
+        WriteLog("Loading scene '%ls' with Assimp...", filePath);
+        std::string fileNameAnsi = WstringToString(filePath);
+
+        Assimp::Importer importer;
+        auto fileDirectory = GetDirectoryFromFilePath(filePath);
+
+        unsigned int flags = aiProcess_CalcTangentSpace | aiProcess_Triangulate |
+                             aiProcess_MakeLeftHanded | aiProcess_JoinIdenticalVertices |
+                             aiProcess_RemoveRedundantMaterials |
+                             aiProcess_PreTransformVertices | aiProcess_OptimizeMeshes;
+        if (bInvertTexcoordY)
+        {
+            flags |= aiProcess_FlipUVs;
+        }
+        const aiScene* pScene = importer.ReadFile(fileNameAnsi, flags);
+        model.name = WstringToString(
+            GetFileName(RemoveExt(WstringToString(filePath).c_str()).c_str()));
+        if (pScene == nullptr || pScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !
+            pScene->mRootNode)
+        {
+            ShowErrorMessage(L"Failed to load scene " + std::wstring(filePath) +
+                             L": " + StringToWstring(importer.GetErrorString()));
+            return false;
+        }
+        if (pScene->mNumMeshes <= 0)
+        {
+            ShowErrorMessage(
+                L"Scene " + std::wstring(filePath) + L" has no meshes");
+            return false;
+        }
+        if (pScene->mNumMaterials <= 0)
+        {
+            ShowErrorMessage(
+                L"Scene " + std::wstring(filePath) + L" has no materials");
+            return false;
+        }
+
+        if (bImportMeshes)
+        {
+            LoadMaterials(pScene, model);
+
+            LoadMaterialResource(model.materials,
+                                 fileDirectory,
+                                 model.materialTextures);
+
+            LoadMeshData(filePath, pScene, scale, model);
+
+            CalculateModelTransformFromBounds(model);
+        }
+
+        std::cout << "Finished loading scene '%ls'" + WstringToString(filePath) <<
+            std::endl;
+
+        return true;
+    }
+#endif
+
+#if GLTF_LOADER == 1
+    void LoadGLTFMaterialResource(eastl::vector<LoadedMaterial>& materials,
+                                  std::wstring fileDirectory,
+                                  GrowableList<MaterialTexture*>& materialTextures)
+    {
+        const UINT64 numMaterials = materials.size();
+
+        for (UINT64 matIdx = 0; matIdx < numMaterials; matIdx ++)
+        {
+            auto& material = materials[matIdx];
+
+            for (UINT64 texType = 0; texType < static_cast<UINT64>(MaterialTextureType::Count);
+                 texType ++)
+            {
+                material.textures[texType] = ElysiaRenderer::TextureManager::Handle::Invalid();
+
                 std::wstring textureFileName = material.textureNames[texType];
                 std::wstring fullPath;
 
@@ -677,269 +1120,6 @@ namespace ElysiaModel
             }
         }
     }
-
-    void LoadMeshData(const std::wstring& filePath,
-                      const aiScene* pScene,
-                      float sceneScale,
-                      LoadedModel& model)
-    {
-        const UINT64 numMeshes = pScene->mNumMeshes;
-        UINT64 numVertices = 0;
-        UINT64 numIndices = 0;
-        for (UINT64 meshIdx = 0; meshIdx < numMeshes; meshIdx ++)
-        {
-            const aiMesh& pMesh = *pScene->mMeshes[meshIdx];
-
-            numVertices += pMesh.mNumVertices;
-            numIndices += pMesh.mNumFaces * 3;
-        }
-
-        model.vertices.resize(numVertices);
-        model.indices.resize(numIndices);
-        model.meshes.resize(numMeshes);
-
-        uint64 vtxOffset = 0;
-        uint64 idxOffset = 0;
-        model.aabbMin = Vector3(FLT_MAX);
-        model.aabbMax = Vector3(-FLT_MAX);
-        for (UINT64 meshIdx = 0; meshIdx < numMeshes; meshIdx ++)
-        {
-            const aiMesh* pMesh = pScene->mMeshes[meshIdx];
-
-            model.meshes[meshIdx].InitFromAssimpMesh(
-                *pScene->mMeshes[meshIdx],
-                sceneScale,
-                &model.vertices[vtxOffset],
-                &model.indices[idxOffset]);
-            model.meshes[meshIdx].name = pMesh->mName.C_Str();
-
-            model.aabbMin = Vector3::Min(model.aabbMin,
-                                         model.meshes[meshIdx].aabbMin);
-
-            model.aabbMax = Vector3::Max(model.aabbMax,
-                                         model.meshes[meshIdx].aabbMax);
-
-            vtxOffset += model.meshes[meshIdx].numVertices;
-            idxOffset += model.meshes[meshIdx].numIndices;
-        }
-
-        vtxOffset = 0;
-        idxOffset = 0;
-        auto vertexBuffer = ElysiaRenderer::BufferManager::GetInstance().
-            CreateVertexBuffer(model);
-        auto indexBuffer = ElysiaRenderer::BufferManager::GetInstance().
-            CreateIndexBuffer(model);
-        auto vbView = D3D12_VERTEX_BUFFER_VIEW
-        {
-            .BufferLocation = vertexBuffer->GetGPUAddress(),
-            .SizeInBytes = static_cast<UINT>(numVertices) * vertexBuffer->
-                           GetStride(),
-            .StrideInBytes = vertexBuffer->GetStride()
-        };
-        auto ibView = D3D12_INDEX_BUFFER_VIEW
-        {
-            .BufferLocation = indexBuffer->GetGPUAddress(),
-            .SizeInBytes = static_cast<UINT>(numIndices) * IndexSize(),
-            .Format = IndexBufferFormat(),
-        };
-
-        for (UINT64 meshIdx = 0; meshIdx < numMeshes; meshIdx ++)
-        {
-            UINT64 vbOffset = vtxOffset * sizeof(MeshVertex);
-            UINT64 ibOffset = idxOffset * sizeof(UINT16);
-
-            model.meshes[meshIdx].InitCommon(
-                vertexBuffer->GetGPUAddress() + vbOffset,
-                indexBuffer->GetGPUAddress() + ibOffset,
-                vtxOffset,
-                idxOffset);
-
-            vtxOffset += model.meshes[meshIdx].numVertices;
-            idxOffset += model.meshes[meshIdx].numIndices;
-        }
-
-        ElysiaRenderer::BufferManager::GetInstance().SetGlobalVertexBuffer(std::move(vertexBuffer));
-        ElysiaRenderer::BufferManager::GetInstance().SetGlobalIndexBuffer(std::move(indexBuffer));
-        ElysiaRenderer::BufferManager::GetInstance().SetGlobalVertexBufferView(
-            std::move(vbView));
-        ElysiaRenderer::BufferManager::GetInstance().SetGlobalIndexBufferView(
-            std::move(ibView));
-    };
-
-    void LoadedModel::Mesh::InitFromAssimpMesh(const aiMesh& assimpMesh,
-                                               float sceneScale,
-                                               MeshVertex* dstVertices,
-                                               UINT32* dstIndices)
-    {
-        numVertices = assimpMesh.mNumVertices;
-        numIndices = assimpMesh.mNumFaces * 3;
-
-        indexType = IndexType::Index16Bit;
-        if (numVertices > 0xFFFF)
-        {
-            ShowErrorMessage(L"32-bit indices not currently supported");
-        }
-
-        auto ConvertVec = [](aiVector3D& aiVec3)
-        {
-            return Vector3(aiVec3.x, aiVec3.y, aiVec3.z);
-        };
-
-        aabbMin = Vector3(FLT_MAX);
-        aabbMax = Vector3(-FLT_MAX);
-        for (UINT32 vertexIdx = 0; vertexIdx < numVertices; vertexIdx ++)
-        {
-            if (assimpMesh.HasPositions())
-            {
-                Vector3 position = ConvertVec(assimpMesh.mVertices[vertexIdx]) * sceneScale;
-
-                aabbMin = Vector3::Min(aabbMin, position);
-                aabbMax = Vector3::Max(aabbMax, position);
-
-                dstVertices[vertexIdx].Position = position;
-            }
-            if (assimpMesh.HasNormals())
-            {
-                dstVertices[vertexIdx].Normal = ConvertVec(
-                    assimpMesh.mNormals[vertexIdx]);
-            }
-            if (assimpMesh.HasTextureCoords(0))
-            {
-                dstVertices[vertexIdx].UV = ConvertVec(
-                    assimpMesh.mTextureCoords[0][vertexIdx]).xy();
-            }
-            if (assimpMesh.HasTangentsAndBitangents())
-            {
-                dstVertices[vertexIdx].Tangent = Vector4(assimpMesh.mTangents[vertexIdx].x,
-                                                         assimpMesh.mTangents[vertexIdx].y,
-                                                         assimpMesh.mTangents[vertexIdx].z,
-                                                         1.f);
-            }
-        }
-
-        const UINT32 numTriangles = assimpMesh.mNumFaces;
-        for (UINT32 triIdx = 0; triIdx < numTriangles; ++triIdx)
-        {
-            dstIndices[triIdx * 3 + 0] = static_cast<UINT16>(assimpMesh.mFaces[
-                triIdx].mIndices[0]);
-            dstIndices[triIdx * 3 + 1] = static_cast<UINT16>(assimpMesh.mFaces[
-                triIdx].mIndices[1]);
-            dstIndices[triIdx * 3 + 2] = static_cast<UINT16>(assimpMesh.mFaces[
-                triIdx].mIndices[2]);
-        }
-
-        materialIndex = assimpMesh.mMaterialIndex;
-        logicalCenter = (aabbMax + aabbMin) * 0.5f;
-    }
-
-    void LoadedModel::Mesh::InitCommon(uint64 vbAddress,
-                                       uint64 ibAddress,
-                                       uint64 vtxOffset_,
-                                       uint64 idxOffset_)
-    {
-        vtxOffset = static_cast<UINT>(vtxOffset_);
-        idxOffset = static_cast<UINT>(idxOffset_);
-
-        vbView.BufferLocation = vbAddress;
-        vbView.SizeInBytes = sizeof(MeshVertex) * numVertices;
-        vbView.StrideInBytes = sizeof(MeshVertex);
-
-        ibView.BufferLocation = ibAddress;
-        ibView.SizeInBytes = IndexSize() * numIndices;
-        ibView.Format = IndexBufferFormat();
-    }
-
-    void CalculateModelTransformFromBounds(LoadedModel& model)
-    {
-        if (model.meshes.empty())
-            return;
-
-        // 计算所有网格的总体包围盒（局部空间）
-        Vector3 overallMin(FLT_MAX);
-        Vector3 overallMax(-FLT_MAX);
-
-        for (const auto& mesh : model.meshes)
-        {
-            overallMin = Vector3::Min(overallMin, mesh.aabbMin); // 需要存储局部AABB
-            overallMax = Vector3::Max(overallMax, mesh.aabbMax);
-        }
-
-        // 存储包围盒信息
-        model.aabbMin = overallMin;
-        model.aabbMax = overallMax;
-    }
-
-    bool LoadModel(const std::wstring& filePath,
-                   bool bInvertTexcoordY,
-                   bool bImportMeshes,
-                   bool bImportSkeletons,
-                   bool bImportAnimations,
-                   float scale,
-                   LoadedModel& model)
-    {
-        if (!FileExists(filePath))
-        {
-            ShowErrorMessage(
-                MakeString(L"Model file with path '%ls' does not exist", filePath));
-            return false;
-        }
-        WriteLog("Loading scene '%ls' with Assimp...", filePath);
-        std::string fileNameAnsi = WstringToString(filePath);
-
-        Assimp::Importer importer;
-        auto fileDirectory = GetDirectoryFromFilePath(filePath);
-
-        unsigned int flags = aiProcess_CalcTangentSpace | aiProcess_Triangulate |
-                             aiProcess_MakeLeftHanded | aiProcess_JoinIdenticalVertices |
-                             aiProcess_GenSmoothNormals;
-        if (bInvertTexcoordY)
-        {
-            flags |= aiProcess_FlipUVs;
-        }
-        const aiScene* pScene = importer.ReadFile(fileNameAnsi, flags);
-        model.name = WstringToString(
-            GetFileName(RemoveExt(WstringToString(filePath).c_str()).c_str()));
-        if (pScene == nullptr || pScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !
-            pScene->mRootNode)
-        {
-            ShowErrorMessage(L"Failed to load scene " + std::wstring(filePath) +
-                             L": " + StringToWstring(importer.GetErrorString()));
-            return false;
-        }
-        if (pScene->mNumMeshes <= 0)
-        {
-            ShowErrorMessage(
-                L"Scene " + std::wstring(filePath) + L" has no meshes");
-            return false;
-        }
-        if (pScene->mNumMaterials <= 0)
-        {
-            ShowErrorMessage(
-                L"Scene " + std::wstring(filePath) + L" has no materials");
-            return false;
-        }
-
-        if (bImportMeshes)
-        {
-            LoadMaterials(pScene, model);
-
-            LoadMaterialResource(model.materials,
-                                 fileDirectory,
-                                 model.materialTextures);
-
-            LoadMeshData(filePath, pScene, scale, model);
-
-            CalculateModelTransformFromBounds(model);
-        }
-
-        std::cout << "Finished loading scene '%ls'" + WstringToString(filePath) <<
-            std::endl;
-
-        return true;
-    }
-#endif
-
-#if GLTF_LOADER == 1
     void FillNodeData(
         const tinygltf::Model& gltfModel,
         int nodeIdx,
@@ -952,21 +1132,12 @@ namespace ElysiaModel
     {
         const auto& node = gltfModel.nodes[nodeIdx];
 
-        Matrix localTransform = getLocalNodeTransform(gltfModel, nodeIdx) * parentTransform;
-        Matrix globalTransform = localTransform * parentTransform;
+        Matrix localTransform = getLocalNodeTransform(gltfModel, nodeIdx);
+        Matrix globalTransform = parentTransform * localTransform;
         // 法线变换矩阵 (逆转置)，防止非均匀缩放导致法线错误
         Matrix normalTransform = globalTransform;
         normalTransform.Invert();
         normalTransform.Transpose();
-
-        bool skipMesh = false;
-        if (node.mesh != -1)
-        {
-            // ElysiaHelper::Log::Warn("GLTFLoader: File has more than one skin. Skipping mesh \"%s\" with skin index %i!",
-            //                         gltfModel.meshes[node.mesh].name.c_str(),
-            //                         node.skin);
-            skipMesh = true;
-        }
 
         if (node.mesh >= 0)
         {
@@ -1049,6 +1220,7 @@ namespace ElysiaModel
                         res = getFloatBufferData(gltfModel, normalsAccessor, v, 3, &normal.x);
                         assert(res);
                         normal = Vector3::TransformNormal(normal, normalTransform);
+                        normal.Normalize();
                     }
 
                     // texcoord
@@ -1060,7 +1232,7 @@ namespace ElysiaModel
 
                         if (bInvertY)
                         {
-                            uv.y = 1.0f - uv.y;
+                            // uv.y = 1.0f - uv.y;
                         }
                     }
 
@@ -1070,6 +1242,7 @@ namespace ElysiaModel
                         res = getFloatBufferData(gltfModel, tangentAccessor, v, 4, &tangent.x);
                         assert(res);
                         auto temp = Vector3::TransformNormal(Vector3(tangent.x, tangent.y, tangent.z), normalTransform);
+                        temp.Normalize();
                         tangent = Vector4(temp.x, temp.y, temp.z, tangent.w);
                     }
 
@@ -1095,20 +1268,27 @@ namespace ElysiaModel
                             iCount);
                         continue;
                     }
-
-                    for (size_t i = 0; i < iCount; ++i)
+                    auto GetIndexValue = [](const tinygltf::Accessor& idxAcc,
+                                            const GltfAccessorView& idxView,
+                                            int index)
                     {
                         uint32_t localIdx = 0;
-                        // ElysiaHelper::Log::Info("Index type:%i", idxAcc.componentType);
-
-                        if (idxAcc.componentType == 5123)               // unsigned short
-                            localIdx = ((uint16_t*)idxView.dataPtr)[i]; // 这里不需要 Stride，因为索引是紧凑的
-                        else if (idxAcc.componentType == 5125)          // unsigned int
-                            localIdx = ((uint32_t*)idxView.dataPtr)[i];
+                        if (idxAcc.componentType == 5123)                   // unsigned short
+                            localIdx = ((uint16_t*)idxView.dataPtr)[index]; // 这里不需要 Stride，因为索引是紧凑的
+                        else if (idxAcc.componentType == 5125)              // unsigned int
+                            localIdx = ((uint32_t*)idxView.dataPtr)[index];
                         else if (idxAcc.componentType == 5121) // unsigned byte
-                            localIdx = ((uint8_t*)idxView.dataPtr)[i];
+                            localIdx = ((uint8_t*)idxView.dataPtr)[index];
 
-                        model.indices[idxOffset + i] = localIdx;
+                        return localIdx;
+                    };
+
+                    for (size_t i = 0; i < iCount; i ++)
+                    {
+                        // ElysiaHelper::Log::Info("Index type:%i", idxAcc.componentType);
+                        uint32_t i0 = GetIndexValue(idxAcc, idxView, i);
+
+                        model.indices[idxOffset + i] = i0;
                     }
 
                     newMesh.numIndices = iCount;
@@ -1160,32 +1340,38 @@ namespace ElysiaModel
 
         if (!gltfModel.meshes.empty())
         {
+            int matIndex = 0;
             for (const auto& gMat : gltfModel.materials)
             {
                 LoadedMaterial elysiaMat;
                 if (gltfModel.materials.empty())
                 {
-                    elysiaMat.name = "null";
+                    elysiaMat.name = "default_material";
                     elysiaMat.alpha = LoadedMaterial::Alpha::Opaque;
                     elysiaMat.albedoFactor = Vector3::One;
                     elysiaMat.metallicFactor = 0.f;
                     elysiaMat.roughnessFactor = 1.f;
                     elysiaMat.emissiveFactor = Vector3::Zero;
                     elysiaMat.opacity = 1.f;
-                    elysiaMat.textureNames[(int)MaterialTextureType::Albedo] = L"";
-                    elysiaMat.textureNames[(int)MaterialTextureType::Normal] = L"";
-                    elysiaMat.textureNames[(int)MaterialTextureType::Metallic] = L"";
-                    elysiaMat.textureNames[(int)MaterialTextureType::Roughness] = L"";
-                    elysiaMat.textureNames[(int)MaterialTextureType::Occlusion] = L"";
-                    elysiaMat.textureNames[(int)MaterialTextureType::Emissive] = L"";
-                    elysiaMat.textureNames[(int)MaterialTextureType::Height] = L"";
-                    elysiaMat.textureNames[(int)MaterialTextureType::Specular] = L"";
+                    elysiaMat.textureNames[(int)MaterialTextureType::Albedo] = ElysiaRenderer::DefaultWhiteTexturePath;
+                    elysiaMat.textureNames[(int)MaterialTextureType::Normal] = ElysiaRenderer::DefaultNormalTexturePath;
+                    elysiaMat.textureNames[(int)MaterialTextureType::Metallic] =
+                        ElysiaRenderer::DefaultBlackTexturePath;
+                    elysiaMat.textureNames[(int)MaterialTextureType::Roughness] =
+                        ElysiaRenderer::DefaultWhiteTexturePath;
+                    elysiaMat.textureNames[(int)MaterialTextureType::Occlusion] =
+                        ElysiaRenderer::DefaultWhiteTexturePath;
+                    elysiaMat.textureNames[(int)MaterialTextureType::Emissive] =
+                        ElysiaRenderer::DefaultBlackTexturePath;
+                    elysiaMat.textureNames[(int)MaterialTextureType::Height] = ElysiaRenderer::DefaultBlackTexturePath;
+                    elysiaMat.textureNames[(int)MaterialTextureType::Specular] =
+                        ElysiaRenderer::DefaultBlackTexturePath;
 
                     ElysiaHelper::Log::Warn("GLTFLoader: No materials found in file \"%s\". Using default material.",
                                             filePath);
                 }
 
-                elysiaMat.name = gMat.name;
+                elysiaMat.name = gMat.name.empty() ? "Material_" + std::to_string(matIndex) : gMat.name;
                 elysiaMat.alpha = gMat.alphaMode == "OPAQUE"
                                       ? LoadedMaterial::Alpha::Opaque
                                       : gMat.alphaMode == "MASK"
@@ -1206,11 +1392,11 @@ namespace ElysiaModel
                 elysiaMat.specularFactor = 0.04f;
 
                 // 纹理映射逻辑
-                auto getTexturePath = [](const tinygltf::Model& model, int textureIndex) -> std::wstring
+                auto getTexturePath = [&](const tinygltf::Model& model, int textureIndex) -> std::wstring
                 {
                     if (textureIndex >= 0 && textureIndex < model.textures.size())
                     {
-                        return StringToWstring(model.images[model.textures[textureIndex].source].uri);
+                        return fileDir + StringToWstring(model.images[model.textures[textureIndex].source].uri);
                     }
                     else
                     {
@@ -1239,9 +1425,10 @@ namespace ElysiaModel
                 elysiaMat.textureNames[(int)MaterialTextureType::Height] = L"";
 
                 model.materials.push_back(elysiaMat);
+                matIndex ++;
             }
 
-            LoadMaterialResource(model.materials, fileDir, model.materialTextures);
+            LoadGLTFMaterialResource(model.materials, fileDir, model.materialTextures);
         }
 
         uint32_t totalV = 0, totalI = 0;
@@ -1253,8 +1440,13 @@ namespace ElysiaModel
                 for (const auto& p : gltfModel.meshes[node.mesh].primitives)
                 {
                     totalV += (uint32_t)gltfModel.accessors[p.attributes.at("POSITION")].count;
+                    ElysiaHelper::Log::Info("Curr Load Total Vertex:%i", totalV);
                     if (p.indices >= 0)
+                    {
                         totalI += (uint32_t)gltfModel.accessors[p.indices].count;
+                        ElysiaHelper::Log::Info("Curr Load Total Index:%i", totalI);
+
+                    }
                 }
             }
             for (int c : node.children)

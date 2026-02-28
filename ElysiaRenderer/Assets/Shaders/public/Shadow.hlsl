@@ -108,7 +108,7 @@ PSOutput PS(PSInput i)
     MeshData currMeshData = meshDataBuffer[meshDataIndex];
 
     float4 baseColor = baseColorTex.Sample(warpLinearSampler, i.uv) * currMeshData.opacity;
-    clip(baseColor.a - currMeshData.cutoff);
+    // clip(baseColor.a - currMeshData.cutoff);
 
     return o;
 }

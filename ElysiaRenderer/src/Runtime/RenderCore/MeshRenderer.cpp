@@ -2,6 +2,7 @@
 #include "MeshRenderer.h"
 
 #include "Programs/Helper.h"
+#include "Programs/Log.h"
 #include "Runtime/Resource/Model/LoadedModel.h"
 
 namespace ElysiaRenderer
@@ -52,6 +53,8 @@ namespace ElysiaRenderer
                 GetResourceHeapIndex();
             m_materialTexIndices.Emissive = material.textures[UINT64(MaterialTextureType::Emissive)]
                 .GetResourceHeapIndex();
+
+            ElysiaHelper::Log::Info("Mesh[%i] bound to Material: \"%s\"", m_meshIndex, material.name.c_str());
         }
     }
 

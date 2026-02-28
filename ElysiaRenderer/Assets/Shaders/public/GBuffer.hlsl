@@ -70,13 +70,12 @@ struct MeshData
     UINT specularTexIndex;
     float metallicIntensity;
 
-    Vector3 baseColorTint;
-    float roughnessIntensity;
+    Vector4 baseColorTint;
 
+    float roughnessIntensity;
     float normalIntensity;
     UINT vertexOffset;
     UINT indexOffset;
-    UINT pad;
 };
 
 struct VSInput
@@ -178,31 +177,23 @@ FEncodeGBufferData GetEncodeGBufferData(FInputParams inputParams, float3 toLight
     MeshData currMeshData = meshDataBuffer[meshDataIndex];
 
     float4 baseColor = SampleTexture2D(currMeshData.baseColorTexIndex,
-                                       inputParams.objectUV * currMeshData.baseColorUVTransform.xy + currMeshData.
-                                                                                                     baseColorUVTransform
-                                                                                                     .zw,
+                                       inputParams.objectUV,
                                        WarpLinearSampler)
-                       * float4(currMeshData.baseColorTint, currMeshData.opacity);
+                       * float4(currMeshData.baseColorTint.xyz, currMeshData.opacity);
     clip(baseColor.a - currMeshData.cutoff);
 
     float4 normalTS = SampleTexture2D(currMeshData.normalTexIndex,
-                                      inputParams.objectUV * currMeshData.baseColorUVTransform.xy + currMeshData.
-                                                                                                    normalUVTransform
-                                                                                                    .zw,
+                                      inputParams.objectUV,
                                       WarpLinearSampler);
 
     float metallic = SampleTexture2D(currMeshData.metallicTexIndex,
-                                     inputParams.objectUV * currMeshData.baseColorUVTransform.xy + currMeshData.
-                                                                                                   metallicRoughnessUVTransform
-                                                                                                   .zw,
-                                     WarpLinearSampler).b;
+                                     inputParams.objectUV,
+                                     WarpLinearSampler);
     metallic = saturate(metallic * currMeshData.metallicIntensity);
 
     float roughness = SampleTexture2D(currMeshData.roughnessTexIndex,
-                                      inputParams.objectUV * currMeshData.baseColorUVTransform.xy + currMeshData.
-                                                                                                    metallicRoughnessUVTransform
-                                                                                                    .zw,
-                                      WarpLinearSampler).g;
+                                      inputParams.objectUV,
+                                      WarpLinearSampler);
     roughness = saturate(roughness * currMeshData.roughnessIntensity);
 
     o.BaseColor = baseColor.rgb;

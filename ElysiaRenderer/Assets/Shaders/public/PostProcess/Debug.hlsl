@@ -237,6 +237,7 @@ PSOutput PS(PSInput i)
                                : float3(0.1f, 0.1f, 0.1f);
             StructuredBuffer<UINT> states = ResourceDescriptorHeap[g_ProbeStatesIndex];
             result.rgb = states[i.instanceID];
+            result.rgb = color;
         }
 
         o.target0 = result;
