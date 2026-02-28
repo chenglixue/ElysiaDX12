@@ -1106,25 +1106,25 @@ D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: '
 D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
   (compiling source file '/src/Runtime/RenderCore/Pass/DebugPass.cpp')
   
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\DebugPass.cpp(260,67): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/DebugPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\DebugPass.cpp(259,67): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/DebugPass.cpp')
+  
 D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\DebugPass.cpp(258,67): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
   (compiling source file '/src/Runtime/RenderCore/Pass/DebugPass.cpp')
   
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\DebugPass.cpp(257,67): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\DebugPass.cpp(317,71): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
   (compiling source file '/src/Runtime/RenderCore/Pass/DebugPass.cpp')
   
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\DebugPass.cpp(256,67): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\DebugPass.cpp(316,71): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
   (compiling source file '/src/Runtime/RenderCore/Pass/DebugPass.cpp')
   
 D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\DebugPass.cpp(315,71): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
   (compiling source file '/src/Runtime/RenderCore/Pass/DebugPass.cpp')
   
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\DebugPass.cpp(314,71): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/DebugPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\DebugPass.cpp(313,71): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/DebugPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\DebugPass.cpp(467,66): warning C4267: 'argument': conversion from 'size_t' to 'UINT', possible loss of data
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\DebugPass.cpp(469,66): warning C4267: 'argument': conversion from 'size_t' to 'UINT', possible loss of data
   (compiling source file '/src/Runtime/RenderCore/Pass/DebugPass.cpp')
   
   FinalBlitPass.cpp
@@ -1162,7 +1162,7 @@ D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GBufferPass.cpp(39
 D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GBufferPass.cpp(391,63): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
   (compiling source file '/src/Runtime/RenderCore/Pass/GBufferPass.cpp')
   
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GBufferPass.cpp(468,78): warning C4267: 'argument': conversion from 'size_t' to 'UINT', possible loss of data
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GBufferPass.cpp(470,78): warning C4267: 'argument': conversion from 'size_t' to 'UINT', possible loss of data
   (compiling source file '/src/Runtime/RenderCore/Pass/GBufferPass.cpp')
   
   Generating Code...
@@ -1181,28 +1181,40 @@ D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: '
 D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
   (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
   
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(131,31): warning C4244: '=': conversion from 'UINT64' to 'UINT', possible loss of data
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(149,31): warning C4244: '=': conversion from 'UINT64' to 'UINT', possible loss of data
   (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
   
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(310,60): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(387,59): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
   (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
   
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(309,60): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(386,59): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
   (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
   
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(308,60): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(385,59): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
   (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
   
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(479,59): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(390,80): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
   (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
   
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(478,59): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(439,60): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
   (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
   
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(477,59): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(438,60): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
   (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
   
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(527,82): warning C4267: '+=': conversion from 'size_t' to 'uint32_t', possible loss of data
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(437,60): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(625,59): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(624,59): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(623,59): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(674,82): warning C4267: '+=': conversion from 'size_t' to 'uint32_t', possible loss of data
   (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
   
   OpaquePass.cpp
@@ -1435,7 +1447,7 @@ D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: '
 D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
   (compiling source file '/src/Runtime/Resource/Model/AssimpLoader.cpp')
   
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\Resource\Model\AssimpLoader.cpp(926,56): warning C4244: '=': conversion from 'const double' to 'float', possible loss of data
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\Resource\Model\AssimpLoader.cpp(885,56): warning C4244: '=': conversion from 'const double' to 'float', possible loss of data
   (compiling source file '/src/Runtime/Resource/Model/AssimpLoader.cpp')
   
   ModelImporter.cpp
@@ -1474,6 +1486,41 @@ DirectXTK12.lib(SimpleMath.obj) : warning LNK4099: PDB 'DirectXTK12.pdb' was not
 DirectXTK12.lib(pch.obj) : warning LNK4099: PDB 'DirectXTK12.pdb' was not found with 'DirectXTK12.lib(pch.obj)' or at 'D:\DX12\ElysiaDX12\x64\Debug\DirectXTK12.pdb'; linking object as if no debug info
      Creating library D:\DX12\ElysiaDX12\x64\Debug\ElysiaRenderer.lib and object D:\DX12\ElysiaDX12\x64\Debug\ElysiaRenderer.exp
   ElysiaRenderer.vcxproj -> D:\DX12\ElysiaDX12\x64\Debug\ElysiaRenderer.exe
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\ABeautifulGame\ABeautifulGame.bin
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\ABeautifulGame\ABeautifulGame.gltf
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\ABeautifulGame\bishop_black_base_color.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\ABeautifulGame\bishop_black_normal.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\ABeautifulGame\Bishop_black_ORM.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\ABeautifulGame\bishop_white_base_color.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\ABeautifulGame\bishop_white_normal.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\ABeautifulGame\Bishop_white_ORM.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\ABeautifulGame\castle_black_base_color.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\ABeautifulGame\Castle_normal.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\ABeautifulGame\Castle_ORM.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\ABeautifulGame\castle_white_base_color.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\ABeautifulGame\chessboard_base_color.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\ABeautifulGame\chessboard_normal.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\ABeautifulGame\Chessboard_ORM.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\ABeautifulGame\king_black_base_color.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\ABeautifulGame\King_black_normal.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\ABeautifulGame\King_black_ORM.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\ABeautifulGame\king_white_base_color.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\ABeautifulGame\King_white_normal.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\ABeautifulGame\King_white_ORM.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\ABeautifulGame\knight_black_base_color.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\ABeautifulGame\Knight_normal.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\ABeautifulGame\Knight_ORM.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\ABeautifulGame\knight_white_base_color.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\ABeautifulGame\pawn_black_base_color.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\ABeautifulGame\Pawn_normal.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\ABeautifulGame\Pawn_ORM.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\ABeautifulGame\pawn_white_base_color.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\ABeautifulGame\queen_black_base_color.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\ABeautifulGame\Queen_black_normal.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\ABeautifulGame\Queen_black_ORM.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\ABeautifulGame\queen_white_base_color.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\ABeautifulGame\Queen_white_normal.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\ABeautifulGame\Queen_white_ORM.jpg
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\CornellBox\cornell_box.bin
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\CornellBox\cornell_box.gltf
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\10381718147657362067.jpg
@@ -1692,4 +1739,4 @@ DirectXTK12.lib(pch.obj) : warning LNK4099: PDB 'DirectXTK12.pdb' was not found 
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Tex\RandomNormalTexture.png
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Tex\texconv.exe
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Tex\White.png
-  复制了 218 个文件
+  复制了 253 个文件

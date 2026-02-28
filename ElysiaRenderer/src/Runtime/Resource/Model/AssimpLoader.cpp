@@ -21,6 +21,7 @@
 
 namespace ElysiaModel
 {
+    using namespace ElysiaHelper;
     struct SkeletonInfo
     {
         eastl::vector<int> jointMap; // maps from node index to actual joint index
@@ -60,33 +61,38 @@ namespace ElysiaModel
         }
     };
 
-    static float ByteToFloat(int8_t b)
+    static float byteToFloat(int8_t b)
     {
         return fmaxf(b / 127.0f, -1.0f);
-    }
-    static float UByteToFloat(uint8_t b)
+    };
+
+    static float ubyteToFloat(uint8_t b)
     {
         return b / 255.0f;
-    }
-    static float ShortToFloat(int16_t b)
+    };
+
+    static float shortToFloat(int16_t b)
     {
         return fmaxf(b / 32767.0f, -1.0f);
-    }
-    static float UShortToFloat(uint16_t b)
+    };
+
+    static float ushortToFloat(uint16_t b)
     {
         return b / 65535.0f;
-    }
-    static float IntToFloat(int32_t b)
+    };
+
+    static float intToFloat(int32_t b)
     {
         return fmaxf(b / (float)INT32_MAX, -1.0f);
-    }
-    static float UIntToFloat(uint32_t b)
+    };
+
+    static float uintToFloat(uint32_t b)
     {
         return b / (float)UINT32_MAX;
-    }
+    };
 
     template <typename T>
-    static const T* GetBufferDataPtr(const tinygltf::Accessor& accessor,
+    static const T* getBufferDataPtr(const tinygltf::Accessor& accessor,
                                      const tinygltf::BufferView& bufferView,
                                      const tinygltf::Buffer& buffer,
                                      size_t componentCount,
@@ -97,6 +103,285 @@ namespace ElysiaModel
         const size_t stride = bufferView.byteStride == 0 ? componentCount * compSize : bufferView.byteStride;
         return (T*)&buffer.data[accessor.byteOffset + bufferView.byteOffset + elementIndex * stride + componentIndex *
                                 compSize];
+    }
+
+    static bool getFloatBufferData(const tinygltf::Model& gltfModel,
+                                   int accessorIdx,
+                                   size_t elementIndex,
+                                   size_t resultSize,
+                                   float* result)
+    {
+        const tinygltf::Accessor& accessor = gltfModel.accessors[accessorIdx];
+        const tinygltf::BufferView& bufferView = gltfModel.bufferViews[accessor.bufferView];
+        const tinygltf::Buffer& buffer = gltfModel.buffers[bufferView.buffer];
+
+        size_t componentCount = 1;
+        switch (accessor.type)
+        {
+        case TINYGLTF_TYPE_VEC2:
+            componentCount = 2;
+            break;
+        case TINYGLTF_TYPE_VEC3:
+            componentCount = 3;
+            break;
+        case TINYGLTF_TYPE_VEC4:
+            componentCount = 4;
+            break;
+        case TINYGLTF_TYPE_MAT2:
+            componentCount = 4;
+            break;
+        case TINYGLTF_TYPE_MAT3:
+            componentCount = 9;
+            break;
+        case TINYGLTF_TYPE_MAT4:
+            componentCount = 16;
+            break;
+        case TINYGLTF_TYPE_SCALAR:
+            componentCount = 1;
+            break;
+        default:
+            assert(false);
+            break;
+        }
+
+        if (elementIndex >= accessor.count || resultSize > componentCount)
+        {
+            return false;
+        }
+
+        for (size_t i = 0; i < eastl::min(resultSize, componentCount); ++i)
+        {
+            switch (accessor.componentType)
+            {
+            case TINYGLTF_COMPONENT_TYPE_BYTE:
+            {
+                result[i] = byteToFloat(
+                    *getBufferDataPtr<int8_t>(accessor, bufferView, buffer, componentCount, elementIndex, i));
+                break;
+            }
+            case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE:
+            {
+                result[i] = ubyteToFloat(
+                    *getBufferDataPtr<uint8_t>(accessor, bufferView, buffer, componentCount, elementIndex, i));
+                break;
+            }
+            case TINYGLTF_COMPONENT_TYPE_SHORT:
+            {
+                result[i] = shortToFloat(
+                    *getBufferDataPtr<int16_t>(accessor, bufferView, buffer, componentCount, elementIndex, i));
+                break;
+            }
+            case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT:
+            {
+                result[i] = ushortToFloat(
+                    *getBufferDataPtr<uint16_t>(accessor, bufferView, buffer, componentCount, elementIndex, i));
+                break;
+            }
+            case TINYGLTF_COMPONENT_TYPE_INT:
+            {
+                result[i] = intToFloat(
+                    *getBufferDataPtr<int32_t>(accessor, bufferView, buffer, componentCount, elementIndex, i));
+                break;
+            }
+            case TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT:
+            {
+                result[i] = uintToFloat(
+                    *getBufferDataPtr<int32_t>(accessor, bufferView, buffer, componentCount, elementIndex, i));
+                break;
+            }
+            case TINYGLTF_COMPONENT_TYPE_FLOAT:
+            {
+                result[i] = *getBufferDataPtr<float>(accessor, bufferView, buffer, componentCount, elementIndex, i);
+                break;
+            }
+            case TINYGLTF_COMPONENT_TYPE_DOUBLE:
+            {
+                result[i] = (float)*getBufferDataPtr<double>(accessor,
+                                                             bufferView,
+                                                             buffer,
+                                                             componentCount,
+                                                             elementIndex,
+                                                             i);
+                break;
+            }
+            default:
+                assert(false);
+                break;
+            }
+        }
+        return true;
+    }
+
+    static bool getIntBufferData(const tinygltf::Model& gltfModel,
+                                 int accessorIdx,
+                                 size_t elementIndex,
+                                 size_t resultSize,
+                                 int64_t* result)
+    {
+        const tinygltf::Accessor& accessor = gltfModel.accessors[accessorIdx];
+        const tinygltf::BufferView& bufferView = gltfModel.bufferViews[accessor.bufferView];
+        const tinygltf::Buffer& buffer = gltfModel.buffers[bufferView.buffer];
+
+        size_t componentCount = 1;
+        switch (accessor.type)
+        {
+        case TINYGLTF_TYPE_VEC2:
+            componentCount = 2;
+            break;
+        case TINYGLTF_TYPE_VEC3:
+            componentCount = 3;
+            break;
+        case TINYGLTF_TYPE_VEC4:
+            componentCount = 4;
+            break;
+        case TINYGLTF_TYPE_MAT2:
+            componentCount = 4;
+            break;
+        case TINYGLTF_TYPE_MAT3:
+            componentCount = 9;
+            break;
+        case TINYGLTF_TYPE_MAT4:
+            componentCount = 16;
+            break;
+        case TINYGLTF_TYPE_SCALAR:
+            componentCount = 1;
+            break;
+        default:
+            assert(false);
+            break;
+        }
+
+        if (elementIndex >= accessor.count || resultSize > componentCount)
+        {
+            return false;
+        }
+
+        for (size_t i = 0; i < eastl::min(resultSize, componentCount); ++i)
+        {
+            switch (accessor.componentType)
+            {
+            case TINYGLTF_COMPONENT_TYPE_BYTE:
+            {
+                result[i] = *getBufferDataPtr<int8_t>(accessor, bufferView, buffer, componentCount, elementIndex, i);
+                break;
+            }
+            case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE:
+            {
+                result[i] = *getBufferDataPtr<uint8_t>(accessor, bufferView, buffer, componentCount, elementIndex, i);
+                break;
+            }
+            case TINYGLTF_COMPONENT_TYPE_SHORT:
+            {
+                result[i] = *getBufferDataPtr<int16_t>(accessor, bufferView, buffer, componentCount, elementIndex, i);
+                break;
+            }
+            case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT:
+            {
+                result[i] = *getBufferDataPtr<uint16_t>(accessor, bufferView, buffer, componentCount, elementIndex, i);
+                break;
+            }
+            case TINYGLTF_COMPONENT_TYPE_INT:
+            {
+                result[i] = *getBufferDataPtr<int32_t>(accessor, bufferView, buffer, componentCount, elementIndex, i);
+                break;
+            }
+            case TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT:
+            {
+                result[i] = *getBufferDataPtr<int32_t>(accessor, bufferView, buffer, componentCount, elementIndex, i);
+                break;
+            }
+            default:
+                assert(false);
+                break;
+            }
+        }
+        return true;
+    }
+
+    static bool isJoint(const tinygltf::Model& gltfModel, int node)
+    {
+        if (!gltfModel.skins.empty())
+        {
+            for (auto joint : gltfModel.skins[0].joints)
+            {
+                if (joint == node)
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    static Matrix getLocalNodeTransform(const tinygltf::Model& gltfModel, int nodeIdx)
+    {
+        Matrix localTransform = Matrix::Identity;
+        if (!isJoint(gltfModel, (int)nodeIdx))
+        {
+            const auto& node = gltfModel.nodes[nodeIdx];
+            if (!node.matrix.empty())
+            {
+                localTransform = Matrix(
+                    (float)node.matrix[0],
+                    (float)node.matrix[1],
+                    (float)node.matrix[2],
+                    (float)node.matrix[3],
+                    (float)node.matrix[4],
+                    (float)node.matrix[5],
+                    (float)node.matrix[6],
+                    (float)node.matrix[7],
+                    (float)node.matrix[8],
+                    (float)node.matrix[9],
+                    (float)node.matrix[10],
+                    (float)node.matrix[11],
+                    (float)node.matrix[12],
+                    (float)node.matrix[13],
+                    (float)node.matrix[14],
+                    (float)node.matrix[15]
+                    );
+            }
+            else if (!node.scale.empty() || !node.rotation.empty() || !node.translation.empty())
+            {
+                // 处理 Scale
+                Vector3 scale = node.scale.empty()
+                                    ? Vector3(1.0f, 1.0f, 1.0f)
+                                    : Vector3((float)node.scale[0], (float)node.scale[1], (float)node.scale[2]);
+
+                // 处理 Rotation (glTF 为 x, y, z, w)
+                Quaternion rot = node.rotation.empty()
+                                     ? Quaternion::Identity
+                                     : Quaternion((float)node.rotation[0],
+                                                  (float)node.rotation[1],
+                                                  (float)node.rotation[2],
+                                                  (float)node.rotation[3]);
+
+                // 处理 Translation
+                Vector3 trans = node.translation.empty()
+                                    ? Vector3(0.0f, 0.0f, 0.0f)
+                                    : Vector3((float)node.translation[0],
+                                              (float)node.translation[1],
+                                              (float)node.translation[2]);
+
+                // SimpleMath 的组合逻辑：Scale -> Rotate -> Translate
+                // 注意顺序：矩阵乘法从左到右执行
+                localTransform = Matrix::CreateScale(scale) * Matrix::CreateFromQuaternion(rot) *
+                                 Matrix::CreateTranslation(trans);
+            }
+        }
+
+        return localTransform;
+    }
+
+
+    template <typename T>
+    const T* GetAccessorDataPtr(const tinygltf::Model& model, int accessorIdx, size_t& outStride)
+    {
+        if (accessorIdx < 0)
+            return nullptr;
+        const auto& acc = model.accessors[accessorIdx];
+        const auto& view = model.bufferViews[acc.bufferView];
+        outStride = acc.ByteStride(view); // 关键：自动计算正确的步长
+        return reinterpret_cast<const T*>(&(model.buffers[view.buffer].data[view.byteOffset + acc.byteOffset]));
     }
 
     static Matrix GetLocalNodeTransform(const tinygltf::Node& node)
@@ -525,8 +810,10 @@ namespace ElysiaModel
             }
             if (assimpMesh.HasTangentsAndBitangents())
             {
-                dstVertices[vertexIdx].Tangent = ConvertVec(
-                    assimpMesh.mTangents[vertexIdx]);
+                dstVertices[vertexIdx].Tangent = Vector4(assimpMesh.mTangents[vertexIdx].x,
+                                                         assimpMesh.mTangents[vertexIdx].y,
+                                                         assimpMesh.mTangents[vertexIdx].z,
+                                                         1.f);
             }
         }
 
@@ -660,132 +947,160 @@ namespace ElysiaModel
         float sceneScale,
         bool bInvertY,
         uint32_t& vtxOffset,
-        // 全局顶点计数器 (引用)
         uint32_t& idxOffset,
-        // 全局索引计数器 (引用)
         LoadedModel& model)
     {
         const auto& node = gltfModel.nodes[nodeIdx];
 
-        // 1. 计算变换矩阵
-        Matrix localTransform = GetLocalNodeTransform(node);
-        Matrix worldTransform = localTransform * parentTransform;
-
+        Matrix localTransform = getLocalNodeTransform(gltfModel, nodeIdx) * parentTransform;
+        Matrix globalTransform = localTransform * parentTransform;
         // 法线变换矩阵 (逆转置)，防止非均匀缩放导致法线错误
-        Matrix invTranspose = worldTransform;
-        invTranspose.Invert();
-        invTranspose.Transpose();
+        Matrix normalTransform = globalTransform;
+        normalTransform.Invert();
+        normalTransform.Transpose();
 
-        // 2. 处理几何数据
+        bool skipMesh = false;
+        if (node.mesh != -1)
+        {
+            // ElysiaHelper::Log::Warn("GLTFLoader: File has more than one skin. Skipping mesh \"%s\" with skin index %i!",
+            //                         gltfModel.meshes[node.mesh].name.c_str(),
+            //                         node.skin);
+            skipMesh = true;
+        }
+
         if (node.mesh >= 0)
         {
             const auto& gltfMesh = gltfModel.meshes[node.mesh];
-            for (const auto& prim : gltfMesh.primitives)
+            ElysiaHelper::Log::Info("GLTFLoader: Importing Mesh \"%s\".", gltfMesh.name.c_str());
+
+            int primIndex = 0;
+            for (const auto& primitive : gltfMesh.primitives)
             {
-                if (prim.mode != TINYGLTF_MODE_TRIANGLES)
+                ElysiaHelper::Log::Info("GLTFLoader: Importing Primitive #%i", primIndex);
+                if (primitive.mode != TINYGLTF_MODE_TRIANGLES)
+                {
+                    ElysiaHelper::Log::Warn("GLTFLoader: glTF primitive has unsupported primitive mode (%i)! Skipping.",
+                                            primitive.mode);
                     continue;
-
-                float minU = 1e10f, maxU = -1e10f;
-                float minV = 1e10f, maxV = -1e10f;
-
-                LoadedModel::Mesh newElysiaMesh;
-
-                // 修复名称：优先使用 Node 名，并附加全局唯一 ID，解决“全是 Mesh0”的问题
-                std::string baseName = node.name.empty() ? (gltfMesh.name.empty() ? "Mesh" : gltfMesh.name) : node.name;
-                newElysiaMesh.name = baseName + "_" + std::to_string(model.meshes.size());
-                newElysiaMesh.materialIndex = prim.material >= 0 ? prim.material : 0;
-
-                // 获取 Accessor Views
-                auto posView = GetAccessorView(gltfModel, prim.attributes.at("POSITION"));
-                auto normView = GetAccessorView(gltfModel,
-                                                prim.attributes.count("NORMAL") ? prim.attributes.at("NORMAL") : -1);
-                auto uvView = GetAccessorView(gltfModel,
-                                              prim.attributes.count("TEXCOORD_0")
-                                                  ? prim.attributes.at("TEXCOORD_0")
-                                                  : -1);
-                auto tanView = GetAccessorView(gltfModel,
-                                               prim.attributes.count("TANGENT") ? prim.attributes.at("TANGENT") : -1);
-
-                uint32_t vCount = (uint32_t)posView.count;
-                // --- 自适应倍率计算逻辑 ---
-                if (uvView.IsValid())
-                {
-                    for (size_t v = 0; v < vCount; ++v)
-                    {
-                        Vector2 uv = uvView.Get<Vector2>(v);
-                        minU = fminf(minU, uv.x);
-                        maxU = fmaxf(maxU, uv.x);
-                        minV = fminf(minV, uv.y);
-                        maxV = fmaxf(maxV, uv.y);
-                    }
                 }
-                float rangeU = maxU - minU;
-                float rangeV = maxV - minV;
-                bool bNeedsNormalizationU = (rangeU > 0.001f && rangeU < 0.7f);
-                bool bNeedsNormalizationV = (rangeV > 0.001f && rangeV < 0.7f);
 
-                // -------------------------------------------------------
-                // 填充顶点
-                // -------------------------------------------------------
-                for (size_t v = 0; v < vCount; ++v)
+                const bool indexed = primitive.indices != -1;
+                uint32_t vertexCount = gltfModel.accessors[primitive.attributes.at("POSITION")].count;
+                const size_t triangleCount = vertexCount / 3;
+
+                int positionsAccessor = -1;
+                int normalsAccessor = -1;
+                int texCoordsAccessor = -1;
+                int tangentAccessor = -1;
+                int weightsAccessor = -1;
+                int jointsAccessor = -1;
+                auto attributeIt = primitive.attributes.find("POSITION");
+                if (attributeIt == primitive.attributes.end())
                 {
-                    // 直接写入全局 buffer 的指定位置
+                    ElysiaHelper::Log::Warn("GLTFLoader: glTF primitive does not have position attribute! Skipping.");
+                    continue;
+                }
+                positionsAccessor = attributeIt->second;
+
+                attributeIt = primitive.attributes.find("NORMAL");
+                if (attributeIt == primitive.attributes.end())
+                {
+                    ElysiaHelper::Log::Warn("GLTFLoader: glTF primitive does not have normal attribute! Skipping.");
+                    continue;
+                }
+                normalsAccessor = attributeIt->second;
+
+                attributeIt = primitive.attributes.find("TEXCOORD_0");
+                if (attributeIt != primitive.attributes.end())
+                {
+                    texCoordsAccessor = attributeIt->second;
+                }
+
+                attributeIt = primitive.attributes.find("TANGENT");
+                if (attributeIt == primitive.attributes.end())
+                {
+                    ElysiaHelper::Log::Warn("GLTFLoader: glTF primitive does not have tangent attribute! Skipping.");
+                    continue;
+                }
+                tangentAccessor = attributeIt->second;
+
+                LoadedModel::Mesh newMesh;
+
+                std::string baseName = node.name.empty() ? (gltfMesh.name.empty() ? "Mesh" : gltfMesh.name) : node.name;
+                newMesh.name = baseName + "_" + std::to_string(model.meshes.size());
+                newMesh.materialIndex = primitive.material >= 0 ? primitive.material : 0;
+
+                for (size_t v = 0; v < vertexCount; ++v)
+                {
+                    bool res = true;
                     MeshVertex& vtx = model.vertices[vtxOffset + v];
-                    vtx.Position = Vector3::Transform(posView.Get<Vector3>(v) * sceneScale, worldTransform);
 
-                    if (normView.IsValid())
+                    // position
+                    Vector3 position = Vector3::Zero;
+                    res = getFloatBufferData(gltfModel, positionsAccessor, v, 3, &position.x);
+                    assert(res);
+                    position = Vector3::Transform(position, globalTransform);
+                    position *= sceneScale;
+
+                    // normal
+                    Vector3 normal = Vector3(0.0f, 1.0f, 0.0f);
+                    if (normalsAccessor != -1)
                     {
-                        vtx.Normal = Vector3::TransformNormal(normView.Get<Vector3>(v), invTranspose);
-                        vtx.Normal.Normalize();
+                        res = getFloatBufferData(gltfModel, normalsAccessor, v, 3, &normal.x);
+                        assert(res);
+                        normal = Vector3::TransformNormal(normal, normalTransform);
                     }
 
-                    // --- 第二遍填充数据 ---
-                    // ... 前面的 Position 计算 ...
-                    if (uvView.IsValid())
+                    // texcoord
+                    Vector2 uv = Vector2();
+                    if (texCoordsAccessor != -1)
                     {
-                        Vector2 uv = uvView.Get<Vector2>(v);
+                        res = getFloatBufferData(gltfModel, texCoordsAccessor, v, 2, &uv.x);
+                        assert(res);
 
-                        // 如果 U 被压缩了，将其映射回 0..1
-                        if (bNeedsNormalizationU)
+                        if (bInvertY)
                         {
-                            uv.x = (uv.x - minU) / rangeU;
+                            uv.y = 1.0f - uv.y;
                         }
-                        // 如果 V 被压缩了，将其映射回 0..1
-                        if (bNeedsNormalizationV)
-                        {
-                            uv.y = (uv.y - minV) / rangeV;
-                        }
-
-                        // 最后应用 DX 翻转
-                        vtx.UV = bInvertY ? Vector2(uv.x, 1.0f - uv.y) : uv;
                     }
 
-                    if (tanView.IsValid())
+                    Vector4 tangent = Vector4(0.0f, 0.0f, 1.0f, 0.f);
+                    if (tangentAccessor != -1)
                     {
-                        // glTF切线是vec4
-                        Vector4 t = tanView.Get<Vector4>(v);
-                        vtx.Tangent = Vector3::TransformNormal(Vector3(t.x, t.y, t.z), worldTransform);
-                        vtx.Tangent.Normalize();
+                        res = getFloatBufferData(gltfModel, tangentAccessor, v, 4, &tangent.x);
+                        assert(res);
+                        auto temp = Vector3::TransformNormal(Vector3(tangent.x, tangent.y, tangent.z), normalTransform);
+                        tangent = Vector4(temp.x, temp.y, temp.z, tangent.w);
                     }
 
                     // 更新 AABB
-                    newElysiaMesh.aabbMin = Vector3::Min(newElysiaMesh.aabbMin, vtx.Position);
-                    newElysiaMesh.aabbMax = Vector3::Max(newElysiaMesh.aabbMax, vtx.Position);
+                    newMesh.aabbMin = Vector3::Min(newMesh.aabbMin, position);
+                    newMesh.aabbMax = Vector3::Max(newMesh.aabbMax, position);
+
+                    vtx.Position = position;
+                    vtx.Normal = normal;
+                    vtx.UV = uv;
+                    vtx.Tangent = tangent;
                 }
 
-                // -------------------------------------------------------
-                // 填充索引 (核心修复区)
-                // -------------------------------------------------------
-                if (prim.indices >= 0)
+                if (indexed)
                 {
-                    auto idxAcc = gltfModel.accessors[prim.indices];
-                    auto idxView = GetAccessorView(gltfModel, prim.indices);
-                    uint32_t iCount = (uint32_t)idxView.count;
+                    auto idxAcc = gltfModel.accessors[primitive.indices];
+                    auto idxView = GetAccessorView(gltfModel, primitive.indices);
+                    uint32_t iCount = gltfModel.accessors[primitive.indices].count;
+                    if (iCount % 3 != 0)
+                    {
+                        ElysiaHelper::Log::Warn(
+                            "GLTFLoader: glTF primitive has a index count that is not divisible by 3 (%i)! Skipping.",
+                            iCount);
+                        continue;
+                    }
 
                     for (size_t i = 0; i < iCount; ++i)
                     {
-                        // 读取原始索引值
                         uint32_t localIdx = 0;
+                        // ElysiaHelper::Log::Info("Index type:%i", idxAcc.componentType);
+
                         if (idxAcc.componentType == 5123)               // unsigned short
                             localIdx = ((uint16_t*)idxView.dataPtr)[i]; // 这里不需要 Stride，因为索引是紧凑的
                         else if (idxAcc.componentType == 5125)          // unsigned int
@@ -793,28 +1108,25 @@ namespace ElysiaModel
                         else if (idxAcc.componentType == 5121) // unsigned byte
                             localIdx = ((uint8_t*)idxView.dataPtr)[i];
 
-                        // 【核心修正】
-                        // 因为你在 InitCommon 里使用了 vb->GetGPUAddress() + vtxOffset
-                        // 所以这里的索引必须是【局部索引】(从 0 开始)。
-                        // 之前代码加了 vtxOffset，导致了双重偏移，所以画面炸裂。
-                        model.indices[idxOffset + i] = (uint32_t)(localIdx);
+                        model.indices[idxOffset + i] = localIdx;
                     }
 
-                    newElysiaMesh.numIndices = iCount;
-                    newElysiaMesh.idxOffset = idxOffset;
+                    newMesh.numIndices = iCount;
+                    newMesh.idxOffset = idxOffset;
                     idxOffset += iCount;
                 }
 
-                newElysiaMesh.numVertices = vCount;
-                newElysiaMesh.vtxOffset = vtxOffset;
-                vtxOffset += vCount; // 累加全局偏移
+                newMesh.numVertices = vertexCount;
+                newMesh.vtxOffset = vtxOffset;
+                vtxOffset += vertexCount;
 
-                model.meshes.push_back(newElysiaMesh);
+                model.meshes.push_back(newMesh);
+                primIndex ++;
             }
         }
 
         for (int child : node.children)
-            FillNodeData(gltfModel, child, worldTransform, sceneScale, bInvertY, vtxOffset, idxOffset, model);
+            FillNodeData(gltfModel, child, globalTransform, sceneScale, bInvertY, vtxOffset, idxOffset, model);
     }
 
     bool LoadGLTFModel(const std::wstring& filePath,
@@ -832,73 +1144,105 @@ namespace ElysiaModel
         std::string fileName = WstringToString(filePath);
         if (!loader.LoadASCIIFromFile(&gltfModel, &err, &warn, fileName))
         {
-            // 尝试加载二进制
-            if (!loader.LoadBinaryFromFile(&gltfModel, &err, &warn, fileName))
-                return false;
+            ElysiaHelper::Log::Error("GLTFLoader: Failed to load file \"%s\"!", filePath);
+            return false;
+        }
+        if (!warn.empty())
+        {
+            ElysiaHelper::Log::Warn("GLTFLoader: Warning while loading file \"%s\": %s", filePath, warn.c_str());
+        }
+        if (!err.empty())
+        {
+            ElysiaHelper::Log::Error("GLTFLoader: Error while loading file \"%s\": %s", filePath, err.c_str());
         }
 
         auto fileDir = GetDirectoryFromFilePath(filePath);
 
-        // 1. 加载材质与 Alpha 模式
-        for (const auto& gMat : gltfModel.materials)
+        if (!gltfModel.meshes.empty())
         {
-            LoadedMaterial elysiaMat;
-            elysiaMat.name = gMat.name;
-
-            // 自动分类 Alpha 模式，用于 SBT 绑定
-            if (gMat.alphaMode == "MASK")
-                elysiaMat.alpha = LoadedMaterial::Alpha::Masked;
-            else if (gMat.alphaMode == "BLEND")
-                elysiaMat.alpha = LoadedMaterial::Alpha::Blend;
-            else
-                elysiaMat.alpha = LoadedMaterial::Alpha::Opaque;
-
-            auto pbr = gMat.pbrMetallicRoughness;
-            elysiaMat.albedoFactor = Vector3((float)pbr.baseColorFactor[0],
-                                             (float)pbr.baseColorFactor[1],
-                                             (float)pbr.baseColorFactor[2]);
-            elysiaMat.normalFactor = gMat.normalTexture.scale;
-            elysiaMat.metallicFactor = (float)pbr.metallicFactor;
-            elysiaMat.roughnessFactor = (float)pbr.roughnessFactor;
-            elysiaMat.emissiveFactor = Vector3((float)gMat.emissiveFactor[0],
-                                               (float)gMat.emissiveFactor[1],
-                                               (float)gMat.emissiveFactor[2]);
-            elysiaMat.opacity = (float)pbr.baseColorFactor[3];
-            elysiaMat.specularFactor = 0.04f;
-
-            // 纹理映射逻辑
-            auto getTexPath = [&](int texIdx) -> std::wstring
+            for (const auto& gMat : gltfModel.materials)
             {
-                if (texIdx < 0)
-                    return L"";
-                int imgIdx = gltfModel.textures[texIdx].source;
-                std::string uri = gltfModel.images[imgIdx].uri;
-                // 防止 uri 为空 (glb 内部纹理) 的情况，这里暂不处理 glb 纹理提取
-                if (uri.empty())
-                    return L"";
-                return fileDir + StringToWstring(uri);
-            };
+                LoadedMaterial elysiaMat;
+                if (gltfModel.materials.empty())
+                {
+                    elysiaMat.name = "null";
+                    elysiaMat.alpha = LoadedMaterial::Alpha::Opaque;
+                    elysiaMat.albedoFactor = Vector3::One;
+                    elysiaMat.metallicFactor = 0.f;
+                    elysiaMat.roughnessFactor = 1.f;
+                    elysiaMat.emissiveFactor = Vector3::Zero;
+                    elysiaMat.opacity = 1.f;
+                    elysiaMat.textureNames[(int)MaterialTextureType::Albedo] = L"";
+                    elysiaMat.textureNames[(int)MaterialTextureType::Normal] = L"";
+                    elysiaMat.textureNames[(int)MaterialTextureType::Metallic] = L"";
+                    elysiaMat.textureNames[(int)MaterialTextureType::Roughness] = L"";
+                    elysiaMat.textureNames[(int)MaterialTextureType::Occlusion] = L"";
+                    elysiaMat.textureNames[(int)MaterialTextureType::Emissive] = L"";
+                    elysiaMat.textureNames[(int)MaterialTextureType::Height] = L"";
+                    elysiaMat.textureNames[(int)MaterialTextureType::Specular] = L"";
 
-            elysiaMat.textureNames[(int)MaterialTextureType::Albedo] = getTexPath(pbr.baseColorTexture.index);
-            elysiaMat.textureNames[(int)MaterialTextureType::Normal] = getTexPath(gMat.normalTexture.index);
-            elysiaMat.textureNames[(int)MaterialTextureType::Emissive] = getTexPath(gMat.emissiveTexture.index);
-            int mrTexIdx = pbr.metallicRoughnessTexture.index;
-            if (mrTexIdx >= 0)
-            {
-                std::wstring mrPath = getTexPath(mrTexIdx);
-                elysiaMat.textureNames[(int)MaterialTextureType::Roughness] = mrPath;
-                elysiaMat.textureNames[(int)MaterialTextureType::Metallic] = mrPath;
+                    ElysiaHelper::Log::Warn("GLTFLoader: No materials found in file \"%s\". Using default material.",
+                                            filePath);
+                }
+
+                elysiaMat.name = gMat.name;
+                elysiaMat.alpha = gMat.alphaMode == "OPAQUE"
+                                      ? LoadedMaterial::Alpha::Opaque
+                                      : gMat.alphaMode == "MASK"
+                                      ? LoadedMaterial::Alpha::Masked
+                                      : LoadedMaterial::Alpha::Blend;
+
+                auto pbr = gMat.pbrMetallicRoughness;
+                elysiaMat.albedoFactor = Vector3((float)pbr.baseColorFactor[0],
+                                                 (float)pbr.baseColorFactor[1],
+                                                 (float)pbr.baseColorFactor[2]);
+                elysiaMat.normalFactor = gMat.normalTexture.scale;
+                elysiaMat.metallicFactor = (float)pbr.metallicFactor;
+                elysiaMat.roughnessFactor = (float)pbr.roughnessFactor;
+                elysiaMat.emissiveFactor = Vector3((float)gMat.emissiveFactor[0],
+                                                   (float)gMat.emissiveFactor[1],
+                                                   (float)gMat.emissiveFactor[2]);
+                elysiaMat.opacity = (float)pbr.baseColorFactor[3];
+                elysiaMat.specularFactor = 0.04f;
+
+                // 纹理映射逻辑
+                auto getTexturePath = [](const tinygltf::Model& model, int textureIndex) -> std::wstring
+                {
+                    if (textureIndex >= 0 && textureIndex < model.textures.size())
+                    {
+                        return StringToWstring(model.images[model.textures[textureIndex].source].uri);
+                    }
+                    else
+                    {
+                        return L"";
+                    }
+                };
+
+                elysiaMat.textureNames[(int)MaterialTextureType::Albedo] = getTexturePath(
+                    gltfModel,
+                    pbr.baseColorTexture.index);
+                elysiaMat.textureNames[(int)MaterialTextureType::Normal] = getTexturePath(
+                    gltfModel,
+                    gMat.normalTexture.index);
+                elysiaMat.textureNames[(int)MaterialTextureType::Emissive] = getTexturePath(
+                    gltfModel,
+                    gMat.emissiveTexture.index);
+                elysiaMat.textureNames[(int)MaterialTextureType::Roughness] = getTexturePath(
+                    gltfModel,
+                    pbr.metallicRoughnessTexture.index);
+                elysiaMat.textureNames[(int)MaterialTextureType::Metallic] = getTexturePath(
+                    gltfModel,
+                    pbr.metallicRoughnessTexture.index);
+                elysiaMat.textureNames[(int)MaterialTextureType::Occlusion] = getTexturePath(
+                    gltfModel,
+                    gMat.occlusionTexture.index);
+                elysiaMat.textureNames[(int)MaterialTextureType::Height] = L"";
+
+                model.materials.push_back(elysiaMat);
             }
-            int ocTexIdx = gMat.occlusionTexture.index;
-            if (ocTexIdx >= 0)
-            {
-                elysiaMat.textureNames[(int)MaterialTextureType::Occlusion] = getTexPath(ocTexIdx);
-            }
 
-            model.materials.push_back(elysiaMat);
+            LoadMaterialResource(model.materials, fileDir, model.materialTextures);
         }
-
-        LoadMaterialResource(model.materials, fileDir, model.materialTextures);
 
         uint32_t totalV = 0, totalI = 0;
         std::function<void(int)> preCount = [&](int n)

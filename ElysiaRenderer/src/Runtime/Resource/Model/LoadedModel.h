@@ -25,7 +25,7 @@ namespace ElysiaModel
         Index32Bit = 1
     };
 
-    enum class MaterialTextureType
+    enum class MaterialTextureType : int
     {
         Albedo = 0,
         Normal,
@@ -59,7 +59,7 @@ namespace ElysiaModel
         Vector3 Position;
         Vector2 UV;
         Vector3 Normal;
-        Vector3 Tangent;
+        Vector4 Tangent;
 
         MeshVertex()
         {
@@ -68,7 +68,7 @@ namespace ElysiaModel
         MeshVertex(const Vector3& p,
                    const Vector3& n,
                    const Vector2& uv,
-                   const Vector3& t,
+                   const Vector4& t,
                    const Vector3& b)
         {
             Position = p;
@@ -84,7 +84,7 @@ namespace ElysiaModel
             Position += p;
 
             Normal = Vector3::Transform(Normal, q);
-            Tangent = Vector3::Transform(Tangent, q);
+            Tangent = Vector4::Transform(Tangent, q);
         }
 
         template <typename TSerializer>
@@ -115,6 +115,8 @@ namespace ElysiaModel
         float roughnessFactor;
         float specularFactor;
         Vector3 emissiveFactor;
+        Vector2 uvScale = Vector2(1.0f, 1.0f);
+        Vector2 uvOffset = Vector2(0.0f, 0.0f);
 
         std::wstring textureNames[UINT64(MaterialTextureType::Count)];
         ElysiaRenderer::TextureManager::Handle textures[uint64(MaterialTextureType::Count)] = {};

@@ -19,7 +19,7 @@ struct Vertex
     float3 positionOS;
     float2 uv;
     float3 normalOS;
-    float3 tangentOS;
+    float4 tangentOS;
 };
 
 struct RayData
@@ -62,12 +62,13 @@ Vertex InterpolateVertex(Vertex vertices[3], float3 barycentrics)
     {
         o.positionOS += barycentrics * vertices[i].positionOS;
         o.normalOS += barycentrics * vertices[i].normalOS;
-        o.tangentOS += barycentrics * vertices[i].tangentOS;
+        o.tangentOS.xyz += barycentrics * vertices[i].tangentOS.xyz;
         o.uv = barycentrics * vertices[i].uv;
     }
 
     o.normalOS = normalize(o.normalOS);
     o.tangentOS.xyz = normalize(o.tangentOS.xyz);
+    o.tangentOS.w = vertices[0].tangentOS.w;
 
     return o;
 }

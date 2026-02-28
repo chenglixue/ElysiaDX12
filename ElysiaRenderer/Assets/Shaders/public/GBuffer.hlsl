@@ -84,7 +84,7 @@ struct VSInput
     float3 positionOS : POSITION;
     float2 uv : TEXCOORD0;
     float3 normalOS : NORMAL;
-    float3 tangentOS : TANGENT;
+    float4 tangentOS : TANGENT;
 };
 
 struct PSInput
@@ -121,7 +121,7 @@ PSInput VS(VSInput i)
     float3 N = normalize(mul((float3x3)worldMatrix, i.normalOS));
     float3 T = normalize(mul((float3x3)worldMatrix, i.tangentOS));
     o.tangentWS = normalize(T - dot(N, T) * N);
-    o.bitTangentWS = (cross(o.tangentWS, N));
+    o.bitTangentWS = cross(o.tangentWS, N) * i.tangentOS.w;
     o.normalWS = N;
 
     //float handedness = dot(o.bitTangentWS, cross(o.normalWS, o.tangentWS)) > 0.0f ? 1.0f : -1.0f;

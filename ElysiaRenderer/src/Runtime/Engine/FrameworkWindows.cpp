@@ -7,6 +7,15 @@
 
 namespace ElysiaEngine
 {
+    void EnableLogColors()
+    {
+        HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+        DWORD dwMode = 0;
+        GetConsoleMode(hOut, &dwMode);
+        dwMode |= 0x0004; // ENABLE_VIRTUAL_TERMINAL_PROCESSING
+        SetConsoleMode(hOut, dwMode);
+    }
+
     LRESULT CALLBACK WindowProc(HWND hWnd,
                                 UINT message,
                                 WPARAM wParam,
@@ -35,6 +44,7 @@ namespace ElysiaEngine
                      int nCmdShow,
                      FrameworkWindows* pFramework)
     {
+        EnableLogColors();
         SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 
         // Init logging
