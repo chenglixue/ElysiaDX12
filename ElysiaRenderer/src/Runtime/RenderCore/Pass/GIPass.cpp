@@ -285,6 +285,8 @@ namespace ElysiaRenderer
             m_pRayDataBuffer)
             return;
 
+        ComputeRandomRotation();
+
         ClearProbeOffset();
         GenerateRay();
         ProbeBlend();
@@ -412,13 +414,13 @@ namespace ElysiaRenderer
             Vector4 g_GridDimensions;
             Vector4 g_IrradianceTexSize;
             Vector4 g_DistanceTexSize;
+            Vector4 g_RandomRotation;
 
             uint g_RayDataBufferIndex;
             UINT g_IrradianceTexIndex;
             UINT g_DistanceTexIndex;
-            float g_RandomRotation;
-
             float g_ProbeNormalBias;
+
             float g_ProbeViewBias;
             float g_DDGIEncodingGamma;
         } constantData;
@@ -440,18 +442,13 @@ namespace ElysiaRenderer
                                             0.f),
                 .g_IrradianceTexSize = GetScreenSize(m_pIrradianceRT->GetWidth(), m_pIrradianceRT->GetHeight()),
                 .g_DistanceTexSize = GetScreenSize(m_pDistanceRT->GetWidth(), m_pDistanceRT->GetHeight()),
+                .g_RandomRotation = m_RandomRotation,
 
                 .g_RayDataBufferIndex = m_pRayDataBuffer->GetUAVResourceHeapIndex(),
                 .g_IrradianceTexIndex = m_pIrradianceRT->GetUAVResourceHeapIndex(),
                 .g_DistanceTexIndex = m_pDistanceRT->GetUAVResourceHeapIndex(),
-                .g_RandomRotation = m_RandomRotation = UserData::GetInstance().GIParameter.
-                                                                               enableLine
-                                                           ? 0
-                                                           : fmodf(
-                                                               static_cast<float>(m_frameIndex) *
-                                                               k_GoldenAngle,
-                                                               2.0f * 3.14159265f),
                 .g_ProbeNormalBias = UserData::GetInstance().GIParameter.normalBias,
+
                 .g_ProbeViewBias = UserData::GetInstance().GIParameter.viewBias,
                 .g_DDGIEncodingGamma = UserData::GetInstance().GIParameter.gamma,
             };
@@ -556,9 +553,9 @@ namespace ElysiaRenderer
             m_pMaterial->SetUInt(ShaderIDs::g_ProbeStatesIndex,
                                  m_pProbeStateBuffer->GetResourceHeapIndex(),
                                  passID);
-            m_pMaterial->SetFloat(ShaderIDs::g_RandomRotation,
-                                  m_RandomRotation,
-                                  passID);
+            m_pMaterial->SetFloat4(ShaderIDs::g_RandomRotation,
+                                   m_RandomRotation,
+                                   passID);
             m_pMaterial->SetFloat4(ShaderIDs::g_GridSpacing,
                                    Vector4(m_gridSpacing.x, m_gridSpacing.y, m_gridSpacing.z, 0.f),
                                    passID);
@@ -600,7 +597,7 @@ namespace ElysiaRenderer
             m_pMaterial->SetUInt(ShaderIDs::g_DistanceTexIndex,
                                  m_pDistanceRT->GetResourceHeapIndex(),
                                  passID);
-            m_pMaterial->SetFloat(ShaderIDs::g_RandomRotation, m_RandomRotation, passID);
+            m_pMaterial->SetFloat4(ShaderIDs::g_RandomRotation, m_RandomRotation, passID);
             m_pMaterial->SetFloat(ShaderIDs::g_DDGIBlendWeight,
                                   UserData::GetInstance().GIParameter.blendWeight,
                                   passID);
@@ -997,7 +994,7 @@ namespace ElysiaRenderer
 
         // 假设我们需要 16 个 32位常量 (比如一个 ViewProj 矩阵或一组索引)
         UINT rootParameterIndex = 0;
-        rootParameters[rootParameterIndex ++].InitAsConstants(28, 0, 2);
+        rootParameters[rootParameterIndex ++].InitAsConstants(48, 0, 2);
         rootParameters[rootParameterIndex ++].InitAsConstantBufferView(0, PER_FRAME_SPACE);
 
         UINT SRVIndex = 0;
@@ -1136,5 +1133,89 @@ namespace ElysiaRenderer
         samplerIndex ++;
 
         return samplerDescs;
+    }
+
+    void GIPass::ComputeRandomRotation()
+    {
+        static std::mt19937 gen(std::random_device{}());
+        static std::uniform_real_distribution<float> dist(0.0f, 1.0f);
+        auto GetRandomFloat = [&]()
+        {
+            return dist(gen);
+        };
+
+        // 基于 James Arvo 的算法生成 3 个均匀分布的随机变量 
+        float u1 = 2.0f * 3.14159265f * GetRandomFloat();
+        float u2 = 2.0f * 3.14159265f * GetRandomFloat();
+        float u3 = GetRandomFloat();
+
+        float cos1 = cosf(u1);
+        float sin1 = sinf(u1);
+        float cos2 = cosf(u2);
+        float sin2 = sinf(u2);
+
+        float sq3 = 2.f * sqrtf(u3 * (1.f - u3));
+        float s2 = 2.f * u3 * sin2 * sin2 - 1.f;
+        float c2 = 2.f * u3 * cos2 * cos2 - 1.f;
+        float sc = 2.f * u3 * sin2 * cos2;
+
+        // 随机旋转矩阵
+        Matrix rotationMatrix = Matrix::Identity;
+
+        rotationMatrix._11 = cos1 * c2 - sin1 * sc;
+        rotationMatrix._12 = sin1 * c2 + cos1 * sc;
+        rotationMatrix._13 = sq3 * cos2;
+
+        rotationMatrix._21 = cos1 * sc - sin1 * s2;
+        rotationMatrix._22 = sin1 * sc + cos1 * s2;
+        rotationMatrix._23 = sq3 * sin2;
+
+        rotationMatrix._31 = cos1 * (sq3 * cos2) - sin1 * (sq3 * sin2);
+        rotationMatrix._32 = sin1 * (sq3 * cos2) + cos1 * (sq3 * sin2);
+        rotationMatrix._33 = 1.f - 2.f * u3;
+
+        m_RandomRotation = Quaternion::CreateFromRotationMatrix(rotationMatrix);
+    }
+
+    static Vector3 GetFibonacciDir(int i)
+    {
+        int dirIndex = i % 64;
+        float b = (sqrt(5.0f) * 0.5f + 0.5f) - 1.0f;
+        float phi = 2.0f * 3.14159265f * b;
+        float theta = phi * dirIndex;
+        float cosPhi = 1.0f - (float(dirIndex) + 0.5f) / 64.0f * 2.0f;
+        float sinPhi = sqrt(std::max(0.0f, 1.0f - cosPhi * cosPhi));
+        Vector3 dir(cos(theta) * sinPhi, cosPhi, sin(theta) * sinPhi);
+
+        return dir;
+    }
+    static float GetDistScale(int i)
+    {
+        // 分配 4 种不同的距离权重
+        int distStep = i / 64; // 0, 1, 2, 3
+        float distScale = (distStep + 1) / 4.0f;
+
+        return distScale;
+    }
+    std::vector<Vector4> GenerateRelocationLUT(Vector3 probeSpacing)
+    {
+        std::vector<Vector4> lut(256);
+        const auto maxOffset = probeSpacing * 0.45f; // 限制在半个网格内，防止越界 
+
+        // 第一项通常设为 (0,0,0)，代表“不偏移” 
+        lut[0] = Vector4(0, 0, 0, 0);
+
+        for (int i = 1; i < 256; ++i)
+        {
+            // 使用斐波那契球面算法生成 64 个方向 
+            auto dir = GetFibonacciDir(i);
+            float distScale = GetDistScale(i);
+
+            Vector3 finalOffset = dir * maxOffset * distScale;
+
+            // 使用 Vector4 是为了满足 HLSL Constant Buffer 的 16 字节对齐 
+            lut[i] = Vector4(finalOffset.x, finalOffset.y, finalOffset.z, 0.0f);
+        }
+        return lut;
     }
 }

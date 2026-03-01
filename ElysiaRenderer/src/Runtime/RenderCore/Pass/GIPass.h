@@ -72,8 +72,8 @@ namespace ElysiaRenderer
         static inline constexpr UINT NumIndices = 60;
         static inline constexpr UINT Probe_Count = 10648;
         static inline const UINT3 Grid_Dimensions = UINT3(22, 22, 22);
-        static inline constexpr UINT Rays_Per_Probe = 128;
-        static inline float m_RandomRotation;
+        static inline constexpr UINT Rays_Per_Probe = 256;
+        static inline Vector4 m_RandomRotation;
 
     public:
         GIPass();
@@ -200,5 +200,7 @@ namespace ElysiaRenderer
         void CreateDXRRootSignature(ID3D12Device* pDevice);
         void GenerateTLAS(const std::vector<std::unique_ptr<Entity>>& entityies);
         std::vector<D3D12_SAMPLER_DESC> GenerateSampler();
+
+        void ComputeRandomRotation();
     };
 }

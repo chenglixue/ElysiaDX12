@@ -85,7 +85,7 @@ PASS(DRAW_GBUFFER_PASS,         "public\\GBuffer.hlsl", false, PS)
             static inline size_t normalIntensity = PropertyToID(L"normalIntensity");
             static inline size_t metallicIntensity = PropertyToID(L"metallicIntensity");
             static inline size_t roughnessIntensity = PropertyToID(L"roughnessIntensity");
-            static inline size_t ambientCubemapIntensity = PropertyToID(L"ambientCubemapIntensity");
+            static inline size_t g_AmbientIntensity = PropertyToID(L"g_AmbientIntensity");
             static inline size_t GBuffer0Index = PropertyToID(L"GBuffer_0");
             static inline size_t GBuffer1Index = PropertyToID(L"GBuffer_1");
             static inline size_t GBuffer2Index = PropertyToID(L"GBuffer_2");

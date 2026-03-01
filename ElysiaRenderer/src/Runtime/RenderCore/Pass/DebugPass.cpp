@@ -317,8 +317,8 @@ namespace ElysiaRenderer
                                                GIPass::Grid_Dimensions.z));
                 m_pMaterial->SetFloat3(GIPass::ShaderIDs::g_GridOrigin, GIPass::m_gridOrigin);
                 m_pMaterial->SetFloat3(GIPass::ShaderIDs::g_GridSpacing, GIPass::m_gridSpacing);
-                m_pMaterial->SetFloat(GIPass::ShaderIDs::g_RandomRotation,
-                                      GIPass::m_RandomRotation);
+                m_pMaterial->SetFloat4(GIPass::ShaderIDs::g_RandomRotation,
+                                       GIPass::m_RandomRotation);
                 m_pMaterial->SetMatrix(ShaderIDs::viewProjMatrix,
                                        m_pCamera->GetViewMat() * m_pCamera->GetProjMat());
 

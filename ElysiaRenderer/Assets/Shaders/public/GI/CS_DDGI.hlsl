@@ -8,13 +8,14 @@ cbuffer PassConstant : register(b0, perPassSpace)
     float4 g_GridOrigin;
     float4 g_GridSpacing;
     float4 g_GridDimensions;
+    float4 g_RandomRotation;
+
     UINT g_ProbeOffsetsIndex;
     UINT g_ProbeStatesIndex;
     UINT g_StaticAABBIndex;
     UINT g_RayDataBufferIndex;
     UINT g_IrradianceTexIndex;
     UINT g_DistanceTexIndex;
-    float g_RandomRotation;
     float g_DDGIBlendWeight;
     float g_ProbeIrradianceThreshold;
     float g_ProbeBrightnessThreshold;
@@ -216,19 +217,12 @@ void RelocateProbes(UINT3 id : SV_DispatchThreadID)
 
     float3 currentOffset = probeOffsetBuffer[probeIndex];
     float3 fullOffset = currentOffset;
-    // A maximum offset computed from the probe grid spacing
-    float3 offsetLimit = g_GridSpacing.xyz * PROBE_MAX_OFFSET_FRACTION;
-
-    // direction to closest frontface scaled by distance
-    float3 closeDir = DDGIGetProbeRayDir(closestFrontfaceIndex, RAYS_PER_PROBE, gridIdx, frameIndex);
-    // direction to farthest frontface scaled by distance
-    float3 farDir = DDGIGetProbeRayDir(farthestFrontfaceIndex, RAYS_PER_PROBE, gridIdx, frameIndex);
 
     // If there’s a close backface AND you see more than 25% backfaces, assume you’re inside something.
     if (closestBackfaceIndex != -1 && (backFaceCount / RELOCATE_RAY_COUNT) > PROBE_BACKFACE_THRESHOLD)
     {
         // direction to closest backface scaled by distance
-        float3 backfaceDir = DDGIGetProbeRayDir(closestBackfaceIndex, RAYS_PER_PROBE, gridIdx, frameIndex);
+        float3 backfaceDir = DDGIGetProbeRayDir(closestBackfaceIndex, RAYS_PER_PROBE, g_RandomRotation);
         fullOffset = currentOffset + (backfaceDir * (
                                           closestBackfaceDist + PROBE_MIN_FRONTFACE_DISTANCE * 0.5f));
 
@@ -246,9 +240,11 @@ void RelocateProbes(UINT3 id : SV_DispatchThreadID)
     }
     else if (closestFrontfaceDist < PROBE_MIN_FRONTFACE_DISTANCE)
     {
+        float3 closeDir = DDGIGetProbeRayDir(closestFrontfaceIndex, RAYS_PER_PROBE, g_RandomRotation);
+        float3 farDir = DDGIGetProbeRayDir(farthestFrontfaceIndex, RAYS_PER_PROBE, g_RandomRotation);
         if (dot(closeDir, farDir) <= 0.f)
         {
-            // Ensures the probe never moves through the farthest frontface
+            // 限制移动步长，确保不会穿过最远的可见平面
             farDir *= min(farthestFrontfaceDist, 1.f);
             fullOffset = currentOffset + farDir;
         }
@@ -259,37 +255,12 @@ void RelocateProbes(UINT3 id : SV_DispatchThreadID)
         float3 moveBackDirection = normalize(-currentOffset);
         fullOffset = currentOffset + (moveBackMargin * moveBackDirection);
     }
-    // === 逻辑 B: 寻找空地 (Avoid Clutter) ===
-    // else if (closestFrontfaceIndex != -1 && farthestFrontfaceIndex != -1)
-    // {
-    //     float minSafeDist = length(g_GridSpacing) * 0.2f;
-    //
-    //     if (closestFrontfaceDist < minSafeDist)
-    //     {
-    //
-    //         if (!(dot(closeDir, farDir) > 0.5f))
-    //         {
-    //             float moveStep = min(0.2f, farthestFrontfaceDist * 0.5f);
-    //             float3 farestDir = moveStep * farDir;
-    //             fullOffset = currentOffset + farestDir;
-    //         }
-    //     }
-    // }
 
     float3 normalizedOffset = fullOffset / g_GridSpacing;
     if (dot(normalizedOffset, normalizedOffset) < 0.2025f) // 0.45 * 0.45 == 0.2025
     {
         probeOffsetBuffer[probeIndex] = fullOffset;
     }
-
-    // float moveDist = length(fullOffset - currentOffset);
-    // float minMoveThreshold = length(g_GridSpacing) * 0.001f; // 极小的死区防止微小震荡
-    //
-    // // 只要有明显的位移趋势，就执行平滑移动
-    // if (moveDist > minMoveThreshold)
-    // {
-    //     probeOffsetBuffer[probeIndex] = fullOffset;
-    // }
 }
 
 [numthreads(DDGI_PROBE_NUM_TEXELS, DDGI_PROBE_NUM_TEXELS, 1)]
@@ -323,7 +294,7 @@ void ProbeBlending(uint3 id : SV_DispatchThreadID,
         float probeMaxRayDistance = length(g_GridSpacing) * 1.5f;
         for (int rayIndex = 32; rayIndex < RAYS_PER_PROBE; rayIndex ++)
         {
-            float3 rayDir = DDGIGetProbeRayDir(rayIndex, RAYS_PER_PROBE, gridIdx, frameIndex);
+            float3 rayDir = DDGIGetProbeRayDir(rayIndex, RAYS_PER_PROBE, g_RandomRotation);
             RayData rayData = Elysia_DDGI_LoadRayData(probeIndex * RAYS_PER_PROBE + rayIndex);
 
             // 方向越接近，权重越高

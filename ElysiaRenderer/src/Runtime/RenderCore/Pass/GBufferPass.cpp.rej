@@ -1,0 +1,6 @@
+diff a/ElysiaRenderer/src/Runtime/RenderCore/Pass/GBufferPass.cpp b/ElysiaRenderer/src/Runtime/RenderCore/Pass/GBufferPass.cpp	(rejected hunks)
+@@ -0,2 +0 @@
+        
+\ No newline at end of file
+-}
+\ No newline at end of file

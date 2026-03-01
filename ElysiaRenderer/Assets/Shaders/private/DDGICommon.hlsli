@@ -4,7 +4,7 @@
 #include "private/Random.hlsl"
 
 #define PROBE_COUNT 10648
-#define RAYS_PER_PROBE 128
+#define RAYS_PER_PROBE 256
 #define DDGI_PROBE_NUM_TEXELS 8
 #define DXR_MAX 10000
 #define DXR_SHADOW_MAX 1e27f
@@ -172,31 +172,6 @@ float4 DDGIQuaternionConjugate(float4 q)
     return float4(-q.xyz, q.w);
 }
 
-float3x3 GetPerProbeRotation(uint probeIdx, uint frameIdx)
-{
-    // 1. 基于帧序号的全局基础旋转
-    float globalAngle = float(frameIdx % 64) * (6.283185f / 64.0f);
-
-    // 2. 基于探针索引的伪随机轴
-    // 这里使用 hash 产生三个方向的随机量来构成旋转轴
-    float3 rand;
-    rand.x = frac(sin(float(probeIdx) * 1.0f) * 43758.5453f);
-    rand.y = frac(sin(float(probeIdx) * 2.0f) * 43758.5453f);
-    rand.z = frac(sin(float(probeIdx) * 3.0f) * 43758.5453f);
-    float3 axis = normalize(rand * 2.0f - 1.0f);
-
-    // 3. 构建旋转四元数并转为矩阵
-    float4 q = QuaternionFromAxisAngle(axis, globalAngle);
-
-    // 四元数转 3x3 矩阵
-    float3x3 rot;
-    rot[0] = float3(1 - 2 * q.y * q.y - 2 * q.z * q.z, 2 * q.x * q.y - 2 * q.w * q.z, 2 * q.x * q.z + 2 * q.w * q.y);
-    rot[1] = float3(2 * q.x * q.y + 2 * q.w * q.z, 1 - 2 * q.x * q.x - 2 * q.z * q.z, 2 * q.y * q.z - 2 * q.w * q.x);
-    rot[2] = float3(2 * q.x * q.z - 2 * q.w * q.y, 2 * q.y * q.z + 2 * q.w * q.x, 1 - 2 * q.x * q.x - 2 * q.y * q.y);
-
-    return rot;
-}
-
 float3 SphericalFibonacci(uint sampleIndex, uint numSamples)
 {
     float b = (sqrt(5.0) * 0.5 + 0.5) - 1.0;
@@ -209,35 +184,10 @@ float3 SphericalFibonacci(uint sampleIndex, uint numSamples)
     return float3(cos(theta) * sinPhi, cosPhi, sin(theta) * sinPhi);
 }
 
-float ProbeHash(uint3 gridIdx)
-{
-    // 将 3D 坐标映射到一个大的素数空间
-    uint h = gridIdx.x * 1664525u + gridIdx.y * 1013904223u + gridIdx.z * 1103515245u;
-    return float(h & 0x00FFFFFFu) / float(0x01000000u);
-}
-
-float3 RotateVectorByQuaternion(float3 v, float4 q)
-{
-    // 标准四元数旋转公式优化版：v' = v + 2.0 * q.xyz x (q.xyz x v + q.w * v)
-    float3 t = 2.0 * cross(q.xyz, v);
-    return v + q.w * t + cross(q.xyz, t);
-}
-
 float3 DDGIGetProbeRayDir(uint sampleIndex,
                           uint numSamples,
-                          uint3 probeGridIdx,
-                          UINT frameIndex)
+                          Vector4 randomRotation)
 {
-    float globalRotation = fmod(float(frameIndex) * 2.399963f, 6.283185f);
-
-    float h1 = ProbeHash(probeGridIdx);
-    float h2 = ProbeHash(probeGridIdx + uint3(17, 31, 7));
-    float h3 = ProbeHash(probeGridIdx + uint3(3, 11, 23));
-
-    // 3. 最终旋转量
-    float3 rotationAxis = normalize(float3(h1, h2, h3) * 2.0f - 1.0f);
-    float finalAngle = globalRotation + h1 * 6.283185f;
-
     bool isFixedRay = false;
     if (true)
     {
@@ -256,8 +206,7 @@ float3 DDGIGetProbeRayDir(uint sampleIndex,
         return normalize(dir);
     }
 
-    float4 q = QuaternionFromAxisAngle(rotationAxis, finalAngle);
-    return normalize(RotateVectorByQuaternion(dir, q));
+    return normalize(DDGIQuaternionRotate(dir, DDGIQuaternionConjugate(randomRotation)));
 }
 
 /**

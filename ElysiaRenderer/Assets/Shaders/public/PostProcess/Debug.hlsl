@@ -26,7 +26,7 @@ cbuffer PassConstant : register(b0, perPassSpace)
     Vector4 g_GridSpacing;
     Vector4 g_GridDimensions;
     float g_ProbeRadius;
-    float g_RandomRotation;
+    float4 g_RandomRotation;
     UINT g_RayDataBufferIndex;
     UINT g_ProbeOffsetsIndex;
     UINT g_ProbeStatesIndex;
@@ -104,7 +104,7 @@ PSInput VS(VSInput i, UINT vertexID : SV_VertexID, uint instanceID : SV_Instance
             StructuredBuffer<RayData> rayDataBuffer = ResourceDescriptorHeap[g_RayDataBufferIndex];
             uint rayDataIdx = probeIdx * RAYS_PER_PROBE + rayInProbeIdx;
             RayData data = rayDataBuffer[rayDataIdx];
-            float3 dir = DDGIGetProbeRayDir(rayInProbeIdx, RAYS_PER_PROBE, g_RandomRotation, frameIndex);
+            float3 dir = DDGIGetProbeRayDir(rayInProbeIdx, RAYS_PER_PROBE, g_RandomRotation);
 
             float3 finalPos = probeWorldPos;
             float3 finalColor = data.Radiance;
@@ -214,7 +214,7 @@ PSOutput PS(PSInput i)
             for (uint r = 0; r < RAYS_PER_PROBE; r ++)
             {
                 // 1. 恢复该射线的发射方向
-                float3 rayDir = DDGIGetProbeRayDir(r, RAYS_PER_PROBE, g_RandomRotation, frameIndex);
+                float3 rayDir = DDGIGetProbeRayDir(r, RAYS_PER_PROBE, g_RandomRotation);
 
                 // 2. 计算权重：使用高次幂（如 16 或 32）来获取清晰的细节
                 float weight = max(0.0f, dot(N, rayDir));

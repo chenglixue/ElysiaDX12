@@ -48,6 +48,7 @@ cbuffer PassConstant : register(b0, perPassSpace)
     float4 g_IrradianceTexSize;
     float4 g_DistanceTexSize;
     float3 g_AmbientTint;
+    float g_AmbientIntensity;
 }
 
 struct MeshData
@@ -245,7 +246,7 @@ FEncodeGBufferData GetEncodeGBufferData(FInputParams inputParams, float3 toLight
                            g_ProbeOffsetsIndex,
                            g_ProbeStatesIndex,
                            WarpLinearSampler
-                    ) * g_AmbientTint;
+                    ) * g_AmbientTint * g_AmbientIntensity;
         o.IBL = baseColor.rgb / PI * o.IBL;
     }
 

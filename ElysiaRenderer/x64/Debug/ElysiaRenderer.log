@@ -789,7 +789,7 @@ D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: '
 D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
   (compiling source file '/src/Runtime/RenderCore/MeshRenderer.cpp')
   
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\MeshRenderer.cpp(17,23): warning C4267: '=': conversion from 'size_t' to 'UINT', possible loss of data
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\MeshRenderer.cpp(18,23): warning C4267: '=': conversion from 'size_t' to 'UINT', possible loss of data
   (compiling source file '/src/Runtime/RenderCore/MeshRenderer.cpp')
   
   AOPass.cpp
@@ -1153,6 +1153,13 @@ D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: '
 D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
   (compiling source file '/src/Runtime/RenderCore/Pass/GBufferPass.cpp')
   
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GBufferPass.cpp(139,57): warning C4927: illegal conversion; more than one user-defined conversion has been implicitly applied
+  (compiling source file '/src/Runtime/RenderCore/Pass/GBufferPass.cpp')
+      D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GBufferPass.cpp(139,57):
+      while calling the constructor 'DirectX::SimpleMath::Vector4::Vector4(DirectX::FXMVECTOR) noexcept'
+      D:\DX12\ElysiaDX12\ElysiaRenderer\src\ThirdParty\SimpleMath\SimpleMath.h(358,13):
+      see declaration of 'DirectX::SimpleMath::Vector4::Vector4'
+  
 D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GBufferPass.cpp(393,63): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
   (compiling source file '/src/Runtime/RenderCore/Pass/GBufferPass.cpp')
   
@@ -1447,7 +1454,16 @@ D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: '
 D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
   (compiling source file '/src/Runtime/Resource/Model/AssimpLoader.cpp')
   
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\Resource\Model\AssimpLoader.cpp(885,56): warning C4244: '=': conversion from 'const double' to 'float', possible loss of data
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\Resource\Model\AssimpLoader.cpp(1159,38): warning C4267: 'initializing': conversion from 'size_t' to 'uint32_t', possible loss of data
+  (compiling source file '/src/Runtime/Resource/Model/AssimpLoader.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\Resource\Model\AssimpLoader.cpp(1263,37): warning C4267: 'initializing': conversion from 'size_t' to 'uint32_t', possible loss of data
+  (compiling source file '/src/Runtime/Resource/Model/AssimpLoader.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\Resource\Model\AssimpLoader.cpp(1289,70): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+  (compiling source file '/src/Runtime/Resource/Model/AssimpLoader.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\Resource\Model\AssimpLoader.cpp(1385,60): warning C4244: '=': conversion from 'const double' to 'float', possible loss of data
   (compiling source file '/src/Runtime/Resource/Model/AssimpLoader.cpp')
   
   ModelImporter.cpp

@@ -430,6 +430,9 @@ namespace ElysiaRenderer
         m_pMaterial->SetFloat(GIPass::ShaderIDs::g_DDGIEncodingGamma,
                               UserData::GetInstance().GIParameter.gamma,
                               passID);
+        m_pMaterial->SetFloat(ShaderIDs::g_AmbientIntensity,
+                              UserData::GetInstance().AmbientCubemapIntensity,
+                              passID);
 
         SetSpaceResource(passData, PER_PASS_SPACE);
         SetSpaceResource(passData, PER_FRAME_SPACE);
@@ -480,5 +483,4 @@ namespace ElysiaRenderer
             );
         m_pCommand->GetCommandList()->ResourceBarrier(1, &barrier);
     }
-
 }

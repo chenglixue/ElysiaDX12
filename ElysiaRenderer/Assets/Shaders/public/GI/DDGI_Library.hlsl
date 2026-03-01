@@ -15,13 +15,13 @@ cbuffer PassConstant : register(b0, perPassSpace)
     float4 g_GridDimensions;
     float4 g_IrradianceTexSize;
     float4 g_DistanceTexSize;
+    Vector4 g_RandomRotation;
 
     UINT g_RayDataBufferIndex;
     UINT g_IrradianceTexIndex;
     UINT g_DistanceTexIndex;
-    float g_RandomRotation;
-
     float g_ProbeNormalBias;
+
     float g_ProbeViewBias;
     float g_DDGIEncodingGamma;
 }
@@ -59,9 +59,12 @@ UINT Elysia_DDGI_LoadeProbeState(UINT probeIndex)
 void GenerateRayMain()
 {
     uint probeIndex = DispatchRaysIndex().x;
+    if (probeIndex % 2 != frameIndex % 2)
+        return;
+
     uint rayIndex = DispatchRaysIndex().y;
-    UINT2 dimension = DispatchRaysDimensions().xy;
-    uint3 gridIdx = GetProbeGridCoord(probeIndex, g_GridDimensions);
+    // UINT2 dimension = DispatchRaysDimensions().xy;
+    // uint3 gridIdx = GetProbeGridCoord(probeIndex, g_GridDimensions);
     UINT probeState = Elysia_DDGI_LoadeProbeState(probeIndex);
 
     if (probeState == PROBE_STATE_INACTIVE && rayIndex >= RELOCATE_RAY_COUNT)
@@ -71,7 +74,7 @@ void GenerateRayMain()
                                               g_GridOrigin,
                                               g_GridSpacing,
                                               g_GridDimensions) + g_ProbeOffsetBuffer[probeIndex];
-    float3 rayDir = DDGIGetProbeRayDir(rayIndex, RAYS_PER_PROBE, gridIdx, frameIndex);
+    float3 rayDir = DDGIGetProbeRayDir(rayIndex, RAYS_PER_PROBE, g_RandomRotation);
 
     RayDesc rayDesc;
     rayDesc.Origin = rayOrigin;
@@ -149,7 +152,6 @@ void RayClosestHit(inout RayData rayData,
                                              sampleUV,
                                              g_WarpLinearSampler,
                                              0);
-        baseColorAlpha.rgb = SRGBToLinear(baseColorAlpha.rgb);
     }
 
     float3 N = normalize(mul(ObjectToWorld3x4(), float4(normalOS, 0.f)));
@@ -162,10 +164,6 @@ void RayClosestHit(inout RayData rayData,
         N = SampleTexture2D_LOD(instanceData.NormalTexIndex, sampleUV, g_WarpLinearSampler, 0);
         N = N * 2.f - 1.f;
         N = mul(N, TBN);
-    }
-    if (isBackFace)
-    {
-        N = -N;
     }
 
     LightData mainLightData = GetMainLight(mainLight);
@@ -206,13 +204,10 @@ void RayClosestHit(inout RayData rayData,
         float maxAlbedo = 0.9f;
         float3 indirectRadiance = min(baseColorAlpha.rgb, maxAlbedo) / PI * indirectIrradiance;
 
-        blendWeight = Pow2(blendWeight);
         indirectRadiance *= blendWeight;
         rayData.Radiance += indirectRadiance;
     }
     rayData.Radiance = (rayData.Radiance + directRadiance);
-    rayData.Radiance = LinearToSRGB(rayData.Radiance);
-    rayData.Radiance = saturate(rayData.Radiance);
     rayData.Distance = RayTCurrent();
 
     if (isBackFace)
