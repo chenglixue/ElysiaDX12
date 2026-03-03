@@ -421,11 +421,17 @@ namespace ElysiaRenderer
         m_pMaterial->SetFloat3(ShaderIDs::g_AmbientTint,
                                UserData::GetInstance().AmbientCubemapTint,
                                passID);
-        m_pMaterial->SetUInt(GIPass::ShaderIDs::g_ProbeOffsetsIndex,
-                             GIPass::m_pProbeOffsetBuffer->GetResourceHeapIndex(),
-                             passID);
+        // m_pMaterial->SetUInt(GIPass::ShaderIDs::g_ProbeOffsetsIndex,
+        //                      GIPass::m_pProbeOffsetBuffer->GetResourceHeapIndex(),
+        //                      passID);
         m_pMaterial->SetUInt(GIPass::ShaderIDs::g_ProbeStatesIndex,
                              GIPass::m_pProbeStateBuffer->GetResourceHeapIndex(),
+                             passID);
+        m_pMaterial->SetUInt(GIPass::ShaderIDs::g_ProbeOffsetIndexTexIndex,
+                             GIPass::m_pProbeOffsetIndexRT->GetResourceHeapIndex(),
+                             passID);
+        m_pMaterial->SetUInt(GIPass::ShaderIDs::g_ProbeRelocationLUTBufferIndex,
+                             GIPass::m_pProbeRelocationLUTBuffer->GetResourceHeapIndex(),
                              passID);
         m_pMaterial->SetFloat(GIPass::ShaderIDs::g_DDGIEncodingGamma,
                               UserData::GetInstance().GIParameter.gamma,

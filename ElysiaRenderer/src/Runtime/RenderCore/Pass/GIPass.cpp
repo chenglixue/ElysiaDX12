@@ -74,14 +74,14 @@ namespace ElysiaRenderer
             .isRawAccess = false
         });
 
-        m_pProbeOffsetBuffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc
-        {
-            .name = L"Probe Offset Buffer",
-            .stride = sizeof(Vector3),
-            .size = sizeof(Vector3) * Probe_Count,
-            .viewFlags = GPUResourceFlags::SRV | GPUResourceFlags::UAV,
-            .accessFlags = BufferAccessFlags::GPUOnly,
-        });
+        // m_pProbeOffsetBuffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc
+        // {
+        //     .name = L"Probe Offset Buffer",
+        //     .stride = sizeof(Vector3),
+        //     .size = sizeof(Vector3) * Probe_Count,
+        //     .viewFlags = GPUResourceFlags::SRV | GPUResourceFlags::UAV,
+        //     .accessFlags = BufferAccessFlags::GPUOnly,
+        // });
 
         m_pProbeStateBuffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc
         {
@@ -97,6 +97,15 @@ namespace ElysiaRenderer
             .name = L"Static AABB Buffer",
             .stride = sizeof(AABBData),
             .size = sizeof(AABBData) * Max_RenderItem_Count,
+            .viewFlags = GPUResourceFlags::SRV,
+            .accessFlags = BufferAccessFlags::HostWritable,
+        });
+
+        m_pProbeRelocationLUTBuffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc
+        {
+            .name = L"Probe Relocation LUT Buffer",
+            .stride = sizeof(Vector4),
+            .size = sizeof(Vector4) * 256,
             .viewFlags = GPUResourceFlags::SRV,
             .accessFlags = BufferAccessFlags::HostWritable,
         });
@@ -129,11 +138,18 @@ namespace ElysiaRenderer
             true,
             RenderResource::GetInstance().GetPropertyName(RenderTextureIDs::IrradianceRTID));
         m_pDistanceRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(
-            Grid_Dimensions.x * 8,
-            Grid_Dimensions.y * Grid_Dimensions.z * 8,
+            Grid_Dimensions.x * 16,
+            Grid_Dimensions.y * Grid_Dimensions.z * 16,
             DXGI_FORMAT_R16G16_FLOAT,
             true,
             RenderResource::GetInstance().GetPropertyName(RenderTextureIDs::DistanceRTID));
+
+        m_pProbeOffsetIndexRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(
+            64,
+            ceil(Probe_Count / 64),
+            DXGI_FORMAT_R8_UINT,
+            true,
+            RenderResource::GetInstance().GetPropertyName(RenderTextureIDs::ProbeOffsetIndexRTID));
 
         m_shaderPasses.assign(std::begin(m_PassData), std::end(m_PassData));
         m_pMaterial = std::make_unique<Material>(m_pDevice, m_shaderPasses);
@@ -162,8 +178,6 @@ namespace ElysiaRenderer
             memcpy(pBufferData.pBufferData.get(), m_probeStates.data(), sizeof(UINT) * Probe_Count);
             BufferManager::GetInstance().UploadBufferData(m_pDevice->GetUploadContext(), &pBufferData);
         }
-
-        static bool isInitStaticAABB = false;
 
         if (!SceneManager::GetInstance().GetEntities().empty() && !SceneManager::GetInstance().
             GetEntities()[0]->GetChildren().empty())
@@ -221,6 +235,7 @@ namespace ElysiaRenderer
                 m_pCommand->FlushBarrier();
             }
 
+            static bool isInitStaticAABB = false;
             if (!isInitStaticAABB)
             {
                 isInitStaticAABB = true;
@@ -285,8 +300,18 @@ namespace ElysiaRenderer
             m_pRayDataBuffer)
             return;
 
+        static bool isInitProbeRelocationLUT = false;
+        if (!isInitProbeRelocationLUT)
+        {
+            isInitProbeRelocationLUT = true;
+            memcpy(m_pProbeRelocationLUTBuffer->GetMappedBuffer(),
+                   GenerateRelocationLUT(m_gridSpacing).data(),
+                   sizeof(Vector4) * 256);
+        }
+
         ComputeRandomRotation();
 
+        InitProbeOffsetIndex();
         ClearProbeOffset();
         GenerateRay();
         ProbeBlend();
@@ -325,6 +350,41 @@ namespace ElysiaRenderer
 
     }
 
+    void GIPass::InitProbeOffsetIndex()
+    {
+        static bool isInit = false;
+        if (isInit)
+            return;
+
+        auto passID = RESET_PROBE_STATES;
+        auto passName = m_PassData[passID].Name.c_str();
+        auto& passData = m_pMaterial->GetPassData(passID);
+        PIXHelper pix(m_pCommand->GetCommandList(), passName);
+
+        PipelineInfo pipelineStateData{};
+        pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(
+            passID).pPipelineStateObject;
+        m_pCommand->SetPipeline(pipelineStateData);
+
+        m_pCommand->AddBarrier(m_pProbeOffsetIndexRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+        {
+            m_pMaterial->SetUInt(ShaderIDs::g_ProbeOffsetIndexTexIndex,
+                                 m_pProbeOffsetIndexRT->GetResourceHeapIndex(),
+                                 passID);
+
+            SetSpaceResource(passData, PER_PASS_SPACE);
+            auto threadGroupSize = passData.GetKernelThreadGroupSizes();
+            m_pCommand->Dispatch(CeilDivide(m_pProbeOffsetIndexRT->GetWidth(), threadGroupSize.x),
+                                 CeilDivide(m_pProbeOffsetIndexRT->GetHeight(), threadGroupSize.y),
+                                 threadGroupSize.z);
+        }
+        m_pCommand->AddBarrier(m_pProbeOffsetIndexRT,
+                               D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
+
+        isInit = true;
+    }
     void GIPass::ResetProbeStates()
     {
         auto passID = RESET_PROBE_STATES;
@@ -419,8 +479,9 @@ namespace ElysiaRenderer
             uint g_RayDataBufferIndex;
             UINT g_IrradianceTexIndex;
             UINT g_DistanceTexIndex;
-            float g_ProbeNormalBias;
+            UINT g_ProbeOffsetIndexTexIndex;
 
+            float g_ProbeNormalBias;
             float g_ProbeViewBias;
             float g_DDGIEncodingGamma;
         } constantData;
@@ -447,8 +508,9 @@ namespace ElysiaRenderer
                 .g_RayDataBufferIndex = m_pRayDataBuffer->GetUAVResourceHeapIndex(),
                 .g_IrradianceTexIndex = m_pIrradianceRT->GetUAVResourceHeapIndex(),
                 .g_DistanceTexIndex = m_pDistanceRT->GetUAVResourceHeapIndex(),
-                .g_ProbeNormalBias = UserData::GetInstance().GIParameter.normalBias,
+                .g_ProbeOffsetIndexTexIndex = m_pProbeRelocationLUTBuffer->GetResourceHeapIndex(),
 
+                .g_ProbeNormalBias = UserData::GetInstance().GIParameter.normalBias,
                 .g_ProbeViewBias = UserData::GetInstance().GIParameter.viewBias,
                 .g_DDGIEncodingGamma = UserData::GetInstance().GIParameter.gamma,
             };
@@ -472,12 +534,15 @@ namespace ElysiaRenderer
             m_pCommand->GetCommandList()->SetComputeRootShaderResourceView(
                 rootParameterIndex ++,
                 m_pInstanceDataBuffer->GetGPUAddress());
-            m_pCommand->GetCommandList()->SetComputeRootShaderResourceView(
-                rootParameterIndex ++,
-                m_pProbeOffsetBuffer->GetGPUAddress());
+            // m_pCommand->GetCommandList()->SetComputeRootShaderResourceView(
+            //     rootParameterIndex ++,
+            //     m_pProbeOffsetBuffer->GetGPUAddress());
             m_pCommand->GetCommandList()->SetComputeRootShaderResourceView(
                 rootParameterIndex ++,
                 m_pProbeStateBuffer->GetGPUAddress());
+            m_pCommand->GetCommandList()->SetComputeRootShaderResourceView(
+                rootParameterIndex ++,
+                m_pProbeRelocationLUTBuffer->GetGPUAddress());
 
             D3D12_DISPATCH_RAYS_DESC dispatchDesc = {};
             dispatchDesc.Width = Probe_Count;
@@ -495,42 +560,37 @@ namespace ElysiaRenderer
     }
     void GIPass::ClearProbeOffset()
     {
-        static bool hasClear = false;
-        if (!m_pProbeOffsetBuffer || hasClear)
-            return;
-
-        auto passID = CLEAR_PROBE_OFFSET_PASS;
-        auto passName = m_PassData[passID].Name.c_str();
-        auto& passData = m_pMaterial->GetPassData(passID);
-        PIXHelper pix(m_pCommand->GetCommandList(), passName);
-
-        PipelineInfo pipelineStateData{};
-        pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(
-            passID).pPipelineStateObject;
-        m_pCommand->SetPipeline(pipelineStateData);
-
-        m_pCommand->AddBarrier(*m_pProbeOffsetBuffer, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-        {
-            m_pMaterial->SetUInt(ShaderIDs::g_ProbeOffsetsIndex,
-                                 m_pProbeOffsetBuffer->GetResourceHeapIndex());
-            SetSpaceResource(passData, PER_PASS_SPACE);
-
-            auto threadGroupSize = passData.GetKernelThreadGroupSizes();
-            m_pCommand->Dispatch(CeilDivide(Probe_Count, threadGroupSize.x),
-                                 threadGroupSize.y,
-                                 threadGroupSize.z);
-        }
-        m_pCommand->AddBarrier(*m_pProbeOffsetBuffer,
-                               D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
-
-        hasClear = true;
-        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
+        // static bool hasClear = false;
+        //
+        // auto passID = CLEAR_PROBE_OFFSET_PASS;
+        // auto passName = m_PassData[passID].Name.c_str();
+        // auto& passData = m_pMaterial->GetPassData(passID);
+        // PIXHelper pix(m_pCommand->GetCommandList(), passName);
+        //
+        // PipelineInfo pipelineStateData{};
+        // pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(
+        //     passID).pPipelineStateObject;
+        // m_pCommand->SetPipeline(pipelineStateData);
+        //
+        // m_pCommand->AddBarrier(*m_pProbeOffsetBuffer, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+        // {
+        //     m_pMaterial->SetUInt(ShaderIDs::g_ProbeOffsetsIndex,
+        //                          m_pProbeOffsetBuffer->GetResourceHeapIndex());
+        //     SetSpaceResource(passData, PER_PASS_SPACE);
+        //
+        //     auto threadGroupSize = passData.GetKernelThreadGroupSizes();
+        //     m_pCommand->Dispatch(CeilDivide(Probe_Count, threadGroupSize.x),
+        //                          threadGroupSize.y,
+        //                          threadGroupSize.z);
+        // }
+        // m_pCommand->AddBarrier(*m_pProbeOffsetBuffer,
+        //                        D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+        //
+        // hasClear = true;
+        // m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
     }
     void GIPass::RelocateProbes()
     {
-        if (!m_pProbeOffsetBuffer)
-            return;
-
         auto passID = RELOCATE_PROBES_PASS;
         auto passName = m_PassData[passID].Name.c_str();
         auto& passData = m_pMaterial->GetPassData(passID);
@@ -542,16 +602,23 @@ namespace ElysiaRenderer
         m_pCommand->SetPipeline(pipelineStateData);
         SetSpaceResource(passData, PER_FRAME_SPACE);
 
-        m_pCommand->AddBarrier(*m_pProbeOffsetBuffer, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+        // m_pCommand->AddBarrier(*m_pProbeOffsetBuffer, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+        m_pCommand->AddBarrier(m_pProbeOffsetIndexRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
         {
-            m_pMaterial->SetUInt(ShaderIDs::g_ProbeOffsetsIndex,
-                                 m_pProbeOffsetBuffer->GetUAVResourceHeapIndex(),
-                                 passID);
+            // m_pMaterial->SetUInt(ShaderIDs::g_ProbeOffsetsIndex,
+            //                      m_pProbeOffsetBuffer->GetUAVResourceHeapIndex(),
+            //                      passID);
             m_pMaterial->SetUInt(ShaderIDs::g_RayDataBufferIndex,
                                  m_pRayDataBuffer->GetResourceHeapIndex(),
                                  passID);
             m_pMaterial->SetUInt(ShaderIDs::g_ProbeStatesIndex,
                                  m_pProbeStateBuffer->GetResourceHeapIndex(),
+                                 passID);
+            m_pMaterial->SetUInt(ShaderIDs::g_ProbeOffsetIndexTexIndex,
+                                 m_pProbeOffsetIndexRT->GetResourceHeapIndex(),
+                                 passID);
+            m_pMaterial->SetUInt(ShaderIDs::g_RelocationLUTIndex,
+                                 m_pProbeRelocationLUTBuffer->GetResourceHeapIndex(),
                                  passID);
             m_pMaterial->SetFloat4(ShaderIDs::g_RandomRotation,
                                    m_RandomRotation,
@@ -563,19 +630,22 @@ namespace ElysiaRenderer
             SetSpaceResource(passData, PER_PASS_SPACE);
 
             auto threadGroupSize = passData.GetKernelThreadGroupSizes();
-            m_pCommand->Dispatch(CeilDivide(Probe_Count, threadGroupSize.x),
-                                 threadGroupSize.y,
+            // m_pCommand->Dispatch(CeilDivide(Probe_Count, threadGroupSize.x),
+            //                      threadGroupSize.y,
+            //                      threadGroupSize.z);
+            m_pCommand->Dispatch(CeilDivide(m_pProbeOffsetIndexRT->GetWidth(), threadGroupSize.x),
+                                 CeilDivide(m_pProbeOffsetIndexRT->GetHeight(), threadGroupSize.y),
                                  threadGroupSize.z);
-            m_pCommand->AddUAVBarrier(m_pProbeOffsetBuffer, false);
+            m_pCommand->AddUAVBarrier(m_pProbeOffsetIndexRT, false);
         }
-        m_pCommand->AddBarrier(*m_pProbeOffsetBuffer,
+        m_pCommand->AddBarrier(m_pProbeOffsetIndexRT,
                                D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
         m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
     }
     void GIPass::ProbeBlend()
     {
         auto passID = PROBE_BLENDING_PASS;
-        auto passName = m_PassData[passID].Name.c_str();
+        auto passName = "Probe Blend Depth";
         auto& passData = m_pMaterial->GetPassData(passID);
         PIXHelper pix(m_pCommand->GetCommandList(), passName);
 
@@ -585,7 +655,6 @@ namespace ElysiaRenderer
         m_pCommand->SetPipeline(pipelineStateData);
         SetSpaceResource(passData, PER_FRAME_SPACE);
 
-        m_pCommand->AddBarrier(m_pIrradianceRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, false);
         m_pCommand->AddBarrier(m_pDistanceRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
         {
             m_pMaterial->SetUInt(ShaderIDs::g_RayDataBufferIndex,
@@ -631,10 +700,29 @@ namespace ElysiaRenderer
             m_pCommand->AddUAVBarrier(m_pIrradianceRT, false);
             m_pCommand->AddUAVBarrier(m_pDistanceRT, false);
         }
+
+        m_pCommand->AddBarrier(m_pDistanceRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
+
+        std::vector<std::wstring> enableKeywords{};
+        enableKeywords.emplace_back(L"BLEND_IRRADIANCE");
+        auto VariantManager = passData.pShader->GetVariantManager();
+        auto currVariantData = &VariantManager->GetOrCompileVariantByNames(enableKeywords);
+        passData.pCurrVariantData = currVariantData;
+        passName = "Probe Blend Irradiance";
+        PIXHelper pix1(m_pCommand->GetCommandList(), passName);
+
+        pipelineStateData = {};
+        pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(
+            passID).pPipelineStateObject;
+        m_pCommand->SetPipeline(pipelineStateData);
+        SetSpaceResource(passData, PER_FRAME_SPACE);
+
+        m_pCommand->AddBarrier(m_pIrradianceRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, false);
         m_pCommand->AddBarrier(m_pIrradianceRT,
                                D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,
                                false);
-        m_pCommand->AddBarrier(m_pDistanceRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 
         m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
     }
@@ -1002,6 +1090,7 @@ namespace ElysiaRenderer
         rootParameters[rootParameterIndex ++].InitAsShaderResourceView(SRVIndex ++, 0);
         rootParameters[rootParameterIndex ++].InitAsShaderResourceView(SRVIndex ++, 0);
         rootParameters[rootParameterIndex ++].InitAsShaderResourceView(SRVIndex ++, 0);
+        // rootParameters[rootParameterIndex ++].InitAsShaderResourceView(SRVIndex ++, 0);
 
         auto samplerDescs = GenerateSampler();
         CD3DX12_STATIC_SAMPLER_DESC staticSamplers[NUM_SAMPLER_DESCRIPTORS];
@@ -1177,7 +1266,7 @@ namespace ElysiaRenderer
         m_RandomRotation = Quaternion::CreateFromRotationMatrix(rotationMatrix);
     }
 
-    static Vector3 GetFibonacciDir(int i)
+    Vector3 GetFibonacciDir(int i)
     {
         int dirIndex = i % 64;
         float b = (sqrt(5.0f) * 0.5f + 0.5f) - 1.0f;
@@ -1189,7 +1278,7 @@ namespace ElysiaRenderer
 
         return dir;
     }
-    static float GetDistScale(int i)
+    float GetDistScale(int i)
     {
         // 分配 4 种不同的距离权重
         int distStep = i / 64; // 0, 1, 2, 3
@@ -1213,7 +1302,6 @@ namespace ElysiaRenderer
 
             Vector3 finalOffset = dir * maxOffset * distScale;
 
-            // 使用 Vector4 是为了满足 HLSL Constant Buffer 的 16 字节对齐 
             lut[i] = Vector4(finalOffset.x, finalOffset.y, finalOffset.z, 0.0f);
         }
         return lut;

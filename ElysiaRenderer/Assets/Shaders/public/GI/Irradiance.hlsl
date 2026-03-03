@@ -39,7 +39,8 @@ float3 SampleDDGI(float3 positionWS,
                   UINT irradianceTexIndex,
                   float4 distanceTexSize,
                   UINT distanceTexIndex,
-                  UINT ProbeOffsetsIndex,
+                  UINT probeOffsetIndexTexIndex,
+                  UINT ProbeRelocationLUTBufferIndex,
                   UINT ProbeStatesIndex,
                   UINT samplerIndex)
 {
@@ -51,7 +52,7 @@ float3 SampleDDGI(float3 positionWS,
 
     float3 sumIrradiance = 0.f;
     float sumWeight = 0.f;
-    StructuredBuffer<float3> probeOffsets = ResourceDescriptorHeap[ProbeOffsetsIndex];
+    // StructuredBuffer<float3> probeOffsets = ResourceDescriptorHeap[ProbeOffsetsIndex];
     StructuredBuffer<UINT> probeStates = ResourceDescriptorHeap[ProbeStatesIndex];
 
     [unroll(8)]
@@ -64,11 +65,19 @@ float3 SampleDDGI(float3 positionWS,
         // 映射到线性索引
         uint adjProbeIdx = adjCoords.x + adjCoords.y * gridDimensions.x + adjCoords.z * (
                                gridDimensions.x * gridDimensions.y);
+
+        UINT2 probeOffsetIndexID = UINT2(adjProbeIdx % 64, adjProbeIdx / 64);
+        RWTexture2D<uint> g_ProbeOffsetIndexTex = ResourceDescriptorHeap[probeOffsetIndexTexIndex];
+        UINT index = g_ProbeOffsetIndexTex.Load(UINT3(probeOffsetIndexID, 0));
+        StructuredBuffer<Vector4> ProbeRelocationLUTBuffer = ResourceDescriptorHeap[ProbeRelocationLUTBufferIndex];
+        float3 probeOffset = ProbeRelocationLUTBuffer[index];
+
         UINT probeState = probeStates[adjProbeIdx];
         if (probeState == PROBE_STATE_INACTIVE)
             continue;
 
-        float3 posOffset = probeOffsets[adjProbeIdx];
+        // float3 posOffset = probeOffsets[adjProbeIdx];
+        float3 posOffset = probeOffset;
         // 获取相邻探针的世界坐标
         float3 adjProbeWorldPos = gridOrigin + adjCoords * gridSpacing + posOffset;
 
@@ -160,7 +169,9 @@ float3 SampleDDGI(float3 positionWS,
                   UINT irradianceTexIndex,
                   float4 distanceTexSize,
                   UINT distanceTexIndex,
-                  StructuredBuffer<float3> ProbeOffsets,
+                  UINT probeOffsetIndexTexIndex,
+                  // StructuredBuffer<float3> ProbeOffsets,
+                  StructuredBuffer<Vector4> ProbeRelocationLUTBuffer,
                   StructuredBuffer<UINT> ProbeStates,
                   SamplerState linearClampSampler)
 {
@@ -183,11 +194,16 @@ float3 SampleDDGI(float3 positionWS,
         // 映射到线性索引
         uint adjProbeIdx = adjCoords.x + adjCoords.y * gridDimensions.x + adjCoords.z * (
                                gridDimensions.x * gridDimensions.y);
+        UINT2 probeOffsetIndexID = UINT2(adjProbeIdx % 64, adjProbeIdx / 64);
+        RWTexture2D<uint> g_ProbeOffsetIndexTex = ResourceDescriptorHeap[probeOffsetIndexTexIndex];
+        UINT index = g_ProbeOffsetIndexTex.Load(UINT3(probeOffsetIndexID, 0));
+        float3 probeOffset = ProbeRelocationLUTBuffer[index];
         UINT probeState = ProbeStates[adjProbeIdx];
         if (probeState == PROBE_STATE_INACTIVE)
             continue;
 
-        float3 posOffset = ProbeOffsets[adjProbeIdx];
+        // float3 posOffset = ProbeOffsets[adjProbeIdx];
+        float3 posOffset = probeOffset;
         // 获取相邻探针的世界坐标
         float3 adjProbeWorldPos = gridOrigin + adjCoords * gridSpacing + posOffset;
 

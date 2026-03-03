@@ -54,7 +54,7 @@ namespace ElysiaRenderer
             m_materialTexIndices.Emissive = material.textures[UINT64(MaterialTextureType::Emissive)]
                 .GetResourceHeapIndex();
 
-            ElysiaHelper::Log::Info("Mesh[%i] bound to Material: \"%s\"", m_meshIndex, material.name.c_str());
+            // ElysiaHelper::Log::Info("Mesh[%i] bound to Material: \"%s\"", m_meshIndex, material.name.c_str());
         }
     }
 

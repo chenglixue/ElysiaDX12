@@ -20,16 +20,18 @@ cbuffer PassConstant : register(b0, perPassSpace)
     UINT g_RayDataBufferIndex;
     UINT g_IrradianceTexIndex;
     UINT g_DistanceTexIndex;
-    float g_ProbeNormalBias;
+    UINT g_ProbeOffsetIndexTexIndex;
 
+    float g_ProbeNormalBias;
     float g_ProbeViewBias;
     float g_DDGIEncodingGamma;
 }
 
 RaytracingAccelerationStructure g_SceneTLAS : register(t0);
 StructuredBuffer<InstanceData> g_InstanceDataBuffer : register(t1);
-StructuredBuffer<Vector3> g_ProbeOffsetBuffer : register(t2);
-StructuredBuffer<UINT> g_ProbeStatesBuffer : register(t3);
+// StructuredBuffer<Vector3> g_ProbeOffsetBuffer : register(t2);
+StructuredBuffer<UINT> g_ProbeStatesBuffer : register(t2);
+StructuredBuffer<Vector4> g_ProbeRelocationLUTBuffer : register(t3);
 
 SamplerState g_WarpPointSampler : register(s0);
 SamplerState g_ClampPointSampler : register(s1);
@@ -70,10 +72,16 @@ void GenerateRayMain()
     if (probeState == PROBE_STATE_INACTIVE && rayIndex >= RELOCATE_RAY_COUNT)
         return;
 
+    UINT2 probeOffsetIndexID = UINT2(probeIndex % 64, probeIndex / 64);
+    RWTexture2D<uint> g_ProbeOffsetIndexTex = ResourceDescriptorHeap[g_ProbeOffsetIndexTexIndex];
+    UINT index = g_ProbeOffsetIndexTex.Load(UINT3(probeOffsetIndexID, 0));
+    float3 probeOffset = g_ProbeRelocationLUTBuffer[index];
+
     Vector3 rayOrigin = GetProbeWorldPosition(probeIndex,
                                               g_GridOrigin,
                                               g_GridSpacing,
-                                              g_GridDimensions) + g_ProbeOffsetBuffer[probeIndex];
+                                              g_GridDimensions + probeOffset);
+    // g_ProbeOffsetBuffer[probeIndex];
     float3 rayDir = DDGIGetProbeRayDir(rayIndex, RAYS_PER_PROBE, g_RandomRotation);
 
     RayDesc rayDesc;
@@ -197,7 +205,8 @@ void RayClosestHit(inout RayData rayData,
             g_IrradianceTexIndex,
             g_DistanceTexSize,
             g_DistanceTexIndex,
-            g_ProbeOffsetBuffer,
+            g_ProbeOffsetIndexTexIndex,
+            g_ProbeRelocationLUTBuffer,
             g_ProbeStatesBuffer,
             g_WarpLinearSampler
             );

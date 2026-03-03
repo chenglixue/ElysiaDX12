@@ -43,8 +43,10 @@ cbuffer PassConstant : register(b0, perPassSpace)
     float3 g_GridSpacing;
     UINT g_IrradianceTexIndex;
     UINT g_DistanceTexIndex;
-    UINT g_ProbeOffsetsIndex;
+    // UINT g_ProbeOffsetsIndex;
     UINT g_ProbeStatesIndex;
+    UINT g_ProbeOffsetIndexTexIndex;
+    UINT g_ProbeRelocationLUTBufferIndex;
     float4 g_IrradianceTexSize;
     float4 g_DistanceTexSize;
     float3 g_AmbientTint;
@@ -243,7 +245,8 @@ FEncodeGBufferData GetEncodeGBufferData(FInputParams inputParams, float3 toLight
                            g_IrradianceTexIndex,
                            g_DistanceTexSize,
                            g_DistanceTexIndex,
-                           g_ProbeOffsetsIndex,
+                           g_ProbeOffsetIndexTexIndex,
+                           g_ProbeRelocationLUTBufferIndex,
                            g_ProbeStatesIndex,
                            WarpLinearSampler
                     ) * g_AmbientTint * g_AmbientIntensity;

@@ -19,7 +19,8 @@ namespace ElysiaRenderer
     PASS(CLEAR_PROBE_OFFSET_PASS,       "public\\GI\\CS_DDGI.hlsl",               true,  ClearProbeOffsetBuffer)\
     PASS(PROBE_BLENDING_PASS,           "public\\GI\\CS_DDGI.hlsl",               true,  ProbeBlending)\
     PASS(UPDATE_PROBE_STATES,           "public\\GI\\CS_DDGI.hlsl",               true,  UpdateProbeStates)\
-    PASS(RESET_PROBE_STATES,           "public\\GI\\CS_DDGI.hlsl",               true,  ResetProbeStates)
+    PASS(RESET_PROBE_STATES,            "public\\GI\\CS_DDGI.hlsl",               true,  ResetProbeStates)\
+    PASS(RESET_PROBE_OFFSET_INDEX,      "public\\GI\\CS_RrobeOffset.hlsl",        true,  ResetProbeOffsetIndex)
 
     class GIPass : public BasePass
     {
@@ -29,6 +30,7 @@ namespace ElysiaRenderer
             static inline size_t GIRTID = PropertyToID(L"GI RT");
             static inline size_t DistanceRTID = PropertyToID(L"Distance RT");
             static inline size_t IrradianceRTID = PropertyToID(L"Irradiance RT");
+            static inline size_t ProbeOffsetIndexRTID = PropertyToID(L"Probe Offset Index RT");
         };
         struct ShaderIDs
         {
@@ -46,6 +48,7 @@ namespace ElysiaRenderer
             static inline size_t g_RandomRotation = PropertyToID(L"g_RandomRotation");
             static inline size_t g_ProbeOffsetsIndex = PropertyToID(L"g_ProbeOffsetsIndex");
             static inline size_t g_ProbeStatesIndex = PropertyToID(L"g_ProbeStatesIndex");
+            static inline size_t g_RelocationLUTIndex = PropertyToID(L"g_RelocationLUTIndex");
             static inline size_t g_StaticAABBIndex = PropertyToID(L"g_StaticAABBIndex");
             static inline size_t g_ProbeNormalBias = PropertyToID(L"g_ProbeNormalBias");
             static inline size_t g_ProbeViewBias = PropertyToID(L"g_ProbeViewBias");
@@ -54,6 +57,10 @@ namespace ElysiaRenderer
             static inline size_t g_ProbeIrradianceThreshold = PropertyToID(L"g_ProbeIrradianceThreshold");
             static inline size_t g_ProbeBrightnessThreshold = PropertyToID(L"g_ProbeBrightnessThreshold");
             static inline size_t g_StaticAABBCount = PropertyToID(L"g_StaticAABBCount");
+            static inline size_t g_ProbeOffsetIndexTexIndex = PropertyToID(L"g_ProbeOffsetIndexTexIndex");
+            static inline size_t g_ProbeRelocationLUTBufferIndex = PropertyToID(L"g_ProbeRelocationLUTBufferIndex");
+            static inline size_t g_DDGI_Probe_Num_Texels = PropertyToID(L"g_DDGI_Probe_Num_Texels");
+            static inline size_t g_IsBlendIrradiance = PropertyToID(L"g_IsBlendIrradiance");
         };
 
         static inline D3D12_VERTEX_BUFFER_VIEW m_vertexView;
@@ -64,8 +71,10 @@ namespace ElysiaRenderer
         static inline BufferHandle m_indexBuffer;
         static inline BufferHandle m_pRayDataBuffer;
         static inline BufferHandle m_pInstanceDataBuffer;
-        static inline BufferHandle m_pProbeOffsetBuffer;
+        // static inline BufferHandle m_pProbeOffsetBuffer;
         static inline BufferHandle m_pProbeStateBuffer;
+        static inline BufferHandle m_pProbeRelocationLUTBuffer;
+        static inline RenderTexture* m_pProbeOffsetIndexRT = nullptr;
         static inline RenderTexture* m_pIrradianceRT = nullptr;
         static inline RenderTexture* m_pDistanceRT = nullptr;
         static inline constexpr UINT NumVertices = 12;
@@ -187,6 +196,7 @@ namespace ElysiaRenderer
         };
 #pragma endregion
 
+        void InitProbeOffsetIndex();
         void ResetProbeStates();
         void UpdateProbeStates();
         void GenerateRay();
@@ -203,4 +213,8 @@ namespace ElysiaRenderer
 
         void ComputeRandomRotation();
     };
+
+    static Vector3 GetFibonacciDir(int i);
+    static float GetDistScale(int i);
+    static std::vector<Vector4> GenerateRelocationLUT(Vector3 probeSpacing);
 }

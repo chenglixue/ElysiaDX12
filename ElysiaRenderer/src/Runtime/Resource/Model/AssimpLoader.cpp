@@ -1440,12 +1440,9 @@ namespace ElysiaModel
                 for (const auto& p : gltfModel.meshes[node.mesh].primitives)
                 {
                     totalV += (uint32_t)gltfModel.accessors[p.attributes.at("POSITION")].count;
-                    ElysiaHelper::Log::Info("Curr Load Total Vertex:%i", totalV);
                     if (p.indices >= 0)
                     {
                         totalI += (uint32_t)gltfModel.accessors[p.indices].count;
-                        ElysiaHelper::Log::Info("Curr Load Total Index:%i", totalI);
-
                     }
                 }
             }

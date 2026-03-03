@@ -28,8 +28,10 @@ cbuffer PassConstant : register(b0, perPassSpace)
     float g_ProbeRadius;
     float4 g_RandomRotation;
     UINT g_RayDataBufferIndex;
-    UINT g_ProbeOffsetsIndex;
+    // UINT g_ProbeOffsetsIndex;
     UINT g_ProbeStatesIndex;
+    UINT g_ProbeOffsetIndexTexIndex;
+    UINT g_ProbeRelocationLUTBufferIndex;
     bool g_IsEnableGILine;
     float g_DebugLineScale;
 }
@@ -93,13 +95,17 @@ PSInput VS(VSInput i, UINT vertexID : SV_VertexID, uint instanceID : SV_Instance
             uint rayInProbeIdx = (vertexID / 2) % RAYS_PER_PROBE;
             uint isEndPoint = vertexID % 2; // 0 为起点，1 为终点
 
-            StructuredBuffer<float3> probeOffsetBuffer = ResourceDescriptorHeap[
-                g_ProbeOffsetsIndex];
+            UINT2 probeOffsetIndexID = UINT2(probeIdx % 64, probeIdx / 64);
+            RWTexture2D<uint> g_ProbeOffsetIndexTex = ResourceDescriptorHeap[g_ProbeOffsetIndexTexIndex];
+            UINT index = g_ProbeOffsetIndexTex.Load(UINT3(probeOffsetIndexID, 0));
+            StructuredBuffer<Vector4> ProbeRelocationLUTBuffer = ResourceDescriptorHeap[
+                g_ProbeRelocationLUTBufferIndex];
+            float3 probeOffset = ProbeRelocationLUTBuffer[index];
             float3 probeWorldPos = GetProbeWorldPosition(probeIdx,
                                                          g_GridOrigin,
                                                          g_GridSpacing,
-                                                         g_GridDimensions) +
-                                   probeOffsetBuffer[probeIdx];
+                                                         g_GridDimensions) + probeOffset;
+            // probeOffsetBuffer[probeIdx];
 
             StructuredBuffer<RayData> rayDataBuffer = ResourceDescriptorHeap[g_RayDataBufferIndex];
             uint rayDataIdx = probeIdx * RAYS_PER_PROBE + rayInProbeIdx;
@@ -134,13 +140,21 @@ PSInput VS(VSInput i, UINT vertexID : SV_VertexID, uint instanceID : SV_Instance
         else
         {
             o.instanceID = instanceID;
-            StructuredBuffer<float3> probeOffsetBuffer = ResourceDescriptorHeap[
-                g_ProbeOffsetsIndex];
+            // StructuredBuffer<float3> probeOffsetBuffer = ResourceDescriptorHeap[
+            //     g_ProbeOffsetsIndex];
+
+            UINT probeIdx = instanceID;
+            UINT2 probeOffsetIndexID = UINT2(probeIdx % 64, probeIdx / 64);
+            RWTexture2D<uint> g_ProbeOffsetIndexTex = ResourceDescriptorHeap[g_ProbeOffsetIndexTexIndex];
+            UINT index = g_ProbeOffsetIndexTex.Load(UINT3(probeOffsetIndexID, 0));
+            StructuredBuffer<Vector4> ProbeRelocationLUTBuffer = ResourceDescriptorHeap[
+                g_ProbeRelocationLUTBufferIndex];
+            float3 probeOffset = ProbeRelocationLUTBuffer[index];
+
             o.probeCenterWS = GetProbeWorldPosition(instanceID,
                                                     g_GridOrigin,
                                                     g_GridSpacing,
-                                                    g_GridDimensions) + probeOffsetBuffer[
-                                  instanceID];
+                                                    g_GridDimensions) + probeOffset;
 
             o.positionWS = i.positionOS * g_ProbeRadius + o.probeCenterWS;
 

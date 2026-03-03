@@ -244,23 +244,40 @@ namespace ElysiaRenderer
             m_pMaterial->SetUInt(GIPass::ShaderIDs::g_IrradianceTexIndex,
                                  RenderTargetManager::GetInstance().GetRenderTexture(
                                                                        GIPass::RenderTextureIDs::IrradianceRTID)
-                                                                   ->GetResourceHeapIndex());
+                                                                   ->GetResourceHeapIndex(),
+                                 passID);
             m_pMaterial->SetUInt(GIPass::ShaderIDs::g_RayDataBufferIndex,
-                                 GIPass::m_pRayDataBuffer->GetResourceHeapIndex());
-            m_pMaterial->SetUInt(GIPass::ShaderIDs::g_ProbeOffsetsIndex,
-                                 GIPass::m_pProbeOffsetBuffer->GetResourceHeapIndex());
+                                 GIPass::m_pRayDataBuffer->GetResourceHeapIndex(),
+                                 passID);
+            // m_pMaterial->SetUInt(GIPass::ShaderIDs::g_ProbeOffsetsIndex,
+            //                      GIPass::m_pProbeOffsetBuffer->GetResourceHeapIndex());
             m_pMaterial->SetUInt(GIPass::ShaderIDs::g_ProbeStatesIndex,
-                                 GIPass::m_pProbeStateBuffer->GetResourceHeapIndex());
+                                 GIPass::m_pProbeStateBuffer->GetResourceHeapIndex(),
+                                 passID);
+            m_pMaterial->SetUInt(GIPass::ShaderIDs::g_ProbeOffsetIndexTexIndex,
+                                 GIPass::m_pProbeOffsetIndexRT->GetResourceHeapIndex(),
+                                 passID);
+            m_pMaterial->SetUInt(GIPass::ShaderIDs::g_ProbeRelocationLUTBufferIndex,
+                                 GIPass::m_pProbeRelocationLUTBuffer->GetResourceHeapIndex(),
+                                 passID);
             m_pMaterial->SetUInt(ShaderIDs::g_IsEnableGILine,
-                                 false);
+                                 false,
+                                 passID);
 
             m_pMaterial->SetFloat3(GIPass::ShaderIDs::g_GridDimensions,
                                    Vector3(GIPass::Grid_Dimensions.x,
                                            GIPass::Grid_Dimensions.y,
-                                           GIPass::Grid_Dimensions.z));
-            m_pMaterial->SetFloat3(GIPass::ShaderIDs::g_GridOrigin, GIPass::m_gridOrigin);
-            m_pMaterial->SetFloat3(GIPass::ShaderIDs::g_GridSpacing, GIPass::m_gridSpacing);
-            m_pMaterial->SetFloat(GIPass::ShaderIDs::g_ProbeRadius, 0.1f);
+                                           GIPass::Grid_Dimensions.z),
+                                   passID);
+            m_pMaterial->SetFloat3(GIPass::ShaderIDs::g_GridOrigin,
+                                   GIPass::m_gridOrigin,
+                                   passID);
+            m_pMaterial->SetFloat3(GIPass::ShaderIDs::g_GridSpacing,
+                                   GIPass::m_gridSpacing,
+                                   passID);
+            m_pMaterial->SetFloat(GIPass::ShaderIDs::g_ProbeRadius,
+                                  0.1f,
+                                  passID);
             SetSpaceResource(passData, PER_PASS_SPACE);
 
             m_pCommand->DrawInstanced(GIPass::NumIndices, GIPass::Probe_Count, 0, 0, 0);
@@ -309,8 +326,8 @@ namespace ElysiaRenderer
             {
                 m_pMaterial->SetUInt(GIPass::ShaderIDs::g_RayDataBufferIndex,
                                      GIPass::m_pRayDataBuffer->GetResourceHeapIndex());
-                m_pMaterial->SetUInt(GIPass::ShaderIDs::g_ProbeOffsetsIndex,
-                                     GIPass::m_pProbeOffsetBuffer->GetResourceHeapIndex());
+                // m_pMaterial->SetUInt(GIPass::ShaderIDs::g_ProbeOffsetsIndex,
+                //                      GIPass::m_pProbeOffsetBuffer->GetResourceHeapIndex());
                 m_pMaterial->SetFloat3(GIPass::ShaderIDs::g_GridDimensions,
                                        Vector3(GIPass::Grid_Dimensions.x,
                                                GIPass::Grid_Dimensions.y,
