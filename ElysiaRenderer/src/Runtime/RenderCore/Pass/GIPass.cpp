@@ -644,8 +644,74 @@ namespace ElysiaRenderer
     }
     void GIPass::ProbeBlend()
     {
-        auto passID = PROBE_BLENDING_PASS;
-        auto passName = "Probe Blend Depth";
+        ProbeBlendIrradiance();
+        ProbeBlendDepth();
+    }
+    void GIPass::ProbeBlendIrradiance()
+    {
+        auto passID = PROBE_IRRADIANCE_BLENDING;
+        auto passName = m_PassData[passID].Name.c_str();
+        auto& passData = m_pMaterial->GetPassData(passID);
+        PIXHelper pix(m_pCommand->GetCommandList(), passName);
+
+        PipelineInfo pipelineStateData{};
+        pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(
+            passID).pPipelineStateObject;
+        m_pCommand->SetPipeline(pipelineStateData);
+        SetSpaceResource(passData, PER_FRAME_SPACE);
+
+        m_pCommand->AddBarrier(m_pIrradianceRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+        {
+            m_pMaterial->SetUInt(ShaderIDs::g_RayDataBufferIndex,
+                                 m_pRayDataBuffer->GetResourceHeapIndex(),
+                                 passID);
+            m_pMaterial->SetUInt(ShaderIDs::g_IrradianceTexIndex,
+                                 m_pIrradianceRT->GetResourceHeapIndex(),
+                                 passID);
+            m_pMaterial->SetUInt(ShaderIDs::g_DistanceTexIndex,
+                                 m_pDistanceRT->GetResourceHeapIndex(),
+                                 passID);
+            m_pMaterial->SetFloat4(ShaderIDs::g_RandomRotation, m_RandomRotation, passID);
+            m_pMaterial->SetFloat(ShaderIDs::g_DDGIBlendWeight,
+                                  UserData::GetInstance().GIParameter.blendWeight,
+                                  passID);
+            m_pMaterial->SetFloat(ShaderIDs::g_ProbeIrradianceThreshold,
+                                  UserData::GetInstance().GIParameter.probeIrradianceThreshold,
+                                  passID);
+            m_pMaterial->SetFloat(ShaderIDs::g_ProbeBrightnessThreshold,
+                                  UserData::GetInstance().GIParameter.probeBrightnessThreshold,
+                                  passID);
+            m_pMaterial->SetFloat(ShaderIDs::g_DDGIEncodingGamma,
+                                  UserData::GetInstance().GIParameter.gamma,
+                                  passID);
+            m_pMaterial->SetFloat4(ShaderIDs::g_GridSpacing,
+                                   Vector4(m_gridSpacing.x,
+                                           m_gridSpacing.y,
+                                           m_gridSpacing.z,
+                                           0.f),
+                                   passID);
+            m_pMaterial->SetFloat4(ShaderIDs::g_GridDimensions,
+                                   Vector4(Grid_Dimensions.x,
+                                           Grid_Dimensions.y,
+                                           Grid_Dimensions.z,
+                                           0.f),
+                                   passID);
+
+            SetSpaceResource(passData, PER_PASS_SPACE);
+
+            m_pCommand->Dispatch(Grid_Dimensions.x,
+                                 Grid_Dimensions.y * Grid_Dimensions.z,
+                                 1);
+            m_pCommand->AddUAVBarrier(m_pIrradianceRT, false);
+        }
+        m_pCommand->AddBarrier(m_pIrradianceRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
+    }
+    void GIPass::ProbeBlendDepth()
+    {
+        auto passID = PROBE_DEPTH_BLENDING;
+        auto passName = m_PassData[passID].Name.c_str();
         auto& passData = m_pMaterial->GetPassData(passID);
         PIXHelper pix(m_pCommand->GetCommandList(), passName);
 
@@ -697,35 +763,13 @@ namespace ElysiaRenderer
             m_pCommand->Dispatch(Grid_Dimensions.x,
                                  Grid_Dimensions.y * Grid_Dimensions.z,
                                  1);
-            m_pCommand->AddUAVBarrier(m_pIrradianceRT, false);
             m_pCommand->AddUAVBarrier(m_pDistanceRT, false);
         }
-
         m_pCommand->AddBarrier(m_pDistanceRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 
         m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
-
-        std::vector<std::wstring> enableKeywords{};
-        enableKeywords.emplace_back(L"BLEND_IRRADIANCE");
-        auto VariantManager = passData.pShader->GetVariantManager();
-        auto currVariantData = &VariantManager->GetOrCompileVariantByNames(enableKeywords);
-        passData.pCurrVariantData = currVariantData;
-        passName = "Probe Blend Irradiance";
-        PIXHelper pix1(m_pCommand->GetCommandList(), passName);
-
-        pipelineStateData = {};
-        pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(
-            passID).pPipelineStateObject;
-        m_pCommand->SetPipeline(pipelineStateData);
-        SetSpaceResource(passData, PER_FRAME_SPACE);
-
-        m_pCommand->AddBarrier(m_pIrradianceRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, false);
-        m_pCommand->AddBarrier(m_pIrradianceRT,
-                               D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,
-                               false);
-
-        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
     }
+
     void GIPass::GenerateTLAS(const std::vector<std::unique_ptr<Entity>>& entityies)
     {
         UINT64 entityCount = entityies.size();

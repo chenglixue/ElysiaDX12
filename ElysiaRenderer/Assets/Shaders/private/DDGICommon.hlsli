@@ -4,8 +4,9 @@
 #include "private/Random.hlsl"
 
 #define PROBE_COUNT 10648
-#define RAYS_PER_PROBE 256
-#define DDGI_PROBE_NUM_TEXELS 6
+#define RAYS_PER_PROBE 128
+#define DDGI_PROBE_IRRADIANCE_NUM_TEXELS 8
+#define DDGI_PROBE_DEPTH_NUM_TEXELS 16
 #define DXR_MAX 10000
 #define DXR_SHADOW_MAX 1e27f
 
@@ -88,7 +89,7 @@ float2 SignNotZero(float2 v)
 // 3D dir normalize to [-1, 1]
 float2 OctEncode(float3 n)
 {
-    n /= (abs(n.x) + abs(n.y) + abs(n.z));
+    n *= rcp((abs(n.x) + abs(n.y) + abs(n.z)));
     float2 result = n.xy;
     if (n.z < 0.0)
     {
@@ -113,7 +114,7 @@ float2 GetProbeUV(uint probeIndex, float2 octUV, float3 gridDims, float probeRes
 
     // 2. 找到探针在 Atlas 中的 2D 索引 
     uint probeX = probeIndex % (uint)gridDims.x;
-    uint probeY = probeIndex / (uint)gridDims.x;
+    uint probeY = probeIndex * rcp((uint)gridDims.x);
 
     // 3. 计算该探针 8x8 块的左上角像素坐标 (带 1 像素边框偏移)
     float2 probeTopLeft = float2(probeX, probeY) * (probeRes + 2.0) + 1.0;
@@ -123,15 +124,15 @@ float2 GetProbeUV(uint probeIndex, float2 octUV, float3 gridDims, float probeRes
 
     // 5. 转换到全局 UV 空间
     float2 atlasSize = float2(gridDims.x, gridDims.y * gridDims.z) * (probeRes + 2.0);
-    return pixelPos / atlasSize;
+    return pixelPos * rcp(atlasSize);
 }
 
 uint3 GetProbeGridCoord(uint probeIndex, Vector3 gridDimensions)
 {
     uint3 gridCoord;
     gridCoord.x = probeIndex % gridDimensions.x;
-    gridCoord.y = (probeIndex / gridDimensions.x) % gridDimensions.y;
-    gridCoord.z = probeIndex / (gridDimensions.x * gridDimensions.y);
+    gridCoord.y = (probeIndex * rcp(gridDimensions.x)) % gridDimensions.y;
+    gridCoord.z = probeIndex * rcp(gridDimensions.x * gridDimensions.y);
     return gridCoord;
 }
 float3 GetProbeWorldPosition(uint probeIndex,
@@ -177,7 +178,7 @@ float3 SphericalFibonacci(uint sampleIndex, uint numSamples)
     float phi = TWO_PI * b;
 
     float theta = phi * sampleIndex;
-    float cosPhi = 1.0 - (float(sampleIndex) + 0.5) / float(numSamples) * 2.0;
+    float cosPhi = 1.0 - (float(sampleIndex) + 0.5) * rcp(float(numSamples)) * 2.0;
     float sinPhi = sqrt(saturate(1.0 - cosPhi * cosPhi));
 
     return float3(cos(theta) * sinPhi, cosPhi, sin(theta) * sinPhi);
@@ -187,19 +188,16 @@ float3 DDGIGetProbeRayDir(uint sampleIndex,
                           uint numSamples,
                           Vector4 randomRotation)
 {
-    bool isFixedRay = false;
-    if (true)
-    {
-        isFixedRay = sampleIndex < RELOCATE_RAY_COUNT;
-        sampleIndex = isFixedRay ? sampleIndex : sampleIndex - RELOCATE_RAY_COUNT;
-        numSamples = isFixedRay
-                         ? RELOCATE_RAY_COUNT
-                         : numSamples - RELOCATE_RAY_COUNT;
-    }
+    bool isFixedRay = sampleIndex < RELOCATE_RAY_COUNT;
+    sampleIndex = isFixedRay ? sampleIndex : sampleIndex - RELOCATE_RAY_COUNT;
+    numSamples = isFixedRay
+                     ? RELOCATE_RAY_COUNT
+                     : numSamples - RELOCATE_RAY_COUNT;
 
     // 4. 判断是否为固定光线 (参考 NVIDIA 策略)
     // 0-31 条光线不参与随机旋转，用于几何定位
     float3 dir = SphericalFibonacci(sampleIndex, numSamples);
+    [branch]
     if (isFixedRay)
     {
         return normalize(dir);
@@ -275,9 +273,9 @@ float DDGIGetVolumeBlendWeight(float3 positionWS,
 
     // Adjust the blend weight for each axis
     float volumeBlendWeight = 1.f;
-    volumeBlendWeight *= (1.f - saturate(delta.x / gridSpacing.x));
-    volumeBlendWeight *= (1.f - saturate(delta.y / gridSpacing.y));
-    volumeBlendWeight *= (1.f - saturate(delta.z / gridSpacing.z));
+    volumeBlendWeight *= (1.f - saturate(delta.x * rcp(gridSpacing.x)));
+    volumeBlendWeight *= (1.f - saturate(delta.y * rcp(gridSpacing.y)));
+    volumeBlendWeight *= (1.f - saturate(delta.z * rcp(gridSpacing.z)));
 
     return volumeBlendWeight;
 }

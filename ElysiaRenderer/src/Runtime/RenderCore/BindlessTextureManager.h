@@ -21,6 +21,7 @@ namespace ElysiaRenderer
         {
             UINT textureIndex;
             UINT resourceHeapIndex = UINT_MAX;
+
             bool IsValid() const
             {
                 return textureIndex != ~0u && resourceHeapIndex != UINT_MAX;
@@ -39,7 +40,8 @@ namespace ElysiaRenderer
         virtual void Destory() override;
 
         TextureHandle CreateTextureFromFile(const std::wstring& filePath, bool isSRGB = false);
-        TextureHandle CreateTexture(const D3D12_RESOURCE_DESC& resourceDesc, TexTypeFlags flag,
+        TextureHandle CreateTexture(const D3D12_RESOURCE_DESC& resourceDesc,
+                                    TexTypeFlags flag,
                                     std::wstring name = L"");
 
         DX12TextureResource* GetTexture(TextureHandle handle) const noexcept;
@@ -59,7 +61,8 @@ namespace ElysiaRenderer
         static inline constexpr UINT m_maxTextureNum = 4096;
 
         std::unique_ptr<DX12TextureResource> LoadTextureFromFile_L(const std::wstring& filePath, bool isSRGB);
-        std::unique_ptr<DX12TextureResource> CreateTexture_L(const D3D12_RESOURCE_DESC& resourceDesc, TexTypeFlags flag,
+        std::unique_ptr<DX12TextureResource> CreateTexture_L(const D3D12_RESOURCE_DESC& resourceDesc,
+                                                             TexTypeFlags flag,
                                                              std::wstring name = L"");
     };
 }

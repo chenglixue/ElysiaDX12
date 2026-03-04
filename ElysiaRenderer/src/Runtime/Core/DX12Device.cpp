@@ -648,30 +648,20 @@ namespace ElysiaCore
             return UINT_MAX;
         }
 
-        // 1. ���ĩβ�Ƿ�����
-        // m_freeReservedDescriptorIndices ������ Stack��back() �����һ����������
-        // ���������Ҫ 3 ������ vector �� [..., 10, 11, 12]���� back �� 12��
-        // ������Ҫ��� vector[size-1], vector[size-2]... �Ƿ��������ݼ���
         bool isContiguous = true;
         size_t size = m_freeReservedDescriptorIndices.size();
         UINT lastVal = m_freeReservedDescriptorIndices.back();
 
-        // ���ټ�飺��� (���һ��ֵ - count + 1) ���� (������ count ��ֵ)
-        // ˵�����������ֵ�������� (ǰ�����б�ֲ�����iota ��ʼ�����������)
         if (m_freeReservedDescriptorIndices[size - count] != (lastVal - count + 1))
         {
             isContiguous = false;
         }
 
-        // 2. �������������������Ƭ���ͷţ�����������
         if (!isContiguous)
         {
-            // ���ܾ��棺Sort ���������������������׶�ͨ���ɽ���
-            // ���Ƶ������/���� Mipmap ������������� offset ��������Է�����
             std::sort(m_freeReservedDescriptorIndices.begin(),
                       m_freeReservedDescriptorIndices.end());
 
-            // �ٴμ��
             lastVal = m_freeReservedDescriptorIndices.back();
             if (m_freeReservedDescriptorIndices[size - count] != (lastVal - count + 1))
             {
@@ -681,11 +671,8 @@ namespace ElysiaCore
             }
         }
 
-        // 3. ִ�з���
-        // ���ǵ� BaseIndexӦ������һ������С���Ǹ���
         UINT baseIndex = lastVal - count + 1;
 
-        // �Ƴ���� count ��Ԫ��
         m_freeReservedDescriptorIndices.resize(size - count);
 
         return baseIndex;

@@ -103,8 +103,8 @@ float3 SampleDDGI(float3 positionWS,
         // 关键：将探针索引映射到图集中
         // 假设图集布局与 Dispatch 一致：X轴为 Grid.x，Y轴为 Grid.y * Grid.z
         uint2 atlasPos = uint2(adjCoords.x, adjCoords.y + adjCoords.z * gridDimensions.y);
-        float2 uv = (octantCoords * 0.5f + 0.5f) * (DDGI_PROBE_NUM_TEXELS - 2.f) + 1.0f;
-        float2 finalUV = (float2(atlasPos * DDGI_PROBE_NUM_TEXELS) + uv) * distanceTexSize.zw;
+        float2 uv = (octantCoords * 0.5f + 0.5f) * (DDGI_PROBE_DEPTH_NUM_TEXELS - 2.f) + 1.0f;
+        float2 finalUV = (float2(atlasPos * DDGI_PROBE_DEPTH_NUM_TEXELS) + uv) * distanceTexSize.zw;
 
         // 采样平均距离 (R) 和距离平方 (G)
         float2 moments = SampleTexture2D_LOD(distanceTexIndex, finalUV, samplerIndex, 0).rg;
@@ -136,8 +136,8 @@ float3 SampleDDGI(float3 positionWS,
         weight *= trilinearWeight;
 
         float2 octantCoordsIrr = OctEncode(normalWS);
-        uv = (octantCoordsIrr * 0.5f + 0.5f) * (DDGI_PROBE_NUM_TEXELS - 2.f) + 1.0f;
-        finalUV = (float2(atlasPos * DDGI_PROBE_NUM_TEXELS) + uv) * irradianceTexSize.zw;
+        uv = (octantCoordsIrr * 0.5f + 0.5f) * (DDGI_PROBE_IRRADIANCE_NUM_TEXELS - 2.f) + 1.0f;
+        finalUV = (float2(atlasPos * DDGI_PROBE_IRRADIANCE_NUM_TEXELS) + uv) * irradianceTexSize.zw;
         float3 probeColor = SampleTexture2D(irradianceTexIndex, finalUV, samplerIndex).rgb;
 
         float3 exponent = gamma * 0.5f;
@@ -229,8 +229,8 @@ float3 SampleDDGI(float3 positionWS,
         // 关键：将探针索引映射到图集中
         // 假设图集布局与 Dispatch 一致：X轴为 Grid.x，Y轴为 Grid.y * Grid.z
         uint2 atlasPos = uint2(adjCoords.x, adjCoords.y + adjCoords.z * gridDimensions.y);
-        float2 uv = (octantCoords * 0.5f + 0.5f) * (DDGI_PROBE_NUM_TEXELS - 2.f) + 1.0f;
-        float2 finalUV = (float2(atlasPos * DDGI_PROBE_NUM_TEXELS) + uv) * distanceTexSize.zw;
+        float2 uv = (octantCoords * 0.5f + 0.5f) * (DDGI_PROBE_DEPTH_NUM_TEXELS - 2.f) + 1.0f;
+        float2 finalUV = (float2(atlasPos * DDGI_PROBE_DEPTH_NUM_TEXELS) + uv) * distanceTexSize.zw;
 
         // 采样平均距离 (R) 和距离平方 (G)
         float2 moments = SampleTexture2D_LOD(distanceTexIndex, finalUV, linearClampSampler, 0).rg;
@@ -262,8 +262,8 @@ float3 SampleDDGI(float3 positionWS,
         weight *= trilinearWeight;
 
         float2 octantCoordsIrr = OctEncode(normalWS);
-        uv = (octantCoordsIrr * 0.5f + 0.5f) * (DDGI_PROBE_NUM_TEXELS - 2.f) + 1.0f;
-        finalUV = (float2(atlasPos * DDGI_PROBE_NUM_TEXELS) + uv) * irradianceTexSize.zw;
+        uv = (octantCoordsIrr * 0.5f + 0.5f) * (DDGI_PROBE_IRRADIANCE_NUM_TEXELS - 2.f) + 1.0f;
+        finalUV = (float2(atlasPos * DDGI_PROBE_IRRADIANCE_NUM_TEXELS) + uv) * irradianceTexSize.zw;
         float3 probeColor = SampleTexture2D_LOD(irradianceTexIndex, finalUV, linearClampSampler, 0).rgb;
         probeColor = pow(probeColor, gamma * 0.5f);
 

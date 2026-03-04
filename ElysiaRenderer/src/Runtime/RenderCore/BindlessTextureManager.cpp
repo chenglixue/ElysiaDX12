@@ -2,6 +2,7 @@
 #include "BindlessTextureManager.h"
 
 #include "BufferManager.h"
+#include "Programs/Log.h"
 #include "Runtime/Core/DX12RenderPassDescriptorHeap.h"
 #include "Runtime/Core/DX12StagingDescriptorHeap.h"
 #include "Runtime/Core/DX12TextureBuffer.h"
@@ -123,19 +124,26 @@ namespace ElysiaRenderer
             WCHAR assetsPath[512];
             ElysiaHelper::GetAssetsPath(assetsPath, _countof(assetsPath));
 
+            std::string loadPath = "";
+
+            loadPath = WstringToString(assetsPath + texturePath);
             if (!std::filesystem::exists(WstringToString(assetsPath + texturePath)))
             {
-                return nullptr;
+                loadPath = WstringToString(texturePath);
+                if (!std::filesystem::exists(loadPath))
+                {
+                    return nullptr;
+                }
             }
 
             imageData = std::make_unique<DirectX::ScratchImage>();
-            auto loadResult = DirectX::LoadFromDDSFile((assetsPath + texturePath).c_str(),
+            auto loadResult = DirectX::LoadFromDDSFile(StringToWstring(loadPath).c_str(),
                                                        DirectX::DDS_FLAGS_NONE,
                                                        nullptr,
                                                        *imageData);
             if (loadResult != S_OK)
             {
-                std::cout << WstringToString(texturePath) + " not found" << std::endl;
+                std::cout << loadPath + " not found" << std::endl;
                 return nullptr;
             }
         }
@@ -326,7 +334,6 @@ namespace ElysiaRenderer
         }
 
         resourceDesc.Format = resourceFormat;
-
         D3D12_CLEAR_VALUE clearValue = {};
         clearValue.Format = desc.Format;
         if (hasDSV)
@@ -362,12 +369,12 @@ namespace ElysiaRenderer
 
         if (hasSRV)
         {
-            newTex->SetSRVCount(desc.MipLevels);
+            newTex->SetSRVCount(1);
             auto srvBaseIndex = m_pDevice->AllocateContiguousReservedDescriptorIndices(
-                desc.MipLevels);
+                1);
             newTex->SetSRVBaseHeapIndex(srvBaseIndex);
 
-            for (UINT i = 0; i < desc.MipLevels; i ++)
+            // for (UINT i = 0; i < desc.MipLevels; i ++)
             {
                 auto SRVHandle = m_pDevice->GetSRVStageHeap()->NewDescriptorHeapHandle();
 
@@ -403,15 +410,15 @@ namespace ElysiaRenderer
                         SRV.TextureCube.ResourceMinLODClamp = 0;
                         srvDescPointer = &SRV;
                     }
-
                     m_pDevice->GetDevice()->CreateShaderResourceView(newTex->GetResource(),
                                                                      srvDescPointer,
                                                                      SRVHandle.GetCPUHandle());
                 }
 
-                newTex->SetSRVDescriptor(SRVHandle, i);
-                UINT currentHeapIndex = srvBaseIndex + i;
-                if (i == 0)
+                newTex->SetSRVDescriptor(SRVHandle, 0);
+                UINT currentHeapIndex = srvBaseIndex + 0;
+
+                //if (i == 0)
                 {
                     newTex->SetResourceHeapIndex(currentHeapIndex);
                 }

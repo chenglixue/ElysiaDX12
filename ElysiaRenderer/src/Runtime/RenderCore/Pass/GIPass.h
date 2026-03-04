@@ -17,7 +17,8 @@ namespace ElysiaRenderer
 #define GI_PASS_LIST \
     PASS(RELOCATE_PROBES_PASS,          "public\\GI\\CS_DDGI.hlsl",               true,  RelocateProbes)\
     PASS(CLEAR_PROBE_OFFSET_PASS,       "public\\GI\\CS_DDGI.hlsl",               true,  ClearProbeOffsetBuffer)\
-    PASS(PROBE_BLENDING_PASS,           "public\\GI\\CS_DDGI.hlsl",               true,  ProbeBlending)\
+    PASS(PROBE_IRRADIANCE_BLENDING,     "public\\GI\\CS_DDGI.hlsl",               true,  ProbeIrradianceBlending)\
+    PASS(PROBE_DEPTH_BLENDING,          "public\\GI\\CS_DDGI.hlsl",               true,  ProbeDepthBlending)\
     PASS(UPDATE_PROBE_STATES,           "public\\GI\\CS_DDGI.hlsl",               true,  UpdateProbeStates)\
     PASS(RESET_PROBE_STATES,            "public\\GI\\CS_DDGI.hlsl",               true,  ResetProbeStates)\
     PASS(RESET_PROBE_OFFSET_INDEX,      "public\\GI\\CS_RrobeOffset.hlsl",        true,  ResetProbeOffsetIndex)
@@ -81,7 +82,7 @@ namespace ElysiaRenderer
         static inline constexpr UINT NumIndices = 60;
         static inline constexpr UINT Probe_Count = 10648;
         static inline const UINT3 Grid_Dimensions = UINT3(22, 22, 22);
-        static inline constexpr UINT Rays_Per_Probe = 256;
+        static inline constexpr UINT Rays_Per_Probe = 128;
         static inline Vector4 m_RandomRotation;
 
     public:
@@ -203,6 +204,8 @@ namespace ElysiaRenderer
         void ClearProbeOffset();
         void RelocateProbes();
         void ProbeBlend();
+        void ProbeBlendIrradiance();
+        void ProbeBlendDepth();
 
         CComPtr<IDxcBlob> CompileRaytracingLibrary(const std::wstring& fileName);
         void CreateRaytracingPipeline(ID3D12RootSignature* pRootSignature,

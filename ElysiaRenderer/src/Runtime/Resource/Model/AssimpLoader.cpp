@@ -378,7 +378,6 @@ namespace ElysiaModel
         return localTransform;
     }
 
-
     template <typename T>
     const T* GetAccessorDataPtr(const tinygltf::Model& model, int accessorIdx, size_t& outStride)
     {
@@ -1057,6 +1056,12 @@ namespace ElysiaModel
                 material.textures[texType] = ElysiaRenderer::TextureManager::Handle::Invalid();
 
                 std::wstring textureFileName = material.textureNames[texType];
+                std::filesystem::path p(textureFileName);
+                p.replace_extension(L".dds"); // 自动替换原有的 .png 或 .jpg
+                // 转回 wstring
+                std::wstring ddsFileName = p.wstring();
+                textureFileName = ddsFileName;
+
                 std::wstring fullPath;
 
                 if (textureFileName.empty())

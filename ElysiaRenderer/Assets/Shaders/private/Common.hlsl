@@ -32,6 +32,20 @@ float4 SampleTexture2D_LOD(UINT textureIndex, float2 uv, SamplerState sampler, f
 
     return SampleTex.SampleLevel(sampler, uv, LOD);
 }
+float4 SampleTexture2D_ForcedLOD(uint texIndex, float2 uv, SamplerState s, float targetLOD)
+{
+    Texture2D<float4> tex = ResourceDescriptorHeap[texIndex];
+
+    uint w, h, levels;
+    tex.GetDimensions(0, w, h, levels);
+
+    float delta = pow(2.0, targetLOD) / (float)w;
+
+    float2 ddx = float2(delta, 0.0);
+    float2 ddy = float2(0.0, delta);
+
+    return tex.SampleGrad(s, uv, ddx, ddy);
+}
 
 float4 SampleTextureCube(UINT textureIndex, float3 dir, UINT samplerStateIndex)
 {

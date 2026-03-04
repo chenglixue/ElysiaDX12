@@ -1,1268 +1,5 @@
 ﻿  Skipping vcpkg. (no packages)
 cl : command line  warning D9014: invalid value '18' for '/wd'; assuming '5999'
-  stdafx.cpp
-cl : command line  warning D9014: invalid value '18' for '/wd'; assuming '5999'
-  IMGUIDrawer.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file 'src/Editor/IMGUIDrawer.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file 'src/Editor/IMGUIDrawer.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file 'src/Editor/IMGUIDrawer.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file 'src/Editor/IMGUIDrawer.cpp')
-  
-  ColorConversion.cpp
-  D3D12MemAlloc.cpp
-  BC.cpp
-  BC4BC5.cpp
-  BC6HBC7.cpp
-  BCDirectCompute.cpp
-  DirectXTexCompress.cpp
-  DirectXTexCompressGPU.cpp
-  DirectXTexConvert.cpp
-  DirectXTexD3D11.cpp
-  DirectXTexDDS.cpp
-  DirectXTexFlipRotate.cpp
-  DirectXTexImage.cpp
-  DirectXTexMipmaps.cpp
-  DirectXTexMisc.cpp
-  DirectXTexNormalMaps.cpp
-  DirectXTexPMAlpha.cpp
-  DirectXTexTGA.cpp
-  DirectXTexUtil.cpp
-  Generating Code...
-  Compiling...
-  DirectXTexWIC.cpp
-  FreesyncHDR.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file 'src/ThirdParty/FreesyncHDR.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file 'src/ThirdParty/FreesyncHDR.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file 'src/ThirdParty/FreesyncHDR.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file 'src/ThirdParty/FreesyncHDR.cpp')
-  
-  imgui.cpp
-  imgui_demo.cpp
-  imgui_draw.cpp
-  imgui_impl_dx12.cpp
-  imgui_impl_win32.cpp
-  imgui_tables.cpp
-  imgui_widgets.cpp
-  Generating Code...
-cl : command line  warning D9014: invalid value '18' for '/wd'; assuming '5999'
-  IMGUIHelper.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Editor/IMGUIHelper.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Editor/IMGUIHelper.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Editor/IMGUIHelper.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Editor/IMGUIHelper.cpp')
-  
-  UI.cpp
-  UserData.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Editor/UserData.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Editor/UserData.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Editor/UserData.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Editor/UserData.cpp')
-  
-  Containers.cpp
-  Helper.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Programs/Helper.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Programs/Helper.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Programs/Helper.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Programs/Helper.cpp')
-  
-  Log.cpp
-  PIXHelper.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Programs/PIXHelper.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Programs/PIXHelper.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Programs/PIXHelper.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Programs/PIXHelper.cpp')
-  
-  RenderHelper.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Programs/RenderHelper.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Programs/RenderHelper.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Programs/RenderHelper.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Programs/RenderHelper.cpp')
-  
-  SBTHelper.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Programs/SBTHelper.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Programs/SBTHelper.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Programs/SBTHelper.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Programs/SBTHelper.cpp')
-  
-  SobolSequenceGenerator.cpp
-  UserMarker.cpp
-  DX12BufferResource.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12BufferResource.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12BufferResource.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12BufferResource.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12BufferResource.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\Core\DX12BufferResource.cpp(47,16): warning C4267: 'return': conversion from 'size_t' to 'UINT', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12BufferResource.cpp')
-  
-  DX12ComputeContext.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12ComputeContext.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12ComputeContext.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12ComputeContext.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12ComputeContext.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\Core\DX12PipelineState.h(53,12): warning C4099: 'ElysiaCore::PipelineStateObject': type name first seen using 'class' now seen using 'struct'
-  (compiling source file '/src/Runtime/Core/DX12ComputeContext.cpp')
-      D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\Core\DX12PipelineState.h(53,12):
-      see declaration of 'ElysiaCore::PipelineStateObject'
-  
-  DX12Context.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12Context.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12Context.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12Context.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12Context.cpp')
-  
-  DX12DescriptorHeap.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12DescriptorHeap.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12DescriptorHeap.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12DescriptorHeap.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12DescriptorHeap.cpp')
-  
-  DX12Device.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12Device.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12Device.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12Device.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12Device.cpp')
-  
-  DX12GPUResource.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12GPUResource.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12GPUResource.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12GPUResource.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12GPUResource.cpp')
-  
-  DX12GraphicsContext.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12GraphicsContext.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12GraphicsContext.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12GraphicsContext.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12GraphicsContext.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\Core\DX12GraphicsContext.cpp(462,69): warning C4244: '=': conversion from 'UINT64' to 'UINT', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12GraphicsContext.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\Core\DX12GraphicsContext.cpp(467,68): warning C4244: '=': conversion from 'UINT64' to 'UINT', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12GraphicsContext.cpp')
-  
-  DX12PipelineState.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12PipelineState.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12PipelineState.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12PipelineState.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12PipelineState.cpp')
-  
-  DX12Queue.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12Queue.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12Queue.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12Queue.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12Queue.cpp')
-  
-  Generating Code...
-  Compiling...
-  DX12QueueManager.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12QueueManager.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12QueueManager.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12QueueManager.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12QueueManager.cpp')
-  
-  DX12RenderPassDescriptorHeap.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12RenderPassDescriptorHeap.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12RenderPassDescriptorHeap.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12RenderPassDescriptorHeap.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12RenderPassDescriptorHeap.cpp')
-  
-  DX12RootSignature.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12RootSignature.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12RootSignature.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12RootSignature.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12RootSignature.cpp')
-  
-  DX12Shader.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12Shader.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12Shader.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12Shader.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12Shader.cpp')
-  
-  DX12StagingDescriptorHeap.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12StagingDescriptorHeap.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12StagingDescriptorHeap.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12StagingDescriptorHeap.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12StagingDescriptorHeap.cpp')
-  
-A:\VS\VC\Tools\MSVC\14.44.35207\include\xutility(462,64): warning C4267: 'initializing': conversion from 'size_t' to '_Ty', possible loss of data
-A:\VS\VC\Tools\MSVC\14.44.35207\include\xutility(462,64): warning C4267:         with
-A:\VS\VC\Tools\MSVC\14.44.35207\include\xutility(462,64): warning C4267:         [
-A:\VS\VC\Tools\MSVC\14.44.35207\include\xutility(462,64): warning C4267:             _Ty=unsigned int
-A:\VS\VC\Tools\MSVC\14.44.35207\include\xutility(462,64): warning C4267:         ]
-  (compiling source file '/src/Runtime/Core/DX12StagingDescriptorHeap.cpp')
-      A:\VS\VC\Tools\MSVC\14.44.35207\include\xutility(462,64):
-      the template instantiation context (the oldest one first) is
-          D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\Core\DX12StagingDescriptorHeap.cpp(59,27):
-          see reference to function template instantiation 'unsigned int &std::vector<std::seed_seq::result_type,std::allocator<std::seed_seq::result_type>>::emplace_back<uint64_t>(uint64_t &&)' being compiled
-              D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\Core\DX12StagingDescriptorHeap.cpp(59,39):
-              see the first reference to 'std::vector<std::seed_seq::result_type,std::allocator<std::seed_seq::result_type>>::emplace_back' in 'ElysiaCore::DX12StagingDescriptorHeap::FreeDescriptorHeapHandle'
-          A:\VS\VC\Tools\MSVC\14.44.35207\include\vector(924,24):
-          see reference to function template instantiation '_Ty &std::vector<_Ty,std::allocator<_Ty>>::_Emplace_one_at_back<unsigned __int64>(unsigned __int64 &&)' being compiled
-          with
-          [
-              _Ty=std::seed_seq::result_type
-          ]
-          A:\VS\VC\Tools\MSVC\14.44.35207\include\vector(845,20):
-          see reference to function template instantiation '_Ty &std::vector<_Ty,std::allocator<_Ty>>::_Emplace_back_with_unused_capacity<unsigned __int64>(unsigned __int64 &&)' being compiled
-          with
-          [
-              _Ty=std::seed_seq::result_type
-          ]
-          A:\VS\VC\Tools\MSVC\14.44.35207\include\vector(860,18):
-          see reference to function template instantiation 'void std::_Construct_in_place<unsigned int,_Ty>(unsigned int &,_Ty &&) noexcept' being compiled
-          with
-          [
-              _Ty=size_t
-          ]
-          A:\VS\VC\Tools\MSVC\14.44.35207\include\xutility(472,14):
-          see reference to function template instantiation '_Ty *std::construct_at<_Ty,unsigned __int64>(_Ty *const ,unsigned __int64 &&) noexcept(<expr>)' being compiled
-          with
-          [
-              _Ty=unsigned int
-          ]
-  
-A:\VS\VC\Tools\MSVC\14.44.35207\include\xutility(476,61): warning C4267: 'initializing': conversion from 'size_t' to 'unsigned int', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12StagingDescriptorHeap.cpp')
-  
-A:\VS\VC\Tools\MSVC\14.44.35207\include\xutility(463,69): warning C4267: 'initializing': conversion from 'size_t' to '_Ty', possible loss of data
-A:\VS\VC\Tools\MSVC\14.44.35207\include\xutility(463,69): warning C4267:         with
-A:\VS\VC\Tools\MSVC\14.44.35207\include\xutility(463,69): warning C4267:         [
-A:\VS\VC\Tools\MSVC\14.44.35207\include\xutility(463,69): warning C4267:             _Ty=unsigned int
-A:\VS\VC\Tools\MSVC\14.44.35207\include\xutility(463,69): warning C4267:         ]
-  (compiling source file '/src/Runtime/Core/DX12StagingDescriptorHeap.cpp')
-      A:\VS\VC\Tools\MSVC\14.44.35207\include\xutility(463,69):
-      the template instantiation context (the oldest one first) is
-          A:\VS\VC\Tools\MSVC\14.44.35207\include\vector(860,18):
-          see reference to function template instantiation 'void std::_Construct_in_place<unsigned int,_Ty>(unsigned int &,_Ty &&) noexcept' being compiled
-          with
-          [
-              _Ty=size_t
-          ]
-          A:\VS\VC\Tools\MSVC\14.44.35207\include\xutility(472,14):
-          see reference to function template instantiation '_Ty *std::construct_at<_Ty,unsigned __int64>(_Ty *const ,unsigned __int64 &&) noexcept' being compiled
-          with
-          [
-              _Ty=unsigned int
-          ]
-  
-  DX12TextureBuffer.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12TextureBuffer.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12TextureBuffer.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12TextureBuffer.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12TextureBuffer.cpp')
-  
-  DX12UploadContext.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12UploadContext.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12UploadContext.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12UploadContext.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/DX12UploadContext.cpp')
-  
-  PipelineResourceSpace.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/PipelineResourceSpace.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/PipelineResourceSpace.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/PipelineResourceSpace.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/PipelineResourceSpace.cpp')
-  
-  PipelineStateUtility.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/PipelineStateUtility.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/PipelineStateUtility.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/PipelineStateUtility.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/PipelineStateUtility.cpp')
-  
-  PSOHelper.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/PSOHelper.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/PSOHelper.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/PSOHelper.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/PSOHelper.cpp')
-  
-  ShaderCompileOptions.cpp
-  ShaderKeywordSet.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/ShaderKeywordSet.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/ShaderKeywordSet.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/ShaderKeywordSet.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/ShaderKeywordSet.cpp')
-  
-  ShaderKeywordSpace.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/ShaderKeywordSpace.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/ShaderKeywordSpace.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/ShaderKeywordSpace.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/ShaderKeywordSpace.cpp')
-  
-  ShaderUtility.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/ShaderUtility.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/ShaderUtility.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/ShaderUtility.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/ShaderUtility.cpp')
-  
-  SwapChain.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/SwapChain.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/SwapChain.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/SwapChain.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/SwapChain.cpp')
-  
-  UploadRingBuffer.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/UploadRingBuffer.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/UploadRingBuffer.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/UploadRingBuffer.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Core/UploadRingBuffer.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\Core\UploadRingBuffer.cpp(42,32): warning C4267: 'argument': conversion from 'size_t' to 'uint32_t', possible loss of data
-  (compiling source file '/src/Runtime/Core/UploadRingBuffer.cpp')
-  
-  Benchmark.cpp
-  GPUTimestamps.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Developer/GPUTimestamps.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Developer/GPUTimestamps.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Developer/GPUTimestamps.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Developer/GPUTimestamps.cpp')
-  
-  Entity.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Engine/ECS/Entity.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Engine/ECS/Entity.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Engine/ECS/Entity.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Engine/ECS/Entity.cpp')
-  
-  Transform.cpp
-  Generating Code...
-  Compiling...
-  ElysiaFrame.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Engine/ElysiaFrame.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Engine/ElysiaFrame.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Engine/ElysiaFrame.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Engine/ElysiaFrame.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\Engine\ElysiaFrame.cpp(124,44): warning C4305: 'argument': truncation from 'double' to 'float'
-  (compiling source file '/src/Runtime/Engine/ElysiaFrame.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\Engine\ElysiaFrame.cpp(124,31): warning C4305: 'argument': truncation from 'double' to 'float'
-  (compiling source file '/src/Runtime/Engine/ElysiaFrame.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\Engine\ElysiaFrame.cpp(390,37): warning C4244: 'argument': conversion from 'float' to 'uint32_t', possible loss of data
-  (compiling source file '/src/Runtime/Engine/ElysiaFrame.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\Engine\ElysiaFrame.cpp(389,37): warning C4244: 'argument': conversion from 'float' to 'uint32_t', possible loss of data
-  (compiling source file '/src/Runtime/Engine/ElysiaFrame.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\Engine\ElysiaFrame.cpp(561,32): warning C4305: 'argument': truncation from 'double' to 'float'
-  (compiling source file '/src/Runtime/Engine/ElysiaFrame.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\Engine\ElysiaFrame.cpp(560,32): warning C4305: 'argument': truncation from 'double' to 'float'
-  (compiling source file '/src/Runtime/Engine/ElysiaFrame.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\Engine\ElysiaFrame.cpp(664,76): warning C4305: 'argument': truncation from 'double' to 'float'
-  (compiling source file '/src/Runtime/Engine/ElysiaFrame.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\Engine\ElysiaFrame.cpp(670,79): warning C4305: 'argument': truncation from 'double' to 'float'
-  (compiling source file '/src/Runtime/Engine/ElysiaFrame.cpp')
-  
-  FrameContext.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Engine/FrameContext.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Engine/FrameContext.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Engine/FrameContext.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Engine/FrameContext.cpp')
-  
-  FrameworkWindows.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Engine/FrameworkWindows.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Engine/FrameworkWindows.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Engine/FrameworkWindows.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Engine/FrameworkWindows.cpp')
-  
-  BindlessTextureManager.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/BindlessTextureManager.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/BindlessTextureManager.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/BindlessTextureManager.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/BindlessTextureManager.cpp')
-  
-  BufferManager.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/BufferManager.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/BufferManager.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/BufferManager.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/BufferManager.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\BufferManager.cpp(150,49): warning C4267: 'argument': conversion from 'size_t' to 'UINT', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/BufferManager.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\BufferManager.cpp(197,70): warning C4267: '=': conversion from 'size_t' to 'UINT', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/BufferManager.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\BufferManager.cpp(203,72): warning C4267: '=': conversion from 'size_t' to 'UINT', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/BufferManager.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\BufferManager.cpp(204,70): warning C4267: '=': conversion from 'size_t' to 'UINT', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/BufferManager.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\BufferManager.cpp(235,70): warning C4267: '=': conversion from 'size_t' to 'UINT', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/BufferManager.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\BufferManager.cpp(241,72): warning C4267: '=': conversion from 'size_t' to 'UINT', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/BufferManager.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\BufferManager.cpp(242,70): warning C4267: '=': conversion from 'size_t' to 'UINT', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/BufferManager.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\BufferManager.cpp(368,41): warning C4267: 'argument': conversion from 'size_t' to 'uint32_t', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/BufferManager.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\BufferManager.cpp(415,44): warning C4267: 'argument': conversion from 'size_t' to 'uint32_t', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/BufferManager.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\BufferManager.cpp(435,41): warning C4267: 'argument': conversion from 'size_t' to 'uint32_t', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/BufferManager.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\BufferManager.cpp(482,44): warning C4267: 'argument': conversion from 'size_t' to 'uint32_t', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/BufferManager.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\BufferManager.cpp(559,43): warning C4267: 'argument': conversion from 'size_t' to 'uint32_t', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/BufferManager.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\BufferManager.cpp(604,44): warning C4267: 'argument': conversion from 'size_t' to 'uint32_t', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/BufferManager.cpp')
-  
-  CameraManager.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/CameraManager.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/CameraManager.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/CameraManager.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/CameraManager.cpp')
-  
-  DX12Camera.cpp
-  DX12Light.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/DX12Light.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/DX12Light.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/DX12Light.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/DX12Light.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\DX12Light.cpp(39,21): warning C4305: 'argument': truncation from 'double' to 'float'
-  (compiling source file '/src/Runtime/RenderCore/DX12Light.cpp')
-  
-  DX12Shadow.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/DX12Shadow.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/DX12Shadow.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/DX12Shadow.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/DX12Shadow.cpp')
-  
-  GIUtility.cpp
-  LightManager.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/LightManager.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/LightManager.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/LightManager.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/LightManager.cpp')
-  
-  Material.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Material.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Material.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Material.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Material.cpp')
-  
-  MaterialParams.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/MaterialParams.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/MaterialParams.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/MaterialParams.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/MaterialParams.cpp')
-  
-  MeshRenderer.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/MeshRenderer.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/MeshRenderer.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/MeshRenderer.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/MeshRenderer.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\MeshRenderer.cpp(18,23): warning C4267: '=': conversion from 'size_t' to 'UINT', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/MeshRenderer.cpp')
-  
-  AOPass.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(234,91): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(233,91): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(232,91): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(231,91): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(242,91): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(241,91): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(240,91): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(239,91): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(257,45): warning C4244: 'argument': conversion from 'UINT64' to 'uint32_t', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(258,45): warning C4244: 'argument': conversion from 'UINT64' to 'uint32_t', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(305,95): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(304,95): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(303,95): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(302,95): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(316,57): warning C4244: 'argument': conversion from 'float' to 'uint32_t', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(317,57): warning C4244: 'argument': conversion from 'float' to 'uint32_t', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(392,70): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(392,70): warning C4244:         with
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(392,70): warning C4244:         [
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(392,70): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(392,70): warning C4244:         ]
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(391,70): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(391,70): warning C4244:         with
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(391,70): warning C4244:         [
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(391,70): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(391,70): warning C4244:         ]
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(390,70): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(390,70): warning C4244:         with
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(390,70): warning C4244:         [
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(390,70): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(390,70): warning C4244:         ]
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(389,70): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(389,70): warning C4244:         with
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(389,70): warning C4244:         [
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(389,70): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(389,70): warning C4244:         ]
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(398,73): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(398,73): warning C4244:         with
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(398,73): warning C4244:         [
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(398,73): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(398,73): warning C4244:         ]
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(397,73): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(397,73): warning C4244:         with
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(397,73): warning C4244:         [
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(397,73): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(397,73): warning C4244:         ]
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(396,73): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(396,73): warning C4244:         with
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(396,73): warning C4244:         [
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(396,73): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(396,73): warning C4244:         ]
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(395,73): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(395,73): warning C4244:         with
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(395,73): warning C4244:         [
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(395,73): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(395,73): warning C4244:         ]
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(447,74): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(447,74): warning C4244:         with
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(447,74): warning C4244:         [
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(447,74): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(447,74): warning C4244:         ]
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(446,74): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(446,74): warning C4244:         with
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(446,74): warning C4244:         [
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(446,74): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(446,74): warning C4244:         ]
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(445,74): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(445,74): warning C4244:         with
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(445,74): warning C4244:         [
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(445,74): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(445,74): warning C4244:         ]
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(444,74): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(444,74): warning C4244:         with
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(444,74): warning C4244:         [
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(444,74): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(444,74): warning C4244:         ]
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(608,70): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(608,70): warning C4244:         with
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(608,70): warning C4244:         [
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(608,70): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(608,70): warning C4244:         ]
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(607,70): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(607,70): warning C4244:         with
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(607,70): warning C4244:         [
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(607,70): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(607,70): warning C4244:         ]
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(606,70): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(606,70): warning C4244:         with
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(606,70): warning C4244:         [
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(606,70): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(606,70): warning C4244:         ]
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(605,70): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(605,70): warning C4244:         with
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(605,70): warning C4244:         [
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(605,70): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(605,70): warning C4244:         ]
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(614,73): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(614,73): warning C4244:         with
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(614,73): warning C4244:         [
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(614,73): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(614,73): warning C4244:         ]
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(613,73): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(613,73): warning C4244:         with
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(613,73): warning C4244:         [
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(613,73): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(613,73): warning C4244:         ]
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(612,73): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(612,73): warning C4244:         with
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(612,73): warning C4244:         [
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(612,73): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(612,73): warning C4244:         ]
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(611,73): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(611,73): warning C4244:         with
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(611,73): warning C4244:         [
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(611,73): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(611,73): warning C4244:         ]
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(663,28): warning C4018: '<=': signed/unsigned mismatch
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(690,57): warning C4244: 'argument': conversion from 'float' to 'uint32_t', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(691,57): warning C4244: 'argument': conversion from 'float' to 'uint32_t', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(721,70): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(721,70): warning C4244:         with
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(721,70): warning C4244:         [
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(721,70): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(721,70): warning C4244:         ]
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(720,70): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(720,70): warning C4244:         with
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(720,70): warning C4244:         [
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(720,70): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(720,70): warning C4244:         ]
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(719,70): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(719,70): warning C4244:         with
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(719,70): warning C4244:         [
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(719,70): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(719,70): warning C4244:         ]
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(718,70): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(718,70): warning C4244:         with
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(718,70): warning C4244:         [
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(718,70): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(718,70): warning C4244:         ]
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(727,73): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(727,73): warning C4244:         with
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(727,73): warning C4244:         [
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(727,73): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(727,73): warning C4244:         ]
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(726,73): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(726,73): warning C4244:         with
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(726,73): warning C4244:         [
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(726,73): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(726,73): warning C4244:         ]
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(725,73): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(725,73): warning C4244:         with
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(725,73): warning C4244:         [
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(725,73): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(725,73): warning C4244:         ]
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(724,73): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(724,73): warning C4244:         with
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(724,73): warning C4244:         [
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(724,73): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(724,73): warning C4244:         ]
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(744,63): warning C4244: 'argument': conversion from 'UINT64' to 'uint32_t', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(745,64): warning C4244: 'argument': conversion from 'UINT64' to 'uint32_t', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(862,68): warning C4244: 'argument': conversion from 'UINT64' to 'uint32_t', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(863,69): warning C4244: 'argument': conversion from 'UINT64' to 'uint32_t', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(886,30): warning C4018: '<': signed/unsigned mismatch
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-  BasePass.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/BasePass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/BasePass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/BasePass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/BasePass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\BasePass.cpp(222,66): warning C4244: 'argument': conversion from 'UINT64' to 'uint32_t', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/BasePass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\BasePass.cpp(223,67): warning C4244: 'argument': conversion from 'UINT64' to 'uint32_t', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/BasePass.cpp')
-  
-  BloomPass.cpp
-  DebugPass.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/DebugPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/DebugPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/DebugPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/DebugPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\DebugPass.cpp(260,67): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/DebugPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\DebugPass.cpp(259,67): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/DebugPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\DebugPass.cpp(258,67): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/DebugPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\DebugPass.cpp(317,71): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/DebugPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\DebugPass.cpp(316,71): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/DebugPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\DebugPass.cpp(315,71): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/DebugPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\DebugPass.cpp(469,66): warning C4267: 'argument': conversion from 'size_t' to 'UINT', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/DebugPass.cpp')
-  
-  FinalBlitPass.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/FinalBlitPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/FinalBlitPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/FinalBlitPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/FinalBlitPass.cpp')
-  
-  GBufferPass.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/GBufferPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/GBufferPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/GBufferPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/GBufferPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GBufferPass.cpp(139,57): warning C4927: illegal conversion; more than one user-defined conversion has been implicitly applied
-  (compiling source file '/src/Runtime/RenderCore/Pass/GBufferPass.cpp')
-      D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GBufferPass.cpp(139,57):
-      while calling the constructor 'DirectX::SimpleMath::Vector4::Vector4(DirectX::FXMVECTOR) noexcept'
-      D:\DX12\ElysiaDX12\ElysiaRenderer\src\ThirdParty\SimpleMath\SimpleMath.h(358,13):
-      see declaration of 'DirectX::SimpleMath::Vector4::Vector4'
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GBufferPass.cpp(393,63): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/GBufferPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GBufferPass.cpp(392,63): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/GBufferPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GBufferPass.cpp(391,63): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/GBufferPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GBufferPass.cpp(470,78): warning C4267: 'argument': conversion from 'size_t' to 'UINT', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/GBufferPass.cpp')
-  
-  Generating Code...
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Material.cpp(100,1): warning C4715: 'ElysiaRenderer::Material::FindPassIndex': not all control paths return a value
-  Compiling...
-  GIPass.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(149,31): warning C4244: '=': conversion from 'UINT64' to 'UINT', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(387,59): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(386,59): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(385,59): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(390,80): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(439,60): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(438,60): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(437,60): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(625,59): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(624,59): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(623,59): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(674,82): warning C4267: '+=': conversion from 'size_t' to 'uint32_t', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
-  
-  OpaquePass.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/OpaquePass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/OpaquePass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/OpaquePass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/OpaquePass.cpp')
-  
-  PreDrawPass.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/PreDrawPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/PreDrawPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/PreDrawPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/PreDrawPass.cpp')
-  
-  ShadowPass.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/ShadowPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/ShadowPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/ShadowPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/ShadowPass.cpp')
-  
   SkyboxPass.cpp
 D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
   (compiling source file '/src/Runtime/RenderCore/Pass/SkyboxPass.cpp')
@@ -1276,231 +13,6 @@ D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: '
 D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
   (compiling source file '/src/Runtime/RenderCore/Pass/SkyboxPass.cpp')
   
-  TonemapPass.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/TonemapPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/TonemapPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/TonemapPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/TonemapPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\TonemapPass.cpp(330,71): warning C4244: 'argument': conversion from 'UINT64' to 'uint32_t', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/TonemapPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\TonemapPass.cpp(331,72): warning C4244: 'argument': conversion from 'UINT64' to 'uint32_t', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/TonemapPass.cpp')
-  
-  UIPass.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/UIPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/UIPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/UIPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/UIPass.cpp')
-  
-  PSOManager.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/PSOManager.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/PSOManager.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/PSOManager.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/PSOManager.cpp')
-  
-  Renderer.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Renderer.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Renderer.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Renderer.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Renderer.cpp')
-  
-  RenderItem.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/RenderItem.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/RenderItem.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/RenderItem.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/RenderItem.cpp')
-  
-  RenderResource.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/RenderResource.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/RenderResource.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/RenderResource.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/RenderResource.cpp')
-  
-  RenderTargetManager.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/RenderTargetManager.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/RenderTargetManager.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/RenderTargetManager.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/RenderTargetManager.cpp')
-  
-  RenderTexture.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/RenderTexture.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/RenderTexture.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/RenderTexture.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/RenderTexture.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\RenderTexture.cpp(59,44): warning C4244: '=': conversion from 'UINT64' to 'UINT16', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/RenderTexture.cpp')
-  
-  SceneManager.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/SceneManager.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/SceneManager.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/SceneManager.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/SceneManager.cpp')
-  
-  ShaderVariantManager.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/ShaderVariantManager.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/ShaderVariantManager.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/ShaderVariantManager.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/ShaderVariantManager.cpp')
-  
-  TextureManager.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/TextureManager.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/TextureManager.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/TextureManager.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/TextureManager.cpp')
-  
-  File.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Resource/File.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Resource/File.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Resource/File.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Resource/File.cpp')
-  
-  AssimpLoader.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Resource/Model/AssimpLoader.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Resource/Model/AssimpLoader.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Resource/Model/AssimpLoader.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Resource/Model/AssimpLoader.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\Resource\Model\AssimpLoader.cpp(1159,38): warning C4267: 'initializing': conversion from 'size_t' to 'uint32_t', possible loss of data
-  (compiling source file '/src/Runtime/Resource/Model/AssimpLoader.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\Resource\Model\AssimpLoader.cpp(1263,37): warning C4267: 'initializing': conversion from 'size_t' to 'uint32_t', possible loss of data
-  (compiling source file '/src/Runtime/Resource/Model/AssimpLoader.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\Resource\Model\AssimpLoader.cpp(1289,70): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-  (compiling source file '/src/Runtime/Resource/Model/AssimpLoader.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\Resource\Model\AssimpLoader.cpp(1385,60): warning C4244: '=': conversion from 'const double' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Resource/Model/AssimpLoader.cpp')
-  
-  ModelImporter.cpp
-  ModelManager.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Resource/Model/ModelManager.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Resource/Model/ModelManager.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Resource/Model/ModelManager.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/Resource/Model/ModelManager.cpp')
-  
-  Generating Code...
-  Compiling...
-  SharedTypes.cpp
-  d3dx12_resource_helpers.cpp
-  DxgiFormatHelper.cpp
-  allocator_eastl.cpp
-  atomic.cpp
-  fixed_pool.cpp
-  hashtable.cpp
-  intrusive_list.cpp
-  numeric_limits.cpp
-  red_black_tree.cpp
-  string.cpp
-  thread_support.cpp
-  Misc.cpp
-  stb_image.cpp
-  xxhash.cpp
-  Generating Code...
-DirectXTK12.lib(SimpleMath.obj) : warning LNK4099: PDB 'DirectXTK12.pdb' was not found with 'DirectXTK12.lib(SimpleMath.obj)' or at 'D:\DX12\ElysiaDX12\x64\Debug\DirectXTK12.pdb'; linking object as if no debug info
-DirectXTK12.lib(pch.obj) : warning LNK4099: PDB 'DirectXTK12.pdb' was not found with 'DirectXTK12.lib(pch.obj)' or at 'D:\DX12\ElysiaDX12\x64\Debug\DirectXTK12.pdb'; linking object as if no debug info
-     Creating library D:\DX12\ElysiaDX12\x64\Debug\ElysiaRenderer.lib and object D:\DX12\ElysiaDX12\x64\Debug\ElysiaRenderer.exp
   ElysiaRenderer.vcxproj -> D:\DX12\ElysiaDX12\x64\Debug\ElysiaRenderer.exe
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\ABeautifulGame\ABeautifulGame.bin
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\ABeautifulGame\ABeautifulGame.gltf
@@ -1539,76 +51,146 @@ DirectXTK12.lib(pch.obj) : warning LNK4099: PDB 'DirectXTK12.pdb' was not found 
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\ABeautifulGame\Queen_white_ORM.jpg
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\CornellBox\cornell_box.bin
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\CornellBox\cornell_box.gltf
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\10381718147657362067.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\10381718147657362067.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\10388182081421875623.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\10388182081421875623.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\11474523244911310074.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\11474523244911310074.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\11490520546946913238.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\11490520546946913238.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\11872827283454512094.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\11872827283454512094.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\11968150294050148237.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\11968150294050148237.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\1219024358953944284.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\1219024358953944284.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\12501374198249454378.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\12501374198249454378.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\13196865903111448057.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\13196865903111448057.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\13824894030729245199.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\13824894030729245199.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\13982482287905699490.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\13982482287905699490.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\14118779221266351425.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\14118779221266351425.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\14170708867020035030.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\14170708867020035030.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\14267839433702832875.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\14267839433702832875.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\14650633544276105767.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\14650633544276105767.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\15295713303328085182.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\15295713303328085182.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\15722799267630235092.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\15722799267630235092.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\16275776544635328252.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\16275776544635328252.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\16299174074766089871.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\16299174074766089871.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\16885566240357350108.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\16885566240357350108.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\17556969131407844942.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\17556969131407844942.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\17876391417123941155.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\17876391417123941155.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\2051777328469649772.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\2051777328469649772.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\2185409758123873465.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\2185409758123873465.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\2299742237651021498.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\2299742237651021498.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\2374361008830720677.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\2374361008830720677.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\2411100444841994089.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\2411100444841994089.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\2775690330959970771.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\2775690330959970771.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\2969916736137545357.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\2969916736137545357.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\332936164838540657.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\332936164838540657.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\3371964815757888145.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\3371964815757888145.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\3455394979645218238.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\3455394979645218238.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\3628158980083700836.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\3628158980083700836.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\3827035219084910048.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\3827035219084910048.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\4477655471536070370.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\4477655471536070370.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\4601176305987539675.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\4601176305987539675.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\466164707995436622.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\466164707995436622.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\4675343432951571524.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\4675343432951571524.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\4871783166746854860.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\4871783166746854860.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\4910669866631290573.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\4910669866631290573.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\4975155472559461469.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\4975155472559461469.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\5061699253647017043.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\5061699253647017043.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\5792855332885324923.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\5792855332885324923.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\5823059166183034438.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\5823059166183034438.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\6047387724914829168.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\6047387724914829168.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\6151467286084645207.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\6151467286084645207.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\6593109234861095314.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\6593109234861095314.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\6667038893015345571.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\6667038893015345571.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\6772804448157695701.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\6772804448157695701.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\7056944414013900257.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\7056944414013900257.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\715093869573992647.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\715093869573992647.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\7268504077753552595.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\7268504077753552595.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\7441062115984513793.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\7441062115984513793.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\755318871556304029.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\755318871556304029.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\759203620573749278.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\759203620573749278.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\7645212358685992005.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\7645212358685992005.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\7815564343179553343.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\7815564343179553343.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\8006627369776289000.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\8006627369776289000.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\8051790464816141987.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\8051790464816141987.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\8114461559286000061.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\8114461559286000061.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\8481240838833932244.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\8481240838833932244.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\8503262930880235456.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\8503262930880235456.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\8747919177698443163.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\8747919177698443163.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\8750083169368950601.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\8750083169368950601.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\8773302468495022225.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\8773302468495022225.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\8783994986360286082.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\8783994986360286082.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\9288698199695299068.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\9288698199695299068.jpg
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\9916269861720640319.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\9916269861720640319.jpg
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\Sponza.bin
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\Sponza.gltf
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\texconv.exe
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\white.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\white.png
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Mesh\LOW_WEPON.fbx
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Mesh\plane.fbx
@@ -1653,6 +235,7 @@ DirectXTK12.lib(pch.obj) : warning LNK4099: PDB 'DirectXTK12.pdb' was not found 
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\public\SSAO.hlsl
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\public\TonemapPass.hlsl
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\public\GI\CS_DDGI.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\public\GI\CS_RrobeOffset.hlsl
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\public\GI\DDGI_Library.hlsl
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\public\GI\Irradiance.hlsl
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\public\PostProcess\CS_AO.hlsl
@@ -1755,4 +338,4 @@ DirectXTK12.lib(pch.obj) : warning LNK4099: PDB 'DirectXTK12.pdb' was not found 
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Tex\RandomNormalTexture.png
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Tex\texconv.exe
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Tex\White.png
-  复制了 253 个文件
+  复制了 324 个文件

@@ -1,7 +1,6 @@
 ﻿#include "private\ShadingCommon.hlsl"
 #include "private/DDGICommon.hlsli"
 
-#pragma shader_feature BLEND_IRRADIANCE
 #define GROUP_SIZE 8
 
 cbuffer PassConstant : register(b0, perPassSpace)
@@ -108,6 +107,7 @@ void ResetProbeStates(uint3 id : SV_DispatchThreadID)
 void UpdateProbeStates(uint3 id : SV_DispatchThreadID)
 {
     uint probeIndex = id.x;
+    [branch]
     if (probeIndex >= PROBE_COUNT)
         return;
 
@@ -127,7 +127,7 @@ void UpdateProbeStates(uint3 id : SV_DispatchThreadID)
         // Increment the count if a backface is hit
         backfaceCount += (hitDistances[rayIndex] < 0.f);
     }
-    if ((float)backfaceCount / (float)RELOCATE_RAY_COUNT > PROBE_BACKFACE_THRESHOLD)
+    if ((float)backfaceCount * rcp((float)RELOCATE_RAY_COUNT) > PROBE_BACKFACE_THRESHOLD)
     {
         probeStateBuffer[probeIndex] = PROBE_STATE_INACTIVE;
         return;
@@ -140,6 +140,7 @@ void UpdateProbeStates(uint3 id : SV_DispatchThreadID)
     for (UINT i = 0; i < g_StaticAABBCount; ++i)
     {
         AABBData AABB = Elysia_DDGI_LoadeStaticAABB(i);
+        [branch]
         if (IsPointInAABB(probePosWS, AABB, probeSpacingMax))
         {
             isNearStatic = true;
@@ -147,6 +148,7 @@ void UpdateProbeStates(uint3 id : SV_DispatchThreadID)
         }
     }
 
+    [branch]
     if (isNearStatic)
     {
         Elysia_DDGI_StoreProbeState(probeIndex, PROBE_STATE_ACTIVE);
@@ -186,13 +188,17 @@ void ClearProbeOffsetBuffer(uint3 id : SV_DispatchThreadID)
 void RelocateProbes(UINT3 id : SV_DispatchThreadID)
 {
     UINT probeIndex = id.x;
+    [branch]
     if (probeIndex >= PROBE_COUNT || probeIndex < 0)
         return;
-    UINT3 gridIdx = GetProbeGridCoord(probeIndex, g_GridDimensions);
+    [branch]
+    if (probeIndex % 4 != frameIndex % 4)
+        return;
+    // UINT3 gridIdx = GetProbeGridCoord(probeIndex, g_GridDimensions);
 
     // RWStructuredBuffer<float3> probeOffsetBuffer = ResourceDescriptorHeap[g_ProbeOffsetsIndex];
     StructuredBuffer<RayData> rayDataBuffer = ResourceDescriptorHeap[g_RayDataBufferIndex];
-    RWStructuredBuffer<UINT> probeStateBuffer = ResourceDescriptorHeap[g_ProbeStatesIndex];
+    // RWStructuredBuffer<UINT> probeStateBuffer = ResourceDescriptorHeap[g_ProbeStatesIndex];
     StructuredBuffer<float4> relocationLUT = ResourceDescriptorHeap[g_RelocationLUTIndex];
 
     int closestBackfaceIndex = -1;
@@ -235,13 +241,13 @@ void RelocateProbes(UINT3 id : SV_DispatchThreadID)
         }
     }
 
-    uint2 texCoord = uint2(probeIndex % 64, probeIndex / 64);
+    uint2 texCoord = uint2(probeIndex % 64, probeIndex * rcp(64));
     UINT currIndex = DDGI_Load_Probe_Offset_Index(texCoord);
     float3 currentOffset = relocationLUT[currIndex].xyz;
     float3 fullOffset = currentOffset;
 
     // If there’s a close backface AND you see more than 25% backfaces, assume you’re inside something.
-    if (closestBackfaceIndex != -1 && (backFaceCount / RELOCATE_RAY_COUNT) > PROBE_BACKFACE_THRESHOLD)
+    if (closestBackfaceIndex != -1 && (backFaceCount * rcp(RELOCATE_RAY_COUNT)) > PROBE_BACKFACE_THRESHOLD)
     {
         // direction to closest backface scaled by distance
         float3 backfaceDir = DDGIGetProbeRayDir(closestBackfaceIndex, RAYS_PER_PROBE, g_RandomRotation);
@@ -269,7 +275,7 @@ void RelocateProbes(UINT3 id : SV_DispatchThreadID)
     // 将offset匹配到最近的 LUT 索引
     UINT bestIndex = 0;
     float minError = 1e27f;
-    float3 normalizedOffset = fullOffset / max(g_GridSpacing * PROBE_MAX_OFFSET_FRACTION, 1e-6);
+    float3 normalizedOffset = fullOffset * rcp(max(g_GridSpacing * PROBE_MAX_OFFSET_FRACTION, 1e-6));
     if (dot(normalizedOffset, normalizedOffset) < 0.2025f)
     {
         // 在 128 个预设点中找一个离理想位置最近的
@@ -295,16 +301,17 @@ void RelocateProbes(UINT3 id : SV_DispatchThreadID)
     // }
 }
 
-[numthreads(g_DDGI_Probe_Num_Texels, g_DDGI_Probe_Num_Texels, 1)]
-void ProbeBlending(uint3 id : SV_DispatchThreadID,
-                   uint3 GroupThreadID : SV_GroupThreadID,
-                   uint3 GroupID : SV_GroupID)
+[numthreads(DDGI_PROBE_IRRADIANCE_NUM_TEXELS, DDGI_PROBE_IRRADIANCE_NUM_TEXELS, 1)]
+void ProbeIrradianceBlending(uint3 id : SV_DispatchThreadID,
+                             uint3 GroupThreadID : SV_GroupThreadID,
+                             uint3 GroupID : SV_GroupID)
 {
-    const UINT N = g_DDGI_Probe_Num_Texels;
+    const UINT N = DDGI_PROBE_IRRADIANCE_NUM_TEXELS;
     const UINT numThreads = N * N;
     const uint localIdx = GroupThreadID.y * N + GroupThreadID.x;
     const UINT probeIndex = GroupID.x + (GroupID.y * g_GridDimensions.x);
 
+    [branch]
     if (probeIndex >= PROBE_COUNT || probeIndex < 0)
         return;
     const UINT currProbeState = Elysia_DDGI_LoadeProbeState(probeIndex);
@@ -313,76 +320,53 @@ void ProbeBlending(uint3 id : SV_DispatchThreadID,
     {
         RayData rayData = Elysia_DDGI_LoadRayData(probeIndex * RAYS_PER_PROBE + i);
         g_RayRadiance[i] = rayData.Radiance;
-        g_RayDistance[i] = rayData.Distance;
         g_RayDirection[i] = DDGIGetProbeRayDir(i, RAYS_PER_PROBE, g_RandomRotation);
     }
 
     GroupMemoryBarrierWithGroupSync();
 
-    // uint3 gridIdx = GetProbeGridCoord(probeIndex, g_GridDimensions);
-    // 将 [1, 6] 映射到八面体坐标的 [-1, 1]
     bool isBorder = (GroupThreadID.x == 0 || GroupThreadID.x == (N - 1) ||
                      GroupThreadID.y == 0 || GroupThreadID.y == (N - 1));
+    [branch]
     if (!isBorder)
     {
         if (currProbeState == PROBE_STATE_INACTIVE)
             return;
-        float2 uv = (float2(GroupThreadID.xy) - 1.f + 0.5f) / (float)(DDGI_PROBE_NUM_TEXELS - 2);
+        float2 uv = (float2(GroupThreadID.xy) - 1.f + 0.5f) * rcp((float)(N - 2));
         float2 octUV = uv * 2.0f - 1.0f;
         float3 probeDirection = OctDecode(octUV);
 
-#if BLEND_IRRADIANCE
         float4 accumulatedIrradiance = 0.0f;
-#endif
-        float2 accumulatedDist = 0.0f;
-        float distSumWeight = 0.f;
-        float probeMaxRayDistance = length(g_GridSpacing) * 1.5f;
         for (int rayIndex = RELOCATE_RAY_COUNT; rayIndex < RAYS_PER_PROBE; rayIndex ++)
         {
-            // float3 rayDir = DDGIGetProbeRayDir(rayIndex, RAYS_PER_PROBE, g_RandomRotation);
-            // RayData rayData = Elysia_DDGI_LoadRayData(probeIndex * RAYS_PER_PROBE + rayIndex);
-
             float3 rayDir = g_RayDirection[rayIndex];
             float rayDistance = g_RayDistance[rayIndex];
-
-            // 方向越接近，权重越高
-            float weight = max(0.f, dot(probeDirection, rayDir));
-            float distWeight = pow(weight, 50.0f);
-            float absDist = min(abs(rayDistance), probeMaxRayDistance);
-            accumulatedDist += float2(absDist * distWeight, (absDist * absDist) * distWeight);
-            distSumWeight += distWeight;
 
             // Backface hit, don't blend
             if (rayDistance < 0.0f)
             {
                 continue;
             }
-#if BLEND_IRRADIANCE
             float3 rayRadiance = g_RayRadiance[rayIndex];
             // (Radiance * w, w)
+            // 方向越接近，权重越高
+            float weight = max(0.f, dot(probeDirection, rayDir));
             accumulatedIrradiance += float4(rayRadiance * weight, weight);
-#endif
         }
         float epsilon = float(RAYS_PER_PROBE - RELOCATE_RAY_COUNT) * 1e-9f;
         float hysteresis = saturate(g_DDGIBlendWeight); // 历史权重
-        float distHysteresis = hysteresis;
 
-#if BLEND_IRRADIANCE
         // NVIDIA 建议除以 (2.0 * sumWeight) 以匹配漫反射积分
         float3 netIrradiance = accumulatedIrradiance.rgb /
                                (2.0f * max(accumulatedIrradiance.a, epsilon));
         netIrradiance = pow(netIrradiance, 1.0f / g_DDGIEncodingGamma);
         float4 historyIrradiance = Elysia_DDGI_LoadIrradiance(id.xy);
-#endif
-        float2 netDist = accumulatedDist / max(distSumWeight, epsilon);
-        float2 historyDist = Elysia_DDGI_LoadDist(id.xy);
 
-#if BLEND_IRRADIANCE
         float3 delta = netIrradiance - historyIrradiance;
 
         if (dot(historyIrradiance, historyIrradiance) == 0)
         {
-            hysteresis = distHysteresis = 0.0f;
+            hysteresis = 0.0f;
         }
 
         // float significantChangeThreshold = 0.25f;
@@ -418,17 +402,129 @@ void ProbeBlending(uint3 id : SV_DispatchThreadID,
         {
             lerpDelta = min(max(c_threshold, abs(lerpDelta)), abs(delta)) * sign(lerpDelta);
         }
+
         float3 finalColor = historyIrradiance + lerpDelta;
         Elysia_DDGI_StoreIrradiance(id.xy, finalColor);
-#endif
+    }
 
-        float2 distDelta = (netDist - historyDist);
-        float2 finalDist = lerp(distDelta, historyDist, distHysteresis);
+    GroupMemoryBarrierWithGroupSync();
+
+    [branch]
+    if (isBorder)
+    {
+        uint2 localCoord = GroupThreadID.xy;
+        uint2 copyLocalCoord;
+
+        // 2. 计算八面体映射的镜像拷贝坐标
+        // 处理四个角 (Corners)：对角线镜像
+        bool isCorner = ((localCoord.x == 0 || localCoord.x == N - 1) &&
+                         (localCoord.y == 0 || localCoord.y == N - 1));
+
+        if (isCorner)
+        {
+            // 角像素拷贝自其对角线上最远的内部像素
+            copyLocalCoord.x = (localCoord.x == 0) ? N - 2 : 1;
+            copyLocalCoord.y = (localCoord.y == 0) ? N - 2 : 1;
+        }
+        else if (localCoord.x == 0 || localCoord.x == (N - 1))
+        {
+            // 左右边界：纵向镜像拷贝
+            copyLocalCoord.x = (localCoord.x == 0) ? N - 2 : 1;
+            copyLocalCoord.y = (N - 1) - localCoord.y;
+        }
+        else // 上下边界 (localCoord.y == 0 || localCoord.y == N - 1)
+        {
+            // 上下边界：横向镜像拷贝
+            copyLocalCoord.y = (localCoord.y == 0) ? N - 2 : 1;
+            copyLocalCoord.x = (N - 1) - localCoord.x;
+        }
+
+        // 3. 计算全局采样坐标并写入
+        uint2 globalCopyPos = GroupID.xy * N + copyLocalCoord;
+
+        // 同时缝合 Irradiance 和 Distance
+        float3 borderIrr = Elysia_DDGI_LoadIrradiance(globalCopyPos).rgb;
+        float2 borderDist = Elysia_DDGI_LoadDist(globalCopyPos).rg;
+
+        Elysia_DDGI_StoreIrradiance(id.xy, borderIrr);
+        Elysia_DDGI_StoreDist(id.xy, borderDist);
+    }
+}
+
+[numthreads(DDGI_PROBE_DEPTH_NUM_TEXELS, DDGI_PROBE_DEPTH_NUM_TEXELS, 1)]
+void ProbeDepthBlending(uint3 id : SV_DispatchThreadID,
+                        uint3 GroupThreadID : SV_GroupThreadID,
+                        uint3 GroupID : SV_GroupID)
+{
+    const UINT N = DDGI_PROBE_DEPTH_NUM_TEXELS;
+    const UINT numThreads = N * N;
+    const uint localIdx = GroupThreadID.y * N + GroupThreadID.x;
+    const UINT probeIndex = GroupID.x + (GroupID.y * g_GridDimensions.x);
+
+    [branch]
+    if (probeIndex >= PROBE_COUNT || probeIndex < 0)
+        return;
+    const UINT currProbeState = Elysia_DDGI_LoadeProbeState(probeIndex);
+
+    for (UINT i = localIdx; i < RAYS_PER_PROBE; i += numThreads)
+    {
+        RayData rayData = Elysia_DDGI_LoadRayData(probeIndex * RAYS_PER_PROBE + i);
+        g_RayDistance[i] = rayData.Distance;
+        g_RayDirection[i] = DDGIGetProbeRayDir(i, RAYS_PER_PROBE, g_RandomRotation);
+    }
+
+    GroupMemoryBarrierWithGroupSync();
+
+    // uint3 gridIdx = GetProbeGridCoord(probeIndex, g_GridDimensions);
+    // 将 [1, 6] 映射到八面体坐标的 [-1, 1]
+    bool isBorder = (GroupThreadID.x == 0 || GroupThreadID.x == (N - 1) ||
+                     GroupThreadID.y == 0 || GroupThreadID.y == (N - 1));
+    [branch]
+    if (!isBorder)
+    {
+        if (currProbeState == PROBE_STATE_INACTIVE)
+            return;
+        float2 uv = (float2(GroupThreadID.xy) - 1.f + 0.5f) / (float)(N - 2);
+        float2 octUV = uv * 2.0f - 1.0f;
+        float3 probeDirection = OctDecode(octUV);
+
+        float2 accumulatedDist = 0.0f;
+        float distSumWeight = 0.f;
+        float probeMaxRayDistance = length(g_GridSpacing) * 1.5f;
+        for (int rayIndex = RELOCATE_RAY_COUNT; rayIndex < RAYS_PER_PROBE; rayIndex ++)
+        {
+            float3 rayDir = g_RayDirection[rayIndex];
+            float rayDistance = g_RayDistance[rayIndex];
+
+            // 方向越接近，权重越高
+            float weight = max(0.f, dot(probeDirection, rayDir));
+            float w2 = weight * weight;
+            float w4 = w2 * w2;
+            float w26 = w4 * w4 * w4 * w2;
+            float distWeight = w26 * w26;
+            float absDist = min(abs(rayDistance), probeMaxRayDistance);
+            accumulatedDist += float2(absDist * distWeight, (absDist * absDist) * distWeight);
+            distSumWeight += distWeight;
+        }
+        float epsilon = float(RAYS_PER_PROBE - RELOCATE_RAY_COUNT) * 1e-9f;
+        float distHysteresis = saturate(g_DDGIBlendWeight);
+        float2 historyDist = Elysia_DDGI_LoadDist(id.xy);
+
+        if (dot(historyDist, historyDist) == 0)
+        {
+            distHysteresis = 0.0f;
+        }
+
+        float2 netDist = accumulatedDist / max(distSumWeight, epsilon);
+
+        float2 distDelta = netDist - historyDist;
+        float2 finalDist = historyDist + distDelta * (1.0f - distHysteresis);;
         Elysia_DDGI_StoreDist(id.xy, finalDist);
     }
 
     GroupMemoryBarrierWithGroupSync();
 
+    [branch]
     if (isBorder)
     {
         uint2 localCoord = GroupThreadID.xy;
