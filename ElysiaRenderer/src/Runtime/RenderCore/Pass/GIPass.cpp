@@ -120,13 +120,40 @@ namespace ElysiaRenderer
             .accessFlags = BufferAccessFlags::HostWritable,
         });
 
-        m_pCompactedBuffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc
+        m_pCompactedRayDataBuffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc
         {
             .name = L"Compacted RayData Buffer",
-            .stride = sizeof(Vector4),
-            .size = sizeof(Vector4) * 256,
-            .viewFlags = GPUResourceFlags::SRV,
-            .accessFlags = BufferAccessFlags::HostWritable,
+            .stride = sizeof(CompactedRay),
+            .size = sizeof(CompactedRay) * Probe_Count * Rays_Per_Probe,
+            .viewFlags = GPUResourceFlags::UAV | GPUResourceFlags::SRV,
+            .accessFlags = BufferAccessFlags::GPUOnly,
+        });
+
+        m_pCompactedRayIndexBuffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc
+        {
+            .name = L"Compacted RayData Buffer",
+            .stride = sizeof(UINT),
+            .size = sizeof(UINT) * Probe_Count * Rays_Per_Probe,
+            .viewFlags = GPUResourceFlags::UAV | GPUResourceFlags::SRV,
+            .accessFlags = BufferAccessFlags::GPUOnly,
+        });
+
+        m_pCounterBuffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc
+        {
+            .name = L"Compacted RayData Buffer",
+            .stride = sizeof(UINT),
+            .size = 16,
+            .viewFlags = GPUResourceFlags::UAV | GPUResourceFlags::SRV,
+            .accessFlags = BufferAccessFlags::GPUOnly,
+        });
+
+        m_pIndirectArgsBuffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc
+        {
+            .name = L"Compacted RayData Buffer",
+            .stride = sizeof(UINT3),
+            .size = 256,
+            .viewFlags = GPUResourceFlags::UAV | GPUResourceFlags::SRV,
+            .accessFlags = BufferAccessFlags::GPUOnly,
         });
 
         m_DXRBlob = CompileRaytracingLibrary(L"Shaders\\public\\GI\\DDGI_Library.hlsl");
@@ -170,6 +197,29 @@ namespace ElysiaRenderer
             true,
             RenderResource::GetInstance().GetPropertyName(RenderTextureIDs::ProbeOffsetIndexRTID));
 
+        auto data = std::vector<UINT>(Probe_Count * Rays_Per_Probe, 0);
+        DX12BufferUpload uploadData = DX12BufferUpload
+        {
+            .buffer = m_pCompactedRayIndexBuffer,
+            .pBufferData = std::make_unique<uint8_t[]>(sizeof(UINT) * Probe_Count * Rays_Per_Probe),
+            .bufferDataSize = sizeof(UINT) * Probe_Count * Rays_Per_Probe,
+        };
+        memcpy(uploadData.pBufferData.get(), data.data(), data.size());
+        BufferManager::GetInstance().UploadBufferData(m_pDevice->GetUploadContext(), &uploadData);
+
+        auto pBufferData = DX12BufferUpload
+        {
+            .buffer = m_pProbeStateBuffer,
+            .pBufferData = std::make_unique<uint8_t[]>(sizeof(UINT) * Probe_Count),
+            .bufferDataSize = sizeof(UINT) * Probe_Count
+        };
+        memcpy(pBufferData.pBufferData.get(), m_probeStates.data(), sizeof(UINT) * Probe_Count);
+        BufferManager::GetInstance().UploadBufferData(m_pDevice->GetUploadContext(), &pBufferData);
+
+        memcpy(m_pProbeRelocationLUTBuffer->GetMappedBuffer(),
+               GenerateRelocationLUT(m_gridSpacing).data(),
+               sizeof(Vector4) * 256);
+
         m_shaderPasses.assign(std::begin(m_PassData), std::end(m_PassData));
         m_pMaterial = std::make_unique<Material>(m_pDevice, m_shaderPasses);
 
@@ -183,20 +233,6 @@ namespace ElysiaRenderer
         m_pGPUTimer = context.pGPUTimer;
         m_frameIndex = context.frameIndex;
         m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), "GI Begin");
-
-        static bool isInitProbeState = false;
-        if (!isInitProbeState)
-        {
-            isInitProbeState = true;
-            auto pBufferData = DX12BufferUpload
-            {
-                .buffer = m_pProbeStateBuffer,
-                .pBufferData = std::make_unique<uint8_t[]>(sizeof(UINT) * Probe_Count),
-                .bufferDataSize = sizeof(UINT) * Probe_Count
-            };
-            memcpy(pBufferData.pBufferData.get(), m_probeStates.data(), sizeof(UINT) * Probe_Count);
-            BufferManager::GetInstance().UploadBufferData(m_pDevice->GetUploadContext(), &pBufferData);
-        }
 
         if (!SceneManager::GetInstance().GetEntities().empty() && !SceneManager::GetInstance().
             GetEntities()[0]->GetChildren().empty())
@@ -319,20 +355,12 @@ namespace ElysiaRenderer
             m_pRayDataBuffer)
             return;
 
-        static bool isInitProbeRelocationLUT = false;
-        if (!isInitProbeRelocationLUT)
-        {
-            isInitProbeRelocationLUT = true;
-            memcpy(m_pProbeRelocationLUTBuffer->GetMappedBuffer(),
-                   GenerateRelocationLUT(m_gridSpacing).data(),
-                   sizeof(Vector4) * 256);
-        }
-
         ComputeRandomRotation();
 
         InitProbeOffsetIndex();
         ClearProbeOffset();
         GenerateRay();
+        CalcCompactedRay();
         CalcIrradiance();
         ProbeBlend();
         RelocateProbes();
@@ -721,6 +749,64 @@ namespace ElysiaRenderer
                                D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 
         m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), "Generate Ray");
+    }
+    void GIPass::CalcCompactedRay()
+    {
+        auto passID = PassID(RAY_COMPACTION);
+        auto& passData = m_pMaterial->GetPassData(passID);
+        auto passName = m_PassData[passID].Name.c_str();
+        PIXHelper pix(m_pCommand->GetCommandList(), passName);
+
+        auto data = std::vector<UINT>(1, 0);
+        auto uploadData = DX12BufferUpload
+        {
+            .buffer = m_pCounterBuffer,
+            .pBufferData = std::make_unique<uint8_t[]>(sizeof(UINT)),
+            .bufferDataSize = 16,
+        };
+        memcpy(uploadData.pBufferData.get(), data.data(), data.size());
+        BufferManager::GetInstance().UploadBufferData(m_pDevice->GetUploadContext(), &uploadData);
+
+        PipelineInfo pipelineStateData{};
+        pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(
+            passID).pPipelineStateObject;
+        m_pCommand->SetPipeline(pipelineStateData);
+        SetSpaceResource(passData, PER_FRAME_SPACE);
+
+        m_pCommand->AddBarrier(*m_pCompactedRayDataBuffer, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+        {
+            m_pMaterial->SetUInt(ShaderIDs::g_SourceRayDataBufferIndex,
+                                 m_pRayDataBuffer->GetUAVResourceHeapIndex(),
+                                 passID);
+            m_pMaterial->SetUInt(ShaderIDs::g_CompactedRayBufferIndex,
+                                 m_pCompactedRayDataBuffer->GetUAVResourceHeapIndex(),
+                                 passID);
+            m_pMaterial->SetUInt(ShaderIDs::g_CompactedIndicesBufferIndex,
+                                 m_pCompactedRayIndexBuffer->GetUAVResourceHeapIndex(),
+                                 passID);
+            m_pMaterial->SetUInt(ShaderIDs::g_GlobalCounterBufferIndex,
+                                 m_pCounterBuffer->GetUAVResourceHeapIndex(),
+                                 passID);
+            m_pMaterial->SetUInt(ShaderIDs::g_IndirectArgsBufferIndex,
+                                 m_pIndirectArgsBuffer->GetUAVResourceHeapIndex(),
+                                 passID);
+            SetSpaceResource(passData, PER_PASS_SPACE);
+
+            auto threadGroupSize = passData.GetKernelThreadGroupSizes();
+            m_pCommand->Dispatch(CeilDivide(Probe_Count * Rays_Per_Probe, threadGroupSize.x),
+                                 threadGroupSize.y,
+                                 threadGroupSize.z);
+            m_pCommand->AddUAVBarrier(m_pCompactedRayDataBuffer, false);
+        }
+        m_pCommand->AddBarrier(*m_pCompactedRayDataBuffer, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
+    }
+    void GIPass::CalcIndirectArgs()
+    {
+        auto passID = PassID(RAY_COMPACTION);
+        auto& passData = m_pMaterial->GetPassData(passID);
+        auto passName = m_PassData[passID].Name.c_str();
+        PIXHelper pix(m_pCommand->GetCommandList(), passName);
     }
     void GIPass::CalcIrradiance()
     {

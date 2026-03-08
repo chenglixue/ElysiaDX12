@@ -45,7 +45,7 @@ UINT DDGI_Load_Probe_Offset_Index(UINT2 id)
     return probeOffsetTex[id];
 }
 
-[numthreads(32, 1, 1)]
+[numthreads(64, 1, 1)]
 void DDGI_Shading(uint3 id : SV_DispatchThreadID,
                   uint3 GroupThreadID : SV_GroupThreadID,
                   uint3 GroupID : SV_GroupID)
@@ -57,10 +57,13 @@ void DDGI_Shading(uint3 id : SV_DispatchThreadID,
         return;
 
     RWStructuredBuffer<GIData> GIDataBuffer = ResourceDescriptorHeap[g_GIDataBufferIndex];
-    RWStructuredBuffer<RayData> RayDataBuffer = ResourceDescriptorHeap[g_RayDataBufferIndex];
+    StructuredBuffer<RayData> RayDataBuffer = ResourceDescriptorHeap[g_RayDataBufferIndex];
     RayData rayData = RayDataBuffer[probeIndex * RAYS_PER_PROBE + rayIndex];
     float distance = rayData.Position.w;
     GIDataBuffer[probeIndex * RAYS_PER_PROBE + rayIndex].Distance = distance;
+    [branch]
+    if (distance < 0.f || distance >= DXR_MAX)
+        return;
 
     [branch]
     if (probeIndex % 4 != frameIndex % 4)
@@ -70,10 +73,6 @@ void DDGI_Shading(uint3 id : SV_DispatchThreadID,
     uint probeState = ProbeStatesBuffer[probeIndex];
     [branch]
     if (probeState == PROBE_STATE_INACTIVE && rayIndex >= RELOCATE_RAY_COUNT)
-        return;
-
-    [branch]
-    if (distance < 0.f || distance >= DXR_MAX)
         return;
 
     UINT baseColorTexIndex = rayData.Data.g;

@@ -84,13 +84,13 @@ UINT DDGI_Load_Probe_Offset_Index(UINT2 id)
     return probeOffsetTex[id];
 }
 
-[numthreads(32, 1, 1)]
+[numthreads(64, 1, 1)]
 void ResetProbeStates(uint3 id : SV_DispatchThreadID)
 {
     Elysia_DDGI_StoreProbeState(id.x, PROBE_STATE_ACTIVE);
 }
 
-[numthreads(32, 1, 1)]
+[numthreads(64, 1, 1)]
 void UpdateProbeStates(uint3 id : SV_DispatchThreadID)
 {
     uint probeIndex = id.x;
@@ -163,7 +163,7 @@ void UpdateProbeStates(uint3 id : SV_DispatchThreadID)
     // }
 }
 
-[numthreads(32, 1, 1)]
+[numthreads(64, 1, 1)]
 void ClearProbeOffsetBuffer(uint3 id : SV_DispatchThreadID)
 {
     // uint probeIndex = id.x;
@@ -173,7 +173,7 @@ void ClearProbeOffsetBuffer(uint3 id : SV_DispatchThreadID)
     // probeOffsetBuffer[probeIndex] = 0.f;
 }
 
-[numthreads(32, 1, 1)]
+[numthreads(64, 1, 1)]
 void RelocateProbes(UINT3 id : SV_DispatchThreadID)
 {
     UINT probeIndex = id.x;
@@ -463,7 +463,7 @@ void ProbeDepthBlending(uint3 id : SV_DispatchThreadID,
 
     for (UINT i = localIdx; i < RAYS_PER_PROBE; i += numThreads)
     {
-        RWStructuredBuffer<GIData> GIDataBuffer = ResourceDescriptorHeap[g_GIDataBufferIndex];
+        StructuredBuffer<GIData> GIDataBuffer = ResourceDescriptorHeap[g_GIDataBufferIndex];
         GIData giData = GIDataBuffer[probeIndex * RAYS_PER_PROBE + i];
         g_RayDistance[i] = giData.Distance;
         g_RayDirection[i] = DDGIGetProbeRayDir(i, RAYS_PER_PROBE, g_RandomRotation);
