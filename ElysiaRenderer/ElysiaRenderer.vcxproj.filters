@@ -655,6 +655,8 @@
     <None Include="Assets\Shaders\public\GI\DDGI_Library.hlsl" />
     <None Include="Assets\Shaders\public\GI\Irradiance.hlsl" />
     <None Include="Assets\Shaders\public\GI\CS_RrobeOffset.hlsl" />
+    <None Include="Assets\Shaders\public\GI\CS_DDGILighting.hlsl" />
+    <None Include="Assets\Shaders\public\GI\CS_RayFilter.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

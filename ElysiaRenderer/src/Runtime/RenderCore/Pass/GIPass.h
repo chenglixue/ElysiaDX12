@@ -21,7 +21,8 @@ namespace ElysiaRenderer
     PASS(PROBE_DEPTH_BLENDING,          "public\\GI\\CS_DDGI.hlsl",               true,  ProbeDepthBlending)\
     PASS(UPDATE_PROBE_STATES,           "public\\GI\\CS_DDGI.hlsl",               true,  UpdateProbeStates)\
     PASS(RESET_PROBE_STATES,            "public\\GI\\CS_DDGI.hlsl",               true,  ResetProbeStates)\
-    PASS(RESET_PROBE_OFFSET_INDEX,      "public\\GI\\CS_RrobeOffset.hlsl",        true,  ResetProbeOffsetIndex)
+    PASS(RESET_PROBE_OFFSET_INDEX,      "public\\GI\\CS_RrobeOffset.hlsl",        true,  ResetProbeOffsetIndex)\
+    PASS(DDGI_SHADING,                  "public\\GI\\CS_DDGILighting.hlsl",       true,  DDGI_Shading)
 
     class GIPass : public BasePass
     {
@@ -41,6 +42,7 @@ namespace ElysiaRenderer
             static inline size_t g_IrradianceTexSize = PropertyToID(L"g_IrradianceTexSize");
             static inline size_t g_DistanceTexSize = PropertyToID(L"g_DistanceTexSize");
             static inline size_t g_RayDataBufferIndex = PropertyToID(L"g_RayDataBufferIndex");
+            static inline size_t g_GIDataBufferIndex = PropertyToID(L"g_GIDataBufferIndex");
 
             static inline size_t g_GridSpacing = PropertyToID(L"g_GridSpacing");
             static inline size_t g_GridOrigin = PropertyToID(L"g_GridOrigin");
@@ -51,6 +53,8 @@ namespace ElysiaRenderer
             static inline size_t g_ProbeStatesIndex = PropertyToID(L"g_ProbeStatesIndex");
             static inline size_t g_RelocationLUTIndex = PropertyToID(L"g_RelocationLUTIndex");
             static inline size_t g_StaticAABBIndex = PropertyToID(L"g_StaticAABBIndex");
+            static inline size_t g_TLASIndex = PropertyToID(L"g_TLASIndex");
+
             static inline size_t g_ProbeNormalBias = PropertyToID(L"g_ProbeNormalBias");
             static inline size_t g_ProbeViewBias = PropertyToID(L"g_ProbeViewBias");
             static inline size_t g_DDGIBlendWeight = PropertyToID(L"g_DDGIBlendWeight");
@@ -62,6 +66,19 @@ namespace ElysiaRenderer
             static inline size_t g_ProbeRelocationLUTBufferIndex = PropertyToID(L"g_ProbeRelocationLUTBufferIndex");
             static inline size_t g_DDGI_Probe_Num_Texels = PropertyToID(L"g_DDGI_Probe_Num_Texels");
             static inline size_t g_IsBlendIrradiance = PropertyToID(L"g_IsBlendIrradiance");
+
+            static inline size_t viewMatrix = PropertyToID(L"viewMatrix");
+            static inline size_t viewMatrix_I = PropertyToID(L"viewMatrix_I");
+            static inline size_t projMatrix = PropertyToID(L"projMatrix");
+            static inline size_t projMatrix_I = PropertyToID(L"projMatrix_I");
+            static inline size_t viewProjMatrix = PropertyToID(L"viewProjMatrix");
+            static inline size_t viewProjMatrix_I = PropertyToID(L"viewProjMatrix_I");
+            static inline size_t pre_viewMatrix = PropertyToID(L"pre_viewMatrix");
+            static inline size_t pre_viewMatrix_I = PropertyToID(L"pre_viewMatrix_I");
+            static inline size_t pre_projMatrix = PropertyToID(L"pre_projMatrix");
+            static inline size_t pre_projMatrix_I = PropertyToID(L"pre_projMatrix_I");
+            static inline size_t pre_viewProjMatrix = PropertyToID(L"pre_viewProjMatrix");
+            static inline size_t pre_viewProjMatrix_I = PropertyToID(L"pre_viewProjMatrix_I");
         };
 
         static inline D3D12_VERTEX_BUFFER_VIEW m_vertexView;
@@ -134,7 +151,12 @@ namespace ElysiaRenderer
         /// --------------------------------------------
         struct alignas(16) RayData
         {
-            Vector3 Radiance;
+            Vector4 Position;
+            Vector4 Data;
+        };
+        struct alignas(16) GIData
+        {
+            Vector3 Irradiance;
             float Distance;
         };
         struct alignas(16) InstanceData
@@ -148,6 +170,12 @@ namespace ElysiaRenderer
             UINT IndexOffset;
             UINT VertexBufferIndex;
             UINT IndexBufferIndex;
+        };
+        struct CompactedRay
+        {
+            Vector4 Position; // XYZ + Normal.x
+            Vector4 Normal;   // YZ + Data.rg (TexIndices)
+            float Distance;
         };
         struct alignas(16) AABBData
         {
@@ -166,6 +194,11 @@ namespace ElysiaRenderer
         BufferHandle m_pTLASScratchBuffer;
         BufferHandle m_pTLASUploadBuffer;
         BufferHandle m_pStaticAABBDataBuffer;
+        BufferHandle m_pCompactedBuffer;
+        BufferHandle m_pCompactedIndexBuffer;
+        BufferHandle m_pCounterBuffer;
+        BufferHandle m_pIndirectArgsBuffer;
+        BufferHandle m_pGIDataBuffer;
         std::vector<InstanceData> m_instanceDatas;
         std::vector<AABBData> m_AABBDatas;
         std::vector<UINT> m_probeStates = std::vector<UINT>(Probe_Count, 1);
@@ -201,6 +234,7 @@ namespace ElysiaRenderer
         void ResetProbeStates();
         void UpdateProbeStates();
         void GenerateRay();
+        void CalcIrradiance();
         void ClearProbeOffset();
         void RelocateProbes();
         void ProbeBlend();

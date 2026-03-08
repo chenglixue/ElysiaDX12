@@ -79,10 +79,11 @@ namespace ElysiaRenderer
 
         static PSOManager& GetInstance()
         {
-            std::call_once(m_initInstanceFlag, []()
-            {
-                m_instance.reset(new PSOManager());
-            });
+            std::call_once(m_initInstanceFlag,
+                           []()
+                           {
+                               m_instance.reset(new PSOManager());
+                           });
 
             return *m_instance;
         }
@@ -90,14 +91,25 @@ namespace ElysiaRenderer
         virtual void Init(DX12Device* pDevice) override;
         virtual void Destory() override;
 
-        PipelineStateObject* GetGraphicsPipelineState(DX12Device* pDevice, Material* pMaterial,
+        PipelineStateObject* GetGraphicsPipelineState(DX12Device* pDevice,
+                                                      Material* pMaterial,
                                                       UINT passIndex,
                                                       const RenderTargetDesc& renderTargetDesc,
                                                       D3D12_PRIMITIVE_TOPOLOGY_TYPE topology =
                                                           D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
 
-        PipelineStateObject* GetComputePipelineState(DX12Device* pDevice, Material* pMaterial,
+        PipelineStateObject* GetComputePipelineState(DX12Device* pDevice,
+                                                     Material* pMaterial,
                                                      UINT passIndex);
+
+        PipelineStateObject* GetGraphicsPipelineState(DX12Device* pDevice,
+                                                      const D3D12_GRAPHICS_PIPELINE_STATE_DESC&
+                                                      PSODesc,
+                                                      DX12RootSignature* pRootSignature);
+        PipelineStateObject* GetComputePipelineState(DX12Device* pDevice,
+                                                     const D3D12_COMPUTE_PIPELINE_STATE_DESC&
+                                                     PSODesc,
+                                                     DX12RootSignature* pRootSignature);
 
     private:
         DX12Device* m_pDevice = nullptr;
@@ -109,11 +121,6 @@ namespace ElysiaRenderer
         std::unordered_map<D3D12_COMPUTE_PIPELINE_STATE_DESC, std::unique_ptr<PipelineStateObject>>
         m_computePipelineStates{};
 
-        PipelineStateObject* GetGraphicsPipelineState(DX12Device* pDevice,
-                                                      const D3D12_GRAPHICS_PIPELINE_STATE_DESC&
-                                                      PSODesc, DX12RootSignature* pRootSignature);
-        PipelineStateObject* GetComputePipelineState(DX12Device* pDevice,
-                                                     const D3D12_COMPUTE_PIPELINE_STATE_DESC&
-                                                     PSODesc, DX12RootSignature* pRootSignature);
+
     };
 }

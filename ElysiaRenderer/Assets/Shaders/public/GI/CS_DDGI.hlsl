@@ -18,13 +18,12 @@ cbuffer PassConstant : register(b0, perPassSpace)
     UINT g_DistanceTexIndex;
     UINT g_ProbeOffsetIndexTexIndex;
     UINT g_RelocationLUTIndex;
+    UINT g_GIDataBufferIndex;
     float g_DDGIBlendWeight;
     float g_ProbeIrradianceThreshold;
     float g_ProbeBrightnessThreshold;
     float g_DDGIEncodingGamma;
     UINT g_StaticAABBCount;
-    UINT g_DDGI_Probe_Num_Texels;
-    bool g_IsBlendIrradiance;
 }
 
 static const float PROBE_BACKFACE_THRESHOLD = 0.25f;    // % 射线撞背面视为在内部
@@ -50,18 +49,6 @@ UINT Elysia_DDGI_LoadeProbeState(UINT id)
 {
     RWStructuredBuffer<UINT> o = ResourceDescriptorHeap[g_ProbeStatesIndex];
     return o[id];
-}
-
-void Elysia_DDGI_StoreRayData(uint writeIndex, float3 radiance, float distance)
-{
-    RWStructuredBuffer<RayData> rayDatas = ResourceDescriptorHeap[g_RayDataBufferIndex];
-    rayDatas[writeIndex].Radiance = radiance;
-    rayDatas[writeIndex].Distance = distance;
-}
-RayData Elysia_DDGI_LoadRayData(uint readIndex)
-{
-    RWStructuredBuffer<RayData> rayDatas = ResourceDescriptorHeap[g_RayDataBufferIndex];
-    return rayDatas[readIndex];
 }
 
 void Elysia_DDGI_StoreIrradiance(uint2 id, float3 val)
@@ -114,15 +101,17 @@ void UpdateProbeStates(uint3 id : SV_DispatchThreadID)
     int backfaceCount = 0;
     float hitDistances[RELOCATE_RAY_COUNT];
     StructuredBuffer<RayData> rayDataBuffer = ResourceDescriptorHeap[g_RayDataBufferIndex];
+    StructuredBuffer<GIData> GIDataBuffer = ResourceDescriptorHeap[g_GIDataBufferIndex];
     RWStructuredBuffer<UINT> probeStateBuffer = ResourceDescriptorHeap[g_ProbeStatesIndex];
 
     for (int rayIndex = 0; rayIndex < RELOCATE_RAY_COUNT; rayIndex ++)
     {
         // Get the coordinates for the probe ray in the RayData texture array
         RayData rayData = rayDataBuffer[probeIndex * RAYS_PER_PROBE + rayIndex];
+        GIData giData = GIDataBuffer[probeIndex * RAYS_PER_PROBE + rayIndex];
 
         // Load the hit distance for the ray
-        hitDistances[rayIndex] = rayData.Distance;
+        hitDistances[rayIndex] = giData.Distance;
 
         // Increment the count if a backface is hit
         backfaceCount += (hitDistances[rayIndex] < 0.f);
@@ -198,6 +187,7 @@ void RelocateProbes(UINT3 id : SV_DispatchThreadID)
 
     // RWStructuredBuffer<float3> probeOffsetBuffer = ResourceDescriptorHeap[g_ProbeOffsetsIndex];
     StructuredBuffer<RayData> rayDataBuffer = ResourceDescriptorHeap[g_RayDataBufferIndex];
+    StructuredBuffer<GIData> giDataBuffer = ResourceDescriptorHeap[g_GIDataBufferIndex];
     // RWStructuredBuffer<UINT> probeStateBuffer = ResourceDescriptorHeap[g_ProbeStatesIndex];
     StructuredBuffer<float4> relocationLUT = ResourceDescriptorHeap[g_RelocationLUTIndex];
 
@@ -212,8 +202,9 @@ void RelocateProbes(UINT3 id : SV_DispatchThreadID)
     for (UINT i = 0; i < RELOCATE_RAY_COUNT; ++i)
     {
         UINT rayIndex = probeIndex * RAYS_PER_PROBE + i;
-        RayData rayData = rayDataBuffer[rayIndex];
-        float hitDistance = rayData.Distance;
+        // RayData rayData = rayDataBuffer[rayIndex];
+        GIData giData = giDataBuffer[rayIndex];
+        float hitDistance = giData.Distance;
 
         if (hitDistance < 0.f)
         {
@@ -314,12 +305,14 @@ void ProbeIrradianceBlending(uint3 id : SV_DispatchThreadID,
     [branch]
     if (probeIndex >= PROBE_COUNT || probeIndex < 0)
         return;
+
     const UINT currProbeState = Elysia_DDGI_LoadeProbeState(probeIndex);
 
     for (UINT i = localIdx; i < RAYS_PER_PROBE; i += numThreads)
     {
-        RayData rayData = Elysia_DDGI_LoadRayData(probeIndex * RAYS_PER_PROBE + i);
-        g_RayRadiance[i] = rayData.Radiance;
+        RWStructuredBuffer<GIData> GIDataBuffer = ResourceDescriptorHeap[g_GIDataBufferIndex];
+        GIData giData = GIDataBuffer[probeIndex * RAYS_PER_PROBE + i];
+        g_RayRadiance[i] = giData.Irradiance;
         g_RayDirection[i] = DDGIGetProbeRayDir(i, RAYS_PER_PROBE, g_RandomRotation);
     }
 
@@ -343,6 +336,7 @@ void ProbeIrradianceBlending(uint3 id : SV_DispatchThreadID,
             float rayDistance = g_RayDistance[rayIndex];
 
             // Backface hit, don't blend
+            [branch]
             if (rayDistance < 0.0f)
             {
                 continue;
@@ -464,12 +458,14 @@ void ProbeDepthBlending(uint3 id : SV_DispatchThreadID,
     [branch]
     if (probeIndex >= PROBE_COUNT || probeIndex < 0)
         return;
+
     const UINT currProbeState = Elysia_DDGI_LoadeProbeState(probeIndex);
 
     for (UINT i = localIdx; i < RAYS_PER_PROBE; i += numThreads)
     {
-        RayData rayData = Elysia_DDGI_LoadRayData(probeIndex * RAYS_PER_PROBE + i);
-        g_RayDistance[i] = rayData.Distance;
+        RWStructuredBuffer<GIData> GIDataBuffer = ResourceDescriptorHeap[g_GIDataBufferIndex];
+        GIData giData = GIDataBuffer[probeIndex * RAYS_PER_PROBE + i];
+        g_RayDistance[i] = giData.Distance;
         g_RayDirection[i] = DDGIGetProbeRayDir(i, RAYS_PER_PROBE, g_RandomRotation);
     }
 

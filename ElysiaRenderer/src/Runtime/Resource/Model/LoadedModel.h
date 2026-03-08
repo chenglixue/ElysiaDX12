@@ -60,6 +60,7 @@ namespace ElysiaModel
         Vector2 UV;
         Vector3 Normal;
         Vector4 Tangent;
+        Vector4 Color;
 
         MeshVertex()
         {
@@ -156,6 +157,9 @@ namespace ElysiaModel
 
             eastl::vector<Vector4> weights;
             eastl::vector<Vector4> joints;
+
+            Vector3 avgColor = Vector3::Zero;
+
 
             // Init from loaded files
             void InitFromAssimpMesh(const aiMesh& assimpMesh,

@@ -1168,6 +1168,7 @@ namespace ElysiaModel
                 int normalsAccessor = -1;
                 int texCoordsAccessor = -1;
                 int tangentAccessor = -1;
+                int colorsAccessor = -1;
                 int weightsAccessor = -1;
                 int jointsAccessor = -1;
                 auto attributeIt = primitive.attributes.find("POSITION");
@@ -1200,12 +1201,29 @@ namespace ElysiaModel
                 }
                 tangentAccessor = attributeIt->second;
 
+                attributeIt = primitive.attributes.find("COLOR_0");
+                if (attributeIt == primitive.attributes.end())
+                {
+                    ElysiaHelper::Log::Warn("GLTFLoader: glTF primitive does not have color attribute! Skipping.");
+                }
+                else
+                {
+                    colorsAccessor = attributeIt->second;
+                }
+                int colorNumComponents = 0;
+                if (colorsAccessor != -1)
+                {
+                    const auto& accessor = gltfModel.accessors[colorsAccessor];
+                    colorNumComponents = (accessor.type == TINYGLTF_TYPE_VEC3) ? 3 : 4;
+                }
+
                 LoadedModel::Mesh newMesh;
 
                 std::string baseName = node.name.empty() ? (gltfMesh.name.empty() ? "Mesh" : gltfMesh.name) : node.name;
                 newMesh.name = baseName + "_" + std::to_string(model.meshes.size());
                 newMesh.materialIndex = primitive.material >= 0 ? primitive.material : 0;
 
+                Vector3 sumColor = Vector3::Zero;
                 for (size_t v = 0; v < vertexCount; ++v)
                 {
                     bool res = true;
@@ -1251,6 +1269,24 @@ namespace ElysiaModel
                         tangent = Vector4(temp.x, temp.y, temp.z, tangent.w);
                     }
 
+                    Vector4 color = Color::White;
+                    if (colorsAccessor != -1)
+                    {
+                        float c[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+                        res = getFloatBufferData(gltfModel, colorsAccessor, v, colorNumComponents, c);
+                        assert(res);
+
+                        color.x = c[0];
+                        color.y = c[1];
+                        color.z = c[2];
+                        sumColor += Vector3(color.x, color.y, color.z);
+                        if (colorNumComponents == 4)
+                        {
+                            color.w = c[3];
+                        }
+                    }
+                    vtx.Color = color;
+
                     // 更新 AABB
                     newMesh.aabbMin = Vector3::Min(newMesh.aabbMin, position);
                     newMesh.aabbMax = Vector3::Max(newMesh.aabbMax, position);
@@ -1260,6 +1296,8 @@ namespace ElysiaModel
                     vtx.UV = uv;
                     vtx.Tangent = tangent;
                 }
+                // sumColor /= vertexCount;
+                newMesh.avgColor = sumColor;
 
                 if (indexed)
                 {

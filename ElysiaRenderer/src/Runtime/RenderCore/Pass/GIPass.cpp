@@ -74,6 +74,16 @@ namespace ElysiaRenderer
             .isRawAccess = false
         });
 
+        m_pGIDataBuffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc
+        {
+            .name = L"DDGI Ray Data Buffer",
+            .stride = sizeof(GIData),
+            .size = sizeof(GIData) * Probe_Count * Rays_Per_Probe,
+            .viewFlags = GPUResourceFlags::SRV | GPUResourceFlags::UAV,
+            .accessFlags = BufferAccessFlags::GPUOnly,
+            .isRawAccess = false
+        });
+
         // m_pProbeOffsetBuffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc
         // {
         //     .name = L"Probe Offset Buffer",
@@ -104,6 +114,15 @@ namespace ElysiaRenderer
         m_pProbeRelocationLUTBuffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc
         {
             .name = L"Probe Relocation LUT Buffer",
+            .stride = sizeof(Vector4),
+            .size = sizeof(Vector4) * 256,
+            .viewFlags = GPUResourceFlags::SRV,
+            .accessFlags = BufferAccessFlags::HostWritable,
+        });
+
+        m_pCompactedBuffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc
+        {
+            .name = L"Compacted RayData Buffer",
             .stride = sizeof(Vector4),
             .size = sizeof(Vector4) * 256,
             .viewFlags = GPUResourceFlags::SRV,
@@ -226,7 +245,7 @@ namespace ElysiaRenderer
                         .VertexBufferIndex = BufferManager::GetInstance().GetGlobalVertexBuffer()->
                                                                           GetResourceHeapIndex(),
                         .IndexBufferIndex = BufferManager::GetInstance().GetGlobalIndexBuffer()->
-                                                                         GetResourceHeapIndex()
+                                                                         GetResourceHeapIndex(),
                     });
                 }
             }
@@ -314,6 +333,7 @@ namespace ElysiaRenderer
         InitProbeOffsetIndex();
         ClearProbeOffset();
         GenerateRay();
+        CalcIrradiance();
         ProbeBlend();
         RelocateProbes();
         UpdateProbeStates();
@@ -333,11 +353,154 @@ namespace ElysiaRenderer
             auto VariantManager = passData.pShader->GetVariantManager();
             passData.pCurrVariantData = &VariantManager->GetOrCompileVariantByNames(enableKeywords);
 
+            if (i == DDGI_SHADING)
+                continue;
+
             passData.pPipelineStateObject =
                 PSOManager::GetInstance().GetComputePipelineState(
                     m_pDevice,
                     m_pMaterial.get(),
                     passID);
+        }
+
+        auto passID = PassID(DDGI_SHADING);
+        auto& passData = m_pMaterial->GetPassData(passID);
+        if (!passData.pPipelineStateObject)
+        {
+            std::vector<std::wstring> enableKeywords{};
+
+            auto VariantManager = passData.pShader->GetVariantManager();
+            passData.pCurrVariantData = &VariantManager->GetOrCompileVariantByNames(enableKeywords);
+
+            if (passData.pRootSignature == nullptr)
+            {
+                auto resourceMapping = PipelineResourceMapping();
+                std::vector<DX12RootParameter*> rootParameters{};
+                std::array<std::vector<D3D12_DESCRIPTOR_RANGE1>, NUM_RESOURCE_SPACES> desciptorRanges;
+                auto resourceLayout = *passData.pCurrVariantData->pMeshResourceLayout;
+                for (UINT currSpaceID = 0; currSpaceID < NUM_RESOURCE_SPACES; ++currSpaceID)
+                {
+                    auto currSpace = resourceLayout.m_spaces[currSpaceID];
+                    if (!currSpace)
+                        continue;
+
+                    if (currSpace->IsPushConstantSpace() && (
+                            currSpaceID == PER_MATERIAL_SPACE || currSpaceID == PER_OBJECT_SPACE))
+                    {
+                        DX12RootParameter* rootParameter = new DX12RootParameter();
+                        rootParameter->InitAsConstants(16, 0, currSpaceID, D3D12_SHADER_VISIBILITY_ALL);
+
+                        resourceMapping.m_PushConstantMappings[currSpaceID] = static_cast<UINT>(
+                            rootParameters.size());
+                        rootParameters.emplace_back(std::move(rootParameter));
+                        continue; // 处理完常量后跳过后续 Table 处理
+                    }
+
+                    std::vector<D3D12_DESCRIPTOR_RANGE1>& currDescriptorRange = desciptorRanges[
+                        currSpaceID];
+
+                    auto SRVs = currSpace->GetSRVs();
+                    auto UAVs = currSpace->GetUAVs();
+
+                    if (currSpace->HasExpectedCBV())
+                    {
+                        DX12RootParameter* rootParameter = new DX12RootParameter();
+                        rootParameter->
+                            InitAsConstantBufferView(0, D3D12_SHADER_VISIBILITY_ALL, currSpaceID);
+
+                        resourceMapping.m_CBVMappings[currSpaceID] = static_cast<UINT>(rootParameters.
+                            size());
+                        rootParameters.emplace_back(std::move(rootParameter));
+                    }
+
+                    if (SRVs.empty() && UAVs.empty())
+                    {
+                        continue;
+                    }
+
+                    for (auto& uav : UAVs)
+                    {
+                        D3D12_DESCRIPTOR_RANGE1 range{};
+                        range.BaseShaderRegister = uav->m_bindingIndex;
+                        range.NumDescriptors = 1;
+                        range.OffsetInDescriptorsFromTableStart = static_cast<uint32_t>(currDescriptorRange.
+                            size());
+                        range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
+                        range.RegisterSpace = currSpaceID;
+                        range.Flags = D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE |
+                                      D3D12_DESCRIPTOR_RANGE_FLAG_DATA_VOLATILE;
+
+                        currDescriptorRange.push_back(range);
+                    }
+
+                    // all of SRV Resource has one DESCRIPTOR RANGE which only has one descriptor
+                    for (auto& SRV : SRVs)
+                    {
+                        D3D12_DESCRIPTOR_RANGE1 pDescriptorRange{};
+                        pDescriptorRange.BaseShaderRegister = SRV->m_bindingIndex;
+                        pDescriptorRange.NumDescriptors = 1;
+                        pDescriptorRange.OffsetInDescriptorsFromTableStart = static_cast<UINT>(
+                            currDescriptorRange.size());
+                        pDescriptorRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+                        pDescriptorRange.RegisterSpace = currSpaceID;
+                        pDescriptorRange.Flags =
+                            D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE |
+                            D3D12_DESCRIPTOR_RANGE_FLAG_DATA_VOLATILE;
+
+                        currDescriptorRange.emplace_back(pDescriptorRange);
+                    }
+
+                    DX12RootParameter* rootParameter = new DX12RootParameter();
+                    rootParameter->InitAsDescriptorTable(static_cast<UINT>(currDescriptorRange.size()),
+                                                         currDescriptorRange.data(),
+                                                         D3D12_SHADER_VISIBILITY_ALL);
+
+                    resourceMapping.m_TableMappings[currSpaceID] = static_cast<UINT>(rootParameters.size());
+                    rootParameters.emplace_back(std::move(rootParameter));
+                }
+
+                DX12RootParameter* rootParameter = new DX12RootParameter();
+                rootParameter->InitAsShaderResourceView(0, PER_PASS_SPACE);
+                rootParameters.emplace_back(rootParameter);
+
+                UINT numRootParamter = static_cast<UINT>(rootParameters.size());
+                UINT numSampler = 0;
+                DX12RootSignature* rootSignature = new DX12RootSignature(numRootParamter, numSampler);
+
+                m_pDevice->CreateRootParameters(rootSignature, rootParameters);
+
+                rootSignature->Init(m_pDevice->GetDevice(),
+                                    D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT |
+                                    D3D12_ROOT_SIGNATURE_FLAG_CBV_SRV_UAV_HEAP_DIRECTLY_INDEXED |
+                                    D3D12_ROOT_SIGNATURE_FLAG_SAMPLER_HEAP_DIRECTLY_INDEXED);
+
+                assert(rootSignature);
+                assert(rootSignature->GetSignature());
+
+                passData.pRootSignature = std::unique_ptr<DX12RootSignature>(std::move(rootSignature));
+                passData.resourceMapping = std::move(resourceMapping);
+            }
+
+            D3D12_COMPUTE_PIPELINE_STATE_DESC PSODesc{};
+            PSODesc.CS = D3D12_SHADER_BYTECODE
+            {
+                .pShaderBytecode = passData.pCurrVariantData->StageShaders.at(ShaderType::Compute).
+                                            bytecode->GetBufferPointer(),
+                .BytecodeLength = passData.pCurrVariantData->StageShaders.at(ShaderType::Compute).
+                                           bytecode->GetBufferSize(),
+            };
+            PSODesc.pRootSignature = passData.pRootSignature->GetSignature();
+
+            auto pipelineStateObject = PSOManager::GetInstance().GetComputePipelineState(m_pDevice,
+                                                                                         PSODesc,
+                                                                                         passData.pRootSignature.get());
+            if (pipelineStateObject != nullptr)
+            {
+                pipelineStateObject->m_pipelineResourceMapping = passData.resourceMapping;
+                pipelineStateObject->m_rootSignature = passData.pRootSignature.get();
+            }
+
+            passData.pPipelineStateObject = pipelineStateObject;
         }
 
         if (!m_pRTPSO || !m_pGlobalRootSig)
@@ -552,12 +715,101 @@ namespace ElysiaRenderer
             dispatchDesc.MissShaderTable = m_stbHelper.GetMissRange();
             dispatchDesc.HitGroupTable = m_stbHelper.GetHitGroupRange();
             m_pCommand->GetCommandList()->DispatchRays(&dispatchDesc);
+            m_pCommand->AddUAVBarrier(m_pRayDataBuffer, false);
         }
         m_pCommand->AddBarrier(*m_pRayDataBuffer,
                                D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 
         m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), "Generate Ray");
     }
+    void GIPass::CalcIrradiance()
+    {
+        auto passID = PassID(DDGI_SHADING);
+        auto& passData = m_pMaterial->GetPassData(passID);
+        auto passName = m_PassData[passID].Name.c_str();
+        PIXHelper pix(m_pCommand->GetCommandList(), passName);
+
+        PipelineInfo pipelineStateData{};
+        pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(
+            passID).pPipelineStateObject;
+        m_pCommand->SetPipeline(pipelineStateData);
+        SetSpaceResource(passData, PER_FRAME_SPACE);
+
+        m_pCommand->AddBarrier(*m_pRayDataBuffer, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+        {
+            m_pMaterial->SetMatrix(ShaderIDs::viewMatrix, m_pCamera->GetViewMat(), passID);
+            m_pMaterial->SetMatrix(ShaderIDs::viewMatrix_I, m_pCamera->GetViewMat().Invert(), passID);
+            m_pMaterial->SetMatrix(ShaderIDs::projMatrix, m_pCamera->GetProjMat(), passID);
+            m_pMaterial->SetMatrix(ShaderIDs::projMatrix_I, m_pCamera->GetProjMat().Invert(), passID);
+            m_pMaterial->SetMatrix(ShaderIDs::viewProjMatrix,
+                                   m_pCamera->GetViewMat() * m_pCamera->GetProjMat(),
+                                   passID);
+            m_pMaterial->SetMatrix(ShaderIDs::viewProjMatrix_I,
+                                   (m_pCamera->GetViewMat() * m_pCamera->GetProjMat()).Invert(),
+                                   passID);
+
+            m_pMaterial->SetFloat4(ShaderIDs::g_GridOrigin,
+                                   Vector4(m_gridOrigin.x, m_gridOrigin.y, m_gridOrigin.z, 0.f),
+                                   passID);
+            m_pMaterial->SetFloat4(ShaderIDs::g_GridSpacing,
+                                   Vector4(m_gridSpacing.x, m_gridSpacing.y, m_gridSpacing.z, 0.f),
+                                   passID);
+            m_pMaterial->SetFloat4(ShaderIDs::g_GridDimensions,
+                                   Vector4(Grid_Dimensions.x,
+                                           Grid_Dimensions.y,
+                                           Grid_Dimensions.z,
+                                           0.f),
+                                   passID);
+
+            m_pMaterial->SetFloat4(ShaderIDs::g_IrradianceTexSize,
+                                   GetScreenSize(m_pIrradianceRT->GetWidth(), m_pIrradianceRT->GetHeight()),
+                                   passID);
+            m_pMaterial->SetFloat4(ShaderIDs::g_DistanceTexSize,
+                                   GetScreenSize(m_pDistanceRT->GetWidth(), m_pDistanceRT->GetHeight()),
+                                   passID);
+
+            m_pMaterial->SetUInt(ShaderIDs::g_RayDataBufferIndex,
+                                 m_pRayDataBuffer->GetUAVResourceHeapIndex(),
+                                 passID);
+            m_pMaterial->SetUInt(ShaderIDs::g_ProbeStatesIndex,
+                                 m_pProbeStateBuffer->GetResourceHeapIndex(),
+                                 passID);
+            m_pMaterial->SetUInt(ShaderIDs::g_ProbeOffsetIndexTexIndex,
+                                 m_pProbeOffsetIndexRT->GetResourceHeapIndex(),
+                                 passID);
+            m_pMaterial->SetUInt(ShaderIDs::g_RelocationLUTIndex,
+                                 m_pProbeRelocationLUTBuffer->GetResourceHeapIndex(),
+                                 passID);
+            m_pMaterial->SetUInt(ShaderIDs::g_IrradianceTexIndex,
+                                 m_pIrradianceRT->GetResourceHeapIndex(),
+                                 passID);
+            m_pMaterial->SetUInt(ShaderIDs::g_DistanceTexIndex,
+                                 m_pDistanceRT->GetResourceHeapIndex(),
+                                 passID);
+            m_pMaterial->SetUInt(ShaderIDs::g_GIDataBufferIndex,
+                                 m_pGIDataBuffer->GetResourceHeapIndex(),
+                                 passID);
+
+            m_pMaterial->SetFloat(ShaderIDs::g_ProbeNormalBias, UserData::GetInstance().GIParameter.normalBias, passID);
+            m_pMaterial->SetFloat(ShaderIDs::g_ProbeViewBias, UserData::GetInstance().GIParameter.viewBias, passID);
+            m_pMaterial->SetFloat(ShaderIDs::g_DDGIEncodingGamma,
+                                  UserData::GetInstance().GIParameter.gamma,
+                                  passID);
+            SetSpaceResource(passData, PER_PASS_SPACE);
+
+            m_pCommand->GetCommandList()->SetComputeRootShaderResourceView(2, m_pTLASBuffer->GetGPUAddress());
+
+            auto threadGroupSize = passData.GetKernelThreadGroupSizes();
+            m_pCommand->Dispatch(CeilDivide(Probe_Count * Rays_Per_Probe, threadGroupSize.x),
+                                 threadGroupSize.y,
+                                 threadGroupSize.z);
+            m_pCommand->AddUAVBarrier(m_pRayDataBuffer, false);
+        }
+        m_pCommand->AddBarrier(*m_pRayDataBuffer,
+                               D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
+    }
+
     void GIPass::ClearProbeOffset()
     {
         // static bool hasClear = false;
@@ -620,6 +872,9 @@ namespace ElysiaRenderer
             m_pMaterial->SetUInt(ShaderIDs::g_RelocationLUTIndex,
                                  m_pProbeRelocationLUTBuffer->GetResourceHeapIndex(),
                                  passID);
+            m_pMaterial->SetUInt(ShaderIDs::g_GIDataBufferIndex,
+                                 m_pGIDataBuffer->GetResourceHeapIndex(),
+                                 passID);
             m_pMaterial->SetFloat4(ShaderIDs::g_RandomRotation,
                                    m_RandomRotation,
                                    passID);
@@ -670,6 +925,9 @@ namespace ElysiaRenderer
                                  passID);
             m_pMaterial->SetUInt(ShaderIDs::g_DistanceTexIndex,
                                  m_pDistanceRT->GetResourceHeapIndex(),
+                                 passID);
+            m_pMaterial->SetUInt(ShaderIDs::g_GIDataBufferIndex,
+                                 m_pGIDataBuffer->GetResourceHeapIndex(),
                                  passID);
             m_pMaterial->SetFloat4(ShaderIDs::g_RandomRotation, m_RandomRotation, passID);
             m_pMaterial->SetFloat(ShaderIDs::g_DDGIBlendWeight,
@@ -731,6 +989,9 @@ namespace ElysiaRenderer
                                  passID);
             m_pMaterial->SetUInt(ShaderIDs::g_DistanceTexIndex,
                                  m_pDistanceRT->GetResourceHeapIndex(),
+                                 passID);
+            m_pMaterial->SetUInt(ShaderIDs::g_GIDataBufferIndex,
+                                 m_pGIDataBuffer->GetResourceHeapIndex(),
                                  passID);
             m_pMaterial->SetFloat4(ShaderIDs::g_RandomRotation, m_RandomRotation, passID);
             m_pMaterial->SetFloat(ShaderIDs::g_DDGIBlendWeight,
@@ -1083,7 +1344,6 @@ namespace ElysiaRenderer
 
         auto shaderConfig = pipelineDesc.CreateSubobject<
             CD3DX12_RAYTRACING_SHADER_CONFIG_SUBOBJECT>();
-        // float4 color + float distance = 20 bytes
         uint32_t maxPayloadSize = 32;
         uint32_t maxAttributeSize = 8; // float2 barycentrics
         shaderConfig->Config(maxPayloadSize, maxAttributeSize);

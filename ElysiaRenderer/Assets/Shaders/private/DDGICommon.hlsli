@@ -20,11 +20,17 @@ struct Vertex
     float2 uv;
     float3 normalOS;
     float4 tangentOS;
+    float4 color;
 };
 
 struct RayData
 {
-    float3 Radiance;
+    Vector4 Position;
+    Vector4 Data;
+};
+struct GIData
+{
+    Vector3 Irradiance;
     float Distance;
 };
 
@@ -63,12 +69,41 @@ Vertex InterpolateVertex(Vertex vertices[3], float3 barycentrics)
         o.positionOS += barycentrics * vertices[i].positionOS;
         o.normalOS += barycentrics * vertices[i].normalOS;
         o.tangentOS.xyz += barycentrics * vertices[i].tangentOS.xyz;
-        o.uv = barycentrics * vertices[i].uv;
+        o.uv += barycentrics * vertices[i].uv;
     }
 
     o.normalOS = normalize(o.normalOS);
     o.tangentOS.xyz = normalize(o.tangentOS.xyz);
     o.tangentOS.w = vertices[0].tangentOS.w;
+
+    return o;
+}
+
+Vertex InterpolateVertex(Vertex v0, Vertex v1, Vertex v2, float3 barycentrics)
+{
+    Vertex o = (Vertex)0;
+
+    o.positionOS += barycentrics * v0.positionOS;
+    o.normalOS += barycentrics * v0.normalOS;
+    o.tangentOS.xyz += barycentrics * v0.tangentOS.xyz;
+    o.uv += barycentrics * v0.uv;
+    o.color.rgb += barycentrics * v0.color.rgb;
+
+    o.positionOS += barycentrics * v1.positionOS;
+    o.normalOS += barycentrics * v1.normalOS;
+    o.tangentOS.xyz += barycentrics * v1.tangentOS.xyz;
+    o.uv += barycentrics * v1.uv;
+    o.color.rgb += barycentrics * v1.color.rgb;
+
+    o.positionOS += barycentrics * v2.positionOS;
+    o.normalOS += barycentrics * v2.normalOS;
+    o.tangentOS.xyz += barycentrics * v2.tangentOS.xyz;
+    o.uv += barycentrics * v2.uv;
+    o.color.rgb += barycentrics * v2.color.rgb;
+
+    o.normalOS = normalize(o.normalOS);
+    o.tangentOS.xyz = normalize(o.tangentOS.xyz);
+    o.tangentOS.w = v0.tangentOS.w;
 
     return o;
 }
@@ -84,6 +119,31 @@ bool IsPointInAABB(float3 position, AABBData aabb, float margin)
 float2 SignNotZero(float2 v)
 {
     return float2((v.x >= 0.0) ? +1.0 : -1.0, (v.y >= 0.0) ? +1.0 : -1.0);
+}
+
+// 压缩：float3 (单位向量) -> uint (R16G16_UNORM 封装)
+uint PackNormal(float3 n)
+{
+    n /= (abs(n.x) + abs(n.y) + abs(n.z));
+    float2 res = (n.z >= 0.0) ? n.xy : (1.0 - abs(n.yx)) * SignNotZero(n.xy);
+    res = res * 0.5 + 0.5; // 映射到 [0, 1]
+
+    // 将两个 float16 压入一个 uint
+    uint x = uint(res.x * 65535.0);
+    uint y = uint(res.y * 65535.0);
+    return (x << 16) | y;
+}
+
+// 解压：uint -> float3 (单位向量)
+float3 UnpackNormal(uint packed)
+{
+    float2 v = float2(float(packed >> 16) / 65535.0, float(packed & 0xFFFF) / 65535.0);
+    v = v * 2.0 - 1.0; // 映射回 [-1, 1]
+
+    float3 n = float3(v.x, v.y, 1.0 - abs(v.x) - abs(v.y));
+    float t = saturate(-n.z);
+    n.xy += (n.xy >= 0.0) ? -t : t;
+    return normalize(n);
 }
 
 // 3D dir normalize to [-1, 1]
@@ -251,6 +311,33 @@ float DDGI_Shadow_Visibity(float3 PositionWS,
         );
 
     return shadowPayload.isHit ? 0.f : 1.f;
+}
+
+float DDGI_Query_Shadow_Visibity(float3 PositionWS,
+                                 float3 NormalWS,
+                                 float3 normalBias,
+                                 float3 ToLight,
+                                 RaytracingAccelerationStructure SceneTLAS)
+{
+    RayDesc shadowRayDesc;
+    shadowRayDesc.Origin = PositionWS + NormalWS * normalBias;
+    shadowRayDesc.Direction = ToLight;
+    shadowRayDesc.TMin = 0.001f;
+    shadowRayDesc.TMax = DXR_SHADOW_MAX;
+
+    RayQuery<RAY_FLAG_ACCEPT_FIRST_HIT_AND_END_SEARCH |
+             RAY_FLAG_SKIP_PROCEDURAL_PRIMITIVES |
+             RAY_FLAG_SKIP_CLOSEST_HIT_SHADER | RAY_FLAG_CULL_BACK_FACING_TRIANGLES> q;
+
+    q.TraceRayInline(SceneTLAS, RAY_FLAG_NONE, 0xFF, shadowRayDesc);
+    while (q.Proceed());
+
+    if (q.CommittedStatus() == COMMITTED_TRIANGLE_HIT)
+    {
+        return 0.f;
+    }
+
+    return 1.f;
 }
 
 float DDGIGetVolumeBlendWeight(float3 positionWS,

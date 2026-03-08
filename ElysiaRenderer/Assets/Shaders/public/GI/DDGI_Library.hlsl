@@ -42,17 +42,6 @@ SamplerState g_ClampAnisotropicSampler : register(s5);
 SamplerState g_ShadowWarpLinearSampler : register(s6);
 SamplerState g_ShadowClampLinearSampler : register(s7);
 
-void Elysia_DDGI_StoreRayData(uint writeIndex, float3 radiance, float distance)
-{
-    RWStructuredBuffer<RayData> rayDatas = ResourceDescriptorHeap[g_RayDataBufferIndex];
-    rayDatas[writeIndex].Radiance = radiance;
-    rayDatas[writeIndex].Distance = distance;
-}
-RayData Elysia_DDGI_LoadRayData(uint readIndex)
-{
-    RWStructuredBuffer<RayData> rayDatas = ResourceDescriptorHeap[g_RayDataBufferIndex];
-    return rayDatas[readIndex];
-}
 UINT Elysia_DDGI_LoadeProbeState(UINT probeIndex)
 {
     return g_ProbeStatesBuffer[probeIndex];
@@ -83,7 +72,7 @@ void GenerateRayMain()
     Vector3 rayOrigin = GetProbeWorldPosition(probeIndex,
                                               g_GridOrigin,
                                               g_GridSpacing,
-                                              g_GridDimensions + probeOffset);
+                                              g_GridDimensions) + probeOffset;
     // g_ProbeOffsetBuffer[probeIndex];
     float3 rayDir = DDGIGetProbeRayDir(rayIndex, RAYS_PER_PROBE, g_RandomRotation);
 
@@ -93,13 +82,11 @@ void GenerateRayMain()
     rayDesc.TMin = 0.f;
     rayDesc.TMax = DXR_MAX;
 
-    RayData rayData;
-    rayData.Radiance = 0.f;
-    rayData.Distance = 0.f;
+    RayData rayData = (RayData)0;
 
-    UINT rayFlag = RAY_FLAG_NONE;
+    RAY_FLAG rayFlag = RAY_FLAG_NONE | RAY_FLAG_CULL_BACK_FACING_TRIANGLES | RAY_FLAG_SKIP_PROCEDURAL_PRIMITIVES;
     TraceRay(g_SceneTLAS,
-             rayFlag,
+             RAY_FLAG_NONE,
              0xFF,
              0,
              1,
@@ -108,14 +95,17 @@ void GenerateRayMain()
              rayData);
 
     uint writeIndex = probeIndex * RAYS_PER_PROBE + rayIndex;
-    Elysia_DDGI_StoreRayData(writeIndex, rayData.Radiance, rayData.Distance);
+    RWStructuredBuffer<RayData> rayDatas = ResourceDescriptorHeap[g_RayDataBufferIndex];
+    rayDatas[writeIndex].Data = rayData.Data;
+    rayDatas[writeIndex].Position = rayData.Position;
+    // Elysia_DDGI_StoreRayData(writeIndex, rayData.Radiance, rayData.Distance);
 }
 
 [shader("miss")]
 void RayMiss(inout RayData rayData)
 {
-    rayData.Radiance = 0.f;
-    rayData.Distance = DXR_MAX;
+    rayData.Position = float4(0.f, 0.f, 0.f, DXR_MAX);
+    rayData.Data = float4(0.f, 0.f, 0.f, 0.f);
 }
 
 [shader("miss")]
@@ -131,100 +121,42 @@ void RayClosestHit(inout RayData rayData,
     [branch]
     if (HitKind() == HIT_KIND_TRIANGLE_BACK_FACE)
     {
-        rayData.Distance = -rayData.Distance * 0.2f; // 用负数标记背面撞击
-        rayData.Radiance = 0.0f;
+        rayData.Position = float4(0.f, 0.f, 0.f, -RayTCurrent() * 0.2f); // 负数标记背面撞击
+        rayData.Data = float4(0.f, 0.f, 0.f, 0.f);
+
         return;
     }
 
     UINT instanceID = InstanceID();
     uint primIdx = PrimitiveIndex();
-    uint globalGeometryIdx = instanceID + GeometryIndex();
+    uint globalGeometryIdx = instanceID + primIdx;
     InstanceData instanceData = g_InstanceDataBuffer[globalGeometryIdx];
     StructuredBuffer<Vertex> verticesBuffer = ResourceDescriptorHeap[instanceData.VertexBufferIndex];
     StructuredBuffer<uint> indicesBuffer = ResourceDescriptorHeap[instanceData.IndexBufferIndex];
     UINT vertexOffset = instanceData.VertexOffset;
     UINT indexOffset = instanceData.IndexOffset;
 
-    UINT i0 = indicesBuffer[indexOffset + primIdx * 3 + 0];
-    UINT i1 = indicesBuffer[indexOffset + primIdx * 3 + 1];
-    UINT i2 = indicesBuffer[indexOffset + primIdx * 3 + 2];
-
-    Vertex vertices[3];
-    vertices[0] = verticesBuffer[vertexOffset + i0];
-    vertices[1] = verticesBuffer[vertexOffset + i1];
-    vertices[2] = verticesBuffer[vertexOffset + i2];
+    // UINT i0 = indicesBuffer[indexOffset + primIdx * 3 + 0];
+    // UINT i1 = indicesBuffer[indexOffset + primIdx * 3 + 1];
+    // UINT i2 = indicesBuffer[indexOffset + primIdx * 3 + 2];
+    // Vertex vertices[3];
+    // vertices[0] = verticesBuffer[vertexOffset + i0];
+    // vertices[1] = verticesBuffer[vertexOffset + i1];
+    // vertices[2] = verticesBuffer[vertexOffset + i2];
     float3 bary = float3(1.0 - attr.barycentrics.x - attr.barycentrics.y, attr.barycentrics.x, attr.barycentrics.y);
-    Vertex v = InterpolateVertex(vertices, bary);
+    Vertex v = InterpolateVertex(verticesBuffer[vertexOffset + indicesBuffer[indexOffset + PrimitiveIndex() * 3 + 0]],
+                                 verticesBuffer[vertexOffset + indicesBuffer[indexOffset + PrimitiveIndex() * 3 + 1]],
+                                 verticesBuffer[vertexOffset + indicesBuffer[indexOffset + PrimitiveIndex() * 3 + 2]],
+                                 bary);
 
-    // 重心坐标插值
-    float2 sampleUV = v.uv;
-    // float3 normalOS = v.normalOS;
-    // float3 tangentOS = v.tangentOS;
+    float3 normalOS = v.normalOS;
+    float3 N = normalize(mul(ObjectToWorld3x4(), float4(normalOS, 0.f)));
 
-    float4 baseColorAlpha = SampleTexture2D_LOD(instanceData.BaseColorTexIndex,
-                                                sampleUV,
-                                                WarpLinearSampler,
-                                                0);
-    [branch]
-    if (baseColorAlpha.a < 0.1f)
-    {
-        rayData.Radiance = 0;
-        rayData.Distance = RayTCurrent();
-        return;
-    }
+    float3 positionWS = WorldRayOrigin() + WorldRayDirection() * RayTCurrent();
 
-    // float3 N = normalize(mul(ObjectToWorld3x4(), float4(normalOS, 0.f)));
-    // if (instanceData.NormalTexIndex > 0)
-    // {
-    //     float3 T = normalize(mul(ObjectToWorld3x4(), float4(tangentOS, 0.f)));
-    //     float3 B = cross(N, T) * v.tangentOS.w;
-    //
-    //     float3x3 TBN = {T, B, N};
-    //     N = SampleTexture2D_LOD(instanceData.NormalTexIndex, sampleUV, g_WarpLinearSampler, 0);
-    //     N = N * 2.f - 1.f;
-    //     N = mul(N, TBN);
-    // }
-
-    // LightData mainLightData = GetMainLight(mainLight);
-    // float NoL = max(0, dot(N, mainLightData.toLight));
-    //
-    // float3 positionWS = WorldRayOrigin() + WorldRayDirection() * RayTCurrent();
-    // float shadow = DDGI_Shadow_Visibity(positionWS,
-    //                                     N,
-    //                                     g_ProbeNormalBias,
-    //                                     mainLightData.toLight,
-    //                                     g_SceneTLAS);
-    // float3 directRadiance = baseColorAlpha.rgb / PI * mainLightData.color * mainLightData.intensity * NoL * shadow;
-    //
-    // float blendWeight = DDGIGetVolumeBlendWeight(positionWS, g_GridOrigin, g_GridSpacing, 0, float4(0, 0, 0, 1));
-    // if (blendWeight > 0.f)
-    // {
-    //     float3 indirectIrradiance = SampleDDGI(
-    //         positionWS,
-    //         N,
-    //         DDGIGetSurfaceBias(N,
-    //                            -WorldRayDirection(),
-    //                            g_ProbeNormalBias,
-    //                            g_ProbeViewBias),
-    //         g_GridOrigin,
-    //         g_GridSpacing,
-    //         g_GridDimensions,
-    //         g_DDGIEncodingGamma,
-    //         g_IrradianceTexSize,
-    //         g_IrradianceTexIndex,
-    //         g_DistanceTexSize,
-    //         g_DistanceTexIndex,
-    //         g_ProbeOffsetIndexTexIndex,
-    //         g_ProbeRelocationLUTBuffer,
-    //         g_ProbeStatesBuffer,
-    //         g_WarpLinearSampler
-    //         );
-    //     float maxAlbedo = 0.9f;
-    //     float3 indirectRadiance = min(baseColorAlpha.rgb, maxAlbedo) / PI * indirectIrradiance;
-    //
-    //     indirectRadiance *= blendWeight;
-    //     rayData.Radiance += indirectRadiance;
-    // }
-    rayData.Radiance = baseColorAlpha;
-    rayData.Distance = RayTCurrent();
+    rayData.Position = float4(positionWS, RayTCurrent());
+    rayData.Data = float4(PackNormal(N),
+                          instanceData.BaseColorTexIndex,
+                          instanceData.NormalTexIndex,
+                          0.f);
 }

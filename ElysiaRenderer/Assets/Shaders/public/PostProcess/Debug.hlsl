@@ -28,6 +28,7 @@ cbuffer PassConstant : register(b0, perPassSpace)
     float g_ProbeRadius;
     float4 g_RandomRotation;
     UINT g_RayDataBufferIndex;
+    UINT g_GIDataBufferIndex;
     // UINT g_ProbeOffsetsIndex;
     UINT g_ProbeStatesIndex;
     UINT g_ProbeOffsetIndexTexIndex;
@@ -47,10 +48,10 @@ struct AABBInstanceData
     Vector4 Color;
 };
 
-RayData Elysia_DDGI_LoadRayData(uint readIndex)
+GIData Elysia_DDGI_LoadRayData(uint readIndex)
 {
-    RWStructuredBuffer<RayData> rayDatas = ResourceDescriptorHeap[g_RayDataBufferIndex];
-    return rayDatas[readIndex];
+    RWStructuredBuffer<GIData> GIDatas = ResourceDescriptorHeap[g_GIDataBufferIndex];
+    return GIDatas[readIndex];
 }
 
 #define DEBUG_NONE 0
@@ -107,13 +108,13 @@ PSInput VS(VSInput i, UINT vertexID : SV_VertexID, uint instanceID : SV_Instance
                                                          g_GridDimensions) + probeOffset;
             // probeOffsetBuffer[probeIdx];
 
-            StructuredBuffer<RayData> rayDataBuffer = ResourceDescriptorHeap[g_RayDataBufferIndex];
+            StructuredBuffer<GIData> GIDataBuffer = ResourceDescriptorHeap[g_GIDataBufferIndex];
             uint rayDataIdx = probeIdx * RAYS_PER_PROBE + rayInProbeIdx;
-            RayData data = rayDataBuffer[rayDataIdx];
+            GIData data = GIDataBuffer[rayDataIdx];
             float3 dir = DDGIGetProbeRayDir(rayInProbeIdx, RAYS_PER_PROBE, g_RandomRotation);
 
             float3 finalPos = probeWorldPos;
-            float3 finalColor = data.Radiance;
+            float3 finalColor = data.Irradiance;
 
             if (isEndPoint)
             {
@@ -235,12 +236,12 @@ PSOutput PS(PSInput i)
                 weight = pow(weight, 16.0f);
 
                 // 3. 加权累加辐射度
-                RayData rayData = Elysia_DDGI_LoadRayData(i.instanceID * RAYS_PER_PROBE + r);
+                GIData giData = Elysia_DDGI_LoadRayData(i.instanceID * RAYS_PER_PROBE + r);
 
                 // 排除 Miss 的射线（Distance=10000），防止球体变黑
-                if (rayData.Distance < 10000.0f)
+                if (giData.Distance < 10000.0f)
                 {
-                    finalRadiance += rayData.Radiance * weight;
+                    finalRadiance += giData.Irradiance * weight;
                     totalWeight += weight;
                 }
             }
