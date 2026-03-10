@@ -23,8 +23,9 @@ namespace ElysiaRenderer
     PASS(RESET_PROBE_STATES,            "public\\GI\\CS_DDGI.hlsl",               true,  ResetProbeStates)\
     PASS(RESET_PROBE_OFFSET_INDEX,      "public\\GI\\CS_RrobeOffset.hlsl",        true,  ResetProbeOffsetIndex)\
     PASS(DDGI_SHADING,                  "public\\GI\\CS_DDGILighting.hlsl",       true,  DDGI_Shading)\
-    PASS(RAY_COMPACTION,                "public\\GI\\CS_RayFilter.hlsl",          true,  RayCompaction)
-
+    PASS(RAY_COMPACTION,                "public\\GI\\CS_RayFilter.hlsl",          true,  RayCompaction)\
+    PASS(CALC_INDIRECT_ARGS,            "public\\GI\\CS_RayFilter.hlsl",          true,  CalcIndirectArgs)\
+    PASS(RESET_COUNTER,                 "public\\GI\\CS_RayFilter.hlsl",          true,  ResetCounter)
     class GIPass : public BasePass
     {
     public:
@@ -98,6 +99,7 @@ namespace ElysiaRenderer
         // static inline BufferHandle m_pProbeOffsetBuffer;
         static inline BufferHandle m_pProbeStateBuffer;
         static inline BufferHandle m_pProbeRelocationLUTBuffer;
+        static inline BufferHandle m_pGIDataBuffer;
         static inline RenderTexture* m_pProbeOffsetIndexRT = nullptr;
         static inline RenderTexture* m_pIrradianceRT = nullptr;
         static inline RenderTexture* m_pDistanceRT = nullptr;
@@ -203,11 +205,10 @@ namespace ElysiaRenderer
         BufferHandle m_pCompactedRayIndexBuffer;
         BufferHandle m_pCounterBuffer;
         BufferHandle m_pIndirectArgsBuffer;
-        BufferHandle m_pGIDataBuffer;
         std::vector<InstanceData> m_instanceDatas;
         std::vector<AABBData> m_AABBDatas;
         std::vector<UINT> m_probeStates = std::vector<UINT>(Probe_Count, 1);
-
+        CComPtr<ID3D12CommandSignature> m_pCommandSignature;
 
 #pragma region Vertices
         // 常量 X = 0.525731f, Z = 0.850651f 来自黄金分割比例，用于构建单位球体
@@ -239,6 +240,7 @@ namespace ElysiaRenderer
         void ResetProbeStates();
         void UpdateProbeStates();
         void GenerateRay();
+        void ResetCounterBuffer();
         void CalcCompactedRay();
         void CalcIndirectArgs();
         void CalcIrradiance();

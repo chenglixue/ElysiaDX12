@@ -26,6 +26,9 @@ cbuffer PassConstant : register(b0, perPassSpace)
     UINT g_ProbeOffsetIndexTexIndex;
     UINT g_RelocationLUTIndex;
     UINT g_GIDataBufferIndex;
+    UINT g_CompactedRayBufferIndex;
+    UINT g_CompactedIndicesBufferIndex;
+    UINT g_GlobalCounterBufferIndex;
 
     float g_ProbeNormalBias;
     float g_ProbeViewBias;
@@ -46,34 +49,24 @@ UINT DDGI_Load_Probe_Offset_Index(UINT2 id)
 }
 
 [numthreads(64, 1, 1)]
-void DDGI_Shading(uint3 id : SV_DispatchThreadID,
-                  uint3 GroupThreadID : SV_GroupThreadID,
-                  uint3 GroupID : SV_GroupID)
+void DDGI_Shading(uint3 id : SV_DispatchThreadID)
 {
-    UINT probeIndex = id.x / RAYS_PER_PROBE;
-    UINT rayIndex = id.x % RAYS_PER_PROBE;
-    [branch]
-    if (id.x >= PROBE_COUNT * RAYS_PER_PROBE)
-        return;
+    UINT compactedIndex = id.x;
 
+    StructuredBuffer<uint> globalCounter = ResourceDescriptorHeap[g_GlobalCounterBufferIndex];
     RWStructuredBuffer<GIData> GIDataBuffer = ResourceDescriptorHeap[g_GIDataBufferIndex];
-    StructuredBuffer<RayData> RayDataBuffer = ResourceDescriptorHeap[g_RayDataBufferIndex];
-    RayData rayData = RayDataBuffer[probeIndex * RAYS_PER_PROBE + rayIndex];
+    StructuredBuffer<CompactedRay> CompactedRayDataBuffer = ResourceDescriptorHeap[g_CompactedRayBufferIndex];
+    StructuredBuffer<UINT> CompactedRayIndexBuffer = ResourceDescriptorHeap[g_CompactedIndicesBufferIndex];
+
+    if (compactedIndex >= globalCounter[0])
+        return;
+
+    UINT originIndex = CompactedRayIndexBuffer[compactedIndex];
+    // UINT probeIndex = originIndex / RAYS_PER_PROBE;
+    // UINT rayIndex = originIndex % RAYS_PER_PROBE;
+
+    CompactedRay rayData = CompactedRayDataBuffer[compactedIndex];
     float distance = rayData.Position.w;
-    GIDataBuffer[probeIndex * RAYS_PER_PROBE + rayIndex].Distance = distance;
-    [branch]
-    if (distance < 0.f || distance >= DXR_MAX)
-        return;
-
-    [branch]
-    if (probeIndex % 4 != frameIndex % 4)
-        return;
-
-    StructuredBuffer<UINT> ProbeStatesBuffer = ResourceDescriptorHeap[g_ProbeStatesIndex];
-    uint probeState = ProbeStatesBuffer[probeIndex];
-    [branch]
-    if (probeState == PROBE_STATE_INACTIVE && rayIndex >= RELOCATE_RAY_COUNT)
-        return;
 
     UINT baseColorTexIndex = rayData.Data.g;
     UINT normalTexIndex = rayData.Data.b;
@@ -88,11 +81,17 @@ void DDGI_Shading(uint3 id : SV_DispatchThreadID,
     Vector3 viewDirWS = GetScreenVectorWS(cameraPosWS.xyz, positionWS);
     LightData mainLightData = GetMainLight(mainLight);
     float NoL = max(0, dot(normalWS, mainLightData.toLight));
-    float shadow = DDGI_Query_Shadow_Visibity(positionWS,
-                                              normalWS,
-                                              g_ProbeNormalBias,
-                                              mainLightData.toLight,
-                                              g_SceneTLAS);
+    float shadow = 1.f;
+    [branch]
+    if (NoL > 0.f)
+    {
+        shadow = DDGI_Query_Shadow_Visibity(positionWS,
+                                            normalWS,
+                                            g_ProbeNormalBias,
+                                            mainLightData.toLight,
+                                            g_SceneTLAS);
+    }
+
     float3 directIrradiance = baseColorAlpha.rgb / PI * mainLightData.color * mainLightData.intensity * NoL * shadow;
     float3 result = directIrradiance;
 
@@ -126,5 +125,8 @@ void DDGI_Shading(uint3 id : SV_DispatchThreadID,
         result += indirectRadiance;
     }
 
-    GIDataBuffer[probeIndex * RAYS_PER_PROBE + rayIndex].Irradiance = result;
+    GIData data = (GIData)0;
+    data.Irradiance = result;
+    data.Distance = distance;
+    GIDataBuffer[originIndex] = data;
 }

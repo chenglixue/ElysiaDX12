@@ -5,6 +5,13 @@
 
 cbuffer PassConstant : register(b0, perPassSpace)
 {
+    Matrix viewMatrix;
+    Matrix viewMatrix_I;
+    Matrix projMatrix;
+    Matrix projMatrix_I;
+    Matrix viewProjMatrix;
+    Matrix viewProjMatrix_I;
+
     float4 g_GridOrigin;
     float4 g_GridSpacing;
     float4 g_GridDimensions;
@@ -122,8 +129,15 @@ void UpdateProbeStates(uint3 id : SV_DispatchThreadID)
         return;
     }
 
-    float3 probePosWS = GetProbeWorldPosition(probeIndex, g_GridOrigin, g_GridSpacing, g_GridDimensions);
+    UINT2 probeOffsetIndexID = UINT2(probeIndex % 64, probeIndex / 64);
+    Texture2D<uint> g_ProbeOffsetIndexTex = ResourceDescriptorHeap[g_ProbeOffsetIndexTexIndex];
+    UINT index = g_ProbeOffsetIndexTex.Load(UINT3(probeOffsetIndexID, 0));
+    StructuredBuffer<float4> relocationLUT = ResourceDescriptorHeap[g_RelocationLUTIndex];
+    float3 probeOffset = relocationLUT[index];
+
+    float3 probePosWS = GetProbeWorldPosition(probeIndex, g_GridOrigin, g_GridSpacing, g_GridDimensions) + probeOffset;
     float probeSpacingMax = max(g_GridSpacing.x, max(g_GridSpacing.y, g_GridSpacing.z));
+    float distToCamera = distance(probePosWS, cameraPosWS);
 
     bool isNearStatic = false;
     for (UINT i = 0; i < g_StaticAABBCount; ++i)
@@ -180,16 +194,33 @@ void RelocateProbes(UINT3 id : SV_DispatchThreadID)
     [branch]
     if (probeIndex >= PROBE_COUNT || probeIndex < 0)
         return;
-    [branch]
-    if (probeIndex % 4 != frameIndex % 4)
-        return;
-    // UINT3 gridIdx = GetProbeGridCoord(probeIndex, g_GridDimensions);
+
+    UINT3 gridIdx = GetProbeGridCoord(probeIndex, g_GridDimensions);
 
     // RWStructuredBuffer<float3> probeOffsetBuffer = ResourceDescriptorHeap[g_ProbeOffsetsIndex];
     StructuredBuffer<RayData> rayDataBuffer = ResourceDescriptorHeap[g_RayDataBufferIndex];
     StructuredBuffer<GIData> giDataBuffer = ResourceDescriptorHeap[g_GIDataBufferIndex];
     // RWStructuredBuffer<UINT> probeStateBuffer = ResourceDescriptorHeap[g_ProbeStatesIndex];
     StructuredBuffer<float4> relocationLUT = ResourceDescriptorHeap[g_RelocationLUTIndex];
+
+    uint2 texCoord = uint2(probeIndex % 64, probeIndex * rcp(64));
+    UINT currIndex = DDGI_Load_Probe_Offset_Index(texCoord);
+    float3 probePosWS = GetProbeWorldPosition(probeIndex, g_GridOrigin, g_GridSpacing, g_GridDimensions) + relocationLUT
+                        [currIndex].xyz;
+    float distToCamera = distance(probePosWS, cameraPosWS);
+
+    uint updateInterval = 64;
+    if (distToCamera < NEAR_GI_DISTANCE)
+    {
+        updateInterval = 4;
+    }
+    else if (distToCamera < MIDDLE_GI_DISTANCE)
+    {
+        updateInterval = 16;
+    }
+    [branch]
+    if (probeIndex % updateInterval != frameIndex % updateInterval)
+        return;
 
     int closestBackfaceIndex = -1;
     int closestFrontfaceIndex = -1;
@@ -232,8 +263,6 @@ void RelocateProbes(UINT3 id : SV_DispatchThreadID)
         }
     }
 
-    uint2 texCoord = uint2(probeIndex % 64, probeIndex * rcp(64));
-    UINT currIndex = DDGI_Load_Probe_Offset_Index(texCoord);
     float3 currentOffset = relocationLUT[currIndex].xyz;
     float3 fullOffset = currentOffset;
 

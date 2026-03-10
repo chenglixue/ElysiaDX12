@@ -51,9 +51,6 @@ UINT Elysia_DDGI_LoadeProbeState(UINT probeIndex)
 void GenerateRayMain()
 {
     uint probeIndex = DispatchRaysIndex().x;
-    [branch]
-    if (probeIndex % 4 != frameIndex % 4)
-        return;
 
     uint rayIndex = DispatchRaysIndex().y;
     // UINT2 dimension = DispatchRaysDimensions().xy;
@@ -73,7 +70,21 @@ void GenerateRayMain()
                                               g_GridOrigin,
                                               g_GridSpacing,
                                               g_GridDimensions) + probeOffset;
-    // g_ProbeOffsetBuffer[probeIndex];
+    float distToCamera = distance(rayOrigin, cameraPosWS);
+    uint updateInterval = 64;
+
+    if (distToCamera < NEAR_GI_DISTANCE)
+    {
+        updateInterval = 4;
+    }
+    else if (distToCamera < MIDDLE_GI_DISTANCE)
+    {
+        updateInterval = 16;
+    }
+    [branch]
+    if (probeIndex % updateInterval != frameIndex % updateInterval)
+        return;
+
     float3 rayDir = DDGIGetProbeRayDir(rayIndex, RAYS_PER_PROBE, g_RandomRotation);
 
     RayDesc rayDesc;
