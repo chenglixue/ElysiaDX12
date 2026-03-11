@@ -1,5 +1,0 @@
-D:\DX12\ElysiaDX12\x64\Release\WinPixEventRuntime.dll
-D:\DX12\ElysiaDX12\x64\Release\D3D12\D3D12Core.dll
-D:\DX12\ElysiaDX12\x64\Release\D3D12\D3D12Core.pdb
-D:\DX12\ElysiaDX12\x64\Release\D3D12\D3D12SDKLayers.dll
-D:\DX12\ElysiaDX12\x64\Release\D3D12\D3D12SDKLayers.pdb
