@@ -4,7 +4,7 @@
 #include "private/Random.hlsl"
 
 #define PROBE_COUNT 10648
-#define RAYS_PER_PROBE 128
+#define RAYS_PER_PROBE 256
 #define DDGI_PROBE_IRRADIANCE_NUM_TEXELS 8
 #define DDGI_PROBE_DEPTH_NUM_TEXELS 16
 #define DXR_MAX 10000

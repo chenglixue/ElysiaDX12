@@ -218,9 +218,9 @@ void RelocateProbes(UINT3 id : SV_DispatchThreadID)
     {
         updateInterval = 8;
     }
-    [branch]
-    if (probeIndex % updateInterval != frameIndex % updateInterval)
-        return;
+    // [branch]
+    // if (probeIndex % updateInterval != frameIndex % updateInterval)
+    //     return;
 
     int closestBackfaceIndex = -1;
     int closestFrontfaceIndex = -1;
@@ -379,7 +379,8 @@ void ProbeIrradianceBlending(uint3 id : SV_DispatchThreadID,
         float epsilon = float(RAYS_PER_PROBE - RELOCATE_RAY_COUNT) * 1e-9f;
         float hysteresis = saturate(g_DDGIBlendWeight); // 历史权重
 
-        float3 netIrradiance = accumulatedIrradiance.rgb / (2.0f * max(accumulatedIrradiance.a, epsilon));
+        float3 netIrradiance = accumulatedIrradiance.rgb / ((float)RAYS_PER_PROBE);
+        // (2.0f * max(accumulatedIrradiance.a, epsilon));
         netIrradiance = pow(netIrradiance, 1.0f / g_DDGIEncodingGamma);
         float4 historyIrradiance = Elysia_DDGI_LoadIrradiance(id.xy);
 

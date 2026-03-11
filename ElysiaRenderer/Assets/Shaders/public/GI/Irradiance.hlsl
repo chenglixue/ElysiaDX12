@@ -153,7 +153,7 @@ float3 SampleDDGI(float3 positionWS,
 
     float3 finalIrradiance = sumIrradiance / sumWeight;
     finalIrradiance *= finalIrradiance;
-    finalIrradiance *= TWO_PI;
+    // finalIrradiance *= TWO_PI;
     return finalIrradiance;
 }
 
@@ -276,7 +276,7 @@ float3 SampleDDGI(float3 positionWS,
 
     float3 finalIrradiance = sumIrradiance / sumWeight;
     finalIrradiance *= finalIrradiance; // 还原回线性空间
-    finalIrradiance *= TWO_PI;
+    //finalIrradiance *= TWO_PI;
     return finalIrradiance;
 }
 
