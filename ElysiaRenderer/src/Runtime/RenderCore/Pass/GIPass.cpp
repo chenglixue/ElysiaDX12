@@ -131,7 +131,7 @@ namespace ElysiaRenderer
 
         m_pCompactedRayIndexBuffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc
         {
-            .name = L"Compacted RayData Buffer",
+            .name = L"Compacted Ray Index Buffer",
             .stride = sizeof(UINT),
             .size = sizeof(UINT) * Probe_Count * Rays_Per_Probe,
             .viewFlags = GPUResourceFlags::UAV | GPUResourceFlags::SRV,
@@ -140,7 +140,7 @@ namespace ElysiaRenderer
 
         m_pCounterBuffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc
         {
-            .name = L"Compacted RayData Buffer",
+            .name = L"Counter Buffer",
             .stride = sizeof(UINT),
             .size = 16,
             .viewFlags = GPUResourceFlags::UAV | GPUResourceFlags::SRV,
@@ -149,7 +149,7 @@ namespace ElysiaRenderer
 
         m_pIndirectArgsBuffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc
         {
-            .name = L"Compacted RayData Buffer",
+            .name = L"Indirect Args Buffer",
             .stride = sizeof(UINT3),
             .size = 256,
             .viewFlags = GPUResourceFlags::UAV | GPUResourceFlags::SRV,
@@ -204,7 +204,7 @@ namespace ElysiaRenderer
             .pBufferData = std::make_unique<uint8_t[]>(sizeof(UINT) * Probe_Count * Rays_Per_Probe),
             .bufferDataSize = sizeof(UINT) * Probe_Count * Rays_Per_Probe,
         };
-        memcpy(uploadData.pBufferData.get(), data.data(), data.size());
+        memcpy(uploadData.pBufferData.get(), data.data(), data.size() * sizeof(UINT));
         BufferManager::GetInstance().UploadBufferData(m_pDevice->GetUploadContext(), &uploadData);
 
         auto pBufferData = DX12BufferUpload
@@ -360,7 +360,9 @@ namespace ElysiaRenderer
         InitProbeOffsetIndex();
         ClearProbeOffset();
         GenerateRay();
+        ResetCounterBuffer();
         CalcCompactedRay();
+        CalcIndirectArgs();
         CalcIrradiance();
         ProbeBlend();
         RelocateProbes();
@@ -531,6 +533,17 @@ namespace ElysiaRenderer
             passData.pPipelineStateObject = pipelineStateObject;
         }
 
+        if (!m_pCommandSignature)
+        {
+            D3D12_INDIRECT_ARGUMENT_DESC argDesc = {};
+            argDesc.Type = D3D12_INDIRECT_ARGUMENT_TYPE_DISPATCH;
+            D3D12_COMMAND_SIGNATURE_DESC sigDesc = {};
+            sigDesc.ByteStride = sizeof(D3D12_DISPATCH_ARGUMENTS);
+            sigDesc.NumArgumentDescs = 1;
+            sigDesc.pArgumentDescs = &argDesc;
+            m_pDevice->GetDevice()->CreateCommandSignature(&sigDesc, nullptr, IID_PPV_ARGS(&m_pCommandSignature));
+        }
+
         if (!m_pRTPSO || !m_pGlobalRootSig)
         {
             assert(m_DXRBlob && m_pDevice->GetDevice());
@@ -616,9 +629,21 @@ namespace ElysiaRenderer
         pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(
             passID).pPipelineStateObject;
         m_pCommand->SetPipeline(pipelineStateData);
+        SetSpaceResource(passData, PER_FRAME_SPACE);
 
         m_pCommand->AddBarrier(*m_pProbeStateBuffer, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
         {
+            m_pMaterial->SetMatrix(ShaderIDs::viewMatrix, m_pCamera->GetViewMat(), passID);
+            m_pMaterial->SetMatrix(ShaderIDs::viewMatrix_I, m_pCamera->GetViewMat().Invert(), passID);
+            m_pMaterial->SetMatrix(ShaderIDs::projMatrix, m_pCamera->GetProjMat(), passID);
+            m_pMaterial->SetMatrix(ShaderIDs::projMatrix_I, m_pCamera->GetProjMat().Invert(), passID);
+            m_pMaterial->SetMatrix(ShaderIDs::viewProjMatrix,
+                                   m_pCamera->GetViewMat() * m_pCamera->GetProjMat(),
+                                   passID);
+            m_pMaterial->SetMatrix(ShaderIDs::viewProjMatrix_I,
+                                   (m_pCamera->GetViewMat() * m_pCamera->GetProjMat()).Invert(),
+                                   passID);
+
             m_pMaterial->SetUInt(ShaderIDs::g_ProbeStatesIndex,
                                  m_pProbeStateBuffer->GetResourceHeapIndex(),
                                  passID);
@@ -627,6 +652,12 @@ namespace ElysiaRenderer
                                  passID);
             m_pMaterial->SetUInt(ShaderIDs::g_RayDataBufferIndex,
                                  m_pRayDataBuffer->GetResourceHeapIndex(),
+                                 passID);
+            m_pMaterial->SetUInt(ShaderIDs::g_ProbeOffsetIndexTexIndex,
+                                 m_pProbeOffsetIndexRT->GetUAVResourceHeapIndex(),
+                                 passID);
+            m_pMaterial->SetUInt(ShaderIDs::g_RelocationLUTIndex,
+                                 m_pProbeRelocationLUTBuffer->GetResourceHeapIndex(),
                                  passID);
             m_pMaterial->SetFloat4(ShaderIDs::g_GridOrigin,
                                    Vector4(m_gridOrigin.x, m_gridOrigin.y, m_gridOrigin.z, 0.f),
@@ -750,22 +781,12 @@ namespace ElysiaRenderer
 
         m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), "Generate Ray");
     }
-    void GIPass::CalcCompactedRay()
+    void GIPass::ResetCounterBuffer()
     {
-        auto passID = PassID(RAY_COMPACTION);
+        auto passID = PassID(RESET_COUNTER);
         auto& passData = m_pMaterial->GetPassData(passID);
         auto passName = m_PassData[passID].Name.c_str();
         PIXHelper pix(m_pCommand->GetCommandList(), passName);
-
-        auto data = std::vector<UINT>(1, 0);
-        auto uploadData = DX12BufferUpload
-        {
-            .buffer = m_pCounterBuffer,
-            .pBufferData = std::make_unique<uint8_t[]>(sizeof(UINT)),
-            .bufferDataSize = 16,
-        };
-        memcpy(uploadData.pBufferData.get(), data.data(), data.size());
-        BufferManager::GetInstance().UploadBufferData(m_pDevice->GetUploadContext(), &uploadData);
 
         PipelineInfo pipelineStateData{};
         pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(
@@ -773,6 +794,33 @@ namespace ElysiaRenderer
         m_pCommand->SetPipeline(pipelineStateData);
         SetSpaceResource(passData, PER_FRAME_SPACE);
 
+        m_pCommand->AddBarrier(*m_pCounterBuffer, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+        {
+            m_pMaterial->SetUInt(ShaderIDs::g_GlobalCounterBufferIndex,
+                                 m_pCounterBuffer->GetUAVResourceHeapIndex(),
+                                 passID);
+            SetSpaceResource(passData, PER_PASS_SPACE);
+
+            m_pCommand->Dispatch(1, 1, 1);
+            m_pCommand->AddUAVBarrier(m_pCounterBuffer, false);
+        }
+        m_pCommand->AddBarrier(*m_pCounterBuffer, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
+    }
+    void GIPass::CalcCompactedRay()
+    {
+        auto passID = PassID(RAY_COMPACTION);
+        auto& passData = m_pMaterial->GetPassData(passID);
+        auto passName = m_PassData[passID].Name.c_str();
+        PIXHelper pix(m_pCommand->GetCommandList(), passName);
+
+        PipelineInfo pipelineStateData{};
+        pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(
+            passID).pPipelineStateObject;
+        m_pCommand->SetPipeline(pipelineStateData);
+        SetSpaceResource(passData, PER_FRAME_SPACE);
+
+        m_pCommand->AddBarrier(*m_pCounterBuffer, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, false);
         m_pCommand->AddBarrier(*m_pCompactedRayDataBuffer, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
         {
             m_pMaterial->SetUInt(ShaderIDs::g_SourceRayDataBufferIndex,
@@ -790,6 +838,30 @@ namespace ElysiaRenderer
             m_pMaterial->SetUInt(ShaderIDs::g_IndirectArgsBufferIndex,
                                  m_pIndirectArgsBuffer->GetUAVResourceHeapIndex(),
                                  passID);
+            m_pMaterial->SetUInt(ShaderIDs::g_ProbeStatesIndex,
+                                 m_pProbeStateBuffer->GetUAVResourceHeapIndex(),
+                                 passID);
+            m_pMaterial->SetUInt(ShaderIDs::g_GIDataBufferIndex,
+                                 m_pGIDataBuffer->GetUAVResourceHeapIndex(),
+                                 passID);
+            m_pMaterial->SetUInt(ShaderIDs::g_ProbeOffsetIndexTexIndex,
+                                 m_pProbeOffsetIndexRT->GetResourceHeapIndex(),
+                                 passID);
+            m_pMaterial->SetUInt(ShaderIDs::g_RelocationLUTIndex,
+                                 m_pProbeRelocationLUTBuffer->GetResourceHeapIndex(),
+                                 passID);
+            m_pMaterial->SetFloat4(ShaderIDs::g_GridOrigin,
+                                   Vector4(m_gridOrigin.x, m_gridOrigin.y, m_gridOrigin.z, 0.f),
+                                   passID);
+            m_pMaterial->SetFloat4(ShaderIDs::g_GridSpacing,
+                                   Vector4(m_gridSpacing.x, m_gridSpacing.y, m_gridSpacing.z, 0.f),
+                                   passID);
+            m_pMaterial->SetFloat4(ShaderIDs::g_GridDimensions,
+                                   Vector4(Grid_Dimensions.x,
+                                           Grid_Dimensions.y,
+                                           Grid_Dimensions.z,
+                                           0.f),
+                                   passID);
             SetSpaceResource(passData, PER_PASS_SPACE);
 
             auto threadGroupSize = passData.GetKernelThreadGroupSizes();
@@ -797,16 +869,41 @@ namespace ElysiaRenderer
                                  threadGroupSize.y,
                                  threadGroupSize.z);
             m_pCommand->AddUAVBarrier(m_pCompactedRayDataBuffer, false);
+            m_pCommand->AddUAVBarrier(m_pCounterBuffer, false);
         }
-        m_pCommand->AddBarrier(*m_pCompactedRayDataBuffer, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+        m_pCommand->AddBarrier(*m_pCounterBuffer, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+        m_pCommand->AddBarrier(*m_pCompactedRayDataBuffer, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, false);
         m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
     }
     void GIPass::CalcIndirectArgs()
     {
-        auto passID = PassID(RAY_COMPACTION);
+        auto passID = PassID(CALC_INDIRECT_ARGS);
         auto& passData = m_pMaterial->GetPassData(passID);
         auto passName = m_PassData[passID].Name.c_str();
         PIXHelper pix(m_pCommand->GetCommandList(), passName);
+
+        PipelineInfo pipelineStateData{};
+        pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(
+            passID).pPipelineStateObject;
+        m_pCommand->SetPipeline(pipelineStateData);
+        SetSpaceResource(passData, PER_FRAME_SPACE);
+
+        m_pCommand->AddBarrier(*m_pIndirectArgsBuffer, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+        {
+            m_pMaterial->SetUInt(ShaderIDs::g_GlobalCounterBufferIndex,
+                                 m_pCounterBuffer->GetUAVResourceHeapIndex(),
+                                 passID);
+            m_pMaterial->SetUInt(ShaderIDs::g_IndirectArgsBufferIndex,
+                                 m_pIndirectArgsBuffer->GetUAVResourceHeapIndex(),
+                                 passID);
+            SetSpaceResource(passData, PER_PASS_SPACE);
+
+            m_pCommand->Dispatch(1, 1, 1);
+            m_pCommand->AddUAVBarrier(m_pIndirectArgsBuffer, false);
+        }
+        m_pCommand->AddBarrier(*m_pIndirectArgsBuffer,
+                               D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
     }
     void GIPass::CalcIrradiance()
     {
@@ -821,7 +918,8 @@ namespace ElysiaRenderer
         m_pCommand->SetPipeline(pipelineStateData);
         SetSpaceResource(passData, PER_FRAME_SPACE);
 
-        m_pCommand->AddBarrier(*m_pRayDataBuffer, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+        m_pCommand->AddBarrier(*m_pIndirectArgsBuffer, D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT, false);
+        m_pCommand->AddBarrier(*m_pGIDataBuffer, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
         {
             m_pMaterial->SetMatrix(ShaderIDs::viewMatrix, m_pCamera->GetViewMat(), passID);
             m_pMaterial->SetMatrix(ShaderIDs::viewMatrix_I, m_pCamera->GetViewMat().Invert(), passID);
@@ -875,6 +973,15 @@ namespace ElysiaRenderer
             m_pMaterial->SetUInt(ShaderIDs::g_GIDataBufferIndex,
                                  m_pGIDataBuffer->GetResourceHeapIndex(),
                                  passID);
+            m_pMaterial->SetUInt(ShaderIDs::g_CompactedRayBufferIndex,
+                                 m_pCompactedRayDataBuffer->GetResourceHeapIndex(),
+                                 passID);
+            m_pMaterial->SetUInt(ShaderIDs::g_CompactedIndicesBufferIndex,
+                                 m_pCompactedRayIndexBuffer->GetResourceHeapIndex(),
+                                 passID);
+            m_pMaterial->SetUInt(ShaderIDs::g_GlobalCounterBufferIndex,
+                                 m_pCounterBuffer->GetResourceHeapIndex(),
+                                 passID);
 
             m_pMaterial->SetFloat(ShaderIDs::g_ProbeNormalBias, UserData::GetInstance().GIParameter.normalBias, passID);
             m_pMaterial->SetFloat(ShaderIDs::g_ProbeViewBias, UserData::GetInstance().GIParameter.viewBias, passID);
@@ -885,13 +992,20 @@ namespace ElysiaRenderer
 
             m_pCommand->GetCommandList()->SetComputeRootShaderResourceView(2, m_pTLASBuffer->GetGPUAddress());
 
-            auto threadGroupSize = passData.GetKernelThreadGroupSizes();
-            m_pCommand->Dispatch(CeilDivide(Probe_Count * Rays_Per_Probe, threadGroupSize.x),
-                                 threadGroupSize.y,
-                                 threadGroupSize.z);
-            m_pCommand->AddUAVBarrier(m_pRayDataBuffer, false);
+            m_pCommand->GetCommandList()->ExecuteIndirect(m_pCommandSignature,
+                                                          1,
+                                                          m_pIndirectArgsBuffer->GetResource(),
+                                                          0,
+                                                          nullptr,
+                                                          0
+                );
+            // auto threadGroupSize = passData.GetKernelThreadGroupSizes();
+            // m_pCommand->Dispatch(CeilDivide(Probe_Count * Rays_Per_Probe, threadGroupSize.x),
+            //                      threadGroupSize.y,
+            //                      threadGroupSize.z);
+            m_pCommand->AddUAVBarrier(m_pGIDataBuffer, false);
         }
-        m_pCommand->AddBarrier(*m_pRayDataBuffer,
+        m_pCommand->AddBarrier(*m_pGIDataBuffer,
                                D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
         m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
     }
@@ -943,6 +1057,7 @@ namespace ElysiaRenderer
         // m_pCommand->AddBarrier(*m_pProbeOffsetBuffer, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
         m_pCommand->AddBarrier(m_pProbeOffsetIndexRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
         {
+
             // m_pMaterial->SetUInt(ShaderIDs::g_ProbeOffsetsIndex,
             //                      m_pProbeOffsetBuffer->GetUAVResourceHeapIndex(),
             //                      passID);
@@ -1417,7 +1532,7 @@ namespace ElysiaRenderer
         lib->DefineExport(L"GenerateRayMain");
         lib->DefineExport(L"RayMiss");
         lib->DefineExport(L"RayClosestHit");
-        lib->DefineExport(L"ShadowMiss");
+        // lib->DefineExport(L"ShadowMiss");
 
         // 创建 Hit Group 子对象
         auto opaqueHitGroup = pipelineDesc.CreateSubobject<CD3DX12_HIT_GROUP_SUBOBJECT>();
@@ -1452,7 +1567,7 @@ namespace ElysiaRenderer
             m_stbHelper.AddRayGen(pRTProps->GetShaderIdentifier(L"GenerateRayMain"));
 
             m_stbHelper.AddMiss(pRTProps->GetShaderIdentifier(L"RayMiss"));
-            m_stbHelper.AddMiss(pRTProps->GetShaderIdentifier(L"ShadowMiss"));
+            // m_stbHelper.AddMiss(pRTProps->GetShaderIdentifier(L"ShadowMiss"));
 
             for (auto& entity : entities)
             {
