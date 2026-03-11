@@ -90,19 +90,12 @@ void DDGI_Shading(uint3 id : SV_DispatchThreadID)
     {
         LightData mainLightData = GetMainLight(mainLight);
         float3 toLight = normalize(mainLightData.toLight);
-        float shadowSpread = 0.05f;
-        float3 jitteredToLight = GetJitteredDirection(toLight,
-                                                      shadowSpread,
-                                                      probeIndex,
-                                                      rayIndex,
-                                                      frameIndex,
-                                                      BlueNoiseTex);
-        float NoL = max(0, dot(normalWS, jitteredToLight));
+        float NoL = max(0, dot(normalWS, toLight));
 
         float shadow = DDGI_Query_Shadow_Visibity(positionWS,
                                                   normalWS,
                                                   g_ProbeNormalBias,
-                                                  jitteredToLight,
+                                                  toLight,
                                                   g_SceneTLAS);
 
         float3 directIrradiance = baseColorAlpha.rgb / PI * mainLightData.color * mainLightData.intensity * NoL *

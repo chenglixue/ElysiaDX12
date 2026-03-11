@@ -765,6 +765,9 @@ namespace ElysiaRenderer
             m_pCommand->GetCommandList()->SetComputeRootShaderResourceView(
                 rootParameterIndex ++,
                 m_pProbeRelocationLUTBuffer->GetGPUAddress());
+            m_pCommand->GetCommandList()->SetComputeRootShaderResourceView(
+                rootParameterIndex ++,
+                m_pGIDataBuffer->GetGPUAddress());
 
             D3D12_DISPATCH_RAYS_DESC dispatchDesc = {};
             dispatchDesc.Width = Probe_Count;
@@ -1583,7 +1586,7 @@ namespace ElysiaRenderer
     {
         // 1. 定义根参数：对于 Bindless 方案，我们通常只需要“根常量 (Root Constants)”
         // 用来传递诸如 g_RayDataUAVIndex 或 DDGI 配置结构体的索引
-        CD3DX12_ROOT_PARAMETER1 rootParameters[6];
+        CD3DX12_ROOT_PARAMETER1 rootParameters[7];
 
         // 假设我们需要 16 个 32位常量 (比如一个 ViewProj 矩阵或一组索引)
         UINT rootParameterIndex = 0;
@@ -1595,7 +1598,7 @@ namespace ElysiaRenderer
         rootParameters[rootParameterIndex ++].InitAsShaderResourceView(SRVIndex ++, 0);
         rootParameters[rootParameterIndex ++].InitAsShaderResourceView(SRVIndex ++, 0);
         rootParameters[rootParameterIndex ++].InitAsShaderResourceView(SRVIndex ++, 0);
-        // rootParameters[rootParameterIndex ++].InitAsShaderResourceView(SRVIndex ++, 0);
+        rootParameters[rootParameterIndex ++].InitAsShaderResourceView(SRVIndex ++, 0);
 
         auto samplerDescs = GenerateSampler();
         CD3DX12_STATIC_SAMPLER_DESC staticSamplers[NUM_SAMPLER_DESCRIPTORS];

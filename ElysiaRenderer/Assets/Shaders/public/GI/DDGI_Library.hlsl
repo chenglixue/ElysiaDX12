@@ -32,6 +32,7 @@ StructuredBuffer<InstanceData> g_InstanceDataBuffer : register(t1);
 // StructuredBuffer<Vector3> g_ProbeOffsetBuffer : register(t2);
 StructuredBuffer<UINT> g_ProbeStatesBuffer : register(t2);
 StructuredBuffer<Vector4> g_ProbeRelocationLUTBuffer : register(t3);
+StructuredBuffer<GIData> g_GIDataBuffer : register(t4);
 
 SamplerState g_WarpPointSampler : register(s0);
 SamplerState g_ClampPointSampler : register(s1);
@@ -70,20 +71,6 @@ void GenerateRayMain()
                                               g_GridOrigin,
                                               g_GridSpacing,
                                               g_GridDimensions) + probeOffset;
-    float distToCamera = distance(rayOrigin, cameraPosWS);
-    uint updateInterval = 16;
-
-    if (distToCamera < NEAR_GI_DISTANCE)
-    {
-        updateInterval = 4;
-    }
-    else if (distToCamera < MIDDLE_GI_DISTANCE)
-    {
-        updateInterval = 8;
-    }
-    // [branch]
-    // if (probeIndex % updateInterval != frameIndex % updateInterval)
-    //     return;
 
     float3 finalRayDir = 0.f;
     float pdf = 0.f;
@@ -113,10 +100,17 @@ void GenerateRayMain()
             float3 irradiance = SampleTexture2D_LOD(g_IrradianceTexIndex, uv, ClampLinearSampler, 0);
 
             weights[i] = Luminance(irradiance) + 0.1f;
+            weights[i] *= Luminance(g_GIDataBuffer[probeIndex * RAYS_PER_PROBE + rayIndex + i * N].Irradiance) + 0.1f;
             sumWeight += weights[i];
         }
 
-        float r = RandomFloat(probeIndex, rayIndex, frameIndex) * sumWeight;
+        Texture2D<float4> blueNoiseTex = ResourceDescriptorHeap[BlueNoiseTexIndex];
+        float w, h;
+        blueNoiseTex.GetDimensions(w, h);
+        uint hash = probeIndex ^ (frameIndex * 19349663);
+        float2 offset = float2(hash & 0xFFFF, (hash >> 16) & 0xFFFF);
+        float2 bnUV = (offset + float2(rayIndex, rayIndex * 7.1f)) / float2(w, h);
+        float r = blueNoiseTex.SampleLevel(g_WarpPointSampler, bnUV, 0).r * sumWeight;
         float cumulativeWeight = 0.f;
         finalRayDir = candidateDirs[0];
         float finalWeight = weights[0];
