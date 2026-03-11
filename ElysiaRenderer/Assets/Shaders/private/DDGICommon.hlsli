@@ -4,7 +4,7 @@
 #include "private/Random.hlsl"
 
 #define PROBE_COUNT 10648
-#define RAYS_PER_PROBE 128
+#define RAYS_PER_PROBE 256
 #define DDGI_PROBE_IRRADIANCE_NUM_TEXELS 8
 #define DDGI_PROBE_DEPTH_NUM_TEXELS 16
 #define DXR_MAX 10000
@@ -176,6 +176,20 @@ float3 OctDecode(float2 f)
     return normalize(n);
 }
 
+uint PCG_Hash(uint input)
+{
+    uint state = input * 747796405u + 2891336453u;
+    uint word = ((state >> ((state >> 28u) + 4u)) ^ state) * 277803737u;
+    return (word >> 22u) ^ word;
+}
+
+float RandomFloat(uint p, uint r, uint f)
+{
+    uint seed = PCG_Hash(p ^ PCG_Hash(r ^ PCG_Hash(f)));
+
+    return (float)(seed & 0x00FFFFFF) / (float)0x01000000;
+}
+
 float2 GetProbeUV(uint probeIndex, float2 octUV, float3 gridDims, float probeRes)
 {
     // 1. 将 [-1, 1] 映射到 [0, 1]
@@ -331,7 +345,7 @@ float DDGI_Query_Shadow_Visibity(float3 PositionWS,
     RayDesc shadowRayDesc;
     shadowRayDesc.Origin = PositionWS + NormalWS * normalBias;
     shadowRayDesc.Direction = ToLight;
-    shadowRayDesc.TMin = 0.01f;
+    shadowRayDesc.TMin = 0.001f;
     shadowRayDesc.TMax = DXR_SHADOW_MAX;
 
     const uint rayFlags = RAY_FLAG_ACCEPT_FIRST_HIT_AND_END_SEARCH |
@@ -352,6 +366,47 @@ float DDGI_Query_Shadow_Visibity(float3 PositionWS,
     }
 
     return 1.f;
+}
+
+uint HashUV(uint2 uv)
+{
+    return uv.x * 397 + uv.y;
+}
+float3 GetJitteredDirection(float3 meanDir,
+                            float spread,
+                            uint probeIndex,
+                            uint rayIndex,
+                            uint frameIndex,
+                            Texture2D<float3> blueNoiseTex)
+{
+    uint2 texDim;
+    blueNoiseTex.GetDimensions(texDim.x, texDim.y);
+
+    uint jitterHash = HashUV(uint2(probeIndex, frameIndex));
+    uint2 sampleUV = uint2(rayIndex % texDim.x, rayIndex / texDim.x);
+    sampleUV = (sampleUV + uint2(jitterHash, jitterHash >> 16)) % texDim;
+
+    float3 bnSample = blueNoiseTex.Load(uint3(sampleUV, 0));
+
+    float phi = 2.0f * PI * bnSample.r;
+    float cosTheta = 1.0f - bnSample.g * spread;
+    float sinTheta = sqrt(max(0.0f, 1.0f - cosTheta * cosTheta));
+
+    float3 localDirJittered = float3(cos(phi) * sinTheta,
+                                     sin(phi) * sinTheta,
+                                     cosTheta);
+
+    float3 tangent, bitangent;
+    float3 v = meanDir;
+    if (abs(v.z) < 0.999f)
+        tangent = normalize(cross(v, float3(0, 0, 1)));
+    else
+        tangent = normalize(cross(v, float3(1, 0, 0)));
+    bitangent = cross(v, tangent);
+
+    return normalize(localDirJittered.x * tangent +
+                     localDirJittered.y * bitangent +
+                     localDirJittered.z * meanDir);
 }
 
 float DDGIGetVolumeBlendWeight(float3 positionWS,
