@@ -209,18 +209,18 @@ void RelocateProbes(UINT3 id : SV_DispatchThreadID)
                         [currIndex].xyz;
     float distToCamera = distance(probePosWS, cameraPosWS);
 
-    uint updateInterval = 16;
+    uint updateInterval = 64;
     if (distToCamera < NEAR_GI_DISTANCE)
     {
         updateInterval = 4;
     }
     else if (distToCamera < MIDDLE_GI_DISTANCE)
     {
-        updateInterval = 8;
+        updateInterval = 16;
     }
-    // [branch]
-    // if (probeIndex % updateInterval != frameIndex % updateInterval)
-    //     return;
+    [branch]
+    if (probeIndex % updateInterval != frameIndex % updateInterval)
+        return;
 
     int closestBackfaceIndex = -1;
     int closestFrontfaceIndex = -1;
@@ -379,8 +379,9 @@ void ProbeIrradianceBlending(uint3 id : SV_DispatchThreadID,
         float epsilon = float(RAYS_PER_PROBE - RELOCATE_RAY_COUNT) * 1e-9f;
         float hysteresis = saturate(g_DDGIBlendWeight); // 历史权重
 
-        float3 netIrradiance = accumulatedIrradiance.rgb / ((float)RAYS_PER_PROBE);
-        // (2.0f * max(accumulatedIrradiance.a, epsilon));
+        // NVIDIA 建议除以 (2.0 * sumWeight) 以匹配漫反射积分
+        float3 netIrradiance = accumulatedIrradiance.rgb /
+                               (2.0f * max(accumulatedIrradiance.a, epsilon));
         netIrradiance = pow(netIrradiance, 1.0f / g_DDGIEncodingGamma);
         float4 historyIrradiance = Elysia_DDGI_LoadIrradiance(id.xy);
 
@@ -484,7 +485,7 @@ void ProbeDepthBlending(uint3 id : SV_DispatchThreadID,
     const UINT probeIndex = GroupID.x + (GroupID.y * g_GridDimensions.x);
 
     [branch]
-    if (probeIndex >= PROBE_COUNT)
+    if (probeIndex >= PROBE_COUNT || probeIndex < 0)
         return;
 
     const UINT currProbeState = Elysia_DDGI_LoadeProbeState(probeIndex);
@@ -522,7 +523,10 @@ void ProbeDepthBlending(uint3 id : SV_DispatchThreadID,
 
             // 方向越接近，权重越高
             float weight = max(0.f, dot(probeDirection, rayDir));
-            float distWeight = pow(weight, 26);
+            float w2 = weight * weight;
+            float w4 = w2 * w2;
+            float w26 = w4 * w4 * w4 * w2;
+            float distWeight = w26 * w26;
             float absDist = min(abs(rayDistance), probeMaxRayDistance);
             accumulatedDist += float2(absDist * distWeight, (absDist * absDist) * distWeight);
             distSumWeight += distWeight;

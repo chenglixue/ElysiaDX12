@@ -179,9 +179,10 @@ FEncodeGBufferData GetEncodeGBufferData(FInputParams inputParams, float3 toLight
     StructuredBuffer<MeshData> meshDataBuffer = ResourceDescriptorHeap[meshDataBufferIndex];
     MeshData currMeshData = meshDataBuffer[meshDataIndex];
 
-    float4 baseColor = SampleTexture2D(currMeshData.baseColorTexIndex,
-                                       inputParams.objectUV,
-                                       WarpLinearSampler)
+    float4 baseColor = SampleTexture2D_LOD(currMeshData.baseColorTexIndex,
+                                           inputParams.objectUV,
+                                           WarpLinearSampler,
+                                           0)
                        * float4(currMeshData.baseColorTint.xyz, currMeshData.opacity);
     clip(baseColor.a - currMeshData.cutoff);
 

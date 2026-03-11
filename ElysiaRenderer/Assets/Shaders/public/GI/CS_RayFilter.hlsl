@@ -51,14 +51,14 @@ void RayCompaction(uint3 id : SV_DispatchThreadID)
     float3 probePosWS = GetProbeWorldPosition(probeIndex, g_GridOrigin, g_GridSpacing, g_GridDimensions) + probeOffset;
     float distToCamera = distance(probePosWS, cameraPosWS);
 
-    uint updateInterval = 16;
+    uint updateInterval = 64;
     if (distToCamera < NEAR_GI_DISTANCE)
     {
         updateInterval = 4;
     }
     else if (distToCamera < MIDDLE_GI_DISTANCE)
     {
-        updateInterval = 8;
+        updateInterval = 16;
     }
     [branch]
     if (probeIndex % updateInterval != frameIndex % updateInterval)

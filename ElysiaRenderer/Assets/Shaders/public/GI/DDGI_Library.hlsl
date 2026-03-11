@@ -71,7 +71,7 @@ void GenerateRayMain()
                                               g_GridSpacing,
                                               g_GridDimensions) + probeOffset;
     float distToCamera = distance(rayOrigin, cameraPosWS);
-    uint updateInterval = 16;
+    uint updateInterval = 64;
 
     if (distToCamera < NEAR_GI_DISTANCE)
     {
@@ -79,65 +79,17 @@ void GenerateRayMain()
     }
     else if (distToCamera < MIDDLE_GI_DISTANCE)
     {
-        updateInterval = 8;
+        updateInterval = 16;
     }
     [branch]
     if (probeIndex % updateInterval != frameIndex % updateInterval)
         return;
 
-    float3 finalRayDir = 0.f;
-    float pdf = 0.f;
-    if (rayIndex <= int(RAYS_PER_PROBE * 0.25f))
-    {
-        finalRayDir = DDGIGetProbeRayDir(rayIndex, RAYS_PER_PROBE, g_RandomRotation);
-        pdf = INV_FOUR_PI;
-    }
-    else
-    {
-        const uint N = 4;
-        float3 candidateDirs[N];
-        float weights[N];
-        float sumWeight = 0.0f;
-        float3 gridCoord = GetGridCoord(rayOrigin, g_GridOrigin, g_GridSpacing);
-        int3 baseProbeCoords = floor(gridCoord);
-        int3 adjCoords = clamp(baseProbeCoords, 0, g_GridDimensions.xyz - 1);
-        uint2 atlasPos = uint2(adjCoords.x, adjCoords.y + adjCoords.z * g_GridDimensions.y);
-
-        for (UINT i = 0; i < N; ++i)
-        {
-            candidateDirs[i] = DDGIGetProbeRayDir(rayIndex + i * N, RAYS_PER_PROBE, g_RandomRotation);
-
-            float2 uv = OctEncode(candidateDirs[i]);
-            uv = (uv * 0.5f + 0.5f) * (DDGI_PROBE_IRRADIANCE_NUM_TEXELS - 2.f) + 1.0f;
-            uv = (float2(atlasPos * DDGI_PROBE_IRRADIANCE_NUM_TEXELS) + uv) * g_IrradianceTexSize.zw;
-            float3 irradiance = SampleTexture2D_LOD(g_IrradianceTexIndex, uv, ClampLinearSampler, 0);
-
-            weights[i] = Luminance(irradiance) + 0.1f;
-            sumWeight += weights[i];
-        }
-
-        float r = RandomFloat(probeIndex, rayIndex, frameIndex) * sumWeight;
-        float cumulativeWeight = 0.f;
-        finalRayDir = candidateDirs[0];
-        float finalWeight = weights[0];
-
-        for (UINT i = 0; i < N; ++i)
-        {
-            cumulativeWeight += weights[i];
-            if (r <= cumulativeWeight)
-            {
-                finalRayDir = candidateDirs[i];
-                finalWeight = weights[i];
-                break;
-            }
-        }
-
-        pdf = (finalWeight / (sumWeight + 1e-4)) * N * INV_FOUR_PI;
-    }
+    float3 rayDir = DDGIGetProbeRayDir(rayIndex, RAYS_PER_PROBE, g_RandomRotation);
 
     RayDesc rayDesc;
     rayDesc.Origin = rayOrigin;
-    rayDesc.Direction = finalRayDir;
+    rayDesc.Direction = rayDir;
     rayDesc.TMin = 0.f;
     rayDesc.TMax = DXR_MAX;
 
@@ -156,7 +108,6 @@ void GenerateRayMain()
     uint writeIndex = probeIndex * RAYS_PER_PROBE + rayIndex;
     RWStructuredBuffer<RayData> rayDatas = ResourceDescriptorHeap[g_RayDataBufferIndex];
     rayDatas[writeIndex].Data = rayData.Data;
-    rayDatas[writeIndex].Data.w = pdf;
     rayDatas[writeIndex].Position = rayData.Position;
     // Elysia_DDGI_StoreRayData(writeIndex, rayData.Radiance, rayData.Distance);
 }
@@ -187,9 +138,6 @@ void RayClosestHit(inout RayData rayData,
         return;
     }
 
-    float hitDistance = RayTCurrent();
-    float3 positionWS = WorldRayOrigin() + WorldRayDirection() * RayTCurrent();
-
     UINT instanceID = InstanceID();
     uint primIdx = PrimitiveIndex();
     uint globalGeometryIdx = instanceID + primIdx;
@@ -199,6 +147,13 @@ void RayClosestHit(inout RayData rayData,
     UINT vertexOffset = instanceData.VertexOffset;
     UINT indexOffset = instanceData.IndexOffset;
 
+    // UINT i0 = indicesBuffer[indexOffset + primIdx * 3 + 0];
+    // UINT i1 = indicesBuffer[indexOffset + primIdx * 3 + 1];
+    // UINT i2 = indicesBuffer[indexOffset + primIdx * 3 + 2];
+    // Vertex vertices[3];
+    // vertices[0] = verticesBuffer[vertexOffset + i0];
+    // vertices[1] = verticesBuffer[vertexOffset + i1];
+    // vertices[2] = verticesBuffer[vertexOffset + i2];
     float3 bary = float3(1.0 - attr.barycentrics.x - attr.barycentrics.y, attr.barycentrics.x, attr.barycentrics.y);
     Vertex v = InterpolateVertex(verticesBuffer[vertexOffset + indicesBuffer[indexOffset + PrimitiveIndex() * 3 + 0]],
                                  verticesBuffer[vertexOffset + indicesBuffer[indexOffset + PrimitiveIndex() * 3 + 1]],
@@ -208,7 +163,9 @@ void RayClosestHit(inout RayData rayData,
     float3 normalOS = v.normalOS;
     float3 N = normalize(mul(ObjectToWorld3x4(), float4(normalOS, 0.f)));
 
-    rayData.Position = float4(positionWS, hitDistance);
+    float3 positionWS = WorldRayOrigin() + WorldRayDirection() * RayTCurrent();
+
+    rayData.Position = float4(positionWS, RayTCurrent());
     rayData.Data = float4(PackNormal(N),
                           instanceData.BaseColorTexIndex,
                           instanceData.NormalTexIndex,
