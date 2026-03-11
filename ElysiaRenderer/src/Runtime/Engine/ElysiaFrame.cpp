@@ -553,7 +553,7 @@ namespace ElysiaEngine
                                0.f,
                                5.f);
             ImGui::ColorEdit3("Ambient Cubemap Tint", (float*)&pUserData.AmbientCubemapTint);
-            ImGui::SliderFloat("GI Normal Bias", (float*)&pUserData.GIParameter.normalBias, 0, 0.2);
+            ImGui::SliderFloat("GI Normal Bias", (float*)&pUserData.GIParameter.normalBias, 0, 0.5);
             ImGui::SliderFloat("GI View Bias", (float*)&pUserData.GIParameter.viewBias, 0, 2);
             ImGui::SliderFloat("GI Blend Weight",
                                (float*)&pUserData.GIParameter.blendWeight,
