@@ -81,9 +81,9 @@ void GenerateRayMain()
     {
         updateInterval = 8;
     }
-    [branch]
-    if (probeIndex % updateInterval != frameIndex % updateInterval)
-        return;
+    // [branch]
+    // if (probeIndex % updateInterval != frameIndex % updateInterval)
+    //     return;
 
     float3 finalRayDir = 0.f;
     float pdf = 0.f;
@@ -199,11 +199,15 @@ void RayClosestHit(inout RayData rayData,
     UINT vertexOffset = instanceData.VertexOffset;
     UINT indexOffset = instanceData.IndexOffset;
 
+    UINT i0 = indicesBuffer[indexOffset + primIdx * 3 + 0];
+    UINT i1 = indicesBuffer[indexOffset + primIdx * 3 + 1];
+    UINT i2 = indicesBuffer[indexOffset + primIdx * 3 + 2];
+    Vertex vertices[3];
+    vertices[0] = verticesBuffer[vertexOffset + i0];
+    vertices[1] = verticesBuffer[vertexOffset + i1];
+    vertices[2] = verticesBuffer[vertexOffset + i2];
     float3 bary = float3(1.0 - attr.barycentrics.x - attr.barycentrics.y, attr.barycentrics.x, attr.barycentrics.y);
-    Vertex v = InterpolateVertex(verticesBuffer[vertexOffset + indicesBuffer[indexOffset + PrimitiveIndex() * 3 + 0]],
-                                 verticesBuffer[vertexOffset + indicesBuffer[indexOffset + PrimitiveIndex() * 3 + 1]],
-                                 verticesBuffer[vertexOffset + indicesBuffer[indexOffset + PrimitiveIndex() * 3 + 2]],
-                                 bary);
+    Vertex v = InterpolateVertex(vertices, bary);
 
     float3 normalOS = v.normalOS;
     float3 N = normalize(mul(ObjectToWorld3x4(), float4(normalOS, 0.f)));

@@ -136,9 +136,7 @@ void DDGI_Shading(uint3 id : SV_DispatchThreadID)
 
             indirectRadiance *= blendWeight;
             result += (indirectRadiance);
-
         }
-        result = shadow;
     }
     else
     {
