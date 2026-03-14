@@ -92,14 +92,15 @@ namespace ElysiaRenderer
         static inline D3D12_INDEX_BUFFER_VIEW m_indexView;
         static inline Vector3 m_gridSpacing;
         static inline Vector3 m_gridOrigin;
-        static inline BufferHandle m_vertexBuffer;
-        static inline BufferHandle m_indexBuffer;
-        static inline BufferHandle m_pRayDataBuffer;
-        static inline BufferHandle m_pInstanceDataBuffer;
+        static inline BufferHandle m_vertexBuffer = nullptr;
+        static inline BufferHandle m_indexBuffer = nullptr;
+        static inline BufferHandle m_pRayDataBuffer = nullptr;
+        static inline BufferHandle m_pInstanceDataBuffer = nullptr;
         // static inline BufferHandle m_pProbeOffsetBuffer;
-        static inline BufferHandle m_pProbeStateBuffer;
-        static inline BufferHandle m_pProbeRelocationLUTBuffer;
-        static inline BufferHandle m_pGIDataBuffer;
+        static inline BufferHandle m_pProbeStateBuffer = nullptr;
+        static inline BufferHandle m_pProbeRelocationLUTBuffer = nullptr;
+        static inline BufferHandle m_pGIDataBuffer = nullptr;
+
         static inline RenderTexture* m_pProbeOffsetIndexRT = nullptr;
         static inline RenderTexture* m_pIrradianceRT = nullptr;
         static inline RenderTexture* m_pDistanceRT = nullptr;
@@ -191,20 +192,35 @@ namespace ElysiaRenderer
             Vector3 Max;
             float pad1;
         };
+        struct alignas(16) Reservoir
+        {
+            Vector3 direction;
+            float weightSum;
+            Vector3 hitPos;
+            float numSamples; // 见过的样本总数
+            float hitDistance;
+            float estimatorWeight; // 归一化权重 (用于最终补偿)
+            uint packedNormal;
+        };
         CComPtr<ID3D12Device5> m_pDevice5;
         SBTHelper m_stbHelper;
         CComPtr<IDxcBlob> m_DXRBlob;
         CComPtr<ID3D12RootSignature> m_pGlobalRootSig;
         CComPtr<ID3D12StateObject> m_pRTPSO;
         mutable std::vector<std::wstring> m_tempStrings;
-        BufferHandle m_pTLASBuffer;
-        BufferHandle m_pTLASScratchBuffer;
-        BufferHandle m_pTLASUploadBuffer;
-        BufferHandle m_pStaticAABBDataBuffer;
-        BufferHandle m_pCompactedRayDataBuffer;
-        BufferHandle m_pCompactedRayIndexBuffer;
-        BufferHandle m_pCounterBuffer;
-        BufferHandle m_pIndirectArgsBuffer;
+        BufferHandle m_pTLASBuffer = nullptr;
+        BufferHandle m_pTLASScratchBuffer = nullptr;
+        BufferHandle m_pTLASUploadBuffer = nullptr;
+        BufferHandle m_pStaticAABBDataBuffer = nullptr;
+        BufferHandle m_pCompactedRayDataBuffer = nullptr;
+        BufferHandle m_pCompactedRayIndexBuffer = nullptr;
+        BufferHandle m_pCounterBuffer = nullptr;
+        BufferHandle m_pIndirectArgsBuffer = nullptr;
+        BufferHandle m_pReservoirBuffer0 = nullptr;
+        BufferHandle m_pReservoirBuffer1 = nullptr;
+        BufferHandle m_pCurrReservoirBuffer = nullptr;
+        BufferHandle m_pPreReservoirBuffer = nullptr;
+        UINT m_currHistoryIndex = 0;
         std::vector<InstanceData> m_instanceDatas;
         std::vector<AABBData> m_AABBDatas;
         std::vector<UINT> m_probeStates = std::vector<UINT>(Probe_Count, 1);

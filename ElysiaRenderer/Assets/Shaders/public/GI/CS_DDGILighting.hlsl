@@ -158,7 +158,7 @@ void DDGI_Shading(uint3 id : SV_DispatchThreadID)
     }
 
     GIData data = (GIData)0;
-    data.Irradiance = saturate(result) * rcp(pdf);
+    data.Irradiance = saturate(result) * (pdf);
     data.Distance = distance;
     GIDataBuffer[originIndex] = data;
 }

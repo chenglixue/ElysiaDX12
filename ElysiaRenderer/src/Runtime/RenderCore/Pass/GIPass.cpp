@@ -156,6 +156,24 @@ namespace ElysiaRenderer
             .accessFlags = BufferAccessFlags::GPUOnly,
         });
 
+        m_pReservoirBuffer0 = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc
+        {
+            .name = L"Reservoir Buffer 0",
+            .stride = sizeof(Reservoir),
+            .size = sizeof(Reservoir) * Probe_Count * Rays_Per_Probe,
+            .viewFlags = GPUResourceFlags::UAV | GPUResourceFlags::SRV,
+            .accessFlags = BufferAccessFlags::GPUOnly,
+        });
+
+        m_pReservoirBuffer1 = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc
+        {
+            .name = L"Reservoir Buffer 1",
+            .stride = sizeof(Reservoir),
+            .size = sizeof(Reservoir) * Probe_Count * Rays_Per_Probe,
+            .viewFlags = GPUResourceFlags::UAV | GPUResourceFlags::SRV,
+            .accessFlags = BufferAccessFlags::GPUOnly,
+        });
+
         m_DXRBlob = CompileRaytracingLibrary(L"Shaders\\public\\GI\\DDGI_Library.hlsl");
     }
 
@@ -703,14 +721,29 @@ namespace ElysiaRenderer
             UINT g_DistanceTexIndex;
             UINT g_ProbeOffsetIndexTexIndex;
 
+            UINT g_PreReservoirBufferIndex;
+            UINT g_CurrReservoirBufferIndex;
             float g_ProbeNormalBias;
             float g_ProbeViewBias;
+
             float g_DDGIEncodingGamma;
         } constantData;
         constexpr UINT constantSize = sizeof(constantData) / 4;
 
-        m_pCommand->AddBarrier(*m_pRayDataBuffer, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+        if (!m_currHistoryIndex)
+        {
+            m_pPreReservoirBuffer = m_pReservoirBuffer0;
+            m_pCurrReservoirBuffer = m_pReservoirBuffer1;
+        }
+        else
+        {
+            m_pPreReservoirBuffer = m_pReservoirBuffer1;
+            m_pCurrReservoirBuffer = m_pReservoirBuffer0;
+        }
+        m_currHistoryIndex = (m_currHistoryIndex + 1) % 2;
 
+        m_pCommand->AddBarrier(*m_pRayDataBuffer, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, false);
+        m_pCommand->AddBarrier(*m_pCurrReservoirBuffer, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
         {
             assert(m_pGlobalRootSig != nullptr);
             m_pCommand->GetCommandList()->SetComputeRootSignature(m_pGlobalRootSig);
@@ -732,8 +765,11 @@ namespace ElysiaRenderer
                 .g_DistanceTexIndex = m_pDistanceRT->GetUAVResourceHeapIndex(),
                 .g_ProbeOffsetIndexTexIndex = m_pProbeRelocationLUTBuffer->GetResourceHeapIndex(),
 
+                .g_PreReservoirBufferIndex = m_pPreReservoirBuffer->GetUAVResourceHeapIndex(),
+                .g_CurrReservoirBufferIndex = m_pCurrReservoirBuffer->GetUAVResourceHeapIndex(),
                 .g_ProbeNormalBias = UserData::GetInstance().GIParameter.normalBias,
                 .g_ProbeViewBias = UserData::GetInstance().GIParameter.viewBias,
+
                 .g_DDGIEncodingGamma = UserData::GetInstance().GIParameter.gamma,
             };
 
@@ -778,7 +814,11 @@ namespace ElysiaRenderer
             dispatchDesc.HitGroupTable = m_stbHelper.GetHitGroupRange();
             m_pCommand->GetCommandList()->DispatchRays(&dispatchDesc);
             m_pCommand->AddUAVBarrier(m_pRayDataBuffer, false);
+            m_pCommand->AddUAVBarrier(m_pCurrReservoirBuffer, false);
         }
+        m_pCommand->AddBarrier(*m_pCurrReservoirBuffer,
+                               D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,
+                               false);
         m_pCommand->AddBarrier(*m_pRayDataBuffer,
                                D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 

@@ -69,6 +69,18 @@ struct AABBData
     float pad1;
 };
 
+struct Reservoir
+{
+    Vector3 direction;
+    float weightSum;
+    Vector3 hitPos;
+    float numSamples; // 见过的样本总数
+
+    float hitDistance;
+    float estimatorWeight; // 归一化权重 (用于最终补偿)
+    uint packedNormal;
+};
+
 Vertex InterpolateVertex(Vertex vertices[3], float3 barycentrics)
 {
     Vertex o = (Vertex)0;

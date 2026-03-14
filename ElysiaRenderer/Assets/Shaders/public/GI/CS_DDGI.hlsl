@@ -520,9 +520,12 @@ void ProbeDepthBlending(uint3 id : SV_DispatchThreadID,
             float3 rayDir = g_RayDirection[rayIndex];
             float rayDistance = g_RayDistance[rayIndex];
 
+            if (rayDistance < 0.0f)
+                continue;
+
             // 方向越接近，权重越高
             float weight = max(0.f, dot(probeDirection, rayDir));
-            float distWeight = pow(weight, 26);
+            float distWeight = pow(weight, 1);
             float absDist = min(abs(rayDistance), probeMaxRayDistance);
             accumulatedDist += float2(absDist * distWeight, (absDist * absDist) * distWeight);
             distSumWeight += distWeight;
