@@ -478,7 +478,20 @@ namespace ElysiaCore
         samplerDescs[samplerIndex].AddressU = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
         samplerDescs[samplerIndex].AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
         samplerDescs[samplerIndex].AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
-        samplerDescs[samplerIndex].ComparisonFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+        //rootSignature->InitStaticSamplers(samplerIndex, samplerDescs[samplerIndex], shaderVisibility);
+        samplerIndex ++;
+
+        samplerDescs[samplerIndex].Filter = D3D12_FILTER_MIN_MAG_MIP_POINT;
+        samplerDescs[samplerIndex].AddressU = D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
+        samplerDescs[samplerIndex].AddressV = D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
+        samplerDescs[samplerIndex].AddressW = D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
+        //rootSignature->InitStaticSamplers(samplerIndex, samplerDescs[samplerIndex], shaderVisibility);
+        samplerIndex ++;
+
+        samplerDescs[samplerIndex].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+        samplerDescs[samplerIndex].AddressU = D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
+        samplerDescs[samplerIndex].AddressV = D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
+        samplerDescs[samplerIndex].AddressW = D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
         //rootSignature->InitStaticSamplers(samplerIndex, samplerDescs[samplerIndex], shaderVisibility);
         samplerIndex ++;
 

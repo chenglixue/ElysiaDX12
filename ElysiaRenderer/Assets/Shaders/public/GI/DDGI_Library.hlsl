@@ -45,6 +45,8 @@ SamplerState g_WarpAnisotropicSampler : register(s4);
 SamplerState g_ClampAnisotropicSampler : register(s5);
 SamplerState g_ShadowWarpLinearSampler : register(s6);
 SamplerState g_ShadowClampLinearSampler : register(s7);
+SamplerState g_MirrorPointSampler : register(s8);
+SamplerState g_MirrorLinearSampler : register(s9);
 
 UINT Elysia_DDGI_LoadeProbeState(UINT probeIndex)
 {
@@ -89,6 +91,20 @@ void GenerateRayMain()
                                               g_GridOrigin,
                                               g_GridSpacing,
                                               g_GridDimensions) + probeOffset;
+
+    float distToCamera = distance(rayOrigin, cameraPosWS);
+    uint updateInterval = 16;
+    if (distToCamera < NEAR_GI_DISTANCE)
+    {
+        updateInterval = 4;
+    }
+    else if (distToCamera < MIDDLE_GI_DISTANCE)
+    {
+        updateInterval = 8;
+    }
+    [branch]
+    if (probeIndex % updateInterval != frameIndex % updateInterval)
+        return;
 
     Texture2D<float4> blueNoiseTex = ResourceDescriptorHeap[BlueNoiseTexIndex];
     float w, h;

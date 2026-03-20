@@ -219,7 +219,6 @@ FEncodeGBufferData GetEncodeGBufferData(FInputParams inputParams, float3 toLight
     float2 preScreenUV = preClipPos.xy * 0.5f * float2(1.f, -1.f) + 0.5f;
 
     o.Velocity = inputParams.ScreenUV - preScreenUV;
-
     o.Anisotropy = 0;
     o.DiffuseColor = o.BaseColor - o.BaseColor * o.Metallic;
     o.SpecularColor = ComputeF0(o.Specular, o.BaseColor, o.Metallic);

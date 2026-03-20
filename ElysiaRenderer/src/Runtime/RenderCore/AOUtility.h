@@ -35,8 +35,8 @@ namespace ElysiaRenderer
         float IntensityMul = 1.f;
         float IntensityPow = 1.f;
 
-        bool IsLerpAO = false;
-        float AOLerpFactor = 0.1f;
+        bool IsDownSample = false;
+        float bilateralSimilarityDistanceSigma = 5.f;
         float TAALerpFactor = 0.5f;
 
         bool IsBlur = true;

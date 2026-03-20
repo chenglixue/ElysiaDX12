@@ -28,7 +28,7 @@ float Elysia_AOImportance_SampleImportance(float2 screenUV)
 void GenerateAOImportance(UINT3 id : SV_DispatchThreadID)
 {
     UINT2 basePos = id * 2;
-    float2 baseUV = (basePos + 0.5f) * g_DeinterleavedAOSize.zw;
+    float2 AOUV = (basePos + 0.5f) * g_DeinterleavedAOSize.zw;
     float avg = 0.f;
     float minV = 1.f;
     float maxV = 0.f;
@@ -38,7 +38,7 @@ void GenerateAOImportance(UINT3 id : SV_DispatchThreadID)
     {
         UINT layerIndex = i;
         float4 vals = GatherRedTexture2D(g_DeinterleaveAOTexIndices[layerIndex],
-                                         baseUV,
+                                         AOUV,
                                          ClampPointSampler);
 
         //vals *= g_AOIntensityMul;

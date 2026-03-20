@@ -1769,6 +1769,20 @@ namespace ElysiaRenderer
         //rootSignature->InitStaticSamplers(samplerIndex, samplerDescs[samplerIndex], shaderVisibility);
         samplerIndex ++;
 
+        samplerDescs[samplerIndex].Filter = D3D12_FILTER_MIN_MAG_MIP_POINT;
+        samplerDescs[samplerIndex].AddressU = D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
+        samplerDescs[samplerIndex].AddressV = D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
+        samplerDescs[samplerIndex].AddressW = D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
+        //rootSignature->InitStaticSamplers(samplerIndex, samplerDescs[samplerIndex], shaderVisibility);
+        samplerIndex ++;
+
+        samplerDescs[samplerIndex].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+        samplerDescs[samplerIndex].AddressU = D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
+        samplerDescs[samplerIndex].AddressV = D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
+        samplerDescs[samplerIndex].AddressW = D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
+        //rootSignature->InitStaticSamplers(samplerIndex, samplerDescs[samplerIndex], shaderVisibility);
+        samplerIndex ++;
+
         return samplerDescs;
     }
 

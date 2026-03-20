@@ -12,6 +12,7 @@ cbuffer PassConstant : register(b0, perPassSpace)
 {
     UINT g_IrradianceTexIndex;
     UINT g_AABBInstanceDatasIndex;
+    UINT g_TargetTexIndex;
     UINT g_DebugMode;
 
     Vector4 screenSize;
@@ -198,6 +199,7 @@ PSOutput PS(PSInput i)
     {
     case DEBUG_AO:
     {
+        // float3 AO = SampleTexture2D(g_TargetTexIndex, i.uv, ClampLinearSampler);
         float AO = SampleTexture2D(g_AOIndex, i.uv, ClampLinearSampler);
         o.target0 = AO;
         break;
