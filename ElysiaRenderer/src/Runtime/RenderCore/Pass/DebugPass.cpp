@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "DebugPass.h"
 
-#include "AOPass.h"
 #include "GIPass.h"
 #include "Editor/UserData.h"
 #include "Programs/PIXHelper.h"
@@ -128,14 +127,6 @@ namespace ElysiaRenderer
         {
             m_pCommand->AddBarrier(m_pCameraColorRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
             {
-                // m_pMaterial->SetUInt(ShaderIDs::g_TargetTexIndex,
-                //                      RenderTargetManager::GetInstance().GetRenderTexture(
-                //                                                             RenderResource::GetInstance().
-                //                                                             GetPropertyName(
-                //                                                                 PropertyToID(
-                //                                                                     L"Deinterleaved AO RT" +
-                //                                                                     std::to_wstring(0))))->
-                //                                                         GetResourceHeapIndex());
                 SetSpaceResource(passData, PER_PASS_SPACE);
                 m_pCommand->DrawFullScreenTriangle();
             }

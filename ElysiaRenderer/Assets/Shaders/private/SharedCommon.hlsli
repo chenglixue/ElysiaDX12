@@ -19,8 +19,6 @@
 #define ClampAnisotropicSampler 5
 #define ShadowWarpLinearSampler 6
 #define ShadowClampLinearSampler 7
-#define MirrorPointSampler 8
-#define MirrorLinearSampler 9
 
 #define Shading_Model_ID_Unlit 0
 #define Shading_Model_ID_Default_Lit 1

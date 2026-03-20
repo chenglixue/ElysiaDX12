@@ -655,16 +655,12 @@ namespace ElysiaEngine
         if (ImGui::CollapsingHeader("AO"))
         {
             ImGui::Checkbox("Is Enable AO", &pUserData.aoParameter.IsEnableAO);
-            ImGui::Checkbox("Is Down Sample", &pUserData.aoParameter.IsDownSample);
+            ImGui::Checkbox("Is IsLerp AO", &pUserData.aoParameter.IsLerpAO);
             ImGui::Checkbox("Is Blur", &pUserData.aoParameter.IsBlur);
 
             ImGui::SliderInt("AO Sample Count", &pUserData.aoParameter.SampleCount, 2, 6);
             ImGui::SliderInt("AO Sample Step Count", &pUserData.aoParameter.SampleStepCount, 2, 6);
 
-            ImGui::SliderFloat("AO Bilateral Similarity Distance Sigma",
-                               &pUserData.aoParameter.bilateralSimilarityDistanceSigma,
-                               0,
-                               10);
             ImGui::SliderFloat("AO Radius", &pUserData.aoParameter.Radius, 0.1, 2);
             ImGui::SliderFloat("AO Fade Radius", &pUserData.aoParameter.FadeRadius, 1, 20000);
             ImGui::SliderFloat("AO Fade Distance", &pUserData.aoParameter.FadeDistance, 1, 20000);
@@ -674,7 +670,9 @@ namespace ElysiaEngine
             ImGui::SliderFloat("AO Pow", &pUserData.aoParameter.IntensityPow, 0.1, 8);
 
             ImGui::SliderFloat("AO Bias", &pUserData.aoParameter.Bias, 0.f, 0.01f);
+            ImGui::SliderFloat("AO HIZ Mip Factor", &pUserData.aoParameter.HIZMipFactor, 0.f, 1.f);
 
+            ImGui::SliderFloat("AO Lerp", &pUserData.aoParameter.AOLerpFactor, 0.1f, 1.f);
             ImGui::SliderFloat("AO TAA Lerp Weight",
                                &pUserData.aoParameter.TAALerpFactor,
                                0.05f,
@@ -693,6 +691,7 @@ namespace ElysiaEngine
             pUserData.aoParameter.BlurQuality = (AOBlurQuality)blurQualityIndex;
 
             ImGui::SliderInt("AO Blur Count", &pUserData.aoParameter.BlurCount, 1, 4);
+            ImGui::SliderInt("AO Blur Radius", &pUserData.aoParameter.BlurIntensity, 1, 10);
             ImGui::SliderFloat("AO Sharpness", &pUserData.aoParameter.Sharpness, 0.f, 1.f);
 
             ImGui::Checkbox("Is Enable TAA", &pUserData.aoParameter.IsTAA);

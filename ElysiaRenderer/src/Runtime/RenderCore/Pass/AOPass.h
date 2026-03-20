@@ -15,18 +15,16 @@ namespace ElysiaRenderer
     using namespace ElysiaHelper;
 
 #define AO_PASS_LIST \
-    PASS(DEINTER_LEAVE_NORMAL_DEPTH_PASS,   "public\\PostProcess\\AO\\CS_GenerateDepthNormalMip.hlsl",  true, DeinterleaveNormalDepth)\
-    PASS(HIZ_PASS,                          "public\\PostProcess\\AO\\CS_GenerateDepthNormalMip.hlsl",  true, AODeinterleavedHIZ)\
-    PASS(Deinterleaved_AO_PASS,             "public\\PostProcess\\AO\\CS_LayeredAO.hlsl",               true, CalcBaseAO)\
-    PASS(Generate_AO_Importance_PASS,       "public\\PostProcess\\AO\\CS_GenerateAOImportance.hlsl",    true, GenerateAOImportance)\
-    PASS(Post_AO_Importance_A,              "public\\PostProcess\\AO\\CS_GenerateAOImportance.hlsl",    true, PostAOImportanceA)\
-    PASS(Post_AO_Importance_B,              "public\\PostProcess\\AO\\CS_GenerateAOImportance.hlsl",    true, PostAOImportanceB)\
-    PASS(Calc_AO_PASS,                      "public\\PostProcess\\AO\\CS_LayeredAO.hlsl",               true, LayeredHBAOMain)\
-    PASS(AO_Reinterleave_PASS,              "public\\PostProcess\\AO\\CS_LayeredAO.hlsl",               true, ReinterleaveMain)\
-    PASS(AO_UPSAMPLE_PASS,                  "public\\PostProcess\\AO\\CS_LayeredAO.hlsl",               true, UpSampleMain)\
-    PASS(Deinterleaved_Blur_PASS,           "public\\PostProcess\\AO\\CS_AOEdgeSensitiveBlur.hlsl",     true, AOEdgeSensitiveBlur)\
-    PASS(AO_TAA_PASS,                       "public\\PostProcess\\CS_AOTAA.hlsl",                       true, TAA)
-
+PASS(Deinterleaved_Depth_PASS,          "public\\PostProcess\\AO\\CS_LayeredAO.hlsl",               true, DeinterleaveMain)\
+PASS(AO_HIZ_PASS,                       "public\\PostProcess\\AO\\CS_AOHIZNormal.hlsl",             true, AOHIZNormal)\
+PASS(Deinterleaved_AO_PASS,             "public\\PostProcess\\AO\\CS_LayeredAO.hlsl",               true, CalcBaseAO)\
+PASS(Generate_AO_Importance_PASS,       "public\\PostProcess\\AO\\CS_GenerateAOImportance.hlsl",    true, GenerateAOImportance)\
+PASS(Post_AO_Importance_A,              "public\\PostProcess\\AO\\CS_GenerateAOImportance.hlsl",    true, PostAOImportanceA)\
+PASS(Post_AO_Importance_B,              "public\\PostProcess\\AO\\CS_GenerateAOImportance.hlsl",    true, PostAOImportanceB)\
+PASS(Calc_AO_PASS,                      "public\\PostProcess\\AO\\CS_LayeredAO.hlsl",               true, LayeredHBAOMain)\
+PASS(Deinterleaved_Blur_PASS,           "public\\PostProcess\\AO\\CS_AOEdgeSensitiveBlur.hlsl",     true, AOEdgeSensitiveBlur)\
+PASS(AO_Reinterleave_PASS,              "public\\PostProcess\\AO\\CS_LayeredAO.hlsl",               true, ReinterleaveMain)\
+PASS(AO_TAA_PASS,                       "public\\PostProcess\\CS_AOTAA.hlsl",                       true, TAA)
 
     class AOPass : public BasePass
     {
@@ -36,8 +34,6 @@ namespace ElysiaRenderer
             static inline size_t HIZRTID = PropertyToID(L"AO HIZ RT");
             static inline size_t AOImportanceID = PropertyToID(L"AO Importance RT");
             static inline size_t AORTID = PropertyToID(L"AO RT");
-            static inline size_t DeinterleavedAORTID = PropertyToID(L"Deinter leaved AO RT");
-            static inline size_t AOUpSampleRTID = PropertyToID(L"AO Up Sample RT");
             static inline size_t TAA0RTID = PropertyToID(L"AO TAA0 RT");
             static inline size_t TAA1RTID = PropertyToID(L"AO TAA1 RT");
             static inline size_t AOBlurHorizonRTID = PropertyToID(L"AO Blur Horizon RT");
@@ -54,44 +50,31 @@ namespace ElysiaRenderer
         virtual void UpdatePipeline() override;
 
     private:
-        UINT m_DeinterleaveHIZMipmapCount;
+        UINT m_HIZMipmapCount;
         static inline bool m_isFirstFrame = true;
         int m_currHistoryIndex = 0;
         static constexpr UINT MAX_BLUR_RADIUS = 10;
         static constexpr UINT DEINTERLEAVED_DEPTH_COUNT = 4;
-        UINT m_inOutBufferWidth;
-        UINT m_inOutBufferHeight;
         UINT m_halfWidth;
         UINT m_halfHeight;
         UINT m_quarterWidth;
         UINT m_quarterHeight;
-        UINT m_eighthWidth;
-        UINT m_eighthHeight;
-        UINT m_AOBufferWidth;
-        UINT m_AOBufferHeight;
-        UINT m_ReinterLeaveAOBufferWidth;
-        UINT m_ReinterLeaveAOBufferHeight;
-        UINT m_DeinterleavedDepthBufferWidth;
-        UINT m_DeinterleavedDepthBufferHeight;
-        UINT m_DeinterleavedNormalBufferWidth;
-        UINT m_DeinterleavedNormalBufferHeight;
-        UINT m_DeinterleavedAOBufferWidth;
-        UINT m_DeinterleavedAOBufferHeight;
-        UINT m_DeinterleavedBlurBufferWidth;
-        UINT m_DeinterleavedBlurBufferHeight;
-        UINT m_ImportanceBufferWidth;
-        UINT m_ImportanceBufferHeight;
+        UINT m_DeinterleavedDepthWidth;
+        UINT m_DeinterleavedDepthHeight;
+        UINT m_DeinterleavedAOWidth;
+        UINT m_DeinterleavedAOHeight;
+        UINT m_DeinterleavedBlurWidth;
+        UINT m_DeinterleavedBlurHeight;
+        UINT m_ImportanceWidth;
+        UINT m_ImportanceHeight;
 
         RenderTexture* m_pAORT = nullptr;
-        RenderTexture* m_pUpSampleRT = nullptr;
         RenderTexture* m_pImportanceRT = nullptr;
         RenderTexture* m_pTAA0RT = nullptr;
         RenderTexture* m_pTAA1RT = nullptr;
         std::vector<RenderTexture*> m_DeinterleavedDepthRTs;
-        std::vector<RenderTexture*> m_DeinterleavedNormalRTs;
         std::vector<RenderTexture*> m_DeinterleavedAORTs;
         std::vector<UINT> m_DeinterleavedDepthIndices;
-        std::vector<UINT> m_DeinterleavedNormalIndices;
         std::vector<UINT> m_DeinterleavedAOIndices;
         TextureManager::Handle m_blueNoise;
 
@@ -119,25 +102,13 @@ namespace ElysiaRenderer
         {
             static inline size_t g_TargetSize = PropertyToID(L"g_TargetSize");
             static inline size_t g_SourceSize = PropertyToID(L"g_SourceSize");
-            static inline size_t g_DepthNormalTexSize = PropertyToID(L"g_DepthNormalTexSize");
             static inline size_t g_FullScreenSize = PropertyToID(L"g_FullScreenSize");
             static inline size_t g_DeinterleavedAOSize = PropertyToID(L"g_DeinterleavedAOSize");
             static inline size_t g_ImportanceBufferSize = PropertyToID(L"g_ImportanceBufferSize");
-            static inline size_t g_UpsampleTexSize = PropertyToID(L"g_UpsampleTexSize");
 
             static inline size_t g_TargetTexIndex = PropertyToID(L"g_TargetTexIndex");
             static inline size_t g_TargetTexIndices = PropertyToID(L"g_TargetTexIndices");
-            static inline size_t g_TargetDepthTexIndices = PropertyToID(L"g_TargetDepthTexIndices");
-            static inline size_t g_TargetNormalTexIndices = PropertyToID(L"g_TargetNormalTexIndices");
-            static inline size_t g_SourceDepthTexIndices = PropertyToID(L"g_SourceDepthTexIndices");
-            static inline size_t g_SourceNormalTexIndices = PropertyToID(L"g_SourceNormalTexIndices");
-            static inline size_t g_HalfScreenTexIndex = PropertyToID(L"g_HalfScreenTexIndex");
-            static inline size_t g_AOTexIndex = PropertyToID(L"g_AOTexIndex");
-            static inline size_t g_DeinterLeaveDepthTexIndices = PropertyToID(L"g_DeinterLeaveDepthTexIndices");
-            static inline size_t g_DeinterLeaveNormalTexIndices = PropertyToID(L"g_DeinterLeaveNormalTexIndices");
             static inline size_t g_SourceTexIndex = PropertyToID(L"g_SourceTexIndex");
-            static inline size_t g_SourceDepthTexIndex = PropertyToID(L"g_SourceDepthTexIndex");
-            static inline size_t g_SourceNormalTexIndex = PropertyToID(L"g_SourceNormalTexIndex");
             static inline size_t g_ReinterleaveAOTexIndex = PropertyToID(
                 L"g_ReinterleaveAOTexIndex");
             static inline size_t g_SourceTexIndices = PropertyToID(L"g_SourceTexIndices");
@@ -199,8 +170,6 @@ namespace ElysiaRenderer
             static inline size_t g_bDebugImportance = PropertyToID(L"g_bDebugImportance");
             static inline size_t g_bDebugHIZMipmap = PropertyToID(L"g_bDebugHIZMipmap");
             static inline size_t g_IsBlur = PropertyToID(L"g_IsBlur");
-            static inline size_t g_BilateralSimilarityDistanceSigma = PropertyToID(
-                L"g_BilateralSimilarityDistanceSigma");
         };
         struct TAAData
         {
@@ -215,16 +184,15 @@ namespace ElysiaRenderer
         std::vector<Vector4> m_kernels;
         std::vector<float> m_blurWeights;
 
-        void DoDeinterleaveDepthNormal();
-        void DoDeinterleaveHIZ();
+        void DoHIZ();
+        void DoDeinterleaveDepth();
         void DoDeinterleaveBaseAO();
         void DoImportance();
         void DoDeinterleaveCalcAO();
+        void DoBilateralBlur();
         void DoReinterleave();
-        void DoUpSample();
 
         void DoTAA();
-        void DoBilateralBlur();
 
         std::vector<Vector4> GenerateSSAOSampleKernel();
         std::vector<Vector4> GenerateHBAOSampleKernel();
