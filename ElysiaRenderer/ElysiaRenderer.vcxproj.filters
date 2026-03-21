@@ -630,7 +630,6 @@
     <None Include="Assets\Shaders\private\DeferredCommon.hlsl" />
     <None Include="Assets\Shaders\public\FullScreenTriangle.hlsl" />
     <None Include="Assets\Shaders\public\SSAO.hlsl" />
-    <None Include="Assets\Shaders\public\Bloom.hlsl" />
     <None Include="Assets\Shaders\public\CS_Tonemap.hlsl" />
     <None Include="Assets\Shaders\public\CS_SSAO.hlsl" />
     <None Include="Assets\Shaders\public\PostProcess\CS_Bilateral_Blur.hlsl" />
@@ -657,6 +656,8 @@
     <None Include="Assets\Shaders\public\GI\CS_RrobeOffset.hlsl" />
     <None Include="Assets\Shaders\public\GI\CS_DDGILighting.hlsl" />
     <None Include="Assets\Shaders\public\GI\CS_RayFilter.hlsl" />
+    <None Include="Assets\Shaders\public\PostProcess\Bloom\Bloom.hlsl" />
+    <None Include="Assets\Shaders\private\BloomCommon.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

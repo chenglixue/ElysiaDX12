@@ -80,6 +80,8 @@ namespace ElysiaRenderer
             std::move(std::make_unique<OpaquePass>()));
         m_passes.emplace_back(
             std::move(std::make_unique<SkyboxPass>()));
+        m_passes.emplace_back(
+            std::move(std::make_unique<BloomPass>()));
 
         m_passes.emplace_back(
             std::move(std::make_unique<TonemapPass>()));

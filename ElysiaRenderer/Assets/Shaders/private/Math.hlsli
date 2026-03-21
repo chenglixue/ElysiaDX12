@@ -13,15 +13,15 @@
 #define MaterialFloat4x4 half4x4 
 #define MaterialFloat4x3 half4x3 
 #else
-	// Material translated vertex shader code always uses floats, 
-	// Because it's used for things like world position and UVs
+// Material translated vertex shader code always uses floats, 
+// Because it's used for things like world position and UVs
 #define MaterialFloat float
 #define MaterialFloat2 float2
 #define MaterialFloat3 float3
 #define MaterialFloat4 float4
 #define MaterialFloat3x3 float3x3
-#define MaterialFloat4x4 float4x4 
-#define MaterialFloat4x3 float4x3 
+#define MaterialFloat4x4 float4x4
+#define MaterialFloat4x3 float4x3
 #endif
 
 #ifndef COMPUTE_SHADED
@@ -150,7 +150,8 @@ float4 ClampToHalfFloatRange(float4 X)
 
 float Luminance(float3 LinearColor)
 {
-    return dot(LinearColor, float3(0.3, 0.59, 0.11));
+    // 0.2126f, 0.7152f, 0.0722f Rec.709/Srgb
+    return dot(LinearColor, float3(0.2126f, 0.7152f, 0.0722f));
 }
 
 float length2(float2 v)
@@ -443,16 +444,16 @@ float4 Pow6(float4 x)
 // Only valid for x >= 0
 MaterialFloat AtanFast(MaterialFloat x)
 {
-	// Minimax 3 approximation
-	MaterialFloat3 A = x < 1 ? MaterialFloat3(x, 0, 1) : MaterialFloat3(1 / x, 0.5 * PI, -1);
+    // Minimax 3 approximation
+    MaterialFloat3 A = x < 1 ? MaterialFloat3(x, 0, 1) : MaterialFloat3(1 / x, 0.5 * PI, -1);
     return A.y + A.z * (((-0.130234 * A.x - 0.0954105) * A.x + 1.00712) * A.x - 0.00001203333);
 }
 
 /** Converts a linear input value into a value to be stored in the light attenuation buffer. */
 MaterialFloat EncodeLightAttenuation(MaterialFloat InColor)
 {
-	// Apply a 1/2 power to the input, which allocates more bits for the darks and prevents banding
-	// Similar to storing colors in gamma space, except this uses less instructions than a pow(x, 1/2.2)
+    // Apply a 1/2 power to the input, which allocates more bits for the darks and prevents banding
+    // Similar to storing colors in gamma space, except this uses less instructions than a pow(x, 1/2.2)
     return sqrt(InColor);
 }
 
@@ -477,9 +478,9 @@ MaterialFloat4 DecodeLightAttenuation(MaterialFloat4 InColor)
 // Like RGBM but this can be interpolated.
 MaterialFloat4 RGBTEncode(MaterialFloat3 Color)
 {
-	MaterialFloat4 RGBT;
-	MaterialFloat Max = max(max(Color.r, Color.g), max(Color.b, 1e-6));
-	MaterialFloat RcpMax = rcp(Max);
+    MaterialFloat4 RGBT;
+    MaterialFloat Max = max(max(Color.r, Color.g), max(Color.b, 1e-6));
+    MaterialFloat RcpMax = rcp(Max);
     RGBT.rgb = Color.rgb * RcpMax;
     RGBT.a = Max * rcp(1.0 + Max);
     return RGBT;
@@ -492,11 +493,10 @@ MaterialFloat3 RGBTDecode(MaterialFloat4 RGBT)
 }
 
 
-
 MaterialFloat4 RGBMEncode(MaterialFloat3 Color)
 {
     Color *= 1.0 / 64.0;
-	
+
     float4 rgbm;
     rgbm.a = saturate(max(max(Color.r, Color.g), max(Color.b, 1e-6)));
     rgbm.a = ceil(rgbm.a * 255.0) / 255.0;
@@ -506,8 +506,8 @@ MaterialFloat4 RGBMEncode(MaterialFloat3 Color)
 
 MaterialFloat4 RGBMEncodeFast(MaterialFloat3 Color)
 {
-	// 0/0 result written to fixed point buffer goes to zero
-	MaterialFloat4 rgbm;
+    // 0/0 result written to fixed point buffer goes to zero
+    MaterialFloat4 rgbm;
     rgbm.a = dot(Color, 255.0 / 64.0);
     rgbm.a = ceil(rgbm.a);
     rgbm.rgb = Color / rgbm.a;
@@ -527,17 +527,17 @@ MaterialFloat3 RGBMDecode(MaterialFloat4 rgbm)
 
 MaterialFloat4 RGBTEncode8BPC(MaterialFloat3 Color, MaterialFloat Range)
 {
-	MaterialFloat Max = max(max(Color.r, Color.g), max(Color.b, 1e-6));
+    MaterialFloat Max = max(max(Color.r, Color.g), max(Color.b, 1e-6));
     Max = min(Max, Range);
 
-	MaterialFloat4 RGBT;
+    MaterialFloat4 RGBT;
     RGBT.a = (Range + 1) / Range * Max / (1 + Max);
 
-	// quantise alpha to 8 bit.
+    // quantise alpha to 8 bit.
     RGBT.a = ceil(RGBT.a * 255.0) / 255.0;
     Max = RGBT.a / (1 + 1 / Range - RGBT.a);
 
-	MaterialFloat RcpMax = rcp(Max);
+    MaterialFloat RcpMax = rcp(Max);
     RGBT.rgb = Color.rgb * RcpMax;
     return RGBT;
 }
@@ -554,21 +554,21 @@ MaterialFloat3 RGBTDecode8BPC(MaterialFloat4 RGBT, MaterialFloat Range)
  */
 MaterialFloat PhongShadingPow(MaterialFloat X, MaterialFloat Y)
 {
-	// The following clamping is done to prevent NaN being the result of the specular power computation.
-	// Clamping has a minor performance cost.
+    // The following clamping is done to prevent NaN being the result of the specular power computation.
+    // Clamping has a minor performance cost.
 
-	// In HLSL pow(a, b) is implemented as exp2(log2(a) * b).
+    // In HLSL pow(a, b) is implemented as exp2(log2(a) * b).
 
-	// For a=0 this becomes exp2(-inf * 0) = exp2(NaN) = NaN.
+    // For a=0 this becomes exp2(-inf * 0) = exp2(NaN) = NaN.
 
-	// As seen in #TTP 160394 "QA Regression: PS3: Some maps have black pixelated artifacting."
-	// this can cause severe image artifacts (problem was caused by specular power of 0, lightshafts propagated this to other pixels).
-	// The problem appeared on PlayStation 3 but can also happen on similar PC NVidia hardware.
+    // As seen in #TTP 160394 "QA Regression: PS3: Some maps have black pixelated artifacting."
+    // this can cause severe image artifacts (problem was caused by specular power of 0, lightshafts propagated this to other pixels).
+    // The problem appeared on PlayStation 3 but can also happen on similar PC NVidia hardware.
 
-	// In order to avoid platform differences and rarely occuring image atrifacts we clamp the base.
+    // In order to avoid platform differences and rarely occuring image atrifacts we clamp the base.
 
-	// Note: Clamping the exponent seemed to fix the issue mentioned TTP but we decided to fix the root and accept the
-	// minor performance cost.
+    // Note: Clamping the exponent seemed to fix the issue mentioned TTP but we decided to fix the root and accept the
+    // minor performance cost.
 
     return ClampedPow(X, Y);
 }
@@ -577,14 +577,14 @@ inline float2 Panner(float2 uv, float time, float2 speed = float2(1., 1.))
 {
     return uv + time * speed;
 }
- 
+
 inline float3 WhiteOutBlendNormal(float3 normal1, float3 normal2)
 {
     float3 result = float3(0., 0., 0.);
- 
+
     result = float3(normal1.xy + normal2.xy, normal1.z * normal2.z);
     result = normalize(result);
- 
+
     return result;
 }
 
@@ -609,7 +609,7 @@ float3 Unity_Contrast_float(float3 In, float Contrast)
 {
     float midpoint = pow(0.5, 2.2);
     float3 Out = (In - midpoint) * Contrast + midpoint;
-	
+
     return Out;
 }
 
@@ -807,7 +807,7 @@ bool IsInfinityFar(float rawDepth)
 	if (rawDepth < 0.00001f)
 		return true;
 #else
-	// Case for platforms without REVERSED_Z, such as OpenGL.
+    // Case for platforms without REVERSED_Z, such as OpenGL.
     if (rawDepth > 0.9999f)
         return true;
 #endif
@@ -845,7 +845,7 @@ inline float ScreenEdgeMask(float2 clipPos)
 {
     float yDif = 1. - abs(clipPos.y);
     float xDif = 1. - abs(clipPos.x);
-	[flatten]
+    [flatten]
     if (yDif < 0. || xDif < 0.)
     {
         return 0.;
@@ -871,24 +871,36 @@ float2 GetMatCapUV(float3 viewDirWS, float3 normalWS, float4x4 M_V)
     float3 viewUpDir = mul(M_V, float4(float3(0., 1., 0.), 0.)).xyz;
     float3 cameraRight = normalize(cross(viewUpDir, cameraFoward));
     float3 cameraUp = normalize(cross(cameraFoward, cameraRight));
- 
+
     float2 uv = mul(float3x3(cameraRight, cameraUp, cameraFoward), normalWS).xy * 0.5 + 0.5;
     return uv;
 }
 
 float3 srgb_to_acescg(float3 col)
 {
-    float3x3 mat = float3x3(0.61319, 0.33951, 0.04737,
-						0.07021, 0.91634, 0.01345,
-						0.02062, 0.10957, 0.86961);
+    float3x3 mat = float3x3(0.61319,
+                            0.33951,
+                            0.04737,
+                            0.07021,
+                            0.91634,
+                            0.01345,
+                            0.02062,
+                            0.10957,
+                            0.86961);
     return mul(col, mat);
 }
 
 float3 acescg_to_srgb(float3 col)
 {
-    float3x3 mat = float3x3(1.70505, -0.62179, -0.08326,
-						-0.13026, 1.14080, -0.01055,
-						-0.02400, -0.12897, 1.15297);
+    float3x3 mat = float3x3(1.70505,
+                            -0.62179,
+                            -0.08326,
+                            -0.13026,
+                            1.14080,
+                            -0.01055,
+                            -0.02400,
+                            -0.12897,
+                            1.15297);
     return mul(col, mat);
 }
 

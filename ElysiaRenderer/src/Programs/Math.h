@@ -71,6 +71,7 @@ namespace ElysiaHelper
 
     struct UINT2
     {
+        UINT2() = default;
         UINT2(UINT x, UINT y)
         {
             this->x = x;

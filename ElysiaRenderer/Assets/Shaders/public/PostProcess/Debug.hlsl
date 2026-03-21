@@ -35,6 +35,8 @@ cbuffer PassConstant : register(b0, perPassSpace)
     UINT g_ProbeRelocationLUTBufferIndex;
     bool g_IsEnableGILine;
     float g_DebugLineScale;
+    UINT g_TargetTexIndex;
+    UINT g_MipmapLevel;
 }
 
 struct AABBInstanceData
@@ -59,6 +61,7 @@ GIData Elysia_DDGI_LoadRayData(uint readIndex)
 #define DEBUG_GI 2
 #define DEBUG_NORMAL 3
 #define DEBUG_AABB 4
+#define DEBUG_BLOOM 5
 
 struct VSInput
 {
@@ -180,6 +183,7 @@ PSInput VS(VSInput i, UINT vertexID : SV_VertexID, uint instanceID : SV_Instance
         o.color = AABBData.Color;
         break;
     }
+    case DEBUG_BLOOM:
     case DEBUG_AO:
     case DEBUG_NORMAL:
         o.uv = float2((vertexID << 1) & 2, vertexID & 2);
@@ -196,6 +200,12 @@ PSOutput PS(PSInput i)
 
     switch (g_DebugMode)
     {
+    case DEBUG_BLOOM:
+    {
+        float3 bloomColor = SampleTexture2D(g_TargetTexIndex, i.uv, ClampLinearSampler);
+        o.target0.rgb = bloomColor;
+        break;
+    }
     case DEBUG_AO:
     {
         float AO = SampleTexture2D(g_AOIndex, i.uv, ClampLinearSampler);

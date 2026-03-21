@@ -503,7 +503,7 @@ namespace ElysiaEngine
         {
             ImGui::ColorEdit3("Color", (float*)&pUserData.lightColor);
             ImGui::SliderFloat3("Direction", (float*)&pUserData.lightDir, -1, 1);
-            ImGui::SliderFloat("Intensity", &pUserData.lightIntensity, 0, 20, "%.3f");
+            ImGui::SliderFloat("Intensity", &pUserData.lightIntensity, 0, 20);
 
             ImGui::Checkbox("Enable Shadow", &pUserData.EnableShadow);
             int shadowTypeIndex = (int)pUserData.shadowType;
@@ -573,128 +573,141 @@ namespace ElysiaEngine
                                5.f);
         }
 
-        if (ImGui::CollapsingHeader("HDR"))
+        if (ImGui::CollapsingHeader("Postprocess"))
         {
-            ImGui::Checkbox("Is Enable HDR", &pUserData.IsUseHDR);
-
-            int HDRQualityIndex = (int)pUserData.HDRLevel;
-            ImGui::Combo("HDR Quality",
-                         &HDRQualityIndex,
-                         StringViewToChar(magic_enum::enum_names<HDRQuality>().data(),
-                                          magic_enum::enum_count<HDRQuality>()).data(),
-                         (int)magic_enum::enum_count<HDRQuality>());
-            HDRQualityIndex = std::clamp(HDRQualityIndex,
-                                         0,
-                                         static_cast<int>(magic_enum::enum_count<HDRQuality>()));
-            pUserData.HDRLevel = (HDRQuality)HDRQualityIndex;
-
-            int tonemapModeIndex = (int)pUserData.tonemapMode;
-            ImGui::Combo("Tonemap Mode",
-                         &tonemapModeIndex,
-                         StringViewToChar(magic_enum::enum_names<TonemapMode>().data(),
-                                          magic_enum::enum_count<TonemapMode>()).data(),
-                         (int)magic_enum::enum_count<TonemapMode>());
-            tonemapModeIndex = std::clamp(tonemapModeIndex,
-                                          0,
-                                          static_cast<int>(magic_enum::enum_count<TonemapMode>()));
-            pUserData.tonemapMode = (TonemapMode)tonemapModeIndex;
-
-            const char** displayModeNames = &m_displayModesNamesAvailable[0];
-            if (ImGui::Combo("Display Mode",
-                             (int*)&m_currentDisplayModeNamesIndex,
-                             displayModeNames,
-                             (int)m_displayModesNamesAvailable.size()))
+            ImGui::Indent();
+            if (ImGui::CollapsingHeader("HDR"))
             {
-                if (m_fullscreenMode != PRESENTATIONMODE_WINDOWED)
+                ImGui::Checkbox("Is Enable HDR", &pUserData.IsUseHDR);
+
+                int HDRQualityIndex = (int)pUserData.HDRLevel;
+                ImGui::Combo("HDR Quality",
+                             &HDRQualityIndex,
+                             StringViewToChar(magic_enum::enum_names<HDRQuality>().data(),
+                                              magic_enum::enum_count<HDRQuality>()).data(),
+                             (int)magic_enum::enum_count<HDRQuality>());
+                HDRQualityIndex = std::clamp(HDRQualityIndex,
+                                             0,
+                                             static_cast<int>(magic_enum::enum_count<HDRQuality>()));
+                pUserData.HDRLevel = (HDRQuality)HDRQualityIndex;
+
+                int tonemapModeIndex = (int)pUserData.tonemapMode;
+                ImGui::Combo("Tonemap Mode",
+                             &tonemapModeIndex,
+                             StringViewToChar(magic_enum::enum_names<TonemapMode>().data(),
+                                              magic_enum::enum_count<TonemapMode>()).data(),
+                             (int)magic_enum::enum_count<TonemapMode>());
+                tonemapModeIndex = std::clamp(tonemapModeIndex,
+                                              0,
+                                              static_cast<int>(magic_enum::enum_count<TonemapMode>()));
+                pUserData.tonemapMode = (TonemapMode)tonemapModeIndex;
+
+                const char** displayModeNames = &m_displayModesNamesAvailable[0];
+                if (ImGui::Combo("Display Mode",
+                                 (int*)&m_currentDisplayModeNamesIndex,
+                                 displayModeNames,
+                                 (int)m_displayModesNamesAvailable.size()))
                 {
-                    UpdateDisplay(m_displayModesAvailable[m_currentDisplayModeNamesIndex],
-                                  m_disableLocalDimming);
-                    m_previousDisplayModeNamesIndex = m_currentDisplayModeNamesIndex;
-                }
-                else if (CheckIfWindowModeHdrOn() &&
-                         (m_displayModesAvailable[m_currentDisplayModeNamesIndex] == DISPLAYMODE_SDR
-                          ||
-                          m_displayModesAvailable[m_currentDisplayModeNamesIndex] ==
-                          DISPLAYMODE_HDR10_2084 ||
-                          m_displayModesAvailable[m_currentDisplayModeNamesIndex] ==
-                          DISPLAYMODE_HDR10_SCRGB))
-                {
-                    UpdateDisplay(m_displayModesAvailable[m_currentDisplayModeNamesIndex],
-                                  m_disableLocalDimming);
-                    m_previousDisplayModeNamesIndex = m_currentDisplayModeNamesIndex;
-                }
-                else
-                {
-                    m_currentDisplayModeNamesIndex = m_previousDisplayModeNamesIndex;
+                    if (m_fullscreenMode != PRESENTATIONMODE_WINDOWED)
+                    {
+                        UpdateDisplay(m_displayModesAvailable[m_currentDisplayModeNamesIndex],
+                                      m_disableLocalDimming);
+                        m_previousDisplayModeNamesIndex = m_currentDisplayModeNamesIndex;
+                    }
+                    else if (CheckIfWindowModeHdrOn() &&
+                             (m_displayModesAvailable[m_currentDisplayModeNamesIndex] == DISPLAYMODE_SDR
+                              ||
+                              m_displayModesAvailable[m_currentDisplayModeNamesIndex] ==
+                              DISPLAYMODE_HDR10_2084 ||
+                              m_displayModesAvailable[m_currentDisplayModeNamesIndex] ==
+                              DISPLAYMODE_HDR10_SCRGB))
+                    {
+                        UpdateDisplay(m_displayModesAvailable[m_currentDisplayModeNamesIndex],
+                                      m_disableLocalDimming);
+                        m_previousDisplayModeNamesIndex = m_currentDisplayModeNamesIndex;
+                    }
+                    else
+                    {
+                        m_currentDisplayModeNamesIndex = m_previousDisplayModeNamesIndex;
+                    }
+
+                    UserData::GetInstance().displayMode = m_currentDisplayModeNamesIndex;
                 }
 
-                UserData::GetInstance().displayMode = m_currentDisplayModeNamesIndex;
+                int colorSpaceIndex = (int)pUserData.colorSpace;
+                ImGui::Combo("Color space",
+                             &colorSpaceIndex,
+                             StringViewToChar(magic_enum::enum_names<ColorSpace>().data(),
+                                              magic_enum::enum_count<ColorSpace>()).data(),
+                             (int)magic_enum::enum_count<ColorSpace>());
+                colorSpaceIndex = std::clamp(colorSpaceIndex,
+                                             0,
+                                             static_cast<int>(magic_enum::enum_count<ColorSpace>()));
+                pUserData.colorSpace = (ColorSpace)colorSpaceIndex;
+
+                ImGui::Checkbox("Shoulder", &pUserData.bShoulder);
+                ImGui::SliderFloat("Soft Gap", &pUserData.SoftGap, 0.0f, 0.5f);
+                ImGui::SliderFloat("HDR Max", &pUserData.HdrMax, 8.0f, 2048.0f);
+                ImGui::SliderFloat("LPM Exposure", &pUserData.LpmExposure, 3.0f, 11.0f);
+                ImGui::SliderFloat("Contrast", &pUserData.Contrast, 0.0f, 1.0f);
+                ImGui::SliderFloat("Shoulder Contrast", &pUserData.ShoulderContrast, 1.0f, 1.2f);
+                ImGui::SliderFloat3("Saturation", &pUserData.Saturation[0], 0.0f, 2.0f);
+                ImGui::SliderFloat3("Crosstalk", &pUserData.Crosstalk[0], 0.0f, 1.0f);
             }
 
-            int colorSpaceIndex = (int)pUserData.colorSpace;
-            ImGui::Combo("Color space",
-                         &colorSpaceIndex,
-                         StringViewToChar(magic_enum::enum_names<ColorSpace>().data(),
-                                          magic_enum::enum_count<ColorSpace>()).data(),
-                         (int)magic_enum::enum_count<ColorSpace>());
-            colorSpaceIndex = std::clamp(colorSpaceIndex,
-                                         0,
-                                         static_cast<int>(magic_enum::enum_count<ColorSpace>()));
-            pUserData.colorSpace = (ColorSpace)colorSpaceIndex;
+            if (ImGui::CollapsingHeader("AO"))
+            {
+                ImGui::Checkbox("Is Enable AO", &pUserData.aoParameter.IsEnableAO);
+                ImGui::Checkbox("Is IsLerp AO", &pUserData.aoParameter.IsLerpAO);
+                ImGui::Checkbox("Is Blur", &pUserData.aoParameter.IsBlur);
 
-            ImGui::Checkbox("Shoulder", &pUserData.bShoulder);
-            ImGui::SliderFloat("Soft Gap", &pUserData.SoftGap, 0.0f, 0.5f);
-            ImGui::SliderFloat("HDR Max", &pUserData.HdrMax, 8.0f, 2048.0f);
-            ImGui::SliderFloat("LPM Exposure", &pUserData.LpmExposure, 3.0f, 11.0f);
-            ImGui::SliderFloat("Contrast", &pUserData.Contrast, 0.0f, 1.0f);
-            ImGui::SliderFloat("Shoulder Contrast", &pUserData.ShoulderContrast, 1.0f, 1.2f);
-            ImGui::SliderFloat3("Saturation", &pUserData.Saturation[0], 0.0f, 2.0f);
-            ImGui::SliderFloat3("Crosstalk", &pUserData.Crosstalk[0], 0.0f, 1.0f);
-        }
+                ImGui::SliderInt("AO Sample Count", &pUserData.aoParameter.SampleCount, 2, 6);
+                ImGui::SliderInt("AO Sample Step Count", &pUserData.aoParameter.SampleStepCount, 2, 6);
 
-        if (ImGui::CollapsingHeader("AO"))
-        {
-            ImGui::Checkbox("Is Enable AO", &pUserData.aoParameter.IsEnableAO);
-            ImGui::Checkbox("Is IsLerp AO", &pUserData.aoParameter.IsLerpAO);
-            ImGui::Checkbox("Is Blur", &pUserData.aoParameter.IsBlur);
+                ImGui::SliderFloat("AO Radius", &pUserData.aoParameter.Radius, 0.1, 2);
+                ImGui::SliderFloat("AO Fade Radius", &pUserData.aoParameter.FadeRadius, 1, 20000);
+                ImGui::SliderFloat("AO Fade Distance", &pUserData.aoParameter.FadeDistance, 1, 20000);
 
-            ImGui::SliderInt("AO Sample Count", &pUserData.aoParameter.SampleCount, 2, 6);
-            ImGui::SliderInt("AO Sample Step Count", &pUserData.aoParameter.SampleStepCount, 2, 6);
+                ImGui::SliderFloat("AO Intensity", &pUserData.aoParameter.IntensityMul, 0, 2);
 
-            ImGui::SliderFloat("AO Radius", &pUserData.aoParameter.Radius, 0.1, 2);
-            ImGui::SliderFloat("AO Fade Radius", &pUserData.aoParameter.FadeRadius, 1, 20000);
-            ImGui::SliderFloat("AO Fade Distance", &pUserData.aoParameter.FadeDistance, 1, 20000);
+                ImGui::SliderFloat("AO Pow", &pUserData.aoParameter.IntensityPow, 0.1, 8);
 
-            ImGui::SliderFloat("AO Intensity", &pUserData.aoParameter.IntensityMul, 0, 2);
+                ImGui::SliderFloat("AO Bias", &pUserData.aoParameter.Bias, 0.f, 0.01f);
+                ImGui::SliderFloat("AO HIZ Mip Factor", &pUserData.aoParameter.HIZMipFactor, 0.f, 1.f);
 
-            ImGui::SliderFloat("AO Pow", &pUserData.aoParameter.IntensityPow, 0.1, 8);
+                ImGui::SliderFloat("AO Lerp", &pUserData.aoParameter.AOLerpFactor, 0.1f, 1.f);
+                ImGui::SliderFloat("AO TAA Lerp Weight",
+                                   &pUserData.aoParameter.TAALerpFactor,
+                                   0.05f,
+                                   0.1f);
 
-            ImGui::SliderFloat("AO Bias", &pUserData.aoParameter.Bias, 0.f, 0.01f);
-            ImGui::SliderFloat("AO HIZ Mip Factor", &pUserData.aoParameter.HIZMipFactor, 0.f, 1.f);
+                int blurQualityIndex = (int)pUserData.aoParameter.BlurQuality;
+                ImGui::Combo("Blur Quality",
+                             &blurQualityIndex,
+                             StringViewToChar(magic_enum::enum_names<AOBlurQuality>().data(),
+                                              magic_enum::enum_count<AOBlurQuality>()).data(),
+                             (int)magic_enum::enum_count<AOBlurQuality>());
+                blurQualityIndex = std::clamp(blurQualityIndex,
+                                              0,
+                                              static_cast<int>(magic_enum::enum_count<
+                                                  AOBlurQuality>()));
+                pUserData.aoParameter.BlurQuality = (AOBlurQuality)blurQualityIndex;
 
-            ImGui::SliderFloat("AO Lerp", &pUserData.aoParameter.AOLerpFactor, 0.1f, 1.f);
-            ImGui::SliderFloat("AO TAA Lerp Weight",
-                               &pUserData.aoParameter.TAALerpFactor,
-                               0.05f,
-                               0.1f);
+                ImGui::SliderInt("AO Blur Count", &pUserData.aoParameter.BlurCount, 1, 4);
+                ImGui::SliderInt("AO Blur Radius", &pUserData.aoParameter.BlurIntensity, 1, 10);
+                ImGui::SliderFloat("AO Sharpness", &pUserData.aoParameter.Sharpness, 0.f, 1.f);
 
-            int blurQualityIndex = (int)pUserData.aoParameter.BlurQuality;
-            ImGui::Combo("Blur Quality",
-                         &blurQualityIndex,
-                         StringViewToChar(magic_enum::enum_names<AOBlurQuality>().data(),
-                                          magic_enum::enum_count<AOBlurQuality>()).data(),
-                         (int)magic_enum::enum_count<AOBlurQuality>());
-            blurQualityIndex = std::clamp(blurQualityIndex,
-                                          0,
-                                          static_cast<int>(magic_enum::enum_count<
-                                              AOBlurQuality>()));
-            pUserData.aoParameter.BlurQuality = (AOBlurQuality)blurQualityIndex;
+                ImGui::Checkbox("Is Enable TAA", &pUserData.aoParameter.IsTAA);
+            }
 
-            ImGui::SliderInt("AO Blur Count", &pUserData.aoParameter.BlurCount, 1, 4);
-            ImGui::SliderInt("AO Blur Radius", &pUserData.aoParameter.BlurIntensity, 1, 10);
-            ImGui::SliderFloat("AO Sharpness", &pUserData.aoParameter.Sharpness, 0.f, 1.f);
-
-            ImGui::Checkbox("Is Enable TAA", &pUserData.aoParameter.IsTAA);
+            if (ImGui::CollapsingHeader("Bloom"))
+            {
+                ImGui::Checkbox("Enable Bloom ", &pUserData.bloomParameter.enable);
+                ImGui::SliderFloat("Bloom Radius", &pUserData.bloomParameter.radius, 0.f, 10.f);
+                ImGui::SliderFloat("Bloom Intensity", &pUserData.bloomParameter.intensity, 0.f, 5.f);
+                ImGui::SliderInt("Bloom  Mipmap Level", &pUserData.bloomParameter.mipmap, 0, 5);
+            }
+            ImGui::Unindent();
         }
 
         if (ImGui::CollapsingHeader("Timing"))

@@ -459,7 +459,7 @@ namespace ElysiaCore
         D3D12_TEXTURE_COPY_LOCATION srcLocation = {};
         srcLocation.pResource = sourceRT->GetResource();
         srcLocation.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
-        srcLocation.SubresourceIndex = sourceRT->GetSubresourceIndex(0);
+        srcLocation.SubresourceIndex = sourceRT->GetSubresourceIndex(mipmapLevel);
 
         D3D12_TEXTURE_COPY_LOCATION destLocation = {};
         destLocation.pResource = destRT->GetResource();

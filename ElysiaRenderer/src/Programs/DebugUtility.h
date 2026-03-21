@@ -10,5 +10,6 @@ namespace ElysiaRenderer
         GI,
         Normal,
         AABB,
+        Bloom,
     };
 }

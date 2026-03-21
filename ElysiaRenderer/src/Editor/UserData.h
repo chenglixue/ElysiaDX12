@@ -5,6 +5,7 @@
 #include "ThirdParty/ColorConversion.h"
 #include "Runtime/RenderCore/AOUtility.h"
 #include "Programs/DebugUtility.h"
+#include "Runtime/RenderCore/BloomUtility.h"
 #include "Runtime/RenderCore/GIUtility.h"
 #include "ThirdParty/FreesyncHDR.h"
 
@@ -84,6 +85,8 @@ namespace ElysiaRenderer
         int instanceID = 0;
 
         bool EnableShadow = true;
+
+        BloomParameter bloomParameter{};
 
     private:
         static std::unique_ptr<UserData> m_instance;

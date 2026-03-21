@@ -159,7 +159,12 @@ float3 Diffuse_Gotanda(float3 DiffuseColor, float Roughness, float NoV, float No
 
 // [ Chan 2018, "Material Advances in Call of Duty: WWII" ]
 // It has been extended here to fade out retro reflectivity contribution from area light in order to avoid visual artefacts.
-float3 Diffuse_Chan(float3 DiffuseColor, float a2, float NoV, float NoL, float VoH, float NoH,
+float3 Diffuse_Chan(float3 DiffuseColor,
+                    float a2,
+                    float NoV,
+                    float NoL,
+                    float VoH,
+                    float NoH,
                     float RetroReflectivityWeight)
 {
     // We saturate each input to avoid out of range negative values which would result in weird darkening at the edge of meshes (resulting from tangent space interpolation).
@@ -215,7 +220,7 @@ float D_Beckmann(float a2, float NoH)
 float D_GGX(float a2, float NoH)
 {
     float d = (NoH * a2 - NoH) * NoH + 1.f; // 2 mad
-    return a2 / (PI * d * d);               // 4 mul, 1 rcp
+    return a2 / (PI * d * d + 1e-4);        // 4 mul, 1 rcp
 }
 
 float D_GGX_Mobile(float Roughness, float NoH)
