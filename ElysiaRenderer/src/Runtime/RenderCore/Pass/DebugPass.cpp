@@ -256,9 +256,6 @@ namespace ElysiaRenderer
             m_pMaterial->SetUInt(GIPass::ShaderIDs::g_RayDataBufferIndex,
                                  GIPass::m_pRayDataBuffer->GetResourceHeapIndex(),
                                  passID);
-            m_pMaterial->SetUInt(GIPass::ShaderIDs::g_GIDataBufferIndex,
-                                 GIPass::m_pGIDataBuffer->GetResourceHeapIndex(),
-                                 passID);
             // m_pMaterial->SetUInt(GIPass::ShaderIDs::g_ProbeOffsetsIndex,
             //                      GIPass::m_pProbeOffsetBuffer->GetResourceHeapIndex());
             m_pMaterial->SetUInt(GIPass::ShaderIDs::g_ProbeStatesIndex,

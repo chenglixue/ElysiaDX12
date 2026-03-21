@@ -14,10 +14,6 @@
 #define PROBE_STATE_ACTIVE   1
 #define RELOCATE_RAY_COUNT 32
 
-# define NEAR_GI_DISTANCE 5
-# define MIDDLE_GI_DISTANCE 10
-# define FAR_GI_DISTANCE 15
-
 struct Vertex
 {
     float3 positionOS;
@@ -28,11 +24,6 @@ struct Vertex
 };
 
 struct RayData
-{
-    Vector4 Position;
-    Vector4 Data;
-};
-struct CompactedRay
 {
     Vector4 Position;
     Vector4 Data;
@@ -360,18 +351,13 @@ float DDGI_Query_Shadow_Visibity(float3 PositionWS,
     shadowRayDesc.TMin = 0.001f;
     shadowRayDesc.TMax = DXR_SHADOW_MAX;
 
-    const uint rayFlags = RAY_FLAG_ACCEPT_FIRST_HIT_AND_END_SEARCH |
-                          RAY_FLAG_SKIP_PROCEDURAL_PRIMITIVES |
-                          RAY_FLAG_SKIP_CLOSEST_HIT_SHADER |
-                          RAY_FLAG_CULL_BACK_FACING_TRIANGLES |
-                          RAY_FLAG_FORCE_OPAQUE;
+    RayQuery<RAY_FLAG_ACCEPT_FIRST_HIT_AND_END_SEARCH |
+             RAY_FLAG_SKIP_PROCEDURAL_PRIMITIVES |
+             RAY_FLAG_SKIP_CLOSEST_HIT_SHADER | RAY_FLAG_CULL_BACK_FACING_TRIANGLES> q;
 
-    RayQuery<rayFlags> q;
-
-    q.TraceRayInline(SceneTLAS, rayFlags, 0xFF, shadowRayDesc);
+    q.TraceRayInline(SceneTLAS, RAY_FLAG_NONE, 0xFF, shadowRayDesc);
     while (q.Proceed());
 
-    [branch]
     if (q.CommittedStatus() == COMMITTED_TRIANGLE_HIT)
     {
         return 0.f;
