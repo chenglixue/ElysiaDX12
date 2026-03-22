@@ -8,7 +8,8 @@ namespace ElysiaRenderer
     PASS(BLOOM_FIRST_DOWN_SAMPLE_PASS,          "public\\PostProcess\\Bloom\\Bloom.hlsl",               true,  BloomKarisDownSample)\
     PASS(BLOOM_WEIGHT_DOWN_SAMPLE_PASS,         "public\\PostProcess\\Bloom\\Bloom.hlsl",               true,  BloomWeightedDownSample)\
     PASS(BLOOM_3X3TENT_UP_SAMPLE,               "public\\PostProcess\\Bloom\\Bloom.hlsl",               true,  Bloom3x3TentUpSample)\
-    PASS(BLOOM_BLEND_SCENE_COLOR,               "public\\PostProcess\\Bloom\\Bloom.hlsl",               true,  BloomBlendSceneColor)
+    PASS(BLOOM_BLEND_SCENE_COLOR,               "public\\PostProcess\\Bloom\\Bloom.hlsl",               true,  BloomBlendSceneColor)\
+    PASS(COPY_RT,                               "public\\PostProcess\\Bloom\\Bloom.hlsl",               true,  CopyRT)
 
     class BloomPass : public BasePass
     {
@@ -73,9 +74,12 @@ namespace ElysiaRenderer
             static inline size_t g_TargetMipLevel = PropertyToID(L"g_TargetMipLevel");
         };
 
+        void DoCopySceneRTToDownSampleRT();
         void DoBloomFirstDownSample();
         void DoBloomWeightDownSample();
+        void DoCopyLastDownSampleRT2LastUpSampleRT();
         void DoBloom3x3TentUpSample();
         void DoBloomBlendSceneColor();
+        void DoCopyBloomRT2CameraRT();
     };
 }

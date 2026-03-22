@@ -100,9 +100,9 @@ void GenerateRayMain()
     {
         updateInterval = 8;
     }
-    // [branch]
-    // if (probeIndex % updateInterval != frameIndex % updateInterval)
-    //     return;
+    [branch]
+    if (probeIndex % updateInterval != frameIndex % updateInterval)
+        return;
 
     Texture2D<float4> blueNoiseTex = ResourceDescriptorHeap[BlueNoiseTexIndex];
     float w, h;

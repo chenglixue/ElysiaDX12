@@ -4,8 +4,14 @@
 
 void Elysia_Store_Bloom(float2 writePos, UINT texIndex, float3 color)
 {
-    RWTexture2D<float4> o = ResourceDescriptorHeap[texIndex];
-    o[writePos] = float4(color, 1.0f);
+    RWTexture2D<float3> o = ResourceDescriptorHeap[texIndex];
+    o[writePos] = color;
+}
+
+float3 Elysia_Load_Bloom(float2 readPos, UINT texIndex)
+{
+    RWTexture2D<float3> o = ResourceDescriptorHeap[texIndex];
+    return o[readPos];
 }
 
 float GetLuminanceWeight(float luminance)

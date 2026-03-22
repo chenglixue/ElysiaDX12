@@ -17,6 +17,16 @@ cbuffer PassConstant : register(b0, perPassSpace)
 }
 
 [numthreads(GROUP_SIZE, GROUP_SIZE, 1)]
+void CopyRT(uint3 id : SV_DispatchThreadID)
+{
+    UINT2 readPos = id.xy;
+    UINT2 writePos = id.xy;
+
+    float3 sourceColor = Elysia_Load_Bloom(readPos, g_SourceTextureIndex);
+    Elysia_Store_Bloom(writePos, g_DestTextureIndex, sourceColor);
+}
+
+[numthreads(GROUP_SIZE, GROUP_SIZE, 1)]
 void BloomKarisDownSample(uint3 id : SV_DispatchThreadID)
 {
     uint2 readPos = id.xy;
@@ -218,14 +228,18 @@ void BloomBlendSceneColor(uint3 id : SV_DispatchThreadID)
     float2 screenUV = ((float2)readPos + 0.5f) * screenSize.zw;
     float2 onePixel = screenSize.zw;
 
-    float3 top2 = SampleTexture2D(g_SourceTextureIndex, screenUV, onePixel * float2(0.f, 2.f));
-    float3 bottom2 = SampleTexture2D(g_SourceTextureIndex, screenUV, onePixel * float2(0.f, -2.f));
-    float3 left2 = SampleTexture2D(g_SourceTextureIndex, screenUV, onePixel * float2(-2.f, 0.f));
-    float3 right2 = SampleTexture2D(g_SourceTextureIndex, screenUV, onePixel * float2(2.f, 0.f));
-    float3 topLeft = SampleTexture2D(g_SourceTextureIndex, screenUV, onePixel * float2(-1.f, 1.f));
-    float3 topRight = SampleTexture2D(g_SourceTextureIndex, screenUV, onePixel * float2(1.f, 1.f));
-    float3 bottomRight = SampleTexture2D(g_SourceTextureIndex, screenUV, onePixel * float2(1.f, -1.f));
-    float3 bottomLeft = SampleTexture2D(g_SourceTextureIndex, screenUV, onePixel * float2(-1.f, -1.f));
+    float3 top2 = SampleTexture2D(g_SourceTextureIndex, screenUV + onePixel * float2(0.f, 2.f), WarpLinearSampler);
+    float3 bottom2 = SampleTexture2D(g_SourceTextureIndex, screenUV + onePixel * float2(0.f, -2.f), WarpLinearSampler);
+    float3 left2 = SampleTexture2D(g_SourceTextureIndex, screenUV + onePixel * float2(-2.f, 0.f), WarpLinearSampler);
+    float3 right2 = SampleTexture2D(g_SourceTextureIndex, screenUV + onePixel * float2(2.f, 0.f), WarpLinearSampler);
+    float3 topLeft = SampleTexture2D(g_SourceTextureIndex, screenUV + onePixel * float2(-1.f, 1.f), WarpLinearSampler);
+    float3 topRight = SampleTexture2D(g_SourceTextureIndex, screenUV + onePixel * float2(1.f, 1.f), WarpLinearSampler);
+    float3 bottomRight = SampleTexture2D(g_SourceTextureIndex,
+                                         screenUV + onePixel * float2(1.f, -1.f),
+                                         WarpLinearSampler);
+    float3 bottomLeft = SampleTexture2D(g_SourceTextureIndex,
+                                        screenUV + onePixel * float2(-1.f, -1.f),
+                                        WarpLinearSampler);
 
     float3 sceneColor = LoadTexture2D(OpaqueColorIndex, readPos);
     float3 bloomColor = (top2 + bottom2 + left2 + right2 + 2.f * (topLeft + topRight + bottomLeft + bottomRight)) *
