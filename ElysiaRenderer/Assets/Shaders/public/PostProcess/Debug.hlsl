@@ -62,6 +62,7 @@ GIData Elysia_DDGI_LoadRayData(uint readIndex)
 #define DEBUG_NORMAL 3
 #define DEBUG_AABB 4
 #define DEBUG_BLOOM 5
+#define DEBUG_VELOCITY 6
 
 struct VSInput
 {
@@ -185,6 +186,7 @@ PSInput VS(VSInput i, UINT vertexID : SV_VertexID, uint instanceID : SV_Instance
     }
     case DEBUG_BLOOM:
     case DEBUG_AO:
+    case DEBUG_VELOCITY:
     case DEBUG_NORMAL:
         o.uv = float2((vertexID << 1) & 2, vertexID & 2);
         o.positionCS = float4(o.uv.x * 2.0f - 1.0f, 1.0f - o.uv.y * 2.0f, 0.0f, 1.0f);
@@ -221,6 +223,12 @@ PSOutput PS(PSInput i)
     case DEBUG_AABB:
     {
         o.target0 = i.color;
+        break;
+    }
+    case DEBUG_VELOCITY:
+    {
+        float2 velocity = SampleTexture2D(GBuffer5Index, i.uv, ClampPointSampler).rg;
+        o.target0 = float4(velocity, 0.f, 1.f);
         break;
     }
     case DEBUG_GI:

@@ -10,7 +10,7 @@ namespace ElysiaCore
 namespace ElysiaRenderer
 {
 #define GBUFFER_PASS_LIST \
-PASS(DRAW_GBUFFER_PASS,         "public\\GBuffer.hlsl", false, PS)
+    PASS(DRAW_GBUFFER_PASS,         "public\\GBuffer.hlsl", false, PS)
 
     class GBufferPass : public BasePass
     {
@@ -66,6 +66,8 @@ PASS(DRAW_GBUFFER_PASS,         "public\\GBuffer.hlsl", false, PS)
             static inline size_t projMatrix_I = PropertyToID(L"projMatrix_I");
             static inline size_t viewProjMatrix = PropertyToID(L"viewProjMatrix");
             static inline size_t viewProjMatrix_I = PropertyToID(L"viewProjMatrix_I");
+            static inline size_t jitterProjMatrix = PropertyToID(L"jitterProjMatrix");
+            static inline size_t jitterProjMatrix_I = PropertyToID(L"jitterProjMatrix_I");
             static inline size_t pre_viewMatrix = PropertyToID(L"pre_viewMatrix");
             static inline size_t pre_viewMatrix_I = PropertyToID(L"pre_viewMatrix_I");
             static inline size_t pre_projMatrix = PropertyToID(L"pre_projMatrix");
@@ -136,6 +138,14 @@ PASS(DRAW_GBUFFER_PASS,         "public\\GBuffer.hlsl", false, PS)
             D3D12_DRAW_INDEXED_ARGUMENTS drawArguments;
         };
 
+        UINT m_cameraWidth;
+        UINT m_cameraHeight;
+        Matrix m_currMatrixP;
+        Matrix m_currMatrixVP;
+        Matrix m_currMatrixVP_I;
+        Matrix m_jitterMatrixProj;
+        Vector2 m_currJitterUV, m_preJitterUV;
+
         std::vector<RenderTexture*> m_GBufferRTs{};
         std::vector<DX12BufferUpload*> m_uploads;
         std::vector<MeshData> m_meshDatas;
@@ -148,6 +158,7 @@ PASS(DRAW_GBUFFER_PASS,         "public\\GBuffer.hlsl", false, PS)
         std::vector<DX12TextureResource*> GetGBuffers();
         void CreateRTs();
         void UpdateGBufferPassVariant(UINT passIndex);
+        void UpdateTAAMatrices();
         void DrawMesh(ElysiaEngine::FrameContext& context, UINT passIndex);
         void DrawGBufferPass(ElysiaEngine::FrameContext& context);
         void UploadMeshData(const std::vector<RenderItem>& renderItems);

@@ -11,5 +11,6 @@ namespace ElysiaRenderer
         Normal,
         AABB,
         Bloom,
+        Velocity
     };
 }

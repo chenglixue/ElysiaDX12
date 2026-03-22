@@ -27,6 +27,8 @@ cbuffer PassConstant : register(b0, perPassSpace)
     Matrix projMatrix_I;
     Matrix viewProjMatrix;
     Matrix viewProjMatrix_I;
+    Matrix jitterProjMatrix;
+    Matrix jitterProjMatrix_I;
 
     Matrix pre_viewMatrix;
     Matrix pre_viewMatrix_I;
@@ -112,7 +114,7 @@ PSInput VS(VSInput i)
     Matrix worldMatrix = meshDataBuffer[meshDataIndex].world_M;
     o.positionWS = mul(float4(i.positionOS, 1.f), worldMatrix);
     o.positionVS = mul(o.positionWS, viewMatrix);
-    o.positionCS = mul(o.positionVS, projMatrix);
+    o.positionCS = mul(o.positionVS, jitterProjMatrix);
 
     float3 N = normalize(mul((float3x3)worldMatrix, i.normalOS));
     float3 T = normalize(mul((float3x3)worldMatrix, i.tangentOS));
@@ -212,7 +214,11 @@ FEncodeGBufferData GetEncodeGBufferData(FInputParams inputParams, float3 toLight
     preClipPos /= preClipPos.w;
     float2 preScreenUV = preClipPos.xy * 0.5f * float2(1.f, -1.f) + 0.5f;
 
-    o.Velocity = inputParams.ScreenUV - preScreenUV;
+    float4 currClipPos = mul(float4(inputParams.PositionWS, 1.f), viewProjMatrix);
+    currClipPos /= currClipPos.w;
+    float2 currScreenUV = currClipPos.xy * 0.5f * float2(1.f, -1.f) + 0.5f;
+
+    o.Velocity = currScreenUV - preScreenUV;
 
     o.Anisotropy = 0;
     o.DiffuseColor = o.BaseColor - o.BaseColor * o.Metallic;

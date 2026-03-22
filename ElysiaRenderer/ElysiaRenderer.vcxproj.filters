@@ -598,6 +598,15 @@
     <ClInclude Include="src\ThirdParty\GLTF\tiny_gltf.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Runtime\RenderCore\BloomUtility.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Runtime\RenderCore\Pass\TAAPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Runtime\RenderCore\TAAUtility.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="dxc\bin\x64\dxcompiler.dll" />
@@ -658,6 +667,7 @@
     <None Include="Assets\Shaders\public\GI\CS_RayFilter.hlsl" />
     <None Include="Assets\Shaders\public\PostProcess\Bloom\Bloom.hlsl" />
     <None Include="Assets\Shaders\private\BloomCommon.hlsli" />
+    <None Include="Assets\Shaders\public\PostProcess\TAA\CS_CalcVelocity.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -1033,6 +1043,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Runtime\RenderCore\GIUtility.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Runtime\RenderCore\Pass\TAAPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

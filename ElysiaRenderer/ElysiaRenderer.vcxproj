@@ -302,6 +302,7 @@
 		<ClInclude Include="src\Runtime\RenderCore\Pass\RenderPassData.h"/>
 		<ClInclude Include="src\Runtime\RenderCore\Pass\ShadowPass.h"/>
 		<ClInclude Include="src\Runtime\RenderCore\Pass\SkyboxPass.h"/>
+		<ClInclude Include="src\Runtime\RenderCore\Pass\TAAPass.h"/>
 		<ClInclude Include="src\Runtime\RenderCore\Pass\TonemapPass.h"/>
 		<ClInclude Include="src\Runtime\RenderCore\Pass\UIPass.h"/>
 		<ClInclude Include="src\Runtime\RenderCore\PSOManager.h"/>
@@ -314,6 +315,7 @@
 		<ClInclude Include="src\Runtime\RenderCore\SceneManager.h"/>
 		<ClInclude Include="src\Runtime\RenderCore\ShaderVariantManager.h"/>
 		<ClInclude Include="src\Runtime\RenderCore\ShadowUtility.h"/>
+		<ClInclude Include="src\Runtime\RenderCore\TAAUtility.h"/>
 		<ClInclude Include="src\Runtime\RenderCore\TextureManager.h"/>
 		<ClInclude Include="src\Runtime\RenderCore\TonemapUtility.h"/>
 		<ClInclude Include="src\Runtime\Resource\File.h"/>
@@ -518,6 +520,7 @@
 		<ClCompile Include="src\Runtime\RenderCore\Pass\PreDrawPass.cpp"/>
 		<ClCompile Include="src\Runtime\RenderCore\Pass\ShadowPass.cpp"/>
 		<ClCompile Include="src\Runtime\RenderCore\Pass\SkyboxPass.cpp"/>
+		<ClCompile Include="src\Runtime\RenderCore\Pass\TAAPass.cpp"/>
 		<ClCompile Include="src\Runtime\RenderCore\Pass\TonemapPass.cpp"/>
 		<ClCompile Include="src\Runtime\RenderCore\Pass\UIPass.cpp"/>
 		<ClCompile Include="src\Runtime\RenderCore\PSOManager.cpp"/>
@@ -823,6 +826,9 @@
 		<None Include="Assets\Shaders\public\PostProcess\CS_TwoTwoMinHIZ.hlsl">
 			<FileType>Document</FileType>
 		</None>
+	</ItemGroup>
+	<ItemGroup>
+		<Folder Include="Assets\Shaders\public\PostProcess\TAA\"/>
 	</ItemGroup>
 	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets"/>
 	<ImportGroup Label="ExtensionTargets">

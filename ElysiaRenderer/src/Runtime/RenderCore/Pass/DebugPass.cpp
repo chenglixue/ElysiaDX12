@@ -2,6 +2,7 @@
 #include "DebugPass.h"
 
 #include "BloomPass.h"
+#include "GBufferPass.h"
 #include "GIPass.h"
 #include "Editor/UserData.h"
 #include "Programs/PIXHelper.h"
@@ -125,18 +126,18 @@ namespace ElysiaRenderer
         }
         case DebugMode::Bloom:
         case DebugMode::AO:
+        case DebugMode::Velocity:
         case DebugMode::Normal:
         {
             m_pCommand->AddBarrier(m_pCameraColorRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
             {
-                m_pMaterial->SetUInt(ShaderIDs::g_TargetTexIndex,
-                                     RenderTargetManager::GetInstance().GetRenderTexture(
-                                                                           RenderResource::GetInstance().
-                                                                           GetPropertyName(
-                                                                               BloomPass::RenderTextureIDs::BloomUpSampleRTID
-                                                                               ) + std::to_wstring(0))
-                                                                       ->GetUAVResourceHeapIndex(),
-                                     passID);
+                // m_pMaterial->SetUInt(ShaderIDs::g_TargetTexIndex,
+                //                      RenderTargetManager::GetInstance().GetRenderTexture(
+                //                                                            RenderResource::GetInstance().
+                //                                                            GetPropertyName(
+                //                                                                GBufferPass::RenderTextureIDs::GBuffer5ID))
+                //                                                        ->GetUAVResourceHeapIndex(),
+                //                      passID);
                 SetSpaceResource(passData, PER_PASS_SPACE);
                 m_pCommand->DrawFullScreenTriangle();
             }

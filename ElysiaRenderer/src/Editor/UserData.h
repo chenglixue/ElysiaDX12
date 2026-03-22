@@ -7,6 +7,7 @@
 #include "Programs/DebugUtility.h"
 #include "Runtime/RenderCore/BloomUtility.h"
 #include "Runtime/RenderCore/GIUtility.h"
+#include "Runtime/RenderCore/TAAUtility.h"
 #include "ThirdParty/FreesyncHDR.h"
 
 namespace ElysiaRenderer
@@ -88,6 +89,7 @@ namespace ElysiaRenderer
         bool EnableShadow = true;
 
         BloomParameter bloomParameter{};
+        TAAParameter taaParameter{};
 
     private:
         static std::unique_ptr<UserData> m_instance;

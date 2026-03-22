@@ -72,6 +72,8 @@ namespace ElysiaRenderer
 
     void GBufferPass::Configure()
     {
+        m_cameraWidth = m_renderSize.x;
+        m_cameraHeight = m_renderSize.y;
         CreateRTs();
 
         m_shaderPasses.assign(std::begin(m_PassData), std::end(m_PassData));
@@ -87,16 +89,16 @@ namespace ElysiaRenderer
 
         if (context.renderList.empty())
             return;
+        UpdateTAAMatrices();
         UploadMeshData(context.renderList);
         DrawGBufferPass(context);
 
         TAAData::Pre_View_M = m_pCamera->GetViewMat();
         TAAData::Pre_View_I_M = m_pCamera->GetViewMat().Invert();
-        TAAData::Pre_Proj_M = m_pCamera->GetProjMat();
-        TAAData::Pre_Proj_I_M = m_pCamera->GetProjMat().Invert();
-        TAAData::Pre_ViewProj_M = m_pCamera->GetViewMat() * m_pCamera->GetProjMat();
-        TAAData::Pre_ViewProj_I_M = (m_pCamera->GetViewMat() * m_pCamera->GetProjMat()).
-            Invert();
+        TAAData::Pre_Proj_M = m_currMatrixP;
+        TAAData::Pre_Proj_I_M = m_currMatrixP.Invert();
+        TAAData::Pre_ViewProj_M = m_currMatrixVP;
+        TAAData::Pre_ViewProj_I_M = m_currMatrixVP_I;
     }
 
     void GBufferPass::Dispose()
@@ -326,6 +328,24 @@ namespace ElysiaRenderer
 
     }
 
+    void GBufferPass::UpdateTAAMatrices()
+    {
+        auto viewMatrix = m_pCamera->GetViewMat();
+        auto projMatrix = m_currMatrixP = m_pCamera->GetProjMat();
+
+        m_jitterMatrixProj = projMatrix;
+
+        m_preJitterUV = m_currJitterUV;
+        m_currJitterUV = Jitter::SampleJitterUV(UserData::GetInstance().taaParameter.jitterType);
+        m_jitterMatrixProj.m[2][0] += m_currJitterUV.x * 2.f / m_cameraWidth * UserData::GetInstance().taaParameter.
+                                                                                                       jitterIntensity;
+        m_jitterMatrixProj.m[2][1] += m_currJitterUV.y * 2.f / m_cameraHeight * UserData::GetInstance().taaParameter.
+                                                                                                        jitterIntensity;
+
+        m_currMatrixVP = viewMatrix * projMatrix;
+        m_currMatrixVP_I = m_currMatrixVP.Invert();
+    }
+
     void GBufferPass::DrawGBufferPass(ElysiaEngine::FrameContext& context)
     {
         auto passID = DRAW_GBUFFER_PASS;
@@ -362,12 +382,12 @@ namespace ElysiaRenderer
                                GetScreenSize(Vector2(m_renderSize.x, m_renderSize.y)));
         m_pMaterial->SetMatrix(ShaderIDs::viewMatrix, m_pCamera->GetViewMat());
         m_pMaterial->SetMatrix(ShaderIDs::viewMatrix_I, m_pCamera->GetViewMat().Invert());
-        m_pMaterial->SetMatrix(ShaderIDs::projMatrix, m_pCamera->GetProjMat());
-        m_pMaterial->SetMatrix(ShaderIDs::projMatrix_I, m_pCamera->GetProjMat().Invert());
-        m_pMaterial->SetMatrix(ShaderIDs::viewProjMatrix,
-                               m_pCamera->GetViewMat() * m_pCamera->GetProjMat());
-        m_pMaterial->SetMatrix(ShaderIDs::viewProjMatrix_I,
-                               (m_pCamera->GetViewMat() * m_pCamera->GetProjMat()).Invert());
+        m_pMaterial->SetMatrix(ShaderIDs::projMatrix, m_currMatrixP);
+        m_pMaterial->SetMatrix(ShaderIDs::projMatrix_I, m_currMatrixP.Invert());
+        m_pMaterial->SetMatrix(ShaderIDs::viewProjMatrix, m_currMatrixVP);
+        m_pMaterial->SetMatrix(ShaderIDs::viewProjMatrix_I, m_currMatrixVP_I);
+        m_pMaterial->SetMatrix(ShaderIDs::jitterProjMatrix, m_jitterMatrixProj);
+        m_pMaterial->SetMatrix(ShaderIDs::jitterProjMatrix_I, m_jitterMatrixProj.Invert());
         m_pMaterial->SetMatrix(ShaderIDs::pre_viewMatrix, TAAData::Pre_View_M, passID);
         m_pMaterial->SetMatrix(ShaderIDs::pre_viewMatrix_I, TAAData::Pre_View_I_M, passID);
         m_pMaterial->SetMatrix(ShaderIDs::pre_projMatrix, TAAData::Pre_Proj_M, passID);

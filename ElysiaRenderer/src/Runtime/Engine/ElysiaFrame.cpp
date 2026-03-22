@@ -708,6 +708,24 @@ namespace ElysiaEngine
                 ImGui::SliderFloat("Bloom Intensity", &pUserData.bloomParameter.intensity, 0.f, 5.f);
                 ImGui::SliderInt("Bloom  Mipmap Level", &pUserData.bloomParameter.mipmap, 0, 5);
             }
+
+            if (ImGui::CollapsingHeader("TAA"))
+            {
+                ImGui::Checkbox("Enable TAA", &pUserData.taaParameter.Enable);
+                int jitterTypeIndex = (int)pUserData.taaParameter.jitterType;
+                ImGui::Combo("TAA Jitter Type",
+                             &jitterTypeIndex,
+                             StringViewToChar(magic_enum::enum_names<Jitter::Type>().data(),
+                                              magic_enum::enum_count<Jitter::Type>()).data(),
+                             (int)magic_enum::enum_count<Jitter::Type>());
+                jitterTypeIndex = std::clamp(jitterTypeIndex,
+                                             0,
+                                             static_cast<int>(magic_enum::enum_count<
+                                                 Jitter::Type>()));
+                pUserData.taaParameter.jitterType = (Jitter::Type)jitterTypeIndex;
+
+                ImGui::SliderFloat("TAA Jitter Intensity", &pUserData.taaParameter.jitterIntensity, 0.f, 1.f);
+            }
             ImGui::Unindent();
         }
 
