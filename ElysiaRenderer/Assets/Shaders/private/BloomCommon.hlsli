@@ -2,6 +2,7 @@
 #define BLOOM_COMMON_H
 #include "ShadingCommon.hlsl"
 
+#define BLOOM_MIPMAP_COUNT 6
 void Elysia_Store_Bloom(float2 writePos, UINT texIndex, float3 color)
 {
     RWTexture2D<float3> o = ResourceDescriptorHeap[texIndex];

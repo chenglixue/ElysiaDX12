@@ -23,6 +23,7 @@
 #include "Editor/UserData.h"
 #include "Programs/PIXHelper.h"
 #define A_CPU 1
+#include "BloomPass.h"
 #include "src/ThirdParty/ffx_a.h"
 A_STATIC AF1 fs2S;
 A_STATIC AF1 hdr10S;
@@ -40,34 +41,10 @@ A_STATIC void LpmSetupOut(AU1 i, inAU4 v)
 namespace ElysiaRenderer
 {
     int TonemapPass::ShaderPasseIDs::TonemapPassID = -1;
-    size_t TonemapPass::ShaderIDs::u_shoulder = SIZE_MAX;
-    size_t TonemapPass::ShaderIDs::u_con = SIZE_MAX;
-    size_t TonemapPass::ShaderIDs::u_soft = SIZE_MAX;
-    size_t TonemapPass::ShaderIDs::u_con2 = SIZE_MAX;
-    size_t TonemapPass::ShaderIDs::u_clip = SIZE_MAX;
-    size_t TonemapPass::ShaderIDs::u_scaleOnly = SIZE_MAX;
-    size_t TonemapPass::ShaderIDs::u_displayMode = SIZE_MAX;
-    size_t TonemapPass::ShaderIDs::u_inputToOutputMatrix = SIZE_MAX;
-    size_t TonemapPass::ShaderIDs::u_ctl = SIZE_MAX;
-    size_t TonemapPass::ShaderIDs::tonemapMode = SIZE_MAX;
-    size_t TonemapPass::ShaderIDs::g_DestSize = SIZE_MAX;
-    size_t TonemapPass::ShaderIDs::g_DestTextureIndex = SIZE_MAX;
 
     TonemapPass::TonemapPass()
         : BasePass()
     {
-        ShaderIDs::u_shoulder = PropertyToID(L"u_shoulder");
-        ShaderIDs::u_con = PropertyToID(L"u_con");
-        ShaderIDs::u_soft = PropertyToID(L"u_soft");
-        ShaderIDs::u_con2 = PropertyToID(L"u_con2");
-        ShaderIDs::u_clip = PropertyToID(L"u_clip");
-        ShaderIDs::u_scaleOnly = PropertyToID(L"u_scaleOnly");
-        ShaderIDs::u_displayMode = PropertyToID(L"u_displayMode");
-        ShaderIDs::u_inputToOutputMatrix = PropertyToID(L"u_inputToOutputMatrix");
-        ShaderIDs::u_ctl = PropertyToID(L"u_ctl");
-        ShaderIDs::tonemapMode = PropertyToID(L"tonemapMode");
-        ShaderIDs::g_DestSize = PropertyToID(L"g_DestSize");
-        ShaderIDs::g_DestTextureIndex = PropertyToID(L"g_DestTextureIndex");
     }
 
     TonemapPass::~TonemapPass()
@@ -322,6 +299,17 @@ namespace ElysiaRenderer
                                    GetScreenSize(Vector2(m_renderSize.x, m_renderSize.y)));
             m_pMaterial->SetUInt(ShaderIDs::g_DestTextureIndex,
                                  m_pCameraColorRT->GetResourceHeapIndex());
+            m_pMaterial->SetFloat(ShaderIDs::g_LocalExposure,
+                                  UserData::GetInstance().localExposure);
+            m_pMaterial->SetUInt(ShaderIDs::g_BloomTexIndex,
+                                 RenderTargetManager::GetInstance().GetRenderTexture(RenderResource::GetInstance().
+                                                                                     GetPropertyName(
+                                                                                         BloomPass::RenderTextureIDs::BloomUpSampleRTID)
+                                                                                     + std::to_wstring(0))->
+                                                                    GetUAVResourceHeapIndex());
+            m_pMaterial->SetFloat(ShaderIDs::g_BloomIntensity,
+                                  UserData::GetInstance().bloomParameter.intensity,
+                                  passID);
 
             auto& passData = m_pMaterial->GetPassData(ShaderPasseIDs::TonemapPassID);
             SetSpaceResource(passData, PER_FRAME_SPACE);

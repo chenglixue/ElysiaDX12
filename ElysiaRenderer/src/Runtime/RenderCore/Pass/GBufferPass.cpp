@@ -117,15 +117,6 @@ namespace ElysiaRenderer
             {
                 .world_M = renderItems[i].worldMatrix,
 
-                .baseColorUVTransform = TextureTransformToVector4(
-                    materialData.textureTransforms[(UINT)MaterialTextureType::Albedo]),
-                .normalUVTransform = TextureTransformToVector4(
-                    materialData.textureTransforms[(UINT)MaterialTextureType::Normal]),
-                .occlusionUVTransform = TextureTransformToVector4(
-                    materialData.textureTransforms[(UINT)MaterialTextureType::Occlusion]),
-                .metallicRoughnessUVTransform = TextureTransformToVector4(
-                    materialData.textureTransforms[(UINT)MaterialTextureType::Metallic]),
-
                 .opacity = materialData.opacity,
                 .cutoff = 0.5,
                 .baseColorTexIndex = textureIndices.Albedo,
@@ -137,8 +128,8 @@ namespace ElysiaRenderer
                 .metallicIntensity = UserData::GetInstance().MetallicIntensity,
 
                 .baseColorTint = UserData::GetInstance().BaseColorTint,
-                .roughnessIntensity = UserData::GetInstance().RoughnessIntensity,
 
+                .roughnessIntensity = UserData::GetInstance().RoughnessIntensity,
                 .normalIntensity = UserData::GetInstance().NormalIntensity,
                 .vertexOffset = renderItems[i].baseVertex,
                 .indexOffset = renderItems[i].startIndex

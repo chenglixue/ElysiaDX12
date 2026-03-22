@@ -2,7 +2,6 @@
 #include "private\BloomCommon.hlsli"
 
 #define GROUP_SIZE 8
-#define MIPMAP_COUNT 6
 cbuffer PassConstant : register(b0, perPassSpace)
 {
     Vector4 g_DestSize;
@@ -19,10 +18,13 @@ cbuffer PassConstant : register(b0, perPassSpace)
 [numthreads(GROUP_SIZE, GROUP_SIZE, 1)]
 void CopyRT(uint3 id : SV_DispatchThreadID)
 {
-    UINT2 readPos = id.xy;
     UINT2 writePos = id.xy;
+    if (writePos.x >= g_DestSize.x || writePos.y >= g_DestSize.y)
+        return;
 
-    float3 sourceColor = Elysia_Load_Bloom(readPos, g_SourceTextureIndex);
+    float2 destUV = ((float2)writePos + 0.5f) * g_DestSize.zw;
+
+    float3 sourceColor = SampleTexture2D(g_SourceTextureIndex, destUV,ClampLinearSampler);
     Elysia_Store_Bloom(writePos, g_DestTextureIndex, sourceColor);
 }
 
@@ -226,25 +228,9 @@ void BloomBlendSceneColor(uint3 id : SV_DispatchThreadID)
         return;
 
     float2 screenUV = ((float2)readPos + 0.5f) * screenSize.zw;
-    float2 onePixel = screenSize.zw;
-
-    float3 top2 = SampleTexture2D(g_SourceTextureIndex, screenUV + onePixel * float2(0.f, 2.f), WarpLinearSampler);
-    float3 bottom2 = SampleTexture2D(g_SourceTextureIndex, screenUV + onePixel * float2(0.f, -2.f), WarpLinearSampler);
-    float3 left2 = SampleTexture2D(g_SourceTextureIndex, screenUV + onePixel * float2(-2.f, 0.f), WarpLinearSampler);
-    float3 right2 = SampleTexture2D(g_SourceTextureIndex, screenUV + onePixel * float2(2.f, 0.f), WarpLinearSampler);
-    float3 topLeft = SampleTexture2D(g_SourceTextureIndex, screenUV + onePixel * float2(-1.f, 1.f), WarpLinearSampler);
-    float3 topRight = SampleTexture2D(g_SourceTextureIndex, screenUV + onePixel * float2(1.f, 1.f), WarpLinearSampler);
-    float3 bottomRight = SampleTexture2D(g_SourceTextureIndex,
-                                         screenUV + onePixel * float2(1.f, -1.f),
-                                         WarpLinearSampler);
-    float3 bottomLeft = SampleTexture2D(g_SourceTextureIndex,
-                                        screenUV + onePixel * float2(-1.f, -1.f),
-                                        WarpLinearSampler);
-
     float3 sceneColor = LoadTexture2D(OpaqueColorIndex, readPos);
-    float3 bloomColor = (top2 + bottom2 + left2 + right2 + 2.f * (topLeft + topRight + bottomLeft + bottomRight)) *
-                        rcp(12.f);
-    bloomColor *= g_BloomIntensity * rcp(MIPMAP_COUNT);
+    float3 bloomColor = SampleTexture2D(g_SourceTextureIndex, screenUV, ClampLinearSampler);;
+    bloomColor *= g_BloomIntensity * rcp(BLOOM_MIPMAP_COUNT);
     float3 finalColor = sceneColor + bloomColor;
 
     Elysia_Store_Bloom(writePos, g_DestTextureIndex, finalColor);

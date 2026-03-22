@@ -104,15 +104,9 @@ PASS(DRAW_GBUFFER_PASS,         "public\\GBuffer.hlsl", false, PS)
             static inline Matrix Pre_Proj_I_M;
             static inline Matrix Pre_ViewProj_I_M;
         };
-        struct alignas(16) MeshData
+        struct MeshData
         {
             Matrix world_M;
-
-            Vector4 baseColorUVTransform;
-            Vector4 normalUVTransform;
-            Vector4 emissiveUVTransform;
-            Vector4 occlusionUVTransform;
-            Vector4 metallicRoughnessUVTransform;
 
             float opacity;
             float cutoff;

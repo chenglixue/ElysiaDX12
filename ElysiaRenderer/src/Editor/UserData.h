@@ -66,6 +66,7 @@ namespace ElysiaRenderer
         TonemapMode tonemapMode = TonemapMode::LMP;
         ColorSpace colorSpace = ColorSpace::ColorSpace_REC709;
         CAULDRON_DX12::DisplayMode displayMode = CAULDRON_DX12::DisplayMode::DISPLAYMODE_SDR;
+        float localExposure = 1.f;
         bool bShoulder;
         // Use optional extra shoulderContrast tuning (set to false if shoulderContrast is 1.0).
         float SoftGap;

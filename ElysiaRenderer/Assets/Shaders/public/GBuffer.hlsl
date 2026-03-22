@@ -57,12 +57,6 @@ struct MeshData
 {
     Matrix world_M;
 
-    Vector4 baseColorUVTransform;
-    Vector4 normalUVTransform;
-    Vector4 emissiveUVTransform;
-    Vector4 occlusionUVTransform;
-    Vector4 metallicRoughnessUVTransform;
-
     float opacity;
     float cutoff;
     UINT baseColorTexIndex;
@@ -207,7 +201,7 @@ FEncodeGBufferData GetEncodeGBufferData(FInputParams inputParams, float3 toLight
     o.AO = 1;
     o.Metallic = metallic;
     o.Roughness = roughness;
-    o.Specular = 0.f;
+    o.Specular = 0.5f;
 
     o.WorldNormal = GetNormal(normalTS.rgb, TBN, currMeshData.normalIntensity);
     o.WorldTangent = TBN._m00_m01_m02;

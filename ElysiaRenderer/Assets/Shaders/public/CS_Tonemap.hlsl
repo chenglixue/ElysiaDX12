@@ -1,4 +1,5 @@
 #include "private\Color.hlsl"
+#include "private\BloomCommon.hlsli"
 
 #pragma Compute Tonemap
 
@@ -20,6 +21,9 @@ cbuffer PassConstant : register(b0, perPassSpace)
     uint g_DestTextureIndex;
     float4 g_DestSize;
     UINT tonemapMode;
+    UINT g_BloomTexIndex;
+    float g_LocalExposure;
+    float g_BloomIntensity;
     bool u_shoulder;
     bool u_con;
     bool u_soft;
@@ -50,43 +54,46 @@ void Tonemap(uint3 dispatchThreadID: SV_DispatchThreadID)
     float2 screenUV = ((float2)dispatchThreadID.xy + 0.5f) * g_DestSize.zw;
 
     RWTexture2D<float4> o = ResourceDescriptorHeap[g_DestTextureIndex];
-    float4 color = LoadTexture2D(g_DestTextureIndex, dispatchThreadID.xy);
+    float4 finalColor = LoadTexture2D(g_DestTextureIndex, dispatchThreadID.xy);
+    float4 bloomColor = SampleTexture2D(g_BloomTexIndex, screenUV, ClampPointSampler);
+    finalColor += bloomColor * g_BloomIntensity * rcp((float)BLOOM_MIPMAP_COUNT);
+    finalColor *= g_LocalExposure;
 
     switch (tonemapMode)
     {
     case Neutral:
     {
-        color.rgb = NeutralTonemap(color);
+        finalColor.rgb = NeutralTonemap(finalColor);
         break;
     }
     case LMP:
     {
-        color = mul(u_inputToOutputMatrix, color);
-        color.r = max(0, color.r);
-        color.g = max(0, color.g);
-        color.b = max(0, color.b);
+        finalColor = mul(u_inputToOutputMatrix, finalColor);
+        finalColor.r = max(0, finalColor.r);
+        finalColor.g = max(0, finalColor.g);
+        finalColor.b = max(0, finalColor.b);
 
-        LpmFilter(color.r, color.g, color.b, u_shoulder, u_con, u_soft, u_con2, u_clip, u_scaleOnly);
+        LpmFilter(finalColor.r, finalColor.g, finalColor.b, u_shoulder, u_con, u_soft, u_con2, u_clip, u_scaleOnly);
         break;
     }
     case AMD:
     {
-        color.rgb = AMDTonemapper(color);
+        finalColor.rgb = AMDTonemapper(finalColor);
         break;
     }
     case ACESFilm:
     {
-        color.rgb = ACESFilmTone(color);
+        finalColor.rgb = ACESFilmTone(finalColor);
         break;
     }
     case Uncharted2:
     {
-        color.rgb = Uncharted2Tonemap(color);
+        finalColor.rgb = Uncharted2Tonemap(finalColor);
         break;
     }
     case DX11DSK:
     {
-        color.rgb = DX11DSKTone(color);
+        finalColor.rgb = DX11DSKTone(finalColor);
         break;
     }
     }
@@ -95,15 +102,15 @@ void Tonemap(uint3 dispatchThreadID: SV_DispatchThreadID)
     {
     case DISPLAYMODE_FSHDR_Gamma22:
     {
-        color.rgb = ApplyGamma(color);
+        finalColor.rgb = ApplyGamma(finalColor);
         break;
     }
     case DISPLAYMODE_HDR10_2084:
     {
-        color.rgb = ApplyPQ(color);
+        finalColor.rgb = ApplyPQ(finalColor);
         break;
     }
     }
 
-    o[dispatchThreadID.xy] = float4(color.rgb, 1.f);
+    o[dispatchThreadID.xy] = float4(finalColor.rgb, 1.f);
 }

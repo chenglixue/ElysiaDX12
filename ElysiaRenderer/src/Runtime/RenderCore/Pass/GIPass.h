@@ -106,8 +106,8 @@ namespace ElysiaRenderer
         static inline RenderTexture* m_pDistanceRT = nullptr;
         static inline constexpr UINT NumVertices = 12;
         static inline constexpr UINT NumIndices = 60;
-        static inline constexpr UINT Probe_Count = 10648;
-        static inline const UINT3 Grid_Dimensions = UINT3(22, 22, 22);
+        static inline constexpr UINT Probe_Count = 27000;
+        static inline const UINT3 Grid_Dimensions = UINT3(30, 30, 30);
         static inline constexpr UINT Rays_Per_Probe = 128;
         static inline Vector4 m_RandomRotation;
 

@@ -36,8 +36,8 @@ namespace ElysiaRenderer
 
     void BloomPass::Configure()
     {
-        m_cameraWidth = ((UINT)m_renderSize.x);
-        m_cameraHeight = ((UINT)m_renderSize.y);
+        m_cameraWidth = ((UINT)m_renderSize.x + 1) >> 1;
+        m_cameraHeight = ((UINT)m_renderSize.y + 1) >> 1;
 
         m_mipmapResolutions[0] = UINT2(m_cameraWidth, m_cameraHeight);
         for (UINT i = 1; i < m_mipmapCount; ++i)
@@ -70,19 +70,6 @@ namespace ElysiaRenderer
                                                                                         + std::to_wstring(i));
         }
 
-        m_pBloomRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(m_cameraWidth,
-                                                                              m_cameraHeight,
-                                                                              !UserData::GetInstance().IsUseHDR
-                                                                                  ? DXGI_FORMAT_R8G8B8A8_UNORM
-                                                                                  : UserData::GetInstance().HDRLevel ==
-                                                                                    HDRQuality::High
-                                                                                  ? DXGI_FORMAT_R16G16B16A16_FLOAT
-                                                                                  : DXGI_FORMAT_R11G11B10_FLOAT,
-                                                                              true,
-                                                                              m_mipmapCount,
-                                                                              RenderResource::GetInstance().
-                                                                              GetPropertyName(
-                                                                                  RenderTextureIDs::BloomRTID));
         m_shaderPasses.assign(std::begin(m_PassData), std::end(m_PassData));
         m_pMaterial = std::make_unique<Material>(m_pDevice, m_shaderPasses);
 
@@ -118,46 +105,12 @@ namespace ElysiaRenderer
         m_pGPUTimer = context.pGPUTimer;
         m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), "Bloom Begin");
 
-        // DoCopySceneRTToDownSampleRT();
         DoBloomFirstDownSample();
         DoBloomWeightDownSample();
         DoCopyLastDownSampleRT2LastUpSampleRT();
         DoBloom3x3TentUpSample();
-        DoBloomBlendSceneColor();
-        DoCopyBloomRT2CameraRT();
     }
 
-    void BloomPass::DoCopySceneRTToDownSampleRT()
-    {
-        auto passID = COPY_RT;
-        auto& passData = m_pMaterial->GetPassData(passID);
-        auto passName = passData.Name.c_str();
-        PIXHelper pix(m_pCommand->GetCommandList(), passName);
-
-        PipelineInfo pipelineStateData{};
-        pipelineStateData.m_pipelineStateObject = passData.pPipelineStateObject;
-        m_pCommand->SetPipeline(pipelineStateData);
-        SetSpaceResource(passData, PER_FRAME_SPACE);
-
-        m_pCommand->AddBarrier(m_downSampleRTs[0], D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-        {
-            m_pMaterial->SetUInt(ShaderIDs::g_SourceTextureIndex,
-                                 m_pCameraColorRT->GetUAVResourceHeapIndex(),
-                                 passID);
-            m_pMaterial->SetUInt(ShaderIDs::g_DestTextureIndexID,
-                                 m_downSampleRTs[0]->GetUAVResourceHeapIndex(),
-                                 passID);
-            SetSpaceResource(passData, PER_PASS_SPACE);
-
-            auto threadGroupSize = passData.GetKernelThreadGroupSizes();
-            m_pCommand->Dispatch(CeilDivide(m_mipmapResolutions[0].x, threadGroupSize.x),
-                                 CeilDivide(m_mipmapResolutions[0].y, threadGroupSize.y),
-                                 threadGroupSize.z);
-            m_pCommand->AddUAVBarrier(m_downSampleRTs[0], false);
-        }
-        m_pCommand->AddBarrier(m_downSampleRTs[0], D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
-        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
-    }
     void BloomPass::DoBloomFirstDownSample()
     {
         auto passID = BLOOM_FIRST_DOWN_SAMPLE_PASS;
@@ -311,77 +264,6 @@ namespace ElysiaRenderer
             m_pCommand->AddBarrier(m_upSampleRTs[i], D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 
         }
-        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
-    }
-    void BloomPass::DoBloomBlendSceneColor()
-    {
-        auto passID = BLOOM_BLEND_SCENE_COLOR;
-        auto& passData = m_pMaterial->GetPassData(passID);
-        auto passName = passData.Name.c_str();
-        PIXHelper pix(m_pCommand->GetCommandList(), passName);
-
-        PipelineInfo pipelineStateData{};
-        pipelineStateData.m_pipelineStateObject = passData.pPipelineStateObject;
-        m_pCommand->SetPipeline(pipelineStateData);
-        SetSpaceResource(passData, PER_FRAME_SPACE);
-
-        m_pCommand->AddBarrier(m_pBloomRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-        {
-            m_pMaterial->SetUInt(ShaderIDs::g_SourceTextureIndex,
-                                 m_upSampleRTs[0]->GetUAVResourceHeapIndex(),
-                                 passID);
-            m_pMaterial->SetUInt(ShaderIDs::g_DestTextureIndexID,
-                                 m_pBloomRT->GetUAVResourceHeapIndex(),
-                                 passID);
-            m_pMaterial->SetFloat4(ShaderIDs::g_SourceSize,
-                                   GetScreenSize(m_mipmapResolutions[0].x, m_mipmapResolutions[0].y),
-                                   passID);
-            m_pMaterial->SetFloat4(ShaderIDs::g_DestSize,
-                                   GetScreenSize(m_mipmapResolutions[0].x, m_mipmapResolutions[0].y),
-                                   passID);
-            m_pMaterial->SetFloat(ShaderIDs::g_BloomIntensity,
-                                  UserData::GetInstance().bloomParameter.intensity,
-                                  passID);
-            SetSpaceResource(passData, PER_PASS_SPACE);
-
-            auto threadGroupSize = passData.GetKernelThreadGroupSizes();
-            m_pCommand->Dispatch(CeilDivide(m_mipmapResolutions[0].x, threadGroupSize.x),
-                                 CeilDivide(m_mipmapResolutions[0].y, threadGroupSize.y),
-                                 threadGroupSize.z);
-            m_pCommand->AddUAVBarrier(m_pBloomRT, false);
-        }
-        m_pCommand->AddBarrier(m_pBloomRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
-        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
-    }
-    void BloomPass::DoCopyBloomRT2CameraRT()
-    {
-        auto passID = COPY_RT;
-        auto& passData = m_pMaterial->GetPassData(passID);
-        auto passName = passData.Name.c_str();
-        PIXHelper pix(m_pCommand->GetCommandList(), passName);
-
-        PipelineInfo pipelineStateData{};
-        pipelineStateData.m_pipelineStateObject = passData.pPipelineStateObject;
-        m_pCommand->SetPipeline(pipelineStateData);
-        SetSpaceResource(passData, PER_FRAME_SPACE);
-
-        m_pCommand->AddBarrier(m_pCameraColorRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-        {
-            m_pMaterial->SetUInt(ShaderIDs::g_SourceTextureIndex,
-                                 m_pBloomRT->GetUAVResourceHeapIndex(),
-                                 passID);
-            m_pMaterial->SetUInt(ShaderIDs::g_DestTextureIndexID,
-                                 m_pCameraColorRT->GetUAVResourceHeapIndex(),
-                                 passID);
-            SetSpaceResource(passData, PER_PASS_SPACE);
-
-            auto threadGroupSize = passData.GetKernelThreadGroupSizes();
-            m_pCommand->Dispatch(CeilDivide(m_mipmapResolutions[0].x, threadGroupSize.x),
-                                 CeilDivide(m_mipmapResolutions[0].y, threadGroupSize.y),
-                                 threadGroupSize.z);
-            m_pCommand->AddUAVBarrier(m_pCameraColorRT, false);
-        }
-        m_pCommand->AddBarrier(m_pCameraColorRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
         m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
     }
 }

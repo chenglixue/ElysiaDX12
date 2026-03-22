@@ -1,5 +1,6 @@
 #pragma once
 #include "BasePass.h"
+#include "Runtime/RenderCore/RenderResource.h"
 
 namespace ElysiaRenderer
 {
@@ -31,18 +32,21 @@ namespace ElysiaRenderer
 
         struct ShaderIDs
         {
-            static size_t u_shoulder;
-            static size_t u_con;
-            static size_t u_soft;
-            static size_t u_con2;
-            static size_t u_clip;
-            static size_t u_scaleOnly;
-            static size_t u_displayMode;
-            static size_t u_inputToOutputMatrix;
-            static size_t u_ctl;
-            static size_t tonemapMode;
-            static size_t g_DestTextureIndex;
-            static size_t g_DestSize;
+            static inline size_t u_shoulder = PropertyToID(L"u_shoulder");
+            static inline size_t u_con = PropertyToID(L"u_con");
+            static inline size_t u_soft = PropertyToID(L"u_soft");
+            static inline size_t u_con2 = PropertyToID(L"u_con2");
+            static inline size_t u_clip = PropertyToID(L"u_clip");
+            static inline size_t u_scaleOnly = PropertyToID(L"u_scaleOnly");
+            static inline size_t u_displayMode = PropertyToID(L"u_displayMode");
+            static inline size_t u_inputToOutputMatrix = PropertyToID(L"u_inputToOutputMatrix");
+            static inline size_t u_ctl = PropertyToID(L"u_ctl");
+            static inline size_t tonemapMode = PropertyToID(L"tonemapMode");
+            static inline size_t g_DestTextureIndex = PropertyToID(L"g_DestTextureIndex");
+            static inline size_t g_DestSize = PropertyToID(L"g_DestSize");
+            static inline size_t g_LocalExposure = PropertyToID(L"g_LocalExposure");
+            static inline size_t g_BloomTexIndex = PropertyToID(L"g_BloomTexIndex");
+            static inline size_t g_BloomIntensity = PropertyToID(L"g_BloomIntensity");
         };
 
         DXGI_FORMAT m_cameraColorFormat = DXGI_FORMAT_UNKNOWN;
@@ -81,9 +85,18 @@ namespace ElysiaRenderer
 
         void SetLPMConfig(bool con, bool soft, bool con2, bool clip, bool scaleOnly);
         void SetLPMColors(
-            float xyRedW[2], float xyGreenW[2], float xyBlueW[2], float xyWhiteW[2],
-            float xyRedO[2], float xyGreenO[2], float xyBlueO[2], float xyWhiteO[2],
-            float xyRedC[2], float xyGreenC[2], float xyBlueC[2], float xyWhiteC[2],
+            float xyRedW[2],
+            float xyGreenW[2],
+            float xyBlueW[2],
+            float xyWhiteW[2],
+            float xyRedO[2],
+            float xyGreenO[2],
+            float xyBlueO[2],
+            float xyWhiteO[2],
+            float xyRedC[2],
+            float xyGreenC[2],
+            float xyBlueC[2],
+            float xyWhiteC[2],
             float scaleC
             );
     };

@@ -646,6 +646,7 @@ namespace ElysiaEngine
                 pUserData.colorSpace = (ColorSpace)colorSpaceIndex;
 
                 ImGui::Checkbox("Shoulder", &pUserData.bShoulder);
+                ImGui::SliderFloat("Local Exposure", &pUserData.localExposure, 0.0f, 5.f);
                 ImGui::SliderFloat("Soft Gap", &pUserData.SoftGap, 0.0f, 0.5f);
                 ImGui::SliderFloat("HDR Max", &pUserData.HdrMax, 8.0f, 2048.0f);
                 ImGui::SliderFloat("LPM Exposure", &pUserData.LpmExposure, 3.0f, 11.0f);

@@ -131,7 +131,10 @@ namespace ElysiaRenderer
             {
                 m_pMaterial->SetUInt(ShaderIDs::g_TargetTexIndex,
                                      RenderTargetManager::GetInstance().GetRenderTexture(
-                                                                           BloomPass::RenderTextureIDs::BloomRTID)
+                                                                           RenderResource::GetInstance().
+                                                                           GetPropertyName(
+                                                                               BloomPass::RenderTextureIDs::BloomUpSampleRTID
+                                                                               ) + std::to_wstring(0))
                                                                        ->GetUAVResourceHeapIndex(),
                                      passID);
                 SetSpaceResource(passData, PER_PASS_SPACE);

@@ -3,7 +3,7 @@
 #include "ShadingCommon.hlsl"
 #include "private/Random.hlsl"
 
-#define PROBE_COUNT 10648
+#define PROBE_COUNT 27000
 #define RAYS_PER_PROBE 128
 #define DDGI_PROBE_IRRADIANCE_NUM_TEXELS 8
 #define DDGI_PROBE_DEPTH_NUM_TEXELS 16

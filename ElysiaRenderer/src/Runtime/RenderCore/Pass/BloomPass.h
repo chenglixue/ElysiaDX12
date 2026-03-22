@@ -57,7 +57,6 @@ namespace ElysiaRenderer
         UINT m_cameraWidth;
         UINT m_cameraHeight;
         static const UINT m_mipmapCount = 6;
-        RenderTexture* m_pBloomRT = nullptr;
         std::array<UINT2, m_mipmapCount> m_mipmapResolutions{};
         std::array<RenderTexture*, m_mipmapCount> m_downSampleRTs{};
         std::array<RenderTexture*, m_mipmapCount> m_upSampleRTs{};
@@ -74,12 +73,9 @@ namespace ElysiaRenderer
             static inline size_t g_TargetMipLevel = PropertyToID(L"g_TargetMipLevel");
         };
 
-        void DoCopySceneRTToDownSampleRT();
         void DoBloomFirstDownSample();
         void DoBloomWeightDownSample();
         void DoCopyLastDownSampleRT2LastUpSampleRT();
         void DoBloom3x3TentUpSample();
-        void DoBloomBlendSceneColor();
-        void DoCopyBloomRT2CameraRT();
     };
 }
