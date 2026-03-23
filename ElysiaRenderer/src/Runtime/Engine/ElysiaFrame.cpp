@@ -169,7 +169,7 @@ namespace ElysiaEngine
     {
         auto frameContext = BeginFrame();
         m_pGraphicsContext->Reset();
-        //ImGUI_UpdateIO();
+        // ImGUI_UpdateIO();
         ImGUI_NewFrame();
 
         if (m_loadingScene)
@@ -379,8 +379,7 @@ namespace ElysiaEngine
             {
                 // 这里可以画一个临时的占位符，或者让旧图拉伸显示
             }
-
-            if (ImGui::IsMouseReleased(ImGuiMouseButton_Left))
+            else
             {
                 if (viewportSize.x > 0 && viewportSize.y > 0)
                 {

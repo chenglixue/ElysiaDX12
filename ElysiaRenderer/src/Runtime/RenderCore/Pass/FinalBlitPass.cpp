@@ -54,7 +54,10 @@ namespace ElysiaRenderer
                 .FilePath = L"Shaders\\public\\Blit.hlsl",
             },
         };
-        m_pMaterial = std::make_unique<Material>(m_pDevice, m_shaderPasses);
+        if (!m_pMaterial)
+        {
+            m_pMaterial = std::make_unique<Material>(m_pDevice, m_shaderPasses);
+        }
         ShaderPassIDs::BlitPassID = m_pMaterial->FindPassIndex("Blit Pass");
 
         UpdatePipeline();

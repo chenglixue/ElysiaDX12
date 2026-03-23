@@ -36,35 +36,6 @@ namespace ElysiaRenderer
         m_pCameraDepthRT = renderPassData.pCameraDepthRT;
         m_pSwaiChain = renderPassData.pSwapChain;
 
-        m_pWarmUPRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(
-            1,
-            1,
-            DXGI_FORMAT_R8_UNORM,
-            true,
-            RenderResource::GetInstance().
-            GetPropertyName(
-                PropertyToID(L"Warmup RT")));
-
-        m_WarmUPShaderPasses =
-        {
-            // ShaderPass
-            // {
-            //     .Name = "Warm Up Graphics Pass",
-            //     .FilePath = L"Shaders\\public\\PostProcess\\CS_AOHIZNormal.hlsl",
-            //     .ComputeEntryPoint = L"WarmUpGraphics",
-            // },
-            ShaderPass
-            {
-                .Name = "Warm Up Compute Pass",
-                .FilePath = L"Shaders\\public\\Warmup\\CS_Warmup.hlsl",
-                .IsComputeShader = true,
-                .ComputeEntryPoint = L"WarmUpCompute",
-            },
-        };
-        m_pWarmUPMaterial = std::make_unique<Material>(m_pDevice, m_WarmUPShaderPasses);
-        //m_warmUpGraphicsPasseID = m_pWarmUPMaterial->FindPassIndex("WarmUpGraphics");
-        m_warmUpComputePasseID = m_pWarmUPMaterial->FindPassIndex("Warm Up Compute Pass");
-
         Configure();
     }
 

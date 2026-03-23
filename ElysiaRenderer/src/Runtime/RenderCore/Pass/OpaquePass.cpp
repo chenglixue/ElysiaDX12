@@ -45,9 +45,11 @@ namespace ElysiaRenderer
                 .FilePath = L"Shaders\\public\\Opaque.hlsl",
             }
         };
-        m_pMaterial = std::make_unique<Material>(m_pDevice, m_shaderPasses);
+        if (!m_pMaterial)
+        {
+            m_pMaterial = std::make_unique<Material>(m_pDevice, m_shaderPasses);
+        }
         ShaderPassIDs::OpaqueLightPassID = m_pMaterial->FindPassIndex("Opaque Light Pass");
-
         UpdatePipeline();
     }
 

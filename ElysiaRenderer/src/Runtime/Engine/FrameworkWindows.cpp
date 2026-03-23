@@ -252,10 +252,34 @@ namespace ElysiaEngine
         {
             if (pFrameworkInstance)
             {
+                if (wParam == SIZE_MINIMIZED)
+                {
+                    bIsMinimized = true;
+                    return 0; // 绝对不允许向下执行 Resize
+                }
+
+                bIsMinimized = false;
+
                 RECT clientRect = {};
                 GetClientRect(hWnd, &clientRect);
-                pFrameworkInstance->HandleResize(clientRect.right - clientRect.left,
-                                                 clientRect.bottom - clientRect.top);
+                UINT newWidth = clientRect.right - clientRect.left;
+                UINT newHeight = clientRect.bottom - clientRect.top;
+
+                if (newWidth == 0 || newHeight == 0)
+                {
+                    return 0;
+                }
+
+                static UINT s_currentWidth = 0;
+                static UINT s_currentHeight = 0;
+                if (newWidth == s_currentWidth && newHeight == s_currentHeight)
+                {
+                    return 0; // 尺寸根本没变，拒绝执行沉重的重置！
+                }
+                s_currentWidth = newWidth;
+                s_currentHeight = newHeight;
+
+                pFrameworkInstance->HandleResize(newWidth, newHeight);
                 bIsMinimized = (IsIconic(hWnd) == TRUE);
                 return 0;
             }

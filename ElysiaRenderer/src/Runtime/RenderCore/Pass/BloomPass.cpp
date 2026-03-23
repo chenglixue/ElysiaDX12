@@ -71,9 +71,12 @@ namespace ElysiaRenderer
         }
 
         m_shaderPasses.assign(std::begin(m_PassData), std::end(m_PassData));
-        m_pMaterial = std::make_unique<Material>(m_pDevice, m_shaderPasses);
+        if (!m_pMaterial)
+        {
+            m_pMaterial = std::make_unique<Material>(m_pDevice, m_shaderPasses);
 
         UpdatePipeline();
+        }
     }
     void BloomPass::UpdatePipeline()
     {

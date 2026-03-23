@@ -57,7 +57,10 @@ namespace ElysiaRenderer
             },
         };
 
-        m_pMaterial = std::make_unique<Material>(m_pDevice, m_shaderPasses);
+        if (!m_pMaterial)
+        {
+            m_pMaterial = std::make_unique<Material>(m_pDevice, m_shaderPasses);
+        }
         ShaderPasseIDs::DebugPassID = m_pMaterial->FindPassIndex("Debug Pass");
 
         UpdatePipeline();
