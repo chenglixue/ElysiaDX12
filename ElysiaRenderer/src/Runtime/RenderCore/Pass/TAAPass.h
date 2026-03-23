@@ -5,16 +5,14 @@
 namespace ElysiaRenderer
 {
 #define TAA_PASS_LIST \
-PASS(BLOOM_FIRST_DOWN_SAMPLE_PASS,          "public\\PostProcess\\Bloom\\Bloom.hlsl",               true,  BloomKarisDownSample)
-
+PASS(TAA_PASS,          "public\\PostProcess\\TAA\\CS_TAA.hlsl",               true,  TAA)\
+PASS(COPY_PASS,          "public\\PostProcess\\TAA\\CS_TAA.hlsl",               true,  CopyRT)
     class TAAPass : public BasePass
     {
     public:
         struct RenderTextureIDs
         {
-            static inline size_t TAA0RTID = PropertyToID(L"TAA 0 RT");
-            static inline size_t TAA1RTID = PropertyToID(L"TAA 1 RT");
-
+            static inline size_t TAARTID = PropertyToID(L"TAA RT");
         };
 
     public:
@@ -51,17 +49,33 @@ PASS(BLOOM_FIRST_DOWN_SAMPLE_PASS,          "public\\PostProcess\\Bloom\\Bloom.h
 #pragma endregion
         UINT m_cameraWidth;
         UINT m_cameraHeight;
+        UINT m_TAAWidth;
+        UINT m_TAAHeight;
 
+        static inline bool m_isFirstFrame = true;
         int m_writeIndex = 0;
+        int m_readIndex = 0;
         const static UINT m_TAARTCount = 2;
         std::array<RenderTexture*, m_TAARTCount> m_TAARTs;
 
         struct ShaderIDs
         {
-            static inline size_t g_DestTextureIndexID = PropertyToID(L"g_DestTextureIndex");
-            static inline size_t g_SourceTextureIndex = PropertyToID(L"g_SourceTextureIndex");
-            static inline size_t g_DestSize = PropertyToID(L"g_DestSize");
-            static inline size_t g_SourceSize = PropertyToID(L"g_SourceSize");
+            static inline size_t g_HistoryTexIndex = PropertyToID(L"g_HistoryTexIndex");
+            static inline size_t g_CurrTexIndex = PropertyToID(L"g_CurrTexIndex");
+            static inline size_t g_SourceTexIndex = PropertyToID(L"g_SourceTexIndex");
+            static inline size_t g_DestTexIndex = PropertyToID(L"g_DestTexIndex");
+
+            static inline size_t viewProjMatrix_I = PropertyToID(L"viewProjMatrix_I");
+            static inline size_t pre_viewProjMatrix = PropertyToID(L"pre_viewProjMatrix");
+            static inline size_t g_ProjMatrix_I = PropertyToID(L"g_ProjMatrix_I");
+            static inline size_t g_Jitter = PropertyToID(L"g_Jitter");
+            static inline size_t g_HistoryJitter = PropertyToID(L"g_HistoryJitter");
+            static inline size_t g_TAATexSize = PropertyToID(L"g_TAATexSize");
+            static inline size_t g_FixedBlendWeight = PropertyToID(L"g_FixedBlendWeight");
         };
+
+        void DoTAA();
+        void DoFirstFrameCopyRT(RenderTexture* pSourceRT, RenderTexture* pDestRT);
+        void DoCopyTAA2CameraColor();
     };
 }

@@ -1,0 +1,246 @@
+#ifndef TAACOMMON_H
+#define TAACOMMON_H
+
+#include "private\ShadingCommon.hlsl"
+
+float2 Elysia_Sample_Velocity(float2 uv)
+{
+    float2 velocity = SampleTexture2D(GBuffer5Index, uv, ClampPointSampler);
+    return velocity;
+}
+float3 Elysia_Sample_History(UINT historyTexIndex, float2 preUV)
+{
+    float3 historyColor = SampleTexture2D(historyTexIndex, preUV, ClampLinearSampler);
+    return historyColor;
+}
+
+float3 Elysia_Sample_TAA(UINT currTexIndex, float2 uv)
+{
+    float3 o = SampleTexture2D(currTexIndex, uv, ClampLinearSampler);
+    return o;
+}
+void Elysia_Save_TAA(UINT currTexIndex, UINT2 writePos, float3 finalColor)
+{
+    RWTexture2D<float4> o = ResourceDescriptorHeap[currTexIndex];
+    o[writePos] = float4(finalColor, 1.f);
+}
+
+float3 TransformRGB2YCoCg(float3 c)
+{
+    // Y  = R/4 + G/2 + B/4
+    // Co = R/2 - B/2
+    // Cg = -R/4 + G/2 - B/4
+    return float3(
+        c.x / 4.0 + c.y / 2.0 + c.z / 4.0,
+        c.x / 2.0 - c.z / 2.0,
+        -c.x / 4.0 + c.y / 2.0 - c.z / 4.0
+        );
+}
+float3 TransformYCoCg2RGB(float3 c)
+{
+    // R = Y + Co - Cg
+    // G = Y + Cg
+    // B = Y - Co - Cg
+    return saturate(float3(
+        c.x + c.y - c.z,
+        c.x + c.z,
+        c.x - c.y - c.z
+        ));
+}
+
+float3 ReinhardTonemap(float3 color)
+{
+    return color * rcp(1.0 + Luminance(color) + FLT_EPS);
+}
+float3 InverseReinhardTonemap(float3 color)
+{
+    return color * rcp(1.f - Luminance(color) + FLT_EPS);
+}
+
+void SampleDepth3x3(UINT depthTexIndex,
+                    float2 uv,
+                    float2 duv,
+                    out float depths[9])
+{
+    float du = duv.x;
+    float dv = duv.y;
+
+    const float2 offsetUV[9] =
+    {
+        {-du, dv}, {0, dv}, {du, dv},
+        {-du, 0}, {0, 0}, {du, 0},
+        {-du, -dv}, {0, -dv}, {du, -dv}
+    };
+
+    [unroll]
+    for (int i = 0; i < 9; ++i)
+    {
+        float depth = SampleTexture2D(depthTexIndex, uv + offsetUV[i], ClampPointSampler);
+        depths[i] = depth;
+    }
+}
+void SampleDepthCross(UINT depthTexIndex,
+                      float2 uv,
+                      float2 duv,
+                      out float depths[5])
+{
+    float du = duv.x;
+    float dv = duv.y;
+
+    const float2 offsetUV[5] =
+    {
+        {0, dv},
+        {-du, 0}, {0, 0}, {du, 0},
+        {0, -dv},
+    };
+
+    [unroll]
+    for (int i = 0; i < 5; ++i)
+    {
+        float depth = SampleTexture2D(depthTexIndex, uv + offsetUV[i], ClampPointSampler);
+        depths[i] = depth;
+    }
+}
+
+void SampleColor3x3(UINT colorTexIndex,
+                    float2 uv,
+                    float2 duv,
+                    out float3 colors[9])
+{
+    float du = duv.x;
+    float dv = duv.y;
+
+    const float2 offsetUV[9] =
+    {
+        {-du, dv}, {0, dv}, {du, dv},
+        {-du, 0}, {0, 0}, {du, 0},
+        {-du, -dv}, {0, -dv}, {du, -dv}
+    };
+
+    [unroll]
+    for (int i = 0; i < 9; ++i)
+    {
+        float3 color = SampleTexture2D(colorTexIndex, uv + offsetUV[i], ClampLinearSampler);
+        colors[i] = TransformRGB2YCoCg(ReinhardTonemap(color));
+    }
+}
+void SampleColorCross(UINT colorTexIndex,
+                      float2 uv,
+                      float2 duv,
+                      out half3 colors[5])
+{
+    float du = duv.x;
+    float dv = duv.y;
+
+    const float2 offsetUV[5] =
+    {
+        {0, dv},
+        {-du, 0}, {0, 0}, {du, 0},
+        {0, -dv},
+    };
+
+    [unroll]
+    for (int i = 0; i < 5; ++i)
+    {
+        half3 color = SampleTexture2D(colorTexIndex, uv + offsetUV[i], ClampLinearSampler);
+        colors[i] = TransformRGB2YCoCg(ReinhardTonemap(color));
+    }
+}
+
+float2 SampleClosestUV3x3(UINT depthTexIndex, float2 uv, float2 duv)
+{
+    float depths[9];
+    SampleDepth3x3(depthTexIndex, uv, duv, depths);
+
+    float du = duv.x;
+    float dv = duv.y;
+
+    float minDepth = depths[4];
+    float2 minUV = uv;
+    const float2 offsetUV[9] =
+    {
+        {-du, dv}, {0, dv}, {du, dv},
+        {-du, 0}, {0, 0}, {du, 0},
+        {-du, -dv}, {0, -dv}, {du, -dv}
+    };
+
+    [unroll]
+    for (int i = 0; i < 9; ++i)
+    {
+        const float lerpFactor = step(depths[i].r, minDepth);
+        if (minDepth > depths[i].r)
+        {
+            minDepth = depths[i];
+            minUV = uv + offsetUV[i];
+        }
+
+        // minDepth = lerp(minDepth, depths[i], lerpFactor);
+        // minUV = lerp(minUV, uv + offsetUV[i], lerpFactor);
+    }
+
+    return minUV;
+}
+float2 SampleClosestUVCross(UINT depthTexIndex, float2 uv, float2 duv)
+{
+    float depths[5];
+    SampleDepthCross(depthTexIndex, uv, duv, depths);
+
+    float du = duv.x;
+    float dv = duv.y;
+
+    float minDepth = FLT_MAX;
+    float2 minUV = uv;
+    const float2 offsetUV[5] =
+    {
+        {0, dv},
+        {-du, 0}, {0, 0}, {du, 0},
+        {0, -dv},
+    };
+
+    [unroll]
+    for (int i = 0; i < 5; ++i)
+    {
+        const float lerpFactor = step(depths[i].r, minDepth);
+
+        minDepth = lerp(minDepth, depths[i], lerpFactor);
+        minUV = lerp(minUV, minUV + offsetUV[i], lerpFactor);
+    }
+
+    return minUV;
+}
+
+float3 ClampBox(float3 historyColor, float3 minColor, float3 maxColor)
+{
+    return clamp(historyColor, minColor, maxColor);
+}
+float3 ClipBox(float3 currColor, float3 minColor, float3 maxColor)
+{
+    float3 midColor = (minColor + maxColor) * 0.5;
+    float3 toEdgeVec = (maxColor - minColor) * 0.5;
+
+    float3 toSrcVec = currColor - midColor;
+    float3 unitVec = abs(toSrcVec / max(toEdgeVec, FLT_EPS));
+    float unit = max(unitVec.x, max(unitVec.y, max(unitVec.z, FLT_EPS)));
+    float3 res = lerp(currColor, midColor + toSrcVec * rcp(unit), step(1.0, unit));
+
+    return res;
+}
+float3 VarianceClipBox(float3 m1, float3 m2, float gamma, float3 preColor)
+{
+    float3 mu = m1 / 9;
+    float3 sigma = sqrt(abs(m2 / 9 - mu * mu));
+    float3 colorMin = mu - gamma * sigma;
+    float3 colorMax = mu + gamma * sigma;
+
+    float3 p_clip = 0.5 * (colorMax + colorMin);
+    float3 e_clip = 0.5 * (colorMax - colorMin) + FLT_EPS;
+
+    float3 v_clip = preColor - p_clip;
+    float3 v_unit = v_clip.xyz / e_clip;
+    float3 a_unit = abs(v_unit);
+    float ma_unit = max(a_unit.x, max(a_unit.y, a_unit.z));
+
+    float factor = rcp(max(1.0, ma_unit));
+    return p_clip + v_clip * factor;
+}
+#endif

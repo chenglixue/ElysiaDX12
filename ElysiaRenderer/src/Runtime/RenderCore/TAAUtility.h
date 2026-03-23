@@ -109,5 +109,6 @@ namespace ElysiaRenderer
         bool Enable;
         Jitter::Type jitterType = Jitter::Type::Halton23X8;
         float jitterIntensity = 1.f;
+        float staticWeight = 0.95f;
     };
 }

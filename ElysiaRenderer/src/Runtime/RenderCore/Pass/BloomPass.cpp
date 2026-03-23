@@ -74,9 +74,8 @@ namespace ElysiaRenderer
         if (!m_pMaterial)
         {
             m_pMaterial = std::make_unique<Material>(m_pDevice, m_shaderPasses);
-
-        UpdatePipeline();
         }
+        UpdatePipeline();
     }
     void BloomPass::UpdatePipeline()
     {

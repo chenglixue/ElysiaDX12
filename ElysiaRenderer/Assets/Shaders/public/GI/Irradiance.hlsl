@@ -67,7 +67,7 @@ float3 SampleDDGI(float3 positionWS,
                                gridDimensions.x * gridDimensions.y);
 
         UINT2 probeOffsetIndexID = UINT2(adjProbeIdx % 64, adjProbeIdx / 64);
-        RWTexture2D<uint> g_ProbeOffsetIndexTex = ResourceDescriptorHeap[probeOffsetIndexTexIndex];
+        Texture2D<uint> g_ProbeOffsetIndexTex = ResourceDescriptorHeap[probeOffsetIndexTexIndex];
         UINT index = g_ProbeOffsetIndexTex.Load(UINT3(probeOffsetIndexID, 0));
         StructuredBuffer<Vector4> ProbeRelocationLUTBuffer = ResourceDescriptorHeap[ProbeRelocationLUTBufferIndex];
         float3 probeOffset = ProbeRelocationLUTBuffer[index];
@@ -117,7 +117,7 @@ float3 SampleDDGI(float3 positionWS,
             float variance = abs(Pow2(mean) - mean2);
 
             // Chebyshev Visibility
-            chebyshevWeight = variance / (variance + Pow2(biasPositionWSToAdjProbeDist - mean));
+            chebyshevWeight = variance / (variance + Pow2(biasPositionWSToAdjProbeDist - mean) + 1e-6f);
 
             // 增强对比度，使遮挡边缘更锐利，减少颜色渗漏
             chebyshevWeight = max(chebyshevWeight * chebyshevWeight * chebyshevWeight, 0.0f);
@@ -195,7 +195,7 @@ float3 SampleDDGI(float3 positionWS,
         uint adjProbeIdx = adjCoords.x + adjCoords.y * gridDimensions.x + adjCoords.z * (
                                gridDimensions.x * gridDimensions.y);
         UINT2 probeOffsetIndexID = UINT2(adjProbeIdx % 64, adjProbeIdx / 64);
-        RWTexture2D<uint> g_ProbeOffsetIndexTex = ResourceDescriptorHeap[probeOffsetIndexTexIndex];
+        Texture2D<uint> g_ProbeOffsetIndexTex = ResourceDescriptorHeap[probeOffsetIndexTexIndex];
         UINT index = g_ProbeOffsetIndexTex.Load(UINT3(probeOffsetIndexID, 0));
         float3 probeOffset = ProbeRelocationLUTBuffer[index];
         UINT probeState = ProbeStates[adjProbeIdx];
@@ -243,7 +243,7 @@ float3 SampleDDGI(float3 positionWS,
             float variance = abs(Pow2(mean) - mean2);
 
             // Chebyshev Visibility
-            chebyshevWeight = variance / (variance + Pow2(biasPositionWSToAdjProbeDist - mean));
+            chebyshevWeight = variance / (variance + Pow2(biasPositionWSToAdjProbeDist - mean) + 1e-6f);
 
             // 增强对比度，使遮挡边缘更锐利，减少颜色渗漏
             chebyshevWeight = max(chebyshevWeight * chebyshevWeight * chebyshevWeight, 0.0f);

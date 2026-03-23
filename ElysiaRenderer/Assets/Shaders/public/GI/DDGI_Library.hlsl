@@ -125,8 +125,8 @@ void GenerateRayMain()
         {
             candidateDirs[i] = DDGIGetProbeRayDir(rayIndex + i * N, RAYS_PER_PROBE, g_RandomRotation);
 
-            weights[i] = Luminance(SampleIrradianceTex(rayOrigin, candidateDirs[i])) + 0.1f;
-            weights[i] *= Luminance(g_GIDataBuffer[probeIndex * RAYS_PER_PROBE + rayIndex + i * N].Irradiance) + 0.1f;
+            // weights[i] = Luminance(SampleIrradianceTex(rayOrigin, candidateDirs[i])) + 0.1f;
+            weights[i] = Luminance(g_GIDataBuffer[probeIndex * RAYS_PER_PROBE + rayIndex + i * N].Irradiance) + 0.1f;
             sumWeight += weights[i];
         }
 
@@ -229,7 +229,7 @@ void GenerateRayMain()
 
             float neighborWeight = Luminance(g_GIDataBuffer[neighborWriteIdx].Irradiance) + 0.1f;
             float neighborAccuWeight = neighborWeight * neighborReservoir.numSamples
-                                       * neighborReservoir.estimatorWeight * jacobian;
+                                       * neighborReservoir.estimatorWeight;
             currReservoir.weightSum += neighborAccuWeight;
             currReservoir.numSamples += neighborReservoir.numSamples;
 

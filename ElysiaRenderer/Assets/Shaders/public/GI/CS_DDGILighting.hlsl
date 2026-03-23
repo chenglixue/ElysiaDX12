@@ -80,81 +80,50 @@ void DDGI_Shading(uint3 id : SV_DispatchThreadID)
     float2 uv = positionNDC * float2(1.f, -1.f) * 0.5f + 0.5f;
     float3 baseColorAlpha = SampleTexture2D(baseColorTexIndex, uv, WarpLinearSampler);
 
-    const float SHORT_DISTANCE_THRESHOLD = 10.f;
-    const bool needRT = distance <= SHORT_DISTANCE_THRESHOLD;
-
     float3 result = 0.f;
     float blendWeight = DDGIGetVolumeBlendWeight(positionWS, g_GridOrigin, g_GridSpacing, 0, float4(0, 0, 0, 1));
     Vector3 viewDirWS = GetScreenVectorWS(cameraPosWS.xyz, positionWS);
-    if (needRT)
+    LightData mainLightData = GetMainLight(mainLight);
+    float3 toLight = normalize(mainLightData.toLight);
+    float NoL = max(0, dot(normalWS, toLight));
+
+    float shadow = DDGI_Query_Shadow_Visibity(positionWS,
+                                              normalWS,
+                                              g_ProbeNormalBias,
+                                              toLight,
+                                              g_SceneTLAS);
+
+    float3 directIrradiance = baseColorAlpha.rgb / PI * mainLightData.color * mainLightData.intensity * NoL *
+                              shadow;
+    result = directIrradiance;
+
+    if (blendWeight > 0.f)
     {
-        LightData mainLightData = GetMainLight(mainLight);
-        float3 toLight = normalize(mainLightData.toLight);
-        float NoL = max(0, dot(normalWS, toLight));
+        float3 indirectIrradiance = SampleDDGI(
+            positionWS,
+            normalWS,
+            DDGIGetSurfaceBias(normalWS,
+                               viewDirWS,
+                               g_ProbeNormalBias,
+                               g_ProbeViewBias),
+            g_GridOrigin,
+            g_GridSpacing,
+            g_GridDimensions,
+            g_DDGIEncodingGamma,
+            g_IrradianceTexSize,
+            g_IrradianceTexIndex,
+            g_DistanceTexSize,
+            g_DistanceTexIndex,
+            g_ProbeOffsetIndexTexIndex,
+            g_RelocationLUTIndex,
+            g_ProbeStatesIndex,
+            WarpLinearSampler
+            );
+        float maxAlbedo = 0.9f;
+        float3 indirectRadiance = min(baseColorAlpha.rgb, maxAlbedo) / PI * indirectIrradiance;
 
-        float shadow = DDGI_Query_Shadow_Visibity(positionWS,
-                                                  normalWS,
-                                                  g_ProbeNormalBias,
-                                                  toLight,
-                                                  g_SceneTLAS);
-
-        float3 directIrradiance = baseColorAlpha.rgb / PI * mainLightData.color * mainLightData.intensity * NoL *
-                                  shadow;
-        result = directIrradiance;
-
-        if (blendWeight > 0.f)
-        {
-            float3 indirectIrradiance = SampleDDGI(
-                positionWS,
-                normalWS,
-                DDGIGetSurfaceBias(normalWS,
-                                   viewDirWS,
-                                   g_ProbeNormalBias,
-                                   g_ProbeViewBias),
-                g_GridOrigin,
-                g_GridSpacing,
-                g_GridDimensions,
-                g_DDGIEncodingGamma,
-                g_IrradianceTexSize,
-                g_IrradianceTexIndex,
-                g_DistanceTexSize,
-                g_DistanceTexIndex,
-                g_ProbeOffsetIndexTexIndex,
-                g_RelocationLUTIndex,
-                g_ProbeStatesIndex,
-                WarpLinearSampler
-                );
-            float maxAlbedo = 0.9f;
-            float3 indirectRadiance = min(baseColorAlpha.rgb, maxAlbedo) / PI * indirectIrradiance;
-
-            indirectRadiance *= blendWeight;
-            result += (indirectRadiance);
-        }
-    }
-    else
-    {
-        if (blendWeight > 0.f)
-        {
-            float3 cacheIrradiance = SampleDDGI(positionWS,
-                                                normalWS,
-                                                DDGIGetSurfaceBias(normalWS,
-                                                                   viewDirWS,
-                                                                   g_ProbeNormalBias,
-                                                                   g_ProbeViewBias),
-                                                g_GridOrigin,
-                                                g_GridSpacing,
-                                                g_GridDimensions,
-                                                g_DDGIEncodingGamma,
-                                                g_IrradianceTexSize,
-                                                g_IrradianceTexIndex,
-                                                g_DistanceTexSize,
-                                                g_DistanceTexIndex,
-                                                g_ProbeOffsetIndexTexIndex,
-                                                g_RelocationLUTIndex,
-                                                g_ProbeStatesIndex,
-                                                WarpLinearSampler);
-            result += (baseColorAlpha.rgb / PI * cacheIrradiance);
-        }
+        indirectRadiance *= blendWeight;
+        result += (indirectRadiance);
     }
 
     GIData data = (GIData)0;

@@ -341,7 +341,7 @@ namespace ElysiaRenderer
         m_currJitterUV = Jitter::SampleJitterUV(UserData::GetInstance().taaParameter.jitterType);
         m_jitterMatrixProj.m[2][0] += m_currJitterUV.x * 2.f / m_cameraWidth * UserData::GetInstance().taaParameter.
                                                                                                        jitterIntensity;
-        m_jitterMatrixProj.m[2][1] += m_currJitterUV.y * 2.f / m_cameraHeight * UserData::GetInstance().taaParameter.
+        m_jitterMatrixProj.m[2][1] -= m_currJitterUV.y * 2.f / m_cameraHeight * UserData::GetInstance().taaParameter.
                                                                                                         jitterIntensity;
 
         m_currMatrixVP = viewMatrix * projMatrix;

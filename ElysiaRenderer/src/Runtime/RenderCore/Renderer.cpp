@@ -32,6 +32,7 @@
 #include "Pass/DebugPass.h"
 #include "Pass/GIPass.h"
 #include "Pass/SkyboxPass.h"
+#include "Pass/TAAPass.h"
 #include "Runtime/Engine/ECS/Entity.h"
 
 extern "C"
@@ -80,6 +81,9 @@ namespace ElysiaRenderer
             std::move(std::make_unique<OpaquePass>()));
         m_passes.emplace_back(
             std::move(std::make_unique<SkyboxPass>()));
+
+        m_passes.emplace_back(
+            std::move(std::make_unique<TAAPass>()));
         m_passes.emplace_back(
             std::move(std::make_unique<BloomPass>()));
 

@@ -56,8 +56,8 @@ namespace ElysiaEngine
 
     void ElysiaFrame::OnParseCommandLine(LPSTR lpCmdLine, uint32_t* pWidth, uint32_t* pHeight)
     {
-        // *pWidth = 1920;
-        // *pHeight = 1080;
+        *pWidth = 1920;
+        *pHeight = 1080;
 
         m_VsyncEnabled = false;
         m_bIsBenchmarking = false;
@@ -723,7 +723,8 @@ namespace ElysiaEngine
                                                  Jitter::Type>()));
                 pUserData.taaParameter.jitterType = (Jitter::Type)jitterTypeIndex;
 
-                ImGui::SliderFloat("TAA Jitter Intensity", &pUserData.taaParameter.jitterIntensity, 0.f, 1.f);
+                ImGui::SliderFloat("TAA Jitter Intensity", &pUserData.taaParameter.jitterIntensity, 0.f, 2.f);
+                ImGui::SliderFloat("TAA Static Weight", &pUserData.taaParameter.staticWeight, 0.9f, 1.f);
             }
             ImGui::Unindent();
         }

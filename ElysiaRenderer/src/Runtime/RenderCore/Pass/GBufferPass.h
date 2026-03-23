@@ -24,6 +24,16 @@ namespace ElysiaRenderer
             static inline size_t GBuffer4ID = PropertyToID(L"GBuffer4");
             static inline size_t GBuffer5ID = PropertyToID(L"GBuffer5");
         };
+        struct TAAData
+        {
+            static inline Matrix Pre_View_M;
+            static inline Matrix Pre_Proj_M;
+            static inline Matrix Pre_ViewProj_M;
+            static inline Matrix Pre_View_I_M;
+            static inline Matrix Pre_Proj_I_M;
+            static inline Matrix Pre_ViewProj_I_M;
+        };
+        static inline Vector2 m_currJitterUV, m_preJitterUV;
 
         GBufferPass();
         virtual ~GBufferPass() override;
@@ -97,15 +107,7 @@ namespace ElysiaRenderer
             static inline size_t g_AmbientTint = PropertyToID(L"g_AmbientTint");
 
         };
-        struct TAAData
-        {
-            static inline Matrix Pre_View_M;
-            static inline Matrix Pre_Proj_M;
-            static inline Matrix Pre_ViewProj_M;
-            static inline Matrix Pre_View_I_M;
-            static inline Matrix Pre_Proj_I_M;
-            static inline Matrix Pre_ViewProj_I_M;
-        };
+
         struct MeshData
         {
             Matrix world_M;
@@ -144,7 +146,6 @@ namespace ElysiaRenderer
         Matrix m_currMatrixVP;
         Matrix m_currMatrixVP_I;
         Matrix m_jitterMatrixProj;
-        Vector2 m_currJitterUV, m_preJitterUV;
 
         std::vector<RenderTexture*> m_GBufferRTs{};
         std::vector<DX12BufferUpload*> m_uploads;

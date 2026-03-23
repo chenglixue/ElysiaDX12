@@ -429,7 +429,7 @@ void ProbeIrradianceBlending(uint3 id : SV_DispatchThreadID,
         Elysia_DDGI_StoreIrradiance(id.xy, finalColor);
     }
 
-    GroupMemoryBarrierWithGroupSync();
+    DeviceMemoryBarrierWithGroupSync();
 
     [branch]
     if (isBorder)
@@ -466,10 +466,8 @@ void ProbeIrradianceBlending(uint3 id : SV_DispatchThreadID,
 
         // 同时缝合 Irradiance 和 Distance
         float3 borderIrr = Elysia_DDGI_LoadIrradiance(globalCopyPos).rgb;
-        float2 borderDist = Elysia_DDGI_LoadDist(globalCopyPos).rg;
 
         Elysia_DDGI_StoreIrradiance(id.xy, borderIrr);
-        Elysia_DDGI_StoreDist(id.xy, borderDist);
     }
 }
 
@@ -546,7 +544,7 @@ void ProbeDepthBlending(uint3 id : SV_DispatchThreadID,
         Elysia_DDGI_StoreDist(id.xy, finalDist);
     }
 
-    GroupMemoryBarrierWithGroupSync();
+    DeviceMemoryBarrierWithGroupSync();
 
     [branch]
     if (isBorder)
@@ -582,10 +580,8 @@ void ProbeDepthBlending(uint3 id : SV_DispatchThreadID,
         uint2 globalCopyPos = GroupID.xy * N + copyLocalCoord;
 
         // 同时缝合 Irradiance 和 Distance
-        float3 borderIrr = Elysia_DDGI_LoadIrradiance(globalCopyPos).rgb;
         float2 borderDist = Elysia_DDGI_LoadDist(globalCopyPos).rg;
 
-        Elysia_DDGI_StoreIrradiance(id.xy, borderIrr);
         Elysia_DDGI_StoreDist(id.xy, borderDist);
     }
 }
