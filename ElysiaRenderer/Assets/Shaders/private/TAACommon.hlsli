@@ -243,4 +243,37 @@ float3 VarianceClipBox(float3 m1, float3 m2, float gamma, float3 preColor)
     float factor = rcp(max(1.0, ma_unit));
     return p_clip + v_clip * factor;
 }
+
+float CalcTAAWeight(float staticWeight, float dynamicWeight, float maxWeight, float velocityFactor)
+{
+    return lerp(staticWeight, maxWeight, saturate(dynamicWeight * velocityFactor));
+}
+
+float3 CatmullRomSample(UINT texIndex, float2 uv, float2 duv)
+{
+    float2 samplePos = uv / duv;
+    float2 f = frac(samplePos - 0.5);
+    float2 i = floor(samplePos - 0.5);
+
+    float2 w0 = f * (-0.5 + f * (1.0 - 0.5 * f));
+    float2 w1 = 1.0 + f * f * (-2.5 + 1.5 * f);
+    float2 w2 = f * (0.5 + f * (2.0 - 1.5 * f));
+    float2 w3 = f * f * (-0.5 + 0.5 * f);
+
+    float2 w12 = w1 + w2;
+    float2 offset = w2 / w12;
+
+    float2 uv0 = (i - 0.5) * duv;
+    float2 uv3 = (i + 2.5) * duv;
+    float2 uv12 = (i + 0.5 + offset) * duv;
+
+    float3 color = 0;
+    color += SampleTexture2D(texIndex, float2(uv12.x, uv0.y), ClampLinearSampler) * (w12.x * w0.y);
+    color += SampleTexture2D(texIndex, float2(uv0.x, uv12.y), ClampLinearSampler) * (w0.x * w12.y);
+    color += SampleTexture2D(texIndex, float2(uv12.x, uv12.y), ClampLinearSampler) * (w12.x * w12.y);
+    color += SampleTexture2D(texIndex, float2(uv3.x, uv12.y), ClampLinearSampler) * (w3.x * w12.y);
+    color += SampleTexture2D(texIndex, float2(uv12.x, uv3.y), ClampLinearSampler) * (w12.x * w3.y);
+
+    return max(0, color);
+}
 #endif

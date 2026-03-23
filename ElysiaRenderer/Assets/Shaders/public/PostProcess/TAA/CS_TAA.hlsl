@@ -15,7 +15,9 @@ cbuffer PassConstant : register(b0, perPassSpace)
     UINT g_SourceTexIndex;
     UINT g_DestTexIndex;
 
-    float g_FixedBlendWeight;
+    float g_StaticBlendWeight;
+    float g_DynamicBlendWeight;
+    float g_MaxBlendWeight;
     float2 g_Jitter;
     float2 g_HistoryJitter;
 }
@@ -71,7 +73,7 @@ void TAA(uint3 id : SV_DispatchThreadID)
     //     preUV = preNDC.xy * float2(0.5f, -0.5f) + 0.5f;
     //     preUV += g_HistoryJitter;
     // }
-    float3 historyColor = Elysia_Sample_History(g_HistoryTexIndex, preUV);
+    float3 historyColor = CatmullRomSample(g_HistoryTexIndex, preUV, g_TAATexSize.zw);
     historyColor = ReinhardTonemap(historyColor);
     historyColor = TransformRGB2YCoCg(historyColor);
 
@@ -79,7 +81,10 @@ void TAA(uint3 id : SV_DispatchThreadID)
     SampleMinMax3x3(g_CurrTexIndex, screenUV, g_TAATexSize.zw, minColor, maxColor, currColor, avgColor, m1, m2);
     historyColor = VarianceClipBox(m1, m2, 1, historyColor);
 
-    float3 blendColor = lerp(currColor, historyColor, g_FixedBlendWeight);
+    float velocityFactor = length(velocity) * g_TAATexSize.xy;
+    float blendWeight = CalcTAAWeight(g_StaticBlendWeight, g_DynamicBlendWeight, g_MaxBlendWeight, velocityFactor);
+
+    float3 blendColor = lerp(currColor, historyColor, blendWeight);
     blendColor = TransformYCoCg2RGB(blendColor);
     blendColor = InverseReinhardTonemap(blendColor);
     Elysia_Save_TAA(g_DestTexIndex, writePos, blendColor);

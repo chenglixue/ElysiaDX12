@@ -71,7 +71,9 @@ PASS(COPY_PASS,          "public\\PostProcess\\TAA\\CS_TAA.hlsl",               
             static inline size_t g_Jitter = PropertyToID(L"g_Jitter");
             static inline size_t g_HistoryJitter = PropertyToID(L"g_HistoryJitter");
             static inline size_t g_TAATexSize = PropertyToID(L"g_TAATexSize");
-            static inline size_t g_FixedBlendWeight = PropertyToID(L"g_FixedBlendWeight");
+            static inline size_t g_StaticBlendWeight = PropertyToID(L"g_StaticBlendWeight");
+            static inline size_t g_DynamicBlendWeight = PropertyToID(L"g_DynamicBlendWeight");
+            static inline size_t g_MaxBlendWeight = PropertyToID(L"g_MaxBlendWeight");
         };
 
         void DoTAA();

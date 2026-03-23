@@ -134,8 +134,14 @@ namespace ElysiaRenderer
             m_pMaterial->SetFloat4(ShaderIDs::g_TAATexSize,
                                    GetScreenSize(m_TAAWidth, m_TAAHeight),
                                    passID);
-            m_pMaterial->SetFloat(ShaderIDs::g_FixedBlendWeight,
+            m_pMaterial->SetFloat(ShaderIDs::g_StaticBlendWeight,
                                   UserData::GetInstance().taaParameter.staticWeight,
+                                  passID);
+            m_pMaterial->SetFloat(ShaderIDs::g_DynamicBlendWeight,
+                                  UserData::GetInstance().taaParameter.dynamicWeight,
+                                  passID);
+            m_pMaterial->SetFloat(ShaderIDs::g_MaxBlendWeight,
+                                  UserData::GetInstance().taaParameter.maxWeight,
                                   passID);
             m_pMaterial->SetFloat2(ShaderIDs::g_Jitter,
                                    GBufferPass::m_currJitterUV / Vector2(m_cameraWidth, m_cameraHeight),
