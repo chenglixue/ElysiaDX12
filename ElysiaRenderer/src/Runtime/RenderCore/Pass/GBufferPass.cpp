@@ -371,7 +371,7 @@ namespace ElysiaRenderer
             m_pCommand->ClearRenderTarget(RT, Color::Black);
         }
         m_pCommand->ClearDepthStencilTarget(m_pCameraDepthRT, 1.f, 0);
-        m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_renderSize));
+        m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_cameraWidth, m_cameraHeight));
         m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
         m_pCommand->SetIndexBuffer(BufferManager::GetInstance().GetGlobalIndexBufferView());
