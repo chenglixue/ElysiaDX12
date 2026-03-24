@@ -41,10 +41,12 @@ namespace ElysiaRenderer
 
     void AOPass::Configure()
     {
-        m_halfWidth = UINT(m_renderSize.x) >> 1;
-        m_halfHeight = UINT(m_renderSize.y) >> 1;
-        m_quarterWidth = UINT(m_renderSize.x) >> 2;
-        m_quarterHeight = UINT(m_renderSize.y) >> 2;
+        m_cameraWidth = (UINT)m_renderSize.x + 1 >> 1;
+        m_cameraHeight = (UINT)m_renderSize.y + 1 >> 1;
+        m_halfWidth = UINT(m_cameraWidth) >> 1;
+        m_halfHeight = UINT(m_cameraHeight) >> 1;
+        m_quarterWidth = UINT(m_cameraWidth) >> 2;
+        m_quarterHeight = UINT(m_cameraHeight) >> 2;
         m_DeinterleavedDepthWidth = m_halfWidth;
         m_DeinterleavedDepthHeight = m_halfHeight;
         m_DeinterleavedAOWidth = m_halfWidth;
@@ -90,8 +92,8 @@ namespace ElysiaRenderer
                 RenderTextureIDs::AOImportanceID));
 
         m_pAORT = RenderTargetManager::GetInstance().CreateRWRenderTexture(
-            static_cast<UINT64>(m_renderSize.x),
-            static_cast<UINT64>(m_renderSize.y),
+            static_cast<UINT64>(m_cameraWidth),
+            static_cast<UINT64>(m_cameraHeight),
             DXGI_FORMAT_R8G8_UNORM,
             true,
             RenderResource::GetInstance().
@@ -99,8 +101,8 @@ namespace ElysiaRenderer
                 RenderTextureIDs::AORTID));
 
         m_pTAA0RT = RenderTargetManager::GetInstance().CreateRWRenderTexture(
-            static_cast<UINT64>(m_renderSize.x),
-            static_cast<UINT64>(m_renderSize.y),
+            static_cast<UINT64>(m_cameraWidth),
+            static_cast<UINT64>(m_cameraHeight),
             DXGI_FORMAT_R8G8_UNORM,
             true,
             RenderResource::GetInstance().
@@ -108,8 +110,8 @@ namespace ElysiaRenderer
                 RenderTextureIDs::TAA0RTID));
 
         m_pTAA1RT = RenderTargetManager::GetInstance().CreateRWRenderTexture(
-            static_cast<UINT64>(m_renderSize.x),
-            static_cast<UINT64>(m_renderSize.y),
+            static_cast<UINT64>(m_cameraWidth),
+            static_cast<UINT64>(m_cameraHeight),
             DXGI_FORMAT_R8G8_UNORM,
             true,
             RenderResource::GetInstance().
@@ -219,8 +221,8 @@ namespace ElysiaRenderer
         }
         m_pCommand->FlushBarrier();
 
-        UINT64 currWidth = UINT64(m_renderSize.x) >> 1;
-        UINT64 currHeight = UINT64(m_renderSize.y) >> 1;
+        UINT64 currWidth = UINT64(m_cameraWidth) >> 1;
+        UINT64 currHeight = UINT64(m_cameraHeight) >> 1;
 
         for (UINT i = 1; i < m_HIZMipmapCount; ++i)
         {
@@ -308,7 +310,7 @@ namespace ElysiaRenderer
                                            m_DeinterleavedDepthRTs[3]->GetUAVResourceHeapIndex()),
                                    passID);
             m_pMaterial->SetFloat4(ShaderIDs::g_TargetSize,
-                                   GetScreenSize(m_renderSize.x, m_renderSize.y));
+                                   GetScreenSize(m_cameraWidth, m_cameraHeight));
             m_pMaterial->SetFloat2(ShaderIDs::g_DepthUnpackConsts,
                                    Vector2(depthLinearizeMul, depthLinearizeAdd),
                                    passID
@@ -316,8 +318,8 @@ namespace ElysiaRenderer
             SetSpaceResource(passData, PER_PASS_SPACE);
 
             auto threadGroupSize = passData.GetKernelThreadGroupSizes();
-            m_pCommand->Dispatch(CeilDivide(m_renderSize.x, threadGroupSize.x),
-                                 CeilDivide(m_renderSize.y, threadGroupSize.y),
+            m_pCommand->Dispatch(CeilDivide(m_cameraWidth, threadGroupSize.x),
+                                 CeilDivide(m_cameraHeight, threadGroupSize.y),
                                  threadGroupSize.z);
         }
 
@@ -386,7 +388,7 @@ namespace ElysiaRenderer
                                    GetScreenSize(m_DeinterleavedAOWidth, m_DeinterleavedAOHeight),
                                    passID);
             m_pMaterial->SetFloat4(ShaderIDs::g_FullScreenSize,
-                                   GetScreenSize(m_renderSize),
+                                   GetScreenSize(m_cameraWidth, m_cameraHeight),
                                    passID);
             m_pMaterial->SetFloat4(ShaderIDs::g_TargetTexIndices,
                                    Vector4(m_DeinterleavedAOIndices[0],
@@ -602,7 +604,7 @@ namespace ElysiaRenderer
                                    GetScreenSize(m_DeinterleavedAOWidth, m_DeinterleavedAOHeight),
                                    passID);
             m_pMaterial->SetFloat4(ShaderIDs::g_FullScreenSize,
-                                   GetScreenSize(m_renderSize),
+                                   GetScreenSize(m_cameraWidth, m_cameraHeight),
                                    passID);
             m_pMaterial->SetFloat4(ShaderIDs::g_DeinterleaveAOTexIndices,
                                    Vector4(m_DeinterleavedAOIndices[0],
@@ -618,8 +620,8 @@ namespace ElysiaRenderer
                                    passID);
             m_pMaterial->SetFloat2(ShaderIDs::g_noiseScale,
                                    Vector2(
-                                       m_renderSize.x / float(m_blueNoise.GetWidth()),
-                                       m_renderSize.y / float(m_blueNoise.GetHeight())),
+                                       m_cameraWidth / float(m_blueNoise.GetWidth()),
+                                       m_cameraHeight / float(m_blueNoise.GetHeight())),
                                    passID);
             m_pMaterial->SetUInt(ShaderIDs::g_HIZMaxMipmap,
                                  MathHelper::Max(m_HIZMipmapCount - 1, UINT(0)),
@@ -677,7 +679,7 @@ namespace ElysiaRenderer
                                  targetRT->GetResourceHeapIndex(),
                                  passID);
             m_pMaterial->SetFloat4(ShaderIDs::g_FullScreenSize,
-                                   GetScreenSize(m_renderSize),
+                                   GetScreenSize(m_cameraWidth, m_cameraHeight),
                                    passID);
             m_pMaterial->SetUInt(ShaderIDs::g_BlurRadius,
                                  i + 1,
@@ -690,8 +692,8 @@ namespace ElysiaRenderer
             SetSpaceResource(passData, PER_PASS_SPACE);
 
             auto threadGroupSize = passData.GetKernelThreadGroupSizes();
-            m_pCommand->Dispatch(CeilDivide(m_renderSize.x, threadGroupSize.x),
-                                 CeilDivide(m_renderSize.x, threadGroupSize.y),
+            m_pCommand->Dispatch(CeilDivide(m_cameraWidth, threadGroupSize.x),
+                                 CeilDivide(m_cameraHeight, threadGroupSize.y),
                                  threadGroupSize.z);
 
             m_pCommand->AddBarrier(targetRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);

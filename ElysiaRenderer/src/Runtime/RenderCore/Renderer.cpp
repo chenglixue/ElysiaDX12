@@ -90,7 +90,7 @@ namespace ElysiaRenderer
         m_passes.emplace_back(
             std::move(std::make_unique<TonemapPass>()));
         // m_passes.emplace_back(std::move(std::make_unique<BloomPass>(m_pCameraManager->GetMainCamera())));
-        m_passes.emplace_back(std::move(std::make_unique<DebugPass>()));
+        // m_passes.emplace_back(std::move(std::make_unique<DebugPass>()));
         m_passes.emplace_back(std::move(std::make_unique<UIPass>()));
         m_passes.emplace_back(std::move(
             std::make_unique<FinalBlitPass>()));
@@ -100,8 +100,9 @@ namespace ElysiaRenderer
                                                         uint32_t Width,
                                                         uint32_t Height)
     {
-        m_Width = Width;
-        m_Height = Height;
+        m_Width = (Width + 1) >> 1;
+        m_Height = (Height + 1) >> 1;
+
         m_viewport = {0.0f, 0.0f, static_cast<float>(Width), static_cast<float>(Height), 0.0f,
                       1.0f};
         m_rectScissor = {0, 0, (LONG)Width, (LONG)Height};
@@ -109,11 +110,17 @@ namespace ElysiaRenderer
         if (!UserData::GetInstance().IsUseHDR)
         {
             m_pCameraColorRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(
+                m_Width,
+                m_Height,
+                DXGI_FORMAT_R8G8B8A8_UNORM,
+                true,
+                L"Camera Color RT");
+            m_pDisplayRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(
                 Width,
                 Height,
                 DXGI_FORMAT_R8G8B8A8_UNORM,
                 true,
-                L"Camera Color RT");
+                L"Display RT");
         }
         else
         {
@@ -122,21 +129,33 @@ namespace ElysiaRenderer
             case HDRQuality::Low:
             {
                 m_pCameraColorRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(
+                    m_Width,
+                    m_Height,
+                    DXGI_FORMAT_R11G11B10_FLOAT,
+                    true,
+                    L"Camera Color RT");
+                m_pDisplayRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(
                     Width,
                     Height,
                     DXGI_FORMAT_R11G11B10_FLOAT,
                     true,
-                    L"Camera Color RT");
+                    L"Display RT");
                 break;
             }
             case HDRQuality::High:
             {
                 m_pCameraColorRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(
+                    m_Width,
+                    m_Height,
+                    DXGI_FORMAT_R16G16B16A16_FLOAT,
+                    true,
+                    L"Camera Color RT");
+                m_pDisplayRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(
                     Width,
                     Height,
                     DXGI_FORMAT_R16G16B16A16_FLOAT,
                     true,
-                    L"Camera Color RT");
+                    L"Display RT");
                 break;
             }
             default:
@@ -146,20 +165,21 @@ namespace ElysiaRenderer
             }
             }
         }
-        m_pCameraDepthRT = RenderTargetManager::GetInstance().CreateRenderTexture(Width,
-                                                                                  Height,
+        m_pCameraDepthRT = RenderTargetManager::GetInstance().CreateRenderTexture(m_Width,
+                                                                                  m_Height,
                                                                                   DXGI_FORMAT_D32_FLOAT_S8X24_UINT,
                                                                                   true,
                                                                                   L"Camera Depth RT");
 
         RenderPassData passData
         {
-            .RenderSize = {m_Width, m_Height},
+            .RenderSize = {Width, Height},
             .pDevice = m_pDevice,
             .pCommand = m_pGraphicsContext,
             .pSwapChain = pSwapChain,
             .pCameraColorRT = m_pCameraColorRT,
-            .pCameraDepthRT = m_pCameraDepthRT
+            .pCameraDepthRT = m_pCameraDepthRT,
+            .pDisplayRT = m_pDisplayRT
         };
 
         for (auto& pass : m_passes)

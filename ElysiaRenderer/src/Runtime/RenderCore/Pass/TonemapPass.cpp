@@ -282,7 +282,7 @@ namespace ElysiaRenderer
                  m_saturation,
                  m_crosstalk);
 
-        m_pCommand->AddBarrier(m_pCameraColorRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+        m_pCommand->AddBarrier(m_pDisplayRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
         {
             m_pMaterial->SetBool(ShaderIDs::u_shoulder, m_shoulder);
@@ -300,7 +300,7 @@ namespace ElysiaRenderer
             m_pMaterial->SetFloat4(ShaderIDs::g_DestSize,
                                    GetScreenSize(Vector2(m_renderSize.x, m_renderSize.y)));
             m_pMaterial->SetUInt(ShaderIDs::g_DestTextureIndex,
-                                 m_pCameraColorRT->GetResourceHeapIndex());
+                                 m_pDisplayRT->GetResourceHeapIndex());
             m_pMaterial->SetFloat(ShaderIDs::g_LocalExposure,
                                   UserData::GetInstance().localExposure);
             m_pMaterial->SetUInt(ShaderIDs::g_BloomTexIndex,
@@ -317,12 +317,12 @@ namespace ElysiaRenderer
             SetSpaceResource(passData, PER_FRAME_SPACE);
 
             auto threadGroupSize = passData.GetKernelThreadGroupSizes();
-            m_pCommand->Dispatch(CeilDivide(m_pCameraColorRT->GetWidth(), threadGroupSize.x),
-                                 CeilDivide(m_pCameraColorRT->GetHeight(), threadGroupSize.y),
+            m_pCommand->Dispatch(CeilDivide(m_pDisplayRT->GetWidth(), threadGroupSize.x),
+                                 CeilDivide(m_pDisplayRT->GetHeight(), threadGroupSize.y),
                                  threadGroupSize.z);
         }
 
-        m_pCommand->AddBarrier(m_pCameraColorRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+        m_pCommand->AddBarrier(m_pDisplayRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
         m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
     }
 

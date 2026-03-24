@@ -8,6 +8,9 @@ namespace ElysiaRenderer
 
     class OpaquePass : public BasePass
     {
+#define OPAQUE_LIGHT_PASS_LIST \
+PASS(DRAW_LIGHT_PASS,         "public\\Opaque.hlsl", false, PS)
+
     public:
         OpaquePass();
         virtual ~OpaquePass() override;
@@ -19,13 +22,30 @@ namespace ElysiaRenderer
         virtual void Dispose() override;
 
     private:
-        struct ShaderPassIDs
+#pragma region Pass
+        enum PassID
         {
-            static inline int OpaqueLightPassID = -1;
+#define PASS(id, file, isCS, entry) id,
+            OPAQUE_LIGHT_PASS_LIST
+#undef PASS
+            OPAQUE_LIGHT_PASS_COUNT
         };
+        static inline const ShaderPass m_PassData[] =
+        {
+#define PASS(id, file, isCS, entry) \
+{ \
+.Name = #id, \
+.FilePath = L"Shaders\\" L##file, \
+.IsComputeShader = isCS, \
+.ComputeEntryPoint = L#entry \
+},
+            OPAQUE_LIGHT_PASS_LIST
+#undef PASS
+        };
+#pragma endregion
         struct ShaderIDs
         {
-            static inline size_t screenSize = PropertyToID(L"screenSize");
+            static inline size_t g_RenderSize = PropertyToID(L"g_RenderSize");
             static inline size_t viewMatrix = PropertyToID(L"viewMatrix");
             static inline size_t viewMatrix_I = PropertyToID(L"viewMatrix_I");
             static inline size_t projMatrix = PropertyToID(L"projMatrix");
@@ -36,7 +56,8 @@ namespace ElysiaRenderer
             static inline size_t g_AOIndex = PropertyToID(L"g_AOIndex");
         };
 
-        DXGI_FORMAT m_cameraColorFormat = DXGI_FORMAT_UNKNOWN;
+        UINT m_cameraWidth;
+        UINT m_cameraHeight;
 
         void UpdateLightingPassVariant(UINT passID);
         void DrawLightingPass(ElysiaEngine::FrameContext& context);

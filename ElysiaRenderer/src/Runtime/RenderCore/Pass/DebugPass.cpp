@@ -71,6 +71,7 @@ namespace ElysiaRenderer
         UpdatePipeline();
         PIXHelper pix(m_pCommand->GetCommandList(), "Debug Pass");
         m_pCamera = context.pCamera;
+        m_pDisplayRT = context.pResolveRT;
 
         DoDebugPass();
     }
@@ -84,7 +85,7 @@ namespace ElysiaRenderer
         PipelineInfo pipelineStateData{};
         pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(
             passID).pPipelineStateObject;
-        pipelineStateData.m_renderTargets = {m_pCameraColorRT->GetTexture()};
+        pipelineStateData.m_renderTargets = {m_pDisplayRT->GetTexture()};
         pipelineStateData.m_depthStencilTarget = m_pCameraDepthRT->GetTexture();
         m_pCommand->SetPipeline(pipelineStateData);
         SetSpaceResource(passData, PER_FRAME_SPACE);
@@ -93,11 +94,11 @@ namespace ElysiaRenderer
 
         m_pMaterial->SetUInt(ShaderIDs::g_DebugMode,
                              static_cast<UINT>(UserData::GetInstance().debugMode));
-        m_pMaterial->SetUInt(ShaderIDs::g_TargetTexIndex, m_pCameraColorRT->GetResourceHeapIndex());
+        m_pMaterial->SetUInt(ShaderIDs::g_TargetTexIndex, m_pDisplayRT->GetResourceHeapIndex());
         m_pMaterial->SetUInt(ShaderIDs::g_MipmapLevel, UserData::GetInstance().mipmapLevel);
         m_pMaterial->SetFloat4(ShaderIDs::g_TargetSize,
-                               GetScreenSize(m_pCameraColorRT->GetWidth(),
-                                             m_pCameraColorRT->GetHeight()));
+                               GetScreenSize(m_pDisplayRT->GetWidth(),
+                                             m_pDisplayRT->GetHeight()));
         m_pMaterial->SetFloat4(ShaderIDs::screenSize,
                                GetScreenSize(Vector2(m_renderSize.x, m_renderSize.y)));
         m_pMaterial->SetMatrix(ShaderIDs::viewMatrix, m_pCamera->GetViewMat());
@@ -132,7 +133,7 @@ namespace ElysiaRenderer
         case DebugMode::Velocity:
         case DebugMode::Normal:
         {
-            m_pCommand->AddBarrier(m_pCameraColorRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+            m_pCommand->AddBarrier(m_pDisplayRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
             {
                 // m_pMaterial->SetUInt(ShaderIDs::g_TargetTexIndex,
                 //                      RenderTargetManager::GetInstance().GetRenderTexture(
@@ -144,7 +145,7 @@ namespace ElysiaRenderer
                 SetSpaceResource(passData, PER_PASS_SPACE);
                 m_pCommand->DrawFullScreenTriangle();
             }
-            m_pCommand->AddBarrier(m_pCameraColorRT,
+            m_pCommand->AddBarrier(m_pDisplayRT,
                                    D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
             return;
             break;
@@ -176,7 +177,7 @@ namespace ElysiaRenderer
 
             const RenderTargetDesc desc =
             {
-                .m_renderTargetFormats = {m_pCameraColorRT->GetFormat()},
+                .m_renderTargetFormats = {m_pDisplayRT->GetFormat()},
                 .m_numRenderTargets = 1,
                 .m_depthStencilFormat = m_pCameraDepthRT->GetFormat(),
             };
@@ -190,7 +191,7 @@ namespace ElysiaRenderer
         PipelineInfo pipelineStateData{};
         pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(
             passID).pPipelineStateObject;
-        pipelineStateData.m_renderTargets = {m_pCameraColorRT->GetTexture()};
+        pipelineStateData.m_renderTargets = {m_pDisplayRT->GetTexture()};
         pipelineStateData.m_depthStencilTarget = m_pCameraDepthRT->GetTexture();
         m_pCommand->SetPipeline(pipelineStateData);
         SetSpaceResource(passData, PER_FRAME_SPACE);
@@ -228,7 +229,7 @@ namespace ElysiaRenderer
         m_pCommand->SetVertexBuffer(0, 1, m_aabbDrawer.vertexView);
         m_pCommand->SetIndexBuffer(m_aabbDrawer.indexView);
 
-        m_pCommand->AddBarrier(m_pCameraColorRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+        m_pCommand->AddBarrier(m_pDisplayRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
         {
             m_pMaterial->SetUInt(ShaderIDs::g_DebugMode,
                                  static_cast<UINT>(DebugMode::AABB));
@@ -238,7 +239,7 @@ namespace ElysiaRenderer
             SetSpaceResource(passData, PER_PASS_SPACE);
             m_aabbDrawer.Draw(m_pCommand);
         }
-        m_pCommand->AddBarrier(m_pCameraColorRT,
+        m_pCommand->AddBarrier(m_pDisplayRT,
                                D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
     }
 
@@ -253,7 +254,7 @@ namespace ElysiaRenderer
         m_pCommand->SetVertexBuffer(0, 1, GIPass::m_vertexView);
         m_pCommand->SetIndexBuffer(GIPass::m_indexView);
 
-        m_pCommand->AddBarrier(m_pCameraColorRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+        m_pCommand->AddBarrier(m_pDisplayRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
         {
             m_pMaterial->SetUInt(GIPass::ShaderIDs::g_IrradianceTexIndex,
                                  RenderTargetManager::GetInstance().GetRenderTexture(
@@ -299,7 +300,7 @@ namespace ElysiaRenderer
 
             m_pCommand->DrawInstanced(GIPass::NumIndices, GIPass::Probe_Count, 0, 0, 0);
         }
-        m_pCommand->AddBarrier(m_pCameraColorRT,
+        m_pCommand->AddBarrier(m_pDisplayRT,
                                D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
         if (UserData::GetInstance().GIParameter.enableLine)
@@ -314,7 +315,7 @@ namespace ElysiaRenderer
                     enableKeywords);
                 const RenderTargetDesc desc =
                 {
-                    .m_renderTargetFormats = {m_pCameraColorRT->GetFormat()},
+                    .m_renderTargetFormats = {m_pDisplayRT->GetFormat()},
                     .m_numRenderTargets = 1,
                     .m_depthStencilFormat = m_pCameraDepthRT->GetFormat(),
                 };
@@ -328,7 +329,7 @@ namespace ElysiaRenderer
                 PipelineInfo pipelineStateData{};
                 pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(
                     passID).pPipelineStateObject;
-                pipelineStateData.m_renderTargets = {m_pCameraColorRT->GetTexture()};
+                pipelineStateData.m_renderTargets = {m_pDisplayRT->GetTexture()};
                 pipelineStateData.m_depthStencilTarget = m_pCameraDepthRT->GetTexture();
                 m_pCommand->SetPipeline(pipelineStateData);
                 SetSpaceResource(passData, PER_FRAME_SPACE);
@@ -339,7 +340,7 @@ namespace ElysiaRenderer
             m_pCommand->GetCommandList()->IASetVertexBuffers(0, 0, nullptr);
             m_pCommand->GetCommandList()->IASetIndexBuffer(nullptr);
 
-            m_pCommand->AddBarrier(m_pCameraColorRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+            m_pCommand->AddBarrier(m_pDisplayRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
             {
                 m_pMaterial->SetUInt(GIPass::ShaderIDs::g_RayDataBufferIndex,
                                      GIPass::m_pRayDataBuffer->GetResourceHeapIndex());
@@ -366,7 +367,7 @@ namespace ElysiaRenderer
                 uint32_t totalVertexCount = GIPass::Probe_Count * GIPass::Rays_Per_Probe * 2;
                 m_pCommand->DrawInstanced(totalVertexCount, 1, 0, 0);
             }
-            m_pCommand->AddBarrier(m_pCameraColorRT,
+            m_pCommand->AddBarrier(m_pDisplayRT,
                                    D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
         }
 
@@ -392,7 +393,12 @@ namespace ElysiaRenderer
 
             const RenderTargetDesc desc =
             {
-                .m_renderTargetFormats = {m_pCameraColorRT->GetFormat()},
+                .m_renderTargetFormats = {!UserData::GetInstance().IsUseHDR
+                                              ? DXGI_FORMAT_R8G8B8A8_UNORM
+                                              : UserData::GetInstance().
+                                                HDRLevel == HDRQuality::Low
+                                              ? DXGI_FORMAT_R11G11B10_FLOAT
+                                              : DXGI_FORMAT_R16G16B16A16_FLOAT},
                 .m_numRenderTargets = 1,
                 .m_depthStencilFormat = m_pCameraDepthRT->GetFormat(),
             };

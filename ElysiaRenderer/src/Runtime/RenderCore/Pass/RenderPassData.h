@@ -24,5 +24,6 @@ namespace ElysiaRenderer
 
         RenderTexture* pCameraColorRT = nullptr;
         RenderTexture* pCameraDepthRT = nullptr;
+        RenderTexture* pDisplayRT = nullptr;
     };
 }

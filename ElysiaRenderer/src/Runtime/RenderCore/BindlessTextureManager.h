@@ -24,7 +24,7 @@ namespace ElysiaRenderer
 
             bool IsValid() const
             {
-                return textureIndex != ~0u && resourceHeapIndex != UINT_MAX;
+                return textureIndex != ~0u && resourceHeapIndex < ElysiaHelper::NUM_SRV_STAGING_DESCRIPTORS;
             }
             static TextureHandle Invalid()
             {

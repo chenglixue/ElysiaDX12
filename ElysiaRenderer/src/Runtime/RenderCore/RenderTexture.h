@@ -30,6 +30,10 @@ namespace ElysiaRenderer
         UINT GetResourceHeapIndex() const noexcept;
         UINT GetUAVResourceHeapIndex(UINT index = 0) const;
         UINT GetSRVResourceHeapIndex(UINT index = 0) const;
+        bool IsValid() const
+        {
+            return m_handle.IsValid();
+        }
 
     private:
         TextureManager::Handle m_handle;

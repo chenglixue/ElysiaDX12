@@ -56,9 +56,9 @@ namespace ElysiaRenderer
             return m_TimeStamps;
         }
 
-        RenderTexture* GetCameraColorRT() const
+        RenderTexture* GetDisplayRT() const
         {
-            return m_pCameraColorRT;
+            return m_pDisplayRT;
         }
 
     protected:
@@ -77,5 +77,6 @@ namespace ElysiaRenderer
         eastl::vector<std::unique_ptr<MeshRenderer>> m_meshRenderers;
         RenderTexture* m_pCameraColorRT = nullptr;
         RenderTexture* m_pCameraDepthRT = nullptr;
+        RenderTexture* m_pDisplayRT = nullptr;
     };
 }

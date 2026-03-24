@@ -55,6 +55,8 @@ PASS(AO_TAA_PASS,                       "public\\PostProcess\\CS_AOTAA.hlsl",   
         int m_currHistoryIndex = 0;
         static constexpr UINT MAX_BLUR_RADIUS = 10;
         static constexpr UINT DEINTERLEAVED_DEPTH_COUNT = 4;
+        UINT m_cameraWidth;
+        UINT m_cameraHeight;
         UINT m_halfWidth;
         UINT m_halfHeight;
         UINT m_quarterWidth;

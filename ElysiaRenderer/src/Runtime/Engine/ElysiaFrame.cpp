@@ -56,8 +56,8 @@ namespace ElysiaEngine
 
     void ElysiaFrame::OnParseCommandLine(LPSTR lpCmdLine, uint32_t* pWidth, uint32_t* pHeight)
     {
-        *pWidth = 1920;
-        *pHeight = 1080;
+        // *pWidth = 1920;
+        // *pHeight = 1080;
 
         m_VsyncEnabled = false;
         m_bIsBenchmarking = false;
@@ -192,10 +192,20 @@ namespace ElysiaEngine
         if (!m_loadingScene)
         {
             frameContext.renderList = SceneManager::GetInstance().renderList;
-            frameContext.buildUI = [this]()
+            static bool firstInit = true;
+            if (firstInit)
             {
+                firstInit = false;
                 BuildUI();
-            };
+            }
+            else
+            {
+                frameContext.buildUI = [this]()
+                {
+                    BuildUI();
+                };
+            }
+
             OnUpdate();
             BufferManager::GetInstance().Update(frameContext);
         }
@@ -394,7 +404,7 @@ namespace ElysiaEngine
 
         }
 
-        auto cameraRT = m_pRenderer->GetCameraColorRT();
+        auto cameraRT = m_pRenderer->GetDisplayRT();
         if (cameraRT)
         {
             auto srcCPUHandle = cameraRT->GetTexture()->GetSRVDescriptor().GetCPUHandle();

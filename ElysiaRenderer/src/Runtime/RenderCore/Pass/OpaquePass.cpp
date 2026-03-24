@@ -37,19 +37,14 @@ namespace ElysiaRenderer
 
     void OpaquePass::Configure()
     {
-        m_shaderPasses =
-        {
-            ShaderPass
-            {
-                .Name = "Opaque Light Pass",
-                .FilePath = L"Shaders\\public\\Opaque.hlsl",
-            }
-        };
+        m_cameraWidth = (UINT)m_renderSize.x + 1 >> 1;
+        m_cameraHeight = (UINT)m_renderSize.y + 1 >> 1;
+
+        m_shaderPasses.assign(std::begin(m_PassData), std::end(m_PassData));
         if (!m_pMaterial)
         {
             m_pMaterial = std::make_unique<Material>(m_pDevice, m_shaderPasses);
         }
-        ShaderPassIDs::OpaqueLightPassID = m_pMaterial->FindPassIndex("Opaque Light Pass");
         UpdatePipeline();
     }
 
@@ -65,7 +60,7 @@ namespace ElysiaRenderer
 
     void OpaquePass::DrawLightingPass(ElysiaEngine::FrameContext& context)
     {
-        auto passID = ShaderPassIDs::OpaqueLightPassID;
+        auto passID = DRAW_LIGHT_PASS;
         auto& passData = m_pMaterial->GetPassData(passID);
         auto passName = passData.Name.c_str();
         PIXHelper pix(m_pCommand->GetCommandList(), passName);
@@ -78,8 +73,9 @@ namespace ElysiaRenderer
         };
         m_pCommand->SetPipeline(pipelineStateData);
 
-        m_pMaterial->SetFloat4(ShaderIDs::screenSize,
-                               GetScreenSize(Vector2(m_renderSize.x, m_renderSize.y)));
+        m_pMaterial->SetFloat4(ShaderIDs::g_RenderSize,
+                               GetScreenSize(Vector2((UINT)m_pCameraColorRT->GetWidth(),
+                                                     (UINT)m_pCameraColorRT->GetHeight())));
         m_pMaterial->SetMatrix(ShaderIDs::viewMatrix, m_pCamera->GetViewMat());
         m_pMaterial->SetMatrix(ShaderIDs::viewMatrix_I, m_pCamera->GetViewMat().Invert());
         m_pMaterial->SetMatrix(ShaderIDs::projMatrix, m_pCamera->GetProjMat());
@@ -109,7 +105,7 @@ namespace ElysiaRenderer
         if (!m_pMaterial)
             return;
 
-        UpdateLightingPassVariant(ShaderPassIDs::OpaqueLightPassID);
+        UpdateLightingPassVariant(DRAW_LIGHT_PASS);
     }
     void OpaquePass::UpdateLightingPassVariant(UINT passIndex)
     {

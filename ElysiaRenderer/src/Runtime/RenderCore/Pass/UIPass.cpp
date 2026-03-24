@@ -31,10 +31,10 @@ namespace ElysiaRenderer
 
         if (context.buildUI)
         {
-            m_pCommand->AddBarrier(m_pCameraColorRT, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+            m_pCommand->AddBarrier(m_pDisplayRT, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
             context.buildUI();
-            m_pCommand->AddBarrier(m_pCameraColorRT,
+            m_pCommand->AddBarrier(m_pDisplayRT,
                                    D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 
         }

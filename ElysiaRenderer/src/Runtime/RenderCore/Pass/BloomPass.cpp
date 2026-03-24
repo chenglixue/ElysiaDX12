@@ -128,7 +128,7 @@ namespace ElysiaRenderer
         m_pCommand->AddBarrier(m_downSampleRTs[1], D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
         {
             m_pMaterial->SetUInt(ShaderIDs::g_SourceTextureIndex,
-                                 m_pCameraColorRT->GetUAVResourceHeapIndex(),
+                                 m_pDisplayRT->GetUAVResourceHeapIndex(),
                                  passID);
             m_pMaterial->SetUInt(ShaderIDs::g_DestTextureIndexID,
                                  m_downSampleRTs[1]->GetUAVResourceHeapIndex(),
@@ -244,7 +244,7 @@ namespace ElysiaRenderer
             m_pMaterial->SetUInt(ShaderIDs::g_DestTextureIndexID, m_upSampleRTs[i]->GetUAVResourceHeapIndex(), passID);
             m_pMaterial->SetUInt(ShaderIDs::g_DownSampleDestTexIndex,
                                  i == 0
-                                     ? m_pCameraColorRT->GetUAVResourceHeapIndex()
+                                     ? m_pDisplayRT->GetUAVResourceHeapIndex()
                                      : m_downSampleRTs[i]->GetUAVResourceHeapIndex(),
                                  passID);
             m_pMaterial->SetFloat4(ShaderIDs::g_SourceSize,

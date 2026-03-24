@@ -72,16 +72,16 @@ namespace ElysiaRenderer
 
     void GBufferPass::Configure()
     {
-        m_cameraWidth = m_renderSize.x;
-        m_cameraHeight = m_renderSize.y;
+        m_cameraWidth = (UINT)m_renderSize.x + 1 >> 1;
+        m_cameraHeight = (UINT)m_renderSize.y + 1 >> 1;
         CreateRTs();
 
         m_shaderPasses.assign(std::begin(m_PassData), std::end(m_PassData));
         if (!m_pMaterial)
         {
             m_pMaterial = std::make_unique<Material>(m_pDevice, m_shaderPasses);
-        UpdatePipeline();
         }
+        UpdatePipeline();
     }
 
     void GBufferPass::Render(ElysiaEngine::FrameContext& context)
@@ -192,8 +192,8 @@ namespace ElysiaRenderer
         // Base Color , ShadingModel
         {
             auto pGBufferRT = RenderTargetManager::GetInstance().CreateRenderTexture(
-                static_cast<UINT64>(m_renderSize.x),
-                static_cast<UINT64>(m_renderSize.y),
+                static_cast<UINT64>(m_cameraWidth),
+                static_cast<UINT64>(m_cameraHeight),
                 DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
                 RenderResource::GetInstance().
                 GetPropertyName(RenderTextureIDs::GBuffer0ID));
@@ -204,8 +204,8 @@ namespace ElysiaRenderer
         // Metallic, Specular, Roughness, AO
         {
             auto pGBufferRT = RenderTargetManager::GetInstance().CreateRenderTexture(
-                static_cast<UINT64>(m_renderSize.x),
-                static_cast<UINT64>(m_renderSize.y),
+                static_cast<UINT64>(m_cameraWidth),
+                static_cast<UINT64>(m_cameraHeight),
                 DXGI_FORMAT_R8G8B8A8_UNORM,
                 RenderResource::GetInstance().
                 GetPropertyName(RenderTextureIDs::GBuffer1ID));
@@ -216,8 +216,8 @@ namespace ElysiaRenderer
         // Encode World Tangent, Anisotropy
         {
             auto pGBufferRT = RenderTargetManager::GetInstance().CreateRenderTexture(
-                static_cast<UINT64>(m_renderSize.x),
-                static_cast<UINT64>(m_renderSize.y),
+                static_cast<UINT64>(m_cameraWidth),
+                static_cast<UINT64>(m_cameraHeight),
                 DXGI_FORMAT_R8G8B8A8_UNORM,
                 RenderResource::GetInstance().
                 GetPropertyName(RenderTextureIDs::GBuffer2ID));
@@ -228,8 +228,8 @@ namespace ElysiaRenderer
         // Encode World Normal, per object data
         {
             auto pGBufferRT = RenderTargetManager::GetInstance().CreateRenderTexture(
-                static_cast<UINT64>(m_renderSize.x),
-                static_cast<UINT64>(m_renderSize.y),
+                static_cast<UINT64>(m_cameraWidth),
+                static_cast<UINT64>(m_cameraHeight),
                 DXGI_FORMAT_R10G10B10A2_UNORM,
                 RenderResource::GetInstance().
                 GetPropertyName(RenderTextureIDs::GBuffer3ID));
@@ -240,8 +240,8 @@ namespace ElysiaRenderer
         // Emission, opacity
         {
             auto pGBufferRT = RenderTargetManager::GetInstance().CreateRenderTexture(
-                static_cast<UINT64>(m_renderSize.x),
-                static_cast<UINT64>(m_renderSize.y),
+                static_cast<UINT64>(m_cameraWidth),
+                static_cast<UINT64>(m_cameraHeight),
                 DXGI_FORMAT_R10G10B10A2_UNORM,
                 RenderResource::GetInstance().
                 GetPropertyName(RenderTextureIDs::GBuffer4ID));
@@ -252,8 +252,8 @@ namespace ElysiaRenderer
         // Velocity
         {
             auto pGBufferRT = RenderTargetManager::GetInstance().CreateRenderTexture(
-                static_cast<UINT64>(m_renderSize.x),
-                static_cast<UINT64>(m_renderSize.y),
+                static_cast<UINT64>(m_cameraWidth),
+                static_cast<UINT64>(m_cameraHeight),
                 DXGI_FORMAT_R16G16B16A16_SNORM,
                 RenderResource::GetInstance().
                 GetPropertyName(RenderTextureIDs::GBuffer5ID));
@@ -279,7 +279,6 @@ namespace ElysiaRenderer
         if (!m_pMaterial)
             return;
         UpdateGBufferPassVariant(DRAW_GBUFFER_PASS);
-
     }
 
     void GBufferPass::UpdateGBufferPassVariant(UINT passIndex)

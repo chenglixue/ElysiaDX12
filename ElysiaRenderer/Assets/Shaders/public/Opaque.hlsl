@@ -15,7 +15,7 @@
 
 cbuffer PassConstant : register(b0, perPassSpace)
 {
-    Vector4 screenSize;
+    Vector4 g_RenderSize;
 
     Matrix viewMatrix;
     Matrix viewMatrix_I;
@@ -66,7 +66,7 @@ PSOutput PS(PSInput i)
 {
     PSOutput o = (PSOutput)0;
 
-    float2 screenUV = i.positionCS.xy / screenSize.xy;
+    float2 screenUV = i.positionCS.xy * g_RenderSize.zw;
 
     FDecodeGBufferData GBufferData = GetDecodeGBufferData(screenUV);
 
@@ -77,7 +77,7 @@ PSOutput PS(PSInput i)
     inputParam.PositionVS = mul(float4(positionWS, 1.f), viewMatrix);
     inputParam.PixelPos = i.positionCS.xy;
     inputParam.objectUV = i.uv;
-    inputParam.ScreenUV = i.positionCS.xy / screenSize.xy;
+    inputParam.ScreenUV = i.positionCS.xy / g_RenderSize.xy;
     inputParam.TangentWS = GBufferData.WorldTangent;
     inputParam.NormalWS = GBufferData.WorldNormal;
     inputParam.BitTangentWS = cross(inputParam.TangentWS, inputParam.NormalWS);

@@ -4,6 +4,7 @@
 
 namespace ElysiaRenderer
 {
+    class RenderTexture;
     class DX12Camera;
 }
 
@@ -17,5 +18,6 @@ namespace ElysiaEngine
         std::function<void()> buildUI;
         ElysiaRenderer::DX12Camera* pCamera;
         ElysiaHelper::GPUTimestamps* pGPUTimer;
+        RenderTexture* pResolveRT = nullptr;
     };
 }

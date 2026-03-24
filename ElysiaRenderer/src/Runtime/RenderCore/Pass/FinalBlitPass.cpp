@@ -90,7 +90,7 @@ namespace ElysiaRenderer
 
         {
             m_pMaterial->SetUInt(ShaderIDs::blitterTextureIndex,
-                                 m_pCameraColorRT->GetResourceHeapIndex());
+                                 m_pDisplayRT->GetResourceHeapIndex());
 
             m_pCommand->SetDefaultViewportAndScissor(UINT2(m_renderSize));
             m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);

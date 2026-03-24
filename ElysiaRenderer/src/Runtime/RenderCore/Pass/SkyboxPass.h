@@ -81,6 +81,8 @@ namespace ElysiaRenderer
             3, 2, 7, 7, 6, 3  // Bottom
         };
 #pragma endregion
+        UINT m_cameraWidth;
+        UINT m_cameraHeight;
         BufferHandle m_vertexBuffer;
         BufferHandle m_indexBuffer;
         D3D12_VERTEX_BUFFER_VIEW m_vertexView;

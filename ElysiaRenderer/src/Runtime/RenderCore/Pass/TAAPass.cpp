@@ -50,7 +50,12 @@ namespace ElysiaRenderer
         {
             m_TAARTs[i] = RenderTargetManager::GetInstance().CreateRWRenderTexture(m_TAAWidth,
                                                                                    m_TAAHeight,
-                                                                                   DXGI_FORMAT_R16G16B16A16_FLOAT,
+                                                                                   !UserData::GetInstance().IsUseHDR
+                                                                                       ? DXGI_FORMAT_R8G8B8A8_UNORM
+                                                                                       : UserData::GetInstance().
+                                                                                         HDRLevel == HDRQuality::Low
+                                                                                       ? DXGI_FORMAT_R11G11B10_FLOAT
+                                                                                       : DXGI_FORMAT_R16G16B16A16_FLOAT,
                                                                                    true,
                                                                                    RenderResource::GetInstance().
                                                                                    GetPropertyName(
@@ -109,7 +114,6 @@ namespace ElysiaRenderer
             DoTAA();
             DoCopyTAA2CameraColor();
         }
-
     }
 
     void TAAPass::DoTAA()
@@ -204,13 +208,13 @@ namespace ElysiaRenderer
         m_pCommand->SetPipeline(pipelineStateData);
         SetSpaceResource(passData, PER_FRAME_SPACE);
 
-        m_pCommand->AddBarrier(m_TAARTs[m_writeIndex], D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+        m_pCommand->AddBarrier(m_pDisplayRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
         {
             m_pMaterial->SetUInt(ShaderIDs::g_SourceTexIndex,
                                  m_TAARTs[m_writeIndex]->GetUAVResourceHeapIndex(),
                                  passID);
             m_pMaterial->SetUInt(ShaderIDs::g_DestTexIndex,
-                                 m_pCameraColorRT->GetUAVResourceHeapIndex(),
+                                 m_pDisplayRT->GetUAVResourceHeapIndex(),
                                  passID);
 
             SetSpaceResource(passData, PER_PASS_SPACE);
@@ -218,9 +222,9 @@ namespace ElysiaRenderer
             m_pCommand->Dispatch(CeilDivide(m_cameraWidth, threadGroupSize.x),
                                  CeilDivide(m_cameraHeight, threadGroupSize.y),
                                  threadGroupSize.z);
-            m_pCommand->AddUAVBarrier(m_pCameraColorRT, false);
+            m_pCommand->AddUAVBarrier(m_pDisplayRT, false);
         }
-        m_pCommand->AddBarrier(m_pCameraColorRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+        m_pCommand->AddBarrier(m_pDisplayRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
         m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
     }
 }

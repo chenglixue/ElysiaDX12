@@ -2,10 +2,11 @@
 #include "private\TAACommon.hlsli"
 
 #define GROUP_SIZE 8
+#define TILE_SIZE (GROUP_SIZE + 2)
+#define TILE_PIXELS (TILE_SIZE * TILE_SIZE)
 
 cbuffer PassConstant : register(b0, perPassSpace)
 {
-    Matrix viewProjMatrix_I;
     Matrix pre_viewProjMatrix;
     Matrix g_ProjMatrix_I;
     Vector4 g_TAATexSize;
@@ -21,6 +22,8 @@ cbuffer PassConstant : register(b0, perPassSpace)
     float2 g_Jitter;
     float2 g_HistoryJitter;
 }
+
+// groupshared float4 g_LDSColorDepth[TILE_PIXELS];
 
 void SampleMinMax3x3(UINT currFrameTexIndex,
                      float2 uv,

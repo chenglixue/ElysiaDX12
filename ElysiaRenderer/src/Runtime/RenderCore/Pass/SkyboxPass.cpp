@@ -75,11 +75,14 @@ namespace ElysiaRenderer
 
     void SkyboxPass::Configure()
     {
+        m_cameraWidth = (UINT)m_renderSize.x + 1 >> 1;
+        m_cameraHeight = (UINT)m_renderSize.y + 1 >> 1;
+
         m_shaderPasses.assign(std::begin(m_PassData), std::end(m_PassData));
         if (!m_pMaterial)
         {
             m_pMaterial = std::make_unique<Material>(m_pDevice, m_shaderPasses);
-        UpdatePipeline();
+            UpdatePipeline();
         }
     }
     void SkyboxPass::Render(ElysiaEngine::FrameContext& context)
@@ -147,7 +150,7 @@ namespace ElysiaRenderer
                                    m_pCamera->GetViewMat() * viewProjInv);
 
             m_pMaterial->SetFloat4(ShaderIDs::screenSize,
-                                   GetScreenSize(Vector2(m_renderSize.x, m_renderSize.y)));
+                                   GetScreenSize(Vector2(m_cameraWidth, m_cameraHeight)));
             m_pMaterial->SetMatrix(ShaderIDs::viewMatrix, m_pCamera->GetViewMat());
             m_pMaterial->SetMatrix(ShaderIDs::viewMatrix_I, m_pCamera->GetViewMat().Invert());
             m_pMaterial->SetMatrix(ShaderIDs::projMatrix, m_pCamera->GetProjMat());

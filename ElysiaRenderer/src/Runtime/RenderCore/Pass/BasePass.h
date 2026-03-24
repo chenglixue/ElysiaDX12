@@ -56,6 +56,7 @@ namespace ElysiaRenderer
         DX12Camera* m_pCamera = nullptr;
         RenderTexture* m_pCameraColorRT = nullptr;
         RenderTexture* m_pCameraDepthRT = nullptr;
+        RenderTexture* m_pDisplayRT = nullptr;
 
         std::vector<ShaderPass> m_shaderPasses;
         std::unique_ptr<Material> m_pMaterial = nullptr;
