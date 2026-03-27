@@ -18,7 +18,7 @@
 namespace ElysiaRenderer
 {
     BasePass::BasePass()
-        : m_renderSize(Vector2::Zero)
+        : m_displaySize(Vector2::Zero)
     {
     }
 
@@ -29,7 +29,7 @@ namespace ElysiaRenderer
 
     void BasePass::Setup(const RenderPassData& renderPassData)
     {
-        m_renderSize = renderPassData.RenderSize;
+        m_displaySize = renderPassData.RenderSize;
         m_pCommand = renderPassData.pCommand;
         m_pDevice = renderPassData.pDevice;
         m_pCameraColorRT = renderPassData.pCameraColorRT;

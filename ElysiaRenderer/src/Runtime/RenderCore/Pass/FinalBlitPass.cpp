@@ -92,7 +92,7 @@ namespace ElysiaRenderer
             m_pMaterial->SetUInt(ShaderIDs::blitterTextureIndex,
                                  m_pDisplayRT->GetResourceHeapIndex());
 
-            m_pCommand->SetDefaultViewportAndScissor(UINT2(m_renderSize));
+            m_pCommand->SetDefaultViewportAndScissor(UINT2(m_displaySize));
             m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
             m_pCommand->DrawFullScreenTriangle();

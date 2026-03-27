@@ -36,8 +36,8 @@ namespace ElysiaRenderer
 
     void BloomPass::Configure()
     {
-        m_cameraWidth = ((UINT)m_renderSize.x + 1) >> 1;
-        m_cameraHeight = ((UINT)m_renderSize.y + 1) >> 1;
+        m_cameraWidth = std::floor(m_displaySize.x * UserData::GetInstance().taaParameter.sampleRate);
+        m_cameraHeight = std::floor(m_displaySize.y * UserData::GetInstance().taaParameter.sampleRate);
 
         m_mipmapResolutions[0] = UINT2(m_cameraWidth, m_cameraHeight);
         for (UINT i = 1; i < m_mipmapCount; ++i)
@@ -105,7 +105,6 @@ namespace ElysiaRenderer
         PIXHelper pix(m_pCommand->GetCommandList(), "Bloom Pass");
         m_pCamera = context.pCamera;
         m_pGPUTimer = context.pGPUTimer;
-        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), "Bloom Begin");
 
         DoBloomFirstDownSample();
         DoBloomWeightDownSample();

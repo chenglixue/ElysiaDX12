@@ -41,8 +41,8 @@ namespace ElysiaRenderer
 
     void AOPass::Configure()
     {
-        m_cameraWidth = (UINT)m_renderSize.x + 1 >> 1;
-        m_cameraHeight = (UINT)m_renderSize.y + 1 >> 1;
+        m_cameraWidth = std::floor(m_displaySize.x * UserData::GetInstance().taaParameter.sampleRate);
+        m_cameraHeight = std::floor(m_displaySize.y * UserData::GetInstance().taaParameter.sampleRate);
         m_halfWidth = UINT(m_cameraWidth) >> 1;
         m_halfHeight = UINT(m_cameraHeight) >> 1;
         m_quarterWidth = UINT(m_cameraWidth) >> 2;
@@ -143,7 +143,6 @@ namespace ElysiaRenderer
         PIXHelper pix(m_pCommand->GetCommandList(), "AO Pass");
         m_pCamera = context.pCamera;
         m_pGPUTimer = context.pGPUTimer;
-        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), "AO Begin");
 
         for (UINT i = 0; i < DEINTERLEAVED_DEPTH_COUNT; ++i)
         {

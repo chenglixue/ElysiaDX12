@@ -47,8 +47,8 @@ PASS(COPY_PASS,          "public\\PostProcess\\TAA\\CS_TAA.hlsl",               
 #undef PASS
         };
 #pragma endregion
-        UINT m_cameraWidth;
-        UINT m_cameraHeight;
+        UINT m_downSampleWidth;
+        UINT m_downSampleHeight;
         UINT m_TAAWidth;
         UINT m_TAAHeight;
 
@@ -57,6 +57,7 @@ PASS(COPY_PASS,          "public\\PostProcess\\TAA\\CS_TAA.hlsl",               
         int m_readIndex = 0;
         const static UINT m_TAARTCount = 2;
         std::array<RenderTexture*, m_TAARTCount> m_TAARTs;
+        float m_upScale = 1.f;
 
         struct ShaderIDs
         {
@@ -68,12 +69,18 @@ PASS(COPY_PASS,          "public\\PostProcess\\TAA\\CS_TAA.hlsl",               
             static inline size_t viewProjMatrix_I = PropertyToID(L"viewProjMatrix_I");
             static inline size_t pre_viewProjMatrix = PropertyToID(L"pre_viewProjMatrix");
             static inline size_t g_ProjMatrix_I = PropertyToID(L"g_ProjMatrix_I");
-            static inline size_t g_Jitter = PropertyToID(L"g_Jitter");
-            static inline size_t g_HistoryJitter = PropertyToID(L"g_HistoryJitter");
+
             static inline size_t g_TAATexSize = PropertyToID(L"g_TAATexSize");
+            static inline size_t g_DownSampleTexSize = PropertyToID(L"g_DownSampleTexSize");
+
             static inline size_t g_StaticBlendWeight = PropertyToID(L"g_StaticBlendWeight");
             static inline size_t g_DynamicBlendWeight = PropertyToID(L"g_DynamicBlendWeight");
             static inline size_t g_MaxBlendWeight = PropertyToID(L"g_MaxBlendWeight");
+
+            static inline size_t g_UpScaleFactor = PropertyToID(L"g_UpScaleFactor");
+            static inline size_t g_Jitter = PropertyToID(L"g_Jitter");
+            static inline size_t g_HistoryJitter = PropertyToID(L"g_HistoryJitter");
+            static inline size_t g_JitterPixels = PropertyToID(L"g_JitterPixels");
         };
 
         void DoTAA();

@@ -48,7 +48,7 @@ namespace ElysiaRenderer
             size_t passID = 0);
 
     protected:
-        Vector2 m_renderSize;
+        Vector2 m_displaySize;
         DX12Device* m_pDevice = nullptr;
         DX12GraphicsContext* m_pCommand = nullptr;
         SwapChain* m_pSwaiChain = nullptr;

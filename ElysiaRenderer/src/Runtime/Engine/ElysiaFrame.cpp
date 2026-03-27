@@ -721,6 +721,7 @@ namespace ElysiaEngine
             if (ImGui::CollapsingHeader("TAA"))
             {
                 ImGui::Checkbox("Enable TAA", &pUserData.taaParameter.Enable);
+                ImGui::SliderFloat("Sample Ratio", &pUserData.taaParameter.sampleRate, 0.5f, 1.f);
                 int jitterTypeIndex = (int)pUserData.taaParameter.jitterType;
                 ImGui::Combo("TAA Jitter Type",
                              &jitterTypeIndex,
@@ -737,6 +738,12 @@ namespace ElysiaEngine
                 ImGui::SliderFloat("TAA Static Weight", &pUserData.taaParameter.staticWeight, 0.9f, 1.f);
                 ImGui::SliderFloat("TAA Dynamic Weight", &pUserData.taaParameter.dynamicWeight, 0.f, 0.3f);
                 ImGui::SliderFloat("TAA Max Weight", &pUserData.taaParameter.maxWeight, 0.5f, 1.f);
+            }
+
+            if (ImGui::CollapsingHeader("Sharpen"))
+            {
+                ImGui::Checkbox("Enable Sharpen", &pUserData.sharpenParameter.enable);
+                ImGui::SliderFloat("Shapren Intensity", &pUserData.sharpenParameter.sharpen, 0.f, 2.f);
             }
             ImGui::Unindent();
         }

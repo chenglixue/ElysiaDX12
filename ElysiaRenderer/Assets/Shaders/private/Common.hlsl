@@ -47,6 +47,14 @@ float4 SampleTexture2D_ForcedLOD(uint texIndex, float2 uv, SamplerState s, float
     return tex.SampleGrad(s, uv, ddx, ddy);
 }
 
+float4 SampleTexture2D_Bias(UINT textureIndex, float2 uv, UINT samplerStateIndex, float bias)
+{
+    Texture2D<float4> SampleTex = ResourceDescriptorHeap[textureIndex];
+    SamplerState Sampler = SamplerDescriptorHeap[samplerStateIndex];
+
+    return SampleTex.SampleBias(Sampler, uv, bias);
+}
+
 float4 SampleTextureCube(UINT textureIndex, float3 dir, UINT samplerStateIndex)
 {
     TextureCube<float4> SampleTex = ResourceDescriptorHeap[textureIndex];

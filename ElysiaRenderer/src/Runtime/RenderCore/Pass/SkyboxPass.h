@@ -31,6 +31,8 @@ namespace ElysiaRenderer
             static inline size_t projMatrix_I = PropertyToID(L"projMatrix_I");
             static inline size_t viewProjMatrix = PropertyToID(L"viewProjMatrix");
             static inline size_t viewProjMatrix_I = PropertyToID(L"viewProjMatrix_I");
+            static inline size_t pre_viewProjMatrix = PropertyToID(L"pre_viewProjMatrix");
+            static inline size_t jitterViewProjMatrix = PropertyToID(L"jitterViewProjMatrix");
             static inline size_t worldMatrix = PropertyToID(L"worldMatrix");
         };
 
@@ -83,6 +85,9 @@ namespace ElysiaRenderer
 #pragma endregion
         UINT m_cameraWidth;
         UINT m_cameraHeight;
+        UINT m_displayWidth;
+        UINT m_displayHeight;
+
         BufferHandle m_vertexBuffer;
         BufferHandle m_indexBuffer;
         D3D12_VERTEX_BUFFER_VIEW m_vertexView;

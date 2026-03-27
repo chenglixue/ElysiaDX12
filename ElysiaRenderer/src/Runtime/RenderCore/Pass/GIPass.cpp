@@ -190,10 +190,10 @@ namespace ElysiaRenderer
         if (!m_pDevice5)
             ThrowIfFailed(m_pDevice->GetDevice()->QueryInterface(IID_PPV_ARGS(&m_pDevice5)));
 
-        m_halfWidth = UINT(m_renderSize.x) >> 1;
-        m_halfHeight = UINT(m_renderSize.y) >> 1;
-        m_quarterWidth = UINT(m_renderSize.x) >> 2;
-        m_quarterHeight = UINT(m_renderSize.y) >> 2;
+        m_halfWidth = UINT(m_displaySize.x) >> 1;
+        m_halfHeight = UINT(m_displaySize.y) >> 1;
+        m_quarterWidth = UINT(m_displaySize.x) >> 2;
+        m_quarterHeight = UINT(m_displaySize.y) >> 2;
 
         m_pIrradianceRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(
             Grid_Dimensions.x * 8,
@@ -242,7 +242,7 @@ namespace ElysiaRenderer
         if (!m_pMaterial)
         {
             m_pMaterial = std::make_unique<Material>(m_pDevice, m_shaderPasses);
-        UpdatePipeline();
+            UpdatePipeline();
         }
     }
 
@@ -252,7 +252,6 @@ namespace ElysiaRenderer
         m_pCamera = context.pCamera;
         m_pGPUTimer = context.pGPUTimer;
         m_frameIndex = context.frameIndex;
-        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), "GI Begin");
 
         if (!SceneManager::GetInstance().GetEntities().empty() && !SceneManager::GetInstance().
             GetEntities()[0]->GetChildren().empty())

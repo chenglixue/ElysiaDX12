@@ -60,5 +60,6 @@ namespace ElysiaRenderer
         UINT AOTexIndex = 0;
         UINT g_EnableAO = true;
         UINT g_EnableShadow = true;
+        float g_MipBias = 0;
     };
 } // namespace ElysiaRenderer

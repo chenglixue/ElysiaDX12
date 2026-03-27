@@ -81,6 +81,7 @@ cbuffer GlobalConstant : register(b0, perFrameSpace)
     UINT g_AOIndex;
     bool g_EnableAO;
     bool g_EnableShadow;
+    float g_MipBias;
 };
 
 struct DX12Vertex

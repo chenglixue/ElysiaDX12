@@ -50,11 +50,11 @@ float3 TransformYCoCg2RGB(float3 c)
 
 float3 ReinhardTonemap(float3 color)
 {
-    return color * rcp(1.0 + Luminance(color) + FLT_EPS);
+    return color * rcp(1.0 + Luminance(clamp(color, 0.f, 0.9999f)) + FLT_EPS);
 }
 float3 InverseReinhardTonemap(float3 color)
 {
-    return color * rcp(1.f - Luminance(color) + FLT_EPS);
+    return color * rcp(1.f - Luminance(clamp(color, 0.f, 0.9999f)) + FLT_EPS);
 }
 
 void SampleDepth3x3(UINT depthTexIndex,
@@ -101,6 +101,7 @@ void SampleDepthCross(UINT depthTexIndex,
         depths[i] = depth;
     }
 }
+
 
 void SampleColor3x3(UINT colorTexIndex,
                     float2 uv,
@@ -209,6 +210,7 @@ float2 SampleClosestUVCross(UINT depthTexIndex, float2 uv, float2 duv)
     return minUV;
 }
 
+
 float3 ClampBox(float3 historyColor, float3 minColor, float3 maxColor)
 {
     return clamp(historyColor, minColor, maxColor);
@@ -229,8 +231,32 @@ float3 VarianceClipBox(float3 m1, float3 m2, float gamma, float3 preColor)
 {
     float3 mu = m1 / 9;
     float3 sigma = sqrt(abs(m2 / 9 - mu * mu));
+    sigma += FLT_EPS;
     float3 colorMin = mu - gamma * sigma;
     float3 colorMax = mu + gamma * sigma;
+
+    colorMin.x = max(colorMin.x, 0.0f);
+
+    float3 p_clip = 0.5 * (colorMax + colorMin);
+    float3 e_clip = 0.5 * (colorMax - colorMin) + FLT_EPS;
+
+    float3 v_clip = preColor - p_clip;
+    float3 v_unit = v_clip.xyz / e_clip;
+    float3 a_unit = abs(v_unit);
+    float ma_unit = max(a_unit.x, max(a_unit.y, a_unit.z));
+
+    float factor = rcp(max(1.0, ma_unit));
+    return p_clip + v_clip * factor;
+}
+float3 TAAUVarianceClipBox(float3 m1, float3 m2, float gamma, float3 preColor)
+{
+    float3 mu = m1;
+    float3 sigma = sqrt(abs(m2 - mu * mu)) + FLT_EPS;
+    float3 colorMin = mu - gamma * sigma;
+    float3 colorMax = mu + gamma * sigma;
+
+    colorMin.x = max(colorMin.x, 0.0f);
+    colorMax.x = max(colorMax.x, 0.0f);
 
     float3 p_clip = 0.5 * (colorMax + colorMin);
     float3 e_clip = 0.5 * (colorMax - colorMin) + FLT_EPS;
@@ -275,5 +301,88 @@ float3 CatmullRomSample(UINT texIndex, float2 uv, float2 duv)
     color += SampleTexture2D(texIndex, float2(uv12.x, uv3.y), ClampLinearSampler) * (w12.x * w3.y);
 
     return max(0, color);
+}
+
+//
+// ------------------------------------------------------------------- TAAU -------------------------------------------------------------------
+// 
+float ComputeTAAUWeight(float2 pixelDelta, float upscaleFactor)
+{
+    float u2 = upscaleFactor * upscaleFactor;
+    // 高分辨率下距离的平方
+    float x2 = saturate(u2 * dot(pixelDelta, pixelDelta));
+    // 拟合曲线:1 - 1.9 * x^2 + 0.9 * x^4
+    return max(0.0f, (0.905f * x2 - 1.9f) * x2 + 1.0f);
+}
+void DownSample3x3(UINT currFrameTexIndex,
+                   float2 downCenterPos,
+                   float4 downTexSize,
+                   float2 posCenterToJitter,
+                   float upScaleFactor,
+                   out float3 currColor,
+                   out float3 minColor,
+                   out float3 maxColor,
+                   out float3 m1,
+                   out float3 m2,
+                   out float2 cloestUV)
+{
+    currColor = 0.f;
+    minColor = FLT_MAX;
+    maxColor = FLT_MIN;
+    cloestUV = 0.f;
+    m1 = 0.f;
+    m2 = 0.f;
+
+    float du = downTexSize.z;
+    float dv = downTexSize.w;
+    const float2 offsetUV[9] =
+    {
+        {-du, dv}, {0, dv}, {du, dv},
+        {-du, 0}, {0, 0}, {du, 0},
+        {-du, -dv}, {0, -dv}, {du, -dv}
+    };
+    float distThresholdSq = lerp(1.51f, 1.3f, upScaleFactor - 1.0f);
+    distThresholdSq *= distThresholdSq;
+    float validVarianceSamples = FLT_EPS;
+
+    float totalWeight = FLT_EPS;
+    float minDepth = FLT_MAX;
+    [unroll]
+    for (int i = 0; i < 9; ++i)
+    {
+        float2 samplePos = downCenterPos + offsetUV[i] * downTexSize.xy;
+        float2 sampleUV = samplePos * downTexSize.zw;
+
+        float depth = SampleTexture2D(OpaqueDepthIndex, sampleUV, ClampPointSampler);
+        [branch]
+        if (minDepth > depth)
+        {
+            minDepth = depth;
+            cloestUV = sampleUV;
+        }
+
+        float3 color = SampleTexture2D(currFrameTexIndex, sampleUV, ClampPointSampler);
+        color = TransformRGB2YCoCg(ReinhardTonemap(color));
+
+        minColor = min(minColor, color);
+        maxColor = max(maxColor, color);
+
+        float2 posSampleToJitter = offsetUV[i] * downTexSize.xy - posCenterToJitter;
+
+        float spatialWeigh = ComputeTAAUWeight(posSampleToJitter, upScaleFactor);
+        currColor += color * spatialWeigh;
+        totalWeight += spatialWeigh;
+
+        if (dot(posSampleToJitter, posSampleToJitter) < distThresholdSq)
+        {
+            m1 += color;
+            m2 += color * color;
+            validVarianceSamples += 1.f;
+        }
+    }
+
+    currColor *= rcp(totalWeight);
+    m1 *= rcp(validVarianceSamples);
+    m2 *= rcp(validVarianceSamples);
 }
 #endif

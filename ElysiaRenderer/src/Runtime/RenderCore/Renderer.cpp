@@ -31,6 +31,7 @@
 #include "Editor/IMGUIDrawer.h"
 #include "Pass/DebugPass.h"
 #include "Pass/GIPass.h"
+#include "Pass/SharpenPass.h"
 #include "Pass/SkyboxPass.h"
 #include "Pass/TAAPass.h"
 #include "Runtime/Engine/ECS/Entity.h"
@@ -59,49 +60,34 @@ namespace ElysiaRenderer
     {
         m_pDevice = pDevice;
         m_pGraphicsContext = context;
-
         m_pGPUTimer = std::make_unique<GPUTimestamps>();
-        // initialize the GPU time stamps module
         m_pGPUTimer->OnCreate(pDevice, NUM_BACK_BUFFERS);
 
         InitPSOHelpers();
 
         m_passes.clear();
-        m_passes.emplace_back(
-            std::move(std::make_unique<PreDrawPass>()));
-        m_passes.emplace_back(
-            std::move(std::make_unique<ShadowPass>()));
-        m_passes.emplace_back(
-            std::move(std::make_unique<GIPass>()));
-        m_passes.emplace_back(
-            std::move(std::make_unique<GBufferPass>()));
 
-        m_passes.emplace_back(std::move(std::make_unique<AOPass>()));
-        m_passes.emplace_back(
-            std::move(std::make_unique<OpaquePass>()));
-        m_passes.emplace_back(
-            std::move(std::make_unique<SkyboxPass>()));
-
-        m_passes.emplace_back(
-            std::move(std::make_unique<TAAPass>()));
-        m_passes.emplace_back(
-            std::move(std::make_unique<BloomPass>()));
-
-        m_passes.emplace_back(
-            std::move(std::make_unique<TonemapPass>()));
-        // m_passes.emplace_back(std::move(std::make_unique<BloomPass>(m_pCameraManager->GetMainCamera())));
-        // m_passes.emplace_back(std::move(std::make_unique<DebugPass>()));
-        m_passes.emplace_back(std::move(std::make_unique<UIPass>()));
-        m_passes.emplace_back(std::move(
-            std::make_unique<FinalBlitPass>()));
+        AddPass<PreDrawPass>();
+        AddPass<ShadowPass>();
+        AddPass<GIPass>();
+        AddPass<GBufferPass>();
+        AddPass<AOPass>();
+        AddPass<OpaquePass>();
+        AddPass<SkyboxPass>();
+        AddPass<TAAPass>();
+        AddPass<BloomPass>();
+        AddPass<TonemapPass>();
+        AddPass<SharpenPass>();
+        AddPass<UIPass>();
+        AddPass<FinalBlitPass>();
     }
 
     void Renderer::OnCreateWindowSizeDependentResources(SwapChain* pSwapChain,
                                                         uint32_t Width,
                                                         uint32_t Height)
     {
-        m_Width = (Width + 1) >> 1;
-        m_Height = (Height + 1) >> 1;
+        m_Width = std::floor(Width * UserData::GetInstance().taaParameter.sampleRate);
+        m_Height = std::floor(Height * UserData::GetInstance().taaParameter.sampleRate);
 
         m_viewport = {0.0f, 0.0f, static_cast<float>(Width), static_cast<float>(Height), 0.0f,
                       1.0f};

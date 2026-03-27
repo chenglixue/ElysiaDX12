@@ -43,10 +43,13 @@ namespace ElysiaRenderer
     void PreDrawPass::Render(FrameContext& context)
     {
         m_pCamera = context.pCamera;
+        auto renderWidth = std::floor(m_displaySize.x * UserData::GetInstance().taaParameter.sampleRate);
+        auto renderHeight = std::floor(m_displaySize.y * UserData::GetInstance().taaParameter.sampleRate);
+        float screenPercentage = (float)renderWidth / (float)m_displaySize.x;
 
         auto GPUAddress = UploadFrameConstant(
             m_pDevice,
-            [this, context](CBVFrameVariable* dst)
+            [this, context, screenPercentage](CBVFrameVariable* dst)
             {
                 *dst = RenderResource::GetInstance().GetCBVFrameVariable();
                 dst->cameraPosWS = CameraManager::GetInstance().GetMainCamera()->GetPosition4();
@@ -102,6 +105,7 @@ namespace ElysiaRenderer
                                                                     ->GetResourceHeapIndex();
                 dst->g_EnableAO = UserData::GetInstance().aoParameter.IsEnableAO;
                 dst->g_EnableShadow = UserData::GetInstance().EnableShadow;
+                dst->g_MipBias = std::max(-2.f, std::log2(screenPercentage));
             });
 
         auto frameSpace = RenderResource::GetInstance().GetPerFrameBindResourceSpace(

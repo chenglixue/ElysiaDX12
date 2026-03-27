@@ -72,8 +72,10 @@ namespace ElysiaRenderer
 
     void GBufferPass::Configure()
     {
-        m_cameraWidth = (UINT)m_renderSize.x + 1 >> 1;
-        m_cameraHeight = (UINT)m_renderSize.y + 1 >> 1;
+        m_displayWidth = (UINT)m_displaySize.x;
+        m_displayHeight = (UINT)m_displaySize.y;
+        m_cameraWidth = std::floor(m_displaySize.x * UserData::GetInstance().taaParameter.sampleRate);
+        m_cameraHeight = std::floor(m_displaySize.y * UserData::GetInstance().taaParameter.sampleRate);
         CreateRTs();
 
         m_shaderPasses.assign(std::begin(m_PassData), std::end(m_PassData));
@@ -338,10 +340,10 @@ namespace ElysiaRenderer
 
         m_preJitterUV = m_currJitterUV;
         m_currJitterUV = Jitter::SampleJitterUV(UserData::GetInstance().taaParameter.jitterType);
-        m_jitterMatrixProj.m[2][0] += m_currJitterUV.x * 2.f / m_cameraWidth * UserData::GetInstance().taaParameter.
-                                                                                                       jitterIntensity;
-        m_jitterMatrixProj.m[2][1] -= m_currJitterUV.y * 2.f / m_cameraHeight * UserData::GetInstance().taaParameter.
+        m_jitterMatrixProj.m[2][0] += m_currJitterUV.x * 2.f / m_displayWidth * UserData::GetInstance().taaParameter.
                                                                                                         jitterIntensity;
+        m_jitterMatrixProj.m[2][1] -= m_currJitterUV.y * 2.f / m_displayHeight * UserData::GetInstance().taaParameter.
+                                                                                                         jitterIntensity;
 
         m_currMatrixVP = viewMatrix * projMatrix;
         m_currMatrixVP_I = m_currMatrixVP.Invert();
@@ -380,7 +382,7 @@ namespace ElysiaRenderer
                                     BufferManager::GetInstance().GetGlobalVertexBufferView());
 
         m_pMaterial->SetFloat4(ShaderIDs::screenSize,
-                               GetScreenSize(Vector2(m_renderSize.x, m_renderSize.y)));
+                               GetScreenSize(Vector2(m_cameraWidth, m_cameraHeight)));
         m_pMaterial->SetMatrix(ShaderIDs::viewMatrix, m_pCamera->GetViewMat());
         m_pMaterial->SetMatrix(ShaderIDs::viewMatrix_I, m_pCamera->GetViewMat().Invert());
         m_pMaterial->SetMatrix(ShaderIDs::projMatrix, m_currMatrixP);

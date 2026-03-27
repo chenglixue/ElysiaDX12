@@ -140,6 +140,8 @@ namespace ElysiaRenderer
             D3D12_DRAW_INDEXED_ARGUMENTS drawArguments;
         };
 
+        UINT m_displayWidth;
+        UINT m_displayHeight;
         UINT m_cameraWidth;
         UINT m_cameraHeight;
         Matrix m_currMatrixP;

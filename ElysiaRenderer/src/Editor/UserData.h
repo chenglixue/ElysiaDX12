@@ -6,6 +6,7 @@
 #include "Runtime/RenderCore/AOUtility.h"
 #include "Programs/DebugUtility.h"
 #include "Runtime/RenderCore/BloomUtility.h"
+#include "Runtime/RenderCore/CASUtility.h"
 #include "Runtime/RenderCore/GIUtility.h"
 #include "Runtime/RenderCore/TAAUtility.h"
 #include "ThirdParty/FreesyncHDR.h"
@@ -25,7 +26,6 @@ namespace ElysiaRenderer
     public:
         UserData()
         {
-
         }
         UserData(const UserData&) = delete;
         UserData& operator=(const UserData&) = delete;
@@ -90,6 +90,7 @@ namespace ElysiaRenderer
 
         BloomParameter bloomParameter{};
         TAAParameter taaParameter{};
+        SharpenParameter sharpenParameter{};
 
     private:
         static std::unique_ptr<UserData> m_instance;

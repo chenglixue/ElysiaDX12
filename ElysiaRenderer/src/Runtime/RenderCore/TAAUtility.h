@@ -112,5 +112,6 @@ namespace ElysiaRenderer
         float staticWeight = 0.95f;
         float dynamicWeight = 0.1f;
         float maxWeight = 0.5f;
+        float sampleRate = 1.0f;
     };
 }

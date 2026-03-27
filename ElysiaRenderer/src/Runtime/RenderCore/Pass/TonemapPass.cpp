@@ -298,7 +298,7 @@ namespace ElysiaRenderer
             m_pMaterial->SetUInt(ShaderIDs::tonemapMode,
                                  (UINT)UserData::GetInstance().tonemapMode);
             m_pMaterial->SetFloat4(ShaderIDs::g_DestSize,
-                                   GetScreenSize(Vector2(m_renderSize.x, m_renderSize.y)));
+                                   GetScreenSize(Vector2(m_displaySize.x, m_displaySize.y)));
             m_pMaterial->SetUInt(ShaderIDs::g_DestTextureIndex,
                                  m_pDisplayRT->GetResourceHeapIndex());
             m_pMaterial->SetFloat(ShaderIDs::g_LocalExposure,

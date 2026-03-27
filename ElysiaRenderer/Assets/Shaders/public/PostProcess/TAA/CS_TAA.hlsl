@@ -10,6 +10,7 @@ cbuffer PassConstant : register(b0, perPassSpace)
     Matrix pre_viewProjMatrix;
     Matrix g_ProjMatrix_I;
     Vector4 g_TAATexSize;
+    Vector4 g_DownSampleTexSize;
 
     UINT g_HistoryTexIndex;
     UINT g_CurrTexIndex;
@@ -19,8 +20,11 @@ cbuffer PassConstant : register(b0, perPassSpace)
     float g_StaticBlendWeight;
     float g_DynamicBlendWeight;
     float g_MaxBlendWeight;
+    float g_UpScaleFactor;
+
     float2 g_Jitter;
     float2 g_HistoryJitter;
+    float2 g_JitterPixels;
 }
 
 // groupshared float4 g_LDSColorDepth[TILE_PIXELS];
@@ -50,42 +54,61 @@ void TAA(uint3 id : SV_DispatchThreadID)
 {
     UINT2 readPos = id.xy;
     UINT2 writePos = id.xy;
-    if (writePos.x > g_TAATexSize.x || writePos.y > g_TAATexSize.y)
+    if (writePos.x >= g_TAATexSize.x || writePos.y >= g_TAATexSize.y)
         return;
 
-    float2 screenUV = ((float2)readPos + 0.5f) * g_TAATexSize.zw;
-    float2 closetUV = SampleClosestUV3x3(OpaqueDepthIndex, screenUV, g_TAATexSize.zw);
+    float2 upSampleUV = ((float2)readPos + 0.5f) * g_TAATexSize.zw;
+    // float2 closetUV = SampleClosestUV3x3(OpaqueDepthIndex, upSampleUV, g_TAATexSize.zw);
+    float2 closetUV;
+    // include jitter
+    float2 downSampleJiiterPos = upSampleUV * g_DownSampleTexSize.xy + g_JitterPixels / g_UpScaleFactor;
+    // 离downSamplePos最近的pixel中心
+    float2 centerDownSamplePos = floor(downSampleJiiterPos) + 0.5f;
+    // down sample pixel offset
+    float2 posCenterToJitter = downSampleJiiterPos - centerDownSamplePos;
 
-    // float rawDepth = SampleTexture2D(OpaqueDepthIndex, screenUV, ClampPointSampler);
-    // float depth01 = Linear01Depth(rawDepth, g_ZBufferParams);
+    float3 minColor, maxColor, currColor, avgColor, m1, m2;
+    DownSample3x3(g_CurrTexIndex,
+                  centerDownSamplePos,
+                  g_DownSampleTexSize,
+                  posCenterToJitter,
+                  g_UpScaleFactor,
+                  currColor,
+                  minColor,
+                  maxColor,
+                  m1,
+                  m2,
+                  closetUV);
 
     float2 velocity = Elysia_Sample_Velocity(closetUV);
-    float2 preUV = screenUV - velocity;
-    // [branch]
-    // if (depth01 > 0.999f)
-    // {
-    //     float2 cleanUV = screenUV - g_Jitter;
-    //     float3 viewDir = ComputeViewSpacePosition(cleanUV, rawDepth, g_ProjMatrix_I);
-    //
-    //     float4 preNDC = mul(float4(viewDir.xyz, 0.0f), pre_viewProjMatrix);
-    //     if (abs(preNDC.w) > 0.0001f)
-    //     {
-    //         preNDC.xyz /= preNDC.w;
-    //     }
-    //
-    //     preUV = preNDC.xy * float2(0.5f, -0.5f) + 0.5f;
-    //     preUV += g_HistoryJitter;
-    // }
+    float2 preUV = upSampleUV - velocity;
+    if (any(preUV < 0.f) || any(preUV > 1.f))
+    {
+        float3 finalRGB = InverseReinhardTonemap(TransformYCoCg2RGB(currColor));
+        Elysia_Save_TAA(g_DestTexIndex, writePos, finalRGB);
+        return;
+    }
     float3 historyColor = CatmullRomSample(g_HistoryTexIndex, preUV, g_TAATexSize.zw);
     historyColor = ReinhardTonemap(historyColor);
     historyColor = TransformRGB2YCoCg(historyColor);
 
-    float3 minColor, maxColor, currColor, avgColor, m1, m2;
-    SampleMinMax3x3(g_CurrTexIndex, screenUV, g_TAATexSize.zw, minColor, maxColor, currColor, avgColor, m1, m2);
-    historyColor = VarianceClipBox(m1, m2, 1, historyColor);
+    // SampleMinMax3x3(g_CurrTexIndex, upSampleUV, g_TAATexSize.zw, minColor, maxColor, currColor, avgColor, m1, m2);
+    historyColor = TAAUVarianceClipBox(m1, m2, 2, historyColor);
+
+    float currRawDepth = SampleTexture2D(OpaqueDepthIndex, closetUV, ClampPointSampler);
+    float currLinear01Depth = Linear01Depth(currRawDepth, g_ZBufferParams);
+    float preRawDepth = SampleTexture2D(OpaqueDepthIndex, preUV, ClampPointSampler);
+    float preLinear01Depth = Linear01Depth(preRawDepth, g_ZBufferParams);
+    float depth01Diff = abs(currLinear01Depth - preLinear01Depth) / (
+                            max(currLinear01Depth, preLinear01Depth) + FLT_EPS);
+    float depthDiffThreshold = 0.03f;
+    float depthPenalty = 1.0f - smoothstep(depthDiffThreshold * 0.5f, depthDiffThreshold, depth01Diff);
 
     float velocityFactor = length(velocity) * g_TAATexSize.xy;
     float blendWeight = CalcTAAWeight(g_StaticBlendWeight, g_DynamicBlendWeight, g_MaxBlendWeight, velocityFactor);
+    float spatialConfidence = ComputeTAAUWeight(posCenterToJitter, g_UpScaleFactor);
+    blendWeight = saturate(blendWeight * (1.0f - spatialConfidence * 0.5f));
+    blendWeight *= depthPenalty;
 
     float3 blendColor = lerp(currColor, historyColor, blendWeight);
     blendColor = TransformYCoCg2RGB(blendColor);

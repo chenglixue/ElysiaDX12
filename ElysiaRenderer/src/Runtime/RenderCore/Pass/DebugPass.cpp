@@ -89,7 +89,7 @@ namespace ElysiaRenderer
         pipelineStateData.m_depthStencilTarget = m_pCameraDepthRT->GetTexture();
         m_pCommand->SetPipeline(pipelineStateData);
         SetSpaceResource(passData, PER_FRAME_SPACE);
-        m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_renderSize));
+        m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_displaySize));
         m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
         m_pMaterial->SetUInt(ShaderIDs::g_DebugMode,
@@ -100,7 +100,7 @@ namespace ElysiaRenderer
                                GetScreenSize(m_pDisplayRT->GetWidth(),
                                              m_pDisplayRT->GetHeight()));
         m_pMaterial->SetFloat4(ShaderIDs::screenSize,
-                               GetScreenSize(Vector2(m_renderSize.x, m_renderSize.y)));
+                               GetScreenSize(Vector2(m_displaySize.x, m_displaySize.y)));
         m_pMaterial->SetMatrix(ShaderIDs::viewMatrix, m_pCamera->GetViewMat());
         m_pMaterial->SetMatrix(ShaderIDs::viewMatrix_I, m_pCamera->GetViewMat().Invert());
         m_pMaterial->SetMatrix(ShaderIDs::projMatrix, m_pCamera->GetProjMat());
@@ -195,7 +195,7 @@ namespace ElysiaRenderer
         pipelineStateData.m_depthStencilTarget = m_pCameraDepthRT->GetTexture();
         m_pCommand->SetPipeline(pipelineStateData);
         SetSpaceResource(passData, PER_FRAME_SPACE);
-        m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_renderSize));
+        m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_displaySize));
         m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
 
         m_aabbDrawer.Clear();
@@ -334,7 +334,7 @@ namespace ElysiaRenderer
                 m_pCommand->SetPipeline(pipelineStateData);
                 SetSpaceResource(passData, PER_FRAME_SPACE);
             }
-            m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_renderSize));
+            m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_displaySize));
             m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
 
             m_pCommand->GetCommandList()->IASetVertexBuffers(0, 0, nullptr);

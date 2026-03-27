@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "SkyboxPass.h"
 
+#include "GBufferPass.h"
 #include "Programs/PIXHelper.h"
 #include "Programs/SobolSequenceGenerator.h"
 #include "Programs/RenderHelper.h"
@@ -75,8 +76,10 @@ namespace ElysiaRenderer
 
     void SkyboxPass::Configure()
     {
-        m_cameraWidth = (UINT)m_renderSize.x + 1 >> 1;
-        m_cameraHeight = (UINT)m_renderSize.y + 1 >> 1;
+        m_displayWidth = (UINT)m_displaySize.x;
+        m_displayHeight = (UINT)m_displaySize.y;
+        m_cameraWidth = std::floor(m_displaySize.x * UserData::GetInstance().taaParameter.sampleRate);
+        m_cameraHeight = std::floor(m_displaySize.y * UserData::GetInstance().taaParameter.sampleRate);
 
         m_shaderPasses.assign(std::begin(m_PassData), std::end(m_PassData));
         if (!m_pMaterial)
@@ -141,29 +144,47 @@ namespace ElysiaRenderer
         m_pCommand->SetIndexBuffer(m_indexView);
         m_pCommand->SetVertexBuffer(0, 1, m_vertexView);
 
-        m_pCommand->AddBarrier(m_pCameraColorRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+        m_pCommand->AddBarrier(m_pCameraColorRT, D3D12_RESOURCE_STATE_RENDER_TARGET, false);
+        m_pCommand->AddBarrier(
+            RenderTargetManager::GetInstance().GetRenderTexture(GBufferPass::RenderTextureIDs::GBuffer5ID),
+            D3D12_RESOURCE_STATE_RENDER_TARGET);
         {
-            Matrix viewNoTranslate = m_pCamera->GetViewMat();
-            viewNoTranslate.Translation(Vector3::Zero); // 抹除位移
-            Matrix viewProjInv = (viewNoTranslate * m_pCamera->GetProjMat()).Invert();
-            m_pMaterial->SetMatrix(ShaderIDs::viewProjMatrix_I,
-                                   m_pCamera->GetViewMat() * viewProjInv);
+            Matrix viewNoTranslateMat = m_pCamera->GetViewMat();
+            viewNoTranslateMat.Translation(Vector3::Zero); // 抹除位移
+
+            auto preViewNoTranslateMat = GBufferPass::TAAData::Pre_View_M;
+            preViewNoTranslateMat.Translation(Vector3::Zero); // 抹除位移
+            Matrix nonJitterProjMat = m_pCamera->GetProjMat();
+
+            auto jitterUV = GBufferPass::m_currJitterUV;
+            auto jitterMatrixProj = m_pCamera->GetProjMat();
+            jitterMatrixProj.m[2][0] += jitterUV.x * 2.f / m_displayWidth * UserData::GetInstance().taaParameter.
+                                                                                                    jitterIntensity;
+            jitterMatrixProj.m[2][1] -= jitterUV.y * 2.f / m_displayHeight * UserData::GetInstance().taaParameter.
+                                                                                                     jitterIntensity;
 
             m_pMaterial->SetFloat4(ShaderIDs::screenSize,
                                    GetScreenSize(Vector2(m_cameraWidth, m_cameraHeight)));
-            m_pMaterial->SetMatrix(ShaderIDs::viewMatrix, m_pCamera->GetViewMat());
-            m_pMaterial->SetMatrix(ShaderIDs::viewMatrix_I, m_pCamera->GetViewMat().Invert());
-            m_pMaterial->SetMatrix(ShaderIDs::projMatrix, m_pCamera->GetProjMat());
-            m_pMaterial->SetMatrix(ShaderIDs::projMatrix_I, m_pCamera->GetProjMat().Invert());
+            m_pMaterial->SetMatrix(ShaderIDs::viewMatrix, viewNoTranslateMat);
+            m_pMaterial->SetMatrix(ShaderIDs::viewMatrix_I, viewNoTranslateMat.Invert());
+            m_pMaterial->SetMatrix(ShaderIDs::projMatrix, jitterMatrixProj);
+            m_pMaterial->SetMatrix(ShaderIDs::projMatrix_I, nonJitterProjMat.Invert());
             m_pMaterial->SetMatrix(ShaderIDs::viewProjMatrix,
-                                   viewNoTranslate * m_pCamera->GetProjMat());
+                                   viewNoTranslateMat * nonJitterProjMat);
             m_pMaterial->SetMatrix(ShaderIDs::viewProjMatrix_I,
-                                   (m_pCamera->GetViewMat() * m_pCamera->GetProjMat()).Invert());
+                                   (viewNoTranslateMat * nonJitterProjMat).Invert());
+            m_pMaterial->SetMatrix(ShaderIDs::jitterViewProjMatrix,
+                                   viewNoTranslateMat * jitterMatrixProj);
+            m_pMaterial->SetMatrix(ShaderIDs::pre_viewProjMatrix,
+                                   preViewNoTranslateMat * GBufferPass::TAAData::Pre_Proj_M);
             SetSpaceResource(passData, PER_PASS_SPACE);
 
             m_pCommand->DrawInstanced(NumIndices, 1, 0, 0, 0);
         }
         m_pCommand->AddBarrier(m_pCameraColorRT, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+        m_pCommand->AddBarrier(
+            RenderTargetManager::GetInstance().GetRenderTexture(GBufferPass::RenderTextureIDs::GBuffer5ID),
+            D3D12_RESOURCE_STATE_RENDER_TARGET);
 
         m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
     }

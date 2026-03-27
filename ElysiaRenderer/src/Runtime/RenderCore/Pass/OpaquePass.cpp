@@ -37,8 +37,8 @@ namespace ElysiaRenderer
 
     void OpaquePass::Configure()
     {
-        m_cameraWidth = (UINT)m_renderSize.x + 1 >> 1;
-        m_cameraHeight = (UINT)m_renderSize.y + 1 >> 1;
+        m_cameraWidth = std::floor(m_displaySize.x * UserData::GetInstance().taaParameter.sampleRate);
+        m_cameraHeight = std::floor(m_displaySize.y * UserData::GetInstance().taaParameter.sampleRate);
 
         m_shaderPasses.assign(std::begin(m_PassData), std::end(m_PassData));
         if (!m_pMaterial)

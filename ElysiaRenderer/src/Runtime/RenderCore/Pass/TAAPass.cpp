@@ -40,11 +40,11 @@ namespace ElysiaRenderer
 
     void TAAPass::Configure()
     {
-        m_cameraWidth = m_renderSize.x;
-        m_cameraHeight = m_renderSize.y;
-
-        m_TAAWidth = m_cameraWidth;
-        m_TAAHeight = m_cameraHeight;
+        m_TAAWidth = m_displaySize.x;
+        m_TAAHeight = m_displaySize.y;
+        m_downSampleWidth = std::floor(m_displaySize.x * UserData::GetInstance().taaParameter.sampleRate);
+        m_downSampleHeight = std::floor(m_displaySize.y * UserData::GetInstance().taaParameter.sampleRate);
+        m_upScale = (float)m_TAAWidth / (float)m_downSampleWidth;
 
         for (UINT i = 0; i < m_TAARTCount; ++i)
         {
@@ -99,7 +99,6 @@ namespace ElysiaRenderer
         PIXHelper pix(m_pCommand->GetCommandList(), "TAA Pass");
         m_pCamera = context.pCamera;
         m_pGPUTimer = context.pGPUTimer;
-        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), "TAA Begin");
 
         m_readIndex = m_writeIndex;
         m_writeIndex = (m_writeIndex + 1) % 2;
@@ -138,6 +137,9 @@ namespace ElysiaRenderer
             m_pMaterial->SetFloat4(ShaderIDs::g_TAATexSize,
                                    GetScreenSize(m_TAAWidth, m_TAAHeight),
                                    passID);
+            m_pMaterial->SetFloat4(ShaderIDs::g_DownSampleTexSize,
+                                   GetScreenSize(m_downSampleWidth, m_downSampleHeight),
+                                   passID);
             m_pMaterial->SetFloat(ShaderIDs::g_StaticBlendWeight,
                                   UserData::GetInstance().taaParameter.staticWeight,
                                   passID);
@@ -147,11 +149,17 @@ namespace ElysiaRenderer
             m_pMaterial->SetFloat(ShaderIDs::g_MaxBlendWeight,
                                   UserData::GetInstance().taaParameter.maxWeight,
                                   passID);
+            m_pMaterial->SetFloat(ShaderIDs::g_UpScaleFactor,
+                                  m_upScale,
+                                  passID);
             m_pMaterial->SetFloat2(ShaderIDs::g_Jitter,
-                                   GBufferPass::m_currJitterUV / Vector2(m_cameraWidth, m_cameraHeight),
+                                   GBufferPass::m_currJitterUV / Vector2(m_TAAWidth, m_TAAHeight),
                                    passID);
             m_pMaterial->SetFloat2(ShaderIDs::g_HistoryJitter,
-                                   GBufferPass::m_preJitterUV / Vector2(m_cameraWidth, m_cameraHeight),
+                                   GBufferPass::m_preJitterUV / Vector2(m_TAAWidth, m_TAAHeight),
+                                   passID);
+            m_pMaterial->SetFloat2(ShaderIDs::g_JitterPixels,
+                                   GBufferPass::m_preJitterUV / m_upScale,
                                    passID);
             m_pMaterial->SetMatrix(ShaderIDs::pre_viewProjMatrix, GBufferPass::TAAData::Pre_ViewProj_M, passID);
             m_pMaterial->SetMatrix(ShaderIDs::g_ProjMatrix_I, m_pCamera->GetProjMat().Invert(), passID);
@@ -219,8 +227,8 @@ namespace ElysiaRenderer
 
             SetSpaceResource(passData, PER_PASS_SPACE);
             auto threadGroupSize = passData.GetKernelThreadGroupSizes();
-            m_pCommand->Dispatch(CeilDivide(m_cameraWidth, threadGroupSize.x),
-                                 CeilDivide(m_cameraHeight, threadGroupSize.y),
+            m_pCommand->Dispatch(CeilDivide(m_TAAWidth, threadGroupSize.x),
+                                 CeilDivide(m_TAAHeight, threadGroupSize.y),
                                  threadGroupSize.z);
             m_pCommand->AddUAVBarrier(m_pDisplayRT, false);
         }

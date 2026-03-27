@@ -175,24 +175,29 @@ FEncodeGBufferData GetEncodeGBufferData(FInputParams inputParams, float3 toLight
     StructuredBuffer<MeshData> meshDataBuffer = ResourceDescriptorHeap[meshDataBufferIndex];
     MeshData currMeshData = meshDataBuffer[meshDataIndex];
 
-    float4 baseColor = SampleTexture2D(currMeshData.baseColorTexIndex,
-                                       inputParams.objectUV,
-                                       WarpLinearSampler)
+    float4 baseColor = SampleTexture2D_Bias(currMeshData.baseColorTexIndex,
+                                            inputParams.objectUV,
+                                            WarpLinearSampler,
+                                            g_MipBias)
                        * float4(currMeshData.baseColorTint.xyz, currMeshData.opacity);
-    clip(baseColor.a - currMeshData.cutoff);
+    float ditherClip = ComputeTemporalDither(inputParams.PixelPos, frameIndex);
+    clip(baseColor.a - 0.5f + (ditherClip - 0.5f) * 0.1);
 
-    float4 normalTS = SampleTexture2D(currMeshData.normalTexIndex,
-                                      inputParams.objectUV,
-                                      WarpLinearSampler);
+    float4 normalTS = SampleTexture2D_Bias(currMeshData.normalTexIndex,
+                                           inputParams.objectUV,
+                                           WarpLinearSampler,
+                                           g_MipBias);
 
-    float metallic = SampleTexture2D(currMeshData.metallicTexIndex,
-                                     inputParams.objectUV,
-                                     WarpLinearSampler);
+    float metallic = SampleTexture2D_Bias(currMeshData.metallicTexIndex,
+                                          inputParams.objectUV,
+                                          WarpLinearSampler,
+                                          g_MipBias);
     metallic = saturate(metallic * currMeshData.metallicIntensity);
 
-    float roughness = SampleTexture2D(currMeshData.roughnessTexIndex,
-                                      inputParams.objectUV,
-                                      WarpLinearSampler);
+    float roughness = SampleTexture2D_Bias(currMeshData.roughnessTexIndex,
+                                           inputParams.objectUV,
+                                           WarpLinearSampler,
+                                           g_MipBias);
     roughness = saturate(roughness * currMeshData.roughnessIntensity);
 
     o.BaseColor = baseColor.rgb;

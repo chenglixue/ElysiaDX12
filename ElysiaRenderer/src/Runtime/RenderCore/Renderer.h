@@ -78,5 +78,12 @@ namespace ElysiaRenderer
         RenderTexture* m_pCameraColorRT = nullptr;
         RenderTexture* m_pCameraDepthRT = nullptr;
         RenderTexture* m_pDisplayRT = nullptr;
+
+        template <typename T, typename... Args>
+        Renderer& AddPass(Args&&... args)
+        {
+            m_passes.emplace_back(std::make_unique<T>(std::forward<Args>(args)...));
+            return *this; // 返回自身以支持链式调用
+        }
     };
 }

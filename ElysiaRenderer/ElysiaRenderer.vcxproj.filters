@@ -669,6 +669,8 @@
     <None Include="Assets\Shaders\private\BloomCommon.hlsli" />
     <None Include="Assets\Shaders\public\PostProcess\TAA\CS_TAA.hlsl" />
     <None Include="Assets\Shaders\private\TAACommon.hlsli" />
+    <None Include="Assets\Shaders\public\PostProcess\Sharpen\CS_CAS.hlsl" />
+    <None Include="Assets\Shaders\private\CASCommon.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
