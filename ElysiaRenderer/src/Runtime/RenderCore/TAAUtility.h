@@ -20,6 +20,31 @@ namespace ElysiaRenderer
             Halton23X64,
             Count
         };
+        NLOHMANN_JSON_SERIALIZE_ENUM(Type,
+                                     {
+                                     {Type::Default,
+                                     "Default"},
+                                     {Type::Uniform2,
+                                     "Uniform2"},
+                                     {Type::Uniform4,
+                                     "Uniform4"},
+                                     {Type::Uniform4Helix,
+                                     "Uniform4Helix"},
+                                     {Type::Rotated4,
+                                     "Rotated4"},
+                                     {Type::Rotated4Helix,
+                                     "Rotated4Helix"},
+                                     {Type::Halton23X8,
+                                     "Halton23X8"},
+                                     {Type::Halton23X16,
+                                     "Halton23X16"},
+                                     {Type::Halton23X32,
+                                     "Halton23X32"},
+                                     {Type::Halton23X64,
+                                     "Halton23X64"},
+                                     {Type::Count,
+                                     "Count"}
+                                     })
 
         /**
          * @brief 获取当前类型的抖动偏移并递增索引
@@ -114,4 +139,12 @@ namespace ElysiaRenderer
         float maxWeight = 0.5f;
         float sampleRate = 1.0f;
     };
+    NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(TAAParameter,
+                                                    Enable,
+                                                    jitterType,
+                                                    jitterIntensity,
+                                                    staticWeight,
+                                                    dynamicWeight,
+                                                    maxWeight,
+                                                    sampleRate)
 }

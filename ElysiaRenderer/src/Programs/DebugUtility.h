@@ -7,10 +7,30 @@ namespace ElysiaRenderer
     {
         None,
         AO,
-        GI,
+        GIProbe,
         Normal,
         AABB,
         Bloom,
-        Velocity
+        Velocity,
+        GI
     };
+    NLOHMANN_JSON_SERIALIZE_ENUM(DebugMode,
+                                 {
+                                 {DebugMode::None,
+                                 "None"},
+                                 {DebugMode::AO,
+                                 "AO"},
+                                 {DebugMode::GIProbe,
+                                 "GIProbe"},
+                                 {DebugMode::Normal,
+                                 "Normal"},
+                                 {DebugMode::AABB,
+                                 "AABB"},
+                                 {DebugMode::Bloom,
+                                 "Bloom"},
+                                 {DebugMode::Velocity,
+                                 "Velocity"},
+                                 {DebugMode::GI,
+                                 "GI"}
+                                 })
 }

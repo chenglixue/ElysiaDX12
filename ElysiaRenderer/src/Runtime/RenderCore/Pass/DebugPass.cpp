@@ -71,7 +71,6 @@ namespace ElysiaRenderer
         UpdatePipeline();
         PIXHelper pix(m_pCommand->GetCommandList(), "Debug Pass");
         m_pCamera = context.pCamera;
-        m_pDisplayRT = context.pResolveRT;
 
         DoDebugPass();
     }
@@ -122,7 +121,7 @@ namespace ElysiaRenderer
             DoAABBPass();
             break;
         }
-        case DebugMode::GI:
+        case DebugMode::GIProbe:
         {
             DoGIPass();
             // DoAABBPass();
@@ -131,6 +130,7 @@ namespace ElysiaRenderer
         case DebugMode::Bloom:
         case DebugMode::AO:
         case DebugMode::Velocity:
+        case DebugMode::GI:
         case DebugMode::Normal:
         {
             m_pCommand->AddBarrier(m_pDisplayRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
@@ -281,6 +281,9 @@ namespace ElysiaRenderer
             m_pMaterial->SetUInt(ShaderIDs::g_IsEnableGILine,
                                  false,
                                  passID);
+            m_pMaterial->SetUInt(ShaderIDs::g_bHideInactiveProbe,
+                                 UserData::GetInstance().GIParameter.bHideInactiveProbe,
+                                 passID);
 
             m_pMaterial->SetFloat3(GIPass::ShaderIDs::g_GridDimensions,
                                    Vector3(GIPass::Grid_Dimensions.x,
@@ -288,7 +291,7 @@ namespace ElysiaRenderer
                                            GIPass::Grid_Dimensions.z),
                                    passID);
             m_pMaterial->SetFloat3(GIPass::ShaderIDs::g_GridOrigin,
-                                   GIPass::m_gridOrigin,
+                                   UserData::GetInstance().GIParameter.probeGroupOrigin,
                                    passID);
             m_pMaterial->SetFloat3(GIPass::ShaderIDs::g_GridSpacing,
                                    GIPass::m_gridSpacing,

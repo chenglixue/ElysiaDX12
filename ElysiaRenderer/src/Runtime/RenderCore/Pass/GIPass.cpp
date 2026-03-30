@@ -363,8 +363,10 @@ namespace ElysiaRenderer
             float spacingY = effectiveSize.y / (Grid_Dimensions.y - 1);
             float spacingZ = effectiveSize.z / (Grid_Dimensions.z - 1);
 
-            m_gridSpacing = Vector3(spacingX, spacingY, spacingZ);
-            m_gridOrigin = effectiveMin;
+            // m_gridSpacing = Vector3(spacingX, spacingY, spacingZ);
+            m_gridSpacing = Vector3(1.02, 0.5, 0.45);
+            // m_gridOrigin = effectiveMin;
+            m_gridOrigin = UserData::GetInstance().GIParameter.probeGroupOrigin;
         }
         else
         {

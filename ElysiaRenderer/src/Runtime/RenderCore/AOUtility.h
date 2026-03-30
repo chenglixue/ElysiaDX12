@@ -9,6 +9,15 @@ namespace ElysiaRenderer
         Middle,
         High
     };
+    NLOHMANN_JSON_SERIALIZE_ENUM(AOBlurQuality,
+                                 {
+                                 {AOBlurQuality::Low,
+                                 "Low"},
+                                 {AOBlurQuality::Middle,
+                                 "Middle"},
+                                 {AOBlurQuality::High,
+                                 "High"},
+                                 })
 
     enum class AODebugTarget : int
     {
@@ -16,18 +25,33 @@ namespace ElysiaRenderer
         HIZMipmap,
         AO
     };
+    NLOHMANN_JSON_SERIALIZE_ENUM(AODebugTarget,
+                                 {
+                                 {AODebugTarget::Importance,
+                                 "Importance"},
+                                 {AODebugTarget::HIZMipmap,
+                                 "HIZMipmap"},
+                                 {AODebugTarget::AO,
+                                 "AO"},
+                                 })
 
     enum class AOType : int
     {
         Soft,
         Hard
     };
+    NLOHMANN_JSON_SERIALIZE_ENUM(AOType,
+                                 {
+                                 {AOType::Soft,
+                                 "Soft"},
+                                 {AOType::Hard,
+                                 "Hard"},
+
+                                 })
 
     struct AOParameter
     {
         bool IsEnableAO = true;
-        int SampleCount = 16;
-        int SampleStepCount = 4;
         float Radius = 1.f;
         float FadeRadius = 1.f;
         float FadeDistance = 1.f;
@@ -36,7 +60,6 @@ namespace ElysiaRenderer
         float IntensityPow = 1.f;
 
         bool IsLerpAO = false;
-        float AOLerpFactor = 0.1f;
         float TAALerpFactor = 0.5f;
 
         bool IsBlur = true;
@@ -54,4 +77,27 @@ namespace ElysiaRenderer
         float importanceIntensity = 2.f;
         float HIZRadius = 1.f;
     };
+
+    NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(AOParameter,
+                                                    IsEnableAO,
+                                                    Radius,
+                                                    FadeRadius,
+                                                    FadeDistance,
+                                                    Bias,
+                                                    IntensityMul,
+                                                    IntensityPow,
+                                                    IsLerpAO,
+                                                    TAALerpFactor,
+                                                    IsBlur,
+                                                    BlurCount,
+                                                    BlurQuality,
+                                                    BlurIntensity,
+                                                    Sharpness,
+                                                    debugTarget,
+                                                    HIZMipFactor,
+                                                    HIZMipmap,
+                                                    IsTAA,
+                                                    importanceIntensity,
+                                                    HIZRadius
+        )
 }

@@ -43,6 +43,7 @@ namespace ElysiaRenderer
             static inline size_t g_TargetSize = PropertyToID(L"g_TargetSize");
             static inline size_t g_IsEnableGILine = PropertyToID(L"g_IsEnableGILine");
             static inline size_t g_DebugLineScale = PropertyToID(L"g_DebugLineScale");
+            static inline size_t g_bHideInactiveProbe = PropertyToID(L"g_bHideInactiveProbe");
 
 
             static inline size_t screenSize = PropertyToID(L"screenSize");

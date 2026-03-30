@@ -89,6 +89,11 @@ void TAA(uint3 id : SV_DispatchThreadID)
         return;
     }
     float3 historyColor = CatmullRomSample(g_HistoryTexIndex, preUV, g_TAATexSize.zw);
+    if (any(isnan(historyColor)) || any(isinf(historyColor)))
+    {
+        historyColor = currColor;
+    }
+    historyColor = max(0.0f, historyColor);
     historyColor = ReinhardTonemap(historyColor);
     historyColor = TransformRGB2YCoCg(historyColor);
 
@@ -113,6 +118,7 @@ void TAA(uint3 id : SV_DispatchThreadID)
     float3 blendColor = lerp(currColor, historyColor, blendWeight);
     blendColor = TransformYCoCg2RGB(blendColor);
     blendColor = InverseReinhardTonemap(blendColor);
+    blendColor = max(0.0f, blendColor);
     Elysia_Save_TAA(g_DestTexIndex, writePos, blendColor);
 }
 

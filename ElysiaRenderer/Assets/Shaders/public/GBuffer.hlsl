@@ -160,7 +160,7 @@ PSOutput PS(PSInput i)
     o.target2 = float4(EncodeNormal(encodeGBufferData.WorldTangent), encodeGBufferData.Anisotropy);
     o.target3 = float4(EncodeNormal(encodeGBufferData.WorldNormal),
                        encodeGBufferData.PerObjectData);
-    o.target4 = float4(encodeGBufferData.IBL * encodeGBufferData.AO, encodeGBufferData.Opacity);
+    o.target4 = float4(encodeGBufferData.IBL, encodeGBufferData.Opacity);
     o.target5 = float4(encodeGBufferData.Velocity, 0.f, 0.f);
 
     return o;

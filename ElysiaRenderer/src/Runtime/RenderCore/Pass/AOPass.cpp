@@ -561,12 +561,6 @@ namespace ElysiaRenderer
         m_pMaterial->SetFloat2(ShaderIDs::g_NDCToViewAdd,
                                Vector2(-cameraTanHalfFOV.x, cameraTanHalfFOV.y));
 
-        m_pMaterial->SetUInt(ShaderIDs::g_AOSampleCount,
-                             UserData::GetInstance().aoParameter.SampleCount,
-                             passID);
-        m_pMaterial->SetUInt(ShaderIDs::g_AOSampleStepCount,
-                             UserData::GetInstance().aoParameter.SampleStepCount,
-                             passID);
         m_pMaterial->SetFloat(ShaderIDs::g_AORadius,
                               UserData::GetInstance().aoParameter.Radius,
                               passID);
@@ -880,8 +874,6 @@ namespace ElysiaRenderer
     std::vector<Vector4> AOPass::GenerateSSAOSampleKernel()
     {
         int maxSampleCount = 16;
-        maxSampleCount = MathHelper::Min(UserData::GetInstance().aoParameter.SampleCount,
-                                         maxSampleCount);
         std::vector<Vector4> o{size_t(maxSampleCount)};
 
         SobolSequenceGenerator sobol(2);
@@ -916,10 +908,9 @@ namespace ElysiaRenderer
     std::vector<Vector4> AOPass::GenerateHBAOSampleKernel()
     {
         int maxSampleCount = 16;
-        int sampleCount = std::min(UserData::GetInstance().aoParameter.SampleCount, maxSampleCount);
 
         std::vector<Vector4> kernel;
-        kernel.reserve(sampleCount);
+        kernel.reserve(maxSampleCount);
 
         // --- 随机数引擎 (用于旋转和步长抖动) ---
         std::random_device rd;
@@ -932,11 +923,11 @@ namespace ElysiaRenderer
         // 这种方法能保证点与点之间距离大致相等
         float goldenRatio = (1.0f + std::sqrt(5.0f)) * 0.5f; // 黄金比例
 
-        for (int i = 0; i < sampleCount; ++i)
+        for (int i = 0; i < maxSampleCount; ++i)
         {
             // --- 1. 生成均匀的球面坐标 ---
             // 使用黄金比例分割法，避免点聚集
-            float t = float(i) / float(sampleCount);
+            float t = float(i) / float(maxSampleCount);
 
             // 在半球上采样，所以 y (Vy) 从 0 到 1 (对应角度 90度到 0度)
             // 使用 sqrt 来修正分布，使其在平面上看起来更均匀

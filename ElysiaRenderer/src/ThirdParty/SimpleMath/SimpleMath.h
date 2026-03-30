@@ -337,7 +337,6 @@ namespace DirectX
             static const Vector3 Forward;
             static const Vector3 Backward;
         };
-
         // Binary operators
         Vector3 operator+ (const Vector3& V1, const Vector3& V2) noexcept;
         Vector3 operator- (const Vector3& V1, const Vector3& V2) noexcept;

@@ -78,6 +78,7 @@ namespace ElysiaRenderer
         AddPass<BloomPass>();
         AddPass<TonemapPass>();
         AddPass<SharpenPass>();
+        AddPass<DebugPass>();
         AddPass<UIPass>();
         AddPass<FinalBlitPass>();
     }

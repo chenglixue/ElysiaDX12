@@ -19,6 +19,7 @@
 #include "ECS/Entity.h"
 #include "Runtime/RenderCore/DX12Camera.h"
 #include "Runtime/RenderCore/RenderTexture.h"
+#include "Runtime/RenderCore/Pass/GIPass.h"
 #include "ThirdParty/imgui/imgui_internal.h"
 
 namespace ElysiaEngine
@@ -493,17 +494,39 @@ namespace ElysiaEngine
                                  0,
                                  10);
             }
-            if (pUserData.debugMode == DebugMode::AABB || pUserData.debugMode == DebugMode::GI)
+            if (pUserData.debugMode == DebugMode::AABB || pUserData.debugMode == DebugMode::GIProbe)
             {
                 ImGui::SliderInt("Instance GI",
                                  &pUserData.instanceID,
                                  0,
                                  400);
             }
-            if (pUserData.debugMode == DebugMode::GI)
+            if (pUserData.debugMode == DebugMode::GIProbe)
             {
                 ImGui::Checkbox("Enable Line", &pUserData.GIParameter.enableLine);
                 ImGui::SliderFloat("Line Thicness", &pUserData.GIParameter.lineWidth, 0.f, 5.f);
+                ImGui::Checkbox("Hide Inactive Probe", &pUserData.GIParameter.bHideInactiveProbe);
+            }
+            if (pUserData.debugMode == DebugMode::GI)
+            {
+                ImGui::Checkbox("Texture Visualization", &pUserData.GIParameter.bTextureVisualization);
+                if (pUserData.GIParameter.bTextureVisualization)
+                {
+                    auto pIrradianceRT = GIPass::m_pIrradianceRT;
+                    D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle = pIrradianceRT->GetTexture()->GetSRVDescriptor().
+                                                                           GetGPUHandle();
+
+                    // ImTextureID 本质上就是一个 void*，在 DX12 的 ImGui 实现中它就是 GPU 句柄的 ptr
+                    ImTextureID texID = (ImTextureID)gpuHandle.ptr;
+
+                    // 获取贴图的实际宽高，或者自定义一个显示尺寸
+                    float width = pIrradianceRT->GetWidth();
+                    // Atlas 的高宽比通常很极端 (比如 宽很长，高很短)，这里等比缩放
+                    float height = pIrradianceRT->GetHeight();
+
+                    // 绘制图片
+                    ImGui::Image(texID, ImVec2(width, height));
+                }
             }
 
         }
@@ -560,7 +583,7 @@ namespace ElysiaEngine
             ImGui::SliderFloat("Ambient Cubemap Intensity",
                                &pUserData.AmbientCubemapIntensity,
                                0.f,
-                               5.f);
+                               20.f);
             ImGui::ColorEdit3("Ambient Cubemap Tint", (float*)&pUserData.AmbientCubemapTint);
             ImGui::SliderFloat("GI Normal Bias", (float*)&pUserData.GIParameter.normalBias, 0, 0.5);
             ImGui::SliderFloat("GI View Bias", (float*)&pUserData.GIParameter.viewBias, 0, 2);
@@ -580,6 +603,9 @@ namespace ElysiaEngine
                                (float*)&pUserData.GIParameter.probeBrightnessThreshold,
                                1.f,
                                5.f);
+            ImGui::DragFloat3("GI Probe Group Origin",
+                              (float*)&pUserData.GIParameter.probeGroupOrigin,
+                              0.1f);
         }
 
         if (ImGui::CollapsingHeader("Postprocess"))
@@ -661,8 +687,8 @@ namespace ElysiaEngine
                 ImGui::SliderFloat("LPM Exposure", &pUserData.LpmExposure, 3.0f, 11.0f);
                 ImGui::SliderFloat("Contrast", &pUserData.Contrast, 0.0f, 1.0f);
                 ImGui::SliderFloat("Shoulder Contrast", &pUserData.ShoulderContrast, 1.0f, 1.2f);
-                ImGui::SliderFloat3("Saturation", &pUserData.Saturation[0], 0.0f, 2.0f);
-                ImGui::SliderFloat3("Crosstalk", &pUserData.Crosstalk[0], 0.0f, 1.0f);
+                ImGui::SliderFloat3("Saturation", (float*)&pUserData.Saturation, 0.0f, 2.0f);
+                ImGui::SliderFloat3("Crosstalk", (float*)&pUserData.Crosstalk, 0.0f, 1.0f);
             }
 
             if (ImGui::CollapsingHeader("AO"))
@@ -670,9 +696,6 @@ namespace ElysiaEngine
                 ImGui::Checkbox("Is Enable AO", &pUserData.aoParameter.IsEnableAO);
                 ImGui::Checkbox("Is IsLerp AO", &pUserData.aoParameter.IsLerpAO);
                 ImGui::Checkbox("Is Blur", &pUserData.aoParameter.IsBlur);
-
-                ImGui::SliderInt("AO Sample Count", &pUserData.aoParameter.SampleCount, 2, 6);
-                ImGui::SliderInt("AO Sample Step Count", &pUserData.aoParameter.SampleStepCount, 2, 6);
 
                 ImGui::SliderFloat("AO Radius", &pUserData.aoParameter.Radius, 0.1, 2);
                 ImGui::SliderFloat("AO Fade Radius", &pUserData.aoParameter.FadeRadius, 1, 20000);
@@ -685,7 +708,6 @@ namespace ElysiaEngine
                 ImGui::SliderFloat("AO Bias", &pUserData.aoParameter.Bias, 0.f, 0.01f);
                 ImGui::SliderFloat("AO HIZ Mip Factor", &pUserData.aoParameter.HIZMipFactor, 0.f, 1.f);
 
-                ImGui::SliderFloat("AO Lerp", &pUserData.aoParameter.AOLerpFactor, 0.1f, 1.f);
                 ImGui::SliderFloat("AO TAA Lerp Weight",
                                    &pUserData.aoParameter.TAALerpFactor,
                                    0.05f,

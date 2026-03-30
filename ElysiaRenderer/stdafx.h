@@ -8,7 +8,7 @@
 
 #ifdef _DEBUG
 #ifndef _ITERATOR_DEBUG_LEVEL
-	#define _ITERATOR_DEBUG_LEVEL 2
+#define _ITERATOR_DEBUG_LEVEL 2
 #endif
 #endif
 
@@ -71,6 +71,8 @@
 
 using namespace DirectX;
 using namespace DirectX::SimpleMath;
+#include "lib/json/json.hpp"
+using json = nlohmann::json;
 
 #pragma comment(lib, "Windowscodecs.lib")
 #pragma comment(lib, "RuntimeObject.lib")

@@ -54,7 +54,8 @@ float3 ReinhardTonemap(float3 color)
 }
 float3 InverseReinhardTonemap(float3 color)
 {
-    return color * rcp(1.f - Luminance(clamp(color, 0.f, 0.9999f)) + FLT_EPS);
+    color = clamp(color, 0.f, 0.9999f);
+    return color * rcp(1.f - Luminance(color) + FLT_EPS);
 }
 
 void SampleDepth3x3(UINT depthTexIndex,
@@ -362,6 +363,13 @@ void DownSample3x3(UINT currFrameTexIndex,
         }
 
         float3 color = SampleTexture2D(currFrameTexIndex, sampleUV, ClampPointSampler);
+        if (any(isnan(color)) || any(isinf(color)))
+        {
+            color = float3(0.0f, 0.0f, 0.0f);
+        }
+        color = clamp(color, 0.0f, 65504.0f);
+        float luma = max(color.r, max(color.g, color.b));
+        float karisWeight = 1.0f / (1.0f + luma);
         color = TransformRGB2YCoCg(ReinhardTonemap(color));
 
         minColor = min(minColor, color);
@@ -370,6 +378,7 @@ void DownSample3x3(UINT currFrameTexIndex,
         float2 posSampleToJitter = offsetUV[i] * downTexSize.xy - posCenterToJitter;
 
         float spatialWeigh = ComputeTAAUWeight(posSampleToJitter, upScaleFactor);
+        spatialWeigh *= karisWeight;
         currColor += color * spatialWeigh;
         totalWeight += spatialWeigh;
 
@@ -384,5 +393,11 @@ void DownSample3x3(UINT currFrameTexIndex,
     currColor *= rcp(totalWeight);
     m1 *= rcp(validVarianceSamples);
     m2 *= rcp(validVarianceSamples);
+}
+
+float KarisWeight(float3 color)
+{
+    float luma = max(color.r, max(color.g, color.b));
+    return 1.0f / (1.0f + luma);
 }
 #endif

@@ -34,6 +34,7 @@ cbuffer PassConstant : register(b0, perPassSpace)
     UINT g_ProbeOffsetIndexTexIndex;
     UINT g_ProbeRelocationLUTBufferIndex;
     bool g_IsEnableGILine;
+    bool g_bHideInactiveProbe;
     float g_DebugLineScale;
     UINT g_TargetTexIndex;
     UINT g_MipmapLevel;
@@ -58,11 +59,12 @@ GIData Elysia_DDGI_LoadRayData(uint readIndex)
 
 #define DEBUG_NONE 0
 #define DEBUG_AO 1
-#define DEBUG_GI 2
+#define DEBUG_GIPROBE 2
 #define DEBUG_NORMAL 3
 #define DEBUG_AABB 4
 #define DEBUG_BLOOM 5
 #define DEBUG_VELOCITY 6
+#define DEBUG_GI 7
 
 struct VSInput
 {
@@ -91,7 +93,7 @@ PSInput VS(VSInput i, UINT vertexID : SV_VertexID, uint instanceID : SV_Instance
 
     switch (g_DebugMode)
     {
-    case DEBUG_GI:
+    case DEBUG_GIPROBE:
     {
         if (g_IsEnableGILine)
         {
@@ -167,6 +169,17 @@ PSInput VS(VSInput i, UINT vertexID : SV_VertexID, uint instanceID : SV_Instance
 
             float3 normalOS = i.positionOS;
             o.normalWS = normalize(normalOS);
+
+            if (g_bHideInactiveProbe)
+            {
+                StructuredBuffer<UINT> ProbeStatesBuffer = ResourceDescriptorHeap[g_ProbeStatesIndex];
+                if (ProbeStatesBuffer[probeIdx] == PROBE_STATE_INACTIVE)
+                {
+                    o.positionCS = float4(0.0f, 0.0f, 0.0f, 0.0f);
+                    return o;
+                }
+            }
+
         }
 
         break;
@@ -187,6 +200,7 @@ PSInput VS(VSInput i, UINT vertexID : SV_VertexID, uint instanceID : SV_Instance
     case DEBUG_BLOOM:
     case DEBUG_AO:
     case DEBUG_VELOCITY:
+    case DEBUG_GI:
     case DEBUG_NORMAL:
         o.uv = float2((vertexID << 1) & 2, vertexID & 2);
         o.positionCS = float4(o.uv.x * 2.0f - 1.0f, 1.0f - o.uv.y * 2.0f, 0.0f, 1.0f);
@@ -231,7 +245,7 @@ PSOutput PS(PSInput i)
         o.target0 = float4(velocity, 0.f, 1.f);
         break;
     }
-    case DEBUG_GI:
+    case DEBUG_GIPROBE:
     {
         float4 result = 0.f;
         if (g_IsEnableGILine)
@@ -247,7 +261,7 @@ PSOutput PS(PSInput i)
             for (uint r = 0; r < RAYS_PER_PROBE; r ++)
             {
                 // 1. 恢复该射线的发射方向
-                float3 rayDir = DDGIGetProbeRayDir(r, RAYS_PER_PROBE, g_RandomRotation);
+                float3 rayDir = DDGIGetProbeRayDir(r, RAYS_PER_PROBE, 0);
 
                 // 2. 计算权重：使用高次幂（如 16 或 32）来获取清晰的细节
                 float weight = max(0.0f, dot(N, rayDir));
@@ -269,11 +283,21 @@ PSOutput PS(PSInput i)
                                ? (finalRadiance / totalWeight)
                                : float3(0.1f, 0.1f, 0.1f);
             StructuredBuffer<UINT> states = ResourceDescriptorHeap[g_ProbeStatesIndex];
+            if (states[i.instanceID] == PROBE_STATE_INACTIVE)
+            {
+                clip(-1);
+            }
             result.rgb = states[i.instanceID];
             result.rgb = color;
         }
 
         o.target0 = result;
+        break;
+    }
+    case DEBUG_GI:
+    {
+        float3 GI = SampleTexture2D(GBuffer4Index, i.uv, ClampPointSampler).rgb;
+        o.target0 = float4(GI, 1.f);
         break;
     }
     }

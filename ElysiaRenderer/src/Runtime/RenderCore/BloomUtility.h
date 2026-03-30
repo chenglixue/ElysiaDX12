@@ -10,4 +10,9 @@ namespace ElysiaRenderer
         float intensity = 1.f;
         int mipmap = 0;
     };
+    NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(BloomParameter,
+                                                    enable,
+                                                    radius,
+                                                    intensity,
+                                                    mipmap)
 }

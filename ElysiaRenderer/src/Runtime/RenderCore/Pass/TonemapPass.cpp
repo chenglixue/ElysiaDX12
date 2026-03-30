@@ -131,12 +131,12 @@ namespace ElysiaRenderer
         m_exposure = UserData::GetInstance().LpmExposure;
         m_contrast = UserData::GetInstance().Contrast;
         m_shoulderContrast = UserData::GetInstance().ShoulderContrast;
-        m_saturation[0] = UserData::GetInstance().Saturation[0];
-        m_saturation[1] = UserData::GetInstance().Saturation[1];
-        m_saturation[2] = UserData::GetInstance().Saturation[2];
-        m_crosstalk[0] = UserData::GetInstance().Crosstalk[0];
-        m_crosstalk[1] = UserData::GetInstance().Crosstalk[1];
-        m_crosstalk[2] = UserData::GetInstance().Crosstalk[2];
+        m_saturation[0] = UserData::GetInstance().Saturation.x;
+        m_saturation[1] = UserData::GetInstance().Saturation.y;
+        m_saturation[2] = UserData::GetInstance().Saturation.z;
+        m_crosstalk[0] = UserData::GetInstance().Crosstalk.x;
+        m_crosstalk[1] = UserData::GetInstance().Crosstalk.y;
+        m_crosstalk[2] = UserData::GetInstance().Crosstalk.z;
 
         switch (UserData::GetInstance().colorSpace)
         {
