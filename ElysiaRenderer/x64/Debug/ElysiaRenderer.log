@@ -1,17 +1,101 @@
 ﻿  Skipping vcpkg. (no packages)
 cl : command line  warning D9014: invalid value '18' for '/wd'; assuming '5999'
-  BindlessTextureManager.cpp
+  GIPass.cpp
 D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/BindlessTextureManager.cpp')
+  (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
   
 D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/BindlessTextureManager.cpp')
+  (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
   
 D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/BindlessTextureManager.cpp')
+  (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
   
 D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/BindlessTextureManager.cpp')
+  (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(213,17): warning C4244: 'argument': conversion from 'double' to 'UINT64', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(254,31): warning C4244: '=': conversion from 'UINT64' to 'UINT', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(367,48): warning C4305: 'argument': truncation from 'double' to 'float'
+  (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(367,37): warning C4305: 'argument': truncation from 'double' to 'float'
+  (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(602,76): warning C4244: 'argument': conversion from 'UINT64' to 'uint32_t', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(603,77): warning C4244: 'argument': conversion from 'UINT64' to 'uint32_t', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(692,59): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(691,59): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(690,59): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(695,80): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(760,60): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(759,60): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(758,60): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(908,59): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(907,59): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(906,59): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(990,59): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(989,59): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(988,59): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(1138,76): warning C4244: 'argument': conversion from 'UINT64' to 'uint32_t', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(1139,77): warning C4244: 'argument': conversion from 'UINT64' to 'uint32_t', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(1201,59): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(1200,59): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(1199,59): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(1265,59): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(1264,59): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(1263,59): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GIPass.cpp(1311,82): warning C4267: '+=': conversion from 'size_t' to 'uint32_t', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/GIPass.cpp')
   
   ElysiaRenderer.vcxproj -> D:\DX12\ElysiaDX12\x64\Debug\ElysiaRenderer.exe
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\ABeautifulGame\ABeautifulGame.bin
@@ -51,10 +135,6 @@ D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: '
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\ABeautifulGame\Queen_white_ORM.jpg
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\CornellBox\cornell_box.bin
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\CornellBox\cornell_box.gltf
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\DragonAttenuation\checkerboard.jpg
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\DragonAttenuation\DragonAttenuation.bin
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\DragonAttenuation\DragonAttenuation.gltf
-  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\DragonAttenuation\Dragon_ThicknessMap.jpg
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\10381718147657362067.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\10381718147657362067.jpg
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\10388182081421875623.dds
@@ -349,4 +429,4 @@ D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: '
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Tex\RandomNormalTexture.png
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Tex\texconv.exe
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Tex\White.png
-  复制了 335 个文件
+  复制了 331 个文件

@@ -87,7 +87,7 @@ float3 SampleDDGI(float3 positionWS,
         float biasPositionWSToAdjProbeDist = length(adjProbeWorldPos - biasPositionWS);
 
         // 三线性插值权重
-        float3 trilinear = lerp(1.0 - alpha, alpha, (float3)offset);
+        float3 trilinear = max(0.001f, lerp(1.0 - alpha, alpha, (float3)offset));
         float trilinearWeight = trilinear.x * trilinear.y * trilinear.z;
         float weight = 1.f;
 
@@ -107,7 +107,7 @@ float3 SampleDDGI(float3 positionWS,
         float2 finalUV = (float2(atlasPos * DDGI_PROBE_DEPTH_NUM_TEXELS) + uv) * distanceTexSize.zw;
 
         // 采样平均距离 (R) 和距离平方 (G)
-        float2 moments = SampleTexture2D_LOD(distanceTexIndex, finalUV, samplerIndex, 0).rg;
+        float2 moments = SampleTexture2D(distanceTexIndex, finalUV, samplerIndex).rg;
         float mean = moments.x;
         float mean2 = moments.y;
         float chebyshevWeight = 1.0f;
@@ -117,7 +117,7 @@ float3 SampleDDGI(float3 positionWS,
             float variance = abs(Pow2(mean) - mean2);
 
             // Chebyshev Visibility
-            chebyshevWeight = variance / (variance + Pow2(biasPositionWSToAdjProbeDist - mean) + 1e-6f);
+            chebyshevWeight = variance / (variance + Pow2(biasPositionWSToAdjProbeDist - mean));
 
             // 增强对比度，使遮挡边缘更锐利，减少颜色渗漏
             chebyshevWeight = max(chebyshevWeight * chebyshevWeight * chebyshevWeight, 0.0f);
@@ -153,7 +153,7 @@ float3 SampleDDGI(float3 positionWS,
 
     float3 finalIrradiance = sumIrradiance / sumWeight;
     finalIrradiance *= finalIrradiance;
-    // finalIrradiance *= TWO_PI;
+    finalIrradiance *= TWO_PI;
     return finalIrradiance;
 }
 
@@ -233,7 +233,7 @@ float3 SampleDDGI(float3 positionWS,
         float2 finalUV = (float2(atlasPos * DDGI_PROBE_DEPTH_NUM_TEXELS) + uv) * distanceTexSize.zw;
 
         // 采样平均距离 (R) 和距离平方 (G)
-        float2 moments = SampleTexture2D_LOD(distanceTexIndex, finalUV, linearClampSampler, 0).rg;
+        float2 moments = SampleTexture2D(distanceTexIndex, finalUV, linearClampSampler).rg;
         float mean = moments.x;
         float mean2 = moments.y;
         float chebyshevWeight = 1.0f;
@@ -264,7 +264,7 @@ float3 SampleDDGI(float3 positionWS,
         float2 octantCoordsIrr = OctEncode(normalWS);
         uv = (octantCoordsIrr * 0.5f + 0.5f) * (DDGI_PROBE_IRRADIANCE_NUM_TEXELS - 2.f) + 1.0f;
         finalUV = (float2(atlasPos * DDGI_PROBE_IRRADIANCE_NUM_TEXELS) + uv) * irradianceTexSize.zw;
-        float3 probeColor = SampleTexture2D_LOD(irradianceTexIndex, finalUV, linearClampSampler, 0).rgb;
+        float3 probeColor = SampleTexture2D(irradianceTexIndex, finalUV, linearClampSampler).rgb;
         probeColor = pow(probeColor, gamma * 0.5f);
 
         sumIrradiance += probeColor * weight;
@@ -276,7 +276,7 @@ float3 SampleDDGI(float3 positionWS,
 
     float3 finalIrradiance = sumIrradiance / sumWeight;
     finalIrradiance *= finalIrradiance; // 还原回线性空间
-    //finalIrradiance *= TWO_PI;
+    finalIrradiance *= TWO_PI;
     return finalIrradiance;
 }
 

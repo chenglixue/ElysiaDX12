@@ -254,8 +254,8 @@ FEncodeGBufferData GetEncodeGBufferData(FInputParams inputParams, float3 toLight
                            g_ProbeRelocationLUTBufferIndex,
                            g_ProbeStatesIndex,
                            WarpLinearSampler
-                    ) * g_AmbientTint * g_AmbientIntensity;
-        o.IBL = baseColor.rgb / PI * o.IBL;
+                    ) * g_AmbientTint * g_AmbientIntensity * blendWeight;
+        // o.IBL = (baseColor.rgb) / PI * o.IBL;
     }
 
     return o;

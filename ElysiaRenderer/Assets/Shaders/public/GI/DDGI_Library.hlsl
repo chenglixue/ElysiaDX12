@@ -22,12 +22,14 @@ cbuffer PassConstant : register(b0, perPassSpace)
     UINT g_DistanceTexIndex;
     UINT g_ProbeOffsetIndexTexIndex;
 
-    UINT g_PreReservoirBufferIndex;
-    UINT g_CurrReservoirBufferIndex;
+    UINT g_RelocationLUTIndex;
+    UINT g_ProbeStatesIndex;
     float g_ProbeNormalBias;
     float g_ProbeViewBias;
 
     float g_DDGIEncodingGamma;
+    UINT g_SkyboxTexIndex;
+    UINT g_GIDataBufferIndex;
 }
 
 RaytracingAccelerationStructure g_SceneTLAS : register(t0);
@@ -35,7 +37,6 @@ StructuredBuffer<InstanceData> g_InstanceDataBuffer : register(t1);
 // StructuredBuffer<Vector3> g_ProbeOffsetBuffer : register(t2);
 StructuredBuffer<UINT> g_ProbeStatesBuffer : register(t2);
 StructuredBuffer<Vector4> g_ProbeRelocationLUTBuffer : register(t3);
-StructuredBuffer<GIData> g_GIDataBuffer : register(t4);
 
 SamplerState g_WarpPointSampler : register(s0);
 SamplerState g_ClampPointSampler : register(s1);
@@ -88,200 +89,97 @@ void GenerateRayMain()
     Vector3 rayOrigin = GetProbeWorldPosition(probeIndex,
                                               g_GridOrigin,
                                               g_GridSpacing,
-                                              g_GridDimensions) + probeOffset;
-    float distToCamera = distance(rayOrigin, cameraPosWS);
-
-    uint updateInterval = 16;
-    if (distToCamera < NEAR_GI_DISTANCE)
-    {
-        updateInterval = 4;
-    }
-    else if (distToCamera < MIDDLE_GI_DISTANCE)
-    {
-        updateInterval = 8;
-    }
-    [branch]
-    if (probeIndex % updateInterval != frameIndex % updateInterval)
-        return;
-
-    Texture2D<float4> blueNoiseTex = ResourceDescriptorHeap[BlueNoiseTexIndex];
-    float w, h;
-    blueNoiseTex.GetDimensions(w, h);
-    uint hash = probeIndex ^ (frameIndex * 19349663);
-    float2 offset = float2(hash & 0xFFFF, (hash >> 16) & 0xFFFF);
-    float2 blueNoiseUV = (offset + float2(rayIndex, rayIndex * 7.1f)) / float2(w, h);
-    float3 blueNoise = blueNoiseTex.SampleLevel(g_WarpPointSampler, blueNoiseUV, 0);
-
-    float3 finalRayDir = 0.f;
-    float pdf = 0.f;
-    float finalWeight = 0.f;
-    {
-        const uint N = 4;
-        float3 candidateDirs[N];
-        float weights[N];
-        float sumWeight = 0.0f;
-
-        for (UINT i = 0; i < N; ++i)
-        {
-            candidateDirs[i] = DDGIGetProbeRayDir(rayIndex + i * N, RAYS_PER_PROBE, g_RandomRotation);
-
-            // weights[i] = Luminance(SampleIrradianceTex(rayOrigin, candidateDirs[i])) + 0.1f;
-            weights[i] = Luminance(g_GIDataBuffer[probeIndex * RAYS_PER_PROBE + rayIndex + i * N].Irradiance) + 0.1f;
-            sumWeight += weights[i];
-        }
-
-        float randomWeight = blueNoise.r * sumWeight;
-        float cumulativeWeight = 0.f;
-        finalRayDir = candidateDirs[0];
-        finalWeight = weights[0];
-
-        for (UINT i = 0; i < N; ++i)
-        {
-            cumulativeWeight += weights[i];
-            if (randomWeight <= cumulativeWeight)
-            {
-                finalRayDir = candidateDirs[i];
-                finalWeight = weights[i];
-                break;
-            }
-        }
-
-        pdf = (finalWeight / (sumWeight + 1e-4)) * N * INV_FOUR_PI;
-    }
-
-    RWStructuredBuffer<Reservoir> preReservoirBuffer = ResourceDescriptorHeap[g_PreReservoirBufferIndex];
-    RWStructuredBuffer<Reservoir> currReservoirBuffer = ResourceDescriptorHeap[g_CurrReservoirBufferIndex];
-    Reservoir currReservoir = (Reservoir)0;
-    currReservoir.weightSum = finalWeight / (pdf + 1e-4);
-    currReservoir.numSamples = 1.f;
-    Reservoir preReservoir = preReservoirBuffer[writeIndex];
-
-    float sampleLimit = 30.f;
-    preReservoir.numSamples = min(preReservoir.numSamples, sampleLimit);
-
-    float preWeight = Luminance(g_GIDataBuffer[probeIndex * RAYS_PER_PROBE + rayIndex].Irradiance) + 0.1f;
-    float preAccuWeight = preWeight * preReservoir.estimatorWeight * preReservoir.numSamples;
-
-    currReservoir.weightSum += preAccuWeight;
-    currReservoir.numSamples += preReservoir.numSamples;
-
-    float random = blueNoise.g;
-    if (random < preAccuWeight / currReservoir.weightSum)
-    {
-        finalRayDir = preReservoir.direction;
-        finalWeight = preWeight;
-    }
-
-    int3 gridCoord = int3(floor((rayOrigin - g_GridOrigin) / g_GridSpacing));
-    int3 neighborOffset = int3(blueNoise.b * 3.0f - 1.0f,
-                               frac(blueNoise.b * 13.1f) * 3.0f - 1.0f,
-                               frac(blueNoise.b * 47.7f) * 3.0f - 1.0f);
-    int3 neighborCoord = clamp(gridCoord + neighborOffset, 0, (int3)g_GridDimensions - 1);
-    uint neighborProbeIdx = neighborCoord.x + neighborCoord.y * g_GridDimensions.x + neighborCoord.z * g_GridDimensions.
-                            x * g_GridDimensions.y;
-
-    if (neighborProbeIdx != probeIndex)
-    {
-        UINT neighborWriteIdx = neighborProbeIdx * RAYS_PER_PROBE + rayIndex;
-        Reservoir neighborReservoir = preReservoirBuffer[neighborWriteIdx];
-        neighborReservoir.numSamples = min(neighborReservoir.numSamples, sampleLimit);
-
-        UINT2 neighborProbeOffsetIndexID = UINT2(neighborProbeIdx % 64, neighborProbeIdx * rcp(64));
-        UINT neighborOffsetIndex = ProbeOffsetIndexTex.Load(UINT3(neighborProbeOffsetIndexID, 0));
-        float3 neighborProbeOffset = g_ProbeRelocationLUTBuffer[neighborOffsetIndex];
-
-        float3 neighborPos = GetProbeWorldPosition(neighborProbeIdx, g_GridOrigin, g_GridSpacing, g_GridDimensions) +
-                             neighborProbeOffset;
-        float3 hitPos = neighborPos + neighborReservoir.direction * neighborReservoir.hitDistance;
-
-        float3 dirToHit = hitPos - rayOrigin;
-        float distToHitSq = dot(dirToHit, dirToHit);
-        float distToHit = sqrt(distToHitSq);
-        float3 dirToHitNor = dirToHit / distToHit;
-
-        RayDesc shadowRay = (RayDesc)0;
-        shadowRay.Origin = rayOrigin;
-        shadowRay.Direction = dirToHitNor;
-        shadowRay.TMin = 0.f;
-        shadowRay.TMax = distToHit;
-
-        ShadowRayload shadowPayload;
-        shadowPayload.isHit = true;
-
-        TraceRay(g_SceneTLAS,
-                 RAY_FLAG_ACCEPT_FIRST_HIT_AND_END_SEARCH | RAY_FLAG_SKIP_CLOSEST_HIT_SHADER,
-                 0xFF,
-                 1,
-                 0,
-                 1,
-                 shadowRay,
-                 shadowPayload);
-
-        [branch]
-        if (!shadowPayload.isHit)
-        {
-            float3 hitNomral = UnpackNormal(neighborReservoir.packedNormal);
-            float cosNeighbor = saturate(dot(-neighborReservoir.direction, hitNomral));
-            float cosCurr = saturate(dot(-dirToHitNor, hitNomral));
-            // 雅可比修正
-            float jacobian = (neighborReservoir.hitDistance * neighborReservoir.hitDistance) / max(1e-6f, distToHitSq);
-            jacobian *= cosCurr / cosNeighbor;
-
-            float neighborWeight = Luminance(g_GIDataBuffer[neighborWriteIdx].Irradiance) + 0.1f;
-            float neighborAccuWeight = neighborWeight * neighborReservoir.numSamples
-                                       * neighborReservoir.estimatorWeight;
-            currReservoir.weightSum += neighborAccuWeight;
-            currReservoir.numSamples += neighborReservoir.numSamples;
-
-            if (blueNoise.b < neighborAccuWeight / currReservoir.weightSum)
-            {
-                finalRayDir = dirToHitNor;
-                finalWeight = neighborWeight;
-            }
-        }
-    }
-
-    currReservoir.direction = finalRayDir;
-    currReservoir.estimatorWeight = currReservoir.weightSum / (currReservoir.numSamples * finalWeight + 1e-6f);
-    currReservoirBuffer[writeIndex] = currReservoir;
+                                              g_GridDimensions);
 
     RayDesc rayDesc;
     rayDesc.Origin = rayOrigin;
-    rayDesc.Direction = currReservoir.direction;
+    rayDesc.Direction = DDGIGetProbeRayDir(rayIndex, RAYS_PER_PROBE, g_RandomRotation);
     rayDesc.TMin = 0.f;
     rayDesc.TMax = DXR_MAX;
 
-    RayData rayData = (RayData)0;
-
-    RAY_FLAG rayFlag = RAY_FLAG_NONE | RAY_FLAG_CULL_BACK_FACING_TRIANGLES | RAY_FLAG_SKIP_PROCEDURAL_PRIMITIVES;
+    RayData packRayData = (RayData)0;
+    RAY_FLAG rayFlag = RAY_FLAG_NONE;
     TraceRay(g_SceneTLAS,
-             RAY_FLAG_NONE,
+             rayFlag,
              0xFF,
              0,
-             1,
+             0,
              0,
              rayDesc,
-             rayData);
+             packRayData);
 
-    currReservoirBuffer[writeIndex].hitDistance = rayData.Position.w;
-    if (rayData.Position.w < 0.f)
+    RWStructuredBuffer<GIData> GIDataBuffer = ResourceDescriptorHeap[g_GIDataBufferIndex];
+
+    if (packRayData.hitDist < 0.f)
     {
-        currReservoirBuffer[writeIndex].weightSum = 0.f;
-        currReservoirBuffer[writeIndex].estimatorWeight = 0.f;
-        currReservoirBuffer[writeIndex].hitDistance = DXR_MAX;
-        currReservoirBuffer[writeIndex].packedNormal = rayData.Data.r;
+        TextureCube<float4> skyboxTex = ResourceDescriptorHeap[g_SkyboxTexIndex];
+        float3 skyRadiance = skyboxTex.SampleLevel(g_WarpLinearSampler, WorldRayDirection(), 0).rgb;
+        DDGI_Store_Probe_RAY_MISS(GIDataBuffer, writeIndex, 0);
+        return;
     }
-    RWStructuredBuffer<RayData> rayDatas = ResourceDescriptorHeap[g_RayDataBufferIndex];
-    rayDatas[writeIndex].Data = rayData.Data;
-    rayDatas[writeIndex].Data.w = currReservoir.estimatorWeight;
-    rayDatas[writeIndex].Position = rayData.Position;
-}
 
-[shader("miss")]
-void RayMiss(inout RayData rayData)
-{
-    rayData.Position = float4(0.f, 0.f, 0.f, DXR_MAX);
-    rayData.Data = float4(0.f, 0.f, 0.f, 0.f);
+    if (packRayData.hitKind == HIT_KIND_TRIANGLE_BACK_FACE)
+    {
+        DDGI_Store_Probe_RAY_BackFace_Hit(GIDataBuffer, writeIndex, packRayData.hitDist);
+        return;
+    }
+
+    if (rayIndex < RELOCATE_RAY_COUNT)
+    {
+        DDGI_Store_Probe_RAY_FrontFace_Hit(GIDataBuffer, writeIndex, packRayData.hitDist);
+        return;
+    }
+
+    // direct light
+    float3 directIrradiance = directDiffuseLight(packRayData,
+                                                 g_ProbeNormalBias,
+                                                 g_ProbeViewBias,
+                                                 g_SceneTLAS,
+                                                 GetMainLight(mainLight));
+
+    // indirect light
+    float3 indirectIrradiance = 0.f;
+    float blendWeight = DDGIGetVolumeBlendWeight(packRayData.Position,
+                                                 g_GridOrigin,
+                                                 g_GridSpacing,
+                                                 0,
+                                                 float4(0, 0, 0, 1));
+    if (blendWeight > 0.f)
+    {
+        float3 surfaceBias = DDGIGetSurfaceBias(packRayData.Normal,
+                                                rayDesc.Direction,
+                                                g_ProbeNormalBias,
+                                                g_ProbeViewBias);
+        indirectIrradiance += SampleDDGI(
+            packRayData.Position,
+            packRayData.Normal,
+            surfaceBias,
+            g_GridOrigin,
+            g_GridSpacing,
+            g_GridDimensions,
+            g_DDGIEncodingGamma,
+            g_IrradianceTexSize,
+            g_IrradianceTexIndex,
+            g_DistanceTexSize,
+            g_DistanceTexIndex,
+            g_ProbeOffsetIndexTexIndex,
+            g_RelocationLUTIndex,
+            g_ProbeStatesIndex,
+            WarpLinearSampler
+            );
+        indirectIrradiance *= blendWeight;
+    }
+
+    float maxAlbedo = 0.9f;
+    float3 indirectRadiance = min(packRayData.Albedo.rgb, maxAlbedo) / PI * indirectIrradiance;
+
+    RWStructuredBuffer<RayData> rayDatas = ResourceDescriptorHeap[g_RayDataBufferIndex];
+    rayDatas[writeIndex] = packRayData;
+
+    DDGI_Store_Probe_RAY_FrontFace_Hit(GIDataBuffer,
+                                       writeIndex,
+                                       packRayData.hitDist,
+                                       directIrradiance);
 }
 
 [shader("miss")]
@@ -289,27 +187,23 @@ void ShadowMiss(inout ShadowRayload shadowRayload)
 {
     shadowRayload.isHit = false;
 }
+[shader("miss")]
+void RayMiss(inout RayData rayData)
+{
+    rayData.hitDist = -1.f;
+}
 
 [shader("closesthit")]
 void RayClosestHit(inout RayData rayData,
                    in BuiltInTriangleIntersectionAttributes attr)
 {
-    [branch]
-    if (HitKind() == HIT_KIND_TRIANGLE_BACK_FACE)
-    {
-        rayData.Position = float4(0.f, 0.f, 0.f, -RayTCurrent() * 0.2f); // 负数标记背面撞击
-        rayData.Data = float4(0.f, 0.f, 0.f, 0.f);
-
-        return;
-    }
-
-    float hitDistance = RayTCurrent();
-    float3 positionWS = WorldRayOrigin() + WorldRayDirection() * RayTCurrent();
+    rayData.hitDist = RayTCurrent();
+    rayData.hitKind = HitKind();
 
     UINT instanceID = InstanceID();
     uint primIdx = PrimitiveIndex();
     uint globalGeometryIdx = instanceID + primIdx;
-    InstanceData instanceData = g_InstanceDataBuffer[globalGeometryIdx];
+    InstanceData instanceData = g_InstanceDataBuffer[instanceID];
     StructuredBuffer<Vertex> verticesBuffer = ResourceDescriptorHeap[instanceData.VertexBufferIndex];
     StructuredBuffer<uint> indicesBuffer = ResourceDescriptorHeap[instanceData.IndexBufferIndex];
     UINT vertexOffset = instanceData.VertexOffset;
@@ -325,12 +219,36 @@ void RayClosestHit(inout RayData rayData,
     float3 bary = float3(1.0 - attr.barycentrics.x - attr.barycentrics.y, attr.barycentrics.x, attr.barycentrics.y);
     Vertex v = InterpolateVertex(vertices, bary);
 
+    float3 positionWS = mul(float4(v.positionOS, 1.f), ObjectToWorld3x4());
+    rayData.Position = positionWS;
+
     float3 normalOS = v.normalOS;
     float3 N = normalize(mul(ObjectToWorld3x4(), float4(normalOS, 0.f)));
+    rayData.Normal.xyz = N;
 
-    rayData.Position = float4(positionWS, hitDistance);
-    rayData.Data = float4(PackNormal(N),
-                          instanceData.BaseColorTexIndex,
-                          instanceData.NormalTexIndex,
-                          0.f);
+    if (instanceData.BaseColorTexIndex > 0)
+    {
+        uint width, height, numLevels;
+        Texture2D<float4> albedoTex = ResourceDescriptorHeap[instanceData.BaseColorTexIndex];
+        albedoTex.GetDimensions(0, width, height, numLevels);
+
+        float4 albedoOpacity = albedoTex.SampleLevel(g_WarpLinearSampler, v.uv, numLevels / 2.f);
+        rayData.Albedo = albedoOpacity.xyz * albedoOpacity.w;
+    }
+
+    if (instanceData.NormalTexIndex > 0)
+    {
+        uint width, height, numLevels;
+        Texture2D<float4> normalTex = ResourceDescriptorHeap[instanceData.NormalTexIndex];
+        normalTex.GetDimensions(0, width, height, numLevels);
+
+        float3 tangent = normalize(mul(ObjectToWorld3x4(), float4(v.tangentOS.xyz, 0.f)));
+        float3 bitTangent = cross(N, tangent) * v.tangentOS.w;
+        float3x3 TBN = {tangent, bitTangent, N};
+
+        float3 normalTS = normalTex.SampleLevel(g_WarpLinearSampler, v.uv, numLevels / 2.f);
+        normalTS = normalTS * 2.f - 1.f;
+        float3 shadingNormal = mul(normalTS, TBN);
+        rayData.ShadingNormal.xyz = shadingNormal;
+    }
 }

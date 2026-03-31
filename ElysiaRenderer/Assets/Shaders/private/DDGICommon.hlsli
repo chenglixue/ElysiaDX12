@@ -3,12 +3,13 @@
 #include "ShadingCommon.hlsl"
 #include "private/Random.hlsl"
 
-#define PROBE_COUNT 27000
+#define PROBE_COUNT 10648
 #define RAYS_PER_PROBE 128
-#define DDGI_PROBE_IRRADIANCE_NUM_TEXELS 8
+#define DDGI_PROBE_IRRADIANCE_NUM_TEXELS 16
 #define DDGI_PROBE_DEPTH_NUM_TEXELS 16
 #define DXR_MAX 10000
 #define DXR_SHADOW_MAX 1e27f
+#define DXR_MISS_DIST 1e27f
 
 #define PROBE_STATE_INACTIVE 0
 #define PROBE_STATE_ACTIVE   1
@@ -24,13 +25,16 @@ struct Vertex
     float2 uv;
     float3 normalOS;
     float4 tangentOS;
-    float4 color;
 };
 
 struct RayData
 {
-    Vector4 Position;
-    Vector4 Data;
+    Vector3 Position;
+    float hitDist;
+    Vector3 Albedo;
+    UINT hitKind;
+    Vector4 Normal;
+    Vector4 ShadingNormal;
 };
 struct CompactedRay
 {
@@ -74,10 +78,10 @@ struct Reservoir
     Vector3 direction;
     float weightSum;
     Vector3 hitPos;
-    float numSamples; // 见过的样本总数
+    float numSamples;
 
     float hitDistance;
-    float estimatorWeight; // 归一化权重 (用于最终补偿)
+    float estimatorWeight;
     uint packedNormal;
 };
 
@@ -87,44 +91,15 @@ Vertex InterpolateVertex(Vertex vertices[3], float3 barycentrics)
 
     for (UINT i = 0; i < 3; i ++)
     {
-        o.positionOS += barycentrics * vertices[i].positionOS;
-        o.normalOS += barycentrics * vertices[i].normalOS;
-        o.tangentOS.xyz += barycentrics * vertices[i].tangentOS.xyz;
-        o.uv += barycentrics * vertices[i].uv;
+        o.positionOS += barycentrics[i] * vertices[i].positionOS;
+        o.normalOS += barycentrics[i] * vertices[i].normalOS;
+        o.tangentOS.xyz += barycentrics[i] * vertices[i].tangentOS.xyz;
+        o.uv += barycentrics[i] * vertices[i].uv;
     }
 
     o.normalOS = normalize(o.normalOS);
     o.tangentOS.xyz = normalize(o.tangentOS.xyz);
     o.tangentOS.w = vertices[0].tangentOS.w;
-
-    return o;
-}
-
-Vertex InterpolateVertex(Vertex v0, Vertex v1, Vertex v2, float3 barycentrics)
-{
-    Vertex o = (Vertex)0;
-
-    o.positionOS += barycentrics * v0.positionOS;
-    o.normalOS += barycentrics * v0.normalOS;
-    o.tangentOS.xyz += barycentrics * v0.tangentOS.xyz;
-    o.uv += barycentrics * v0.uv;
-    o.color.rgb += barycentrics * v0.color.rgb;
-
-    o.positionOS += barycentrics * v1.positionOS;
-    o.normalOS += barycentrics * v1.normalOS;
-    o.tangentOS.xyz += barycentrics * v1.tangentOS.xyz;
-    o.uv += barycentrics * v1.uv;
-    o.color.rgb += barycentrics * v1.color.rgb;
-
-    o.positionOS += barycentrics * v2.positionOS;
-    o.normalOS += barycentrics * v2.normalOS;
-    o.tangentOS.xyz += barycentrics * v2.tangentOS.xyz;
-    o.uv += barycentrics * v2.uv;
-    o.color.rgb += barycentrics * v2.color.rgb;
-
-    o.normalOS = normalize(o.normalOS);
-    o.tangentOS.xyz = normalize(o.tangentOS.xyz);
-    o.tangentOS.w = v0.tangentOS.w;
 
     return o;
 }
@@ -140,31 +115,6 @@ bool IsPointInAABB(float3 position, AABBData aabb, float margin)
 float2 SignNotZero(float2 v)
 {
     return float2((v.x >= 0.0) ? +1.0 : -1.0, (v.y >= 0.0) ? +1.0 : -1.0);
-}
-
-// 压缩：float3 (单位向量) -> uint (R16G16_UNORM 封装)
-uint PackNormal(float3 n)
-{
-    n /= (abs(n.x) + abs(n.y) + abs(n.z));
-    float2 res = (n.z >= 0.0) ? n.xy : (1.0 - abs(n.yx)) * SignNotZero(n.xy);
-    res = res * 0.5 + 0.5; // 映射到 [0, 1]
-
-    // 将两个 float16 压入一个 uint
-    uint x = uint(res.x * 65535.0);
-    uint y = uint(res.y * 65535.0);
-    return (x << 16) | y;
-}
-
-// 解压：uint -> float3 (单位向量)
-float3 UnpackNormal(uint packed)
-{
-    float2 v = float2(float(packed >> 16) / 65535.0, float(packed & 0xFFFF) / 65535.0);
-    v = v * 2.0 - 1.0; // 映射回 [-1, 1]
-
-    float3 n = float3(v.x, v.y, 1.0 - abs(v.x) - abs(v.y));
-    float t = saturate(-n.z);
-    n.xy += (n.xy >= 0.0) ? -t : t;
-    return normalize(n);
 }
 
 // 3D dir normalize to [-1, 1]
@@ -328,19 +278,14 @@ float DDGI_Shadow_Visibity(float3 PositionWS,
     shadowRayDesc.TMin = 0.001f;
     shadowRayDesc.TMax = DXR_SHADOW_MAX;
 
-    ShadowRayload shadowPayload;
+    ShadowRayload shadowPayload = (ShadowRayload)0;
     shadowPayload.isHit = true;
-
     TraceRay(SceneTLAS,
-             // 找到第一个遮挡就停止
-             RAY_FLAG_ACCEPT_FIRST_HIT_AND_END_SEARCH |
-             // 只跑 AnyHit 或 Miss
-             RAY_FLAG_SKIP_CLOSEST_HIT_SHADER |
-             RAY_FLAG_CULL_BACK_FACING_TRIANGLES,
+             RAY_FLAG_ACCEPT_FIRST_HIT_AND_END_SEARCH | RAY_FLAG_SKIP_CLOSEST_HIT_SHADER,
              0xFF,
              0,
-             1,
              0,
+             1,
              shadowRayDesc,
              shadowPayload
         );
@@ -357,15 +302,10 @@ float DDGI_Query_Shadow_Visibity(float3 PositionWS,
     RayDesc shadowRayDesc;
     shadowRayDesc.Origin = PositionWS + NormalWS * normalBias;
     shadowRayDesc.Direction = ToLight;
-    shadowRayDesc.TMin = 0.001f;
+    shadowRayDesc.TMin = 0.f;
     shadowRayDesc.TMax = DXR_SHADOW_MAX;
 
-    const uint rayFlags = RAY_FLAG_ACCEPT_FIRST_HIT_AND_END_SEARCH |
-                          RAY_FLAG_SKIP_PROCEDURAL_PRIMITIVES |
-                          RAY_FLAG_SKIP_CLOSEST_HIT_SHADER |
-                          RAY_FLAG_CULL_BACK_FACING_TRIANGLES |
-                          RAY_FLAG_FORCE_OPAQUE;
-
+    const uint rayFlags = RAY_FLAG_ACCEPT_FIRST_HIT_AND_END_SEARCH | RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
     RayQuery<rayFlags> q;
 
     q.TraceRayInline(SceneTLAS, rayFlags, 0xFF, shadowRayDesc);
@@ -446,5 +386,60 @@ float DDGIGetVolumeBlendWeight(float3 positionWS,
     volumeBlendWeight *= (1.f - saturate(delta.z * rcp(gridSpacing.z)));
 
     return volumeBlendWeight;
+}
+
+float3 EvaluateDirectLight(RayData rayData,
+                           float normalBias,
+                           float viewBias,
+                           RaytracingAccelerationStructure sceneTLAS,
+                           LightData lightData)
+{
+    float3 toLight = normalize(lightData.toLight);
+    float visibility = DDGI_Shadow_Visibity(rayData.Position, rayData.Normal, normalBias, toLight, sceneTLAS);
+    return visibility;
+    // if (visibility <= 0.f)
+    //     return 0.f;
+
+    float NoL = max(dot(rayData.ShadingNormal, toLight), 0.f);
+    return lightData.color * lightData.intensity * NoL;
+}
+
+float3 directDiffuseLight(RayData rayData,
+                          float normalBias,
+                          float viewBias,
+                          RaytracingAccelerationStructure sceneTLAS,
+                          LightData lightData)
+{
+    float3 brdf = rayData.Albedo * INV_PI;
+    float3 lighting = 0.f;
+
+    lighting += EvaluateDirectLight(rayData, normalBias, viewBias, sceneTLAS, lightData);
+
+    return lighting;
+    return brdf * lighting;
+}
+
+void DDGI_Store_Probe_RAY_MISS(RWStructuredBuffer<GIData> giData, UINT writeIndex, float3 radiance)
+{
+    giData[writeIndex].Irradiance = radiance;
+    giData[writeIndex].Distance = 1e27f;
+}
+
+void DDGI_Store_Probe_RAY_BackFace_Hit(RWStructuredBuffer<GIData> giData, UINT writeIndex, float hitDist)
+{
+    giData[writeIndex].Distance = hitDist * -0.2f;
+}
+
+void DDGI_Store_Probe_RAY_FrontFace_Hit(RWStructuredBuffer<GIData> giData, UINT writeIndex, float hitDist)
+{
+    giData[writeIndex].Distance = hitDist;
+}
+void DDGI_Store_Probe_RAY_FrontFace_Hit(RWStructuredBuffer<GIData> giData,
+                                        UINT writeIndex,
+                                        float hitDist,
+                                        float3 radiance)
+{
+    giData[writeIndex].Irradiance = radiance;
+    giData[writeIndex].Distance = hitDist;
 }
 #endif

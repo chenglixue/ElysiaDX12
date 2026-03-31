@@ -271,7 +271,7 @@ PSOutput PS(PSInput i)
                 GIData giData = Elysia_DDGI_LoadRayData(i.instanceID * RAYS_PER_PROBE + r);
 
                 // 排除 Miss 的射线（Distance=10000），防止球体变黑
-                if (giData.Distance < 10000.0f)
+                if (giData.Distance > 10000.f)
                 {
                     finalRadiance += giData.Irradiance * weight;
                     totalWeight += weight;
@@ -283,11 +283,6 @@ PSOutput PS(PSInput i)
                                ? (finalRadiance / totalWeight)
                                : float3(0.1f, 0.1f, 0.1f);
             StructuredBuffer<UINT> states = ResourceDescriptorHeap[g_ProbeStatesIndex];
-            if (states[i.instanceID] == PROBE_STATE_INACTIVE)
-            {
-                clip(-1);
-            }
-            result.rgb = states[i.instanceID];
             result.rgb = color;
         }
 

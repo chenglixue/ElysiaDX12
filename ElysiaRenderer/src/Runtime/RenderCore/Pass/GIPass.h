@@ -21,11 +21,7 @@ namespace ElysiaRenderer
     PASS(PROBE_DEPTH_BLENDING,          "public\\GI\\CS_DDGI.hlsl",               true,  ProbeDepthBlending)\
     PASS(UPDATE_PROBE_STATES,           "public\\GI\\CS_DDGI.hlsl",               true,  UpdateProbeStates)\
     PASS(RESET_PROBE_STATES,            "public\\GI\\CS_DDGI.hlsl",               true,  ResetProbeStates)\
-    PASS(RESET_PROBE_OFFSET_INDEX,      "public\\GI\\CS_RrobeOffset.hlsl",        true,  ResetProbeOffsetIndex)\
-    PASS(DDGI_SHADING,                  "public\\GI\\CS_DDGILighting.hlsl",       true,  DDGI_Shading)\
-    PASS(RAY_COMPACTION,                "public\\GI\\CS_RayFilter.hlsl",          true,  RayCompaction)\
-    PASS(CALC_INDIRECT_ARGS,            "public\\GI\\CS_RayFilter.hlsl",          true,  CalcIndirectArgs)\
-    PASS(RESET_COUNTER,                 "public\\GI\\CS_RayFilter.hlsl",          true,  ResetCounter)
+    PASS(RESET_PROBE_OFFSET_INDEX,      "public\\GI\\CS_RrobeOffset.hlsl",        true,  ResetProbeOffsetIndex)
     class GIPass : public BasePass
     {
     public:
@@ -106,8 +102,8 @@ namespace ElysiaRenderer
         static inline RenderTexture* m_pDistanceRT = nullptr;
         static inline constexpr UINT NumVertices = 12;
         static inline constexpr UINT NumIndices = 60;
-        static inline constexpr UINT Probe_Count = 27000;
-        static inline const UINT3 Grid_Dimensions = UINT3(30, 30, 30);
+        static inline constexpr UINT Probe_Count = 10648;
+        static inline const UINT3 Grid_Dimensions = UINT3(22, 22, 22);
         static inline constexpr UINT Rays_Per_Probe = 128;
         static inline Vector4 m_RandomRotation;
 
@@ -160,8 +156,12 @@ namespace ElysiaRenderer
         /// --------------------------------------------
         struct alignas(16) RayData
         {
-            Vector4 Position;
-            Vector4 Data;
+            Vector3 Position;
+            float hitDist;
+            Vector3 Albedo;
+            UINT hitKind;
+            Vector4 Normal;
+            Vector4 ShadingNormal;
         };
         struct alignas(16) GIData
         {
