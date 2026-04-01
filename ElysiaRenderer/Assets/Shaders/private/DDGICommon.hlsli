@@ -5,7 +5,7 @@
 
 #define PROBE_COUNT 10648
 #define RAYS_PER_PROBE 128
-#define DDGI_PROBE_IRRADIANCE_NUM_TEXELS 16
+#define DDGI_PROBE_IRRADIANCE_NUM_TEXELS 8
 #define DDGI_PROBE_DEPTH_NUM_TEXELS 16
 #define DXR_MAX 10000
 #define DXR_SHADOW_MAX 1e27f
@@ -275,7 +275,7 @@ float DDGI_Shadow_Visibity(float3 PositionWS,
     RayDesc shadowRayDesc;
     shadowRayDesc.Origin = PositionWS + NormalWS * normalBias;
     shadowRayDesc.Direction = ToLight;
-    shadowRayDesc.TMin = 0.01f;
+    shadowRayDesc.TMin = 0.001f;
     shadowRayDesc.TMax = DXR_SHADOW_MAX;
 
     RayData shadowPayload = (RayData)0;
@@ -283,7 +283,7 @@ float DDGI_Shadow_Visibity(float3 PositionWS,
              RAY_FLAG_ACCEPT_FIRST_HIT_AND_END_SEARCH | RAY_FLAG_SKIP_CLOSEST_HIT_SHADER,
              0xFF,
              0,
-             0,
+             1,
              0,
              shadowRayDesc,
              shadowPayload

@@ -196,8 +196,8 @@ namespace ElysiaRenderer
         m_quarterHeight = UINT(m_displaySize.y) >> 2;
 
         m_pIrradianceRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(
-            Grid_Dimensions.x * 16,
-            Grid_Dimensions.y * Grid_Dimensions.z * 16,
+            Grid_Dimensions.x * 8,
+            Grid_Dimensions.y * Grid_Dimensions.z * 8,
             DXGI_FORMAT_R16G16B16A16_FLOAT,
             true,
             RenderResource::GetInstance().GetPropertyName(RenderTextureIDs::IrradianceRTID));

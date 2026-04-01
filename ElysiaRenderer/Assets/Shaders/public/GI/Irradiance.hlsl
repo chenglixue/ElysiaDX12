@@ -117,7 +117,7 @@ float3 SampleDDGI(float3 positionWS,
             chebyshevWeight = variance / (variance + Pow2(biasPositionWSToAdjProbeDist - mean));
 
             // 增强对比度，使遮挡边缘更锐利，减少颜色渗漏
-            chebyshevWeight = max(pow(chebyshevWeight, 16), 0.0f);
+            chebyshevWeight = max(Pow3(chebyshevWeight), 0.0f);
         }
         // 避免权重完全为 0 导致全黑，设定一个极小的底值
         weight *= max(0.05f, chebyshevWeight);
@@ -237,7 +237,7 @@ float3 SampleDDGI(float3 positionWS,
             chebyshevWeight = variance / (variance + Pow2(biasPositionWSToAdjProbeDist - mean) + 1e-6f);
 
             // 增强对比度，使遮挡边缘更锐利，减少颜色渗漏
-            chebyshevWeight = max(pow(chebyshevWeight, 16), 0.0f);
+            chebyshevWeight = max(Pow3(chebyshevWeight), 0.0f);
         }
         // 避免权重完全为 0 导致全黑，设定一个极小的底值
         weight *= max(0.05f, chebyshevWeight);

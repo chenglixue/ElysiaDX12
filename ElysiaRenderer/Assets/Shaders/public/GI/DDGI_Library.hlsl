@@ -98,7 +98,7 @@ void GenerateRayMain()
              rayFlag,
              0xFF,
              0,
-             0,
+             1,
              0,
              rayDesc,
              packRayData);

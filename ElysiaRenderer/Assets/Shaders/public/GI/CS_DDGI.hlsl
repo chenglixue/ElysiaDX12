@@ -349,7 +349,7 @@ void ProbeIrradianceBlending(uint3 id : SV_DispatchThreadID,
 
             // Backface hit, don't blend
             [branch]
-            if (rayDistance < 0.0f || rayDistance >= DXR_MAX)
+            if (rayDistance < 0.0f)
             {
                 backfaces ++;
                 if (backfaces >= maxBackfaces)
@@ -506,7 +506,7 @@ void ProbeDepthBlending(uint3 id : SV_DispatchThreadID,
 
             // 方向越接近，权重越高
             float weight = max(0.f, dot(probeDirection, rayDir));
-            float distWeight = pow(weight, 50);
+            float distWeight = pow(weight, 26);
             float absDist = min(abs(rayDistance), probeMaxRayDistance);
             accumulatedDist += float2(absDist * distWeight, (absDist * absDist) * distWeight);
             distSumWeight += distWeight;
@@ -515,7 +515,7 @@ void ProbeDepthBlending(uint3 id : SV_DispatchThreadID,
         float distHysteresis = saturate(g_DDGIBlendWeight);
         float2 historyDist = Elysia_DDGI_LoadDist(id.xy);
 
-        float2 netDist = accumulatedDist / (2.f * max(distSumWeight, epsilon));
+        float2 netDist = accumulatedDist / (max(distSumWeight, epsilon));
 
         if (dot(historyDist, historyDist) == 0)
         {
