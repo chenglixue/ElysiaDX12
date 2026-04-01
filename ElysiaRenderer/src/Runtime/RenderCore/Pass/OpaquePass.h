@@ -45,6 +45,7 @@ PASS(DRAW_LIGHT_PASS,         "public\\Opaque.hlsl", false, PS)
 #pragma endregion
         struct ShaderIDs
         {
+            static inline size_t g_DebugMode = PropertyToID(L"g_DebugMode");
             static inline size_t g_RenderSize = PropertyToID(L"g_RenderSize");
             static inline size_t viewMatrix = PropertyToID(L"viewMatrix");
             static inline size_t viewMatrix_I = PropertyToID(L"viewMatrix_I");
@@ -54,6 +55,8 @@ PASS(DRAW_LIGHT_PASS,         "public\\Opaque.hlsl", false, PS)
             static inline size_t viewProjMatrix_I = PropertyToID(L"viewProjMatrix_I");
 
             static inline size_t g_AOIndex = PropertyToID(L"g_AOIndex");
+            static inline size_t g_AmbientTint = PropertyToID(L"g_AmbientTint");
+            static inline size_t g_AmbientIntensity = PropertyToID(L"g_AmbientIntensity");
         };
 
         UINT m_cameraWidth;

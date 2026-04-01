@@ -29,7 +29,7 @@ cbuffer PassConstant : register(b0, perPassSpace)
     float4 g_RandomRotation;
     UINT g_RayDataBufferIndex;
     UINT g_GIDataBufferIndex;
-    // UINT g_ProbeOffsetsIndex;
+    UINT g_ProbeOffsetsIndex;
     UINT g_ProbeStatesIndex;
     UINT g_ProbeOffsetIndexTexIndex;
     UINT g_ProbeRelocationLUTBufferIndex;
@@ -147,16 +147,16 @@ PSInput VS(VSInput i, UINT vertexID : SV_VertexID, uint instanceID : SV_Instance
         else
         {
             o.instanceID = instanceID;
-            // StructuredBuffer<float3> probeOffsetBuffer = ResourceDescriptorHeap[
-            //     g_ProbeOffsetsIndex];
+            StructuredBuffer<float3> probeOffsetBuffer = ResourceDescriptorHeap[
+                g_ProbeOffsetsIndex];
 
             UINT probeIdx = instanceID;
-            UINT2 probeOffsetIndexID = UINT2(probeIdx % 64, probeIdx / 64);
-            RWTexture2D<uint> g_ProbeOffsetIndexTex = ResourceDescriptorHeap[g_ProbeOffsetIndexTexIndex];
-            UINT index = g_ProbeOffsetIndexTex.Load(UINT3(probeOffsetIndexID, 0));
-            StructuredBuffer<Vector4> ProbeRelocationLUTBuffer = ResourceDescriptorHeap[
-                g_ProbeRelocationLUTBufferIndex];
-            float3 probeOffset = ProbeRelocationLUTBuffer[index];
+            // UINT2 probeOffsetIndexID = UINT2(probeIdx % 64, probeIdx / 64);
+            // RWTexture2D<uint> g_ProbeOffsetIndexTex = ResourceDescriptorHeap[g_ProbeOffsetIndexTexIndex];
+            // UINT index = g_ProbeOffsetIndexTex.Load(UINT3(probeOffsetIndexID, 0));
+            // StructuredBuffer<Vector4> ProbeRelocationLUTBuffer = ResourceDescriptorHeap[
+            //     g_ProbeRelocationLUTBufferIndex];
+            float3 probeOffset = probeOffsetBuffer[probeIdx];
 
             o.probeCenterWS = GetProbeWorldPosition(instanceID,
                                                     g_GridOrigin,
@@ -197,6 +197,7 @@ PSInput VS(VSInput i, UINT vertexID : SV_VertexID, uint instanceID : SV_Instance
         o.color = AABBData.Color;
         break;
     }
+    case DEBUG_NONE:
     case DEBUG_BLOOM:
     case DEBUG_AO:
     case DEBUG_VELOCITY:
@@ -287,12 +288,6 @@ PSOutput PS(PSInput i)
         }
 
         o.target0 = result;
-        break;
-    }
-    case DEBUG_GI:
-    {
-        float3 GI = SampleTexture2D(GBuffer4Index, i.uv, ClampPointSampler).rgb;
-        o.target0 = float4(GI, 1.f);
         break;
     }
     }

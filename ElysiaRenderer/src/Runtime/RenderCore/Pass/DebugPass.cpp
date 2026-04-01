@@ -130,7 +130,6 @@ namespace ElysiaRenderer
         case DebugMode::Bloom:
         case DebugMode::AO:
         case DebugMode::Velocity:
-        case DebugMode::GI:
         case DebugMode::Normal:
         {
             m_pCommand->AddBarrier(m_pDisplayRT, D3D12_RESOURCE_STATE_RENDER_TARGET);

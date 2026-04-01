@@ -2,6 +2,7 @@
 #include <private\Light.hlsl>
 #include <private\LightCommon.hlsl>
 #include <private\ShadowCommon.hlsl>
+#include <public\GI\Irradiance.hlsl>
 
 #pragma Vertex VS
 #pragma Pixel PS
@@ -13,6 +14,15 @@
 #pragma shader_feature SHADOW_QUALITY_LOW SHADOW_QUALITY_MIDDLE SHADOW_QUALITY_HIGH SHADOW_QUALITY_VERYHIGH
 #pragma shader_feature HARD_SHADOW SOFT_SHADOW
 
+#define DEBUG_NONE 0
+#define DEBUG_AO 1
+#define DEBUG_GIPROBE 2
+#define DEBUG_NORMAL 3
+#define DEBUG_AABB 4
+#define DEBUG_BLOOM 5
+#define DEBUG_VELOCITY 6
+#define DEBUG_GI 7
+
 cbuffer PassConstant : register(b0, perPassSpace)
 {
     Vector4 g_RenderSize;
@@ -23,6 +33,24 @@ cbuffer PassConstant : register(b0, perPassSpace)
     Matrix projMatrix_I;
     Matrix viewProjMatrix;
     Matrix viewProjMatrix_I;
+
+    float3 g_GridDimensions;
+    float g_ProbeNormalBias;
+    float g_ProbeViewBias;
+    float g_DDGIEncodingGamma;
+    float3 g_GridOrigin;
+    float3 g_GridSpacing;
+    UINT g_IrradianceTexIndex;
+    UINT g_DistanceTexIndex;
+    UINT g_ProbeOffsetsIndex;
+    UINT g_ProbeStatesIndex;
+    UINT g_ProbeOffsetIndexTexIndex;
+    UINT g_ProbeRelocationLUTBufferIndex;
+    float4 g_IrradianceTexSize;
+    float4 g_DistanceTexSize;
+    float3 g_AmbientTint;
+    float g_AmbientIntensity;
+    UINT g_DebugMode;
 }
 
 struct PSInput
@@ -91,8 +119,39 @@ PSOutput PS(PSInput i)
         AO = 1;
     }
     float4 lighting = GetDynamicLighting(inputParam, GBufferData, mainLightData, AO);
-    lighting += float4(GBufferData.SceneColor, 1.f) * AO;
+    float blendWeight = DDGIGetVolumeBlendWeight(inputParam.PositionWS,
+                                                 g_GridOrigin,
+                                                 g_GridSpacing,
+                                                 0,
+                                                 float4(0, 0, 0, 1));
+    float3 IBL = SampleDDGI(inputParam.PositionWS,
+                            inputParam.NormalWS,
+                            DDGIGetSurfaceBias(inputParam.NormalWS,
+                                               inputParam.ScreenVector,
+                                               g_ProbeNormalBias,
+                                               g_ProbeViewBias),
+                            g_GridOrigin,
+                            g_GridSpacing,
+                            g_GridDimensions,
+                            g_DDGIEncodingGamma,
+                            g_IrradianceTexSize,
+                            g_IrradianceTexIndex,
+                            g_DistanceTexSize,
+                            g_DistanceTexIndex,
+                            g_ProbeOffsetsIndex,
+                            g_ProbeStatesIndex,
+                            WarpLinearSampler
+                     ) * g_AmbientTint * g_AmbientIntensity * blendWeight;
+    IBL *= (GBufferData.BaseColor.rgb) / PI;
+    lighting += float4(IBL, 1.f) * AO;
 
+    switch (g_DebugMode)
+    {
+    case DEBUG_GI:
+        o.target0.rgb = (IBL);
+        return o;
+        break;
+    }
     o.target0.rgb = (lighting);
     return o;
 }

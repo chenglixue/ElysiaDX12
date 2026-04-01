@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "OpaquePass.h"
 
+#include "GIPass.h"
 #include "Editor/UserData.h"
 #include "Programs/PIXHelper.h"
 
@@ -84,6 +85,61 @@ namespace ElysiaRenderer
                                m_pCamera->GetViewMat() * m_pCamera->GetProjMat());
         m_pMaterial->SetMatrix(ShaderIDs::viewProjMatrix_I,
                                (m_pCamera->GetViewMat() * m_pCamera->GetProjMat()).Invert());
+
+        m_pMaterial->SetFloat3(GIPass::ShaderIDs::g_GridDimensions,
+                               Vector3(GIPass::Grid_Dimensions.x,
+                                       GIPass::Grid_Dimensions.y,
+                                       GIPass::Grid_Dimensions.z),
+                               passID);
+        m_pMaterial->SetFloat3(GIPass::ShaderIDs::g_GridOrigin,
+                               GIPass::m_gridOrigin,
+                               passID);
+        m_pMaterial->SetFloat3(GIPass::ShaderIDs::g_GridSpacing,
+                               GIPass::m_gridSpacing,
+                               passID);
+        m_pMaterial->SetUInt(GIPass::ShaderIDs::g_IrradianceTexIndex,
+                             GIPass::m_pIrradianceRT->GetResourceHeapIndex(),
+                             passID);
+        m_pMaterial->SetUInt(GIPass::ShaderIDs::g_DistanceTexIndex,
+                             GIPass::m_pDistanceRT->GetResourceHeapIndex(),
+                             passID);
+        m_pMaterial->SetFloat4(GIPass::ShaderIDs::g_IrradianceTexSize,
+                               GetScreenSize(GIPass::m_pIrradianceRT->GetWidth(),
+                                             GIPass::m_pIrradianceRT->GetHeight()),
+                               passID);
+        m_pMaterial->SetFloat4(GIPass::ShaderIDs::g_DistanceTexSize,
+                               GetScreenSize(GIPass::m_pDistanceRT->GetWidth(),
+                                             GIPass::m_pDistanceRT->GetHeight()),
+                               passID);
+        m_pMaterial->SetFloat(GIPass::ShaderIDs::g_ProbeNormalBias,
+                              UserData::GetInstance().GIParameter.normalBias,
+                              passID);
+        m_pMaterial->SetFloat(GIPass::ShaderIDs::g_ProbeViewBias,
+                              UserData::GetInstance().GIParameter.viewBias,
+                              passID);
+        m_pMaterial->SetFloat3(ShaderIDs::g_AmbientTint,
+                               UserData::GetInstance().AmbientCubemapTint,
+                               passID);
+        // m_pMaterial->SetUInt(GIPass::ShaderIDs::g_ProbeOffsetsIndex,
+        //                      GIPass::m_pProbeOffsetBuffer->GetResourceHeapIndex(),
+        //                      passID);
+        m_pMaterial->SetUInt(GIPass::ShaderIDs::g_ProbeStatesIndex,
+                             GIPass::m_pProbeStateBuffer->GetResourceHeapIndex(),
+                             passID);
+        m_pMaterial->SetUInt(GIPass::ShaderIDs::g_ProbeOffsetIndexTexIndex,
+                             GIPass::m_pProbeOffsetIndexRT->GetResourceHeapIndex(),
+                             passID);
+        m_pMaterial->SetUInt(GIPass::ShaderIDs::g_ProbeRelocationLUTBufferIndex,
+                             GIPass::m_pProbeRelocationLUTBuffer->GetResourceHeapIndex(),
+                             passID);
+        m_pMaterial->SetFloat(GIPass::ShaderIDs::g_DDGIEncodingGamma,
+                              UserData::GetInstance().GIParameter.gamma,
+                              passID);
+        m_pMaterial->SetFloat(ShaderIDs::g_AmbientIntensity,
+                              UserData::GetInstance().AmbientCubemapIntensity,
+                              passID);
+        m_pMaterial->SetUInt(ShaderIDs::g_DebugMode,
+                             static_cast<UINT>(UserData::GetInstance().debugMode));
 
         SetSpaceResource(passData, PER_PASS_SPACE);
         SetSpaceResource(passData, PER_FRAME_SPACE);

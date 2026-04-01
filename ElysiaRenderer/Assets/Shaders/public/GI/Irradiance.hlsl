@@ -39,8 +39,7 @@ float3 SampleDDGI(float3 positionWS,
                   UINT irradianceTexIndex,
                   float4 distanceTexSize,
                   UINT distanceTexIndex,
-                  UINT probeOffsetIndexTexIndex,
-                  UINT ProbeRelocationLUTBufferIndex,
+                  UINT probeOffsetsBufferIndex,
                   UINT ProbeStatesIndex,
                   UINT samplerIndex)
 {
@@ -52,7 +51,7 @@ float3 SampleDDGI(float3 positionWS,
 
     float3 sumIrradiance = 0.f;
     float sumWeight = 0.f;
-    // StructuredBuffer<float3> probeOffsets = ResourceDescriptorHeap[ProbeOffsetsIndex];
+    StructuredBuffer<float3> probeOffsetsBuffer = ResourceDescriptorHeap[probeOffsetsBufferIndex];
     StructuredBuffer<UINT> probeStates = ResourceDescriptorHeap[ProbeStatesIndex];
 
     [unroll(8)]
@@ -66,18 +65,16 @@ float3 SampleDDGI(float3 positionWS,
         uint adjProbeIdx = adjCoords.x + adjCoords.y * gridDimensions.x + adjCoords.z * (
                                gridDimensions.x * gridDimensions.y);
 
-        UINT2 probeOffsetIndexID = UINT2(adjProbeIdx % 64, adjProbeIdx / 64);
-        Texture2D<uint> g_ProbeOffsetIndexTex = ResourceDescriptorHeap[probeOffsetIndexTexIndex];
-        UINT index = g_ProbeOffsetIndexTex.Load(UINT3(probeOffsetIndexID, 0));
-        StructuredBuffer<Vector4> ProbeRelocationLUTBuffer = ResourceDescriptorHeap[ProbeRelocationLUTBufferIndex];
-        float3 probeOffset = ProbeRelocationLUTBuffer[index];
+        // UINT2 probeOffsetIndexID = UINT2(adjProbeIdx % 64, adjProbeIdx / 64);
+        // Texture2D<uint> g_ProbeOffsetIndexTex = ResourceDescriptorHeap[probeOffsetIndexTexIndex];
+        // UINT index = g_ProbeOffsetIndexTex.Load(UINT3(probeOffsetIndexID, 0));
+        // StructuredBuffer<Vector4> ProbeRelocationLUTBuffer = ResourceDescriptorHeap[ProbeRelocationLUTBufferIndex];
 
         UINT probeState = probeStates[adjProbeIdx];
         if (probeState == PROBE_STATE_INACTIVE)
             continue;
 
-        // float3 posOffset = probeOffsets[adjProbeIdx];
-        float3 posOffset = probeOffset;
+        float3 posOffset = probeOffsetsBuffer[adjProbeIdx];
         // 获取相邻探针的世界坐标
         float3 adjProbeWorldPos = gridOrigin + adjCoords * gridSpacing + posOffset;
 
@@ -107,7 +104,7 @@ float3 SampleDDGI(float3 positionWS,
         float2 finalUV = (float2(atlasPos * DDGI_PROBE_DEPTH_NUM_TEXELS) + uv) * distanceTexSize.zw;
 
         // 采样平均距离 (R) 和距离平方 (G)
-        float2 moments = SampleTexture2D(distanceTexIndex, finalUV, samplerIndex).rg;
+        float2 moments = SampleTexture2D_LOD(distanceTexIndex, finalUV, samplerIndex, 0).rg * 2.f;
         float mean = moments.x;
         float mean2 = moments.y;
         float chebyshevWeight = 1.0f;
@@ -120,7 +117,7 @@ float3 SampleDDGI(float3 positionWS,
             chebyshevWeight = variance / (variance + Pow2(biasPositionWSToAdjProbeDist - mean));
 
             // 增强对比度，使遮挡边缘更锐利，减少颜色渗漏
-            chebyshevWeight = max(chebyshevWeight * chebyshevWeight * chebyshevWeight, 0.0f);
+            chebyshevWeight = max(pow(chebyshevWeight, 16), 0.0f);
         }
         // 避免权重完全为 0 导致全黑，设定一个极小的底值
         weight *= max(0.05f, chebyshevWeight);
@@ -138,7 +135,7 @@ float3 SampleDDGI(float3 positionWS,
         float2 octantCoordsIrr = OctEncode(normalWS);
         uv = (octantCoordsIrr * 0.5f + 0.5f) * (DDGI_PROBE_IRRADIANCE_NUM_TEXELS - 2.f) + 1.0f;
         finalUV = (float2(atlasPos * DDGI_PROBE_IRRADIANCE_NUM_TEXELS) + uv) * irradianceTexSize.zw;
-        float3 probeColor = SampleTexture2D(irradianceTexIndex, finalUV, samplerIndex).rgb;
+        float3 probeColor = SampleTexture2D_LOD(irradianceTexIndex, finalUV, samplerIndex, 0).rgb;
 
         float3 exponent = gamma * 0.5f;
         probeColor = pow(probeColor, exponent);
@@ -169,9 +166,7 @@ float3 SampleDDGI(float3 positionWS,
                   UINT irradianceTexIndex,
                   float4 distanceTexSize,
                   UINT distanceTexIndex,
-                  UINT probeOffsetIndexTexIndex,
-                  // StructuredBuffer<float3> ProbeOffsets,
-                  StructuredBuffer<Vector4> ProbeRelocationLUTBuffer,
+                  StructuredBuffer<float3> ProbeOffsets,
                   StructuredBuffer<UINT> ProbeStates,
                   SamplerState linearClampSampler)
 {
@@ -194,16 +189,12 @@ float3 SampleDDGI(float3 positionWS,
         // 映射到线性索引
         uint adjProbeIdx = adjCoords.x + adjCoords.y * gridDimensions.x + adjCoords.z * (
                                gridDimensions.x * gridDimensions.y);
-        UINT2 probeOffsetIndexID = UINT2(adjProbeIdx % 64, adjProbeIdx / 64);
-        Texture2D<uint> g_ProbeOffsetIndexTex = ResourceDescriptorHeap[probeOffsetIndexTexIndex];
-        UINT index = g_ProbeOffsetIndexTex.Load(UINT3(probeOffsetIndexID, 0));
-        float3 probeOffset = ProbeRelocationLUTBuffer[index];
+
         UINT probeState = ProbeStates[adjProbeIdx];
         if (probeState == PROBE_STATE_INACTIVE)
             continue;
 
-        // float3 posOffset = ProbeOffsets[adjProbeIdx];
-        float3 posOffset = probeOffset;
+        float3 posOffset = ProbeOffsets[adjProbeIdx];
         // 获取相邻探针的世界坐标
         float3 adjProbeWorldPos = gridOrigin + adjCoords * gridSpacing + posOffset;
 
@@ -233,7 +224,7 @@ float3 SampleDDGI(float3 positionWS,
         float2 finalUV = (float2(atlasPos * DDGI_PROBE_DEPTH_NUM_TEXELS) + uv) * distanceTexSize.zw;
 
         // 采样平均距离 (R) 和距离平方 (G)
-        float2 moments = SampleTexture2D(distanceTexIndex, finalUV, linearClampSampler).rg;
+        float2 moments = SampleTexture2D(distanceTexIndex, finalUV, linearClampSampler).rg * 2.f;
         float mean = moments.x;
         float mean2 = moments.y;
         float chebyshevWeight = 1.0f;
@@ -246,7 +237,7 @@ float3 SampleDDGI(float3 positionWS,
             chebyshevWeight = variance / (variance + Pow2(biasPositionWSToAdjProbeDist - mean) + 1e-6f);
 
             // 增强对比度，使遮挡边缘更锐利，减少颜色渗漏
-            chebyshevWeight = max(chebyshevWeight * chebyshevWeight * chebyshevWeight, 0.0f);
+            chebyshevWeight = max(pow(chebyshevWeight, 16), 0.0f);
         }
         // 避免权重完全为 0 导致全黑，设定一个极小的底值
         weight *= max(0.05f, chebyshevWeight);

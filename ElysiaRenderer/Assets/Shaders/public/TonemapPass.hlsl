@@ -149,7 +149,7 @@ PSOutput PS(PSInput i)
         break;
     }
     }
-
+    finalColor.rgb = LinearToSRGB(finalColor.rgb);
     o.target0 = float4(finalColor.rgb, 1.f);
 
     return o;

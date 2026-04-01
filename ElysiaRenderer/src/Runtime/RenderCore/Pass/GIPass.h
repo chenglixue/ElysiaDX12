@@ -92,7 +92,7 @@ namespace ElysiaRenderer
         static inline BufferHandle m_indexBuffer = nullptr;
         static inline BufferHandle m_pRayDataBuffer = nullptr;
         static inline BufferHandle m_pInstanceDataBuffer = nullptr;
-        // static inline BufferHandle m_pProbeOffsetBuffer;
+        static inline BufferHandle m_pProbeOffsetBuffer;
         static inline BufferHandle m_pProbeStateBuffer = nullptr;
         static inline BufferHandle m_pProbeRelocationLUTBuffer = nullptr;
         static inline BufferHandle m_pGIDataBuffer = nullptr;

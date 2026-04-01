@@ -17,7 +17,7 @@ cbuffer PassConstant : register(b0, perPassSpace)
     float4 g_GridDimensions;
     float4 g_RandomRotation;
 
-    // UINT g_ProbeOffsetsIndex;
+    UINT g_ProbeOffsetsIndex;
     UINT g_ProbeStatesIndex;
     UINT g_StaticAABBIndex;
     UINT g_RayDataBufferIndex;
@@ -107,14 +107,12 @@ void UpdateProbeStates(uint3 id : SV_DispatchThreadID)
 
     int backfaceCount = 0;
     float hitDistances[RELOCATE_RAY_COUNT];
-    StructuredBuffer<RayData> rayDataBuffer = ResourceDescriptorHeap[g_RayDataBufferIndex];
     StructuredBuffer<GIData> GIDataBuffer = ResourceDescriptorHeap[g_GIDataBufferIndex];
     RWStructuredBuffer<UINT> probeStateBuffer = ResourceDescriptorHeap[g_ProbeStatesIndex];
 
     for (int rayIndex = 0; rayIndex < RELOCATE_RAY_COUNT; rayIndex ++)
     {
         // Get the coordinates for the probe ray in the RayData texture array
-        RayData rayData = rayDataBuffer[probeIndex * RAYS_PER_PROBE + rayIndex];
         GIData giData = GIDataBuffer[probeIndex * RAYS_PER_PROBE + rayIndex];
 
         // Load the hit distance for the ray
@@ -137,7 +135,6 @@ void UpdateProbeStates(uint3 id : SV_DispatchThreadID)
 
     float3 probePosWS = GetProbeWorldPosition(probeIndex, g_GridOrigin, g_GridSpacing, g_GridDimensions) + probeOffset;
     float probeSpacingMax = max(g_GridSpacing.x, max(g_GridSpacing.y, g_GridSpacing.z));
-    float distToCamera = distance(probePosWS, cameraPosWS);
 
     bool isNearStatic = false;
     for (UINT i = 0; i < g_StaticAABBCount; ++i)
@@ -180,11 +177,11 @@ void UpdateProbeStates(uint3 id : SV_DispatchThreadID)
 [numthreads(64, 1, 1)]
 void ClearProbeOffsetBuffer(uint3 id : SV_DispatchThreadID)
 {
-    // uint probeIndex = id.x;
-    // if (probeIndex >= PROBE_COUNT)
-    //     return;
-    // RWStructuredBuffer<float3> probeOffsetBuffer = ResourceDescriptorHeap[g_ProbeOffsetsIndex];
-    // probeOffsetBuffer[probeIndex] = 0.f;
+    uint probeIndex = id.x;
+    if (probeIndex >= PROBE_COUNT)
+        return;
+    RWStructuredBuffer<float3> probeOffsetBuffer = ResourceDescriptorHeap[g_ProbeOffsetsIndex];
+    probeOffsetBuffer[probeIndex] = 0.f;
 }
 
 [numthreads(64, 1, 1)]
@@ -192,35 +189,18 @@ void RelocateProbes(UINT3 id : SV_DispatchThreadID)
 {
     UINT probeIndex = id.x;
     [branch]
-    if (probeIndex >= PROBE_COUNT || probeIndex < 0)
+    if (probeIndex >= PROBE_COUNT)
         return;
 
     UINT3 gridIdx = GetProbeGridCoord(probeIndex, g_GridDimensions);
 
-    // RWStructuredBuffer<float3> probeOffsetBuffer = ResourceDescriptorHeap[g_ProbeOffsetsIndex];
-    StructuredBuffer<RayData> rayDataBuffer = ResourceDescriptorHeap[g_RayDataBufferIndex];
+    RWStructuredBuffer<float3> probeOffsetBuffer = ResourceDescriptorHeap[g_ProbeOffsetsIndex];
     StructuredBuffer<GIData> giDataBuffer = ResourceDescriptorHeap[g_GIDataBufferIndex];
     // RWStructuredBuffer<UINT> probeStateBuffer = ResourceDescriptorHeap[g_ProbeStatesIndex];
-    StructuredBuffer<float4> relocationLUT = ResourceDescriptorHeap[g_RelocationLUTIndex];
+    // StructuredBuffer<float4> relocationLUT = ResourceDescriptorHeap[g_RelocationLUTIndex];
 
     uint2 texCoord = uint2(probeIndex % 64, probeIndex * rcp(64));
     UINT currIndex = DDGI_Load_Probe_Offset_Index(texCoord);
-    float3 probePosWS = GetProbeWorldPosition(probeIndex, g_GridOrigin, g_GridSpacing, g_GridDimensions) + relocationLUT
-                        [currIndex].xyz;
-    float distToCamera = distance(probePosWS, cameraPosWS);
-
-    uint updateInterval = 16;
-    if (distToCamera < NEAR_GI_DISTANCE)
-    {
-        updateInterval = 4;
-    }
-    else if (distToCamera < MIDDLE_GI_DISTANCE)
-    {
-        updateInterval = 8;
-    }
-    // [branch]
-    // if (probeIndex % updateInterval != frameIndex % updateInterval)
-    //     return;
 
     int closestBackfaceIndex = -1;
     int closestFrontfaceIndex = -1;
@@ -233,14 +213,12 @@ void RelocateProbes(UINT3 id : SV_DispatchThreadID)
     for (UINT i = 0; i < RELOCATE_RAY_COUNT; ++i)
     {
         UINT rayIndex = probeIndex * RAYS_PER_PROBE + i;
-        // RayData rayData = rayDataBuffer[rayIndex];
         GIData giData = giDataBuffer[rayIndex];
         float hitDistance = giData.Distance;
 
         if (hitDistance < 0.f)
         {
-            backFaceCount += 1.0f;
-            // 还原物理距离 (RayGen中可能缩短了80%)
+            backFaceCount ++;
             hitDistance = (hitDistance) * -5.0f;
             if (hitDistance < closestBackfaceDist)
             {
@@ -263,8 +241,8 @@ void RelocateProbes(UINT3 id : SV_DispatchThreadID)
         }
     }
 
-    float3 currentOffset = relocationLUT[currIndex].xyz;
-    float3 fullOffset = currentOffset;
+    float3 currentOffset = probeOffsetBuffer[probeIndex];
+    float3 fullOffset = float3(1e27f, 1e27f, 1e27f);
 
     // If there’s a close backface AND you see more than 25% backfaces, assume you’re inside something.
     if (closestBackfaceIndex != -1 && (backFaceCount * rcp(RELOCATE_RAY_COUNT)) > PROBE_BACKFACE_THRESHOLD)
@@ -293,32 +271,33 @@ void RelocateProbes(UINT3 id : SV_DispatchThreadID)
     }
 
     // 将offset匹配到最近的 LUT 索引
-    UINT bestIndex = 0;
-    float minError = 1e27f;
-    float3 normalizedOffset = fullOffset * rcp(max(g_GridSpacing * PROBE_MAX_OFFSET_FRACTION, 1e-6));
-    if (dot(normalizedOffset, normalizedOffset) < 0.2025f)
-    {
-        // 在 128 个预设点中找一个离理想位置最近的
-        for (uint i = 0; i < 32 * 4; ++i)
-        {
-            float d = distance(relocationLUT[i].xyz, fullOffset);
-            if (d < minError)
-            {
-                minError = d;
-                bestIndex = i;
-            }
-        }
-    }
-    else
-    {
-        bestIndex = currIndex; // 超出范围则保持现状
-    }
-
-    DDGI_Store_Probe_Offset_Index(id, bestIndex);
-    // if (dot(normalizedOffset, normalizedOffset) < 0.2025f) // 0.45 * 0.45 == 0.2025
+    // UINT bestIndex = 0;
+    // float minError = 1e27f;
+    // float3 normalizedOffset = fullOffset * rcp(max(g_GridSpacing * PROBE_MAX_OFFSET_FRACTION, 1e-6));
+    // if (dot(normalizedOffset, normalizedOffset) < 0.2025f)
     // {
-    //     probeOffsetBuffer[probeIndex] = fullOffset;
+    //     // 在 128 个预设点中找一个离理想位置最近的
+    //     for (uint i = 0; i < 32 * 4; ++i)
+    //     {
+    //         float d = distance(relocationLUT[i].xyz, fullOffset);
+    //         if (d < minError)
+    //         {
+    //             minError = d;
+    //             bestIndex = i;
+    //         }
+    //     }
     // }
+    // else
+    // {
+    //     bestIndex = currIndex; // 超出范围则保持现状
+    // }
+
+    // DDGI_Store_Probe_Offset_Index(id, bestIndex);
+    float normalizedOffset = fullOffset / g_GridSpacing;
+    if (dot(normalizedOffset, normalizedOffset) < 0.2025f) // 0.45 * 0.45 == 0.2025
+    {
+        probeOffsetBuffer[probeIndex] = fullOffset;
+    }
 }
 
 [numthreads(DDGI_PROBE_IRRADIANCE_NUM_TEXELS, DDGI_PROBE_IRRADIANCE_NUM_TEXELS, 1)]
@@ -339,8 +318,9 @@ void ProbeIrradianceBlending(uint3 id : SV_DispatchThreadID,
 
     for (UINT i = localIdx; i < RAYS_PER_PROBE; i += numThreads)
     {
+        UINT rayIndex = probeIndex * RAYS_PER_PROBE + i;
         RWStructuredBuffer<GIData> GIDataBuffer = ResourceDescriptorHeap[g_GIDataBufferIndex];
-        GIData giData = GIDataBuffer[probeIndex * RAYS_PER_PROBE + i];
+        GIData giData = GIDataBuffer[rayIndex];
         g_RayRadiance[i] = giData.Irradiance;
         g_RayDirection[i] = DDGIGetProbeRayDir(i, RAYS_PER_PROBE, g_RandomRotation);
     }
@@ -358,6 +338,9 @@ void ProbeIrradianceBlending(uint3 id : SV_DispatchThreadID,
         float2 octUV = uv * 2.0f - 1.0f;
         float3 probeDirection = OctDecode(octUV);
 
+        float probeRandomRayBackfaceThreshold = 0.1f;
+        uint backfaces = 0;
+        uint maxBackfaces = uint((RAYS_PER_PROBE - RELOCATE_RAY_COUNT) * probeRandomRayBackfaceThreshold);
         float4 accumulatedIrradiance = 0.0f;
         for (int rayIndex = RELOCATE_RAY_COUNT; rayIndex < RAYS_PER_PROBE; rayIndex ++)
         {
@@ -366,10 +349,14 @@ void ProbeIrradianceBlending(uint3 id : SV_DispatchThreadID,
 
             // Backface hit, don't blend
             [branch]
-            if (rayDistance < 0.0f)
+            if (rayDistance < 0.0f || rayDistance >= DXR_MAX)
             {
+                backfaces ++;
+                if (backfaces >= maxBackfaces)
+                    return;
                 continue;
             }
+
             float3 rayRadiance = g_RayRadiance[rayIndex];
             // (Radiance * w, w)
             // 方向越接近，权重越高
@@ -379,17 +366,16 @@ void ProbeIrradianceBlending(uint3 id : SV_DispatchThreadID,
         float epsilon = float(RAYS_PER_PROBE - RELOCATE_RAY_COUNT) * 1e-9f;
         float hysteresis = saturate(g_DDGIBlendWeight); // 历史权重
 
-        float3 netIrradiance = accumulatedIrradiance.rgb / ((float)RAYS_PER_PROBE);
-        // (2.0f * max(accumulatedIrradiance.a, epsilon));
-        netIrradiance = pow(netIrradiance, 1.0f / g_DDGIEncodingGamma);
+        float3 netIrradiance = accumulatedIrradiance.rgb / (2.0f * max(accumulatedIrradiance.a, epsilon));
         float4 historyIrradiance = Elysia_DDGI_LoadIrradiance(id.xy);
-
-        float3 delta = netIrradiance - historyIrradiance;
 
         if (dot(historyIrradiance, historyIrradiance) == 0)
         {
             hysteresis = 0.0f;
         }
+
+        netIrradiance = pow(netIrradiance, 1.0f / g_DDGIEncodingGamma);
+        float3 delta = netIrradiance - historyIrradiance;
 
         // float significantChangeThreshold = 0.25f;
         // float newDistributionChangeThreshold = 0.8f;
@@ -429,7 +415,7 @@ void ProbeIrradianceBlending(uint3 id : SV_DispatchThreadID,
         Elysia_DDGI_StoreIrradiance(id.xy, finalColor);
     }
 
-    DeviceMemoryBarrierWithGroupSync();
+    AllMemoryBarrierWithGroupSync();
 
     [branch]
     if (isBorder)
@@ -518,12 +504,9 @@ void ProbeDepthBlending(uint3 id : SV_DispatchThreadID,
             float3 rayDir = g_RayDirection[rayIndex];
             float rayDistance = g_RayDistance[rayIndex];
 
-            if (rayDistance < 0.0f)
-                continue;
-
             // 方向越接近，权重越高
             float weight = max(0.f, dot(probeDirection, rayDir));
-            float distWeight = pow(weight, 1);
+            float distWeight = pow(weight, 50);
             float absDist = min(abs(rayDistance), probeMaxRayDistance);
             accumulatedDist += float2(absDist * distWeight, (absDist * absDist) * distWeight);
             distSumWeight += distWeight;
@@ -532,19 +515,18 @@ void ProbeDepthBlending(uint3 id : SV_DispatchThreadID,
         float distHysteresis = saturate(g_DDGIBlendWeight);
         float2 historyDist = Elysia_DDGI_LoadDist(id.xy);
 
+        float2 netDist = accumulatedDist / (2.f * max(distSumWeight, epsilon));
+
         if (dot(historyDist, historyDist) == 0)
         {
             distHysteresis = 0.0f;
         }
 
-        float2 netDist = accumulatedDist / max(distSumWeight, epsilon);
-
-        float2 distDelta = netDist - historyDist;
-        float2 finalDist = historyDist + distDelta * (1.0f - distHysteresis);;
+        float2 finalDist = lerp(netDist, historyDist, distHysteresis);
         Elysia_DDGI_StoreDist(id.xy, finalDist);
     }
 
-    DeviceMemoryBarrierWithGroupSync();
+    AllMemoryBarrierWithGroupSync();
 
     [branch]
     if (isBorder)

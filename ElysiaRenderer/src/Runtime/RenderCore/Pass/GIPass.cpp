@@ -84,14 +84,14 @@ namespace ElysiaRenderer
             .isRawAccess = false
         });
 
-        // m_pProbeOffsetBuffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc
-        // {
-        //     .name = L"Probe Offset Buffer",
-        //     .stride = sizeof(Vector3),
-        //     .size = sizeof(Vector3) * Probe_Count,
-        //     .viewFlags = GPUResourceFlags::SRV | GPUResourceFlags::UAV,
-        //     .accessFlags = BufferAccessFlags::GPUOnly,
-        // });
+        m_pProbeOffsetBuffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc
+        {
+            .name = L"Probe Offset Buffer",
+            .stride = sizeof(Vector3),
+            .size = sizeof(Vector3) * Probe_Count,
+            .viewFlags = GPUResourceFlags::SRV | GPUResourceFlags::UAV,
+            .accessFlags = BufferAccessFlags::GPUOnly,
+        });
 
         m_pProbeStateBuffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc
         {
@@ -732,6 +732,7 @@ namespace ElysiaRenderer
             float g_DDGIEncodingGamma;
             UINT g_SkyboxTexIndex;
             UINT g_GIDataBufferIndex;
+            UINT g_ProbeOffsetsIndex;
         } constantData;
         constexpr UINT constantSize = sizeof(constantData) / 4;
 
@@ -778,7 +779,8 @@ namespace ElysiaRenderer
                 .g_DDGIEncodingGamma = UserData::GetInstance().GIParameter.gamma,
                 .g_SkyboxTexIndex = TextureManager::GetInstance().LoadResidentTexture(L"Tex\\cubemap0.dds").
                                                                   GetResourceHeapIndex(),
-                .g_GIDataBufferIndex = m_pGIDataBuffer->GetUAVResourceHeapIndex()
+                .g_GIDataBufferIndex = m_pGIDataBuffer->GetUAVResourceHeapIndex(),
+                .g_ProbeOffsetsIndex = m_pProbeOffsetIndexRT->GetUAVResourceHeapIndex()
             };
 
             UINT rootParameterIndex = 0;

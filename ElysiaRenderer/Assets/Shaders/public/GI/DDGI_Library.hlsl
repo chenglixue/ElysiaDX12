@@ -30,11 +30,11 @@ cbuffer PassConstant : register(b0, perPassSpace)
     float g_DDGIEncodingGamma;
     UINT g_SkyboxTexIndex;
     UINT g_GIDataBufferIndex;
+    UINT g_ProbeOffsetsIndex;
 }
 
 RaytracingAccelerationStructure g_SceneTLAS : register(t0);
 StructuredBuffer<InstanceData> g_InstanceDataBuffer : register(t1);
-// StructuredBuffer<Vector3> g_ProbeOffsetBuffer : register(t2);
 StructuredBuffer<UINT> g_ProbeStatesBuffer : register(t2);
 StructuredBuffer<Vector4> g_ProbeRelocationLUTBuffer : register(t3);
 
@@ -80,11 +80,6 @@ void GenerateRayMain()
     [branch]
     if (probeState == PROBE_STATE_INACTIVE && rayIndex >= RELOCATE_RAY_COUNT)
         return;
-
-    RWTexture2D<uint> ProbeOffsetIndexTex = ResourceDescriptorHeap[g_ProbeOffsetIndexTexIndex];
-    UINT2 probeOffsetIndexID = UINT2(probeIndex % 64, probeIndex * rcp(64));
-    UINT index = ProbeOffsetIndexTex.Load(UINT3(probeOffsetIndexID, 0));
-    float3 probeOffset = g_ProbeRelocationLUTBuffer[index];
 
     Vector3 rayOrigin = GetProbeWorldPosition(probeIndex,
                                               g_GridOrigin,
@@ -162,8 +157,7 @@ void GenerateRayMain()
             g_IrradianceTexIndex,
             g_DistanceTexSize,
             g_DistanceTexIndex,
-            g_ProbeOffsetIndexTexIndex,
-            g_RelocationLUTIndex,
+            g_ProbeOffsetsIndex,
             g_ProbeStatesIndex,
             WarpLinearSampler
             );
@@ -171,7 +165,7 @@ void GenerateRayMain()
     }
 
     float maxAlbedo = 0.9f;
-    float3 indirectRadiance = min(packRayData.Albedo.rgb, maxAlbedo) / PI * indirectIrradiance;
+    indirectIrradiance = min(packRayData.Albedo.rgb, maxAlbedo) / PI * indirectIrradiance;
 
     RWStructuredBuffer<RayData> rayDatas = ResourceDescriptorHeap[g_RayDataBufferIndex];
     rayDatas[writeIndex] = packRayData;
@@ -179,7 +173,7 @@ void GenerateRayMain()
     DDGI_Store_Probe_RAY_FrontFace_Hit(GIDataBuffer,
                                        writeIndex,
                                        packRayData.hitDist,
-                                       directIrradiance);
+                                       directIrradiance + indirectIrradiance);
 }
 
 [shader("miss")]
@@ -202,8 +196,8 @@ void RayClosestHit(inout RayData rayData,
 
     UINT instanceID = InstanceID();
     uint primIdx = PrimitiveIndex();
-    uint globalGeometryIdx = instanceID + primIdx;
-    InstanceData instanceData = g_InstanceDataBuffer[instanceID];
+    uint globalGeometryIdx = instanceID + GeometryIndex();
+    InstanceData instanceData = g_InstanceDataBuffer[globalGeometryIdx];
     StructuredBuffer<Vertex> verticesBuffer = ResourceDescriptorHeap[instanceData.VertexBufferIndex];
     StructuredBuffer<uint> indicesBuffer = ResourceDescriptorHeap[instanceData.IndexBufferIndex];
     UINT vertexOffset = instanceData.VertexOffset;
@@ -219,7 +213,7 @@ void RayClosestHit(inout RayData rayData,
     float3 bary = float3(1.0 - attr.barycentrics.x - attr.barycentrics.y, attr.barycentrics.x, attr.barycentrics.y);
     Vertex v = InterpolateVertex(vertices, bary);
 
-    float3 positionWS = mul(float4(v.positionOS, 1.f), ObjectToWorld3x4());
+    float3 positionWS = WorldRayOrigin() + WorldRayDirection() * RayTCurrent();
     rayData.Position = positionWS;
 
     float3 normalOS = v.normalOS;

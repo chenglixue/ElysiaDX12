@@ -45,7 +45,7 @@ cbuffer PassConstant : register(b0, perPassSpace)
     float3 g_GridSpacing;
     UINT g_IrradianceTexIndex;
     UINT g_DistanceTexIndex;
-    // UINT g_ProbeOffsetsIndex;
+    UINT g_ProbeOffsetsIndex;
     UINT g_ProbeStatesIndex;
     UINT g_ProbeOffsetIndexTexIndex;
     UINT g_ProbeRelocationLUTBufferIndex;
@@ -229,34 +229,33 @@ FEncodeGBufferData GetEncodeGBufferData(FInputParams inputParams, float3 toLight
     o.DiffuseColor = o.BaseColor - o.BaseColor * o.Metallic;
     o.SpecularColor = ComputeF0(o.Specular, o.BaseColor, o.Metallic);
 
-    float blendWeight = DDGIGetVolumeBlendWeight(inputParams.PositionWS,
-                                                 g_GridOrigin,
-                                                 g_GridSpacing,
-                                                 0,
-                                                 float4(0, 0, 0, 1));
-    if (blendWeight > 0.f)
-    {
-        o.IBL = SampleDDGI(inputParams.PositionWS,
-                           o.WorldNormal,
-                           DDGIGetSurfaceBias(o.WorldNormal,
-                                              inputParams.ScreenVector,
-                                              g_ProbeNormalBias,
-                                              g_ProbeViewBias),
-                           g_GridOrigin,
-                           g_GridSpacing,
-                           g_GridDimensions,
-                           g_DDGIEncodingGamma,
-                           g_IrradianceTexSize,
-                           g_IrradianceTexIndex,
-                           g_DistanceTexSize,
-                           g_DistanceTexIndex,
-                           g_ProbeOffsetIndexTexIndex,
-                           g_ProbeRelocationLUTBufferIndex,
-                           g_ProbeStatesIndex,
-                           WarpLinearSampler
-                    ) * g_AmbientTint * g_AmbientIntensity * blendWeight;
-        // o.IBL = (baseColor.rgb) / PI * o.IBL;
-    }
+    // float blendWeight = DDGIGetVolumeBlendWeight(inputParams.PositionWS,
+    //                                              g_GridOrigin,
+    //                                              g_GridSpacing,
+    //                                              0,
+    //                                              float4(0, 0, 0, 1));
+    // if (blendWeight > 0.f)
+    // {
+    //     o.IBL = SampleDDGI(inputParams.PositionWS,
+    //                        o.WorldNormal,
+    //                        DDGIGetSurfaceBias(o.WorldNormal,
+    //                                           inputParams.ScreenVector,
+    //                                           g_ProbeNormalBias,
+    //                                           g_ProbeViewBias),
+    //                        g_GridOrigin,
+    //                        g_GridSpacing,
+    //                        g_GridDimensions,
+    //                        g_DDGIEncodingGamma,
+    //                        g_IrradianceTexSize,
+    //                        g_IrradianceTexIndex,
+    //                        g_DistanceTexSize,
+    //                        g_DistanceTexIndex,
+    //                        g_ProbeOffsetsIndex,
+    //                        g_ProbeStatesIndex,
+    //                        WarpLinearSampler
+    //                 ) * g_AmbientTint * g_AmbientIntensity * blendWeight;
+    //     // o.IBL = (baseColor.rgb) / PI * o.IBL;
+    // }
 
     return o;
 }

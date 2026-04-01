@@ -275,22 +275,21 @@ float DDGI_Shadow_Visibity(float3 PositionWS,
     RayDesc shadowRayDesc;
     shadowRayDesc.Origin = PositionWS + NormalWS * normalBias;
     shadowRayDesc.Direction = ToLight;
-    shadowRayDesc.TMin = 0.001f;
+    shadowRayDesc.TMin = 0.01f;
     shadowRayDesc.TMax = DXR_SHADOW_MAX;
 
-    ShadowRayload shadowPayload = (ShadowRayload)0;
-    shadowPayload.isHit = true;
+    RayData shadowPayload = (RayData)0;
     TraceRay(SceneTLAS,
              RAY_FLAG_ACCEPT_FIRST_HIT_AND_END_SEARCH | RAY_FLAG_SKIP_CLOSEST_HIT_SHADER,
              0xFF,
              0,
              0,
-             1,
+             0,
              shadowRayDesc,
              shadowPayload
         );
 
-    return shadowPayload.isHit ? 0.f : 1.f;
+    return shadowPayload.hitDist < 0.f;
 }
 
 float DDGI_Query_Shadow_Visibity(float3 PositionWS,
@@ -396,12 +395,11 @@ float3 EvaluateDirectLight(RayData rayData,
 {
     float3 toLight = normalize(lightData.toLight);
     float visibility = DDGI_Shadow_Visibity(rayData.Position, rayData.Normal, normalBias, toLight, sceneTLAS);
-    return visibility;
-    // if (visibility <= 0.f)
-    //     return 0.f;
+    if (visibility <= 0.f)
+        return 0.f;
 
     float NoL = max(dot(rayData.ShadingNormal, toLight), 0.f);
-    return lightData.color * lightData.intensity * NoL;
+    return lightData.color * lightData.intensity * NoL * visibility;
 }
 
 float3 directDiffuseLight(RayData rayData,
@@ -415,7 +413,6 @@ float3 directDiffuseLight(RayData rayData,
 
     lighting += EvaluateDirectLight(rayData, normalBias, viewBias, sceneTLAS, lightData);
 
-    return lighting;
     return brdf * lighting;
 }
 
