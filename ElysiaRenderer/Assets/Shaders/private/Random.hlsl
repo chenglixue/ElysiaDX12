@@ -300,9 +300,17 @@ float4 MGradient(int seed, float3 offset)
 // @param RepeatSize = integer units before tiling in each dimension
 // @param seed000-seed111 = hash function seeds for the eight corners
 // @return fractional part of v
-float3 NoiseSeeds(float3 v, bool bTiling, float RepeatSize,
-                  out float seed000, out float seed001, out float seed010, out float seed011,
-                  out float seed100, out float seed101, out float seed110, out float seed111)
+float3 NoiseSeeds(float3 v,
+                  bool bTiling,
+                  float RepeatSize,
+                  out float seed000,
+                  out float seed001,
+                  out float seed010,
+                  out float seed011,
+                  out float seed100,
+                  out float seed101,
+                  out float seed110,
+                  out float seed111)
 {
     float3 fv = frac(v);
     float3 iv = floor(v);
@@ -346,7 +354,16 @@ float3 NoiseSeeds(float3 v, bool bTiling, float RepeatSize,
 float GradientNoise3D_ALU(float3 v, bool bTiling, float RepeatSize)
 {
     float seed000, seed001, seed010, seed011, seed100, seed101, seed110, seed111;
-    float3 fv = NoiseSeeds(v, bTiling, RepeatSize, seed000, seed001, seed010, seed011, seed100, seed101, seed110,
+    float3 fv = NoiseSeeds(v,
+                           bTiling,
+                           RepeatSize,
+                           seed000,
+                           seed001,
+                           seed010,
+                           seed011,
+                           seed100,
+                           seed101,
+                           seed110,
                            seed111);
 
     float rand000 = MGradient(int(seed000), fv - float3(0, 0, 0)).w;
@@ -493,7 +510,16 @@ float3x4 JacobianSimplex_ALU(float3 v, bool bTiling, float RepeatSize)
 float ValueNoise3D_ALU(float3 v, bool bTiling, float RepeatSize)
 {
     float seed000, seed001, seed010, seed011, seed100, seed101, seed110, seed111;
-    float3 fv = NoiseSeeds(v, bTiling, RepeatSize, seed000, seed001, seed010, seed011, seed100, seed101, seed110,
+    float3 fv = NoiseSeeds(v,
+                           bTiling,
+                           RepeatSize,
+                           seed000,
+                           seed001,
+                           seed010,
+                           seed011,
+                           seed100,
+                           seed101,
+                           seed110,
                            seed111);
 
     float rand000 = RandBBSfloat(seed000) * 2 - 1;
@@ -778,6 +804,21 @@ float4 GenerateRNG(in uint seed)
     rng_seed.z = LCG(seed);
     rng_seed.w = LCG(seed);
     return asfloat(rng_seed);
+}
+
+float3 GetLowDiscrepancyBlueNoise(int2 screenPosition, uint frameNumber, float noiseScale, UINT blueNoiseTexIndex)
+{
+    static const float goldenRatioConjugate = 0.61803398875f;
+
+    Texture2D<float4> blueNoise = ResourceDescriptorHeap[blueNoiseTexIndex];
+    // Load random value from a blue noise texture
+    float3 rnd = blueNoise.Load(int3(screenPosition % 256, 0)).rgb;
+
+    // Generate a low discrepancy sequence
+    rnd = frac(rnd + goldenRatioConjugate * ((frameNumber - 1) % 16));
+
+    // Scale the noise magnitude to [0, noiseScale]
+    return (rnd * noiseScale);
 }
 
 #endif

@@ -149,7 +149,9 @@ PSOutput PS(PSInput i)
         break;
     }
     }
-    finalColor.rgb = LinearToSRGB(finalColor.rgb);
+
+    finalColor += GetLowDiscrepancyBlueNoise(i.positionCS.xy, frameIndex, 1.f / 1024.f, BlueNoiseTexIndex);
+
     o.target0 = float4(finalColor.rgb, 1.f);
 
     return o;
