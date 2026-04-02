@@ -134,13 +134,14 @@ namespace ElysiaRenderer
         {
             m_pCommand->AddBarrier(m_pDisplayRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
             {
-                // m_pMaterial->SetUInt(ShaderIDs::g_TargetTexIndex,
-                //                      RenderTargetManager::GetInstance().GetRenderTexture(
-                //                                                            RenderResource::GetInstance().
-                //                                                            GetPropertyName(
-                //                                                                GBufferPass::RenderTextureIDs::GBuffer5ID))
-                //                                                        ->GetUAVResourceHeapIndex(),
-                //                      passID);
+                m_pMaterial->SetUInt(ShaderIDs::g_TargetTexIndex,
+                                     RenderTargetManager::GetInstance().GetRenderTexture(
+                                                                           RenderResource::GetInstance().
+                                                                           GetPropertyName(
+                                                                               BloomPass::RenderTextureIDs::BloomDownSampleRTID)
+                                                                           + std::to_wstring(1))
+                                                                       ->GetUAVResourceHeapIndex(),
+                                     passID);
                 SetSpaceResource(passData, PER_PASS_SPACE);
                 m_pCommand->DrawFullScreenTriangle();
             }

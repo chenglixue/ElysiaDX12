@@ -78,6 +78,10 @@ void GenerateRayMain()
     UINT probeState = Elysia_DDGI_LoadeProbeState(probeIndex);
 
     [branch]
+    if (probeIndex % 4 != frameIndex % 4)
+        return;
+
+    [branch]
     if (probeState == PROBE_STATE_INACTIVE && rayIndex >= RELOCATE_RAY_COUNT)
         return;
 
