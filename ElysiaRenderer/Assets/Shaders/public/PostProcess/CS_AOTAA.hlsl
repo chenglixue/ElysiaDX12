@@ -34,7 +34,7 @@ float Elysia_Sample_Importance(float2 uv);
 [numthreads(AO_GROUP_SIZE, AO_GROUP_SIZE, 1)]
 void TAA(uint3 id: SV_DispatchThreadID)
 {
-    RWTexture2D<float4> o = ResourceDescriptorHeap[g_TargetTexIndex];
+    RWTexture2D<float3> o = ResourceDescriptorHeap[g_TargetTexIndex];
     float2 screenUV = (float2(id.xy) + 0.5f) * g_TargetSize.zw;
 
     float rawDepth = LoadTexture2D(OpaqueDepthIndex, id);
@@ -94,8 +94,9 @@ void TAA(uint3 id: SV_DispatchThreadID)
 
     float dynamicWeight = lerp(g_BlendWeight, g_BlendWeight * 2.0, 1.0 - edgeScore);
 
-    float4 finalAO = lerp(historyAO, currAO, dynamicWeight);
-    o[id.xy] = finalAO;
+    float2 finalAO = lerp(historyAO, currAO, dynamicWeight);
+    float currDepth = SampleTexture2D(OpaqueDepthIndex, screenUV, ClampPointSampler);
+    o[id.xy].rgb = float3(finalAO, currDepth);
 }
 
 float4 UnpackEdges(float _packedVal)

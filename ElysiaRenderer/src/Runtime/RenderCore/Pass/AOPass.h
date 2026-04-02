@@ -111,6 +111,7 @@ PASS(AO_TAA_PASS,                       "public\\PostProcess\\CS_AOTAA.hlsl",   
             static inline size_t g_TargetTexIndex = PropertyToID(L"g_TargetTexIndex");
             static inline size_t g_TargetTexIndices = PropertyToID(L"g_TargetTexIndices");
             static inline size_t g_SourceTexIndex = PropertyToID(L"g_SourceTexIndex");
+            static inline size_t g_HistoryTex = PropertyToID(L"g_HistoryTex");
             static inline size_t g_ReinterleaveAOTexIndex = PropertyToID(
                 L"g_ReinterleaveAOTexIndex");
             static inline size_t g_SourceTexIndices = PropertyToID(L"g_SourceTexIndices");

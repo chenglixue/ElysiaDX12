@@ -23,6 +23,13 @@ void AOHIZNormal(UINT3 id : SV_DispatchThreadID)
     const UINT2 targetCoord = id.xy;
     const UINT2 srcCoord = id.xy * 2;
 
+    bool isEvenGroup = (layerIndex == 0 || layerIndex == 3);
+    bool isCurrentFrameActive = (isEvenGroup == (frameIndex % 2 == 0));
+    if (!isCurrentFrameActive)
+    {
+        return;
+    }
+
     if (targetCoord.x >= (uint)g_TargetSize.x || targetCoord.y >= (uint)g_TargetSize.y)
         return;
 

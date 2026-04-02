@@ -28,6 +28,7 @@ cbuffer PassConstant : register(b0, perPassSpace)
     UINT g_SourceTexIndex;
     UINT g_TargetTexIndex;
     UINT g_ReinterleaveAOTexIndex;
+    UINT g_HistoryTex;
 
     float2 g_NDCToViewMul;
     float2 g_NDCToViewAdd;
@@ -151,6 +152,13 @@ void DeinterleaveMain(UINT3 id : SV_DispatchThreadID)
 void CalcBaseAO(UINT3 id : SV_DispatchThreadID)
 {
     uint layerIndex = id.z;
+    bool isEvenGroup = (layerIndex == 0 || layerIndex == 3);
+    bool isCurrentFrameActive = (isEvenGroup == (frameIndex % 2 == 0));
+    if (!isCurrentFrameActive)
+    {
+        return;
+    }
+
     RWTexture2D<float2> o = ResourceDescriptorHeap[g_TargetTexIndices[layerIndex]];
     uint layerHeapIndex = g_SourceTexIndices[layerIndex];
 
@@ -256,6 +264,13 @@ void LayeredHBAOMain(UINT3 id : SV_DispatchThreadID)
     UINT AOLayerHeapIndex = g_DeinterleaveAOTexIndices[layerIndex];
     UINT DepthLayerHeapIndex = g_DeinterleaveDepthTexIndices[layerIndex];
 
+    bool isEvenGroup = (layerIndex == 0 || layerIndex == 3);
+    bool isCurrentFrameActive = (isEvenGroup == (frameIndex % 2 == 0));
+    if (!isCurrentFrameActive)
+    {
+        return;
+    }
+
     uint offsetX = layerIndex % 2;
     uint offsetY = layerIndex / 2;
     float2 localScreenUV = (float2(id.xy) + 0.5f) * g_DeinterleavedAOSize.zw;
@@ -338,7 +353,7 @@ void LayeredHBAOMain(UINT3 id : SV_DispatchThreadID)
 
     float importance = Elysia_Sample_Importance(
         (trunc(id.xy / 2) + 0.5f) * g_ImportanceBufferSize.zw);
-    UINT dirSampleCount = lerp(4, 8, importance);
+    UINT dirSampleCount = lerp(4, 6, importance);
 
     float baseAO = SampleTexture2D(AOLayerHeapIndex, localScreenUV, ClampPointSampler);
 
@@ -378,6 +393,10 @@ void ReinterleaveMain(UINT3 id : SV_DispatchThreadID)
 
     UINT2 pixelOffset = pixPos % 2;
     UINT centerLayerIndex = pixelOffset.x + pixelOffset.y * 2;
+
+    bool isEvenLayer = (centerLayerIndex == 0 || centerLayerIndex == 3);
+    bool isComputedThisFrame = (isEvenLayer == (frameIndex % 2 == 0));
+
     UINT rightLayerIndex = (1 - pixelOffset.x) + pixelOffset.y * 2;
     UINT bottomLayerIndex = pixelOffset.x + (1 - pixelOffset.y) * 2;
     UINT rightBottomLayerIndex = (1 - pixelOffset.x) + (1 - pixelOffset.y) * 2;
@@ -392,38 +411,40 @@ void ReinterleaveMain(UINT3 id : SV_DispatchThreadID)
 
     float2 simpleUV = (float2(readPos) + 0.5f) * g_DeinterleavedAOSize.zw;
 
-    float fmx = (float)pixelOffset.x;
-    float fmy = (float)pixelOffset.y;
-    float fmxe = (edgeLRTB.y - edgeLRTB.x);
-    float fmye = (edgeLRTB.w - edgeLRTB.z);
-
-    // Horizontal Neighbor UV
-    float2 uvH = (float2(pixPos) + float2(fmx + fmxe - 0.5, 0.5 - fmy)) * 0.5 *
-                 g_DeinterleavedAOSize.zw;
-
-    // Vertical Neighbor UV
-    float2 uvV = (float2(pixPos) + float2(0.5 - fmx, fmy - 0.5 + fmye)) * 0.5 *
-                 g_DeinterleavedAOSize.zw;
-
-    // Diagonal Neighbor UV
-    float2 uvD = (float2(pixPos) + float2(fmx - 0.5 + fmxe, fmy - 0.5 + fmye)) * 0.5 *
-                 g_DeinterleavedAOSize.zw;
+    // float fmx = (float)pixelOffset.x;
+    // float fmy = (float)pixelOffset.y;
+    // float fmxe = (edgeLRTB.y - edgeLRTB.x);
+    // float fmye = (edgeLRTB.w - edgeLRTB.z);
+    //
+    // // Horizontal Neighbor UV
+    // float2 uvH = (float2(pixPos) + float2(fmx + fmxe - 0.5, 0.5 - fmy)) * 0.5 *
+    //              g_DeinterleavedAOSize.zw;
+    //
+    // // Vertical Neighbor UV
+    // float2 uvV = (float2(pixPos) + float2(0.5 - fmx, fmy - 0.5 + fmye)) * 0.5 *
+    //              g_DeinterleavedAOSize.zw;
+    //
+    // // Diagonal Neighbor UV
+    // float2 uvD = (float2(pixPos) + float2(fmx - 0.5 + fmxe, fmy - 0.5 + fmye)) * 0.5 *
+    //              g_DeinterleavedAOSize.zw;
 
     float rightData = Elysia_Reinterleave_SampleAO(AORightHeapIndex, simpleUV);
     float bottomData = Elysia_Reinterleave_SampleAO(AOBottomHeapIndex, simpleUV);
     float rightBottomData = Elysia_Reinterleave_SampleAO(AORightBottomHeapIndex, simpleUV);
 
+    float finalAO = 0.0f;
+    float outEdge = 0.0f;
     float4 weight;
-    weight.x = 1.f;
+    weight.x = isComputedThisFrame ? 1.f : 0.f;
     weight.y = (edgeLRTB.r + edgeLRTB.g) * 0.5f;
     weight.z = (edgeLRTB.b + edgeLRTB.a) * 0.5f;
     weight.w = (weight.y + weight.z) * 0.5f;
-
     float weightSum = dot(weight, 1.f);
 
-    float finalAO = dot(float4(centerData.x, rightData, bottomData, rightBottomData),
-                        weight) / weightSum;
-    Elysia_Reinterleave_StoreOutput(id, float2(finalAO, centerData.y));
+    finalAO = dot(float4(centerData.x, rightData, bottomData, rightBottomData), weight) / weightSum;
+    outEdge = centerData.y;
+
+    Elysia_Reinterleave_StoreOutput(id, float2(finalAO, outEdge));
 }
 
 float4 CalcEdges(float centerZ, float leftZ, float rightZ, float topZ, float bottomZ)

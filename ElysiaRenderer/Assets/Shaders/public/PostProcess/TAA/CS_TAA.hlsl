@@ -121,20 +121,10 @@ void TAA(uint3 id : SV_DispatchThreadID)
         // SampleMinMax3x3(g_CurrTexIndex, upSampleUV, g_TAATexSize.zw, minColor, maxColor, currColor, avgColor, m1, m2);
         historyColor = TAAUVarianceClipBox(m1, m2, 1, historyColor);
 
-        float currRawDepth = SampleTexture2D(OpaqueDepthIndex, closetUV, ClampPointSampler);
-        float currLinear01Depth = Linear01Depth(currRawDepth, g_ZBufferParams);
-        float preRawDepth = SampleTexture2D(OpaqueDepthIndex, preUV, ClampPointSampler);
-        float preLinear01Depth = Linear01Depth(preRawDepth, g_ZBufferParams);
-        float depth01Diff = abs(currLinear01Depth - preLinear01Depth) / (
-                                max(currLinear01Depth, preLinear01Depth) + FLT_EPS);
-        float depthDiffThreshold = 0.03f;
-        float depthPenalty = 1.0f - smoothstep(depthDiffThreshold * 0.5f, depthDiffThreshold, depth01Diff);
-
         float velocityFactor = length(velocity) * g_TAATexSize.xy;
         float blendWeight = CalcTAAWeight(g_StaticBlendWeight, g_DynamicBlendWeight, g_MaxBlendWeight, velocityFactor);
         float spatialConfidence = ComputeTAAUWeight(posCenterToJitter, g_UpScaleFactor);
         // blendWeight = saturate(blendWeight * (1.0f - spatialConfidence * 0.1f));
-        blendWeight *= depthPenalty;
 
         float3 blendColor = lerp(currColor, historyColor, blendWeight);
         blendColor = TransformYCoCg2RGB(blendColor);

@@ -103,7 +103,7 @@ namespace ElysiaRenderer
         m_pTAA0RT = RenderTargetManager::GetInstance().CreateRWRenderTexture(
             static_cast<UINT64>(m_cameraWidth),
             static_cast<UINT64>(m_cameraHeight),
-            DXGI_FORMAT_R8G8_UNORM,
+            DXGI_FORMAT_R8G8B8A8_UNORM,
             true,
             RenderResource::GetInstance().
             GetPropertyName(
@@ -112,7 +112,7 @@ namespace ElysiaRenderer
         m_pTAA1RT = RenderTargetManager::GetInstance().CreateRWRenderTexture(
             static_cast<UINT64>(m_cameraWidth),
             static_cast<UINT64>(m_cameraHeight),
-            DXGI_FORMAT_R8G8_UNORM,
+            DXGI_FORMAT_R8G8B8A8_UNORM,
             true,
             RenderResource::GetInstance().
             GetPropertyName(
@@ -709,6 +709,19 @@ namespace ElysiaRenderer
         m_pCommand->SetPipeline(pipelineStateData);
         SetSpaceResource(passData, PER_FRAME_SPACE);
 
+        RenderTexture* currTAART = nullptr;
+        RenderTexture* historyTAART = nullptr;
+        if (m_currHistoryIndex == 0)
+        {
+            historyTAART = m_pTAA0RT;
+            currTAART = m_pTAA1RT;
+        }
+        else
+        {
+            historyTAART = m_pTAA1RT;
+            currTAART = m_pTAA0RT;
+        }
+
         auto targetRT = m_pAORT;
         m_pCommand->AddBarrier(m_pAORT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
         {
@@ -726,6 +739,9 @@ namespace ElysiaRenderer
                                    passID);
             m_pMaterial->SetUInt(ShaderIDs::g_ReinterleaveAOTexIndex,
                                  targetRT->GetResourceHeapIndex(),
+                                 passID);
+            m_pMaterial->SetUInt(ShaderIDs::g_HistoryTex,
+                                 historyTAART->GetResourceHeapIndex(),
                                  passID);
             m_pMaterial->SetFloat4(ShaderIDs::g_TargetSize,
                                    GetScreenSize(targetRT->GetWidth(), targetRT->GetHeight()),
