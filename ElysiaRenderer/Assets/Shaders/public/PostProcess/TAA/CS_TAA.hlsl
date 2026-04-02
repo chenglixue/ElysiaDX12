@@ -57,69 +57,92 @@ void TAA(uint3 id : SV_DispatchThreadID)
     if (writePos.x >= g_TAATexSize.x || writePos.y >= g_TAATexSize.y)
         return;
 
-    float2 upSampleUV = ((float2)readPos + 0.5f) * g_TAATexSize.zw;
-    // float2 closetUV = SampleClosestUV3x3(OpaqueDepthIndex, upSampleUV, g_TAATexSize.zw);
-    float2 closetUV;
-    // include jitter
-    float2 downSampleJiiterPos = upSampleUV * g_DownSampleTexSize.xy + g_JitterPixels / g_UpScaleFactor;
-    // 离downSamplePos最近的pixel中心
-    float2 centerDownSamplePos = floor(downSampleJiiterPos) + 0.5f;
-    // down sample pixel offset
-    float2 posCenterToJitter = downSampleJiiterPos - centerDownSamplePos;
-
-    float3 minColor, maxColor, currColor, avgColor, m1, m2;
-    DownSample3x3(g_CurrTexIndex,
-                  centerDownSamplePos,
-                  g_DownSampleTexSize,
-                  posCenterToJitter,
-                  g_UpScaleFactor,
-                  currColor,
-                  minColor,
-                  maxColor,
-                  m1,
-                  m2,
-                  closetUV);
-
-    float2 velocity = Elysia_Sample_Velocity(closetUV);
-    float2 preUV = upSampleUV - velocity;
-    if (any(preUV < 0.f) || any(preUV > 1.f))
+    if (g_UpScaleFactor == 1)
     {
-        float3 finalRGB = InverseReinhardTonemap(TransformYCoCg2RGB(currColor));
-        Elysia_Save_TAA(g_DestTexIndex, writePos, finalRGB);
-        return;
+        float2 screenUV = ((float2)readPos + 0.5f) * g_TAATexSize.zw;
+        float2 closetUV = SampleClosestUV3x3(OpaqueDepthIndex, screenUV, g_TAATexSize.zw);
+
+        float2 velocity = Elysia_Sample_Velocity(closetUV);
+        float2 preUV = screenUV - velocity;
+        float3 historyColor = CatmullRomSample(g_HistoryTexIndex, preUV, g_TAATexSize.zw);
+        historyColor = ReinhardTonemap(historyColor);
+        historyColor = TransformRGB2YCoCg(historyColor);
+
+        float3 minColor, maxColor, currColor, avgColor, m1, m2;
+        SampleMinMax3x3(g_CurrTexIndex, screenUV, g_TAATexSize.zw, minColor, maxColor, currColor, avgColor, m1, m2);
+        historyColor = VarianceClipBox(m1, m2, 1, historyColor);
+
+        float velocityFactor = length(velocity) * g_TAATexSize.xy;
+        float blendWeight = CalcTAAWeight(g_StaticBlendWeight, g_DynamicBlendWeight, g_MaxBlendWeight, velocityFactor);
+
+        float3 blendColor = lerp(currColor, historyColor, blendWeight);
+        blendColor = TransformYCoCg2RGB(blendColor);
+        blendColor = InverseReinhardTonemap(blendColor);
+        Elysia_Save_TAA(g_DestTexIndex, writePos, blendColor);
     }
-    float3 historyColor = CatmullRomSample(g_HistoryTexIndex, preUV, g_TAATexSize.zw);
-    if (any(isnan(historyColor)) || any(isinf(historyColor)))
+    else
     {
-        historyColor = currColor;
+        float2 upSampleUV = ((float2)readPos + 0.5f) * g_TAATexSize.zw;
+        // float2 closetUV = SampleClosestUV3x3(OpaqueDepthIndex, upSampleUV, g_TAATexSize.zw);
+        float2 closetUV = 0.f;
+        // include jitter
+        float2 downSampleJiiterPos = upSampleUV * g_DownSampleTexSize.xy + g_JitterPixels / g_UpScaleFactor;
+        // 离downSamplePos最近的pixel中心
+        float2 centerDownSamplePos = floor(downSampleJiiterPos) + 0.5f;
+        // down sample pixel offset
+        float2 posCenterToJitter = downSampleJiiterPos - centerDownSamplePos;
+
+        float3 minColor, maxColor, currColor, avgColor, m1, m2;
+        DownSample3x3(g_CurrTexIndex,
+                      centerDownSamplePos,
+                      g_DownSampleTexSize,
+                      posCenterToJitter,
+                      g_UpScaleFactor,
+                      currColor,
+                      minColor,
+                      maxColor,
+                      m1,
+                      m2,
+                      closetUV);
+
+        float2 velocity = Elysia_Sample_Velocity(closetUV);
+        float2 preUV = upSampleUV - velocity;
+        if (any(preUV < 0.f) || any(preUV > 1.f))
+        {
+            float3 finalRGB = InverseReinhardTonemap(TransformYCoCg2RGB(currColor));
+            Elysia_Save_TAA(g_DestTexIndex, writePos, finalRGB);
+            return;
+        }
+        float3 historyColor = CatmullRomSample(g_HistoryTexIndex, preUV, g_TAATexSize.zw);
+        historyColor = max(0.0f, historyColor);
+        historyColor = ReinhardTonemap(historyColor);
+        historyColor = TransformRGB2YCoCg(historyColor);
+
+        // SampleMinMax3x3(g_CurrTexIndex, upSampleUV, g_TAATexSize.zw, minColor, maxColor, currColor, avgColor, m1, m2);
+        historyColor = TAAUVarianceClipBox(m1, m2, 1, historyColor);
+
+        float currRawDepth = SampleTexture2D(OpaqueDepthIndex, closetUV, ClampPointSampler);
+        float currLinear01Depth = Linear01Depth(currRawDepth, g_ZBufferParams);
+        float preRawDepth = SampleTexture2D(OpaqueDepthIndex, preUV, ClampPointSampler);
+        float preLinear01Depth = Linear01Depth(preRawDepth, g_ZBufferParams);
+        float depth01Diff = abs(currLinear01Depth - preLinear01Depth) / (
+                                max(currLinear01Depth, preLinear01Depth) + FLT_EPS);
+        float depthDiffThreshold = 0.03f;
+        float depthPenalty = 1.0f - smoothstep(depthDiffThreshold * 0.5f, depthDiffThreshold, depth01Diff);
+
+        float velocityFactor = length(velocity) * g_TAATexSize.xy;
+        float blendWeight = CalcTAAWeight(g_StaticBlendWeight, g_DynamicBlendWeight, g_MaxBlendWeight, velocityFactor);
+        float spatialConfidence = ComputeTAAUWeight(posCenterToJitter, g_UpScaleFactor);
+        // blendWeight = saturate(blendWeight * (1.0f - spatialConfidence * 0.1f));
+        blendWeight *= depthPenalty;
+
+        float3 blendColor = lerp(currColor, historyColor, blendWeight);
+        blendColor = TransformYCoCg2RGB(blendColor);
+        blendColor = InverseReinhardTonemap(blendColor);
+        blendColor = max(0.0f, blendColor);
+        Elysia_Save_TAA(g_DestTexIndex, writePos, blendColor);
     }
-    historyColor = max(0.0f, historyColor);
-    historyColor = ReinhardTonemap(historyColor);
-    historyColor = TransformRGB2YCoCg(historyColor);
 
-    // SampleMinMax3x3(g_CurrTexIndex, upSampleUV, g_TAATexSize.zw, minColor, maxColor, currColor, avgColor, m1, m2);
-    historyColor = TAAUVarianceClipBox(m1, m2, 2, historyColor);
-
-    float currRawDepth = SampleTexture2D(OpaqueDepthIndex, closetUV, ClampPointSampler);
-    float currLinear01Depth = Linear01Depth(currRawDepth, g_ZBufferParams);
-    float preRawDepth = SampleTexture2D(OpaqueDepthIndex, preUV, ClampPointSampler);
-    float preLinear01Depth = Linear01Depth(preRawDepth, g_ZBufferParams);
-    float depth01Diff = abs(currLinear01Depth - preLinear01Depth) / (
-                            max(currLinear01Depth, preLinear01Depth) + FLT_EPS);
-    float depthDiffThreshold = 0.03f;
-    float depthPenalty = 1.0f - smoothstep(depthDiffThreshold * 0.5f, depthDiffThreshold, depth01Diff);
-
-    float velocityFactor = length(velocity) * g_TAATexSize.xy;
-    float blendWeight = CalcTAAWeight(g_StaticBlendWeight, g_DynamicBlendWeight, g_MaxBlendWeight, velocityFactor);
-    float spatialConfidence = ComputeTAAUWeight(posCenterToJitter, g_UpScaleFactor);
-    blendWeight = saturate(blendWeight * (1.0f - spatialConfidence * 0.5f));
-    blendWeight *= depthPenalty;
-
-    float3 blendColor = lerp(currColor, historyColor, blendWeight);
-    blendColor = TransformYCoCg2RGB(blendColor);
-    blendColor = InverseReinhardTonemap(blendColor);
-    blendColor = max(0.0f, blendColor);
-    Elysia_Save_TAA(g_DestTexIndex, writePos, blendColor);
 }
 
 void SampleMinMax3x3(UINT currFrameTexIndex,

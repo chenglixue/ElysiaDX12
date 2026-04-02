@@ -55,7 +55,7 @@ void Tonemap(uint3 dispatchThreadID: SV_DispatchThreadID)
 
     RWTexture2D<float4> o = ResourceDescriptorHeap[g_DestTextureIndex];
     float4 finalColor = LoadTexture2D(g_DestTextureIndex, dispatchThreadID.xy);
-    float4 bloomColor = SampleTexture2D(g_BloomTexIndex, screenUV, ClampPointSampler);
+    float4 bloomColor = SampleTexture2D(g_BloomTexIndex, screenUV, ClampLinearSampler);
     finalColor += bloomColor * g_BloomIntensity * rcp((float)BLOOM_MIPMAP_COUNT);
     finalColor *= g_LocalExposure;
 

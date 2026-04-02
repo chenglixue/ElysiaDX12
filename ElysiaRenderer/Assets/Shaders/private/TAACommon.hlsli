@@ -50,11 +50,10 @@ float3 TransformYCoCg2RGB(float3 c)
 
 float3 ReinhardTonemap(float3 color)
 {
-    return color * rcp(1.0 + Luminance(clamp(color, 0.f, 0.9999f)) + FLT_EPS);
+    return color * rcp(1.0 + Luminance(color) + FLT_EPS);
 }
 float3 InverseReinhardTonemap(float3 color)
 {
-    color = clamp(color, 0.f, 0.9999f);
     return color * rcp(1.f - Luminance(color) + FLT_EPS);
 }
 
@@ -395,9 +394,4 @@ void DownSample3x3(UINT currFrameTexIndex,
     m2 *= rcp(validVarianceSamples);
 }
 
-float KarisWeight(float3 color)
-{
-    float luma = max(color.r, max(color.g, color.b));
-    return 1.0f / (1.0f + luma);
-}
 #endif

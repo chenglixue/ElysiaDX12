@@ -10,6 +10,15 @@ cbuffer PassConstant : register(b0, perPassSpace)
     UINT g_SharpenTexIndex;
     float g_SharpenIntensity;
 }
+float3 CompressHDR(float3 c)
+{
+    return c / (1.0f + c);
+}
+
+float3 DecompressHDR(float3 c)
+{
+    return c / max(1.0f - c, 1e-5f);
+}
 
 [numthreads(GROUP_SIZE, GROUP_SIZE, 1)]
 void CAS(uint3 id : SV_DispatchThreadID)
@@ -22,11 +31,11 @@ void CAS(uint3 id : SV_DispatchThreadID)
     float2 uv = (readPos + 0.5f) * g_SharpenTexSize.zw;
     float2 duv = g_SharpenTexSize.zw;
 
-    float3 bottomColor = SampleTexture2D(g_SharpenTexIndex, uv + int2(0, -1) * duv, ClampPointSampler);
-    float3 leftColor = SampleTexture2D(g_SharpenTexIndex, uv + int2(-1, 0) * duv, ClampPointSampler);
-    float3 middleColor = SampleTexture2D(g_SharpenTexIndex, uv + int2(0, 0) * duv, ClampPointSampler);
-    float3 rightColor = SampleTexture2D(g_SharpenTexIndex, uv + int2(1, 0) * duv, ClampPointSampler);
-    float3 topColor = SampleTexture2D(g_SharpenTexIndex, uv + int2(0, 1) * duv, ClampPointSampler);
+    float3 bottomColor = CompressHDR(SampleTexture2D(g_SharpenTexIndex, uv + int2(0, -1) * duv, ClampPointSampler));
+    float3 leftColor = CompressHDR(SampleTexture2D(g_SharpenTexIndex, uv + int2(-1, 0) * duv, ClampPointSampler));
+    float3 middleColor = CompressHDR(SampleTexture2D(g_SharpenTexIndex, uv + int2(0, 0) * duv, ClampPointSampler));
+    float3 rightColor = CompressHDR(SampleTexture2D(g_SharpenTexIndex, uv + int2(1, 0) * duv, ClampPointSampler));
+    float3 topColor = CompressHDR(SampleTexture2D(g_SharpenTexIndex, uv + int2(0, 1) * duv, ClampPointSampler));
 
     float3 minColor = min(min(min(bottomColor, leftColor), min(middleColor, rightColor)), topColor);
     float3 maxColor = max(max(max(bottomColor, leftColor), max(middleColor, rightColor)), topColor);
@@ -46,5 +55,5 @@ void CAS(uint3 id : SV_DispatchThreadID)
     float3 finalColor = saturate(
         (bottomColor * w + leftColor * w + rightColor * w + topColor * w + middleColor) * rcpWeight);
 
-    Elyisa_CAS_Save(g_SharpenTexIndex, writePos, finalColor);
+    Elyisa_CAS_Save(g_SharpenTexIndex, writePos, DecompressHDR(finalColor));
 }

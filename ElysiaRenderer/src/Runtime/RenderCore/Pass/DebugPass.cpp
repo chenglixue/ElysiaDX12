@@ -128,20 +128,41 @@ namespace ElysiaRenderer
             break;
         }
         case DebugMode::Bloom:
-        case DebugMode::AO:
-        case DebugMode::Velocity:
-        case DebugMode::Normal:
         {
-            m_pCommand->AddBarrier(m_pDisplayRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+            int mipmapLevel = UserData::GetInstance().bloomParameter.mipmap;
+            switch (UserData::GetInstance().bloomParameter.debugMode)
+            {
+            case DebugDownOrUp::Up:
+            {
+                m_pMaterial->SetUInt(ShaderIDs::g_TargetTexIndex,
+                                     RenderTargetManager::GetInstance().GetRenderTexture(
+                                                                           RenderResource::GetInstance().
+                                                                           GetPropertyName(
+                                                                               BloomPass::RenderTextureIDs::BloomUpSampleRTID)
+                                                                           + std::to_wstring(mipmapLevel))
+                                                                       ->GetUAVResourceHeapIndex(),
+                                     passID);
+                break;
+            }
+            case DebugDownOrUp::Down:
             {
                 m_pMaterial->SetUInt(ShaderIDs::g_TargetTexIndex,
                                      RenderTargetManager::GetInstance().GetRenderTexture(
                                                                            RenderResource::GetInstance().
                                                                            GetPropertyName(
                                                                                BloomPass::RenderTextureIDs::BloomDownSampleRTID)
-                                                                           + std::to_wstring(1))
+                                                                           + std::to_wstring(mipmapLevel))
                                                                        ->GetUAVResourceHeapIndex(),
                                      passID);
+            }
+            }
+        }
+        case DebugMode::AO:
+        case DebugMode::Velocity:
+        case DebugMode::Normal:
+        {
+            m_pCommand->AddBarrier(m_pDisplayRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+            {
                 SetSpaceResource(passData, PER_PASS_SPACE);
                 m_pCommand->DrawFullScreenTriangle();
             }

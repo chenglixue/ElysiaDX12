@@ -56,6 +56,8 @@ namespace ElysiaRenderer
 
         UINT m_cameraWidth;
         UINT m_cameraHeight;
+        UINT m_displayWidth;
+        UINT m_displayHeight;
         static const UINT m_mipmapCount = 6;
         std::array<UINT2, m_mipmapCount> m_mipmapResolutions{};
         std::array<RenderTexture*, m_mipmapCount> m_downSampleRTs{};

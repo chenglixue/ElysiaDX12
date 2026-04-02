@@ -40,44 +40,44 @@ void BloomKarisDownSample(uint3 id : SV_DispatchThreadID)
 
     float3 insideTopLeft = SampleTexture2D(g_SourceTextureIndex,
                                            screenUV + float2(-1.f, 1.f) * g_SourceSize.zw,
-                                           WarpLinearSampler);
+                                           ClampLinearSampler);
     float3 insideTopRight = SampleTexture2D(g_SourceTextureIndex,
                                             screenUV + float2(1.f, 1.f) * g_SourceSize.zw,
-                                            WarpLinearSampler);
+                                            ClampLinearSampler);
     float3 insideBottomLeft = SampleTexture2D(g_SourceTextureIndex,
                                               screenUV + float2(-1.f, -1.f) * g_SourceSize.zw,
-                                              WarpLinearSampler);
+                                              ClampLinearSampler);
     float3 insideBottomRight = SampleTexture2D(g_SourceTextureIndex,
                                                screenUV + float2(1.f, -1.f) * g_SourceSize.zw,
-                                               WarpLinearSampler);
+                                               ClampLinearSampler);
 
     float3 outSideLeftTop = SampleTexture2D(g_SourceTextureIndex,
                                             screenUV + float2(-2.f, 2.f) * g_SourceSize.zw,
-                                            WarpLinearSampler);
+                                            ClampLinearSampler);
     float3 outSideLeftMiddle = SampleTexture2D(g_SourceTextureIndex,
                                                screenUV + float2(-2.f, 0.f) * g_SourceSize.zw,
-                                               WarpLinearSampler);
+                                               ClampLinearSampler);
     float3 outSideLeftBottom = SampleTexture2D(g_SourceTextureIndex,
                                                screenUV + float2(-2.f, -2.f) * g_SourceSize.zw,
-                                               WarpLinearSampler);
+                                               ClampLinearSampler);
     float3 outSideMiddleTop = SampleTexture2D(g_SourceTextureIndex,
                                               screenUV + float2(0.f, 2.f) * g_SourceSize.zw,
-                                              WarpLinearSampler);
+                                              ClampLinearSampler);
     float3 outSideMiddle = SampleTexture2D(g_SourceTextureIndex,
                                            screenUV,
-                                           WarpLinearSampler);
+                                           ClampLinearSampler);
     float3 outSideMiddleBottom = SampleTexture2D(g_SourceTextureIndex,
                                                  screenUV + float2(0.f, -2.f) * g_SourceSize.zw,
-                                                 WarpLinearSampler);
+                                                 ClampLinearSampler);
     float3 outSideRightTop = SampleTexture2D(g_SourceTextureIndex,
                                              screenUV + float2(2.f, 2.f) * g_SourceSize.zw,
-                                             WarpLinearSampler);
+                                             ClampLinearSampler);
     float3 outSideRightMiddle = SampleTexture2D(g_SourceTextureIndex,
                                                 screenUV + float2(2.f, 0.f) * g_SourceSize.zw,
-                                                WarpLinearSampler);
+                                                ClampLinearSampler);
     float3 outSideRightBottom = SampleTexture2D(g_SourceTextureIndex,
                                                 screenUV + float2(2.f, -2.f) * g_SourceSize.zw,
-                                                WarpLinearSampler);
+                                                ClampLinearSampler);
 
     float3 groupCenterColor = (insideTopLeft + insideTopRight + insideBottomLeft + insideBottomRight) * 0.25f;
     float3 groupTopLeftColor = (outSideLeftTop + outSideLeftMiddle + outSideMiddle + outSideMiddleTop) * 0.25f;
@@ -101,7 +101,7 @@ void BloomKarisDownSample(uint3 id : SV_DispatchThreadID)
 
     float3 finalColor = totalColor / (totalWeight + 1e-6);
 
-    Elysia_Store_Bloom(writePos, g_DestTextureIndex, finalColor);
+    Elysia_Store_Bloom(writePos, g_DestTextureIndex, SafeHDR(finalColor));
 }
 
 [numthreads(GROUP_SIZE, GROUP_SIZE, 1)]
@@ -115,44 +115,44 @@ void BloomWeightedDownSample(uint3 id : SV_DispatchThreadID)
 
     float3 insideTopLeft = SampleTexture2D(g_SourceTextureIndex,
                                            screenUV + float2(-1.f, 1.f) * g_SourceSize.zw,
-                                           WarpLinearSampler);
+                                           ClampLinearSampler);
     float3 insideTopRight = SampleTexture2D(g_SourceTextureIndex,
                                             screenUV + float2(1.f, 1.f) * g_SourceSize.zw,
-                                            WarpLinearSampler);
+                                            ClampLinearSampler);
     float3 insideBottomLeft = SampleTexture2D(g_SourceTextureIndex,
                                               screenUV + float2(-1.f, -1.f) * g_SourceSize.zw,
-                                              WarpLinearSampler);
+                                              ClampLinearSampler);
     float3 insideBottomRight = SampleTexture2D(g_SourceTextureIndex,
                                                screenUV + float2(1.f, -1.f) * g_SourceSize.zw,
-                                               WarpLinearSampler);
+                                               ClampLinearSampler);
 
     float3 outSideLeftTop = SampleTexture2D(g_SourceTextureIndex,
                                             screenUV + float2(-2.f, 2.f) * g_SourceSize.zw,
-                                            WarpLinearSampler);
+                                            ClampLinearSampler);
     float3 outSideLeftMiddle = SampleTexture2D(g_SourceTextureIndex,
                                                screenUV + float2(-2.f, 0.f) * g_SourceSize.zw,
-                                               WarpLinearSampler);
+                                               ClampLinearSampler);
     float3 outSideLeftBottom = SampleTexture2D(g_SourceTextureIndex,
                                                screenUV + float2(-2.f, -2.f) * g_SourceSize.zw,
-                                               WarpLinearSampler);
+                                               ClampLinearSampler);
     float3 outSideMiddleTop = SampleTexture2D(g_SourceTextureIndex,
                                               screenUV + float2(0.f, 2.f) * g_SourceSize.zw,
-                                              WarpLinearSampler);
+                                              ClampLinearSampler);
     float3 outSideMiddle = SampleTexture2D(g_SourceTextureIndex,
                                            screenUV,
-                                           WarpLinearSampler);
+                                           ClampLinearSampler);
     float3 outSideMiddleBottom = SampleTexture2D(g_SourceTextureIndex,
                                                  screenUV + float2(0.f, -2.f) * g_SourceSize.zw,
-                                                 WarpLinearSampler);
+                                                 ClampLinearSampler);
     float3 outSideRightTop = SampleTexture2D(g_SourceTextureIndex,
                                              screenUV + float2(2.f, 2.f) * g_SourceSize.zw,
-                                             WarpLinearSampler);
+                                             ClampLinearSampler);
     float3 outSideRightMiddle = SampleTexture2D(g_SourceTextureIndex,
                                                 screenUV + float2(2.f, 0.f) * g_SourceSize.zw,
-                                                WarpLinearSampler);
+                                                ClampLinearSampler);
     float3 outSideRightBottom = SampleTexture2D(g_SourceTextureIndex,
                                                 screenUV + float2(2.f, -2.f) * g_SourceSize.zw,
-                                                WarpLinearSampler);
+                                                ClampLinearSampler);
 
     float3 groupCenterColor = (insideTopLeft + insideTopRight + insideBottomLeft + insideBottomRight) * 0.25f;
     float3 groupTopLeftColor = (outSideLeftTop + outSideLeftMiddle + outSideMiddle + outSideMiddleTop) * 0.25f;
@@ -185,34 +185,34 @@ void Bloom3x3TentUpSample(uint3 id : SV_DispatchThreadID)
 
     float3 leftTopColor = SampleTexture2D(g_SourceTextureIndex,
                                           screenUV + float2(-1.f, 1.f) * offset,
-                                          WarpLinearSampler);
+                                          ClampLinearSampler);
     float3 leftMiddleColor = SampleTexture2D(g_SourceTextureIndex,
                                              screenUV + float2(-1.f, 0.f) * offset,
-                                             WarpLinearSampler);
+                                             ClampLinearSampler);
     float3 leftBottomColor = SampleTexture2D(g_SourceTextureIndex,
                                              screenUV + float2(-1.f, -1.f) * offset,
-                                             WarpLinearSampler);
+                                             ClampLinearSampler);
     float3 middleTopColor = SampleTexture2D(g_SourceTextureIndex,
                                             screenUV + float2(0.f, 1.f) * offset,
-                                            WarpLinearSampler);
-    float3 middleColor = SampleTexture2D(g_SourceTextureIndex, screenUV, WarpLinearSampler);
+                                            ClampLinearSampler);
+    float3 middleColor = SampleTexture2D(g_SourceTextureIndex, screenUV, ClampLinearSampler);
     float3 middleBottomColor = SampleTexture2D(g_SourceTextureIndex,
                                                screenUV + float2(0.f, -1.f) * offset,
-                                               WarpLinearSampler);
+                                               ClampLinearSampler);
     float3 rightTopColor = SampleTexture2D(g_SourceTextureIndex,
                                            screenUV + float2(1.f, 1.f) * offset,
-                                           WarpLinearSampler);
+                                           ClampLinearSampler);
     float3 rightMiddleColor = SampleTexture2D(g_SourceTextureIndex,
                                               screenUV + float2(1.f, 0.f) * offset,
-                                              WarpLinearSampler);
+                                              ClampLinearSampler);
     float3 rightBottomColor = SampleTexture2D(g_SourceTextureIndex,
                                               screenUV + float2(1.f, -1.f) * offset,
-                                              WarpLinearSampler);
+                                              ClampLinearSampler);
 
     float3 finalColor = (leftTopColor + leftBottomColor + rightTopColor + rightBottomColor) * rcp(16.f)
                         + (leftMiddleColor + middleTopColor + middleBottomColor + rightMiddleColor) * rcp(8.f)
                         + middleColor * rcp(4.f);
-    float3 destColor = SampleTexture2D(g_DownSampleDestTexIndex, screenUV, WarpLinearSampler);
+    float3 destColor = SampleTexture2D(g_DownSampleDestTexIndex, screenUV, ClampLinearSampler);
     finalColor += destColor;
 
     Elysia_Store_Bloom(writePos, g_DestTextureIndex, finalColor);

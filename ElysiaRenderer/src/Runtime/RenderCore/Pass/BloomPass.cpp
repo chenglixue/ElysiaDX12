@@ -36,8 +36,10 @@ namespace ElysiaRenderer
 
     void BloomPass::Configure()
     {
-        m_cameraWidth = std::floor(m_displaySize.x * UserData::GetInstance().taaParameter.sampleRate);
-        m_cameraHeight = std::floor(m_displaySize.y * UserData::GetInstance().taaParameter.sampleRate);
+        m_displayWidth = (UINT)m_displaySize.x;
+        m_displayHeight = (UINT)m_displaySize.y;
+        m_cameraWidth = (UINT)m_displaySize.x >> 1;
+        m_cameraHeight = (UINT)m_displaySize.x >> 1;
 
         m_mipmapResolutions[0] = UINT2(m_cameraWidth, m_cameraHeight);
         for (UINT i = 1; i < m_mipmapCount; ++i)
@@ -124,29 +126,29 @@ namespace ElysiaRenderer
         m_pCommand->SetPipeline(pipelineStateData);
         SetSpaceResource(passData, PER_FRAME_SPACE);
 
-        m_pCommand->AddBarrier(m_downSampleRTs[1], D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+        m_pCommand->AddBarrier(m_downSampleRTs[0], D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
         {
             m_pMaterial->SetUInt(ShaderIDs::g_SourceTextureIndex,
                                  m_pDisplayRT->GetUAVResourceHeapIndex(),
                                  passID);
             m_pMaterial->SetUInt(ShaderIDs::g_DestTextureIndexID,
-                                 m_downSampleRTs[1]->GetUAVResourceHeapIndex(),
+                                 m_downSampleRTs[0]->GetUAVResourceHeapIndex(),
                                  passID);
             m_pMaterial->SetFloat4(ShaderIDs::g_SourceSize,
-                                   GetScreenSize(m_mipmapResolutions[0].x, m_mipmapResolutions[0].y),
+                                   GetScreenSize(m_displayWidth, m_displayHeight),
                                    passID);
             m_pMaterial->SetFloat4(ShaderIDs::g_DestSize,
-                                   GetScreenSize(m_mipmapResolutions[1].x, m_mipmapResolutions[1].y),
+                                   GetScreenSize(m_mipmapResolutions[0].x, m_mipmapResolutions[0].y),
                                    passID);
             SetSpaceResource(passData, PER_PASS_SPACE);
 
             auto threadGroupSize = passData.GetKernelThreadGroupSizes();
-            m_pCommand->Dispatch(CeilDivide(m_mipmapResolutions[1].x, threadGroupSize.x),
-                                 CeilDivide(m_mipmapResolutions[1].y, threadGroupSize.y),
+            m_pCommand->Dispatch(CeilDivide(m_mipmapResolutions[0].x, threadGroupSize.x),
+                                 CeilDivide(m_mipmapResolutions[0].y, threadGroupSize.y),
                                  threadGroupSize.z);
-            m_pCommand->AddUAVBarrier(m_downSampleRTs[1], false);
+            m_pCommand->AddUAVBarrier(m_downSampleRTs[0], false);
         }
-        m_pCommand->AddBarrier(m_downSampleRTs[1], D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+        m_pCommand->AddBarrier(m_downSampleRTs[0], D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
         m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
     }
     void BloomPass::DoBloomWeightDownSample()
@@ -161,7 +163,7 @@ namespace ElysiaRenderer
         m_pCommand->SetPipeline(pipelineStateData);
         SetSpaceResource(passData, PER_FRAME_SPACE);
 
-        for (UINT i = 2; i < m_mipmapCount; ++i)
+        for (UINT i = 1; i < m_mipmapCount; ++i)
         {
             m_pCommand->AddBarrier(m_downSampleRTs[i], D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
@@ -210,6 +212,10 @@ namespace ElysiaRenderer
             m_pMaterial->SetUInt(ShaderIDs::g_DestTextureIndexID,
                                  m_upSampleRTs[m_mipmapCount - 1]->GetUAVResourceHeapIndex(),
                                  passID);
+            m_pMaterial->SetFloat4(ShaderIDs::g_DestSize,
+                                   GetScreenSize(m_mipmapResolutions[m_mipmapCount - 1].x,
+                                                 m_mipmapResolutions[m_mipmapCount - 1].y),
+                                   passID);
             SetSpaceResource(passData, PER_PASS_SPACE);
 
             auto threadGroupSize = passData.GetKernelThreadGroupSizes();
@@ -238,13 +244,11 @@ namespace ElysiaRenderer
             m_pCommand->AddBarrier(m_upSampleRTs[i], D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
             m_pMaterial->SetUInt(ShaderIDs::g_SourceTextureIndex,
-                                 m_downSampleRTs[i + 1]->GetUAVResourceHeapIndex(),
+                                 m_upSampleRTs[i + 1]->GetUAVResourceHeapIndex(),
                                  passID);
             m_pMaterial->SetUInt(ShaderIDs::g_DestTextureIndexID, m_upSampleRTs[i]->GetUAVResourceHeapIndex(), passID);
             m_pMaterial->SetUInt(ShaderIDs::g_DownSampleDestTexIndex,
-                                 i == 0
-                                     ? m_pDisplayRT->GetUAVResourceHeapIndex()
-                                     : m_downSampleRTs[i]->GetUAVResourceHeapIndex(),
+                                 m_downSampleRTs[i]->GetUAVResourceHeapIndex(),
                                  passID);
             m_pMaterial->SetFloat4(ShaderIDs::g_SourceSize,
                                    GetScreenSize(m_mipmapResolutions[i + 1].x, m_mipmapResolutions[i + 1].y),

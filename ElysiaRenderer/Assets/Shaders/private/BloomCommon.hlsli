@@ -21,13 +21,19 @@ float GetLuminanceWeight(float luminance)
 }
 float GetLuminanceWeight(float3 color)
 {
-    float luminance = Luminance(color);
+    float luminance = Luminance(max(color, 0.f));
 
     return rcp(1.f + luminance);
 }
 
 float GetKarisWeight(float3 color)
 {
-    return rcp(1.f + Luminance(color));
+    return rcp(1.f + Luminance(max(color, 0.f)));
+}
+
+float3 SafeHDR(float3 c)
+{
+    float3 sanitized = clamp(c, 0.0, 65000.0);
+    return any(isnan(sanitized)) ? 0.0f : sanitized;
 }
 #endif

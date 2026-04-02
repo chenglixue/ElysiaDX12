@@ -281,6 +281,7 @@
 		<ClInclude Include="src\Runtime\Engine\ElysiaFrame.h"/>
 		<ClInclude Include="src\Runtime\Engine\FrameContext.h"/>
 		<ClInclude Include="src\Runtime\Engine\FrameworkWindows.h"/>
+		<ClInclude Include="src\Runtime\Engine\ImGuiUtility.h"/>
 		<ClInclude Include="src\Runtime\RenderCore\AOUtility.h"/>
 		<ClInclude Include="src\Runtime\RenderCore\BindlessTextureManager.h"/>
 		<ClInclude Include="src\Runtime\RenderCore\BloomUtility.h"/>
@@ -512,6 +513,7 @@
 		<ClCompile Include="src\Runtime\Engine\ElysiaFrame.cpp"/>
 		<ClCompile Include="src\Runtime\Engine\FrameContext.cpp"/>
 		<ClCompile Include="src\Runtime\Engine\FrameworkWindows.cpp"/>
+		<ClCompile Include="src\Runtime\Engine\ImGuiUtility.cpp"/>
 		<ClCompile Include="src\Runtime\RenderCore\BindlessTextureManager.cpp"/>
 		<ClCompile Include="src\Runtime\RenderCore\BufferManager.cpp"/>
 		<ClCompile Include="src\Runtime\RenderCore\CameraManager.cpp"/>
