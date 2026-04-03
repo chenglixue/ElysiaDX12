@@ -173,6 +173,8 @@ PASS(AO_TAA_PASS,                       "public\\PostProcess\\CS_AOTAA.hlsl",   
             static inline size_t g_bDebugImportance = PropertyToID(L"g_bDebugImportance");
             static inline size_t g_bDebugHIZMipmap = PropertyToID(L"g_bDebugHIZMipmap");
             static inline size_t g_IsBlur = PropertyToID(L"g_IsBlur");
+
+            static inline size_t g_ActiveLayerIndex = PropertyToID(L"g_ActiveLayerIndex");
         };
         struct TAAData
         {
@@ -189,9 +191,9 @@ PASS(AO_TAA_PASS,                       "public\\PostProcess\\CS_AOTAA.hlsl",   
 
         void DoHIZ();
         void DoDeinterleaveDepth();
-        void DoDeinterleaveBaseAO();
+        void DoDeinterleaveBaseAO(const FrameContext& context);
         void DoImportance();
-        void DoDeinterleaveCalcAO();
+        void DoDeinterleaveCalcAO(const FrameContext& context);
         void DoBilateralBlur();
         void DoReinterleave();
 

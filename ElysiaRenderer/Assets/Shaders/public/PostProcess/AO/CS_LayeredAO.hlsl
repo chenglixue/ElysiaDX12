@@ -54,6 +54,7 @@ cbuffer PassConstant : register(b0, perPassSpace)
 
     float g_SampleImportanceThreshold;
     UINT g_AOImportanceTexIndex;
+    UINT g_ActiveLayerIndex;
 
     float4 g_AOSampleKernelArray[_AO_MAX_SAMPLE_COUNT];
 }
@@ -151,13 +152,8 @@ void DeinterleaveMain(UINT3 id : SV_DispatchThreadID)
 [numthreads(GROUP_SIZE, GROUP_SIZE, 1)]
 void CalcBaseAO(UINT3 id : SV_DispatchThreadID)
 {
-    uint layerIndex = id.z;
-    bool isEvenGroup = (layerIndex == 0 || layerIndex == 3);
-    bool isCurrentFrameActive = (isEvenGroup == (frameIndex % 2 == 0));
-    if (!isCurrentFrameActive)
-    {
-        return;
-    }
+    // uint layerIndex = id.z;
+    uint layerIndex = g_ActiveLayerIndex;
 
     RWTexture2D<float2> o = ResourceDescriptorHeap[g_TargetTexIndices[layerIndex]];
     uint layerHeapIndex = g_SourceTexIndices[layerIndex];
@@ -173,7 +169,7 @@ void CalcBaseAO(UINT3 id : SV_DispatchThreadID)
     float eyeDepth = pixZ;
 
     uint offsetX = layerIndex % 2;
-    uint offsetY = layerIndex / 2;
+    uint offsetY = layerIndex * rcp(2);
     float2 fullScreenUV = (float2(id.xy * 2 + uint2(offsetX, offsetY)) + 0.5f) *
                           g_FullScreenSize.zw;
 
@@ -186,15 +182,15 @@ void CalcBaseAO(UINT3 id : SV_DispatchThreadID)
     float3 normalVS = normalize(mul(inputParam.NormalWS, (float3x3)viewMatrix));
 
     float radius = g_AORadius;
-    const float EffectSamplingRadiusNearLimitRec = rcp(radius * 1.2f / rcp(projMatrix[1][1]));
-    const float tooCloseLimitMod = saturate(length(inputParam.PositionVS) *
-                                            EffectSamplingRadiusNearLimitRec) * 0.8 + 0.2;
-    radius *= tooCloseLimitMod;
-    float falloffCalcMulSq = -1.0f / (radius * radius);
+    // const float EffectSamplingRadiusNearLimitRec = rcp(radius * 1.2f * rcp(projMatrix[1][1]));
+    // const float tooCloseLimitMod = saturate(length(inputParam.PositionVS) *
+    //                                         EffectSamplingRadiusNearLimitRec) * 0.8 + 0.2;
+    // radius *= tooCloseLimitMod;
+    float falloffCalcMulSq = -rcp(radius * radius);
 
     const float2 pixelDirRBViewspaceSizeAtCenterZ =
         inputParam.PositionVS.z * g_NDCToViewMul * g_TargetSize.zw;
-    float pixLookupRadiusMod = (0.85f * radius) / pixelDirRBViewspaceSizeAtCenterZ.x;
+    float pixLookupRadiusMod = (0.85f * radius) * rcp(pixelDirRBViewspaceSizeAtCenterZ.x);
 
     float nearScreenBorder = min(min(fullScreenUV.x, 1.0 - fullScreenUV.x),
                                  min(fullScreenUV.y, 1.0 - fullScreenUV.y));
@@ -250,9 +246,8 @@ void CalcBaseAO(UINT3 id : SV_DispatchThreadID)
                       weightSum);
     }
 
-    float finalObscurance = obscuranceSum / (weightSum + 1e-6);
+    float finalObscurance = obscuranceSum * rcp(weightSum + 1e-6);
     float normalizedWeight = weightSum * 0.05f;
-    // normalizedWeight *= PackEdges(edgeWeight);
 
     o[id.xy].rg = float2(finalObscurance, normalizedWeight);
 }
@@ -260,19 +255,13 @@ void CalcBaseAO(UINT3 id : SV_DispatchThreadID)
 [numthreads(GROUP_SIZE, GROUP_SIZE, 1)]
 void LayeredHBAOMain(UINT3 id : SV_DispatchThreadID)
 {
-    UINT layerIndex = id.z;
+    // UINT layerIndex = id.z;
+    UINT layerIndex = g_ActiveLayerIndex;
     UINT AOLayerHeapIndex = g_DeinterleaveAOTexIndices[layerIndex];
     UINT DepthLayerHeapIndex = g_DeinterleaveDepthTexIndices[layerIndex];
 
-    bool isEvenGroup = (layerIndex == 0 || layerIndex == 3);
-    bool isCurrentFrameActive = (isEvenGroup == (frameIndex % 2 == 0));
-    if (!isCurrentFrameActive)
-    {
-        return;
-    }
-
     uint offsetX = layerIndex % 2;
-    uint offsetY = layerIndex / 2;
+    uint offsetY = layerIndex * rcp(2);
     float2 localScreenUV = (float2(id.xy) + 0.5f) * g_DeinterleavedAOSize.zw;
     float2 fullResCoord = (id.xy * 2 + float2(offsetX, offsetY) + 0.5f) * g_FullScreenSize.zw;
 
@@ -341,7 +330,7 @@ void LayeredHBAOMain(UINT3 id : SV_DispatchThreadID)
 
     const float2 pixelDirRBViewspaceSizeAtCenterZ =
         inputParam.PositionVS.z * g_NDCToViewMul * g_DeinterleavedAOSize.zw;
-    float pixLookupRadiusMod = (0.85f * radius) / pixelDirRBViewspaceSizeAtCenterZ.x;
+    float pixLookupRadiusMod = (0.85f * radius) * rcp(pixelDirRBViewspaceSizeAtCenterZ.x);
 
     float nearScreenBorder = min(min(localScreenUV.x, 1.0 - localScreenUV.x),
                                  min(localScreenUV.y, 1.0 - localScreenUV.y));
@@ -352,8 +341,8 @@ void LayeredHBAOMain(UINT3 id : SV_DispatchThreadID)
     mipLevel = clamp(mipLevel, 0, g_HIZMaxMipmap);
 
     float importance = Elysia_Sample_Importance(
-        (trunc(id.xy / 2) + 0.5f) * g_ImportanceBufferSize.zw);
-    UINT dirSampleCount = lerp(4, 6, importance);
+        (trunc(id.xy * rcp(2)) + 0.5f) * g_ImportanceBufferSize.zw);
+    UINT dirSampleCount = lerp(2, 4, importance);
 
     float baseAO = SampleTexture2D(AOLayerHeapIndex, localScreenUV, ClampPointSampler);
 
@@ -375,7 +364,7 @@ void LayeredHBAOMain(UINT3 id : SV_DispatchThreadID)
     aoResult = saturate(1.0 - aoResult * g_AOIntensityMul * 2.f);
     aoResult = pow(abs(aoResult), g_AOIntensityPow * 2.f);
     float fadeRadius = max(1.f, radius);
-    float invFadeRadius = 1.f / fadeRadius;
+    float invFadeRadius = rcp(fadeRadius);
     float mul = invFadeRadius;
     float add = -(g_AOFadeDistance - fadeRadius) * invFadeRadius;
     float distFade = saturate(inputParam.LinearEyeDepth * mul + add);
@@ -526,7 +515,7 @@ float CalcAO(UINT DepthLayerHeapIndex,
     [unroll(8)]
     for (UINT dir = 0; dir < dirSampleCount; dir ++)
     {
-        float angle = float(dir) / float(dirSampleCount) * TWO_PI +
+        float angle = float(dir) * rcp(float(dirSampleCount)) * TWO_PI +
                       randomAngle;
 
         float2 dirUV;
@@ -539,7 +528,7 @@ float CalcAO(UINT DepthLayerHeapIndex,
         [unroll(4)]
         for (UINT step = 0; step < stepSampleCount; ++step)
         {
-            float progress = (float(step) + jitter) / float(stepSampleCount);
+            float progress = (float(step) + jitter) * rcp(float(stepSampleCount));
             progress *= progress;
             float2 currentUV = localUV + rayDirUV * progress;
 
@@ -560,9 +549,9 @@ float CalcAO(UINT DepthLayerHeapIndex,
             if (distSq > Pow2(radius))
                 continue;
 
-            float falloff = max(0, 1.0 - distSq / Pow2(radius));
+            float falloff = max(0, 1.0 - distSq * rcp(Pow2(radius)));
 
-            float3 V_norm = v / (dist + 1e-6);
+            float3 V_norm = v * rcp(dist + 1e-6);
             float sampleHorizonSin = dot(V_norm, normalVS);
             if (sampleHorizonSin > topOcclusionAngle + angleBias)
             {
@@ -573,7 +562,7 @@ float CalcAO(UINT DepthLayerHeapIndex,
             }
         }
     }
-    o /= (float)dirSampleCount;
+    o *= rcp((float)dirSampleCount);
 
     return o;
 }
