@@ -25,10 +25,12 @@ namespace ElysiaRenderer
         : BasePass()
     {
         m_DeinterleavedDepthRTs = std::vector<RenderTexture*>(DEINTERLEAVED_DEPTH_COUNT, nullptr);
-        m_DeinterleavedAORTs = std::vector<RenderTexture*>(DEINTERLEAVED_DEPTH_COUNT, nullptr);
+        m_DeinterleavedAORTs = std::vector<RenderTexture*>(DEINTERLEAVED_AO_COUNT, nullptr);
+        m_DeinterleavedBlurRTs = std::vector<RenderTexture*>(DEINTERLEAVED_BLUR_COUNT, nullptr);
 
         m_DeinterleavedDepthIndices = std::vector<UINT>(DEINTERLEAVED_DEPTH_COUNT, UINT_MAX);
-        m_DeinterleavedAOIndices = std::vector<UINT>(DEINTERLEAVED_DEPTH_COUNT, UINT_MAX);
+        m_DeinterleavedAOIndices = std::vector<UINT>(DEINTERLEAVED_AO_COUNT, UINT_MAX);
+        m_DeinterleavedBlurIndices = std::vector<UINT>(DEINTERLEAVED_BLUR_COUNT, UINT_MAX);
     }
     AOPass::~AOPass()
     {
@@ -80,6 +82,15 @@ namespace ElysiaRenderer
                 RenderResource::GetInstance().GetPropertyName(
                     PropertyToID(L"Deinterleaved AO RT" + std::to_wstring(i))));
             m_DeinterleavedAOIndices[i] = m_DeinterleavedAORTs[i]->GetUAVResourceHeapIndex();
+
+            m_DeinterleavedBlurRTs[i] = RenderTargetManager::GetInstance().CreateRWRenderTexture(
+                m_DeinterleavedBlurWidth,
+                m_DeinterleavedBlurHeight,
+                DXGI_FORMAT_R8G8_UNORM,
+                true,
+                RenderResource::GetInstance().GetPropertyName(
+                    PropertyToID(L"Deinterleaved Blur RT" + std::to_wstring(i))));
+            m_DeinterleavedBlurIndices[i] = m_DeinterleavedBlurRTs[i]->GetUAVResourceHeapIndex();
         }
 
         m_pImportanceRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(
@@ -173,8 +184,8 @@ namespace ElysiaRenderer
         DoDeinterleaveBaseAO(context);
         DoImportance();
         DoDeinterleaveCalcAO(context);
-        DoReinterleave();
         DoBilateralBlur();
+        DoReinterleave();
         if (UserData::GetInstance().aoParameter.IsTAA)
         {
             DoTAA();
@@ -404,8 +415,8 @@ namespace ElysiaRenderer
         };
 
         std::vector<RenderTexture*> activeRTs;
-        activeRTs.reserve(m_DeinterleavedAORTs.size());
-        for (UINT i = 0; i < m_DeinterleavedAORTs.size(); ++i)
+        activeRTs.reserve(DEINTERLEAVED_AO_COUNT);
+        for (UINT i = 0; i < DEINTERLEAVED_AO_COUNT; ++i)
         {
             if (IsLayerActiveThisFrame(i))
             {
@@ -415,7 +426,7 @@ namespace ElysiaRenderer
         }
         m_pCommand->FlushBarrier();
 
-        for (UINT layerIndex = 0; layerIndex < m_DeinterleavedAORTs.size(); ++layerIndex)
+        for (UINT layerIndex = 0; layerIndex < DEINTERLEAVED_AO_COUNT; ++layerIndex)
         {
             if (!IsLayerActiveThisFrame(layerIndex))
                 continue;
@@ -643,8 +654,8 @@ namespace ElysiaRenderer
         };
 
         std::vector<RenderTexture*> activeRTs;
-        activeRTs.reserve(DEINTERLEAVED_DEPTH_COUNT);
-        for (UINT i = 0; i < DEINTERLEAVED_DEPTH_COUNT; ++i)
+        activeRTs.reserve(DEINTERLEAVED_AO_COUNT);
+        for (UINT i = 0; i < DEINTERLEAVED_AO_COUNT; ++i)
         {
             if (!IsLayerActiveThisFrame(i))
                 continue;
@@ -655,7 +666,7 @@ namespace ElysiaRenderer
         }
         m_pCommand->FlushBarrier();
 
-        for (UINT layerIndex = 0; layerIndex < DEINTERLEAVED_DEPTH_COUNT; ++layerIndex)
+        for (UINT layerIndex = 0; layerIndex < DEINTERLEAVED_AO_COUNT; ++layerIndex)
         {
             if (!IsLayerActiveThisFrame(layerIndex))
                 continue;
@@ -694,42 +705,61 @@ namespace ElysiaRenderer
         SetSpaceResource(passData, PER_FRAME_SPACE);
 
         auto inputIndices = m_DeinterleavedAOIndices;
-        auto outputIndices = m_DeinterleavedAOIndices;
+        auto outputIndices = m_DeinterleavedBlurIndices;
+        auto inputRTs = m_DeinterleavedAORTs;
+        auto outputRTs = m_DeinterleavedBlurRTs;
 
         auto targetRT = m_pAORT;
-        for (UINT i = 0; i <= UserData::GetInstance().aoParameter.BlurCount; ++i)
+        for (UINT j = 0; j < UserData::GetInstance().aoParameter.BlurCount; ++j)
         {
-            m_pCommand->AddBarrier(targetRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-
-            m_pMaterial->SetUInt(ShaderIDs::g_BlurTexIndex,
-                                 targetRT->GetResourceHeapIndex(),
-                                 passID);
-            m_pMaterial->SetUInt(ShaderIDs::g_ReinterleaveAOTexIndex,
-                                 targetRT->GetResourceHeapIndex(),
-                                 passID);
-            m_pMaterial->SetUInt(ShaderIDs::g_AOImportanceTexIndex,
-                                 targetRT->GetResourceHeapIndex(),
-                                 passID);
-            m_pMaterial->SetFloat4(ShaderIDs::g_FullScreenSize,
-                                   GetScreenSize(m_cameraWidth, m_cameraHeight),
+            m_pMaterial->SetFloat4(ShaderIDs::g_SourceTexIndices,
+                                   Vector4(inputIndices[0],
+                                           inputIndices[1],
+                                           inputIndices[2],
+                                           inputIndices[3]),
+                                   passID);
+            m_pMaterial->SetFloat4(ShaderIDs::g_TargetTexIndices,
+                                   Vector4(outputIndices[0],
+                                           outputIndices[1],
+                                           outputIndices[2],
+                                           outputIndices[3]),
                                    passID);
             m_pMaterial->SetUInt(ShaderIDs::g_BlurRadius,
-                                 i + 1,
+                                 std::pow(2, j),
                                  passID);
-
             m_pMaterial->SetFloat(ShaderIDs::g_Sharpness_Inv,
                                   1.f - UserData::GetInstance().aoParameter.Sharpness);
             m_pMaterial->SetUInt(ShaderIDs::g_IsBlur,
                                  UserData::GetInstance().aoParameter.IsBlur);
-            SetSpaceResource(passData, PER_PASS_SPACE);
 
-            auto threadGroupSize = passData.GetKernelThreadGroupSizes();
-            m_pCommand->Dispatch(CeilDivide(m_cameraWidth, threadGroupSize.x),
-                                 CeilDivide(m_cameraHeight, threadGroupSize.y),
-                                 threadGroupSize.z);
+            for (UINT i = 0; i < 4; ++i)
+            {
+                m_pCommand->AddBarrier(outputRTs[i], D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
-            m_pCommand->AddBarrier(targetRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+                m_pMaterial->SetUInt(ShaderIDs::g_ActiveLayerIndex,
+                                     i,
+                                     passID);
+                SetSpaceResource(passData, PER_PASS_SPACE);
+
+                auto threadGroupSize = passData.GetKernelThreadGroupSizes();
+                m_pCommand->Dispatch(CeilDivide(m_DeinterleavedBlurWidth, threadGroupSize.x),
+                                     CeilDivide(m_DeinterleavedBlurHeight, threadGroupSize.y),
+                                     threadGroupSize.z);
+
+                m_pCommand->AddUAVBarrier(outputRTs[i], false);
+                m_pCommand->AddBarrier(outputRTs[i], D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+            }
+
             std::swap(inputIndices, outputIndices);
+            std::swap(inputRTs, outputRTs);
+        }
+
+        if (UserData::GetInstance().aoParameter.BlurCount % 2 == 1)
+        {
+            for (UINT i = 0; i < DEINTERLEAVED_BLUR_COUNT; ++i)
+            {
+                m_pCommand->CopyTexture(m_DeinterleavedBlurRTs[i], m_DeinterleavedAORTs[i]);
+            }
         }
 
         m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);

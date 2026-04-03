@@ -385,6 +385,7 @@ namespace ElysiaEngine
 
         static ImVec2 lastSize = {0, 0};
         ImVec2 viewportSize = ImGui::GetContentRegionAvail();
+        viewportSize = {1920, 1080};
         if (viewportSize.x != lastSize.x || viewportSize.y != lastSize.y)
         {
             if (ImGui::IsMouseDown(ImGuiMouseButton_Left))

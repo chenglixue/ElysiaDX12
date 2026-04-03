@@ -13,7 +13,7 @@ cbuffer PassConstant : register(b0, perPassSpace)
 
 }
 
-void Elysia_AOImportance_StoreOutput(UINT2 id, float value)
+void Elysia_AOImportance_StoreOutput(UINT2 id, min16float value)
 {
     RWTexture2D<float> o = ResourceDescriptorHeap[g_TargetTexIndex];
     o[id.xy] = value;
@@ -29,57 +29,57 @@ void GenerateAOImportance(UINT3 id : SV_DispatchThreadID)
 {
     UINT2 basePos = id * 2;
     float2 baseUV = (basePos + 0.5f) * g_DeinterleavedAOSize.zw;
-    float avg = 0.f;
-    float minV = 1.f;
-    float maxV = 0.f;
+    min16float avg = 0.f;
+    min16float minV = 1.f;
+    min16float maxV = 0.f;
 
     [unroll]
     for (int i = 0; i < 4; i ++)
     {
         UINT layerIndex = i;
-        float4 vals = GatherRedTexture2D(g_DeinterleaveAOTexIndices[layerIndex],
-                                         baseUV,
-                                         ClampPointSampler);
+        min16float4 vals = GatherRedTexture2D(g_DeinterleaveAOTexIndices[layerIndex],
+                                              baseUV,
+                                              ClampPointSampler);
 
         //vals *= g_AOIntensityMul;
         vals = 1 - vals;
 
         //vals = pow(saturate(vals), g_AOIntensityPow);
 
-        avg += dot(float4(vals.x, vals.y, vals.z, vals.w),
-                   float4(1.0 / 16.0, 1.0 / 16.0, 1.0 / 16.0, 1.0 / 16.0));
+        avg += dot(min16float4(vals.x, vals.y, vals.z, vals.w),
+                   min16float4(1.0 / 16.0, 1.0 / 16.0, 1.0 / 16.0, 1.0 / 16.0));
 
         maxV = max(maxV, max(max(vals.x, vals.y), max(vals.z, vals.w)));
         minV = min(minV, min(min(vals.x, vals.y), min(vals.z, vals.w)));
     }
 
-    float minMaxDiff = maxV - minV;
+    min16float minMaxDiff = maxV - minV;
 
     Elysia_AOImportance_StoreOutput(id, pow(saturate(minMaxDiff * 2.0), 0.8));
 }
 
-static const float Smooth_Importance = 0.5f;
+static const min16float Smooth_Importance = 0.5f;
 
 [numthreads(GROUP_SIZE, GROUP_SIZE, 1)]
 void PostAOImportanceA(UINT3 id : SV_DispatchThreadID)
 {
     float2 screenUV = (id + 0.5f) * g_ImportanceBufferSize.zw;
-    float centerVal = Elysia_AOImportance_SampleImportance(screenUV);
+    min16float centerVal = Elysia_AOImportance_SampleImportance(screenUV);
 
     float2 halfTexel = 0.5f * g_ImportanceBufferSize.zw;
-    float4 vals;
+    min16float4 vals;
     vals[0] = Elysia_AOImportance_SampleImportance(
-        screenUV + float2(-halfTexel.x * 3, -halfTexel.y));
+        screenUV + min16float2(-halfTexel.x * 3, -halfTexel.y));
     vals[1] = Elysia_AOImportance_SampleImportance(
-        screenUV + float2(+halfTexel.x, -halfTexel.y * 3));
+        screenUV + min16float2(+halfTexel.x, -halfTexel.y * 3));
     vals[2] = Elysia_AOImportance_SampleImportance(
-        screenUV + float2(+halfTexel.x * 3, +halfTexel.y));
+        screenUV + min16float2(+halfTexel.x * 3, +halfTexel.y));
     vals[3] = Elysia_AOImportance_SampleImportance(
-        screenUV + float2(-halfTexel.x, +halfTexel.y * 3));
+        screenUV + min16float2(-halfTexel.x, +halfTexel.y * 3));
 
-    float avgVal = dot(vals, 0.25f);
+    min16float avgVal = dot(vals, 0.25f);
     vals.xy = max(vals.xy, vals.zw);
-    float maxVal = max(centerVal, max(vals.x, vals.y));
+    min16float maxVal = max(centerVal, max(vals.x, vals.y));
     Elysia_AOImportance_StoreOutput(id, lerp(maxVal, avgVal, Smooth_Importance));
 }
 
@@ -87,21 +87,21 @@ void PostAOImportanceA(UINT3 id : SV_DispatchThreadID)
 void PostAOImportanceB(UINT3 id : SV_DispatchThreadID)
 {
     float2 screenUV = (id + 0.5f) * g_ImportanceBufferSize.zw;
-    float centerVal = Elysia_AOImportance_SampleImportance(screenUV);
+    min16float centerVal = Elysia_AOImportance_SampleImportance(screenUV);
 
     float2 halfTexel = 0.5f * g_ImportanceBufferSize.zw;
-    float4 vals;
+    min16float4 vals;
     vals[0] = Elysia_AOImportance_SampleImportance(
-        screenUV + float2(-halfTexel.x, -halfTexel.y * 3));
+        screenUV + min16float2(-halfTexel.x, -halfTexel.y * 3));
     vals[1] = Elysia_AOImportance_SampleImportance(
-        screenUV + float2(+halfTexel.x * 3, -halfTexel.y));
+        screenUV + min16float2(+halfTexel.x * 3, -halfTexel.y));
     vals[2] = Elysia_AOImportance_SampleImportance(
-        screenUV + float2(+halfTexel.x, +halfTexel.y * 3));
+        screenUV + min16float2(+halfTexel.x, +halfTexel.y * 3));
     vals[3] = Elysia_AOImportance_SampleImportance(
-        screenUV + float2(-halfTexel.x * 3, +halfTexel.y));
+        screenUV + min16float2(-halfTexel.x * 3, +halfTexel.y));
 
-    float avgVal = dot(vals, 0.25f);
+    min16float avgVal = dot(vals, 0.25f);
     vals.xy = max(vals.xy, vals.zw);
-    float maxVal = max(centerVal, max(vals.x, vals.y));
+    min16float maxVal = max(centerVal, max(vals.x, vals.y));
     Elysia_AOImportance_StoreOutput(id, lerp(maxVal, avgVal, Smooth_Importance));
 }

@@ -55,6 +55,8 @@ PASS(AO_TAA_PASS,                       "public\\PostProcess\\CS_AOTAA.hlsl",   
         int m_currHistoryIndex = 0;
         static constexpr UINT MAX_BLUR_RADIUS = 10;
         static constexpr UINT DEINTERLEAVED_DEPTH_COUNT = 4;
+        static constexpr UINT DEINTERLEAVED_BLUR_COUNT = 4;
+        static constexpr UINT DEINTERLEAVED_AO_COUNT = 4;
         UINT m_cameraWidth;
         UINT m_cameraHeight;
         UINT m_halfWidth;
@@ -76,8 +78,10 @@ PASS(AO_TAA_PASS,                       "public\\PostProcess\\CS_AOTAA.hlsl",   
         RenderTexture* m_pTAA1RT = nullptr;
         std::vector<RenderTexture*> m_DeinterleavedDepthRTs;
         std::vector<RenderTexture*> m_DeinterleavedAORTs;
+        std::vector<RenderTexture*> m_DeinterleavedBlurRTs;
         std::vector<UINT> m_DeinterleavedDepthIndices;
         std::vector<UINT> m_DeinterleavedAOIndices;
+        std::vector<UINT> m_DeinterleavedBlurIndices;
         TextureManager::Handle m_blueNoise;
 
         enum PassID

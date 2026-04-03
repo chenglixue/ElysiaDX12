@@ -14,7 +14,7 @@ cbuffer PassConstant : register(b0, perPassSpace)
     float g_AORadius;
 }
 
-float MipSmartAverage(float4 depths, float effectRadius);
+float MipSmartAverage(float4 depths, min16float effectRadius);
 
 [numthreads(GROUP_SIZE, GROUP_SIZE, 1)]
 void AOHIZNormal(UINT3 id : SV_DispatchThreadID)
@@ -44,10 +44,10 @@ void AOHIZNormal(UINT3 id : SV_DispatchThreadID)
     o[id.xy] = MipSmartAverage(depths, g_AORadius);
 }
 
-float MipSmartAverage(float4 depths, float effectRadius)
+float MipSmartAverage(float4 depths, min16float effectRadius)
 {
     float closest = min(min(depths.x, depths.y), min(depths.z, depths.w));
-    float falloffCalcMulSq = -1.0f / (effectRadius * effectRadius);
+    min16float falloffCalcMulSq = -1.0f / (effectRadius * effectRadius);
 
     float4 dists = depths - closest.xxxx;
     float4 weights = saturate(dists * dists * falloffCalcMulSq + 1.0);
