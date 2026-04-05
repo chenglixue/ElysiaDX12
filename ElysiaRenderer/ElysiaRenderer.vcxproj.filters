@@ -607,6 +607,15 @@
     <ClInclude Include="src\Runtime\RenderCore\TAAUtility.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Runtime\Engine\ImGuiUtility.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Runtime\RenderCore\CASUtility.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Runtime\RenderCore\Pass\SharpenPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="dxc\bin\x64\dxcompiler.dll" />
@@ -671,6 +680,7 @@
     <None Include="Assets\Shaders\private\TAACommon.hlsli" />
     <None Include="Assets\Shaders\public\PostProcess\Sharpen\CS_CAS.hlsl" />
     <None Include="Assets\Shaders\private\CASCommon.hlsli" />
+    <None Include="Assets\Shaders\public\CS_GBufferCulling.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -1049,6 +1059,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Runtime\RenderCore\Pass\TAAPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Runtime\Engine\ImGuiUtility.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Runtime\RenderCore\Pass\SharpenPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

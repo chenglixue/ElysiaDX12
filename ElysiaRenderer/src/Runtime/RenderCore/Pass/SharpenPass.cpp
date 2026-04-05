@@ -96,7 +96,7 @@ namespace ElysiaRenderer
             m_pMaterial->SetFloat(ShaderIDs::g_SharpenIntensity,
                                   UserData::GetInstance().sharpenParameter.sharpen,
                                   passID);
-            m_pMaterial->SetUInt(ShaderIDs::g_SharpenTexIndex,
+            m_pMaterial->SetUINT(ShaderIDs::g_SharpenTexIndex,
                                  m_pDisplayRT->GetUAVResourceHeapIndex(),
                                  passID);
             m_pMaterial->SetFloat4(ShaderIDs::g_SharpenTexSize,

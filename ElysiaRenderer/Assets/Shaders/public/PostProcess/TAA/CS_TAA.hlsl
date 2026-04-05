@@ -105,7 +105,7 @@ void TAA(uint3 id : SV_DispatchThreadID)
                       m2,
                       closetUV);
 
-        float2 velocity = Elysia_Sample_Velocity(closetUV);
+        float2 velocity = Elysia_Sample_Velocity(upSampleUV);
         float2 preUV = upSampleUV - velocity;
         if (any(preUV < 0.f) || any(preUV > 1.f))
         {

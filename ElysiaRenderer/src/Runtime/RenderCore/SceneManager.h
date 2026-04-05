@@ -50,6 +50,10 @@ namespace ElysiaRenderer
         {
             return m_entities;
         }
+        std::unique_ptr<Entity>& GetRootEntity()
+        {
+            return m_entities[0];
+        }
         void AddEntity(std::unique_ptr<Entity> pEntity)
         {
             m_entities.emplace_back(std::move(pEntity));

@@ -291,19 +291,19 @@ namespace ElysiaRenderer
             m_pMaterial->SetBool(ShaderIDs::u_con2, m_con2);
             m_pMaterial->SetBool(ShaderIDs::u_clip, m_clip);
             m_pMaterial->SetBool(ShaderIDs::u_scaleOnly, m_scaleOnly);
-            m_pMaterial->SetUInt(ShaderIDs::u_displayMode,
+            m_pMaterial->SetUINT(ShaderIDs::u_displayMode,
                                  (UINT)m_pSwaiChain->GetDisplayMode());
             m_pMaterial->SetMatrix(ShaderIDs::u_inputToOutputMatrix, m_inputToOutputMatrix);
             m_pMaterial->SetUINTArray(ShaderIDs::u_ctl, ctl);
-            m_pMaterial->SetUInt(ShaderIDs::tonemapMode,
+            m_pMaterial->SetUINT(ShaderIDs::tonemapMode,
                                  (UINT)UserData::GetInstance().tonemapMode);
             m_pMaterial->SetFloat4(ShaderIDs::g_DestSize,
                                    GetScreenSize(Vector2(m_displaySize.x, m_displaySize.y)));
-            m_pMaterial->SetUInt(ShaderIDs::g_DestTextureIndex,
+            m_pMaterial->SetUINT(ShaderIDs::g_DestTextureIndex,
                                  m_pDisplayRT->GetResourceHeapIndex());
             m_pMaterial->SetFloat(ShaderIDs::g_LocalExposure,
                                   UserData::GetInstance().localExposure);
-            m_pMaterial->SetUInt(ShaderIDs::g_BloomTexIndex,
+            m_pMaterial->SetUINT(ShaderIDs::g_BloomTexIndex,
                                  RenderTargetManager::GetInstance().GetRenderTexture(RenderResource::GetInstance().
                                                                                      GetPropertyName(
                                                                                          BloomPass::RenderTextureIDs::BloomUpSampleRTID)

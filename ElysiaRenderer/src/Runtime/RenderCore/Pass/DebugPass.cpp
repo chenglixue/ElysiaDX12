@@ -91,10 +91,10 @@ namespace ElysiaRenderer
         m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_displaySize));
         m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-        m_pMaterial->SetUInt(ShaderIDs::g_DebugMode,
+        m_pMaterial->SetUINT(ShaderIDs::g_DebugMode,
                              static_cast<UINT>(UserData::GetInstance().debugMode));
-        m_pMaterial->SetUInt(ShaderIDs::g_TargetTexIndex, m_pDisplayRT->GetResourceHeapIndex());
-        m_pMaterial->SetUInt(ShaderIDs::g_MipmapLevel, UserData::GetInstance().mipmapLevel);
+        m_pMaterial->SetUINT(ShaderIDs::g_TargetTexIndex, m_pDisplayRT->GetResourceHeapIndex());
+        m_pMaterial->SetUINT(ShaderIDs::g_MipmapLevel, UserData::GetInstance().mipmapLevel);
         m_pMaterial->SetFloat4(ShaderIDs::g_TargetSize,
                                GetScreenSize(m_pDisplayRT->GetWidth(),
                                              m_pDisplayRT->GetHeight()));
@@ -134,7 +134,7 @@ namespace ElysiaRenderer
             {
             case DebugDownOrUp::Up:
             {
-                m_pMaterial->SetUInt(ShaderIDs::g_TargetTexIndex,
+                m_pMaterial->SetUINT(ShaderIDs::g_TargetTexIndex,
                                      RenderTargetManager::GetInstance().GetRenderTexture(
                                                                            RenderResource::GetInstance().
                                                                            GetPropertyName(
@@ -146,7 +146,7 @@ namespace ElysiaRenderer
             }
             case DebugDownOrUp::Down:
             {
-                m_pMaterial->SetUInt(ShaderIDs::g_TargetTexIndex,
+                m_pMaterial->SetUINT(ShaderIDs::g_TargetTexIndex,
                                      RenderTargetManager::GetInstance().GetRenderTexture(
                                                                            RenderResource::GetInstance().
                                                                            GetPropertyName(
@@ -252,7 +252,7 @@ namespace ElysiaRenderer
 
         m_pCommand->AddBarrier(m_pDisplayRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
         {
-            m_pMaterial->SetUInt(ShaderIDs::g_DebugMode,
+            m_pMaterial->SetUINT(ShaderIDs::g_DebugMode,
                                  static_cast<UINT>(DebugMode::AABB));
             m_pMaterial->SetMatrix(ShaderIDs::viewProjMatrix,
                                    m_pCamera->GetViewMat() * m_pCamera->GetProjMat());
@@ -277,32 +277,32 @@ namespace ElysiaRenderer
 
         m_pCommand->AddBarrier(m_pDisplayRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
         {
-            m_pMaterial->SetUInt(GIPass::ShaderIDs::g_IrradianceTexIndex,
+            m_pMaterial->SetUINT(GIPass::ShaderIDs::g_IrradianceTexIndex,
                                  RenderTargetManager::GetInstance().GetRenderTexture(
                                                                        GIPass::RenderTextureIDs::IrradianceRTID)
                                                                    ->GetResourceHeapIndex(),
                                  passID);
-            m_pMaterial->SetUInt(GIPass::ShaderIDs::g_RayDataBufferIndex,
+            m_pMaterial->SetUINT(GIPass::ShaderIDs::g_RayDataBufferIndex,
                                  GIPass::m_pRayDataBuffer->GetResourceHeapIndex(),
                                  passID);
-            m_pMaterial->SetUInt(GIPass::ShaderIDs::g_GIDataBufferIndex,
+            m_pMaterial->SetUINT(GIPass::ShaderIDs::g_GIDataBufferIndex,
                                  GIPass::m_pGIDataBuffer->GetResourceHeapIndex(),
                                  passID);
             // m_pMaterial->SetUInt(GIPass::ShaderIDs::g_ProbeOffsetsIndex,
             //                      GIPass::m_pProbeOffsetBuffer->GetResourceHeapIndex());
-            m_pMaterial->SetUInt(GIPass::ShaderIDs::g_ProbeStatesIndex,
+            m_pMaterial->SetUINT(GIPass::ShaderIDs::g_ProbeStatesIndex,
                                  GIPass::m_pProbeStateBuffer->GetResourceHeapIndex(),
                                  passID);
-            m_pMaterial->SetUInt(GIPass::ShaderIDs::g_ProbeOffsetIndexTexIndex,
+            m_pMaterial->SetUINT(GIPass::ShaderIDs::g_ProbeOffsetIndexTexIndex,
                                  GIPass::m_pProbeOffsetIndexRT->GetResourceHeapIndex(),
                                  passID);
-            m_pMaterial->SetUInt(GIPass::ShaderIDs::g_ProbeRelocationLUTBufferIndex,
+            m_pMaterial->SetUINT(GIPass::ShaderIDs::g_ProbeRelocationLUTBufferIndex,
                                  GIPass::m_pProbeRelocationLUTBuffer->GetResourceHeapIndex(),
                                  passID);
-            m_pMaterial->SetUInt(ShaderIDs::g_IsEnableGILine,
+            m_pMaterial->SetUINT(ShaderIDs::g_IsEnableGILine,
                                  false,
                                  passID);
-            m_pMaterial->SetUInt(ShaderIDs::g_bHideInactiveProbe,
+            m_pMaterial->SetUINT(ShaderIDs::g_bHideInactiveProbe,
                                  UserData::GetInstance().GIParameter.bHideInactiveProbe,
                                  passID);
 
@@ -366,7 +366,7 @@ namespace ElysiaRenderer
 
             m_pCommand->AddBarrier(m_pDisplayRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
             {
-                m_pMaterial->SetUInt(GIPass::ShaderIDs::g_RayDataBufferIndex,
+                m_pMaterial->SetUINT(GIPass::ShaderIDs::g_RayDataBufferIndex,
                                      GIPass::m_pRayDataBuffer->GetResourceHeapIndex());
                 // m_pMaterial->SetUInt(GIPass::ShaderIDs::g_ProbeOffsetsIndex,
                 //                      GIPass::m_pProbeOffsetBuffer->GetResourceHeapIndex());
@@ -381,9 +381,9 @@ namespace ElysiaRenderer
                 m_pMaterial->SetMatrix(ShaderIDs::viewProjMatrix,
                                        m_pCamera->GetViewMat() * m_pCamera->GetProjMat());
 
-                m_pMaterial->SetUInt(ShaderIDs::g_DebugMode,
+                m_pMaterial->SetUINT(ShaderIDs::g_DebugMode,
                                      static_cast<UINT>(UserData::GetInstance().debugMode));
-                m_pMaterial->SetUInt(ShaderIDs::g_IsEnableGILine, 1);
+                m_pMaterial->SetUINT(ShaderIDs::g_IsEnableGILine, 1);
                 m_pMaterial->SetFloat(ShaderIDs::g_DebugLineScale,
                                       UserData::GetInstance().GIParameter.lineWidth);
 
@@ -488,6 +488,7 @@ namespace ElysiaRenderer
             .Min = min,
             .Max = max,
             .Color = color
+
         };
         m_instanceCpuData.emplace_back(data);
     }
@@ -525,7 +526,7 @@ namespace ElysiaRenderer
         if (instanceDataBuffer)
             BufferManager::GetInstance().DestoryBuffer(instanceDataBuffer);
         instanceDataBuffer = BufferManager::GetInstance().CreateBuffer(instanceDataDesc);
-        pMaterail->SetUInt(ShaderIDs::g_AABBInstanceDatasIndex,
+        pMaterail->SetUINT(ShaderIDs::g_AABBInstanceDatasIndex,
                            instanceDataBuffer->GetResourceHeapIndex());
     }
     void DebugPass::AABBDrawer::Draw(DX12GraphicsContext* context)

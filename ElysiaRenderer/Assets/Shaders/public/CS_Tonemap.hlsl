@@ -1,8 +1,6 @@
 #include "private\Color.hlsl"
 #include "private\BloomCommon.hlsli"
 
-#pragma Compute Tonemap
-
 #define Neutral 0
 #define LMP 1
 #define AMD 2

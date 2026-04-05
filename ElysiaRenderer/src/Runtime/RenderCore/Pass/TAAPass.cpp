@@ -129,11 +129,11 @@ namespace ElysiaRenderer
 
         m_pCommand->AddBarrier(m_TAARTs[m_writeIndex], D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
         {
-            m_pMaterial->SetUInt(ShaderIDs::g_HistoryTexIndex,
+            m_pMaterial->SetUINT(ShaderIDs::g_HistoryTexIndex,
                                  m_TAARTs[m_readIndex]->GetUAVResourceHeapIndex(),
                                  passID);
-            m_pMaterial->SetUInt(ShaderIDs::g_CurrTexIndex, m_pCameraColorRT->GetUAVResourceHeapIndex(), passID);
-            m_pMaterial->SetUInt(ShaderIDs::g_DestTexIndex, m_TAARTs[m_writeIndex]->GetUAVResourceHeapIndex(), passID);
+            m_pMaterial->SetUINT(ShaderIDs::g_CurrTexIndex, m_pCameraColorRT->GetUAVResourceHeapIndex(), passID);
+            m_pMaterial->SetUINT(ShaderIDs::g_DestTexIndex, m_TAARTs[m_writeIndex]->GetUAVResourceHeapIndex(), passID);
             m_pMaterial->SetFloat4(ShaderIDs::g_TAATexSize,
                                    GetScreenSize(m_TAAWidth, m_TAAHeight),
                                    passID);
@@ -191,8 +191,8 @@ namespace ElysiaRenderer
 
         m_pCommand->AddBarrier(pDestRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
         {
-            m_pMaterial->SetUInt(ShaderIDs::g_SourceTexIndex, pSourceRT->GetUAVResourceHeapIndex(), passID);
-            m_pMaterial->SetUInt(ShaderIDs::g_DestTexIndex, pDestRT->GetUAVResourceHeapIndex(), passID);
+            m_pMaterial->SetUINT(ShaderIDs::g_SourceTexIndex, pSourceRT->GetUAVResourceHeapIndex(), passID);
+            m_pMaterial->SetUINT(ShaderIDs::g_DestTexIndex, pDestRT->GetUAVResourceHeapIndex(), passID);
 
             SetSpaceResource(passData, PER_PASS_SPACE);
             auto threadGroupSize = passData.GetKernelThreadGroupSizes();
@@ -218,10 +218,10 @@ namespace ElysiaRenderer
 
         m_pCommand->AddBarrier(m_pDisplayRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
         {
-            m_pMaterial->SetUInt(ShaderIDs::g_SourceTexIndex,
+            m_pMaterial->SetUINT(ShaderIDs::g_SourceTexIndex,
                                  m_TAARTs[m_writeIndex]->GetUAVResourceHeapIndex(),
                                  passID);
-            m_pMaterial->SetUInt(ShaderIDs::g_DestTexIndex,
+            m_pMaterial->SetUINT(ShaderIDs::g_DestTexIndex,
                                  m_pDisplayRT->GetUAVResourceHeapIndex(),
                                  passID);
 

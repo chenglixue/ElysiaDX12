@@ -14,8 +14,8 @@ namespace ElysiaRenderer
 {
     Material::Material() = default;
 
-    Material::Material(DX12Device* pDevice, std::vector<ShaderPass>& shaderPasses) :
-        m_pDevice(pDevice)
+    Material::Material(DX12Device* pDevice, std::vector<ShaderPass>& shaderPasses)
+        : m_pDevice(pDevice)
     {
         assert(pDevice);
         Init(shaderPasses);
@@ -104,7 +104,7 @@ namespace ElysiaRenderer
         m_parameterBlock.SetInt(nameHash, v, passID);
     }
 
-    void Material::SetUInt(size_t nameHash, unsigned int v, size_t passID)
+    void Material::SetUINT(size_t nameHash, unsigned int v, size_t passID)
     {
         m_parameterBlock.SetUInt(nameHash, v, passID);
     }

@@ -53,6 +53,8 @@ cbuffer PassConstant : register(b0, perPassSpace)
     float4 g_DistanceTexSize;
     float3 g_AmbientTint;
     float g_AmbientIntensity;
+
+    UINT g_VisbibleIndexBufferIndex;
 }
 
 struct MeshData
@@ -106,12 +108,14 @@ struct PSOutput
     float4 target5 : SV_TARGET5;
 };
 
-PSInput VS(VSInput i)
+PSInput VS(VSInput i, uint InstanceID : SV_InstanceID)
 {
     PSInput o = (PSInput)0;
 
     StructuredBuffer<MeshData> meshDataBuffer = ResourceDescriptorHeap[meshDataBufferIndex];
-    Matrix worldMatrix = meshDataBuffer[meshDataIndex].world_M;
+    StructuredBuffer<int> visibleIndexBuffer = ResourceDescriptorHeap[g_VisbibleIndexBufferIndex];
+    int instanceID = visibleIndexBuffer[InstanceID];
+    Matrix worldMatrix = meshDataBuffer[instanceID].world_M;
     o.positionWS = mul(float4(i.positionOS, 1.f), worldMatrix);
     o.positionVS = mul(o.positionWS, viewMatrix);
     o.positionCS = mul(o.positionVS, jitterProjMatrix);

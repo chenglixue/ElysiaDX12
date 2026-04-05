@@ -311,7 +311,7 @@ namespace ElysiaRenderer
             float depthLinearizeMul = -projMat.m[3][2];
             float depthLinearizeAdd = projMat.m[2][2];
 
-            m_pMaterial->SetUInt(ShaderIDs::g_SourceTexIndex,
+            m_pMaterial->SetUINT(ShaderIDs::g_SourceTexIndex,
                                  m_pCameraDepthRT->GetResourceHeapIndex(),
                                  passID);
             m_pMaterial->SetFloat4(ShaderIDs::g_TargetTexIndices,
@@ -384,7 +384,7 @@ namespace ElysiaRenderer
         m_pMaterial->SetFloat(ShaderIDs::g_AOBias,
                               UserData::GetInstance().aoParameter.Bias,
                               passID);
-        m_pMaterial->SetUInt(ShaderIDs::g_HIZMaxMipmap,
+        m_pMaterial->SetUINT(ShaderIDs::g_HIZMaxMipmap,
                              MathHelper::Max(m_HIZMipmapCount - 1, UINT(0)),
                              passID);
         m_pMaterial->SetFloat4(ShaderIDs::g_TargetSize,
@@ -431,7 +431,7 @@ namespace ElysiaRenderer
             if (!IsLayerActiveThisFrame(layerIndex))
                 continue;
 
-            m_pMaterial->SetUInt(ShaderIDs::g_ActiveLayerIndex, layerIndex, passID);
+            m_pMaterial->SetUINT(ShaderIDs::g_ActiveLayerIndex, layerIndex, passID);
             SetSpaceResource(passData, PER_PASS_SPACE);
 
             auto threadGroupSize = passData.GetKernelThreadGroupSizes();
@@ -467,7 +467,7 @@ namespace ElysiaRenderer
             m_pCommand->AddBarrier(targetRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
             {
-                m_pMaterial->SetUInt(ShaderIDs::g_TargetTexIndex, targetRT->GetResourceHeapIndex());
+                m_pMaterial->SetUINT(ShaderIDs::g_TargetTexIndex, targetRT->GetResourceHeapIndex());
                 m_pMaterial->SetFloat4(ShaderIDs::g_DeinterleavedAOSize,
                                        GetScreenSize(m_DeinterleavedAOWidth,
                                                      m_DeinterleavedAOHeight));
@@ -511,7 +511,7 @@ namespace ElysiaRenderer
                 m_pMaterial->SetFloat4(ShaderIDs::g_ImportanceBufferSize,
                                        GetScreenSize(m_ImportanceWidth, m_ImportanceHeight),
                                        passID);
-                m_pMaterial->SetUInt(ShaderIDs::g_TargetTexIndex,
+                m_pMaterial->SetUINT(ShaderIDs::g_TargetTexIndex,
                                      targetRT->GetResourceHeapIndex(),
                                      passID);
                 SetSpaceResource(passData, PER_PASS_SPACE);
@@ -544,7 +544,7 @@ namespace ElysiaRenderer
                 m_pMaterial->SetFloat4(ShaderIDs::g_ImportanceBufferSize,
                                        GetScreenSize(m_ImportanceWidth, m_ImportanceHeight),
                                        passID);
-                m_pMaterial->SetUInt(ShaderIDs::g_TargetTexIndex,
+                m_pMaterial->SetUINT(ShaderIDs::g_TargetTexIndex,
                                      targetRT->GetResourceHeapIndex(),
                                      passID);
                 SetSpaceResource(passData, PER_PASS_SPACE);
@@ -638,10 +638,10 @@ namespace ElysiaRenderer
                                    m_cameraWidth / float(m_blueNoise.GetWidth()),
                                    m_cameraHeight / float(m_blueNoise.GetHeight())),
                                passID);
-        m_pMaterial->SetUInt(ShaderIDs::g_HIZMaxMipmap,
+        m_pMaterial->SetUINT(ShaderIDs::g_HIZMaxMipmap,
                              MathHelper::Max(m_HIZMipmapCount - 1, UINT(0)),
                              passID);
-        m_pMaterial->SetUInt(ShaderIDs::g_AOImportanceTexIndex,
+        m_pMaterial->SetUINT(ShaderIDs::g_AOImportanceTexIndex,
                              m_pImportanceRT->GetResourceHeapIndex(),
                              passID);
 
@@ -671,7 +671,7 @@ namespace ElysiaRenderer
             if (!IsLayerActiveThisFrame(layerIndex))
                 continue;
 
-            m_pMaterial->SetUInt(ShaderIDs::g_ActiveLayerIndex, layerIndex, passID);
+            m_pMaterial->SetUINT(ShaderIDs::g_ActiveLayerIndex, layerIndex, passID);
             SetSpaceResource(passData, PER_PASS_SPACE);
 
             auto threadGroupSize = passData.GetKernelThreadGroupSizes();
@@ -724,19 +724,19 @@ namespace ElysiaRenderer
                                            outputIndices[2],
                                            outputIndices[3]),
                                    passID);
-            m_pMaterial->SetUInt(ShaderIDs::g_BlurRadius,
+            m_pMaterial->SetUINT(ShaderIDs::g_BlurRadius,
                                  std::pow(2, j),
                                  passID);
             m_pMaterial->SetFloat(ShaderIDs::g_Sharpness_Inv,
                                   1.f - UserData::GetInstance().aoParameter.Sharpness);
-            m_pMaterial->SetUInt(ShaderIDs::g_IsBlur,
+            m_pMaterial->SetUINT(ShaderIDs::g_IsBlur,
                                  UserData::GetInstance().aoParameter.IsBlur);
 
             for (UINT i = 0; i < 4; ++i)
             {
                 m_pCommand->AddBarrier(outputRTs[i], D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
-                m_pMaterial->SetUInt(ShaderIDs::g_ActiveLayerIndex,
+                m_pMaterial->SetUINT(ShaderIDs::g_ActiveLayerIndex,
                                      i,
                                      passID);
                 SetSpaceResource(passData, PER_PASS_SPACE);
@@ -806,10 +806,10 @@ namespace ElysiaRenderer
                                            m_DeinterleavedDepthIndices[2],
                                            m_DeinterleavedDepthIndices[3]),
                                    passID);
-            m_pMaterial->SetUInt(ShaderIDs::g_ReinterleaveAOTexIndex,
+            m_pMaterial->SetUINT(ShaderIDs::g_ReinterleaveAOTexIndex,
                                  targetRT->GetResourceHeapIndex(),
                                  passID);
-            m_pMaterial->SetUInt(ShaderIDs::g_HistoryTex,
+            m_pMaterial->SetUINT(ShaderIDs::g_HistoryTex,
                                  historyTAART->GetResourceHeapIndex(),
                                  passID);
             m_pMaterial->SetFloat4(ShaderIDs::g_TargetSize,
@@ -916,13 +916,13 @@ namespace ElysiaRenderer
                 m_pMaterial->SetFloat4(ShaderIDs::g_TargetSize,
                                        GetScreenSize(currTAART->GetWidth(), currTAART->GetHeight()),
                                        passID);
-                m_pMaterial->SetUInt(ShaderIDs::g_TargetTexIndex,
+                m_pMaterial->SetUINT(ShaderIDs::g_TargetTexIndex,
                                      currTAART->GetResourceHeapIndex(),
                                      passID);
-                m_pMaterial->SetUInt(ShaderIDs::g_SourceTexIndex,
+                m_pMaterial->SetUINT(ShaderIDs::g_SourceTexIndex,
                                      historyTAART->GetResourceHeapIndex(),
                                      passID);
-                m_pMaterial->SetUInt(ShaderIDs::g_AOImportanceTexIndex,
+                m_pMaterial->SetUINT(ShaderIDs::g_AOImportanceTexIndex,
                                      m_pImportanceRT->GetResourceHeapIndex(),
                                      passID);
                 m_pMaterial->SetFloat(ShaderIDs::g_BlendWeight,

@@ -593,7 +593,7 @@ namespace ElysiaRenderer
 
         m_pCommand->AddBarrier(m_pProbeOffsetIndexRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
         {
-            m_pMaterial->SetUInt(ShaderIDs::g_ProbeOffsetIndexTexIndex,
+            m_pMaterial->SetUINT(ShaderIDs::g_ProbeOffsetIndexTexIndex,
                                  m_pProbeOffsetIndexRT->GetResourceHeapIndex(),
                                  passID);
 
@@ -624,7 +624,7 @@ namespace ElysiaRenderer
 
         m_pCommand->AddBarrier(*m_pProbeStateBuffer, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
         {
-            m_pMaterial->SetUInt(ShaderIDs::g_ProbeStatesIndex,
+            m_pMaterial->SetUINT(ShaderIDs::g_ProbeStatesIndex,
                                  m_pProbeStateBuffer->GetResourceHeapIndex(),
                                  passID);
 
@@ -665,19 +665,19 @@ namespace ElysiaRenderer
                                    (m_pCamera->GetViewMat() * m_pCamera->GetProjMat()).Invert(),
                                    passID);
 
-            m_pMaterial->SetUInt(ShaderIDs::g_ProbeStatesIndex,
+            m_pMaterial->SetUINT(ShaderIDs::g_ProbeStatesIndex,
                                  m_pProbeStateBuffer->GetResourceHeapIndex(),
                                  passID);
-            m_pMaterial->SetUInt(ShaderIDs::g_StaticAABBIndex,
+            m_pMaterial->SetUINT(ShaderIDs::g_StaticAABBIndex,
                                  m_pStaticAABBDataBuffer->GetResourceHeapIndex(),
                                  passID);
-            m_pMaterial->SetUInt(ShaderIDs::g_RayDataBufferIndex,
+            m_pMaterial->SetUINT(ShaderIDs::g_RayDataBufferIndex,
                                  m_pRayDataBuffer->GetResourceHeapIndex(),
                                  passID);
-            m_pMaterial->SetUInt(ShaderIDs::g_ProbeOffsetIndexTexIndex,
+            m_pMaterial->SetUINT(ShaderIDs::g_ProbeOffsetIndexTexIndex,
                                  m_pProbeOffsetIndexRT->GetUAVResourceHeapIndex(),
                                  passID);
-            m_pMaterial->SetUInt(ShaderIDs::g_RelocationLUTIndex,
+            m_pMaterial->SetUINT(ShaderIDs::g_RelocationLUTIndex,
                                  m_pProbeRelocationLUTBuffer->GetResourceHeapIndex(),
                                  passID);
             m_pMaterial->SetFloat4(ShaderIDs::g_GridOrigin,
@@ -692,7 +692,7 @@ namespace ElysiaRenderer
                                            Grid_Dimensions.z,
                                            0.f),
                                    passID);
-            m_pMaterial->SetUInt(ShaderIDs::g_StaticAABBCount, m_AABBDatas.size(), passID);
+            m_pMaterial->SetUINT(ShaderIDs::g_StaticAABBCount, m_AABBDatas.size(), passID);
             SetSpaceResource(passData, PER_PASS_SPACE);
 
             auto threadGroupSize = passData.GetKernelThreadGroupSizes();
@@ -1111,19 +1111,19 @@ namespace ElysiaRenderer
             // m_pMaterial->SetUInt(ShaderIDs::g_ProbeOffsetsIndex,
             //                      m_pProbeOffsetBuffer->GetUAVResourceHeapIndex(),
             //                      passID);
-            m_pMaterial->SetUInt(ShaderIDs::g_RayDataBufferIndex,
+            m_pMaterial->SetUINT(ShaderIDs::g_RayDataBufferIndex,
                                  m_pRayDataBuffer->GetResourceHeapIndex(),
                                  passID);
-            m_pMaterial->SetUInt(ShaderIDs::g_ProbeStatesIndex,
+            m_pMaterial->SetUINT(ShaderIDs::g_ProbeStatesIndex,
                                  m_pProbeStateBuffer->GetResourceHeapIndex(),
                                  passID);
-            m_pMaterial->SetUInt(ShaderIDs::g_ProbeOffsetIndexTexIndex,
+            m_pMaterial->SetUINT(ShaderIDs::g_ProbeOffsetIndexTexIndex,
                                  m_pProbeOffsetIndexRT->GetResourceHeapIndex(),
                                  passID);
-            m_pMaterial->SetUInt(ShaderIDs::g_RelocationLUTIndex,
+            m_pMaterial->SetUINT(ShaderIDs::g_RelocationLUTIndex,
                                  m_pProbeRelocationLUTBuffer->GetResourceHeapIndex(),
                                  passID);
-            m_pMaterial->SetUInt(ShaderIDs::g_GIDataBufferIndex,
+            m_pMaterial->SetUINT(ShaderIDs::g_GIDataBufferIndex,
                                  m_pGIDataBuffer->GetResourceHeapIndex(),
                                  passID);
             m_pMaterial->SetFloat4(ShaderIDs::g_RandomRotation,
@@ -1168,16 +1168,16 @@ namespace ElysiaRenderer
 
         m_pCommand->AddBarrier(m_pIrradianceRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
         {
-            m_pMaterial->SetUInt(ShaderIDs::g_RayDataBufferIndex,
+            m_pMaterial->SetUINT(ShaderIDs::g_RayDataBufferIndex,
                                  m_pRayDataBuffer->GetResourceHeapIndex(),
                                  passID);
-            m_pMaterial->SetUInt(ShaderIDs::g_IrradianceTexIndex,
+            m_pMaterial->SetUINT(ShaderIDs::g_IrradianceTexIndex,
                                  m_pIrradianceRT->GetResourceHeapIndex(),
                                  passID);
-            m_pMaterial->SetUInt(ShaderIDs::g_DistanceTexIndex,
+            m_pMaterial->SetUINT(ShaderIDs::g_DistanceTexIndex,
                                  m_pDistanceRT->GetResourceHeapIndex(),
                                  passID);
-            m_pMaterial->SetUInt(ShaderIDs::g_GIDataBufferIndex,
+            m_pMaterial->SetUINT(ShaderIDs::g_GIDataBufferIndex,
                                  m_pGIDataBuffer->GetResourceHeapIndex(),
                                  passID);
             m_pMaterial->SetFloat4(ShaderIDs::g_RandomRotation, m_RandomRotation, passID);
@@ -1232,16 +1232,16 @@ namespace ElysiaRenderer
 
         m_pCommand->AddBarrier(m_pDistanceRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
         {
-            m_pMaterial->SetUInt(ShaderIDs::g_RayDataBufferIndex,
+            m_pMaterial->SetUINT(ShaderIDs::g_RayDataBufferIndex,
                                  m_pRayDataBuffer->GetResourceHeapIndex(),
                                  passID);
-            m_pMaterial->SetUInt(ShaderIDs::g_IrradianceTexIndex,
+            m_pMaterial->SetUINT(ShaderIDs::g_IrradianceTexIndex,
                                  m_pIrradianceRT->GetResourceHeapIndex(),
                                  passID);
-            m_pMaterial->SetUInt(ShaderIDs::g_DistanceTexIndex,
+            m_pMaterial->SetUINT(ShaderIDs::g_DistanceTexIndex,
                                  m_pDistanceRT->GetResourceHeapIndex(),
                                  passID);
-            m_pMaterial->SetUInt(ShaderIDs::g_GIDataBufferIndex,
+            m_pMaterial->SetUINT(ShaderIDs::g_GIDataBufferIndex,
                                  m_pGIDataBuffer->GetResourceHeapIndex(),
                                  passID);
             m_pMaterial->SetFloat4(ShaderIDs::g_RandomRotation, m_RandomRotation, passID);

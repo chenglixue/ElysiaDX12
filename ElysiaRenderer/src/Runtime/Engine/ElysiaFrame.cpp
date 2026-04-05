@@ -385,7 +385,6 @@ namespace ElysiaEngine
 
         static ImVec2 lastSize = {0, 0};
         ImVec2 viewportSize = ImGui::GetContentRegionAvail();
-        viewportSize = {1920, 1080};
         if (viewportSize.x != lastSize.x || viewportSize.y != lastSize.y)
         {
             if (ImGui::IsMouseDown(ImGuiMouseButton_Left))
@@ -755,7 +754,7 @@ namespace ElysiaEngine
                 ImGui::SliderFloat("TAA Jitter Intensity", &pUserData.taaParameter.jitterIntensity, 0.f, 2.f);
                 ImGui::SliderFloat("TAA Static Weight", &pUserData.taaParameter.staticWeight, 0.9f, 1.f);
                 ImGui::SliderFloat("TAA Dynamic Weight", &pUserData.taaParameter.dynamicWeight, 0.f, 0.3f);
-                ImGui::SliderFloat("TAA Max Weight", &pUserData.taaParameter.maxWeight, 0.1f, 1.f);
+                ImGui::SliderFloat("TAA Max Weight", &pUserData.taaParameter.maxWeight, 0.5f, 1.f);
             }
 
             if (ImGui::CollapsingHeader("Sharpen"))

@@ -89,7 +89,7 @@ namespace ElysiaRenderer
         SetSpaceResource(passData, PER_PASS_SPACE);
 
         {
-            m_pMaterial->SetUInt(ShaderIDs::blitterTextureIndex,
+            m_pMaterial->SetUINT(ShaderIDs::blitterTextureIndex,
                                  m_pDisplayRT->GetResourceHeapIndex());
 
             m_pCommand->SetDefaultViewportAndScissor(UINT2(m_displaySize));

@@ -97,10 +97,10 @@ namespace ElysiaRenderer
         m_pMaterial->SetFloat3(GIPass::ShaderIDs::g_GridSpacing,
                                GIPass::m_gridSpacing,
                                passID);
-        m_pMaterial->SetUInt(GIPass::ShaderIDs::g_IrradianceTexIndex,
+        m_pMaterial->SetUINT(GIPass::ShaderIDs::g_IrradianceTexIndex,
                              GIPass::m_pIrradianceRT->GetResourceHeapIndex(),
                              passID);
-        m_pMaterial->SetUInt(GIPass::ShaderIDs::g_DistanceTexIndex,
+        m_pMaterial->SetUINT(GIPass::ShaderIDs::g_DistanceTexIndex,
                              GIPass::m_pDistanceRT->GetResourceHeapIndex(),
                              passID);
         m_pMaterial->SetFloat4(GIPass::ShaderIDs::g_IrradianceTexSize,
@@ -123,13 +123,13 @@ namespace ElysiaRenderer
         // m_pMaterial->SetUInt(GIPass::ShaderIDs::g_ProbeOffsetsIndex,
         //                      GIPass::m_pProbeOffsetBuffer->GetResourceHeapIndex(),
         //                      passID);
-        m_pMaterial->SetUInt(GIPass::ShaderIDs::g_ProbeStatesIndex,
+        m_pMaterial->SetUINT(GIPass::ShaderIDs::g_ProbeStatesIndex,
                              GIPass::m_pProbeStateBuffer->GetResourceHeapIndex(),
                              passID);
-        m_pMaterial->SetUInt(GIPass::ShaderIDs::g_ProbeOffsetIndexTexIndex,
+        m_pMaterial->SetUINT(GIPass::ShaderIDs::g_ProbeOffsetIndexTexIndex,
                              GIPass::m_pProbeOffsetIndexRT->GetResourceHeapIndex(),
                              passID);
-        m_pMaterial->SetUInt(GIPass::ShaderIDs::g_ProbeRelocationLUTBufferIndex,
+        m_pMaterial->SetUINT(GIPass::ShaderIDs::g_ProbeRelocationLUTBufferIndex,
                              GIPass::m_pProbeRelocationLUTBuffer->GetResourceHeapIndex(),
                              passID);
         m_pMaterial->SetFloat(GIPass::ShaderIDs::g_DDGIEncodingGamma,
@@ -138,7 +138,7 @@ namespace ElysiaRenderer
         m_pMaterial->SetFloat(ShaderIDs::g_AmbientIntensity,
                               UserData::GetInstance().AmbientCubemapIntensity,
                               passID);
-        m_pMaterial->SetUInt(ShaderIDs::g_DebugMode,
+        m_pMaterial->SetUINT(ShaderIDs::g_DebugMode,
                              static_cast<UINT>(UserData::GetInstance().debugMode));
 
         SetSpaceResource(passData, PER_PASS_SPACE);

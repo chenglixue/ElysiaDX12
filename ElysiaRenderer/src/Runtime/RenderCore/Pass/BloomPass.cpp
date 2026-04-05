@@ -128,10 +128,10 @@ namespace ElysiaRenderer
 
         m_pCommand->AddBarrier(m_downSampleRTs[0], D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
         {
-            m_pMaterial->SetUInt(ShaderIDs::g_SourceTextureIndex,
+            m_pMaterial->SetUINT(ShaderIDs::g_SourceTextureIndex,
                                  m_pDisplayRT->GetUAVResourceHeapIndex(),
                                  passID);
-            m_pMaterial->SetUInt(ShaderIDs::g_DestTextureIndexID,
+            m_pMaterial->SetUINT(ShaderIDs::g_DestTextureIndexID,
                                  m_downSampleRTs[0]->GetUAVResourceHeapIndex(),
                                  passID);
             m_pMaterial->SetFloat4(ShaderIDs::g_SourceSize,
@@ -167,10 +167,10 @@ namespace ElysiaRenderer
         {
             m_pCommand->AddBarrier(m_downSampleRTs[i], D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
-            m_pMaterial->SetUInt(ShaderIDs::g_SourceTextureIndex,
+            m_pMaterial->SetUINT(ShaderIDs::g_SourceTextureIndex,
                                  m_downSampleRTs[i - 1]->GetUAVResourceHeapIndex(),
                                  passID);
-            m_pMaterial->SetUInt(ShaderIDs::g_DestTextureIndexID,
+            m_pMaterial->SetUINT(ShaderIDs::g_DestTextureIndexID,
                                  m_downSampleRTs[i]->GetUAVResourceHeapIndex(),
                                  passID);
             m_pMaterial->SetFloat4(ShaderIDs::g_SourceSize,
@@ -206,10 +206,10 @@ namespace ElysiaRenderer
 
         m_pCommand->AddBarrier(m_upSampleRTs[m_mipmapCount - 1], D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
         {
-            m_pMaterial->SetUInt(ShaderIDs::g_SourceTextureIndex,
+            m_pMaterial->SetUINT(ShaderIDs::g_SourceTextureIndex,
                                  m_downSampleRTs[m_mipmapCount - 1]->GetUAVResourceHeapIndex(),
                                  passID);
-            m_pMaterial->SetUInt(ShaderIDs::g_DestTextureIndexID,
+            m_pMaterial->SetUINT(ShaderIDs::g_DestTextureIndexID,
                                  m_upSampleRTs[m_mipmapCount - 1]->GetUAVResourceHeapIndex(),
                                  passID);
             m_pMaterial->SetFloat4(ShaderIDs::g_DestSize,
@@ -243,11 +243,11 @@ namespace ElysiaRenderer
         {
             m_pCommand->AddBarrier(m_upSampleRTs[i], D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
-            m_pMaterial->SetUInt(ShaderIDs::g_SourceTextureIndex,
+            m_pMaterial->SetUINT(ShaderIDs::g_SourceTextureIndex,
                                  m_upSampleRTs[i + 1]->GetUAVResourceHeapIndex(),
                                  passID);
-            m_pMaterial->SetUInt(ShaderIDs::g_DestTextureIndexID, m_upSampleRTs[i]->GetUAVResourceHeapIndex(), passID);
-            m_pMaterial->SetUInt(ShaderIDs::g_DownSampleDestTexIndex,
+            m_pMaterial->SetUINT(ShaderIDs::g_DestTextureIndexID, m_upSampleRTs[i]->GetUAVResourceHeapIndex(), passID);
+            m_pMaterial->SetUINT(ShaderIDs::g_DownSampleDestTexIndex,
                                  m_downSampleRTs[i]->GetUAVResourceHeapIndex(),
                                  passID);
             m_pMaterial->SetFloat4(ShaderIDs::g_SourceSize,

@@ -92,7 +92,7 @@ namespace ElysiaRenderer
         }
 
         void SetInt(size_t nameHash, int v, size_t passID = 0);
-        void SetUInt(size_t nameHash, unsigned int v, size_t passID = 0);
+        void SetUINT(size_t nameHash, unsigned int v, size_t passID = 0);
         void SetBool(size_t nameHash, bool v, size_t passID = 0);
         void SetFloat(size_t nameHash, float v, size_t passID = 0);
         void SetFloat2(size_t nameHash, const Vector2& v, size_t passID = 0);
@@ -103,11 +103,14 @@ namespace ElysiaRenderer
         void SetFloatArray(size_t nameHash, const std::vector<float>& values, size_t passID = 0);
         void SetIntArray(size_t nameHash, const std::vector<int>& values, size_t passID = 0);
         void SetUINTArray(size_t nameHash, const std::vector<UINT>& values, size_t passID = 0);
-        void SetVector2Array(size_t nameHash, const std::vector<Vector2>& values,
+        void SetVector2Array(size_t nameHash,
+                             const std::vector<Vector2>& values,
                              size_t passID = 0);
-        void SetVector3Array(size_t nameHash, const std::vector<Vector3>& values,
+        void SetVector3Array(size_t nameHash,
+                             const std::vector<Vector3>& values,
                              size_t passID = 0);
-        void SetVector4Array(size_t nameHash, const std::vector<Vector4>& values,
+        void SetVector4Array(size_t nameHash,
+                             const std::vector<Vector4>& values,
                              size_t passID = 0);
         void SetMatrixArray(size_t nameHash, const std::vector<Matrix>& values, size_t passID = 0);
 

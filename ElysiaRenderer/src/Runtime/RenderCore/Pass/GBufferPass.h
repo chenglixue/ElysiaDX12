@@ -10,7 +10,8 @@ namespace ElysiaCore
 namespace ElysiaRenderer
 {
 #define GBUFFER_PASS_LIST \
-    PASS(DRAW_GBUFFER_PASS,         "public\\GBuffer.hlsl", false, PS)
+    PASS(DRAW_GBUFFER_PASS,         "public\\GBuffer.hlsl", false, PS)\
+    PASS(CS_GBUFFER_CULLING_PASS,   "public\\CS_GBufferCulling.hlsl", true,  Gbuffer_Culling)
 
     class GBufferPass : public BasePass
     {
@@ -106,8 +107,13 @@ namespace ElysiaRenderer
             static inline size_t GBuffer5Index = PropertyToID(L"GBuffer_5");
             static inline size_t g_AmbientTint = PropertyToID(L"g_AmbientTint");
 
-        };
+            static inline size_t g_AABBInstanceDatasIndex = PropertyToID(L"g_AABBInstanceDatasIndex");
+            static inline size_t g_VisbibleCounterBufferIndex = PropertyToID(L"g_VisbibleCounterBufferIndex");
+            static inline size_t g_VisbibleIndexBufferIndex = PropertyToID(L"g_VisbibleIndexBufferIndex");
+            static inline size_t g_FrustumPlanes = PropertyToID(L"g_FrustumPlanes");
+            static inline size_t g_TotalObjectCount = PropertyToID(L"g_TotalObjectCount");
 
+        };
         struct MeshData
         {
             Matrix world_M;
@@ -139,6 +145,23 @@ namespace ElysiaRenderer
 
             D3D12_DRAW_INDEXED_ARGUMENTS drawArguments;
         };
+        struct AABBLoader
+        {
+            struct alignas(16) AABBInstanceData
+            {
+                Vector3 Min;
+                float pad0;
+                Vector3 Max;
+                float pad1;
+            };
+            std::vector<AABBInstanceData> m_instanceCpuData;
+            void AddAABB(const Vector3& min, const Vector3& max);
+            void Clear();
+            void Bind(Material* pMaterail);
+
+        private:
+            BufferHandle instanceDataBuffer;
+        };
 
         UINT m_displayWidth;
         UINT m_displayHeight;
@@ -155,15 +178,26 @@ namespace ElysiaRenderer
         std::vector<IndirectCommand> m_indirectCommands;
         BufferHandle m_pMeshDataBuffer;
         BufferHandle m_pIndirectDataBuffer;
+        BufferHandle m_pVisbibleCounterBuffer;
+        BufferHandle m_pVisbibleIndexBuffer;
         static inline bool m_isFirstFrame = true;
         CComPtr<ID3D12CommandSignature> m_pCommandSignature;
 
+        AABBLoader m_aabbLoader;
+
         std::vector<DX12TextureResource*> GetGBuffers();
         void CreateRTs();
+
         void UpdateGBufferPassVariant(UINT passIndex);
+        void UpdateGBufferCullingVariant(UINT passIndex);
+
         void UpdateTAAMatrices();
+        void UploadMeshData(const std::vector<RenderItem>& renderItems);
+
+        // 从 ViewProjection 矩阵提取 6 个平面
+        static std::vector<Vector4> ExtractFrustumPlanes(const Matrix& viewProj);
+        void DoCulling(const std::vector<RenderItem>& renderItems);
         void DrawMesh(ElysiaEngine::FrameContext& context, UINT passIndex);
         void DrawGBufferPass(ElysiaEngine::FrameContext& context);
-        void UploadMeshData(const std::vector<RenderItem>& renderItems);
     };
 }
