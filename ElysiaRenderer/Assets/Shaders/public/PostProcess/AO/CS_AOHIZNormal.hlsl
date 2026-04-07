@@ -33,7 +33,7 @@ void AOHIZNormal(UINT3 id : SV_DispatchThreadID)
     if (targetCoord.x >= (uint)g_TargetSize.x || targetCoord.y >= (uint)g_TargetSize.y)
         return;
 
-    float2 screenUV = (srcCoord + 0.5f) * g_SourceSize.zw;
+    float2 screenUV = (srcCoord + 1.f) * g_SourceSize.zw;
 
     float4 depths = GatherRedTexture2D(g_SourceTexIndices[layerIndex],
                                        screenUV,

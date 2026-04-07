@@ -51,6 +51,8 @@ cbuffer PassConstant : register(b0, perPassSpace)
     float3 g_AmbientTint;
     float g_AmbientIntensity;
     UINT g_DebugMode;
+
+    float2 g_SobolSequence[64];
 }
 
 struct PSInput
@@ -110,6 +112,8 @@ PSOutput PS(PSInput i)
     inputParam.NormalWS = GBufferData.WorldNormal;
     inputParam.BitTangentWS = cross(inputParam.TangentWS, inputParam.NormalWS);
     inputParam.ScreenVector = GetScreenVectorWS(cameraPosWS.xyz, positionWS);
+    inputParam.SobelSqeuence = g_SobolSequence;
+    inputParam.ScreenSize = g_RenderSize.xy;
 
     LightData mainLightData = GetMainLight(mainLight);
 

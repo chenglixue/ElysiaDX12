@@ -57,10 +57,12 @@ PASS(DRAW_LIGHT_PASS,         "public\\Opaque.hlsl", false, PS)
             static inline size_t g_AOIndex = PropertyToID(L"g_AOIndex");
             static inline size_t g_AmbientTint = PropertyToID(L"g_AmbientTint");
             static inline size_t g_AmbientIntensity = PropertyToID(L"g_AmbientIntensity");
+            static inline size_t g_SobolSequence = PropertyToID(L"g_SobolSequence");
         };
 
         UINT m_cameraWidth;
         UINT m_cameraHeight;
+        std::vector<Vector2> m_sobolSequences;
 
         void UpdateLightingPassVariant(UINT passID);
         void DrawLightingPass(ElysiaEngine::FrameContext& context);

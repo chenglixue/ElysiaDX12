@@ -59,8 +59,11 @@ FLightAccumulator AccumulateDynamicLighting(FInputParams inputData,
 
     float shadow = SunShadowVisibility(inputData.PositionWS,
                                        inputData.ScreenUV,
+                                       inputData.ScreenSize,
+                                       g_ShadowRadius,
                                        shadowSize,
-                                       shadowMatrix);
+                                       shadowMatrix,
+                                       inputData.SobelSqeuence);
     if (!g_EnableShadow)
         shadow = 1;
     Shadow.SurfaceShadow = AO * shadow;

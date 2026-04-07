@@ -82,6 +82,8 @@ cbuffer GlobalConstant : register(b0, perFrameSpace)
     bool g_EnableAO;
     bool g_EnableShadow;
     float g_MipBias;
+
+    float g_ShadowRadius;
 };
 
 struct DX12Vertex
@@ -101,6 +103,7 @@ struct FInputParams
 
     float2 objectUV;
     float2 ScreenUV;
+    float2 ScreenSize;
 
     float3 TangentWS;
     float3 BitTangentWS;
@@ -109,6 +112,8 @@ struct FInputParams
 
     float Linear01Depth;
     float LinearEyeDepth;
+
+    float2 SobelSqeuence[64];
 };
 
 struct MaterialData

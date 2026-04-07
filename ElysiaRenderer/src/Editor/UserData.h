@@ -99,6 +99,7 @@ namespace ElysiaRenderer
         float shadowDepthBias = 0;
         float shadowSlopeDepthBias = 0;
         float shadowMaxSlopeDepthBias = 0;
+        float shadowRadius = 1.f;
 
         bool IsUseHDR = true;
         HDRQuality HDRLevel = HDRQuality::High;
@@ -130,6 +131,8 @@ namespace ElysiaRenderer
         TAAParameter taaParameter{};
         SharpenParameter sharpenParameter{};
 
+        bool EnableHIZ = true;
+
         NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(UserData,
                                                     lightColor,
                                                     lightDir,
@@ -147,6 +150,7 @@ namespace ElysiaRenderer
                                                     shadowDepthBias,
                                                     shadowSlopeDepthBias,
                                                     shadowMaxSlopeDepthBias,
+                                                    shadowRadius,
                                                     IsUseHDR,
                                                     HDRLevel,
                                                     tonemapMode,
@@ -169,7 +173,8 @@ namespace ElysiaRenderer
                                                     EnableShadow,
                                                     bloomParameter,
                                                     taaParameter,
-                                                    sharpenParameter)
+                                                    sharpenParameter,
+                                                    EnableHIZ)
 
     private:
         static std::unique_ptr<UserData> m_instance;

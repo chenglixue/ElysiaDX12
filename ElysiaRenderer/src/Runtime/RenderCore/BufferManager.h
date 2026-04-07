@@ -89,6 +89,7 @@ namespace ElysiaRenderer
         }
 
         BufferHandle CreateBuffer(const BufferCreationDesc& bufferCreationDesc);
+        BufferHandle CreateReadBackBuffer(UINT64 size, const std::string& name);
         void DestoryBuffer(const BufferHandle handle);
         void Release(BufferHandle handle);
         void ProcessGarbage(uint64_t currentFrameIndex);

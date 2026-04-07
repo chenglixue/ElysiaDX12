@@ -59,8 +59,8 @@ namespace ElysiaRenderer
         m_ImportanceHeight = m_quarterHeight;
 
         m_HIZMipmapCount = UINT(std::floor(std::log2(std::max(
-                               m_DeinterleavedDepthWidth,
-                               m_DeinterleavedDepthHeight)))) / 2;
+            m_DeinterleavedDepthWidth,
+            m_DeinterleavedDepthHeight))));
 
         for (UINT i = 0; i < DEINTERLEAVED_DEPTH_COUNT; ++i)
         {
@@ -232,8 +232,8 @@ namespace ElysiaRenderer
         }
         m_pCommand->FlushBarrier();
 
-        UINT64 currWidth = UINT64(m_cameraWidth) >> 1;
-        UINT64 currHeight = UINT64(m_cameraHeight) >> 1;
+        UINT64 currWidth = m_DeinterleavedDepthWidth;
+        UINT64 currHeight = m_DeinterleavedDepthHeight;
 
         for (UINT i = 1; i < m_HIZMipmapCount; ++i)
         {
@@ -400,10 +400,14 @@ namespace ElysiaRenderer
                                        m_DeinterleavedAOIndices[3]),
                                passID);
         m_pMaterial->SetFloat4(ShaderIDs::g_SourceTexIndices,
-                               Vector4(m_DeinterleavedDepthIndices[0],
-                                       m_DeinterleavedDepthIndices[1],
-                                       m_DeinterleavedDepthIndices[2],
-                                       m_DeinterleavedDepthIndices[3]),
+                               Vector4(m_DeinterleavedDepthRTs[0]->GetResourceHeapIndex(),
+                                       m_DeinterleavedDepthRTs[1]->GetResourceHeapIndex(),
+                                       m_DeinterleavedDepthRTs[2]->GetResourceHeapIndex(),
+                                       m_DeinterleavedDepthRTs[3]->GetResourceHeapIndex()),
+                               // Vector4(m_DeinterleavedDepthIndices[0],
+                               //         m_DeinterleavedDepthIndices[1],
+                               //         m_DeinterleavedDepthIndices[2],
+                               //         m_DeinterleavedDepthIndices[3]),
                                passID);
 
         uint64_t frameIndex = context.frameIndex;
@@ -628,10 +632,14 @@ namespace ElysiaRenderer
                                        m_DeinterleavedAOIndices[3]),
                                passID);
         m_pMaterial->SetFloat4(ShaderIDs::g_DeinterleaveDepthTexIndices,
-                               Vector4(m_DeinterleavedDepthIndices[0],
-                                       m_DeinterleavedDepthIndices[1],
-                                       m_DeinterleavedDepthIndices[2],
-                                       m_DeinterleavedDepthIndices[3]),
+                               Vector4(m_DeinterleavedDepthRTs[0]->GetResourceHeapIndex(),
+                                       m_DeinterleavedDepthRTs[1]->GetResourceHeapIndex(),
+                                       m_DeinterleavedDepthRTs[2]->GetResourceHeapIndex(),
+                                       m_DeinterleavedDepthRTs[3]->GetResourceHeapIndex()),
+                               // Vector4(m_DeinterleavedDepthIndices[0],
+                               //         m_DeinterleavedDepthIndices[1],
+                               //         m_DeinterleavedDepthIndices[2],
+                               //         m_DeinterleavedDepthIndices[3]),
                                passID);
         m_pMaterial->SetFloat2(ShaderIDs::g_noiseScale,
                                Vector2(
@@ -801,10 +809,14 @@ namespace ElysiaRenderer
                                            m_DeinterleavedAOIndices[3]),
                                    passID);
             m_pMaterial->SetFloat4(ShaderIDs::g_DeinterleaveDepthTexIndices,
-                                   Vector4(m_DeinterleavedDepthIndices[0],
-                                           m_DeinterleavedDepthIndices[1],
-                                           m_DeinterleavedDepthIndices[2],
-                                           m_DeinterleavedDepthIndices[3]),
+                                   Vector4(m_DeinterleavedDepthRTs[0]->GetResourceHeapIndex(),
+                                           m_DeinterleavedDepthRTs[1]->GetResourceHeapIndex(),
+                                           m_DeinterleavedDepthRTs[2]->GetResourceHeapIndex(),
+                                           m_DeinterleavedDepthRTs[3]->GetResourceHeapIndex()),
+                                   // Vector4(m_DeinterleavedDepthIndices[0],
+                                   //         m_DeinterleavedDepthIndices[1],
+                                   //         m_DeinterleavedDepthIndices[2],
+                                   //         m_DeinterleavedDepthIndices[3]),
                                    passID);
             m_pMaterial->SetUINT(ShaderIDs::g_ReinterleaveAOTexIndex,
                                  targetRT->GetResourceHeapIndex(),

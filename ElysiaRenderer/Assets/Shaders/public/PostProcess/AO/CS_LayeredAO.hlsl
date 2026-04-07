@@ -338,6 +338,7 @@ void LayeredHBAOMain(UINT3 id : SV_DispatchThreadID)
     pixLookupRadiusMod *= nearScreenBorder;
 
     min16float mipLevel = max(0.0f, log2(pixLookupRadiusMod) - 4.3f);
+    mipLevel /= 2;
     mipLevel = clamp(mipLevel, 0, g_HIZMaxMipmap);
 
     min16float importance = Elysia_Sample_Importance(

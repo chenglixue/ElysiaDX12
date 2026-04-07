@@ -156,19 +156,72 @@ namespace ElysiaRenderer
                                      passID);
             }
             }
-        }
-        case DebugMode::AO:
-        case DebugMode::Velocity:
-        case DebugMode::Normal:
-        {
+            m_pMaterial->SetFloat4(ShaderIDs::g_TargetSize,
+                                   GetScreenSize(
+                                       std::floor(m_displaySize.x * UserData::GetInstance().taaParameter.sampleRate),
+                                       std::floor(m_displaySize.y * UserData::GetInstance().taaParameter.sampleRate)),
+                                   passID);
+
+            Vector2 renderSize = Vector2(std::floor(
+                                             m_displaySize.x * UserData::GetInstance().taaParameter.sampleRate),
+                                         std::floor(
+                                             m_displaySize.y * UserData::GetInstance().taaParameter.sampleRate));
             m_pCommand->AddBarrier(m_pDisplayRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
             {
+                m_pMaterial->SetFloat4(ShaderIDs::g_TargetSize,
+                                       GetScreenSize(renderSize),
+                                       passID);
                 SetSpaceResource(passData, PER_PASS_SPACE);
                 m_pCommand->DrawFullScreenTriangle();
             }
             m_pCommand->AddBarrier(m_pDisplayRT,
                                    D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-            return;
+            break;
+        }
+        case DebugMode::AO:
+        {
+            m_pMaterial->SetUINT(ShaderIDs::g_TargetTexIndex,
+                                 RenderTargetManager::GetInstance().GetRenderTexture(
+                                                                       RenderResource::GetInstance().GetPropertyName(
+                                                                           GBufferPass::RenderTextureIDs::GBufferHIZID))
+                                                                   ->GetSRVResourceHeapIndex(),
+                                 passID);
+            m_pMaterial->SetUINT(ShaderIDs::g_MipmapLevel,
+                                 UserData::GetInstance().mipmapLevel,
+                                 passID);
+            Vector2 renderSize = Vector2(std::floor(
+                                             m_displaySize.x * UserData::GetInstance().taaParameter.sampleRate),
+                                         std::floor(
+                                             m_displaySize.y * UserData::GetInstance().taaParameter.sampleRate));
+            m_pCommand->AddBarrier(m_pDisplayRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+            {
+                m_pMaterial->SetFloat4(ShaderIDs::g_TargetSize,
+                                       GetScreenSize(renderSize),
+                                       passID);
+                SetSpaceResource(passData, PER_PASS_SPACE);
+                m_pCommand->DrawFullScreenTriangle();
+            }
+            m_pCommand->AddBarrier(m_pDisplayRT,
+                                   D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+            break;
+        }
+        case DebugMode::Velocity:
+        case DebugMode::Normal:
+        {
+            Vector2 renderSize = Vector2(std::floor(
+                                             m_displaySize.x * UserData::GetInstance().taaParameter.sampleRate),
+                                         std::floor(
+                                             m_displaySize.y * UserData::GetInstance().taaParameter.sampleRate));
+            m_pCommand->AddBarrier(m_pDisplayRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+            {
+                m_pMaterial->SetFloat4(ShaderIDs::g_TargetSize,
+                                       GetScreenSize(renderSize),
+                                       passID);
+                SetSpaceResource(passData, PER_PASS_SPACE);
+                m_pCommand->DrawFullScreenTriangle();
+            }
+            m_pCommand->AddBarrier(m_pDisplayRT,
+                                   D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
             break;
         }
 

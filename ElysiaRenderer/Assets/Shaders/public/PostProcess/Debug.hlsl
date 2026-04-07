@@ -6,7 +6,7 @@
 
 #pragma Rasterizer NoCullNoMS
 #pragma Blend Disabled
-#pragma Depth Enabled
+#pragma Depth Disabled
 
 cbuffer PassConstant : register(b0, perPassSpace)
 {
@@ -15,6 +15,7 @@ cbuffer PassConstant : register(b0, perPassSpace)
     UINT g_DebugMode;
 
     Vector4 screenSize;
+    Vector4 g_TargetSize;
     Matrix viewMatrix;
     Matrix viewMatrix_I;
     Matrix projMatrix;
@@ -214,24 +215,27 @@ PSInput VS(VSInput i, UINT vertexID : SV_VertexID, uint instanceID : SV_Instance
 PSOutput PS(PSInput i)
 {
     PSOutput o = (PSOutput)0;
+    float2 screenUV = (i.positionCS.xy + 0.5f) * screenSize.zw;
 
     switch (g_DebugMode)
     {
     case DEBUG_BLOOM:
     {
-        float3 bloomColor = SampleTexture2D(g_TargetTexIndex, i.uv, ClampLinearSampler);
+        float3 bloomColor = SampleTexture2D(g_TargetTexIndex, screenUV, ClampLinearSampler);
         o.target0.rgb = bloomColor;
         break;
     }
     case DEBUG_AO:
     {
-        float AO = SampleTexture2D(g_AOIndex, i.uv, ClampLinearSampler);
+        float AO = SampleTexture2D(g_AOIndex, screenUV, ClampLinearSampler);
+        AO = SampleTexture2D_LOD(g_TargetTexIndex, screenUV, ClampPointSampler, g_MipmapLevel);
+        AO = Linear01Depth(AO, g_ZBufferParams);
         o.target0 = AO;
         break;
     }
     case DEBUG_NORMAL:
     {
-        float3 normal = SampleNormalWS(i.uv);
+        float3 normal = SampleNormalWS(screenUV);
         o.target0 = float4(normal, 1.f);
         break;
     }
@@ -242,7 +246,7 @@ PSOutput PS(PSInput i)
     }
     case DEBUG_VELOCITY:
     {
-        float2 velocity = SampleTexture2D(GBuffer5Index, i.uv, ClampPointSampler).rg;
+        float2 velocity = SampleTexture2D(GBuffer5Index, screenUV, ClampPointSampler).rg;
         o.target0 = float4(velocity, 0.f, 1.f);
         break;
     }

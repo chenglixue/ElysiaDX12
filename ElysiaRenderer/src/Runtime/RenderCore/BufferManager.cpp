@@ -271,6 +271,47 @@ namespace ElysiaRenderer
         return pNewBuffer;
 
     }
+    BufferHandle BufferManager::CreateReadBackBuffer(UINT64 size, const std::string& name)
+    {
+        std::lock_guard<std::mutex> lock(m_createMutex);
+
+        // 1. Readback 缓冲不需要像 CBV 那样做严格的 256 字节对齐
+        D3D12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(size);
+
+        // 2. 专属的 Heap 类型
+        D3D12MA::ALLOCATION_DESC allocationDesc{};
+        allocationDesc.HeapType = D3D12_HEAP_TYPE_READBACK;
+
+        CComPtr<D3D12MA::Allocation> pAllocation = nullptr;
+        CComPtr<ID3D12Resource> pResource = nullptr;
+
+        // 3. 初始状态必须强制设为 COPY_DEST
+        D3D12_RESOURCE_STATES resourceState = D3D12_RESOURCE_STATE_COPY_DEST;
+
+        ElysiaHelper::ThrowIfFailed(m_pAllocator->CreateResource(
+            &allocationDesc,
+            &resourceDesc,
+            resourceState,
+            nullptr,
+            &pAllocation,
+            IID_PPV_ARGS(&pResource)));
+
+        if (!name.empty())
+        {
+            std::wstring wName(name.begin(), name.end());
+            pResource->SetName(wName.c_str());
+        }
+
+        // 4. 直接封装并返回，彻底跳过 SRV/UAV 和 Bindless 描述符的分配！
+        auto pNewBuffer = std::make_shared<DX12BufferResource>(
+            pResource,
+            resourceState,
+            pAllocation);
+
+        pNewBuffer->SetStride(0);
+
+        return pNewBuffer;
+    }
     void BufferManager::DestoryBuffer(const BufferHandle handle)
     {
         if (!handle)

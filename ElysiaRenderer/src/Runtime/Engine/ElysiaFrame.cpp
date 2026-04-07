@@ -20,6 +20,7 @@
 #include "ECS/Entity.h"
 #include "Runtime/RenderCore/DX12Camera.h"
 #include "Runtime/RenderCore/RenderTexture.h"
+#include "Runtime/RenderCore/Pass/GBufferPass.h"
 #include "Runtime/RenderCore/Pass/GIPass.h"
 #include "ThirdParty/imgui/imgui_internal.h"
 
@@ -226,7 +227,7 @@ namespace ElysiaEngine
         ImGuiIO& io = ImGui::GetIO();
 
         HandleInput(io);
-        // CameraManager::GetInstance().GetMainCamera()->UpdateFrustum();
+        CameraManager::GetInstance().GetMainCamera()->UpdateFrustum();
         // SceneManager::GetInstance().CollectRenderItems();
     }
 
@@ -463,71 +464,32 @@ namespace ElysiaEngine
         ImGui::Begin("Render Settings");
         auto& pUserData = UserData::GetInstance();
 
+        ImGui::Checkbox("Enable HIZ", &pUserData.EnableHIZ);
+        ImGui::Text("GBuffer Render Count: %u", GBufferPass::m_renderCount);
         if (ImGui::CollapsingHeader("Debug"))
         {
-            int debugModeIndex = (int)pUserData.debugMode;
-            ImGui::Combo("Debug Mode",
-                         &debugModeIndex,
-                         StringViewToChar(magic_enum::enum_names<DebugMode>().data(),
-                                          magic_enum::enum_count<DebugMode>()).data(),
-                         (int)magic_enum::enum_count<DebugMode>());
-            debugModeIndex = std::clamp(debugModeIndex,
-                                        0,
-                                        static_cast<int>(magic_enum::enum_count<DebugMode>()));
-            pUserData.debugMode = (DebugMode)debugModeIndex;
+            ElysiaRenderer::EnumCombo("Debug Mode", &pUserData.debugMode);
 
             if (pUserData.debugMode == DebugMode::AO)
             {
-                int debugModeIndex = (int)pUserData.aoParameter.debugTarget;
-                ImGui::Combo("AO Debug",
-                             &debugModeIndex,
-                             StringViewToChar(magic_enum::enum_names<AODebugTarget>().data(),
-                                              magic_enum::enum_count<AODebugTarget>()).data(),
-                             (int)magic_enum::enum_count<AODebugTarget>());
-                debugModeIndex = std::clamp(debugModeIndex,
-                                            0,
-                                            static_cast<int>(magic_enum::enum_count<
-                                                AODebugTarget>()));
-                pUserData.aoParameter.debugTarget = (AODebugTarget)debugModeIndex;
-
+                ElysiaRenderer::EnumCombo("AO Debug", &pUserData.aoParameter.debugTarget);
                 ImGui::SliderInt("mipmap level",
                                  &pUserData.mipmapLevel,
                                  0,
-                                 10);
+                                 5);
             }
             if (pUserData.debugMode == DebugMode::AABB || pUserData.debugMode == DebugMode::GIProbe)
             {
                 ImGui::SliderInt("Instance GI",
                                  &pUserData.instanceID,
                                  0,
-                                 400);
+                                 102);
             }
             if (pUserData.debugMode == DebugMode::GIProbe)
             {
                 ImGui::Checkbox("Enable Line", &pUserData.GIParameter.enableLine);
                 ImGui::SliderFloat("Line Thicness", &pUserData.GIParameter.lineWidth, 0.f, 5.f);
                 ImGui::Checkbox("Hide Inactive Probe", &pUserData.GIParameter.bHideInactiveProbe);
-            }
-            if (pUserData.debugMode == DebugMode::GI)
-            {
-                ImGui::Checkbox("Texture Visualization", &pUserData.GIParameter.bTextureVisualization);
-                if (pUserData.GIParameter.bTextureVisualization)
-                {
-                    auto pIrradianceRT = GIPass::m_pIrradianceRT;
-                    D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle = pIrradianceRT->GetTexture()->GetSRVDescriptor().
-                                                                           GetGPUHandle();
-
-                    // ImTextureID 本质上就是一个 void*，在 DX12 的 ImGui 实现中它就是 GPU 句柄的 ptr
-                    ImTextureID texID = (ImTextureID)gpuHandle.ptr;
-
-                    // 获取贴图的实际宽高，或者自定义一个显示尺寸
-                    float width = pIrradianceRT->GetWidth();
-                    // Atlas 的高宽比通常很极端 (比如 宽很长，高很短)，这里等比缩放
-                    float height = pIrradianceRT->GetHeight();
-
-                    // 绘制图片
-                    ImGui::Image(texID, ImVec2(width, height));
-                }
             }
             if (pUserData.debugMode == DebugMode::Bloom)
             {
@@ -571,6 +533,10 @@ namespace ElysiaEngine
             ImGui::SliderFloat("Shadow Slope Depth Bias", &pUserData.shadowSlopeDepthBias, 0, 10);
             ImGui::SliderFloat("Shadow Max Slope Depth Bias",
                                &pUserData.shadowMaxSlopeDepthBias,
+                               0,
+                               10);
+            ImGui::SliderFloat("Shadow Radius",
+                               &pUserData.shadowRadius,
                                0,
                                10);
         }

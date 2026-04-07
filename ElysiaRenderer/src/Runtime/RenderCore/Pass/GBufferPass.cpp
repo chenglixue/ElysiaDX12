@@ -33,6 +33,7 @@ namespace ElysiaRenderer
     {
         m_indirectCommands.reserve(Max_RenderItem_Count);
         m_meshDatas.reserve(Max_RenderItem_Count);
+        m_cullRenderList.reserve(Max_RenderItem_Count);
 
         {
             auto bufferSize = sizeof(IndirectCommand) * Max_RenderItem_Count;
@@ -81,6 +82,10 @@ namespace ElysiaRenderer
                 .viewFlags = GPUResourceFlags::SRV | GPUResourceFlags::UAV,
                 .accessFlags = BufferAccessFlags::GPUOnly,
             });
+
+            m_pVisbibleCounterReadBackBuffer = BufferManager::GetInstance().CreateReadBackBuffer(
+                sizeof(int),
+                "HiZ_Readback");
         }
     }
 
@@ -112,9 +117,24 @@ namespace ElysiaRenderer
 
         if (context.renderList.empty())
             return;
+        auto viewFrustum = CameraManager::GetInstance().GetMainCamera()->GetFrustum();
+
+        m_cullRenderList.clear();
+        for (const auto& pRenderItem : context.renderList)
+        {
+            auto pEntity = pRenderItem.pAssociatedEntity;
+            if (viewFrustum.Contains(pEntity->GetWorldAABB()) != DISJOINT)
+            {
+                m_cullRenderList.emplace_back(pRenderItem);
+            }
+        }
+
         UpdateTAAMatrices();
-        DoCulling(context.renderList);
-        UploadMeshData(context.renderList);
+        UploadMeshData(m_cullRenderList);
+        CopyDepth();
+        DoHIZ();
+        ClearCounterBuffer();
+        DoCulling(m_cullRenderList);
         DrawGBufferPass(context);
 
         TAAData::Pre_View_M = m_pCamera->GetViewMat();
@@ -204,6 +224,20 @@ namespace ElysiaRenderer
 
             m_GBufferRTs.emplace_back(std::move(pGBufferRT));
         }
+
+        m_HIZWidth = std::bit_ceil(m_cameraWidth) >> 1;
+        m_HIZHeight = std::bit_ceil(m_cameraHeight) >> 1;
+        m_HIZMipmapCount = UINT(std::floor(std::log2(std::max(
+                               m_HIZWidth,
+                               m_HIZHeight)))) + 1;
+        m_pHIZTex = RenderTargetManager::GetInstance().CreateRWRenderTexture(
+            m_HIZWidth,
+            m_HIZHeight,
+            DXGI_FORMAT_R32_FLOAT,
+            true,
+            m_HIZMipmapCount,
+            RenderResource::GetInstance().GetPropertyName(
+                RenderTextureIDs::GBufferHIZID));
     }
     std::vector<DX12TextureResource*> GBufferPass::GetGBuffers()
     {
@@ -222,7 +256,11 @@ namespace ElysiaRenderer
         if (!m_pMaterial)
             return;
         UpdateGBufferPassVariant(DRAW_GBUFFER_PASS);
-        UpdateGBufferCullingVariant(CS_GBUFFER_CULLING_PASS);
+        UpdateCSVariant(CS_GBuffer_COPY_DEPTH);
+        UpdateCSVariant(CS_GBuffer_HIZ);
+        UpdateCSVariant(CS_CLEAR_COUNTER_BUFFER);
+        UpdateCSVariant(CS_GBUFFER_CULLING_PASS);
+
     }
     void GBufferPass::UpdateGBufferPassVariant(UINT passIndex)
     {
@@ -271,7 +309,7 @@ namespace ElysiaRenderer
         }
 
     }
-    void GBufferPass::UpdateGBufferCullingVariant(UINT passIndex)
+    void GBufferPass::UpdateCSVariant(UINT passIndex)
     {
         std::vector<std::wstring> enableKeywords{};
 
@@ -382,6 +420,126 @@ namespace ElysiaRenderer
                Max_RenderItem_Count * sizeof(IndirectCommand));
     }
 
+    void GBufferPass::CopyDepth()
+    {
+        auto passID = CS_GBuffer_COPY_DEPTH;
+        auto& passData = m_pMaterial->GetPassData(passID);
+        auto passName = passData.Name.c_str();
+        PIXHelper pix(m_pCommand->GetCommandList(), passName);
+
+        PipelineInfo pipelineStateData{};
+        pipelineStateData.m_pipelineStateObject = passData.pPipelineStateObject;
+        m_pCommand->SetPipeline(pipelineStateData);
+        SetSpaceResource(passData, PER_FRAME_SPACE);
+
+        m_pCommand->AddBarrier(m_pHIZTex, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+        {
+            float maxBoundX = (static_cast<float>(m_cameraWidth) - 0.5f) / static_cast<float>(m_cameraWidth);
+            float maxBoundY = (static_cast<float>(m_cameraHeight) - 0.5f) / static_cast<float>(m_cameraHeight);
+
+            m_pMaterial->SetUINT(ShaderIDs::g_GBufferHIZTargetTexIndex,
+                                 m_pHIZTex->GetUAVResourceHeapIndex(),
+                                 passID);
+            m_pMaterial->SetFloat4(ShaderIDs::g_TargetSize,
+                                   GetScreenSize(m_HIZWidth, m_HIZHeight),
+                                   passID);
+            m_pMaterial->SetFloat4(ShaderIDs::g_SourceSize,
+                                   GetScreenSize(m_cameraWidth, m_cameraHeight),
+                                   passID);
+            m_pMaterial->SetFloat4(ShaderIDs::g_InputViewportMaxBound,
+                                   Vector4(maxBoundX, maxBoundY, 0.0f, 0.0f),
+                                   passID);
+            SetSpaceResource(passData, PER_PASS_SPACE);
+
+            auto threadGroupSize = passData.GetKernelThreadGroupSizes();
+            m_pCommand->Dispatch(CeilDivide(m_HIZWidth, threadGroupSize.x),
+                                 CeilDivide(m_HIZHeight, threadGroupSize.y),
+                                 threadGroupSize.z);
+            m_pCommand->AddUAVBarrier(m_pHIZTex, false);
+        }
+        m_pCommand->AddBarrier(m_pHIZTex, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
+    }
+    void GBufferPass::DoHIZ()
+    {
+        auto passID = CS_GBuffer_HIZ;
+        auto& passData = m_pMaterial->GetPassData(passID);
+        auto passName = passData.Name.c_str();
+        PIXHelper pix(m_pCommand->GetCommandList(), passName);
+
+        PipelineInfo pipelineStateData{};
+        pipelineStateData.m_pipelineStateObject = passData.pPipelineStateObject;
+        m_pCommand->SetPipeline(pipelineStateData);
+        SetSpaceResource(passData, PER_FRAME_SPACE);
+
+        UINT64 currWidth = UINT64(m_HIZWidth);
+        UINT64 currHeight = UINT64(m_HIZHeight);
+        float maxBoundX = (static_cast<float>(m_cameraWidth) - 0.5f) / static_cast<float>(m_cameraWidth);
+        float maxBoundY = (static_cast<float>(m_cameraHeight) - 0.5f) / static_cast<float>(m_cameraHeight);
+
+        m_pCommand->AddBarrier(m_pHIZTex, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+        for (UINT i = 1; i < m_HIZMipmapCount; ++i)
+        {
+            auto lastWidth = currWidth;
+            auto lastHeight = currHeight;
+            currWidth = MathHelper::Max(UINT64(1), UINT64(currWidth + 1) >> 1);
+            currHeight = MathHelper::Max(UINT64(1), UINT64(currHeight + 1) >> 1);
+
+            m_pMaterial->SetUINT(ShaderIDs::g_GBufferHIZSourceTexIndex,
+                                 m_pHIZTex->GetUAVResourceHeapIndex(i - 1),
+                                 passID);
+            m_pMaterial->SetUINT(ShaderIDs::g_GBufferHIZTargetTexIndex,
+                                 m_pHIZTex->GetUAVResourceHeapIndex(i),
+                                 passID);
+            m_pMaterial->SetFloat4(ShaderIDs::g_TargetSize,
+                                   GetScreenSize(currWidth, currHeight),
+                                   passID);
+            m_pMaterial->SetFloat4(ShaderIDs::g_SourceSize,
+                                   GetScreenSize(lastWidth, lastHeight),
+                                   passID);
+            m_pMaterial->SetFloat4(ShaderIDs::g_InputViewportMaxBound,
+                                   Vector4(maxBoundX, maxBoundY, 0.0f, 0.0f),
+                                   passID);
+            SetSpaceResource(passData, PER_PASS_SPACE);
+
+            auto threadGroupSize = passData.GetKernelThreadGroupSizes();
+            m_pCommand->Dispatch(CeilDivide(currWidth, threadGroupSize.x),
+                                 CeilDivide(currHeight, threadGroupSize.y),
+                                 threadGroupSize.z);
+            m_pCommand->AddUAVBarrier(m_pHIZTex);
+        }
+        m_pCommand->AddBarrier(m_pHIZTex, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
+    }
+
+    void GBufferPass::ClearCounterBuffer()
+    {
+        auto passID = CS_CLEAR_COUNTER_BUFFER;
+        auto& passData = m_pMaterial->GetPassData(passID);
+        auto passName = passData.Name.c_str();
+        PIXHelper pix(m_pCommand->GetCommandList(), passName);
+
+        PipelineInfo pipelineStateData{};
+        pipelineStateData.m_pipelineStateObject = passData.pPipelineStateObject;
+        m_pCommand->SetPipeline(pipelineStateData);
+        SetSpaceResource(passData, PER_FRAME_SPACE);
+
+        m_pCommand->AddBarrier(*m_pVisbibleCounterBuffer, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+        {
+            m_pMaterial->SetUINT(ShaderIDs::g_VisbibleCounterBufferIndex,
+                                 m_pVisbibleCounterBuffer->GetUAVResourceHeapIndex(),
+                                 passID);
+            SetSpaceResource(passData, PER_PASS_SPACE);
+            auto threadGroupSize = passData.GetKernelThreadGroupSizes();
+            m_pCommand->Dispatch(threadGroupSize.x,
+                                 threadGroupSize.y,
+                                 threadGroupSize.z);
+            m_pCommand->AddUAVBarrier(m_pVisbibleCounterBuffer, false);
+        }
+        m_pCommand->AddBarrier(*m_pVisbibleCounterBuffer, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
+    }
     std::vector<Vector4> GBufferPass::ExtractFrustumPlanes(const Matrix& viewProj)
     {
         // XYZ 是法线，W 是距离
@@ -442,11 +600,11 @@ namespace ElysiaRenderer
         if (SceneManager::GetInstance().GetEntities().empty())
             return;
 
-        auto& entities = SceneManager::GetInstance().GetRootEntity();
-        m_aabbLoader.m_instanceCpuData.reserve(entities->GetChildren().size());
-        for (UINT i = 0; i < entities->GetChildren().size(); i ++)
+        m_aabbLoader.m_instanceCpuData.reserve(renderItems.size());
+        auto viewFrustum = CameraManager::GetInstance().GetMainCamera()->GetFrustum();
+        for (UINT i = 0; i < renderItems.size(); i ++)
         {
-            const auto entity = entities->GetChildren()[i].get();
+            const auto entity = renderItems[i].pAssociatedEntity;
             const auto AABB = entity->GetWorldAABB();
             const auto min = AABB.Center - AABB.Extents;
             const auto max = AABB.Center + AABB.Extents;
@@ -454,12 +612,38 @@ namespace ElysiaRenderer
         }
 
         auto viewMatrix = m_pCamera->GetViewMat();
-        auto projMatrix = m_currMatrixP = m_pCamera->GetProjMat();
+        auto projMatrix = m_pCamera->GetProjMat();
 
-        m_pCommand->AddBarrier(*m_pVisbibleCounterBuffer, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, false);
+        Vector3 FrustumMaxPoint, FrustumMinPoint;
+        std::vector<Vector3> frustumCorners(8);
+        viewFrustum.GetCorners(frustumCorners.data());
+        FrustumMaxPoint = FrustumMinPoint = frustumCorners[0];
+        for (UINT i = 1; i < 8; ++i)
+        {
+            auto corner = frustumCorners[i];
+            FrustumMinPoint = Vector3::Min(FrustumMinPoint, corner);
+            FrustumMaxPoint = Vector3::Max(FrustumMaxPoint, corner);
+        }
+
+        std::vector<XMVECTOR> planes(6);
+        viewFrustum.GetPlanes(&planes[0],
+                              &planes[1],
+                              &planes[2],
+                              &planes[3],
+                              &planes[4],
+                              &planes[5]);
+        auto frustumPlanes = std::vector<Vector4>(6);
+        for (int i = 0; i < 6; ++i)
+        {
+            XMStoreFloat4(&frustumPlanes[i], planes[i]);
+        }
+        m_aabbLoader.Bind(m_pMaterial.get());
+
+        m_pCommand->AddBarrier(*m_pVisbibleCounterBuffer,
+                               D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
+                               false);
         m_pCommand->AddBarrier(*m_pVisbibleIndexBuffer, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
         {
-            m_aabbLoader.Bind(m_pMaterial.get());
             m_pMaterial->SetUINT(ShaderIDs::g_VisbibleCounterBufferIndex,
                                  m_pVisbibleCounterBuffer->GetUAVResourceHeapIndex(),
                                  passID);
@@ -467,10 +651,32 @@ namespace ElysiaRenderer
                                  m_pVisbibleIndexBuffer->GetUAVResourceHeapIndex(),
                                  passID);
             m_pMaterial->SetUINT(ShaderIDs::g_TotalObjectCount,
-                                 renderItems.size(),
+                                 m_aabbLoader.m_instanceCpuData.size(),
                                  passID);
+            m_pMaterial->SetUINT(ShaderIDs::g_HIZTexIndex,
+                                 m_pHIZTex->GetSRVResourceHeapIndex(),
+                                 passID);
+            m_pMaterial->SetUINT(ShaderIDs::g_EnableHIZ,
+                                 UserData::GetInstance().EnableHIZ,
+                                 passID);
+            m_pMaterial->SetUINT(ShaderIDs::g_HIZMipmapCount,
+                                 m_HIZMipmapCount,
+                                 passID);
+            m_pMaterial->SetFloat4(ShaderIDs::g_HIZTexSize,
+                                   GetScreenSize(m_pHIZTex->GetWidth(), m_pHIZTex->GetHeight()),
+                                   passID);
+            m_pMaterial->SetFloat4(ShaderIDs::g_FrustumMaxPoint,
+                                   Vector4(FrustumMaxPoint),
+                                   passID);
+            m_pMaterial->SetFloat4(ShaderIDs::g_FrustumMinPoint,
+                                   Vector4(FrustumMinPoint),
+                                   passID);
+            m_pMaterial->SetMatrix(ShaderIDs::viewProjMatrix,
+                                   viewMatrix * projMatrix,
+                                   passID);
             m_pMaterial->SetVector4Array(ShaderIDs::g_FrustumPlanes,
-                                         ExtractFrustumPlanes(viewMatrix * projMatrix),
+                                         // ExtractFrustumPlanes(viewMatrix * projMatrix),
+                                         frustumPlanes,
                                          passID);
             SetSpaceResource(passData, PER_PASS_SPACE);
 
@@ -483,6 +689,12 @@ namespace ElysiaRenderer
         }
         m_pCommand->AddBarrier(*m_pVisbibleCounterBuffer, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, false);
         m_pCommand->AddBarrier(*m_pVisbibleIndexBuffer, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+
+        m_pCommand->AddBarrier(*m_pVisbibleCounterBuffer, D3D12_RESOURCE_STATE_COPY_SOURCE, false);
+        m_pCommand->GetCommandList()->CopyResource(m_pVisbibleCounterReadBackBuffer->GetResource(),
+                                                   m_pVisbibleCounterBuffer->GetResource());
+        m_pCommand->AddBarrier(*m_pVisbibleCounterBuffer, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+        ReadGPUCounter();
 
         m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
     }
@@ -630,7 +842,7 @@ namespace ElysiaRenderer
         m_pCommand->GetCommandList()->ResourceBarrier(1, &barrier);
 
         m_pCommand->GetCommandList()->ExecuteIndirect(m_pCommandSignature,
-                                                      context.renderList.size(),
+                                                      m_cullRenderList.size(),
                                                       m_pIndirectDataBuffer->GetResource(),
                                                       0,
                                                       m_pVisbibleCounterBuffer->GetResource(),
@@ -661,7 +873,7 @@ namespace ElysiaRenderer
     {
         BufferCreationDesc instanceDataDesc =
         {
-            .name = L"AABB Data Buffer",
+            .name = L"GBuffer AABB Data Buffer",
             .stride = sizeof(AABBInstanceData),
             .size = sizeof(AABBInstanceData) * m_instanceCpuData.size(),
             .viewFlags = GPUResourceFlags::SRV,
@@ -674,5 +886,24 @@ namespace ElysiaRenderer
         instanceDataBuffer = BufferManager::GetInstance().CreateBuffer(instanceDataDesc);
         pMaterail->SetUINT(ShaderIDs::g_AABBInstanceDatasIndex,
                            instanceDataBuffer->GetResourceHeapIndex());
+    }
+
+    void GBufferPass::ReadGPUCounter()
+    {
+        uint32_t* pMappedData = nullptr;
+        D3D12_RANGE readRange{0, sizeof(uint32_t)}; // 我们要读前 4 个字节
+
+        HRESULT hr = m_pVisbibleCounterReadBackBuffer->GetResource()->Map(
+            0,
+            &readRange,
+            reinterpret_cast<void**>(&pMappedData));
+
+        if (SUCCEEDED(hr))
+        {
+            m_renderCount = *pMappedData;
+
+            D3D12_RANGE writeRange{0, 0};
+            m_pVisbibleCounterReadBackBuffer->GetResource()->Unmap(0, &writeRange);
+        }
     }
 }

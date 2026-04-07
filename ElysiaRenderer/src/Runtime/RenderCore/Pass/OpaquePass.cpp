@@ -4,6 +4,7 @@
 #include "GIPass.h"
 #include "Editor/UserData.h"
 #include "Programs/PIXHelper.h"
+#include "Programs/SobolSequenceGenerator.h"
 
 #include "Runtime/Core/DX12GraphicsContext.h"
 #include "Runtime/Core/DX12Shader.h"
@@ -46,6 +47,8 @@ namespace ElysiaRenderer
         {
             m_pMaterial = std::make_unique<Material>(m_pDevice, m_shaderPasses);
         }
+
+        m_sobolSequences = Create2DSobolSqeuence(64);
         UpdatePipeline();
     }
 
@@ -140,6 +143,7 @@ namespace ElysiaRenderer
                               passID);
         m_pMaterial->SetUINT(ShaderIDs::g_DebugMode,
                              static_cast<UINT>(UserData::GetInstance().debugMode));
+        m_pMaterial->SetVector2Array(ShaderIDs::g_SobolSequence, m_sobolSequences, passID);
 
         SetSpaceResource(passData, PER_PASS_SPACE);
         SetSpaceResource(passData, PER_FRAME_SPACE);

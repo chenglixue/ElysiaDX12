@@ -470,6 +470,9 @@
     <None Include="Assets\Shaders\public\CS_GBufferCulling.hlsl">
       <FileType>Document</FileType>
     </None>
+    <None Include="Assets\Shaders\public\CS_GBufferHIZ.hlsl">
+      <FileType>Document</FileType>
+    </None>
     <ClCompile Include="src\Editor\IMGUIDrawer.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>

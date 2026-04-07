@@ -61,5 +61,7 @@ namespace ElysiaRenderer
         UINT g_EnableAO = true;
         UINT g_EnableShadow = true;
         float g_MipBias = 0;
+
+        float g_ShadowRadius;
     };
 } // namespace ElysiaRenderer

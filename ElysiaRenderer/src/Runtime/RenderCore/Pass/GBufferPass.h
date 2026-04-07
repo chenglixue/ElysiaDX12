@@ -10,9 +10,11 @@ namespace ElysiaCore
 namespace ElysiaRenderer
 {
 #define GBUFFER_PASS_LIST \
-    PASS(DRAW_GBUFFER_PASS,         "public\\GBuffer.hlsl", false, PS)\
-    PASS(CS_GBUFFER_CULLING_PASS,   "public\\CS_GBufferCulling.hlsl", true,  Gbuffer_Culling)
-
+    PASS(DRAW_GBUFFER_PASS,         "public\\GBuffer.hlsl",             false, PS)\
+    PASS(CS_GBuffer_COPY_DEPTH,     "public\\CS_GBufferHIZ.hlsl",       true,  GBuffer_Copy_Depth)\
+    PASS(CS_GBuffer_HIZ,            "public\\CS_GBufferHIZ.hlsl",       true,  GBuffer_HIZ)\
+    PASS(CS_CLEAR_COUNTER_BUFFER,   "public\\CS_GBufferCulling.hlsl",       true,  ClearCounterBuffer)\
+    PASS(CS_GBUFFER_CULLING_PASS,   "public\\CS_GBufferCulling.hlsl",   true,  Gbuffer_Culling)
     class GBufferPass : public BasePass
     {
     public:
@@ -24,6 +26,7 @@ namespace ElysiaRenderer
             static inline size_t GBuffer3ID = PropertyToID(L"GBuffer3");
             static inline size_t GBuffer4ID = PropertyToID(L"GBuffer4");
             static inline size_t GBuffer5ID = PropertyToID(L"GBuffer5");
+            static inline size_t GBufferHIZID = PropertyToID(L"GBuffer HIZ RT");
         };
         struct TAAData
         {
@@ -35,6 +38,8 @@ namespace ElysiaRenderer
             static inline Matrix Pre_ViewProj_I_M;
         };
         static inline Vector2 m_currJitterUV, m_preJitterUV;
+        static inline BufferHandle m_pVisbibleCounterReadBackBuffer;
+        static inline int m_renderCount;
 
         GBufferPass();
         virtual ~GBufferPass() override;
@@ -67,6 +72,7 @@ namespace ElysiaRenderer
         };
 #pragma endregion
         static constexpr auto Max_RenderItem_Count = 1024;
+        int m_HIZMipmapCount;
 
         struct ShaderIDs
         {
@@ -112,6 +118,17 @@ namespace ElysiaRenderer
             static inline size_t g_VisbibleIndexBufferIndex = PropertyToID(L"g_VisbibleIndexBufferIndex");
             static inline size_t g_FrustumPlanes = PropertyToID(L"g_FrustumPlanes");
             static inline size_t g_TotalObjectCount = PropertyToID(L"g_TotalObjectCount");
+            static inline size_t g_GBufferHIZSourceTexIndex = PropertyToID(L"g_GBufferHIZSourceTexIndex");
+            static inline size_t g_GBufferHIZTargetTexIndex = PropertyToID(L"g_GBufferHIZTargetTexIndex");
+            static inline size_t g_TargetSize = PropertyToID(L"g_TargetSize");
+            static inline size_t g_SourceSize = PropertyToID(L"g_SourceSize");
+            static inline size_t g_HIZTexIndex = PropertyToID(L"g_HIZTexIndex");
+            static inline size_t g_HIZTexSize = PropertyToID(L"g_HIZTexSize");
+            static inline size_t g_EnableHIZ = PropertyToID(L"g_EnableHIZ");
+            static inline size_t g_FrustumMaxPoint = PropertyToID(L"g_FrustumMaxPoint");
+            static inline size_t g_FrustumMinPoint = PropertyToID(L"g_FrustumMinPoint");
+            static inline size_t g_HIZMipmapCount = PropertyToID(L"g_HIZMipmapCount");
+            static inline size_t g_InputViewportMaxBound = PropertyToID(L"g_InputViewportMaxBound");
 
         };
         struct MeshData
@@ -155,18 +172,20 @@ namespace ElysiaRenderer
                 float pad1;
             };
             std::vector<AABBInstanceData> m_instanceCpuData;
+            BufferHandle instanceDataBuffer;
+
             void AddAABB(const Vector3& min, const Vector3& max);
             void Clear();
             void Bind(Material* pMaterail);
 
-        private:
-            BufferHandle instanceDataBuffer;
         };
 
         UINT m_displayWidth;
         UINT m_displayHeight;
         UINT m_cameraWidth;
         UINT m_cameraHeight;
+        UINT m_HIZWidth;
+        UINT m_HIZHeight;
         Matrix m_currMatrixP;
         Matrix m_currMatrixVP;
         Matrix m_currMatrixVP_I;
@@ -180,24 +199,33 @@ namespace ElysiaRenderer
         BufferHandle m_pIndirectDataBuffer;
         BufferHandle m_pVisbibleCounterBuffer;
         BufferHandle m_pVisbibleIndexBuffer;
+        RenderTexture* m_pHIZTex;
         static inline bool m_isFirstFrame = true;
         CComPtr<ID3D12CommandSignature> m_pCommandSignature;
 
+        std::vector<RenderItem> m_cullRenderList;
         AABBLoader m_aabbLoader;
 
         std::vector<DX12TextureResource*> GetGBuffers();
         void CreateRTs();
 
+        void UpdateCSVariant(UINT passIndex);
         void UpdateGBufferPassVariant(UINT passIndex);
-        void UpdateGBufferCullingVariant(UINT passIndex);
 
         void UpdateTAAMatrices();
         void UploadMeshData(const std::vector<RenderItem>& renderItems);
 
+        void CopyDepth();
+        void DoHIZ();
+
+        void ClearCounterBuffer();
         // 从 ViewProjection 矩阵提取 6 个平面
         static std::vector<Vector4> ExtractFrustumPlanes(const Matrix& viewProj);
         void DoCulling(const std::vector<RenderItem>& renderItems);
+
         void DrawMesh(ElysiaEngine::FrameContext& context, UINT passIndex);
         void DrawGBufferPass(ElysiaEngine::FrameContext& context);
+
+        void ReadGPUCounter();
     };
 }
