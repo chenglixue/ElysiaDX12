@@ -94,29 +94,9 @@ namespace ElysiaRenderer
         float AmbientCubemapIntensity = 1;
         Vector3 AmbientCubemapTint = Vector3::One;
 
-        ShadowType shadowType = ShadowType::Soft;
-        ShadowQuality shadowQuality = ShadowQuality::VeryHigh;
-        float shadowDepthBias = 0;
-        float shadowSlopeDepthBias = 0;
-        float shadowMaxSlopeDepthBias = 0;
-        float shadowRadius = 1.f;
+        ShadowParameter shadowParameter;
 
-        bool IsUseHDR = true;
-        HDRQuality HDRLevel = HDRQuality::High;
-        TonemapMode tonemapMode = TonemapMode::LMP;
-        ColorSpace colorSpace = ColorSpace::ColorSpace_REC709;
-        CAULDRON_DX12::DisplayMode displayMode = CAULDRON_DX12::DisplayMode::DISPLAYMODE_SDR;
-        float localExposure = 1.f;
-        bool bShoulder;
-        // Use optional extra shoulderContrast tuning (set to false if shoulderContrast is 1.0).
-        float SoftGap;
-        // Range of 0 to a little over zero, controls how much feather region in out-of-gamut mapping, 0=clip.
-        float HdrMax;           // Maximum input value.
-        float LpmExposure;      // Number of stops between 'hdrMax' and 18% mid-level on input.
-        float Contrast;         // Input range {0.0 (no extra contrast) to 1.0 (maximum contrast)}.
-        float ShoulderContrast; // Shoulder shaping, 1.0 = no change (fast path).
-        Vector3 Saturation;     // A per channel adjustment, use <0 decrease, 0=no change, >0 increase.
-        Vector3 Crosstalk;      // One channel must be 1.0, the rest can be <= 1.0 but not zero.
+        HDRParameter hdrParameter;
 
         AOParameter aoParameter{};
         GIParameter GIParameter{};
@@ -124,8 +104,6 @@ namespace ElysiaRenderer
         DebugMode debugMode = DebugMode::None;
         int mipmapLevel = 0;
         int instanceID = 0;
-
-        bool EnableShadow = true;
 
         BloomParameter bloomParameter{};
         TAAParameter taaParameter{};
@@ -145,32 +123,13 @@ namespace ElysiaRenderer
                                                     RoughnessIntensity,
                                                     AmbientCubemapIntensity,
                                                     AmbientCubemapTint,
-                                                    shadowType,
-                                                    shadowQuality,
-                                                    shadowDepthBias,
-                                                    shadowSlopeDepthBias,
-                                                    shadowMaxSlopeDepthBias,
-                                                    shadowRadius,
-                                                    IsUseHDR,
-                                                    HDRLevel,
-                                                    tonemapMode,
-                                                    colorSpace,
-                                                    displayMode,
-                                                    localExposure,
-                                                    bShoulder,
-                                                    SoftGap,
-                                                    HdrMax,
-                                                    LpmExposure,
-                                                    Contrast,
-                                                    ShoulderContrast,
-                                                    Saturation,
-                                                    Crosstalk,
+                                                    shadowParameter,
+                                                    hdrParameter,
                                                     aoParameter,
                                                     GIParameter,
                                                     debugMode,
                                                     mipmapLevel,
                                                     instanceID,
-                                                    EnableShadow,
                                                     bloomParameter,
                                                     taaParameter,
                                                     sharpenParameter,

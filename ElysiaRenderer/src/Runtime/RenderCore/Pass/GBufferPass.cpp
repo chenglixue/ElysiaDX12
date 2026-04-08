@@ -112,6 +112,7 @@ namespace ElysiaRenderer
 
     void GBufferPass::Render(ElysiaEngine::FrameContext& context)
     {
+        PIXHelper pix(m_pCommand->GetCommandList(), "GBuffer Pass");
         m_pCamera = context.pCamera;
         m_pGPUTimer = context.pGPUTimer;
 
@@ -458,7 +459,7 @@ namespace ElysiaRenderer
             m_pCommand->AddUAVBarrier(m_pHIZTex, false);
         }
         m_pCommand->AddBarrier(m_pHIZTex, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
-        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("GBuffer/") + passName).c_str());
     }
     void GBufferPass::DoHIZ()
     {
@@ -510,7 +511,7 @@ namespace ElysiaRenderer
         }
         m_pCommand->AddBarrier(m_pHIZTex, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 
-        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("GBuffer/") + passName).c_str());
     }
 
     void GBufferPass::ClearCounterBuffer()
@@ -538,7 +539,7 @@ namespace ElysiaRenderer
             m_pCommand->AddUAVBarrier(m_pVisbibleCounterBuffer, false);
         }
         m_pCommand->AddBarrier(*m_pVisbibleCounterBuffer, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
-        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("GBuffer/") + passName).c_str());
     }
     std::vector<Vector4> GBufferPass::ExtractFrustumPlanes(const Matrix& viewProj)
     {
@@ -696,7 +697,7 @@ namespace ElysiaRenderer
         m_pCommand->AddBarrier(*m_pVisbibleCounterBuffer, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
         ReadGPUCounter();
 
-        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("GBuffer/") + passName).c_str());
     }
 
     void GBufferPass::DrawGBufferPass(ElysiaEngine::FrameContext& context)
@@ -819,7 +820,7 @@ namespace ElysiaRenderer
                                D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE |
                                D3D12_RESOURCE_STATE_DEPTH_READ);
 
-        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("GBuffer/") + passName).c_str());
     }
     void GBufferPass::DrawMesh(ElysiaEngine::FrameContext& context, UINT passIndex)
     {

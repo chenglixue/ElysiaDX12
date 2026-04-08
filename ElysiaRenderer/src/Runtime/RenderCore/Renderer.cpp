@@ -35,6 +35,7 @@
 #include "Pass/SkyboxPass.h"
 #include "Pass/TAAPass.h"
 #include "Runtime/Engine/ECS/Entity.h"
+#include "Pass/ShadowProjectionPass.h"
 
 extern "C"
 {
@@ -72,6 +73,7 @@ namespace ElysiaRenderer
         AddPass<GIPass>();
         AddPass<GBufferPass>();
         AddPass<AOPass>();
+        AddPass<ShadowProjectionPass>();
         AddPass<OpaquePass>();
         AddPass<SkyboxPass>();
         AddPass<TAAPass>();
@@ -94,7 +96,7 @@ namespace ElysiaRenderer
                       1.0f};
         m_rectScissor = {0, 0, (LONG)Width, (LONG)Height};
 
-        if (!UserData::GetInstance().IsUseHDR)
+        if (!UserData::GetInstance().hdrParameter.IsUseHDR)
         {
             m_pCameraColorRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(
                 m_Width,
@@ -111,7 +113,7 @@ namespace ElysiaRenderer
         }
         else
         {
-            switch (UserData::GetInstance().HDRLevel)
+            switch (UserData::GetInstance().hdrParameter.HDRLevel)
             {
             case HDRQuality::Low:
             {
@@ -190,10 +192,21 @@ namespace ElysiaRenderer
 
     void Renderer::OnRender(ElysiaEngine::FrameContext frameContext)
     {
+        static LARGE_INTEGER frequency = {};
+        if (frequency.QuadPart == 0)
+        {
+            QueryPerformanceFrequency(&frequency);
+        }
+        QueryPerformanceCounter(&cpuStart);
+
         LightManager::GetInstance().Update(frameContext);
         SerializeUserData();
 
         OnUpdateConstantBuffer(frameContext.renderList);
+
+        QueryPerformanceCounter(&cpuEnd);
+        float elapsedUs = (float)((cpuEnd.QuadPart - cpuStart.QuadPart) * 1000000 / frequency.QuadPart);
+        m_pGPUTimer->GetTimeStampUser({"CPU/RenderPrepare", elapsedUs});
 
         frameContext.pGPUTimer = m_pGPUTimer.get();
 

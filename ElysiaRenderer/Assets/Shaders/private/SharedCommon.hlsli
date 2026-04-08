@@ -113,7 +113,7 @@ struct FInputParams
     float Linear01Depth;
     float LinearEyeDepth;
 
-    float2 SobelSqeuence[64];
+    UINT ShadowMaskTexIndex;
 };
 
 struct MaterialData

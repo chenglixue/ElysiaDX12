@@ -505,40 +505,21 @@ namespace ElysiaEngine
             ImGui::SliderFloat3("Direction", (float*)&pUserData.lightDir, -1, 1);
             ImGui::SliderFloat("Intensity", &pUserData.lightIntensity, 0, 20);
 
-            ImGui::Checkbox("Enable Shadow", &pUserData.EnableShadow);
-            int shadowTypeIndex = (int)pUserData.shadowType;
-            ImGui::Combo("Shadow Type",
-                         &shadowTypeIndex,
-                         StringViewToChar(magic_enum::enum_names<ShadowType>().data(),
-                                          magic_enum::enum_count<ShadowType>()).data(),
-                         (int)magic_enum::enum_count<ShadowType>());
-            shadowTypeIndex = std::clamp(shadowTypeIndex,
-                                         0,
-                                         static_cast<int>(magic_enum::enum_count<ShadowType>()));
-            pUserData.shadowType = (ShadowType)shadowTypeIndex;
-
-            int shadowQualityIndex = (int)pUserData.shadowQuality;
-            ImGui::Combo("Shadow Quality",
-                         &shadowQualityIndex,
-                         StringViewToChar(magic_enum::enum_names<ShadowQuality>().data(),
-                                          magic_enum::enum_count<ShadowQuality>()).data(),
-                         (int)magic_enum::enum_count<ShadowQuality>());
-            shadowQualityIndex = std::clamp(shadowQualityIndex,
-                                            0,
-                                            static_cast<int>(magic_enum::enum_count<
-                                                ShadowQuality>()));
-            pUserData.shadowQuality = (ShadowQuality)shadowQualityIndex;
-
-            ImGui::SliderFloat("Shadow Depth Bias", &pUserData.shadowDepthBias, 0, 1);
-            ImGui::SliderFloat("Shadow Slope Depth Bias", &pUserData.shadowSlopeDepthBias, 0, 10);
+            ImGui::Checkbox("Enable Shadow", &pUserData.shadowParameter.EnableShadow);
+            ElysiaRenderer::EnumCombo("Shadow Type", &pUserData.shadowParameter.shadowType);
+            ElysiaRenderer::EnumCombo("Shadow Quality", &pUserData.shadowParameter.shadowQuality);
+            ImGui::SliderFloat("Shadow Depth Bias", &pUserData.shadowParameter.shadowDepthBias, 0, 1);
+            ImGui::SliderFloat("Shadow Slope Depth Bias", &pUserData.shadowParameter.shadowSlopeDepthBias, 0, 10);
             ImGui::SliderFloat("Shadow Max Slope Depth Bias",
-                               &pUserData.shadowMaxSlopeDepthBias,
+                               &pUserData.shadowParameter.shadowMaxSlopeDepthBias,
                                0,
                                10);
             ImGui::SliderFloat("Shadow Radius",
-                               &pUserData.shadowRadius,
+                               &pUserData.shadowParameter.shadowRadius,
                                0,
-                               10);
+                               5);
+            ImGui::Checkbox("Enable Shadow TAA",
+                            &pUserData.shadowParameter.EnableTAA);
         }
 
         if (ImGui::CollapsingHeader("PBR Data"))
@@ -585,29 +566,9 @@ namespace ElysiaEngine
             ImGui::Indent();
             if (ImGui::CollapsingHeader("HDR"))
             {
-                ImGui::Checkbox("Is Enable HDR", &pUserData.IsUseHDR);
-
-                int HDRQualityIndex = (int)pUserData.HDRLevel;
-                ImGui::Combo("HDR Quality",
-                             &HDRQualityIndex,
-                             StringViewToChar(magic_enum::enum_names<HDRQuality>().data(),
-                                              magic_enum::enum_count<HDRQuality>()).data(),
-                             (int)magic_enum::enum_count<HDRQuality>());
-                HDRQualityIndex = std::clamp(HDRQualityIndex,
-                                             0,
-                                             static_cast<int>(magic_enum::enum_count<HDRQuality>()));
-                pUserData.HDRLevel = (HDRQuality)HDRQualityIndex;
-
-                int tonemapModeIndex = (int)pUserData.tonemapMode;
-                ImGui::Combo("Tonemap Mode",
-                             &tonemapModeIndex,
-                             StringViewToChar(magic_enum::enum_names<TonemapMode>().data(),
-                                              magic_enum::enum_count<TonemapMode>()).data(),
-                             (int)magic_enum::enum_count<TonemapMode>());
-                tonemapModeIndex = std::clamp(tonemapModeIndex,
-                                              0,
-                                              static_cast<int>(magic_enum::enum_count<TonemapMode>()));
-                pUserData.tonemapMode = (TonemapMode)tonemapModeIndex;
+                ImGui::Checkbox("Is Enable HDR", &pUserData.hdrParameter.IsUseHDR);
+                ElysiaRenderer::EnumCombo("HDR Quality", &pUserData.hdrParameter.HDRLevel);
+                ElysiaRenderer::EnumCombo("Tonemap Mode", &pUserData.hdrParameter.tonemapMode);
 
                 const char** displayModeNames = &m_displayModesNamesAvailable[0];
                 if (ImGui::Combo("Display Mode",
@@ -638,29 +599,19 @@ namespace ElysiaEngine
                         m_currentDisplayModeNamesIndex = m_previousDisplayModeNamesIndex;
                     }
 
-                    UserData::GetInstance().displayMode = m_currentDisplayModeNamesIndex;
+                    UserData::GetInstance().hdrParameter.displayMode = m_currentDisplayModeNamesIndex;
                 }
+                ElysiaRenderer::EnumCombo("Color space", &pUserData.hdrParameter.colorSpace);
 
-                int colorSpaceIndex = (int)pUserData.colorSpace;
-                ImGui::Combo("Color space",
-                             &colorSpaceIndex,
-                             StringViewToChar(magic_enum::enum_names<ColorSpace>().data(),
-                                              magic_enum::enum_count<ColorSpace>()).data(),
-                             (int)magic_enum::enum_count<ColorSpace>());
-                colorSpaceIndex = std::clamp(colorSpaceIndex,
-                                             0,
-                                             static_cast<int>(magic_enum::enum_count<ColorSpace>()));
-                pUserData.colorSpace = (ColorSpace)colorSpaceIndex;
-
-                ImGui::Checkbox("Shoulder", &pUserData.bShoulder);
-                ImGui::SliderFloat("Local Exposure", &pUserData.localExposure, 0.0f, 5.f);
-                ImGui::SliderFloat("Soft Gap", &pUserData.SoftGap, 0.0f, 0.5f);
-                ImGui::SliderFloat("HDR Max", &pUserData.HdrMax, 8.0f, 2048.0f);
-                ImGui::SliderFloat("LPM Exposure", &pUserData.LpmExposure, 3.0f, 11.0f);
-                ImGui::SliderFloat("Contrast", &pUserData.Contrast, 0.0f, 1.0f);
-                ImGui::SliderFloat("Shoulder Contrast", &pUserData.ShoulderContrast, 1.0f, 1.2f);
-                ImGui::SliderFloat3("Saturation", (float*)&pUserData.Saturation, 0.0f, 2.0f);
-                ImGui::SliderFloat3("Crosstalk", (float*)&pUserData.Crosstalk, 0.0f, 1.0f);
+                ImGui::Checkbox("Shoulder", &pUserData.hdrParameter.bShoulder);
+                ImGui::SliderFloat("Local Exposure", &pUserData.hdrParameter.localExposure, 0.0f, 5.f);
+                ImGui::SliderFloat("Soft Gap", &pUserData.hdrParameter.SoftGap, 0.0f, 0.5f);
+                ImGui::SliderFloat("HDR Max", &pUserData.hdrParameter.HdrMax, 8.0f, 2048.0f);
+                ImGui::SliderFloat("LPM Exposure", &pUserData.hdrParameter.LpmExposure, 3.0f, 11.0f);
+                ImGui::SliderFloat("Contrast", &pUserData.hdrParameter.Contrast, 0.0f, 1.0f);
+                ImGui::SliderFloat("Shoulder Contrast", &pUserData.hdrParameter.ShoulderContrast, 1.0f, 1.2f);
+                ImGui::SliderFloat3("Saturation", (float*)&pUserData.hdrParameter.Saturation, 0.0f, 2.0f);
+                ImGui::SliderFloat3("Crosstalk", (float*)&pUserData.hdrParameter.Crosstalk, 0.0f, 1.0f);
             }
 
             if (ImGui::CollapsingHeader("AO"))
@@ -684,18 +635,7 @@ namespace ElysiaEngine
                                    &pUserData.aoParameter.TAALerpFactor,
                                    0.05f,
                                    0.1f);
-
-                int blurQualityIndex = (int)pUserData.aoParameter.BlurQuality;
-                ImGui::Combo("Blur Quality",
-                             &blurQualityIndex,
-                             StringViewToChar(magic_enum::enum_names<AOBlurQuality>().data(),
-                                              magic_enum::enum_count<AOBlurQuality>()).data(),
-                             (int)magic_enum::enum_count<AOBlurQuality>());
-                blurQualityIndex = std::clamp(blurQualityIndex,
-                                              0,
-                                              static_cast<int>(magic_enum::enum_count<
-                                                  AOBlurQuality>()));
-                pUserData.aoParameter.BlurQuality = (AOBlurQuality)blurQualityIndex;
+                ElysiaRenderer::EnumCombo("Blur Quality", &pUserData.aoParameter.BlurQuality);
 
                 ImGui::SliderInt("AO Blur Count", &pUserData.aoParameter.BlurCount, 1, 4);
                 ImGui::SliderInt("AO Blur Radius", &pUserData.aoParameter.BlurIntensity, 1, 10);
@@ -733,9 +673,60 @@ namespace ElysiaEngine
 
         if (ImGui::CollapsingHeader("Timing"))
         {
-            for (const auto& ts : m_pRenderer->GetTimingValues())
+            if (ImGui::BeginTable("TimingTable", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg))
             {
-                ImGui::Text("%s: %.2f us", ts.m_label.c_str(), ts.m_microseconds);
+                ImGui::TableSetupColumn("Pass / Category");
+                ImGui::TableSetupColumn("Time (us)", ImGuiTableColumnFlags_WidthFixed, 100.0f);
+                ImGui::TableHeadersRow();
+
+                // 临时按前缀分组
+                std::map<std::string, std::vector<TimeStamp>> categorizedTimes;
+                for (const auto& ts : m_pRenderer->GetTimingValues())
+                {
+                    size_t pos = ts.m_label.find('/');
+                    std::string category = (pos != std::string::npos) ? ts.m_label.substr(0, pos) : "Uncategorized";
+                    std::string passName = (pos != std::string::npos) ? ts.m_label.substr(pos + 1) : ts.m_label;
+
+                    categorizedTimes[category].push_back({passName, ts.m_microseconds}); // 伪代码构造
+                }
+
+                // 渲染分类树
+                for (const auto& [category, passes] : categorizedTimes)
+                {
+                    float categoryTotalTime = 0.0f;
+                    for (const auto& p : passes)
+                        categoryTotalTime += p.m_microseconds;
+
+                    ImGui::TableNextRow();
+                    ImGui::TableSetColumnIndex(0);
+
+                    // 分类节点（粗体或不同颜色提示）
+                    bool nodeOpen = ImGui::TreeNodeEx(category.c_str(), ImGuiTreeNodeFlags_SpanFullWidth);
+
+                    ImGui::TableSetColumnIndex(1);
+                    ImGui::Text("%.2f", categoryTotalTime); // 显示该类别的总耗时
+
+                    if (nodeOpen)
+                    {
+                        for (const auto& ts : passes)
+                        {
+                            ImGui::TableNextRow();
+                            ImGui::TableSetColumnIndex(0);
+                            ImGui::Text("  %s", ts.m_label.c_str()); // 缩进表示层级
+
+                            ImVec4 color = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+                            if (ts.m_microseconds > 2000.0f)
+                                color = ImVec4(1.0f, 0.4f, 0.4f, 1.0f);
+                            else if (ts.m_microseconds > 500.0f)
+                                color = ImVec4(1.0f, 0.8f, 0.4f, 1.0f);
+
+                            ImGui::TableSetColumnIndex(1);
+                            ImGui::TextColored(color, "%.2f", ts.m_microseconds);
+                        }
+                        ImGui::TreePop();
+                    }
+                }
+                ImGui::EndTable();
             }
         }
         ImGui::End();

@@ -47,6 +47,7 @@ PASS(DRAW_LIGHT_PASS,         "public\\Opaque.hlsl", false, PS)
         {
             static inline size_t g_DebugMode = PropertyToID(L"g_DebugMode");
             static inline size_t g_RenderSize = PropertyToID(L"g_RenderSize");
+
             static inline size_t viewMatrix = PropertyToID(L"viewMatrix");
             static inline size_t viewMatrix_I = PropertyToID(L"viewMatrix_I");
             static inline size_t projMatrix = PropertyToID(L"projMatrix");
@@ -57,12 +58,11 @@ PASS(DRAW_LIGHT_PASS,         "public\\Opaque.hlsl", false, PS)
             static inline size_t g_AOIndex = PropertyToID(L"g_AOIndex");
             static inline size_t g_AmbientTint = PropertyToID(L"g_AmbientTint");
             static inline size_t g_AmbientIntensity = PropertyToID(L"g_AmbientIntensity");
-            static inline size_t g_SobolSequence = PropertyToID(L"g_SobolSequence");
+            static inline size_t g_ShadowMaskTexIndex = PropertyToID(L"g_ShadowMaskTexIndex");
         };
 
         UINT m_cameraWidth;
         UINT m_cameraHeight;
-        std::vector<Vector2> m_sobolSequences;
 
         void UpdateLightingPassVariant(UINT passID);
         void DrawLightingPass(ElysiaEngine::FrameContext& context);

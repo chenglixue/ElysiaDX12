@@ -40,6 +40,7 @@ cbuffer PassConstant : register(b0, perPassSpace)
     float g_DDGIEncodingGamma;
     float3 g_GridOrigin;
     float3 g_GridSpacing;
+    UINT g_ShadowMaskTexIndex;
     UINT g_IrradianceTexIndex;
     UINT g_DistanceTexIndex;
     UINT g_ProbeOffsetsIndex;
@@ -51,8 +52,6 @@ cbuffer PassConstant : register(b0, perPassSpace)
     float3 g_AmbientTint;
     float g_AmbientIntensity;
     UINT g_DebugMode;
-
-    float2 g_SobolSequence[64];
 }
 
 struct PSInput
@@ -112,8 +111,8 @@ PSOutput PS(PSInput i)
     inputParam.NormalWS = GBufferData.WorldNormal;
     inputParam.BitTangentWS = cross(inputParam.TangentWS, inputParam.NormalWS);
     inputParam.ScreenVector = GetScreenVectorWS(cameraPosWS.xyz, positionWS);
-    inputParam.SobelSqeuence = g_SobolSequence;
     inputParam.ScreenSize = g_RenderSize.xy;
+    inputParam.ShadowMaskTexIndex = g_ShadowMaskTexIndex;
 
     LightData mainLightData = GetMainLight(mainLight);
 

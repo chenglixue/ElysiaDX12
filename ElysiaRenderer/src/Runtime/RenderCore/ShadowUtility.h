@@ -36,4 +36,25 @@ namespace ElysiaRenderer
                                  {ShadowType::Soft,
                                  "Soft"}
                                  })
+
+    struct ShadowParameter
+    {
+        ShadowType shadowType = ShadowType::Soft;
+        ShadowQuality shadowQuality = ShadowQuality::VeryHigh;
+        float shadowDepthBias = 0;
+        float shadowSlopeDepthBias = 0;
+        float shadowMaxSlopeDepthBias = 0;
+        float shadowRadius = 1.f;
+        bool EnableShadow = true;
+        bool EnableTAA = true;
+    };
+    NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ShadowParameter,
+                                                    shadowType,
+                                                    shadowQuality,
+                                                    shadowDepthBias,
+                                                    shadowSlopeDepthBias,
+                                                    shadowMaxSlopeDepthBias,
+                                                    shadowRadius,
+                                                    EnableShadow,
+                                                    EnableTAA)
 }

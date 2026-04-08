@@ -79,6 +79,6 @@ namespace ElysiaRenderer
                 pUserData.lightIntensity);
         }
 
-        m_pMainLight->CreateMainShadow(25, DXGI_FORMAT_D24_UNORM_S8_UINT);
+        m_pMainLight->CreateMainShadow(20, DXGI_FORMAT_D32_FLOAT_S8X24_UINT);
     }
 }

@@ -15,12 +15,16 @@ namespace ElysiaRenderer
 {
 
     DX12Light::DX12Light(Vector3 lightColor, Vector3 lightDir, float intensity)
-        : m_lightType(LightType::None), m_lightColor(lightColor), m_lightDir(lightDir), m_lightIntensity(intensity)
+        : m_lightType(LightType::None),
+          m_lightColor(lightColor),
+          m_lightDir(lightDir),
+          m_lightIntensity(intensity)
     {
     }
 
     DX12DirectionLight::DX12DirectionLight(Vector3 lightColor, Vector3 lightDir, float intensity)
-        : DX12Light(lightColor, lightDir, intensity), m_lightType(LightType::Dir)
+        : DX12Light(lightColor, lightDir, intensity),
+          m_lightType(LightType::Dir)
     {
     }
 
@@ -78,7 +82,7 @@ namespace ElysiaRenderer
     void DX12DirectionLight::CreateMainShadow(float boundSphereRadius, DXGI_FORMAT format)
     {
         float resolution;
-        switch (UserData::GetInstance().shadowQuality)
+        switch (UserData::GetInstance().shadowParameter.shadowQuality)
         {
         case ShadowQuality::Low:
         {

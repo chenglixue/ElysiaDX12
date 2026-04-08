@@ -606,7 +606,7 @@ namespace ElysiaRenderer
         m_pCommand->AddBarrier(m_pProbeOffsetIndexRT,
                                D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 
-        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("GI/") + passName).c_str());
 
         isInit = true;
     }
@@ -637,7 +637,7 @@ namespace ElysiaRenderer
         m_pCommand->AddBarrier(*m_pProbeStateBuffer,
                                D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 
-        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("GI/") + passName).c_str());
     }
     void GIPass::UpdateProbeStates()
     {
@@ -703,7 +703,7 @@ namespace ElysiaRenderer
         m_pCommand->AddBarrier(*m_pProbeStateBuffer,
                                D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 
-        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("GI/") + passName).c_str());
     }
     void GIPass::GenerateRay()
     {
@@ -829,7 +829,7 @@ namespace ElysiaRenderer
         m_pCommand->AddBarrier(*m_pRayDataBuffer,
                                D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 
-        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), "Generate Ray");
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), "GI/Generate Ray");
     }
     void GIPass::ResetCounterBuffer()
     {
@@ -1146,7 +1146,7 @@ namespace ElysiaRenderer
         }
         m_pCommand->AddBarrier(m_pProbeOffsetIndexRT,
                                D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
-        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("GI/") + passName).c_str());
     }
     void GIPass::ProbeBlend()
     {
@@ -1215,7 +1215,7 @@ namespace ElysiaRenderer
         }
         m_pCommand->AddBarrier(m_pIrradianceRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 
-        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("GI/") + passName).c_str());
     }
     void GIPass::ProbeBlendDepth()
     {
@@ -1279,7 +1279,7 @@ namespace ElysiaRenderer
         }
         m_pCommand->AddBarrier(m_pDistanceRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 
-        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("GI/") + passName).c_str());
     }
 
     void GIPass::GenerateTLAS(const std::vector<std::unique_ptr<Entity>>& entityies)

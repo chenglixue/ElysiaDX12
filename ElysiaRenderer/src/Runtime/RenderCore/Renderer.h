@@ -69,6 +69,9 @@ namespace ElysiaRenderer
         D3D12_VIEWPORT m_viewport;
         D3D12_RECT m_rectScissor;
 
+        LARGE_INTEGER cpuStart;
+        LARGE_INTEGER cpuEnd;
+
         std::unique_ptr<GPUTimestamps> m_pGPUTimer = nullptr;
         std::vector<TimeStamp> m_TimeStamps;
 

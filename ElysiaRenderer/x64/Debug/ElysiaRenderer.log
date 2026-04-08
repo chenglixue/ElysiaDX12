@@ -1,57 +1,23 @@
 ﻿  Skipping vcpkg. (no packages)
 cl : command line  warning D9014: invalid value '18' for '/wd'; assuming '5999'
-  GBufferPass.cpp
+  ShadowProjectionPass.cpp
 D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/GBufferPass.cpp')
+  (compiling source file '/src/Runtime/RenderCore/Pass/ShadowProjectionPass.cpp')
   
 D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/GBufferPass.cpp')
+  (compiling source file '/src/Runtime/RenderCore/Pass/ShadowProjectionPass.cpp')
   
 D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/GBufferPass.cpp')
+  (compiling source file '/src/Runtime/RenderCore/Pass/ShadowProjectionPass.cpp')
   
 D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/GBufferPass.cpp')
+  (compiling source file '/src/Runtime/RenderCore/Pass/ShadowProjectionPass.cpp')
   
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GBufferPass.cpp(102,35): warning C4244: '=': conversion from 'float' to 'UINT', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/GBufferPass.cpp')
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\ShadowProjectionPass.cpp(43,39): warning C4244: '=': conversion from 'float' to 'UINT', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/ShadowProjectionPass.cpp')
   
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GBufferPass.cpp(103,36): warning C4244: '=': conversion from 'float' to 'UINT', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/GBufferPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GBufferPass.cpp(367,57): warning C4927: illegal conversion; more than one user-defined conversion has been implicitly applied
-  (compiling source file '/src/Runtime/RenderCore/Pass/GBufferPass.cpp')
-      D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GBufferPass.cpp(367,57):
-      while calling the constructor 'DirectX::SimpleMath::Vector4::Vector4(DirectX::FXMVECTOR) noexcept'
-      D:\DX12\ElysiaDX12\ElysiaRenderer\src\ThirdParty\SimpleMath\SimpleMath.h(357,13):
-      see declaration of 'DirectX::SimpleMath::Vector4::Vector4'
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GBufferPass.cpp(469,28): warning C4018: '<': signed/unsigned mismatch
-  (compiling source file '/src/Runtime/RenderCore/Pass/GBufferPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GBufferPass.cpp(491,45): warning C4244: 'argument': conversion from 'UINT64' to 'uint32_t', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/GBufferPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GBufferPass.cpp(492,45): warning C4244: 'argument': conversion from 'UINT64' to 'uint32_t', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/GBufferPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GBufferPass.cpp(639,69): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/GBufferPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GBufferPass.cpp(666,61): warning C4267: 'argument': conversion from 'size_t' to 'uint32_t', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/GBufferPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GBufferPass.cpp(739,63): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/GBufferPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GBufferPass.cpp(738,63): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/GBufferPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GBufferPass.cpp(737,63): warning C4244: 'argument': conversion from 'const uint32_t' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/GBufferPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GBufferPass.cpp(827,76): warning C4267: 'argument': conversion from 'size_t' to 'UINT', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/GBufferPass.cpp')
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\ShadowProjectionPass.cpp(44,40): warning C4244: '=': conversion from 'float' to 'UINT', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/Pass/ShadowProjectionPass.cpp')
   
   ElysiaRenderer.vcxproj -> D:\DX12\ElysiaDX12\x64\Debug\ElysiaRenderer.exe
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\ABeautifulGame\ABeautifulGame.bin
@@ -267,6 +233,7 @@ D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GBufferPass.cpp(82
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\public\CopyTexture.hlsl
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\public\CS_GBufferCulling.hlsl
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\public\CS_GBufferHIZ.hlsl
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\public\CS_ScreenSpaceShadow.hlsl
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\public\CS_SSAO.hlsl
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\public\CS_SSAO.hlsl.rej
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Shaders\public\CS_Tonemap.hlsl
@@ -387,4 +354,4 @@ D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\GBufferPass.cpp(82
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Tex\RandomNormalTexture.png
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Tex\texconv.exe
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Tex\White.png
-  复制了 333 个文件
+  复制了 334 个文件

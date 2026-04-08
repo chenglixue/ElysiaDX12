@@ -50,9 +50,11 @@ namespace ElysiaRenderer
         {
             m_TAARTs[i] = RenderTargetManager::GetInstance().CreateRWRenderTexture(m_TAAWidth,
                                                                                    m_TAAHeight,
-                                                                                   !UserData::GetInstance().IsUseHDR
+                                                                                   !UserData::GetInstance().hdrParameter
+                                                                                                           .IsUseHDR
                                                                                        ? DXGI_FORMAT_R8G8B8A8_UNORM
                                                                                        : UserData::GetInstance().
+                                                                                         hdrParameter.
                                                                                          HDRLevel == HDRQuality::Low
                                                                                        ? DXGI_FORMAT_R11G11B10_FLOAT
                                                                                        : DXGI_FORMAT_R16G16B16A16_FLOAT,
@@ -175,7 +177,7 @@ namespace ElysiaRenderer
             m_pCommand->AddUAVBarrier(m_TAARTs[m_writeIndex], false);
         }
         m_pCommand->AddBarrier(m_TAARTs[m_writeIndex], D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
-        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("TAAU/") + passName).c_str());
     }
     void TAAPass::DoFirstFrameCopyRT(RenderTexture* pSourceRT, RenderTexture* pDestRT)
     {
@@ -202,7 +204,7 @@ namespace ElysiaRenderer
             m_pCommand->AddUAVBarrier(pDestRT, false);
         }
         m_pCommand->AddBarrier(pDestRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
-        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("TAAU/") + passName).c_str());
     }
     void TAAPass::DoCopyTAA2CameraColor()
     {
@@ -233,6 +235,6 @@ namespace ElysiaRenderer
             m_pCommand->AddUAVBarrier(m_pDisplayRT, false);
         }
         m_pCommand->AddBarrier(m_pDisplayRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
-        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("TAAU/") + passName).c_str());
     }
 }

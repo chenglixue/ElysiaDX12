@@ -57,13 +57,14 @@ FLightAccumulator AccumulateDynamicLighting(FInputParams inputData,
     float3 L = lightData.toLight;
     float3 MaskedLightColor = lightData.color * lightData.intensity;
 
-    float shadow = SunShadowVisibility(inputData.PositionWS,
-                                       inputData.ScreenUV,
-                                       inputData.ScreenSize,
-                                       g_ShadowRadius,
-                                       shadowSize,
-                                       shadowMatrix,
-                                       inputData.SobelSqeuence);
+    // float shadow = SunShadowVisibility(inputData.PositionWS,
+    //                                    inputData.ScreenUV,
+    //                                    inputData.ScreenSize,
+    //                                    g_ShadowRadius,
+    //                                    shadowSize,
+    //                                    shadowMatrix,
+    //                                    inputData.SobelSqeuence);
+    float shadow = SampleTexture2D(inputData.ShadowMaskTexIndex, inputData.ScreenUV, ClampLinearSampler);
     if (!g_EnableShadow)
         shadow = 1;
     Shadow.SurfaceShadow = AO * shadow;

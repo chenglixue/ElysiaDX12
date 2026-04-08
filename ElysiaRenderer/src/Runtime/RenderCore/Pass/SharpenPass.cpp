@@ -111,6 +111,6 @@ namespace ElysiaRenderer
             m_pCommand->AddUAVBarrier(m_pDisplayRT, false);
         }
         m_pCommand->AddBarrier(m_pDisplayRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
-        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("Sharpen/") + passName).c_str());
     }
 }

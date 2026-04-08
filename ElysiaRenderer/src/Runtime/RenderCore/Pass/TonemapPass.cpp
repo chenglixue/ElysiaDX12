@@ -97,7 +97,7 @@ namespace ElysiaRenderer
 
         SetupGamutMapperMatrices(
             ColorSpace_REC709,
-            UserData::GetInstance().colorSpace,
+            UserData::GetInstance().hdrParameter.colorSpace,
             &m_inputToOutputMatrix
             );
 
@@ -106,7 +106,7 @@ namespace ElysiaRenderer
         varAF2(fs2B);
         varAF2(fs2W);
         varAF2(displayMinMaxLuminance);
-        if (UserData::GetInstance().displayMode != DisplayMode::DISPLAYMODE_SDR)
+        if (UserData::GetInstance().hdrParameter.displayMode != DisplayMode::DISPLAYMODE_SDR)
         {
             const DXGI_OUTPUT_DESC1* displayInfo = CAULDRON_DX12::GetDisplayInfo();
 
@@ -125,24 +125,24 @@ namespace ElysiaRenderer
             displayMinMaxLuminance[1] = displayInfo->MaxLuminance;
         }
 
-        m_shoulder = UserData::GetInstance().bShoulder;
-        m_softGap = UserData::GetInstance().SoftGap;
-        m_hdrMax = UserData::GetInstance().HdrMax;
-        m_exposure = UserData::GetInstance().LpmExposure;
-        m_contrast = UserData::GetInstance().Contrast;
-        m_shoulderContrast = UserData::GetInstance().ShoulderContrast;
-        m_saturation[0] = UserData::GetInstance().Saturation.x;
-        m_saturation[1] = UserData::GetInstance().Saturation.y;
-        m_saturation[2] = UserData::GetInstance().Saturation.z;
-        m_crosstalk[0] = UserData::GetInstance().Crosstalk.x;
-        m_crosstalk[1] = UserData::GetInstance().Crosstalk.y;
-        m_crosstalk[2] = UserData::GetInstance().Crosstalk.z;
+        m_shoulder = UserData::GetInstance().hdrParameter.bShoulder;
+        m_softGap = UserData::GetInstance().hdrParameter.SoftGap;
+        m_hdrMax = UserData::GetInstance().hdrParameter.HdrMax;
+        m_exposure = UserData::GetInstance().hdrParameter.LpmExposure;
+        m_contrast = UserData::GetInstance().hdrParameter.Contrast;
+        m_shoulderContrast = UserData::GetInstance().hdrParameter.ShoulderContrast;
+        m_saturation[0] = UserData::GetInstance().hdrParameter.Saturation.x;
+        m_saturation[1] = UserData::GetInstance().hdrParameter.Saturation.y;
+        m_saturation[2] = UserData::GetInstance().hdrParameter.Saturation.z;
+        m_crosstalk[0] = UserData::GetInstance().hdrParameter.Crosstalk.x;
+        m_crosstalk[1] = UserData::GetInstance().hdrParameter.Crosstalk.y;
+        m_crosstalk[2] = UserData::GetInstance().hdrParameter.Crosstalk.z;
 
-        switch (UserData::GetInstance().colorSpace)
+        switch (UserData::GetInstance().hdrParameter.colorSpace)
         {
         case ColorSpace_REC709:
         {
-            switch (UserData::GetInstance().displayMode)
+            switch (UserData::GetInstance().hdrParameter.displayMode)
             {
             case DisplayMode::DISPLAYMODE_SDR:
                 SetLPMConfig(LPM_CONFIG_709_709);
@@ -180,7 +180,7 @@ namespace ElysiaRenderer
 
         case ColorSpace_REC2020:
         {
-            switch (UserData::GetInstance().displayMode)
+            switch (UserData::GetInstance().hdrParameter.displayMode)
             {
             case DisplayMode::DISPLAYMODE_SDR:
                 SetLPMConfig(LPM_CONFIG_709_2020);
@@ -218,7 +218,7 @@ namespace ElysiaRenderer
 
         case ColorSpace_P3:
         {
-            switch (UserData::GetInstance().displayMode)
+            switch (UserData::GetInstance().hdrParameter.displayMode)
             {
             case DisplayMode::DISPLAYMODE_SDR:
                 SetLPMConfig(LPM_CONFIG_709_P3);
@@ -296,13 +296,13 @@ namespace ElysiaRenderer
             m_pMaterial->SetMatrix(ShaderIDs::u_inputToOutputMatrix, m_inputToOutputMatrix);
             m_pMaterial->SetUINTArray(ShaderIDs::u_ctl, ctl);
             m_pMaterial->SetUINT(ShaderIDs::tonemapMode,
-                                 (UINT)UserData::GetInstance().tonemapMode);
+                                 (UINT)UserData::GetInstance().hdrParameter.tonemapMode);
             m_pMaterial->SetFloat4(ShaderIDs::g_DestSize,
                                    GetScreenSize(Vector2(m_displaySize.x, m_displaySize.y)));
             m_pMaterial->SetUINT(ShaderIDs::g_DestTextureIndex,
                                  m_pDisplayRT->GetResourceHeapIndex());
             m_pMaterial->SetFloat(ShaderIDs::g_LocalExposure,
-                                  UserData::GetInstance().localExposure);
+                                  UserData::GetInstance().hdrParameter.localExposure);
             m_pMaterial->SetUINT(ShaderIDs::g_BloomTexIndex,
                                  RenderTargetManager::GetInstance().GetRenderTexture(RenderResource::GetInstance().
                                                                                      GetPropertyName(
@@ -323,7 +323,7 @@ namespace ElysiaRenderer
         }
 
         m_pCommand->AddBarrier(m_pDisplayRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
-        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("Tonemap/") + passName).c_str());
     }
 
     void TonemapPass::UpdatePipeline()

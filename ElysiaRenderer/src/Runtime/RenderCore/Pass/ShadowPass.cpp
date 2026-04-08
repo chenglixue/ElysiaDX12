@@ -77,7 +77,7 @@ namespace ElysiaRenderer
         m_pCamera = context.pCamera;
         m_pGPUTimer = context.pGPUTimer;
 
-        if (!UserData::GetInstance().EnableShadow)
+        if (!UserData::GetInstance().shadowParameter.EnableShadow)
             return;
 
         if (context.renderList.empty())
@@ -99,7 +99,7 @@ namespace ElysiaRenderer
     {
         std::vector<std::wstring> enableKeywords{};
 
-        switch (UserData::GetInstance().shadowQuality)
+        switch (UserData::GetInstance().shadowParameter.shadowQuality)
         {
         case ShadowQuality::Low:
         {
@@ -122,7 +122,7 @@ namespace ElysiaRenderer
             break;
         }
         }
-        switch (UserData::GetInstance().shadowType)
+        switch (UserData::GetInstance().shadowParameter.shadowType)
         {
         case ShadowType::Hard:
         {
@@ -251,11 +251,11 @@ namespace ElysiaRenderer
         m_pMaterial->SetFloat(ShaderIDs::shadowFarZ,
                               LightManager::GetInstance().GetMainShadow()->GetFarZ());
         m_pMaterial->SetFloat(ShaderIDs::shadowDepthBias,
-                              UserData::GetInstance().shadowDepthBias / 100);
+                              UserData::GetInstance().shadowParameter.shadowDepthBias / 100);
         m_pMaterial->SetFloat(ShaderIDs::shadowSlopeDepthBias,
-                              UserData::GetInstance().shadowSlopeDepthBias / 100);
+                              UserData::GetInstance().shadowParameter.shadowSlopeDepthBias / 100);
         m_pMaterial->SetFloat(ShaderIDs::shadowMaxSlopeDepthBias,
-                              UserData::GetInstance().shadowMaxSlopeDepthBias / 100);
+                              UserData::GetInstance().shadowParameter.shadowMaxSlopeDepthBias / 100);
         m_pMaterial->SetVector2Array(ShaderIDs::g_sobolSequence, m_sobolSqeuences);
         SetSpaceResource(passData, PER_PASS_SPACE);
 
@@ -263,7 +263,7 @@ namespace ElysiaRenderer
 
         m_pCommand->AddBarrier(pShadowRT, D3D12_RESOURCE_STATE_DEPTH_READ);
 
-        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("Shadow/") + passName).c_str());
     }
 
     void ShadowPass::UploadMeshData(const std::vector<RenderItem>& renderItems)

@@ -66,6 +66,7 @@ GIData Elysia_DDGI_LoadRayData(uint readIndex)
 #define DEBUG_BLOOM 5
 #define DEBUG_VELOCITY 6
 #define DEBUG_GI 7
+#define DEBUG_SHADOW_MASK 8
 
 struct VSInput
 {
@@ -203,6 +204,7 @@ PSInput VS(VSInput i, UINT vertexID : SV_VertexID, uint instanceID : SV_Instance
     case DEBUG_AO:
     case DEBUG_VELOCITY:
     case DEBUG_GI:
+    case DEBUG_SHADOW_MASK:
     case DEBUG_NORMAL:
         o.uv = float2((vertexID << 1) & 2, vertexID & 2);
         o.positionCS = float4(o.uv.x * 2.0f - 1.0f, 1.0f - o.uv.y * 2.0f, 0.0f, 1.0f);
@@ -228,8 +230,6 @@ PSOutput PS(PSInput i)
     case DEBUG_AO:
     {
         float AO = SampleTexture2D(g_AOIndex, screenUV, ClampLinearSampler);
-        AO = SampleTexture2D_LOD(g_TargetTexIndex, screenUV, ClampPointSampler, g_MipmapLevel);
-        AO = Linear01Depth(AO, g_ZBufferParams);
         o.target0 = AO;
         break;
     }
@@ -292,6 +292,12 @@ PSOutput PS(PSInput i)
         }
 
         o.target0 = result;
+        break;
+    }
+    case DEBUG_SHADOW_MASK:
+    {
+        float shadowMask = SampleTexture2D(g_TargetTexIndex, screenUV, ClampPointSampler);
+        o.target0.rgb = shadowMask;
         break;
     }
     }

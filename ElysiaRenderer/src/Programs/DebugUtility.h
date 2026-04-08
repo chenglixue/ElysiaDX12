@@ -12,7 +12,8 @@ namespace ElysiaRenderer
         AABB,
         Bloom,
         Velocity,
-        GI
+        GI,
+        ShadowMask
     };
     NLOHMANN_JSON_SERIALIZE_ENUM(DebugMode,
                                  {
@@ -31,6 +32,8 @@ namespace ElysiaRenderer
                                  {DebugMode::Velocity,
                                  "Velocity"},
                                  {DebugMode::GI,
-                                 "GI"}
+                                 "GI"},
+                                 { DebugMode::ShadowMask,
+                                 "ShadowMask" }
                                  })
 }

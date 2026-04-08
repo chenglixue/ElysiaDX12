@@ -149,7 +149,7 @@ namespace ElysiaRenderer
             m_pCommand->AddUAVBarrier(m_downSampleRTs[0], false);
         }
         m_pCommand->AddBarrier(m_downSampleRTs[0], D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
-        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("Bloom/") + passName).c_str());
     }
     void BloomPass::DoBloomWeightDownSample()
     {
@@ -190,7 +190,7 @@ namespace ElysiaRenderer
             m_pCommand->AddBarrier(m_downSampleRTs[i], D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 
         }
-        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("Bloom/") + passName).c_str());
     }
     void BloomPass::DoCopyLastDownSampleRT2LastUpSampleRT()
     {
@@ -225,7 +225,7 @@ namespace ElysiaRenderer
             m_pCommand->AddUAVBarrier(m_upSampleRTs[m_mipmapCount - 1], false);
         }
         m_pCommand->AddBarrier(m_upSampleRTs[m_mipmapCount - 1], D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
-        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("Bloom/") + passName).c_str());
     }
     void BloomPass::DoBloom3x3TentUpSample()
     {
@@ -269,6 +269,6 @@ namespace ElysiaRenderer
             m_pCommand->AddBarrier(m_upSampleRTs[i], D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 
         }
-        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("Bloom/") + passName).c_str());
     }
 }

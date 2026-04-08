@@ -75,15 +75,14 @@ PSInput VS(VSInput i)
     StructuredBuffer<MeshData> meshDataBuffer = ResourceDescriptorHeap[meshDataBufferIndex];
     Matrix worldMatrix = meshDataBuffer[meshDataIndex].world_M;
 
-    o.normalWS = normalize(mul(i.normalOS, (float3x3)worldMatrix));
+    LightData mainLightData = GetMainLight(mainLight);
+    float3 lightDirWS = mainLightData.toLight;
+
+    o.normalWS = normalize(mul((float3x3)worldMatrix, i.normalOS));
+    const float NoL = dot(o.normalWS, lightDirWS);
 
     o.positionWS = mul(float4(i.positionOS, 1.f), worldMatrix);
     o.positionCS = mul(o.positionWS, shadowMatrix);
-
-    LightData mainLightData = GetMainLight(mainLight);
-
-    float3 lightDirWS = mainLightData.toLight;
-    const float NoL = dot(o.normalWS, lightDirWS);
 
     o.positionWS.rgb += GetShadowDepthOffset(NoL,
                                              o.positionCS,
@@ -101,13 +100,13 @@ PSOutput PS(PSInput i)
 {
     PSOutput o = (PSOutput)0;
 
-    SamplerState warpLinearSampler = SamplerDescriptorHeap[WarpLinearSampler];
-    Texture2D<float4> baseColorTex = ResourceDescriptorHeap[GBuffer4Index];
-
-    StructuredBuffer<MeshData> meshDataBuffer = ResourceDescriptorHeap[meshDataBufferIndex];
-    MeshData currMeshData = meshDataBuffer[meshDataIndex];
-
-    float4 baseColor = baseColorTex.Sample(warpLinearSampler, i.uv) * currMeshData.opacity;
+    // SamplerState warpLinearSampler = SamplerDescriptorHeap[WarpLinearSampler];
+    // Texture2D<float4> baseColorTex = ResourceDescriptorHeap[GBuffer4Index];
+    //
+    // StructuredBuffer<MeshData> meshDataBuffer = ResourceDescriptorHeap[meshDataBufferIndex];
+    // MeshData currMeshData = meshDataBuffer[meshDataIndex];
+    //
+    // float4 baseColor = baseColorTex.Sample(warpLinearSampler, i.uv) * currMeshData.opacity;
     // clip(baseColor.a - currMeshData.cutoff);
 
     return o;

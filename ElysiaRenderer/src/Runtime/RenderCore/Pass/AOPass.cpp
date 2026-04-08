@@ -281,7 +281,7 @@ namespace ElysiaRenderer
         }
         m_pCommand->FlushBarrier();
 
-        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("AO/") + passName).c_str());
     }
     void AOPass::DoDeinterleaveDepth()
     {
@@ -340,7 +340,7 @@ namespace ElysiaRenderer
         }
         m_pCommand->FlushBarrier();
 
-        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("AO/") + passName).c_str());
     }
     void AOPass::DoDeinterleaveBaseAO(const FrameContext& context)
     {
@@ -450,7 +450,7 @@ namespace ElysiaRenderer
         }
         m_pCommand->FlushBarrier();
 
-        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("AO/") + passName).c_str());
     }
     void AOPass::DoImportance()
     {
@@ -563,7 +563,7 @@ namespace ElysiaRenderer
         }
 
         m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(),
-                                  m_shaderPasses[Generate_AO_Importance_PASS].Name.c_str());
+                                  (std::string("AO/") + m_shaderPasses[Generate_AO_Importance_PASS].Name).c_str());
     }
     void AOPass::DoDeinterleaveCalcAO(const FrameContext& context)
     {
@@ -696,7 +696,7 @@ namespace ElysiaRenderer
         }
         m_pCommand->FlushBarrier();
 
-        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("AO/") + passName).c_str());
     }
     void AOPass::DoBilateralBlur()
     {
@@ -770,7 +770,7 @@ namespace ElysiaRenderer
             }
         }
 
-        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("AO/") + passName).c_str());
     }
     void AOPass::DoReinterleave()
     {
@@ -842,7 +842,7 @@ namespace ElysiaRenderer
         }
         m_pCommand->AddBarrier(m_pAORT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 
-        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("AO/") + passName).c_str());
     }
     void AOPass::DoTAA()
     {
@@ -965,7 +965,7 @@ namespace ElysiaRenderer
             m_currHistoryIndex = (m_currHistoryIndex + 1) % 2;
         }
 
-        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("AO/") + passName).c_str());
     }
 
     std::vector<Vector4> AOPass::GenerateSSAOSampleKernel()

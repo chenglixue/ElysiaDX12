@@ -134,31 +134,3 @@ void TAA(uint3 id : SV_DispatchThreadID)
     }
 
 }
-
-void SampleMinMax3x3(UINT currFrameTexIndex,
-                     float2 uv,
-                     float2 duv,
-                     out float3 minColor,
-                     out float3 maxColor,
-                     out float3 currColor,
-                     out float3 avgColor,
-                     out float3 m1,
-                     out float3 m2)
-{
-    float3 colors[9];
-    SampleColor3x3(currFrameTexIndex, uv, duv, colors);
-
-    m1 = m2 = 0;
-    minColor = maxColor = colors[0];
-    [unroll(9)]
-    for (UINT i = 0; i < 9; i ++)
-    {
-        minColor = min(minColor, colors[i]);
-        maxColor = max(maxColor, colors[i]);
-        avgColor += colors[i];
-        m1 += colors[i];
-        m2 += Pow2(colors[i]);
-    }
-    avgColor *= rcp(9.f);
-    currColor = colors[4];
-}

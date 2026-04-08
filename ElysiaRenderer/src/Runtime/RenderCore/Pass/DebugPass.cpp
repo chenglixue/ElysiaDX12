@@ -4,6 +4,7 @@
 #include "BloomPass.h"
 #include "GBufferPass.h"
 #include "GIPass.h"
+#include "ShadowProjectionPass.h"
 #include "Editor/UserData.h"
 #include "Programs/PIXHelper.h"
 #include "Runtime/Core/DX12GraphicsContext.h"
@@ -188,6 +189,28 @@ namespace ElysiaRenderer
                                  passID);
             m_pMaterial->SetUINT(ShaderIDs::g_MipmapLevel,
                                  UserData::GetInstance().mipmapLevel,
+                                 passID);
+            Vector2 renderSize = Vector2(std::floor(
+                                             m_displaySize.x * UserData::GetInstance().taaParameter.sampleRate),
+                                         std::floor(
+                                             m_displaySize.y * UserData::GetInstance().taaParameter.sampleRate));
+            m_pCommand->AddBarrier(m_pDisplayRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+            {
+                m_pMaterial->SetFloat4(ShaderIDs::g_TargetSize,
+                                       GetScreenSize(renderSize),
+                                       passID);
+                SetSpaceResource(passData, PER_PASS_SPACE);
+                m_pCommand->DrawFullScreenTriangle();
+            }
+            m_pCommand->AddBarrier(m_pDisplayRT,
+                                   D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+            break;
+        }
+        case DebugMode::ShadowMask:
+        {
+            m_pMaterial->SetUINT(ShaderIDs::g_TargetTexIndex,
+                                 ShadowProjectionPass::m_pShadowMaskRTs[ShadowProjectionPass::m_writeIndex]->
+                                 GetSRVResourceHeapIndex(),
                                  passID);
             Vector2 renderSize = Vector2(std::floor(
                                              m_displaySize.x * UserData::GetInstance().taaParameter.sampleRate),
@@ -470,10 +493,10 @@ namespace ElysiaRenderer
 
             const RenderTargetDesc desc =
             {
-                .m_renderTargetFormats = {!UserData::GetInstance().IsUseHDR
+                .m_renderTargetFormats = {!UserData::GetInstance().hdrParameter.IsUseHDR
                                               ? DXGI_FORMAT_R8G8B8A8_UNORM
-                                              : UserData::GetInstance().
-                                                HDRLevel == HDRQuality::Low
+                                              : UserData::GetInstance().hdrParameter.
+                                                                        HDRLevel == HDRQuality::Low
                                               ? DXGI_FORMAT_R11G11B10_FLOAT
                                               : DXGI_FORMAT_R16G16B16A16_FLOAT},
                 .m_numRenderTargets = 1,

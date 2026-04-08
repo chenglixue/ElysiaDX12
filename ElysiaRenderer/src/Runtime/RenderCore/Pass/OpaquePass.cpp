@@ -2,6 +2,7 @@
 #include "OpaquePass.h"
 
 #include "GIPass.h"
+#include "ShadowProjectionPass.h"
 #include "Editor/UserData.h"
 #include "Programs/PIXHelper.h"
 #include "Programs/SobolSequenceGenerator.h"
@@ -48,7 +49,6 @@ namespace ElysiaRenderer
             m_pMaterial = std::make_unique<Material>(m_pDevice, m_shaderPasses);
         }
 
-        m_sobolSequences = Create2DSobolSqeuence(64);
         UpdatePipeline();
     }
 
@@ -143,7 +143,10 @@ namespace ElysiaRenderer
                               passID);
         m_pMaterial->SetUINT(ShaderIDs::g_DebugMode,
                              static_cast<UINT>(UserData::GetInstance().debugMode));
-        m_pMaterial->SetVector2Array(ShaderIDs::g_SobolSequence, m_sobolSequences, passID);
+        m_pMaterial->SetUINT(ShaderIDs::g_ShadowMaskTexIndex,
+                             ShadowProjectionPass::m_pShadowMaskRTs[ShadowProjectionPass::m_writeIndex]->
+                             GetSRVResourceHeapIndex(),
+                             passID);
 
         SetSpaceResource(passData, PER_PASS_SPACE);
         SetSpaceResource(passData, PER_FRAME_SPACE);
@@ -157,7 +160,7 @@ namespace ElysiaRenderer
 
         m_pCommand->AddBarrier(m_pCameraColorRT, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
-        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("Lighting/") + passName).c_str());
     }
 
     void OpaquePass::UpdatePipeline()
@@ -171,7 +174,7 @@ namespace ElysiaRenderer
     {
         std::vector<std::wstring> enableKeywords{};
 
-        switch (UserData::GetInstance().shadowQuality)
+        switch (UserData::GetInstance().shadowParameter.shadowQuality)
         {
         case ShadowQuality::Low:
         {
@@ -194,7 +197,7 @@ namespace ElysiaRenderer
             break;
         }
         }
-        switch (UserData::GetInstance().shadowType)
+        switch (UserData::GetInstance().shadowParameter.shadowType)
         {
         case ShadowType::Hard:
         {

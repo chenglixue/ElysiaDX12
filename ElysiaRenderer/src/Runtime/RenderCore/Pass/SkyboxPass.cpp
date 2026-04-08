@@ -186,6 +186,6 @@ namespace ElysiaRenderer
             RenderTargetManager::GetInstance().GetRenderTexture(GBufferPass::RenderTextureIDs::GBuffer5ID),
             D3D12_RESOURCE_STATE_RENDER_TARGET);
 
-        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), passName);
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("Skybox/") + passName).c_str());
     }
 }

@@ -104,9 +104,9 @@ namespace ElysiaRenderer
                                                                         AOPass::RenderTextureIDs::AORTID)
                                                                     ->GetResourceHeapIndex();
                 dst->g_EnableAO = UserData::GetInstance().aoParameter.IsEnableAO;
-                dst->g_EnableShadow = UserData::GetInstance().EnableShadow;
+                dst->g_EnableShadow = UserData::GetInstance().shadowParameter.EnableShadow;
                 dst->g_MipBias = std::max(-2.f, std::log2(screenPercentage));
-                dst->g_ShadowRadius = UserData::GetInstance().shadowRadius;
+                dst->g_ShadowRadius = UserData::GetInstance().shadowParameter.shadowRadius;
             });
 
         auto frameSpace = RenderResource::GetInstance().GetPerFrameBindResourceSpace(
