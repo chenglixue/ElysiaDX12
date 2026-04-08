@@ -254,7 +254,12 @@ inline float SobolPCF(float2 screenSize,
     [unroll]
     for (int i = 0; i < numSamples; i ++)
     {
-        float2 baseSobol = g_Sobol_256spp_256d[(i + frameIndex) % 65536];
+        uint sampleIdx = (i + frameIndex) % 256;
+        uint sobolX = g_Sobol_256spp_256d[sampleIdx * 256 + 0];
+        uint sobolY = g_Sobol_256spp_256d[sampleIdx * 256 + 1];
+        float2 baseSobol = float2(sobolX, sobolY) * (1.0f / 256.0f);
+
+        // float2 baseSobol = sobolSequence[(i + frameIndex) % 64];
         float2 samplePoint = frac(baseSobol + shift);
 
         float2 offset = WarpToDisk(samplePoint);

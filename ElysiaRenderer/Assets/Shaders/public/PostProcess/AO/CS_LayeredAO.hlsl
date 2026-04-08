@@ -1,5 +1,6 @@
 #include "private\ShadingCommon.hlsl"
 #include <private\SSAOCommon.hlsli>
+#include "private\ShadowConst.hlsli"
 
 #define GROUP_SIZE 8
 static const UINT DEINTERLEAVED_DEPTH_COUNT = 4;
@@ -59,9 +60,9 @@ cbuffer PassConstant : register(b0, perPassSpace)
     float4 g_AOSampleKernelArray[_AO_MAX_SAMPLE_COUNT];
 }
 
-static const UINT ELYSIA_HBAO_BASE_SAMPLE_COUNT = 4;
-static const UINT ELYSIA_HBAO_MAX_SAMPLE_COUNT = 8;
-static const UINT ELYSIA_HBAO_BASE_STEP_SAMPLE_COUNT = 2;
+static const UINT ELYSIA_HBAO_BASE_SAMPLE_COUNT = 2;
+static const UINT ELYSIA_HBAO_MAX_SAMPLE_COUNT = 4;
+static const UINT ELYSIA_HBAO_BASE_STEP_SAMPLE_COUNT = 4;
 static const UINT ELYSIA_HBAO_MAX_STEP_SAMPLE_COUNT = 6;
 static const UINT ELYSIA_HBAO_FLEXIBLE_COUNT =
     ELYSIA_HBAO_MAX_STEP_SAMPLE_COUNT - ELYSIA_HBAO_BASE_STEP_SAMPLE_COUNT;
@@ -315,12 +316,27 @@ void LayeredHBAOMain(UINT3 id : SV_DispatchThreadID)
                                        (1.0 - edgeWeight.z - edgeWeight.w) * 0.35);
     edgeFadeoutFactor = 1 - edgeFadeoutFactor;
 
-    min16float3 randomVector = SampleTexture2D(BlueNoiseTexIndex,
-                                               fullResCoord * g_noiseScale,
-                                               WarpPointSampler).xyz;
-    min16float temporalAngle = InterleavedGradientNoise(id.xy * 2 + UINT2(offsetX, offsetY),
-                                                        frameIndex % 8) * TWO_PI;
-    min16float randomAngle = randomVector.x * TWO_PI + temporalAngle;
+    uint2 absolutePixelCoord = id.xy * 2 + uint2(offsetX, offsetY);
+    uint2 seed = hash_int(absolutePixelCoord ^ uint2(frameIndex * 0x9E3779B9, frameIndex * 0x45D9F3B));
+    float2 spatialShift = float2(seed) * (1.0 / 4294967295.0);
+    float2 temporalShift = frac(frameIndex * float2(0.61803398875f, 0.75487766624f));
+    float2 shift = frac(spatialShift + temporalShift);
+
+    uint sampleIdx = frameIndex % 256;
+    uint sobolX = g_Sobol_256spp_256d[sampleIdx * 256 + 0];
+    uint sobolY = g_Sobol_256spp_256d[sampleIdx * 256 + 1];
+    float2 baseSobol = float2(sobolX, sobolY) * (1.0f / 256.0f);
+
+    float2 jitter = frac(baseSobol + shift);
+    min16float randomAngle = (min16float)(jitter.x * TWO_PI);
+    min16float rayJitter = (min16float)jitter.y;
+
+    // min16float3 randomVector = SampleTexture2D(BlueNoiseTexIndex,
+    //                                            fullResCoord * g_noiseScale,
+    //                                            WarpPointSampler).xyz;
+    // min16float temporalAngle = InterleavedGradientNoise(id.xy * 2 + UINT2(offsetX, offsetY),
+    //                                                     frameIndex % 8) * TWO_PI;
+    // min16float randomAngle = randomVector.x * TWO_PI + temporalAngle;
 
     min16float radius = g_AORadius;
     const min16float EffectSamplingRadiusNearLimitRec = rcp(radius * 1.2f / (projMatrix[1][1]));
@@ -343,7 +359,7 @@ void LayeredHBAOMain(UINT3 id : SV_DispatchThreadID)
 
     min16float importance = Elysia_Sample_Importance(
         (trunc(id.xy * rcp(2)) + 0.5f) * g_ImportanceBufferSize.zw);
-    UINT dirSampleCount = lerp(2, 6, importance);
+    UINT dirSampleCount = lerp(ELYSIA_HBAO_BASE_SAMPLE_COUNT, ELYSIA_HBAO_MAX_SAMPLE_COUNT, importance);
 
     min16float baseAO = SampleTexture2D(AOLayerHeapIndex, localScreenUV, ClampPointSampler);
 
@@ -358,7 +374,7 @@ void LayeredHBAOMain(UINT3 id : SV_DispatchThreadID)
                         inputParam,
                         normalVS,
                         randomAngle,
-                        randomVector.y);
+                        rayJitter);
     occlusion *= lerp(0.8, 1.2f, importance);
 
     min16float aoResult = occlusion * edgeFadeoutFactor;
