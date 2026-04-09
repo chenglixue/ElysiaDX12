@@ -361,8 +361,6 @@ void LayeredHBAOMain(UINT3 id : SV_DispatchThreadID)
         (trunc(id.xy * rcp(2)) + 0.5f) * g_ImportanceBufferSize.zw);
     UINT dirSampleCount = lerp(ELYSIA_HBAO_BASE_SAMPLE_COUNT, ELYSIA_HBAO_MAX_SAMPLE_COUNT, importance);
 
-    min16float baseAO = SampleTexture2D(AOLayerHeapIndex, localScreenUV, ClampPointSampler);
-
     min16float occlusion = 0;
     occlusion += CalcAO(DepthLayerHeapIndex,
                         dirSampleCount,
