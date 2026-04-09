@@ -84,6 +84,9 @@ cbuffer GlobalConstant : register(b0, perFrameSpace)
     float g_MipBias;
 
     float g_ShadowRadius;
+    UINT g_SobolBufferIndex;
+    UINT g_ScramblingTileBufferIndex;
+    UINT g_RankingTileBufferIndex;
 };
 
 struct DX12Vertex

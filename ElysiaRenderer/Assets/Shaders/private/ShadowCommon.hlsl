@@ -3,7 +3,6 @@
 
 #include "SharedCommon.hlsli"
 #include "Random.hlsl"
-#include "ShadowConst.hlsli"
 
 //-------------------------------------------------------------------------------------------------
 // Calculates the offset to use for sampling the shadow map, based on the surface normal
@@ -199,35 +198,61 @@ inline float2 WarpToDisk(float2 samplePoint)
     return u * sqrt(1.0f - 0.5f * u.yx * u.yx);
 }
 
-inline float2 GetHeitzBlueNoise(uint2 pixelCoord, uint frameIndex)
+float samplerBlueNoiseErrorDistribution_128x128_OptimizedFor_2d2d2d2d_1spp(
+    int pixel_i,
+    int pixel_j,
+    int sampleIndex,
+    int sampleDimension)
 {
-    uint tx = pixelCoord.x % 128;
-    uint ty = pixelCoord.y % 128;
-    uint tileBaseIndex = (ty * 128 + tx) * 8;
+    // wrap arguments
+    pixel_i = pixel_i & 127;
+    pixel_j = pixel_j & 127;
+    sampleIndex = sampleIndex & 255;
+    sampleDimension = sampleDimension & 255;
 
-    uint rank0 = g_RankingTile[tileBaseIndex + 0];
-    uint rank1 = g_RankingTile[tileBaseIndex + 1];
-    uint scram0 = g_ScramblingTile[tileBaseIndex + 0];
-    uint scram1 = g_ScramblingTile[tileBaseIndex + 1];
+    StructuredBuffer<int> SobolBuffer = ResourceDescriptorHeap[g_SobolBufferIndex];
+    StructuredBuffer<int> ScramblingTileBuffer = ResourceDescriptorHeap[g_ScramblingTileBufferIndex];
+    StructuredBuffer<int> RankingTileBuffer = ResourceDescriptorHeap[g_RankingTileBufferIndex];
+    // xor index based on optimized ranking
+    int rankedSampleIndex = sampleIndex ^ RankingTileBuffer[sampleDimension + (pixel_i + pixel_j * 128) * 8];
 
-    uint sampleIndex = frameIndex % 256;
+    // fetch value in sequence
+    int value = SobolBuffer[sampleDimension + rankedSampleIndex * 256];
 
-    uint index0 = sampleIndex ^ rank0;
-    uint index1 = sampleIndex ^ rank1;
+    // If the dimension is optimized, xor sequence value based on optimized scrambling
+    value = value ^ ScramblingTileBuffer[(sampleDimension % 8) + (pixel_i + pixel_j * 128) * 8];
 
-    uint sobol0 = g_Sobol_256spp_256d[index0 * 256 + 0];
-    uint sobol1 = g_Sobol_256spp_256d[index1 * 256 + 1];
-    sobol0 = sobol0 & 0xFF;
-    sobol1 = sobol1 & 0xFF;
+    // convert to float and return
+    float v = (0.5f + value) / 256.0f;
+    return v;
+}
 
-    uint val0 = sobol0 ^ scram0;
-    uint val1 = sobol1 ^ scram1;
+inline float SobolPCF1Spp(float2 screenSize,
+                          float2 screenUV,
+                          float shadowRadius,
+                          float2 shadowPos,
+                          float lightDepth,
+                          Texture2D shadowTex,
+                          in SamplerState pcfSampler,
+                          in float4 shadowMapSize,
+                          float2 sobolSequence[64],
+                          uint CSMIndex = 0)
+{
+    float shadow = 0.0;
 
-    float2 result;
-    result.x = (float)val0 * (1.0f / 256.0f);
-    result.y = (float)val1 * (1.0f / 256.0f);
+    uint2 pixelCoord = uint2(screenUV * screenSize);
+    SamplerComparisonState compShadowSampler = SamplerDescriptorHeap[ShadowClampLinearSampler];
+    float2 offset = samplerBlueNoiseErrorDistribution_128x128_OptimizedFor_2d2d2d2d_1spp(
+        pixelCoord.x,
+        pixelCoord.y,
+        frameIndex,
+        uint3(0, 1, 2));
+    float2 sampleUV = shadowPos + offset * shadowMapSize.zw * shadowRadius;
+    float sampleShadow = shadowTex.SampleCmpLevelZero(compShadowSampler, sampleUV, lightDepth);
 
-    return result;
+    shadow += sampleShadow;
+
+    return shadow;
 }
 
 inline float SobolPCF(float2 screenSize,
@@ -243,24 +268,22 @@ inline float SobolPCF(float2 screenSize,
 {
     float shadow = 0.0;
     const UINT numSamples = 3;
+    SamplerComparisonState compShadowSampler = SamplerDescriptorHeap[ShadowClampLinearSampler];
+    StructuredBuffer<int> SobolBuffer = ResourceDescriptorHeap[g_SobolBufferIndex];
 
     uint2 pixelCoord = uint2(screenUV * screenSize);
     float temporalShift = frac(frameIndex * 0.61803398875f);
     uint2 seed = hash_int(pixelCoord ^ uint2(frameIndex * 0x9E3779B9, frameIndex * 0x45D9F3B));
     float2 shift = float2(seed) * (1.0 / 4294967295.0);
     shift += temporalShift;
-    SamplerComparisonState compShadowSampler = SamplerDescriptorHeap[ShadowClampLinearSampler];
 
     [unroll]
     for (int i = 0; i < numSamples; i ++)
     {
-        uint sampleIdx = (i + frameIndex) % 256;
-        uint sobolX = g_Sobol_256spp_256d[sampleIdx * 256 + 0];
-        uint sobolY = g_Sobol_256spp_256d[sampleIdx * 256 + 1];
-        float2 baseSobol = float2(sobolX, sobolY) * (1.0f / 256.0f);
+        uint sampleIdx = (frameIndex * numSamples + i) % 64;
+        uint sobol = sobolSequence[sampleIdx];
 
-        // float2 baseSobol = sobolSequence[(i + frameIndex) % 64];
-        float2 samplePoint = frac(baseSobol + shift);
+        float2 samplePoint = frac(sobol + shift);
 
         float2 offset = WarpToDisk(samplePoint);
         float2 sampleUV = shadowPos + offset * shadowMapSize.zw * shadowRadius;

@@ -60,8 +60,8 @@ cbuffer PassConstant : register(b0, perPassSpace)
     float4 g_AOSampleKernelArray[_AO_MAX_SAMPLE_COUNT];
 }
 
-static const UINT ELYSIA_HBAO_BASE_SAMPLE_COUNT = 2;
-static const UINT ELYSIA_HBAO_MAX_SAMPLE_COUNT = 4;
+static const UINT ELYSIA_HBAO_BASE_SAMPLE_COUNT = 4;
+static const UINT ELYSIA_HBAO_MAX_SAMPLE_COUNT = 6;
 static const UINT ELYSIA_HBAO_BASE_STEP_SAMPLE_COUNT = 4;
 static const UINT ELYSIA_HBAO_MAX_STEP_SAMPLE_COUNT = 6;
 static const UINT ELYSIA_HBAO_FLEXIBLE_COUNT =
@@ -130,6 +130,11 @@ min16float Elysia_Reinterleave_SampleAO(UINT index, float2 screenUV);
 void Elysia_Reinterleave_StoreOutput(UINT2 id, min16float2 val);
 float Elysia_Sample_Importance(float2 uv);
 min16float4 UnpackEdges(min16float _packedVal);
+float samplerBlueNoiseErrorDistribution_128x128_OptimizedFor_2d2d2d2d_1spp(
+    int pixel_i,
+    int pixel_j,
+    int sampleIndex,
+    int sampleDimension);
 
 [numthreads(GROUP_SIZE, GROUP_SIZE, 1)]
 void DeinterleaveMain(UINT3 id : SV_DispatchThreadID)
@@ -317,17 +322,12 @@ void LayeredHBAOMain(UINT3 id : SV_DispatchThreadID)
     edgeFadeoutFactor = 1 - edgeFadeoutFactor;
 
     uint2 absolutePixelCoord = id.xy * 2 + uint2(offsetX, offsetY);
-    uint2 seed = hash_int(absolutePixelCoord ^ uint2(frameIndex * 0x9E3779B9, frameIndex * 0x45D9F3B));
-    float2 spatialShift = float2(seed) * (1.0 / 4294967295.0);
-    float2 temporalShift = frac(frameIndex * float2(0.61803398875f, 0.75487766624f));
-    float2 shift = frac(spatialShift + temporalShift);
+    float2 jitter = samplerBlueNoiseErrorDistribution_128x128_OptimizedFor_2d2d2d2d_1spp(
+        absolutePixelCoord.x,
+        absolutePixelCoord.y,
+        frameIndex,
+        uint3(0, 1, 2));
 
-    uint sampleIdx = frameIndex % 256;
-    uint sobolX = g_Sobol_256spp_256d[sampleIdx * 256 + 0];
-    uint sobolY = g_Sobol_256spp_256d[sampleIdx * 256 + 1];
-    float2 baseSobol = float2(sobolX, sobolY) * (1.0f / 256.0f);
-
-    float2 jitter = frac(baseSobol + shift);
     min16float randomAngle = (min16float)(jitter.x * TWO_PI);
     min16float rayJitter = (min16float)jitter.y;
 
@@ -363,7 +363,7 @@ void LayeredHBAOMain(UINT3 id : SV_DispatchThreadID)
 
     min16float baseAO = SampleTexture2D(AOLayerHeapIndex, localScreenUV, ClampPointSampler);
 
-    min16float occlusion = baseAO;
+    min16float occlusion = 0;
     occlusion += CalcAO(DepthLayerHeapIndex,
                         dirSampleCount,
                         ELYSIA_HBAO_MAX_STEP_SAMPLE_COUNT,
@@ -532,7 +532,8 @@ float CalcAO(UINT DepthLayerHeapIndex,
     [unroll(8)]
     for (UINT dir = 0; dir < dirSampleCount; dir ++)
     {
-        min16float angle = float(dir) * rcp(float(dirSampleCount)) * TWO_PI +
+        min16float dirOffset = frac(jitter * (dir + 1.0f));
+        min16float angle = min16float((min16float)dir + dirOffset) * rcp(float(dirSampleCount)) * TWO_PI +
                            randomAngle;
 
         float2 dirUV;
@@ -542,7 +543,7 @@ float CalcAO(UINT DepthLayerHeapIndex,
 
         min16float angleBias = g_AOBias;
         min16float topOcclusionAngle = 1e-4;
-        [unroll(4)]
+        [unroll]
         for (UINT step = 0; step < stepSampleCount; ++step)
         {
             min16float progress = (float(step) + jitter) * rcp(float(stepSampleCount));
@@ -639,4 +640,33 @@ min16float4 UnpackEdges(min16float _packedVal)
     edgesLRTB.w = min16float((packedVal >> 0) & 0x03) / 3.0;
 
     return saturate(edgesLRTB + g_Sharpness_Inv);
+}
+
+float samplerBlueNoiseErrorDistribution_128x128_OptimizedFor_2d2d2d2d_1spp(
+    int pixel_i,
+    int pixel_j,
+    int sampleIndex,
+    int sampleDimension)
+{
+    // wrap arguments
+    pixel_i = pixel_i & 127;
+    pixel_j = pixel_j & 127;
+    sampleIndex = sampleIndex & 255;
+    sampleDimension = sampleDimension & 255;
+
+    StructuredBuffer<int> SobolBuffer = ResourceDescriptorHeap[g_SobolBufferIndex];
+    StructuredBuffer<int> ScramblingTileBuffer = ResourceDescriptorHeap[g_ScramblingTileBufferIndex];
+    StructuredBuffer<int> RankingTileBuffer = ResourceDescriptorHeap[g_RankingTileBufferIndex];
+    // xor index based on optimized ranking
+    int rankedSampleIndex = sampleIndex ^ RankingTileBuffer[sampleDimension + (pixel_i + pixel_j * 128) * 8];
+
+    // fetch value in sequence
+    int value = SobolBuffer[sampleDimension + rankedSampleIndex * 256];
+
+    // If the dimension is optimized, xor sequence value based on optimized scrambling
+    value = value ^ ScramblingTileBuffer[(sampleDimension % 8) + (pixel_i + pixel_j * 128) * 8];
+
+    // convert to float and return
+    float v = (0.5f + value) / 256.0f;
+    return v;
 }

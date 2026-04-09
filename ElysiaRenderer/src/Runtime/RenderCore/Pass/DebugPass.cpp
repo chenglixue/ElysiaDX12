@@ -86,7 +86,7 @@ namespace ElysiaRenderer
         pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(
             passID).pPipelineStateObject;
         pipelineStateData.m_renderTargets = {m_pDisplayRT->GetTexture()};
-        pipelineStateData.m_depthStencilTarget = m_pCameraDepthRT->GetTexture();
+        // pipelineStateData.m_depthStencilTarget = m_pCameraDepthRT->GetTexture();
         m_pCommand->SetPipeline(pipelineStateData);
         SetSpaceResource(passData, PER_FRAME_SPACE);
         m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_displaySize));
@@ -219,7 +219,7 @@ namespace ElysiaRenderer
             m_pCommand->AddBarrier(m_pDisplayRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
             {
                 m_pMaterial->SetFloat4(ShaderIDs::g_TargetSize,
-                                       GetScreenSize(renderSize),
+                                       GetScreenSize(m_displaySize),
                                        passID);
                 SetSpaceResource(passData, PER_PASS_SPACE);
                 m_pCommand->DrawFullScreenTriangle();
@@ -238,7 +238,7 @@ namespace ElysiaRenderer
             m_pCommand->AddBarrier(m_pDisplayRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
             {
                 m_pMaterial->SetFloat4(ShaderIDs::g_TargetSize,
-                                       GetScreenSize(renderSize),
+                                       GetScreenSize(m_displaySize),
                                        passID);
                 SetSpaceResource(passData, PER_PASS_SPACE);
                 m_pCommand->DrawFullScreenTriangle();
@@ -289,7 +289,7 @@ namespace ElysiaRenderer
         pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(
             passID).pPipelineStateObject;
         pipelineStateData.m_renderTargets = {m_pDisplayRT->GetTexture()};
-        pipelineStateData.m_depthStencilTarget = m_pCameraDepthRT->GetTexture();
+        // pipelineStateData.m_depthStencilTarget = m_pCameraDepthRT->GetTexture();
         m_pCommand->SetPipeline(pipelineStateData);
         SetSpaceResource(passData, PER_FRAME_SPACE);
         m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_displaySize));
@@ -430,7 +430,7 @@ namespace ElysiaRenderer
                 pipelineStateData.m_pipelineStateObject = m_pMaterial->GetPassData(
                     passID).pPipelineStateObject;
                 pipelineStateData.m_renderTargets = {m_pDisplayRT->GetTexture()};
-                pipelineStateData.m_depthStencilTarget = m_pCameraDepthRT->GetTexture();
+                // pipelineStateData.m_depthStencilTarget = m_pCameraDepthRT->GetTexture();
                 m_pCommand->SetPipeline(pipelineStateData);
                 SetSpaceResource(passData, PER_FRAME_SPACE);
             }

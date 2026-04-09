@@ -25,6 +25,44 @@ namespace ElysiaRenderer
     PreDrawPass::PreDrawPass()
         : BasePass()
     {
+        {
+            BufferCreationDesc bufferDesc =
+            {
+                .name = L"Sobol 256spp256d Buffer",
+                .stride = sizeof(int),
+                .size = sizeof(int) * 256 * 256,
+                .viewFlags = GPUResourceFlags::UAV | GPUResourceFlags::SRV,
+                .accessFlags = BufferAccessFlags::GPUOnly,
+            };
+            m_pSobol256spp256dBuffer = BufferManager::GetInstance().CreateBuffer(bufferDesc);
+            
+        }
+
+        {
+            BufferCreationDesc bufferDesc =
+            {
+                .name = L"Scrambling Tile Buffer",
+                .stride = sizeof(int),
+                .size = sizeof(int) * 128 * 128 * 8,
+                .viewFlags = GPUResourceFlags::UAV | GPUResourceFlags::SRV,
+                .accessFlags = BufferAccessFlags::GPUOnly,
+            };
+            m_pScramblingTileBuffer = BufferManager::GetInstance().CreateBuffer(bufferDesc);
+            
+        }
+
+        {
+            BufferCreationDesc bufferDesc =
+            {
+                .name = L"Ranking Tile Buffer",
+                .stride = sizeof(int),
+                .size = sizeof(int) * 128 * 128 * 8,
+                .viewFlags = GPUResourceFlags::UAV | GPUResourceFlags::SRV,
+                .accessFlags = BufferAccessFlags::GPUOnly,
+            };
+            m_pRankingTileBuffer = BufferManager::GetInstance().CreateBuffer(bufferDesc);
+            
+        }
     }
 
     PreDrawPass::~PreDrawPass()
@@ -38,6 +76,38 @@ namespace ElysiaRenderer
 
     void PreDrawPass::Configure()
     {
+        {
+            auto pBufferData = DX12BufferUpload
+            {
+                .buffer = m_pSobol256spp256dBuffer,
+                .pBufferData = std::make_unique<uint8_t[]>(sizeof(int) * 256 * 256),
+                .bufferDataSize = sizeof(int) * 256 * 256
+            };
+            memcpy(pBufferData.pBufferData.get(), g_Sobol_256spp_256d, sizeof(int) * 256 * 256);
+            BufferManager::GetInstance().UploadBufferData(m_pDevice->GetUploadContext(), &pBufferData);
+        }
+        
+        {
+            auto pBufferData = DX12BufferUpload
+            {
+                .buffer = m_pScramblingTileBuffer,
+                .pBufferData = std::make_unique<uint8_t[]>(sizeof(int) * 128 * 128 * 8),
+                .bufferDataSize = sizeof(int) * 128 * 128 * 8
+            };
+            memcpy(pBufferData.pBufferData.get(), g_ScramblingTile, sizeof(int) * 128 * 128 * 8);
+            BufferManager::GetInstance().UploadBufferData(m_pDevice->GetUploadContext(), &pBufferData);
+        }
+
+        {
+            auto pBufferData = DX12BufferUpload
+            {
+                .buffer = m_pRankingTileBuffer,
+                .pBufferData = std::make_unique<uint8_t[]>(sizeof(int) * 128 * 128 * 8),
+                .bufferDataSize = sizeof(int) * 128 * 128 * 8
+            };
+            memcpy(pBufferData.pBufferData.get(), g_RankingTile, sizeof(int) * 128 * 128 * 8);
+            BufferManager::GetInstance().UploadBufferData(m_pDevice->GetUploadContext(), &pBufferData);
+        }
     }
 
     void PreDrawPass::Render(FrameContext& context)
@@ -107,6 +177,9 @@ namespace ElysiaRenderer
                 dst->g_EnableShadow = UserData::GetInstance().shadowParameter.EnableShadow;
                 dst->g_MipBias = std::max(-2.f, std::log2(screenPercentage));
                 dst->g_ShadowRadius = UserData::GetInstance().shadowParameter.shadowRadius;
+                dst->g_SobolBufferIndex = m_pSobol256spp256dBuffer->GetResourceHeapIndex();
+                dst->g_ScramblingTileBufferIndex = m_pScramblingTileBuffer->GetResourceHeapIndex();
+                dst->g_RankingTileBufferIndex = m_pRankingTileBuffer->GetResourceHeapIndex();
             });
 
         auto frameSpace = RenderResource::GetInstance().GetPerFrameBindResourceSpace(

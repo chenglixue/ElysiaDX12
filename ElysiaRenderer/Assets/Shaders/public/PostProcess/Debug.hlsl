@@ -218,6 +218,7 @@ PSOutput PS(PSInput i)
 {
     PSOutput o = (PSOutput)0;
     float2 screenUV = (i.positionCS.xy + 0.5f) * screenSize.zw;
+    screenUV = i.uv;
 
     switch (g_DebugMode)
     {

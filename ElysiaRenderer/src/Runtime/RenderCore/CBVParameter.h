@@ -63,5 +63,8 @@ namespace ElysiaRenderer
         float g_MipBias = 0;
 
         float g_ShadowRadius;
+        UINT g_SobolBufferIndex;
+        UINT g_ScramblingTileBufferIndex;
+        UINT g_RankingTileBufferIndex;
     };
 } // namespace ElysiaRenderer

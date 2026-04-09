@@ -101,4 +101,12 @@ float4 LoadTexture2D(UINT textureIndex, int2 coord)
 
     return SampleTex.Load(int3(coord, 0));
 }
+
+float3 GetTexture2DDimensions(UINT textureIndex)
+{
+    Texture2D<float4> SampleTex = ResourceDescriptorHeap[textureIndex];
+    float width, height, mipLevel;
+    SampleTex.GetDimensions(0, width, height, mipLevel);
+    return float3(width, height, mipLevel);
+}
 #endif
