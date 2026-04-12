@@ -179,6 +179,7 @@ PASS(AO_TAA_PASS,                       "public\\PostProcess\\CS_AOTAA.hlsl",   
             static inline size_t g_IsBlur = PropertyToID(L"g_IsBlur");
 
             static inline size_t g_ActiveLayerIndex = PropertyToID(L"g_ActiveLayerIndex");
+            static inline size_t g_SobolSequence = PropertyToID(L"g_SobolSequence");
         };
         struct TAAData
         {
@@ -192,6 +193,7 @@ PASS(AO_TAA_PASS,                       "public\\PostProcess\\CS_AOTAA.hlsl",   
 
         std::vector<Vector4> m_kernels;
         std::vector<float> m_blurWeights;
+        std::vector<Vector2> m_sobolSequences;
 
         void DoHIZ();
         void DoDeinterleaveDepth();

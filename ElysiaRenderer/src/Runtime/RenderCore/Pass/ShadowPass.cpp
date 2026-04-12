@@ -68,6 +68,7 @@ namespace ElysiaRenderer
         };
         m_pMaterial = std::move(std::make_unique<Material>(m_pDevice, m_shaderPasses));
         ShaderPassIDs::ShadowCastPassID = m_pMaterial->FindPassIndex("Shadow Cast Pass");
+        LightManager::GetInstance().GetMainLight()->CreateMainShadow(20, DXGI_FORMAT_D32_FLOAT_S8X24_UINT);
 
         m_sobolSqeuences = Create2DSobolSqeuence(64);
         UpdatePipeline();

@@ -389,11 +389,6 @@ void DownSample3x3(UINT currFrameTexIndex,
         }
 
         float3 color = SampleTexture2D(currFrameTexIndex, sampleUV, ClampPointSampler);
-        if (any(isnan(color)) || any(isinf(color)))
-        {
-            color = float3(0.0f, 0.0f, 0.0f);
-        }
-        color = clamp(color, 0.0f, 65504.0f);
         float luma = max(color.r, max(color.g, color.b));
         float karisWeight = 1.0f / (1.0f + luma);
         color = TransformRGB2YCoCg(ReinhardTonemap(color));

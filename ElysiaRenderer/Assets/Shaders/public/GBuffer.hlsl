@@ -212,7 +212,7 @@ FEncodeGBufferData GetEncodeGBufferData(FInputParams inputParams, float3 toLight
     o.AO = 1;
     o.Metallic = metallic;
     o.Roughness = roughness;
-    o.Specular = 0.5f;
+    o.Specular = 0.04f;
 
     o.WorldNormal = GetNormal(normalTS.rgb, TBN, currMeshData.normalIntensity);
     o.WorldTangent = TBN._m00_m01_m02;

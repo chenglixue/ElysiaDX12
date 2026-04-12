@@ -127,26 +127,30 @@ PSOutput PS(PSInput i)
                                                  g_GridSpacing,
                                                  0,
                                                  float4(0, 0, 0, 1));
-    float3 IBL = SampleDDGI(inputParam.PositionWS,
-                            inputParam.NormalWS,
-                            DDGIGetSurfaceBias(inputParam.NormalWS,
-                                               inputParam.ScreenVector,
-                                               g_ProbeNormalBias,
-                                               g_ProbeViewBias),
-                            g_GridOrigin,
-                            g_GridSpacing,
-                            g_GridDimensions,
-                            g_DDGIEncodingGamma,
-                            g_IrradianceTexSize,
-                            g_IrradianceTexIndex,
-                            g_DistanceTexSize,
-                            g_DistanceTexIndex,
-                            g_ProbeOffsetsIndex,
-                            g_ProbeStatesIndex,
-                            WarpLinearSampler
-                     ) * g_AmbientTint * g_AmbientIntensity * blendWeight;
-    IBL *= (GBufferData.BaseColor.rgb) / PI;
-    lighting += float4(IBL, 1.f) * AO;
+    float3 IBL = 0.f;
+    if (blendWeight > 0)
+    {
+        float3 IBL = SampleDDGI(inputParam.PositionWS,
+                                inputParam.NormalWS,
+                                DDGIGetSurfaceBias(inputParam.NormalWS,
+                                                   inputParam.ScreenVector,
+                                                   g_ProbeNormalBias,
+                                                   g_ProbeViewBias),
+                                g_GridOrigin,
+                                g_GridSpacing,
+                                g_GridDimensions,
+                                g_DDGIEncodingGamma,
+                                g_IrradianceTexSize,
+                                g_IrradianceTexIndex,
+                                g_DistanceTexSize,
+                                g_DistanceTexIndex,
+                                g_ProbeOffsetsIndex,
+                                g_ProbeStatesIndex,
+                                WarpLinearSampler
+                         ) * g_AmbientTint * g_AmbientIntensity * blendWeight;
+        IBL *= (GBufferData.BaseColor.rgb) / PI;
+        lighting += float4(IBL, 1.f) * AO;
+    }
 
     switch (g_DebugMode)
     {

@@ -35,7 +35,7 @@ namespace ElysiaRenderer
                 .accessFlags = BufferAccessFlags::GPUOnly,
             };
             m_pSobol256spp256dBuffer = BufferManager::GetInstance().CreateBuffer(bufferDesc);
-            
+
         }
 
         {
@@ -48,7 +48,7 @@ namespace ElysiaRenderer
                 .accessFlags = BufferAccessFlags::GPUOnly,
             };
             m_pScramblingTileBuffer = BufferManager::GetInstance().CreateBuffer(bufferDesc);
-            
+
         }
 
         {
@@ -61,7 +61,7 @@ namespace ElysiaRenderer
                 .accessFlags = BufferAccessFlags::GPUOnly,
             };
             m_pRankingTileBuffer = BufferManager::GetInstance().CreateBuffer(bufferDesc);
-            
+
         }
     }
 
@@ -86,7 +86,7 @@ namespace ElysiaRenderer
             memcpy(pBufferData.pBufferData.get(), g_Sobol_256spp_256d, sizeof(int) * 256 * 256);
             BufferManager::GetInstance().UploadBufferData(m_pDevice->GetUploadContext(), &pBufferData);
         }
-        
+
         {
             auto pBufferData = DX12BufferUpload
             {
@@ -117,9 +117,13 @@ namespace ElysiaRenderer
         auto renderHeight = std::floor(m_displaySize.y * UserData::GetInstance().taaParameter.sampleRate);
         float screenPercentage = (float)renderWidth / (float)m_displaySize.x;
 
+        static std::mt19937 gen(std::random_device{}());
+        static std::uniform_real_distribution<float> dist(0.0f, 1.0f);
+        auto randomSeed = dist(gen);
+
         auto GPUAddress = UploadFrameConstant(
             m_pDevice,
-            [this, context, screenPercentage](CBVFrameVariable* dst)
+            [this, &context, &screenPercentage, &randomSeed](CBVFrameVariable* dst)
             {
                 *dst = RenderResource::GetInstance().GetCBVFrameVariable();
                 dst->cameraPosWS = CameraManager::GetInstance().GetMainCamera()->GetPosition4();
@@ -180,6 +184,7 @@ namespace ElysiaRenderer
                 dst->g_SobolBufferIndex = m_pSobol256spp256dBuffer->GetResourceHeapIndex();
                 dst->g_ScramblingTileBufferIndex = m_pScramblingTileBuffer->GetResourceHeapIndex();
                 dst->g_RankingTileBufferIndex = m_pRankingTileBuffer->GetResourceHeapIndex();
+                dst->g_RandomSeed = randomSeed;
             });
 
         auto frameSpace = RenderResource::GetInstance().GetPerFrameBindResourceSpace(

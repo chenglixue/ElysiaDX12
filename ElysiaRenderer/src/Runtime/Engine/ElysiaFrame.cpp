@@ -506,8 +506,15 @@ namespace ElysiaEngine
             ImGui::SliderFloat("Intensity", &pUserData.lightIntensity, 0, 20);
 
             ImGui::Checkbox("Enable Shadow", &pUserData.shadowParameter.EnableShadow);
-            ElysiaRenderer::EnumCombo("Shadow Type", &pUserData.shadowParameter.shadowType);
-            ElysiaRenderer::EnumCombo("Shadow Quality", &pUserData.shadowParameter.shadowQuality);
+            if (ElysiaRenderer::EnumCombo("Shadow Type", &pUserData.shadowParameter.shadowType))
+            {
+                m_pRenderer->OnUpdateDisplayDependentResources(&m_swapChain);
+            }
+            if (ElysiaRenderer::EnumCombo("Shadow Quality", &pUserData.shadowParameter.shadowQuality))
+            {
+                m_pRenderer->OnUpdateDisplayDependentResources(&m_swapChain);
+                m_pRenderer->OnCreateWindowSizeDependentResources(&m_swapChain, m_Width, m_Height);
+            }
             ImGui::SliderFloat("Shadow Depth Bias", &pUserData.shadowParameter.shadowDepthBias, 0, 1);
             ImGui::SliderFloat("Shadow Slope Depth Bias", &pUserData.shadowParameter.shadowSlopeDepthBias, 0, 10);
             ImGui::SliderFloat("Shadow Max Slope Depth Bias",
@@ -654,7 +661,11 @@ namespace ElysiaEngine
             if (ImGui::CollapsingHeader("TAA"))
             {
                 ImGui::Checkbox("Enable TAA", &pUserData.taaParameter.Enable);
-                ImGui::SliderFloat("Sample Ratio", &pUserData.taaParameter.sampleRate, 0.5f, 1.f);
+                if (ImGui::SliderFloat("Sample Ratio", &pUserData.taaParameter.sampleRate, 0.5f, 1.f))
+                {
+                    m_pRenderer->OnCreateWindowSizeDependentResources(&m_swapChain, m_Width, m_Height);
+                }
+
                 ElysiaRenderer::EnumCombo("TAA Jitter Type", &pUserData.taaParameter.jitterType);
 
                 ImGui::SliderFloat("TAA Jitter Intensity", &pUserData.taaParameter.jitterIntensity, 0.f, 2.f);

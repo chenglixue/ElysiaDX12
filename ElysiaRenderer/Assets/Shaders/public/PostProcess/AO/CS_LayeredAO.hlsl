@@ -58,10 +58,12 @@ cbuffer PassConstant : register(b0, perPassSpace)
     UINT g_ActiveLayerIndex;
 
     float4 g_AOSampleKernelArray[_AO_MAX_SAMPLE_COUNT];
+
+    float2 g_SobolSequence[64];
 }
 
-static const UINT ELYSIA_HBAO_BASE_SAMPLE_COUNT = 4;
-static const UINT ELYSIA_HBAO_MAX_SAMPLE_COUNT = 6;
+static const UINT ELYSIA_HBAO_BASE_SAMPLE_COUNT = 2;
+static const UINT ELYSIA_HBAO_MAX_SAMPLE_COUNT = 4;
 static const UINT ELYSIA_HBAO_BASE_STEP_SAMPLE_COUNT = 4;
 static const UINT ELYSIA_HBAO_MAX_STEP_SAMPLE_COUNT = 6;
 static const UINT ELYSIA_HBAO_FLEXIBLE_COUNT =
@@ -269,7 +271,8 @@ void LayeredHBAOMain(UINT3 id : SV_DispatchThreadID)
     uint offsetX = layerIndex % 2;
     uint offsetY = layerIndex * rcp(2);
     float2 localScreenUV = (float2(id.xy) + 0.5f) * g_DeinterleavedAOSize.zw;
-    float2 fullResCoord = (id.xy * 2 + float2(offsetX, offsetY) + 0.5f) * g_FullScreenSize.zw;
+    float2 fullResUV = (id.xy * 2 + float2(offsetX, offsetY) + 0.5f) * g_FullScreenSize.zw;
+    uint2 fullResPos = id.xy * 2 + uint2(offsetX, offsetY);
 
     float4 valuesUL = GatherRedTexture2D(DepthLayerHeapIndex,
                                          localScreenUV,
@@ -283,10 +286,10 @@ void LayeredHBAOMain(UINT3 id : SV_DispatchThreadID)
 
     FInputParams inputParam;
     inputParam.PositionVS = NDCToViewSpace(
-        fullResCoord,
+        fullResUV,
         eyeDepth);
     inputParam.LinearEyeDepth = eyeDepth;
-    inputParam.NormalWS = SampleNormalWS(fullResCoord, ClampPointSampler);
+    inputParam.NormalWS = SampleNormalWS(fullResUV, ClampPointSampler);
 
     const min16float3 normalVS = normalize(mul(inputParam.NormalWS, viewMatrix));
     inputParam.PositionVS += normalVS * g_AOBias * eyeDepth;
@@ -298,16 +301,16 @@ void LayeredHBAOMain(UINT3 id : SV_DispatchThreadID)
     float pixBZ = valuesBR.x;
     min16float4 edgeWeight = CalcEdges(pixZ, pixLZ, pixRZ, pixTZ, pixBZ);
     min16float3 nL = normalize(mul(
-        SampleNormalWS(fullResCoord + min16float2(-1, 0) * g_FullScreenSize.zw, ClampPointSampler),
+        SampleNormalWS(fullResUV + min16float2(-1, 0) * g_FullScreenSize.zw, ClampPointSampler),
         (min16float3x3)viewMatrix));
     min16float3 nR = normalize(mul(
-        SampleNormalWS(fullResCoord + min16float2(1, 0) * g_FullScreenSize.zw, ClampPointSampler),
+        SampleNormalWS(fullResUV + min16float2(1, 0) * g_FullScreenSize.zw, ClampPointSampler),
         (min16float3x3)viewMatrix));
     min16float3 nT = normalize(mul(
-        SampleNormalWS(fullResCoord + min16float2(0, -1) * g_FullScreenSize.zw, ClampPointSampler),
+        SampleNormalWS(fullResUV + min16float2(0, -1) * g_FullScreenSize.zw, ClampPointSampler),
         (min16float3x3)viewMatrix));
     min16float3 nB = normalize(mul(
-        SampleNormalWS(fullResCoord + min16float2(0, 1) * g_FullScreenSize.zw, ClampPointSampler),
+        SampleNormalWS(fullResUV + min16float2(0, 1) * g_FullScreenSize.zw, ClampPointSampler),
         (min16float3x3)viewMatrix));
 
     const min16float dotThreshold = 0.5f;
@@ -321,28 +324,38 @@ void LayeredHBAOMain(UINT3 id : SV_DispatchThreadID)
                                        (1.0 - edgeWeight.z - edgeWeight.w) * 0.35);
     edgeFadeoutFactor = 1 - edgeFadeoutFactor;
 
-    uint2 absolutePixelCoord = id.xy * 2 + uint2(offsetX, offsetY);
-    float2 jitter = samplerBlueNoiseErrorDistribution_128x128_OptimizedFor_2d2d2d2d_1spp(
-        absolutePixelCoord.x,
-        absolutePixelCoord.y,
-        frameIndex,
-        uint3(0, 1, 2));
+    min16float randomAngle = 0.f;
+    min16float rayJitter = 0.f;
+    if (g_bImportance)
+    {
+        float2 jitter = samplerBlueNoiseErrorDistribution_128x128_OptimizedFor_2d2d2d2d_1spp(
+            fullResPos.x,
+            fullResPos.y,
+            frameIndex,
+            uint3(0, 1, 2));
+        min16float temporalAngle = InterleavedGradientNoise(fullResPos,
+                                                            frameIndex % 8);
+        temporalAngle = (float)(frameIndex % 8) * 0.6180339887f;
+        min16float spatialAngle = jitter.x;
+        randomAngle = (spatialAngle + temporalAngle) * TWO_PI;
+        rayJitter = (min16float)jitter.y;
+    }
+    else
+    {
+        min16float3 randomVector = SampleTexture2D(BlueNoiseTexIndex,
+                                                   fullResUV * g_noiseScale,
+                                                   WarpPointSampler).xyz;
 
-    min16float randomAngle = (min16float)(jitter.x * TWO_PI);
-    min16float rayJitter = (min16float)jitter.y;
-
-    // min16float3 randomVector = SampleTexture2D(BlueNoiseTexIndex,
-    //                                            fullResCoord * g_noiseScale,
-    //                                            WarpPointSampler).xyz;
-    // min16float temporalAngle = InterleavedGradientNoise(id.xy * 2 + UINT2(offsetX, offsetY),
-    //                                                     frameIndex % 8) * TWO_PI;
-    // min16float randomAngle = randomVector.x * TWO_PI + temporalAngle;
+        min16float temporalAngle = InterleavedGradientNoise(fullResPos, frameIndex % 8);
+        randomAngle = (randomVector.x + temporalAngle) * TWO_PI;
+        rayJitter = randomVector.y;
+    }
 
     min16float radius = g_AORadius;
-    const min16float EffectSamplingRadiusNearLimitRec = rcp(radius * 1.2f / (projMatrix[1][1]));
-    const min16float tooCloseLimitMod = saturate(length(inputParam.PositionVS) *
-                                                 EffectSamplingRadiusNearLimitRec) * 0.8 + 0.2;
-    radius *= tooCloseLimitMod;
+    // const min16float EffectSamplingRadiusNearLimitRec = rcp(radius * 1.2f / (projMatrix[1][1]));
+    // const min16float tooCloseLimitMod = saturate(length(inputParam.PositionVS) *
+    //                                              EffectSamplingRadiusNearLimitRec) * 0.8 + 0.2;
+    // radius *= tooCloseLimitMod;
 
     const min16float2 pixelDirRBViewspaceSizeAtCenterZ =
         inputParam.PositionVS.z * g_NDCToViewMul * g_DeinterleavedAOSize.zw;
@@ -354,8 +367,7 @@ void LayeredHBAOMain(UINT3 id : SV_DispatchThreadID)
     pixLookupRadiusMod *= nearScreenBorder;
 
     min16float mipLevel = max(0.0f, log2(pixLookupRadiusMod) - 4.3f);
-    mipLevel /= 2;
-    mipLevel = clamp(mipLevel, 0, g_HIZMaxMipmap);
+    mipLevel = clamp(mipLevel / 2, 0, g_HIZMaxMipmap);
 
     min16float importance = Elysia_Sample_Importance(
         (trunc(id.xy * rcp(2)) + 0.5f) * g_ImportanceBufferSize.zw);
@@ -527,11 +539,10 @@ float CalcAO(UINT DepthLayerHeapIndex,
     float2 localPixelSize = g_DeinterleavedAOSize.zw;
     float stepSizeUV = (screenPixelRadius * localPixelSize.x);
 
-    [unroll(8)]
+    [unroll(4)]
     for (UINT dir = 0; dir < dirSampleCount; dir ++)
     {
-        min16float dirOffset = frac(jitter * (dir + 1.0f));
-        min16float angle = min16float((min16float)dir + dirOffset) * rcp(float(dirSampleCount)) * TWO_PI +
+        min16float angle = min16float(dir) * rcp(float(dirSampleCount)) * TWO_PI +
                            randomAngle;
 
         float2 dirUV;
@@ -541,7 +552,7 @@ float CalcAO(UINT DepthLayerHeapIndex,
 
         min16float angleBias = g_AOBias;
         min16float topOcclusionAngle = 1e-4;
-        [unroll]
+        [unroll(6)]
         for (UINT step = 0; step < stepSampleCount; ++step)
         {
             min16float progress = (float(step) + jitter) * rcp(float(stepSampleCount));
@@ -665,6 +676,6 @@ float samplerBlueNoiseErrorDistribution_128x128_OptimizedFor_2d2d2d2d_1spp(
     value = value ^ ScramblingTileBuffer[(sampleDimension % 8) + (pixel_i + pixel_j * 128) * 8];
 
     // convert to float and return
-    float v = (0.5f + value) / 256.0f;
+    float v = (g_RandomSeed + value) / 256.0f;
     return v;
 }

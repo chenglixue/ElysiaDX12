@@ -91,7 +91,7 @@ void SSAO(uint3 dispatchThreadID: SV_DispatchThreadID)
 
     float radius = g_AORadius;
 
-    float2 WeightAccumulator = 0.0001f; // x: �ڵ����ף�y: ������Ȩ��
+    float2 WeightAccumulator = 0.0001f;
     [unroll(_AO_MAX_SAMPLE_COUNT)]
     for (UINT i = 0; i < g_AOSampleCount; i ++)
     {
@@ -99,17 +99,14 @@ void SSAO(uint3 dispatchThreadID: SV_DispatchThreadID)
         float2 randomDirUV = mul(rotationMatrix, unrotatedRandomDir);
         randomDirUV *= g_TargetSize.zw * g_TargetSize.xx;
 
-        // �������߽�
-        // ������Ļ�����
         float3 randomDirVS = float3(randomDirUV.x,
                                     randomDirUV.y, 0.0f);
-        float3 tangentVS = randomDirVS - normalVS * dot(randomDirVS, normalVS);
 
-        float maxSin = dot(tangentVS, normalVS) + sin(g_AOBias);
+        float maxSin = sin(g_AOBias);
         [unroll(_AO_MAX_SAMPLE_STEP_COUNT)]
-        for (UINT step = 0; step < g_AOSampleStepCount; ++step) // ÿ�������ڲ�����
+        for (UINT step = 0; step < g_AOSampleStepCount; ++step)
         {
-            float stepDistance = ((float)step + jitter + 1) / g_AOSampleStepCount; // ��������
+            float stepDistance = ((float)step + jitter + 1) / g_AOSampleStepCount;
             stepDistance *= stepDistance;
 
             //  world space to uv space
@@ -129,20 +126,17 @@ void SSAO(uint3 dispatchThreadID: SV_DispatchThreadID)
             float distSq = dot(v, v);
             float dist = sqrt(distSq);
 
-            // ����˥��
             float falloff = saturate(1.0 - distSq / (radius * radius));
 
             float3 V_norm = v / (dist + 1e-6);
             float sampleHorizonSin = dot(V_norm, normalVS);
 
-            // �����ǰ�߶Ƚǳ�����֪���ǣ������ڵ�
             if (sampleHorizonSin > maxSin)
             {
                 maxSin = lerp(maxSin, sampleHorizonSin, falloff);
             }
         }
 
-        // �ۼ��ڵ���Ȩ��
         float occlusion = Square(1.0 - saturate(maxSin));
         WeightAccumulator.x += occlusion;
         WeightAccumulator.y += 1;

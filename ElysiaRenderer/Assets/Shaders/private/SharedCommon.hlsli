@@ -87,6 +87,8 @@ cbuffer GlobalConstant : register(b0, perFrameSpace)
     UINT g_SobolBufferIndex;
     UINT g_ScramblingTileBufferIndex;
     UINT g_RankingTileBufferIndex;
+
+    float g_RandomSeed;
 };
 
 struct DX12Vertex

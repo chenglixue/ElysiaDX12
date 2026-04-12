@@ -223,7 +223,7 @@ float samplerBlueNoiseErrorDistribution_128x128_OptimizedFor_2d2d2d2d_1spp(
     value = value ^ ScramblingTileBuffer[(sampleDimension % 8) + (pixel_i + pixel_j * 128) * 8];
 
     // convert to float and return
-    float v = (0.5f + value) / 256.0f;
+    float v = (g_RandomSeed + value) / 256.0f;
     return v;
 }
 
@@ -267,7 +267,7 @@ inline float SobolPCF(float2 screenSize,
                       uint CSMIndex = 0)
 {
     float shadow = 0.0;
-    const UINT numSamples = 3;
+    const UINT numSamples = 9;
     SamplerComparisonState compShadowSampler = SamplerDescriptorHeap[ShadowClampLinearSampler];
     StructuredBuffer<int> SobolBuffer = ResourceDescriptorHeap[g_SobolBufferIndex];
 
@@ -280,12 +280,12 @@ inline float SobolPCF(float2 screenSize,
     [unroll]
     for (int i = 0; i < numSamples; i ++)
     {
-        uint sampleIdx = (frameIndex * numSamples + i) % 64;
-        uint sobol = sobolSequence[sampleIdx];
+        uint sampleIdx = (i + frameIndex) % 32;
+        float2 sobol = sobolSequence[sampleIdx];
 
         float2 samplePoint = frac(sobol + shift);
 
-        float2 offset = WarpToDisk(samplePoint);
+        float2 offset = (samplePoint);
         float2 sampleUV = shadowPos + offset * shadowMapSize.zw * shadowRadius;
         float sampleShadow = shadowTex.SampleCmpLevelZero(compShadowSampler, sampleUV, lightDepth);
 

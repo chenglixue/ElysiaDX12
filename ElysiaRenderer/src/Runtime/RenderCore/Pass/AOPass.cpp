@@ -59,8 +59,8 @@ namespace ElysiaRenderer
         m_ImportanceHeight = m_quarterHeight;
 
         m_HIZMipmapCount = UINT(std::floor(std::log2(std::max(
-            m_DeinterleavedDepthWidth,
-            m_DeinterleavedDepthHeight))));
+                               m_DeinterleavedDepthWidth,
+                               m_DeinterleavedDepthHeight)))) / 2;
 
         for (UINT i = 0; i < DEINTERLEAVED_DEPTH_COUNT; ++i)
         {
@@ -145,6 +145,8 @@ namespace ElysiaRenderer
 
         if (m_blurWeights.empty())
             m_blurWeights = GenerateBlurWeights(MAX_BLUR_RADIUS);
+
+        m_sobolSequences = Create2DSobolSqeuence(64);
     }
 
     void AOPass::Render(FrameContext& context)
@@ -385,7 +387,7 @@ namespace ElysiaRenderer
                               UserData::GetInstance().aoParameter.Bias,
                               passID);
         m_pMaterial->SetUINT(ShaderIDs::g_HIZMaxMipmap,
-                             MathHelper::Max(m_HIZMipmapCount - 1, UINT(0)),
+                             MathHelper::Max(m_HIZMipmapCount, UINT(0)),
                              passID);
         m_pMaterial->SetFloat4(ShaderIDs::g_TargetSize,
                                GetScreenSize(m_DeinterleavedAOWidth, m_DeinterleavedAOHeight),
@@ -647,11 +649,15 @@ namespace ElysiaRenderer
                                    m_cameraHeight / float(m_blueNoise.GetHeight())),
                                passID);
         m_pMaterial->SetUINT(ShaderIDs::g_HIZMaxMipmap,
-                             MathHelper::Max(m_HIZMipmapCount - 1, UINT(0)),
+                             MathHelper::Max(m_HIZMipmapCount, UINT(0)),
                              passID);
         m_pMaterial->SetUINT(ShaderIDs::g_AOImportanceTexIndex,
                              m_pImportanceRT->GetResourceHeapIndex(),
                              passID);
+        m_pMaterial->SetUINT(ShaderIDs::g_bImportance,
+                             UserData::GetInstance().aoParameter.debugTarget == AODebugTarget::Importance,
+                             passID);
+        m_pMaterial->SetVector2Array(ShaderIDs::g_SobolSequence, m_sobolSequences, passID);
 
         uint64_t frameIndex = context.frameIndex;
         bool isEvenFrame = (frameIndex % 2 == 0);

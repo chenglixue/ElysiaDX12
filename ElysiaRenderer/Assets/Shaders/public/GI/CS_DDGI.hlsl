@@ -109,6 +109,7 @@ void UpdateProbeStates(uint3 id : SV_DispatchThreadID)
     float hitDistances[RELOCATE_RAY_COUNT];
     StructuredBuffer<GIData> GIDataBuffer = ResourceDescriptorHeap[g_GIDataBufferIndex];
     RWStructuredBuffer<UINT> probeStateBuffer = ResourceDescriptorHeap[g_ProbeStatesIndex];
+    RWStructuredBuffer<float3> probeOffsetBuffer = ResourceDescriptorHeap[g_ProbeOffsetsIndex];
 
     for (int rayIndex = 0; rayIndex < RELOCATE_RAY_COUNT; rayIndex ++)
     {
@@ -127,11 +128,12 @@ void UpdateProbeStates(uint3 id : SV_DispatchThreadID)
         return;
     }
 
-    UINT2 probeOffsetIndexID = UINT2(probeIndex % 64, probeIndex / 64);
-    Texture2D<uint> g_ProbeOffsetIndexTex = ResourceDescriptorHeap[g_ProbeOffsetIndexTexIndex];
-    UINT index = g_ProbeOffsetIndexTex.Load(UINT3(probeOffsetIndexID, 0));
-    StructuredBuffer<float4> relocationLUT = ResourceDescriptorHeap[g_RelocationLUTIndex];
-    float3 probeOffset = relocationLUT[index];
+    // UINT2 probeOffsetIndexID = UINT2(probeIndex % 64, probeIndex / 64);
+    // Texture2D<uint> g_ProbeOffsetIndexTex = ResourceDescriptorHeap[g_ProbeOffsetIndexTexIndex];
+    // UINT index = g_ProbeOffsetIndexTex.Load(UINT3(probeOffsetIndexID, 0));
+    // StructuredBuffer<float4> relocationLUT = ResourceDescriptorHeap[g_RelocationLUTIndex];
+    // float3 probeOffset = relocationLUT[index];
+    float3 probeOffset = probeOffsetBuffer[probeIndex];
 
     float3 probePosWS = GetProbeWorldPosition(probeIndex, g_GridOrigin, g_GridSpacing, g_GridDimensions) + probeOffset;
     float probeSpacingMax = max(g_GridSpacing.x, max(g_GridSpacing.y, g_GridSpacing.z));
@@ -450,7 +452,7 @@ void ProbeIrradianceBlending(uint3 id : SV_DispatchThreadID,
         // 3. 计算全局采样坐标并写入
         uint2 globalCopyPos = GroupID.xy * N + copyLocalCoord;
 
-        // 同时缝合 Irradiance 和 Distance
+        // 缝合 Irradiance
         float3 borderIrr = Elysia_DDGI_LoadIrradiance(globalCopyPos).rgb;
 
         Elysia_DDGI_StoreIrradiance(id.xy, borderIrr);
@@ -504,9 +506,8 @@ void ProbeDepthBlending(uint3 id : SV_DispatchThreadID,
             float3 rayDir = g_RayDirection[rayIndex];
             float rayDistance = g_RayDistance[rayIndex];
 
-            // 方向越接近，权重越高
             float weight = max(0.f, dot(probeDirection, rayDir));
-            float distWeight = pow(weight, 26);
+            float distWeight = pow(weight, 50);
             float absDist = min(abs(rayDistance), probeMaxRayDistance);
             accumulatedDist += float2(absDist * distWeight, (absDist * absDist) * distWeight);
             distSumWeight += distWeight;
@@ -515,7 +516,7 @@ void ProbeDepthBlending(uint3 id : SV_DispatchThreadID,
         float distHysteresis = saturate(g_DDGIBlendWeight);
         float2 historyDist = Elysia_DDGI_LoadDist(id.xy);
 
-        float2 netDist = accumulatedDist / (max(distSumWeight, epsilon));
+        float2 netDist = accumulatedDist / (2.f * max(distSumWeight, epsilon));
 
         if (dot(historyDist, historyDist) == 0)
         {

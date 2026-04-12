@@ -53,7 +53,7 @@ FLightAccumulator AccumulateDynamicLighting(FInputParams inputData,
 
     float3 V = -inputData.ScreenVector;
     float3 N = GBufferData.WorldNormal;
-    N = inputData.NormalWS;
+    // N = inputData.NormalWS;
     float3 L = lightData.toLight;
     float3 MaskedLightColor = lightData.color * lightData.intensity;
 

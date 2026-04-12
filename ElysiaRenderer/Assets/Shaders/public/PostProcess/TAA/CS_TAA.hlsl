@@ -86,7 +86,7 @@ void TAA(uint3 id : SV_DispatchThreadID)
         // float2 closetUV = SampleClosestUV3x3(OpaqueDepthIndex, upSampleUV, g_TAATexSize.zw);
         float2 closetUV = 0.f;
         // include jitter
-        float2 downSampleJiiterPos = upSampleUV * g_DownSampleTexSize.xy + g_JitterPixels / g_UpScaleFactor;
+        float2 downSampleJiiterPos = upSampleUV * g_DownSampleTexSize.xy + g_JitterPixels;
         // 离downSamplePos最近的pixel中心
         float2 centerDownSamplePos = floor(downSampleJiiterPos) + 0.5f;
         // down sample pixel offset
@@ -105,7 +105,7 @@ void TAA(uint3 id : SV_DispatchThreadID)
                       m2,
                       closetUV);
 
-        float2 velocity = Elysia_Sample_Velocity(upSampleUV);
+        float2 velocity = Elysia_Sample_Velocity(closetUV);
         float2 preUV = upSampleUV - velocity;
         if (any(preUV < 0.f) || any(preUV > 1.f))
         {
@@ -124,7 +124,7 @@ void TAA(uint3 id : SV_DispatchThreadID)
         float velocityFactor = length(velocity) * g_TAATexSize.xy;
         float blendWeight = CalcTAAWeight(g_StaticBlendWeight, g_DynamicBlendWeight, g_MaxBlendWeight, velocityFactor);
         float spatialConfidence = ComputeTAAUWeight(posCenterToJitter, g_UpScaleFactor);
-        // blendWeight = saturate(blendWeight * (1.0f - spatialConfidence * 0.1f));
+        blendWeight = saturate(blendWeight * (1.0f - spatialConfidence * 0.1f));
 
         float3 blendColor = lerp(currColor, historyColor, blendWeight);
         blendColor = TransformYCoCg2RGB(blendColor);
