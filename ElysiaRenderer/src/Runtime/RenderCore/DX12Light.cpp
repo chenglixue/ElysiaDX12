@@ -101,7 +101,7 @@ namespace ElysiaRenderer
         }
         case ShadowQuality::VeryHigh:
         {
-            resolution = 4096;
+            resolution = 4096 * 2;
             break;
         }
         default:
