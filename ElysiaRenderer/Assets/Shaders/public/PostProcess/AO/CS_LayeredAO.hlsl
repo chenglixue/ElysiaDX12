@@ -62,8 +62,8 @@ cbuffer PassConstant : register(b0, perPassSpace)
     float2 g_SobolSequence[64];
 }
 
-static const UINT ELYSIA_HBAO_BASE_SAMPLE_COUNT = 2;
-static const UINT ELYSIA_HBAO_MAX_SAMPLE_COUNT = 4;
+static const UINT ELYSIA_HBAO_BASE_SAMPLE_COUNT = 4;
+static const UINT ELYSIA_HBAO_MAX_SAMPLE_COUNT = 6;
 static const UINT ELYSIA_HBAO_BASE_STEP_SAMPLE_COUNT = 4;
 static const UINT ELYSIA_HBAO_MAX_STEP_SAMPLE_COUNT = 6;
 static const UINT ELYSIA_HBAO_FLEXIBLE_COUNT =

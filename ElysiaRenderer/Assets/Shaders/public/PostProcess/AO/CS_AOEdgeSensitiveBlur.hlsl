@@ -40,11 +40,11 @@ min16float4 UnpackEdges(min16float _packedVal)
 void AOEdgeSensitiveBlur(uint3 id : SV_DispatchThreadID)
 {
     UINT layerIndex = g_ActiveLayerIndex;
-    UINT AOIndex = g_SourceTexIndices[layerIndex];
+    UINT AOIndex = g_BlurTexIndex;
     // RWTexture2D<float2> o = ResourceDescriptorHeap[g_TargetTexIndices[layerIndex]];
 
     // UINT AOIndex = g_ReinterleaveAOTexIndex;
-    UINT BlurIndex = g_TargetTexIndices[layerIndex];
+    UINT BlurIndex = g_BlurTexIndex;
 
     min16float2 centerData = LoadTexture2D(AOIndex, id);
     min16float centerAO = centerData.r;
