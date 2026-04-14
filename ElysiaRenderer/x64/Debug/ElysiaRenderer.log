@@ -1,5 +1,47 @@
 ﻿  Skipping vcpkg. (no packages)
 cl : command line  warning D9014: invalid value '18' for '/wd'; assuming '5999'
+  DX12Light.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/DX12Light.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/DX12Light.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/DX12Light.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/DX12Light.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\DX12Light.cpp(43,21): warning C4305: 'argument': truncation from 'double' to 'float'
+  (compiling source file '/src/Runtime/RenderCore/DX12Light.cpp')
+  
+  DX12Shadow.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/DX12Shadow.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/DX12Shadow.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/DX12Shadow.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/DX12Shadow.cpp')
+  
+  LightManager.cpp
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/LightManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/LightManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/LightManager.cpp')
+  
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/RenderCore/LightManager.cpp')
+  
   AOPass.cpp
 D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
   (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
@@ -286,6 +328,7 @@ D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(975,69)
 D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(996,30): warning C4018: '<': signed/unsigned mismatch
   (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
   
+  Generating Code...
   ElysiaRenderer.vcxproj -> D:\DX12\ElysiaDX12\x64\Debug\ElysiaRenderer.exe
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\ABeautifulGame\ABeautifulGame.bin
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\ABeautifulGame\ABeautifulGame.gltf

@@ -11,7 +11,7 @@ Duration ：0.08ms
 
 ## Deinterleaved HBAO+
 
-![](https://pic1.imgdb.cn/item/69dc9af8f26639441e6a71ee.png)
+![](https://pic1.imgdb.cn/item/69de4d7af76f4dd14b4984cb.png)
 Duration ：0.53ms
 ![](https://pic1.imgdb.cn/item/69dc9b1df26639441e6a721f.png)
 
