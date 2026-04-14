@@ -4,7 +4,7 @@ Environment：2922 * 1311 Resolutions，GPU 3080
 
 ## One Sample PCF Shadow
 
-![](https://pic1.imgdb.cn/item/69dc9616f26639441e6a6ba0.png)
+![](https://pic1.imgdb.cn/item/69de34c5f76f4dd14b48cd7d.png)
 
 Duration ：0.08ms
 ![](https://pic1.imgdb.cn/item/69dc97c4f26639441e6a6dac.png)
