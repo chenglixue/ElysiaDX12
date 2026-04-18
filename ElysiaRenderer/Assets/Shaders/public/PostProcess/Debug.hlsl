@@ -67,6 +67,10 @@ GIData Elysia_DDGI_LoadRayData(uint readIndex)
 #define DEBUG_VELOCITY 6
 #define DEBUG_GI 7
 #define DEBUG_SHADOW_MASK 8
+#define DEBUG_ALBEDO 9
+#define DEBUG_EMISSION 10
+#define DEBUG_METALLIC 11
+#define DEBUG_ROUGHNESS 12
 
 struct VSInput
 {
@@ -205,6 +209,10 @@ PSInput VS(VSInput i, UINT vertexID : SV_VertexID, uint instanceID : SV_Instance
     case DEBUG_VELOCITY:
     case DEBUG_GI:
     case DEBUG_SHADOW_MASK:
+    case DEBUG_ALBEDO:
+    case DEBUG_EMISSION:
+    case DEBUG_METALLIC:
+    case DEBUG_ROUGHNESS:
     case DEBUG_NORMAL:
         o.uv = float2((vertexID << 1) & 2, vertexID & 2);
         o.positionCS = float4(o.uv.x * 2.0f - 1.0f, 1.0f - o.uv.y * 2.0f, 0.0f, 1.0f);
@@ -249,6 +257,30 @@ PSOutput PS(PSInput i)
     {
         float2 velocity = SampleTexture2D(GBuffer5Index, screenUV, ClampPointSampler).rg;
         o.target0 = float4(velocity, 0.f, 1.f);
+        break;
+    }
+    case DEBUG_EMISSION:
+    {
+        float4 emission = SampleTexture2D(GBuffer4Index, screenUV, ClampPointSampler);
+        o.target0 = emission;
+        break;
+    }
+    case DEBUG_ALBEDO:
+    {
+        float4 albedo = SampleTexture2D(GBuffer0Index, screenUV, ClampPointSampler);
+        o.target0 = albedo;
+        break;
+    }
+    case DEBUG_ROUGHNESS:
+    {
+        float4 albedo = SampleTexture2D(GBuffer1Index, screenUV, ClampPointSampler);
+        o.target0 = albedo.b;
+        break;
+    }
+    case DEBUG_METALLIC:
+    {
+        float4 albedo = SampleTexture2D(GBuffer1Index, screenUV, ClampPointSampler);
+        o.target0 = albedo.r;
         break;
     }
     case DEBUG_GIPROBE:

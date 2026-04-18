@@ -146,11 +146,12 @@ namespace ElysiaRenderer
             float metallicIntensity;
 
             Vector4 baseColorTint;
+            Vector4 emissionColorTint;
 
             float roughnessIntensity;
             float normalIntensity;
-            UINT vertexOffset;
-            UINT indexOffset;
+            UINT emissionColorIndex;
+            float specular;
         };
         struct alignas(16) IndirectCommand
         {

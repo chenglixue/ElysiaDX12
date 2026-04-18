@@ -97,7 +97,7 @@ void SphereMaxNoH(inout BxDFContext Context, float SinAlpha, bool bNewtonIterati
 }
 
 
-// ----------------------------------------------------------------------- Diffuse
+// ----------------------------------------------------------------------- Diffuses
 float3 Diffuse_Lambert(float3 DiffuseColor)
 {
     return DiffuseColor * (1. / PI);
@@ -335,6 +335,12 @@ float3 UE_F_Schlick(float3 SpecularColor, float VoH)
     // Anything less than 2% is physically impossible and is instead considered to be shadowing
     return saturate(50.0 * SpecularColor.g) * Fc + (1. - Fc) * SpecularColor;
 }
+
+float3 F_Schlick(float u, float3 f0)
+{
+    return f0 + (1.f - f0) * pow(1.0 - u, 5.0);
+}
+
 
 float3 F_Schlick(float3 F0, float3 F90, float VoH)
 {

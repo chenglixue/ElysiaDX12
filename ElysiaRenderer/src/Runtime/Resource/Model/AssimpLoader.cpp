@@ -1063,15 +1063,18 @@ namespace ElysiaModel
                 textureFileName = ddsFileName;
 
                 std::wstring fullPath;
+                WCHAR assetsPath[512];
+                GetAssetsPath(assetsPath, _countof(assetsPath));
 
-                if (textureFileName.empty())
+                if (material.textureNames[texType].empty())
                 {
-                    // 如果 glTF 没提供该贴图，根据类型分配默认兜底图
-                    fullPath = fileDirectory;
+                    fullPath = assetsPath;
                     switch (static_cast<MaterialTextureType>(texType))
                     {
                     case MaterialTextureType::Albedo:
+                    case MaterialTextureType::Emissive:
                     case MaterialTextureType::Roughness:
+                    case MaterialTextureType::Metallic:
                     case MaterialTextureType::Occlusion:
                         fullPath += ElysiaRenderer::DefaultWhiteTexturePath;
                         break;
@@ -1405,7 +1408,7 @@ namespace ElysiaModel
                     elysiaMat.textureNames[(int)MaterialTextureType::Occlusion] =
                         ElysiaRenderer::DefaultWhiteTexturePath;
                     elysiaMat.textureNames[(int)MaterialTextureType::Emissive] =
-                        ElysiaRenderer::DefaultBlackTexturePath;
+                        ElysiaRenderer::DefaultWhiteTexturePath;
                     elysiaMat.textureNames[(int)MaterialTextureType::Height] = ElysiaRenderer::DefaultBlackTexturePath;
                     elysiaMat.textureNames[(int)MaterialTextureType::Specular] =
                         ElysiaRenderer::DefaultBlackTexturePath;

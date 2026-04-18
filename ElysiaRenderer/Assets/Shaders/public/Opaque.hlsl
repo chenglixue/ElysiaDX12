@@ -148,9 +148,10 @@ PSOutput PS(PSInput i)
                                 g_ProbeStatesIndex,
                                 WarpLinearSampler
                          ) * g_AmbientTint * g_AmbientIntensity * blendWeight;
-        IBL *= (GBufferData.BaseColor.rgb) / PI;
+        IBL *= (GBufferData.DiffuseColor.rgb) / PI;
         lighting += float4(IBL, 1.f) * AO;
     }
+    lighting.rgb += GBufferData.SceneColor * AO;
 
     switch (g_DebugMode)
     {

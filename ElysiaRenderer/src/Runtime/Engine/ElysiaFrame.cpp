@@ -537,9 +537,11 @@ namespace ElysiaEngine
                               ImGuiColorEditFlags_HDR);
             ImGui::SliderFloat("Opacity", &pUserData.Opacity, 0.f, 1.f);
             ImGui::SliderFloat("Cutoff", &pUserData.Cutoff, 0.f, 1.f);
-            ImGui::SliderFloat("Normal Intensity", &pUserData.NormalIntensity, 0.f, 5.f);
-            ImGui::SliderFloat("Metallic Intensity", &pUserData.MetallicIntensity, 0.f, 5.f);
-            ImGui::SliderFloat("Roughness Intensity", &pUserData.RoughnessIntensity, 0.f, 5.f);
+            ImGui::SliderFloat("Normal Intensity", &pUserData.NormalIntensity, 0.f, 2.f);
+            ImGui::SliderFloat("Metallic Intensity", &pUserData.MetallicIntensity, 0.f, 1.f);
+            ImGui::SliderFloat("Roughness Intensity", &pUserData.RoughnessIntensity, 0.f, 1.f);
+            ImGui::SliderFloat("Specular", &pUserData.Specular, 0.f, 1.f);
+            ImGui::ColorEdit3("Emission Tint", (float*)&pUserData.EmissionTint);
             ImGui::SliderFloat("Ambient Cubemap Intensity",
                                &pUserData.AmbientCubemapIntensity,
                                0.f,

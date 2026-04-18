@@ -72,11 +72,12 @@ struct MeshData
     float metallicIntensity;
 
     Vector4 baseColorTint;
+    Vector4 emissionColorTint;
 
     float roughnessIntensity;
     float normalIntensity;
-    UINT vertexOffset;
-    UINT indexOffset;
+    UINT emissionColorIndex;
+    float specular;
 };
 
 struct VSInput
@@ -185,7 +186,7 @@ FEncodeGBufferData GetEncodeGBufferData(FInputParams inputParams, float3 toLight
                                             g_MipBias)
                        * float4(currMeshData.baseColorTint.xyz, currMeshData.opacity);
     float ditherClip = ComputeTemporalDither(inputParams.PixelPos, frameIndex);
-    clip(baseColor.a - 0.5f + (ditherClip - 0.5f) * 0.1);
+    //clip(baseColor.a - 0.5f + (ditherClip - 0.5f) * 0.1);
 
     float4 normalTS = SampleTexture2D_Bias(currMeshData.normalTexIndex,
                                            inputParams.objectUV,
@@ -195,14 +196,14 @@ FEncodeGBufferData GetEncodeGBufferData(FInputParams inputParams, float3 toLight
     float metallic = SampleTexture2D_Bias(currMeshData.metallicTexIndex,
                                           inputParams.objectUV,
                                           WarpLinearSampler,
-                                          g_MipBias);
-    metallic = saturate(metallic * currMeshData.metallicIntensity);
+                                          g_MipBias).r;
+    metallic = saturate(currMeshData.metallicIntensity);
 
     float roughness = SampleTexture2D_Bias(currMeshData.roughnessTexIndex,
                                            inputParams.objectUV,
                                            WarpLinearSampler,
-                                           g_MipBias);
-    roughness = saturate(roughness * currMeshData.roughnessIntensity);
+                                           g_MipBias).g;
+    roughness = saturate(currMeshData.roughnessIntensity);
 
     o.BaseColor = baseColor.rgb;
     o.ShadingModelID = FLT_MAX;
@@ -212,7 +213,7 @@ FEncodeGBufferData GetEncodeGBufferData(FInputParams inputParams, float3 toLight
     o.AO = 1;
     o.Metallic = metallic;
     o.Roughness = roughness;
-    o.Specular = 0.04f;
+    o.Specular = currMeshData.specular * 0.08f;
 
     o.WorldNormal = GetNormal(normalTS.rgb, TBN, currMeshData.normalIntensity);
     o.WorldTangent = TBN._m00_m01_m02;
@@ -232,6 +233,10 @@ FEncodeGBufferData GetEncodeGBufferData(FInputParams inputParams, float3 toLight
     o.Anisotropy = 0;
     o.DiffuseColor = o.BaseColor - o.BaseColor * o.Metallic;
     o.SpecularColor = ComputeF0(o.Specular, o.BaseColor, o.Metallic);
+    o.IBL = SampleTexture2D_Bias(currMeshData.emissionColorIndex,
+                                 inputParams.objectUV,
+                                 WarpLinearSampler,
+                                 g_MipBias) * currMeshData.emissionColorTint;
 
     // float blendWeight = DDGIGetVolumeBlendWeight(inputParams.PositionWS,
     //                                              g_GridOrigin,

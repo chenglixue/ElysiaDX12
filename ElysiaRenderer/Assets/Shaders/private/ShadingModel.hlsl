@@ -33,15 +33,16 @@ float3 SpecularGGX(float Roughness,
                    float3 SpecularColor,
                    BxDFContext Context,
                    half NoL,
+                   float HoL,
                    FAreaLight AreaLight)
 {
     float3 o = 0.f;
 
-    float a2 = Pow4(max(Roughness, 0.02f));
+    float a2 = Pow2(max(Roughness, 0.02f));
 
     float NDF = D_GGX(a2, Context.NoH);
     float Vis = Vis_SmithJointApprox(a2, Context.NoV, NoL);
-    float F = UE_F_Schlick(SpecularColor, Context.VoH);
+    float F = F_Schlick(SpecularColor, Context.VoH);
 
     o = NDF * F * Vis;
 
@@ -141,29 +142,28 @@ FDirectLighting DefaultLitBxDF(FDecodeGBufferData GBufferData,
     BxDFContext Context = (BxDFContext)0;
 
     Init(Context, N, V, L);
-    float NoV, VoH, NoH;
-    NoV = Context.NoV;
-    VoH = Context.VoH;
-    NoH = Context.NoH;
+    // float NoV, VoH, NoH;
+    // NoV = Context.NoV;
+    // VoH = Context.VoH;
+    // NoH = Context.NoH;
+    float3 h = normalize(V + L);
+    float NoV = abs(dot(N, V)) + 1e-5;
+    NoL = clamp(dot(N, L), 0.0, 1.0);
+    float NoH = clamp(dot(N, h), 0.0, 1.0);
+    float LoH = clamp(dot(L, h), 0.0, 1.0);
 
     //SphereMaxNoH(Context, AreaLight.SphereSinAlpha, true);
     Context.NoV = saturate(abs(Context.NoV) + 1e-5);
 
-    float3 KD = (1 - UE_F_Schlick(GBufferData.SpecularColor, Context.VoH)) * (
-                    1 - GBufferData.Metallic);
-    Lighting.Diffuse = Diffuse_Chan(GBufferData.DiffuseColor,
-                                    Pow4(GBufferData.Roughness),
-                                    NoV,
-                                    NoL,
-                                    VoH,
-                                    NoH,
-                                    GetAreaLightDiffuseMicroReflWeight(AreaLight));
+    float3 KD = 1 - UE_F_Schlick(GBufferData.SpecularColor, Context.VoH);
+    Lighting.Diffuse = Diffuse_Lambert(GBufferData.DiffuseColor);
     Lighting.Diffuse *= AreaLight.FalloffColor * Falloff * NoL * KD;
 
     Lighting.Specular = SpecularGGX(GBufferData.Roughness,
                                     GBufferData.SpecularColor,
                                     Context,
                                     NoL,
+                                    LoH,
                                     AreaLight);
     Lighting.Specular *= AreaLight.FalloffColor * Falloff * NoL;
 

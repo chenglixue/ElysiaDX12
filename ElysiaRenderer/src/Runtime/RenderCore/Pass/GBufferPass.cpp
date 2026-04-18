@@ -124,7 +124,7 @@ namespace ElysiaRenderer
         for (const auto& pRenderItem : context.renderList)
         {
             auto pEntity = pRenderItem.pAssociatedEntity;
-            if (viewFrustum.Contains(pEntity->GetWorldAABB()) != DISJOINT)
+            //if (viewFrustum.Contains(pEntity->GetWorldAABB()) != DISJOINT)
             {
                 m_cullRenderList.emplace_back(pRenderItem);
             }
@@ -367,11 +367,12 @@ namespace ElysiaRenderer
                 .metallicIntensity = UserData::GetInstance().MetallicIntensity,
 
                 .baseColorTint = UserData::GetInstance().BaseColorTint,
+                .emissionColorTint = UserData::GetInstance().EmissionTint,
 
                 .roughnessIntensity = UserData::GetInstance().RoughnessIntensity,
                 .normalIntensity = UserData::GetInstance().NormalIntensity,
-                .vertexOffset = renderItems[i].baseVertex,
-                .indexOffset = renderItems[i].startIndex
+                .emissionColorIndex = textureIndices.Emissive,
+                .specular = UserData::GetInstance().Specular
             };
             m_meshDatas.emplace_back(meshData);
         }
@@ -882,6 +883,8 @@ namespace ElysiaRenderer
             .isRawAccess = false,
             .InitData = m_instanceCpuData.data()
         };
+        if (instanceDataDesc.size == 0)
+            return;
         if (instanceDataBuffer)
             BufferManager::GetInstance().DestoryBuffer(instanceDataBuffer);
         instanceDataBuffer = BufferManager::GetInstance().CreateBuffer(instanceDataDesc);

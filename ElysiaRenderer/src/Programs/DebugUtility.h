@@ -13,7 +13,11 @@ namespace ElysiaRenderer
         Bloom,
         Velocity,
         GI,
-        ShadowMask
+        ShadowMask,
+        Albedo,
+        Emission,
+        Metallic,
+        Roughness
     };
     NLOHMANN_JSON_SERIALIZE_ENUM(DebugMode,
                                  {
@@ -34,6 +38,14 @@ namespace ElysiaRenderer
                                  {DebugMode::GI,
                                  "GI"},
                                  { DebugMode::ShadowMask,
-                                 "ShadowMask" }
+                                 "ShadowMask" },
+                                 { DebugMode::Albedo,
+                                 "Albedo" },
+                                 { DebugMode::Emission,
+                                 "Emission" },
+                                 { DebugMode::Metallic,
+                                 "Metallic" },
+                                 { DebugMode::Roughness,
+                                 "Roughness" }
                                  })
 }

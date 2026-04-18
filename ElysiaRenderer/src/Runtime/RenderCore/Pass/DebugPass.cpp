@@ -229,6 +229,10 @@ namespace ElysiaRenderer
             break;
         }
         case DebugMode::Velocity:
+        case DebugMode::Albedo:
+        case DebugMode::Emission:
+        case DebugMode::Metallic:
+        case DebugMode::Roughness:
         case DebugMode::Normal:
         {
             Vector2 renderSize = Vector2(std::floor(

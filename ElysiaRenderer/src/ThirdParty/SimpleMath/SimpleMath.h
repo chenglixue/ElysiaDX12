@@ -245,6 +245,14 @@ namespace DirectX
             Vector2 xz() const noexcept { return Vector2(x, z); }
             Vector2 zx() const noexcept { return Vector2(z, x); }
 
+            float operator[](size_t index) const noexcept {
+                return (&x)[index];
+            }
+
+            float& operator[](size_t index) noexcept {
+                return (&x)[index];
+            }
+
             operator XMVECTOR() const noexcept { return XMLoadFloat3(this); }
 
             // Comparison operators

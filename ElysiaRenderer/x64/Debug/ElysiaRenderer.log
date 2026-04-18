@@ -1,335 +1,32 @@
 ﻿  Skipping vcpkg. (no packages)
 cl : command line  warning D9014: invalid value '18' for '/wd'; assuming '5999'
-  DX12Light.cpp
+  AssimpLoader.cpp
 D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/DX12Light.cpp')
+  (compiling source file '/src/Runtime/Resource/Model/AssimpLoader.cpp')
   
 D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/DX12Light.cpp')
+  (compiling source file '/src/Runtime/Resource/Model/AssimpLoader.cpp')
   
 D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/DX12Light.cpp')
+  (compiling source file '/src/Runtime/Resource/Model/AssimpLoader.cpp')
   
 D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/DX12Light.cpp')
+  (compiling source file '/src/Runtime/Resource/Model/AssimpLoader.cpp')
   
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\DX12Light.cpp(43,21): warning C4305: 'argument': truncation from 'double' to 'float'
-  (compiling source file '/src/Runtime/RenderCore/DX12Light.cpp')
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\Resource\Model\AssimpLoader.cpp(1167,38): warning C4267: 'initializing': conversion from 'size_t' to 'uint32_t', possible loss of data
+  (compiling source file '/src/Runtime/Resource/Model/AssimpLoader.cpp')
   
-  DX12Shadow.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/DX12Shadow.cpp')
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\Resource\Model\AssimpLoader.cpp(1309,37): warning C4267: 'initializing': conversion from 'size_t' to 'uint32_t', possible loss of data
+  (compiling source file '/src/Runtime/Resource/Model/AssimpLoader.cpp')
   
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/DX12Shadow.cpp')
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\Resource\Model\AssimpLoader.cpp(1335,70): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+  (compiling source file '/src/Runtime/Resource/Model/AssimpLoader.cpp')
   
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/DX12Shadow.cpp')
+D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\Resource\Model\AssimpLoader.cpp(1431,60): warning C4244: '=': conversion from 'const double' to 'float', possible loss of data
+  (compiling source file '/src/Runtime/Resource/Model/AssimpLoader.cpp')
   
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/DX12Shadow.cpp')
-  
-  LightManager.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/LightManager.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/LightManager.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/LightManager.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/LightManager.cpp')
-  
-  AOPass.cpp
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,31): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(13,24): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,31): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Programs\Common.h(18,24): warning C4244: 'argument': conversion from 'UINT64' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(46,35): warning C4244: '=': conversion from 'float' to 'UINT', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(47,36): warning C4244: '=': conversion from 'float' to 'UINT', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(252,91): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(251,91): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(250,91): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(249,91): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(260,91): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(259,91): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(258,91): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(257,91): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(275,45): warning C4244: 'argument': conversion from 'UINT64' to 'uint32_t', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(276,45): warning C4244: 'argument': conversion from 'UINT64' to 'uint32_t', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(323,95): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(322,95): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(321,95): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(320,95): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(402,66): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(402,66): warning C4244:         with
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(402,66): warning C4244:         [
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(402,66): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(402,66): warning C4244:         ]
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(401,66): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(401,66): warning C4244:         with
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(401,66): warning C4244:         [
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(401,66): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(401,66): warning C4244:         ]
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(400,66): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(400,66): warning C4244:         with
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(400,66): warning C4244:         [
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(400,66): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(400,66): warning C4244:         ]
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(399,66): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(399,66): warning C4244:         with
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(399,66): warning C4244:         [
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(399,66): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(399,66): warning C4244:         ]
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(408,88): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(407,88): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(406,88): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(405,88): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(488,74): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(488,74): warning C4244:         with
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(488,74): warning C4244:         [
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(488,74): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(488,74): warning C4244:         ]
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(487,74): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(487,74): warning C4244:         with
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(487,74): warning C4244:         [
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(487,74): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(487,74): warning C4244:         ]
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(486,74): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(486,74): warning C4244:         with
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(486,74): warning C4244:         [
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(486,74): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(486,74): warning C4244:         ]
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(485,74): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(485,74): warning C4244:         with
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(485,74): warning C4244:         [
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(485,74): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(485,74): warning C4244:         ]
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(634,66): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(634,66): warning C4244:         with
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(634,66): warning C4244:         [
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(634,66): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(634,66): warning C4244:         ]
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(633,66): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(633,66): warning C4244:         with
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(633,66): warning C4244:         [
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(633,66): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(633,66): warning C4244:         ]
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(632,66): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(632,66): warning C4244:         with
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(632,66): warning C4244:         [
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(632,66): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(632,66): warning C4244:         ]
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(631,66): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(631,66): warning C4244:         with
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(631,66): warning C4244:         [
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(631,66): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(631,66): warning C4244:         ]
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(640,88): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(639,88): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(638,88): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(637,88): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(728,28): warning C4018: '<': signed/unsigned mismatch
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(734,58): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(734,58): warning C4244:         with
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(734,58): warning C4244:         [
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(734,58): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(734,58): warning C4244:         ]
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(733,58): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(733,58): warning C4244:         with
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(733,58): warning C4244:         [
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(733,58): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(733,58): warning C4244:         ]
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(732,58): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(732,58): warning C4244:         with
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(732,58): warning C4244:         [
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(732,58): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(732,58): warning C4244:         ]
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(731,58): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(731,58): warning C4244:         with
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(731,58): warning C4244:         [
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(731,58): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(731,58): warning C4244:         ]
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(740,59): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(740,59): warning C4244:         with
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(740,59): warning C4244:         [
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(740,59): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(740,59): warning C4244:         ]
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(739,59): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(739,59): warning C4244:         with
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(739,59): warning C4244:         [
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(739,59): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(739,59): warning C4244:         ]
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(738,59): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(738,59): warning C4244:         with
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(738,59): warning C4244:         [
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(738,59): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(738,59): warning C4244:         ]
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(737,59): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(737,59): warning C4244:         with
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(737,59): warning C4244:         [
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(737,59): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(737,59): warning C4244:         ]
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(743,42): warning C4244: 'argument': conversion from 'double' to 'unsigned int', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(826,70): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(826,70): warning C4244:         with
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(826,70): warning C4244:         [
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(826,70): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(826,70): warning C4244:         ]
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(825,70): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(825,70): warning C4244:         with
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(825,70): warning C4244:         [
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(825,70): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(825,70): warning C4244:         ]
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(824,70): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(824,70): warning C4244:         with
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(824,70): warning C4244:         [
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(824,70): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(824,70): warning C4244:         ]
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(823,70): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(823,70): warning C4244:         with
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(823,70): warning C4244:         [
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(823,70): warning C4244:             _Ty=std::seed_seq::result_type
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(823,70): warning C4244:         ]
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(832,92): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(831,92): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(830,92): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(829,92): warning C4244: 'argument': conversion from 'UINT' to 'float', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(856,63): warning C4244: 'argument': conversion from 'UINT64' to 'uint32_t', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(857,64): warning C4244: 'argument': conversion from 'UINT64' to 'uint32_t', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(974,68): warning C4244: 'argument': conversion from 'UINT64' to 'uint32_t', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(975,69): warning C4244: 'argument': conversion from 'UINT64' to 'uint32_t', possible loss of data
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(996,30): warning C4018: '<': signed/unsigned mismatch
-  (compiling source file '/src/Runtime/RenderCore/Pass/AOPass.cpp')
-  
-  Generating Code...
   ElysiaRenderer.vcxproj -> D:\DX12\ElysiaDX12\x64\Debug\ElysiaRenderer.exe
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\ElysiaRenderer.lnk
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\ABeautifulGame\ABeautifulGame.bin
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\ABeautifulGame\ABeautifulGame.gltf
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\ABeautifulGame\bishop_black_base_color.jpg
@@ -508,6 +205,12 @@ D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(996,30)
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\texconv.exe
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\white.dds
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Sponza\white.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Suzanne\Suzanne.bin
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Suzanne\Suzanne.gltf
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Suzanne\Suzanne_BaseColor.dds
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Suzanne\Suzanne_BaseColor.png
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Suzanne\Suzanne_MetallicRoughness.dds
+  D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\glTF\Suzanne\Suzanne_MetallicRoughness.png
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Mesh\LOW_WEPON.fbx
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Mesh\plane.fbx
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Mesh\Sphere.fbx
@@ -665,4 +368,4 @@ D:\DX12\ElysiaDX12\ElysiaRenderer\src\Runtime\RenderCore\Pass\AOPass.cpp(996,30)
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Tex\RandomNormalTexture.png
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Tex\texconv.exe
   D:\DX12\ElysiaDX12\ElysiaRenderer\Assets\Tex\White.png
-  复制了 335 个文件
+  复制了 342 个文件
