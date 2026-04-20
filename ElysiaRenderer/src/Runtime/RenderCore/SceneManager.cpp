@@ -45,16 +45,19 @@ namespace ElysiaRenderer
         WCHAR assetsPath[512];
         GetAssetsPath(assetsPath, _countof(assetsPath));
 
-        std::vector<std::shared_ptr<LoadedModel>> loadedModels;
-        for (const auto& modelPath : g_ModelPaths)
+        if (loadStage == 0)
         {
-            loadedModels.emplace_back(
-                std::move(CreateModel(ElysiaHelper::GetAssetFullPath(assetsPath, modelPath))));
+            m_pendingModels.clear();
+            for (const auto& modelPath : g_ModelPaths)
+            {
+                m_pendingModels.emplace_back(
+                    std::move(CreateModel(ElysiaHelper::GetAssetFullPath(assetsPath, modelPath))));
+            }
         }
-
+        
         if (loadStage == 6)
         {
-            for (auto& loadedModel : loadedModels)
+            for (auto& loadedModel : m_pendingModels)
             {
                 CreateEntityFromModel(loadedModel);
             }

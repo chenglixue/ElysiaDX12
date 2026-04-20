@@ -106,6 +106,7 @@ namespace ElysiaCore
             return &m_agsGPUInfo;
         }
         ID3D12CommandQueue* GetDirectQueue() const noexcept;
+        ID3D12CommandQueue* GetCopyQueue() const noexcept;
 
         std::unique_ptr<DX12GraphicsContext> CreateGraphicsContext();
         std::unique_ptr<DX12Shader> CreateShader(ShaderCreateDesc& shaderCreateDesc);

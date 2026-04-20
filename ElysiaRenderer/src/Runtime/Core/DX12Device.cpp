@@ -1238,6 +1238,10 @@ namespace ElysiaCore
     {
         return m_graphicsQueue->GetCommandQueue();
     }
+    ID3D12CommandQueue* DX12Device::GetCopyQueue() const noexcept
+    {
+        return m_copyQueue->GetCommandQueue();
+    }
     void DX12Device::GetDeviceInfo(std::string* deviceName, std::string* driverVersion)
     {
         DXGI_ADAPTER_DESC adapterDescription;

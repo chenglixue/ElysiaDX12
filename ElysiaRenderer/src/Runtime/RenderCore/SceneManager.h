@@ -78,5 +78,6 @@ namespace ElysiaRenderer
 
         std::mutex m_mutex;
         std::vector<std::unique_ptr<Entity>> m_entities;
+        std::vector<std::shared_ptr<ElysiaModel::LoadedModel>> m_pendingModels;
     };
 }

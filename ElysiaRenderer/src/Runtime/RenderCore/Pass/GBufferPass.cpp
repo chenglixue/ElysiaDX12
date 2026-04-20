@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "GBufferPass.h"
 
+#include "PreDrawPass.h"
 #include "GIPass.h"
 #include "Editor/UserData.h"
 #include "Programs/PIXHelper.h"
@@ -132,6 +133,7 @@ namespace ElysiaRenderer
 
         UpdateTAAMatrices();
         UploadMeshData(m_cullRenderList);
+        DoPreIntegrateSSSLUT();
         CopyDepth();
         DoHIZ();
         ClearCounterBuffer();
@@ -261,7 +263,7 @@ namespace ElysiaRenderer
         UpdateCSVariant(CS_GBuffer_HIZ);
         UpdateCSVariant(CS_CLEAR_COUNTER_BUFFER);
         UpdateCSVariant(CS_GBUFFER_CULLING_PASS);
-
+        UpdateCSVariant(CS_PRE_INTEGRATE_SSS);
     }
     void GBufferPass::UpdateGBufferPassVariant(UINT passIndex)
     {
@@ -357,7 +359,7 @@ namespace ElysiaRenderer
                 .world_M = renderItems[i].worldMatrix,
 
                 .opacity = materialData.opacity,
-                .cutoff = 0.5,
+                .cutoff = UserData::GetInstance().Cutoff,
                 .baseColorTexIndex = textureIndices.Albedo,
                 .normalTexIndex = textureIndices.Normal,
 
@@ -372,7 +374,9 @@ namespace ElysiaRenderer
                 .roughnessIntensity = UserData::GetInstance().RoughnessIntensity,
                 .normalIntensity = UserData::GetInstance().NormalIntensity,
                 .emissionColorIndex = textureIndices.Emissive,
-                .specular = UserData::GetInstance().Specular
+                .specular = UserData::GetInstance().Specular,
+
+                .shadingModelID = (int)UserData::GetInstance().shadingModelID
             };
             m_meshDatas.emplace_back(meshData);
         }
@@ -420,6 +424,65 @@ namespace ElysiaRenderer
         memcpy(m_uploads[1]->pBufferData.get(),
                m_indirectCommands.data(),
                Max_RenderItem_Count * sizeof(IndirectCommand));
+    }
+
+    void GBufferPass::DoPreIntegrateSSSLUT()
+    {
+        auto passID = CS_PRE_INTEGRATE_SSS;
+        auto& passData = m_pMaterial->GetPassData(passID);
+        auto passName = passData.Name.c_str();
+        PIXHelper pix(m_pCommand->GetCommandList(), passName);
+
+        PipelineInfo pipelineStateData{};
+        pipelineStateData.m_pipelineStateObject = passData.pPipelineStateObject;
+        m_pCommand->SetPipeline(pipelineStateData);
+        SetSpaceResource(passData, PER_FRAME_SPACE);
+
+        auto targetRT = PreDrawPass::m_pPreIntegrateSSSLUT;
+        m_pCommand->AddBarrier(targetRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+        {
+            m_pMaterial->SetUINT(ShaderIDs::g_PreIntegrateSSSLUT,
+                                 targetRT->GetUAVResourceHeapIndex(),
+                                 passID);
+            m_pMaterial->SetFloat4(ShaderIDs::g_TargetSize,
+                                   GetScreenSize(targetRT->GetWidth(), targetRT->GetHeight()),
+                                   passID);
+            SetSpaceResource(passData, PER_PASS_SPACE);
+
+            auto threadGroupSize = passData.GetKernelThreadGroupSizes();
+            m_pCommand->Dispatch(CeilDivide(targetRT->GetWidth(), threadGroupSize.x),
+                                 CeilDivide(targetRT->GetHeight(), threadGroupSize.y),
+                                 threadGroupSize.z);
+            m_pCommand->AddUAVBarrier(targetRT, false);
+        }
+        m_pCommand->AddBarrier(targetRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("GBuffer/") + passName).c_str());
+
+        // ScratchImage image;
+        // HRESULT hr = CaptureTexture(
+        //     m_pDevice->GetCopyQueue(),
+        //     targetRT->GetResource(),
+        //     true,
+        //     image,
+        //     D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,
+        //     D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE
+        //     );
+        // if (SUCCEEDED(hr))
+        // {
+        //     hr = DirectX::SaveToWICFile(
+        //         image.GetImages(),
+        //         image.GetImageCount(),
+        //         DirectX::WIC_FLAGS_NONE,
+        //         GetWICCodec(DirectX::WIC_CODEC_PNG),
+        //         L"output_render.png"
+        //         );
+        //     if (SUCCEEDED(hr))
+        //     {
+        //         ElysiaHelper::Log::Info("Saving PNG image Pre Integrate SSS LUT");
+        //         // 保存成功！
+        //
+        //     }
+        // }
     }
 
     void GBufferPass::CopyDepth()

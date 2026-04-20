@@ -1,0 +1,11 @@
+Model Information:
+* title:	Chinook Wind Ponytail (With Bones)
+* source:	https://sketchfab.com/3d-models/chinook-wind-ponytail-with-bones-3f87f94c71ad4973892a8043d111e66c
+* author:	zHairezt (https://sketchfab.com/zHairezt)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Chinook Wind Ponytail (With Bones)" (https://sketchfab.com/3d-models/chinook-wind-ponytail-with-bones-3f87f94c71ad4973892a8043d111e66c) by zHairezt (https://sketchfab.com/zHairezt) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

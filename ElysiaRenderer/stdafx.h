@@ -29,8 +29,8 @@
 #include <vector>
 #include <mutex>
 #include <optional>
-#include "ThirdParty/DXTex/DirectXTex.h"
 #include "dxc/inc/d3dx12.h"
+#include "ThirdParty/DXTex/DirectXTex.h"
 #include "ThirdParty/D3D12MemoryAllocator/D3D12MemAlloc.h"
 #include <dxgidebug.h>
 #include <numeric>

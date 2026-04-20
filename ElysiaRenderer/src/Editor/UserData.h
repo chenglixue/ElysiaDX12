@@ -10,6 +10,7 @@
 #include "Runtime/RenderCore/GIUtility.h"
 #include "Runtime/RenderCore/TAAUtility.h"
 #include "ThirdParty/FreesyncHDR.h"
+#include "../Runtime/RenderCore/Material.h"
 
 namespace DirectX
 {
@@ -57,7 +58,8 @@ namespace ElysiaRenderer
     {
         //L"glTF\\Sponza\\Sponza.gltf",
         L"glTF\\Suzanne\\Suzanne.gltf",
-        // L"glTF\\DragonAttenuation\\DragonAttenuation.gltf",
+        //L"glTF\\scene\\scene.gltf",
+        //L"glTF\\DragonAttenuation\\DragonAttenuation.gltf",
     };
 
     class UserData
@@ -86,6 +88,7 @@ namespace ElysiaRenderer
         Vector3 lightDir = Vector3::One;
         float lightIntensity = 1.f;
 
+        ShadingModel shadingModelID = ShadingModel::DefaultLit;
         Vector3 BaseColorTint = Vector3::One;
         float Opacity = 1;
         float Cutoff = 0.5;
@@ -118,6 +121,7 @@ namespace ElysiaRenderer
                                                     lightColor,
                                                     lightDir,
                                                     lightIntensity,
+                                                    shadingModelID,
                                                     BaseColorTint,
                                                     Opacity,
                                                     Cutoff,
@@ -125,7 +129,7 @@ namespace ElysiaRenderer
                                                     MetallicIntensity,
                                                     RoughnessIntensity,
                                                     AmbientCubemapIntensity,
-            Specular,
+                                                    Specular,
                                                     AmbientCubemapTint,
                                                     EmissionTint,
                                                     shadowParameter,

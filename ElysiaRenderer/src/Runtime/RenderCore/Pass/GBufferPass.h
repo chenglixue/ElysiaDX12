@@ -13,8 +13,10 @@ namespace ElysiaRenderer
     PASS(DRAW_GBUFFER_PASS,         "public\\GBuffer.hlsl",             false, PS)\
     PASS(CS_GBuffer_COPY_DEPTH,     "public\\CS_GBufferHIZ.hlsl",       true,  GBuffer_Copy_Depth)\
     PASS(CS_GBuffer_HIZ,            "public\\CS_GBufferHIZ.hlsl",       true,  GBuffer_HIZ)\
-    PASS(CS_CLEAR_COUNTER_BUFFER,   "public\\CS_GBufferCulling.hlsl",       true,  ClearCounterBuffer)\
-    PASS(CS_GBUFFER_CULLING_PASS,   "public\\CS_GBufferCulling.hlsl",   true,  Gbuffer_Culling)
+    PASS(CS_CLEAR_COUNTER_BUFFER,   "public\\CS_GBufferCulling.hlsl",   true,  ClearCounterBuffer)\
+    PASS(CS_GBUFFER_CULLING_PASS,   "public\\CS_GBufferCulling.hlsl",   true,  Gbuffer_Culling)\
+    PASS(CS_PRE_INTEGRATE_SSS,      "public\\CS_GBufferCulling.hlsl",   true,  Gbuffer_Culling)
+
     class GBufferPass : public BasePass
     {
     public:
@@ -120,6 +122,8 @@ namespace ElysiaRenderer
             static inline size_t g_TotalObjectCount = PropertyToID(L"g_TotalObjectCount");
             static inline size_t g_GBufferHIZSourceTexIndex = PropertyToID(L"g_GBufferHIZSourceTexIndex");
             static inline size_t g_GBufferHIZTargetTexIndex = PropertyToID(L"g_GBufferHIZTargetTexIndex");
+            static inline size_t g_PreIntegrateSSSLUT = PropertyToID(L"g_PreIntegrateSSSLUT");
+
             static inline size_t g_TargetSize = PropertyToID(L"g_TargetSize");
             static inline size_t g_SourceSize = PropertyToID(L"g_SourceSize");
             static inline size_t g_HIZTexIndex = PropertyToID(L"g_HIZTexIndex");
@@ -152,6 +156,9 @@ namespace ElysiaRenderer
             float normalIntensity;
             UINT emissionColorIndex;
             float specular;
+
+            int shadingModelID;
+            Vector3 padd;
         };
         struct alignas(16) IndirectCommand
         {
@@ -218,6 +225,7 @@ namespace ElysiaRenderer
 
         void CopyDepth();
         void DoHIZ();
+        void DoPreIntegrateSSSLUT();
 
         void ClearCounterBuffer();
         // 从 ViewProjection 矩阵提取 6 个平面

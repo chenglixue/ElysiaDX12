@@ -531,6 +531,7 @@ namespace ElysiaEngine
 
         if (ImGui::CollapsingHeader("PBR Data"))
         {
+            ElysiaRenderer::EnumCombo("Shading Model", &pUserData.shadingModelID);
             ImGui::ColorEdit3("Base Color Tint",
                               (float*)&pUserData.BaseColorTint,
                               ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_AlphaPreview |
@@ -819,6 +820,11 @@ namespace ElysiaEngine
             {
                 entity->OnTransformChanged();
             }
+        }
+
+        if (ImGui::CollapsingHeader("Material Properties", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+
         }
     }
 }

@@ -32,20 +32,24 @@ namespace ElysiaRenderer
         const std::wstring& filePath,
         float scale)
     {
-        std::lock_guard<std::mutex> lock(m_mutex);
-
         auto fileHash = xxh::GetHash(filePath);
-        if (m_modelCache.count(fileHash))
+
         {
-            if (auto sharedModel = m_modelCache[fileHash].lock())
+            std::lock_guard<std::mutex> lock(m_mutex);
+            auto it = m_modelCache.find(fileHash);
+            if (it != m_modelCache.end())
             {
-                return sharedModel;
-            }
-            else
-            {
-                m_modelCache.erase(fileHash);
+                if (auto sharedModel = it->second.lock())
+                {
+                    return sharedModel; // 缓存命中，直接返回
+                }
+                else
+                {
+                    m_modelCache.erase(it); // 弱引用已失效，清理旧条目
+                }
             }
         }
+        
 
         std::shared_ptr<ElysiaModel::LoadedModel> sharedModel = LoadModelFromDisk(filePath,
                                                                                   true,
@@ -54,8 +58,25 @@ namespace ElysiaRenderer
                                                                                   false,
                                                                                   scale);
 
-        m_modelCache.emplace(fileHash, sharedModel);
-        return sharedModel;
+        {
+            std::lock_guard<std::mutex> lock(m_mutex);
+
+            // 双重检查：在我们无锁加载的这段时间里，是不是有其他线程也加载了同一个模型并抢先写入了缓存？
+            auto it = m_modelCache.find(fileHash);
+            if (it != m_modelCache.end())
+            {
+                if (auto sharedModel = it->second.lock())
+                {
+                    // 别人抢先了一步！丢弃我们刚刚加载的重复结果，使用缓存中的实例
+                    return sharedModel;
+                }
+            }
+
+            // 安全写入缓存
+            m_modelCache.emplace(fileHash, sharedModel);
+            return sharedModel;
+        }
+        
     }
 
     std::unique_ptr<ElysiaModel::LoadedModel> ModelManager::LoadModelFromDisk(

@@ -205,7 +205,18 @@ FDirectLighting IntegrateBxDF(FDecodeGBufferData GBufferData,
 {
     FDirectLighting o = (FDirectLighting)0;
 
-    o = DefaultLitBxDF(GBufferData, N, V, L, Falloff, NoL, AreaLight, Shadow);
+    if (GBufferData.ShadingModelID == Shading_Model_ID_Unlit)
+    {
+
+    }
+    else if (GBufferData.ShadingModelID == Shading_Model_ID_Default_Lit)
+    {
+        o = DefaultLitBxDF(GBufferData, N, V, L, Falloff, NoL, AreaLight, Shadow);
+    }
+    else if (GBufferData.ShadingModelID == Shading_Model_ID_Preintegrated_Skin)
+    {
+
+    }
 
     return o;
 }

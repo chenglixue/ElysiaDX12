@@ -78,6 +78,9 @@ struct MeshData
     float normalIntensity;
     UINT emissionColorIndex;
     float specular;
+
+    int shadingModelID;
+    Vector3 padd;
 };
 
 struct VSInput
@@ -186,7 +189,7 @@ FEncodeGBufferData GetEncodeGBufferData(FInputParams inputParams, float3 toLight
                                             g_MipBias)
                        * float4(currMeshData.baseColorTint.xyz, currMeshData.opacity);
     float ditherClip = ComputeTemporalDither(inputParams.PixelPos, frameIndex);
-    //clip(baseColor.a - 0.5f + (ditherClip - 0.5f) * 0.1);
+    clip(baseColor.a - currMeshData.cutoff);
 
     float4 normalTS = SampleTexture2D_Bias(currMeshData.normalTexIndex,
                                            inputParams.objectUV,
@@ -197,17 +200,17 @@ FEncodeGBufferData GetEncodeGBufferData(FInputParams inputParams, float3 toLight
                                           inputParams.objectUV,
                                           WarpLinearSampler,
                                           g_MipBias).r;
-    metallic = saturate(currMeshData.metallicIntensity);
+    metallic = saturate(metallic * currMeshData.metallicIntensity);
 
     float roughness = SampleTexture2D_Bias(currMeshData.roughnessTexIndex,
                                            inputParams.objectUV,
                                            WarpLinearSampler,
                                            g_MipBias).g;
-    roughness = saturate(currMeshData.roughnessIntensity);
+    roughness = saturate(roughness * currMeshData.roughnessIntensity);
 
     o.BaseColor = baseColor.rgb;
     o.ShadingModelID = FLT_MAX;
-    o.ShadingModelID = Shading_Model_ID_Default_Lit;
+    o.ShadingModelID = currMeshData.shadingModelID;
     o.Opacity = baseColor.a;
 
     o.AO = 1;

@@ -108,6 +108,14 @@ namespace ElysiaRenderer
             memcpy(pBufferData.pBufferData.get(), g_RankingTile, sizeof(int) * 128 * 128 * 8);
             BufferManager::GetInstance().UploadBufferData(m_pDevice->GetUploadContext(), &pBufferData);
         }
+
+        m_pPreIntegrateSSSLUT = RenderTargetManager::GetInstance().CreateRWRenderTexture(
+            static_cast<UINT64>(1024),
+            static_cast<UINT64>(1024),
+            DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
+            true,
+            RenderResource::GetInstance().
+            GetPropertyName(PropertyToID(L"Pre Integrate SSS LUT")));
     }
 
     void PreDrawPass::Render(FrameContext& context)

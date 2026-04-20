@@ -45,6 +45,33 @@ namespace ElysiaRenderer
 {
     using namespace ElysiaCore;
 
+    enum class ShadingModel : int
+    {
+        Unlit, DefaultLit, Preintegrated_Skin, Subsurface_Profile, Hair, Eye, Cloth, Clear_Coat, Two_Sided_Foliage
+    };
+
+    NLOHMANN_JSON_SERIALIZE_ENUM(ShadingModel,
+                                 {
+                                 {ShadingModel::Unlit,
+                                 "Unit"},
+                                 {ShadingModel::DefaultLit,
+                                 "Default Lit"},
+                                 {ShadingModel::Preintegrated_Skin,
+                                 "Preintegrated Skin"},
+                                 {ShadingModel::Subsurface_Profile,
+                                 "Subsurface Profile"},
+                                 {ShadingModel::Hair,
+                                 "Hair"},
+                                 {ShadingModel::Eye,
+                                 "Eye"},
+                                 {ShadingModel::Cloth,
+                                 "Cloth"},
+                                 {ShadingModel::Clear_Coat,
+                                 "Clear Coat"},
+                                 {ShadingModel::Two_Sided_Foliage,
+                                 "Two Sided Foliage"},
+                                 })
+
     struct PassData
     {
         UINT PassIndex;
