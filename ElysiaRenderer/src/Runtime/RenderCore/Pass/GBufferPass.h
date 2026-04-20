@@ -15,7 +15,7 @@ namespace ElysiaRenderer
     PASS(CS_GBuffer_HIZ,            "public\\CS_GBufferHIZ.hlsl",       true,  GBuffer_HIZ)\
     PASS(CS_CLEAR_COUNTER_BUFFER,   "public\\CS_GBufferCulling.hlsl",   true,  ClearCounterBuffer)\
     PASS(CS_GBUFFER_CULLING_PASS,   "public\\CS_GBufferCulling.hlsl",   true,  Gbuffer_Culling)\
-    PASS(CS_PRE_INTEGRATE_SSS,      "public\\CS_GBufferCulling.hlsl",   true,  Gbuffer_Culling)
+    PASS(CS_PRE_INTEGRATE_SSS,      "public\\PreGen\\CS_PreIntegrateSSS.hlsl",   true,  PreIntegrateSSS)
 
     class GBufferPass : public BasePass
     {

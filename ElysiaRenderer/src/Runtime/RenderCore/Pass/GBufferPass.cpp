@@ -458,31 +458,57 @@ namespace ElysiaRenderer
         m_pCommand->AddBarrier(targetRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
         m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("GBuffer/") + passName).c_str());
 
-        // ScratchImage image;
-        // HRESULT hr = CaptureTexture(
-        //     m_pDevice->GetCopyQueue(),
-        //     targetRT->GetResource(),
-        //     true,
-        //     image,
-        //     D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,
-        //     D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE
-        //     );
-        // if (SUCCEEDED(hr))
-        // {
-        //     hr = DirectX::SaveToWICFile(
-        //         image.GetImages(),
-        //         image.GetImageCount(),
-        //         DirectX::WIC_FLAGS_NONE,
-        //         GetWICCodec(DirectX::WIC_CODEC_PNG),
-        //         L"output_render.png"
-        //         );
-        //     if (SUCCEEDED(hr))
-        //     {
-        //         ElysiaHelper::Log::Info("Saving PNG image Pre Integrate SSS LUT");
-        //         // 保存成功！
-        //
-        //     }
-        // }
+        DirectX::ScratchImage image;
+        HRESULT hr = DirectX::CaptureTexture(
+            m_pDevice->GetDirectQueue(),
+            targetRT->GetResource(),
+            false,
+            image,
+            D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,
+            D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE
+            );
+        if (SUCCEEDED(hr))
+        {
+            DirectX::ScratchImage convertedImage;
+            DXGI_FORMAT targetFormat = DXGI_FORMAT_R16G16B16A16_UNORM;
+            if (image.GetMetadata().format != targetFormat)
+            {
+                hr = DirectX::Convert(
+                    image.GetImages(),
+                    image.GetImageCount(),
+                    image.GetMetadata(),
+                    targetFormat,
+                    DirectX::TEX_FILTER_DEFAULT,
+                    DirectX::TEX_THRESHOLD_DEFAULT,
+                    convertedImage
+                    );
+
+                if (FAILED(hr))
+                {
+                    ElysiaHelper::Log::Error("DirectX::Convert Failed!");
+                    return;
+                }
+            }
+            else
+            {
+                // 如果格式碰巧一样，直接把原图移交给 convertedImage
+                convertedImage = std::move(image);
+            }
+
+            hr = DirectX::SaveToWICFile(
+                convertedImage.GetImages(),
+                convertedImage.GetImageCount(),
+                DirectX::WIC_FLAGS_NONE,
+                GetWICCodec(DirectX::WIC_CODEC_PNG),
+                L"output_render.png"
+                );
+            if (SUCCEEDED(hr))
+            {
+                ElysiaHelper::Log::Info("Saving PNG image Pre Integrate SSS LUT");
+                // 保存成功！
+
+            }
+        }
     }
 
     void GBufferPass::CopyDepth()

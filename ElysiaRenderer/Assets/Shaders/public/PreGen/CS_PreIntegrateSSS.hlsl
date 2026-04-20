@@ -3,7 +3,7 @@
 #define GROUP_SIZE 8
 cbuffer PassConstant : register(b0, perPassSpace)
 {
-    float4 g_DestSize;
+    float4 g_TargetSize;
 
     UINT g_PreIntegrateSSSLUT;
 }
@@ -58,10 +58,10 @@ void PreIntegrateSSS(uint3 globalID : SV_DispatchThreadID)
 {
     uint2 readPos = globalID.xy;
     uint2 writePos = globalID.xy;
-    if (writePos.x >= g_DestSize.x || writePos.y >= g_DestSize.y)
+    if (writePos.x >= g_TargetSize.x || writePos.y >= g_TargetSize.y)
         return;
 
-    float2 screenUV = (float2(readPos) + 0.5f) * g_DestSize.zw;
+    float2 screenUV = (float2(readPos) + 0.5f) * g_TargetSize.zw;
     float3 scatterDiffuse = GetLUT(screenUV);
 
     Elysia_Save_PreIntegrateSSS(writePos, scatterDiffuse);

@@ -687,6 +687,7 @@
     <None Include="Assets\Shaders\public\CS_GBufferHIZ.hlsl" />
     <None Include="Assets\Shaders\public\CS_ScreenSpaceShadow.hlsl" />
     <None Include="Assets\Shaders\private\ShadowConst.hlsli" />
+    <None Include="Assets\Shaders\public\PreGen\CS_PreIntegrateSSS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -855,9 +856,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\ThirdParty\DXTex\DirectXTexConvert.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\ThirdParty\DXTex\DirectXTexD3D11.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\ThirdParty\DXTex\DirectXTexDDS.cpp">
@@ -1074,6 +1072,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Runtime\RenderCore\Pass\ShadowProjectionPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ThirdParty\DXTex\DirectXTexD3D12.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
