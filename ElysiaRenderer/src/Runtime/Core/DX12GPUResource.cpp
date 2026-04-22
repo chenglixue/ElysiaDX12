@@ -3,7 +3,7 @@
 
 namespace ElysiaCore
 {
-    DX12GPUResource::DX12GPUResource(CComPtr<ID3D12Resource> resource, D3D12_RESOURCE_STATES usageState) :
+    DX12GPUResource::DX12GPUResource(ComPtr<ID3D12Resource> resource, D3D12_RESOURCE_STATES usageState) :
         m_state(GPUResourceState::InUse)
     {
         m_resource = resource;
@@ -13,7 +13,7 @@ namespace ElysiaCore
         m_GPUAddress = 0;
         m_isReady = false;
     }
-    DX12GPUResource::DX12GPUResource(CComPtr<ID3D12Resource> resource,
+    DX12GPUResource::DX12GPUResource(ComPtr<ID3D12Resource> resource,
                                      std::vector<D3D12_RESOURCE_STATES>& usageStates) :
         m_state(GPUResourceState::InUse)
     {
@@ -32,12 +32,12 @@ namespace ElysiaCore
     {
         if (m_resource)
         {
-            m_resource.Release();
+            m_resource.Reset();
             m_resource = nullptr;
         }
         if (m_allocation)
         {
-            m_allocation.Release();
+            m_allocation.Reset();
             m_allocation = nullptr;
         }
         m_usageStates[0] = D3D12_RESOURCE_STATE_COMMON;

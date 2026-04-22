@@ -1,5 +1,7 @@
 #pragma once
 #include "stdafx.h"
+
+#include "Log.h"
 #include "ThirdParty/Misc.h"
 
 #include "Runtime/Core/PSOHelper.h"
@@ -924,6 +926,65 @@ __debugbreak(); \
         }
 #endif
         return false;
+    }
+
+    inline void SaveTexToLocal(const std::wstring& name,
+                               DXGI_FORMAT format,
+                               ID3D12CommandQueue* pDirectCommandQueue,
+                               ID3D12Resource* pResource,
+                               bool isCubemap = false)
+    {
+        DirectX::ScratchImage image;
+        HRESULT hr = DirectX::CaptureTexture(
+            pDirectCommandQueue,
+            pResource,
+            isCubemap,
+            image,
+            D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,
+            D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE
+            );
+
+        if (SUCCEEDED(hr))
+        {
+            DirectX::ScratchImage convertedImage;
+            DXGI_FORMAT targetFormat = format;
+            if (image.GetMetadata().format != targetFormat)
+            {
+                hr = DirectX::Convert(
+                    image.GetImages(),
+                    image.GetImageCount(),
+                    image.GetMetadata(),
+                    targetFormat,
+                    DirectX::TEX_FILTER_DEFAULT,
+                    DirectX::TEX_THRESHOLD_DEFAULT,
+                    convertedImage
+                    );
+
+                if (FAILED(hr))
+                {
+                    ElysiaHelper::Log::Error("DirectX::Convert Failed!");
+                    return;
+                }
+            }
+            else
+            {
+                // 如果格式碰巧一样，直接把原图移交给 convertedImage
+                convertedImage = std::move(image);
+            }
+
+            hr = DirectX::SaveToWICFile(
+                convertedImage.GetImages(),
+                convertedImage.GetImageCount(),
+                DirectX::WIC_FLAGS_NONE,
+                GetWICCodec(DirectX::WIC_CODEC_PNG),
+                (L"../Assets/Tex/" + name).c_str()
+                );
+            if (SUCCEEDED(hr))
+            {
+                ElysiaHelper::Log::Info("Saving PNG image %s", name.c_str());
+                // 保存成功！
+            }
+        }
     }
 }
 

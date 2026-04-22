@@ -1044,7 +1044,7 @@ HRESULT hr = D3D12MA::CreateAllocator(&allocatorDesc, &allocator);
 Objects of this library must be destroyed by calling `Release` method.
 They are somewhat compatible with COM: they implement `IUnknown` interface with its virtual methods: `AddRef`, `Release`, `QueryInterface`,
 and they are reference-counted internally.
-You can use smart pointers designed for COM with objects of this library - e.g. `CComPtr` or `Microsoft::WRL::ComPtr`.
+You can use smart pointers designed for COM with objects of this library - e.g. `ComPtr` or `Microsoft::WRL::ComPtr`.
 The reference counter is thread-safe.
 `QueryInterface` method supports only `IUnknown`, as classes of this library don't define their own GUIDs.
 

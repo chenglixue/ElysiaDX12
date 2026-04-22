@@ -31,7 +31,7 @@ namespace ElysiaCore
 
         void Reset(UINT frameID);
     private:
-        CComPtr<ID3D12Resource>     m_pResource = nullptr;
+        ComPtr<ID3D12Resource>     m_pResource = nullptr;
         D3D12_GPU_VIRTUAL_ADDRESS   m_gpuAddress = 0;
         UINT8*                      m_pCPUPtr = nullptr;
         size_t                      m_size = 0;

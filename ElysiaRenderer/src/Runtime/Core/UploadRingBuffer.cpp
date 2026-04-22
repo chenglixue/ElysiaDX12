@@ -27,7 +27,7 @@ namespace ElysiaCore
     {
         assert(m_pResource);
 
-        return m_pResource;
+        return m_pResource.Get();
     }
 
     size_t UploadRingBuffer::GetSegmentSize() const noexcept
@@ -48,7 +48,7 @@ namespace ElysiaCore
         {
             .HeapType = D3D12_HEAP_TYPE_UPLOAD
         };
-        CComPtr<D3D12MA::Allocation> pAllocation = nullptr;
+        ComPtr<D3D12MA::Allocation> pAllocation = nullptr;
         ElysiaHelper::ThrowIfFailed(pAllocator->CreateResource(&allocationDesc, &resourceDesc, usageState, nullptr,
             &pAllocation, IID_PPV_ARGS(&m_pResource)));
         

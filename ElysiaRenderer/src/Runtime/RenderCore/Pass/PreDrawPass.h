@@ -16,8 +16,6 @@ namespace ElysiaRenderer
 
         virtual void Dispose() override;
 
-        static inline RenderTexture* m_pPreIntegrateSSSLUT = nullptr;
-
         private:
             BufferHandle m_pSobol256spp256dBuffer;
             BufferHandle m_pRankingTileBuffer;

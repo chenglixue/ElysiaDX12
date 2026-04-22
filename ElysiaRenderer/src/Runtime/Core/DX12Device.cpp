@@ -53,7 +53,7 @@ namespace ElysiaCore
         m_copyQueue = nullptr;
 
 #ifdef DEBUG
-        CComPtr<ID3D12DeviceRemovedExtendedDataSettings> pDredSettings;
+        ComPtr<ID3D12DeviceRemovedExtendedDataSettings> pDredSettings;
         if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&pDredSettings))))
         {
             pDredSettings->SetAutoBreadcrumbsEnablement(D3D12_DRED_ENABLEMENT_FORCED_ON);
@@ -76,7 +76,7 @@ namespace ElysiaCore
                               bool bGpuValidationEnabled)
     {
 #if defined(_DEBUG)
-        CComPtr<ID3D12Debug> debugController;
+        ComPtr<ID3D12Debug> debugController;
         if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController))))
         {
             debugController->EnableDebugLayer();
@@ -325,15 +325,15 @@ namespace ElysiaCore
         compileOptions.SetOptLevel(3);
 #endif
 
-        CComPtr<IDxcUtils> pUtils;
-        CComPtr<IDxcCompiler3> pCompiler;
+        ComPtr<IDxcUtils> pUtils;
+        ComPtr<IDxcCompiler3> pCompiler;
         ThrowIfFailed(DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&pUtils)));
         ThrowIfFailed(DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&pCompiler)));
 
         //
         // Open source file.  
         //
-        CComPtr<IDxcBlobEncoding> pSource;
+        ComPtr<IDxcBlobEncoding> pSource;
         auto path = ElysiaHelper::GetAssetFullPath(assetsPath,
                                                    shaderCreateDesc.stages.begin()->ShaderName.
                                                                     c_str());
@@ -784,16 +784,16 @@ namespace ElysiaCore
         m_computeQueue->WaitForIdle();
     }
 
-    ShaderReflectionData DX12Device::ReflectShaderStage(CComPtr<IDxcResult> pResults,
-                                                        CComPtr<IDxcUtils> pUtils)
+    ShaderReflectionData DX12Device::ReflectShaderStage(ComPtr<IDxcResult> pResults,
+                                                        ComPtr<IDxcUtils> pUtils)
     {
         ShaderReflectionData o{};
 
         //
         // Get separate reflection.
         //
-        CComPtr<IDxcBlob> pReflectionData;
-        CComPtr<ID3D12ShaderReflection> pReflection;
+        ComPtr<IDxcBlob> pReflectionData;
+        ComPtr<ID3D12ShaderReflection> pReflection;
         ThrowIfFailed(pResults->GetOutput(DXC_OUT_REFLECTION,
                                           IID_PPV_ARGS(&pReflectionData),
                                           nullptr));
@@ -947,15 +947,15 @@ namespace ElysiaCore
         // 
         // Create compiler and utils.
         //
-        CComPtr<IDxcUtils> pUtils;
-        CComPtr<IDxcCompiler3> pCompiler;
+        ComPtr<IDxcUtils> pUtils;
+        ComPtr<IDxcCompiler3> pCompiler;
         ThrowIfFailed(DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&pUtils)));
         ThrowIfFailed(DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&pCompiler)));
 
         //
         // Create default include handler
         //
-        CComPtr<IDxcIncludeHandler> pIncludeHandler;
+        ComPtr<IDxcIncludeHandler> pIncludeHandler;
         auto hr = pUtils->CreateDefaultIncludeHandler(&pIncludeHandler);
         if (FAILED(hr) || !pIncludeHandler)
         {
@@ -970,7 +970,7 @@ namespace ElysiaCore
         //
         // Compile it with specified arguments.
         //
-        CComPtr<IDxcResult> pResults;
+        ComPtr<IDxcResult> pResults;
         hr = pCompiler->Compile(
             &sourceBuffer,
             // Source buffer.
@@ -978,7 +978,7 @@ namespace ElysiaCore
             // Array of pointers to arguments.
             (UINT)pszArgs.size(),
             // Number of arguments.
-            pIncludeHandler,
+            pIncludeHandler.Get(),
             // User-provided interface to handle #include directives (optional).
             IID_PPV_ARGS(&pResults) // Compiler output status, buffer, and errors.
             );
@@ -992,7 +992,7 @@ namespace ElysiaCore
             // also try to get any error text returned in pResults (sometimes present even if Compile returned failure)
             if (pResults)
             {
-                CComPtr<IDxcBlobUtf8> pErrors;
+                ComPtr<IDxcBlobUtf8> pErrors;
                 if (SUCCEEDED(
                     pResults->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&pErrors), nullptr)) && pErrors
                     && pErrors->GetStringLength() > 0)
@@ -1008,7 +1008,7 @@ namespace ElysiaCore
         //
         // Print errors if present.
         //
-        CComPtr<IDxcBlobUtf8> pErrors = nullptr;
+        ComPtr<IDxcBlobUtf8> pErrors = nullptr;
         pResults->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&pErrors), nullptr);
         // Note that d3dcompiler would return null if no errors or warnings are present.
         // IDxcCompiler3::Compile will always return an error buffer, but its length
@@ -1029,8 +1029,8 @@ namespace ElysiaCore
         //
         // Save shader binary.
         //
-        CComPtr<IDxcBlob> pShader = nullptr;
-        CComPtr<IDxcBlobUtf16> pShaderName = nullptr;
+        ComPtr<IDxcBlob> pShader = nullptr;
+        ComPtr<IDxcBlobUtf16> pShaderName = nullptr;
         pResults->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&pShader), nullptr);
         if (pShader != nullptr)
         {
@@ -1049,8 +1049,8 @@ namespace ElysiaCore
         //
         // Save pdb.
         //
-        CComPtr<IDxcBlob> pPDB = nullptr;
-        CComPtr<IDxcBlobUtf16> pPDBName = nullptr;
+        ComPtr<IDxcBlob> pPDB = nullptr;
+        ComPtr<IDxcBlobUtf16> pPDBName = nullptr;
         pResults->GetOutput(DXC_OUT_PDB, IID_PPV_ARGS(&pPDB), &pPDBName);
         if (pPDB != nullptr && pPDBName != nullptr)
         {
@@ -1066,7 +1066,7 @@ namespace ElysiaCore
         //
         // Print hash.
         //
-        CComPtr<IDxcBlob> pHash = nullptr;
+        ComPtr<IDxcBlob> pHash = nullptr;
         pResults->GetOutput(DXC_OUT_SHADER_HASH, IID_PPV_ARGS(&pHash), nullptr);
         if (pHash != nullptr && pHash->GetBufferSize() >= 16)
         {
@@ -1080,9 +1080,9 @@ namespace ElysiaCore
         //
         // Demonstrate getting the hash from the PDB blob using the IDxcUtils::GetPDBContents API
         //
-        CComPtr<IDxcBlob> pHashDigestBlob = nullptr;
-        CComPtr<IDxcBlob> pDebugDxilContainer = nullptr;
-        if (SUCCEEDED(pUtils->GetPDBContents(pPDB, &pHashDigestBlob, &pDebugDxilContainer)))
+        ComPtr<IDxcBlob> pHashDigestBlob = nullptr;
+        ComPtr<IDxcBlob> pDebugDxilContainer = nullptr;
+        if (SUCCEEDED(pUtils->GetPDBContents(pPDB.Get(), &pHashDigestBlob, &pDebugDxilContainer)))
         {
             // This API returns the raw hash digest, rather than a DxcShaderHash structure.
             // This will be the same as the DxcShaderHash::HashDigest returned from

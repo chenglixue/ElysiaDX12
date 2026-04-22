@@ -30,8 +30,8 @@ namespace ElysiaCore
 		m_pCurrentPipeline = pipelineStateData.m_pipelineStateObject;
 		auto pipelineState = m_pCurrentPipeline->m_pipelineState.get();
 
-		m_commandList->SetPipelineState(pipelineState->GetPipelineState());
-		m_commandList->SetComputeRootSignature(pipelineState->GetRootSignature()->GetSignature());
+		m_commandList->SetPipelineState(pipelineState->GetPipelineState().Get());
+		m_commandList->SetComputeRootSignature(pipelineState->GetRootSignature()->GetSignature().Get());
 	}
 
 	void DX12ComputeContext::SetPipelineResource(uint8_t spaceID, PipelineResourceSpace* pipelineBindResourceSpace)

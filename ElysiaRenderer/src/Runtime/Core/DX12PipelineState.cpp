@@ -13,13 +13,13 @@ namespace ElysiaCore
 	
 	DX12PipelineState::DX12PipelineState() = default;
 
-	DX12PipelineState::DX12PipelineState(CComPtr<ID3D12PipelineState> pipelineState)
+	DX12PipelineState::DX12PipelineState(ComPtr<ID3D12PipelineState> pipelineState)
 		: m_pipelineState(pipelineState)
 	{
 
 	}
 
-	DX12PipelineState::DX12PipelineState(CComPtr<ID3D12PipelineState> pipelineState, DX12RootSignature* rootSignature)
+	DX12PipelineState::DX12PipelineState(ComPtr<ID3D12PipelineState> pipelineState, DX12RootSignature* rootSignature)
 		: m_pipelineState(pipelineState), m_rootSignature(rootSignature)
 	{
 
@@ -27,7 +27,7 @@ namespace ElysiaCore
 
 	DX12PipelineState::~DX12PipelineState() = default;
 
-	CComPtr<ID3D12PipelineState> DX12PipelineState::GetPipelineState()
+	ComPtr<ID3D12PipelineState> DX12PipelineState::GetPipelineState()
 	{
 		return m_pipelineState;
 	}
@@ -47,7 +47,7 @@ namespace ElysiaCore
 	{
 		m_pipelineType = PipelineType::Graphics;
 	}
-	DX12GraphicsPipelineState::DX12GraphicsPipelineState(CComPtr<ID3D12PipelineState> pipelineState, DX12RootSignature* rootSignature)
+	DX12GraphicsPipelineState::DX12GraphicsPipelineState(ComPtr<ID3D12PipelineState> pipelineState, DX12RootSignature* rootSignature)
 		: DX12PipelineState(pipelineState, rootSignature)
 	{
 		m_pipelineType = PipelineType::Graphics;
@@ -62,7 +62,7 @@ namespace ElysiaCore
 	{
 		m_pipelineType = PipelineType::Compute;
 	}
-	DX12ComputePipelineState::DX12ComputePipelineState(CComPtr<ID3D12PipelineState> pipelineState, DX12RootSignature* rootSignature)
+	DX12ComputePipelineState::DX12ComputePipelineState(ComPtr<ID3D12PipelineState> pipelineState, DX12RootSignature* rootSignature)
 		: DX12PipelineState(pipelineState, rootSignature)
 	{
 		m_pipelineType = PipelineType::Compute;

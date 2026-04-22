@@ -119,7 +119,7 @@ namespace ElysiaCore
 
     struct ShaderBytecode
     {
-        CComPtr<IDxcBlob> bytecode;
+        ComPtr<IDxcBlob> bytecode;
         std::wstring entry;
         std::wstring target;
         ShaderReflectionData ReflectionData;

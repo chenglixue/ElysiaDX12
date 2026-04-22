@@ -104,16 +104,16 @@ namespace ElysiaCore
 
         if (!pipelineExpectedBoundExternally)
         {
-            m_commandList->SetPipelineState(pipelineState->GetPipelineState());
+            m_commandList->SetPipelineState(pipelineState->GetPipelineState().Get());
             if (m_graphicsPipelineStateObject->m_pipelineType == PipelineType::Compute)
             {
                 m_commandList->SetComputeRootSignature(
-                    m_graphicsPipelineStateObject->m_rootSignature->GetSignature());
+                    m_graphicsPipelineStateObject->m_rootSignature->GetSignature().Get());
             }
             else
             {
                 m_commandList->SetGraphicsRootSignature(
-                    m_graphicsPipelineStateObject->m_rootSignature->GetSignature());
+                    m_graphicsPipelineStateObject->m_rootSignature->GetSignature().Get());
             }
         }
 

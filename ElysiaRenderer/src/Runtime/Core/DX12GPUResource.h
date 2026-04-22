@@ -10,15 +10,15 @@ namespace ElysiaCore
     class DX12GPUResource
     {
     public:
-        DX12GPUResource(CComPtr<ID3D12Resource> resource, D3D12_RESOURCE_STATES usageState);
-        DX12GPUResource(CComPtr<ID3D12Resource> resource, std::vector<D3D12_RESOURCE_STATES>& usageState);
+        DX12GPUResource(ComPtr<ID3D12Resource> resource, D3D12_RESOURCE_STATES usageState);
+        DX12GPUResource(ComPtr<ID3D12Resource> resource, std::vector<D3D12_RESOURCE_STATES>& usageState);
         ~DX12GPUResource();
 
         GPUResourceType GetBufferType() const noexcept
         {
             return m_bufferType;
         }
-        CComPtr<ID3D12Resource>& GetResource()
+        ComPtr<ID3D12Resource>& GetResource()
         {
             return m_resource;
         }
@@ -34,7 +34,7 @@ namespace ElysiaCore
         {
             return m_resourceDesc;
         }
-        CComPtr<D3D12MA::Allocation> GetAllocation() const noexcept
+        ComPtr<D3D12MA::Allocation> GetAllocation() const noexcept
         {
             return m_allocation;
         }
@@ -64,7 +64,7 @@ namespace ElysiaCore
         {
             m_GPUAddress = GPUAddress;
         }
-        void SetAllocation(CComPtr<D3D12MA::Allocation> allocation)
+        void SetAllocation(ComPtr<D3D12MA::Allocation> allocation)
         {
             m_allocation = allocation;
         }
@@ -86,8 +86,8 @@ namespace ElysiaCore
         void Reset();
 
     protected:
-        CComPtr<ID3D12Resource> m_resource = nullptr;
-        CComPtr<D3D12MA::Allocation> m_allocation = nullptr;
+        ComPtr<ID3D12Resource> m_resource = nullptr;
+        ComPtr<D3D12MA::Allocation> m_allocation = nullptr;
         D3D12_RESOURCE_DESC m_resourceDesc = {};
         D3D12_GPU_VIRTUAL_ADDRESS m_GPUAddress = 0;
         // a resource must be in COMMON state before being used on a COPY queue

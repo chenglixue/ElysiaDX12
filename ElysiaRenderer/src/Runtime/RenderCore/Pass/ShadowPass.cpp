@@ -170,7 +170,7 @@ namespace ElysiaRenderer
             desc.pArgumentDescs = args;
 
             m_pDevice->GetDevice()->CreateCommandSignature(&desc,
-                                                           passData.pRootSignature->GetSignature(),
+                                                           passData.pRootSignature->GetSignature().Get(),
                                                            IID_PPV_ARGS(&m_pCommandSignature));
         }
     }
@@ -203,10 +203,10 @@ namespace ElysiaRenderer
                m_indirectCommands.data(),
                sizeof(IndirectCommand) * Max_RenderItem_Count);
 
-        m_pCommand->GetCommandList()->ExecuteIndirect(m_pCommandSignature,
+        m_pCommand->GetCommandList()->ExecuteIndirect(m_pCommandSignature.Get(),
                                                       // 执行多少次命令
                                                       renderItemIndex,
-                                                      m_pIndirectDataBuffer->GetResource(),
+                                                      m_pIndirectDataBuffer->GetResource().Get(),
                                                       // 从 Buffer 的开头开始
                                                       0,
                                                       // 如果没有 CountBuffer，则固定执行指定的次数

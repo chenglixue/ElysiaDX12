@@ -133,7 +133,6 @@ namespace ElysiaRenderer
 
         UpdateTAAMatrices();
         UploadMeshData(m_cullRenderList);
-        DoPreIntegrateSSSLUT();
         CopyDepth();
         DoHIZ();
         ClearCounterBuffer();
@@ -263,7 +262,6 @@ namespace ElysiaRenderer
         UpdateCSVariant(CS_GBuffer_HIZ);
         UpdateCSVariant(CS_CLEAR_COUNTER_BUFFER);
         UpdateCSVariant(CS_GBUFFER_CULLING_PASS);
-        UpdateCSVariant(CS_PRE_INTEGRATE_SSS);
     }
     void GBufferPass::UpdateGBufferPassVariant(UINT passIndex)
     {
@@ -307,7 +305,7 @@ namespace ElysiaRenderer
             desc.pArgumentDescs = args;
 
             m_pDevice->GetDevice()->CreateCommandSignature(&desc,
-                                                           passData.pRootSignature->GetSignature(),
+                                                           passData.pRootSignature->GetSignature().Get(),
                                                            IID_PPV_ARGS(&m_pCommandSignature));
         }
 
@@ -424,91 +422,6 @@ namespace ElysiaRenderer
         memcpy(m_uploads[1]->pBufferData.get(),
                m_indirectCommands.data(),
                Max_RenderItem_Count * sizeof(IndirectCommand));
-    }
-
-    void GBufferPass::DoPreIntegrateSSSLUT()
-    {
-        auto passID = CS_PRE_INTEGRATE_SSS;
-        auto& passData = m_pMaterial->GetPassData(passID);
-        auto passName = passData.Name.c_str();
-        PIXHelper pix(m_pCommand->GetCommandList(), passName);
-
-        PipelineInfo pipelineStateData{};
-        pipelineStateData.m_pipelineStateObject = passData.pPipelineStateObject;
-        m_pCommand->SetPipeline(pipelineStateData);
-        SetSpaceResource(passData, PER_FRAME_SPACE);
-
-        auto targetRT = PreDrawPass::m_pPreIntegrateSSSLUT;
-        m_pCommand->AddBarrier(targetRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-        {
-            m_pMaterial->SetUINT(ShaderIDs::g_PreIntegrateSSSLUT,
-                                 targetRT->GetUAVResourceHeapIndex(),
-                                 passID);
-            m_pMaterial->SetFloat4(ShaderIDs::g_TargetSize,
-                                   GetScreenSize(targetRT->GetWidth(), targetRT->GetHeight()),
-                                   passID);
-            SetSpaceResource(passData, PER_PASS_SPACE);
-
-            auto threadGroupSize = passData.GetKernelThreadGroupSizes();
-            m_pCommand->Dispatch(CeilDivide(targetRT->GetWidth(), threadGroupSize.x),
-                                 CeilDivide(targetRT->GetHeight(), threadGroupSize.y),
-                                 threadGroupSize.z);
-            m_pCommand->AddUAVBarrier(targetRT, false);
-        }
-        m_pCommand->AddBarrier(targetRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
-        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("GBuffer/") + passName).c_str());
-
-        DirectX::ScratchImage image;
-        HRESULT hr = DirectX::CaptureTexture(
-            m_pDevice->GetDirectQueue(),
-            targetRT->GetResource(),
-            false,
-            image,
-            D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,
-            D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE
-            );
-        if (SUCCEEDED(hr))
-        {
-            DirectX::ScratchImage convertedImage;
-            DXGI_FORMAT targetFormat = DXGI_FORMAT_R16G16B16A16_UNORM;
-            if (image.GetMetadata().format != targetFormat)
-            {
-                hr = DirectX::Convert(
-                    image.GetImages(),
-                    image.GetImageCount(),
-                    image.GetMetadata(),
-                    targetFormat,
-                    DirectX::TEX_FILTER_DEFAULT,
-                    DirectX::TEX_THRESHOLD_DEFAULT,
-                    convertedImage
-                    );
-
-                if (FAILED(hr))
-                {
-                    ElysiaHelper::Log::Error("DirectX::Convert Failed!");
-                    return;
-                }
-            }
-            else
-            {
-                // 如果格式碰巧一样，直接把原图移交给 convertedImage
-                convertedImage = std::move(image);
-            }
-
-            hr = DirectX::SaveToWICFile(
-                convertedImage.GetImages(),
-                convertedImage.GetImageCount(),
-                DirectX::WIC_FLAGS_NONE,
-                GetWICCodec(DirectX::WIC_CODEC_PNG),
-                L"output_render.png"
-                );
-            if (SUCCEEDED(hr))
-            {
-                ElysiaHelper::Log::Info("Saving PNG image Pre Integrate SSS LUT");
-                // 保存成功！
-
-            }
-        }
     }
 
     void GBufferPass::CopyDepth()
@@ -782,8 +695,8 @@ namespace ElysiaRenderer
         m_pCommand->AddBarrier(*m_pVisbibleIndexBuffer, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 
         m_pCommand->AddBarrier(*m_pVisbibleCounterBuffer, D3D12_RESOURCE_STATE_COPY_SOURCE, false);
-        m_pCommand->GetCommandList()->CopyResource(m_pVisbibleCounterReadBackBuffer->GetResource(),
-                                                   m_pVisbibleCounterBuffer->GetResource());
+        m_pCommand->GetCommandList()->CopyResource(m_pVisbibleCounterReadBackBuffer->GetResource().Get(),
+                                                   m_pVisbibleCounterBuffer->GetResource().Get());
         m_pCommand->AddBarrier(*m_pVisbibleCounterBuffer, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
         ReadGPUCounter();
 
@@ -917,7 +830,7 @@ namespace ElysiaRenderer
         auto& passData = m_pMaterial->GetPassData(passIndex);
 
         CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-            m_pIndirectDataBuffer->GetResource(),
+            m_pIndirectDataBuffer->GetResource().Get(),
             D3D12_RESOURCE_STATE_COMMON,
             D3D12_RESOURCE_STATE_COPY_DEST
             );
@@ -926,21 +839,21 @@ namespace ElysiaRenderer
         BufferManager::GetInstance().UploadBufferData(m_pCommand, m_uploads);
 
         barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-            m_pIndirectDataBuffer->GetResource(),
+            m_pIndirectDataBuffer->GetResource().Get(),
             D3D12_RESOURCE_STATE_COPY_DEST,
             D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT
             );
         m_pCommand->GetCommandList()->ResourceBarrier(1, &barrier);
 
-        m_pCommand->GetCommandList()->ExecuteIndirect(m_pCommandSignature,
+        m_pCommand->GetCommandList()->ExecuteIndirect(m_pCommandSignature.Get(),
                                                       m_cullRenderList.size(),
-                                                      m_pIndirectDataBuffer->GetResource(),
+                                                      m_pIndirectDataBuffer->GetResource().Get(),
                                                       0,
-                                                      m_pVisbibleCounterBuffer->GetResource(),
+                                                      m_pVisbibleCounterBuffer->GetResource().Get(),
                                                       0);
 
         barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-            m_pIndirectDataBuffer->GetResource(),
+            m_pIndirectDataBuffer->GetResource().Get(),
             D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT,
             D3D12_RESOURCE_STATE_COMMON
             );

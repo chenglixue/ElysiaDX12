@@ -104,7 +104,7 @@ namespace ElysiaRenderer
     }
     ID3D12Resource* RenderTexture::GetResource() const
     {
-        return GetTexture()->GetResource();
+        return GetTexture()->GetResource().Get();
     }
     UINT64 RenderTexture::GetSubresourceIndex(UINT64 mipmapLevel, UINT64 arraySlice, UINT64 planeSlice) const
     {

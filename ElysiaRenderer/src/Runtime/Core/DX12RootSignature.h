@@ -65,7 +65,7 @@ namespace ElysiaCore
 
         ~DX12RootSignature();
 
-        CComPtr<ID3D12RootSignature> GetSignature() const
+        ComPtr<ID3D12RootSignature> GetSignature() const
         {
             return m_rootSignature;
         }
@@ -122,7 +122,7 @@ namespace ElysiaCore
         UINT m_numRootParameters;
         UINT m_numSamplers;
         UINT m_numInitedSamplers;
-        CComPtr<ID3D12RootSignature> m_rootSignature;
+        ComPtr<ID3D12RootSignature> m_rootSignature;
         std::unique_ptr<DX12RootParameter[]> m_rootParametersArray;
         std::unique_ptr<D3D12_STATIC_SAMPLER_DESC[]> m_samplerArray;
         UINT32 m_descriptorTableSize[16];

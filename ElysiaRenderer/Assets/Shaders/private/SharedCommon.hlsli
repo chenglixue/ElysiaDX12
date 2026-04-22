@@ -116,8 +116,6 @@ struct FInputParams
 
     float Linear01Depth;
     float LinearEyeDepth;
-
-    UINT ShadowMaskTexIndex;
 };
 
 struct MaterialData
@@ -223,4 +221,5 @@ struct BxDFContext
     float YoL;
     float YoH;
 };
+
 #endif

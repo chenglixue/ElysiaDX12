@@ -51,6 +51,7 @@ namespace ElysiaEngine
         void BuildUISceneHierarchy();
         void BuildUIViewport();
         void BuildUIInspector();
+        void BuildMainMenuBar();
         void BuildUIRenderSetting();
 
         void DrawEntityNode(Entity* entity);

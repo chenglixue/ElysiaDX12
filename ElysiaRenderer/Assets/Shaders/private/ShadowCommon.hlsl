@@ -366,7 +366,7 @@ float SampleShadowPCF(in Texture2D shadowMap,
     o = SobolPCF(screenSize, screenUV, shadowRadius, shadowPos.xy, shadowPos.z, shadowMap,
         pointShadowSampler, shadowMapSize, sobolSequence);
 #elif defined (SHADOW_QUALITY_VERYHIGH)
-    o = SobolPCF(screenSize, screenUV, shadowRadius, shadowPos.xy, shadowPos.z, shadowMap,
+    o = SobolPCF1Spp(screenSize, screenUV, shadowRadius, shadowPos.xy, shadowPos.z, shadowMap,
         pointShadowSampler, shadowMapSize, sobolSequence);
 #endif
 

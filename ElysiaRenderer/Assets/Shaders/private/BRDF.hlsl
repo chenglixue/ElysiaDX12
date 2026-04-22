@@ -336,7 +336,7 @@ float3 UE_F_Schlick(float3 SpecularColor, float VoH)
     return saturate(50.0 * SpecularColor.g) * Fc + (1. - Fc) * SpecularColor;
 }
 
-float3 F_Schlick(float u, float3 f0)
+float3 SchlickFresnel(float u, float3 f0)
 {
     return f0 + (1.f - f0) * pow(1.0 - u, 5.0);
 }

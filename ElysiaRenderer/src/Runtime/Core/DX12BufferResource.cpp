@@ -7,7 +7,7 @@
 
 namespace ElysiaCore
 {
-    DX12BufferResource::DX12BufferResource(CComPtr<ID3D12Resource> resource,
+    DX12BufferResource::DX12BufferResource(ComPtr<ID3D12Resource> resource,
                                            D3D12_RESOURCE_STATES usageState)
         : DX12GPUResource(resource, usageState),
           m_isDirty(false),
@@ -15,9 +15,9 @@ namespace ElysiaCore
     {
 
     }
-    DX12BufferResource::DX12BufferResource(CComPtr<ID3D12Resource> resource,
+    DX12BufferResource::DX12BufferResource(ComPtr<ID3D12Resource> resource,
                                            D3D12_RESOURCE_STATES usageState,
-                                           CComPtr<D3D12MA::Allocation> allocation)
+        ComPtr<D3D12MA::Allocation> allocation)
         : DX12GPUResource(resource, usageState),
           m_isDirty(false),
           m_mappedBuffer(nullptr)
@@ -182,7 +182,7 @@ namespace ElysiaCore
                                        : D3D12_BUFFER_SRV_FLAG_NONE;
 
             SetSRVDescriptor(pDevice->GetSRVStageHeap()->NewDescriptorHeapHandle());
-            pDevice->GetDevice()->CreateShaderResourceView(GetResource(),
+            pDevice->GetDevice()->CreateShaderResourceView(GetResource().Get(),
                                                            &SRVDesc,
                                                            GetSRVDescriptor().GetCPUHandle());
 
@@ -215,7 +215,7 @@ namespace ElysiaCore
 
             SetUAVDescriptor(pDevice->GetSRVStageHeap()->NewDescriptorHeapHandle());
 
-            pDevice->GetDevice()->CreateUnorderedAccessView(GetResource(),
+            pDevice->GetDevice()->CreateUnorderedAccessView(GetResource().Get(),
                                                             nullptr,
                                                             &UAVDesc,
                                                             GetUAVDescriptor().GetCPUHandle());

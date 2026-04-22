@@ -35,7 +35,7 @@ namespace ElysiaRenderer
 
         if (emplaceResult.second)
         {
-            CComPtr<ID3D12PipelineState> pipelineState = nullptr;
+            ComPtr<ID3D12PipelineState> pipelineState = nullptr;
             ElysiaHelper::ThrowIfFailed(
                 pDevice->GetDevice()->CreateGraphicsPipelineState(
                     &PSODesc,
@@ -80,7 +80,7 @@ namespace ElysiaRenderer
         }
 
         D3D12_GRAPHICS_PIPELINE_STATE_DESC PSODesc{};
-        PSODesc.pRootSignature = passData.pRootSignature->GetSignature();
+        PSODesc.pRootSignature = passData.pRootSignature->GetSignature().Get();
 
         auto& stageShaders = passData.pCurrVariantData->StageShaders;
         if (stageShaders.count(ShaderType::Vertex) == 0 || stageShaders.count(ShaderType::Pixel) ==
@@ -181,7 +181,7 @@ namespace ElysiaRenderer
             .BytecodeLength = passData.pCurrVariantData->StageShaders.at(ShaderType::Compute).
                                        bytecode->GetBufferSize(),
         };
-        PSODesc.pRootSignature = passData.pRootSignature->GetSignature();
+        PSODesc.pRootSignature = passData.pRootSignature->GetSignature().Get();
 
         auto pipelineStateObject = GetComputePipelineState(pDevice,
                                                            PSODesc,
@@ -204,7 +204,7 @@ namespace ElysiaRenderer
 
         if (emplaceResult.second)
         {
-            CComPtr<ID3D12PipelineState> pipelineState = nullptr;
+            ComPtr<ID3D12PipelineState> pipelineState = nullptr;
             ElysiaHelper::ThrowIfFailed(
                 pDevice->GetDevice()->CreateComputePipelineState(
                     &PSODesc,

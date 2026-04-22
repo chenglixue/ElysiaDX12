@@ -3292,7 +3292,7 @@ inline bool operator==( const D3D12_RENDER_PASS_DEPTH_STENCIL_DESC &a, const D3D
 #define D3DX12_COM_PTR_ADDRESSOF(x) x.GetAddressOf()
 #else
 #include <atlbase.h>
-#define D3DX12_COM_PTR ATL::CComPtr
+#define D3DX12_COM_PTR ATL::ComPtr
 #define D3DX12_COM_PTR_GET(x) x.p
 #define D3DX12_COM_PTR_ADDRESSOF(x) &x.p
 #endif

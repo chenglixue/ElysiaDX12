@@ -57,8 +57,8 @@ namespace ElysiaRenderer
     const std::vector<LPCWSTR> g_ModelPaths
     {
         //L"glTF\\Sponza\\Sponza.gltf",
-        L"glTF\\Suzanne\\Suzanne.gltf",
-        //L"glTF\\scene\\scene.gltf",
+        //L"glTF\\Suzanne\\Suzanne.gltf",
+        L"glTF\\trump_head\\trump_head.gltf",
         //L"glTF\\DragonAttenuation\\DragonAttenuation.gltf",
     };
 
@@ -99,6 +99,7 @@ namespace ElysiaRenderer
         float Specular = 1;
         Vector3 AmbientCubemapTint = Vector3::One;
         Vector3 EmissionTint = Vector3::One;
+        float CurveScale = 1.f;
 
         ShadowParameter shadowParameter;
 

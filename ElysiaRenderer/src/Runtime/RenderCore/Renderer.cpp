@@ -29,6 +29,7 @@
 #include "RenderTargetManager.h"
 #include "TonemapUtility.h"
 #include "Editor/IMGUIDrawer.h"
+#include "Pass/BakePass.h"
 #include "Pass/DebugPass.h"
 #include "Pass/GIPass.h"
 #include "Pass/SharpenPass.h"
@@ -69,6 +70,7 @@ namespace ElysiaRenderer
         m_passes.clear();
 
         AddPass<PreDrawPass>();
+        AddPass<BakePass>();
         AddPass<ShadowPass>();
         AddPass<GIPass>();
         AddPass<GBufferPass>();

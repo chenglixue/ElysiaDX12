@@ -59,10 +59,15 @@ PASS(DRAW_LIGHT_PASS,         "public\\Opaque.hlsl", false, PS)
             static inline size_t g_AmbientTint = PropertyToID(L"g_AmbientTint");
             static inline size_t g_AmbientIntensity = PropertyToID(L"g_AmbientIntensity");
             static inline size_t g_ShadowMaskTexIndex = PropertyToID(L"g_ShadowMaskTexIndex");
+            static inline size_t g_PreIntegrateSSSLUTIndex = PropertyToID(L"g_PreIntegrateSSSLUTIndex");
+            static inline size_t g_PreIntegrateSSSNDFLUTIndex = PropertyToID(L"g_PreIntegrateSSSNDFLUTIndex");
+            static inline size_t g_CurveScale = PropertyToID(L"g_CurveScale");
         };
 
         UINT m_cameraWidth;
         UINT m_cameraHeight;
+        TextureManager::Handle m_PreIntegrateSSSLUT;
+        TextureManager::Handle m_PreIntegrateSSSNDFLUT;
 
         void UpdateLightingPassVariant(UINT passID);
         void DrawLightingPass(ElysiaEngine::FrameContext& context);

@@ -202,11 +202,11 @@ namespace ElysiaRenderer
             float estimatorWeight; // 归一化权重 (用于最终补偿)
             uint packedNormal;
         };
-        CComPtr<ID3D12Device5> m_pDevice5;
+        ComPtr<ID3D12Device5> m_pDevice5;
         SBTHelper m_stbHelper;
-        CComPtr<IDxcBlob> m_DXRBlob;
-        CComPtr<ID3D12RootSignature> m_pGlobalRootSig;
-        CComPtr<ID3D12StateObject> m_pRTPSO;
+        ComPtr<IDxcBlob> m_DXRBlob;
+        ComPtr<ID3D12RootSignature> m_pGlobalRootSig;
+        ComPtr<ID3D12StateObject> m_pRTPSO;
         mutable std::vector<std::wstring> m_tempStrings;
         BufferHandle m_pTLASBuffer = nullptr;
         BufferHandle m_pTLASScratchBuffer = nullptr;
@@ -224,7 +224,7 @@ namespace ElysiaRenderer
         std::vector<InstanceData> m_instanceDatas;
         std::vector<AABBData> m_AABBDatas;
         std::vector<UINT> m_probeStates = std::vector<UINT>(Probe_Count, 1);
-        CComPtr<ID3D12CommandSignature> m_pCommandSignature;
+        ComPtr<ID3D12CommandSignature> m_pCommandSignature;
 
 #pragma region Vertices
         // 常量 X = 0.525731f, Z = 0.850651f 来自黄金分割比例，用于构建单位球体
@@ -266,7 +266,7 @@ namespace ElysiaRenderer
         void ProbeBlendIrradiance();
         void ProbeBlendDepth();
 
-        CComPtr<IDxcBlob> CompileRaytracingLibrary(const std::wstring& fileName);
+        ComPtr<IDxcBlob> CompileRaytracingLibrary(const std::wstring& fileName);
         void CreateRaytracingPipeline(ID3D12RootSignature* pRootSignature,
                                       const std::vector<std::unique_ptr<Entity>>& entities);
         void CreateDXRRootSignature(ID3D12Device* pDevice);

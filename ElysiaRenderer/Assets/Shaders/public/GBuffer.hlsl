@@ -1,8 +1,6 @@
-#include <private\ShadingCommon.hlsl>
+#include <private\SharedCommon.hlsli>
+#include "private\ShadingCommon.hlsl"
 #include <private\Light.hlsl>
-#include <private\LightCommon.hlsl>
-#include <private\ShadowCommon.hlsl>
-#include <public\GI\Irradiance.hlsl>
 
 #pragma Vertex VS
 #pragma Pixel PS
@@ -201,12 +199,13 @@ FEncodeGBufferData GetEncodeGBufferData(FInputParams inputParams, float3 toLight
                                           WarpLinearSampler,
                                           g_MipBias).r;
     metallic = saturate(metallic * currMeshData.metallicIntensity);
+    metallic = saturate(currMeshData.metallicIntensity);
 
     float roughness = SampleTexture2D_Bias(currMeshData.roughnessTexIndex,
                                            inputParams.objectUV,
                                            WarpLinearSampler,
                                            g_MipBias).g;
-    roughness = saturate(roughness * currMeshData.roughnessIntensity);
+    roughness = saturate(currMeshData.roughnessIntensity);
 
     o.BaseColor = baseColor.rgb;
     o.ShadingModelID = FLT_MAX;

@@ -1,6 +1,6 @@
 #include "private\ShadingCommon.hlsl"
 #include <private\Light.hlsl>
-#include <private\LightCommon.hlsl>
+#include <private\ShadowCommon.hlsl>
 #include <private\TAACommon.hlsli>
 
 #define GROUP_SIZE 8

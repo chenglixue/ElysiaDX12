@@ -78,7 +78,7 @@ namespace ElysiaRenderer
         std::vector<IndirectCommand> m_indirectCommands;
         BufferHandle m_pMeshDataBuffer;
         BufferHandle m_pIndirectDataBuffer;
-        CComPtr<ID3D12CommandSignature> m_pCommandSignature;
+        ComPtr<ID3D12CommandSignature> m_pCommandSignature;
 
         void UpdateShadowPassVariant(UINT passIndex);
         void DrawMesh(ElysiaEngine::FrameContext& context, PassData& passData);

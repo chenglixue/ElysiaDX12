@@ -48,7 +48,7 @@ namespace ElysiaEngine
         SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 
         // Init logging
-        int result = Log::InitLogSystem();
+        int result = ::Log::InitLogSystem();
         assert(!result);
 
         // Init window class
@@ -153,7 +153,7 @@ namespace ElysiaEngine
         delete pFramework;
 
         // Shutdown logging before quitting the application
-        Log::TerminateLogSystem();
+        ::Log::TerminateLogSystem();
 
         // return this part of the WM_QUIT message to Sample
         return static_cast<char>(msg.wParam);

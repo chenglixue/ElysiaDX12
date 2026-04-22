@@ -132,8 +132,8 @@ namespace ElysiaRenderer
         D3D12MA::ALLOCATION_DESC allocationDesc{};
         allocationDesc.HeapType = isHostVisible ? D3D12_HEAP_TYPE_UPLOAD : D3D12_HEAP_TYPE_DEFAULT;
 
-        CComPtr<D3D12MA::Allocation> pAllocation = nullptr;
-        CComPtr<ID3D12Resource> pResource = nullptr;
+        ComPtr<D3D12MA::Allocation> pAllocation = nullptr;
+        ComPtr<ID3D12Resource> pResource = nullptr;
         ElysiaHelper::ThrowIfFailed(m_pAllocator->CreateResource(&allocationDesc,
                                                                  &resourceDesc,
                                                                  resourceState,
@@ -209,7 +209,7 @@ namespace ElysiaRenderer
 
             pNewBuffer->SetSRVDescriptor(m_pDevice->GetSRVStageHeap()->NewDescriptorHeapHandle());
             m_pDevice->GetDevice()->CreateShaderResourceView(
-                pNewBuffer->GetResource(),
+                pNewBuffer->GetResource().Get(),
                 &SRVDesc,
                 pNewBuffer->GetSRVDescriptor().GetCPUHandle());
 
@@ -249,7 +249,7 @@ namespace ElysiaRenderer
             pNewBuffer->SetUAVDescriptor(m_pDevice->GetSRVStageHeap()->NewDescriptorHeapHandle());
 
             m_pDevice->GetDevice()->CreateUnorderedAccessView(
-                pNewBuffer->GetResource(),
+                pNewBuffer->GetResource().Get(),
                 nullptr,
                 &UAVDesc,
                 pNewBuffer->GetUAVDescriptor().GetCPUHandle());
@@ -284,8 +284,8 @@ namespace ElysiaRenderer
         D3D12MA::ALLOCATION_DESC allocationDesc{};
         allocationDesc.HeapType = D3D12_HEAP_TYPE_READBACK;
 
-        CComPtr<D3D12MA::Allocation> pAllocation = nullptr;
-        CComPtr<ID3D12Resource> pResource = nullptr;
+        ComPtr<D3D12MA::Allocation> pAllocation = nullptr;
+        ComPtr<ID3D12Resource> pResource = nullptr;
 
         // 3. 初始状态必须强制设为 COPY_DEST
         D3D12_RESOURCE_STATES resourceState = D3D12_RESOURCE_STATE_COPY_DEST;
@@ -443,7 +443,7 @@ namespace ElysiaRenderer
                 // uploadContext->CopyBufferRegion(*bufferUpload->buffer, 0, m_pUploadBuffer->GetResource(), 
                 // 	gpuAddress - m_pUploadBuffer->GetResource()->GetGPUVirtualAddress(), bufferUpload->bufferDataSize);
                 UpdateSubresources(uploadContext->GetCommandList(),
-                                   bufferUpload->buffer->GetResource(),
+                                   bufferUpload->buffer->GetResource().Get(),
                                    m_pUploadBuffer->GetResource(),
                                    gpuAddress - m_pUploadBuffer->GetResource()->
                                                                  GetGPUVirtualAddress() +
@@ -510,7 +510,7 @@ namespace ElysiaRenderer
                 // uploadContext->CopyBufferRegion(*bufferUpload->buffer, 0, m_pUploadBuffer->GetResource(), 
                 // 	gpuAddress - m_pUploadBuffer->GetResource()->GetGPUVirtualAddress(), bufferUpload->bufferDataSize);
                 UpdateSubresources(uploadContext->GetCommandList(),
-                                   bufferUpload->buffer->GetResource(),
+                                   bufferUpload->buffer->GetResource().Get(),
                                    m_pUploadBuffer->GetResource(),
                                    gpuAddress - m_pUploadBuffer->GetResource()->
                                                                  GetGPUVirtualAddress() +
@@ -632,7 +632,7 @@ namespace ElysiaRenderer
                 // uploadContext->CopyBufferRegion(*bufferUpload->buffer, 0, m_pUploadBuffer->GetResource(), 
                 // 	gpuAddress - m_pUploadBuffer->GetResource()->GetGPUVirtualAddress(), bufferUpload->bufferDataSize);
                 UpdateSubresources(uploadContext->GetCommandList(),
-                                   bufferUpload->buffer->GetResource(),
+                                   bufferUpload->buffer->GetResource().Get(),
                                    m_pUploadBuffer->GetResource(),
                                    gpuAddress - m_pUploadBuffer->GetResource()->
                                                                  GetGPUVirtualAddress() +

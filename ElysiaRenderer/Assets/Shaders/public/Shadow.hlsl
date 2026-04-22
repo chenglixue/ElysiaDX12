@@ -1,6 +1,5 @@
-#include <private\ShadingCommon.hlsl>
 #include <private\Light.hlsl>
-#include <private\LightCommon.hlsl>
+// #include <private\LightCommon.hlsl>
 #include <private\ShadowCommon.hlsl>
 
 #pragma Vertex VS

@@ -1,9 +1,4 @@
-#include <private\ShadingCommon.hlsl>
-#include <private\Light.hlsl>
-#include <private\LightCommon.hlsl>
-#include <private\ShadowCommon.hlsl>
-#include <public\GI\Irradiance.hlsl>
-
+#include <private\SharedCommon.hlsli>
 #pragma Vertex VS
 #pragma Pixel PS
 
@@ -40,7 +35,6 @@ cbuffer PassConstant : register(b0, perPassSpace)
     float g_DDGIEncodingGamma;
     float3 g_GridOrigin;
     float3 g_GridSpacing;
-    UINT g_ShadowMaskTexIndex;
     UINT g_IrradianceTexIndex;
     UINT g_DistanceTexIndex;
     UINT g_ProbeOffsetsIndex;
@@ -52,7 +46,19 @@ cbuffer PassConstant : register(b0, perPassSpace)
     float3 g_AmbientTint;
     float g_AmbientIntensity;
     UINT g_DebugMode;
+
+    UINT g_ShadowMaskTexIndex;
+    UINT g_PreIntegrateSSSLUTIndex;
+    UINT g_PreIntegrateSSSNDFLUTIndex;
+    float g_CurveScale;
 }
+
+#include <private\ShadingCommon.hlsl>
+#include <private\ShadingModel.hlsl>
+
+#include <private\LightCommon.hlsl>
+#include <private\Light.hlsl>
+#include <public\GI\Irradiance.hlsl>
 
 struct PSInput
 {
@@ -112,7 +118,6 @@ PSOutput PS(PSInput i)
     inputParam.BitTangentWS = cross(inputParam.TangentWS, inputParam.NormalWS);
     inputParam.ScreenVector = GetScreenVectorWS(cameraPosWS.xyz, positionWS);
     inputParam.ScreenSize = g_RenderSize.xy;
-    inputParam.ShadowMaskTexIndex = g_ShadowMaskTexIndex;
 
     LightData mainLightData = GetMainLight(mainLight);
 

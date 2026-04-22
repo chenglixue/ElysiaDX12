@@ -352,8 +352,8 @@ namespace ElysiaRenderer
         allocationDesc.HeapType = D3D12_HEAP_TYPE_DEFAULT;
         allocationDesc.Flags = D3D12MA::ALLOCATION_FLAG_NONE;
         allocationDesc.ExtraHeapFlags = D3D12_HEAP_FLAG_NONE;
-        CComPtr<ID3D12Resource> texResource = nullptr;
-        CComPtr<D3D12MA::Allocation> allocation = nullptr;
+        ComPtr<ID3D12Resource> texResource = nullptr;
+        ComPtr<D3D12MA::Allocation> allocation = nullptr;
         ElysiaHelper::ThrowIfFailed(BufferManager::GetInstance().GetAllocator()->CreateResource(
             &allocationDesc,
             &resourceDesc,
@@ -389,7 +389,7 @@ namespace ElysiaRenderer
                     SRV.Texture2D.ResourceMinLODClamp = 0;
                     SRV.Texture2D.PlaneSlice = 0;
 
-                    m_pDevice->GetDevice()->CreateShaderResourceView(newTex->GetResource(),
+                    m_pDevice->GetDevice()->CreateShaderResourceView(newTex->GetResource().Get(),
                                                                      &SRV,
                                                                      SRVHandle.GetCPUHandle());
                 }
@@ -410,7 +410,7 @@ namespace ElysiaRenderer
                         SRV.TextureCube.ResourceMinLODClamp = 0;
                         srvDescPointer = &SRV;
                     }
-                    m_pDevice->GetDevice()->CreateShaderResourceView(newTex->GetResource(),
+                    m_pDevice->GetDevice()->CreateShaderResourceView(newTex->GetResource().Get(),
                                                                      srvDescPointer,
                                                                      SRVHandle.GetCPUHandle());
                 }
@@ -436,7 +436,7 @@ namespace ElysiaRenderer
             auto RTVHandle = m_pDevice->GetRTVStageHeap()->NewDescriptorHeapHandle();
 
             newTex->SetRTVDescriptor(RTVHandle);
-            m_pDevice->GetDevice()->CreateRenderTargetView(newTex->GetResource(),
+            m_pDevice->GetDevice()->CreateRenderTargetView(newTex->GetResource().Get(),
                                                            nullptr,
                                                            newTex->GetRTVDescriptor().
                                                                    GetCPUHandle());
@@ -453,7 +453,7 @@ namespace ElysiaRenderer
 
             auto newDSVHandle = m_pDevice->GetDSVStageHeap()->NewDescriptorHeapHandle();
             newTex->SetDSVDescriptor(newDSVHandle);
-            m_pDevice->GetDevice()->CreateDepthStencilView(newTex->GetResource(),
+            m_pDevice->GetDevice()->CreateDepthStencilView(newTex->GetResource().Get(),
                                                            &dsvDesc,
                                                            newTex->GetDSVDescriptor().
                                                                    GetCPUHandle());
@@ -476,7 +476,7 @@ namespace ElysiaRenderer
 
                 auto newUAVHandle = m_pDevice->GetSRVStageHeap()->NewDescriptorHeapHandle();
                 newTex->SetUAVDescriptor(newUAVHandle, i);
-                m_pDevice->GetDevice()->CreateUnorderedAccessView(newTex->GetResource(),
+                m_pDevice->GetDevice()->CreateUnorderedAccessView(newTex->GetResource().Get(),
                                                                   nullptr,
                                                                   &UAVDesc,
                                                                   newTex->GetUAVDescriptor(i).

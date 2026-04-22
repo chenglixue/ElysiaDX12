@@ -25,7 +25,6 @@ FLightAccumulator AccumulateDynamicLighting(FInputParams inputData,
 
     float3 V = -inputData.ScreenVector;
     float3 N = materialData.WorldNormal;
-    N = inputData.NormalWS;
     float3 L = lightData.toLight;
     float3 MaskedLightColor = lightData.color * lightData.intensity;
     Shadow.SurfaceShadow = 1;
@@ -38,7 +37,7 @@ FLightAccumulator AccumulateDynamicLighting(FInputParams inputData,
                               directLight.Diffuse,
                               directLight.Specular,
                               directLight.Diffuse,
-                              Shadow.SurfaceShadow * MaskedLightColor * PI);
+                              Shadow.SurfaceShadow * MaskedLightColor);
 
     return o;
 }
@@ -53,7 +52,6 @@ FLightAccumulator AccumulateDynamicLighting(FInputParams inputData,
 
     float3 V = -inputData.ScreenVector;
     float3 N = GBufferData.WorldNormal;
-    // N = inputData.NormalWS;
     float3 L = lightData.toLight;
     float3 MaskedLightColor = lightData.color * lightData.intensity;
 
@@ -64,14 +62,14 @@ FLightAccumulator AccumulateDynamicLighting(FInputParams inputData,
     //                                    shadowSize,
     //                                    shadowMatrix,
     //                                    inputData.SobelSqeuence);
-    float shadow = SampleTexture2D(inputData.ShadowMaskTexIndex, inputData.ScreenUV, ClampLinearSampler);
+    float shadow = SampleTexture2D(g_ShadowMaskTexIndex, inputData.ScreenUV, ClampLinearSampler);
     if (!g_EnableShadow)
         shadow = 1;
     Shadow.SurfaceShadow = AO * shadow;
 
     FDirectLighting directLight = (FDirectLighting)0;
-    float NoL = saturate(dot(N, L));
-    directLight = EvaluateBxDF(GBufferData, N, V, L, NoL, Shadow);
+    float NoL = max(0, dot(N, L));
+    directLight = EvaluateBxDF(GBufferData, inputData.PositionWS, N, V, L, NoL, Shadow);
 
     LightAccumulator_AddSplit(o,
                               directLight.Diffuse,

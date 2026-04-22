@@ -279,7 +279,7 @@ namespace ElysiaRenderer
                 if (!currEntity->GetBLASBuffer())
                 {
                     needFlushBarrier = true;
-                    currEntity->GenerateBLAS(m_pDevice5, m_pCommand);
+                    currEntity->GenerateBLAS(m_pDevice5.Get(), m_pCommand);
                 }
                 const auto& materials = currEntity->pMeshRenderer->m_pModel->materials;
                 for (auto& mesh : currEntity->pMeshRenderer->m_pModel->meshes)
@@ -343,8 +343,8 @@ namespace ElysiaRenderer
             GenerateTLAS(allEntities);
             if (!m_pRTPSO || !m_pGlobalRootSig)
             {
-                CreateRaytracingPipeline(m_pGlobalRootSig, allEntities);
-                m_stbHelper.Build(m_pDevice->GetDevice(), m_pRTPSO);
+                CreateRaytracingPipeline(m_pGlobalRootSig.Get(), allEntities);
+                m_stbHelper.Build(m_pDevice->GetDevice(), m_pRTPSO.Get());
             }
 
             const Entity* pEntity = SceneManager::GetInstance().GetEntities()[0].get();
@@ -709,7 +709,7 @@ namespace ElysiaRenderer
     {
         PIXHelper pix(m_pCommand->GetCommandList(), "Generate Ray");
 
-        m_pCommand->GetCommandList()->SetPipelineState1(m_pRTPSO);
+        m_pCommand->GetCommandList()->SetPipelineState1(m_pRTPSO.Get());
         struct alignas(16)
         {
             Vector4 g_GridSpacing;
@@ -752,7 +752,7 @@ namespace ElysiaRenderer
         m_pCommand->AddBarrier(*m_pGIDataBuffer, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
         {
             assert(m_pGlobalRootSig != nullptr);
-            m_pCommand->GetCommandList()->SetComputeRootSignature(m_pGlobalRootSig);
+            m_pCommand->GetCommandList()->SetComputeRootSignature(m_pGlobalRootSig.Get());
 
             constantData =
             {
@@ -1396,16 +1396,16 @@ namespace ElysiaRenderer
         //DebugDumpTLASInstances(instanceDescs, instanceNames);
     }
 
-    CComPtr<IDxcBlob> GIPass::CompileRaytracingLibrary(const std::wstring& fileName)
+    ComPtr<IDxcBlob> GIPass::CompileRaytracingLibrary(const std::wstring& fileName)
     {
         m_tempStrings.clear();
         m_tempStrings.reserve(20);
-        CComPtr<IDxcUtils> pUtils;
-        CComPtr<IDxcCompiler3> pCompiler;
+        ComPtr<IDxcUtils> pUtils;
+        ComPtr<IDxcCompiler3> pCompiler;
         ThrowIfFailed(DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&pUtils)));
         ThrowIfFailed(DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&pCompiler)));
 
-        CComPtr<IDxcIncludeHandler> pIncludeHandler;
+        ComPtr<IDxcIncludeHandler> pIncludeHandler;
         ThrowIfFailed(pUtils->CreateDefaultIncludeHandler(&pIncludeHandler));
 
         WCHAR assetsPath[512];
@@ -1413,7 +1413,7 @@ namespace ElysiaRenderer
         auto path = ElysiaHelper::GetAssetFullPath(assetsPath, fileName.c_str());
 
         // 1. 读取文件内容
-        CComPtr<IDxcBlobEncoding> pSource;
+        ComPtr<IDxcBlobEncoding> pSource;
         ThrowIfFailed(pUtils->LoadFile(path.c_str(), nullptr, &pSource));
 
         auto shaderDir = std::filesystem::path(assetsPath).wstring();
@@ -1448,11 +1448,11 @@ namespace ElysiaRenderer
         sourceBuffer.Encoding = DXC_CP_UTF8;
 
         // 3. 执行编译
-        CComPtr<IDxcResult> pResults;
+        ComPtr<IDxcResult> pResults;
         auto hr = (pCompiler->Compile(&sourceBuffer,
                                       arguments.data(),
                                       (uint32_t)arguments.size(),
-                                      pIncludeHandler,
+                                      pIncludeHandler.Get(),
                                       IID_PPV_ARGS(&pResults)));
         if (FAILED(hr))
         {
@@ -1462,7 +1462,7 @@ namespace ElysiaRenderer
             // also try to get any error text returned in pResults (sometimes present even if Compile returned failure)
             if (pResults)
             {
-                CComPtr<IDxcBlobUtf8> pErrors;
+                ComPtr<IDxcBlobUtf8> pErrors;
                 if (SUCCEEDED(
                     pResults->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&pErrors), nullptr)) && pErrors
                     && pErrors->GetStringLength() > 0)
@@ -1476,7 +1476,7 @@ namespace ElysiaRenderer
         }
 
         // 4. 检查错误
-        CComPtr<IDxcBlobUtf8> pErrors;
+        ComPtr<IDxcBlobUtf8> pErrors;
         pResults->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&pErrors), nullptr);
         if (pErrors != nullptr && pErrors->GetStringLength() != 0)
             wprintf(L"Warnings and Errors:\n%S\n", pErrors->GetStringPointer());
@@ -1488,8 +1488,8 @@ namespace ElysiaRenderer
             wprintf(L"Compilation Failed\n");
         }
 
-        CComPtr<IDxcBlob> pShader = nullptr;
-        CComPtr<IDxcBlobUtf16> pShaderName = nullptr;
+        ComPtr<IDxcBlob> pShader = nullptr;
+        ComPtr<IDxcBlobUtf16> pShaderName = nullptr;
         pResults->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&pShader), nullptr);
         if (pShader != nullptr)
         {
@@ -1508,8 +1508,8 @@ namespace ElysiaRenderer
         //
         // Save pdb.
         //
-        CComPtr<IDxcBlob> pPDB = nullptr;
-        CComPtr<IDxcBlobUtf16> pPDBName = nullptr;
+        ComPtr<IDxcBlob> pPDB = nullptr;
+        ComPtr<IDxcBlobUtf16> pPDBName = nullptr;
         pResults->GetOutput(DXC_OUT_PDB, IID_PPV_ARGS(&pPDB), &pPDBName);
         if (pPDB != nullptr && pPDBName != nullptr)
         {
@@ -1529,7 +1529,7 @@ namespace ElysiaRenderer
             }
         }
 
-        CComPtr<IDxcBlob> pHash = nullptr;
+        ComPtr<IDxcBlob> pHash = nullptr;
         pResults->GetOutput(DXC_OUT_SHADER_HASH, IID_PPV_ARGS(&pHash), nullptr);
         if (pHash != nullptr && pHash->GetBufferSize() >= 16)
         {
@@ -1540,9 +1540,9 @@ namespace ElysiaRenderer
             wprintf(L"\n");
         }
 
-        CComPtr<IDxcBlob> pHashDigestBlob = nullptr;
-        CComPtr<IDxcBlob> pDebugDxilContainer = nullptr;
-        if (SUCCEEDED(pUtils->GetPDBContents(pPDB, &pHashDigestBlob, &pDebugDxilContainer)))
+        ComPtr<IDxcBlob> pHashDigestBlob = nullptr;
+        ComPtr<IDxcBlob> pDebugDxilContainer = nullptr;
+        if (SUCCEEDED(pUtils->GetPDBContents(pPDB.Get(), &pHashDigestBlob, &pDebugDxilContainer)))
         {
             // This API returns the raw hash digest, rather than a DxcShaderHash structure.
             // This will be the same as the DxcShaderHash::HashDigest returned from
@@ -1611,7 +1611,7 @@ namespace ElysiaRenderer
         if (SUCCEEDED(hr))
         {
             // 构建成功后，提取 Shader ID 用于SBTHelper
-            CComPtr<ID3D12StateObjectProperties> pRTProps;
+            ComPtr<ID3D12StateObjectProperties> pRTProps;
             m_pRTPSO->QueryInterface(IID_PPV_ARGS(&pRTProps));
 
             m_stbHelper.AddRayGen(pRTProps->GetShaderIdentifier(L"GenerateRayMain"));
@@ -1682,8 +1682,8 @@ namespace ElysiaRenderer
                         rsFlags);
 
         // 3. 序列化并创建
-        CComPtr<ID3DBlob> signature;
-        CComPtr<ID3DBlob> error;
+        ComPtr<ID3DBlob> signature;
+        ComPtr<ID3DBlob> error;
         HRESULT hr = D3D12SerializeVersionedRootSignature(&rsDesc, &signature, &error);
 
         if (FAILED(hr))

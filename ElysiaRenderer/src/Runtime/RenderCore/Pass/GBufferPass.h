@@ -14,8 +14,7 @@ namespace ElysiaRenderer
     PASS(CS_GBuffer_COPY_DEPTH,     "public\\CS_GBufferHIZ.hlsl",       true,  GBuffer_Copy_Depth)\
     PASS(CS_GBuffer_HIZ,            "public\\CS_GBufferHIZ.hlsl",       true,  GBuffer_HIZ)\
     PASS(CS_CLEAR_COUNTER_BUFFER,   "public\\CS_GBufferCulling.hlsl",   true,  ClearCounterBuffer)\
-    PASS(CS_GBUFFER_CULLING_PASS,   "public\\CS_GBufferCulling.hlsl",   true,  Gbuffer_Culling)\
-    PASS(CS_PRE_INTEGRATE_SSS,      "public\\PreGen\\CS_PreIntegrateSSS.hlsl",   true,  PreIntegrateSSS)
+    PASS(CS_GBUFFER_CULLING_PASS,   "public\\CS_GBufferCulling.hlsl",   true,  Gbuffer_Culling)
 
     class GBufferPass : public BasePass
     {
@@ -122,7 +121,7 @@ namespace ElysiaRenderer
             static inline size_t g_TotalObjectCount = PropertyToID(L"g_TotalObjectCount");
             static inline size_t g_GBufferHIZSourceTexIndex = PropertyToID(L"g_GBufferHIZSourceTexIndex");
             static inline size_t g_GBufferHIZTargetTexIndex = PropertyToID(L"g_GBufferHIZTargetTexIndex");
-            static inline size_t g_PreIntegrateSSSLUT = PropertyToID(L"g_PreIntegrateSSSLUT");
+
 
             static inline size_t g_TargetSize = PropertyToID(L"g_TargetSize");
             static inline size_t g_SourceSize = PropertyToID(L"g_SourceSize");
@@ -209,7 +208,7 @@ namespace ElysiaRenderer
         BufferHandle m_pVisbibleIndexBuffer;
         RenderTexture* m_pHIZTex;
         static inline bool m_isFirstFrame = true;
-        CComPtr<ID3D12CommandSignature> m_pCommandSignature;
+        ComPtr<ID3D12CommandSignature> m_pCommandSignature;
 
         std::vector<RenderItem> m_cullRenderList;
         AABBLoader m_aabbLoader;
@@ -226,6 +225,7 @@ namespace ElysiaRenderer
         void CopyDepth();
         void DoHIZ();
         void DoPreIntegrateSSSLUT();
+        void DoIntegrateSSSNDFLUT();
 
         void ClearCounterBuffer();
         // 从 ViewProjection 矩阵提取 6 个平面

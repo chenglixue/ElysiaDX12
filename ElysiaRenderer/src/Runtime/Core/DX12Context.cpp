@@ -63,11 +63,11 @@ namespace ElysiaCore
             BindDescriptorHeaps(currFrameID);
         }
     }
-    void DX12Context::Reset(CComPtr<ID3D12PipelineState> pipelineState)
+    void DX12Context::Reset(ComPtr<ID3D12PipelineState> pipelineState)
     {
         UINT currFrameID = m_device->GetFrameID();
         m_commandAllocators[currFrameID]->Reset();
-        m_commandList->Reset(m_commandAllocators[currFrameID], pipelineState);
+        m_commandList->Reset(m_commandAllocators[currFrameID], pipelineState.Get());
 
         if (m_contextType != D3D12_COMMAND_LIST_TYPE_COPY)
         {
@@ -94,7 +94,7 @@ namespace ElysiaCore
             // Describes the transition of subresources between different usages
             barrierDesc.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
             barrierDesc.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-            barrierDesc.Transition = {resource.GetResource(),
+            barrierDesc.Transition = {resource.GetResource().Get(),
                                       D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES, oldState,
                                       newState};
 
@@ -127,7 +127,7 @@ namespace ElysiaCore
                 // Describes the transition of subresources between different usages
                 barrierDesc.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
                 barrierDesc.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-                barrierDesc.Transition = {resource.GetResource(),
+                barrierDesc.Transition = {resource.GetResource().Get(),
                                           D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES, oldState,
                                           newStates[i]};
 
@@ -159,7 +159,7 @@ namespace ElysiaCore
             // Describes the transition of subresources between different usages
             barrierDesc.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
             barrierDesc.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-            barrierDesc.Transition = {resource->GetResource(),
+            barrierDesc.Transition = {resource->GetResource().Get(),
                                       D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES, oldState,
                                       newState};
 
@@ -194,7 +194,7 @@ namespace ElysiaCore
             // Describes the transition of subresources between different usages
             barrierDesc.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
             barrierDesc.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-            barrierDesc.Transition = {resource->GetResource(), subresourceIndex, oldState,
+            barrierDesc.Transition = {resource->GetResource().Get(), subresourceIndex, oldState,
                                       newState};
 
             resource->SetUsageState(newState, mipmapNum);
@@ -220,7 +220,7 @@ namespace ElysiaCore
 
         barrierDesc.Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
         barrierDesc.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-        barrierDesc.UAV.pResource = resource->GetResource();
+        barrierDesc.UAV.pResource = resource->GetResource().Get();
 
         if (isFlush)
         {
@@ -242,7 +242,7 @@ namespace ElysiaCore
 
         barrierDesc.Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
         barrierDesc.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-        barrierDesc.UAV.pResource = resource->GetResource();
+        barrierDesc.UAV.pResource = resource->GetResource().Get();
 
         if (isFlush)
         {
@@ -279,7 +279,7 @@ namespace ElysiaCore
             // }
 
             D3D12_TEXTURE_COPY_LOCATION destLocation{};
-            destLocation.pResource = dest.GetResource();
+            destLocation.pResource = dest.GetResource().Get();
             destLocation.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
             destLocation.SubresourceIndex = currSubResourceIndex;
 
@@ -299,9 +299,9 @@ namespace ElysiaCore
                                        UINT64 sourceOffset,
                                        UINT64 numBytes)
     {
-        m_commandList->CopyBufferRegion(destination.GetResource(),
+        m_commandList->CopyBufferRegion(destination.GetResource().Get(),
                                         destOffset,
-                                        source.GetResource(),
+                                        source.GetResource().Get(),
                                         sourceOffset,
                                         numBytes);
     }

@@ -18,6 +18,7 @@
 #include "Runtime/RenderCore/TextureManager.h"
 #include "Runtime/Resource/Model/ModelManager.h"
 #include "ECS/Entity.h"
+#include "Runtime/RenderCore/BakeManager.h"
 #include "Runtime/RenderCore/DX12Camera.h"
 #include "Runtime/RenderCore/RenderTexture.h"
 #include "Runtime/RenderCore/Pass/GBufferPass.h"
@@ -80,6 +81,7 @@ namespace ElysiaEngine
         assert(_CrtCheckMemory());
 #endif
 
+        BakeManager::GetInstance().Init(m_pDevice);
         BufferManager::GetInstance().Init(m_pDevice);
         TextureManager::GetInstance().Init(m_pDevice);
         RenderTargetManager::GetInstance().Init(m_pDevice);
@@ -286,6 +288,7 @@ namespace ElysiaEngine
         BuildUISceneHierarchy();
         BuildUIViewport();
         BuildUIInspector();
+        BuildMainMenuBar();
         BuildUIRenderSetting();
     }
     void ElysiaFrame::SetupDockSpace()
@@ -459,6 +462,34 @@ namespace ElysiaEngine
 
         ImGui::End();
     }
+    void ElysiaFrame::BuildMainMenuBar()
+    {
+        if (ImGui::BeginMainMenuBar())
+        {
+            if (ImGui::BeginMenu("Bake"))
+            {
+                if (ImGui::MenuItem("Pre-integrate SSS LUT"))
+                {
+                    BakeManager::GetInstance().RequestMasks(EBakeTaskFlags::SSSLut);
+                }
+
+                if (ImGui::MenuItem("Pre-integrate SSS NDF LUT"))
+                {
+                    BakeManager::GetInstance().RequestMasks(EBakeTaskFlags::SSSNDFLut);
+                }
+
+                ImGui::Separator();
+
+                if (ImGui::MenuItem("Bake All Pre-computations"))
+                {
+                    BakeManager::GetInstance().RequestMasks(EBakeTaskFlags::All);
+                }
+
+                ImGui::EndMenu();
+            }
+        }
+        ImGui::EndMainMenuBar();
+    }
     void ElysiaFrame::BuildUIRenderSetting()
     {
         ImGui::Begin("Render Settings");
@@ -531,7 +562,14 @@ namespace ElysiaEngine
 
         if (ImGui::CollapsingHeader("PBR Data"))
         {
-            ElysiaRenderer::EnumCombo("Shading Model", &pUserData.shadingModelID);
+            if (ElysiaRenderer::EnumCombo("Shading Model", &pUserData.shadingModelID))
+            {
+                m_pRenderer->OnUpdateDisplayDependentResources(&m_swapChain);
+            }
+            if (pUserData.shadingModelID == ShadingModel::Preintegrated_Skin)
+            {
+                ImGui::SliderFloat("Curve Scale", &pUserData.CurveScale, 0.f, 2.f);
+            }
             ImGui::ColorEdit3("Base Color Tint",
                               (float*)&pUserData.BaseColorTint,
                               ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_AlphaPreview |
@@ -657,8 +695,8 @@ namespace ElysiaEngine
             if (ImGui::CollapsingHeader("Bloom"))
             {
                 ImGui::Checkbox("Enable Bloom ", &pUserData.bloomParameter.enable);
-                ImGui::SliderFloat("Bloom Radius", &pUserData.bloomParameter.radius, 0.f, 10.f);
-                ImGui::SliderFloat("Bloom Intensity", &pUserData.bloomParameter.intensity, 0.f, 5.f);
+                ImGui::SliderFloat("Bloom Radius", &pUserData.bloomParameter.radius, 0.f, 2.f);
+                ImGui::SliderFloat("Bloom Intensity", &pUserData.bloomParameter.intensity, 0.f, 3.f);
             }
 
             if (ImGui::CollapsingHeader("TAA"))

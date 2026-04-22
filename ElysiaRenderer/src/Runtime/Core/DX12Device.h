@@ -184,8 +184,8 @@ namespace ElysiaCore
         void InitializeDeviceResources();
         void ProcessDestruction(UINT frameIndex);
 
-        ShaderReflectionData ReflectShaderStage(CComPtr<IDxcResult> pResults,
-                                                CComPtr<IDxcUtils> pUtils);
+        ShaderReflectionData ReflectShaderStage(ComPtr<IDxcResult> pResults,
+                                                ComPtr<IDxcUtils> pUtils);
         ShaderBytecode CompileShaderStage(
             const std::wstring& path,
             const std::wstring& entry,

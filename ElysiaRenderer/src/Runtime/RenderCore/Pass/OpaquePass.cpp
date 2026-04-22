@@ -43,6 +43,11 @@ namespace ElysiaRenderer
         m_cameraWidth = std::floor(m_displaySize.x * UserData::GetInstance().taaParameter.sampleRate);
         m_cameraHeight = std::floor(m_displaySize.y * UserData::GetInstance().taaParameter.sampleRate);
 
+        m_PreIntegrateSSSLUT = TextureManager::GetInstance().LoadResidentTexture(
+            L"Tex\\Pre_Integrate_SSS_LUT.dds");
+        m_PreIntegrateSSSNDFLUT = TextureManager::GetInstance().LoadResidentTexture(
+            L"Tex\\Integrate_SSS_NDF_LUT.dds");
+
         m_shaderPasses.assign(std::begin(m_PassData), std::end(m_PassData));
         if (!m_pMaterial)
         {
@@ -147,6 +152,13 @@ namespace ElysiaRenderer
                              ShadowProjectionPass::m_pShadowMaskRTs[ShadowProjectionPass::m_writeIndex]->
                              GetSRVResourceHeapIndex(),
                              passID);
+        m_pMaterial->SetUINT(ShaderIDs::g_PreIntegrateSSSLUTIndex,
+                             m_PreIntegrateSSSLUT.GetResourceHeapIndex(),
+                             passID);
+        m_pMaterial->SetUINT(ShaderIDs::g_PreIntegrateSSSNDFLUTIndex,
+                             m_PreIntegrateSSSNDFLUT.GetResourceHeapIndex(),
+                             passID);
+        m_pMaterial->SetFloat(ShaderIDs::g_CurveScale, UserData::GetInstance().CurveScale, passID);
 
         SetSpaceResource(passData, PER_PASS_SPACE);
         SetSpaceResource(passData, PER_FRAME_SPACE);

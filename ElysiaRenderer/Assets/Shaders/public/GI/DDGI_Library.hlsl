@@ -1,7 +1,6 @@
 #include "private\ShadingCommon.hlsl"
 #include "private\DDGICommon.hlsli"
 #include <private\Light.hlsl>
-#include <private\LightCommon.hlsl>
 #include "public\GI\Irradiance.hlsl"
 
 #define GROUP_SIZE 8

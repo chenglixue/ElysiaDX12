@@ -19,6 +19,10 @@
 #include <windowsx.h>
 #include <wrl.h>
 #include <shellapi.h>
+#include <wrl/client.h>
+template <typename T>
+using ComPtr = Microsoft::WRL::ComPtr<T>;
+
 #include <d3d12.h>
 #include <dxgi1_6.h>
 #include <D3Dcompiler.h>
@@ -65,8 +69,6 @@
 
 #include "magic_enum/magic_enum.hpp"
 #include "ThirdParty/SimpleMath/SimpleMath.h"
-#include <atlbase.h>        // Common COM helpers.
-
 //#include <WICTextureLoader.h>
 
 using namespace DirectX;

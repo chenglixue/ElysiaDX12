@@ -9,10 +9,10 @@ namespace ElysiaCore
     class DX12BufferResource : public DX12GPUResource
     {
     public:
-        DX12BufferResource(CComPtr<ID3D12Resource> resource, D3D12_RESOURCE_STATES usageState);
-        DX12BufferResource(CComPtr<ID3D12Resource> resource,
+        DX12BufferResource(ComPtr<ID3D12Resource> resource, D3D12_RESOURCE_STATES usageState);
+        DX12BufferResource(ComPtr<ID3D12Resource> resource,
                            D3D12_RESOURCE_STATES usageState,
-                           CComPtr<D3D12MA::Allocation> allocation);
+            ComPtr<D3D12MA::Allocation> allocation);
 
         ~DX12BufferResource();
 

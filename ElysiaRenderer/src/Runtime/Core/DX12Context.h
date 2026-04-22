@@ -30,7 +30,7 @@ namespace ElysiaCore
         ID3D12GraphicsCommandList4* GetCommandList() const;
 
         void Reset();
-        void Reset(CComPtr<ID3D12PipelineState> pipelineState);
+        void Reset(ComPtr<ID3D12PipelineState> pipelineState);
         void AddBarrier(DX12GPUResource& resource, D3D12_RESOURCE_STATES newState, bool isFlush = true);
         void AddBarrier(DX12GPUResource& resource, std::vector<D3D12_RESOURCE_STATES>& newState, bool isFlush = true);
         void AddBarrier(RenderTexture* resource, D3D12_RESOURCE_STATES newState, bool isFlush = true);
