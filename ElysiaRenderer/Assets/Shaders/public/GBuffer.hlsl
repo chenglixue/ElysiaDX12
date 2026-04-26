@@ -186,6 +186,7 @@ FEncodeGBufferData GetEncodeGBufferData(FInputParams inputParams, float3 toLight
                                             WarpLinearSampler,
                                             g_MipBias)
                        * float4(currMeshData.baseColorTint.xyz, currMeshData.opacity);
+    baseColor = saturate(baseColor);
     float ditherClip = ComputeTemporalDither(inputParams.PixelPos, frameIndex);
     clip(baseColor.a - currMeshData.cutoff);
 
@@ -205,7 +206,7 @@ FEncodeGBufferData GetEncodeGBufferData(FInputParams inputParams, float3 toLight
                                            inputParams.objectUV,
                                            WarpLinearSampler,
                                            g_MipBias).g;
-    roughness = saturate(currMeshData.roughnessIntensity);
+    roughness = saturate(max(0.02f, currMeshData.roughnessIntensity));
 
     o.BaseColor = baseColor.rgb;
     o.ShadingModelID = FLT_MAX;
@@ -215,7 +216,7 @@ FEncodeGBufferData GetEncodeGBufferData(FInputParams inputParams, float3 toLight
     o.AO = 1;
     o.Metallic = metallic;
     o.Roughness = roughness;
-    o.Specular = currMeshData.specular * 0.08f;
+    o.Specular = currMeshData.specular;
 
     o.WorldNormal = GetNormal(normalTS.rgb, TBN, currMeshData.normalIntensity);
     o.WorldTangent = TBN._m00_m01_m02;

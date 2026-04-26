@@ -29,25 +29,6 @@ float New_a2(float a2, float SinAlpha, float VoH)
     //return a2 + 0.25 * SinAlpha * ( a2 * 2 + 1 + SinAlpha ) / ( VoH + 0.001 );
 }
 
-float3 SpecularGGX(float Roughness,
-                   float3 SpecularColor,
-                   BxDFContext Context,
-                   half NoL,
-                   FAreaLight AreaLight)
-{
-    float3 o = 0.f;
-
-    float a2 = Pow4(Roughness);
-
-    float NDF = D_GGX(a2, Context.NoH);
-    float Vis = Vis_SmithJointApprox(a2, Context.NoV, NoL);
-    float F = UE_F_Schlick(SpecularColor, Context.VoH);
-
-    o = NDF * F * Vis;
-
-    return o;
-}
-
 float EnergyNormalization(inout float a2, float VoH, FAreaLight AreaLight)
 {
     if (AreaLight.SphereSinAlphaSoft > 0)
@@ -82,6 +63,25 @@ float EnergyNormalization(inout float a2, float VoH, FAreaLight AreaLight)
     return Energy;
 }
 
+float3 SpecularGGX(float Roughness,
+                   float3 SpecularColor,
+                   BxDFContext Context,
+                   half NoL,
+                   FAreaLight AreaLight)
+{
+    float3 o = 0.f;
+
+    float a2 = Pow4(Roughness);
+
+    float NDF = D_GGX(a2, Context.NoH);
+    float Vis = Vis_SmithJointApprox(a2, Context.NoV, NoL);
+    float F = UE_F_Schlick(SpecularColor, Context.VoH);
+
+    o = NDF * Vis * F;
+
+    return o;
+}
+
 FDirectLighting DefaultLitBxDF(MaterialData materialData,
                                float3 N,
                                float3 V,
@@ -108,15 +108,15 @@ FDirectLighting DefaultLitBxDF(MaterialData materialData,
     Lighting.Diffuse = Diffuse_Lambert(materialData.DiffuseColor);
     Lighting.Diffuse *= AreaLight.FalloffColor * Falloff * NoL * KD;
 
-    // Lighting.Specular = SpecularGGX(materialData.Roughness, materialData.SpecularColor, Context, NoL, AreaLight);
-    // Lighting.Specular *= AreaLight.FalloffColor * Falloff * NoL;
+    Lighting.Specular = SpecularGGX(materialData.Roughness, materialData.SpecularColor, Context, NoL, AreaLight);
+    Lighting.Specular *= AreaLight.FalloffColor * Falloff * NoL;
 
     FBxDFEnergyTerms energyTerm = ComputeFresnelEnergyTerms(
         GGXEnergyLookup(materialData.Roughness, NoV),
         materialData.SpecularColor);
 
-    // Lighting.Diffuse += ComputeEnergyPreservation(energyTerm);
-    // Lighting.Specular *= ComputeEnergyConservation(energyTerm);
+    Lighting.Diffuse += ComputeEnergyPreservation(energyTerm);
+    Lighting.Specular *= ComputeEnergyConservation(energyTerm);
 
     return Lighting;
 }
@@ -132,20 +132,20 @@ FDirectLighting DefaultLitBxDF(FDecodeGBufferData GBufferData,
 {
     FDirectLighting Lighting = (FDirectLighting)0;
     BxDFContext Context = (BxDFContext)0;
-    NoL = max(0.f, NoL);
 
     Init(Context, N, V, L);
     float NoV, VoH, NoH;
     NoV = Context.NoV;
     VoH = Context.VoH;
     NoH = Context.NoH;
+    Context.NoH = max(0.f, dot(N, normalize(V + L)));
 
     //SphereMaxNoH(Context, AreaLight.SphereSinAlpha, true);
-    Context.NoV = saturate(abs(Context.NoV) + 1e-5);
+    Context.NoV = saturate(NoV + 1e-5);
 
     float3 KD = 1 - UE_F_Schlick(GBufferData.SpecularColor, Context.VoH);
     Lighting.Diffuse = Diffuse_Lambert(GBufferData.DiffuseColor);
-    Lighting.Diffuse *= AreaLight.FalloffColor * Falloff * NoL;
+    Lighting.Diffuse *= AreaLight.FalloffColor * Falloff * NoL * KD;
 
     Lighting.Specular = SpecularGGX(GBufferData.Roughness,
                                     GBufferData.SpecularColor,

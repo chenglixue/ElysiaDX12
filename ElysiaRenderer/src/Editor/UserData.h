@@ -58,7 +58,7 @@ namespace ElysiaRenderer
     {
         //L"glTF\\Sponza\\Sponza.gltf",
         //L"glTF\\Suzanne\\Suzanne.gltf",
-        L"glTF\\trump_head\\trump_head.gltf",
+        L"glTF\\SM_MatPreviewMesh_01\\SM_MatPreviewMesh_01.gltf",
         //L"glTF\\DragonAttenuation\\DragonAttenuation.gltf",
     };
 

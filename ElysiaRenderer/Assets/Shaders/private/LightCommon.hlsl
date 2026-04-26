@@ -68,7 +68,7 @@ FLightAccumulator AccumulateDynamicLighting(FInputParams inputData,
     Shadow.SurfaceShadow = AO * shadow;
 
     FDirectLighting directLight = (FDirectLighting)0;
-    float NoL = max(0, dot(N, L));
+    float NoL = saturate(dot(N, L));
     directLight = EvaluateBxDF(GBufferData, inputData.PositionWS, N, V, L, NoL, Shadow);
 
     LightAccumulator_AddSplit(o,
@@ -155,7 +155,7 @@ float4 GetDynamicLighting(FInputParams inputData,
     o += lighting.SpecularLighting;
     o.a = GBufferData.Opacity;
 
-    return o;
+    return (o);
 }
 
 #endif

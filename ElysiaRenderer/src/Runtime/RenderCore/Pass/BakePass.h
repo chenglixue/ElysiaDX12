@@ -15,6 +15,7 @@ namespace ElysiaRenderer
         {
             static inline size_t PreIntegrateSSSLUTID = PropertyToID(L"Pre Integrate SSS LUT");
             static inline size_t IntegrateSSSNDFLUTID = PropertyToID(L"Integrate SSS NDF LUT");
+            static inline size_t PreIntegrateDiffuseID = PropertyToID(L"Pre Integrate Diffuse");
         };
 
         BakePass();
@@ -54,6 +55,7 @@ namespace ElysiaRenderer
         UINT m_cameraHeight;
         RenderTexture* m_pPreIntegrateSSSLUT = nullptr;
         RenderTexture* m_pNDFLUT = nullptr;
+        RenderTexture* m_pPreIntegrateDiffuse = nullptr;
 
         struct ShaderIDs
         {

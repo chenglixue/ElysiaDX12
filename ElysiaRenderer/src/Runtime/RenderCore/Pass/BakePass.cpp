@@ -60,6 +60,14 @@ namespace ElysiaRenderer
             RenderResource::GetInstance().
             GetPropertyName(RenderTextureIDs::IntegrateSSSNDFLUTID));
 
+        m_pPreIntegrateDiffuse = RenderTargetManager::GetInstance().CreateRWRenderTexture(
+            static_cast<UINT64>(1024),
+            static_cast<UINT64>(1024),
+            DXGI_FORMAT_R16G16B16A16_FLOAT,
+            true,
+            RenderResource::GetInstance().
+            GetPropertyName(RenderTextureIDs::PreIntegrateDiffuseID));
+
         m_shaderPasses.assign(std::begin(m_PassData), std::end(m_PassData));
         if (!m_pMaterial)
         {

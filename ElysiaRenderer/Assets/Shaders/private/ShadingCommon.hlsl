@@ -184,7 +184,7 @@ FDecodeGBufferData DecodeGBufferData(float4 InGBuffer0,
     o.Anisotropy = InGBuffer2.a;
 
     o.WorldNormal = DecodeNormal(InGBuffer3.rgb);
-    o.WorldNormal = normalize(o.WorldNormal);
+    // o.WorldNormal = normalize(o.WorldNormal);
 
     o.SceneColor = InGBuffer4.rgb;
     o.Opacity = InGBuffer4.a;

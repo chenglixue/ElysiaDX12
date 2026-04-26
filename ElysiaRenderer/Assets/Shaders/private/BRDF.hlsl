@@ -10,16 +10,16 @@ void Init(inout BxDFContext Context, float3 N, float3 V, float3 L)
     Context.NoL = dot(N, L);
     Context.NoV = dot(N, V);
     Context.VoL = dot(V, L);
-    float InvLenH = rsqrt(2. + 2. * Context.VoL);
+    float InvLenH = rsqrt(2 + 2 * Context.VoL);
     Context.NoH = saturate((Context.NoL + Context.NoV) * InvLenH);
     Context.VoH = saturate(InvLenH + InvLenH * Context.VoL);
 
-    Context.XoV = 0.0;
-    Context.XoL = 0.0;
-    Context.XoH = 0.0;
-    Context.YoV = 0.0;
-    Context.YoL = 0.0;
-    Context.YoH = 0.0;
+    Context.XoV = 0.0f;
+    Context.XoL = 0.0f;
+    Context.XoH = 0.0f;
+    Context.YoV = 0.0f;
+    Context.YoL = 0.0f;
+    Context.YoH = 0.0f;
 }
 
 // [ de Carpentier 2017, "Decima Engine: Advances in Lighting and AA" ]
@@ -219,8 +219,8 @@ float D_Beckmann(float a2, float NoH)
 // [Walter et al. 2007, "Microfacet models for refraction through rough surfaces"]
 float D_GGX(float a2, float NoH)
 {
-    float d = (NoH * a2 - NoH) * NoH + 1.f; // 2 mad
-    return a2 / (PI * d * d + 1e-4);        // 4 mul, 1 rcp
+    float d = (NoH * a2 - NoH) * NoH + 1; // 2 mad
+    return a2 / (PI * d * d);             // 4 mul, 1 rcp
 }
 
 float D_GGX_Mobile(float Roughness, float NoH)

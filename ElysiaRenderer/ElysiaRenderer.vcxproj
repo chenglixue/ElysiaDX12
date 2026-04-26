@@ -485,6 +485,7 @@
 		<None Include="Assets\Shaders\public\PreGen\CS_PreIntegrateSSS.hlsl">
 			<FileType>Document</FileType>
 		</None>
+		<ClCompile Include="Assets\Shaders\public\PreGen\CS_PreIntegrateGIDiffuse.hlsl"/>
 		<ClCompile Include="src\Editor\IMGUIDrawer.cpp">
 			<PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
 		</ClCompile>
