@@ -75,7 +75,8 @@ namespace ElysiaRenderer
     {
         std::lock_guard<std::mutex> lock(m_createMutex);
 
-        if (bufferCreationDesc.size <= 0) return nullptr;
+        if (bufferCreationDesc.size <= 0)
+            return nullptr;
 
         auto alignSize = AlignU32((UINT)bufferCreationDesc.size,
                                   D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);

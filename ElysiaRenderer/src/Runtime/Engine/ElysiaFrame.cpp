@@ -20,6 +20,7 @@
 #include "ECS/Entity.h"
 #include "Runtime/RenderCore/BakeManager.h"
 #include "Runtime/RenderCore/DX12Camera.h"
+#include "Runtime/RenderCore/RenderPassResourceManager.h"
 #include "Runtime/RenderCore/RenderTexture.h"
 #include "Runtime/RenderCore/Pass/GBufferPass.h"
 #include "Runtime/RenderCore/Pass/GIPass.h"
@@ -89,6 +90,7 @@ namespace ElysiaEngine
         LightManager::GetInstance().Init(m_pDevice);
         PSOManager::GetInstance().Init(m_pDevice);
         SceneManager::GetInstance().Init(m_pDevice);
+        RenderPassResourceManager::GetInstance().Init(m_pDevice);
 
         m_pGraphicsContext = m_pDevice->CreateGraphicsContext();
         ElysiaEditor::ImGUI_Init(m_windowHwnd, m_pDevice, m_swapChain);

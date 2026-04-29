@@ -32,6 +32,7 @@ namespace ElysiaCore
         void Reset();
         void Reset(ComPtr<ID3D12PipelineState> pipelineState);
         void AddBarrier(DX12GPUResource& resource, D3D12_RESOURCE_STATES newState, bool isFlush = true);
+        void AddBarrier(DX12GPUResource* resource, D3D12_RESOURCE_STATES newState, bool isFlush = true);
         void AddBarrier(DX12GPUResource& resource, std::vector<D3D12_RESOURCE_STATES>& newState, bool isFlush = true);
         void AddBarrier(RenderTexture* resource, D3D12_RESOURCE_STATES newState, bool isFlush = true);
         void AddBarrier(RenderTexture* resource, D3D12_RESOURCE_STATES newState, UINT mipmapNum, bool isFlush = true);
@@ -40,10 +41,16 @@ namespace ElysiaCore
 
 
         void FlushBarrier();
-        void CopyTextureRegion(DX12GPUResource& destination, ID3D12Resource* source, size_t sourceOffset,
-                               SubResourceLayouts subResourceLayouts, UINT numSubResources);
-        void CopyBufferRegion(DX12GPUResource& destination, UINT64 destOffset,
-                              DX12GPUResource& source, UINT64 sourceOffset, UINT64 numBytes);
+        void CopyTextureRegion(DX12GPUResource& destination,
+                               ID3D12Resource* source,
+                               size_t sourceOffset,
+                               SubResourceLayouts subResourceLayouts,
+                               UINT numSubResources);
+        void CopyBufferRegion(DX12GPUResource& destination,
+                              UINT64 destOffset,
+                              DX12GPUResource& source,
+                              UINT64 sourceOffset,
+                              UINT64 numBytes);
         void BindDescriptorHeaps(UINT frameIndex);
 
     protected:

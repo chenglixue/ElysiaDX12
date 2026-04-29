@@ -324,6 +324,7 @@
 		<ClInclude Include="src\Runtime\RenderCore\Renderer.h"/>
 		<ClInclude Include="src\Runtime\RenderCore\RenderItem.h"/>
 		<ClInclude Include="src\Runtime\RenderCore\RenderResource.h"/>
+		<ClInclude Include="src\Runtime\RenderCore\RenderPassResourceManager.h"/>
 		<ClInclude Include="src\Runtime\RenderCore\RenderTargetManager.h"/>
 		<ClInclude Include="src\Runtime\RenderCore\RenderTexture.h"/>
 		<ClInclude Include="src\Runtime\RenderCore\RenderTextureUtility.h"/>
@@ -485,7 +486,9 @@
 		<None Include="Assets\Shaders\public\PreGen\CS_PreIntegrateSSS.hlsl">
 			<FileType>Document</FileType>
 		</None>
-		<ClCompile Include="Assets\Shaders\public\PreGen\CS_PreIntegrateGIDiffuse.hlsl"/>
+		<None Include="Assets\Shaders\public\PreGen\CS_SHCoefficients.hlsl">
+			<FileType>Document</FileType>
+		</None>
 		<ClCompile Include="src\Editor\IMGUIDrawer.cpp">
 			<PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
 		</ClCompile>
@@ -566,6 +569,7 @@
 		<ClCompile Include="src\Runtime\RenderCore\Renderer.cpp"/>
 		<ClCompile Include="src\Runtime\RenderCore\RenderItem.cpp"/>
 		<ClCompile Include="src\Runtime\RenderCore\RenderResource.cpp"/>
+		<ClCompile Include="src\Runtime\RenderCore\RenderPassResourceManager.cpp"/>
 		<ClCompile Include="src\Runtime\RenderCore\RenderTargetManager.cpp"/>
 		<ClCompile Include="src\Runtime\RenderCore\RenderTexture.cpp"/>
 		<ClCompile Include="src\Runtime\RenderCore\SceneManager.cpp"/>

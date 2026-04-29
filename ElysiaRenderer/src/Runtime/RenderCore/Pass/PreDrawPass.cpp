@@ -18,6 +18,7 @@
 
 #include "GBufferPass.h"
 #include "Editor/UserData.h"
+#include "Runtime/RenderCore/RenderPassResourceManager.h"
 #include "Runtime/RenderCore/TextureManager.h"
 
 namespace ElysiaRenderer
@@ -109,6 +110,15 @@ namespace ElysiaRenderer
             BufferManager::GetInstance().UploadBufferData(m_pDevice->GetUploadContext(), &pBufferData);
         }
 
+        m_shaderGlobalData =
+        {
+            .skyboxTex = TextureManager::GetInstance().LoadResidentTexture(L"Tex\\cubemap0.dds"),
+            .GGX_E_LUT_Index = TextureManager::GetInstance().LoadResidentTexture(L"Tex\\GGX_E_LUT.dds"),
+            .GGX_Eavg_LUT_Index = TextureManager::GetInstance().LoadResidentTexture(L"Tex\\GGX_Eavg_LUT.dds"),
+            .blueNoiseTexIndex = TextureManager::GetInstance().LoadResidentTexture(L"Tex\\blue_noise.dds")
+        };
+
+        RenderPassResourceManager::GetInstance().Create<ShaderGlobalData>(&m_shaderGlobalData);
     }
 
     void PreDrawPass::Render(FrameContext& context)
@@ -122,9 +132,11 @@ namespace ElysiaRenderer
         static std::uniform_real_distribution<float> dist(0.0f, 1.0f);
         auto randomSeed = dist(gen);
 
+        auto& shaderGlobalData = RenderPassResourceManager::GetInstance().Get<ShaderGlobalData>();
+
         auto GPUAddress = UploadFrameConstant(
             m_pDevice,
-            [this, &context, &screenPercentage, &randomSeed](CBVFrameVariable* dst)
+            [this, &context, &screenPercentage, &randomSeed, &shaderGlobalData](CBVFrameVariable* dst)
             {
                 *dst = RenderResource::GetInstance().GetCBVFrameVariable();
                 dst->cameraPosWS = CameraManager::GetInstance().GetMainCamera()->GetPosition4();
@@ -143,18 +155,10 @@ namespace ElysiaRenderer
 
                 dst->OpaqueColorIndex = m_pCameraColorRT->GetResourceHeapIndex();
                 dst->OpaqueDepthIndex = m_pCameraDepthRT->GetResourceHeapIndex();
-                dst->SkyboxTexIndex =
-                    TextureManager::GetInstance().LoadResidentTexture(L"Tex\\cubemap0.dds").
-                                                  GetResourceHeapIndex();
-                dst->GGX_E_LUT_Index =
-                    TextureManager::GetInstance().LoadResidentTexture(L"Tex\\GGX_E_LUT.dds").
-                                                  GetResourceHeapIndex();
-                dst->GGX_Eavg_LUT_Index =
-                    TextureManager::GetInstance().LoadResidentTexture(L"Tex\\GGX_Eavg_LUT.dds").
-                                                  GetResourceHeapIndex();
-                dst->BlueNoiseTexIndex =
-                    TextureManager::GetInstance().LoadResidentTexture(L"Tex\\blue_noise.dds").
-                                                  GetResourceHeapIndex();
+                dst->SkyboxTexIndex = shaderGlobalData.skyboxTex.GetResourceHeapIndex();
+                dst->GGX_E_LUT_Index = shaderGlobalData.GGX_E_LUT_Index.GetResourceHeapIndex();
+                dst->GGX_Eavg_LUT_Index = shaderGlobalData.GGX_Eavg_LUT_Index.GetResourceHeapIndex();
+                dst->BlueNoiseTexIndex = shaderGlobalData.blueNoiseTexIndex.GetResourceHeapIndex();
                 dst->ShadowTexIndex = LightManager::GetInstance().GetMainShadowRT()->
                                                                   GetResourceHeapIndex();
                 dst->GBuffer0Index = RenderTargetManager::GetInstance()

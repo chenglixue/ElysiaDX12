@@ -107,6 +107,37 @@ namespace ElysiaCore
         }
     }
 
+    void DX12Context::AddBarrier(DX12GPUResource* resource,
+                                 D3D12_RESOURCE_STATES newState,
+                                 bool isFlush)
+    {
+        if (m_numQueuedBarriers >= MAX_QUEUED_BARRIERS)
+        {
+            FlushBarrier();
+        }
+
+        D3D12_RESOURCE_STATES oldState = resource->GetUsageState();
+        if (oldState != newState)
+        {
+            D3D12_RESOURCE_BARRIER& barrierDesc = m_resourceBarriers[m_numQueuedBarriers];
+            m_numQueuedBarriers ++;
+
+            // Describes the transition of subresources between different usages
+            barrierDesc.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+            barrierDesc.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+            barrierDesc.Transition = {resource->GetResource().Get(),
+                                      D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES, oldState,
+                                      newState};
+
+            resource->SetUsageState(newState);
+        }
+
+        if (isFlush)
+        {
+            FlushBarrier();
+        }
+    }
+
     void DX12Context::AddBarrier(DX12GPUResource& resource,
                                  std::vector<D3D12_RESOURCE_STATES>& newStates,
                                  bool isFlush)

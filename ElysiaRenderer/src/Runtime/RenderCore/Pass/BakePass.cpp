@@ -20,6 +20,7 @@
 #include "Runtime/RenderCore/RenderTargetManager.h"
 #include "Runtime/RenderCore/CameraManager.h"
 #include "Runtime/RenderCore/PSOManager.h"
+#include "Runtime/RenderCore/RenderPassResourceManager.h"
 #include "Runtime/RenderCore/SceneManager.h"
 #include "Runtime/RenderCore/ShaderVariantManager.h"
 
@@ -44,29 +45,59 @@ namespace ElysiaRenderer
         m_cameraWidth = std::floor(m_displaySize.x * UserData::GetInstance().taaParameter.sampleRate);
         m_cameraHeight = std::floor(m_displaySize.y * UserData::GetInstance().taaParameter.sampleRate);
 
-        m_pPreIntegrateSSSLUT = RenderTargetManager::GetInstance().CreateRWRenderTexture(
-            static_cast<UINT64>(1024),
-            static_cast<UINT64>(1024),
-            DXGI_FORMAT_R16G16B16A16_FLOAT,
-            true,
-            RenderResource::GetInstance().
-            GetPropertyName(RenderTextureIDs::PreIntegrateSSSLUTID));
+        m_subsurfaceScatterData =
+        {
+            .pPreIntegrateSSSLUT = RenderTargetManager::GetInstance().CreateRWRenderTexture(
+                static_cast<UINT64>(1024),
+                static_cast<UINT64>(1024),
+                DXGI_FORMAT_R16G16B16A16_FLOAT,
+                true,
+                RenderResource::GetInstance().
+                GetPropertyName(RenderTextureIDs::PreIntegrateSSSLUTID)),
+            .pNDFLUT = RenderTargetManager::GetInstance().CreateRWRenderTexture(
+                static_cast<UINT64>(1024),
+                static_cast<UINT64>(1024),
+                DXGI_FORMAT_R16_FLOAT,
+                true,
+                RenderResource::GetInstance().
+                GetPropertyName(RenderTextureIDs::IntegrateSSSNDFLUTID))
+        };
+        RenderPassResourceManager::GetInstance().Create<SubsurfaceScatterData>(&m_subsurfaceScatterData);
 
-        m_pNDFLUT = RenderTargetManager::GetInstance().CreateRWRenderTexture(
-            static_cast<UINT64>(1024),
-            static_cast<UINT64>(1024),
-            DXGI_FORMAT_R16_FLOAT,
-            true,
-            RenderResource::GetInstance().
-            GetPropertyName(RenderTextureIDs::IntegrateSSSNDFLUTID));
+        auto skyboxTex = RenderPassResourceManager::GetInstance().Get<ShaderGlobalData>().skyboxTex;
+        UINT groupCountX = m_SHCoefficientsTempCount.x = CeilDivide(skyboxTex.GetWidth(), 8);
+        UINT groupCountY = m_SHCoefficientsTempCount.y = CeilDivide(skyboxTex.GetHeight(), 8);
+        UINT groupCountZ = m_SHCoefficientsTempCount.z = 6;
+        auto SHCoefficientsTempCount = groupCountX * groupCountY * groupCountZ;
+        if (!m_pSHCoefficientsTempBuffer || m_pSHCoefficientsTempBuffer->GetResourceDesc().Width != AlignU32(
+                (UINT)sizeof(SHCoefficientData) * SHCoefficientsTempCount,
+                D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT))
+        {
+            m_pSHCoefficientsTempBuffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc
+            {
+                .name = L"SH Coefficients Temp Buffer",
+                .stride = sizeof(SHCoefficientData),
+                .size = sizeof(SHCoefficientData) * SHCoefficientsTempCount,
+                .viewFlags = GPUResourceFlags::SRV | GPUResourceFlags::UAV,
+                .accessFlags = BufferAccessFlags::GPUOnly,
+                .isRawAccess = false
+            });
+        }
 
-        m_pPreIntegrateDiffuse = RenderTargetManager::GetInstance().CreateRWRenderTexture(
-            static_cast<UINT64>(1024),
-            static_cast<UINT64>(1024),
-            DXGI_FORMAT_R16G16B16A16_FLOAT,
-            true,
-            RenderResource::GetInstance().
-            GetPropertyName(RenderTextureIDs::PreIntegrateDiffuseID));
+        if (!m_GIData.pSHCoefficientsBuffer)
+        {
+            m_GIData.pSHCoefficientsBuffer = BufferManager::GetInstance().CreateBuffer(
+                BufferCreationDesc
+                {
+                    .name = L"SH Coefficients Buffer",
+                    .stride = sizeof(Vector4),
+                    .size = sizeof(Vector4) * 9,
+                    .viewFlags = GPUResourceFlags::SRV | GPUResourceFlags::UAV,
+                    .accessFlags = BufferAccessFlags::GPUOnly,
+                    .isRawAccess = false
+                });
+        }
+        RenderPassResourceManager::GetInstance().Create<EnvironmentData>(&m_GIData);
 
         m_shaderPasses.assign(std::begin(m_PassData), std::end(m_PassData));
         if (!m_pMaterial)
@@ -103,6 +134,7 @@ namespace ElysiaRenderer
         m_pCamera = context.pCamera;
         m_pGPUTimer = context.pGPUTimer;
 
+        DoSHCoefficients();
         DoPreIntegrateSSSLUT();
         DoIntegrateSSSNDFLUT();
     }
@@ -122,7 +154,7 @@ namespace ElysiaRenderer
         m_pCommand->SetPipeline(pipelineStateData);
         SetSpaceResource(passData, PER_FRAME_SPACE);
 
-        auto targetRT = m_pPreIntegrateSSSLUT;
+        auto targetRT = m_subsurfaceScatterData.pPreIntegrateSSSLUT;
         m_pCommand->AddBarrier(targetRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
         {
             m_pMaterial->SetUINT(ShaderIDs::g_PreIntegrateSSSLUTIndex,
@@ -168,7 +200,7 @@ namespace ElysiaRenderer
         m_pCommand->SetPipeline(pipelineStateData);
         SetSpaceResource(passData, PER_FRAME_SPACE);
 
-        auto targetRT = m_pNDFLUT;
+        auto targetRT = m_subsurfaceScatterData.pNDFLUT;
         m_pCommand->AddBarrier(targetRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
         {
             m_pMaterial->SetUINT(ShaderIDs::g_IntegrateSSSNDFLUTIndex,
@@ -199,4 +231,83 @@ namespace ElysiaRenderer
 
         m_pCommand->Reset();
     }
+    void BakePass::DoSHCoefficients()
+    {
+        DoCalcTempSHCoefficients();
+        DoCalcSHCoefficients();
+    }
+
+    void BakePass::DoCalcTempSHCoefficients()
+    {
+        auto passID = CS_TEMP_SH_Coefficients;
+        auto& passData = m_pMaterial->GetPassData(passID);
+        auto passName = passData.Name.c_str();
+        PIXHelper pix(m_pCommand->GetCommandList(), passName);
+
+        PipelineInfo pipelineStateData{};
+        pipelineStateData.m_pipelineStateObject = passData.pPipelineStateObject;
+        m_pCommand->SetPipeline(pipelineStateData);
+        SetSpaceResource(passData, PER_FRAME_SPACE);
+
+        auto targetRT = m_pSHCoefficientsTempBuffer;
+        auto& skyboxTex = RenderPassResourceManager::GetInstance().Get<ShaderGlobalData>().skyboxTex;
+        m_pCommand->AddBarrier(*targetRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+        {
+            m_pMaterial->SetUINT(ShaderIDs::g_SHCoefficientsTempBufferIndex,
+                                 targetRT->GetUAVResourceHeapIndex(),
+                                 passID);
+            m_pMaterial->SetFloat4(ShaderIDs::g_SkyboxSize,
+                                   GetScreenSize(skyboxTex.GetWidth(), skyboxTex.GetHeight()),
+                                   passID);
+            m_pMaterial->SetFloat4(ShaderIDs::g_SHCoefficientsTempCount,
+                                   m_SHCoefficientsTempCount,
+                                   passID);
+            SetSpaceResource(passData, PER_PASS_SPACE);
+
+            auto threadGroupSize = passData.GetKernelThreadGroupSizes();
+            m_pCommand->Dispatch(CeilDivide(skyboxTex.GetWidth(), threadGroupSize.x),
+                                 CeilDivide(skyboxTex.GetHeight(), threadGroupSize.y),
+                                 6);
+            m_pCommand->AddUAVBarrier(targetRT, false);
+        }
+        m_pCommand->AddBarrier(*targetRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("Bake/") + passName).c_str());
+    }
+    void BakePass::DoCalcSHCoefficients()
+    {
+        auto passID = CS_SH_Coefficients;
+        auto& passData = m_pMaterial->GetPassData(passID);
+        auto passName = passData.Name.c_str();
+        PIXHelper pix(m_pCommand->GetCommandList(), passName);
+
+        PipelineInfo pipelineStateData{};
+        pipelineStateData.m_pipelineStateObject = passData.pPipelineStateObject;
+        m_pCommand->SetPipeline(pipelineStateData);
+        SetSpaceResource(passData, PER_FRAME_SPACE);
+
+        auto targetRT = m_GIData.pSHCoefficientsBuffer;
+        m_pCommand->AddBarrier(*targetRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+        {
+            m_pMaterial->SetUINT(ShaderIDs::g_SHCoefficientsBufferIndex,
+                                 targetRT->GetUAVResourceHeapIndex(),
+                                 passID);
+            m_pMaterial->SetUINT(ShaderIDs::g_SHCoefficientsTempBufferIndex,
+                                 m_pSHCoefficientsTempBuffer->GetUAVResourceHeapIndex(),
+                                 passID);
+            m_pMaterial->SetFloat4(ShaderIDs::g_SHCoefficientsTempCount,
+                                   m_SHCoefficientsTempCount,
+                                   passID);
+            SetSpaceResource(passData, PER_PASS_SPACE);
+
+            auto threadGroupSize = passData.GetKernelThreadGroupSizes();
+            m_pCommand->Dispatch(1, 1, 1);
+            m_pCommand->AddUAVBarrier(targetRT, false);
+        }
+        m_pCommand->AddBarrier(*targetRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("Bake/") + passName).c_str());
+    }
+
+
 }
