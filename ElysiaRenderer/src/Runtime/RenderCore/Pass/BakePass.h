@@ -58,6 +58,7 @@ namespace ElysiaRenderer
         UINT m_displayHeight;
         UINT m_cameraWidth;
         UINT m_cameraHeight;
+        bool m_bIsBakeSHCoefficients = false;
         Vector4 m_SHCoefficientsTempCount;
         EnvironmentData m_GIData{};
         SubsurfaceScatterData m_subsurfaceScatterData{};

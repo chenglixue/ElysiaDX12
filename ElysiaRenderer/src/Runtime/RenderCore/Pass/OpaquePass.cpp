@@ -18,6 +18,7 @@
 
 #include "Runtime/RenderCore/PSOManager.h"
 #include "Runtime/RenderCore/CameraManager.h"
+#include "Runtime/RenderCore/RenderPassResourceManager.h"
 #include "Runtime/RenderCore/RenderTargetManager.h"
 #include "Runtime/RenderCore/ShaderVariantManager.h"
 
@@ -159,11 +160,16 @@ namespace ElysiaRenderer
                              m_PreIntegrateSSSNDFLUT.GetResourceHeapIndex(),
                              passID);
         m_pMaterial->SetFloat(ShaderIDs::g_CurveScale, UserData::GetInstance().CurveScale, passID);
-
+        m_pMaterial->SetUINT(ShaderIDs::g_SHCoefficientsBufferIndex,
+                             RenderPassResourceManager::GetInstance().Get<EnvironmentData>().pSHCoefficientsBuffer->
+                                                                      GetResourceHeapIndex(),
+                             passID);
         SetSpaceResource(passData, PER_PASS_SPACE);
         SetSpaceResource(passData, PER_FRAME_SPACE);
 
         m_pCommand->AddBarrier(m_pCameraColorRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+        m_pCommand->AddBarrier(*RenderPassResourceManager::GetInstance().Get<EnvironmentData>().pSHCoefficientsBuffer,
+                               D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
         m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_cameraWidth, m_cameraHeight));
         m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -171,6 +177,8 @@ namespace ElysiaRenderer
         m_pCommand->DrawFullScreenTriangle();
 
         m_pCommand->AddBarrier(m_pCameraColorRT, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+        m_pCommand->AddBarrier(*RenderPassResourceManager::GetInstance().Get<EnvironmentData>().pSHCoefficientsBuffer,
+                               D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 
         m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("Lighting/") + passName).c_str());
     }

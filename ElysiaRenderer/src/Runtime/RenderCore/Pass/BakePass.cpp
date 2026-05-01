@@ -82,6 +82,7 @@ namespace ElysiaRenderer
                 .accessFlags = BufferAccessFlags::GPUOnly,
                 .isRawAccess = false
             });
+            m_bIsBakeSHCoefficients = false;
         }
 
         if (!m_GIData.pSHCoefficientsBuffer)
@@ -96,6 +97,7 @@ namespace ElysiaRenderer
                     .accessFlags = BufferAccessFlags::GPUOnly,
                     .isRawAccess = false
                 });
+            m_bIsBakeSHCoefficients = false;
         }
         RenderPassResourceManager::GetInstance().Create<EnvironmentData>(&m_GIData);
 
@@ -233,10 +235,17 @@ namespace ElysiaRenderer
     }
     void BakePass::DoSHCoefficients()
     {
+        if (m_bIsBakeSHCoefficients)
+        {
+            return;
+        }
+        auto& skyboxTex = RenderPassResourceManager::GetInstance().Get<ShaderGlobalData>().skyboxTex;
+        if (!TextureManager::GetInstance().GetTexture(skyboxTex)->GetIsReady())
+            return;
         DoCalcTempSHCoefficients();
         DoCalcSHCoefficients();
+        m_bIsBakeSHCoefficients = true;
     }
-
     void BakePass::DoCalcTempSHCoefficients()
     {
         auto passID = CS_TEMP_SH_Coefficients;
@@ -300,7 +309,6 @@ namespace ElysiaRenderer
                                    passID);
             SetSpaceResource(passData, PER_PASS_SPACE);
 
-            auto threadGroupSize = passData.GetKernelThreadGroupSizes();
             m_pCommand->Dispatch(1, 1, 1);
             m_pCommand->AddUAVBarrier(targetRT, false);
         }

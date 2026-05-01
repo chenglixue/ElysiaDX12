@@ -2,7 +2,6 @@
 #define SHADING_COMMON_H
 
 #include "SharedCommon.hlsli"
-#include "private/AmbientCubemap.hlsl"
 #include "Color.hlsl"
 
 ///////////////////////////////////////////////////////////////////////////////

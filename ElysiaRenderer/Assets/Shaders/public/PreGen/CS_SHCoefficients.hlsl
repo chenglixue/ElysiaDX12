@@ -109,14 +109,14 @@ void CalcTempSHCoefficients(uint3 globalID : SV_DispatchThreadID,
     const UINT2 samplePos = globalID.xy;
     const UINT sampleFace = globalID.z;
 
-    float3 localSH[9] = {(float3)0, (float3)0, (float3)0, (float3)0, (float3)0, (float3)0, (float3)0, (float3)0,
-                         (float3)0};
+    float3 localSH[9] = (float3[9])0;
     float localWeight = 0.0f;
     if (samplePos.x < g_SkyboxSize.x && samplePos.y < g_SkyboxSize.y && sampleFace < 6)
     {
         const float2 sampleUV = ((float2)samplePos + 0.5f) * g_SkyboxSize.zw;
         float3 N = GetCubeFaceDirection(sampleUV, sampleFace);
         float3 radiance = SampleTextureCube(SkyboxTexIndex, N, ClampLinearSampler);
+        radiance = pow(radiance, 2.2f);
 
         float u_coord = (samplePos.x + 0.5f) * g_SkyboxSize.z * 2.0f - 1.0f;
         float v_coord = (samplePos.y + 0.5f) * g_SkyboxSize.w * 2.0f - 1.0f;
@@ -143,19 +143,32 @@ void CalcTempSHCoefficients(uint3 globalID : SV_DispatchThreadID,
 
     GroupMemoryBarrierWithGroupSync();
 
+    for (UINT stride = 32; stride >= 1; stride >>= 1)
+    {
+        if (localIdx < stride)
+        {
+            for (UINT i = 0; i < 9; ++i)
+            {
+                g_SHCoefficients[i][localIdx] += g_SHCoefficients[i][localIdx + stride];
+            }
+            g_SHWeights[localIdx] += g_SHWeights[localIdx + stride];
+            GroupMemoryBarrierWithGroupSync();
+        }
+    }
+
     if (localIdx == 0)
     {
-        float4 totalSH[9] = (float4[9])0;
-        float totalWeight = 0.f;
-
-        for (int k = 0; k < 64; ++k)
-        {
-            for (int j = 0; j < 9; ++j)
-            {
-                totalSH[j] += g_SHCoefficients[j][k];
-            }
-            totalWeight += g_SHWeights[k];
-        }
+        // float4 totalSH[9] = (float4[9])0;
+        // float totalWeight = 0.f;
+        //
+        // for (int k = 0; k < 64; ++k)
+        // {
+        //     for (int j = 0; j < 9; ++j)
+        //     {
+        //         totalSH[j] += g_SHCoefficients[j][k];
+        //     }
+        //     totalWeight += g_SHWeights[k];
+        // }
 
         const UINT saveIndex = groupID.x +
                                groupID.y * g_SHCoefficientsTempCount.x +
@@ -163,9 +176,9 @@ void CalcTempSHCoefficients(uint3 globalID : SV_DispatchThreadID,
         SHCoefficientData groupResult;
         for (int i = 0; i < 9; ++i)
         {
-            groupResult.SHCoefficients[i] = totalSH[i];
+            groupResult.SHCoefficients[i] = g_SHCoefficients[i][0];
         }
-        groupResult.TotalWeight = totalWeight;
+        groupResult.TotalWeight = g_SHWeights[0];
         groupResult._Padding = float3(0, 0, 0);
 
         Elysia_Save_Temp_SHCoefficient_Data(saveIndex, groupResult);
@@ -199,21 +212,43 @@ void CalcSHCoefficients(uint3 globalID : SV_DispatchThreadID,
     g_SHWeights[localIdx] = threadWeight;
 
     GroupMemoryBarrierWithGroupSync();
+
+    for (UINT stride = 32; stride >= 1; stride >>= 1)
+    {
+        if (localIdx < stride)
+        {
+            [unroll]
+            for (UINT i = 0; i < 9; ++i)
+            {
+                g_SHCoefficients[i][localIdx] += g_SHCoefficients[i][localIdx + stride];
+            }
+            g_SHWeights[localIdx] += g_SHWeights[localIdx + stride];
+        }
+        GroupMemoryBarrierWithGroupSync();
+    }
+
     if (localIdx == 0)
     {
         float4 finalSH[9] = {(float4)0, (float4)0, (float4)0, (float4)0, (float4)0, (float4)0, (float4)0, (float4)0,
                              (float4)0};
         float finalWeight = 0.0f;
 
-        for (UINT i = 0; i < 64; ++i)
+        [unroll]
+        for (UINT j = 0; j < 9; ++j)
         {
-            [unroll]
-            for (UINT j = 0; j < 9; ++j)
-            {
-                finalSH[j] += g_SHCoefficients[j][i];
-            }
-            finalWeight += g_SHWeights[i];
+            finalSH[j] += g_SHCoefficients[j][0];
         }
+        finalWeight += g_SHWeights[0];
+        finalSH[0] *= 0.28209479f;
+        finalSH[1] *= 0.32573501f;
+        finalSH[2] *= 0.32573501f;
+        finalSH[3] *= 0.32573501f;
+        finalSH[4] *= 0.27313711f;
+        finalSH[5] *= 0.27313711f;
+        finalSH[7] *= 0.27313711f;
+        finalSH[6] *= 0.07884789f;
+        finalSH[8] *= 0.13656855f;
+
         float normalFactor = FOUR_PI * rcp(finalWeight) + FLT_EPS;
         [unroll]
         for (UINT j = 0; j < 9; ++j)

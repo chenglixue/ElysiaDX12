@@ -17,6 +17,7 @@
 #include "Runtime/RenderCore/Material.h"
 #include "Runtime/RenderCore/MeshRenderer.h"
 #include "Runtime/RenderCore/PSOManager.h"
+#include "Runtime/RenderCore/RenderPassResourceManager.h"
 #include "Runtime/RenderCore/RenderTargetManager.h"
 #include "Runtime/RenderCore/SceneManager.h"
 #include "Runtime/RenderCore/ShaderVariantManager.h"
@@ -777,8 +778,8 @@ namespace ElysiaRenderer
                 .g_ProbeViewBias = UserData::GetInstance().GIParameter.viewBias,
 
                 .g_DDGIEncodingGamma = UserData::GetInstance().GIParameter.gamma,
-                .g_SkyboxTexIndex = TextureManager::GetInstance().LoadResidentTexture(L"Tex\\cubemap0.dds").
-                                                                  GetResourceHeapIndex(),
+                .g_SkyboxTexIndex = RenderPassResourceManager::GetInstance().Get<ShaderGlobalData>().skyboxTex.
+                                                                             GetResourceHeapIndex(),
                 .g_GIDataBufferIndex = m_pGIDataBuffer->GetUAVResourceHeapIndex(),
                 .g_ProbeOffsetsIndex = m_pProbeOffsetIndexRT->GetUAVResourceHeapIndex()
             };

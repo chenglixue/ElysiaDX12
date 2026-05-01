@@ -1,6 +1,7 @@
 #include "private\ShadingCommon.hlsl"
 #include <private\SSAOCommon.hlsli>
 #include "private\ShadowConst.hlsli"
+#include <private\Random.hlsl>
 
 #define GROUP_SIZE 8
 static const UINT DEINTERLEAVED_DEPTH_COUNT = 4;

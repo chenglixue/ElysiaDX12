@@ -77,7 +77,7 @@ float3 SpecularGGX(float Roughness,
     float Vis = Vis_SmithJointApprox(a2, Context.NoV, NoL);
     float F = UE_F_Schlick(SpecularColor, Context.VoH);
 
-    o = NDF * Vis * F;
+    o = NDF * F * Vis;
 
     return o;
 }
@@ -141,7 +141,7 @@ FDirectLighting DefaultLitBxDF(FDecodeGBufferData GBufferData,
     Context.NoH = max(0.f, dot(N, normalize(V + L)));
 
     //SphereMaxNoH(Context, AreaLight.SphereSinAlpha, true);
-    Context.NoV = saturate(NoV + 1e-5);
+    Context.NoV = saturate(abs(NoV) + 1e-5);
 
     float3 KD = 1 - UE_F_Schlick(GBufferData.SpecularColor, Context.VoH);
     Lighting.Diffuse = Diffuse_Lambert(GBufferData.DiffuseColor);
@@ -158,8 +158,8 @@ FDirectLighting DefaultLitBxDF(FDecodeGBufferData GBufferData,
         GGXEnergyLookup(GBufferData.Roughness, Context.NoV),
         GBufferData.SpecularColor);
 
-    Lighting.Diffuse *= ComputeEnergyPreservation(energyTerm);
-    Lighting.Specular *= ComputeEnergyConservation(energyTerm);
+    // Lighting.Diffuse *= ComputeEnergyPreservation(energyTerm);
+    // Lighting.Specular *= ComputeEnergyConservation(energyTerm);
 
     return Lighting;
 }

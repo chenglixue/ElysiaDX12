@@ -51,8 +51,11 @@ cbuffer PassConstant : register(b0, perPassSpace)
     UINT g_PreIntegrateSSSLUTIndex;
     UINT g_PreIntegrateSSSNDFLUTIndex;
     float g_CurveScale;
+
+    UINT g_SHCoefficientsBufferIndex;
 }
 
+#include <private\AmbientCubemap.hlsl>
 #include <private\ShadingCommon.hlsl>
 #include <private\ShadingModel.hlsl>
 
@@ -96,6 +99,7 @@ PSInput VS(UINT vertexID : SV_VertexID)
 
     return o;
 }
+
 
 PSOutput PS(PSInput i)
 {
@@ -156,7 +160,8 @@ PSOutput PS(PSInput i)
         IBL *= (GBufferData.DiffuseColor.rgb) / PI;
         //lighting += float4(IBL, 1.f) * AO;
     }
-    lighting.rgb += GBufferData.SceneColor * AO;
+    IBL += GetIBL(inputParam, GBufferData, mainLightData.toLight, g_AmbientIntensity, g_AmbientTint);
+    lighting.rgb += (GBufferData.SceneColor + IBL) * AO;
 
     switch (g_DebugMode)
     {

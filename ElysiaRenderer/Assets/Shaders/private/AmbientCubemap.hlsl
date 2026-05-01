@@ -92,7 +92,7 @@ float3 DiffuseIBLMul(uint2 Random, float3 DiffuseColor, float Roughness, float3 
             // pdf = NoL / PI
             DiffuseLighting += SampleColor * DiffuseColor * FdV * FdL * (1 - 0.3333 * Roughness);
 #else
-			DiffuseLighting += SampleColor * DiffuseColor;
+            DiffuseLighting += SampleColor * DiffuseColor;
 #endif
         }
     }
@@ -199,6 +199,47 @@ float3 ApproximateSpecularIBL(uint2 Random,
     return PrefilteredColor * (SpecularColor * AB.x + AB.y);
 }
 
+float3 CalcIrradiance(float3 normal)
+{
+    float x = normal.x;
+    float y = normal.y;
+    float z = normal.z;
+
+    StructuredBuffer<float4> SH = ResourceDescriptorHeap[g_SHCoefficientsBufferIndex];
+    float3 result = (
+        SH[0] +
+        SH[1] * y +
+        SH[2] * z +
+        SH[3] * x +
+        SH[4] * (x * y) +
+        SH[5] * (y * z) +
+        SH[6] * (3.0 * z * z - 1.0) +
+        SH[7] * (x * z) +
+        SH[8] * (x * x - y * y)
+    );
+
+    return max(result, float3(0, 0, 0));
+}
+float3 CalcSpecular(float Roughness,
+                    float3 SpueclarColor,
+                    float3 N,
+                    float3 V)
+{
+    float3 dimensions = GetTexture2DDimensions(SkyboxTexIndex);
+
+    const UINT MAX_REFLECTION_LOD = dimensions.z;
+    float lod = Roughness * MAX_REFLECTION_LOD;
+
+    float3 R = 2 * dot(V, N) * N - V;
+    float3 prefilteredColor = SampleTextureCube_LOD(SkyboxTexIndex, R, ClampLinearSampler, lod);
+
+    float NoV = saturate(dot(N, V));
+    float2 envBRDF = EnvBRDFApproxLazarov(Roughness, NoV);
+    float3 specularIBL = prefilteredColor * (SpueclarColor * envBRDF.x + envBRDF.y);
+
+    return specularIBL;
+}
+
 float3 GetIBL(FInputParams inputParams,
               MaterialData materialData,
               float3 toLight,
@@ -254,7 +295,7 @@ float3 GetIBL(FInputParams inputParams,
 }
 
 float3 GetIBL(FInputParams inputParams,
-              FEncodeGBufferData GBufferData,
+              FDecodeGBufferData GBufferData,
               float3 toLight,
               float ambientCubemapIntensity,
               float3 ambientCubemapTint)
@@ -280,24 +321,15 @@ float3 GetIBL(FInputParams inputParams,
     float3 SpecularContribution = 0;
 
     //NonSpecularContribution += DiffuseIBL(Random, materialData.DiffuseColor, materialData.Roughness, N, KD);
-    NonSpecularContribution += DiffuseIBLMul(Random,
-                                             GBufferData.DiffuseColor,
-                                             GBufferData.Roughness,
-                                             N,
-                                             V);
+    NonSpecularContribution += CalcIrradiance(N) * GBufferData.BaseColor;
     // NonSpecularContribution = AMDTonemapInvert(NonSpecularContribution);
-    SpecularContribution += ApproximateSpecularIBL(Random,
-                                                   GBufferData.SpecularColor,
-                                                   GBufferData.Roughness,
-                                                   N,
-                                                   V);
+    SpecularContribution += CalcSpecular(GBufferData.Roughness, GBufferData.SpecularColor, N, V);
 
     FLightAccumulator LightAccumulator = (FLightAccumulator)0;
     const bool bNeedsSeparateSubsurfaceLightAccumulation = false;
 
     // .rgb:AmbientCubemapTint*AmbientCubemapIntensity, a:unused
     half3 AmbientCubemapColor = ambientCubemapIntensity * ambientCubemapTint;
-    AmbientCubemapColor = 1;
 
     LightAccumulator_Add(LightAccumulator,
                          NonSpecularContribution + SpecularContribution,

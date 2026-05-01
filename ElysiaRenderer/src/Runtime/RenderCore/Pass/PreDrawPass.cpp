@@ -18,6 +18,8 @@
 
 #include "GBufferPass.h"
 #include "Editor/UserData.h"
+#include "Runtime/Core/DX12GraphicsContext.h"
+#include "Runtime/Core/DX12UploadContext.h"
 #include "Runtime/RenderCore/RenderPassResourceManager.h"
 #include "Runtime/RenderCore/TextureManager.h"
 
