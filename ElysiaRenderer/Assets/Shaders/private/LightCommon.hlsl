@@ -37,6 +37,10 @@ FLightAccumulator AccumulateDynamicLighting(FInputParams inputData,
     //                                    shadowMatrix,
     //                                    inputData.SobelSqeuence);
     float shadow = SampleTexture2D(g_ShadowMaskTexIndex, inputData.ScreenUV, ClampLinearSampler);
+    if (GBufferData.ShadingModelID == Shading_Model_ID_Preintegrated_Skin)
+    {
+        shadow = lerp(GBufferData.CustomData.rgb, 1, shadow);
+    }
     if (!g_EnableShadow)
         shadow = 1;
     Shadow.SurfaceShadow = AO * shadow;

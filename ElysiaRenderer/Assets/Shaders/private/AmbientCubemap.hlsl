@@ -328,7 +328,7 @@ float3 GetIBL(FInputParams inputParams,
     // NonSpecularContribution = AMDTonemapInvert(NonSpecularContribution);
     SpecularContribution += specularEnv;
 
-    //if (GBufferData.ShadingModelID == Shading_Model_ID_Preintegrated_Skin)
+    if (GBufferData.ShadingModelID == Shading_Model_ID_Preintegrated_Skin)
     {
         // some view dependent and some non view dependent (hard coded)
         float DependentSplit = 0.5f;
