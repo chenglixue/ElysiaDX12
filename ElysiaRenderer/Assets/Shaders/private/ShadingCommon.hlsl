@@ -167,6 +167,7 @@ FDecodeGBufferData DecodeGBufferData(float4 InGBuffer0,
                                      float4 InGBuffer3,
                                      float4 InGBuffer4,
                                      float4 InGBufferVelocity,
+                                     float4 InGBuffer6,
                                      float SceneDepth)
 {
     FDecodeGBufferData o = (FDecodeGBufferData)0;
@@ -190,7 +191,7 @@ FDecodeGBufferData DecodeGBufferData(float4 InGBuffer0,
 
     o.Velocity = InGBufferVelocity.rg;
 
-    o.CustomData = 0;
+    o.CustomData = InGBuffer6;
 
     o.Depth = SceneDepth;
 
@@ -210,6 +211,7 @@ FDecodeGBufferData GetDecodeGBufferData(float2 uv)
     float4 GBuffer3 = SampleTexture2D(GBuffer3Index, uv, WarpLinearSampler);
     float4 GBuffer4 = SampleTexture2D(GBuffer4Index, uv, WarpLinearSampler);
     float4 GBuffer5 = SampleTexture2D(GBuffer5Index, uv, WarpLinearSampler);
+    float4 GBuffer6 = SampleTexture2D(GBuffer6Index, uv, WarpLinearSampler);
     float sceneDepth = SampleTexture2D(OpaqueDepthIndex, uv, WarpPointSampler).r;
 
     o = DecodeGBufferData(GBuffer0,
@@ -218,6 +220,7 @@ FDecodeGBufferData GetDecodeGBufferData(float2 uv)
                           GBuffer3,
                           GBuffer4,
                           GBuffer5,
+                          GBuffer6,
                           sceneDepth);
 
     return o;

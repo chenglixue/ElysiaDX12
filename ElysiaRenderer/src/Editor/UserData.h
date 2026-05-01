@@ -58,8 +58,8 @@ namespace ElysiaRenderer
     {
         //L"glTF\\Sponza\\Sponza.gltf",
         //L"glTF\\Suzanne\\Suzanne.gltf",
-        L"glTF\\SM_MatPreviewMesh_01\\SM_MatPreviewMesh_01.gltf",
-        //L"glTF\\DragonAttenuation\\DragonAttenuation.gltf",
+        // L"glTF\\SM_MatPreviewMesh_01\\SM_MatPreviewMesh_01.gltf",
+        L"glTF\\head\\head.gltf",
     };
 
     class UserData
@@ -100,6 +100,8 @@ namespace ElysiaRenderer
         Vector3 AmbientCubemapTint = Vector3::One;
         Vector3 EmissionTint = Vector3::One;
         float CurveScale = 1.f;
+        float MinCurve = 0.2f;
+        Vector3 SubsurfaceColor = Vector3::One;
 
         ShadowParameter shadowParameter;
 
@@ -133,6 +135,9 @@ namespace ElysiaRenderer
                                                     Specular,
                                                     AmbientCubemapTint,
                                                     EmissionTint,
+                                                    CurveScale,
+                                                    MinCurve,
+                                                    SubsurfaceColor,
                                                     shadowParameter,
                                                     hdrParameter,
                                                     aoParameter,

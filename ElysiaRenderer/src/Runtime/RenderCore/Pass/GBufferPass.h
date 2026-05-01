@@ -27,6 +27,7 @@ namespace ElysiaRenderer
             static inline size_t GBuffer3ID = PropertyToID(L"GBuffer3");
             static inline size_t GBuffer4ID = PropertyToID(L"GBuffer4");
             static inline size_t GBuffer5ID = PropertyToID(L"GBuffer5");
+            static inline size_t GBuffer6ID = PropertyToID(L"GBuffer6");
             static inline size_t GBufferHIZID = PropertyToID(L"GBuffer HIZ RT");
         };
         struct TAAData
@@ -113,6 +114,8 @@ namespace ElysiaRenderer
             static inline size_t GBuffer4Index = PropertyToID(L"GBuffer_4");
             static inline size_t GBuffer5Index = PropertyToID(L"GBuffer_5");
             static inline size_t g_AmbientTint = PropertyToID(L"g_AmbientTint");
+            static inline size_t g_CurveScale = PropertyToID(L"g_CurveScale");
+            static inline size_t g_MinCurve = PropertyToID(L"g_MinCurve");
 
             static inline size_t g_AABBInstanceDatasIndex = PropertyToID(L"g_AABBInstanceDatasIndex");
             static inline size_t g_VisbibleCounterBufferIndex = PropertyToID(L"g_VisbibleCounterBufferIndex");
@@ -157,7 +160,7 @@ namespace ElysiaRenderer
             float specular;
 
             int shadingModelID;
-            Vector3 padd;
+            Vector3 subsurfaceColor;
         };
         struct alignas(16) IndirectCommand
         {

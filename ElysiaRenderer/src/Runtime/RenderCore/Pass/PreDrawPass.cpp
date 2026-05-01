@@ -181,6 +181,9 @@ namespace ElysiaRenderer
                 dst->GBuffer5Index = RenderTargetManager::GetInstance()
                                      .GetRenderTexture(GBufferPass::RenderTextureIDs::GBuffer5ID)
                                      ->GetResourceHeapIndex();
+                dst->GBuffer6Index = RenderTargetManager::GetInstance()
+                                     .GetRenderTexture(GBufferPass::RenderTextureIDs::GBuffer6ID)
+                                     ->GetResourceHeapIndex();
                 dst->AOTexIndex = RenderTargetManager::GetInstance().GetRenderTexture(
                                                                         AOPass::RenderTextureIDs::AORTID)
                                                                     ->GetResourceHeapIndex();

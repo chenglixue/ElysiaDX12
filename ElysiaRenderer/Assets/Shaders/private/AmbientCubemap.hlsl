@@ -320,10 +320,23 @@ float3 GetIBL(FInputParams inputParams,
     float3 NonSpecularContribution = 0;
     float3 SpecularContribution = 0;
 
+    float3 diffuseEnv = CalcIrradiance(N);
+    float3 specularEnv = CalcSpecular(GBufferData.Roughness, GBufferData.SpecularColor, N, V);
+
     //NonSpecularContribution += DiffuseIBL(Random, materialData.DiffuseColor, materialData.Roughness, N, KD);
-    NonSpecularContribution += CalcIrradiance(N) * GBufferData.BaseColor;
+    NonSpecularContribution += diffuseEnv * GBufferData.BaseColor;
     // NonSpecularContribution = AMDTonemapInvert(NonSpecularContribution);
-    SpecularContribution += CalcSpecular(GBufferData.Roughness, GBufferData.SpecularColor, N, V);
+    SpecularContribution += specularEnv;
+
+    //if (GBufferData.ShadingModelID == Shading_Model_ID_Preintegrated_Skin)
+    {
+        // some view dependent and some non view dependent (hard coded)
+        float DependentSplit = 0.5f;
+        float3 subsurfaceColor = GBufferData.CustomData.rgb;
+
+        NonSpecularContribution += diffuseEnv * subsurfaceColor * (DependentSplit);
+        SpecularContribution += specularEnv * subsurfaceColor * (1 - DependentSplit);
+    }
 
     FLightAccumulator LightAccumulator = (FLightAccumulator)0;
     const bool bNeedsSeparateSubsurfaceLightAccumulation = false;

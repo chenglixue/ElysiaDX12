@@ -74,19 +74,20 @@ cbuffer GlobalConstant : register(b0, perFrameSpace)
 
     UINT GBuffer4Index;
     UINT GBuffer5Index;
+    UINT GBuffer6Index;
     UINT OpaqueDepthIndex;
-    UINT OpaqueColorIndex;
 
+    UINT OpaqueColorIndex;
     UINT g_AOIndex;
     bool g_EnableAO;
     bool g_EnableShadow;
-    float g_MipBias;
 
+    float g_MipBias;
     float g_ShadowRadius;
     UINT g_SobolBufferIndex;
     UINT g_ScramblingTileBufferIndex;
-    UINT g_RankingTileBufferIndex;
 
+    UINT g_RankingTileBufferIndex;
     float g_RandomSeed;
 };
 
@@ -171,6 +172,9 @@ struct FEncodeGBufferData
     float PerObjectData;
     float PerComputedShadow;
     float3 IBL;
+
+    float3 SubsurfaceColor;
+    float Curvature;
 };
 
 struct FDecodeGBufferData

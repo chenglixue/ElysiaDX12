@@ -158,7 +158,7 @@ PSOutput PS(PSInput i)
                                 WarpLinearSampler
                          ) * g_AmbientTint * g_AmbientIntensity * blendWeight;
         IBL *= (GBufferData.DiffuseColor.rgb) / PI;
-        //lighting += float4(IBL, 1.f) * AO;
+        lighting += float4(IBL, 1.f) * AO;
     }
     IBL += GetIBL(inputParam, GBufferData, mainLightData.toLight, g_AmbientIntensity, g_AmbientTint);
     lighting.rgb += (GBufferData.SceneColor + IBL) * AO;

@@ -54,6 +54,7 @@ namespace ElysiaRenderer
 
         UINT GBuffer4Index = 0;
         UINT GBuffer5Index = 0;
+        UINT GBuffer6Index = 0;
         UINT OpaqueDepthIndex = 0;
         UINT OpaqueColorIndex = 0;
 

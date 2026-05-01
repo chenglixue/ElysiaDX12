@@ -227,6 +227,17 @@ namespace ElysiaRenderer
             m_GBufferRTs.emplace_back(std::move(pGBufferRT));
         }
 
+        {
+            auto pGBufferRT = RenderTargetManager::GetInstance().CreateRenderTexture(
+                static_cast<UINT64>(m_cameraWidth),
+                static_cast<UINT64>(m_cameraHeight),
+                DXGI_FORMAT_R8G8B8A8_UNORM,
+                RenderResource::GetInstance().
+                GetPropertyName(RenderTextureIDs::GBuffer6ID));
+
+            m_GBufferRTs.emplace_back(std::move(pGBufferRT));
+        }
+
         m_HIZWidth = std::bit_ceil(m_cameraWidth) >> 1;
         m_HIZHeight = std::bit_ceil(m_cameraHeight) >> 1;
         m_HIZMipmapCount = UINT(std::floor(std::log2(std::max(
@@ -374,7 +385,8 @@ namespace ElysiaRenderer
                 .emissionColorIndex = textureIndices.Emissive,
                 .specular = UserData::GetInstance().Specular,
 
-                .shadingModelID = (int)UserData::GetInstance().shadingModelID
+                .shadingModelID = (int)UserData::GetInstance().shadingModelID,
+                .subsurfaceColor = UserData::GetInstance().SubsurfaceColor
             };
             m_meshDatas.emplace_back(meshData);
         }
@@ -810,6 +822,8 @@ namespace ElysiaRenderer
         m_pMaterial->SetUINT(ShaderIDs::g_VisbibleIndexBufferIndex,
                              m_pVisbibleIndexBuffer->GetResourceHeapIndex(),
                              passID);
+        m_pMaterial->SetFloat(ShaderIDs::g_CurveScale, UserData::GetInstance().CurveScale, passID);
+        m_pMaterial->SetFloat(ShaderIDs::g_MinCurve, UserData::GetInstance().MinCurve, passID);
 
         SetSpaceResource(passData, PER_PASS_SPACE);
         SetSpaceResource(passData, PER_FRAME_SPACE);

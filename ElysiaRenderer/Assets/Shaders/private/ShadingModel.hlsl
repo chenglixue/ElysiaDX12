@@ -20,6 +20,7 @@ struct FDirectLighting
 {
     float3 Diffuse;
     float3 Specular;
+    float3 Transmission;
 };
 
 float New_a2(float a2, float SinAlpha, float VoH)
@@ -82,45 +83,6 @@ float3 SpecularGGX(float Roughness,
     return o;
 }
 
-FDirectLighting DefaultLitBxDF(MaterialData materialData,
-                               float3 N,
-                               float3 V,
-                               float3 L,
-                               float Falloff,
-                               float NoL,
-                               FAreaLight AreaLight,
-                               FShadowTerms Shadow)
-{
-    FDirectLighting Lighting = (FDirectLighting)0;
-    BxDFContext Context = (BxDFContext)0;
-
-    Init(Context, N, V, L);
-    float NoV, VoH, NoH;
-    NoV = Context.NoV;
-    VoH = Context.VoH;
-    NoH = Context.NoH;
-
-    //SphereMaxNoH(Context, AreaLight.SphereSinAlpha, true);
-    Context.NoV = saturate(abs(Context.NoV) + 1e-5);
-
-    float3 KD = (1 - UE_F_Schlick(materialData.SpecularColor, Context.VoH)) * (
-                    1 - materialData.Metallic);
-    Lighting.Diffuse = Diffuse_Lambert(materialData.DiffuseColor);
-    Lighting.Diffuse *= AreaLight.FalloffColor * Falloff * NoL * KD;
-
-    Lighting.Specular = SpecularGGX(materialData.Roughness, materialData.SpecularColor, Context, NoL, AreaLight);
-    Lighting.Specular *= AreaLight.FalloffColor * Falloff * NoL;
-
-    FBxDFEnergyTerms energyTerm = ComputeFresnelEnergyTerms(
-        GGXEnergyLookup(materialData.Roughness, NoV),
-        materialData.SpecularColor);
-
-    Lighting.Diffuse += ComputeEnergyPreservation(energyTerm);
-    Lighting.Specular *= ComputeEnergyConservation(energyTerm);
-
-    return Lighting;
-}
-
 FDirectLighting DefaultLitBxDF(FDecodeGBufferData GBufferData,
                                float3 N,
                                float3 V,
@@ -181,45 +143,39 @@ FDirectLighting PreintegratedSkinBxDF(FDecodeGBufferData GBufferData,
                                       FAreaLight AreaLight,
                                       FShadowTerms Shadow)
 {
-    FDirectLighting Lighting = (FDirectLighting)0;
-    BxDFContext Context = (BxDFContext)0;
-    Init(Context, N, V, L);
-    float3 H = normalize(V + L);
+    FDirectLighting Lighting = DefaultLitBxDF(GBufferData, N, V, L, Falloff, NoL, AreaLight, Shadow);
 
-    float UnclampedNoL = dot(N, L);
-    float curve = length(fwidth(N)) / length(fwidth(PosWS));
-    curve *= g_CurveScale;
-    curve = saturate(curve + 0.3f);
-    float3 SSSDiffuse = SampleTexture2D(g_PreIntegrateSSSLUTIndex,
-                                        float2(UnclampedNoL * 0.5f + 0.5f, curve),
-                                        ClampLinearSampler);
-    Lighting.Diffuse = (SSSDiffuse) * GBufferData.DiffuseColor;
+    float3 subsurfaceColor = GBufferData.CustomData.rgb;
+    float curvature = GBufferData.CustomData.a;
 
-    float NDF = SampleTexture2D(g_PreIntegrateSSSNDFLUTIndex,
-                                float2(Context.NoH * 0.5 + 0.5f, GBufferData.Roughness),
-                                ClampLinearSampler);
-    NDF = pow(2.f * NDF, 10.f);
-    float F = fresnelReflectance(H, V, GBufferData.SpecularColor);
-    float G = 1.0 / (4.0 * Context.VoH * Context.VoH);
+    float3 PreintegratedBRDF = SampleTexture2D_LOD(g_PreIntegrateSSSLUTIndex,
+                                                   float2(saturate(dot(N, L) * 0.5f + 0.5f), curvature),
+                                                   ClampLinearSampler,
+                                                   0).rgb;
+    Lighting.Transmission = AreaLight.FalloffColor * Falloff * PreintegratedBRDF * subsurfaceColor;
+
+    // BxDFContext Context = (BxDFContext)0;
+    // Init(Context, N, V, L);
+    // float3 H = normalize(V + L);
+    //
+    // float UnclampedNoL = dot(N, L);
+    // float curve = length(fwidth(N)) / length(fwidth(PosWS));
+    // curve *= g_CurveScale;
+    // curve = saturate(curve + 0.3f);
+    // float3 SSSDiffuse = SampleTexture2D(g_PreIntegrateSSSLUTIndex,
+    //                                     float2(UnclampedNoL * 0.5f + 0.5f, curve),
+    //                                     ClampLinearSampler);
+    // Lighting.Diffuse = (SSSDiffuse) * GBufferData.DiffuseColor;
+    //
+    // float NDF = SampleTexture2D(g_PreIntegrateSSSNDFLUTIndex,
+    //                             float2(Context.NoH * 0.5 + 0.5f, GBufferData.Roughness),
+    //                             ClampLinearSampler);
+    // NDF = pow(2.f * NDF, 10.f);
+    // float F = fresnelReflectance(H, V, GBufferData.SpecularColor);
+    // float G = 1.0 / (4.0 * Context.VoH * Context.VoH);
     // Lighting.Specular = NDF * F * G * AreaLight.FalloffColor * Falloff * max(0.f, NoL);
 
     return Lighting;
-}
-
-FDirectLighting IntegrateBxDF(MaterialData materialData,
-                              float3 N,
-                              float3 V,
-                              float3 L,
-                              float Falloff,
-                              float NoL,
-                              FAreaLight AreaLight,
-                              FShadowTerms Shadow)
-{
-    FDirectLighting o = (FDirectLighting)0;
-
-    o = DefaultLitBxDF(materialData, N, V, L, Falloff, NoL, AreaLight, Shadow);
-
-    return o;
 }
 
 FDirectLighting IntegrateBxDF(FDecodeGBufferData GBufferData,
@@ -248,24 +204,6 @@ FDirectLighting IntegrateBxDF(FDecodeGBufferData GBufferData,
     }
 
     return o;
-}
-
-FDirectLighting EvaluateBxDF(MaterialData materialData,
-                             float3 N,
-                             float3 V,
-                             float3 L,
-                             float NoL,
-                             FShadowTerms Shadow)
-{
-    FAreaLight AreaLight;
-
-    AreaLight.SphereSinAlpha = 0;
-    AreaLight.SphereSinAlphaSoft = 0;
-    AreaLight.LineCosSubtended = 1;
-    AreaLight.FalloffColor = 1;
-    AreaLight.IsRectAndDiffuseMicroReflWeight = 0;
-
-    return IntegrateBxDF(materialData, N, V, L, 1, NoL, AreaLight, Shadow);
 }
 
 FDirectLighting EvaluateBxDF(FDecodeGBufferData GBufferData,

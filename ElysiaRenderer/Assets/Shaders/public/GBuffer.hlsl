@@ -53,6 +53,8 @@ cbuffer PassConstant : register(b0, perPassSpace)
     float g_AmbientIntensity;
 
     UINT g_VisbibleIndexBufferIndex;
+    float g_CurveScale;
+    float g_MinCurve;
 }
 
 struct MeshData
@@ -78,7 +80,7 @@ struct MeshData
     float specular;
 
     int shadingModelID;
-    Vector3 padd;
+    Vector3 subsurfaceColor;
 };
 
 struct VSInput
@@ -108,6 +110,7 @@ struct PSOutput
     float4 target3 : SV_TARGET3;
     float4 target4 : SV_TARGET4;
     float4 target5 : SV_TARGET5;
+    float4 target6 : SV_TARGET6;
 };
 
 PSInput VS(VSInput i, uint InstanceID : SV_InstanceID)
@@ -168,6 +171,10 @@ PSOutput PS(PSInput i)
                        encodeGBufferData.PerObjectData);
     o.target4 = float4(encodeGBufferData.IBL, encodeGBufferData.Opacity);
     o.target5 = float4(encodeGBufferData.Velocity, 0.f, 0.f);
+    if (encodeGBufferData.ShadingModelID == Shading_Model_ID_Preintegrated_Skin)
+    {
+        o.target6 = float4(encodeGBufferData.SubsurfaceColor, encodeGBufferData.Curvature);
+    }
 
     return o;
 }
@@ -240,6 +247,13 @@ FEncodeGBufferData GetEncodeGBufferData(FInputParams inputParams, float3 toLight
                                  inputParams.objectUV,
                                  WarpLinearSampler,
                                  g_MipBias) * currMeshData.emissionColorTint;
+
+    o.SubsurfaceColor = currMeshData.subsurfaceColor;
+    float3 N = inputParams.NormalWS;
+    float curve = length(fwidth(N)) / length(fwidth(inputParams.PositionWS));
+    curve *= g_CurveScale;
+    curve = saturate(curve + g_MinCurve);
+    o.Curvature = curve;
 
     // float blendWeight = DDGIGetVolumeBlendWeight(inputParams.PositionWS,
     //                                              g_GridOrigin,
