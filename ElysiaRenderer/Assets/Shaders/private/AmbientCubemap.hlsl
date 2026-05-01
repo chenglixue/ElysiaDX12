@@ -234,8 +234,8 @@ float3 CalcSpecular(float Roughness,
     float3 prefilteredColor = SampleTextureCube_LOD(SkyboxTexIndex, R, ClampLinearSampler, lod);
 
     float NoV = saturate(dot(N, V));
-    float2 envBRDF = EnvBRDFApproxLazarov(Roughness, NoV);
-    float3 specularIBL = prefilteredColor * (SpueclarColor * envBRDF.x + envBRDF.y);
+    float3 envBRDF = EnvBRDFApprox(SpueclarColor, Roughness, NoV);
+    float3 specularIBL = prefilteredColor * envBRDF;
 
     return specularIBL;
 }
