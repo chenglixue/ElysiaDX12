@@ -357,17 +357,45 @@ float SampleShadowPCF(in Texture2D shadowMap,
     o = shadowMap.SampleCmpLevelZero(compShadowSampler, shadowPos.xy, shadowPos.z);
 #elif defined(SOFT_SHADOW)
 #if defined (SHADOW_QUALITY_LOW)
-    o = SobolPCF(screenSize, screenUV, shadowRadius, shadowPos.xy, shadowPos.z, shadowMap,
-        pointShadowSampler, shadowMapSize, sobolSequence);
+    o = SobolPCF(screenSize,
+                 screenUV,
+                 shadowRadius,
+                 shadowPos.xy,
+                 shadowPos.z,
+                 shadowMap,
+                 pointShadowSampler,
+                 shadowMapSize,
+                 sobolSequence);
 #elif defined (SHADOW_QUALITY_MIDDLE)
-    o = SobolPCF(screenSize, screenUV, shadowRadius, shadowPos.xy, shadowPos.z, shadowMap,
-        pointShadowSampler, shadowMapSize, sobolSequence);
+    o = SobolPCF(screenSize,
+                 screenUV,
+                 shadowRadius,
+                 shadowPos.xy,
+                 shadowPos.z,
+                 shadowMap,
+                 pointShadowSampler,
+                 shadowMapSize,
+                 sobolSequence);
 #elif defined (SHADOW_QUALITY_HIGH)
-    o = SobolPCF(screenSize, screenUV, shadowRadius, shadowPos.xy, shadowPos.z, shadowMap,
-        pointShadowSampler, shadowMapSize, sobolSequence);
+    o = SobolPCF(screenSize,
+                 screenUV,
+                 shadowRadius,
+                 shadowPos.xy,
+                 shadowPos.z,
+                 shadowMap,
+                 pointShadowSampler,
+                 shadowMapSize,
+                 sobolSequence);
 #elif defined (SHADOW_QUALITY_VERYHIGH)
-    o = SobolPCF1Spp(screenSize, screenUV, shadowRadius, shadowPos.xy, shadowPos.z, shadowMap,
-        pointShadowSampler, shadowMapSize, sobolSequence);
+    o = SobolPCF(screenSize,
+                 screenUV,
+                 shadowRadius,
+                 shadowPos.xy,
+                 shadowPos.z,
+                 shadowMap,
+                 pointShadowSampler,
+                 shadowMapSize,
+                 sobolSequence);
 #endif
 
 #endif

@@ -64,6 +64,9 @@ PASS(DRAW_LIGHT_PASS,         "public\\Opaque.hlsl", false, PS)
             static inline size_t g_PreIntegrateSSSNDFLUTIndex = PropertyToID(L"g_PreIntegrateSSSNDFLUTIndex");
             static inline size_t g_CurveScale = PropertyToID(L"g_CurveScale");
             static inline size_t g_ScatterRadius = PropertyToID(L"g_ScatterRadius");
+            static inline size_t g_TransmissionScale = PropertyToID(L"g_TransmissionScale");
+            static inline size_t g_TransmissionRange = PropertyToID(L"g_TransmissionRange");
+            static inline size_t g_TransmissionEdgeGlow = PropertyToID(L"g_TransmissionEdgeGlow");
 
             static inline size_t g_SHCoefficientsBufferIndex = PropertyToID(L"g_SHCoefficientsBufferIndex");
         };

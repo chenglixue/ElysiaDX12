@@ -576,8 +576,19 @@ namespace ElysiaEngine
                                   (float*)&pUserData.subsurfaceScatterParameter.SubsurfaceColor,
                                   ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_AlphaPreview |
                                   ImGuiColorEditFlags_HDR);
-                ImGui::SliderFloat("Scatter Radius", &pUserData.subsurfaceScatterParameter.ScatterRadius, 0.f, 10.f);
-
+                ImGui::SliderFloat("Scatter Radius", &pUserData.subsurfaceScatterParameter.ScatterRadius, 0.f, 2.f);
+                ImGui::SliderFloat("Transmission Scale",
+                                   &pUserData.subsurfaceScatterParameter.TransmissionScale,
+                                   0.f,
+                                   5.f);
+                ImGui::SliderFloat("Transmission Range",
+                                   &pUserData.subsurfaceScatterParameter.TransmissionRange,
+                                   0.f,
+                                   2.f);
+                ImGui::SliderFloat("Transmission Halo Diffusion",
+                                   &pUserData.subsurfaceScatterParameter.TransmissionEdgeGlow,
+                                   0.f,
+                                   1.f);
             }
             ImGui::ColorEdit3("Base Color Tint",
                               (float*)&pUserData.BaseColorTint,

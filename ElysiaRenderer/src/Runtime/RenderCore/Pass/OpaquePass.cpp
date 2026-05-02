@@ -170,6 +170,15 @@ namespace ElysiaRenderer
         m_pMaterial->SetFloat(ShaderIDs::g_ScatterRadius,
                               UserData::GetInstance().subsurfaceScatterParameter.ScatterRadius,
                               passID);
+        m_pMaterial->SetFloat(ShaderIDs::g_TransmissionScale,
+                              UserData::GetInstance().subsurfaceScatterParameter.TransmissionScale,
+                              passID);
+        m_pMaterial->SetFloat(ShaderIDs::g_TransmissionRange,
+                              UserData::GetInstance().subsurfaceScatterParameter.TransmissionRange,
+                              passID);
+        m_pMaterial->SetFloat(ShaderIDs::g_TransmissionEdgeGlow,
+                              UserData::GetInstance().subsurfaceScatterParameter.TransmissionEdgeGlow,
+                              passID);
         SetSpaceResource(passData, PER_PASS_SPACE);
         SetSpaceResource(passData, PER_FRAME_SPACE);
 
