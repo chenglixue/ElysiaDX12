@@ -570,12 +570,14 @@ namespace ElysiaEngine
             }
             if (pUserData.shadingModelID == ShadingModel::Preintegrated_Skin)
             {
-                ImGui::SliderFloat("Curve Scale", &pUserData.CurveScale, 0.f, 2.f);
-                ImGui::SliderFloat("Min Curve", &pUserData.MinCurve, 0.f, 1.f);
+                ImGui::SliderFloat("Curve Scale", &pUserData.subsurfaceScatterParameter.CurveScale, 0.f, 2.f);
+                ImGui::SliderFloat("Min Curve", &pUserData.subsurfaceScatterParameter.MinCurve, 0.f, 1.f);
                 ImGui::ColorEdit3("Subsurface Color",
-                                  (float*)&pUserData.SubsurfaceColor,
+                                  (float*)&pUserData.subsurfaceScatterParameter.SubsurfaceColor,
                                   ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_AlphaPreview |
                                   ImGuiColorEditFlags_HDR);
+                ImGui::SliderFloat("Scatter Radius", &pUserData.subsurfaceScatterParameter.ScatterRadius, 0.f, 10.f);
+
             }
             ImGui::ColorEdit3("Base Color Tint",
                               (float*)&pUserData.BaseColorTint,

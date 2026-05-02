@@ -331,6 +331,7 @@
 		<ClInclude Include="src\Runtime\RenderCore\SceneManager.h"/>
 		<ClInclude Include="src\Runtime\RenderCore\ShaderVariantManager.h"/>
 		<ClInclude Include="src\Runtime\RenderCore\ShadowUtility.h"/>
+		<ClInclude Include="src\Runtime\RenderCore\SubsurfaceScatterUtility.h"/>
 		<ClInclude Include="src\Runtime\RenderCore\TAAUtility.h"/>
 		<ClInclude Include="src\Runtime\RenderCore\TextureManager.h"/>
 		<ClInclude Include="src\Runtime\RenderCore\TonemapUtility.h"/>

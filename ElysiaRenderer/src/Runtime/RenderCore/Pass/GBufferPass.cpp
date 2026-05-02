@@ -386,7 +386,7 @@ namespace ElysiaRenderer
                 .specular = UserData::GetInstance().Specular,
 
                 .shadingModelID = (int)UserData::GetInstance().shadingModelID,
-                .subsurfaceColor = UserData::GetInstance().SubsurfaceColor
+                .subsurfaceColor = UserData::GetInstance().subsurfaceScatterParameter.SubsurfaceColor
             };
             m_meshDatas.emplace_back(meshData);
         }
@@ -822,8 +822,12 @@ namespace ElysiaRenderer
         m_pMaterial->SetUINT(ShaderIDs::g_VisbibleIndexBufferIndex,
                              m_pVisbibleIndexBuffer->GetResourceHeapIndex(),
                              passID);
-        m_pMaterial->SetFloat(ShaderIDs::g_CurveScale, UserData::GetInstance().CurveScale, passID);
-        m_pMaterial->SetFloat(ShaderIDs::g_MinCurve, UserData::GetInstance().MinCurve, passID);
+        m_pMaterial->SetFloat(ShaderIDs::g_CurveScale,
+                              UserData::GetInstance().subsurfaceScatterParameter.CurveScale,
+                              passID);
+        m_pMaterial->SetFloat(ShaderIDs::g_MinCurve,
+                              UserData::GetInstance().subsurfaceScatterParameter.MinCurve,
+                              passID);
 
         SetSpaceResource(passData, PER_PASS_SPACE);
         SetSpaceResource(passData, PER_FRAME_SPACE);

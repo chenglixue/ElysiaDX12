@@ -11,6 +11,7 @@
 #include "Runtime/RenderCore/TAAUtility.h"
 #include "ThirdParty/FreesyncHDR.h"
 #include "../Runtime/RenderCore/Material.h"
+#include "Runtime/RenderCore/SubsurfaceScatterUtility.h"
 
 namespace DirectX
 {
@@ -99,10 +100,8 @@ namespace ElysiaRenderer
         float Specular = 1;
         Vector3 AmbientCubemapTint = Vector3::One;
         Vector3 EmissionTint = Vector3::One;
-        float CurveScale = 1.f;
-        float MinCurve = 0.2f;
-        Vector3 SubsurfaceColor = Vector3::One;
 
+        SubsurfaceScatterParameter subsurfaceScatterParameter{};
         ShadowParameter shadowParameter;
 
         HDRParameter hdrParameter;
@@ -135,9 +134,7 @@ namespace ElysiaRenderer
                                                     Specular,
                                                     AmbientCubemapTint,
                                                     EmissionTint,
-                                                    CurveScale,
-                                                    MinCurve,
-                                                    SubsurfaceColor,
+                                                    subsurfaceScatterParameter,
                                                     shadowParameter,
                                                     hdrParameter,
                                                     aoParameter,

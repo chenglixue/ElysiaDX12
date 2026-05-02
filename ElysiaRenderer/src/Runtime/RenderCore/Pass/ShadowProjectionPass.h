@@ -16,6 +16,7 @@ PASS(SHADOW_TAA_PASS,                       "public\\CS_ScreenSpaceShadow.hlsl",
         struct RenderTextureIDs
         {
             static inline size_t ShadowMaskRTID = PropertyToID(L"Shadow Mask RT");
+            static inline size_t ThicknessInLightRTID = PropertyToID(L"Thickness In Light RT");
         };
         static inline int m_writeIndex = 0;
         static inline int m_readIndex = 0;
@@ -63,7 +64,7 @@ PASS(SHADOW_TAA_PASS,                       "public\\CS_ScreenSpaceShadow.hlsl",
         static inline bool m_isFirstFrame = true;
 
         std::vector<Vector2> m_sobolSequences;
-
+        RenderTexture* m_pThicknessTexInLight = nullptr;
 
         struct ShaderIDs
         {

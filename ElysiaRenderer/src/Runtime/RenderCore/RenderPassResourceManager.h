@@ -33,6 +33,11 @@ namespace ElysiaRenderer
         RenderTexture* pPreIntegrateSSSLUT = nullptr;
         RenderTexture* pNDFLUT = nullptr;
     };
+    struct ShadowData
+    {
+        RenderTexture* pShadowCastRT = nullptr;
+        RenderTexture* pShadowMaskRT = nullptr;
+    };
 
     class RenderPassResourceManager : public IManager
     {

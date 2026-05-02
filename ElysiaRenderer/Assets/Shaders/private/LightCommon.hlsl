@@ -36,6 +36,17 @@ FLightAccumulator AccumulateDynamicLighting(FInputParams inputData,
     //                                    shadowSize,
     //                                    shadowMatrix,
     //                                    inputData.SobelSqeuence);
+
+    float4 posLS = mul(float4(inputData.PositionWS, 1.f), shadowMatrix);
+    posLS.xyz /= posLS.w;
+    float castShadow = SampleTexture2D(ShadowTexIndex, posLS.xy * float2(0.5f, -0.5f) + 0.5f, ClampPointSampler).r;
+    float lightPosZ = posLS.z;
+    float thicknessInLight = max(0.f, lightPosZ - castShadow);
+    float transmissionAttenuation = saturate(exp(-thicknessInLight * g_ScatterRadius));
+
+    float viewDependency = saturate(dot(V, -L));
+    viewDependency = pow(saturate(dot(V, -L) + 0.3f), 4.0f);
+
     float shadow = SampleTexture2D(g_ShadowMaskTexIndex, inputData.ScreenUV, ClampLinearSampler);
     if (GBufferData.ShadingModelID == Shading_Model_ID_Preintegrated_Skin)
     {
@@ -59,6 +70,12 @@ FLightAccumulator AccumulateDynamicLighting(FInputParams inputData,
                               0,
                               directLight.Transmission,
                               Shadow.SurfaceShadow * MaskedLightColor);
+    LightAccumulator_AddSplit(o,
+                              directLight.Transmission,
+                              0,
+                              directLight.Transmission,
+                              MaskedLightColor * transmissionAttenuation * viewDependency);
+    // o.TotalLight = transmissionAttenuation;
     return o;
 }
 
@@ -90,6 +107,8 @@ FLightingSplit GetDynamicLightingSplit(FInputParams inputData,
         lightData,
         AO);
     o = GetLightAccumulator_ResultSplit(lightAccumulator);
+    // o.DiffuseLighting = float4(lightAccumulator.TotalLight, 1.f);
+    // o.SpecularLighting = 0;
 
     return o;
 }

@@ -51,6 +51,7 @@ cbuffer PassConstant : register(b0, perPassSpace)
     UINT g_PreIntegrateSSSLUTIndex;
     UINT g_PreIntegrateSSSNDFLUTIndex;
     float g_CurveScale;
+    float g_ScatterRadius;
 
     UINT g_SHCoefficientsBufferIndex;
 }

@@ -2,6 +2,7 @@
 #include "OpaquePass.h"
 
 #include "GIPass.h"
+#include "ShadowPass.h"
 #include "ShadowProjectionPass.h"
 #include "Editor/UserData.h"
 #include "Programs/PIXHelper.h"
@@ -159,11 +160,16 @@ namespace ElysiaRenderer
         m_pMaterial->SetUINT(ShaderIDs::g_PreIntegrateSSSNDFLUTIndex,
                              m_PreIntegrateSSSNDFLUT.GetResourceHeapIndex(),
                              passID);
-        m_pMaterial->SetFloat(ShaderIDs::g_CurveScale, UserData::GetInstance().CurveScale, passID);
+        m_pMaterial->SetFloat(ShaderIDs::g_CurveScale,
+                              UserData::GetInstance().subsurfaceScatterParameter.CurveScale,
+                              passID);
         m_pMaterial->SetUINT(ShaderIDs::g_SHCoefficientsBufferIndex,
                              RenderPassResourceManager::GetInstance().Get<EnvironmentData>().pSHCoefficientsBuffer->
                                                                       GetResourceHeapIndex(),
                              passID);
+        m_pMaterial->SetFloat(ShaderIDs::g_ScatterRadius,
+                              UserData::GetInstance().subsurfaceScatterParameter.ScatterRadius,
+                              passID);
         SetSpaceResource(passData, PER_PASS_SPACE);
         SetSpaceResource(passData, PER_FRAME_SPACE);
 

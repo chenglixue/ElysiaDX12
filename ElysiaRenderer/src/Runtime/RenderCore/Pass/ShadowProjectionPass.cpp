@@ -21,6 +21,8 @@
 #include "Runtime/RenderCore/ShaderVariantManager.h"
 #include <Programs/SobolSequenceGenerator.h>
 
+#include "Runtime/RenderCore/RenderPassResourceManager.h"
+
 namespace ElysiaRenderer
 {
     ShadowProjectionPass::ShadowProjectionPass()
@@ -137,6 +139,8 @@ namespace ElysiaRenderer
         m_readIndex = m_writeIndex;
         m_writeIndex = (m_writeIndex + 1) % 2;
 
+        auto& shadowData = RenderPassResourceManager::GetInstance().Get<ShadowData>();
+        shadowData.pShadowMaskRT = m_pShadowMaskRTs[m_writeIndex];
         DoShadowMask();
         if (m_isFirstFrame)
         {
