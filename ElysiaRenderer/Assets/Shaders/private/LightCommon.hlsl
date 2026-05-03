@@ -45,8 +45,9 @@ FLightAccumulator AccumulateDynamicLighting(FInputParams inputData,
     float transmissionAttenuation = saturate(exp(-thicknessInLight * g_ScatterRadius));
 
     float3 distortedLight = normalize(L + N * g_TransmissionEdgeGlow);
-    float viewDependency = pow(saturate(dot(V, -distortedLight)), max(1.f, rcp(g_TransmissionRange + 1e-2))) *
-                           g_TransmissionScale;
+    float phaseFunction = pow(saturate(dot(V, -distortedLight)), max(1.f, rcp(g_TransmissionRange + 1e-2))) *
+                          g_TransmissionScale;
+    float backfaceLambert = saturate(dot(-L, N));
 
     float shadow = SampleTexture2D(g_ShadowMaskTexIndex, inputData.ScreenUV, ClampLinearSampler);
     if (GBufferData.ShadingModelID == Shading_Model_ID_Preintegrated_Skin)
@@ -75,7 +76,7 @@ FLightAccumulator AccumulateDynamicLighting(FInputParams inputData,
                               directLight.Transmission,
                               0,
                               directLight.Transmission,
-                              MaskedLightColor * transmissionAttenuation * viewDependency);
+                              MaskedLightColor * transmissionAttenuation * phaseFunction * backfaceLambert);
     // o.TotalLight = transmissionAttenuation;
     return o;
 }

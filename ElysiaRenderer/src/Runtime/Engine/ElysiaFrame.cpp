@@ -585,7 +585,7 @@ namespace ElysiaEngine
                                    &pUserData.subsurfaceScatterParameter.TransmissionRange,
                                    0.f,
                                    2.f);
-                ImGui::SliderFloat("Transmission Halo Diffusion",
+                ImGui::SliderFloat("Transmission Edge Glow",
                                    &pUserData.subsurfaceScatterParameter.TransmissionEdgeGlow,
                                    0.f,
                                    1.f);

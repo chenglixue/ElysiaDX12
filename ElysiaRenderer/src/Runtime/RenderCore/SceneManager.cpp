@@ -54,7 +54,7 @@ namespace ElysiaRenderer
                     std::move(CreateModel(ElysiaHelper::GetAssetFullPath(assetsPath, modelPath))));
             }
         }
-        
+
         if (loadStage == 6)
         {
             for (auto& loadedModel : m_pendingModels)
@@ -100,7 +100,7 @@ namespace ElysiaRenderer
     {
         auto pParent = std::make_unique<Entity>(ToEastl(model->name));
         pParent->transform.scale = Vector3::One * 1.f;
-        // pParent->transform.rotation = MathHelper::Euler(90, 0, 180);
+        pParent->transform.rotation = MathHelper::Euler(-45, 0, 0);
         pParent->SetLocalAABB(model->aabbMin, model->aabbMax);
         pParent->UpdateWorldAABB();
 
