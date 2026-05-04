@@ -35,3 +35,9 @@ Duration ：0.22ms
 ## DDGI
 
 ![](https://pic1.imgdb.cn/item/69dca504f26639441e6aa8f0.png)
+
+#          Pre Integrate SSS
+
+![](https://pic1.imgdb.cn/item/69f8214bb681ce9bfd1da4f8.png)
+
+![](https://pic1.imgdb.cn/item/69f82154b681ce9bfd1da4fa.png)
