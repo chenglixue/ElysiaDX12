@@ -179,6 +179,19 @@ namespace ElysiaRenderer
         m_pMaterial->SetFloat(ShaderIDs::g_TransmissionEdgeGlow,
                               UserData::GetInstance().subsurfaceScatterParameter.TransmissionEdgeGlow,
                               passID);
+
+        m_pMaterial->SetBool(ShaderIDs::g_EnableMultiScatter,
+                             UserData::GetInstance().hairParameter.bEnableMultiScatter,
+                             passID);
+        m_pMaterial->SetBool(ShaderIDs::g_EnableR,
+                             UserData::GetInstance().hairParameter.bEnableR,
+                             passID);
+        m_pMaterial->SetBool(ShaderIDs::g_EnableTT,
+                             UserData::GetInstance().hairParameter.bEnableTT,
+                             passID);
+        m_pMaterial->SetBool(ShaderIDs::g_EnableTRT,
+                             UserData::GetInstance().hairParameter.bEnableTRT,
+                             passID);
         SetSpaceResource(passData, PER_PASS_SPACE);
         SetSpaceResource(passData, PER_FRAME_SPACE);
 

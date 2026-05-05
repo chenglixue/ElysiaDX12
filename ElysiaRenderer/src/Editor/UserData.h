@@ -11,6 +11,7 @@
 #include "Runtime/RenderCore/TAAUtility.h"
 #include "ThirdParty/FreesyncHDR.h"
 #include "../Runtime/RenderCore/Material.h"
+#include "Runtime/RenderCore/HairUtility.h"
 #include "Runtime/RenderCore/SubsurfaceScatterUtility.h"
 
 namespace DirectX
@@ -103,6 +104,7 @@ namespace ElysiaRenderer
         Vector3 EmissionTint = Vector3::One;
 
         SubsurfaceScatterParameter subsurfaceScatterParameter{};
+        HairParameter hairParameter{};
         ShadowParameter shadowParameter;
 
         HDRParameter hdrParameter;
@@ -136,6 +138,7 @@ namespace ElysiaRenderer
                                                     AmbientCubemapTint,
                                                     EmissionTint,
                                                     subsurfaceScatterParameter,
+                                                    hairParameter,
                                                     shadowParameter,
                                                     hdrParameter,
                                                     aoParameter,

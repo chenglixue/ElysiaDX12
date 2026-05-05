@@ -386,7 +386,9 @@ namespace ElysiaRenderer
                 .specular = UserData::GetInstance().Specular,
 
                 .shadingModelID = (int)UserData::GetInstance().shadingModelID,
-                .subsurfaceColor = UserData::GetInstance().subsurfaceScatterParameter.SubsurfaceColor
+                .subsurfaceColor = UserData::GetInstance().subsurfaceScatterParameter.SubsurfaceColor,
+
+                .backLit = UserData::GetInstance().hairParameter.backLit
             };
             m_meshDatas.emplace_back(meshData);
         }

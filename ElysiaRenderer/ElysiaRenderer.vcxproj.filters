@@ -625,6 +625,15 @@
     <ClInclude Include="src\Runtime\RenderCore\Pass\BakePass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Runtime\RenderCore\RenderPassResourceManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Runtime\RenderCore\SubsurfaceScatterUtility.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Runtime\RenderCore\HairUtility.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="dxc\bin\x64\dxcompiler.dll" />
@@ -694,7 +703,9 @@
     <None Include="Assets\Shaders\public\CS_ScreenSpaceShadow.hlsl" />
     <None Include="Assets\Shaders\private\ShadowConst.hlsli" />
     <None Include="Assets\Shaders\public\PreGen\CS_PreIntegrateSSS.hlsl" />
-    <None Include="Assets\Shaders\public\PreGen\CS_PreIntegrateGIDiffuse.hlsl" />
+    <None Include="Assets\Shaders\public\PreGen\CS_SHCoefficients.hlsl" />
+    <None Include="Assets\Shaders\private\HairBsdf.hlsli" />
+    <None Include="Assets\Shaders\private\OctahedralCommon.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -1088,6 +1099,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Runtime\RenderCore\Pass\BakePass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Runtime\RenderCore\RenderPassResourceManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Runtime\RenderCore\HairUtility.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

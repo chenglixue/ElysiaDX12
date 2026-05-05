@@ -161,6 +161,9 @@ namespace ElysiaRenderer
 
             int shadingModelID;
             Vector3 subsurfaceColor;
+
+            float backLit;
+            Vector3 padding;
         };
         struct alignas(16) IndirectCommand
         {

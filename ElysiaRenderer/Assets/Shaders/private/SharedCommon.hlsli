@@ -175,6 +175,8 @@ struct FEncodeGBufferData
 
     float3 SubsurfaceColor;
     float Curvature;
+
+    float backLit;
 };
 
 struct FDecodeGBufferData

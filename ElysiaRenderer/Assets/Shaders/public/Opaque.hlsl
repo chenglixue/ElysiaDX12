@@ -56,13 +56,18 @@ cbuffer PassConstant : register(b0, perPassSpace)
     float g_TransmissionRange;
     float g_TransmissionEdgeGlow;
 
+    bool g_EnableMultiScatter;
+    bool g_EnableR;
+    bool g_EnableTT;
+    bool g_EnableTRT;
+
     UINT g_SHCoefficientsBufferIndex;
 }
+
 
 #include <private\AmbientCubemap.hlsl>
 #include <private\ShadingCommon.hlsl>
 #include <private\ShadingModel.hlsl>
-
 #include <private\LightCommon.hlsl>
 #include <private\Light.hlsl>
 #include <public\GI\Irradiance.hlsl>

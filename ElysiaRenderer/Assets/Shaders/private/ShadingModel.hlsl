@@ -4,10 +4,12 @@
 #pragma once
 
 #include "SharedCommon.hlsli"
+#include "Common.hlsl"
 #include "BRDF.hlsl"
 #include "AreaLightCommon.hlsl"
 #include "LightAccumulator.hlsl"
 #include "EnergyPreservation.hlsl"
+#include "HairBsdf.hlsli"
 
 struct FShadowTerms
 {
@@ -115,26 +117,19 @@ FDirectLighting DefaultLitBxDF(FDecodeGBufferData GBufferData,
                                     NoL,
                                     AreaLight);
     Lighting.Specular *= AreaLight.FalloffColor * Falloff * NoL;
+    Lighting.Specular = 0;
 
     FBxDFEnergyTerms energyTerm = ComputeFresnelEnergyTerms(
         GGXEnergyLookup(GBufferData.Roughness, Context.NoV),
         GBufferData.SpecularColor);
 
-    // Lighting.Diffuse *= ComputeEnergyPreservation(energyTerm);
-    // Lighting.Specular *= ComputeEnergyConservation(energyTerm);
+    Lighting.Diffuse *= ComputeEnergyPreservation(energyTerm);
+    Lighting.Specular *= ComputeEnergyConservation(energyTerm);
 
     return Lighting;
 }
 
-float fresnelReflectance(float3 H, float3 V, float F0)
-{
-    float base = 1.0 - dot(V, H);
-    float exponential = pow(base, 5.0);
-    return exponential + F0 * (1.0 - exponential);
-}
-
 FDirectLighting PreintegratedSkinBxDF(FDecodeGBufferData GBufferData,
-                                      float3 PosWS,
                                       float3 N,
                                       float3 V,
                                       float3 L,
@@ -154,27 +149,25 @@ FDirectLighting PreintegratedSkinBxDF(FDecodeGBufferData GBufferData,
                                                    0).rgb;
     Lighting.Transmission = AreaLight.FalloffColor * Falloff * PreintegratedBRDF * subsurfaceColor;
 
-    // BxDFContext Context = (BxDFContext)0;
-    // Init(Context, N, V, L);
-    // float3 H = normalize(V + L);
-    //
-    // float UnclampedNoL = dot(N, L);
-    // float curve = length(fwidth(N)) / length(fwidth(PosWS));
-    // curve *= g_CurveScale;
-    // curve = saturate(curve + 0.3f);
-    // float3 SSSDiffuse = SampleTexture2D(g_PreIntegrateSSSLUTIndex,
-    //                                     float2(UnclampedNoL * 0.5f + 0.5f, curve),
-    //                                     ClampLinearSampler);
-    // Lighting.Diffuse = (SSSDiffuse) * GBufferData.DiffuseColor;
-    //
-    // float NDF = SampleTexture2D(g_PreIntegrateSSSNDFLUTIndex,
-    //                             float2(Context.NoH * 0.5 + 0.5f, GBufferData.Roughness),
-    //                             ClampLinearSampler);
-    // NDF = pow(2.f * NDF, 10.f);
-    // float F = fresnelReflectance(H, V, GBufferData.SpecularColor);
-    // float G = 1.0 / (4.0 * Context.VoH * Context.VoH);
-    // Lighting.Specular = NDF * F * G * AreaLight.FalloffColor * Falloff * max(0.f, NoL);
+    return Lighting;
+}
 
+FDirectLighting HairBxDF(FDecodeGBufferData GBufferData,
+                         float3 N,
+                         float3 V,
+                         float3 L,
+                         float Falloff,
+                         float NoL,
+                         FAreaLight AreaLight,
+                         FShadowTerms Shadow)
+{
+    FDirectLighting Lighting = (FDirectLighting)0;
+
+    const float3 hairShading = HairShading(GBufferData, L, V, GBufferData.WorldTangent * 0.1, Shadow.SurfaceShadow);
+
+    Lighting.Diffuse = 0;
+    Lighting.Specular = 0;
+    Lighting.Transmission = AreaLight.FalloffColor * Falloff * hairShading;
     return Lighting;
 }
 
@@ -200,7 +193,11 @@ FDirectLighting IntegrateBxDF(FDecodeGBufferData GBufferData,
     }
     else if (GBufferData.ShadingModelID == Shading_Model_ID_Preintegrated_Skin)
     {
-        o = PreintegratedSkinBxDF(GBufferData, PosWS, N, V, L, Falloff, NoL, AreaLight, Shadow);
+        o = PreintegratedSkinBxDF(GBufferData, N, V, L, Falloff, NoL, AreaLight, Shadow);
+    }
+    else if (GBufferData.ShadingModelID == Shading_Model_ID_Hair)
+    {
+        o = HairBxDF(GBufferData, N, V, L, Falloff, NoL, AreaLight, Shadow);
     }
 
     return o;

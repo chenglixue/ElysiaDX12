@@ -72,11 +72,15 @@ FLightAccumulator AccumulateDynamicLighting(FInputParams inputData,
                               0,
                               directLight.Transmission,
                               Shadow.SurfaceShadow * MaskedLightColor);
-    LightAccumulator_AddSplit(o,
-                              directLight.Transmission,
-                              0,
-                              directLight.Transmission,
-                              MaskedLightColor * transmissionAttenuation * phaseFunction * backfaceLambert);
+    if (GBufferData.ShadingModelID == Shading_Model_ID_Preintegrated_Skin)
+    {
+        LightAccumulator_AddSplit(o,
+                                  directLight.Transmission,
+                                  0,
+                                  directLight.Transmission,
+                                  MaskedLightColor * transmissionAttenuation * phaseFunction * backfaceLambert);
+    }
+
     // o.TotalLight = transmissionAttenuation;
     return o;
 }

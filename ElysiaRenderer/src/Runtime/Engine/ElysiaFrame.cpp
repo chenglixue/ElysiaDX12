@@ -590,6 +590,27 @@ namespace ElysiaEngine
                                    0.f,
                                    1.f);
             }
+            if (pUserData.shadingModelID == ShadingModel::Hair)
+            {
+                if (ImGui::Checkbox("Enable Multi Scatter", &pUserData.hairParameter.bEnableMultiScatter))
+                {
+                    m_pRenderer->OnUpdateDisplayDependentResources(&m_swapChain);
+                }
+                if (ImGui::Checkbox("Enable R", &pUserData.hairParameter.bEnableR))
+                {
+                    m_pRenderer->OnUpdateDisplayDependentResources(&m_swapChain);
+                }
+                if (ImGui::Checkbox("Enable TT", &pUserData.hairParameter.bEnableTT))
+                {
+                    m_pRenderer->OnUpdateDisplayDependentResources(&m_swapChain);
+                }
+                if (ImGui::Checkbox("Enable TRT", &pUserData.hairParameter.bEnableTRT))
+                {
+                    m_pRenderer->OnUpdateDisplayDependentResources(&m_swapChain);
+                }
+
+                ImGui::SliderFloat("Back Lit", &pUserData.hairParameter.backLit, 0.f, 1.f);
+            }
             ImGui::ColorEdit3("Base Color Tint",
                               (float*)&pUserData.BaseColorTint,
                               ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_AlphaPreview |

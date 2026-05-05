@@ -68,6 +68,11 @@ PASS(DRAW_LIGHT_PASS,         "public\\Opaque.hlsl", false, PS)
             static inline size_t g_TransmissionRange = PropertyToID(L"g_TransmissionRange");
             static inline size_t g_TransmissionEdgeGlow = PropertyToID(L"g_TransmissionEdgeGlow");
 
+            static inline size_t g_EnableMultiScatter = PropertyToID(L"g_EnableMultiScatter");
+            static inline size_t g_EnableR = PropertyToID(L"g_EnableR");
+            static inline size_t g_EnableTT = PropertyToID(L"g_EnableTT");
+            static inline size_t g_EnableTRT = PropertyToID(L"g_EnableTRT");
+
             static inline size_t g_SHCoefficientsBufferIndex = PropertyToID(L"g_SHCoefficientsBufferIndex");
         };
 

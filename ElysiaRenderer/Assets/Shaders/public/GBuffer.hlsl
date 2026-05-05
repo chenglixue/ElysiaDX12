@@ -1,6 +1,7 @@
 #include <private\SharedCommon.hlsli>
 #include "private\ShadingCommon.hlsl"
 #include <private\Light.hlsl>
+#include <private\OctahedralCommon.hlsli>
 
 #pragma Vertex VS
 #pragma Pixel PS
@@ -81,6 +82,9 @@ struct MeshData
 
     int shadingModelID;
     Vector3 subsurfaceColor;
+
+    float backLit;
+    Vector3 padding;
 };
 
 struct VSInput
@@ -175,6 +179,10 @@ PSOutput PS(PSInput i)
     {
         o.target6 = float4(encodeGBufferData.SubsurfaceColor, encodeGBufferData.Curvature);
     }
+    else if (encodeGBufferData.ShadingModelID == Shading_Model_ID_Hair)
+    {
+        o.target6 = float4(OctEncode(encodeGBufferData.WorldNormal) * 0.5f + 0.5f, encodeGBufferData.backLit, 0.f);
+    }
 
     return o;
 }
@@ -254,6 +262,8 @@ FEncodeGBufferData GetEncodeGBufferData(FInputParams inputParams, float3 toLight
     curve *= g_CurveScale;
     curve = saturate(curve + g_MinCurve);
     o.Curvature = curve;
+
+    o.backLit = currMeshData.backLit;
 
     // float blendWeight = DDGIGetVolumeBlendWeight(inputParams.PositionWS,
     //                                              g_GridOrigin,
