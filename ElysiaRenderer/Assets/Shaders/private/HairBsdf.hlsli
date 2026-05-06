@@ -69,12 +69,14 @@ float3 HairShading(FDecodeGBufferData GBuffer, float3 L, float3 V, half3 T, floa
     const float sinThetaV = clamp(dot(T, V), -1.f, 1.f);
     const float cosThetaL = sqrt(1 - Pow2(sinThetaL));
     const float cosThetaV = sqrt(1 - Pow2(sinThetaV));
+    const float cosThetaD = cos(abs(asin(sinThetaV) - asin(sinThetaL)) * 0.5f);
 
     const float3 Lp = L - T * sinThetaL;
     const float3 Vp = V - T * sinThetaV;
     const float cosPhi = dot(Lp, Vp) * rsqrt(dot(Lp, Lp) * dot(Vp, Vp) + 1e-4);
     const float cosHalfPhi = sqrt(saturate(0.5f + 0.5f * cosPhi));
 
+    float n_prime = 1.19 / cosThetaD + 0.36 * cosThetaD;
     float Shift = 0.035;
     float Alpha[] =
     {
@@ -83,29 +85,56 @@ float3 HairShading(FDecodeGBufferData GBuffer, float3 L, float3 V, half3 T, floa
         Shift * 4,
     };
 
-    // R
     if (g_EnableR)
     {
         const float v = Pow2(clampedRoughness);
 
-        float M = Hair_g(v * cosHalfPhi * sqrt(2), sinThetaL + sinThetaV);
+        float M = Hair_g(v * cosHalfPhi * sqrt(2), sinThetaL + sinThetaV - Alpha[0]);
 
         const float N = 0.25f * cosHalfPhi;
 
         const float3 H = normalize(V + L);
-        const float A = Hair_F(sqrt(saturate(0.5 + 0.5 * VoL)));
+        const float A = Hair_F(dot(V, H));
 
         const float specularScale = GBuffer.Specular * 2.f;
 
         o += M * N * A * specularScale * lerp(1.f, backLit, saturate(-VoL));
-        o = M * N * A;
     }
 
     if (g_EnableTT)
     {
+        float beta = 0.5 * Pow2(clampedRoughness);
 
+        float M = Hair_g(beta, sinThetaL + sinThetaV - Alpha[1]);
+
+        float a = rcp(n_prime);
+        float h = cosHalfPhi * (1 + a * (0.6 - 0.8 * cosPhi));
+
+        float T = pow(GBuffer.BaseColor, sqrt(1 - Pow2(h * a)) * rcp(2.f * cosThetaD));
+        float f = Hair_F(cosThetaD * sqrt(1 - Pow2(h)));
+        float A = T * Pow2(1 - f);
+
+        float Dp = exp(-3.65f * cosPhi - 3.98);
+
+        o += M * Dp * A * backLit;
     }
 
+    if (g_EnableTRT)
+    {
+        float beta = 2.f * Pow2(clampedRoughness);
+        float M = Hair_g(beta, sinThetaL + sinThetaV - Alpha[2]);
+
+        float T = pow(GBuffer.BaseColor, 0.8f * rcp(cosThetaD));
+        float Dp = exp(17.f * cosPhi - 16.78f);
+        float N = T * Dp;
+
+        float f = Hair_F(cosThetaD * 0.5f);
+        float A = Pow2(1 - f) * f;
+
+        o += M * N * A;
+    }
+
+    o = -min(-o, 0.f);
     return o;
 }
 #endif
