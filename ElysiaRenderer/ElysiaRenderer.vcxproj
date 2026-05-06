@@ -201,6 +201,9 @@
     <None Include="Assets\Shaders\private\OctahedralCommon.hlsli">
       <FileType>Document</FileType>
     </None>
+    <None Include="Assets\Shaders\private\SSSR\SSSRCommon.hlsli">
+      <FileType>Document</FileType>
+    </None>
     <ClInclude Include="dxc\inc\d3dx12.h" />
     <ClInclude Include="lib\AMD\libs\AGS\amd_ags.h" />
     <ClInclude Include="lib\AMD\libs\d3d12x\d3dx12.h" />
@@ -321,6 +324,7 @@
     <ClInclude Include="src\Runtime\RenderCore\Pass\ShadowProjectionPass.h" />
     <ClInclude Include="src\Runtime\RenderCore\Pass\SharpenPass.h" />
     <ClInclude Include="src\Runtime\RenderCore\Pass\SkyboxPass.h" />
+    <ClInclude Include="src\Runtime\RenderCore\Pass\SSSRPass.h" />
     <ClInclude Include="src\Runtime\RenderCore\Pass\TAAPass.h" />
     <ClInclude Include="src\Runtime\RenderCore\Pass\TonemapPass.h" />
     <ClInclude Include="src\Runtime\RenderCore\Pass\UIPass.h" />
@@ -497,6 +501,9 @@
     <None Include="Assets\Shaders\private\HairBsdf.hlsli">
       <FileType>Document</FileType>
     </None>
+    <None Include="Assets\Shaders\public\PostProcess\SSSR\CS_TileClassify.hlsl">
+      <FileType>Document</FileType>
+    </None>
     <ClCompile Include="src\Editor\IMGUIDrawer.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
@@ -571,6 +578,7 @@
     <ClCompile Include="src\Runtime\RenderCore\Pass\ShadowProjectionPass.cpp" />
     <ClCompile Include="src\Runtime\RenderCore\Pass\SharpenPass.cpp" />
     <ClCompile Include="src\Runtime\RenderCore\Pass\SkyboxPass.cpp" />
+    <ClCompile Include="src\Runtime\RenderCore\Pass\SSSRPass.cpp" />
     <ClCompile Include="src\Runtime\RenderCore\Pass\TAAPass.cpp" />
     <ClCompile Include="src\Runtime\RenderCore\Pass\TonemapPass.cpp" />
     <ClCompile Include="src\Runtime\RenderCore\Pass\UIPass.cpp" />

@@ -100,7 +100,7 @@ namespace ElysiaRenderer
     {
         auto pParent = std::make_unique<Entity>(ToEastl(model->name));
         pParent->transform.scale = Vector3::One * 1.f;
-        pParent->transform.rotation = MathHelper::Euler(-45, 0, 0);
+        // pParent->transform.rotation = MathHelper::Euler(-45, 0, 0);
         pParent->SetLocalAABB(model->aabbMin, model->aabbMax);
         pParent->UpdateWorldAABB();
 
