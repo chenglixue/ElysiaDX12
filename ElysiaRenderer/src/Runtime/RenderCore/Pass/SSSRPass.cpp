@@ -128,31 +128,6 @@ namespace ElysiaRenderer
         DoIntersectionArgs();
     }
 
-    void SSSRPass::DoClearRayCounter()
-    {
-        auto passID = SSSR_CLEAR_RAY_COUNTER_PASS;
-        auto& passData = m_pMaterial->GetPassData(passID);
-        auto passName = passData.Name.c_str();
-        PIXHelper pix(m_pCommand->GetCommandList(), passName);
-
-        PipelineInfo pipelineStateData{};
-        pipelineStateData.m_pipelineStateObject = passData.pPipelineStateObject;
-        m_pCommand->SetPipeline(pipelineStateData);
-        SetSpaceResource(passData, PER_FRAME_SPACE);
-
-        m_pCommand->AddBarrier(*m_pRayCounterBuffer, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-        {
-            m_pMaterial->SetUINT(ShaderIDs::g_RayCounterBufferIndex,
-                                 m_pRayCounterBuffer->GetUAVResourceHeapIndex(),
-                                 passID);
-
-            SetSpaceResource(passData, PER_PASS_SPACE);
-            m_pCommand->Dispatch(1, 1, 1);
-        }
-        m_pCommand->AddBarrier(*m_pRayCounterBuffer, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
-        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("SSSR/") + passName).c_str());
-    }
-
     void SSSRPass::DoTileClassify()
     {
         auto passID = SSSR_TILE_CLASSIFY_PASS;
@@ -212,11 +187,11 @@ namespace ElysiaRenderer
         m_pCommand->AddBarrier(*m_pRayListBuffer, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, false);
         m_pCommand->AddBarrier(m_pIntersectionOutputRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 
-        m_pCommand->AddBarrier(*m_pRayCounterBuffer, D3D12_RESOURCE_STATE_COPY_SOURCE);
-        m_pCommand->GetCommandList()->CopyResource(m_pRayCounterReadBackBuffer->GetResource().Get(),
-                                                   m_pRayCounterBuffer->GetResource().Get());
-        m_pCommand->AddBarrier(*m_pRayCounterBuffer, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
-        DoTileClassifyDebug();
+        // m_pCommand->AddBarrier(*m_pRayCounterBuffer, D3D12_RESOURCE_STATE_COPY_SOURCE);
+        // m_pCommand->GetCommandList()->CopyResource(m_pRayCounterReadBackBuffer->GetResource().Get(),
+        //                                            m_pRayCounterBuffer->GetResource().Get());
+        // m_pCommand->AddBarrier(*m_pRayCounterBuffer, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+        // DoTileClassifyDebug();
 
         m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("SSSR/") + passName).c_str());
     }
@@ -272,25 +247,27 @@ namespace ElysiaRenderer
                                false);
         m_pCommand->AddBarrier(*m_pRayCounterBuffer, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 
-        m_pCommand->AddBarrier(*m_pRayCounterBuffer, D3D12_RESOURCE_STATE_COPY_SOURCE);
-        m_pCommand->GetCommandList()->CopyResource(m_pRayCounterReadBackBuffer->GetResource().Get(),
-                                                   m_pRayCounterBuffer->GetResource().Get());
-        uint32_t* pMappedData = nullptr;
-        D3D12_RANGE readRange{0, sizeof(UINT) * 6ull};
-
-        HRESULT hr = m_pRayCounterReadBackBuffer->GetResource()->Map(
-            0,
-            &readRange,
-            reinterpret_cast<void**>(&pMappedData));
-
-        uint32_t* rayCounter;
-        if (SUCCEEDED(hr))
         {
-            rayCounter = pMappedData;
-            ElysiaHelper::Log::Info("SSSR Intersection Args: %i", rayCounter[0]);
-
-            D3D12_RANGE writeRange{0, 0};
-            m_pRayCounterReadBackBuffer->GetResource()->Unmap(0, &writeRange);
+            // m_pCommand->AddBarrier(*m_pIntersectionIndirectArgsBuffer, D3D12_RESOURCE_STATE_COPY_SOURCE);
+            // m_pCommand->GetCommandList()->CopyResource(m_pIntersectionArgsReadBackBuffer->GetResource().Get(),
+            //                                            m_pIntersectionIndirectArgsBuffer->GetResource().Get());
+            // uint32_t* pMappedData = nullptr;
+            // D3D12_RANGE readRange{0, sizeof(UINT) * 6ull};
+            //
+            // HRESULT hr = m_pIntersectionArgsReadBackBuffer->GetResource()->Map(
+            //     0,
+            //     &readRange,
+            //     reinterpret_cast<void**>(&pMappedData));
+            //
+            // uint32_t* rayCounter;
+            // if (SUCCEEDED(hr))
+            // {
+            //     rayCounter = pMappedData;
+            //     ElysiaHelper::Log::Info("SSSR Intersection Args: %i", rayCounter[0]);
+            //
+            //     D3D12_RANGE writeRange{0, 0};
+            //     m_pRayCounterReadBackBuffer->GetResource()->Unmap(0, &writeRange);
+            // }
         }
 
         m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("SSSR/") + passName).c_str());

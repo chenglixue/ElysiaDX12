@@ -35,15 +35,8 @@ void IncrementRayCounter(UINT waveRayCount, out UINT baseRayIndex);
 void StoreRay(UINT rayIndex, UINT2 rayCoord, bool copyHorizontal, bool copyVertical, bool copyDiagonal);
 float4 CalcSpecular(UINT2 readPos, float Roughness);
 
-void ClearRayCounter();
 void DoTileClassify(UINT2 readPos, UINT2 groupThreadID, float roughness);
 void CalcIntersectArgs();
-
-[numthreads(1, 1, 1)]
-void ClearRayCounterBuffer()
-{
-    ClearRayCounter();
-}
 
 [numthreads(GROUP_SIZE, GROUP_SIZE, 1)]
 void TileClassify(uint2 groupID : SV_GroupID,
@@ -143,12 +136,6 @@ float4 CalcSpecular(UINT2 readPos, float Roughness)
     float4 specularIBL = SampleTextureCube_LOD(SkyboxTexIndex, R, ClampLinearSampler, lod);
 
     return specularIBL;
-}
-
-void ClearRayCounter()
-{
-    RWStructuredBuffer<UINT> rayCounterBuffer = ResourceDescriptorHeap[g_RayCounterBufferIndex];
-    rayCounterBuffer[0] = 0;
 }
 
 void DoTileClassify(UINT2 readPos, UINT2 groupThreadID, float roughness)

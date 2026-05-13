@@ -23,7 +23,6 @@ namespace ElysiaRenderer
 
     private:
 #define SSSR_PASS_LIST \
-    PASS(SSSR_CLEAR_RAY_COUNTER_PASS,      "public\\PostProcess\\SSSR\\CS_TileClassify.hlsl",               true,  ClearRayCounterBuffer)\
     PASS(SSSR_TILE_CLASSIFY_PASS,          "public\\PostProcess\\SSSR\\CS_TileClassify.hlsl",               true,  TileClassify)\
     PASS(SSSR_INTERSECT_ARGS_PASS,         "public\\PostProcess\\SSSR\\CS_TileClassify.hlsl",               true,  DoIntersectArgs)
 
@@ -82,7 +81,6 @@ namespace ElysiaRenderer
             static inline size_t g_SamplesPerQuad = PropertyToID(L"g_SamplesPerQuad");
         };
 
-        void DoClearRayCounter();
         void DoTileClassify();
         void DoTileClassifyDebug();
         void DoIntersectionArgs();
