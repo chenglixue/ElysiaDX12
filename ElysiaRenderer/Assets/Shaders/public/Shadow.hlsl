@@ -1,6 +1,4 @@
 #include <private\Light.hlsl>
-// #include <private\LightCommon.hlsl>
-#include <private\ShadowCommon.hlsl>
 
 #pragma Vertex VS
 #pragma Pixel PS
@@ -40,7 +38,12 @@ cbuffer PassConstant : register(b0, perPassSpace)
     float shadowMaxSlopeDepthBias;
 
     Vector2 g_sobolSequence[64];
+
+    UINT g_SobolNoiseTexIndex;
 };
+
+#include <private\ShadowCommon.hlsl>
+
 
 struct VSInput
 {

@@ -47,6 +47,7 @@ cbuffer PassConstant : register(b0, perPassSpace)
     float g_AmbientIntensity;
     UINT g_DebugMode;
 
+    UINT g_SobolNoiseTexIndex;
     UINT g_ShadowMaskTexIndex;
     UINT g_PreIntegrateSSSLUTIndex;
     UINT g_PreIntegrateSSSNDFLUTIndex;
@@ -169,7 +170,7 @@ PSOutput PS(PSInput i)
         IBL *= (GBufferData.DiffuseColor.rgb) / PI;
         lighting += float4(IBL, 1.f) * AO;
     }
-    IBL += GetIBL(inputParam, GBufferData, mainLightData.toLight, g_AmbientIntensity, g_AmbientTint);
+    // IBL += GetIBL(inputParam, GBufferData, mainLightData.toLight, g_AmbientIntensity, g_AmbientTint);
     lighting.rgb += (GBufferData.SceneColor + IBL) * AO;
 
     switch (g_DebugMode)

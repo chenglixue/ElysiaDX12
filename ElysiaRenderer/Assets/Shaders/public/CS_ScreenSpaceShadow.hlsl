@@ -1,6 +1,5 @@
 #include "private\ShadingCommon.hlsl"
 #include <private\Light.hlsl>
-#include <private\ShadowCommon.hlsl>
 #include <private\TAACommon.hlsli>
 
 #define GROUP_SIZE 8
@@ -22,6 +21,7 @@ cbuffer PassConstant : register(b0, perPassSpace)
     UINT g_ShadowMaskTexIndex;
     UINT g_HistoryTexIndex;
     UINT g_CurrTexIndex;
+    UINT g_SobolNoiseTexIndex;
 
     float g_StaticBlendWeight;
     float g_DynamicBlendWeight;
@@ -29,11 +29,15 @@ cbuffer PassConstant : register(b0, perPassSpace)
     float2 g_SobolSequence[64];
 }
 
+#include <private\ShadowCommon.hlsl>
+
+
 void SaveShadowMask(UINT2 writePos, float3 shadow)
 {
     RWTexture2D<float3> ShadowMaskTex = ResourceDescriptorHeap[g_ShadowMaskTexIndex];
     ShadowMaskTex[writePos].rgb = shadow;
 }
+
 float LoadSceneRawDepth(UINT2 readPos)
 {
     float rawDepth = LoadTexture2D(OpaqueDepthIndex, readPos);

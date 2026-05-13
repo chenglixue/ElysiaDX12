@@ -2,6 +2,7 @@
 #define SHADOW_COMMON_H
 
 #include "SharedCommon.hlsli"
+#include "Common.hlsl"
 #include "Random.hlsl"
 
 //-------------------------------------------------------------------------------------------------
@@ -242,11 +243,7 @@ inline float SobolPCF1Spp(float2 screenSize,
 
     uint2 pixelCoord = uint2(screenUV * screenSize);
     SamplerComparisonState compShadowSampler = SamplerDescriptorHeap[ShadowClampLinearSampler];
-    float2 offset = samplerBlueNoiseErrorDistribution_128x128_OptimizedFor_2d2d2d2d_1spp(
-        pixelCoord.x,
-        pixelCoord.y,
-        frameIndex,
-        uint3(0, 1, 2));
+    float2 offset = SampleTexture2D(g_SobolNoiseTexIndex, screenUV, ClampPointSampler);
     float2 sampleUV = shadowPos + offset * shadowMapSize.zw * shadowRadius;
     float sampleShadow = shadowTex.SampleCmpLevelZero(compShadowSampler, sampleUV, lightDepth);
 
@@ -278,7 +275,7 @@ inline float SobolPCF(float2 screenSize,
     shift += temporalShift;
 
     [unroll]
-    for (int i = 0; i < numSamples; i ++)
+    for (int i = 0; i < numSamples; i++)
     {
         uint sampleIdx = (i + frameIndex) % 32;
         float2 sobol = sobolSequence[sampleIdx];
@@ -357,45 +354,45 @@ float SampleShadowPCF(in Texture2D shadowMap,
     o = shadowMap.SampleCmpLevelZero(compShadowSampler, shadowPos.xy, shadowPos.z);
 #elif defined(SOFT_SHADOW)
 #if defined (SHADOW_QUALITY_LOW)
-    o = SobolPCF(screenSize,
-                 screenUV,
-                 shadowRadius,
-                 shadowPos.xy,
-                 shadowPos.z,
-                 shadowMap,
-                 pointShadowSampler,
-                 shadowMapSize,
-                 sobolSequence);
+    o = SobolPCF1Spp(screenSize,
+                     screenUV,
+                     shadowRadius,
+                     shadowPos.xy,
+                     shadowPos.z,
+                     shadowMap,
+                     pointShadowSampler,
+                     shadowMapSize,
+                     sobolSequence);
 #elif defined (SHADOW_QUALITY_MIDDLE)
-    o = SobolPCF(screenSize,
-                 screenUV,
-                 shadowRadius,
-                 shadowPos.xy,
-                 shadowPos.z,
-                 shadowMap,
-                 pointShadowSampler,
-                 shadowMapSize,
-                 sobolSequence);
+    o = SobolPCF1Spp(screenSize,
+                     screenUV,
+                     shadowRadius,
+                     shadowPos.xy,
+                     shadowPos.z,
+                     shadowMap,
+                     pointShadowSampler,
+                     shadowMapSize,
+                     sobolSequence);
 #elif defined (SHADOW_QUALITY_HIGH)
-    o = SobolPCF(screenSize,
-                 screenUV,
-                 shadowRadius,
-                 shadowPos.xy,
-                 shadowPos.z,
-                 shadowMap,
-                 pointShadowSampler,
-                 shadowMapSize,
-                 sobolSequence);
+    o = SobolPCF1Spp(screenSize,
+                     screenUV,
+                     shadowRadius,
+                     shadowPos.xy,
+                     shadowPos.z,
+                     shadowMap,
+                     pointShadowSampler,
+                     shadowMapSize,
+                     sobolSequence);
 #elif defined (SHADOW_QUALITY_VERYHIGH)
-    o = SobolPCF(screenSize,
-                 screenUV,
-                 shadowRadius,
-                 shadowPos.xy,
-                 shadowPos.z,
-                 shadowMap,
-                 pointShadowSampler,
-                 shadowMapSize,
-                 sobolSequence);
+    o = SobolPCF1Spp(screenSize,
+                     screenUV,
+                     shadowRadius,
+                     shadowPos.xy,
+                     shadowPos.z,
+                     shadowMap,
+                     pointShadowSampler,
+                     shadowMapSize,
+                     sobolSequence);
 #endif
 
 #endif

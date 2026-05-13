@@ -37,6 +37,7 @@
 #include "Pass/TAAPass.h"
 #include "Runtime/Engine/ECS/Entity.h"
 #include "Pass/ShadowProjectionPass.h"
+#include "Pass/SSSRPass.h"
 
 extern "C"
 {
@@ -78,6 +79,7 @@ namespace ElysiaRenderer
         AddPass<ShadowProjectionPass>();
         AddPass<OpaquePass>();
         AddPass<SkyboxPass>();
+        AddPass<SSSRPass>();
         AddPass<TAAPass>();
         AddPass<BloomPass>();
         AddPass<TonemapPass>();

@@ -23,7 +23,9 @@ namespace ElysiaRenderer
 
     private:
 #define SSSR_PASS_LIST \
-    PASS(BLOOM_FIRST_DOWN_SAMPLE_PASS,          "public\\PostProcess\\Bloom\\Bloom.hlsl",               true,  BloomKarisDownSample)
+    PASS(SSSR_CLEAR_RAY_COUNTER_PASS,      "public\\PostProcess\\SSSR\\CS_TileClassify.hlsl",               true,  ClearRayCounterBuffer)\
+    PASS(SSSR_TILE_CLASSIFY_PASS,          "public\\PostProcess\\SSSR\\CS_TileClassify.hlsl",               true,  TileClassify)\
+    PASS(SSSR_INTERSECT_ARGS_PASS,         "public\\PostProcess\\SSSR\\CS_TileClassify.hlsl",               true,  DoIntersectArgs)
 
 #pragma region Pass
         enum PassID
@@ -33,6 +35,7 @@ namespace ElysiaRenderer
 #undef PASS
             SSSR_PASS_COUNT
         };
+
         static inline const ShaderPass m_PassData[] =
         {
 #define PASS(id, file, isCS, entry) \
@@ -47,19 +50,41 @@ namespace ElysiaRenderer
         };
 #pragma endregion
 
-        UINT m_cameraWidth;
-        UINT m_cameraHeight;
         UINT m_displayWidth;
         UINT m_displayHeight;
+        UINT m_cameraWidth;
+        UINT m_cameraHeight;
         BufferHandle m_pRayCounterBuffer = nullptr;
-        BufferHandle m_pIntersectionIndirectArgs = nullptr;
+        BufferHandle m_pIntersectionIndirectArgsBuffer = nullptr;
+        BufferHandle m_pRayListBuffer = nullptr;
+        RenderTexture* m_pIntersectionOutputRT = nullptr;
+
+        BufferHandle m_pRayCounterReadBackBuffer;
+        BufferHandle m_pIntersectionArgsReadBackBuffer;
 
         struct ShaderIDs
         {
-            static inline size_t g_DestTextureIndexID = PropertyToID(L"g_DestTextureIndex");
+            static inline size_t viewMatrix = PropertyToID(L"viewMatrix");
+            static inline size_t viewMatrix_I = PropertyToID(L"viewMatrix_I");
+            static inline size_t projMatrix = PropertyToID(L"projMatrix");
+            static inline size_t projMatrix_I = PropertyToID(L"projMatrix_I");
+            static inline size_t viewProjMatrix = PropertyToID(L"viewProjMatrix");
+            static inline size_t viewProjMatrix_I = PropertyToID(L"viewProjMatrix_I");
 
+            static inline size_t g_RayCounterBufferIndex = PropertyToID(L"g_RayCounterBufferIndex");
+            static inline size_t g_RayListBufferIndex = PropertyToID(L"g_RayListBufferIndex");
+            static inline size_t g_IntersectionOutputTexIndex = PropertyToID(L"g_IntersectionOutputTexIndex");
+            static inline size_t g_IntersectionArgsBufferIndex = PropertyToID(L"g_IntersectionArgsBufferIndex");
+
+            static inline size_t g_DestTextureIndexID = PropertyToID(L"g_DestTextureIndex");
+            static inline size_t g_DestSize = PropertyToID(L"g_DestSize");
+            static inline size_t g_RoughnessThreshold = PropertyToID(L"g_RoughnessThreshold");
+            static inline size_t g_SamplesPerQuad = PropertyToID(L"g_SamplesPerQuad");
         };
 
+        void DoClearRayCounter();
         void DoTileClassify();
+        void DoTileClassifyDebug();
+        void DoIntersectionArgs();
     };
 }

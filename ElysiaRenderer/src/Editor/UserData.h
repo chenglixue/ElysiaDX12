@@ -12,6 +12,7 @@
 #include "ThirdParty/FreesyncHDR.h"
 #include "../Runtime/RenderCore/Material.h"
 #include "Runtime/RenderCore/HairUtility.h"
+#include "Runtime/RenderCore/SSSRUtility.h"
 #include "Runtime/RenderCore/SubsurfaceScatterUtility.h"
 
 namespace DirectX
@@ -71,6 +72,7 @@ namespace ElysiaRenderer
         UserData()
         {
         }
+
         UserData(const UserData&) = delete;
         UserData& operator=(const UserData&) = delete;
         UserData(UserData&&) = delete;
@@ -119,6 +121,7 @@ namespace ElysiaRenderer
         BloomParameter bloomParameter{};
         TAAParameter taaParameter{};
         SharpenParameter sharpenParameter{};
+        SSSRParameter sssrParameter{};
 
         bool EnableHIZ = true;
 
@@ -149,6 +152,7 @@ namespace ElysiaRenderer
                                                     bloomParameter,
                                                     taaParameter,
                                                     sharpenParameter,
+                                                    sssrParameter,
                                                     EnableHIZ)
 
     private:

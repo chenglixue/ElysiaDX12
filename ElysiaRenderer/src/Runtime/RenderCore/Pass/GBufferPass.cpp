@@ -251,7 +251,9 @@ namespace ElysiaRenderer
             m_HIZMipmapCount,
             RenderResource::GetInstance().GetPropertyName(
                 RenderTextureIDs::GBufferHIZID));
+
     }
+
     std::vector<DX12TextureResource*> GBufferPass::GetGBuffers()
     {
         std::vector<DX12TextureResource*> temp{};
@@ -274,6 +276,7 @@ namespace ElysiaRenderer
         UpdateCSVariant(CS_CLEAR_COUNTER_BUFFER);
         UpdateCSVariant(CS_GBUFFER_CULLING_PASS);
     }
+
     void GBufferPass::UpdateGBufferPassVariant(UINT passIndex)
     {
         std::vector<std::wstring> enableKeywords{};
@@ -321,6 +324,7 @@ namespace ElysiaRenderer
         }
 
     }
+
     void GBufferPass::UpdateCSVariant(UINT passIndex)
     {
         std::vector<std::wstring> enableKeywords{};
@@ -347,19 +351,20 @@ namespace ElysiaRenderer
         m_preJitterUV = m_currJitterUV;
         m_currJitterUV = Jitter::SampleJitterUV(UserData::GetInstance().taaParameter.jitterType);
         m_jitterMatrixProj.m[2][0] += m_currJitterUV.x * 2.f / m_displayWidth * UserData::GetInstance().taaParameter.
-                                                                                                        jitterIntensity;
+            jitterIntensity;
         m_jitterMatrixProj.m[2][1] -= m_currJitterUV.y * 2.f / m_displayHeight * UserData::GetInstance().taaParameter.
-                                                                                                         jitterIntensity;
+            jitterIntensity;
 
         m_currMatrixVP = viewMatrix * projMatrix;
         m_currMatrixVP_I = m_currMatrixVP.Invert();
     }
+
     void GBufferPass::UploadMeshData(const std::vector<RenderItem>& renderItems)
     {
         const auto renderItemCount = renderItems.size();
 
         m_meshDatas.clear();
-        for (UINT64 i = 0; i < renderItemCount; i ++)
+        for (UINT64 i = 0; i < renderItemCount; i++)
         {
             const auto& materialData = renderItems[i].loadedMaterial;
             const auto& textureIndices = renderItems[i].textureIndices;
@@ -430,7 +435,7 @@ namespace ElysiaRenderer
                 .StartInstanceLocation = 0,
             };
             m_indirectCommands.emplace_back(indirectCommand);
-            renderItemIndex ++;
+            renderItemIndex++;
         }
         m_uploads[1]->buffer = m_pIndirectDataBuffer;
         memcpy(m_uploads[1]->pBufferData.get(),
@@ -478,6 +483,7 @@ namespace ElysiaRenderer
         m_pCommand->AddBarrier(m_pHIZTex, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
         m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("GBuffer/") + passName).c_str());
     }
+
     void GBufferPass::DoHIZ()
     {
         auto passID = CS_GBuffer_HIZ;
@@ -558,6 +564,7 @@ namespace ElysiaRenderer
         m_pCommand->AddBarrier(*m_pVisbibleCounterBuffer, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
         m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("GBuffer/") + passName).c_str());
     }
+
     std::vector<Vector4> GBufferPass::ExtractFrustumPlanes(const Matrix& viewProj)
     {
         // XYZ 是法线，W 是距离
@@ -602,6 +609,7 @@ namespace ElysiaRenderer
         }
         return frustumPlanes;
     }
+
     void GBufferPass::DoCulling(const std::vector<RenderItem>& renderItems)
     {
         auto passID = CS_GBUFFER_CULLING_PASS;
@@ -620,7 +628,7 @@ namespace ElysiaRenderer
 
         m_aabbLoader.m_instanceCpuData.reserve(renderItems.size());
         auto viewFrustum = CameraManager::GetInstance().GetMainCamera()->GetFrustum();
-        for (UINT i = 0; i < renderItems.size(); i ++)
+        for (UINT i = 0; i < renderItems.size(); i++)
         {
             const auto entity = renderItems[i].pAssociatedEntity;
             const auto AABB = entity->GetWorldAABB();
@@ -845,6 +853,7 @@ namespace ElysiaRenderer
 
         m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("GBuffer/") + passName).c_str());
     }
+
     void GBufferPass::DrawMesh(ElysiaEngine::FrameContext& context, UINT passIndex)
     {
         auto& passData = m_pMaterial->GetPassData(passIndex);
@@ -889,10 +898,12 @@ namespace ElysiaRenderer
         };
         m_instanceCpuData.emplace_back(data);
     }
+
     void GBufferPass::AABBLoader::Clear()
     {
         m_instanceCpuData.clear();
     }
+
     void GBufferPass::AABBLoader::Bind(Material* pMaterail)
     {
         BufferCreationDesc instanceDataDesc =

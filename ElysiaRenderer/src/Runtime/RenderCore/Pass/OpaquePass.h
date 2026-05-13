@@ -74,6 +74,7 @@ PASS(DRAW_LIGHT_PASS,         "public\\Opaque.hlsl", false, PS)
             static inline size_t g_EnableTRT = PropertyToID(L"g_EnableTRT");
 
             static inline size_t g_SHCoefficientsBufferIndex = PropertyToID(L"g_SHCoefficientsBufferIndex");
+            static inline size_t g_SobolNoiseTexIndex = PropertyToID(L"g_SobolNoiseTexIndex");
         };
 
         UINT m_cameraWidth;

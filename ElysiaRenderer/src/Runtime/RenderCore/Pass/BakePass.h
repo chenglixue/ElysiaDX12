@@ -11,6 +11,7 @@ namespace ElysiaRenderer
     {
     public:
 #define BAKE_PASS_LIST \
+        PASS(CS_CALC_SOBOL_NOISE,           "public\\CS_CalcSobolNoise.hlsl",              true,  CalcSobolNoise)\
         PASS(CS_PRE_INTEGRATE_SSS,          "public\\PreGen\\CS_PreIntegrateSSS.hlsl",     true,  PreIntegrateSSS)\
         PASS(CS_INTEGRATE_SSS_NDF,          "public\\PreGen\\CS_PreIntegrateSSS.hlsl",     true,  IntegrateSSSNDF)\
         PASS(CS_TEMP_SH_Coefficients,       "public\\PreGen\\CS_SHCoefficients.hlsl",      true,  CalcTempSHCoefficients)\
@@ -21,6 +22,7 @@ namespace ElysiaRenderer
             static inline size_t PreIntegrateSSSLUTID = PropertyToID(L"Pre Integrate SSS LUT");
             static inline size_t IntegrateSSSNDFLUTID = PropertyToID(L"Integrate SSS NDF LUT");
             static inline size_t PreIntegrateDiffuseID = PropertyToID(L"Pre Integrate Diffuse");
+            static inline size_t SobolNoiseTexID = PropertyToID(L"Sobol Noise RT");
         };
 
         BakePass();
@@ -40,6 +42,7 @@ namespace ElysiaRenderer
 #undef PASS
             BAKE_PASS_COUNT
         };
+
         static inline const ShaderPass m_PassData[] =
         {
 #define PASS(id, file, isCS, entry) \
@@ -58,11 +61,14 @@ namespace ElysiaRenderer
         UINT m_displayHeight;
         UINT m_cameraWidth;
         UINT m_cameraHeight;
+        constexpr static UINT m_SobolNoiseRTWidth = 128;
+        constexpr static UINT m_SobolNoiseRTHeight = 128;
         bool m_bIsBakeSHCoefficients = false;
         Vector4 m_SHCoefficientsTempCount;
         EnvironmentData m_GIData{};
         SubsurfaceScatterData m_subsurfaceScatterData{};
         BufferHandle m_pSHCoefficientsTempBuffer = nullptr;
+        RenderTexture* m_pSobolNoiseTex = nullptr;
 
         struct ShaderIDs
         {
@@ -71,17 +77,20 @@ namespace ElysiaRenderer
             static inline size_t g_EnvironmentTexIndex = PropertyToID(L"g_EnvironmentTexIndex");
             static inline size_t g_SHCoefficientsBufferIndex = PropertyToID(L"g_SHCoefficientsBufferIndex");
             static inline size_t g_SHCoefficientsTempBufferIndex = PropertyToID(L"g_SHCoefficientsTempBufferIndex");
+            static inline size_t g_SobolNoiseTexIndex = PropertyToID(L"g_SobolNoiseTexIndex");
 
             static inline size_t g_TargetSize = PropertyToID(L"g_TargetSize");
             static inline size_t g_SkyboxSize = PropertyToID(L"g_SkyboxSize");
             static inline size_t g_SHCoefficientsTempCount = PropertyToID(L"g_SHCoefficientsTempCount");
         };
+
         struct alignas(16) SHCoefficientData
         {
             Vector4 SHCoefficients[9]; // 这个 8x8 区域的 9 个系数的局部累加和
-            float TotalWeight;         // 这个 8x8 区域的立体角权重之和
+            float TotalWeight; // 这个 8x8 区域的立体角权重之和
         };
 
+        void DoSobolNoise();
         void DoPreIntegrateSSSLUT();
         void DoIntegrateSSSNDFLUT();
         void DoSHCoefficients();

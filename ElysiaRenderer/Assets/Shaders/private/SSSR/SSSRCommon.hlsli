@@ -8,6 +8,7 @@ uint SSSR_BitfieldExtract(uint src, uint off, uint bits)
     uint mask = (1 << bits) - 1;
     return (src >> off) & mask;
 }
+
 uint SSSR_BitfieldInsert(uint src, uint ins, uint bits)
 {
     uint mask = (1 << bits) - 1;
@@ -30,5 +31,21 @@ uint2 SSSR_RemapLane8x8(uint lane)
                  SSSR_BitfieldInsert(SSSR_BitfieldExtract(lane, 3u, 3u),
                                      SSSR_BitfieldExtract(lane, 1u, 2u),
                                      2u));
+}
+
+UINT PackRayData(UINT2 coord, bool copyHorizontal, bool copyVertical, bool copyDiagonal)
+{
+    UINT copyHorizontal1Bit = copyHorizontal ? 1 : 0;
+    UINT copyVertical1Bit = copyVertical ? 1 : 0;
+    UINT copyDiagonal1Bit = copyDiagonal ? 1 : 0;
+    UINT coord14Bit = coord.y & 0b11111111111111;
+    UINT coord15Bit = coord.x & 0b111111111111111;
+
+    return (copyHorizontal1Bit << 31) |
+           (copyVertical1Bit << 30) |
+           (copyDiagonal1Bit << 29) |
+           (coord14Bit << 15) |
+           (coord15Bit << 0);
+
 }
 #endif

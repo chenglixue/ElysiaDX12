@@ -30,10 +30,12 @@ namespace ElysiaRenderer
     {
 
     }
+
     BakePass::~BakePass()
     {
         Dispose();
     }
+
     void BakePass::Dispose()
     {
     }
@@ -44,6 +46,15 @@ namespace ElysiaRenderer
         m_displayHeight = (UINT)m_displaySize.y;
         m_cameraWidth = std::floor(m_displaySize.x * UserData::GetInstance().taaParameter.sampleRate);
         m_cameraHeight = std::floor(m_displaySize.y * UserData::GetInstance().taaParameter.sampleRate);
+
+        m_pSobolNoiseTex = RenderTargetManager::GetInstance().CreateRWRenderTexture(
+            m_SobolNoiseRTWidth,
+            m_SobolNoiseRTHeight,
+            DXGI_FORMAT_R8G8_UNORM,
+            true,
+            RenderResource::GetInstance().
+            GetPropertyName(RenderTextureIDs::SobolNoiseTexID));
+        RenderPassResourceManager::GetInstance().Get<ShaderGlobalData>().sobolNoiseTex = m_pSobolNoiseTex;
 
         m_subsurfaceScatterData =
         {
@@ -136,9 +147,40 @@ namespace ElysiaRenderer
         m_pCamera = context.pCamera;
         m_pGPUTimer = context.pGPUTimer;
 
+        DoSobolNoise();
         DoSHCoefficients();
         DoPreIntegrateSSSLUT();
         DoIntegrateSSSNDFLUT();
+    }
+
+    void BakePass::DoSobolNoise()
+    {
+        auto passID = CS_CALC_SOBOL_NOISE;
+        auto& passData = m_pMaterial->GetPassData(passID);
+        auto passName = passData.Name.c_str();
+        PIXHelper pix(m_pCommand->GetCommandList(), passName);
+
+        PipelineInfo pipelineStateData{};
+        pipelineStateData.m_pipelineStateObject = passData.pPipelineStateObject;
+        m_pCommand->SetPipeline(pipelineStateData);
+        SetSpaceResource(passData, PER_FRAME_SPACE);
+
+        m_pCommand->AddBarrier(m_pSobolNoiseTex, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+        {
+            m_pMaterial->SetUINT(ShaderIDs::g_SobolNoiseTexIndex,
+                                 m_pSobolNoiseTex->GetUAVResourceHeapIndex(),
+                                 passID);
+            SetSpaceResource(passData, PER_PASS_SPACE);
+
+            auto threadGroupSize = passData.GetKernelThreadGroupSizes();
+            m_pCommand->Dispatch(CeilDivide(m_SobolNoiseRTWidth, threadGroupSize.x),
+                                 CeilDivide(m_SobolNoiseRTHeight, threadGroupSize.y),
+                                 1);
+        }
+        m_pCommand->AddBarrier(m_pSobolNoiseTex, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("Sobol Noise/") + passName).c_str());
+
     }
 
     void BakePass::DoPreIntegrateSSSLUT()
@@ -187,6 +229,7 @@ namespace ElysiaRenderer
 
         m_pCommand->Reset();
     }
+
     void BakePass::DoIntegrateSSSNDFLUT()
     {
         if (!BakeManager::GetInstance().ConsumeMasks(EBakeTaskFlags::SSSNDFLut))
@@ -233,6 +276,7 @@ namespace ElysiaRenderer
 
         m_pCommand->Reset();
     }
+
     void BakePass::DoSHCoefficients()
     {
         if (m_bIsBakeSHCoefficients)
@@ -246,6 +290,7 @@ namespace ElysiaRenderer
         DoCalcSHCoefficients();
         m_bIsBakeSHCoefficients = true;
     }
+
     void BakePass::DoCalcTempSHCoefficients()
     {
         auto passID = CS_TEMP_SH_Coefficients;
@@ -283,6 +328,7 @@ namespace ElysiaRenderer
 
         m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("Bake/") + passName).c_str());
     }
+
     void BakePass::DoCalcSHCoefficients()
     {
         auto passID = CS_SH_Coefficients;

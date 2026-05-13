@@ -192,6 +192,10 @@ namespace ElysiaRenderer
         m_pMaterial->SetBool(ShaderIDs::g_EnableTRT,
                              UserData::GetInstance().hairParameter.bEnableTRT,
                              passID);
+        m_pMaterial->SetUINT(ShaderIDs::g_SobolNoiseTexIndex,
+                             RenderPassResourceManager::GetInstance().Get<ShaderGlobalData>().sobolNoiseTex->
+                                                                      GetSRVResourceHeapIndex(),
+                             passID);
         SetSpaceResource(passData, PER_PASS_SPACE);
         SetSpaceResource(passData, PER_FRAME_SPACE);
 
@@ -218,6 +222,7 @@ namespace ElysiaRenderer
 
         UpdateLightingPassVariant(DRAW_LIGHT_PASS);
     }
+
     void OpaquePass::UpdateLightingPassVariant(UINT passIndex)
     {
         std::vector<std::wstring> enableKeywords{};

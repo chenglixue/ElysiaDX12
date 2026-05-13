@@ -30,6 +30,7 @@ namespace ElysiaRenderer
             static inline size_t GBuffer6ID = PropertyToID(L"GBuffer6");
             static inline size_t GBufferHIZID = PropertyToID(L"GBuffer HIZ RT");
         };
+
         struct TAAData
         {
             static inline Matrix Pre_View_M;
@@ -39,6 +40,7 @@ namespace ElysiaRenderer
             static inline Matrix Pre_Proj_I_M;
             static inline Matrix Pre_ViewProj_I_M;
         };
+
         static inline Vector2 m_currJitterUV, m_preJitterUV;
         static inline BufferHandle m_pVisbibleCounterReadBackBuffer;
         static inline int m_renderCount;
@@ -60,6 +62,7 @@ namespace ElysiaRenderer
 #undef PASS
             GBUFFER_PASS_COUNT
         };
+
         static inline const ShaderPass m_PassData[] =
         {
 #define PASS(id, file, isCS, entry) \
@@ -137,6 +140,7 @@ namespace ElysiaRenderer
             static inline size_t g_InputViewportMaxBound = PropertyToID(L"g_InputViewportMaxBound");
 
         };
+
         struct MeshData
         {
             Matrix world_M;
@@ -165,6 +169,7 @@ namespace ElysiaRenderer
             float backLit;
             Vector3 padding;
         };
+
         struct alignas(16) IndirectCommand
         {
             struct
@@ -175,6 +180,7 @@ namespace ElysiaRenderer
 
             D3D12_DRAW_INDEXED_ARGUMENTS drawArguments;
         };
+
         struct AABBLoader
         {
             struct alignas(16) AABBInstanceData
@@ -184,6 +190,7 @@ namespace ElysiaRenderer
                 Vector3 Max;
                 float pad1;
             };
+
             std::vector<AABBInstanceData> m_instanceCpuData;
             BufferHandle instanceDataBuffer;
 
@@ -199,6 +206,7 @@ namespace ElysiaRenderer
         UINT m_cameraHeight;
         UINT m_HIZWidth;
         UINT m_HIZHeight;
+
         Matrix m_currMatrixP;
         Matrix m_currMatrixVP;
         Matrix m_currMatrixVP_I;
@@ -212,7 +220,7 @@ namespace ElysiaRenderer
         BufferHandle m_pIndirectDataBuffer;
         BufferHandle m_pVisbibleCounterBuffer;
         BufferHandle m_pVisbibleIndexBuffer;
-        RenderTexture* m_pHIZTex;
+        RenderTexture* m_pHIZTex = nullptr;
         static inline bool m_isFirstFrame = true;
         ComPtr<ID3D12CommandSignature> m_pCommandSignature;
 

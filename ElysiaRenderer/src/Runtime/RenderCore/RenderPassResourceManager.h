@@ -22,17 +22,21 @@ namespace ElysiaRenderer
         TextureManager::Handle GGX_E_LUT_Index;
         TextureManager::Handle GGX_Eavg_LUT_Index;
         TextureManager::Handle blueNoiseTexIndex;
+        RenderTexture* sobolNoiseTex;
     };
+
     struct EnvironmentData
     {
         // RenderTexture* pBRDFLUT = nullptr;
         BufferHandle pSHCoefficientsBuffer = nullptr;
     };
+
     struct SubsurfaceScatterData
     {
         RenderTexture* pPreIntegrateSSSLUT = nullptr;
         RenderTexture* pNDFLUT = nullptr;
     };
+
     struct ShadowData
     {
         RenderTexture* pShadowCastRT = nullptr;
@@ -101,16 +105,19 @@ namespace ElysiaRenderer
         {
             virtual ~BlackboardData() = default;
         };
+
         template <typename T>
         struct TBlackboardData : public BlackboardData
         {
             T Data;
+
             template <typename... Args>
             TBlackboardData(Args&&... args)
                 : Data(std::forward<Args>(args)...)
             {
             }
         };
+
         std::unordered_map<size_t, void*> m_DataMap;
     };
 }

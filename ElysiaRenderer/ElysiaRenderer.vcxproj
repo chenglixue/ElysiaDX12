@@ -180,8 +180,8 @@
     </Link>
     <PostBuildEvent>
       <Command>xcopy $(ProjectDir)Assets $(TargetDir) /Y /E
-				xcopy $(ProjectDir)bin\*.dll $(TargetDir) /Y /E
-			</Command>
+                xcopy $(ProjectDir)bin\*.dll $(TargetDir) /Y /E
+            </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -339,6 +339,7 @@
     <ClInclude Include="src\Runtime\RenderCore\SceneManager.h" />
     <ClInclude Include="src\Runtime\RenderCore\ShaderVariantManager.h" />
     <ClInclude Include="src\Runtime\RenderCore\ShadowUtility.h" />
+    <ClInclude Include="src\Runtime\RenderCore\SSSRUtility.h" />
     <ClInclude Include="src\Runtime\RenderCore\SubsurfaceScatterUtility.h" />
     <ClInclude Include="src\Runtime\RenderCore\TAAUtility.h" />
     <ClInclude Include="src\Runtime\RenderCore\TextureManager.h" />
@@ -502,6 +503,9 @@
       <FileType>Document</FileType>
     </None>
     <None Include="Assets\Shaders\public\PostProcess\SSSR\CS_TileClassify.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Assets\Shaders\public\CS_CalcSobolNoise.hlsl">
       <FileType>Document</FileType>
     </None>
     <ClCompile Include="src\Editor\IMGUIDrawer.cpp">
