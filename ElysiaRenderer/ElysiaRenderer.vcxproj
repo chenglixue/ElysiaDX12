@@ -508,6 +508,9 @@
     <None Include="Assets\Shaders\public\CS_CalcSobolNoise.hlsl">
       <FileType>Document</FileType>
     </None>
+    <None Include="Assets\Shaders\public\PostProcess\SSSR\CS_Intersect.hlsl">
+      <FileType>Document</FileType>
+    </None>
     <ClCompile Include="src\Editor\IMGUIDrawer.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>

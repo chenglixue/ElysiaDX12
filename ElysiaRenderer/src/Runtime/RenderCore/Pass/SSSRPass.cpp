@@ -101,6 +101,8 @@ namespace ElysiaRenderer
 
         for (UINT i = 0; i < SSSR_PASS_COUNT; ++i)
         {
+            // if (i == (UINT)SSSR_INTERSECT_PASS)
+            //     continue;
             std::vector<std::wstring> enableKeywords{};
 
             auto passID = PassID(i);
@@ -114,6 +116,23 @@ namespace ElysiaRenderer
                     m_pMaterial.get(),
                     passID);
         }
+
+        if (!m_pCommandSignature)
+        {
+            auto& passData = m_pMaterial->GetPassData(SSSR_INTERSECT_PASS);
+
+            D3D12_INDIRECT_ARGUMENT_DESC args[1] = {};
+            args[0].Type = D3D12_INDIRECT_ARGUMENT_TYPE_DISPATCH;
+
+            D3D12_COMMAND_SIGNATURE_DESC desc = {};
+            desc.ByteStride = sizeof(D3D12_DISPATCH_ARGUMENTS);
+            desc.NumArgumentDescs = 1;
+            desc.pArgumentDescs = args;
+
+            m_pDevice->GetDevice()->CreateCommandSignature(&desc,
+                                                           nullptr,
+                                                           IID_PPV_ARGS(&m_pCommandSignature));
+        }
     }
 
     void SSSRPass::Render(FrameContext& context)
@@ -126,6 +145,7 @@ namespace ElysiaRenderer
 
         DoTileClassify();
         DoIntersectionArgs();
+        DoIntersection();
     }
 
     void SSSRPass::DoTileClassify()
@@ -269,6 +289,44 @@ namespace ElysiaRenderer
             //     m_pRayCounterReadBackBuffer->GetResource()->Unmap(0, &writeRange);
             // }
         }
+
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("SSSR/") + passName).c_str());
+    }
+
+    void SSSRPass::DoIntersection()
+    {
+        auto passID = SSSR_INTERSECT_PASS;
+        auto& passData = m_pMaterial->GetPassData(passID);
+        auto passName = passData.Name.c_str();
+        PIXHelper pix(m_pCommand->GetCommandList(), passName);
+
+        PipelineInfo pipelineStateData{};
+        pipelineStateData.m_pipelineStateObject = passData.pPipelineStateObject;
+        m_pCommand->SetPipeline(pipelineStateData);
+        SetSpaceResource(passData, PER_FRAME_SPACE);
+
+        m_pCommand->AddBarrier(m_pIntersectionOutputRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+        {
+            m_pMaterial->SetUINT(ShaderIDs::g_RayCounterBufferIndex,
+                                 m_pRayCounterBuffer->GetUAVResourceHeapIndex(),
+                                 passID);
+            m_pMaterial->SetUINT(ShaderIDs::g_IntersectionArgsBufferIndex,
+                                 m_pIntersectionIndirectArgsBuffer->GetUAVResourceHeapIndex(),
+                                 passID);
+            m_pMaterial->SetUINT(ShaderIDs::g_IntersectionOutputTexIndex,
+                                 m_pIntersectionOutputRT->GetUAVResourceHeapIndex(),
+                                 passID);
+
+            SetSpaceResource(passData, PER_PASS_SPACE);
+
+            m_pCommand->GetCommandList()->ExecuteIndirect(m_pCommandSignature.Get(),
+                                                          1,
+                                                          m_pIntersectionIndirectArgsBuffer->GetResource().Get(),
+                                                          0,
+                                                          nullptr,
+                                                          0);
+        }
+        m_pCommand->AddBarrier(m_pIntersectionOutputRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 
         m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("SSSR/") + passName).c_str());
     }

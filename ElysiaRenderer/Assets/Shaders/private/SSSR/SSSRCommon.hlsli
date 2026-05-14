@@ -35,17 +35,32 @@ uint2 SSSR_RemapLane8x8(uint lane)
 
 UINT PackRayData(UINT2 coord, bool copyHorizontal, bool copyVertical, bool copyDiagonal)
 {
-    UINT copyHorizontal1Bit = copyHorizontal ? 1 : 0;
-    UINT copyVertical1Bit = copyVertical ? 1 : 0;
-    UINT copyDiagonal1Bit = copyDiagonal ? 1 : 0;
-    UINT coord14Bit = coord.y & 0b11111111111111;
-    UINT coord15Bit = coord.x & 0b111111111111111;
+    uint ray_x_15bit = coord.x & 0b111111111111111;
+    uint ray_y_14bit = coord.y & 0b11111111111111;
+    uint copy_horizontal_1bit = copyHorizontal ? 1 : 0;
+    uint copy_vertical_1bit = copyVertical ? 1 : 0;
+    uint copy_diagonal_1bit = copyDiagonal ? 1 : 0;
 
-    return (copyHorizontal1Bit << 31) |
-           (copyVertical1Bit << 30) |
-           (copyDiagonal1Bit << 29) |
-           (coord14Bit << 15) |
-           (coord15Bit << 0);
+    uint packed = (copy_diagonal_1bit << 31) | (copy_vertical_1bit << 30) | (copy_horizontal_1bit << 29) | (
+                      ray_y_14bit << 15) | (ray_x_15bit << 0);
+    return packed;
+}
 
+void UnpackRayData(UINT packed,
+                   out UINT2 rayCoord,
+                   out bool copyHorizontal,
+                   out bool copyVertical,
+                   out bool copyDiagonal)
+{
+    rayCoord.x = (packed >> 0) & 0b111111111111111;
+    rayCoord.y = (packed >> 15) & 0b11111111111111;
+    copyHorizontal = (packed >> 29) & 0b1;
+    copyVertical = (packed >> 30) & 0b1;
+    copyDiagonal = (packed >> 31) & 0b1;
+}
+
+float2 SSSR_GetMipResolution(float2 screen_dimensions, int mip_level)
+{
+    return screen_dimensions * pow(0.5, mip_level);
 }
 #endif

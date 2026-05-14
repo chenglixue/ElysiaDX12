@@ -637,6 +637,9 @@
     <ClInclude Include="src\Runtime\RenderCore\Pass\SSSRPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Runtime\RenderCore\SSSRUtility.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="dxc\bin\x64\dxcompiler.dll" />
@@ -711,6 +714,8 @@
     <None Include="Assets\Shaders\private\OctahedralCommon.hlsli" />
     <None Include="Assets\Shaders\public\PostProcess\SSSR\CS_TileClassify.hlsl" />
     <None Include="Assets\Shaders\private\SSSR\SSSRCommon.hlsli" />
+    <None Include="Assets\Shaders\public\CS_CalcSobolNoise.hlsl" />
+    <None Include="Assets\Shaders\public\PostProcess\SSSR\CS_Intersect.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

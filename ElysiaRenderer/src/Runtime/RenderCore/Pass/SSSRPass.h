@@ -23,8 +23,9 @@ namespace ElysiaRenderer
 
     private:
 #define SSSR_PASS_LIST \
-    PASS(SSSR_TILE_CLASSIFY_PASS,          "public\\PostProcess\\SSSR\\CS_TileClassify.hlsl",               true,  TileClassify)\
-    PASS(SSSR_INTERSECT_ARGS_PASS,         "public\\PostProcess\\SSSR\\CS_TileClassify.hlsl",               true,  DoIntersectArgs)
+    PASS(SSSR_TILE_CLASSIFY_PASS,           "public\\PostProcess\\SSSR\\CS_TileClassify.hlsl",              true,  TileClassify)\
+    PASS(SSSR_INTERSECT_ARGS_PASS,          "public\\PostProcess\\SSSR\\CS_TileClassify.hlsl",              true,  DoIntersectArgs)\
+    PASS(SSSR_INTERSECT_PASS,               "public\\PostProcess\\SSSR\\CS_Intersect.hlsl",                 true,  DoIntersect)
 
 #pragma region Pass
         enum PassID
@@ -61,6 +62,8 @@ namespace ElysiaRenderer
         BufferHandle m_pRayCounterReadBackBuffer;
         BufferHandle m_pIntersectionArgsReadBackBuffer;
 
+        ComPtr<ID3D12CommandSignature> m_pCommandSignature;
+
         struct ShaderIDs
         {
             static inline size_t viewMatrix = PropertyToID(L"viewMatrix");
@@ -84,5 +87,6 @@ namespace ElysiaRenderer
         void DoTileClassify();
         void DoTileClassifyDebug();
         void DoIntersectionArgs();
+        void DoIntersection();
     };
 }

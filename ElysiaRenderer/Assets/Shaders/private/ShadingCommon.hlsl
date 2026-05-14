@@ -50,10 +50,12 @@ float GetF0MicroOcclusionThreshold()
 {
     return 0.02f;
 }
+
 float F0ToMicroOcclusion(float F0)
 {
     return saturate(50.0 * F0);
 }
+
 float3 F0ToMicroOcclusion(float3 F0)
 {
     return saturate(50.0 * F0);
@@ -234,6 +236,7 @@ float3 SampleNormalWS(float2 uv)
 
     return decodeNormalWS;
 }
+
 float3 SampleNormalWS(float2 uv, UINT samplerIndex)
 {
     float3 encodeNormalWS = SampleTexture2D(GBuffer3Index, uv, samplerIndex);
@@ -242,6 +245,7 @@ float3 SampleNormalWS(float2 uv, UINT samplerIndex)
 
     return decodeNormalWS;
 }
+
 float3 SampleTangentWS(float2 uv, UINT samplerIndex)
 {
     float3 encodeNormalWS = SampleTexture2D(GBuffer2Index, uv, samplerIndex);
@@ -249,6 +253,11 @@ float3 SampleTangentWS(float2 uv, UINT samplerIndex)
     decodeNormalWS = normalize(decodeNormalWS);
 
     return decodeNormalWS;
+}
+
+float SampleRoughness(float2 uv)
+{
+    return SampleTexture2D(GBuffer1Index, uv, ClampPointSampler).b;
 }
 
 // Computes world-space position from post-projection depth
@@ -269,6 +278,7 @@ float4 ComputeClipSpacePosition(float2 screenUV, float rawDepth)
 
     return positionCS;
 }
+
 float4 ComputeClipSpacePosition(float2 ScreenUV, float EyeDepth, Matrix projMatrix)
 {
     float TanHalfFovX = rcp(projMatrix[0][0]);
