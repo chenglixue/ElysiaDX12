@@ -30,7 +30,7 @@ namespace ElysiaHelper
 		{
 			assert(FileExists(filePath));
 
-			//创建或者打开一个文件或者I/O设备
+			//锟斤拷锟斤拷锟斤拷锟竭达拷一锟斤拷锟侥硷拷锟斤拷锟斤拷I/O锟借备
 			m_fileHandle = CreateFile(filePath.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 			if (m_fileHandle == INVALID_HANDLE_VALUE)
 			{
@@ -85,18 +85,6 @@ namespace ElysiaHelper
 
 		DWORD bytesWrite = 0;
 		ThrowIfFailed(WriteFile(m_fileHandle, data, static_cast<DWORD>(size), &bytesWrite, NULL));
-	}
-
-	template<typename T> 
-	void File::Read(T& data) const
-	{
-		Read(sizeof(T), &data);
-	}
-
-	template<typename T>
-	void File::Write(const T& data) const
-	{
-		Write(sizeof(T), &data);
 	}
 
 	UINT64 File::Size() const

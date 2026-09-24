@@ -167,8 +167,49 @@ namespace ElysiaHelper
 	template<typename TSerializer, typename TValue>
 	static inline void BulkSerializeArray(TSerializer& serializer, TValue* array, UINT64 numElements)
 	{
-		
 		SerializeData(serializer, array, sizeof(TValue) * numElements);
+	}
+
+	template<typename TSerializer>
+	static inline void SerializeItem(TSerializer& serializer, bool& val)
+	{
+		UINT8 packed = val ? 1 : 0;
+		SerializeItem(serializer, packed);
+		if (TSerializer::IsReadSerializer())
+			val = packed != 0;
+	}
+
+	template<typename TSerializer>
+	static inline void SerializeItem(TSerializer& serializer, std::string& val)
+	{
+		UINT32 length = static_cast<UINT32>(val.size());
+		SerializeItem(serializer, length);
+		if (TSerializer::IsReadSerializer())
+			val.resize(length);
+		if (length > 0)
+			SerializeData(serializer, val.data(), length);
+	}
+
+	template<typename TSerializer>
+	static inline void SerializeItem(TSerializer& serializer, std::wstring& val)
+	{
+		UINT32 length = static_cast<UINT32>(val.size());
+		SerializeItem(serializer, length);
+		if (TSerializer::IsReadSerializer())
+			val.resize(length);
+		if (length > 0)
+			SerializeData(serializer, val.data(), static_cast<UINT64>(length) * sizeof(wchar_t));
+	}
+
+	template<typename TSerializer, typename TValue>
+	static inline void SerializeEastlVectorBulk(TSerializer& serializer, eastl::vector<TValue>& values)
+	{
+		UINT32 count = static_cast<UINT32>(values.size());
+		SerializeItem(serializer, count);
+		if (TSerializer::IsReadSerializer())
+			values.resize(count);
+		if (count > 0)
+			BulkSerializeArray(serializer, values.data(), count);
 	}
 
 	template<typename T>

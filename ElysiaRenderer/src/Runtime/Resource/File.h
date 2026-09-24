@@ -22,8 +22,15 @@ namespace ElysiaHelper
 		void Read(UINT64 size, void* data) const;
 		void Write(UINT64 size, const void* data) const;
 
-		template<typename T> void Read(T& data) const;
-		template<typename T> void Write(const T& data) const;
+		template<typename T> void Read(T& data) const
+		{
+			Read(sizeof(T), &data);
+		}
+
+		template<typename T> void Write(const T& data) const
+		{
+			Write(sizeof(T), &data);
+		}
 
 		UINT64 Size() const;
 

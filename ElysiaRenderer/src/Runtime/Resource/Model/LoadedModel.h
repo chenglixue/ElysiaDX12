@@ -8,6 +8,7 @@
 #include "Runtime/RenderCore/BufferManager.h"
 #include "Programs/Containers.h"
 #include "Runtime/Core/DX12BufferResource.h"
+#include "Runtime/Resource/Serialization.h"
 
 namespace ElysiaModel
 {
@@ -44,6 +45,17 @@ namespace ElysiaModel
         Vector2 offset = {0.0f, 0.0f};
         Vector2 scale = {1.0f, 1.0f};
         int texCoord = 0; // glTF 支持 TEXCOORD_0, TEXCOORD_1 等
+
+        template <typename TSerializer>
+        void SerializeCPU(TSerializer& serializer)
+        {
+            SerializeItem(serializer, offset);
+            SerializeItem(serializer, scale);
+            INT32 packedTexCoord = texCoord;
+            SerializeItem(serializer, packedTexCoord);
+            if (TSerializer::IsReadSerializer())
+                texCoord = packedTexCoord;
+        }
     };
 
     inline Vector4 TextureTransformToVector4(const TextureTransform& tran)
@@ -95,6 +107,7 @@ namespace ElysiaModel
             SerializeItem(serializer, Normal);
             SerializeItem(serializer, UV);
             SerializeItem(serializer, Tangent);
+            SerializeItem(serializer, Color);
         }
     };
 
@@ -123,6 +136,43 @@ namespace ElysiaModel
         ElysiaRenderer::TextureManager::Handle textures[uint64(MaterialTextureType::Count)] = {};
         UINT32 textureIndices[uint64(MaterialTextureType::Count)] = {};
         TextureTransform textureTransforms[static_cast<size_t>(MaterialTextureType::Count)];
+
+        template <typename TSerializer>
+        void SerializeCPU(TSerializer& serializer)
+        {
+            SerializeItem(serializer, name);
+
+            UINT32 packedAlpha = static_cast<UINT32>(alpha);
+            SerializeItem(serializer, packedAlpha);
+            if (TSerializer::IsReadSerializer())
+                alpha = static_cast<Alpha>(packedAlpha);
+
+            SerializeItem(serializer, albedoFactor);
+            SerializeItem(serializer, opacity);
+            SerializeItem(serializer, normalFactor);
+            SerializeItem(serializer, metallicFactor);
+            SerializeItem(serializer, roughnessFactor);
+            SerializeItem(serializer, specularFactor);
+            SerializeItem(serializer, emissiveFactor);
+            SerializeItem(serializer, uvScale);
+            SerializeItem(serializer, uvOffset);
+
+            const UINT32 textureCount = static_cast<UINT32>(MaterialTextureType::Count);
+            for (UINT32 i = 0; i < textureCount; ++i)
+            {
+                SerializeItem(serializer, textureNames[i]);
+                textureTransforms[i].SerializeCPU(serializer);
+            }
+
+            if (TSerializer::IsReadSerializer())
+            {
+                for (UINT32 i = 0; i < textureCount; ++i)
+                {
+                    textures[i] = ElysiaRenderer::TextureManager::Handle::Invalid();
+                    textureIndices[i] = 0;
+                }
+            }
+        }
     };
 
 #define INDEX_FORMAT UINT16
@@ -171,6 +221,35 @@ namespace ElysiaModel
                             uint64 ibAddress,
                             uint64 vtxOffset_,
                             uint64 idxOffset_);
+
+            template <typename TSerializer>
+            void SerializeCPU(TSerializer& serializer)
+            {
+                SerializeItem(serializer, name);
+                SerializeItem(serializer, materialIndex);
+                SerializeItem(serializer, aabbMin);
+                SerializeItem(serializer, aabbMax);
+                SerializeItem(serializer, logicalCenter);
+                SerializeItem(serializer, numVertices);
+                SerializeItem(serializer, numIndices);
+                SerializeItem(serializer, vtxOffset);
+                SerializeItem(serializer, idxOffset);
+
+                UINT32 packedIndexType = static_cast<UINT32>(indexType);
+                SerializeItem(serializer, packedIndexType);
+                if (TSerializer::IsReadSerializer())
+                    indexType = static_cast<IndexType>(packedIndexType);
+
+                SerializeEastlVectorBulk(serializer, weights);
+                SerializeEastlVectorBulk(serializer, joints);
+                SerializeItem(serializer, avgColor);
+
+                if (TSerializer::IsReadSerializer())
+                {
+                    vbView = {};
+                    ibView = {};
+                }
+            }
         };
 
 
@@ -185,11 +264,30 @@ namespace ElysiaModel
         eastl::vector<LoadedMaterial> materials;
         GrowableList<MaterialTexture*> materialTextures;
 
-        // ElysiaRenderer::BufferHandle vertexBuffer;
-        // ElysiaRenderer::BufferHandle indexBuffer;
+        template <typename TSerializer>
+        void SerializeCPU(TSerializer& serializer)
+        {
+            SerializeItem(serializer, name);
+            SerializeItem(serializer, scale);
+            SerializeItem(serializer, aabbMin);
+            SerializeItem(serializer, aabbMax);
+            SerializeEastlVectorBulk(serializer, vertices);
+            SerializeEastlVectorBulk(serializer, indices);
 
-        // D3D12_VERTEX_BUFFER_VIEW vbView;
-        // D3D12_INDEX_BUFFER_VIEW ibView;
+            UINT32 meshCount = static_cast<UINT32>(meshes.size());
+            SerializeItem(serializer, meshCount);
+            if (TSerializer::IsReadSerializer())
+                meshes.resize(meshCount);
+            for (UINT32 i = 0; i < meshCount; ++i)
+                meshes[i].SerializeCPU(serializer);
+
+            UINT32 materialCount = static_cast<UINT32>(materials.size());
+            SerializeItem(serializer, materialCount);
+            if (TSerializer::IsReadSerializer())
+                materials.resize(materialCount);
+            for (UINT32 i = 0; i < materialCount; ++i)
+                materials[i].SerializeCPU(serializer);
+        }
     };
 
     struct LoadedSkeleton

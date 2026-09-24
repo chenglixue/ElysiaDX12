@@ -488,6 +488,42 @@ namespace ElysiaModel
         model.aabbMax = overallMax;
     }
 
+    bool CreateGpuResources(LoadedModel& model)
+    {
+        const UINT32 totalV = static_cast<UINT32>(model.vertices.size());
+        const UINT32 totalI = static_cast<UINT32>(model.indices.size());
+
+        auto vb = ElysiaRenderer::BufferManager::GetInstance().CreateVertexBuffer(model);
+        auto ib = ElysiaRenderer::BufferManager::GetInstance().CreateIndexBuffer({
+            .name = StringToWstring(model.name + " Index Buffer"),
+            .stride = 0,
+            .size = model.indices.size() * sizeof(UINT32),
+            .viewFlags = ElysiaCore::GPUResourceFlags::SRV | ElysiaCore::GPUResourceFlags::UAV,
+            .accessFlags = ElysiaCore::BufferAccessFlags::GPUOnly,
+            .isRawAccess = true,
+            .InitData = model.indices.data()
+        });
+
+        for (auto& mesh : model.meshes)
+        {
+            mesh.InitCommon(vb->GetGPUAddress() + (uint64)mesh.vtxOffset * sizeof(MeshVertex),
+                            ib->GetGPUAddress() + (uint64)mesh.idxOffset * sizeof(UINT32),
+                            mesh.vtxOffset,
+                            mesh.idxOffset);
+        }
+
+        auto vbView = D3D12_VERTEX_BUFFER_VIEW{vb->GetGPUAddress(), (UINT)totalV * (UINT)sizeof(MeshVertex),
+                                               (UINT)sizeof(MeshVertex)};
+        auto ibView = D3D12_INDEX_BUFFER_VIEW{ib->GetGPUAddress(), (UINT)totalI * (UINT)sizeof(UINT32),
+                                              DXGI_FORMAT_R32_UINT};
+
+        ElysiaRenderer::BufferManager::GetInstance().SetGlobalVertexBuffer(std::move(vb));
+        ElysiaRenderer::BufferManager::GetInstance().SetGlobalIndexBuffer(std::move(ib));
+        ElysiaRenderer::BufferManager::GetInstance().SetGlobalVertexBufferView(std::move(vbView));
+        ElysiaRenderer::BufferManager::GetInstance().SetGlobalIndexBufferView(std::move(ibView));
+        return true;
+    }
+
 #if ASSIMP_LOADER == 1
 
 
@@ -841,53 +877,7 @@ namespace ElysiaModel
             idxOffset += model.meshes[meshIdx].numIndices;
         }
 
-        vtxOffset = 0;
-        idxOffset = 0;
-        auto vb = ElysiaRenderer::BufferManager::GetInstance().CreateVertexBuffer(model);
-        auto ib = ElysiaRenderer::BufferManager::GetInstance().CreateIndexBuffer({
-            .name = StringToWstring(model.name + " Index Buffer"),
-            .stride = 0,
-            .size = model.indices.size() * sizeof(UINT32),
-            .viewFlags = ElysiaCore::GPUResourceFlags::SRV | ElysiaCore::GPUResourceFlags::UAV,
-            .accessFlags = ElysiaCore::BufferAccessFlags::GPUOnly,
-            .isRawAccess = true,
-            .InitData = model.indices.data()
-        });
-        auto vbView = D3D12_VERTEX_BUFFER_VIEW
-        {
-            .BufferLocation = vb->GetGPUAddress(),
-            .SizeInBytes = static_cast<UINT>(numVertices) * vb->
-                           GetStride(),
-            .StrideInBytes = vb->GetStride()
-        };
-        auto ibView = D3D12_INDEX_BUFFER_VIEW
-        {
-            .BufferLocation = ib->GetGPUAddress(),
-            .SizeInBytes = static_cast<UINT>(numIndices) * (UINT)sizeof(UINT32),
-            .Format = DXGI_FORMAT_R32_UINT
-        };
-
-        for (UINT64 meshIdx = 0; meshIdx < numMeshes; meshIdx ++)
-        {
-            UINT64 vbOffset = vtxOffset * sizeof(MeshVertex);
-            UINT64 ibOffset = idxOffset * sizeof(UINT32);
-
-            model.meshes[meshIdx].InitCommon(
-                vb->GetGPUAddress() + vbOffset,
-                ib->GetGPUAddress() + ibOffset,
-                vtxOffset,
-                idxOffset);
-
-            vtxOffset += model.meshes[meshIdx].numVertices;
-            idxOffset += model.meshes[meshIdx].numIndices;
-        }
-
-        ElysiaRenderer::BufferManager::GetInstance().SetGlobalVertexBuffer(std::move(vb));
-        ElysiaRenderer::BufferManager::GetInstance().SetGlobalIndexBuffer(std::move(ib));
-        ElysiaRenderer::BufferManager::GetInstance().SetGlobalVertexBufferView(
-            std::move(vbView));
-        ElysiaRenderer::BufferManager::GetInstance().SetGlobalIndexBufferView(
-            std::move(ibView));
+        CreateGpuResources(model);
     };
 
     void LoadedModel::Mesh::InitFromAssimpMesh(const aiMesh& assimpMesh,
@@ -1355,14 +1345,23 @@ namespace ElysiaModel
             FillNodeData(gltfModel, child, globalTransform, sceneScale, bInvertY, vtxOffset, idxOffset, model);
     }
 
-    bool LoadGLTFModel(const std::wstring& filePath,
-                       bool bInvertTexcoordY,
-                       bool bImportMeshes,
-                       bool bImportSkeletons,
-                       bool bImportAnimations,
-                       float scale,
-                       LoadedModel& model)
+    void BindMaterialTextures(LoadedModel& model)
     {
+        LoadGLTFMaterialResource(model.materials, L"", model.materialTextures);
+    }
+
+    bool ParseGLTFToCPU(const std::wstring& filePath,
+                        bool bInvertTexcoordY,
+                        bool bImportMeshes,
+                        bool bImportSkeletons,
+                        bool bImportAnimations,
+                        float scale,
+                        LoadedModel& model)
+    {
+        (void)bImportMeshes;
+        (void)bImportSkeletons;
+        (void)bImportAnimations;
+
         tinygltf::Model gltfModel;
         tinygltf::TinyGLTF loader;
         std::string err, warn;
@@ -1383,6 +1382,11 @@ namespace ElysiaModel
         }
 
         auto fileDir = GetDirectoryFromFilePath(filePath);
+        model.scale = scale;
+        if (model.name.empty())
+        {
+            model.name = WstringToString(GetFileNameWithoutExtension(filePath.c_str()));
+        }
 
         if (!gltfModel.meshes.empty())
         {
@@ -1473,8 +1477,6 @@ namespace ElysiaModel
                 model.materials.push_back(elysiaMat);
                 matIndex ++;
             }
-
-            LoadGLTFMaterialResource(model.materials, fileDir, model.materialTextures);
         }
 
         uint32_t totalV = 0, totalI = 0;
@@ -1507,41 +1509,31 @@ namespace ElysiaModel
         for (int r : scene.nodes)
             FillNodeData(gltfModel, r, Matrix::Identity, scale, bInvertTexcoordY, currentV, currentI, model);
 
-        // 3. 构建 GPU 资源
-        auto vb = ElysiaRenderer::BufferManager::GetInstance().CreateVertexBuffer(model);
-        auto ib = ElysiaRenderer::BufferManager::GetInstance().CreateIndexBuffer({
-            .name = StringToWstring(model.name + " Index Buffer"),
-            .stride = 0,
-            .size = model.indices.size() * sizeof(UINT32),
-            .viewFlags = ElysiaCore::GPUResourceFlags::SRV | ElysiaCore::GPUResourceFlags::UAV,
-            .accessFlags = ElysiaCore::BufferAccessFlags::GPUOnly,
-            .isRawAccess = true,
-            .InitData = model.indices.data()
-        });
+        CalculateModelTransformFromBounds(model);
+        return true;
+    }
 
-        // 映射回 Mesh 结构
-        for (auto& mesh : model.meshes)
+    bool LoadGLTFModel(const std::wstring& filePath,
+                       bool bInvertTexcoordY,
+                       bool bImportMeshes,
+                       bool bImportSkeletons,
+                       bool bImportAnimations,
+                       float scale,
+                       LoadedModel& model)
+    {
+        if (!ParseGLTFToCPU(filePath,
+                            bInvertTexcoordY,
+                            bImportMeshes,
+                            bImportSkeletons,
+                            bImportAnimations,
+                            scale,
+                            model))
         {
-            // 注意：InitCommon 使用了偏移后的地址
-            mesh.InitCommon(vb->GetGPUAddress() + (uint64)mesh.vtxOffset * sizeof(MeshVertex),
-                            ib->GetGPUAddress() + (uint64)mesh.idxOffset * sizeof(UINT32),
-                            mesh.vtxOffset,
-                            mesh.idxOffset);
+            return false;
         }
 
-        auto vbView = D3D12_VERTEX_BUFFER_VIEW{vb->GetGPUAddress(), (UINT)totalV * (UINT)sizeof(MeshVertex),
-                                               (UINT)sizeof(MeshVertex)};
-        auto ibView = D3D12_INDEX_BUFFER_VIEW{ib->GetGPUAddress(), (UINT)totalI * (UINT)sizeof(UINT32),
-                                              DXGI_FORMAT_R32_UINT};
-
-        ElysiaRenderer::BufferManager::GetInstance().SetGlobalVertexBuffer(std::move(vb));
-        ElysiaRenderer::BufferManager::GetInstance().SetGlobalIndexBuffer(std::move(ib));
-        ElysiaRenderer::BufferManager::GetInstance().SetGlobalVertexBufferView(std::move(vbView));
-        ElysiaRenderer::BufferManager::GetInstance().SetGlobalIndexBufferView(std::move(ibView));
-
-        CalculateModelTransformFromBounds(model);
-
-        return true;
+        BindMaterialTextures(model);
+        return CreateGpuResources(model);
     }
 #endif
 }

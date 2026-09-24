@@ -33,8 +33,10 @@ bool IsMirror(float roughness);
 UINT GetMostDetailedMip();
 float GetSSSRDepth(int2 readPos, int mip);
 
-[numthreads(GROUP_SIZE, GROUP_SIZE, 1)]
+float3x3 CreateTBN(float3 N);
+float3 SampleReflectRay(UINT2 readPos, float3 viewDirVS, float3 normalVS, float roughness);
 
+[numthreads(GROUP_SIZE, GROUP_SIZE, 1)]
 void DoIntersect(uint2 groupID : SV_GroupID,
                  uint groupIndex : SV_GroupIndex)
 {
@@ -64,6 +66,7 @@ void DoIntersect(uint2 groupID : SV_GroupID,
     float3 rayDirVS = normalize(positionVS);
 
     float3 normalVS = normalize(mul(float4(normalWS, 0.f), viewMatrix));
+
 }
 
 UINT GetRayCount()
@@ -107,5 +110,36 @@ UINT GetMostDetailedMip()
 float GetSSSRDepth(int2 readPos, int mip)
 {
     Texture2D<float> HIZTex = ResourceDescriptorHeap[g_HIZTexIndex];
-    return HIZTex.Load(readPos, mip);
+    return HIZTex.Load(uint3(readPos, 0), mip);
 }
+
+float3x3 CreateTBN(float3 N)
+{
+    float3 U;
+    if (abs(N.z) > 0.0)
+    {
+        float k = sqrt(N.y * N.y + N.z * N.z);
+        U.x = 0.0;
+        U.y = -N.z / k;
+        U.z = N.y / k;
+    }
+    else
+    {
+        float k = sqrt(N.x * N.x + N.y * N.y);
+        U.x = N.y / k;
+        U.y = -N.x / k;
+        U.z = 0.0;
+    }
+
+    float3x3 TBN;
+    TBN[0] = U;
+    TBN[1] = cross(N, U);
+    TBN[2] = N;
+
+    return TBN;
+}
+
+// float3 SampleReflectRay(UINT2 readPos, float3 viewDirVS, float3 normalVS, float roughness)
+// {
+//     float3 TBN = CreateTBN(normalWS);
+// }
