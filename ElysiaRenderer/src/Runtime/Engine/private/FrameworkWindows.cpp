@@ -1,0 +1,748 @@
+#include "stdafx.h"
+#include "../public/FrameworkWindows.h"
+
+#include "../public/FrameContext.h"
+#include "Editor/public/IMGUIHelper.h"
+#include "Runtime/RenderCore/public/BufferManager.h"
+
+namespace ElysiaEngine
+{
+    void EnableLogColors()
+    {
+        HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+        DWORD dwMode = 0;
+        GetConsoleMode(hOut, &dwMode);
+        dwMode |= 0x0004; // ENABLE_VIRTUAL_TERMINAL_PROCESSING
+        SetConsoleMode(hOut, dwMode);
+    }
+
+    LRESULT CALLBACK WindowProc(HWND hWnd,
+                                UINT message,
+                                WPARAM wParam,
+                                LPARAM lParam);
+
+    static const wchar_t* const WINDOW_CLASS_NAME = L"Elysia Engine";
+    static FrameworkWindows* pFrameworkInstance = nullptr;
+
+    static bool bIsMinimized = false;
+    static RECT m_windowRect;
+    static LONG lBorderedStyle = 0;
+    static LONG lBorderlessStyle = 0;
+    static UINT lwindowStyle = 0;
+
+    // Default values for validation layers - applications can override these values in their constructors
+#if _DEBUG
+    static constexpr bool ENABLE_CPU_VALIDATION_DEFAULT = true;
+    static constexpr bool ENABLE_GPU_VALIDATION_DEFAULT = true;
+#else // RELEASE
+    static constexpr bool ENABLE_CPU_VALIDATION_DEFAULT = false;
+    static constexpr bool ENABLE_GPU_VALIDATION_DEFAULT = false;
+#endif
+
+    int RunFramework(HINSTANCE hInstance,
+                     LPSTR lpCmdLine,
+                     int nCmdShow,
+                     FrameworkWindows* pFramework)
+    {
+        EnableLogColors();
+        SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+
+        // Init logging
+        int result = ::Log::InitLogSystem();
+        assert(!result);
+
+        // Init window class
+        HWND hWnd;
+        WNDCLASSEX windowClass;
+
+        ZeroMemory(&windowClass, sizeof(WNDCLASSEX));
+        windowClass.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
+        windowClass.lpfnWndProc = WindowProc;
+        windowClass.hInstance = hInstance;
+        windowClass.hIcon = LoadIcon(nullptr, IDI_WINLOGO);
+        windowClass.hIconSm = windowClass.hIcon;
+        windowClass.hCursor = LoadCursor(nullptr, IDC_ARROW);
+        windowClass.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
+        windowClass.lpszMenuName = nullptr;
+        windowClass.lpszClassName = WINDOW_CLASS_NAME;
+        windowClass.cbSize = sizeof(WNDCLASSEX);
+        if (windowClass.hIcon == NULL)
+        {
+            DWORD dw = GetLastError();
+            if (dw == 0x715) // 0x715 is file not found.
+                Trace("Warning: Icon file or .rc file not found, using default Windows app icon.");
+            else
+                Trace("Warning: error loading icon, using default Windows app icon.");
+        }
+        RegisterClassEx(&windowClass);
+
+        // If this is null, nothing to do, bail
+        assert(pFramework);
+        if (!pFramework)
+            return -1;
+        pFrameworkInstance = pFramework;
+
+        // Get command line and config file parameters for app run
+        RECT workAreaRect;
+        SystemParametersInfo(SPI_GETWORKAREA, 0, &workAreaRect, 0);
+        uint32_t Width = workAreaRect.right - workAreaRect.left;
+        uint32_t Height = workAreaRect.bottom - workAreaRect.top;
+        pFramework->OnParseCommandLine(lpCmdLine, &Width, &Height);
+
+        // Window setup based on config params
+        lwindowStyle = WS_OVERLAPPEDWINDOW;
+        // RECT windowRect = {0, 0, (LONG)Width, (LONG)Height};
+        // AdjustWindowRect(&windowRect, lwindowStyle, FALSE); // adjust the size
+
+        // This makes sure that in a multi-monitor setup with different resolutions, get monitor info returns correct dimensions
+        // SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+
+        // Create the window
+        hWnd = CreateWindowEx(WS_EX_APPWINDOW,
+                              WINDOW_CLASS_NAME,
+                              // name of the window class
+                              pFramework->GetName().c_str(),
+                              lwindowStyle,
+                              workAreaRect.left,
+                              workAreaRect.top,
+                              Width,
+                              Height,
+                              NULL,
+                              // we have no parent window, NULL
+                              NULL,
+                              // we aren't using menus, NULL
+                              hInstance,
+                              // application handle
+                              NULL); // used with multiple windows, NULL
+
+        // Framework owns device and swapchain, so initialize them
+        pFramework->DeviceInit(hWnd);
+
+        // Sample create callback
+        pFramework->OnCreate();
+
+        // show the window
+        ShowWindow(hWnd, SW_SHOWMAXIMIZED);
+        lBorderedStyle = GetWindowLong(hWnd, GWL_STYLE);
+        lBorderlessStyle = lBorderedStyle & ~(
+                               WS_CAPTION | WS_THICKFRAME | WS_MINIMIZE | WS_MAXIMIZE | WS_SYSMENU);
+
+        // main loop
+        MSG msg = {0};
+        while (msg.message != WM_QUIT)
+        {
+            // check to see if any messages are waiting in the queue
+            if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+            {
+                TranslateMessage(&msg);
+                // translate keystroke messages into the right format            
+                DispatchMessage(&msg); // send the message to the WindowProc function
+            }
+            else if (!bIsMinimized)
+                pFramework->OnRender();
+        }
+
+        // Destroy app-side framework 
+        pFramework->OnDestroy();
+
+        // Shutdown all the device stuff before quitting
+        pFramework->DeviceShutdown();
+
+        // Delete the framework created by the sample
+        pFrameworkInstance = nullptr;
+        delete pFramework;
+
+        // Shutdown logging before quitting the application
+        ::Log::TerminateLogSystem();
+
+        // return this part of the WM_QUIT message to Sample
+        return static_cast<char>(msg.wParam);
+    }
+
+    void SetFullscreen(HWND hWnd, bool fullscreen)
+    {
+        if (fullscreen)
+        {
+            // Save the old window rect so we can restore it when exiting fullscreen mode.
+            GetWindowRect(hWnd, &m_windowRect);
+
+            // Make the window borderless so that the client area can fill the screen.
+            SetWindowLong(hWnd,
+                          GWL_STYLE,
+                          lwindowStyle & ~(
+                              WS_CAPTION | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_SYSMENU |
+                              WS_THICKFRAME));
+
+            MONITORINFO monitorInfo;
+            monitorInfo.cbSize = sizeof(monitorInfo);
+            GetMonitorInfo(MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST), &monitorInfo);
+
+            SetWindowPos(
+                hWnd,
+                HWND_NOTOPMOST,
+                monitorInfo.rcMonitor.left,
+                monitorInfo.rcMonitor.top,
+                monitorInfo.rcMonitor.right - monitorInfo.rcMonitor.left,
+                monitorInfo.rcMonitor.bottom - monitorInfo.rcMonitor.top,
+                SWP_FRAMECHANGED | SWP_NOACTIVATE);
+
+            ShowWindow(hWnd, SW_MAXIMIZE);
+        }
+        else
+        {
+            // Restore the window's attributes and size.
+            SetWindowLong(hWnd, GWL_STYLE, lwindowStyle);
+
+            SetWindowPos(
+                hWnd,
+                HWND_NOTOPMOST,
+                m_windowRect.left,
+                m_windowRect.top,
+                m_windowRect.right - m_windowRect.left,
+                m_windowRect.bottom - m_windowRect.top,
+                SWP_FRAMECHANGED | SWP_NOACTIVATE);
+
+            ShowWindow(hWnd, SW_NORMAL);
+        }
+    }
+
+    // this is the main message handler for the program
+    LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+    {
+        if (ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam))
+            return true;
+
+        // sort through and find what code to run for the message given
+        switch (message)
+        {
+        case WM_DESTROY:
+        {
+            PostQuitMessage(0);
+            return 0;
+        }
+
+        // When close button is clicked on window
+        case WM_CLOSE:
+        {
+            PostQuitMessage(0);
+            return 0;
+        }
+
+        case WM_KEYDOWN:
+        {
+            if (wParam == VK_ESCAPE)
+            {
+                pFrameworkInstance->ReleaseResource();
+                PostQuitMessage(0);
+            }
+
+            break;
+        }
+
+        case WM_SYSKEYDOWN:
+        {
+            const bool bAltKeyDown = (lParam & (1 << 29));
+            if ((wParam == VK_RETURN) && bAltKeyDown)
+                // For simplicity, alt+enter only toggles in/out windowed and borderless fullscreen
+                pFrameworkInstance->ToggleFullScreen();
+            break;
+        }
+
+        case WM_SIZE:
+        {
+            if (pFrameworkInstance)
+            {
+                if (wParam == SIZE_MINIMIZED)
+                {
+                    bIsMinimized = true;
+                    return 0; // 绝对不允许向下执行 Resize
+                }
+
+                bIsMinimized = false;
+
+                RECT clientRect = {};
+                GetClientRect(hWnd, &clientRect);
+                UINT newWidth = clientRect.right - clientRect.left;
+                UINT newHeight = clientRect.bottom - clientRect.top;
+
+                if (newWidth == 0 || newHeight == 0)
+                {
+                    return 0;
+                }
+
+                static UINT s_currentWidth = 0;
+                static UINT s_currentHeight = 0;
+                if (newWidth == s_currentWidth && newHeight == s_currentHeight)
+                {
+                    return 0; // 尺寸根本没变，拒绝执行沉重的重置！
+                }
+                s_currentWidth = newWidth;
+                s_currentHeight = newHeight;
+
+                pFrameworkInstance->HandleResize(newWidth, newHeight);
+                bIsMinimized = (IsIconic(hWnd) == TRUE);
+                return 0;
+            }
+            break;
+        }
+
+        // When window goes outof focus, use this event to fall back on SDR.
+        // If we don't gracefully fallback to SDR, the renderer will output HDR colours which will look extremely bright and washed out.
+        // However if you want to use breakpoints in HDR mode to inspect/debug values, you will have to comment this function call.
+        case WM_ACTIVATE:
+        {
+            if (pFrameworkInstance)
+            {
+                pFrameworkInstance->OnActivate(wParam != WA_INACTIVE);
+            }
+
+            break;
+        }
+
+        case WM_MOVE:
+        {
+            if (pFrameworkInstance)
+            {
+                pFrameworkInstance->OnWindowMove();
+
+                return 0;
+            }
+            break;
+        }
+
+        // Turn off MessageBeep sound on Alt+Enter
+        case WM_MENUCHAR:
+            return MNC_CLOSE << 16;
+        }
+
+        if (pFrameworkInstance)
+        {
+            MSG msg;
+            msg.hwnd = hWnd;
+            msg.message = message;
+            msg.wParam = wParam;
+            msg.lParam = lParam;
+            pFrameworkInstance->OnEvent(msg);
+        }
+
+        // Handle any messages the switch statement didn't
+        return DefWindowProc(hWnd, message, wParam, lParam);
+    }
+
+    static std::string GetCPUNameString()
+    {
+        int nIDs = 0;
+        int nExIDs = 0;
+
+        char strCPUName[0x40] = {};
+
+        std::array<int, 4> cpuInfo;
+        std::vector<std::array<int, 4>> extData;
+
+        __cpuid(cpuInfo.data(), 0);
+
+        // Calling __cpuid with 0x80000000 as the function_id argument
+        // gets the number of the highest valid extended ID.
+        __cpuid(cpuInfo.data(), 0x80000000);
+
+        nExIDs = cpuInfo[0];
+        for (int i = 0x80000000; i <= nExIDs; ++i)
+        {
+            __cpuidex(cpuInfo.data(), i, 0);
+            extData.push_back(cpuInfo);
+        }
+
+        // Interpret CPU strCPUName string if reported
+        if (nExIDs >= 0x80000004)
+        {
+            memcpy(strCPUName, extData[2].data(), sizeof(cpuInfo));
+            memcpy(strCPUName + 16, extData[3].data(), sizeof(cpuInfo));
+            memcpy(strCPUName + 32, extData[4].data(), sizeof(cpuInfo));
+        }
+
+        return strlen(strCPUName) != 0 ? strCPUName : "UNAVAILABLE";
+    }
+
+    FrameworkWindows::FrameworkWindows(std::wstring name)
+        : m_Name(name),
+          m_Width(0),
+          m_Height(0),
+          m_frameID(0),
+          m_frameIndex(0)
+
+          // Simulation management
+          ,
+          m_lastFrameTime(MillisecondsNow()),
+          m_deltaTime(0.0)
+
+          // Device management
+          ,
+          m_windowHwnd(NULL),
+          m_pDevice(new ElysiaCore::DX12Device()),
+          m_stablePowerState(false),
+          m_isCpuValidationLayerEnabled(ENABLE_CPU_VALIDATION_DEFAULT),
+          m_isGpuValidationLayerEnabled(ENABLE_GPU_VALIDATION_DEFAULT),
+          m_initializeAGS(false)
+
+          // Swapchain management
+          ,
+          m_swapChain(),
+          m_VsyncEnabled(false),
+          m_fullscreenMode(PRESENTATIONMODE_WINDOWED),
+          m_previousFullscreenMode(PRESENTATIONMODE_WINDOWED)
+
+          // Display management
+          ,
+          m_monitor(),
+          m_FreesyncHDROptionEnabled(false),
+          m_currentDisplayMode(DISPLAYMODE_SDR),
+          m_previousDisplayModeNamesIndex(DISPLAYMODE_SDR),
+          m_currentDisplayModeNamesIndex(DISPLAYMODE_SDR),
+          m_displayModesAvailable(),
+          m_displayModesNamesAvailable(),
+          m_disableLocalDimming(false),
+          m_forceManualResize(false)
+
+          // System info
+          ,
+          m_systemInfo() // initialized after device
+    {
+
+    }
+
+    void FrameworkWindows::DeviceInit(HWND WindowsHandle)
+    {
+        // Store the windows handle (other things need it later)
+        m_windowHwnd = WindowsHandle;
+
+        // Create Device
+        m_pDevice->OnCreate(m_Name, m_isCpuValidationLayerEnabled, m_isGpuValidationLayerEnabled);
+
+        // set stable power state (only works when Developer Mode is enabled)
+        if (m_stablePowerState)
+        {
+            HRESULT hr = m_pDevice->GetDevice()->SetStablePowerState(TRUE);
+
+            // handle failure / device removed
+            if (FAILED(hr))
+            {
+                HRESULT reason = m_pDevice->GetDevice()->GetDeviceRemovedReason();
+
+                Trace(
+                    "Warning: ID3D12Device::SetStablePowerState(TRUE) failed: Reason 0x%x (DXGI_ERROR). Recreating device, setting m_stablePowerState = false.",
+                    reason);
+
+                // device removed, so recreate
+                m_pDevice->OnDestroy();
+                m_pDevice->OnCreate(m_Name,
+                                    m_isCpuValidationLayerEnabled,
+                                    m_isGpuValidationLayerEnabled);
+                m_stablePowerState = false;
+            }
+        }
+
+        // Get the monitor
+        m_monitor = MonitorFromWindow(m_windowHwnd, MONITOR_DEFAULTTONEAREST);
+
+        // Create Swapchain
+        m_swapChain.OnCreate(m_pDevice, m_windowHwnd);
+
+        m_swapChain.EnumerateDisplayModes(&m_displayModesAvailable, &m_displayModesNamesAvailable);
+
+        if (m_previousFullscreenMode != m_fullscreenMode)
+        {
+            HandleFullScreen();
+            m_previousFullscreenMode = m_fullscreenMode;
+        }
+
+        // Get system info
+        std::string dummyStr;
+        m_pDevice->GetDeviceInfo(&m_systemInfo.mGPUName, &dummyStr); // 2nd parameter is unused
+        m_systemInfo.mCPUName = GetCPUNameString();
+        m_systemInfo.mGfxAPI = "DirectX 12";
+    }
+
+    void FrameworkWindows::DeviceShutdown()
+    {
+        // Fullscreen state should always be false before exiting the app.
+        if (m_fullscreenMode == PRESENTATIONMODE_EXCLUSIVE_FULLSCREEN)
+            m_swapChain.SetFullScreen(false);
+
+        // Fall back to SDR when app closes
+        if (m_currentDisplayMode != DISPLAYMODE_SDR)
+            m_swapChain.OnCreateWindowSizeDependentResources(
+                m_Width,
+                m_Height,
+                m_VsyncEnabled,
+                DISPLAYMODE_SDR,
+                false);
+
+        m_swapChain.OnDestroyWindowSizeDependentResources();
+        m_swapChain.OnDestroy();
+
+        m_pDevice->OnDestroy();
+    }
+
+    void FrameworkWindows::ToggleFullScreen()
+    {
+        if (m_fullscreenMode == PRESENTATIONMODE_WINDOWED)
+        {
+            m_fullscreenMode = PRESENTATIONMODE_BORDERLESS_FULLSCREEN;
+        }
+        else
+        {
+            m_fullscreenMode = PRESENTATIONMODE_WINDOWED;
+        }
+
+        HandleFullScreen();
+        m_previousFullscreenMode = m_fullscreenMode;
+    }
+
+    void FrameworkWindows::HandleFullScreen()
+    {
+        // Flush the gpu to make sure we don't change anything still active
+        m_pDevice->WaitForIdle();
+
+        // -------------------- For HDR only.
+        // If FS2 modes, always fallback to SDR
+        if (m_fullscreenMode == PRESENTATIONMODE_WINDOWED &&
+            (m_displayModesAvailable[m_currentDisplayModeNamesIndex] == DISPLAYMODE_FSHDR_Gamma22 ||
+             m_displayModesAvailable[m_currentDisplayModeNamesIndex] == DISPLAYMODE_FSHDR_SCRGB))
+        {
+            m_currentDisplayModeNamesIndex = DISPLAYMODE_SDR;
+        }
+        // when hdr10 modes, fall back to SDR unless windowMode hdr is enabled
+        else if (m_fullscreenMode == PRESENTATIONMODE_WINDOWED && !CheckIfWindowModeHdrOn() &&
+                 (m_displayModesAvailable[m_currentDisplayModeNamesIndex] != DISPLAYMODE_SDR))
+        {
+            m_currentDisplayModeNamesIndex = DISPLAYMODE_SDR;
+        }
+        // For every other case go back to previous state
+        else
+        {
+            m_currentDisplayModeNamesIndex = m_previousDisplayModeNamesIndex;
+        }
+        // -------------------- For HDR only.
+
+        switch (m_fullscreenMode)
+        {
+        case PRESENTATIONMODE_WINDOWED:
+        {
+            if (m_previousFullscreenMode == PRESENTATIONMODE_EXCLUSIVE_FULLSCREEN)
+            {
+                m_swapChain.SetFullScreen(false);
+                m_forceManualResize = true;
+            }
+
+            SetFullscreen(m_windowHwnd, false);
+
+            break;
+        }
+
+        case PRESENTATIONMODE_BORDERLESS_FULLSCREEN:
+        {
+            if (m_previousFullscreenMode == PRESENTATIONMODE_WINDOWED)
+            {
+                SetFullscreen(m_windowHwnd, true);
+            }
+            else if (m_previousFullscreenMode == PRESENTATIONMODE_EXCLUSIVE_FULLSCREEN)
+            {
+                m_swapChain.SetFullScreen(false);
+                m_forceManualResize = true;
+            }
+
+            break;
+        }
+
+        case PRESENTATIONMODE_EXCLUSIVE_FULLSCREEN:
+        {
+            if (m_previousFullscreenMode == PRESENTATIONMODE_WINDOWED)
+            {
+                SetFullscreen(m_windowHwnd, true);
+            }
+
+            m_swapChain.SetFullScreen(true);
+            m_forceManualResize = true;
+
+            break;
+        }
+        }
+
+        RECT clientRect = {};
+        GetClientRect(m_windowHwnd, &clientRect);
+        OnResize(clientRect.right - clientRect.left,
+                 clientRect.bottom - clientRect.top,
+                 m_forceManualResize);
+        UpdateDisplay(m_displayModesAvailable[m_currentDisplayModeNamesIndex],
+                      m_disableLocalDimming);
+        m_forceManualResize = false;
+    }
+
+    void FrameworkWindows::OnResize(uint32_t width, uint32_t height, bool forceManulResize)
+    {
+        if (m_Width != width || m_Height != height || forceManulResize)
+        {
+            // Flush GPU
+            m_pDevice->WaitForIdle();
+
+            // Destroy resources (if we are not minimized)
+            if (m_Width > 0 && m_Height > 0)
+                m_swapChain.OnDestroyWindowSizeDependentResources();
+
+            m_Width = width;
+            m_Height = height;
+
+            // If resizing but not minimizing the recreate it with the new size
+            if (m_Width > 0 && m_Height > 0)
+                m_swapChain.OnCreateWindowSizeDependentResources(m_Width,
+                                                                 m_Height,
+                                                                 m_VsyncEnabled,
+                                                                 m_currentDisplayMode,
+                                                                 m_disableLocalDimming);
+
+            // Call sample defined OnResize()
+            OnResize();
+        }
+    }
+
+    void FrameworkWindows::UpdateDisplay(int displayMode, bool disableLocalDimming)
+    {
+        // Nothing was changed in UI
+        if (displayMode < 0)
+        {
+            m_currentDisplayModeNamesIndex = m_previousDisplayModeNamesIndex;
+            return;
+        }
+
+        if (m_currentDisplayMode != displayMode || m_disableLocalDimming != disableLocalDimming)
+        {
+            // Flush GPU
+            m_pDevice->WaitForIdle();
+
+            m_swapChain.OnDestroyWindowSizeDependentResources();
+
+            m_currentDisplayMode = (DisplayMode)displayMode;
+            m_disableLocalDimming = disableLocalDimming;
+
+            m_swapChain.OnCreateWindowSizeDependentResources(m_Width,
+                                                             m_Height,
+                                                             m_VsyncEnabled,
+                                                             m_currentDisplayMode,
+                                                             m_disableLocalDimming);
+
+            // Call sample defined UpdateDisplay()
+            OnUpdateDisplay();
+        }
+    }
+
+    void FrameworkWindows::OnActivate(bool WindowActive)
+    {
+        static bool s_lastActiveState = false;
+        if (WindowActive == s_lastActiveState)
+            return;
+        s_lastActiveState = WindowActive;
+
+        // *********************************************************************************
+        // Edge case for handling Fullscreen Exclusive (FSE) mode 
+        // FSE<->FSB transitions are handled here and at the end of EndFrame().
+        if (WindowActive &&
+            m_fullscreenMode == PRESENTATIONMODE_BORDERLESS_FULLSCREEN &&
+            m_previousFullscreenMode == PRESENTATIONMODE_EXCLUSIVE_FULLSCREEN)
+        {
+            m_fullscreenMode = PRESENTATIONMODE_EXCLUSIVE_FULLSCREEN;
+            m_previousFullscreenMode = PRESENTATIONMODE_BORDERLESS_FULLSCREEN;
+            HandleFullScreen();
+            m_previousFullscreenMode = m_fullscreenMode;
+        }
+        // *********************************************************************************
+
+        if (m_displayModesAvailable[m_currentDisplayModeNamesIndex] == DisplayMode::DISPLAYMODE_SDR
+            &&
+            m_displayModesAvailable[m_previousDisplayModeNamesIndex] ==
+            DisplayMode::DISPLAYMODE_SDR)
+            return;
+
+        if (CheckIfWindowModeHdrOn() &&
+            (m_displayModesAvailable[m_currentDisplayModeNamesIndex] == DISPLAYMODE_HDR10_2084 ||
+             m_displayModesAvailable[m_currentDisplayModeNamesIndex] == DISPLAYMODE_HDR10_SCRGB))
+            return;
+
+        // Fall back HDR to SDR when window is fullscreen but not the active window or foreground window
+        m_currentDisplayModeNamesIndex = WindowActive && (
+                                             m_fullscreenMode != PRESENTATIONMODE_WINDOWED)
+                                             ? m_previousDisplayModeNamesIndex
+                                             : DisplayMode::DISPLAYMODE_SDR;
+
+        OnResize(m_Width, m_Height, m_forceManualResize);
+        UpdateDisplay(m_displayModesAvailable[m_currentDisplayModeNamesIndex],
+                      m_disableLocalDimming);
+    }
+
+    void FrameworkWindows::OnWindowMove()
+    {
+        // mutl monitor
+        HMONITOR currentMonitor = MonitorFromWindow(m_windowHwnd, MONITOR_DEFAULTTONEAREST);
+        if (m_monitor != currentMonitor)
+        {
+            m_swapChain.EnumerateDisplayModes(&m_displayModesAvailable,
+                                              &m_displayModesNamesAvailable);
+            m_monitor = currentMonitor;
+            m_previousDisplayModeNamesIndex = m_currentDisplayModeNamesIndex = DISPLAYMODE_SDR;
+            UpdateDisplay(m_displayModesAvailable[m_currentDisplayModeNamesIndex],
+                          m_disableLocalDimming);
+        }
+    }
+
+    FrameContext FrameworkWindows::BeginFrame()
+    {
+        m_frameIndex ++;
+        m_frameID = (m_frameID + 1) % ElysiaHelper::NUM_FRAMES_IN_FLIGHT;
+
+        FrameContext frameContext
+        {
+            .frameID = m_frameID,
+            .frameIndex = m_frameIndex,
+        };
+
+        m_pDevice->BeginFrame(m_frameID);
+
+        // Get timings
+        double timeNow = MillisecondsNow();
+        m_deltaTime = (float)(timeNow - m_lastFrameTime);
+        m_lastFrameTime = timeNow;
+
+        return frameContext;
+    }
+
+    // EndFrame will handle Present and other end of frame logic needed
+    void FrameworkWindows::EndFrame()
+    {
+        m_pDevice->EndFrame();
+
+        // If we are doing GPU Validation, flush every frame
+        if (m_isGpuValidationLayerEnabled)
+            m_pDevice->WaitForIdle();
+
+        // *********************************************************************************
+        // Edge case for handling Fullscreen Exclusive (FSE) mode
+        // Usually OnActivate() detects application changing focus and that's where this transition is handled.
+        // However, SwapChain::GetFullScreen() returns true when we handle the event in the OnActivate() block,
+        // which is not expected. Hence we handle FSE -> FSB transition here at the end of the frame.
+        if (m_fullscreenMode == PRESENTATIONMODE_EXCLUSIVE_FULLSCREEN)
+        {
+            bool isFullScreen = m_swapChain.GetFullScreen();
+            if (!isFullScreen)
+            {
+                m_fullscreenMode = PRESENTATIONMODE_BORDERLESS_FULLSCREEN;
+                HandleFullScreen();
+            }
+        }
+    }
+
+    void FrameworkWindows::Present()
+    {
+        m_swapChain.Present();
+        m_pDevice->Present();
+    }
+
+}

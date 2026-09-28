@@ -1,0 +1,84 @@
+#include "stdafx.h"
+#include "../public/LightManager.h"
+
+#include "Editor/public/UserData.h"
+
+#include "Runtime/Engine/public/ElysiaFrame.h"
+
+#include "Runtime/RenderCore/Pass/public/ShadowPass.h"
+#include "../public/DX12Light.h"
+#include "../public/DX12Shadow.h"
+
+namespace ElysiaRenderer
+{
+    std::unique_ptr<LightManager> LightManager::m_instance;
+    std::once_flag LightManager::m_initInstanceFlag;
+
+    LightManager::LightManager() = default;
+    LightManager::~LightManager()
+    {
+        Destory();
+    }
+
+    void LightManager::Init(ElysiaCore::DX12Device* pDevice)
+    {
+        assert(pDevice);
+        m_pDevice = pDevice;
+        CreatMainLight();
+
+    }
+
+    void LightManager::Destory()
+    {
+
+    }
+
+    void LightManager::Update(const ElysiaEngine::FrameContext& context)
+    {
+        m_frameID = context.frameID;
+        m_frameIndex = context.frameIndex;
+
+        auto& pUsetData = UserData::GetInstance();
+
+        m_pMainLight->m_lightColor = pUsetData.lightColor;
+        m_pMainLight->m_lightDir = pUsetData.lightDir;
+        m_pMainLight->m_lightIntensity = pUsetData.lightIntensity;
+
+        m_pMainLight->GetMainShadow()->UpdateShadowTransform(m_pMainLight.get());
+    }
+
+    DX12DirectionLight* LightManager::GetMainLight()
+    {
+        return m_pMainLight.get();
+    }
+    DX12Shadow* LightManager::GetMainShadow()
+    {
+        return m_pMainLight->GetMainShadow();
+    }
+    RenderTexture* LightManager::GetMainShadowRT() const
+    {
+        return m_pMainLight->GetMainShadowRT();
+    }
+
+    void LightManager::CreatMainLight()
+    {
+        auto& pUserData = UserData::GetInstance();
+        if (m_pMainLight != nullptr)
+        {
+            m_pMainLight.reset();
+            m_pMainLight = std::make_unique<DX12DirectionLight>(
+                pUserData.lightColor,
+                pUserData.lightDir,
+                pUserData.lightIntensity);
+        }
+        else
+        {
+            m_pMainLight = std::make_unique<DX12DirectionLight>(
+                pUserData.lightColor,
+                pUserData.lightDir,
+                pUserData.lightIntensity);
+        }
+
+        m_pMainLight->CreateMainShadow(20, DXGI_FORMAT_D32_FLOAT_S8X24_UINT);
+    }
+}
