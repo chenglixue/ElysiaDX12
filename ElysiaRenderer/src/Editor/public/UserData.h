@@ -1,4 +1,7 @@
 #pragma once
+#include <string>
+#include <vector>
+
 #include "Runtime/Resource/public/Serialization.h"
 #include "Runtime/RenderCore/public/ShadowUtility.h"
 #include "Runtime/RenderCore/public/TonemapUtility.h"
@@ -57,14 +60,8 @@ namespace ElysiaRenderer
 {
     using namespace ElysiaHelper;
 
-    const std::vector<LPCWSTR> g_ModelPaths
-    {
-        L"glTF\\bistro\\bistro.gltf",
-        // L"glTF\\Suzanne\\Suzanne.gltf",
-        //L"glTF\\SM_MatPreviewMesh_01\\SM_MatPreviewMesh_01.gltf",
-        // L"glTF\\head\\head.gltf",
-        //L"glTF\\scene\\scene.gltf",
-    };
+    // Filled from [Startup] +ModelPath in the ini hierarchy.
+    extern std::vector<std::wstring> g_ModelPaths;
 
     class UserData
     {

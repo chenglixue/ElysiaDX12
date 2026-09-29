@@ -259,14 +259,14 @@ namespace ElysiaRenderer
         {
             auto& allEntities = SceneManager::GetInstance().GetEntities()[0]->GetChildren();
             auto entityCount = allEntities.size();
-            auto instanceSize = entityCount * allEntities[0]->pMeshRenderer->m_pModel->meshes.size();
 
             m_instanceDatas.clear();
             m_AABBDatas.clear();
-            m_instanceDatas.reserve(instanceSize);
-            m_AABBDatas.reserve(Max_RenderItem_Count);
+            m_instanceDatas.reserve(entityCount);
+            m_AABBDatas.reserve(entityCount);
             bool needFlushBarrier = false;
-            // first is root list
+            // One child entity owns one mesh, and GenerateBLAS packs only that mesh.
+            // RayClosestHit indexes g_InstanceDataBuffer with InstanceID() + GeometryIndex().
             for (UINT i = 0; i < entityCount; i ++)
             {
                 auto currEntity = allEntities[i].get();
@@ -282,28 +282,27 @@ namespace ElysiaRenderer
                     needFlushBarrier = true;
                     currEntity->GenerateBLAS(m_pDevice5.Get(), m_pCommand);
                 }
+                const auto& mesh = currEntity->pMeshRenderer->GetMesh();
                 const auto& materials = currEntity->pMeshRenderer->m_pModel->materials;
-                for (auto& mesh : currEntity->pMeshRenderer->m_pModel->meshes)
+                const auto& material = materials[mesh.materialIndex];
+                m_instanceDatas.emplace_back(InstanceData
                 {
-                    m_instanceDatas.emplace_back(InstanceData
-                    {
-                        .BaseColorTexIndex = materials[mesh.materialIndex].
-                        textures[UINT64(MaterialTextureType::Albedo)].GetResourceHeapIndex(),
-                        .NormalTexIndex = materials[mesh.materialIndex].
-                        textures[UINT64(MaterialTextureType::Normal)].GetResourceHeapIndex(),
-                        .MetallicTexIndex = materials[mesh.materialIndex].
-                        textures[UINT64(MaterialTextureType::Metallic)].GetResourceHeapIndex(),
-                        .RoughnessTexIndex = materials[mesh.materialIndex].
-                        textures[UINT64(MaterialTextureType::Roughness)].GetResourceHeapIndex(),
+                    .BaseColorTexIndex = material.
+                    textures[UINT64(MaterialTextureType::Albedo)].GetResourceHeapIndex(),
+                    .NormalTexIndex = material.
+                    textures[UINT64(MaterialTextureType::Normal)].GetResourceHeapIndex(),
+                    .MetallicTexIndex = material.
+                    textures[UINT64(MaterialTextureType::Metallic)].GetResourceHeapIndex(),
+                    .RoughnessTexIndex = material.
+                    textures[UINT64(MaterialTextureType::Roughness)].GetResourceHeapIndex(),
 
-                        .VertexOffset = mesh.vtxOffset,
-                        .IndexOffset = mesh.idxOffset,
-                        .VertexBufferIndex = BufferManager::GetInstance().GetGlobalVertexBuffer()->
-                                                                          GetResourceHeapIndex(),
-                        .IndexBufferIndex = BufferManager::GetInstance().GetGlobalIndexBuffer()->
-                                                                         GetResourceHeapIndex(),
-                    });
-                }
+                    .VertexOffset = mesh.vtxOffset,
+                    .IndexOffset = mesh.idxOffset,
+                    .VertexBufferIndex = BufferManager::GetInstance().GetGlobalVertexBuffer()->
+                                                                      GetResourceHeapIndex(),
+                    .IndexBufferIndex = BufferManager::GetInstance().GetGlobalIndexBuffer()->
+                                                                     GetResourceHeapIndex(),
+                });
             }
             if (needFlushBarrier)
             {
@@ -314,13 +313,15 @@ namespace ElysiaRenderer
             if (!isInitStaticAABB)
             {
                 isInitStaticAABB = true;
+                const size_t aabbCopyCount = std::min(m_AABBDatas.size(),
+                                                       static_cast<size_t>(Max_RenderItem_Count));
                 memcpy(m_pStaticAABBDataBuffer->GetMappedBuffer(),
                        m_AABBDatas.data(),
-                       sizeof(AABBData) * Max_RenderItem_Count);
+                       sizeof(AABBData) * aabbCopyCount);
             }
 
-            if (!m_pInstanceDataBuffer || m_pInstanceDataBuffer->GetResourceDesc().Width < sizeof(
-                    InstanceData) * entityCount)
+            const UINT64 instanceBytes = m_instanceDatas.size() * sizeof(InstanceData);
+            if (!m_pInstanceDataBuffer || m_pInstanceDataBuffer->GetResourceDesc().Width < instanceBytes)
             {
                 if (m_pInstanceDataBuffer)
                     BufferManager::GetInstance().DestoryBuffer(m_pInstanceDataBuffer);
@@ -328,7 +329,7 @@ namespace ElysiaRenderer
                 {
                     .name = L"GI Instance Data",
                     .stride = sizeof(InstanceData),
-                    .size = instanceSize * sizeof(InstanceData),
+                    .size = instanceBytes,
                     .viewFlags = GPUResourceFlags::SRV,
                     .accessFlags = BufferAccessFlags::HostWritable,
                     .isRawAccess = false,
@@ -339,7 +340,7 @@ namespace ElysiaRenderer
             {
                 memcpy(m_pInstanceDataBuffer->GetMappedBuffer(),
                        m_instanceDatas.data(),
-                       instanceSize * sizeof(InstanceData));
+                       instanceBytes);
             }
             GenerateTLAS(allEntities);
             if (!m_pRTPSO || !m_pGlobalRootSig)
@@ -1292,14 +1293,14 @@ namespace ElysiaRenderer
         // 定义实例描述符 (Instance Desc)
         std::vector<std::string> instanceNames(entityCount);
         std::vector<D3D12_RAYTRACING_INSTANCE_DESC> instanceDescs(entityCount);
-        uint32_t currentHitGroupOffset = 0;
         for (UINT64 i = 0; i < entityCount; ++i)
         {
             const auto& entity = entityies[i];
             instanceNames[i] = std::string(entity->name.c_str());
             instanceDescs[i].InstanceMask = 0xFF;                                         // 与 TraceRay 的 mask 匹配
-            instanceDescs[i].InstanceID = currentHitGroupOffset;                          // 对应 HLSL 中的 InstanceID()
-            instanceDescs[i].InstanceContributionToHitGroupIndex = currentHitGroupOffset; // 对应 HitGroup 偏移
+            // BLAS has one geometry. InstanceID() + GeometryIndex() must land on this entity.
+            instanceDescs[i].InstanceID = static_cast<UINT>(i);
+            instanceDescs[i].InstanceContributionToHitGroupIndex = static_cast<UINT>(i);
             instanceDescs[i].Flags = D3D12_RAYTRACING_INSTANCE_FLAG_NONE;
 
             auto entityWorld_M = entity->transform.GetWorldMatrix();
@@ -1310,10 +1311,7 @@ namespace ElysiaRenderer
                     instanceDescs[i].Transform[row][col] = entityWorld_M.m[row][col];
                 }
             }
-            // 关联BLAS
             instanceDescs[i].AccelerationStructure = entity->GetBLASBuffer()->GetGPUAddress();
-
-            currentHitGroupOffset += entity->pMeshRenderer->m_pModel->meshes.size();
         }
 
         size_t bufferSize = sizeof(D3D12_RAYTRACING_INSTANCE_DESC) * entityCount;
@@ -1383,6 +1381,7 @@ namespace ElysiaRenderer
 
         m_pCommand->AddBarrier(*m_pTLASScratchBuffer, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, false);
         m_pCommand->AddUAVBarrier(m_pTLASScratchBuffer);
+        m_pCommand->FlushBarrier();
 
         // Build
         D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC buildDesc =
@@ -1393,6 +1392,7 @@ namespace ElysiaRenderer
         };
         m_pCommand->GetCommandList()->BuildRaytracingAccelerationStructure(&buildDesc, 0, nullptr);
         m_pCommand->AddUAVBarrier(m_pTLASBuffer);
+        m_pCommand->FlushBarrier();
 
         //DebugDumpTLASInstances(instanceDescs, instanceNames);
     }
@@ -1620,13 +1620,9 @@ namespace ElysiaRenderer
             m_stbHelper.AddMiss(pRTProps->GetShaderIdentifier(L"RayMiss"));
             m_stbHelper.AddMiss(pRTProps->GetShaderIdentifier(L"ShadowMiss"));
 
-            for (auto& entity : entities)
+            for (size_t hitGroupIndex = 0; hitGroupIndex < entities.size(); ++hitGroupIndex)
             {
-                auto& pModel = entity->pMeshRenderer->m_pModel;
-                for (size_t meshIndex = 0; meshIndex < pModel->meshes.size(); meshIndex ++)
-                {
-                    m_stbHelper.AddHitGroup(pRTProps->GetShaderIdentifier(L"OpaqueHitGroup"));
-                }
+                m_stbHelper.AddHitGroup(pRTProps->GetShaderIdentifier(L"OpaqueHitGroup"));
             }
         }
     }

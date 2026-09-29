@@ -51,7 +51,7 @@ namespace ElysiaRenderer
             for (const auto& modelPath : g_ModelPaths)
             {
                 m_pendingModels.emplace_back(
-                    std::move(CreateModel(ElysiaHelper::GetAssetFullPath(assetsPath, modelPath))));
+                    std::move(CreateModel(ElysiaHelper::GetAssetFullPath(assetsPath, modelPath.c_str()))));
             }
         }
 

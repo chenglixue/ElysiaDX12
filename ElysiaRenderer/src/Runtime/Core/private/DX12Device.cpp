@@ -154,6 +154,7 @@ namespace ElysiaCore
                     if (rc == AGS_SUCCESS)
                     {
                         m_pDevice = returnedParams.pDevice;
+                        SetDiagnosticD3D12Device(m_pDevice);
                     }
                     else
                     {
@@ -172,6 +173,7 @@ namespace ElysiaCore
             ThrowIfFailed(D3D12CreateDevice(m_pAdapter,
                                             D3D_FEATURE_LEVEL_12_0,
                                             IID_PPV_ARGS(&m_pDevice)));
+            SetDiagnosticD3D12Device(m_pDevice);
 
             if (bCPUValidationEnabled || bGpuValidationEnabled)
             {
@@ -222,7 +224,7 @@ namespace ElysiaCore
     }
     void DX12Device::OnDestroy()
     {
-
+        SetDiagnosticD3D12Device(nullptr);
     }
 
     void DX12Device::InitializeDeviceResources()

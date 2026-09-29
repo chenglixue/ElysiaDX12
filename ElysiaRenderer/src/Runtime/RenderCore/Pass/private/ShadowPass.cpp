@@ -204,17 +204,18 @@ namespace ElysiaRenderer
             m_indirectCommands.emplace_back(indirectCommand);
             renderItemIndex ++;
         }
+        const size_t commandCopyCount = std::min(m_indirectCommands.size(),
+                                                 static_cast<size_t>(Max_RenderItem_Count));
         memcpy(m_pIndirectDataBuffer->GetMappedBuffer(),
                m_indirectCommands.data(),
-               sizeof(IndirectCommand) * Max_RenderItem_Count);
+               commandCopyCount * sizeof(IndirectCommand));
 
+        const UINT maxCommands = static_cast<UINT>(
+            m_pIndirectDataBuffer->GetResourceDesc().Width / sizeof(IndirectCommand));
         m_pCommand->GetCommandList()->ExecuteIndirect(m_pCommandSignature.Get(),
-                                                      // 执行多少次命令
-                                                      renderItemIndex,
+                                                      std::min(renderItemIndex, maxCommands),
                                                       m_pIndirectDataBuffer->GetResource().Get(),
-                                                      // 从 Buffer 的开头开始
                                                       0,
-                                                      // 如果没有 CountBuffer，则固定执行指定的次数
                                                       nullptr,
                                                       0);
 

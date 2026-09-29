@@ -44,6 +44,7 @@ namespace ElysiaRenderer
 
     void BufferManager::Destory()
     {
+        m_pUploadBuffer.reset();
         ElysiaHelper::SafeRelease(m_pAllocator);
         for (auto& buffer : m_bufferPools)
         {
@@ -58,6 +59,7 @@ namespace ElysiaRenderer
     {
         m_frameID = context.frameID;
         m_frameIndex = context.frameIndex;
+        ProcessGarbage(m_frameIndex);
     }
 
     D3D12MA::Allocator* BufferManager::GetAllocator() const noexcept
@@ -120,16 +122,14 @@ namespace ElysiaRenderer
         }
         D3D12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(alignSize, resFlags);
 
-        D3D12_RESOURCE_STATES resourceState = isHostVisible
-                                                  ? D3D12_RESOURCE_STATE_GENERIC_READ
-                                                  : D3D12_RESOURCE_STATE_COPY_DEST;
-        if (!isHostVisible)
-        {
-            if (bufferCreationDesc.isAccelerationStructure)
-                resourceState = D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE;
-            else if (bufferCreationDesc.isIndirectBuffer)
-                resourceState = D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT;
-        }
+        // Buffers ignore COPY_DEST at creation and start in COMMON.
+        D3D12_RESOURCE_STATES resourceState = D3D12_RESOURCE_STATE_COMMON;
+        if (isHostVisible)
+            resourceState = D3D12_RESOURCE_STATE_GENERIC_READ;
+        else if (bufferCreationDesc.isAccelerationStructure)
+            resourceState = D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE;
+        else if (bufferCreationDesc.isIndirectBuffer)
+            resourceState = D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT;
         D3D12MA::ALLOCATION_DESC allocationDesc{};
         allocationDesc.HeapType = isHostVisible ? D3D12_HEAP_TYPE_UPLOAD : D3D12_HEAP_TYPE_DEFAULT;
 
@@ -320,28 +320,9 @@ namespace ElysiaRenderer
         if (!handle)
             return;
 
-        if (handle->GetCBVDescriptor().IsValid())
-        {
-            m_pDevice->GetSRVStageHeap()->FreeDescriptorHeapHandle(
-                handle->GetCBVDescriptor());
-            handle->GetCBVDescriptor().Reset();
-
-        }
-        if (handle->GetSRVDescriptor().IsValid())
-        {
-            m_pDevice->GetSRVStageHeap()->FreeDescriptorHeapHandle(
-                handle->GetSRVDescriptor());
-            handle->GetSRVDescriptor().Reset();
-
-            m_pDevice->FreeContiguousReservedDescriptorIndices(handle->GetResourceHeapIndex(), 1);
-
-        }
-        if (handle->GetUAVDescriptor().IsValid())
-        {
-            m_pDevice->GetSRVStageHeap()->FreeDescriptorHeapHandle(
-                handle->GetUAVDescriptor());
-            handle->GetUAVDescriptor().Reset();
-        }
+        // Get*Descriptor() returns a copy, so Reset() on that copy leaves the
+        // stored handle valid. ReleaseViews clears the members after one free.
+        handle->ReleaseViews(m_pDevice);
 
         UINT64 deleteFrameIndex = m_frameIndex + NUM_FRAMES_IN_FLIGHT;
         m_grbageQueue.push_back({deleteFrameIndex, handle});
@@ -368,25 +349,9 @@ namespace ElysiaRenderer
         {
             if (it->first <= currentFrameIndex)
             {
-                auto pBuffer = it->second;
-                if (pBuffer->GetCBVDescriptor().IsValid())
-                {
-                    pBuffer->GetCBVDescriptor().Reset();
-                    m_pDevice->GetSRVStageHeap()->FreeDescriptorHeapHandle(
-                        pBuffer->GetCBVDescriptor());
-                }
-                if (pBuffer->GetSRVDescriptor().IsValid())
-                {
-                    pBuffer->GetSRVDescriptor().Reset();
-                    m_pDevice->GetSRVStageHeap()->FreeDescriptorHeapHandle(
-                        pBuffer->GetSRVDescriptor());
-                }
-                if (pBuffer->GetUAVDescriptor().IsValid())
-                {
-                    pBuffer->GetUAVDescriptor().Reset();
-                    m_pDevice->GetSRVStageHeap()->FreeDescriptorHeapHandle(
-                        pBuffer->GetUAVDescriptor());
-                }
+                // Descriptors were already returned by DestoryBuffer. Dropping the
+                // shared_ptr here is what releases the ID3D12Resource after the
+                // frames that may still reference it have completed.
                 it = m_grbageQueue.erase(it);
             }
             else
@@ -400,256 +365,166 @@ namespace ElysiaRenderer
                                          std::vector<DX12BufferUpload*>& bufferUploads)
     {
         const auto numBufferUploads = static_cast<UINT>(bufferUploads.size());
-        size_t bufferUploadHeapOffset = 0;
         UINT numBuffersProcessed = 0;
 
         if (numBufferUploads <= 0)
             return;
 
-        size_t totalSize = 0;
-        for (const auto& upload : bufferUploads)
+        for (numBuffersProcessed; numBuffersProcessed < numBufferUploads; numBuffersProcessed++)
         {
-            totalSize += AlignU32(upload->bufferDataSize,
-                                  D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
-        }
-
-        D3D12_GPU_VIRTUAL_ADDRESS gpuAddress;
-        UINT8* cpuAddress;
-        if (m_pUploadBuffer->AllocateForFrame(m_pDevice->GetFrameID(),
-                                              totalSize,
-                                              gpuAddress,
-                                              cpuAddress))
-        {
-            for (numBuffersProcessed; numBuffersProcessed < numBufferUploads; numBuffersProcessed
-                 ++)
+            auto bufferUpload = bufferUploads[numBuffersProcessed];
+            ElysiaCore::UploadAllocation allocation;
+            if (!m_pUploadBuffer->AllocateForFrame(m_pDevice->GetFrameID(),
+                                                   bufferUpload->bufferDataSize,
+                                                   allocation))
             {
-                auto bufferUpload = bufferUploads[numBuffersProcessed];
-                if (bufferUploadHeapOffset + bufferUpload->bufferDataSize > totalSize)
-                {
-                    break;
-                }
-
-                // uploadContext->AddBarrier(*bufferUpload->buffer,
-                //                           D3D12_RESOURCE_STATE_COPY_DEST,
-                //                           false);
-                memcpy(cpuAddress + bufferUploadHeapOffset,
-                       bufferUpload->pBufferData.get(),
-                       bufferUpload->bufferDataSize);
-                D3D12_SUBRESOURCE_DATA subData =
-                {
-                    bufferUpload->pBufferData.get(),
-                    static_cast<UINT>(bufferUpload->bufferDataSize),
-                    static_cast<UINT>(bufferUpload->bufferDataSize)
-                };
-                // uploadContext->CopyBufferRegion(*bufferUpload->buffer, 0, m_pUploadBuffer->GetResource(), 
-                // 	gpuAddress - m_pUploadBuffer->GetResource()->GetGPUVirtualAddress(), bufferUpload->bufferDataSize);
-                UpdateSubresources(uploadContext->GetCommandList(),
-                                   bufferUpload->buffer->GetResource().Get(),
-                                   m_pUploadBuffer->GetResource(),
-                                   gpuAddress - m_pUploadBuffer->GetResource()->
-                                                                 GetGPUVirtualAddress() +
-                                   bufferUploadHeapOffset,
-                                   0,
-                                   1,
-                                   &subData);
-                // uploadContext->AddBarrier(*bufferUpload->buffer,
-                //                           D3D12_RESOURCE_STATE_COMMON,
-                //                           false);
-                bufferUploadHeapOffset = AlignU32(
-                    bufferUploadHeapOffset + bufferUpload->bufferDataSize,
-                    D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
+                break;
             }
-            uploadContext->FlushBarrier();
+
+            memcpy(allocation.cpuAddress,
+                   bufferUpload->pBufferData.get(),
+                   bufferUpload->bufferDataSize);
+            D3D12_SUBRESOURCE_DATA subData =
+            {
+                bufferUpload->pBufferData.get(),
+                static_cast<UINT>(bufferUpload->bufferDataSize),
+                static_cast<UINT>(bufferUpload->bufferDataSize)
+            };
+            const UINT64 uploadOffset = allocation.gpuAddress - allocation.resource->GetGPUVirtualAddress();
+            UpdateSubresources(uploadContext->GetCommandList(),
+                               bufferUpload->buffer->GetResource().Get(),
+                               allocation.resource,
+                               uploadOffset,
+                               0,
+                               1,
+                               &subData);
         }
+        uploadContext->FlushBarrier();
     }
     void BufferManager::UploadBufferData(DX12UploadContext* uploadContext,
                                          std::vector<DX12BufferUpload*>& bufferUploads,
                                          bool isErase)
     {
         const auto numBufferUploads = static_cast<UINT>(bufferUploads.size());
-        size_t bufferUploadHeapOffset = 0;
         UINT numBuffersProcessed = 0;
 
         if (numBufferUploads <= 0)
             return;
 
-        size_t totalSize = 0;
-        for (const auto& upload : bufferUploads)
+        for (numBuffersProcessed; numBuffersProcessed < numBufferUploads; numBuffersProcessed++)
         {
-            totalSize += AlignU32(upload->bufferDataSize,
-                                  D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
+            auto bufferUpload = bufferUploads[numBuffersProcessed];
+            ElysiaCore::UploadAllocation allocation;
+            if (!m_pUploadBuffer->AllocateForFrame(m_pDevice->GetFrameID(),
+                                                   bufferUpload->bufferDataSize,
+                                                   allocation))
+            {
+                break;
+            }
+
+            uploadContext->AddBarrier(*bufferUpload->buffer,
+                                      D3D12_RESOURCE_STATE_COPY_DEST,
+                                      false);
+            memcpy(allocation.cpuAddress,
+                   bufferUpload->pBufferData.get(),
+                   bufferUpload->bufferDataSize);
+            D3D12_SUBRESOURCE_DATA subData =
+            {
+                bufferUpload->pBufferData.get(),
+                static_cast<UINT>(bufferUpload->bufferDataSize),
+                static_cast<UINT>(bufferUpload->bufferDataSize)
+            };
+            const UINT64 uploadOffset = allocation.gpuAddress - allocation.resource->GetGPUVirtualAddress();
+            UpdateSubresources(uploadContext->GetCommandList(),
+                               bufferUpload->buffer->GetResource().Get(),
+                               allocation.resource,
+                               uploadOffset,
+                               0,
+                               1,
+                               &subData);
+            uploadContext->AddBarrier(*bufferUpload->buffer,
+                                      D3D12_RESOURCE_STATE_COMMON,
+                                      false);
+            uploadContext->AddBufferProcess(bufferUpload);
         }
+        uploadContext->FlushBarrier();
 
-        D3D12_GPU_VIRTUAL_ADDRESS gpuAddress;
-        UINT8* cpuAddress;
-        if (m_pUploadBuffer->AllocateForFrame(m_pDevice->GetFrameID(),
-                                              totalSize,
-                                              gpuAddress,
-                                              cpuAddress))
+        if (numBuffersProcessed > 0 && isErase)
         {
-            for (numBuffersProcessed; numBuffersProcessed < numBufferUploads; numBuffersProcessed
-                 ++)
-            {
-                auto bufferUpload = bufferUploads[numBuffersProcessed];
-                if (bufferUploadHeapOffset + bufferUpload->bufferDataSize > totalSize)
-                {
-                    break;
-                }
-
-                uploadContext->AddBarrier(*bufferUpload->buffer,
-                                          D3D12_RESOURCE_STATE_COPY_DEST,
-                                          false);
-                memcpy(cpuAddress + bufferUploadHeapOffset,
-                       bufferUpload->pBufferData.get(),
-                       bufferUpload->bufferDataSize);
-                D3D12_SUBRESOURCE_DATA subData =
-                {
-                    bufferUpload->pBufferData.get(),
-                    static_cast<UINT>(bufferUpload->bufferDataSize),
-                    static_cast<UINT>(bufferUpload->bufferDataSize)
-                };
-                // uploadContext->CopyBufferRegion(*bufferUpload->buffer, 0, m_pUploadBuffer->GetResource(), 
-                // 	gpuAddress - m_pUploadBuffer->GetResource()->GetGPUVirtualAddress(), bufferUpload->bufferDataSize);
-                UpdateSubresources(uploadContext->GetCommandList(),
-                                   bufferUpload->buffer->GetResource().Get(),
-                                   m_pUploadBuffer->GetResource(),
-                                   gpuAddress - m_pUploadBuffer->GetResource()->
-                                                                 GetGPUVirtualAddress() +
-                                   bufferUploadHeapOffset,
-                                   0,
-                                   1,
-                                   &subData);
-                uploadContext->AddBarrier(*bufferUpload->buffer,
-                                          D3D12_RESOURCE_STATE_COMMON,
-                                          false);
-                bufferUploadHeapOffset = AlignU32(
-                    bufferUploadHeapOffset + bufferUpload->bufferDataSize,
-                    D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
-                uploadContext->AddBufferProcess(bufferUpload);
-            }
-            uploadContext->FlushBarrier();
-
-            if (numBuffersProcessed > 0 && isErase)
-            {
-                bufferUploads.erase(bufferUploads.begin(),
-                                    bufferUploads.begin() + numBuffersProcessed);
-            }
+            bufferUploads.erase(bufferUploads.begin(),
+                                bufferUploads.begin() + numBuffersProcessed);
         }
     }
     void BufferManager::UploadTextureData(DX12UploadContext* uploadContext,
                                           std::vector<DX12TextureUpload*>& textureUploads)
     {
         const auto numTextureUploads = static_cast<UINT>(textureUploads.size());
-        size_t texUploadHeapOffset = 0;
         UINT numTexsProcessed = 0;
 
         if (numTextureUploads <= 0)
             return;
 
-        size_t totalSize = 0;
-        for (const auto& upload : textureUploads)
+        for (numTexsProcessed; numTexsProcessed < numTextureUploads; ++numTexsProcessed)
         {
-            totalSize += AlignU64(upload->textureDataSize, 512);
+            auto textureUpload = textureUploads[numTexsProcessed];
+            ElysiaCore::UploadAllocation allocation;
+            if (!m_pUploadBuffer->AllocateForFrame(m_pDevice->GetFrameID(),
+                                                   textureUpload->textureDataSize,
+                                                   allocation,
+                                                   D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT))
+            {
+                break;
+            }
+
+            memcpy(allocation.cpuAddress,
+                   textureUpload->pTextureData.get(),
+                   textureUpload->textureDataSize);
+            const UINT64 uploadOffset = allocation.gpuAddress - allocation.resource->GetGPUVirtualAddress();
+            uploadContext->CopyTextureRegion(*textureUpload->pTextureBuffer,
+                                             allocation.resource,
+                                             uploadOffset,
+                                             textureUpload->subResourceLayouts,
+                                             textureUpload->numSubResources);
+
+            uploadContext->AddTextureProcess(textureUpload);
         }
 
-        D3D12_GPU_VIRTUAL_ADDRESS gpuAddress;
-        UINT8* cpuAddress;
-        if (m_pUploadBuffer->AllocateForFrame(m_pDevice->GetFrameID(),
-                                              totalSize,
-                                              gpuAddress,
-                                              cpuAddress))
+        if (numTexsProcessed > 0)
         {
-            for (numTexsProcessed; numTexsProcessed < numTextureUploads; ++numTexsProcessed)
-            {
-                auto textureUpload = textureUploads[numTexsProcessed];
-                if (texUploadHeapOffset + textureUpload->textureDataSize > totalSize)
-                {
-                    break;
-                }
-
-                memcpy(cpuAddress + texUploadHeapOffset,
-                       textureUpload->pTextureData.get(),
-                       textureUpload->textureDataSize);
-                uploadContext->CopyTextureRegion(*textureUpload->pTextureBuffer,
-                                                 m_pUploadBuffer->GetResource(),
-                                                 gpuAddress - m_pUploadBuffer->GetResource()->
-                                                                               GetGPUVirtualAddress()
-                                                 + texUploadHeapOffset,
-                                                 textureUpload->subResourceLayouts,
-                                                 textureUpload->numSubResources);
-
-                texUploadHeapOffset += textureUpload->textureDataSize;
-                texUploadHeapOffset = AlignU64(texUploadHeapOffset, 512);
-
-                uploadContext->AddTextureProcess(textureUpload);
-            }
-
-            if (numTexsProcessed > 0)
-            {
-                textureUploads.erase(textureUploads.begin(),
-                                     textureUploads.begin() + numTexsProcessed);
-            }
+            textureUploads.erase(textureUploads.begin(),
+                                 textureUploads.begin() + numTexsProcessed);
         }
     }
 
     void BufferManager::UploadBufferData(DX12UploadContext* uploadContext,
                                          DX12BufferUpload* bufferUpload)
     {
-        const auto numBufferUploads = 1;
-        size_t bufferUploadHeapOffset = 0;
-        UINT numBuffersProcessed = 0;
-
-        size_t totalSize = 0;
-        totalSize += AlignU32(bufferUpload->bufferDataSize,
-                              D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
-
-        D3D12_GPU_VIRTUAL_ADDRESS gpuAddress;
-        UINT8* cpuAddress;
-        if (m_pUploadBuffer->AllocateForFrame(m_pDevice->GetFrameID(),
-                                              totalSize,
-                                              gpuAddress,
-                                              cpuAddress))
+        ElysiaCore::UploadAllocation allocation;
+        if (!m_pUploadBuffer->AllocateForFrame(m_pDevice->GetFrameID(),
+                                               bufferUpload->bufferDataSize,
+                                               allocation))
         {
-            for (numBuffersProcessed; numBuffersProcessed < numBufferUploads; numBuffersProcessed
-                 ++)
-            {
-                if (bufferUploadHeapOffset + bufferUpload->bufferDataSize > totalSize)
-                {
-                    break;
-                }
-
-                // uploadContext->AddBarrier(*bufferUpload->buffer,
-                //                           D3D12_RESOURCE_STATE_COPY_DEST,
-                //                           false);
-                memcpy(cpuAddress + bufferUploadHeapOffset,
-                       bufferUpload->pBufferData.get(),
-                       bufferUpload->bufferDataSize);
-                D3D12_SUBRESOURCE_DATA subData =
-                {
-                    bufferUpload->pBufferData.get(),
-                    static_cast<UINT>(bufferUpload->bufferDataSize),
-                    static_cast<UINT>(bufferUpload->bufferDataSize)
-                };
-                // uploadContext->CopyBufferRegion(*bufferUpload->buffer, 0, m_pUploadBuffer->GetResource(), 
-                // 	gpuAddress - m_pUploadBuffer->GetResource()->GetGPUVirtualAddress(), bufferUpload->bufferDataSize);
-                UpdateSubresources(uploadContext->GetCommandList(),
-                                   bufferUpload->buffer->GetResource().Get(),
-                                   m_pUploadBuffer->GetResource(),
-                                   gpuAddress - m_pUploadBuffer->GetResource()->
-                                                                 GetGPUVirtualAddress() +
-                                   bufferUploadHeapOffset,
-                                   0,
-                                   1,
-                                   &subData);
-                // uploadContext->AddBarrier(*bufferUpload->buffer,
-                //                           D3D12_RESOURCE_STATE_COMMON,
-                //                           false);
-                bufferUploadHeapOffset = AlignU32(
-                    bufferUploadHeapOffset + bufferUpload->bufferDataSize,
-                    D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
-            }
-            uploadContext->FlushBarrier();
+            return;
         }
+
+        memcpy(allocation.cpuAddress,
+               bufferUpload->pBufferData.get(),
+               bufferUpload->bufferDataSize);
+        D3D12_SUBRESOURCE_DATA subData =
+        {
+            bufferUpload->pBufferData.get(),
+            static_cast<UINT>(bufferUpload->bufferDataSize),
+            static_cast<UINT>(bufferUpload->bufferDataSize)
+        };
+        const UINT64 uploadOffset = allocation.gpuAddress - allocation.resource->GetGPUVirtualAddress();
+        UpdateSubresources(uploadContext->GetCommandList(),
+                           bufferUpload->buffer->GetResource().Get(),
+                           allocation.resource,
+                           uploadOffset,
+                           0,
+                           1,
+                           &subData);
+        uploadContext->FlushBarrier();
     }
 
     BufferHandle BufferManager::CreateVertexBuffer(const ElysiaModel::LoadedModel& model)

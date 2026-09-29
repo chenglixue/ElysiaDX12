@@ -59,8 +59,50 @@ __debugbreak(); \
 #define Elysia_Assert(expression) ((void)0)
 #endif
 
+    inline ID3D12Device*& DiagnosticD3D12Device()
+    {
+        static ID3D12Device* device = nullptr;
+        return device;
+    }
+
+    inline void SetDiagnosticD3D12Device(ID3D12Device* device)
+    {
+        DiagnosticD3D12Device() = device;
+    }
+
     inline void AssertIfFailed(HRESULT hr)
     {
+        if (FAILED(hr))
+        {
+            FILE* file = nullptr;
+            _wfopen_s(&file, L"D:\\DX12\\ElysiaDX12\\d3d-error.txt", L"w, ccs=UTF-8");
+            if (file)
+            {
+                fwprintf(file, L"AssertIfFailed hr=0x%08X\n", static_cast<unsigned>(hr));
+                ID3D12Device* device = DiagnosticD3D12Device();
+                if (device)
+                {
+                    ComPtr<ID3D12InfoQueue> infoQueue;
+                    if (SUCCEEDED(device->QueryInterface(IID_PPV_ARGS(&infoQueue))))
+                    {
+                        const UINT64 count = infoQueue->GetNumStoredMessages();
+                        fwprintf(file, L"InfoQueue messages: %llu\n", count);
+                        for (UINT64 i = 0; i < count; ++i)
+                        {
+                            SIZE_T length = 0;
+                            infoQueue->GetMessage(i, nullptr, &length);
+                            std::vector<char> bytes(length);
+                            auto* message = reinterpret_cast<D3D12_MESSAGE*>(bytes.data());
+                            if (SUCCEEDED(infoQueue->GetMessage(i, message, &length)))
+                            {
+                                fwprintf(file, L"[%u] %hs\n", message->Severity, message->pDescription);
+                            }
+                        }
+                    }
+                }
+                fclose(file);
+            }
+        }
         assert(SUCCEEDED(hr));
     }
 
@@ -124,6 +166,27 @@ __debugbreak(); \
         int msgboxID = MessageBoxW(NULL, lpErrorString, L"Error", MB_OK);
     }
 
+    inline const wchar_t* DeviceRemovedReasonName(HRESULT reason)
+    {
+        switch (reason)
+        {
+        case DXGI_ERROR_DEVICE_HUNG:
+            return L"DXGI_ERROR_DEVICE_HUNG";
+        case DXGI_ERROR_DEVICE_REMOVED:
+            return L"DXGI_ERROR_DEVICE_REMOVED";
+        case DXGI_ERROR_DEVICE_RESET:
+            return L"DXGI_ERROR_DEVICE_RESET";
+        case DXGI_ERROR_DRIVER_INTERNAL_ERROR:
+            return L"DXGI_ERROR_DRIVER_INTERNAL_ERROR";
+        case DXGI_ERROR_INVALID_CALL:
+            return L"DXGI_ERROR_INVALID_CALL";
+        case E_OUTOFMEMORY:
+            return L"E_OUTOFMEMORY";
+        default:
+            return L"unrecognized";
+        }
+    }
+
     inline static void ThrowIfFailed(HRESULT hr)
     {
         if (FAILED(hr))
@@ -137,12 +200,33 @@ __debugbreak(); \
                            err,
                            255,
                            NULL);
-            char errA[256];
-            size_t returnSize;
-            wcstombs_s(&returnSize, errA, 255, err, 255);
+
+            std::wstring message = err;
+            if (hr == DXGI_ERROR_DEVICE_REMOVED)
+            {
+                ID3D12Device* device = DiagnosticD3D12Device();
+                wchar_t extra[192];
+                if (device)
+                {
+                    const HRESULT reason = device->GetDeviceRemovedReason();
+                    swprintf_s(extra,
+                               L"\nGetDeviceRemovedReason: 0x%08X %s",
+                               static_cast<unsigned>(reason),
+                               DeviceRemovedReasonName(reason));
+                }
+                else
+                {
+                    swprintf_s(extra, L"\nGetDeviceRemovedReason: device pointer was not set");
+                }
+                message += extra;
+            }
+
+            char errA[512];
+            size_t returnSize = 0;
+            wcstombs_s(&returnSize, errA, message.c_str(), _TRUNCATE);
             Trace(errA);
 #ifdef _DEBUG
-            ShowErrorMessageBox(err);
+            ShowErrorMessageBox(message.c_str());
 #endif
             throw 1;
         }

@@ -62,17 +62,15 @@ namespace ElysiaRenderer
             return 0;
         }
 
-        D3D12_GPU_VIRTUAL_ADDRESS GPUAddress;
-        UINT8* CPUAddress = nullptr;
+        ElysiaCore::UploadAllocation allocation;
         if (!pUploadBuffer->AllocateForFrame(m_pDevice->GetFrameID(),
                                              totalSize,
-                                             GPUAddress,
-                                             CPUAddress))
+                                             allocation))
         {
             assert(false && "UploadRingBuffer is full! Call Reset() at beginning of frame.");
             return 0;
         }
-        memset(CPUAddress, 0, totalSize);
+        memset(allocation.cpuAddress, 0, totalSize);
 
         for (const auto& memberPair : CBuffer.members)
         {
@@ -85,7 +83,7 @@ namespace ElysiaRenderer
             if (!pMaterialParam)
                 continue;
 
-            uint8_t* dest = CPUAddress + member.StartOffset;
+            uint8_t* dest = allocation.cpuAddress + member.StartOffset;
             if (IsArrayType(pMaterialParam->type))
             {
                 if (!pMaterialParam->value.arrayData.empty())
@@ -103,7 +101,7 @@ namespace ElysiaRenderer
             }
         }
 
-        return GPUAddress;
+        return allocation.gpuAddress;
     }
 
     void BasePass::SetSpaceResource(PassData& passData, UINT8 spaceID)

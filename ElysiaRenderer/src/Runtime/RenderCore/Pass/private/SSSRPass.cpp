@@ -143,9 +143,9 @@ namespace ElysiaRenderer
         m_pGPUTimer = context.pGPUTimer;
         m_frameIndex = context.frameIndex;
 
-        DoTileClassify();
-        DoIntersectionArgs();
-        DoIntersection();
+        // DoTileClassify();
+        // DoIntersectionArgs();
+        // DoIntersection();
     }
 
     void SSSRPass::DoTileClassify()

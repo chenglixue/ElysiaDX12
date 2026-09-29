@@ -2,6 +2,7 @@
 #include "../public/Entity.h"
 
 #include "Runtime/Core/public/DX12GraphicsContext.h"
+#include "Runtime/RenderCore/public/BufferManager.h"
 #include "Runtime/RenderCore/public/MeshRenderer.h"
 
 namespace ElysiaEngine
@@ -63,70 +64,37 @@ namespace ElysiaEngine
 
     void Entity::GenerateBLAS(ID3D12Device5* pDevice, DX12GraphicsContext* pCommand)
     {
-        if (m_pBLASBuffer && m_pBLASScratchBuffer || !pMeshRenderer)
+        if (m_pBLASBuffer || !pMeshRenderer || !pMeshRenderer->m_pModel)
             return;
 
-        // auto mesh = pMeshRenderer->GetMesh();
-        auto& model = pMeshRenderer->m_pModel;
-        UINT64 numSubMeshes = model->meshes.size();
-        if (numSubMeshes == 0)
+        const auto& subMesh = pMeshRenderer->GetMesh();
+        if (subMesh.numVertices == 0 || subMesh.numIndices == 0)
             return;
 
-        std::vector<D3D12_RAYTRACING_GEOMETRY_DESC> tempGeometryDescs;
-        tempGeometryDescs.reserve(numSubMeshes);
+        D3D12_RAYTRACING_GEOMETRY_DESC geometryDesc = {};
+        geometryDesc.Type = D3D12_RAYTRACING_GEOMETRY_TYPE_TRIANGLES;
+        geometryDesc.Flags = D3D12_RAYTRACING_GEOMETRY_FLAG_OPAQUE;
 
-        for (const auto& subMesh : model->meshes)
-        {
-            D3D12_RAYTRACING_GEOMETRY_DESC gd = {};
-            gd.Type = D3D12_RAYTRACING_GEOMETRY_TYPE_TRIANGLES;
-
-            // 判定材质是否不透明 (Opaque)
-            // Sponza 的旗帜等 Mask 材质不能带此 Flag，否则 AnyHit 不起作用
-            auto& material = model->materials[subMesh.materialIndex];
-            gd.Flags = D3D12_RAYTRACING_GEOMETRY_FLAG_OPAQUE;
-            // if (material.alpha == LoadedMaterial::Alpha::Opaque)
-            // {
-            //     gd.Flags = D3D12_RAYTRACING_GEOMETRY_FLAG_OPAQUE;
-            // }
-            // else
-            // {
-            //     gd.Flags = D3D12_RAYTRACING_GEOMETRY_FLAG_NONE;
-            // }
-
-            auto& triangles = gd.Triangles;
-            auto rootVBView = subMesh.vbView;
-            auto rootIBView = subMesh.ibView;
-
-            // 直接使用 subMesh 在 InitCommon 中已经计算好的 GPU 地址
-            triangles.VertexBuffer.StartAddress = rootVBView.BufferLocation;
-            triangles.VertexBuffer.StrideInBytes = rootVBView.StrideInBytes;
-            triangles.VertexCount = subMesh.numVertices;
-            triangles.VertexFormat = DXGI_FORMAT_R32G32B32_FLOAT;
-
-            triangles.IndexBuffer = rootIBView.BufferLocation;
-            triangles.IndexCount = subMesh.numIndices;
-            triangles.IndexFormat = DXGI_FORMAT_R32_UINT;
-
-            triangles.Transform3x4 = 0; // 局部空间无需变换
-
-            tempGeometryDescs.emplace_back(gd);
-        }
+        auto& triangles = geometryDesc.Triangles;
+        triangles.VertexBuffer.StartAddress = subMesh.vbView.BufferLocation;
+        triangles.VertexBuffer.StrideInBytes = subMesh.vbView.StrideInBytes;
+        triangles.VertexCount = subMesh.numVertices;
+        triangles.VertexFormat = DXGI_FORMAT_R32G32B32_FLOAT;
+        triangles.IndexBuffer = subMesh.ibView.BufferLocation;
+        triangles.IndexCount = subMesh.numIndices;
+        triangles.IndexFormat = DXGI_FORMAT_R32_UINT;
+        triangles.Transform3x4 = 0;
 
         D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS buildInputs = {};
         buildInputs.Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL;
         buildInputs.Flags = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PREFER_FAST_TRACE;
-        buildInputs.NumDescs = static_cast<UINT>(tempGeometryDescs.size());
+        buildInputs.NumDescs = 1;
         buildInputs.DescsLayout = D3D12_ELEMENTS_LAYOUT_ARRAY;
-        buildInputs.pGeometryDescs = tempGeometryDescs.data();
+        buildInputs.pGeometryDescs = &geometryDesc;
 
         D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO prebuildInfo = {};
         pDevice->GetRaytracingAccelerationStructurePrebuildInfo(&buildInputs, &prebuildInfo);
 
-        // allocate GPU Buffer
-        if (m_pBLASBuffer)
-            BufferManager::GetInstance().DestoryBuffer(m_pBLASBuffer);
-        if (m_pBLASScratchBuffer)
-            BufferManager::GetInstance().DestoryBuffer(m_pBLASScratchBuffer);
         m_pBLASBuffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc
         {
             .name = L"DXR BLAS Result Buffer",
@@ -137,29 +105,55 @@ namespace ElysiaEngine
             .isRawAccess = true,
             .isAccelerationStructure = true
         });
-        m_pBLASScratchBuffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc
-        {
-            .name = L"DXR BLAS Scratch Buffer",
-            .stride = 0,
-            .size = prebuildInfo.ScratchDataSizeInBytes,
-            .viewFlags = GPUResourceFlags::UAV,
-            .accessFlags = BufferAccessFlags::GPUOnly,
-            .isRawAccess = true,
-            .isAccelerationStructure = false
-        });
-        pCommand->AddBarrier(*m_pBLASScratchBuffer,
-                             D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
-        // Build
+        struct SharedScratch
+        {
+            BufferHandle buffer;
+            UINT64 size = 0;
+        };
+        static SharedScratch scratch;
+        if (!scratch.buffer || scratch.size < prebuildInfo.ScratchDataSizeInBytes)
+        {
+            if (scratch.buffer)
+                BufferManager::GetInstance().DestoryBuffer(scratch.buffer);
+            scratch.buffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc
+            {
+                .name = L"DXR BLAS Scratch Buffer",
+                .stride = 0,
+                .size = prebuildInfo.ScratchDataSizeInBytes,
+                .viewFlags = GPUResourceFlags::UAV,
+                .accessFlags = BufferAccessFlags::GPUOnly,
+                .isRawAccess = true,
+                .isAccelerationStructure = false
+            });
+            scratch.size = prebuildInfo.ScratchDataSizeInBytes;
+            pCommand->AddBarrier(*scratch.buffer, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, false);
+        }
+        else
+        {
+            pCommand->AddUAVBarrier(scratch.buffer, false);
+        }
+
+        auto vertexBuffer = BufferManager::GetInstance().GetGlobalVertexBuffer();
+        auto indexBuffer = BufferManager::GetInstance().GetGlobalIndexBuffer();
+        const D3D12_RESOURCE_STATES vertexState = vertexBuffer->GetUsageState();
+        const D3D12_RESOURCE_STATES indexState = indexBuffer->GetUsageState();
+        pCommand->AddBarrier(*vertexBuffer, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, false);
+        pCommand->AddBarrier(*indexBuffer, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, false);
+        pCommand->FlushBarrier();
+
         D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC buildDesc =
         {
             .DestAccelerationStructureData = m_pBLASBuffer->GetGPUAddress(),
             .Inputs = buildInputs,
-            .SourceAccelerationStructureData = 0, // 仅在更新（Update）时使用
-            .ScratchAccelerationStructureData = m_pBLASScratchBuffer->GetGPUAddress(),
+            .SourceAccelerationStructureData = 0,
+            .ScratchAccelerationStructureData = scratch.buffer->GetGPUAddress(),
         };
 
         pCommand->GetCommandList()->BuildRaytracingAccelerationStructure(&buildDesc, 0, nullptr);
+        pCommand->AddBarrier(*vertexBuffer, vertexState, false);
+        pCommand->AddBarrier(*indexBuffer, indexState, false);
         pCommand->AddUAVBarrier(m_pBLASBuffer, false);
+        pCommand->FlushBarrier();
     }
 }

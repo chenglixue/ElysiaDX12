@@ -38,6 +38,9 @@ namespace ElysiaCore
             m_UAVResourceHeapIndex = index;
         }
 
+        // Returns staging CBV/SRV/UAV handles and their bindless slots exactly once.
+        void ReleaseViews(DX12Device* pDevice);
+
         bool ReInit(DX12Device* pDevice, const BufferCreationDesc& bufferCreationDesc);
 
         uint8_t* m_mappedBuffer = nullptr;
@@ -48,7 +51,7 @@ namespace ElysiaCore
         DX12DescriptorHeapHandle m_CBVDescriptor;
         DX12DescriptorHeapHandle m_SRVDescriptor;
         DX12DescriptorHeapHandle m_UAVDescriptor;
-        UINT m_UAVResourceHeapIndex = 0;
+        UINT m_UAVResourceHeapIndex = INVALID_RESOURCE_TABLE_INDEX;
 
         // index of buffer pool
         UINT m_index;

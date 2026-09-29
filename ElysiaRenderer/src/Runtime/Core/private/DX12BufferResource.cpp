@@ -91,6 +91,36 @@ namespace ElysiaCore
         memcpy_s(m_mappedBuffer, m_resourceDesc.Width, bufferData, bufferSize);
     }
 
+    void DX12BufferResource::ReleaseViews(DX12Device* pDevice)
+    {
+        auto releaseStaging = [&](DX12DescriptorHeapHandle& view)
+        {
+            if (!view.IsValid())
+                return;
+            DX12DescriptorHeapHandle freed = view;
+            view.Reset();
+            pDevice->GetSRVStageHeap()->FreeDescriptorHeapHandle(freed);
+        };
+
+        releaseStaging(m_CBVDescriptor);
+
+        if (m_SRVDescriptor.IsValid() &&
+            m_descriptorHeapIndex != INVALID_RESOURCE_TABLE_INDEX)
+        {
+            pDevice->FreeContiguousReservedDescriptorIndices(m_descriptorHeapIndex, 1);
+            m_descriptorHeapIndex = INVALID_RESOURCE_TABLE_INDEX;
+        }
+        releaseStaging(m_SRVDescriptor);
+
+        if (m_UAVDescriptor.IsValid() &&
+            m_UAVResourceHeapIndex != INVALID_RESOURCE_TABLE_INDEX)
+        {
+            pDevice->FreeContiguousReservedDescriptorIndices(m_UAVResourceHeapIndex, 1);
+            m_UAVResourceHeapIndex = INVALID_RESOURCE_TABLE_INDEX;
+        }
+        releaseStaging(m_UAVDescriptor);
+    }
+
     bool DX12BufferResource::ReInit(DX12Device* pDevice,
                                     const BufferCreationDesc& bufferCreationDesc)
     {
@@ -112,21 +142,7 @@ namespace ElysiaCore
         bool isHasUAV = ((bufferCreationDesc.viewFlags & GPUResourceFlags::UAV) ==
                          GPUResourceFlags::UAV);
 
-        if (isHasCBV && m_CBVDescriptor.IsValid())
-        {
-            m_CBVDescriptor.Reset();
-            pDevice->GetSRVStageHeap()->FreeDescriptorHeapHandle(m_CBVDescriptor);
-        }
-        if (isHasSRV && m_SRVDescriptor.IsValid())
-        {
-            m_SRVDescriptor.Reset();
-            pDevice->GetSRVStageHeap()->FreeDescriptorHeapHandle(m_SRVDescriptor);
-        }
-        if (isHasUAV && m_UAVDescriptor.IsValid())
-        {
-            m_UAVDescriptor.Reset();
-            pDevice->GetSRVStageHeap()->FreeDescriptorHeapHandle(m_UAVDescriptor);
-        }
+        ReleaseViews(pDevice);
         m_state = GPUResourceState::InUse;
 
         auto alignSize = AlignU32((UINT)bufferCreationDesc.size,

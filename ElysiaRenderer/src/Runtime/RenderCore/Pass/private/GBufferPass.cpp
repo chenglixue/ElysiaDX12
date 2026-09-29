@@ -411,9 +411,10 @@ namespace ElysiaRenderer
             });
         }
         m_uploads[0]->buffer = m_pMeshDataBuffer;
+        const size_t meshCopyCount = std::min(m_meshDatas.size(), static_cast<size_t>(Max_RenderItem_Count));
         memcpy(m_uploads[0]->pBufferData.get(),
                m_meshDatas.data(),
-               Max_RenderItem_Count * sizeof(MeshData));
+               meshCopyCount * sizeof(MeshData));
 
         m_indirectCommands.clear();
         UINT renderItemIndex = 0;
@@ -438,9 +439,11 @@ namespace ElysiaRenderer
             renderItemIndex++;
         }
         m_uploads[1]->buffer = m_pIndirectDataBuffer;
+        const size_t commandCopyCount = std::min(m_indirectCommands.size(),
+                                                 static_cast<size_t>(Max_RenderItem_Count));
         memcpy(m_uploads[1]->pBufferData.get(),
                m_indirectCommands.data(),
-               Max_RenderItem_Count * sizeof(IndirectCommand));
+               commandCopyCount * sizeof(IndirectCommand));
     }
 
     void GBufferPass::CopyDepth()
@@ -713,13 +716,15 @@ namespace ElysiaRenderer
             m_pCommand->AddUAVBarrier(m_pVisbibleCounterBuffer, false);
             m_pCommand->AddUAVBarrier(m_pVisbibleIndexBuffer, false);
         }
-        m_pCommand->AddBarrier(*m_pVisbibleCounterBuffer, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, false);
-        m_pCommand->AddBarrier(*m_pVisbibleIndexBuffer, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
-
-        m_pCommand->AddBarrier(*m_pVisbibleCounterBuffer, D3D12_RESOURCE_STATE_COPY_SOURCE, false);
-        m_pCommand->GetCommandList()->CopyResource(m_pVisbibleCounterReadBackBuffer->GetResource().Get(),
-                                                   m_pVisbibleCounterBuffer->GetResource().Get());
-        m_pCommand->AddBarrier(*m_pVisbibleCounterBuffer, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+        m_pCommand->AddBarrier(*m_pVisbibleIndexBuffer, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, false);
+        m_pCommand->AddBarrier(*m_pVisbibleCounterBuffer, D3D12_RESOURCE_STATE_COPY_SOURCE);
+        m_pCommand->GetCommandList()->CopyBufferRegion(
+            m_pVisbibleCounterReadBackBuffer->GetResource().Get(),
+            0,
+            m_pVisbibleCounterBuffer->GetResource().Get(),
+            0,
+            sizeof(int));
+        m_pCommand->AddBarrier(*m_pVisbibleCounterBuffer, D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT);
         ReadGPUCounter();
 
         m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("GBuffer/") + passName).c_str());
@@ -858,35 +863,23 @@ namespace ElysiaRenderer
     {
         auto& passData = m_pMaterial->GetPassData(passIndex);
 
-        CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-            m_pIndirectDataBuffer->GetResource().Get(),
-            D3D12_RESOURCE_STATE_COMMON,
-            D3D12_RESOURCE_STATE_COPY_DEST
-            );
-        m_pCommand->GetCommandList()->ResourceBarrier(1, &barrier);
+        m_pCommand->AddBarrier(*m_pIndirectDataBuffer, D3D12_RESOURCE_STATE_COPY_DEST);
 
         BufferManager::GetInstance().UploadBufferData(m_pCommand, m_uploads);
 
-        barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-            m_pIndirectDataBuffer->GetResource().Get(),
-            D3D12_RESOURCE_STATE_COPY_DEST,
-            D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT
-            );
-        m_pCommand->GetCommandList()->ResourceBarrier(1, &barrier);
-
+        const UINT maxCommands = static_cast<UINT>(
+            m_pIndirectDataBuffer->GetResourceDesc().Width / sizeof(IndirectCommand));
+        const UINT commandCount = std::min(static_cast<UINT>(m_cullRenderList.size()), maxCommands);
+        m_pCommand->AddBarrier(*m_pIndirectDataBuffer, D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT, false);
+        m_pCommand->AddBarrier(*m_pVisbibleCounterBuffer, D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT);
         m_pCommand->GetCommandList()->ExecuteIndirect(m_pCommandSignature.Get(),
-                                                      m_cullRenderList.size(),
+                                                      commandCount,
                                                       m_pIndirectDataBuffer->GetResource().Get(),
                                                       0,
                                                       m_pVisbibleCounterBuffer->GetResource().Get(),
                                                       0);
 
-        barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-            m_pIndirectDataBuffer->GetResource().Get(),
-            D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT,
-            D3D12_RESOURCE_STATE_COMMON
-            );
-        m_pCommand->GetCommandList()->ResourceBarrier(1, &barrier);
+        m_pCommand->AddBarrier(*m_pIndirectDataBuffer, D3D12_RESOURCE_STATE_COMMON);
     }
 
     void GBufferPass::AABBLoader::AddAABB(const Vector3& min, const Vector3& max)
