@@ -28,6 +28,7 @@
 #include "Runtime/RenderCore/Pass/public/GBufferPass.h"
 #include "Runtime/RenderCore/Pass/public/GIPass.h"
 #include "ThirdParty/imgui/imgui_internal.h"
+#include "ThirdParty/ImGuizmo/ImGuizmo.h"
 #include "Editor/public/OutputLogPanel.h"
 #include "Programs/public/LogHistory.h"
 
@@ -38,6 +39,28 @@ namespace ElysiaEngine
     static void ToggleBool(bool& b)
     {
         b = !b;
+    }
+
+    namespace
+    {
+        // ImGuizmo's internal matrix type uses the same convention as SimpleMath
+        // (row-vector maths with the translation in the 4th row, i.e. m16[12..14]),
+        // so the matrices are passed through unchanged. Transposing them would move
+        // the translation out of m16[12..14] and ImGuizmo would read the object as
+        // being at the origin.
+        void ToGizmoMatrix(const Matrix& in, float out[16])
+        {
+            memcpy(out, &in, sizeof(float) * 16);
+        }
+
+        Matrix FromGizmoMatrix(const float in[16])
+        {
+            Matrix result;
+            memcpy(&result, in, sizeof(float) * 16);
+            return result;
+        }
+
+        constexpr size_t GizmoUndoStackLimit = 64;
     }
 
     ElysiaFrame::ElysiaFrame(std::wstring name)
@@ -445,19 +468,23 @@ namespace ElysiaEngine
 
             ImTextureID sceneTexID = (ImTextureID)dstDescriptor.GetGPUHandle().ptr;
             ImGui::Image(sceneTexID, viewportSize, ImVec2(0, 0), ImVec2(1, 1));
+            const ImVec2 imageOrigin = ImGui::GetItemRectMin();
 
             // Viewport click picking: LMB click on the image selects the entity,
-            // syncing Scene Hierarchy and Inspector
+            // syncing Scene Hierarchy and Inspector. While the transform gizmo is
+            // hovered or being dragged it owns the mouse, so picking stands down.
             if (viewportSize.x > 0 && viewportSize.y > 0 &&
-                ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+                ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left) &&
+                !ImGuizmo::IsOver() && !ImGuizmo::IsUsing())
             {
-                const ImVec2 rectMin = ImGui::GetItemRectMin();
                 const ImVec2 mousePos = ImGui::GetIO().MousePos;
-                const Vector2 viewportUV((mousePos.x - rectMin.x) / viewportSize.x,
-                                         (mousePos.y - rectMin.y) / viewportSize.y);
+                const Vector2 viewportUV((mousePos.x - imageOrigin.x) / viewportSize.x,
+                                         (mousePos.y - imageOrigin.y) / viewportSize.y);
 
                 SelectionManager::GetInstance().RequestPick(viewportUV);
             }
+
+            DrawViewportGizmo(imageOrigin, viewportSize);
         }
 
         ImGui::End();
@@ -983,6 +1010,296 @@ namespace ElysiaEngine
                 model.materialParametersDirty = true;
             if (model.materialParametersDirty && !ImGui::IsAnyItemActive())
                 ElysiaModel::MaterialOverrides::SaveIfDirty(model);
+        }
+    }
+    void ElysiaFrame::ApplyGizmoWorldMatrix(Entity* entity, const Matrix& worldMatrix)
+    {
+        // Transform::GetWorldMatrix() composes as local * parentWorld, so a
+        // manipulated world matrix has to be converted back to local space before
+        // it can be written into position / rotation / scale.
+        Matrix localMatrix = worldMatrix;
+        if (Entity* pParent = entity->GetParent())
+        {
+            localMatrix = worldMatrix * pParent->transform.GetWorldMatrix().Invert();
+        }
+
+        Vector3 scale, translation;
+        Quaternion rotation;
+        if (!localMatrix.Decompose(scale, rotation, translation))
+            return;
+
+        entity->transform.position = translation;
+        entity->transform.rotation = rotation;
+        entity->transform.scale = scale;
+
+        // Same dirty path the Inspector uses, so the render list picks it up.
+        entity->OnTransformChanged();
+    }
+
+    void ElysiaFrame::DrawGizmoToolbar(const ImVec2& imageOrigin)
+    {
+        // Overlay (absolute position) so the viewport image keeps its layout and
+        // its render targets are not resized by adding a toolbar row.
+        ImGui::SetCursorScreenPos(ImVec2(imageOrigin.x + 10.0f, imageOrigin.y + 10.0f));
+        ImGui::BeginGroup();
+
+        const auto operationButton = [this](const char* label, int operation)
+        {
+            const bool bActive = (m_gizmoOperation == operation);
+            if (bActive)
+            {
+                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.26f, 0.59f, 0.98f, 0.85f));
+            }
+            const bool bClicked = ImGui::Button(label, ImVec2(56.0f, 0.0f));
+            if (bActive)
+            {
+                ImGui::PopStyleColor();
+            }
+            if (bClicked)
+            {
+                m_gizmoOperation = operation;
+            }
+        };
+
+        operationButton("Move", ImGuizmo::TRANSLATE);
+        ImGui::SameLine();
+        operationButton("Rotate", ImGuizmo::ROTATE);
+        ImGui::SameLine();
+        operationButton("Scale", ImGuizmo::SCALE);
+
+        ImGui::SetCursorScreenPos(ImVec2(imageOrigin.x + 10.0f, imageOrigin.y + 40.0f));
+        const bool bLocal = (m_gizmoMode == ImGuizmo::LOCAL);
+        if (bLocal)
+        {
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.26f, 0.59f, 0.98f, 0.85f));
+        }
+        if (ImGui::Button(bLocal ? "Local" : "World", ImVec2(64.0f, 0.0f)))
+        {
+            m_gizmoMode = bLocal ? ImGuizmo::WORLD : ImGuizmo::LOCAL;
+        }
+        if (bLocal)
+        {
+            ImGui::PopStyleColor();
+        }
+        ImGui::SameLine();
+        ImGui::Checkbox("Snap", &m_gizmoUseSnap);
+
+        ImGui::EndGroup();
+    }
+
+    void ElysiaFrame::DrawViewportGizmo(const ImVec2& imageOrigin, const ImVec2& imageSize)
+    {
+        DrawGizmoToolbar(imageOrigin);
+
+        Entity* pSelected = SelectionManager::GetInstance().GetSelected();
+        auto* pCamera = CameraManager::GetInstance().GetMainCamera();
+        if (pSelected == nullptr || pCamera == nullptr)
+        {
+            m_bGizmoWasUsing = false;
+            return;
+        }
+
+        // Draw the gizmo into the viewport window, over the scene image.
+        ImGuizmo::SetDrawlist(ImGui::GetWindowDrawList());
+        ImGuizmo::SetRect(imageOrigin.x, imageOrigin.y, imageSize.x, imageSize.y);
+        ImGuizmo::SetOrthographic(false);
+        ImGuizmo::SetGizmoSizeClipSpace(0.12f);
+        ImGuizmo::Enable(true);
+
+        // Matrices are handed to ImGuizmo as-is (same convention as SimpleMath).
+        float view[16]{};
+        float proj[16]{};
+        float object[16]{};
+        ToGizmoMatrix(pCamera->GetViewMat(), view);
+        ToGizmoMatrix(pCamera->GetProjMat(), proj);
+
+        Matrix worldMatrix = pSelected->transform.GetWorldMatrix();
+
+        Vector3 boundsMin{};
+        Vector3 boundsMax{};
+        bool bHasBounds = false;
+        if (pSelected->pMeshRenderer != nullptr)
+        {
+            const BoundingBox localBounds = pSelected->pMeshRenderer->GetBoundingBox();
+            const Vector3 centerOS = localBounds.Center;
+            const Vector3 extentsOS = localBounds.Extents;
+            if (std::isfinite(centerOS.x) && std::isfinite(centerOS.y) &&
+                std::isfinite(centerOS.z) && std::isfinite(extentsOS.x) &&
+                std::isfinite(extentsOS.y) && std::isfinite(extentsOS.z))
+            {
+                boundsMin = Vector3(FLT_MAX, FLT_MAX, FLT_MAX);
+                boundsMax = Vector3(-FLT_MAX, -FLT_MAX, -FLT_MAX);
+                for (int corner = 0; corner < 8; ++corner)
+                {
+                    const Vector3 cornerOS(
+                        centerOS.x + ((corner & 1) != 0 ? extentsOS.x : -extentsOS.x),
+                        centerOS.y + ((corner & 2) != 0 ? extentsOS.y : -extentsOS.y),
+                        centerOS.z + ((corner & 4) != 0 ? extentsOS.z : -extentsOS.z));
+                    const Vector3 cornerWS = Vector3::Transform(cornerOS, worldMatrix);
+                    boundsMin = Vector3::Min(boundsMin, cornerWS);
+                    boundsMax = Vector3::Max(boundsMax, cornerWS);
+                }
+                bHasBounds = true;
+            }
+        }
+
+        const Matrix viewProj = pCamera->GetViewMat() * pCamera->GetProjMat();
+
+        // Preferred pivot: the bounds centre, i.e. the object's centre as a user
+        // expects. Only when that centre is outside the view (huge meshes that wrap
+        // around the camera or extend far off screen) fall back to a point that is
+        // guaranteed to be visible.
+        Vector3 pivot = worldMatrix.Translation();
+        if (bHasBounds)
+        {
+            const Vector3 boundsCenter = (boundsMin + boundsMax) * 0.5f;
+
+            bool bCenterOnScreen = false;
+            {
+                const Vector4 centerClip = Vector4::Transform(
+                    Vector4(boundsCenter.x, boundsCenter.y, boundsCenter.z, 1.0f),
+                    viewProj);
+                if (centerClip.w > 0.0f)
+                {
+                    const float ndcX = centerClip.x / centerClip.w;
+                    const float ndcY = centerClip.y / centerClip.w;
+                    bCenterOnScreen = ndcX >= -1.0f && ndcX <= 1.0f &&
+                                      ndcY >= -1.0f && ndcY <= 1.0f;
+                }
+            }
+
+            if (bCenterOnScreen)
+            {
+                pivot = boundsCenter;
+            }
+            else
+            {
+                const Vector3 cameraPos = pCamera->GetPosition();
+                const Vector3 cameraDir = pCamera->GetForwardDir();
+                const DirectX::BoundingBox worldBounds(boundsCenter,
+                                                       (boundsMax - boundsMin) * 0.5f);
+
+                if (worldBounds.Contains(cameraPos) == DirectX::CONTAINS)
+                {
+                    // Camera inside the object (interior walls): use the point where
+                    // the view ray leaves the bounds - the surface being faced.
+                    float exitDistance = FLT_MAX;
+                    for (int axis = 0; axis < 3; ++axis)
+                    {
+                        const float direction = cameraDir[axis];
+                        if (fabsf(direction) > 1.0e-4f)
+                        {
+                            const float bound = (direction > 0.0f)
+                                                    ? boundsMax[axis]
+                                                    : boundsMin[axis];
+                            exitDistance = (std::min)(exitDistance,
+                                                      (bound - cameraPos[axis]) / direction);
+                        }
+                    }
+                    pivot = cameraPos + cameraDir * (std::max)(exitDistance, 0.0f);
+                }
+                else
+                {
+                    float hitDistance = 0.0f;
+                    if (worldBounds.Intersects(cameraPos, cameraDir, hitDistance))
+                    {
+                        // Object under the view centre: keep the handle visible.
+                        pivot = cameraPos + cameraDir * hitDistance;
+                    }
+                    else
+                    {
+                        // Otherwise the point of the bounds closest to the camera.
+                        pivot = Vector3::Min(Vector3::Max(cameraPos, boundsMin), boundsMax);
+                    }
+                }
+            }
+        }
+
+        Vector3 worldScale{}, worldTranslation{};
+        Quaternion worldRotation{};
+        if (!worldMatrix.Decompose(worldScale, worldRotation, worldTranslation))
+        {
+            worldScale = Vector3::One;
+            worldRotation = Quaternion::Identity;
+        }
+
+        // Final safety net: if the chosen pivot ended up behind the camera, use the
+        // transform origin so the handle stays reachable.
+        Vector4 pivotClip = Vector4::Transform(Vector4(pivot.x, pivot.y, pivot.z, 1.0f), viewProj);
+        if (pivotClip.w <= 0.0f)
+        {
+            pivot = worldMatrix.Translation();
+            pivotClip = Vector4::Transform(Vector4(pivot.x, pivot.y, pivot.z, 1.0f), viewProj);
+        }
+
+        // Gizmo frame: same orientation/scale as the object, positioned at the pivot.
+        const Matrix gizmoFrame = Matrix::CreateScale(worldScale) *
+                                  Matrix::CreateFromQuaternion(worldRotation) *
+                                  Matrix::CreateTranslation(pivot);
+        ToGizmoMatrix(gizmoFrame, object);
+
+        const float snap[3] = {m_gizmoSnapTranslate, m_gizmoSnapRotateDegrees, m_gizmoSnapScale};
+        ImGuizmo::Manipulate(view,
+                             proj,
+                             static_cast<ImGuizmo::OPERATION>(m_gizmoOperation),
+                             static_cast<ImGuizmo::MODE>(m_gizmoMode),
+                             object,
+                             nullptr,
+                             m_gizmoUseSnap ? snap : nullptr);
+
+        const bool bUsing = ImGuizmo::IsUsing();
+        if (bUsing)
+        {
+            if (!m_bGizmoWasUsing && m_pGizmoIdleEntity == pSelected)
+            {
+                // Drag start with a valid pre-drag snapshot: remember it for undo.
+                m_gizmoUndoStack.push_back({pSelected, m_gizmoIdleTransform});
+                if (m_gizmoUndoStack.size() > GizmoUndoStackLimit)
+                {
+                    m_gizmoUndoStack.erase(m_gizmoUndoStack.begin());
+                }
+            }
+
+            // The gizmo may sit on an off-centre pivot, so apply its delta
+            // (frame^-1 * frame') to the object instead of overwriting the matrix.
+            const Matrix manipulatedFrame = FromGizmoMatrix(object);
+            const Matrix newWorldMatrix = worldMatrix * gizmoFrame.Invert() * manipulatedFrame;
+            ApplyGizmoWorldMatrix(pSelected, newWorldMatrix);
+        }
+        else
+        {
+            // Keep the pre-drag state current so the next drag can snapshot it.
+            m_gizmoIdleTransform = pSelected->transform;
+            m_pGizmoIdleEntity = pSelected;
+        }
+        m_bGizmoWasUsing = bUsing;
+
+        // Shortcuts, only while the viewport is focused and the camera is not
+        // being flown (RMB) or text is being typed.
+        const bool bViewportActive = ImGui::IsWindowHovered() && !ImGui::GetIO().WantTextInput &&
+                                     !ImGui::IsMouseDown(ImGuiMouseButton_Right);
+        if (!bViewportActive)
+            return;
+
+        if (ImGui::IsKeyPressed(ImGuiKey_W))
+            m_gizmoOperation = ImGuizmo::TRANSLATE;
+        if (ImGui::IsKeyPressed(ImGuiKey_E))
+            m_gizmoOperation = ImGuizmo::ROTATE;
+        if (ImGui::IsKeyPressed(ImGuiKey_R))
+            m_gizmoOperation = ImGuizmo::SCALE;
+        if (ImGui::IsKeyPressed(ImGuiKey_X))
+        {
+            m_gizmoMode = (m_gizmoMode == ImGuizmo::LOCAL) ? ImGuizmo::WORLD : ImGuizmo::LOCAL;
+        }
+        if (ImGui::GetIO().KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_Z) && !m_gizmoUndoStack.empty())
+        {
+            GizmoUndoEntry& entry = m_gizmoUndoStack.back();
+            if (entry.pEntity != nullptr)
+            {
+                entry.pEntity->transform = entry.transform;
+                entry.pEntity->OnTransformChanged();
+            }
+            m_gizmoUndoStack.pop_back();
         }
     }
 }

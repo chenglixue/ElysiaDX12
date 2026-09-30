@@ -6,6 +6,8 @@
 #include "Runtime/Core/public/DX12RenderPassDescriptorHeap.h"
 #include "Runtime/Core/public/SwapChain.h"
 
+#include "ThirdParty/ImGuizmo/ImGuizmo.h"
+
 namespace ElysiaEditor
 {
     static HWND g_hWnd;
@@ -75,6 +77,13 @@ namespace ElysiaEditor
         ImGui_ImplDX12_NewFrame();
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
+
+        // ImGuizmo needs its per-frame bookkeeping right after NewFrame, and
+        // outside of any window (BeginFrame submits its own fullscreen window).
+        // Keeping that internal window undocked stops it from being captured by
+        // the editor dockspace.
+        ImGui::SetNextWindowDockID(0, ImGuiCond_Always);
+        ImGuizmo::BeginFrame();
     }
 
     void ImGUI_EndFrame(ElysiaCore::DX12Device* pDevice)
