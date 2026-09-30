@@ -44,6 +44,11 @@ namespace ElysiaRenderer
         void OnDestroyWindowSizeDependentResources();
         void OnUpdateDisplayDependentResources(SwapChain* pSwapChain);
 
+        // Shadow map resolution changed (shadow quality): let the passes that own
+        // shadow-sized resources rebuild just those, instead of recreating every
+        // window-sized resource.
+        void RefreshShadowDependentResources();
+
         void OnCreate(DX12Device* pDevice,
                       SwapChain* pSwapChain,
                       ElysiaCore::DX12GraphicsContext* context);
@@ -81,6 +86,11 @@ namespace ElysiaRenderer
         RenderTexture* m_pCameraColorRT = nullptr;
         RenderTexture* m_pCameraDepthRT = nullptr;
         RenderTexture* m_pDisplayRT = nullptr;
+
+        // Warms every runtime-switchable shader keyword combination inside the
+        // PSO precache batch, so toggling those settings later is a cache lookup
+        // instead of a synchronous PSO creation (which causes a hitch).
+        void PrecacheKeywordCombinations();
 
         template <typename T, typename... Args>
         Renderer& AddPass(Args&&... args)

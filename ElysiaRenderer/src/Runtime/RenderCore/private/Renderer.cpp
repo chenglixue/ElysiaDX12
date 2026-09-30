@@ -33,11 +33,13 @@
 #include "Runtime/RenderCore/Pass/public/DebugPass.h"
 #include "Runtime/RenderCore/Pass/public/GIPass.h"
 #include "Runtime/RenderCore/Pass/public/SharpenPass.h"
+#include "Runtime/RenderCore/Pass/public/SelectionOutlinePass.h"
 #include "Runtime/RenderCore/Pass/public/SkyboxPass.h"
 #include "Runtime/RenderCore/Pass/public/TAAPass.h"
 #include "Runtime/Engine/ECS/public/Entity.h"
 #include "Runtime/RenderCore/Pass/public/ShadowProjectionPass.h"
 #include "Runtime/RenderCore/Pass/public/SSSRPass.h"
+#include "Runtime/RenderCore/public/PSOManager.h"
 
 extern "C"
 {
@@ -84,6 +86,7 @@ namespace ElysiaRenderer
         AddPass<BloomPass>();
         AddPass<TonemapPass>();
         AddPass<SharpenPass>();
+        AddPass<SelectionOutlinePass>();
         AddPass<DebugPass>();
         AddPass<UIPass>();
         AddPass<FinalBlitPass>();
@@ -175,10 +178,13 @@ namespace ElysiaRenderer
             .pDisplayRT = m_pDisplayRT
         };
 
+        PSOManager::GetInstance().BeginPrecacheBatch();
         for (auto& pass : m_passes)
         {
             pass->Setup(passData);
         }
+        PrecacheKeywordCombinations();
+        PSOManager::GetInstance().WaitPrecacheBatch();
     }
 
     void Renderer::OnDestroyWindowSizeDependentResources()
@@ -191,6 +197,14 @@ namespace ElysiaRenderer
         for (auto& pass : m_passes)
         {
             pass->UpdatePipeline();
+        }
+    }
+
+    void Renderer::RefreshShadowDependentResources()
+    {
+        for (auto& pass : m_passes)
+        {
+            pass->OnShadowResolutionChanged();
         }
     }
 
@@ -231,6 +245,60 @@ namespace ElysiaRenderer
     void Renderer::OnDestory()
     {
         m_pGPUTimer->OnDestroy();
+    }
+
+    void Renderer::PrecacheKeywordCombinations()
+    {
+        // Shadow quality / type select shader keywords (SHADOW_QUALITY_* and
+        // HARD_SHADOW / SOFT_SHADOW) consumed by OpaquePass, ShadowPass and
+        // ShadowProjectionPass. Setup() only resolves the *currently selected*
+        // combination, so switching these settings at runtime used to create the
+        // missing PSOs synchronously inside a frame and hitch. Warm every
+        // combination here instead - still inside the precache batch, so the
+        // work runs on the precache threads and, from the second run on, is
+        // satisfied from the PSO disk cache.
+        auto& shadowParameter = UserData::GetInstance().shadowParameter;
+        const ShadowQuality savedQuality = shadowParameter.shadowQuality;
+        const ShadowType savedType = shadowParameter.shadowType;
+
+        constexpr ShadowQuality qualities[] =
+        {
+            ShadowQuality::Low,
+            ShadowQuality::Middle,
+            ShadowQuality::High,
+            ShadowQuality::VeryHigh
+        };
+        constexpr ShadowType types[] = {ShadowType::Hard, ShadowType::Soft};
+
+        for (const ShadowQuality quality : qualities)
+        {
+            for (const ShadowType type : types)
+            {
+                if (quality == savedQuality && type == savedType)
+                {
+                    continue; // already warmed by Setup()
+                }
+
+                shadowParameter.shadowQuality = quality;
+                shadowParameter.shadowType = type;
+
+                // Passes re-resolve their keyword set from UserData and create
+                // (or look up) the matching PSOs.
+                for (auto& pass : m_passes)
+                {
+                    pass->UpdatePipeline();
+                }
+            }
+        }
+
+        // Restore the user's selection and rebuild the active pipelines.
+        shadowParameter.shadowQuality = savedQuality;
+        shadowParameter.shadowType = savedType;
+
+        for (auto& pass : m_passes)
+        {
+            pass->UpdatePipeline();
+        }
     }
 
     void Renderer::OnUpdateConstantBuffer(std::vector<ElysiaRenderer::RenderItem>& renderList)

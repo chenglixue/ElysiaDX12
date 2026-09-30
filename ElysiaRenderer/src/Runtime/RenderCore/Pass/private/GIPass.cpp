@@ -7,6 +7,7 @@
 #include "Runtime/Core/public/DX12GraphicsContext.h"
 #include "Runtime/Core/public/DX12Shader.h"
 #include "Runtime/Core/public/DX12Device.h"
+#include "Runtime/Core/public/ShaderBytecodeCache.h"
 #include "Runtime/Core/public/DX12TextureBuffer.h"
 #include "Runtime/Core/public/SwapChain.h"
 #include "Runtime/Engine/ECS/public/Entity.h"
@@ -16,6 +17,7 @@
 #include "Runtime/RenderCore/public/RenderTexture.h"
 #include "Runtime/RenderCore/public/Material.h"
 #include "Runtime/RenderCore/public/MeshRenderer.h"
+#include "Programs/public/Log.h"
 #include "Runtime/RenderCore/public/PSOManager.h"
 #include "Runtime/RenderCore/public/RenderPassResourceManager.h"
 #include "Runtime/RenderCore/public/RenderTargetManager.h"
@@ -302,6 +304,10 @@ namespace ElysiaRenderer
                                                                       GetResourceHeapIndex(),
                     .IndexBufferIndex = BufferManager::GetInstance().GetGlobalIndexBuffer()->
                                                                      GetResourceHeapIndex(),
+                    .BaseColor = Vector4(material.albedoFactor.x,
+                                         material.albedoFactor.y,
+                                         material.albedoFactor.z,
+                                         material.opacity),
                 });
             }
             if (needFlushBarrier)
@@ -343,11 +349,16 @@ namespace ElysiaRenderer
                        instanceBytes);
             }
             GenerateTLAS(allEntities);
-            if (!m_pRTPSO || !m_pGlobalRootSig)
+            if (!m_pGlobalRootSig)
+                CreateDXRRootSignature(m_pDevice->GetDevice());
+            if (!m_pRTPSO)
             {
-                CreateRaytracingPipeline(m_pGlobalRootSig.Get(), allEntities);
-                m_stbHelper.Build(m_pDevice->GetDevice(), m_pRTPSO.Get());
+                ElysiaHelper::Log::Warn(
+                    "PSO precache miss: ray tracing state object 'DDGI Ray Tracing' compiled during the frame.");
+                CreateRaytracingStateObject();
             }
+            if (m_pRTPSO)
+                BuildRaytracingShaderTable(allEntities.size());
 
             const Entity* pEntity = SceneManager::GetInstance().GetEntities()[0].get();
             auto sceneAABB = pEntity->GetWorldAABB();
@@ -567,12 +578,16 @@ namespace ElysiaRenderer
             m_pDevice->GetDevice()->CreateCommandSignature(&sigDesc, nullptr, IID_PPV_ARGS(&m_pCommandSignature));
         }
 
-        if (!m_pRTPSO || !m_pGlobalRootSig)
+        if (!m_pGlobalRootSig)
         {
             assert(m_DXRBlob && m_pDevice->GetDevice());
-            {
-                CreateDXRRootSignature(m_pDevice->GetDevice());
-            }
+            CreateDXRRootSignature(m_pDevice->GetDevice());
+        }
+        if (!m_pRTPSO)
+        {
+            PSOManager::GetInstance().EnqueuePrecacheWork(
+                [this]() { CreateRaytracingStateObject(); },
+                "DDGI Ray Tracing");
         }
 
     }
@@ -1448,6 +1463,27 @@ namespace ElysiaRenderer
         sourceBuffer.Size = pSource->GetBufferSize();
         sourceBuffer.Encoding = DXC_CP_UTF8;
 
+        std::vector<std::wstring> argumentStrings;
+        argumentStrings.reserve(arguments.size());
+        for (LPCWSTR argument : arguments)
+            argumentStrings.emplace_back(argument != nullptr ? argument : L"");
+        ElysiaCore::ShaderBytecodeLookup lookup;
+        lookup.source = sourceBuffer.Ptr;
+        lookup.sourceSize = sourceBuffer.Size;
+        lookup.shaderName = fileName;
+        lookup.arguments = &argumentStrings;
+        std::vector<uint8_t> cachedObject;
+        std::vector<uint8_t> cachedReflection;
+        if (ElysiaCore::ShaderBytecodeCache::Get().TryGet(lookup, cachedObject, cachedReflection))
+        {
+            ComPtr<IDxcBlobEncoding> cachedBlob;
+            ThrowIfFailed(pUtils->CreateBlob(cachedObject.data(),
+                                             static_cast<UINT32>(cachedObject.size()),
+                                             DXC_CP_ACP,
+                                             &cachedBlob));
+            return cachedBlob;
+        }
+
         // 3. 执行编译
         ComPtr<IDxcResult> pResults;
         auto hr = (pCompiler->Compile(&sourceBuffer,
@@ -1492,6 +1528,17 @@ namespace ElysiaRenderer
         ComPtr<IDxcBlob> pShader = nullptr;
         ComPtr<IDxcBlobUtf16> pShaderName = nullptr;
         pResults->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&pShader), nullptr);
+        if (pShader != nullptr)
+        {
+            ComPtr<IDxcBlob> pReflectionData;
+            pResults->GetOutput(DXC_OUT_REFLECTION, IID_PPV_ARGS(&pReflectionData), nullptr);
+            ElysiaCore::ShaderBytecodeCache::Get().Put(
+                lookup,
+                pShader->GetBufferPointer(),
+                pShader->GetBufferSize(),
+                pReflectionData != nullptr ? pReflectionData->GetBufferPointer() : nullptr,
+                pReflectionData != nullptr ? pReflectionData->GetBufferSize() : 0);
+        }
         if (pShader != nullptr)
         {
             FILE* fp = NULL;
@@ -1566,9 +1613,11 @@ namespace ElysiaRenderer
         assert(pShader);
         return pShader;
     }
-    void GIPass::CreateRaytracingPipeline(ID3D12RootSignature* pRootSignature,
-                                          const std::vector<std::unique_ptr<Entity>>& entities)
+    void GIPass::CreateRaytracingStateObject()
     {
+        if (m_pRTPSO)
+            return;
+
         CD3DX12_STATE_OBJECT_DESC pipelineDesc(D3D12_STATE_OBJECT_TYPE_RAYTRACING_PIPELINE);
 
         D3D12_SHADER_BYTECODE rayGenBytecode =
@@ -1606,25 +1655,28 @@ namespace ElysiaRenderer
 
         auto globalRootSig = pipelineDesc.CreateSubobject<
             CD3DX12_GLOBAL_ROOT_SIGNATURE_SUBOBJECT>();
-        globalRootSig->SetRootSignature(pRootSignature);
+        globalRootSig->SetRootSignature(m_pGlobalRootSig.Get());
 
-        auto hr = m_pDevice5->CreateStateObject(pipelineDesc, IID_PPV_ARGS(&m_pRTPSO));
-        if (SUCCEEDED(hr))
-        {
-            // 构建成功后，提取 Shader ID 用于SBTHelper
-            ComPtr<ID3D12StateObjectProperties> pRTProps;
-            m_pRTPSO->QueryInterface(IID_PPV_ARGS(&pRTProps));
+        ElysiaHelper::ThrowIfFailed(
+            m_pDevice5->CreateStateObject(pipelineDesc, IID_PPV_ARGS(&m_pRTPSO)));
+    }
 
-            m_stbHelper.AddRayGen(pRTProps->GetShaderIdentifier(L"GenerateRayMain"));
+    void GIPass::BuildRaytracingShaderTable(size_t entityCount)
+    {
+        if (m_raytracingSbtReady || !m_pRTPSO)
+            return;
 
-            m_stbHelper.AddMiss(pRTProps->GetShaderIdentifier(L"RayMiss"));
-            m_stbHelper.AddMiss(pRTProps->GetShaderIdentifier(L"ShadowMiss"));
+        ComPtr<ID3D12StateObjectProperties> raytracingProperties;
+        ElysiaHelper::ThrowIfFailed(m_pRTPSO.As(&raytracingProperties));
 
-            for (size_t hitGroupIndex = 0; hitGroupIndex < entities.size(); ++hitGroupIndex)
-            {
-                m_stbHelper.AddHitGroup(pRTProps->GetShaderIdentifier(L"OpaqueHitGroup"));
-            }
-        }
+        m_stbHelper.AddRayGen(raytracingProperties->GetShaderIdentifier(L"GenerateRayMain"));
+        m_stbHelper.AddMiss(raytracingProperties->GetShaderIdentifier(L"RayMiss"));
+        m_stbHelper.AddMiss(raytracingProperties->GetShaderIdentifier(L"ShadowMiss"));
+        for (size_t hitGroupIndex = 0; hitGroupIndex < entityCount; ++hitGroupIndex)
+            m_stbHelper.AddHitGroup(raytracingProperties->GetShaderIdentifier(L"OpaqueHitGroup"));
+
+        m_stbHelper.Build(m_pDevice->GetDevice(), m_pRTPSO.Get());
+        m_raytracingSbtReady = true;
     }
     void GIPass::CreateDXRRootSignature(ID3D12Device* pDevice)
     {

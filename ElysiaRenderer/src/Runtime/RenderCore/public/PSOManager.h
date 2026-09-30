@@ -1,60 +1,10 @@
 #pragma once
 #include "Programs/public/Helper.h"
 #include "Programs/public/IManager.h"
-#include "Programs/public/Hash.h"
 #include "Runtime/Core/public/PipelineStateUtility.h"
 #include "Runtime/Core/public/DX12PipelineState.h"
 
-namespace std
-{
-    template <>
-    struct hash<D3D12_GRAPHICS_PIPELINE_STATE_DESC>
-    {
-        using argument_type = D3D12_GRAPHICS_PIPELINE_STATE_DESC;
-        using result_type = size_t;
-
-        size_t operator()(argument_type const& v) const
-        {
-            return xxh::GetHash<argument_type>(v);
-        }
-    };
-
-    template <>
-    struct equal_to<D3D12_GRAPHICS_PIPELINE_STATE_DESC>
-    {
-        using argument_type = D3D12_GRAPHICS_PIPELINE_STATE_DESC;
-        using result_type = size_t;
-
-        bool operator()(argument_type const& a, argument_type const& b) const
-        {
-            return memcmp(&a, &b, sizeof(argument_type)) == 0;
-        }
-    };
-
-    template <>
-    struct hash<D3D12_COMPUTE_PIPELINE_STATE_DESC>
-    {
-        using argument_type = D3D12_COMPUTE_PIPELINE_STATE_DESC;
-        using result_type = size_t;
-
-        size_t operator()(argument_type const& v) const
-        {
-            return xxh::GetHash<argument_type>(v);
-        }
-    };
-
-    template <>
-    struct equal_to<D3D12_COMPUTE_PIPELINE_STATE_DESC>
-    {
-        using argument_type = D3D12_COMPUTE_PIPELINE_STATE_DESC;
-        using result_type = size_t;
-
-        bool operator()(argument_type const& a, argument_type const& b) const
-        {
-            return memcmp(&a, &b, sizeof(argument_type)) == 0;
-        }
-    };
-}
+#include <functional>
 
 namespace ElysiaCore
 {
@@ -91,6 +41,12 @@ namespace ElysiaRenderer
         virtual void Init(DX12Device* pDevice) override;
         virtual void Destory() override;
 
+        // Bracket pass setup. Pipeline creation requested inside the batch
+        // runs on the precache threads; Wait blocks until that batch is done.
+        void BeginPrecacheBatch();
+        void WaitPrecacheBatch();
+        void EnqueuePrecacheWork(std::function<void()> work, const char* name);
+
         PipelineStateObject* GetGraphicsPipelineState(DX12Device* pDevice,
                                                       Material* pMaterial,
                                                       UINT passIndex,
@@ -115,12 +71,5 @@ namespace ElysiaRenderer
         DX12Device* m_pDevice = nullptr;
         static std::unique_ptr<PSOManager> m_instance;
         static std::once_flag m_initInstanceFlag;
-
-        std::unordered_map<D3D12_GRAPHICS_PIPELINE_STATE_DESC, std::unique_ptr<PipelineStateObject>>
-        m_graphicsPipelineStates{};
-        std::unordered_map<D3D12_COMPUTE_PIPELINE_STATE_DESC, std::unique_ptr<PipelineStateObject>>
-        m_computePipelineStates{};
-
-
     };
 }

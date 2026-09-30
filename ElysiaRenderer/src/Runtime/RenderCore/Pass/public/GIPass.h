@@ -179,6 +179,8 @@ namespace ElysiaRenderer
             UINT IndexOffset;
             UINT VertexBufferIndex;
             UINT IndexBufferIndex;
+
+            Vector4 BaseColor;
         };
         struct alignas(16) CompactedRay
         {
@@ -207,6 +209,7 @@ namespace ElysiaRenderer
         ComPtr<IDxcBlob> m_DXRBlob;
         ComPtr<ID3D12RootSignature> m_pGlobalRootSig;
         ComPtr<ID3D12StateObject> m_pRTPSO;
+        bool m_raytracingSbtReady = false;
         mutable std::vector<std::wstring> m_tempStrings;
         BufferHandle m_pTLASBuffer = nullptr;
         BufferHandle m_pTLASScratchBuffer = nullptr;
@@ -267,8 +270,8 @@ namespace ElysiaRenderer
         void ProbeBlendDepth();
 
         ComPtr<IDxcBlob> CompileRaytracingLibrary(const std::wstring& fileName);
-        void CreateRaytracingPipeline(ID3D12RootSignature* pRootSignature,
-                                      const std::vector<std::unique_ptr<Entity>>& entities);
+        void CreateRaytracingStateObject();
+        void BuildRaytracingShaderTable(size_t entityCount);
         void CreateDXRRootSignature(ID3D12Device* pDevice);
         void GenerateTLAS(const std::vector<std::unique_ptr<Entity>>& entityies);
         std::vector<D3D12_SAMPLER_DESC> GenerateSampler();

@@ -18,6 +18,9 @@ namespace ElysiaRenderer
         void Apply();
         void SaveDiff() const;
 
+        bool TryGetBool(const char* section, const char* key, bool& out) const;
+        bool TryGetInt(const char* section, const char* key, int& out) const;
+
     private:
         ConfigCache() = default;
 

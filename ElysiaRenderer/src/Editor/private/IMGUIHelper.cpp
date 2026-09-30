@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "../public/IMGUIHelper.h"
 
+#include "Programs/public/Helper.h"
 #include "Runtime/Core/public/DX12Device.h"
 #include "Runtime/Core/public/DX12RenderPassDescriptorHeap.h"
 #include "Runtime/Core/public/SwapChain.h"
@@ -8,6 +9,7 @@
 namespace ElysiaEditor
 {
     static HWND g_hWnd;
+    static std::string g_imguiIniPath;
 
     bool ImGUI_Init(HWND windowHandle,
                     ElysiaCore::DX12Device* pDevice,
@@ -17,6 +19,16 @@ namespace ElysiaEditor
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
         ImGuiIO& io = ImGui::GetIO();
+
+        WCHAR assetsPath[512];
+        ElysiaHelper::GetAssetsPath(assetsPath, _countof(assetsPath));
+        const std::wstring iniDirectory = std::wstring(assetsPath) + L"Saved\\Config\\Windows\\";
+        std::error_code dirError;
+        std::filesystem::create_directories(iniDirectory, dirError);
+        g_imguiIniPath = ElysiaHelper::WstringToString(iniDirectory + L"imgui.ini");
+        if (!g_imguiIniPath.empty() && g_imguiIniPath.back() == '\0')
+            g_imguiIniPath.pop_back();
+        io.IniFilename = g_imguiIniPath.c_str();
         ImGui_ImplWin32_Init(windowHandle);
 
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // 启用键盘控制

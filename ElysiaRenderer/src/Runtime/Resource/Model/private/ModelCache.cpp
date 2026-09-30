@@ -12,7 +12,7 @@ namespace ElysiaModel
     namespace ModelCache
     {
         static constexpr UINT32 kMagic = 0x4C444D45; // 'EMDL' little-endian
-        static constexpr UINT32 kVersion = 1;
+        static constexpr UINT32 kVersion = 2;
 
         static UINT32 PackFlags(const ModelImportSettings& settings)
         {

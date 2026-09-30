@@ -29,6 +29,7 @@ namespace ElysiaRenderer
 		
 		virtual void Init(DX12Device* pDevice) override;
 		virtual void Destory() override;
+		void FlushMaterialEdits();
 		
 		std::shared_ptr<ElysiaModel::LoadedModel> LoadStaticModel(const std::wstring& filePath, float scale);
 		

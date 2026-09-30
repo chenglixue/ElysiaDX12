@@ -230,7 +230,7 @@ void RayClosestHit(inout RayData rayData,
         albedoTex.GetDimensions(0, width, height, numLevels);
 
         float4 albedoOpacity = albedoTex.SampleLevel(g_WarpLinearSampler, v.uv, numLevels / 2.f);
-        rayData.Albedo = albedoOpacity.xyz * albedoOpacity.w;
+        rayData.Albedo = albedoOpacity.xyz * albedoOpacity.w * instanceData.BaseColor.xyz;
     }
 
     if (instanceData.NormalTexIndex > 0)

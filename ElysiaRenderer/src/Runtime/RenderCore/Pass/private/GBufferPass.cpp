@@ -366,34 +366,43 @@ namespace ElysiaRenderer
         m_meshDatas.clear();
         for (UINT64 i = 0; i < renderItemCount; i++)
         {
-            const auto& materialData = renderItems[i].loadedMaterial;
+            const auto& materialData = renderItems[i].GetMaterial();
             const auto& textureIndices = renderItems[i].textureIndices;
+            const int shadingModel = materialData.shadingModelID >= 0
+                                         ? materialData.shadingModelID
+                                         : static_cast<int>(ShadingModel::DefaultLit);
             auto meshData = MeshData
             {
                 .world_M = renderItems[i].worldMatrix,
 
                 .opacity = materialData.opacity,
-                .cutoff = UserData::GetInstance().Cutoff,
+                .cutoff = materialData.alphaCutoff,
                 .baseColorTexIndex = textureIndices.Albedo,
                 .normalTexIndex = textureIndices.Normal,
 
                 .metallicTexIndex = textureIndices.Metallic,
                 .roughnessTexIndex = textureIndices.Roughness,
                 .specularTexIndex = textureIndices.Specular,
-                .metallicIntensity = UserData::GetInstance().MetallicIntensity,
+                .metallicIntensity = materialData.metallicFactor,
 
-                .baseColorTint = UserData::GetInstance().BaseColorTint,
-                .emissionColorTint = UserData::GetInstance().EmissionTint,
+                .baseColorTint = Vector4(materialData.albedoFactor.x,
+                                         materialData.albedoFactor.y,
+                                         materialData.albedoFactor.z,
+                                         1.f),
+                .emissionColorTint = Vector4(materialData.emissiveFactor.x,
+                                             materialData.emissiveFactor.y,
+                                             materialData.emissiveFactor.z,
+                                             1.f),
 
-                .roughnessIntensity = UserData::GetInstance().RoughnessIntensity,
-                .normalIntensity = UserData::GetInstance().NormalIntensity,
+                .roughnessIntensity = materialData.roughnessFactor,
+                .normalIntensity = materialData.normalFactor,
                 .emissionColorIndex = textureIndices.Emissive,
-                .specular = UserData::GetInstance().Specular,
+                .specular = materialData.specularFactor,
 
-                .shadingModelID = (int)UserData::GetInstance().shadingModelID,
-                .subsurfaceColor = UserData::GetInstance().subsurfaceScatterParameter.SubsurfaceColor,
+                .shadingModelID = shadingModel,
+                .subsurfaceColor = materialData.subsurfaceColor,
 
-                .backLit = UserData::GetInstance().hairParameter.backLit
+                .backLit = materialData.backLit
             };
             m_meshDatas.emplace_back(meshData);
         }
@@ -834,9 +843,6 @@ namespace ElysiaRenderer
         m_pMaterial->SetFloat(ShaderIDs::g_AmbientIntensity,
                               UserData::GetInstance().AmbientCubemapIntensity,
                               passID);
-        m_pMaterial->SetUINT(ShaderIDs::g_VisbibleIndexBufferIndex,
-                             m_pVisbibleIndexBuffer->GetResourceHeapIndex(),
-                             passID);
         m_pMaterial->SetFloat(ShaderIDs::g_CurveScale,
                               UserData::GetInstance().subsurfaceScatterParameter.CurveScale,
                               passID);

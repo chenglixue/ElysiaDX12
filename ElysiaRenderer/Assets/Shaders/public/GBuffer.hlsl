@@ -53,7 +53,6 @@ cbuffer PassConstant : register(b0, perPassSpace)
     float3 g_AmbientTint;
     float g_AmbientIntensity;
 
-    UINT g_VisbibleIndexBufferIndex;
     float g_CurveScale;
     float g_MinCurve;
 }
@@ -117,14 +116,12 @@ struct PSOutput
     float4 target6 : SV_TARGET6;
 };
 
-PSInput VS(VSInput i, uint InstanceID : SV_InstanceID)
+PSInput VS(VSInput i)
 {
     PSInput o = (PSInput)0;
 
     StructuredBuffer<MeshData> meshDataBuffer = ResourceDescriptorHeap[meshDataBufferIndex];
-    StructuredBuffer<int> visibleIndexBuffer = ResourceDescriptorHeap[g_VisbibleIndexBufferIndex];
-    int instanceID = visibleIndexBuffer[InstanceID];
-    Matrix worldMatrix = meshDataBuffer[instanceID].world_M;
+    Matrix worldMatrix = meshDataBuffer[meshDataIndex].world_M;
     o.positionWS = mul(float4(i.positionOS, 1.f), worldMatrix);
     o.positionVS = mul(o.positionWS, viewMatrix);
     o.positionCS = mul(o.positionVS, jitterProjMatrix);
@@ -215,13 +212,12 @@ FEncodeGBufferData GetEncodeGBufferData(FInputParams inputParams, float3 toLight
                                           WarpLinearSampler,
                                           g_MipBias).r;
     metallic = saturate(metallic * currMeshData.metallicIntensity);
-    metallic = saturate(currMeshData.metallicIntensity);
 
     float roughness = SampleTexture2D_Bias(currMeshData.roughnessTexIndex,
                                            inputParams.objectUV,
                                            WarpLinearSampler,
                                            g_MipBias).g;
-    roughness = saturate(max(0.02f, currMeshData.roughnessIntensity));
+    roughness = saturate(max(0.02f, roughness * currMeshData.roughnessIntensity));
 
     o.BaseColor = baseColor.rgb;
     o.ShadingModelID = FLT_MAX;

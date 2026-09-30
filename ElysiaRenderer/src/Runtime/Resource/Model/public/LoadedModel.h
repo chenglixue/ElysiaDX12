@@ -121,14 +121,19 @@ namespace ElysiaModel
         };
 
         std::string name;
-        Alpha alpha;
-        Vector3 albedoFactor;
-        float opacity;
-        float normalFactor;
-        float metallicFactor;
-        float roughnessFactor;
-        float specularFactor;
-        Vector3 emissiveFactor;
+        Alpha alpha = Alpha::Opaque;
+        Vector3 albedoFactor = Vector3::One;
+        float opacity = 1.f;
+        float normalFactor = 1.f;
+        float metallicFactor = 1.f;
+        float roughnessFactor = 1.f;
+        float specularFactor = 0.5f;
+        float alphaCutoff = 0.5f;
+        // ShadingModel::DefaultLit. Values below 0 are drawn as DefaultLit.
+        int shadingModelID = 1;
+        Vector3 emissiveFactor = Vector3::Zero;
+        Vector3 subsurfaceColor = Vector3::One;
+        float backLit = 1.f;
         Vector2 uvScale = Vector2(1.0f, 1.0f);
         Vector2 uvOffset = Vector2(0.0f, 0.0f);
 
@@ -153,6 +158,8 @@ namespace ElysiaModel
             SerializeItem(serializer, metallicFactor);
             SerializeItem(serializer, roughnessFactor);
             SerializeItem(serializer, specularFactor);
+            SerializeItem(serializer, alphaCutoff);
+            SerializeItem(serializer, shadingModelID);
             SerializeItem(serializer, emissiveFactor);
             SerializeItem(serializer, uvScale);
             SerializeItem(serializer, uvOffset);
@@ -263,6 +270,8 @@ namespace ElysiaModel
         eastl::vector<Mesh> meshes;
         eastl::vector<LoadedMaterial> materials;
         GrowableList<MaterialTexture*> materialTextures;
+        std::wstring sourcePath;
+        bool materialParametersDirty = false;
 
         template <typename TSerializer>
         void SerializeCPU(TSerializer& serializer)

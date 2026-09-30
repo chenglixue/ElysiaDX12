@@ -289,6 +289,22 @@ namespace ElysiaRenderer
         return cache;
     }
 
+    bool ConfigCache::TryGetBool(const char* section, const char* key, bool& out) const
+    {
+        std::string text;
+        if (!TryGet(section, key, text))
+            return false;
+        return ParseBool(text, out);
+    }
+
+    bool ConfigCache::TryGetInt(const char* section, const char* key, int& out) const
+    {
+        std::string text;
+        if (!TryGet(section, key, text))
+            return false;
+        return ParseInt(text, out);
+    }
+
     bool ConfigCache::TryGet(const char* section, const char* key, std::string& out) const
     {
         const auto it = m_scalars.find(MakeKey(section, key));

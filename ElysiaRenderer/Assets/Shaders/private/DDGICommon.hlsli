@@ -63,6 +63,8 @@ struct InstanceData
     UINT IndexOffset;
     UINT VertexBufferIndex;
     UINT IndexBufferIndex;
+
+    float4 BaseColor;
 };
 
 struct AABBData

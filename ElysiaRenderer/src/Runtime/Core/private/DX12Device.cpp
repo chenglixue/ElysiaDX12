@@ -20,6 +20,7 @@
 #include "Programs/public/UserMarker.h"
 #include "Runtime/RenderCore/public/BufferManager.h"
 #include "../public/ShaderCompileOptions.h"
+#include "../public/ShaderBytecodeCache.h"
 #include "Runtime/RenderCore/public/ShaderVariantManager.h"
 #include "ThirdParty/Misc.h"
 #include "lib/AMD/libs/AGS/amd_ags.h"
@@ -786,32 +787,22 @@ namespace ElysiaCore
         m_computeQueue->WaitForIdle();
     }
 
-    ShaderReflectionData DX12Device::ReflectShaderStage(ComPtr<IDxcResult> pResults,
-                                                        ComPtr<IDxcUtils> pUtils)
+    static ShaderReflectionData ReflectReflectionBlob(IDxcUtils* pUtils, const void* data, size_t size)
     {
         ShaderReflectionData o{};
+        if (pUtils == nullptr || data == nullptr || size == 0)
+            return o;
 
-        //
-        // Get separate reflection.
-        //
-        ComPtr<IDxcBlob> pReflectionData;
         ComPtr<ID3D12ShaderReflection> pReflection;
-        ThrowIfFailed(pResults->GetOutput(DXC_OUT_REFLECTION,
-                                          IID_PPV_ARGS(&pReflectionData),
-                                          nullptr));
-        if (pReflectionData != nullptr)
+        const DxcBuffer ReflectionData
         {
-            // Optionally, save reflection blob for later here.
-
-            // Create reflection interface.
-            const DxcBuffer ReflectionData
-            {
-                .Ptr = pReflectionData->GetBufferPointer(),
-                .Size = pReflectionData->GetBufferSize(),
-                .Encoding = DXC_CP_ACP,
-            };
-
-            pUtils->CreateReflection(&ReflectionData, IID_PPV_ARGS(&pReflection));
+            .Ptr = data,
+            .Size = size,
+            .Encoding = DXC_CP_ACP,
+        };
+        pUtils->CreateReflection(&ReflectionData, IID_PPV_ARGS(&pReflection));
+        if (pReflection != nullptr)
+        {
 
             // Use reflection interface here.
             D3D12_SHADER_DESC pShaderDesc{};
@@ -896,6 +887,17 @@ namespace ElysiaCore
                         pReflection->GetInputParameterDesc(parameterIndex,
                                                            &signatureParameterDesc));
 
+                    // System-value semantics (SV_VertexID / SV_InstanceID / ...) are
+                    // supplied by the input assembler or the shader stage itself.
+                    // Declaring them in the input layout makes the IA fetch them
+                    // from the vertex buffer instead - SV_InstanceID then reads
+                    // back as vertex data (usually 0) and instanced draws break.
+                    if (signatureParameterDesc.SemanticName != nullptr &&
+                        strncmp(signatureParameterDesc.SemanticName, "SV_", 3) == 0)
+                    {
+                        continue;
+                    }
+
                     inputElementSemanticNames.emplace_back(
                         signatureParameterDesc.SemanticName
                             ? signatureParameterDesc.SemanticName
@@ -929,6 +931,20 @@ namespace ElysiaCore
         return o;
     }
 
+    ShaderReflectionData DX12Device::ReflectShaderStage(ComPtr<IDxcResult> pResults,
+                                                        ComPtr<IDxcUtils> pUtils)
+    {
+        ComPtr<IDxcBlob> pReflectionData;
+        ThrowIfFailed(pResults->GetOutput(DXC_OUT_REFLECTION,
+                                          IID_PPV_ARGS(&pReflectionData),
+                                          nullptr));
+        if (pReflectionData == nullptr)
+            return {};
+        return ReflectReflectionBlob(pUtils.Get(),
+                                     pReflectionData->GetBufferPointer(),
+                                     pReflectionData->GetBufferSize());
+    }
+
     ShaderBytecode DX12Device::CompileShaderStage(
         const std::wstring& path,
         const std::wstring& entry,
@@ -944,6 +960,41 @@ namespace ElysiaCore
                 ThrowRuntimeError(
                     "CompileShaderStage: args contains nullptr at index " + std::to_string(i));
             }
+        }
+
+        std::vector<std::wstring> argumentStrings;
+        argumentStrings.reserve(args.size());
+        for (LPCWSTR argument : args)
+            argumentStrings.emplace_back(argument);
+
+        ShaderBytecodeLookup lookup;
+        lookup.source = sourceBuffer.Ptr;
+        lookup.sourceSize = sourceBuffer.Size;
+        lookup.shaderName = path;
+        lookup.arguments = &argumentStrings;
+
+        std::vector<uint8_t> cachedObject;
+        std::vector<uint8_t> cachedReflection;
+        if (ShaderBytecodeCache::Get().TryGet(lookup, cachedObject, cachedReflection))
+        {
+            ComPtr<IDxcUtils> pUtils;
+            ThrowIfFailed(DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&pUtils)));
+            ComPtr<IDxcBlobEncoding> cachedBlob;
+            ThrowIfFailed(pUtils->CreateBlob(cachedObject.data(),
+                                             static_cast<UINT32>(cachedObject.size()),
+                                             DXC_CP_ACP,
+                                             &cachedBlob));
+            ShaderBytecode cached
+            {
+                .bytecode = cachedBlob,
+                .entry = entry,
+                .target = target,
+                .ReflectionData = ReflectReflectionBlob(pUtils.Get(),
+                                                        cachedReflection.data(),
+                                                        cachedReflection.size()),
+                .args = args
+            };
+            return cached;
         }
 
         // 
@@ -1104,12 +1155,27 @@ namespace ElysiaCore
             // This blob is not meant to be directly interpreted by an application.
         }
 
+        ComPtr<IDxcBlob> pReflectionData;
+        pResults->GetOutput(DXC_OUT_REFLECTION, IID_PPV_ARGS(&pReflectionData), nullptr);
+        if (pShader != nullptr)
+        {
+            ShaderBytecodeCache::Get().Put(lookup,
+                                           pShader->GetBufferPointer(),
+                                           pShader->GetBufferSize(),
+                                           pReflectionData != nullptr ? pReflectionData->GetBufferPointer() : nullptr,
+                                           pReflectionData != nullptr ? pReflectionData->GetBufferSize() : 0);
+        }
+
         ShaderBytecode o
         {
             .bytecode = pShader,
             .entry = entry,
             .target = target,
-            .ReflectionData = ReflectShaderStage(pResults, pUtils),
+            .ReflectionData = pReflectionData == nullptr
+                                  ? ShaderReflectionData{}
+                                  : ReflectReflectionBlob(pUtils.Get(),
+                                                          pReflectionData->GetBufferPointer(),
+                                                          pReflectionData->GetBufferSize()),
             .args = args
         };
 

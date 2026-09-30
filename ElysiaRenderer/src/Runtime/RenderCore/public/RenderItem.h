@@ -20,6 +20,8 @@ namespace ElysiaRenderer
         MaterialTextureIndices textureIndices;
         ElysiaModel::LoadedMaterial loadedMaterial;
 
+        const ElysiaModel::LoadedMaterial& GetMaterial() const;
+
         ID3D12PipelineState* pso;
 
         mutable UINT NumFramesDirty = 3;

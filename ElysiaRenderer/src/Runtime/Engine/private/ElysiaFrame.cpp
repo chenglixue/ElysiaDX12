@@ -15,9 +15,12 @@
 #include "Runtime/RenderCore/public/CameraManager.h"
 #include "Runtime/RenderCore/public/PSOManager.h"
 #include "Runtime/RenderCore/public/SceneManager.h"
+#include "Runtime/RenderCore/public/SelectionManager.h"
 #include "Runtime/RenderCore/public/TextureManager.h"
+#include "Runtime/Resource/Model/public/MaterialOverrides.h"
 #include "Runtime/Resource/Model/public/ModelManager.h"
 #include "Runtime/Engine/ECS/public/Entity.h"
+#include "Runtime/RenderCore/public/MeshRenderer.h"
 #include "Runtime/RenderCore/public/BakeManager.h"
 #include "Runtime/RenderCore/public/DX12Camera.h"
 #include "Runtime/RenderCore/public/RenderPassResourceManager.h"
@@ -118,11 +121,14 @@ namespace ElysiaEngine
 
     void ElysiaFrame::OnDestroy()
     {
+        ModelManager::GetInstance().FlushMaterialEdits();
         m_pDevice->WaitForIdle();
         m_pGraphicsContext.release();
         m_pRenderer->OnDestroyWindowSizeDependentResources();
         m_pRenderer->OnDestory();
         delete m_pRenderer;
+        m_pRenderer = nullptr;
+        PSOManager::GetInstance().Destory();
     }
 
     void ElysiaFrame::OnResize()
@@ -278,10 +284,11 @@ namespace ElysiaEngine
             pFirstPersonCam->SetXRotation(x);
             pFirstPersonCam->SetYRotation(y);
 
-            if (m_pSelectedObject && m_pSelectedObject->pAttachedCamera == pFirstPersonCam)
+            if (auto* pSelectedObject = SelectionManager::GetInstance().GetSelected();
+                pSelectedObject && pSelectedObject->pAttachedCamera == pFirstPersonCam)
             {
-                m_pSelectedObject->transform.rotation = pFirstPersonCam->m_transform.rotation;
-                m_pSelectedObject->transform.position = pFirstPersonCam->m_transform.position;
+                pSelectedObject->transform.rotation = pFirstPersonCam->m_transform.rotation;
+                pSelectedObject->transform.position = pFirstPersonCam->m_transform.position;
             }
         }
 
@@ -322,11 +329,8 @@ namespace ElysiaEngine
         ImGui::Begin("MainDockHost", nullptr, window_flags);
         ImGui::PopStyleVar(3);
 
-        static bool layout_initialized = true;
-        if (layout_initialized)
+        if (ImGui::DockBuilderGetNode(dockspace_id) == nullptr)
         {
-            layout_initialized = false;
-
             ImGui::DockBuilderRemoveNode(dockspace_id);
             ImGui::DockBuilderAddNode(dockspace_id, ImGuiDockNodeFlags_None);
             ImGui::DockBuilderSetNodeSize(dockspace_id, viewport->Size);
@@ -385,7 +389,7 @@ namespace ElysiaEngine
         if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !
             ImGui::IsAnyItemHovered())
         {
-            m_pSelectedObject = nullptr;
+            SelectionManager::GetInstance().Clear();
         }
 
         auto& entities = SceneManager::GetInstance().GetEntities();
@@ -441,6 +445,19 @@ namespace ElysiaEngine
 
             ImTextureID sceneTexID = (ImTextureID)dstDescriptor.GetGPUHandle().ptr;
             ImGui::Image(sceneTexID, viewportSize, ImVec2(0, 0), ImVec2(1, 1));
+
+            // Viewport click picking: LMB click on the image selects the entity,
+            // syncing Scene Hierarchy and Inspector
+            if (viewportSize.x > 0 && viewportSize.y > 0 &&
+                ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+            {
+                const ImVec2 rectMin = ImGui::GetItemRectMin();
+                const ImVec2 mousePos = ImGui::GetIO().MousePos;
+                const Vector2 viewportUV((mousePos.x - rectMin.x) / viewportSize.x,
+                                         (mousePos.y - rectMin.y) / viewportSize.y);
+
+                SelectionManager::GetInstance().RequestPick(viewportUV);
+            }
         }
 
         ImGui::End();
@@ -449,7 +466,8 @@ namespace ElysiaEngine
     {
         ImGui::Begin("Inspector");
 
-        if (m_pSelectedObject == nullptr)
+        Entity* pSelectedObject = SelectionManager::GetInstance().GetSelected();
+        if (pSelectedObject == nullptr)
         {
             ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f),
                                "Select an object to view its properties.");
@@ -475,7 +493,7 @@ namespace ElysiaEngine
 
         ImGui::Separator();
 
-        DrawTransformComponent(m_pSelectedObject);
+        DrawTransformComponent(pSelectedObject);
 
         ImGui::End();
     }
@@ -566,8 +584,11 @@ namespace ElysiaEngine
             }
             if (ElysiaRenderer::EnumCombo("Shadow Quality", &pUserData.shadowParameter.shadowQuality))
             {
+                // Only the shadow map resolution changes: rebuild that one texture
+                // (plus the shadow keyword/PSO selection), instead of recreating
+                // every window-sized resource and re-running the PSO precache.
                 m_pRenderer->OnUpdateDisplayDependentResources(&m_swapChain);
-                m_pRenderer->OnCreateWindowSizeDependentResources(&m_swapChain, m_Width, m_Height);
+                m_pRenderer->RefreshShadowDependentResources();
             }
             ImGui::SliderFloat("Shadow Depth Bias", &pUserData.shadowParameter.shadowDepthBias, 0, 1);
             ImGui::SliderFloat("Shadow Slope Depth Bias", &pUserData.shadowParameter.shadowSlopeDepthBias, 0, 10);
@@ -585,64 +606,6 @@ namespace ElysiaEngine
 
         if (ImGui::CollapsingHeader("PBR Data"))
         {
-            if (ElysiaRenderer::EnumCombo("Shading Model", &pUserData.shadingModelID))
-            {
-                m_pRenderer->OnUpdateDisplayDependentResources(&m_swapChain);
-            }
-            if (pUserData.shadingModelID == ShadingModel::Preintegrated_Skin)
-            {
-                ImGui::SliderFloat("Curve Scale", &pUserData.subsurfaceScatterParameter.CurveScale, 0.f, 2.f);
-                ImGui::SliderFloat("Min Curve", &pUserData.subsurfaceScatterParameter.MinCurve, 0.f, 1.f);
-                ImGui::ColorEdit3("Subsurface Color",
-                                  (float*)&pUserData.subsurfaceScatterParameter.SubsurfaceColor,
-                                  ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_AlphaPreview |
-                                  ImGuiColorEditFlags_HDR);
-                ImGui::SliderFloat("Scatter Radius", &pUserData.subsurfaceScatterParameter.ScatterRadius, 0.f, 2.f);
-                ImGui::SliderFloat("Transmission Scale",
-                                   &pUserData.subsurfaceScatterParameter.TransmissionScale,
-                                   0.f,
-                                   5.f);
-                ImGui::SliderFloat("Transmission Range",
-                                   &pUserData.subsurfaceScatterParameter.TransmissionRange,
-                                   0.f,
-                                   2.f);
-                ImGui::SliderFloat("Transmission Edge Glow",
-                                   &pUserData.subsurfaceScatterParameter.TransmissionEdgeGlow,
-                                   0.f,
-                                   1.f);
-            }
-            if (pUserData.shadingModelID == ShadingModel::Hair)
-            {
-                if (ImGui::Checkbox("Enable Multi Scatter", &pUserData.hairParameter.bEnableMultiScatter))
-                {
-                    m_pRenderer->OnUpdateDisplayDependentResources(&m_swapChain);
-                }
-                if (ImGui::Checkbox("Enable R", &pUserData.hairParameter.bEnableR))
-                {
-                    m_pRenderer->OnUpdateDisplayDependentResources(&m_swapChain);
-                }
-                if (ImGui::Checkbox("Enable TT", &pUserData.hairParameter.bEnableTT))
-                {
-                    m_pRenderer->OnUpdateDisplayDependentResources(&m_swapChain);
-                }
-                if (ImGui::Checkbox("Enable TRT", &pUserData.hairParameter.bEnableTRT))
-                {
-                    m_pRenderer->OnUpdateDisplayDependentResources(&m_swapChain);
-                }
-
-                ImGui::SliderFloat("Back Lit", &pUserData.hairParameter.backLit, 0.f, 1.f);
-            }
-            ImGui::ColorEdit3("Base Color Tint",
-                              (float*)&pUserData.BaseColorTint,
-                              ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_AlphaPreview |
-                              ImGuiColorEditFlags_HDR);
-            ImGui::SliderFloat("Opacity", &pUserData.Opacity, 0.f, 1.f);
-            ImGui::SliderFloat("Cutoff", &pUserData.Cutoff, 0.f, 1.f);
-            ImGui::SliderFloat("Normal Intensity", &pUserData.NormalIntensity, 0.f, 2.f);
-            ImGui::SliderFloat("Metallic Intensity", &pUserData.MetallicIntensity, 0.f, 1.f);
-            ImGui::SliderFloat("Roughness Intensity", &pUserData.RoughnessIntensity, 0.f, 1.f);
-            ImGui::SliderFloat("Specular", &pUserData.Specular, 0.f, 1.f);
-            ImGui::ColorEdit3("Emission Tint", (float*)&pUserData.EmissionTint);
             ImGui::SliderFloat("Ambient Cubemap Intensity",
                                &pUserData.AmbientCubemapIntensity,
                                0.f,
@@ -856,7 +819,7 @@ namespace ElysiaEngine
                                    ImGuiTreeNodeFlags_SpanAvailWidth;
 
         // 如果被选中，加上高亮标志
-        if (m_pSelectedObject == entity)
+        if (SelectionManager::GetInstance().GetSelected() == entity)
             flags |= ImGuiTreeNodeFlags_Selected;
 
         // 如果没有子节点，标记为叶子节点（不显示箭头）
@@ -865,13 +828,28 @@ namespace ElysiaEngine
             flags |= ImGuiTreeNodeFlags_Leaf;
 
         // 2. 渲染节点
+        // Viewport picking: force-open the ancestor chain so the selected node
+        // becomes visible and can be scrolled to below.
+        if (SelectionManager::GetInstance().IsScrollTargetAncestor(entity))
+        {
+            ImGui::SetNextItemOpen(true, ImGuiCond_Always);
+        }
+
         // 使用指针作为唯一 ID，节点显示名称
         bool opened = ImGui::TreeNodeEx((void*)entity, flags, entity->name.c_str());
 
         // 3. 处理点击交互
         if (ImGui::IsItemClicked())
         {
-            m_pSelectedObject = entity;
+            SelectionManager::GetInstance().Select(entity);
+        }
+
+        // 3.5 When the node got selected by a viewport click, scroll here
+        //     (consumed once, only at the selected node)
+        if (SelectionManager::GetInstance().GetSelected() == entity &&
+            SelectionManager::GetInstance().ConsumeScrollToSelected())
+        {
+            ImGui::SetScrollHereY(0.5f);
         }
 
         // 4. 如果节点被展开，递归绘制子节点
@@ -922,9 +900,89 @@ namespace ElysiaEngine
             }
         }
 
+        if (entity->pMeshRenderer == nullptr || entity->pMeshRenderer->m_pModel == nullptr)
+            return;
+
+        auto& model = *entity->pMeshRenderer->m_pModel;
+        const UINT materialIndex = entity->pMeshRenderer->GetMesh().materialIndex;
+        if (materialIndex >= model.materials.size())
+            return;
+
         if (ImGui::CollapsingHeader("Material Properties", ImGuiTreeNodeFlags_DefaultOpen))
         {
+            auto& material = model.materials[materialIndex];
+            if (material.shadingModelID < 0)
+                material.shadingModelID = static_cast<int>(ShadingModel::DefaultLit);
 
+            ImGui::Text("Material: %s", material.name.empty() ? "Material" : material.name.c_str());
+            bool edited = false;
+            auto shadingModel = static_cast<ShadingModel>(material.shadingModelID);
+            if (ElysiaRenderer::EnumCombo("Shading Model", &shadingModel))
+            {
+                material.shadingModelID = static_cast<int>(shadingModel);
+                edited = true;
+            }
+
+            auto& userData = UserData::GetInstance();
+            if (shadingModel == ShadingModel::Preintegrated_Skin)
+            {
+                if (ImGui::ColorEdit3("Subsurface Color",
+                                      (float*)&material.subsurfaceColor,
+                                      ImGuiColorEditFlags_HDR))
+                    edited = true;
+                ImGui::SliderFloat("Curve Scale", &userData.subsurfaceScatterParameter.CurveScale, 0.f, 2.f);
+                ImGui::SliderFloat("Min Curve", &userData.subsurfaceScatterParameter.MinCurve, 0.f, 1.f);
+                ImGui::SliderFloat("Scatter Radius", &userData.subsurfaceScatterParameter.ScatterRadius, 0.f, 2.f);
+                ImGui::SliderFloat("Transmission Scale",
+                                   &userData.subsurfaceScatterParameter.TransmissionScale,
+                                   0.f,
+                                   5.f);
+                ImGui::SliderFloat("Transmission Range",
+                                   &userData.subsurfaceScatterParameter.TransmissionRange,
+                                   0.f,
+                                   2.f);
+                ImGui::SliderFloat("Transmission Edge Glow",
+                                   &userData.subsurfaceScatterParameter.TransmissionEdgeGlow,
+                                   0.f,
+                                   1.f);
+            }
+            if (shadingModel == ShadingModel::Hair)
+            {
+                if (ImGui::Checkbox("Enable Multi Scatter", &userData.hairParameter.bEnableMultiScatter))
+                    m_pRenderer->OnUpdateDisplayDependentResources(&m_swapChain);
+                if (ImGui::Checkbox("Enable R", &userData.hairParameter.bEnableR))
+                    m_pRenderer->OnUpdateDisplayDependentResources(&m_swapChain);
+                if (ImGui::Checkbox("Enable TT", &userData.hairParameter.bEnableTT))
+                    m_pRenderer->OnUpdateDisplayDependentResources(&m_swapChain);
+                if (ImGui::Checkbox("Enable TRT", &userData.hairParameter.bEnableTRT))
+                    m_pRenderer->OnUpdateDisplayDependentResources(&m_swapChain);
+                if (ImGui::SliderFloat("Back Lit", &material.backLit, 0.f, 1.f))
+                    edited = true;
+            }
+
+            const ImGuiColorEditFlags baseColorFlags =
+                ImGuiColorEditFlags_Uint8 | ImGuiColorEditFlags_DisplayRGB | ImGuiColorEditFlags_InputRGB;
+            if (ImGui::ColorEdit3("Base Color", (float*)&material.albedoFactor, baseColorFlags))
+                edited = true;
+            if (ImGui::SliderFloat("Opacity", &material.opacity, 0.f, 1.f))
+                edited = true;
+            if (ImGui::SliderFloat("Cutoff", &material.alphaCutoff, 0.f, 1.f))
+                edited = true;
+            if (ImGui::SliderFloat("Normal Intensity", &material.normalFactor, 0.f, 2.f))
+                edited = true;
+            if (ImGui::SliderFloat("Metallic", &material.metallicFactor, 0.f, 1.f))
+                edited = true;
+            if (ImGui::SliderFloat("Roughness", &material.roughnessFactor, 0.f, 1.f))
+                edited = true;
+            if (ImGui::SliderFloat("Specular", &material.specularFactor, 0.f, 1.f))
+                edited = true;
+            if (ImGui::ColorEdit3("Emission", (float*)&material.emissiveFactor))
+                edited = true;
+
+            if (edited)
+                model.materialParametersDirty = true;
+            if (model.materialParametersDirty && !ImGui::IsAnyItemActive())
+                ElysiaModel::MaterialOverrides::SaveIfDirty(model);
         }
     }
 }

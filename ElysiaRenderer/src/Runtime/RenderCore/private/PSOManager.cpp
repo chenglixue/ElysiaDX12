@@ -1,9 +1,11 @@
 #include "stdafx.h"
 #include "../public/PSOManager.h"
 
+#include "Editor/public/ConfigCache.h"
 #include "Runtime/Core/public/DX12Device.h"
-#include "../public/Material.h"
 #include "Runtime/Core/public/DX12RootSignature.h"
+#include "../public/Material.h"
+#include "../public/PSOPrecache.h"
 
 namespace ElysiaRenderer
 {
@@ -15,15 +17,58 @@ namespace ElysiaRenderer
         Destory();
     }
 
+    namespace
+    {
+        bool ReadBool(const char* section, const char* key, bool fallback)
+        {
+            bool value = fallback;
+            if (!ConfigCache::Get().TryGetBool(section, key, value))
+                return fallback;
+            return value;
+        }
+
+        int ReadInt(const char* section, const char* key, int fallback)
+        {
+            int value = fallback;
+            if (!ConfigCache::Get().TryGetInt(section, key, value))
+                return fallback;
+            return value;
+        }
+    }
+
     void PSOManager::Init(ElysiaCore::DX12Device* pDevice)
     {
         assert(pDevice);
         m_pDevice = pDevice;
+
+        PSOPrecacheSettings settings{};
+        settings.enable = ReadBool("PSOPrecache", "Enable", settings.enable);
+        settings.threadPercent = ReadInt("PSOPrecache", "ThreadPercent", settings.threadPercent);
+        settings.threadMin = ReadInt("PSOPrecache", "ThreadMin", settings.threadMin);
+        settings.threadMax = ReadInt("PSOPrecache", "ThreadMax", settings.threadMax);
+        settings.validation = ReadInt("PSOPrecache", "Validation", settings.validation);
+        PSOPrecache::Get().Startup(pDevice->GetDevice(), settings);
     }
 
     void PSOManager::Destory()
     {
+        PSOPrecache::Get().Shutdown();
+        m_pDevice = nullptr;
+    }
 
+    void PSOManager::BeginPrecacheBatch()
+    {
+        PSOPrecache::Get().BeginBatch();
+    }
+
+    void PSOManager::WaitPrecacheBatch()
+    {
+        PSOPrecache::Get().WaitBatch();
+    }
+
+    void PSOManager::EnqueuePrecacheWork(std::function<void()> work, const char* name)
+    {
+        PSOPrecache::Get().Enqueue(std::move(work), name);
     }
 
     PipelineStateObject* PSOManager::GetGraphicsPipelineState(
@@ -31,29 +76,8 @@ namespace ElysiaRenderer
         const D3D12_GRAPHICS_PIPELINE_STATE_DESC& PSODesc,
         DX12RootSignature* pRootSignature)
     {
-        auto emplaceResult = m_graphicsPipelineStates.try_emplace(PSODesc);
-
-        if (emplaceResult.second)
-        {
-            ComPtr<ID3D12PipelineState> pipelineState = nullptr;
-            ElysiaHelper::ThrowIfFailed(
-                pDevice->GetDevice()->CreateGraphicsPipelineState(
-                    &PSODesc,
-                    IID_PPV_ARGS(&pipelineState)));
-
-            auto graphicsPipeline = std::make_unique<DX12GraphicsPipelineState>(
-                pipelineState,
-                pRootSignature);
-
-            std::unique_ptr<PipelineStateObject> pipelineStateObject = std::make_unique<
-                PipelineStateObject>();
-            pipelineStateObject->m_pipelineType = PipelineType::Graphics;
-            pipelineStateObject->m_pipelineState = std::move(graphicsPipeline);
-
-            emplaceResult.first->second = std::move(pipelineStateObject);
-        }
-
-        return emplaceResult.first->second.get();
+        (void)pDevice;
+        return PSOPrecache::Get().GetGraphics(PSODesc, pRootSignature, "Graphics PSO");
     }
 
     PipelineStateObject* PSOManager::GetGraphicsPipelineState(
@@ -140,10 +164,11 @@ namespace ElysiaRenderer
         PSODesc.NumRenderTargets = renderTargetDesc.m_numRenderTargets;
         PSODesc.DSVFormat = renderTargetDesc.m_depthStencilFormat;
 
-        auto pipelineStateObject = GetGraphicsPipelineState(
-            pDevice,
+        (void)pDevice;
+        auto pipelineStateObject = PSOPrecache::Get().GetGraphics(
             PSODesc,
-            passData.pRootSignature.get());
+            passData.pRootSignature.get(),
+            passData.Name);
         if (pipelineStateObject != nullptr)
         {
             pipelineStateObject->m_pipelineResourceMapping = passData.resourceMapping;
@@ -183,9 +208,11 @@ namespace ElysiaRenderer
         };
         PSODesc.pRootSignature = passData.pRootSignature->GetSignature().Get();
 
-        auto pipelineStateObject = GetComputePipelineState(pDevice,
-                                                           PSODesc,
-                                                           passData.pRootSignature.get());
+        (void)pDevice;
+        auto pipelineStateObject = PSOPrecache::Get().GetCompute(
+            PSODesc,
+            passData.pRootSignature.get(),
+            passData.Name);
         if (pipelineStateObject != nullptr)
         {
             pipelineStateObject->m_pipelineResourceMapping = passData.resourceMapping;
@@ -200,28 +227,7 @@ namespace ElysiaRenderer
         const D3D12_COMPUTE_PIPELINE_STATE_DESC& PSODesc,
         DX12RootSignature* pRootSignature)
     {
-        auto emplaceResult = m_computePipelineStates.try_emplace(PSODesc);
-
-        if (emplaceResult.second)
-        {
-            ComPtr<ID3D12PipelineState> pipelineState = nullptr;
-            ElysiaHelper::ThrowIfFailed(
-                pDevice->GetDevice()->CreateComputePipelineState(
-                    &PSODesc,
-                    IID_PPV_ARGS(&pipelineState)));
-
-            auto computePipeline = std::make_unique<DX12ComputePipelineState>(
-                pipelineState,
-                pRootSignature);
-
-            std::unique_ptr<PipelineStateObject> pipelineStateObject = std::make_unique<
-                PipelineStateObject>();
-            pipelineStateObject->m_pipelineType = PipelineType::Compute;
-            pipelineStateObject->m_pipelineState = std::move(computePipeline);
-
-            emplaceResult.first->second = std::move(pipelineStateObject);
-        }
-
-        return emplaceResult.first->second.get();
+        (void)pDevice;
+        return PSOPrecache::Get().GetCompute(PSODesc, pRootSignature, "Compute PSO");
     }
 }

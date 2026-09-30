@@ -1452,7 +1452,9 @@ namespace ElysiaModel
                                                    (float)gMat.emissiveFactor[1],
                                                    (float)gMat.emissiveFactor[2]);
                 elysiaMat.opacity = (float)pbr.baseColorFactor[3];
-                elysiaMat.specularFactor = 0.04f;
+                elysiaMat.alphaCutoff = (float)gMat.alphaCutoff;
+                elysiaMat.specularFactor = 0.5f;
+                elysiaMat.shadingModelID = 1;
 
                 // 纹理映射逻辑
                 auto getTexturePath = [&](const tinygltf::Model& model, int textureIndex) -> std::wstring

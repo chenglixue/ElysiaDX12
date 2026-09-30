@@ -4,6 +4,7 @@
 #include "../public/CameraManager.h"
 #include "../public/DX12Camera.h"
 #include "../public/MeshRenderer.h"
+#include "../public/SelectionManager.h"
 #include "Editor/public/UserData.h"
 #include "Runtime/Core/public/DX12UploadContext.h"
 #include "Runtime/Resource/Model/public/LoadedModel.h"
@@ -187,6 +188,9 @@ namespace ElysiaRenderer
 
     void SceneManager::ClearScene()
     {
+        // The selection (and any pending hit-proxy readback) holds raw Entity
+        // pointers; drop them before the entities are destroyed.
+        SelectionManager::GetInstance().Clear();
         m_entities.clear();
     }
 

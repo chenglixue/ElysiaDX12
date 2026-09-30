@@ -94,6 +94,25 @@ namespace ElysiaRenderer
         DrawShadowPass(context);
     }
 
+    void ShadowPass::OnShadowResolutionChanged()
+    {
+        // Shadow quality selects the shadow map resolution. Recreate the shadow
+        // map (and the DX12Shadow bound to it) and refresh the pointer cached in
+        // the pass resource manager, instead of going through the full
+        // window-size-dependent rebuild (which recreates every resource and
+        // re-runs the whole PSO precache batch).
+        LightManager::GetInstance().GetMainLight()->CreateMainShadow(
+            20,
+            DXGI_FORMAT_D32_FLOAT_S8X24_UINT);
+
+        RenderPassResourceManager::GetInstance().Get<ShadowData>().pShadowCastRT =
+            LightManager::GetInstance().GetMainShadowRT();
+
+        // The shadow PSO depends on the shadow RT format, which does not change
+        // with the resolution - so this is a cache lookup.
+        UpdatePipeline();
+    }
+
     void ShadowPass::UpdatePipeline()
     {
         if (!m_pMaterial)
@@ -282,7 +301,7 @@ namespace ElysiaRenderer
 
         for (UINT64 i = 0; i < renderItemCount; i ++)
         {
-            const auto& materialData = renderItems[i].loadedMaterial;
+            const auto& materialData = renderItems[i].GetMaterial();
             const auto& textureIndices = renderItems[i].textureIndices;
             auto meshData = MeshData
             {

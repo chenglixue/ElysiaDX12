@@ -46,6 +46,10 @@ namespace ElysiaRenderer
 
         virtual void Dispose() override;
 
+        // Shadow quality selects the shadow map resolution; rebuild only the
+        // shadow map and the data that caches it.
+        virtual void OnShadowResolutionChanged() override;
+
     private:
         static constexpr auto Max_RenderItem_Count = 1024;
 

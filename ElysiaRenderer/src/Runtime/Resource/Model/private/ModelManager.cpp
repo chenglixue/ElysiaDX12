@@ -5,6 +5,7 @@
 #include "../public/AssimpLoader.h"
 #include "../public/LoadedModel.h"
 #include "../public/ModelCache.h"
+#include "../public/MaterialOverrides.h"
 #include "Programs/public/Hash.h"
 #include "Programs/public/Log.h"
 
@@ -50,14 +51,21 @@ namespace ElysiaRenderer
         m_pDevice = pDevice;
     }
 
-    void ModelManager::Destory()
+    void ModelManager::FlushMaterialEdits()
     {
         std::lock_guard<std::mutex> lock(m_mutex);
-        auto it = m_modelCache.begin();
-        while (it != m_modelCache.end())
+        for (auto& entry : m_modelCache)
         {
-            it = m_modelCache.erase(it);
+            if (auto model = entry.second.lock())
+                ElysiaModel::MaterialOverrides::SaveIfDirty(*model);
         }
+    }
+
+    void ModelManager::Destory()
+    {
+        FlushMaterialEdits();
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_modelCache.clear();
     }
 
     std::shared_ptr<ElysiaModel::LoadedModel> ModelManager::LoadStaticModel(
@@ -125,8 +133,10 @@ namespace ElysiaRenderer
         settings.importAnimations = bImportAnimations;
         settings.scale = scale;
 
+        loadedModel->sourcePath = filePath;
         if (ElysiaModel::ModelCache::TryLoad(filePath, settings, *loadedModel))
         {
+            ElysiaModel::MaterialOverrides::Apply(*loadedModel);
             ElysiaModel::BindMaterialTextures(*loadedModel);
             ElysiaModel::CreateGpuResources(*loadedModel);
             return loadedModel;
@@ -148,6 +158,7 @@ namespace ElysiaRenderer
             ElysiaHelper::Log::Warn("ModelCache: write failed, continuing without disk cache.");
         }
 
+        ElysiaModel::MaterialOverrides::Apply(*loadedModel);
         ElysiaModel::BindMaterialTextures(*loadedModel);
         ElysiaModel::CreateGpuResources(*loadedModel);
         return loadedModel;

@@ -40,6 +40,14 @@ namespace ElysiaRenderer
 
         virtual void UpdatePipeline() = 0;
 
+        // Called when the user changes the shadow map resolution. Passes that own
+        // shadow-sized resources rebuild them here, instead of going through the
+        // full window-size-dependent rebuild (which recreates every resource and
+        // re-runs the whole PSO precache batch).
+        virtual void OnShadowResolutionChanged()
+        {
+        }
+
         D3D12_GPU_VIRTUAL_ADDRESS UploadMaterialConstants(
             UploadRingBuffer* pUploadBuffer,
             UINT8 spaceID,
