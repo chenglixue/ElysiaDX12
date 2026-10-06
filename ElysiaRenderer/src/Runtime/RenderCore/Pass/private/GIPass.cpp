@@ -256,11 +256,30 @@ namespace ElysiaRenderer
         m_pGPUTimer = context.pGPUTimer;
         m_frameIndex = context.frameIndex;
 
-        if (!SceneManager::GetInstance().GetEntities().empty() && !SceneManager::GetInstance().
-            GetEntities()[0]->GetChildren().empty())
+        const auto& roots = SceneManager::GetInstance().GetEntities();
+        // Every root is one loaded model. Each mesh child keeps that model's buffers.
+        // InstanceID in the TLAS must stay aligned with this list.
+        std::vector<Entity*> meshEntities;
+        for (const auto& root : roots)
         {
-            auto& allEntities = SceneManager::GetInstance().GetEntities()[0]->GetChildren();
-            auto entityCount = allEntities.size();
+            if (!root)
+                continue;
+            for (const auto& child : root->GetChildren())
+            {
+                if (!child || !child->pMeshRenderer || !child->pMeshRenderer->m_pModel)
+                    continue;
+                const auto& model = *child->pMeshRenderer->m_pModel;
+                const auto& mesh = child->pMeshRenderer->GetMesh();
+                if (!model.vertexBuffer || !model.indexBuffer)
+                    continue;
+                if (mesh.numVertices == 0 || mesh.numIndices == 0)
+                    continue;
+                meshEntities.push_back(child.get());
+            }
+        }
+        if (!meshEntities.empty())
+        {
+            const auto entityCount = meshEntities.size();
 
             m_instanceDatas.clear();
             m_AABBDatas.clear();
@@ -271,7 +290,7 @@ namespace ElysiaRenderer
             // RayClosestHit indexes g_InstanceDataBuffer with InstanceID() + GeometryIndex().
             for (UINT i = 0; i < entityCount; i ++)
             {
-                auto currEntity = allEntities[i].get();
+                auto currEntity = meshEntities[i];
 
                 auto AABB = currEntity->GetWorldAABB();
                 m_AABBDatas.emplace_back(AABBData
@@ -285,7 +304,8 @@ namespace ElysiaRenderer
                     currEntity->GenerateBLAS(m_pDevice5.Get(), m_pCommand);
                 }
                 const auto& mesh = currEntity->pMeshRenderer->GetMesh();
-                const auto& materials = currEntity->pMeshRenderer->m_pModel->materials;
+                const auto& model = *currEntity->pMeshRenderer->m_pModel;
+                const auto& materials = model.materials;
                 const auto& material = materials[mesh.materialIndex];
                 m_instanceDatas.emplace_back(InstanceData
                 {
@@ -300,10 +320,8 @@ namespace ElysiaRenderer
 
                     .VertexOffset = mesh.vtxOffset,
                     .IndexOffset = mesh.idxOffset,
-                    .VertexBufferIndex = BufferManager::GetInstance().GetGlobalVertexBuffer()->
-                                                                      GetResourceHeapIndex(),
-                    .IndexBufferIndex = BufferManager::GetInstance().GetGlobalIndexBuffer()->
-                                                                     GetResourceHeapIndex(),
+                    .VertexBufferIndex = model.vertexBuffer->GetResourceHeapIndex(),
+                    .IndexBufferIndex = model.indexBuffer->GetResourceHeapIndex(),
                     .BaseColor = Vector4(material.albedoFactor.x,
                                          material.albedoFactor.y,
                                          material.albedoFactor.z,
@@ -348,7 +366,7 @@ namespace ElysiaRenderer
                        m_instanceDatas.data(),
                        instanceBytes);
             }
-            GenerateTLAS(allEntities);
+            GenerateTLAS(meshEntities);
             if (!m_pGlobalRootSig)
                 CreateDXRRootSignature(m_pDevice->GetDevice());
             if (!m_pRTPSO)
@@ -358,10 +376,47 @@ namespace ElysiaRenderer
                 CreateRaytracingStateObject();
             }
             if (m_pRTPSO)
-                BuildRaytracingShaderTable(allEntities.size());
+                BuildRaytracingShaderTable(meshEntities.size());
 
-            const Entity* pEntity = SceneManager::GetInstance().GetEntities()[0].get();
-            auto sceneAABB = pEntity->GetWorldAABB();
+            auto isFiniteBox = [](const BoundingBox& box)
+            {
+                const Vector3 center(box.Center.x, box.Center.y, box.Center.z);
+                const Vector3 extents(box.Extents.x, box.Extents.y, box.Extents.z);
+                return std::isfinite(center.x) && std::isfinite(center.y) && std::isfinite(center.z) &&
+                       std::isfinite(extents.x) && std::isfinite(extents.y) && std::isfinite(extents.z) &&
+                       extents.x >= 0.0f && extents.y >= 0.0f && extents.z >= 0.0f;
+            };
+            auto mergeBox = [&](BoundingBox& dst, const BoundingBox& src)
+            {
+                if (!isFiniteBox(src))
+                    return;
+                if (!isFiniteBox(dst))
+                {
+                    dst = src;
+                    return;
+                }
+                const Vector3 dstMin = Vector3(dst.Center.x, dst.Center.y, dst.Center.z) -
+                                       Vector3(dst.Extents.x, dst.Extents.y, dst.Extents.z);
+                const Vector3 dstMax = Vector3(dst.Center.x, dst.Center.y, dst.Center.z) +
+                                       Vector3(dst.Extents.x, dst.Extents.y, dst.Extents.z);
+                const Vector3 srcMin = Vector3(src.Center.x, src.Center.y, src.Center.z) -
+                                       Vector3(src.Extents.x, src.Extents.y, src.Extents.z);
+                const Vector3 srcMax = Vector3(src.Center.x, src.Center.y, src.Center.z) +
+                                       Vector3(src.Extents.x, src.Extents.y, src.Extents.z);
+                const Vector3 mergedMin = Vector3::Min(dstMin, srcMin);
+                const Vector3 mergedMax = Vector3::Max(dstMax, srcMax);
+                const Vector3 mergedCenter = (mergedMin + mergedMax) * 0.5f;
+                const Vector3 mergedExtents = (mergedMax - mergedMin) * 0.5f;
+                dst.Center = mergedCenter;
+                dst.Extents = mergedExtents;
+            };
+            BoundingBox sceneAABB = roots[0]->GetWorldAABB();
+            for (size_t rootIndex = 1; rootIndex < roots.size(); ++rootIndex)
+            {
+                if (!roots[rootIndex])
+                    continue;
+                mergeBox(sceneAABB, roots[rootIndex]->GetWorldAABB());
+            }
             auto sceneMin = sceneAABB.Center - sceneAABB.Extents;
             auto sceneMax = sceneAABB.Center + sceneAABB.Extents;
 
@@ -1299,9 +1354,9 @@ namespace ElysiaRenderer
         m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("GI/") + passName).c_str());
     }
 
-    void GIPass::GenerateTLAS(const std::vector<std::unique_ptr<Entity>>& entityies)
+    void GIPass::GenerateTLAS(const std::vector<Entity*>& entities)
     {
-        UINT64 entityCount = entityies.size();
+        UINT64 entityCount = entities.size();
         if (!entityCount)
             return;
 
@@ -1310,7 +1365,7 @@ namespace ElysiaRenderer
         std::vector<D3D12_RAYTRACING_INSTANCE_DESC> instanceDescs(entityCount);
         for (UINT64 i = 0; i < entityCount; ++i)
         {
-            const auto& entity = entityies[i];
+            const Entity* entity = entities[i];
             instanceNames[i] = std::string(entity->name.c_str());
             instanceDescs[i].InstanceMask = 0xFF;                                         // 与 TraceRay 的 mask 匹配
             // BLAS has one geometry. InstanceID() + GeometryIndex() must land on this entity.

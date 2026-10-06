@@ -512,15 +512,12 @@ namespace ElysiaModel
                             mesh.idxOffset);
         }
 
-        auto vbView = D3D12_VERTEX_BUFFER_VIEW{vb->GetGPUAddress(), (UINT)totalV * (UINT)sizeof(MeshVertex),
-                                               (UINT)sizeof(MeshVertex)};
-        auto ibView = D3D12_INDEX_BUFFER_VIEW{ib->GetGPUAddress(), (UINT)totalI * (UINT)sizeof(UINT32),
-                                              DXGI_FORMAT_R32_UINT};
-
-        ElysiaRenderer::BufferManager::GetInstance().SetGlobalVertexBuffer(std::move(vb));
-        ElysiaRenderer::BufferManager::GetInstance().SetGlobalIndexBuffer(std::move(ib));
-        ElysiaRenderer::BufferManager::GetInstance().SetGlobalVertexBufferView(std::move(vbView));
-        ElysiaRenderer::BufferManager::GetInstance().SetGlobalIndexBufferView(std::move(ibView));
+        model.vertexBufferView = D3D12_VERTEX_BUFFER_VIEW{
+            vb->GetGPUAddress(), (UINT)totalV * (UINT)sizeof(MeshVertex), (UINT)sizeof(MeshVertex)};
+        model.indexBufferView = D3D12_INDEX_BUFFER_VIEW{
+            ib->GetGPUAddress(), (UINT)totalI * (UINT)sizeof(UINT32), DXGI_FORMAT_R32_UINT};
+        model.vertexBuffer = std::move(vb);
+        model.indexBuffer = std::move(ib);
         return true;
     }
 
@@ -1118,6 +1115,70 @@ namespace ElysiaModel
             }
         }
     }
+    void GenerateTangents(LoadedModel& model,
+                          uint32_t vtxOffset,
+                          uint32_t vertexCount,
+                          uint32_t idxOffset,
+                          uint32_t indexCount)
+    {
+        if (vertexCount == 0 || indexCount < 3)
+            return;
+
+        std::vector<Vector3> tangentAccum(vertexCount, Vector3::Zero);
+        std::vector<Vector3> bitangentAccum(vertexCount, Vector3::Zero);
+        for (uint32_t index = 0; index + 2 < indexCount; index += 3)
+        {
+            const uint32_t i0 = model.indices[idxOffset + index];
+            const uint32_t i1 = model.indices[idxOffset + index + 1];
+            const uint32_t i2 = model.indices[idxOffset + index + 2];
+            if (i0 >= vertexCount || i1 >= vertexCount || i2 >= vertexCount)
+                continue;
+
+            const MeshVertex& v0 = model.vertices[vtxOffset + i0];
+            const MeshVertex& v1 = model.vertices[vtxOffset + i1];
+            const MeshVertex& v2 = model.vertices[vtxOffset + i2];
+            const Vector3 edge1 = v1.Position - v0.Position;
+            const Vector3 edge2 = v2.Position - v0.Position;
+            const Vector2 uv1 = v1.UV - v0.UV;
+            const Vector2 uv2 = v2.UV - v0.UV;
+            const float determinant = uv1.x * uv2.y - uv2.x * uv1.y;
+            if (fabsf(determinant) < 1.0e-8f)
+                continue;
+
+            const float inverseDeterminant = 1.0f / determinant;
+            const Vector3 tangentDir = (edge1 * uv2.y - edge2 * uv1.y) * inverseDeterminant;
+            const Vector3 bitangentDir = (edge2 * uv1.x - edge1 * uv2.x) * inverseDeterminant;
+            tangentAccum[i0] += tangentDir;
+            tangentAccum[i1] += tangentDir;
+            tangentAccum[i2] += tangentDir;
+            bitangentAccum[i0] += bitangentDir;
+            bitangentAccum[i1] += bitangentDir;
+            bitangentAccum[i2] += bitangentDir;
+        }
+
+        for (uint32_t vertexIndex = 0; vertexIndex < vertexCount; ++vertexIndex)
+        {
+            MeshVertex& vertex = model.vertices[vtxOffset + vertexIndex];
+            Vector3 normal = vertex.Normal;
+            if (normal.LengthSquared() < 1.0e-8f)
+                normal = Vector3::UnitY;
+            else
+                normal.Normalize();
+
+            Vector3 tangent = tangentAccum[vertexIndex] - normal * normal.Dot(tangentAccum[vertexIndex]);
+            if (tangent.LengthSquared() < 1.0e-8f)
+            {
+                const Vector3 axis = fabsf(normal.y) < 0.9f ? Vector3::UnitY : Vector3::UnitX;
+                tangent = axis.Cross(normal);
+            }
+            tangent.Normalize();
+            const float handedness = normal.Cross(tangent).Dot(bitangentAccum[vertexIndex]) < 0.0f
+                                          ? -1.0f
+                                          : 1.0f;
+            vertex.Tangent = Vector4(tangent.x, tangent.y, tangent.z, handedness);
+        }
+    }
+
     void FillNodeData(
         const tinygltf::Model& gltfModel,
         int nodeIdx,
@@ -1189,10 +1250,13 @@ namespace ElysiaModel
                 attributeIt = primitive.attributes.find("TANGENT");
                 if (attributeIt == primitive.attributes.end())
                 {
-                    ElysiaHelper::Log::Warn("GLTFLoader: glTF primitive does not have tangent attribute! Skipping.");
-                    continue;
+                    ElysiaHelper::Log::Warn(
+                        "GLTFLoader: glTF primitive does not have tangent attribute. Tangents will be generated.");
                 }
-                tangentAccessor = attributeIt->second;
+                else
+                {
+                    tangentAccessor = attributeIt->second;
+                }
 
                 attributeIt = primitive.attributes.find("COLOR_0");
                 if (attributeIt == primitive.attributes.end())
@@ -1331,6 +1395,9 @@ namespace ElysiaModel
                     newMesh.idxOffset = idxOffset;
                     idxOffset += iCount;
                 }
+
+                if (tangentAccessor < 0 && newMesh.numIndices >= 3)
+                    GenerateTangents(model, vtxOffset, vertexCount, newMesh.idxOffset, newMesh.numIndices);
 
                 newMesh.numVertices = vertexCount;
                 newMesh.vtxOffset = vtxOffset;

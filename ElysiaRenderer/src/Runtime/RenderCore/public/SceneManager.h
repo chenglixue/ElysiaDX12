@@ -41,7 +41,8 @@ namespace ElysiaRenderer
         void LoadScene(UINT&);
 
         std::shared_ptr<ElysiaModel::LoadedModel> CreateModel(const std::wstring& modelPath);
-        Entity* CreateEntityFromModel(std::shared_ptr<ElysiaModel::LoadedModel> pModel);
+        Entity* CreateEntityFromModel(std::shared_ptr<ElysiaModel::LoadedModel> pModel,
+                                      const Vector3& position);
         void CollectRenderItems();
         void ClearScene();
 
@@ -67,7 +68,8 @@ namespace ElysiaRenderer
         SceneManager(SceneManager&& rhs) = default;
 
         std::unique_ptr<Entity> CreateEntity(
-            const std::shared_ptr<ElysiaModel::LoadedModel>& model) const;
+            const std::shared_ptr<ElysiaModel::LoadedModel>& model,
+            const Vector3& position) const;
         void UpdateEntity(const std::unique_ptr<Entity>& pEntity);
         void CollectRenderItem(const std::unique_ptr<Entity>& pEntity,
                                BoundingFrustum& boundingFrustum);

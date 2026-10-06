@@ -15,6 +15,7 @@
 
 #include "Runtime/RenderCore/public/BufferManager.h"
 #include "Runtime/RenderCore/public/Material.h"
+#include "Runtime/RenderCore/public/MeshRenderer.h"
 #include "Runtime/RenderCore/public/PSOManager.h"
 #include "Runtime/RenderCore/public/RenderTargetManager.h"
 #include "Runtime/RenderCore/public/RenderTexture.h"
@@ -194,10 +195,6 @@ namespace ElysiaRenderer
         m_pCommand->SetDefaultViewportAndScissor(
             ElysiaHelper::UINT2(m_pMaskRT->GetWidth(), m_pMaskRT->GetHeight()));
         m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-        m_pCommand->SetVertexBuffer(0, 1,
-                                    BufferManager::GetInstance().GetGlobalVertexBufferView());
-        m_pCommand->SetIndexBuffer(
-            BufferManager::GetInstance().GetGlobalIndexBufferView());
 
         m_pMaterial->SetMatrix(ShaderIDs::g_ViewProjMatrix,
                                GetJitteredViewProj(m_pCamera, m_displaySize),
@@ -209,11 +206,12 @@ namespace ElysiaRenderer
                              m_pCameraDepthRT->GetSRVResourceHeapIndex(),
                              passID);
 
-        // One draw per item, each with its own world matrix re-uploaded to the
-        // per-pass constant buffer. Engine convention (GBuffer/Shadow): bind the
-        // GLOBAL views and let startIndex/baseVertex carry the per-mesh offsets.
         for (RenderItem* pItem : drawItems)
         {
+            const auto& model = *pItem->pAssociatedEntity->pMeshRenderer->m_pModel;
+            auto vertexView = model.vertexBufferView;
+            m_pCommand->SetVertexBuffer(0, 1, vertexView);
+            m_pCommand->SetIndexBuffer(model.indexBufferView);
             m_pMaterial->SetMatrix(ShaderIDs::g_WorldMatrix, pItem->worldMatrix, passID);
             SetSpaceResource(passData, PER_PASS_SPACE);
 
@@ -315,10 +313,6 @@ namespace ElysiaRenderer
         const UINT pickHeight = static_cast<UINT>(m_pPickRT->GetHeight());
         m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(pickWidth, pickHeight));
         m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-        m_pCommand->SetVertexBuffer(0, 1,
-                                    BufferManager::GetInstance().GetGlobalVertexBufferView());
-        m_pCommand->SetIndexBuffer(
-            BufferManager::GetInstance().GetGlobalIndexBufferView());
 
         m_pMaterial->SetMatrix(ShaderIDs::g_ViewProjMatrix,
                                GetJitteredViewProj(m_pCamera, m_displaySize),
@@ -330,11 +324,13 @@ namespace ElysiaRenderer
                              m_pCameraDepthRT->GetSRVResourceHeapIndex(),
                              passID);
 
-        // One draw per item; the per-item world matrix and the render list index
-        // (the id written into the pick RT) are re-uploaded per draw.
         for (UINT drawIndex = 0; drawIndex < pickDrawItems.size(); ++drawIndex)
         {
             RenderItem* pItem = pickDrawItems[drawIndex];
+            const auto& model = *pItem->pAssociatedEntity->pMeshRenderer->m_pModel;
+            auto vertexView = model.vertexBufferView;
+            m_pCommand->SetVertexBuffer(0, 1, vertexView);
+            m_pCommand->SetIndexBuffer(model.indexBufferView);
             m_pMaterial->SetMatrix(ShaderIDs::g_WorldMatrix, pItem->worldMatrix, passID);
             m_pMaterial->SetUINT(ShaderIDs::g_EntityID, pickDrawIds[drawIndex], passID);
             SetSpaceResource(passData, PER_PASS_SPACE);

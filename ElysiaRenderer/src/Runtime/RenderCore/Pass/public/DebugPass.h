@@ -39,6 +39,7 @@ namespace ElysiaRenderer
             static inline size_t g_AABBInstanceDatasIndex = PropertyToID(
                 L"g_AABBInstanceDatasIndex");
             static inline size_t g_MipmapLevel = PropertyToID(L"g_MipmapLevel");
+            static inline size_t g_ShadowMapInset = PropertyToID(L"g_ShadowMapInset");
             static inline size_t g_SourceSize = PropertyToID(L"g_SourceSize");
             static inline size_t g_TargetSize = PropertyToID(L"g_TargetSize");
             static inline size_t g_IsEnableGILine = PropertyToID(L"g_IsEnableGILine");

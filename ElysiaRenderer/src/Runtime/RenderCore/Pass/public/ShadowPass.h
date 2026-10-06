@@ -73,8 +73,13 @@ namespace ElysiaRenderer
                 UINT meshDataIndex;
             } pushConstants;
 
+            D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
+            D3D12_INDEX_BUFFER_VIEW indexBufferView;
             D3D12_DRAW_INDEXED_ARGUMENTS drawArguments;
         };
+        static_assert(offsetof(IndirectCommand, vertexBufferView) == 8);
+        static_assert(offsetof(IndirectCommand, indexBufferView) == 24);
+        static_assert(offsetof(IndirectCommand, drawArguments) == 40);
 
         DX12Light* m_pMainLight;
         std::vector<Vector2> m_sobolSqeuences;

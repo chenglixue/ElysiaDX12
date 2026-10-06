@@ -89,6 +89,11 @@ namespace ElysiaRenderer
         Vector3 lightColor = Vector3::One;
         Vector3 lightDir = Vector3::One;
         float lightIntensity = 1.f;
+        // Directional light "source angle": angular diameter of the sun disc in
+        // degrees (0.5357 = the real sun), matching UE's directional light SourceAngle.
+        // A directional light sits at infinity, so it has an angle rather than a
+        // world-space radius (that one belongs to point/spot lights).
+        float lightSourceAngleDegrees = 0.5357f;
 
         ShadingModel shadingModelID = ShadingModel::DefaultLit;
         Vector3 BaseColorTint = Vector3::One;
@@ -126,6 +131,7 @@ namespace ElysiaRenderer
                                                     lightColor,
                                                     lightDir,
                                                     lightIntensity,
+                                                    lightSourceAngleDegrees,
                                                     shadingModelID,
                                                     BaseColorTint,
                                                     Opacity,

@@ -21,6 +21,7 @@
 #include "Runtime/RenderCore/public/PSOManager.h"
 #include "Runtime/RenderCore/public/RenderTargetManager.h"
 #include "Runtime/RenderCore/public/SceneManager.h"
+#include "Runtime/RenderCore/public/LightManager.h"
 #include "Runtime/RenderCore/public/ShaderVariantManager.h"
 
 namespace ElysiaRenderer
@@ -206,6 +207,61 @@ namespace ElysiaRenderer
                                    D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
             break;
         }
+        case DebugMode::ShadowMap:
+        {
+            RenderTexture* pShadowRT = LightManager::GetInstance().GetMainShadowRT();
+            if (pShadowRT == nullptr)
+                break;
+
+            // Drawn as an overlay panel in the top-right corner of the viewport so
+            // the main view stays visible. The shadow map is square, so the panel is
+            // square as well.
+            const float insetSize = std::floor(m_displaySize.y * 0.3f);
+            const float insetMargin = 12.0f;
+            D3D12_VIEWPORT insetViewport{};
+            insetViewport.TopLeftX = (std::max)(0.0f, m_displaySize.x - insetSize - insetMargin);
+            insetViewport.TopLeftY = insetMargin;
+            insetViewport.Width = insetSize;
+            insetViewport.Height = insetSize;
+            insetViewport.MinDepth = 0.0f;
+            insetViewport.MaxDepth = 1.0f;
+
+            const D3D12_RECT insetScissor
+            {
+                static_cast<LONG>(insetViewport.TopLeftX),
+                static_cast<LONG>(insetViewport.TopLeftY),
+                static_cast<LONG>(insetViewport.TopLeftX + insetSize),
+                static_cast<LONG>(insetViewport.TopLeftY + insetSize)
+            };
+
+            // The shadow map is a depth texture: make it readable by the pixel shader.
+            m_pCommand->AddBarrier(pShadowRT, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+            m_pMaterial->SetUINT(ShaderIDs::g_TargetTexIndex,
+                                 pShadowRT->GetResourceHeapIndex(),
+                                 passID);
+            m_pMaterial->SetFloat4(ShaderIDs::g_ShadowMapInset,
+                                   Vector4(insetViewport.TopLeftX,
+                                           insetViewport.TopLeftY,
+                                           insetSize,
+                                           insetSize),
+                                   passID);
+            m_pCommand->AddBarrier(m_pDisplayRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+            {
+                m_pMaterial->SetFloat4(ShaderIDs::g_TargetSize,
+                                       GetScreenSize(m_displaySize),
+                                       passID);
+                SetSpaceResource(passData, PER_PASS_SPACE);
+                // Restricted to the panel rect, so only that region is written.
+                m_pCommand->SetViewport(insetViewport);
+                m_pCommand->SetScissorRect(insetScissor);
+                m_pCommand->DrawFullScreenTriangle();
+                m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_displaySize));
+            }
+            m_pCommand->AddBarrier(m_pDisplayRT,
+                                   D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+            m_pCommand->AddBarrier(pShadowRT, D3D12_RESOURCE_STATE_DEPTH_READ);
+            break;
+        }
         case DebugMode::ShadowMask:
         {
             m_pMaterial->SetUINT(ShaderIDs::g_TargetTexIndex,
@@ -303,12 +359,22 @@ namespace ElysiaRenderer
         if (!m_aabbDrawer.IsReady() || SceneManager::GetInstance().GetEntities().empty())
             return;
 
-        auto& entities = SceneManager::GetInstance().GetEntities()[0];
+        std::vector<Entity*> meshEntities;
+        for (const auto& root : SceneManager::GetInstance().GetEntities())
+        {
+            if (!root)
+                continue;
+            for (const auto& child : root->GetChildren())
+            {
+                if (child)
+                    meshEntities.push_back(child.get());
+            }
+        }
         auto instanceID = UserData::GetInstance().instanceID;
         instanceID = MathHelper::Max(0, instanceID);
-        if (instanceID < entities->GetChildren().size())
+        if (instanceID < static_cast<int>(meshEntities.size()))
         {
-            const auto entity = entities->GetChildren()[instanceID].get();
+            const auto entity = meshEntities[instanceID];
             const auto AABB = entity->GetWorldAABB();
             const auto min = AABB.Center - AABB.Extents;
             const auto max = AABB.Center + AABB.Extents;
@@ -316,10 +382,10 @@ namespace ElysiaRenderer
         }
         else
         {
-            m_aabbDrawer.m_instanceCpuData.reserve(entities->GetChildren().size());
-            for (UINT i = 0; i < entities->GetChildren().size(); i ++)
+            m_aabbDrawer.m_instanceCpuData.reserve(meshEntities.size());
+            for (UINT i = 0; i < meshEntities.size(); i ++)
             {
-                const auto entity = entities->GetChildren()[i].get();
+                const auto entity = meshEntities[i];
                 const auto AABB = entity->GetWorldAABB();
                 const auto min = AABB.Center - AABB.Extents;
                 const auto max = AABB.Center + AABB.Extents;
@@ -512,6 +578,14 @@ namespace ElysiaRenderer
                 passID,
                 desc,
                 D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+
+            // A null PSO silently draws nothing - surface it instead of guessing.
+            if (!passData.pPipelineStateObject)
+            {
+                ElysiaHelper::Log::Error(
+                    "[DebugPass] PSO creation failed (displayRT format=%u)",
+                    static_cast<UINT>(m_pDisplayRT->GetFormat()));
+            }
         }
     }
 

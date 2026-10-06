@@ -8,3 +8,4 @@ E:\DX12\ElysiaDX12\x64\Debug\D3D12\D3D12Core.dll
 E:\DX12\ElysiaDX12\x64\Debug\D3D12\D3D12Core.pdb
 E:\DX12\ElysiaDX12\x64\Debug\D3D12\D3D12SDKLayers.dll
 E:\DX12\ElysiaDX12\x64\Debug\D3D12\D3D12SDKLayers.pdb
+D:\DX12\ElysiaDX12\ElysiaRenderer\x64\Debug\ElysiaRenderer.exe

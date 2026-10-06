@@ -667,11 +667,21 @@ namespace ElysiaEngine
              m_displayModesAvailable[m_currentDisplayModeNamesIndex] == DISPLAYMODE_HDR10_SCRGB))
             return;
 
-        // Fall back HDR to SDR when window is fullscreen but not the active window or foreground window
-        m_currentDisplayModeNamesIndex = WindowActive && (
-                                             m_fullscreenMode != PRESENTATIONMODE_WINDOWED)
-                                             ? m_previousDisplayModeNamesIndex
-                                             : DisplayMode::DISPLAYMODE_SDR;
+        // An inactive window drops back to SDR. Coming back to the foreground,
+        // fullscreen restores the mode that was current before the drop.
+        // A focused windowed session keeps the mode loaded from config.
+        if (!WindowActive)
+        {
+            m_currentDisplayModeNamesIndex = DisplayMode::DISPLAYMODE_SDR;
+        }
+        else if (m_fullscreenMode != PRESENTATIONMODE_WINDOWED)
+        {
+            m_currentDisplayModeNamesIndex = m_previousDisplayModeNamesIndex;
+        }
+        else
+        {
+            return;
+        }
 
         OnResize(m_Width, m_Height, m_forceManualResize);
         UpdateDisplay(m_displayModesAvailable[m_currentDisplayModeNamesIndex],

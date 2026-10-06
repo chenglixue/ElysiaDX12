@@ -273,6 +273,12 @@ namespace ElysiaModel
         std::wstring sourcePath;
         bool materialParametersDirty = false;
 
+        // Kept here so a later model cannot release this model's geometry.
+        ElysiaCore::BufferHandle vertexBuffer;
+        ElysiaCore::BufferHandle indexBuffer;
+        D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
+        D3D12_INDEX_BUFFER_VIEW indexBufferView{};
+
         template <typename TSerializer>
         void SerializeCPU(TSerializer& serializer)
         {

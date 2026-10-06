@@ -191,6 +191,13 @@ namespace ElysiaRenderer
                 dst->g_EnableShadow = UserData::GetInstance().shadowParameter.EnableShadow;
                 dst->g_MipBias = std::max(-2.f, std::log2(screenPercentage));
                 dst->g_ShadowRadius = UserData::GetInstance().shadowParameter.shadowRadius;
+                // UE parity note: a directional light's source angle only becomes a shadow
+                // filter radius inside UE's PCSS path (see ShadowRendering.h:
+                // PCSSParameters.x = tan(0.5 * angle) * SZ / SW). UE's non-PCSS path
+                // (ShadowFilteringCommon.ush ManualPCF) uses fixed 1x1/3x3/5x5 kernels and
+                // never consumes the angle, so with no PCSS in this renderer the source
+                // angle deliberately has no effect here: softness comes from the texel
+                // radius above and from the shadow quality's fixed filter kernel.
                 dst->g_SobolBufferIndex = m_pSobol256spp256dBuffer->GetResourceHeapIndex();
                 dst->g_ScramblingTileBufferIndex = m_pScramblingTileBuffer->GetResourceHeapIndex();
                 dst->g_RankingTileBufferIndex = m_pRankingTileBuffer->GetResourceHeapIndex();

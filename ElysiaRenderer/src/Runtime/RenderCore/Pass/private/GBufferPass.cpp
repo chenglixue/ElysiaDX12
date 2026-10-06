@@ -22,6 +22,7 @@
 #include "Runtime/RenderCore/public/RenderTargetManager.h"
 #include "Runtime/RenderCore/public/CameraManager.h"
 #include "Runtime/RenderCore/public/PSOManager.h"
+#include "Runtime/RenderCore/public/MeshRenderer.h"
 #include "Runtime/RenderCore/public/SceneManager.h"
 #include "Runtime/RenderCore/public/ShaderVariantManager.h"
 
@@ -302,20 +303,22 @@ namespace ElysiaRenderer
 
         if (!m_pCommandSignature)
         {
-            // 对应 IndirectCommand::pushConstants
-            D3D12_INDIRECT_ARGUMENT_DESC args[2] = {};
+            D3D12_INDIRECT_ARGUMENT_DESC args[4] = {};
             args[0].Type = D3D12_INDIRECT_ARGUMENT_TYPE_CONSTANT;
             args[0].Constant.RootParameterIndex = PER_MATERIAL_SPACE - 1;
-            // 对应 PER_MATERIAL_SPACE 的槽位
             args[0].Constant.DestOffsetIn32BitValues = 0;
-            args[0].Constant.Num32BitValuesToSet = 2; // 两个 UINT
+            args[0].Constant.Num32BitValuesToSet = 2;
 
-            // 对应 IndirectCommand::drawArguments
-            args[1].Type = D3D12_INDIRECT_ARGUMENT_TYPE_DRAW_INDEXED;
+            args[1].Type = D3D12_INDIRECT_ARGUMENT_TYPE_VERTEX_BUFFER_VIEW;
+            args[1].VertexBuffer.Slot = 0;
+
+            args[2].Type = D3D12_INDIRECT_ARGUMENT_TYPE_INDEX_BUFFER_VIEW;
+
+            args[3].Type = D3D12_INDIRECT_ARGUMENT_TYPE_DRAW_INDEXED;
 
             D3D12_COMMAND_SIGNATURE_DESC desc = {};
             desc.ByteStride = sizeof(IndirectCommand);
-            desc.NumArgumentDescs = 2;
+            desc.NumArgumentDescs = 4;
             desc.pArgumentDescs = args;
 
             m_pDevice->GetDevice()->CreateCommandSignature(&desc,
@@ -436,6 +439,13 @@ namespace ElysiaRenderer
                 .meshDataBufferIndex = meshDataBufferIndex,
                 .meshDataIndex = renderItemIndex
             };
+            if (renderItem.pAssociatedEntity && renderItem.pAssociatedEntity->pMeshRenderer &&
+                renderItem.pAssociatedEntity->pMeshRenderer->m_pModel)
+            {
+                const auto& model = *renderItem.pAssociatedEntity->pMeshRenderer->m_pModel;
+                indirectCommand.vertexBufferView = model.vertexBufferView;
+                indirectCommand.indexBufferView = model.indexBufferView;
+            }
             indirectCommand.drawArguments = D3D12_DRAW_INDEXED_ARGUMENTS
             {
                 .IndexCountPerInstance = renderItem.indexCount,
@@ -765,11 +775,6 @@ namespace ElysiaRenderer
         m_pCommand->ClearDepthStencilTarget(m_pCameraDepthRT, 1.f, 0);
         m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_cameraWidth, m_cameraHeight));
         m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-        m_pCommand->SetIndexBuffer(BufferManager::GetInstance().GetGlobalIndexBufferView());
-        m_pCommand->SetVertexBuffer(0,
-                                    1,
-                                    BufferManager::GetInstance().GetGlobalVertexBufferView());
 
         m_pMaterial->SetFloat4(ShaderIDs::screenSize,
                                GetScreenSize(Vector2(m_cameraWidth, m_cameraHeight)));

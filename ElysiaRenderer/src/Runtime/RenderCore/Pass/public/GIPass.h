@@ -273,7 +273,7 @@ namespace ElysiaRenderer
         void CreateRaytracingStateObject();
         void BuildRaytracingShaderTable(size_t entityCount);
         void CreateDXRRootSignature(ID3D12Device* pDevice);
-        void GenerateTLAS(const std::vector<std::unique_ptr<Entity>>& entityies);
+        void GenerateTLAS(const std::vector<Entity*>& entities);
         std::vector<D3D12_SAMPLER_DESC> GenerateSampler();
 
         void ComputeRandomRotation();

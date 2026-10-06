@@ -3,11 +3,14 @@
 #pragma Vertex VS
 #pragma Pixel PS
 
-#pragma Rasterizer NoCullNoMS
+#pragma Rasterizer BackFaceCull
 #pragma Blend Disabled
 #pragma Depth Disabled
 
 // R is the visible surface, G is the full projected coverage.
+// Cull back faces the same way GBuffer does. A closed mesh's back faces fail the
+// depth compare, and with depth testing disabled they would overwrite the front
+// face mask and turn every triangle edge into an outline.
 //
 // Per-item data (the world matrix) arrives through the per-pass constant buffer,
 // which is re-uploaded and re-bound before every item draw.

@@ -71,6 +71,11 @@ namespace ElysiaEngine
         if (subMesh.numVertices == 0 || subMesh.numIndices == 0)
             return;
 
+        auto vertexBuffer = pMeshRenderer->m_pModel->vertexBuffer;
+        auto indexBuffer = pMeshRenderer->m_pModel->indexBuffer;
+        if (!vertexBuffer || !indexBuffer)
+            return;
+
         D3D12_RAYTRACING_GEOMETRY_DESC geometryDesc = {};
         geometryDesc.Type = D3D12_RAYTRACING_GEOMETRY_TYPE_TRIANGLES;
         geometryDesc.Flags = D3D12_RAYTRACING_GEOMETRY_FLAG_OPAQUE;
@@ -134,8 +139,6 @@ namespace ElysiaEngine
             pCommand->AddUAVBarrier(scratch.buffer, false);
         }
 
-        auto vertexBuffer = BufferManager::GetInstance().GetGlobalVertexBuffer();
-        auto indexBuffer = BufferManager::GetInstance().GetGlobalIndexBuffer();
         const D3D12_RESOURCE_STATES vertexState = vertexBuffer->GetUsageState();
         const D3D12_RESOURCE_STATES indexState = indexBuffer->GetUsageState();
         pCommand->AddBarrier(*vertexBuffer, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, false);

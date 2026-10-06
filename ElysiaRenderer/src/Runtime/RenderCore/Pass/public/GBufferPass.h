@@ -178,8 +178,14 @@ namespace ElysiaRenderer
                 UINT meshDataIndex;
             } pushConstants;
 
+            // Full-model views. Draw arguments still carry each mesh's offset.
+            D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
+            D3D12_INDEX_BUFFER_VIEW indexBufferView;
             D3D12_DRAW_INDEXED_ARGUMENTS drawArguments;
         };
+        static_assert(offsetof(IndirectCommand, vertexBufferView) == 8);
+        static_assert(offsetof(IndirectCommand, indexBufferView) == 24);
+        static_assert(offsetof(IndirectCommand, drawArguments) == 40);
 
         struct AABBLoader
         {

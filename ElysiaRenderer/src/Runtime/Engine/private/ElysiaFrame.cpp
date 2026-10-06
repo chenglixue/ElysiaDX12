@@ -11,6 +11,7 @@
 #include "Runtime/Core/public/DX12StagingDescriptorHeap.h"
 #include "Runtime/RenderCore/public/BufferManager.h"
 #include "Runtime/RenderCore/public/LightManager.h"
+#include "Runtime/RenderCore/public/DX12Shadow.h"
 #include "Runtime/RenderCore/public/RenderTargetManager.h"
 #include "Runtime/RenderCore/public/CameraManager.h"
 #include "Runtime/RenderCore/public/PSOManager.h"
@@ -106,6 +107,7 @@ namespace ElysiaEngine
         assert(_CrtCheckMemory());
 #endif
         DeSerializeUserData();
+        RestoreSavedDisplayMode();
         ElysiaHelper::LogHistory::ImportBuildDiagnostics();
 #ifdef _DEBUG
         assert(_CrtCheckMemory());
@@ -158,10 +160,48 @@ namespace ElysiaEngine
     {
         if (m_Width && m_Height && m_pRenderer)
         {
+            Vector3 lookAt(-0.48f, 5.2f, -0.31f);
+            const auto& sceneEntities = SceneManager::GetInstance().GetEntities();
+            if (!sceneEntities.empty())
+            {
+                auto isFiniteBox = [](const BoundingBox& box)
+                {
+                    return std::isfinite(box.Center.x) && std::isfinite(box.Center.y) &&
+                           std::isfinite(box.Center.z) && std::isfinite(box.Extents.x) &&
+                           std::isfinite(box.Extents.y) && std::isfinite(box.Extents.z) &&
+                           box.Extents.x >= 0.0f && box.Extents.y >= 0.0f && box.Extents.z >= 0.0f;
+                };
+                BoundingBox sceneAABB = sceneEntities[0]->GetWorldAABB();
+                for (size_t entityIndex = 1; entityIndex < sceneEntities.size(); ++entityIndex)
+                {
+                    const BoundingBox nextBox = sceneEntities[entityIndex]->GetWorldAABB();
+                    if (!isFiniteBox(nextBox))
+                        continue;
+                    if (!isFiniteBox(sceneAABB))
+                    {
+                        sceneAABB = nextBox;
+                        continue;
+                    }
+                    const Vector3 dstMin = Vector3(sceneAABB.Center.x, sceneAABB.Center.y, sceneAABB.Center.z) -
+                                           Vector3(sceneAABB.Extents.x, sceneAABB.Extents.y, sceneAABB.Extents.z);
+                    const Vector3 dstMax = Vector3(sceneAABB.Center.x, sceneAABB.Center.y, sceneAABB.Center.z) +
+                                           Vector3(sceneAABB.Extents.x, sceneAABB.Extents.y, sceneAABB.Extents.z);
+                    const Vector3 srcMin = Vector3(nextBox.Center.x, nextBox.Center.y, nextBox.Center.z) -
+                                           Vector3(nextBox.Extents.x, nextBox.Extents.y, nextBox.Extents.z);
+                    const Vector3 srcMax = Vector3(nextBox.Center.x, nextBox.Center.y, nextBox.Center.z) +
+                                           Vector3(nextBox.Extents.x, nextBox.Extents.y, nextBox.Extents.z);
+                    const Vector3 mergedMin = Vector3::Min(dstMin, srcMin);
+                    const Vector3 mergedMax = Vector3::Max(dstMax, srcMax);
+                    const Vector3 mergedCenter = (mergedMin + mergedMax) * 0.5f;
+                    const Vector3 mergedExtents = (mergedMax - mergedMin) * 0.5f;
+                    sceneAABB.Center = mergedCenter;
+                    sceneAABB.Extents = mergedExtents;
+                }
+                if (isFiniteBox(sceneAABB))
+                    lookAt = Vector3(sceneAABB.Center.x, sceneAABB.Center.y, sceneAABB.Center.z);
+            }
             CameraManager::GetInstance().CreateMainCamera(
-                SceneManager::GetInstance().GetEntities().empty()
-                    ? Vector3(-0.48, 5.2f, -0.31)
-                    : SceneManager::GetInstance().GetEntities()[0]->GetWorldAABB().Center,
+                lookAt,
                 static_cast<float>(m_Width) / static_cast<float>(m_Height),
                 AMD_PI_OVER_4,
                 0.1f,
@@ -170,6 +210,27 @@ namespace ElysiaEngine
             m_pRenderer->OnDestroyWindowSizeDependentResources();
             m_pRenderer->OnCreateWindowSizeDependentResources(&m_swapChain, m_Width, m_Height);
         }
+    }
+
+    void ElysiaFrame::RestoreSavedDisplayMode()
+    {
+        const CAULDRON_DX12::DisplayMode saved = UserData::GetInstance().hdrParameter.displayMode;
+        int found = -1;
+        for (int index = 0; index < static_cast<int>(m_displayModesAvailable.size()); ++index)
+        {
+            if (m_displayModesAvailable[index] == saved)
+            {
+                found = index;
+                break;
+            }
+        }
+        if (found < 0)
+            return;
+
+        m_currentDisplayModeNamesIndex = static_cast<CAULDRON_DX12::DisplayMode>(found);
+        m_previousDisplayModeNamesIndex = m_currentDisplayModeNamesIndex;
+        if (m_currentDisplayMode != saved)
+            UpdateDisplay(saved, m_disableLocalDimming);
     }
 
     void ElysiaFrame::OnUpdateDisplay()
@@ -485,6 +546,11 @@ namespace ElysiaEngine
             }
 
             DrawViewportGizmo(imageOrigin, viewportSize);
+
+            if (m_bShowShadowFrustum)
+            {
+                DrawShadowFrustumOverlay(imageOrigin, viewportSize);
+            }
         }
 
         ImGui::End();
@@ -568,6 +634,7 @@ namespace ElysiaEngine
         if (ImGui::CollapsingHeader("Debug"))
         {
             ElysiaRenderer::EnumCombo("Debug Mode", &pUserData.debugMode);
+            ImGui::Checkbox("Show Shadow Frustum", &m_bShowShadowFrustum);
 
             if (pUserData.debugMode == DebugMode::AO)
             {
@@ -603,6 +670,18 @@ namespace ElysiaEngine
             ImGui::ColorEdit3("Color", (float*)&pUserData.lightColor);
             ImGui::SliderFloat3("Direction", (float*)&pUserData.lightDir, -1, 1);
             ImGui::SliderFloat("Intensity", &pUserData.lightIntensity, 0, 20);
+            // UE parity: UDirectionalLightComponent::LightSourceAngle (angular diameter of the
+            // sun disc, default 0.5357 deg = the real sun). In UE this angle only becomes a
+            // shadow filter radius inside the PCSS path (ShadowRendering.h: PCSSParameters.x =
+            // tan(0.5 * angle) * SZ / SW); the non-PCSS path (ShadowFilteringCommon.ush
+            // ManualPCF) uses fixed 1x1/3x3/5x5 kernels and ignores it. This renderer has no
+            // PCSS, so the value is kept for parity/documentation only and does NOT change the
+            // shadow softness - use "Shadow Radius" below for that.
+            ImGui::SliderFloat("Light Source Angle (deg)",
+                               &pUserData.lightSourceAngleDegrees,
+                               0.0f,
+                               5.0f,
+                               "%.3f");
 
             ImGui::Checkbox("Enable Shadow", &pUserData.shadowParameter.EnableShadow);
             if (ElysiaRenderer::EnumCombo("Shadow Type", &pUserData.shadowParameter.shadowType))
@@ -623,10 +702,17 @@ namespace ElysiaEngine
                                &pUserData.shadowParameter.shadowMaxSlopeDepthBias,
                                0,
                                10);
+            // Shadow filter radius in shadow map texels (fixed-radius PCF, UE non-PCSS style).
             ImGui::SliderFloat("Shadow Radius",
                                &pUserData.shadowParameter.shadowRadius,
-                               0,
-                               5);
+                               0.0f,
+                               5.0f,
+                               "%.2f");
+            ImGui::SliderFloat("Shadow Distance",
+                               &pUserData.shadowParameter.shadowDistance,
+                               1.f,
+                               200.f,
+                               "%.1f");
             ImGui::Checkbox("Enable Shadow TAA",
                             &pUserData.shadowParameter.EnableTAA);
         }
@@ -676,30 +762,22 @@ namespace ElysiaEngine
                                  displayModeNames,
                                  (int)m_displayModesNamesAvailable.size()))
                 {
-                    if (m_fullscreenMode != PRESENTATIONMODE_WINDOWED)
+                    const DisplayMode selected = m_displayModesAvailable[m_currentDisplayModeNamesIndex];
+                    const bool windowedHdr =
+                        CheckIfWindowModeHdrOn() &&
+                        (selected == DISPLAYMODE_SDR ||
+                         selected == DISPLAYMODE_HDR10_2084 ||
+                         selected == DISPLAYMODE_HDR10_SCRGB);
+                    if (m_fullscreenMode != PRESENTATIONMODE_WINDOWED || windowedHdr)
                     {
-                        UpdateDisplay(m_displayModesAvailable[m_currentDisplayModeNamesIndex],
-                                      m_disableLocalDimming);
+                        UpdateDisplay(selected, m_disableLocalDimming);
                         m_previousDisplayModeNamesIndex = m_currentDisplayModeNamesIndex;
-                    }
-                    else if (CheckIfWindowModeHdrOn() &&
-                             (m_displayModesAvailable[m_currentDisplayModeNamesIndex] == DISPLAYMODE_SDR
-                              ||
-                              m_displayModesAvailable[m_currentDisplayModeNamesIndex] ==
-                              DISPLAYMODE_HDR10_2084 ||
-                              m_displayModesAvailable[m_currentDisplayModeNamesIndex] ==
-                              DISPLAYMODE_HDR10_SCRGB))
-                    {
-                        UpdateDisplay(m_displayModesAvailable[m_currentDisplayModeNamesIndex],
-                                      m_disableLocalDimming);
-                        m_previousDisplayModeNamesIndex = m_currentDisplayModeNamesIndex;
+                        UserData::GetInstance().hdrParameter.displayMode = selected;
                     }
                     else
                     {
                         m_currentDisplayModeNamesIndex = m_previousDisplayModeNamesIndex;
                     }
-
-                    UserData::GetInstance().hdrParameter.displayMode = m_currentDisplayModeNamesIndex;
                 }
                 ElysiaRenderer::EnumCombo("Color space", &pUserData.hdrParameter.colorSpace);
 
@@ -1085,6 +1163,81 @@ namespace ElysiaEngine
         ImGui::Checkbox("Snap", &m_gizmoUseSnap);
 
         ImGui::EndGroup();
+    }
+
+    void ElysiaFrame::DrawShadowFrustumOverlay(const ImVec2& imageOrigin, const ImVec2& imageSize)
+    {
+        auto* pCamera = CameraManager::GetInstance().GetMainCamera();
+        DX12Shadow* pShadow = LightManager::GetInstance().GetMainShadow();
+        if (pCamera == nullptr || pShadow == nullptr || imageSize.x <= 0.0f || imageSize.y <= 0.0f)
+            return;
+
+        // The shadow camera is a *different* camera, so its frustum is a real shape
+        // in the scene. Unproject its 8 corners (D3D convention: z = 0 near, 1 far)
+        // and project them with the viewport camera.
+        const Matrix viewProj = pCamera->GetViewMat() * pCamera->GetProjMat();
+        const Matrix shadowViewProj = pShadow->GetView() * pShadow->GetProj();
+        const Matrix invShadowViewProj = shadowViewProj.Invert();
+
+        // Corner index: bit0 = +x, bit1 = +y, bit2 = far plane.
+        ImVec2 cornersScreen[8]{};
+        bool bValid[8]{};
+        for (int corner = 0; corner < 8; ++corner)
+        {
+            const float ndcX = ((corner & 1) != 0) ? 1.0f : -1.0f;
+            const float ndcY = ((corner & 2) != 0) ? 1.0f : -1.0f;
+            const float ndcZ = ((corner & 4) != 0) ? 1.0f : 0.0f;
+
+            const Vector3 cornerWS = Vector3::Transform(Vector3(ndcX, ndcY, ndcZ), invShadowViewProj);
+            const Vector4 cornerClip = Vector4::Transform(
+                Vector4(cornerWS.x, cornerWS.y, cornerWS.z, 1.0f),
+                viewProj);
+
+            bValid[corner] = cornerClip.w > 0.0f;
+            if (!bValid[corner])
+                continue;
+
+            const float screenX = cornerClip.x / cornerClip.w;
+            const float screenY = cornerClip.y / cornerClip.w;
+            cornersScreen[corner] = ImVec2(imageOrigin.x + (screenX * 0.5f + 0.5f) * imageSize.x,
+                                           imageOrigin.y + (0.5f - screenY * 0.5f) * imageSize.y);
+        }
+
+        // 12 edges of the frustum
+        static constexpr int edges[12][2] =
+        {
+            {0, 1}, {1, 3}, {3, 2}, {2, 0}, // near plane
+            {4, 5}, {5, 7}, {7, 6}, {6, 4}, // far plane
+            {0, 4}, {1, 5}, {2, 6}, {3, 7}  // side edges
+        };
+
+        ImDrawList* pDrawList = ImGui::GetWindowDrawList();
+        const ImU32 nearColor = IM_COL32(255, 205, 60, 255);
+        const ImU32 farColor = IM_COL32(70, 170, 255, 190);
+
+        for (const auto& edge : edges)
+        {
+            const int a = edge[0];
+            const int b = edge[1];
+            if (!bValid[a] || !bValid[b])
+                continue;
+
+            const bool bNearPlaneEdge = (a < 4) && (b < 4);
+            pDrawList->AddLine(cornersScreen[a],
+                               cornersScreen[b],
+                               bNearPlaneEdge ? nearColor : farColor,
+                               bNearPlaneEdge ? 2.0f : 1.5f);
+        }
+
+        // Mark the near-plane centre as the "eye" side of the frustum.
+        if (bValid[0] && bValid[1] && bValid[2] && bValid[3])
+        {
+            const ImVec2 nearCenter((cornersScreen[0].x + cornersScreen[1].x +
+                                     cornersScreen[2].x + cornersScreen[3].x) * 0.25f,
+                                    (cornersScreen[0].y + cornersScreen[1].y +
+                                     cornersScreen[2].y + cornersScreen[3].y) * 0.25f);
+            pDrawList->AddCircleFilled(nearCenter, 3.0f, nearColor);
+        }
     }
 
     void ElysiaFrame::DrawViewportGizmo(const ImVec2& imageOrigin, const ImVec2& imageSize)

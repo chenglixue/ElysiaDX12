@@ -45,6 +45,7 @@ namespace ElysiaRenderer
         float shadowSlopeDepthBias = 0;
         float shadowMaxSlopeDepthBias = 0;
         float shadowRadius = 1.f;
+        float shadowDistance = 50.f;
         bool EnableShadow = true;
         bool EnableTAA = true;
     };
@@ -55,6 +56,7 @@ namespace ElysiaRenderer
                                                     shadowSlopeDepthBias,
                                                     shadowMaxSlopeDepthBias,
                                                     shadowRadius,
+                                                    shadowDistance,
                                                     EnableShadow,
                                                     EnableTAA)
 }

@@ -1,0 +1,120 @@
+#ifndef COMMON_H
+#define COMMON_H
+
+#pragma once
+
+#include "SharedCommon.hlsli"
+
+float4 SampleTexture2D(UINT textureIndex, float2 uv, UINT samplerStateIndex)
+{
+    Texture2D<float4> SampleTex = ResourceDescriptorHeap[textureIndex];
+    SamplerState Sampler = SamplerDescriptorHeap[samplerStateIndex];
+
+    return SampleTex.Sample(Sampler, uv);
+}
+float4 SampleTexture2D(UINT textureIndex, float2 uv, SamplerState samplerState)
+{
+    Texture2D<float4> SampleTex = ResourceDescriptorHeap[textureIndex];
+
+    return SampleTex.Sample(samplerState, uv);
+}
+
+float4 SampleTexture2D_LOD(UINT textureIndex, float2 uv, UINT samplerStateIndex, float LOD)
+{
+    Texture2D<float4> SampleTex = ResourceDescriptorHeap[textureIndex];
+    SamplerState Sampler = SamplerDescriptorHeap[samplerStateIndex];
+
+    return SampleTex.SampleLevel(Sampler, uv, LOD);
+}
+float4 SampleTexture2D_LOD(UINT textureIndex, float2 uv, SamplerState sampler, float LOD)
+{
+    Texture2D<float4> SampleTex = ResourceDescriptorHeap[textureIndex];
+
+    return SampleTex.SampleLevel(sampler, uv, LOD);
+}
+float4 SampleTexture2D_ForcedLOD(uint texIndex, float2 uv, SamplerState s, float targetLOD)
+{
+    Texture2D<float4> tex = ResourceDescriptorHeap[texIndex];
+
+    uint w, h, levels;
+    tex.GetDimensions(0, w, h, levels);
+
+    float delta = pow(2.0, targetLOD) / (float)w;
+
+    float2 ddx = float2(delta, 0.0);
+    float2 ddy = float2(0.0, delta);
+
+    return tex.SampleGrad(s, uv, ddx, ddy);
+}
+
+float4 SampleTexture2D_Bias(UINT textureIndex, float2 uv, UINT samplerStateIndex, float bias)
+{
+    Texture2D<float4> SampleTex = ResourceDescriptorHeap[textureIndex];
+    SamplerState Sampler = SamplerDescriptorHeap[samplerStateIndex];
+
+    return SampleTex.SampleBias(Sampler, uv, bias);
+}
+
+float4 SampleTextureCube(UINT textureIndex, float3 dir, UINT samplerStateIndex)
+{
+    TextureCube<float4> SampleTex = ResourceDescriptorHeap[textureIndex];
+    SamplerState Sampler = SamplerDescriptorHeap[samplerStateIndex];
+
+    return SampleTex.Sample(Sampler, dir);
+}
+
+float4 SampleTextureCube_LOD(UINT textureIndex, float3 dir, UINT samplerStateIndex, float targetLOD)
+{
+    TextureCube<float4> SampleTex = ResourceDescriptorHeap[textureIndex];
+    SamplerState Sampler = SamplerDescriptorHeap[samplerStateIndex];
+
+    return SampleTex.SampleLevel(Sampler, dir, targetLOD);
+}
+
+float4 GatherRedTexture2D(UINT textureIndex, float2 uv, UINT samplerStateIndex, uint2 offset = 0)
+{
+    Texture2D<float4> SampleTex = ResourceDescriptorHeap[textureIndex];
+    SamplerState Sampler = SamplerDescriptorHeap[samplerStateIndex];
+
+    return SampleTex.GatherRed(Sampler, uv, offset);
+}
+
+float4 GatherGreenTexture2D(UINT textureIndex, float2 uv, UINT samplerStateIndex, uint2 offset = 0)
+{
+    Texture2D<float4> SampleTex = ResourceDescriptorHeap[textureIndex];
+    SamplerState Sampler = SamplerDescriptorHeap[samplerStateIndex];
+
+    return SampleTex.GatherGreen(Sampler, uv, offset);
+}
+
+float4 GatherBlueTexture2D(UINT textureIndex, float2 uv, UINT samplerStateIndex, uint2 offset = 0)
+{
+    Texture2D<float4> SampleTex = ResourceDescriptorHeap[textureIndex];
+    SamplerState Sampler = SamplerDescriptorHeap[samplerStateIndex];
+
+    return SampleTex.GatherBlue(Sampler, uv, offset);
+}
+
+float4 GatherAlphaTexture2D(UINT textureIndex, float2 uv, UINT samplerStateIndex, uint2 offset = 0)
+{
+    Texture2D<float4> SampleTex = ResourceDescriptorHeap[textureIndex];
+    SamplerState Sampler = SamplerDescriptorHeap[samplerStateIndex];
+
+    return SampleTex.GatherAlpha(Sampler, uv, offset);
+}
+
+float4 LoadTexture2D(UINT textureIndex, int2 coord)
+{
+    Texture2D<float4> SampleTex = ResourceDescriptorHeap[textureIndex];
+
+    return SampleTex.Load(int3(coord, 0));
+}
+
+float3 GetTexture2DDimensions(UINT textureIndex)
+{
+    Texture2D<float4> SampleTex = ResourceDescriptorHeap[textureIndex];
+    float width, height, mipLevel;
+    SampleTex.GetDimensions(0, width, height, mipLevel);
+    return float3(width, height, mipLevel);
+}
+#endif

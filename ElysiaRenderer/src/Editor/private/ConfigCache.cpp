@@ -19,7 +19,10 @@ namespace ElysiaRenderer
     {
         std::string Trim(std::string text)
         {
-            auto isSpace = [](unsigned char c) { return std::isspace(c) != 0; };
+            auto isSpace = [](unsigned char c)
+            {
+                return std::isspace(c) != 0;
+            };
             while (!text.empty() && isSpace(static_cast<unsigned char>(text.front())))
                 text.erase(text.begin());
             while (!text.empty() && isSpace(static_cast<unsigned char>(text.back())))
@@ -121,7 +124,8 @@ namespace ElysiaRenderer
         bool Component(const std::string& text, char axis, float& out)
         {
             const std::string lower = Lower(text);
-            const std::string token = std::string(1, static_cast<char>(std::tolower(static_cast<unsigned char>(axis)))) + "=";
+            const std::string token = std::string(1, static_cast<char>(std::tolower(static_cast<unsigned char>(axis))))
+                                      + "=";
             const size_t pos = lower.find(token);
             if (pos == std::string::npos)
                 return false;
@@ -603,6 +607,7 @@ namespace ElysiaRenderer
         setFloat("Shadow", "SlopeDepthBias", data.shadowParameter.shadowSlopeDepthBias);
         setFloat("Shadow", "MaxSlopeDepthBias", data.shadowParameter.shadowMaxSlopeDepthBias);
         setFloat("Shadow", "Radius", data.shadowParameter.shadowRadius);
+        setFloat("Shadow", "Distance", data.shadowParameter.shadowDistance);
         setBool("Shadow", "Enable", data.shadowParameter.EnableShadow);
         setBool("Shadow", "EnableTAA", data.shadowParameter.EnableTAA);
 
@@ -715,7 +720,11 @@ namespace ElysiaRenderer
         {
             std::string baseline;
             if (!TryGetBaseline(section, key, baseline))
+            {
+                begin(section);
+                out << key << "=" << (live ? "true" : "false") << "\n";
                 return;
+            }
             bool parsed = false;
             if (ParseBool(baseline, parsed) && parsed == live)
                 return;
@@ -726,7 +735,11 @@ namespace ElysiaRenderer
         {
             std::string baseline;
             if (!TryGetBaseline(section, key, baseline))
+            {
+                begin(section);
+                out << key << "=" << FormatFloat(live) << "\n";
                 return;
+            }
             float parsed = 0.f;
             if (ParseFloat(baseline, parsed) && parsed == live)
                 return;
@@ -737,7 +750,11 @@ namespace ElysiaRenderer
         {
             std::string baseline;
             if (!TryGetBaseline(section, key, baseline))
+            {
+                begin(section);
+                out << key << "=" << live << "\n";
                 return;
+            }
             int parsed = 0;
             if (ParseInt(baseline, parsed) && parsed == live)
                 return;
@@ -748,7 +765,11 @@ namespace ElysiaRenderer
         {
             std::string baseline;
             if (!TryGetBaseline(section, key, baseline))
+            {
+                begin(section);
+                out << key << "=" << FormatVector3(live) << "\n";
                 return;
+            }
             Vector3 parsed = live;
             if (ParseVector3(baseline, parsed) && parsed.x == live.x && parsed.y == live.y && parsed.z == live.z)
                 return;
@@ -759,7 +780,11 @@ namespace ElysiaRenderer
         {
             std::string baseline;
             if (!TryGetBaseline(section, key, baseline))
+            {
+                begin(section);
+                out << key << "=" << NameOf(live, table) << "\n";
                 return;
+            }
             decltype(live) parsed = live;
             if (ParseEnum(baseline, table, parsed) && parsed == live)
                 return;
@@ -826,6 +851,7 @@ namespace ElysiaRenderer
         emitFloat("Shadow", "SlopeDepthBias", data.shadowParameter.shadowSlopeDepthBias);
         emitFloat("Shadow", "MaxSlopeDepthBias", data.shadowParameter.shadowMaxSlopeDepthBias);
         emitFloat("Shadow", "Radius", data.shadowParameter.shadowRadius);
+        emitFloat("Shadow", "Distance", data.shadowParameter.shadowDistance);
         emitBool("Shadow", "Enable", data.shadowParameter.EnableShadow);
         emitBool("Shadow", "EnableTAA", data.shadowParameter.EnableTAA);
 

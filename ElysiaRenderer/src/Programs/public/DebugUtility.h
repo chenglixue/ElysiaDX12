@@ -17,7 +17,8 @@ namespace ElysiaRenderer
         Albedo,
         Emission,
         Metallic,
-        Roughness
+        Roughness,
+        ShadowMap
     };
     NLOHMANN_JSON_SERIALIZE_ENUM(DebugMode,
                                  {
@@ -46,6 +47,8 @@ namespace ElysiaRenderer
                                  { DebugMode::Metallic,
                                  "Metallic" },
                                  { DebugMode::Roughness,
-                                 "Roughness" }
+                                 "Roughness" },
+                                 { DebugMode::ShadowMap,
+                                 "ShadowMap" }
                                  })
 }

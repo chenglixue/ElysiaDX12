@@ -146,8 +146,19 @@ namespace ElysiaModel
                     if (headerValid)
                     {
                         model.SerializeCPU(serializer);
-                        ElysiaHelper::Log::Info("ModelCache: loaded \"%s\".", WstringToString(cachePath).c_str());
-                        return true;
+                        if (model.meshes.empty())
+                        {
+                            ElysiaHelper::Log::Warn(
+                                "ModelCache: \"%s\" has no meshes, rebuilding.",
+                                WstringToString(cachePath).c_str());
+                            headerValid = false;
+                        }
+                        else
+                        {
+                            ElysiaHelper::Log::Info("ModelCache: loaded \"%s\".",
+                                                    WstringToString(cachePath).c_str());
+                            return true;
+                        }
                     }
                 }
 

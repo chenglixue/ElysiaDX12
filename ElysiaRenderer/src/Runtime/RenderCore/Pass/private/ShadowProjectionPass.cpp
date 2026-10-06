@@ -186,6 +186,12 @@ namespace ElysiaRenderer
                                    GetScreenSize(m_shadowMaskWidth, m_shadowMaskHeight),
                                    passID);
             m_pMaterial->SetVector2Array(ShaderIDs::g_SobolSequence, m_sobolSequences, passID);
+            // Per-frame Sobol noise, sampled by the CS for its sub-texel PCF offset.
+            // Without this the offset was constant and the shadow radius had no effect.
+            m_pMaterial->SetUINT(ShaderIDs::g_SobolNoiseTexIndex,
+                                 RenderPassResourceManager::GetInstance().Get<ShaderGlobalData>().
+                                                                          sobolNoiseTex->GetSRVResourceHeapIndex(),
+                                 passID);
 
             SetSpaceResource(passData, PER_PASS_SPACE);
 

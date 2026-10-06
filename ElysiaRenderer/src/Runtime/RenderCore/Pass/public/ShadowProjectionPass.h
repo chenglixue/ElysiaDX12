@@ -77,6 +77,10 @@ PASS(SHADOW_TAA_PASS,                       "public\\CS_ScreenSpaceShadow.hlsl",
 
             static inline size_t g_ShadowMaskTexIndex = PropertyToID(L"g_ShadowMaskTexIndex");
             static inline size_t g_SobolTexIndex = PropertyToID(L"g_SobolTexIndex");
+            // The screen space shadow shader samples the per-frame Sobol noise texture
+            // through this name; without it the CS fell back to descriptor 0 and its
+            // PCF offset was constant, so the source radius could not soften shadows.
+            static inline size_t g_SobolNoiseTexIndex = PropertyToID(L"g_SobolNoiseTexIndex");
             static inline size_t g_HistoryTexIndex = PropertyToID(L"g_HistoryTexIndex");
             static inline size_t g_CurrTexIndex = PropertyToID(L"g_CurrTexIndex");
 

@@ -33,6 +33,7 @@ namespace ElysiaEngine
         void BuildUI();
 
     private:
+        void RestoreSavedDisplayMode();
         bool m_bIsBenchmarking;
         bool m_loadingScene = false;
         std::unique_ptr<ElysiaCore::DX12GraphicsContext> m_pGraphicsContext = nullptr;
@@ -64,6 +65,13 @@ namespace ElysiaEngine
         Transform m_gizmoIdleTransform{};
         Entity* m_pGizmoIdleEntity = nullptr;
 
+        // Editor overlay: draw the shadow (light) camera's frustum inside the
+        // viewport. Drawing the *main* camera's own frustum from its own viewpoint
+        // is degenerate (the corners project onto the viewport border), so the
+        // overlay shows the light camera instead - which is the useful one for
+        // judging shadow coverage.
+        bool m_bShowShadowFrustum = false;
+
         struct GizmoUndoEntry
         {
             Entity* pEntity = nullptr;
@@ -83,6 +91,9 @@ namespace ElysiaEngine
 
         // Gizmo + its small overlay toolbar, drawn on top of the viewport image
         void DrawViewportGizmo(const ImVec2& imageOrigin, const ImVec2& imageSize);
+        // Editor overlay: unprojects the shadow camera's 8 frustum corners and
+        // draws the 12 edges through the main camera (no GPU work).
+        void DrawShadowFrustumOverlay(const ImVec2& imageOrigin, const ImVec2& imageSize);
         void DrawGizmoToolbar(const ImVec2& imageOrigin);
         // Writes a manipulated world matrix back into the entity's local transform
         void ApplyGizmoWorldMatrix(Entity* entity, const Matrix& worldMatrix);

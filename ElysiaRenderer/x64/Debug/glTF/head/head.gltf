@@ -1,0 +1,188 @@
+{
+	"asset":
+	{
+		"version": "2.0",
+		"generator": "Unreal Engine 5.3.2"
+	},
+	"scene": 0,
+	"accessors": [
+		{
+			"bufferView": 0,
+			"count": 53043,
+			"type": "SCALAR",
+			"componentType": 5123
+		},
+		{
+			"bufferView": 1,
+			"count": 9296,
+			"type": "VEC3",
+			"componentType": 5126,
+			"min": [ -0.221154511, -0.305049568, -0.221102819 ],
+			"max": [ 0.232135043, 0.116039559, 0.0534764193 ]
+		},
+		{
+			"bufferView": 2,
+			"count": 9296,
+			"type": "VEC3",
+			"componentType": 5126
+		},
+		{
+			"bufferView": 3,
+			"count": 9296,
+			"type": "VEC4",
+			"componentType": 5126
+		},
+		{
+			"bufferView": 4,
+			"count": 9296,
+			"type": "VEC2",
+			"componentType": 5126
+		}
+	],
+	"buffers": [
+		{
+			"uri": "head.bin",
+			"byteLength": 552296
+		}
+	],
+	"bufferViews": [
+		{
+			"buffer": 0,
+			"byteLength": 106086,
+			"target": 34963
+		},
+		{
+			"buffer": 0,
+			"byteLength": 111552,
+			"byteOffset": 106088,
+			"target": 34962
+		},
+		{
+			"buffer": 0,
+			"byteLength": 111552,
+			"byteOffset": 217640,
+			"target": 34962
+		},
+		{
+			"buffer": 0,
+			"byteLength": 148736,
+			"byteOffset": 329192,
+			"target": 34962
+		},
+		{
+			"buffer": 0,
+			"byteLength": 74368,
+			"byteOffset": 477928,
+			"target": 34962
+		}
+	],
+	"images": [
+		{
+			"uri": "SkinMaster_head_BaseColor.png"
+		},
+		{
+			"uri": "SkinMaster_head_MetallicRoughness.png"
+		},
+		{
+			"uri": "SkinMaster_head_Normal.png"
+		}
+	],
+	"materials": [
+		{
+			"name": "SkinMaster_head",
+			"pbrMetallicRoughness":
+			{
+				"baseColorTexture":
+				{
+					"index": 0,
+					"extensions":
+					{
+						"KHR_texture_transform":
+						{
+							"offset": [ -0.0050999755, -0.00244713947 ],
+							"scale": [ 1.01052761, 1.01183426 ]
+						}
+					}
+				},
+				"metallicRoughnessTexture":
+				{
+					"index": 1,
+					"extensions":
+					{
+						"KHR_texture_transform":
+						{
+							"offset": [ -0.0050999755, -0.00244713947 ],
+							"scale": [ 1.01052761, 1.01183426 ]
+						}
+					}
+				}
+			},
+			"normalTexture":
+			{
+				"index": 2,
+				"extensions":
+				{
+					"KHR_texture_transform":
+					{
+						"offset": [ -0.0050999755, -0.00244713947 ],
+						"scale": [ 1.01052761, 1.01183426 ]
+					}
+				}
+			}
+		}
+	],
+	"meshes": [
+		{
+			"name": "head",
+			"primitives": [
+				{
+					"attributes":
+					{
+						"POSITION": 1,
+						"NORMAL": 2,
+						"TANGENT": 3,
+						"TEXCOORD_0": 4
+					},
+					"indices": 0,
+					"material": 0
+				}
+			]
+		}
+	],
+	"nodes": [
+		{
+			"mesh": 0
+		}
+	],
+	"samplers": [
+		{
+			"minFilter": 9987,
+			"magFilter": 9729
+		}
+	],
+	"scenes": [
+		{
+			"nodes": [ 0 ]
+		}
+	],
+	"textures": [
+		{
+			"name": "SkinMaster_head_BaseColor",
+			"sampler": 0,
+			"source": 0
+		},
+		{
+			"name": "SkinMaster_head_MetallicRoughness",
+			"sampler": 0,
+			"source": 1
+		},
+		{
+			"name": "SkinMaster_head_Normal",
+			"sampler": 0,
+			"source": 2
+		}
+	],
+	"extensionsUsed": [
+		"KHR_texture_transform"
+	]
+}

@@ -9,6 +9,7 @@
 #include "Runtime/Core/public/DX12UploadContext.h"
 #include "Runtime/Resource/Model/public/LoadedModel.h"
 #include "Runtime/Resource/Model/public/ModelManager.h"
+#include "Programs/public/Log.h"
 #include "Runtime/Engine/ECS/public/Entity.h"
 
 namespace ElysiaRenderer
@@ -58,9 +59,23 @@ namespace ElysiaRenderer
 
         if (loadStage == 6)
         {
+            // The first model stays at the origin. Each later model is placed
+            // just past the previous model's right edge so they do not overlap.
+            constexpr float kModelGap = 1.f;
+            float nextOriginX = 0.f;
+            bool isFirstModel = true;
             for (auto& loadedModel : m_pendingModels)
             {
-                CreateEntityFromModel(loadedModel);
+                Vector3 position = Vector3::Zero;
+                const bool hasBounds = loadedModel && loadedModel->aabbMin.x <= loadedModel->aabbMax.x;
+                if (!isFirstModel && hasBounds)
+                    position.x = nextOriginX - loadedModel->aabbMin.x;
+
+                CreateEntityFromModel(loadedModel, position);
+
+                if (hasBounds)
+                    nextOriginX = position.x + loadedModel->aabbMax.x + kModelGap;
+                isFirstModel = false;
             }
         }
         if (loadStage == 7)
@@ -87,9 +102,17 @@ namespace ElysiaRenderer
 
         return pModel;
     }
-    Entity* SceneManager::CreateEntityFromModel(std::shared_ptr<ElysiaModel::LoadedModel> pModel)
+    Entity* SceneManager::CreateEntityFromModel(std::shared_ptr<ElysiaModel::LoadedModel> pModel,
+                                                 const Vector3& position)
     {
-        auto pEntity = CreateEntity(pModel);
+        if (!pModel || pModel->meshes.empty())
+        {
+            ElysiaHelper::Log::Warn("SceneManager: skip \"%s\" because it has no meshes.",
+                                    pModel ? pModel->name.c_str() : "(null)");
+            return nullptr;
+        }
+
+        auto pEntity = CreateEntity(pModel, position);
 
         Entity* ptr = pEntity.get();
 
@@ -97,9 +120,11 @@ namespace ElysiaRenderer
         return ptr;
     }
     std::unique_ptr<Entity> SceneManager::CreateEntity(
-        const std::shared_ptr<LoadedModel>& model) const
+        const std::shared_ptr<LoadedModel>& model,
+        const Vector3& position) const
     {
         auto pParent = std::make_unique<Entity>(ToEastl(model->name));
+        pParent->transform.position = position;
         pParent->transform.scale = Vector3::One * 1.f;
         // pParent->transform.rotation = MathHelper::Euler(-45, 0, 0);
         pParent->SetLocalAABB(model->aabbMin, model->aabbMax);

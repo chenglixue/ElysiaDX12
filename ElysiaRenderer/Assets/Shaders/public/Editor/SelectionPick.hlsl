@@ -3,7 +3,7 @@
 #pragma Vertex VS
 #pragma Pixel PS
 
-#pragma Rasterizer NoCullNoMS
+#pragma Rasterizer BackFaceCull
 #pragma Blend Disabled
 #pragma Depth Disabled
 

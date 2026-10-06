@@ -8,6 +8,7 @@
 #include "Runtime/RenderCore/Pass/public/ShadowPass.h"
 #include "../public/DX12Light.h"
 #include "../public/DX12Shadow.h"
+#include "Runtime/RenderCore/public/SceneManager.h"
 
 namespace ElysiaRenderer
 {
@@ -44,7 +45,28 @@ namespace ElysiaRenderer
         m_pMainLight->m_lightDir = pUsetData.lightDir;
         m_pMainLight->m_lightIntensity = pUsetData.lightIntensity;
 
-        m_pMainLight->GetMainShadow()->UpdateShadowTransform(m_pMainLight.get());
+        std::vector<BoundingBox> casterBounds;
+        auto& entities = SceneManager::GetInstance().GetEntities();
+        casterBounds.reserve(entities.size());
+        for (const auto& entity : entities)
+        {
+            if (!entity)
+                AppendCasterBounds(*entity, casterBounds);
+            const BoundingBox box = entity->GetWorldAABB();
+            if (box.Extents.x <= 0.f && box.Extents.y <= 0.f && box.Extents.z <= 0.f)
+                continue;
+            casterBounds.push_back(box);
+        }
+
+        if (context.pCamera != nullptr)
+        {
+            m_pMainLight->GetMainShadow()->UpdateShadowTransform(
+                m_pMainLight.get(),
+                *context.pCamera,
+                pUsetData.shadowParameter.shadowDistance,
+                casterBounds.data(),
+                casterBounds.size());
+        }
     }
 
     DX12DirectionLight* LightManager::GetMainLight()
@@ -78,7 +100,22 @@ namespace ElysiaRenderer
                 pUserData.lightDir,
                 pUserData.lightIntensity);
         }
+    }
 
-        m_pMainLight->CreateMainShadow(20, DXGI_FORMAT_D32_FLOAT_S8X24_UINT);
+    void LightManager::AppendCasterBounds(Entity& entity, std::vector<BoundingBox>& casterBounds)
+    {
+        if (entity.pMeshRenderer != nullptr)
+        {
+            BoundingBox worldBounds;
+            entity.GetLocalAABB().Transform(worldBounds, entity.transform.GetWorldMatrix());
+            if (worldBounds.Extents.x > 0.f || worldBounds.Extents.y > 0.f || worldBounds.Extents.z > 0.f)
+                casterBounds.push_back(worldBounds);
+        }
+
+        for (auto& child : entity.GetChildren())
+        {
+            if (child)
+                AppendCasterBounds(*child, casterBounds);
+        }
     }
 }
