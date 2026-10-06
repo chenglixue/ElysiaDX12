@@ -43,4 +43,12 @@ namespace ElysiaEngine
                        XMConvertToDegrees(yaw),
                        XMConvertToDegrees(roll));
     }
+
+    void Transform::SetEulerDegrees(const Vector3& pitchYawRollDegrees)
+    {
+        rotation = Quaternion::CreateFromYawPitchRoll(
+            XMConvertToRadians(pitchYawRollDegrees.y),
+            XMConvertToRadians(pitchYawRollDegrees.x),
+            XMConvertToRadians(pitchYawRollDegrees.z));
+    }
 }

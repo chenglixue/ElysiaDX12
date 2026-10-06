@@ -61,17 +61,34 @@ namespace ElysiaRenderer
         {
             // The first model stays at the origin. Each later model is placed
             // just past the previous model's right edge so they do not overlap.
+            // Saved transforms from Engine.ini win over this default packing.
             constexpr float kModelGap = 1.f;
             float nextOriginX = 0.f;
             bool isFirstModel = true;
-            for (auto& loadedModel : m_pendingModels)
+            for (size_t modelIndex = 0; modelIndex < m_pendingModels.size(); ++modelIndex)
             {
+                auto& loadedModel = m_pendingModels[modelIndex];
                 Vector3 position = Vector3::Zero;
+                Quaternion rotation = Quaternion::Identity;
+                Vector3 scale = Vector3::One;
                 const bool hasBounds = loadedModel && loadedModel->aabbMin.x <= loadedModel->aabbMax.x;
-                if (!isFirstModel && hasBounds)
+                const bool hasSaved = modelIndex < g_ModelTransforms.size() &&
+                                      g_ModelTransforms[modelIndex].valid;
+                if (hasSaved)
+                {
+                    position = g_ModelTransforms[modelIndex].location;
+                    Transform savedRotation;
+                    savedRotation.SetEulerDegrees(g_ModelTransforms[modelIndex].rotationEuler);
+                    rotation = savedRotation.rotation;
+                    scale = g_ModelTransforms[modelIndex].scale;
+                }
+                else if (!isFirstModel && hasBounds)
+                {
                     position.x = nextOriginX - loadedModel->aabbMin.x;
+                }
 
-                CreateEntityFromModel(loadedModel, position);
+                if (Entity* pEntity = CreateEntityFromModel(loadedModel, position, rotation, scale))
+                    pEntity->sourceModelIndex = static_cast<int>(modelIndex);
 
                 if (hasBounds)
                     nextOriginX = position.x + loadedModel->aabbMax.x + kModelGap;
@@ -103,7 +120,9 @@ namespace ElysiaRenderer
         return pModel;
     }
     Entity* SceneManager::CreateEntityFromModel(std::shared_ptr<ElysiaModel::LoadedModel> pModel,
-                                                 const Vector3& position)
+                                                 const Vector3& position,
+                                                 const Quaternion& rotation,
+                                                 const Vector3& scale)
     {
         if (!pModel || pModel->meshes.empty())
         {
@@ -112,7 +131,7 @@ namespace ElysiaRenderer
             return nullptr;
         }
 
-        auto pEntity = CreateEntity(pModel, position);
+        auto pEntity = CreateEntity(pModel, position, rotation, scale);
 
         Entity* ptr = pEntity.get();
 
@@ -121,11 +140,14 @@ namespace ElysiaRenderer
     }
     std::unique_ptr<Entity> SceneManager::CreateEntity(
         const std::shared_ptr<LoadedModel>& model,
-        const Vector3& position) const
+        const Vector3& position,
+        const Quaternion& rotation,
+        const Vector3& scale) const
     {
         auto pParent = std::make_unique<Entity>(ToEastl(model->name));
         pParent->transform.position = position;
-        pParent->transform.scale = Vector3::One * 1.f;
+        pParent->transform.rotation = rotation;
+        pParent->transform.scale = scale;
         // pParent->transform.rotation = MathHelper::Euler(-45, 0, 0);
         pParent->SetLocalAABB(model->aabbMin, model->aabbMax);
         pParent->UpdateWorldAABB();

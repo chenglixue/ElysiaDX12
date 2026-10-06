@@ -53,5 +53,6 @@ namespace ElysiaEngine
         }
 
         Vector3 GetEulerDegrees() const;
+        void SetEulerDegrees(const Vector3& pitchYawRollDegrees);
     };
 }

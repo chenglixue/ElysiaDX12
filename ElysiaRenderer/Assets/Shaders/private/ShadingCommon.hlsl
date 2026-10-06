@@ -182,11 +182,10 @@ FDecodeGBufferData DecodeGBufferData(float4 InGBuffer0,
     o.Roughness = InGBuffer1.b;
     o.AO = InGBuffer1.a;
 
-    o.WorldTangent = DecodeNormal(InGBuffer2.rgb);
+    o.WorldTangent = normalize(DecodeNormal(InGBuffer2.rgb));
     o.Anisotropy = InGBuffer2.a;
 
-    o.WorldNormal = DecodeNormal(InGBuffer3.rgb);
-    // o.WorldNormal = normalize(o.WorldNormal);
+    o.WorldNormal = normalize(DecodeNormal(InGBuffer3.rgb));
 
     o.SceneColor = InGBuffer4.rgb;
     o.Opacity = InGBuffer4.a;
@@ -230,7 +229,7 @@ FDecodeGBufferData GetDecodeGBufferData(float2 uv)
 
 float3 SampleNormalWS(float2 uv)
 {
-    float3 encodeNormalWS = SampleTexture2D(GBuffer3Index, uv, WarpLinearSampler);
+    float3 encodeNormalWS = SampleTexture2D(GBuffer3Index, uv, WarpPointSampler);
     float3 decodeNormalWS = DecodeNormal(encodeNormalWS);
     decodeNormalWS = normalize(decodeNormalWS);
 

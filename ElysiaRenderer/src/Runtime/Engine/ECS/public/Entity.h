@@ -25,6 +25,9 @@ namespace ElysiaEngine
         Transform transform;
         std::unique_ptr<MeshRenderer> pMeshRenderer = nullptr;
         DX12Camera* pAttachedCamera = nullptr;
+        // Index into g_ModelPaths / g_ModelTransforms for the root entity of a
+        // loaded model. -1 for mesh children and anything not spawned from Startup.
+        int sourceModelIndex = -1;
 
         ~Entity();
         Entity(eastl::string n);

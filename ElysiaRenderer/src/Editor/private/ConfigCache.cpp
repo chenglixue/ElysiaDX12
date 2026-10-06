@@ -698,6 +698,29 @@ namespace ElysiaRenderer
         {
             g_ModelPaths.emplace_back(Utf8ToWide(kFallbackModel));
         }
+
+        g_ModelTransforms.assign(g_ModelPaths.size(), SavedModelTransform{});
+        auto loadTransformArray = [&](const char* key, Vector3 SavedModelTransform::* member)
+        {
+            const auto* values = TryGetArray("Startup", key);
+            if (!values)
+                return;
+            const size_t count = (std::min)(values->size(), g_ModelTransforms.size());
+            for (size_t i = 0; i < count; ++i)
+            {
+                Vector3 parsed = g_ModelTransforms[i].*member;
+                if (!ParseVector3((*values)[i], parsed))
+                {
+                    warn("Startup", key, (*values)[i]);
+                    continue;
+                }
+                g_ModelTransforms[i].*member = parsed;
+                g_ModelTransforms[i].valid = true;
+            }
+        };
+        loadTransformArray("ModelLocation", &SavedModelTransform::location);
+        loadTransformArray("ModelRotation", &SavedModelTransform::rotationEuler);
+        loadTransformArray("ModelScale", &SavedModelTransform::scale);
     }
 
     void ConfigCache::SaveDiff() const
@@ -814,6 +837,43 @@ namespace ElysiaRenderer
                     out << (i == 0 ? "." : "+") << "ModelPath=" << livePaths[i] << "\n";
             }
         }
+
+        bool anySavedTransform = false;
+        for (const auto& saved : g_ModelTransforms)
+        {
+            if (saved.valid)
+            {
+                anySavedTransform = true;
+                break;
+            }
+        }
+
+        auto emitVecArray = [&](const char* key, Vector3 SavedModelTransform::* member, const Vector3& fallback)
+        {
+            if (g_ModelPaths.empty() || !anySavedTransform)
+                return;
+
+            std::vector<std::string> live;
+            live.reserve(g_ModelPaths.size());
+            for (size_t i = 0; i < g_ModelPaths.size(); ++i)
+            {
+                Vector3 value = fallback;
+                if (i < g_ModelTransforms.size() && g_ModelTransforms[i].valid)
+                    value = g_ModelTransforms[i].*member;
+                live.push_back(FormatVector3(value));
+            }
+
+            const std::vector<std::string>* baseline = TryGetBaselineArray("Startup", key);
+            if (baseline != nullptr && *baseline == live)
+                return;
+
+            begin("Startup");
+            for (size_t i = 0; i < live.size(); ++i)
+                out << (i == 0 ? "." : "+") << key << "=" << live[i] << "\n";
+        };
+        emitVecArray("ModelLocation", &SavedModelTransform::location, Vector3::Zero);
+        emitVecArray("ModelRotation", &SavedModelTransform::rotationEuler, Vector3::Zero);
+        emitVecArray("ModelScale", &SavedModelTransform::scale, Vector3::One);
 
         emitVector("Light", "Color", data.lightColor);
         emitVector("Light", "Direction", data.lightDir);

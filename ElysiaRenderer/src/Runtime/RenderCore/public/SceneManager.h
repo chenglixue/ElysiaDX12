@@ -42,7 +42,9 @@ namespace ElysiaRenderer
 
         std::shared_ptr<ElysiaModel::LoadedModel> CreateModel(const std::wstring& modelPath);
         Entity* CreateEntityFromModel(std::shared_ptr<ElysiaModel::LoadedModel> pModel,
-                                      const Vector3& position);
+                                      const Vector3& position,
+                                      const Quaternion& rotation = Quaternion::Identity,
+                                      const Vector3& scale = Vector3::One);
         void CollectRenderItems();
         void ClearScene();
 
@@ -69,7 +71,9 @@ namespace ElysiaRenderer
 
         std::unique_ptr<Entity> CreateEntity(
             const std::shared_ptr<ElysiaModel::LoadedModel>& model,
-            const Vector3& position) const;
+            const Vector3& position,
+            const Quaternion& rotation,
+            const Vector3& scale) const;
         void UpdateEntity(const std::unique_ptr<Entity>& pEntity);
         void CollectRenderItem(const std::unique_ptr<Entity>& pEntity,
                                BoundingFrustum& boundingFrustum);

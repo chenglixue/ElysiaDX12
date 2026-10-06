@@ -63,6 +63,17 @@ namespace ElysiaRenderer
     // Filled from [Startup] +ModelPath in the ini hierarchy.
     extern std::vector<std::wstring> g_ModelPaths;
 
+    // Parallel to g_ModelPaths. Restored from [Startup] ModelLocation / ModelRotation /
+    // ModelScale, then kept in sync with live root-entity transforms.
+    struct SavedModelTransform
+    {
+        Vector3 location = Vector3::Zero;
+        Vector3 rotationEuler = Vector3::Zero; // pitch, yaw, roll in degrees
+        Vector3 scale = Vector3::One;
+        bool valid = false;
+    };
+    extern std::vector<SavedModelTransform> g_ModelTransforms;
+
     class UserData
     {
     public:
