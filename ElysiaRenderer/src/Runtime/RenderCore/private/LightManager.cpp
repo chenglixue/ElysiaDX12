@@ -9,6 +9,7 @@
 #include "../public/DX12Light.h"
 #include "../public/DX12Shadow.h"
 #include "Runtime/RenderCore/public/SceneManager.h"
+#include "Runtime/Engine/ECS/public/Entity.h"
 
 namespace ElysiaRenderer
 {
@@ -39,11 +40,31 @@ namespace ElysiaRenderer
         m_frameID = context.frameID;
         m_frameIndex = context.frameIndex;
 
-        auto& pUsetData = UserData::GetInstance();
-
-        m_pMainLight->m_lightColor = pUsetData.lightColor;
-        m_pMainLight->m_lightDir = pUsetData.lightDir;
-        m_pMainLight->m_lightIntensity = pUsetData.lightIntensity;
+        auto& pUserData = UserData::GetInstance();
+        if (Entity* pMainLightEntity = SceneManager::GetInstance().FindMainDirectionalLight())
+        {
+            const LightComponent& light = *pMainLightEntity->pLight;
+            m_pMainLight->m_lightColor = light.color;
+            m_pMainLight->m_lightDir = GetDirectionalLightDirection(pMainLightEntity->transform);
+            m_pMainLight->m_lightIntensity = light.intensity;
+            pUserData.lightColor = m_pMainLight->m_lightColor;
+            pUserData.lightDir = m_pMainLight->m_lightDir;
+            pUserData.lightIntensity = m_pMainLight->m_lightIntensity;
+            pUserData.lightSourceAngleDegrees = light.sourceAngleDegrees;
+            pUserData.shadowParameter = light.shadow;
+        }
+        else if (g_DirectionalLightsSpawned)
+        {
+            m_pMainLight->m_lightIntensity = 0.f;
+            pUserData.lightIntensity = 0.f;
+            pUserData.shadowParameter.EnableShadow = false;
+        }
+        else
+        {
+            m_pMainLight->m_lightColor = pUserData.lightColor;
+            m_pMainLight->m_lightDir = pUserData.lightDir;
+            m_pMainLight->m_lightIntensity = pUserData.lightIntensity;
+        }
 
         std::vector<BoundingBox> casterBounds;
         auto& entities = SceneManager::GetInstance().GetEntities();
@@ -63,10 +84,12 @@ namespace ElysiaRenderer
             m_pMainLight->GetMainShadow()->UpdateShadowTransform(
                 m_pMainLight.get(),
                 *context.pCamera,
-                pUsetData.shadowParameter.shadowDistance,
+                pUserData.shadowParameter.shadowDistance,
                 casterBounds.data(),
                 casterBounds.size());
         }
+
+        DetectShadowLayoutChange();
     }
 
     DX12DirectionLight* LightManager::GetMainLight()
@@ -100,6 +123,34 @@ namespace ElysiaRenderer
                 pUserData.lightDir,
                 pUserData.lightIntensity);
         }
+
+        CaptureAppliedShadowLayout();
+    }
+
+    void LightManager::CaptureAppliedShadowLayout()
+    {
+        const auto& shadow = UserData::GetInstance().shadowParameter;
+        m_appliedShadowType = shadow.shadowType;
+        m_appliedShadowQuality = shadow.shadowQuality;
+        m_bShadowLayoutDirty = false;
+    }
+
+    void LightManager::DetectShadowLayoutChange()
+    {
+        const auto& shadow = UserData::GetInstance().shadowParameter;
+        if (shadow.shadowType == m_appliedShadowType && shadow.shadowQuality == m_appliedShadowQuality)
+            return;
+
+        m_appliedShadowType = shadow.shadowType;
+        m_appliedShadowQuality = shadow.shadowQuality;
+        m_bShadowLayoutDirty = true;
+    }
+
+    bool LightManager::ConsumeShadowLayoutDirty()
+    {
+        const bool dirty = m_bShadowLayoutDirty;
+        m_bShadowLayoutDirty = false;
+        return dirty;
     }
 
     void LightManager::AppendCasterBounds(Entity& entity, std::vector<BoundingBox>& casterBounds)

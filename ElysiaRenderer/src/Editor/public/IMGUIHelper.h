@@ -16,6 +16,8 @@ namespace ElysiaEditor
                     ElysiaCore::DX12Device* pDevice,
                     ElysiaCore::SwapChain& pSwapChain);
     void ImGUI_Shutdown();
+    // UE FTabManager::SavePersistentLayout: flush imgui.ini now (shutdown / reset).
+    void ImGUI_SaveLayout();
     void ImGUI_UpdateIO();
     void ImGUI_NewFrame();
     void ImGUI_EndFrame(ElysiaCore::DX12Device* pDevice);

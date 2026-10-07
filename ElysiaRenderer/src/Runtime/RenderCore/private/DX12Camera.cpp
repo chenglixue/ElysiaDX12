@@ -2,6 +2,8 @@
 #include "../public/DX12Camera.h"
 
 #include "Programs/public/Math.h"
+#include <algorithm>
+#include <cmath>
 
 namespace ElysiaRenderer
 {
@@ -246,6 +248,20 @@ namespace ElysiaRenderer
         m_yaw = 0.0f;
         m_pitch = 0.0f;
     }
+    void FirstPersonCamera::SetCameraSpeed(float speed) noexcept
+    {
+        if (!std::isfinite(speed))
+            return;
+        m_speed = std::clamp(speed, kMinCameraSpeed, kMaxCameraSpeed);
+    }
+
+    void FirstPersonCamera::AdjustCameraSpeed(float relativeFactor) noexcept
+    {
+        if (!std::isfinite(relativeFactor))
+            return;
+        SetCameraSpeed(m_speed + m_speed * relativeFactor);
+    }
+
     void FirstPersonCamera::AddYawPitch(float yawDelta, float pitchDelta) noexcept
     {
         m_yaw += yawDelta;
@@ -283,5 +299,85 @@ namespace ElysiaRenderer
     void FirstPersonCamera::SyncFromTransform()
     {
         SetRotation(Quaternion(XMQuaternionRotationRollPitchYaw(m_pitch, m_yaw, 0)));
+    }
+
+    Vector3 FirstPersonCamera::GetWorldForwardDir() const noexcept
+    {
+        // Explicit +Z: SimpleMath Vector3::Forward is (0,0,-1).
+        return Vector3::Transform(Vector3(0.0f, 0.0f, 1.0f), m_transform.rotation);
+    }
+
+    void FirstPersonCamera::SetLookAtLocation(const Vector3& lookAt) noexcept
+    {
+        if (!std::isfinite(lookAt.x) || !std::isfinite(lookAt.y) || !std::isfinite(lookAt.z))
+            return;
+        m_lookAt = lookAt;
+        m_bHasLookAt = true;
+    }
+
+    void FirstPersonCamera::FocusViewportOnBox(const BoundingBox& box) noexcept
+    {
+        Vector3 center = box.Center;
+        Vector3 extents = box.Extents;
+        if (!std::isfinite(center.x) || !std::isfinite(center.y) || !std::isfinite(center.z) ||
+            !std::isfinite(extents.x) || !std::isfinite(extents.y) || !std::isfinite(extents.z))
+        {
+            return;
+        }
+
+        // UE: Radius = max(extent.Size(), MinimumFocusRadius). ViewFOV is
+        // horizontal so they scale radius when aspect > 1. CreatePerspectiveFieldOfView
+        // takes vertical FOV, so the tight axis is vertical on wide frames and
+        // horizontal on tall ones.
+        float radius = (std::max)(extents.Length(), kMinimumFocusRadius);
+        const float aspect = GetAspect();
+        if (aspect > 0.0f && aspect < 1.0f)
+            radius /= aspect;
+
+        const float halfFov = GetFOVY() * 0.5f;
+        const float tanHalf = std::tan(halfFov);
+        float distance = (tanHalf > 1.0e-6f) ? (radius / tanHalf) : radius;
+        distance = (std::max)(distance, m_nearZ * 2.0f);
+
+        const Vector3 forward = GetWorldForwardDir();
+        SetLookAtLocation(center);
+        m_orbitDistance = distance;
+        SetPosition(center - forward * distance);
+    }
+
+    void FirstPersonCamera::BeginOrbitCamera() noexcept
+    {
+        const Vector3 forward = GetWorldForwardDir();
+        if (!m_bHasLookAt)
+            SetLookAtLocation(m_transform.position + forward * kInitialLookAtDistance);
+
+        Vector3 offset = m_transform.position - m_lookAt;
+        float distance = offset.Length();
+        if (!std::isfinite(distance) || distance < 1.0e-3f)
+            distance = kInitialLookAtDistance;
+        m_orbitDistance = distance;
+
+        Vector3 dir = m_lookAt - m_transform.position;
+        if (dir.LengthSquared() < 1.0e-8f)
+            dir = forward;
+        else
+            dir.Normalize();
+
+        // Inverse of CreateFromYawPitchRoll: +pitch looks down (forward.y < 0).
+        m_pitch = std::asin(std::clamp(-dir.y, -1.0f, 1.0f));
+        m_yaw = std::atan2(dir.x, dir.z);
+        m_pitch = std::clamp(m_pitch, -XM_PIDIV2 + 0.01f, XM_PIDIV2 - 0.01f);
+        m_transform.rotation = Quaternion::CreateFromYawPitchRoll(m_yaw, m_pitch, 0.0f);
+        UpdateViewMatrix();
+        SetPosition(m_lookAt - GetWorldForwardDir() * m_orbitDistance);
+    }
+
+    void FirstPersonCamera::OrbitCamera(float yawDelta, float pitchDelta) noexcept
+    {
+        if (!m_bHasLookAt)
+            BeginOrbitCamera();
+
+        AddYawPitch(yawDelta, pitchDelta);
+        SetPosition(m_lookAt - GetWorldForwardDir() * m_orbitDistance);
     }
 }

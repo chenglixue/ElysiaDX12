@@ -1,8 +1,10 @@
 ﻿#include "stdafx.h"
 #include "../public/OutputLogPanel.h"
 
+#include "../public/EditorIcons.h"
 #include "Programs/public/LogHistory.h"
 #include "ThirdParty/imgui/imgui.h"
+#include "ThirdParty/imgui/imgui_internal.h"
 
 namespace ElysiaEditor
 {
@@ -32,13 +34,63 @@ namespace ElysiaEditor
         return "Info";
     }
 
-    void DrawOutputLog(bool& open)
+    void DrawOutputLogDrawer(bool& open, const ImVec2& pos, const ImVec2& size, bool& hovered, float* heightDelta)
     {
-        if (!ImGui::Begin("Output Log", &open))
+        hovered = false;
+        if (heightDelta)
+            *heightDelta = 0.0f;
+        if (!open)
+            return;
+
+        ImGui::SetNextWindowPos(pos);
+        ImGui::SetNextWindowSize(size, ImGuiCond_Always);
+        ImGui::SetNextWindowViewport(ImGui::GetMainViewport()->ID);
+        // Overlay, not a dock tab. Stay on top of the dock; don't steal viewport keys.
+        const ImGuiWindowFlags flags =
+            ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoCollapse |
+            ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
+            ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoTitleBar |
+            ImGuiWindowFlags_NoFocusOnAppearing;
+
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 4.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8.0f, 6.0f));
+        if (!ImGui::Begin("##OutputLogDrawer", nullptr, flags))
         {
+            hovered = ImGui::IsWindowHovered();
             ImGui::End();
+            ImGui::PopStyleVar(2);
             return;
         }
+
+        ImGui::BringWindowToDisplayFront(ImGui::GetCurrentWindow());
+        hovered = ImGui::IsWindowHovered(
+            ImGuiHoveredFlags_ChildWindows | ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
+
+        // UE SDrawerOverlay: drag the top edge to resize height.
+        {
+            const ImVec2 grabSize(ImGui::GetContentRegionAvail().x, 8.0f);
+            ImGui::InvisibleButton("##OutputLogResize", grabSize);
+            const ImVec2 rmin = ImGui::GetItemRectMin();
+            const ImVec2 rmax = ImGui::GetItemRectMax();
+            ImDrawList* dl = ImGui::GetWindowDrawList();
+            const float midX = (rmin.x + rmax.x) * 0.5f;
+            const float midY = (rmin.y + rmax.y) * 0.5f;
+            dl->AddRectFilled(
+                ImVec2(midX - 18.0f, midY - 1.0f),
+                ImVec2(midX + 18.0f, midY + 1.0f),
+                ImGui::GetColorU32(ImGuiCol_Separator));
+            if (ImGui::IsItemActive() && heightDelta)
+                *heightDelta = -ImGui::GetIO().MouseDelta.y;
+            if (ImGui::IsItemHovered())
+                ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNS);
+        }
+
+        auto& icons = EditorIcons::Get();
+        icons.Image(EditorIcon::OutputLog);
+        ImGui::SameLine();
+        ImGui::AlignTextToFramePadding();
+        ImGui::TextUnformatted("Output Log");
+        ImGui::Separator();
 
         static bool showInfo = true;
         static bool showWarn = true;
@@ -143,5 +195,6 @@ namespace ElysiaEditor
 
         ImGui::EndChild();
         ImGui::End();
+        ImGui::PopStyleVar(2);
     }
 }

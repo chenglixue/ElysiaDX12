@@ -115,7 +115,10 @@ namespace ElysiaRenderer
         switch (UserData::GetInstance().debugMode)
         {
         case DebugMode::None:
+        case DebugMode::LightingOnly:
+        case DebugMode::GI:
         {
+            // Lit / Lighting Only / GI Scene are produced by Opaque. Leave DisplayRT as-is.
             break;
         }
         case DebugMode::AABB:
@@ -290,11 +293,12 @@ namespace ElysiaRenderer
         case DebugMode::Metallic:
         case DebugMode::Roughness:
         case DebugMode::Normal:
+        case DebugMode::Specular:
+        case DebugMode::WorldTangent:
+        case DebugMode::SceneDepth:
+        case DebugMode::Opacity:
+        case DebugMode::ShadingModel:
         {
-            Vector2 renderSize = Vector2(std::floor(
-                                             m_displaySize.x * UserData::GetInstance().taaParameter.sampleRate),
-                                         std::floor(
-                                             m_displaySize.y * UserData::GetInstance().taaParameter.sampleRate));
             m_pCommand->AddBarrier(m_pDisplayRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
             {
                 m_pMaterial->SetFloat4(ShaderIDs::g_TargetSize,
@@ -305,6 +309,33 @@ namespace ElysiaRenderer
             }
             m_pCommand->AddBarrier(m_pDisplayRT,
                                    D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+            break;
+        }
+        case DebugMode::PreTonemapHDR:
+        {
+            // CameraColorRT still holds the lighting HDR; DisplayRT has already been tonemapped.
+            if (m_pCameraColorRT == nullptr)
+                break;
+            m_pCommand->AddBarrier(m_pCameraColorRT, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+            m_pMaterial->SetUINT(ShaderIDs::g_TargetTexIndex,
+                                 m_pCameraColorRT->GetSRVResourceHeapIndex(),
+                                 passID);
+            m_pCommand->AddBarrier(m_pDisplayRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+            {
+                m_pMaterial->SetFloat4(ShaderIDs::g_TargetSize,
+                                       GetScreenSize(m_displaySize),
+                                       passID);
+                SetSpaceResource(passData, PER_PASS_SPACE);
+                m_pCommand->DrawFullScreenTriangle();
+            }
+            m_pCommand->AddBarrier(m_pDisplayRT,
+                                   D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+            break;
+        }
+        case DebugMode::PostTonemapHDR:
+        {
+            // DisplayRT is already the tonemapped color (DebugPass runs after Tonemap).
+            // Reading it while bound as the RT is illegal, so leave the buffer as-is.
             break;
         }
 

@@ -36,7 +36,9 @@ namespace ElysiaEditor
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // 启用键盘控制
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;     // 启用Docking
 
-        io.ConfigDockingWithShift = true;
+        // UE tab docking does not require Shift. Keep the 5s debounce
+        // (io.IniSavingRate) and also flush on shutdown via ImGUI_SaveLayout.
+        io.ConfigDockingWithShift = false;
 
         // 2. 设置样式（docking分支可能使用不同的默认样式）
         ImGui::StyleColorsDark();
@@ -57,8 +59,22 @@ namespace ElysiaEditor
         return true;
     }
 
+    void ImGUI_SaveLayout()
+    {
+        if (ImGui::GetCurrentContext() == nullptr)
+            return;
+        const char* iniFilename = ImGui::GetIO().IniFilename;
+        if (iniFilename && iniFilename[0] != '\0')
+            ImGui::SaveIniSettingsToDisk(iniFilename);
+    }
+
     void ImGUI_Shutdown()
     {
+        if (ImGui::GetCurrentContext() == nullptr)
+            return;
+        // Persist before tearing down backends (DestroyContext also saves, but
+        // only if SettingsLoaded — flush explicitly like UE PersistLayout).
+        ImGUI_SaveLayout();
         ImGui_ImplDX12_Shutdown();
         ImGui_ImplWin32_Shutdown();
         ImGui::DestroyContext();

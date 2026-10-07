@@ -123,6 +123,24 @@ uint DecodeMaterialFlags(float packedMaterialFlags)
     return uint((packedMaterialFlags * 255.0h) + 0.5h);
 }
 
+// UE ShadingCommon.ush GetShadingModelColor, keyed by this renderer's shading-model IDs.
+float3 GetShadingModelColor(uint shadingModelID)
+{
+    switch (shadingModelID)
+    {
+    case Shading_Model_ID_Unlit: return float3(0.1f, 0.1f, 0.2f);
+    case Shading_Model_ID_Default_Lit: return float3(0.1f, 1.0f, 0.1f);
+    case Shading_Model_ID_Preintegrated_Skin: return float3(0.6f, 0.4f, 0.1f);
+    case Shading_Model_ID_Subsurface_Profile: return float3(0.2f, 0.6f, 0.5f);
+    case Shading_Model_ID_Hair: return float3(0.6f, 0.1f, 0.5f);
+    case Shading_Model_ID_Eye: return float3(0.3f, 1.0f, 1.0f);
+    case Shading_Model_ID_Cloth: return float3(0.7f, 1.0f, 1.0f);
+    case Shading_Model_ID_Clear_Coat: return float3(0.1f, 0.4f, 0.4f);
+    case Shading_Model_ID_Two_Sided_Foliage: return float3(0.2f, 0.2f, 0.8f);
+    default: return float3(1.0f, 1.0f, 1.0f);
+    }
+}
+
 //MaterialData GetMaterialData(FInputParams inputParams)
 //{
 //    MaterialData o = (MaterialData) 0;

@@ -3,6 +3,7 @@
 
 
 #include "../public/ImGuiUtility.h"
+#include "Editor/public/EditorIcons.h"
 #include "Editor/public/IMGUIDrawer.h"
 #include "Editor/public/IMGUIHelper.h"
 #include "Editor/public/UserData.h"
@@ -32,6 +33,10 @@
 #include "ThirdParty/ImGuizmo/ImGuizmo.h"
 #include "Editor/public/OutputLogPanel.h"
 #include "Programs/public/LogHistory.h"
+#include <algorithm>
+#include <cmath>
+#include <cstdio>
+#include <string>
 
 namespace ElysiaEngine
 {
@@ -44,6 +49,68 @@ namespace ElysiaEngine
 
     namespace
     {
+        ImGuiWindowClass MakeViewportWindowClass()
+        {
+            // UE SLevelEditor viewport stack: HideTabWell, no split over the
+            // document, no independent Y splitter (only left/right neighbors).
+            ImGuiWindowClass windowClass;
+            windowClass.DockNodeFlagsOverrideSet =
+                ImGuiDockNodeFlags_AutoHideTabBar | ImGuiDockNodeFlags_NoDockingSplit |
+                ImGuiDockNodeFlags_NoDockingOverMe | ImGuiDockNodeFlags_NoResizeY;
+            return windowClass;
+        }
+
+        // UE LevelEditor_Layout_v1.8: bump when the default dock tree is incompatible.
+        constexpr const char* kEditorDockSpace = "ElysiaLevelEditor_Layout_v1";
+
+        void ApplyDefaultEditorDockLayout(ImGuiID dockspace_id, const ImVec2& dockSize)
+        {
+            ImGui::DockBuilderRemoveNode(dockspace_id);
+            ImGui::DockBuilderAddNode(dockspace_id, ImGuiDockNodeFlags_DockSpace);
+            ImGui::DockBuilderSetNodeSize(dockspace_id, dockSize);
+
+            ImGuiID dock_id_left = 0;
+            ImGuiID dock_id_center = 0;
+            ImGuiID dock_id_right = 0;
+            ImGui::DockBuilderSplitNode(
+                dockspace_id, ImGuiDir_Left, 0.16f, &dock_id_left, &dock_id_center);
+            ImGui::DockBuilderSplitNode(
+                dock_id_center, ImGuiDir_Right, 0.22f, &dock_id_right, &dock_id_center);
+
+            ImGuiID dock_id_details = 0;
+            ImGuiID dock_id_render_settings = 0;
+            ImGui::DockBuilderSplitNode(
+                dock_id_right, ImGuiDir_Up, 0.50f, &dock_id_details, &dock_id_render_settings);
+
+            char outlinerName[96];
+            char detailsName[96];
+            std::snprintf(
+                outlinerName,
+                sizeof(outlinerName),
+                "%s",
+                ElysiaEditor::EditorIcons::TabWindowName("Outliner"));
+            std::snprintf(
+                detailsName,
+                sizeof(detailsName),
+                "%s",
+                ElysiaEditor::EditorIcons::TabWindowName("Details"));
+
+            ImGui::DockBuilderDockWindow(outlinerName, dock_id_left);
+            ImGui::DockBuilderDockWindow("Render Settings", dock_id_render_settings);
+            ImGui::DockBuilderDockWindow("Viewport", dock_id_center);
+            ImGui::DockBuilderDockWindow(detailsName, dock_id_details);
+
+            if (ImGuiDockNode* center = ImGui::DockBuilderGetNode(dock_id_center))
+            {
+                center->SetLocalFlags(
+                    center->LocalFlags | ImGuiDockNodeFlags_CentralNode |
+                    ImGuiDockNodeFlags_AutoHideTabBar | ImGuiDockNodeFlags_NoDockingSplit |
+                    ImGuiDockNodeFlags_NoDockingOverMe | ImGuiDockNodeFlags_NoResizeY);
+            }
+
+            ImGui::DockBuilderFinish(dockspace_id);
+        }
+
         // ImGuizmo's internal matrix type uses the same convention as SimpleMath
         // (row-vector maths with the translation in the 4th row, i.e. m16[12..14]),
         // so the matrices are passed through unchanged. Transposing them would move
@@ -69,7 +136,6 @@ namespace ElysiaEngine
     {
 
         m_time = 0;
-        m_bPlay = true;
 
 #if (_WIN32_WINNT >= 0x0A00 /*_WIN32_WINNT_WIN10*/)
         Microsoft::WRL::Wrappers::RoInitializeWrapper initialize(RO_INIT_MULTITHREADED);
@@ -126,6 +192,7 @@ namespace ElysiaEngine
         m_pGraphicsContext = m_pDevice->CreateGraphicsContext();
         ElysiaEditor::ImGUI_Init(m_windowHwnd, m_pDevice, m_swapChain);
         m_pImGui->OnCreate(m_pDevice, &m_swapChain);
+        ElysiaEditor::EditorIcons::Get().Init(m_pDevice);
 
         m_pRenderer = new ElysiaRenderer::Renderer();
         m_pRenderer->OnCreate(m_pDevice,
@@ -146,8 +213,11 @@ namespace ElysiaEngine
 
     void ElysiaFrame::OnDestroy()
     {
+        StopPlay();
         ModelManager::GetInstance().FlushMaterialEdits();
         m_pDevice->WaitForIdle();
+        ElysiaEditor::EditorIcons::Get().Shutdown();
+        ElysiaEditor::ImGUI_Shutdown();
         m_pGraphicsContext.release();
         m_pRenderer->OnDestroyWindowSizeDependentResources();
         m_pRenderer->OnDestory();
@@ -160,55 +230,65 @@ namespace ElysiaEngine
     {
         if (m_Width && m_Height && m_pRenderer)
         {
-            Vector3 lookAt(-0.48f, 5.2f, -0.31f);
-            const auto& sceneEntities = SceneManager::GetInstance().GetEntities();
-            if (!sceneEntities.empty())
+            // Scene color/depth follow the Viewport widget (FSceneViewport), not
+            // the OS client size. Recreating them here would squash the image and
+            // reset camera aspect to the window instead of the widget.
+            if (CameraManager::GetInstance().GetMainCamera() == nullptr)
             {
-                auto isFiniteBox = [](const BoundingBox& box)
+                Vector3 lookAt(-0.48f, 5.2f, -0.31f);
+                const auto& sceneEntities = SceneManager::GetInstance().GetEntities();
+                if (!sceneEntities.empty())
                 {
-                    return std::isfinite(box.Center.x) && std::isfinite(box.Center.y) &&
-                           std::isfinite(box.Center.z) && std::isfinite(box.Extents.x) &&
-                           std::isfinite(box.Extents.y) && std::isfinite(box.Extents.z) &&
-                           box.Extents.x >= 0.0f && box.Extents.y >= 0.0f && box.Extents.z >= 0.0f;
-                };
-                BoundingBox sceneAABB = sceneEntities[0]->GetWorldAABB();
-                for (size_t entityIndex = 1; entityIndex < sceneEntities.size(); ++entityIndex)
-                {
-                    const BoundingBox nextBox = sceneEntities[entityIndex]->GetWorldAABB();
-                    if (!isFiniteBox(nextBox))
-                        continue;
-                    if (!isFiniteBox(sceneAABB))
+                    auto isFiniteBox = [](const BoundingBox& box)
                     {
-                        sceneAABB = nextBox;
-                        continue;
+                        return std::isfinite(box.Center.x) && std::isfinite(box.Center.y) &&
+                               std::isfinite(box.Center.z) && std::isfinite(box.Extents.x) &&
+                               std::isfinite(box.Extents.y) && std::isfinite(box.Extents.z) &&
+                               box.Extents.x >= 0.0f && box.Extents.y >= 0.0f && box.Extents.z >= 0.0f;
+                    };
+                    BoundingBox sceneAABB = sceneEntities[0]->GetWorldAABB();
+                    for (size_t entityIndex = 1; entityIndex < sceneEntities.size(); ++entityIndex)
+                    {
+                        const BoundingBox nextBox = sceneEntities[entityIndex]->GetWorldAABB();
+                        if (!isFiniteBox(nextBox))
+                            continue;
+                        if (!isFiniteBox(sceneAABB))
+                        {
+                            sceneAABB = nextBox;
+                            continue;
+                        }
+                        const Vector3 dstMin = Vector3(sceneAABB.Center.x, sceneAABB.Center.y, sceneAABB.Center.z) -
+                                               Vector3(sceneAABB.Extents.x, sceneAABB.Extents.y, sceneAABB.Extents.z);
+                        const Vector3 dstMax = Vector3(sceneAABB.Center.x, sceneAABB.Center.y, sceneAABB.Center.z) +
+                                               Vector3(sceneAABB.Extents.x, sceneAABB.Extents.y, sceneAABB.Extents.z);
+                        const Vector3 srcMin = Vector3(nextBox.Center.x, nextBox.Center.y, nextBox.Center.z) -
+                                               Vector3(nextBox.Extents.x, nextBox.Extents.y, nextBox.Extents.z);
+                        const Vector3 srcMax = Vector3(nextBox.Center.x, nextBox.Center.y, nextBox.Center.z) +
+                                               Vector3(nextBox.Extents.x, nextBox.Extents.y, nextBox.Extents.z);
+                        const Vector3 mergedMin = Vector3::Min(dstMin, srcMin);
+                        const Vector3 mergedMax = Vector3::Max(dstMax, srcMax);
+                        const Vector3 mergedCenter = (mergedMin + mergedMax) * 0.5f;
+                        const Vector3 mergedExtents = (mergedMax - mergedMin) * 0.5f;
+                        sceneAABB.Center = mergedCenter;
+                        sceneAABB.Extents = mergedExtents;
                     }
-                    const Vector3 dstMin = Vector3(sceneAABB.Center.x, sceneAABB.Center.y, sceneAABB.Center.z) -
-                                           Vector3(sceneAABB.Extents.x, sceneAABB.Extents.y, sceneAABB.Extents.z);
-                    const Vector3 dstMax = Vector3(sceneAABB.Center.x, sceneAABB.Center.y, sceneAABB.Center.z) +
-                                           Vector3(sceneAABB.Extents.x, sceneAABB.Extents.y, sceneAABB.Extents.z);
-                    const Vector3 srcMin = Vector3(nextBox.Center.x, nextBox.Center.y, nextBox.Center.z) -
-                                           Vector3(nextBox.Extents.x, nextBox.Extents.y, nextBox.Extents.z);
-                    const Vector3 srcMax = Vector3(nextBox.Center.x, nextBox.Center.y, nextBox.Center.z) +
-                                           Vector3(nextBox.Extents.x, nextBox.Extents.y, nextBox.Extents.z);
-                    const Vector3 mergedMin = Vector3::Min(dstMin, srcMin);
-                    const Vector3 mergedMax = Vector3::Max(dstMax, srcMax);
-                    const Vector3 mergedCenter = (mergedMin + mergedMax) * 0.5f;
-                    const Vector3 mergedExtents = (mergedMax - mergedMin) * 0.5f;
-                    sceneAABB.Center = mergedCenter;
-                    sceneAABB.Extents = mergedExtents;
+                    if (isFiniteBox(sceneAABB))
+                        lookAt = Vector3(sceneAABB.Center.x, sceneAABB.Center.y, sceneAABB.Center.z);
                 }
-                if (isFiniteBox(sceneAABB))
-                    lookAt = Vector3(sceneAABB.Center.x, sceneAABB.Center.y, sceneAABB.Center.z);
+                CameraManager::GetInstance().CreateMainCamera(
+                    lookAt,
+                    static_cast<float>(m_Width) / static_cast<float>(m_Height),
+                    AMD_PI_OVER_4,
+                    0.1f,
+                    1000.f);
             }
-            CameraManager::GetInstance().CreateMainCamera(
-                lookAt,
-                static_cast<float>(m_Width) / static_cast<float>(m_Height),
-                AMD_PI_OVER_4,
-                0.1f,
-                1000.f);
 
-            m_pRenderer->OnDestroyWindowSizeDependentResources();
-            m_pRenderer->OnCreateWindowSizeDependentResources(&m_swapChain, m_Width, m_Height);
+            // Bootstrap RTs so 3D can run before the first Viewport layout.
+            // Subsequent sizes come from SyncSceneViewportSize().
+            if (m_pRenderer->GetDisplayRT() == nullptr)
+            {
+                m_pRenderer->OnCreateWindowSizeDependentResources(&m_swapChain, m_Width, m_Height);
+            }
         }
     }
 
@@ -272,6 +352,11 @@ namespace ElysiaEngine
         // ImGUI_UpdateIO();
         ImGUI_NewFrame();
 
+        // Apply last frame's Viewport widget size before 3D, matching
+        // FSceneViewport::OnDrawViewport (resize then Draw).
+        if (!m_loadingScene)
+            SyncSceneViewportSize();
+
         if (m_loadingScene)
         {
             static UINT loadingStage = 0;
@@ -297,6 +382,7 @@ namespace ElysiaEngine
             {
                 firstInit = false;
                 BuildUI();
+                SyncSceneViewportSize();
             }
             else
             {
@@ -328,6 +414,31 @@ namespace ElysiaEngine
         // SceneManager::GetInstance().CollectRenderItems();
     }
 
+    void ElysiaFrame::FocusViewportToSelection()
+    {
+        Entity* pSelected = SelectionManager::GetInstance().GetSelected();
+        auto* pCamera = dynamic_cast<FirstPersonCamera*>(
+            CameraManager::GetInstance().GetMainCamera());
+        if (pSelected == nullptr || pCamera == nullptr)
+            return;
+
+        BoundingBox box = pSelected->GetWorldAABB();
+        const Vector3 center = box.Center;
+        const Vector3 extents = box.Extents;
+        if (!std::isfinite(center.x) || !std::isfinite(center.y) || !std::isfinite(center.z) ||
+            !std::isfinite(extents.x) || !std::isfinite(extents.y) || !std::isfinite(extents.z))
+        {
+            box.Center = pSelected->transform.GetWorldMatrix().Translation();
+            box.Extents = Vector3(0.1f, 0.1f, 0.1f);
+        }
+
+        pCamera->FocusViewportOnBox(box);
+    }
+    void ElysiaFrame::ToggleViewportImmersive()
+    {
+        m_bViewportImmersive = !m_bViewportImmersive;
+    }
+
     void ElysiaFrame::HandleInput(const ImGuiIO& io)
     {
         auto pCamera = CameraManager::GetInstance().GetMainCamera();
@@ -338,9 +449,77 @@ namespace ElysiaEngine
             return;
 
         const float sensitivity = 0.002f;
-        const float moveSpeed = 2.f;
+        const bool bPlaying = SceneManager::GetInstance().IsPlaying();
+        const bool bPopupOpen = ImGui::IsPopupOpen("", ImGuiPopupFlags_AnyPopupId);
 
-        if (ImGui::IsMouseDown(ImGuiMouseButton_Right))
+        // UE FEditorViewportCommands::FocusViewportToSelection: F, no Ctrl/Shift.
+        // Alt+F is allowed so "hold Alt, F, keep Alt, drag" works.
+        if (!bPlaying && !io.WantTextInput && !bPopupOpen &&
+            !io.KeyCtrl && !io.KeyShift &&
+            ImGui::IsKeyPressed(ImGuiKey_F, false))
+        {
+            FocusViewportToSelection();
+        }
+
+        // UE FLevelViewportCommands::ToggleImmersive: F11, no modifiers (Mac is Ctrl+F11).
+        // Not Alt+Enter OS fullscreen. Allowed during Play, same as the viewport command.
+        if (!io.WantTextInput && !bPopupOpen &&
+            !io.KeyCtrl && !io.KeyShift && !io.KeyAlt &&
+            ImGui::IsKeyPressed(ImGuiKey_F11, false))
+        {
+            ToggleViewportImmersive();
+        }
+
+        // UE ShouldOrbitCamera: Alt && !Ctrl && !Shift && !flight look && !ortho.
+        // UE IsOrbitRotationMode: LMB && !MMB && !RMB.
+        const bool bAltOrbitChord =
+            !bPlaying && !io.WantTextInput &&
+            io.KeyAlt && !io.KeyCtrl && !io.KeyShift &&
+            ImGui::IsMouseDown(ImGuiMouseButton_Left) &&
+            !ImGui::IsMouseDown(ImGuiMouseButton_Right) &&
+            !ImGui::IsMouseDown(ImGuiMouseButton_Middle);
+
+        if (m_bOrbiting)
+        {
+            if (!bAltOrbitChord)
+                m_bOrbiting = false;
+        }
+        else if (bAltOrbitChord && m_bViewportHovered && !m_bGizmoWasUsing)
+        {
+            m_bOrbiting = true;
+            pFirstPersonCam->BeginOrbitCamera();
+        }
+
+        if (m_bOrbiting && (io.MouseDelta.x != 0.0f || io.MouseDelta.y != 0.0f))
+        {
+            // UE ConvertMovementToOrbitDragRot: Yaw = +mouseX, then
+            // SetViewRotation(pitch, -yaw). Same pixel scale as RMB look.
+            pFirstPersonCam->OrbitCamera(-io.MouseDelta.x * sensitivity,
+                                         io.MouseDelta.y * sensitivity);
+        }
+
+        const bool bLook = !m_bOrbiting && !io.KeyAlt && ImGui::IsMouseDown(ImGuiMouseButton_Right);
+        const bool bMove = !m_bOrbiting && !io.KeyAlt &&
+                           (bLook || (bPlaying && m_bViewportHovered && !io.WantTextInput));
+        const bool bMouseHeld =
+            ImGui::IsMouseDown(ImGuiMouseButton_Left) ||
+            ImGui::IsMouseDown(ImGuiMouseButton_Right) ||
+            ImGui::IsMouseDown(ImGuiMouseButton_Middle);
+
+        const bool bWasdHeld =
+            ImGui::IsKeyDown(ImGuiKey_W) || ImGui::IsKeyDown(ImGuiKey_S) ||
+            ImGui::IsKeyDown(ImGuiKey_A) || ImGui::IsKeyDown(ImGuiKey_D) ||
+            ImGui::IsKeyDown(ImGuiKey_E) || ImGui::IsKeyDown(ImGuiKey_Q);
+
+        // UE ViewportCameraSpeedMouseWheelInteraction: mouse button down → ±10%.
+        // Also while actually flying (WASD) so Play without RMB still works.
+        if (!io.WantTextInput && io.MouseWheel != 0.0f && m_bViewportHovered &&
+            (bMouseHeld || bWasdHeld))
+        {
+            pFirstPersonCam->AdjustCameraSpeed(io.MouseWheel > 0.0f ? 0.1f : -0.1f);
+        }
+
+        if (bMove)
         {
             Vector3 moveDir = Vector3::Zero;
             if (ImGui::IsKeyDown(ImGuiKey_W))
@@ -360,14 +539,20 @@ namespace ElysiaEngine
                 moveDir.Normalize();
                 pFirstPersonCam->Move(moveDir, io.DeltaTime);
             }
+        }
 
+        if (bLook)
+        {
             float x = pFirstPersonCam->GetXRotation();
             float y = pFirstPersonCam->GetYRotation();
             x += io.MouseDelta.y * sensitivity;
             y += io.MouseDelta.x * sensitivity;
             pFirstPersonCam->SetXRotation(x);
             pFirstPersonCam->SetYRotation(y);
+        }
 
+        if ((bMove || bLook || m_bOrbiting) && !bPlaying)
+        {
             if (auto* pSelectedObject = SelectionManager::GetInstance().GetSelected();
                 pSelectedObject && pSelectedObject->pAttachedCamera == pFirstPersonCam)
             {
@@ -380,95 +565,171 @@ namespace ElysiaEngine
 
     void ElysiaFrame::BuildUI()
     {
+        // UE chrome order: menu, then Level Editor toolbar, then dock (viewport toolbar lives in Viewport).
+        BuildMainMenuBar();
         SetupDockSpace();
         BuildUISceneHierarchy();
         BuildUIViewport();
         BuildUIInspector();
-        BuildMainMenuBar();
         BuildUIRenderSetting();
-        if (m_UIState.bShowOutputLog)
-            ElysiaEditor::DrawOutputLog(m_UIState.bShowOutputLog);
+
+        const bool bPlaying = SceneManager::GetInstance().IsPlaying();
+        if (!ImGui::GetIO().WantTextInput)
+        {
+            // UE OpenOutputLogDrawer (Alt+~). Toggle before drawing so it opens this frame.
+            if (ImGui::GetIO().KeyAlt && ImGui::IsKeyPressed(ImGuiKey_GraveAccent, false))
+                m_UIState.bShowOutputLog = !m_UIState.bShowOutputLog;
+        }
+
+        {
+            ImGuiViewport* viewport = ImGui::GetMainViewport();
+            const float barH = ImGui::GetFrameHeight() + ImGui::GetStyle().WindowPadding.y * 2.0f;
+            if (m_UIState.outputLogDrawerHeight <= 0.0f)
+                m_UIState.outputLogDrawerHeight = viewport->WorkSize.y * 0.33f;
+            // UE SDrawerOverlay: about a third of the window, capped at 90%.
+            const float maxH = (std::max)(140.0f, viewport->WorkSize.y * 0.90f - barH);
+            m_UIState.outputLogDrawerHeight = std::clamp(m_UIState.outputLogDrawerHeight, 140.0f, maxH);
+
+            const ImVec2 drawerPos(
+                viewport->WorkPos.x,
+                viewport->WorkPos.y + viewport->WorkSize.y - barH - m_UIState.outputLogDrawerHeight);
+            const ImVec2 drawerSize(viewport->WorkSize.x, m_UIState.outputLogDrawerHeight);
+            bool drawerHovered = false;
+            float heightDelta = 0.0f;
+            ElysiaEditor::DrawOutputLogDrawer(
+                m_UIState.bShowOutputLog, drawerPos, drawerSize, drawerHovered, &heightDelta);
+            if (heightDelta != 0.0f)
+            {
+                m_UIState.outputLogDrawerHeight = std::clamp(
+                    m_UIState.outputLogDrawerHeight + heightDelta, 140.0f, maxH);
+            }
+
+            // UE SWidgetDrawer::OnGlobalFocusChanging: dismiss when clicking away,
+            // but not on the same click that opened the drawer (Window menu / Alt+` / button).
+            const bool openedThisFrame = m_UIState.bShowOutputLog && !m_bOutputLogWasOpen;
+            const bool popupOpen = ImGui::IsPopupOpen("", ImGuiPopupFlags_AnyPopupId);
+            if (m_UIState.bShowOutputLog &&
+                !openedThisFrame &&
+                !popupOpen &&
+                ImGui::IsMouseClicked(ImGuiMouseButton_Left) &&
+                !drawerHovered &&
+                !m_bOutputLogButtonHovered)
+            {
+                m_UIState.bShowOutputLog = false;
+            }
+            m_bOutputLogWasOpen = m_UIState.bShowOutputLog;
+        }
+
+        // After every other editor window so it covers menu, dock, and drawers
+        // the way SWindow::SetFullWindowOverlayContent covers the owner window.
+        BuildImmersiveViewportOverlay();
+
+        if (!ImGui::GetIO().WantTextInput)
+        {
+            if (bPlaying && ImGui::IsKeyPressed(ImGuiKey_Escape, false) &&
+                !ImGui::IsPopupOpen("", ImGuiPopupFlags_AnyPopupId))
+            {
+                StopPlay();
+            }
+            else if (!bPlaying && ImGui::GetIO().KeyAlt && ImGui::IsKeyPressed(ImGuiKey_P, false))
+            {
+                StartPlay();
+            }
+
+            if (!bPlaying && ImGui::IsKeyPressed(ImGuiKey_Delete, false))
+            {
+                Entity* pSelected = SelectionManager::GetInstance().GetSelected();
+                Entity* pRoot = pSelected;
+                while (pRoot && pRoot->GetParent())
+                    pRoot = pRoot->GetParent();
+                if (pRoot && pRoot->GetParent() == nullptr && pRoot->sourceModelIndex < 0 &&
+                    (pRoot->pLight || pRoot->sourceShapeIndex >= 0))
+                {
+                    SceneManager::GetInstance().DestroyRootEntity(pRoot);
+                }
+            }
+        }
     }
     void ElysiaFrame::SetupDockSpace()
     {
-
         ImGuiViewport* viewport = ImGui::GetMainViewport();
-        // 窗口始终完美覆盖主渲染窗口
-        ImGui::SetNextWindowPos(viewport->Pos);
-        ImGui::SetNextWindowSize(viewport->Size);
-        ImGui::SetNextWindowViewport(viewport->ID);
+        const float toolbarH = ImGui::GetFrameHeight() + ImGui::GetStyle().WindowPadding.y * 2.0f;
+        const float statusH = toolbarH;
+        const ImVec2 dockPos(viewport->WorkPos.x, viewport->WorkPos.y + toolbarH);
+        const ImVec2 dockSize(
+            viewport->WorkSize.x,
+            (std::max)(0.0f, viewport->WorkSize.y - toolbarH - statusH));
 
-        // 样式设置：无边框、无标题栏、不可移动
-        ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
-        window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse |
-            ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
-        window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
-        // window_flags |= ImGuiWindowFlags_NoBackground;
+        const ImGuiWindowFlags chromeFlags =
+            ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+            ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoDocking |
+            ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
 
         ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+        ImGui::PushStyleColor(ImGuiCol_WindowBg, ImGui::GetStyleColorVec4(ImGuiCol_MenuBarBg));
+
+        // UE Level Editor toolbar: a full-width row under the main menu.
+        ImGui::SetNextWindowPos(viewport->WorkPos);
+        ImGui::SetNextWindowSize(ImVec2(viewport->WorkSize.x, toolbarH));
+        ImGui::SetNextWindowViewport(viewport->ID);
+        ImGui::Begin("##EditorToolbar", nullptr, chromeFlags);
+        DrawEditorToolbar();
+        ImGui::End();
+
+        // UE SStatusBar: full-width row at the bottom of the editor.
+        ImGui::SetNextWindowPos(ImVec2(viewport->WorkPos.x, viewport->WorkPos.y + viewport->WorkSize.y - statusH));
+        ImGui::SetNextWindowSize(ImVec2(viewport->WorkSize.x, statusH));
+        ImGui::SetNextWindowViewport(viewport->ID);
+        ImGui::Begin("##EditorStatusBar", nullptr, chromeFlags);
+        DrawStatusBar();
+        ImGui::End();
+        ImGui::PopStyleColor();
+
+        ImGui::SetNextWindowPos(dockPos);
+        ImGui::SetNextWindowSize(dockSize);
+        ImGui::SetNextWindowViewport(viewport->ID);
+
+        ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking;
+        window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse |
+            ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+        window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus |
+            ImGuiWindowFlags_NoSavedSettings;
+
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 
-        ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
         ImGui::Begin("MainDockHost", nullptr, window_flags);
-        ImGui::PopStyleVar(3);
+        ImGui::PopStyleVar();
+        ImGui::PopStyleVar(2);
 
-        if (ImGui::DockBuilderGetNode(dockspace_id) == nullptr)
+        // ID is owned by the host window so it is stable across sessions, matching
+        // UE FLayoutSaveRestore keyed by LevelEditor_Layout_v*.
+        const ImGuiID dockspace_id = ImGui::GetID(kEditorDockSpace);
+        if (m_bResetEditorLayout)
         {
             ImGui::DockBuilderRemoveNode(dockspace_id);
-            ImGui::DockBuilderAddNode(dockspace_id, ImGuiDockNodeFlags_None);
-            ImGui::DockBuilderSetNodeSize(dockspace_id, viewport->Size);
-
-            ImGuiViewport* viewport = ImGui::GetMainViewport();
-            ImGui::DockBuilderSetNodeSize(dockspace_id, viewport->Size);
-
-            ImGuiID dock_id_left;
-            ImGuiID dock_id_center;
-            ImGuiID dock_id_right;
-
-            ImGui::DockBuilderSplitNode(dockspace_id,
-                                        ImGuiDir_Left,
-                                        0.05f,
-                                        &dock_id_left,
-                                        &dock_id_center);
-
-            ImGui::DockBuilderSplitNode(dock_id_center,
-                                        ImGuiDir_Right,
-                                        0.1f,
-                                        &dock_id_right,
-                                        &dock_id_center);
-
-            ImGuiID dock_id_viewport;
-            ImGuiID dock_id_output;
-            ImGui::DockBuilderSplitNode(dock_id_center,
-                                        ImGuiDir_Down,
-                                        0.22f,
-                                        &dock_id_output,
-                                        &dock_id_viewport);
-
-            ImGuiID dock_id_inspector;
-            ImGuiID dock_id_render_settings;
-            ImGui::DockBuilderSplitNode(dock_id_right,
-                                        ImGuiDir_Up,
-                                        0.50f,
-                                        &dock_id_inspector,
-                                        &dock_id_render_settings);
-
-            ImGui::DockBuilderDockWindow("Scene Hierarchy", dock_id_left);
-            ImGui::DockBuilderDockWindow("Render Settings", dock_id_render_settings);
-            ImGui::DockBuilderDockWindow("Viewport", dock_id_viewport);
-            ImGui::DockBuilderDockWindow("Output Log", dock_id_output);
-            ImGui::DockBuilderDockWindow("Inspector", dock_id_inspector);
-
-            ImGui::DockBuilderFinish(dockspace_id);
+            m_bResetEditorLayout = false;
+        }
+        if (ImGui::DockBuilderGetNode(dockspace_id) == nullptr)
+        {
+            ApplyDefaultEditorDockLayout(dockspace_id, dockSize);
+            ElysiaEditor::ImGUI_SaveLayout();
         }
 
-        ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
+        ImGui::DockSpace(
+            dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_NoDockingOverCentralNode);
         ImGui::End();
     }
     void ElysiaFrame::BuildUISceneHierarchy()
     {
-        ImGui::Begin("Scene Hierarchy");
+        ImGui::Begin(ElysiaEditor::EditorIcons::TabWindowName("Outliner"));
+        // Keep Begin/End while immersive so the dock node stays in imgui.ini.
+        if (m_bViewportImmersive)
+        {
+            ImGui::End();
+            return;
+        }
+        ElysiaEditor::EditorIcons::Get().DecorateWindowTab(ElysiaEditor::EditorIcon::Outliner);
 
         if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !
             ImGui::IsAnyItemHovered())
@@ -486,78 +747,181 @@ namespace ElysiaEngine
 
         ImGui::End();
     }
-    void ElysiaFrame::BuildUIViewport()
+    void ElysiaFrame::SyncSceneViewportSize()
     {
-        ImGui::Begin("Viewport",
-                     nullptr,
-                     ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+        if (!m_pRenderer || m_viewportClientWidth == 0 || m_viewportClientHeight == 0)
+            return;
 
-        static ImVec2 lastSize = {0, 0};
-        ImVec2 viewportSize = ImGui::GetContentRegionAvail();
-        if (viewportSize.x != lastSize.x || viewportSize.y != lastSize.y)
+        auto* pDisplay = m_pRenderer->GetDisplayRT();
+        const uint32_t rtW = pDisplay ? static_cast<uint32_t>(pDisplay->GetWidth()) : 0;
+        const uint32_t rtH = pDisplay ? static_cast<uint32_t>(pDisplay->GetHeight()) : 0;
+        const bool sizeChanged = (rtW != m_viewportClientWidth || rtH != m_viewportClientHeight);
+        if (sizeChanged || m_bSceneViewportResourcesDirty)
         {
-            if (ImGui::IsMouseDown(ImGuiMouseButton_Left))
-            {
-                // 这里可以画一个临时的占位符，或者让旧图拉伸显示
-            }
-            else
-            {
-                if (viewportSize.x > 0 && viewportSize.y > 0)
-                {
-                    m_pRenderer->OnCreateWindowSizeDependentResources(
-                        &m_swapChain,
-                        viewportSize.x,
-                        viewportSize.y);
-
-                    lastSize = viewportSize;
-                }
-            }
-
+            if (m_pDevice)
+                m_pDevice->WaitForIdle();
+            m_pRenderer->OnCreateWindowSizeDependentResources(
+                &m_swapChain, m_viewportClientWidth, m_viewportClientHeight);
+            m_bSceneViewportResourcesDirty = false;
         }
+
+        if (auto* pCam = dynamic_cast<PerspectiveCamera*>(
+                CameraManager::GetInstance().GetMainCamera()))
+        {
+            const float aspect = static_cast<float>(m_viewportClientWidth) /
+                                 static_cast<float>(m_viewportClientHeight);
+            if (std::abs(pCam->GetAspect() - aspect) > 1.0e-4f)
+                pCam->SetAspectRatio(aspect);
+        }
+    }
+
+    void ElysiaFrame::DrawViewportImage()
+    {
+        const ImVec2 viewportSize = ImGui::GetContentRegionAvail();
+        if (viewportSize.x > 0.0f && viewportSize.y > 0.0f)
+        {
+            m_viewportClientWidth = static_cast<uint32_t>(viewportSize.x + 0.5f);
+            m_viewportClientHeight = static_cast<uint32_t>(viewportSize.y + 0.5f);
+            if (m_viewportClientWidth == 0)
+                m_viewportClientWidth = 1;
+            if (m_viewportClientHeight == 0)
+                m_viewportClientHeight = 1;
+            // First frame runs BuildUI before 3D, so the RT must exist now.
+            if (m_pRenderer && m_pRenderer->GetDisplayRT() == nullptr)
+                SyncSceneViewportSize();
+        }
+
+        if (!m_pRenderer || !m_pDevice)
+            return;
 
         auto cameraRT = m_pRenderer->GetDisplayRT();
-        if (cameraRT)
+        if (!cameraRT)
+            return;
+
+        auto srcCPUHandle = cameraRT->GetTexture()->GetSRVDescriptor().GetCPUHandle();
+        auto dstDescriptor = m_pDevice->GetImguiDescriptor();
+        m_pDevice->GetDevice()->CopyDescriptorsSimple(
+            1,
+            dstDescriptor.GetCPUHandle(),
+            srcCPUHandle,
+            D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV
+            );
+
+        ImTextureID sceneTexID = (ImTextureID)dstDescriptor.GetGPUHandle().ptr;
+
+        // 1:1 with the RT (FSceneViewport). If the widget moved this frame
+        // before the RT caught up, fit uniformly instead of squash-stretch.
+        ImVec2 imageSize = viewportSize;
+        ImVec2 imageOffset(0.0f, 0.0f);
+        const float rtW = static_cast<float>(cameraRT->GetWidth());
+        const float rtH = static_cast<float>(cameraRT->GetHeight());
+        if (rtW > 0.0f && rtH > 0.0f && viewportSize.x > 0.0f && viewportSize.y > 0.0f)
         {
-            auto srcCPUHandle = cameraRT->GetTexture()->GetSRVDescriptor().GetCPUHandle();
-            auto dstDescriptor = m_pDevice->GetImguiDescriptor();
-            m_pDevice->GetDevice()->CopyDescriptorsSimple(
-                1,
-                dstDescriptor.GetCPUHandle(),
-                srcCPUHandle,
-                D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV
-                );
-
-            ImTextureID sceneTexID = (ImTextureID)dstDescriptor.GetGPUHandle().ptr;
-            ImGui::Image(sceneTexID, viewportSize, ImVec2(0, 0), ImVec2(1, 1));
-            const ImVec2 imageOrigin = ImGui::GetItemRectMin();
-
-            // Viewport click picking: LMB click on the image selects the entity,
-            // syncing Scene Hierarchy and Inspector. While the transform gizmo is
-            // hovered or being dragged it owns the mouse, so picking stands down.
-            if (viewportSize.x > 0 && viewportSize.y > 0 &&
-                ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left) &&
-                !ImGuizmo::IsOver() && !ImGuizmo::IsUsing())
+            const float rtAspect = rtW / rtH;
+            const float widgetAspect = viewportSize.x / viewportSize.y;
+            if (std::abs(rtAspect - widgetAspect) > 0.0005f)
             {
-                const ImVec2 mousePos = ImGui::GetIO().MousePos;
-                const Vector2 viewportUV((mousePos.x - imageOrigin.x) / viewportSize.x,
-                                         (mousePos.y - imageOrigin.y) / viewportSize.y);
-
-                SelectionManager::GetInstance().RequestPick(viewportUV);
-            }
-
-            DrawViewportGizmo(imageOrigin, viewportSize);
-
-            if (m_bShowShadowFrustum)
-            {
-                DrawShadowFrustumOverlay(imageOrigin, viewportSize);
+                if (widgetAspect > rtAspect)
+                {
+                    imageSize.x = viewportSize.y * rtAspect;
+                    imageSize.y = viewportSize.y;
+                }
+                else
+                {
+                    imageSize.x = viewportSize.x;
+                    imageSize.y = viewportSize.x / rtAspect;
+                }
+                imageOffset.x = (viewportSize.x - imageSize.x) * 0.5f;
+                imageOffset.y = (viewportSize.y - imageSize.y) * 0.5f;
             }
         }
 
+        const ImVec2 cursor = ImGui::GetCursorPos();
+        ImGui::SetCursorPos(ImVec2(cursor.x + imageOffset.x, cursor.y + imageOffset.y));
+        ImGui::Image(sceneTexID, imageSize, ImVec2(0, 0), ImVec2(1, 1));
+        const ImVec2 imageOrigin = ImGui::GetItemRectMin();
+
+        DrawViewportGizmo(imageOrigin, imageSize);
+
+        if (m_bShowShadowFrustum && !SceneManager::GetInstance().IsPlaying())
+        {
+            DrawShadowFrustumOverlay(imageOrigin, imageSize);
+        }
+    }
+
+    void ElysiaFrame::BuildUIViewport()
+    {
+        const ImGuiWindowClass viewportClass = MakeViewportWindowClass();
+        ImGui::SetNextWindowClass(&viewportClass);
+        ImGui::Begin("Viewport",
+                     nullptr,
+                     ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse |
+                     ImGuiWindowFlags_MenuBar);
+        // Keep the docked Viewport window so imgui.ini / the dock tree stay put.
+        // Size and hover belong to the overlay while immersive.
+        if (!m_bViewportImmersive)
+        {
+            m_bViewportHovered = ImGui::IsWindowHovered();
+
+            // UE viewport toolbar: a real menu-bar row above the image, not a floating overlay.
+            if (ImGui::BeginMenuBar())
+            {
+                DrawGizmoToolbar();
+                ImGui::EndMenuBar();
+            }
+
+            DrawViewportImage();
+        }
+        ImGui::End();
+    }
+
+    void ElysiaFrame::BuildImmersiveViewportOverlay()
+    {
+        if (!m_bViewportImmersive)
+            return;
+
+        ImGuiViewport* mainVp = ImGui::GetMainViewport();
+        ImGui::SetNextWindowPos(mainVp->Pos);
+        ImGui::SetNextWindowSize(mainVp->Size);
+        ImGui::SetNextWindowViewport(mainVp->ID);
+        ImGui::SetNextWindowBgAlpha(1.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+        const ImGuiWindowFlags flags =
+            ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse |
+            ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+            ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoSavedSettings |
+            ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse |
+            ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoNavFocus |
+            ImGuiWindowFlags_NoBringToFrontOnFocus;
+        ImGui::Begin("##ImmersiveViewport", nullptr, flags);
+        ImGui::PopStyleVar(3);
+        // Cover docked chrome, but never climb above View Mode / Camera Speed
+        // popups: those are layer-0 windows, and a per-frame display-front
+        // would hide them behind this opaque overlay.
+        if (!ImGui::IsPopupOpen("", ImGuiPopupFlags_AnyPopupId | ImGuiPopupFlags_AnyPopupLevel))
+            ImGui::BringWindowToDisplayFront(ImGui::GetCurrentWindow());
+        m_bViewportHovered = ImGui::IsWindowHovered();
+
+        if (ImGui::BeginMenuBar())
+        {
+            DrawGizmoToolbar();
+            ImGui::EndMenuBar();
+        }
+
+        DrawViewportImage();
         ImGui::End();
     }
     void ElysiaFrame::BuildUIInspector()
     {
-        ImGui::Begin("Inspector");
+        ImGui::Begin(ElysiaEditor::EditorIcons::TabWindowName("Details"));
+        if (m_bViewportImmersive)
+        {
+            ImGui::End();
+            return;
+        }
+        ElysiaEditor::EditorIcons::Get().DecorateWindowTab(ElysiaEditor::EditorIcon::Details);
 
         Entity* pSelectedObject = SelectionManager::GetInstance().GetSelected();
         if (pSelectedObject == nullptr)
@@ -586,9 +950,68 @@ namespace ElysiaEngine
 
         ImGui::Separator();
 
+        const bool bPlaying = SceneManager::GetInstance().IsPlaying();
+        if (bPlaying)
+            ImGui::TextDisabled("Playing — scene edits are discarded on Stop.");
+        ImGui::BeginDisabled(bPlaying);
         DrawTransformComponent(pSelectedObject);
+        DrawLightComponent(pSelectedObject);
+        ImGui::EndDisabled();
 
         ImGui::End();
+    }
+    void ElysiaFrame::PlaceDirectionalLight()
+    {
+        if (SceneManager::GetInstance().IsPlaying())
+            return;
+        Entity* pLight = SceneManager::GetInstance().SpawnDirectionalLight();
+        if (pLight)
+            SelectionManager::GetInstance().Select(pLight);
+    }
+    void ElysiaFrame::PlaceBasicShape(BasicShapeType type)
+    {
+        if (SceneManager::GetInstance().IsPlaying())
+            return;
+        Entity* pShape = SceneManager::GetInstance().SpawnBasicShape(type);
+        if (pShape)
+            SelectionManager::GetInstance().Select(pShape);
+    }
+    void ElysiaFrame::StartPlay()
+    {
+        if (m_loadingScene || SceneManager::GetInstance().IsPlaying())
+            return;
+
+        if (auto* pCamera = CameraManager::GetInstance().GetMainCamera())
+        {
+            m_playCameraPosition = pCamera->GetPosition();
+            if (auto* pFirstPerson = dynamic_cast<FirstPersonCamera*>(pCamera))
+            {
+                m_playCameraPitch = pFirstPerson->GetXRotation();
+                m_playCameraYaw = pFirstPerson->GetYRotation();
+            }
+        }
+
+        SceneManager::GetInstance().BeginPlay();
+        SelectionManager::GetInstance().Clear();
+        m_bGizmoWasUsing = false;
+        m_pGizmoIdleEntity = nullptr;
+    }
+    void ElysiaFrame::StopPlay()
+    {
+        if (!SceneManager::GetInstance().IsPlaying())
+            return;
+
+        SceneManager::GetInstance().EndPlay();
+
+        if (auto* pCamera = CameraManager::GetInstance().GetMainCamera())
+        {
+            pCamera->SetPosition(m_playCameraPosition);
+            if (auto* pFirstPerson = dynamic_cast<FirstPersonCamera*>(pCamera))
+            {
+                pFirstPerson->SetYRotation(m_playCameraYaw);
+                pFirstPerson->SetXRotation(m_playCameraPitch);
+            }
+        }
     }
     void ElysiaFrame::BuildMainMenuBar()
     {
@@ -616,9 +1039,30 @@ namespace ElysiaEngine
                 ImGui::EndMenu();
             }
 
+            const bool bPlaying = SceneManager::GetInstance().IsPlaying();
             if (ImGui::BeginMenu("Window"))
             {
-                ImGui::MenuItem("Output Log", nullptr, &m_UIState.bShowOutputLog);
+                ImGui::MenuItem("Output Log", "Alt+`", &m_UIState.bShowOutputLog);
+                if (ImGui::MenuItem("Reset Layout"))
+                    m_bResetEditorLayout = true;
+                if (ImGui::BeginMenu("Place Actors"))
+                {
+                    ImGui::BeginDisabled(bPlaying);
+                    if (ImGui::MenuItem("Directional Light"))
+                        PlaceDirectionalLight();
+                    if (ImGui::BeginMenu("Shapes"))
+                    {
+                        if (ImGui::MenuItem("Cube"))
+                            PlaceBasicShape(BasicShapeType::Cube);
+                        if (ImGui::MenuItem("Sphere"))
+                            PlaceBasicShape(BasicShapeType::Sphere);
+                        if (ImGui::MenuItem("Plane"))
+                            PlaceBasicShape(BasicShapeType::Plane);
+                        ImGui::EndMenu();
+                    }
+                    ImGui::EndDisabled();
+                    ImGui::EndMenu();
+                }
                 ImGui::EndMenu();
             }
         }
@@ -627,13 +1071,42 @@ namespace ElysiaEngine
     void ElysiaFrame::BuildUIRenderSetting()
     {
         ImGui::Begin("Render Settings");
+        if (m_bViewportImmersive)
+        {
+            ImGui::End();
+            return;
+        }
         auto& pUserData = UserData::GetInstance();
 
         ImGui::Checkbox("Enable HIZ", &pUserData.EnableHIZ);
         ImGui::Text("GBuffer Render Count: %u", GBufferPass::m_renderCount);
         if (ImGui::CollapsingHeader("Debug"))
         {
-            ElysiaRenderer::EnumCombo("Debug Mode", &pUserData.debugMode);
+            // Viewport Lit / Unlit / Buffer Visualization live on the viewport
+            // toolbar (UE CreateViewModesSubmenu). This combo is only the extra
+            // overlays that have no View Mode equivalent.
+            {
+                const bool overlayOn = IsDebugOverlayMode(pUserData.debugMode);
+                const char* overlayPreview = "Off";
+                std::string overlayName;
+                if (overlayOn)
+                {
+                    overlayName = std::string(magic_enum::enum_name(pUserData.debugMode));
+                    overlayPreview = overlayName.c_str();
+                }
+                if (ImGui::BeginCombo("Debug Overlay", overlayPreview))
+                {
+                    if (ImGui::Selectable("Off", !overlayOn))
+                        pUserData.debugMode = m_lastViewportViewMode;
+                    for (DebugMode overlay : kDebugOverlayModes)
+                    {
+                        const std::string name(magic_enum::enum_name(overlay));
+                        if (ImGui::Selectable(name.c_str(), pUserData.debugMode == overlay))
+                            pUserData.debugMode = overlay;
+                    }
+                    ImGui::EndCombo();
+                }
+            }
             ImGui::Checkbox("Show Shadow Frustum", &m_bShowShadowFrustum);
 
             if (pUserData.debugMode == DebugMode::AO)
@@ -663,58 +1136,6 @@ namespace ElysiaEngine
                 ImGui::SliderInt("Bloom  Mipmap Level", &pUserData.bloomParameter.mipmap, 0, 5);
 
             }
-        }
-
-        if (ImGui::CollapsingHeader("Light"))
-        {
-            ImGui::ColorEdit3("Color", (float*)&pUserData.lightColor);
-            ImGui::SliderFloat3("Direction", (float*)&pUserData.lightDir, -1, 1);
-            ImGui::SliderFloat("Intensity", &pUserData.lightIntensity, 0, 20);
-            // UE parity: UDirectionalLightComponent::LightSourceAngle (angular diameter of the
-            // sun disc, default 0.5357 deg = the real sun). In UE this angle only becomes a
-            // shadow filter radius inside the PCSS path (ShadowRendering.h: PCSSParameters.x =
-            // tan(0.5 * angle) * SZ / SW); the non-PCSS path (ShadowFilteringCommon.ush
-            // ManualPCF) uses fixed 1x1/3x3/5x5 kernels and ignores it. This renderer has no
-            // PCSS, so the value is kept for parity/documentation only and does NOT change the
-            // shadow softness - use "Shadow Radius" below for that.
-            ImGui::SliderFloat("Light Source Angle (deg)",
-                               &pUserData.lightSourceAngleDegrees,
-                               0.0f,
-                               5.0f,
-                               "%.3f");
-
-            ImGui::Checkbox("Enable Shadow", &pUserData.shadowParameter.EnableShadow);
-            if (ElysiaRenderer::EnumCombo("Shadow Type", &pUserData.shadowParameter.shadowType))
-            {
-                m_pRenderer->OnUpdateDisplayDependentResources(&m_swapChain);
-            }
-            if (ElysiaRenderer::EnumCombo("Shadow Quality", &pUserData.shadowParameter.shadowQuality))
-            {
-                // Only the shadow map resolution changes: rebuild that one texture
-                // (plus the shadow keyword/PSO selection), instead of recreating
-                // every window-sized resource and re-running the PSO precache.
-                m_pRenderer->OnUpdateDisplayDependentResources(&m_swapChain);
-                m_pRenderer->RefreshShadowDependentResources();
-            }
-            ImGui::SliderFloat("Shadow Depth Bias", &pUserData.shadowParameter.shadowDepthBias, 0, 1);
-            ImGui::SliderFloat("Shadow Slope Depth Bias", &pUserData.shadowParameter.shadowSlopeDepthBias, 0, 10);
-            ImGui::SliderFloat("Shadow Max Slope Depth Bias",
-                               &pUserData.shadowParameter.shadowMaxSlopeDepthBias,
-                               0,
-                               10);
-            // Shadow filter radius in shadow map texels (fixed-radius PCF, UE non-PCSS style).
-            ImGui::SliderFloat("Shadow Radius",
-                               &pUserData.shadowParameter.shadowRadius,
-                               0.0f,
-                               5.0f,
-                               "%.2f");
-            ImGui::SliderFloat("Shadow Distance",
-                               &pUserData.shadowParameter.shadowDistance,
-                               1.f,
-                               200.f,
-                               "%.1f");
-            ImGui::Checkbox("Enable Shadow TAA",
-                            &pUserData.shadowParameter.EnableTAA);
         }
 
         if (ImGui::CollapsingHeader("PBR Data"))
@@ -834,7 +1255,7 @@ namespace ElysiaEngine
                 ImGui::Checkbox("Enable TAA", &pUserData.taaParameter.Enable);
                 if (ImGui::SliderFloat("Sample Ratio", &pUserData.taaParameter.sampleRate, 0.5f, 1.f))
                 {
-                    m_pRenderer->OnCreateWindowSizeDependentResources(&m_swapChain, m_Width, m_Height);
+                    m_bSceneViewportResourcesDirty = true;
                 }
 
                 ElysiaRenderer::EnumCombo("TAA Jitter Type", &pUserData.taaParameter.jitterType);
@@ -944,7 +1365,7 @@ namespace ElysiaEngine
         bool opened = ImGui::TreeNodeEx((void*)entity, flags, entity->name.c_str());
 
         // 3. 处理点击交互
-        if (ImGui::IsItemClicked())
+        if (ImGui::IsItemClicked() && !SceneManager::GetInstance().IsPlaying())
         {
             SelectionManager::GetInstance().Select(entity);
         }
@@ -1090,6 +1511,119 @@ namespace ElysiaEngine
                 ElysiaModel::MaterialOverrides::SaveIfDirty(model);
         }
     }
+    void ElysiaFrame::DrawLightComponent(Entity* entity)
+    {
+        if (!entity || !entity->pLight)
+            return;
+
+        LightComponent& light = *entity->pLight;
+        auto& scene = SceneManager::GetInstance();
+
+        auto writeThroughIfMain = [&]()
+        {
+            if (scene.FindMainDirectionalLight() != entity)
+                return;
+            auto& data = UserData::GetInstance();
+            data.lightColor = light.color;
+            data.lightDir = GetDirectionalLightDirection(entity->transform);
+            data.lightIntensity = light.intensity;
+            data.lightSourceAngleDegrees = light.sourceAngleDegrees;
+            data.shadowParameter = light.shadow;
+        };
+
+        auto refreshShadowLayoutIfMain = [&](ShadowType oldType, ShadowQuality oldQuality)
+        {
+            writeThroughIfMain();
+            if (scene.FindMainDirectionalLight() != entity)
+                return;
+            if (light.shadow.shadowType != oldType)
+                m_pRenderer->OnUpdateDisplayDependentResources(&m_swapChain);
+            if (light.shadow.shadowQuality != oldQuality)
+            {
+                m_pRenderer->OnUpdateDisplayDependentResources(&m_swapChain);
+                m_pRenderer->RefreshShadowDependentResources();
+            }
+        };
+
+        // UE ULightComponentBase + UDirectionalLightComponent Category = Light.
+        // FDirectionalLightComponentDetails overrides Intensity to 0-150 lux.
+        if (ImGui::CollapsingHeader("Light", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            ImGui::SliderFloat("Intensity", &light.intensity, 0.f, 150.f, "%.3f lux");
+            ImGui::ColorEdit3("Light Color", (float*)&light.color);
+            ImGui::Checkbox("Cast Shadows", &light.shadow.EnableShadow);
+            ImGui::SliderFloat("Source Angle", &light.sourceAngleDegrees, 0.f, 5.f, "%.3f deg");
+            const Vector3 dir = GetDirectionalLightDirection(entity->transform);
+            ImGui::Text("Direction  %.3f  %.3f  %.3f", dir.x, dir.y, dir.z);
+            ImGui::TextDisabled("Rays travel along local +X (UE GetDirection).");
+
+            if (ImGui::TreeNode("Advanced"))
+            {
+                const ShadowType oldType = light.shadow.shadowType;
+                const ShadowQuality oldQuality = light.shadow.shadowQuality;
+                bool layoutChanged = false;
+                if (ElysiaRenderer::EnumCombo("Shadow Type", &light.shadow.shadowType))
+                    layoutChanged = true;
+                if (ElysiaRenderer::EnumCombo("Shadow Quality", &light.shadow.shadowQuality))
+                    layoutChanged = true;
+                ImGui::SliderFloat("Shadow Bias", &light.shadow.shadowDepthBias, 0.f, 1.f);
+                ImGui::SliderFloat("Shadow Slope Bias", &light.shadow.shadowSlopeDepthBias, 0.f, 10.f);
+                ImGui::SliderFloat("Shadow Max Slope Bias", &light.shadow.shadowMaxSlopeDepthBias, 0.f, 10.f);
+                ImGui::SliderFloat("Shadow Radius", &light.shadow.shadowRadius, 0.f, 5.f, "%.2f");
+                ImGui::TextDisabled("PCF radius in shadow-map texels (this renderer has no PCSS).");
+                ImGui::Checkbox("Shadow TAA", &light.shadow.EnableTAA);
+                if (layoutChanged)
+                    refreshShadowLayoutIfMain(oldType, oldQuality);
+                ImGui::TreePop();
+            }
+        }
+
+        // UDirectionalLightComponent Category = CascadedShadowMaps.
+        if (ImGui::CollapsingHeader("Cascaded Shadow Maps"))
+        {
+            ImGui::SliderFloat("Dynamic Shadow Distance",
+                               &light.shadow.shadowDistance,
+                               1.f,
+                               200.f,
+                               "%.1f");
+            ImGui::TextDisabled("How far cascaded shadows cover, measured from the camera.");
+        }
+
+        // UDirectionalLightComponent Category = AtmosphereAndCloud.
+        if (ImGui::CollapsingHeader("Atmosphere and Cloud"))
+        {
+            bool atmosphereSun = light.bAtmosphereSun;
+            if (ImGui::Checkbox("Atmosphere Sun Light", &atmosphereSun))
+            {
+                const ShadowType oldType = UserData::GetInstance().shadowParameter.shadowType;
+                const ShadowQuality oldQuality = UserData::GetInstance().shadowParameter.shadowQuality;
+                if (atmosphereSun)
+                    scene.SetAtmosphereSun(entity);
+                else
+                    light.bAtmosphereSun = false;
+
+                Entity* pMain = scene.FindMainDirectionalLight();
+                if (pMain && pMain->pLight)
+                {
+                    auto& data = UserData::GetInstance();
+                    data.lightColor = pMain->pLight->color;
+                    data.lightDir = GetDirectionalLightDirection(pMain->transform);
+                    data.lightIntensity = pMain->pLight->intensity;
+                    data.lightSourceAngleDegrees = pMain->pLight->sourceAngleDegrees;
+                    data.shadowParameter = pMain->pLight->shadow;
+                    if (data.shadowParameter.shadowType != oldType)
+                        m_pRenderer->OnUpdateDisplayDependentResources(&m_swapChain);
+                    if (data.shadowParameter.shadowQuality != oldQuality)
+                    {
+                        m_pRenderer->OnUpdateDisplayDependentResources(&m_swapChain);
+                        m_pRenderer->RefreshShadowDependentResources();
+                    }
+                }
+            }
+        }
+
+        writeThroughIfMain();
+    }
     void ElysiaFrame::ApplyGizmoWorldMatrix(Entity* entity, const Matrix& worldMatrix)
     {
         // Transform::GetWorldMatrix() composes as local * parentWorld, so a
@@ -1110,59 +1644,348 @@ namespace ElysiaEngine
         entity->transform.rotation = rotation;
         entity->transform.scale = scale;
 
-        // Same dirty path the Inspector uses, so the render list picks it up.
+        // Same dirty path Details uses, so the render list picks it up.
         entity->OnTransformChanged();
     }
 
-    void ElysiaFrame::DrawGizmoToolbar(const ImVec2& imageOrigin)
+    void ElysiaFrame::DrawEditorToolbar()
     {
-        // Overlay (absolute position) so the viewport image keeps its layout and
-        // its render targets are not resized by adding a toolbar row.
-        ImGui::SetCursorScreenPos(ImVec2(imageOrigin.x + 10.0f, imageOrigin.y + 10.0f));
-        ImGui::BeginGroup();
+        using ElysiaEditor::EditorIcon;
+        auto& icons = ElysiaEditor::EditorIcons::Get();
+        const bool bPlaying = SceneManager::GetInstance().IsPlaying();
 
-        const auto operationButton = [this](const char* label, int operation)
+        // UE Toolbar.BackplateLeftPlay / BackplateCenterStop: white Starship
+        // glyphs, green / red foreground, no text labels.
+        constexpr float kPlayStopSize = 20.0f;
+        const ImVec4 playTint(0.35f, 0.85f, 0.40f, 1.0f);
+        const ImVec4 stopTint(0.90f, 0.32f, 0.28f, 1.0f);
+
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(6.0f, 2.0f));
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2.0f, 0.0f));
+
+        ImGui::BeginDisabled(bPlaying);
+        if (icons.Button(EditorIcon::Play, "##Play", "Play In Viewport (Alt+P)",
+                         false, playTint, kPlayStopSize))
+            StartPlay();
+        ImGui::EndDisabled();
+
+        ImGui::SameLine();
+        ImGui::BeginDisabled(!bPlaying);
+        if (icons.Button(EditorIcon::Stop, "##Stop", "Stop (Esc)",
+                         false, stopTint, kPlayStopSize))
+            StopPlay();
+        ImGui::EndDisabled();
+
+        ImGui::PopStyleVar(2);
+    }
+
+    void ElysiaFrame::DrawGizmoToolbar()
+    {
+        // Called from the Viewport window's menu bar. Items layout horizontally;
+        // Separator() becomes a vertical tick, matching UE's viewport toolbar.
+        using ElysiaEditor::EditorIcon;
+        auto& icons = ElysiaEditor::EditorIcons::Get();
+
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(3.0f, 2.0f));
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(3.0f, 0.0f));
+
+        const bool bPlaying = SceneManager::GetInstance().IsPlaying();
+        ImGui::BeginDisabled(bPlaying);
+
+        if (icons.Button(EditorIcon::Move, "##GizmoMove", "Move (W)",
+                         m_gizmoOperation == ImGuizmo::TRANSLATE))
+            m_gizmoOperation = ImGuizmo::TRANSLATE;
+        if (icons.Button(EditorIcon::Rotate, "##GizmoRotate", "Rotate (E)",
+                         m_gizmoOperation == ImGuizmo::ROTATE))
+            m_gizmoOperation = ImGuizmo::ROTATE;
+        if (icons.Button(EditorIcon::Scale, "##GizmoScale", "Scale (R)",
+                         m_gizmoOperation == ImGuizmo::SCALE))
+            m_gizmoOperation = ImGuizmo::SCALE;
+
+        ImGui::Separator();
+
+        const bool bLocal = (m_gizmoMode == ImGuizmo::LOCAL);
+        if (icons.Button(bLocal ? EditorIcon::Local : EditorIcon::World,
+                         "##GizmoCoord",
+                         "Coordinate system (X)"))
+            m_gizmoMode = bLocal ? ImGuizmo::WORLD : ImGuizmo::LOCAL;
+
+        ImGui::Separator();
+
+        if (icons.Button(EditorIcon::Snap, "##GizmoSnap", "Enable snapping", m_gizmoUseSnap))
+            m_gizmoUseSnap = !m_gizmoUseSnap;
+
+        ImGui::BeginDisabled(!m_gizmoUseSnap);
+        auto snapField = [&](EditorIcon icon, const char* id, float* value, float speed,
+                             float minV, float maxV, const char* fmt, const char* tooltip)
         {
-            const bool bActive = (m_gizmoOperation == operation);
-            if (bActive)
+            icons.Image(icon);
+            ImGui::SetNextItemWidth(56.0f);
+            ImGui::DragFloat(id, value, speed, minV, maxV, fmt);
+            if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+                ImGui::SetTooltip("%s", tooltip);
+        };
+        snapField(EditorIcon::SnapTranslate, "##SnapT", &m_gizmoSnapTranslate,
+                  0.05f, 0.01f, 50.f, "%.2f", "Translation snap");
+        snapField(EditorIcon::SnapRotate, "##SnapR", &m_gizmoSnapRotateDegrees,
+                  1.f, 1.f, 90.f, "%.0f deg", "Rotation snap (degrees)");
+        snapField(EditorIcon::SnapScale, "##SnapS", &m_gizmoSnapScale,
+                  0.01f, 0.01f, 5.f, "%.2f", "Scale snap");
+        ImGui::EndDisabled();
+
+        ImGui::EndDisabled();
+
+        auto* pCamera = dynamic_cast<FirstPersonCamera*>(
+            CameraManager::GetInstance().GetMainCamera());
+        const float padX = ImGui::GetStyle().FramePadding.x;
+        const float spacing = ImGui::GetStyle().ItemSpacing.x;
+        float camW = 0.0f;
+        if (pCamera != nullptr)
+        {
+            const float speed = pCamera->GetCameraSpeed();
+            char speedLabel[32]{};
+            std::snprintf(speedLabel, sizeof(speedLabel), (speed > 1.0f) ? "%.1f" : "%.3f", speed);
+            const float iconBtnW = ElysiaEditor::EditorIcons::DisplaySize + padX * 2.0f;
+            const float numWidth = (std::max)(
+                ImGui::CalcTextSize(speedLabel).x + padX * 2.0f + 8.0f, 48.0f);
+            camW = iconBtnW + spacing + numWidth;
+        }
+
+        DebugMode displayMode = IsViewportViewMode(UserData::GetInstance().debugMode)
+                                    ? UserData::GetInstance().debugMode
+                                    : m_lastViewportViewMode;
+        const char* viewLabel = GetViewportViewModeLabel(displayMode);
+        const float viewIconW = ElysiaEditor::EditorIcons::DisplaySize;
+        const float viewW = padX * 2.0f + viewIconW + 4.0f
+            + ImGui::CalcTextSize(viewLabel).x + 4.0f + 8.0f;
+        const float immersiveW = ImGui::CalcTextSize("Immersive").x + padX * 2.0f
+            + ImGui::CalcTextSize("F11").x + 12.0f;
+        const float totalW = viewW + spacing + immersiveW + (camW > 0.0f ? camW + spacing : 0.0f);
+        const float rightX = ImGui::GetWindowContentRegionMax().x - totalW;
+        if (rightX > ImGui::GetCursorPosX() + 8.0f)
+            ImGui::SetCursorPosX(rightX);
+
+        DrawCameraSpeedControl();
+        DrawViewModeControl();
+        if (ImGui::MenuItem("Immersive", "F11", m_bViewportImmersive))
+            ToggleViewportImmersive();
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip("Immersive View: fill the editor window. F11 toggles.");
+        ImGui::PopStyleVar(2);
+    }
+
+    void ElysiaFrame::DrawStatusBar()
+    {
+        auto& icons = ElysiaEditor::EditorIcons::Get();
+        if (icons.IconLabelButton(
+                ElysiaEditor::EditorIcon::OutputLog,
+                "Output Log",
+                "Opens the output log drawer. (Alt+`) toggles.",
+                m_UIState.bShowOutputLog))
+        {
+            m_UIState.bShowOutputLog = !m_UIState.bShowOutputLog;
+        }
+        m_bOutputLogButtonHovered = ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled);
+    }
+
+    void ElysiaFrame::DrawCameraSpeedControl()
+    {
+        auto* pCamera = dynamic_cast<FirstPersonCamera*>(CameraManager::GetInstance().GetMainCamera());
+        if (pCamera == nullptr)
+            return;
+
+        // UE CreateCameraSpeedMenu: raised toolbar entry on the right, label is the speed number.
+        constexpr float kUiMin = 0.33f;
+        constexpr float kUiMax = 32.0f;
+
+        const float speed = pCamera->GetCameraSpeed();
+        const char* valueFmt = (speed > 1.0f) ? "%.1f" : "%.3f";
+        char label[32]{};
+        std::snprintf(label, sizeof(label), valueFmt, speed);
+
+        auto& icons = ElysiaEditor::EditorIcons::Get();
+        const float padX = ImGui::GetStyle().FramePadding.x;
+        const float iconBtnW = ElysiaEditor::EditorIcons::DisplaySize + padX * 2.0f;
+        const float numWidth = (std::max)(
+            ImGui::CalcTextSize(label).x + padX * 2.0f + 8.0f,
+            48.0f);
+
+        const char* speedTooltip = "Camera Speed (WASD). Hold a mouse button and scroll to adjust.";
+        if (icons.Button(ElysiaEditor::EditorIcon::CameraSpeed, "##CameraSpeedIcon", speedTooltip))
+            ImGui::OpenPopup("##CameraSpeedPopup");
+
+        char buttonId[40]{};
+        std::snprintf(buttonId, sizeof(buttonId), "%s###CameraSpeed", label);
+        if (ImGui::Button(buttonId, ImVec2(numWidth, 0.0f)))
+            ImGui::OpenPopup("##CameraSpeedPopup");
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip("%s", speedTooltip);
+
+        const ImVec2 btnMax = ImGui::GetItemRectMax();
+        ImGui::SetNextWindowPos(ImVec2(btnMax.x, btnMax.y + 2.0f), ImGuiCond_Appearing, ImVec2(1.0f, 0.0f));
+        ImGui::SetNextWindowSizeConstraints(ImVec2(260.0f, 0.0f), ImVec2(320.0f, FLT_MAX));
+        if (ImGui::BeginPopup("##CameraSpeedPopup"))
+        {
+            ImGui::AlignTextToFramePadding();
+            ImGui::TextUnformatted("Speed");
+            ImGui::SameLine();
+
+            float uiSpeed = std::clamp(pCamera->GetCameraSpeed(), kUiMin, kUiMax);
+            const float valueWidth = 64.0f;
+            ImGui::SetNextItemWidth((std::max)(80.0f, ImGui::GetContentRegionAvail().x - valueWidth - ImGui::GetStyle().ItemSpacing.x));
+            if (ImGui::SliderFloat("##CameraSpeedSlider",
+                                   &uiSpeed,
+                                   kUiMin,
+                                   kUiMax,
+                                   "",
+                                   ImGuiSliderFlags_Logarithmic | ImGuiSliderFlags_NoRoundToFormat))
             {
-                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.26f, 0.59f, 0.98f, 0.85f));
+                pCamera->SetCameraSpeed(uiSpeed);
             }
-            const bool bClicked = ImGui::Button(label, ImVec2(56.0f, 0.0f));
-            if (bActive)
-            {
-                ImGui::PopStyleColor();
-            }
-            if (bClicked)
-            {
-                m_gizmoOperation = operation;
-            }
+
+            ImGui::SameLine();
+            float typedSpeed = pCamera->GetCameraSpeed();
+            const char* typedFmt = (typedSpeed > 1.0f) ? "%.1f" : "%.3f";
+            ImGui::SetNextItemWidth(valueWidth);
+            if (ImGui::InputFloat("##CameraSpeedInput", &typedSpeed, 0.0f, 0.0f, typedFmt))
+                pCamera->SetCameraSpeed(typedSpeed);
+
+            ImGui::Spacing();
+            ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyleColorVec4(ImGuiCol_TextDisabled));
+            ImGui::TextWrapped("Hold either mouse button and use the scroll wheel to adjust the speed on the fly.");
+            ImGui::PopStyleColor();
+            ImGui::EndPopup();
+        }
+    }
+
+    void ElysiaFrame::DrawViewModeControl()
+    {
+        using ElysiaEditor::EditorIcon;
+        auto& icons = ElysiaEditor::EditorIcons::Get();
+        auto& debugMode = UserData::GetInstance().debugMode;
+        if (IsViewportViewMode(debugMode))
+            m_lastViewportViewMode = debugMode;
+
+        const DebugMode displayMode = IsViewportViewMode(debugMode)
+                                          ? debugMode
+                                          : m_lastViewportViewMode;
+        const char* label = GetViewportViewModeLabel(displayMode);
+        EditorIcon icon = EditorIcon::Lit;
+        if (displayMode == DebugMode::Emission)
+            icon = EditorIcon::Unlit;
+        else if (displayMode == DebugMode::LightingOnly)
+            icon = EditorIcon::LightingOnly;
+        else if (IsBufferVisualizationMode(displayMode))
+            icon = EditorIcon::BufferVisualization;
+        else if (IsShadowVisualizationMode(displayMode))
+            icon = EditorIcon::VirtualShadowMap;
+        else if (IsGIVisualizationMode(displayMode))
+            icon = EditorIcon::Lumen;
+
+        const char* tooltip = "View mode settings for the current viewport.";
+        if (icons.IconLabelButton(icon, label, tooltip, false, true, "ViewMode"))
+            ImGui::OpenPopup("##ViewModePopup");
+
+        const ImVec2 btnMin = ImGui::GetItemRectMin();
+        const ImVec2 btnMax = ImGui::GetItemRectMax();
+        ImGui::SetNextWindowPos(ImVec2(btnMin.x, btnMax.y + 2.0f), ImGuiCond_Appearing);
+        ImGui::SetNextWindowSizeConstraints(ImVec2(240.0f, 0.0f), ImVec2(360.0f, FLT_MAX));
+        if (!ImGui::BeginPopup("##ViewModePopup"))
+            return;
+
+        auto applyMode = [&](DebugMode mode)
+        {
+            debugMode = mode;
+            if (IsViewportViewMode(mode))
+                m_lastViewportViewMode = mode;
+            ImGui::CloseCurrentPopup();
         };
 
-        operationButton("Move", ImGuizmo::TRANSLATE);
-        ImGui::SameLine();
-        operationButton("Rotate", ImGuizmo::ROTATE);
-        ImGui::SameLine();
-        operationButton("Scale", ImGuizmo::SCALE);
+        auto menuRadio = [](bool on)
+        {
+            const float h = ImGui::GetFrameHeight();
+            const float r = 4.0f;
+            const ImVec2 p = ImGui::GetCursorScreenPos();
+            ImDrawList* dl = ImGui::GetWindowDrawList();
+            const ImU32 col = ImGui::GetColorU32(ImGuiCol_Text);
+            const ImVec2 c(p.x + r + 2.0f, p.y + h * 0.5f);
+            dl->AddCircle(c, r, col, 16, 1.15f);
+            if (on)
+                dl->AddCircleFilled(c, r - 2.1f, col, 16);
+            ImGui::Dummy(ImVec2(r * 2.0f + 8.0f, h));
+        };
 
-        ImGui::SetCursorScreenPos(ImVec2(imageOrigin.x + 10.0f, imageOrigin.y + 40.0f));
-        const bool bLocal = (m_gizmoMode == ImGuizmo::LOCAL);
-        if (bLocal)
+        auto modeRow = [&](EditorIcon rowIcon, const char* rowLabel, DebugMode mode)
         {
-            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.26f, 0.59f, 0.98f, 0.85f));
-        }
-        if (ImGui::Button(bLocal ? "Local" : "World", ImVec2(64.0f, 0.0f)))
-        {
-            m_gizmoMode = bLocal ? ImGuizmo::WORLD : ImGuizmo::LOCAL;
-        }
-        if (bLocal)
-        {
-            ImGui::PopStyleColor();
-        }
-        ImGui::SameLine();
-        ImGui::Checkbox("Snap", &m_gizmoUseSnap);
+            ImGui::PushID(rowLabel);
+            menuRadio(debugMode == mode);
+            ImGui::SameLine(0.0f, 0.0f);
+            if (icons.IsValid(rowIcon))
+            {
+                icons.Image(rowIcon);
+                ImGui::SameLine(0.0f, 4.0f);
+            }
+            if (ImGui::Selectable(rowLabel, debugMode == mode))
+                applyMode(mode);
+            ImGui::PopID();
+        };
 
-        ImGui::EndGroup();
+        ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyleColorVec4(ImGuiCol_TextDisabled));
+        ImGui::TextUnformatted("VIEW MODE");
+        ImGui::PopStyleColor();
+
+        modeRow(EditorIcon::Lit, "Lit", DebugMode::None);
+        modeRow(EditorIcon::Unlit, "Unlit", DebugMode::Emission);
+        modeRow(EditorIcon::LightingOnly, "Lighting Only", DebugMode::LightingOnly);
+
+        auto visSubmenu = [&](const char* id, EditorIcon menuIcon, const char* title, bool parentOn,
+                              const BufferVisualizationEntry* entries, size_t count)
+        {
+            ImGui::PushID(id);
+            menuRadio(parentOn);
+            ImGui::SameLine(0.0f, 0.0f);
+            if (icons.IsValid(menuIcon))
+            {
+                icons.Image(menuIcon);
+                ImGui::SameLine(0.0f, 4.0f);
+            }
+            if (ImGui::BeginMenu(title))
+            {
+                for (size_t i = 0; i < count; ++i)
+                {
+                    const BufferVisualizationEntry& entry = entries[i];
+                    ImGui::PushID(static_cast<int>(entry.mode));
+                    menuRadio(debugMode == entry.mode);
+                    ImGui::SameLine(0.0f, 0.0f);
+                    if (ImGui::Selectable(entry.label, debugMode == entry.mode))
+                        applyMode(entry.mode);
+                    ImGui::PopID();
+                }
+                ImGui::EndMenu();
+            }
+            ImGui::PopID();
+        };
+
+        visSubmenu("BufferVisualizationMenu",
+                   EditorIcon::BufferVisualization,
+                   "Buffer Visualization",
+                   IsBufferVisualizationMode(debugMode),
+                   kBufferVisualizationModes,
+                   sizeof(kBufferVisualizationModes) / sizeof(kBufferVisualizationModes[0]));
+        visSubmenu("ShadowVisualizationMenu",
+                   EditorIcon::VirtualShadowMap,
+                   "Shadow",
+                   IsShadowVisualizationMode(debugMode),
+                   kShadowVisualizationModes,
+                   sizeof(kShadowVisualizationModes) / sizeof(kShadowVisualizationModes[0]));
+        visSubmenu("GIVisualizationMenu",
+                   EditorIcon::Lumen,
+                   "GI",
+                   IsGIVisualizationMode(debugMode),
+                   kGIVisualizationModes,
+                   sizeof(kGIVisualizationModes) / sizeof(kGIVisualizationModes[0]));
+
+        ImGui::EndPopup();
     }
 
     void ElysiaFrame::DrawShadowFrustumOverlay(const ImVec2& imageOrigin, const ImVec2& imageSize)
@@ -1242,7 +2065,26 @@ namespace ElysiaEngine
 
     void ElysiaFrame::DrawViewportGizmo(const ImVec2& imageOrigin, const ImVec2& imageSize)
     {
-        DrawGizmoToolbar(imageOrigin);
+        if (SceneManager::GetInstance().IsPlaying())
+            return;
+
+        // Viewport click picking: LMB on the image selects the entity, syncing
+        // Outliner and Details. The transform gizmo owns the mouse
+        // while hovered or dragged, so picking stands down.
+        const ImVec2 mousePos = ImGui::GetIO().MousePos;
+        const bool bMouseOnImage =
+            mousePos.x >= imageOrigin.x && mousePos.x < imageOrigin.x + imageSize.x &&
+            mousePos.y >= imageOrigin.y && mousePos.y < imageOrigin.y + imageSize.y;
+        if (imageSize.x > 0.0f && imageSize.y > 0.0f &&
+            bMouseOnImage &&
+            ImGui::IsMouseClicked(ImGuiMouseButton_Left) &&
+            !ImGui::GetIO().KeyAlt && !m_bOrbiting &&
+            !ImGuizmo::IsOver() && !ImGuizmo::IsUsing())
+        {
+            const Vector2 viewportUV((mousePos.x - imageOrigin.x) / imageSize.x,
+                                     (mousePos.y - imageOrigin.y) / imageSize.y);
+            SelectionManager::GetInstance().RequestPick(viewportUV);
+        }
 
         Entity* pSelected = SelectionManager::GetInstance().GetSelected();
         auto* pCamera = CameraManager::GetInstance().GetMainCamera();
@@ -1257,7 +2099,8 @@ namespace ElysiaEngine
         ImGuizmo::SetRect(imageOrigin.x, imageOrigin.y, imageSize.x, imageSize.y);
         ImGuizmo::SetOrthographic(false);
         ImGuizmo::SetGizmoSizeClipSpace(0.12f);
-        ImGuizmo::Enable(true);
+        // UE CanUseDragTool: orbit (Alt) owns the mouse, widget stands down.
+        ImGuizmo::Enable(!ImGui::GetIO().KeyAlt && !m_bOrbiting);
 
         // Matrices are handed to ImGuizmo as-is (same convention as SimpleMath).
         float view[16]{};

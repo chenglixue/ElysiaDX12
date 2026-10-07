@@ -86,6 +86,7 @@ namespace ElysiaRenderer
         RenderTexture* m_pCameraColorRT = nullptr;
         RenderTexture* m_pCameraDepthRT = nullptr;
         RenderTexture* m_pDisplayRT = nullptr;
+        bool m_bSizeDependentResourcesReady = false;
 
         // Warms every runtime-switchable shader keyword combination inside the
         // PSO precache batch, so toggling those settings later is a cache lookup

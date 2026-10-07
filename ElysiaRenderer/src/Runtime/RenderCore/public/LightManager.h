@@ -2,6 +2,7 @@
 
 #include "Programs/public/IManager.h"
 #include "Programs/public/IUpdate.h"
+#include "Runtime/RenderCore/public/ShadowUtility.h"
 
 namespace ElysiaRenderer
 {
@@ -46,6 +47,7 @@ namespace ElysiaRenderer
         DX12DirectionLight* GetMainLight();
         DX12Shadow* GetMainShadow();
         RenderTexture* GetMainShadowRT() const;
+        bool ConsumeShadowLayoutDirty();
 
     private:
         static std::unique_ptr<LightManager> m_instance;
@@ -56,8 +58,13 @@ namespace ElysiaRenderer
         UINT64 m_frameIndex;
 
         std::unique_ptr<DX12DirectionLight> m_pMainLight = nullptr;
+        ShadowType m_appliedShadowType = ShadowType::Soft;
+        ShadowQuality m_appliedShadowQuality = ShadowQuality::VeryHigh;
+        bool m_bShadowLayoutDirty = false;
 
         void CreatMainLight();
+        void CaptureAppliedShadowLayout();
+        void DetectShadowLayoutChange();
         void AppendCasterBounds(Entity& entity, std::vector<BoundingBox>& casterBounds);
     };
 }

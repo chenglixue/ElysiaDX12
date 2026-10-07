@@ -200,6 +200,13 @@ namespace ElysiaRenderer
             {ShadowQuality::VeryHigh, "VeryHigh"},
         };
 
+        const EnumName<BasicShapeType> kBasicShapeTypes[] =
+        {
+            {BasicShapeType::Cube, "Cube"},
+            {BasicShapeType::Sphere, "Sphere"},
+            {BasicShapeType::Plane, "Plane"},
+        };
+
         const EnumName<HDRQuality> kHdrQualities[] =
         {
             {HDRQuality::Low, "Low"},
@@ -262,6 +269,15 @@ namespace ElysiaRenderer
             {DebugMode::Emission, "Emission"},
             {DebugMode::Metallic, "Metallic"},
             {DebugMode::Roughness, "Roughness"},
+            {DebugMode::ShadowMap, "ShadowMap"},
+            {DebugMode::Specular, "Specular"},
+            {DebugMode::WorldTangent, "WorldTangent"},
+            {DebugMode::SceneDepth, "SceneDepth"},
+            {DebugMode::Opacity, "Opacity"},
+            {DebugMode::PreTonemapHDR, "PreTonemapHDR"},
+            {DebugMode::PostTonemapHDR, "PostTonemapHDR"},
+            {DebugMode::LightingOnly, "LightingOnly"},
+            {DebugMode::ShadingModel, "ShadingModel"},
         };
 
         const EnumName<DebugDownOrUp> kBloomDirections[] =
@@ -721,6 +737,195 @@ namespace ElysiaRenderer
         loadTransformArray("ModelLocation", &SavedModelTransform::location);
         loadTransformArray("ModelRotation", &SavedModelTransform::rotationEuler);
         loadTransformArray("ModelScale", &SavedModelTransform::scale);
+
+        const auto* lightLocations = TryGetArray("Startup", "DirectionalLightLocation");
+        g_HasExplicitDirectionalLights = lightLocations != nullptr;
+        g_DirectionalLights.clear();
+        if (lightLocations)
+        {
+            g_DirectionalLights.resize(lightLocations->size());
+            for (size_t i = 0; i < lightLocations->size(); ++i)
+            {
+                g_DirectionalLights[i].shadow = data.shadowParameter;
+                if (!ParseVector3((*lightLocations)[i], g_DirectionalLights[i].location))
+                    warn("Startup", "DirectionalLightLocation", (*lightLocations)[i]);
+            }
+
+            auto loadLightVec = [&](const char* key, Vector3 SavedDirectionalLight::* member)
+            {
+                const auto* values = TryGetArray("Startup", key);
+                if (!values)
+                    return;
+                const size_t count = (std::min)(values->size(), g_DirectionalLights.size());
+                for (size_t i = 0; i < count; ++i)
+                {
+                    Vector3 parsed = g_DirectionalLights[i].*member;
+                    if (!ParseVector3((*values)[i], parsed))
+                    {
+                        warn("Startup", key, (*values)[i]);
+                        continue;
+                    }
+                    g_DirectionalLights[i].*member = parsed;
+                }
+            };
+            auto loadLightFloat = [&](const char* key, float SavedDirectionalLight::* member)
+            {
+                const auto* values = TryGetArray("Startup", key);
+                if (!values)
+                    return;
+                const size_t count = (std::min)(values->size(), g_DirectionalLights.size());
+                for (size_t i = 0; i < count; ++i)
+                {
+                    float parsed = g_DirectionalLights[i].*member;
+                    if (!ParseFloat((*values)[i], parsed))
+                    {
+                        warn("Startup", key, (*values)[i]);
+                        continue;
+                    }
+                    g_DirectionalLights[i].*member = parsed;
+                }
+            };
+            auto loadLightShadowFloat = [&](const char* key, float ShadowParameter::* member)
+            {
+                const auto* values = TryGetArray("Startup", key);
+                if (!values)
+                    return;
+                const size_t count = (std::min)(values->size(), g_DirectionalLights.size());
+                for (size_t i = 0; i < count; ++i)
+                {
+                    float parsed = g_DirectionalLights[i].shadow.*member;
+                    if (!ParseFloat((*values)[i], parsed))
+                    {
+                        warn("Startup", key, (*values)[i]);
+                        continue;
+                    }
+                    g_DirectionalLights[i].shadow.*member = parsed;
+                }
+            };
+            auto loadLightShadowBool = [&](const char* key, bool ShadowParameter::* member)
+            {
+                const auto* values = TryGetArray("Startup", key);
+                if (!values)
+                    return;
+                const size_t count = (std::min)(values->size(), g_DirectionalLights.size());
+                for (size_t i = 0; i < count; ++i)
+                {
+                    bool parsed = g_DirectionalLights[i].shadow.*member;
+                    if (!ParseBool((*values)[i], parsed))
+                    {
+                        warn("Startup", key, (*values)[i]);
+                        continue;
+                    }
+                    g_DirectionalLights[i].shadow.*member = parsed;
+                }
+            };
+            auto loadLightShadowEnum = [&](const char* key, auto member, const auto& table)
+            {
+                const auto* values = TryGetArray("Startup", key);
+                if (!values)
+                    return;
+                const size_t count = (std::min)(values->size(), g_DirectionalLights.size());
+                for (size_t i = 0; i < count; ++i)
+                {
+                    auto parsed = g_DirectionalLights[i].shadow.*member;
+                    if (!ParseEnum((*values)[i], table, parsed))
+                    {
+                        warn("Startup", key, (*values)[i]);
+                        continue;
+                    }
+                    g_DirectionalLights[i].shadow.*member = parsed;
+                }
+            };
+
+            loadLightVec("DirectionalLightRotation", &SavedDirectionalLight::rotationEuler);
+            loadLightVec("DirectionalLightColor", &SavedDirectionalLight::color);
+            loadLightFloat("DirectionalLightIntensity", &SavedDirectionalLight::intensity);
+            loadLightFloat("DirectionalLightSourceAngle", &SavedDirectionalLight::sourceAngleDegrees);
+            loadLightShadowBool("DirectionalLightCastShadows", &ShadowParameter::EnableShadow);
+            loadLightShadowEnum("DirectionalLightShadowType", &ShadowParameter::shadowType, kShadowTypes);
+            loadLightShadowEnum("DirectionalLightShadowQuality", &ShadowParameter::shadowQuality, kShadowQualities);
+            loadLightShadowFloat("DirectionalLightShadowBias", &ShadowParameter::shadowDepthBias);
+            loadLightShadowFloat("DirectionalLightShadowSlopeBias", &ShadowParameter::shadowSlopeDepthBias);
+            loadLightShadowFloat("DirectionalLightShadowMaxSlopeBias", &ShadowParameter::shadowMaxSlopeDepthBias);
+            loadLightShadowFloat("DirectionalLightShadowRadius", &ShadowParameter::shadowRadius);
+            loadLightShadowFloat("DirectionalLightShadowDistance", &ShadowParameter::shadowDistance);
+            loadLightShadowBool("DirectionalLightShadowTAA", &ShadowParameter::EnableTAA);
+
+            if (const auto* names = TryGetArray("Startup", "DirectionalLightName"))
+            {
+                const size_t count = (std::min)(names->size(), g_DirectionalLights.size());
+                for (size_t i = 0; i < count; ++i)
+                {
+                    if (!(*names)[i].empty())
+                        g_DirectionalLights[i].name = (*names)[i];
+                }
+            }
+            if (const auto* flags = TryGetArray("Startup", "DirectionalLightAtmosphereSun"))
+            {
+                const size_t count = (std::min)(flags->size(), g_DirectionalLights.size());
+                for (size_t i = 0; i < count; ++i)
+                {
+                    bool parsed = g_DirectionalLights[i].atmosphereSun;
+                    if (!ParseBool((*flags)[i], parsed))
+                    {
+                        warn("Startup", "DirectionalLightAtmosphereSun", (*flags)[i]);
+                        continue;
+                    }
+                    g_DirectionalLights[i].atmosphereSun = parsed;
+                }
+            }
+            else if (!g_DirectionalLights.empty())
+            {
+                g_DirectionalLights[0].atmosphereSun = true;
+            }
+        }
+
+        const auto* shapeTypes = TryGetArray("Startup", "BasicShapeType");
+        g_HasExplicitBasicShapes = shapeTypes != nullptr;
+        g_BasicShapes.clear();
+        if (shapeTypes)
+        {
+            g_BasicShapes.resize(shapeTypes->size());
+            for (size_t i = 0; i < shapeTypes->size(); ++i)
+            {
+                BasicShapeType parsed = BasicShapeType::Cube;
+                if (!ParseEnum((*shapeTypes)[i], kBasicShapeTypes, parsed))
+                    warn("Startup", "BasicShapeType", (*shapeTypes)[i]);
+                g_BasicShapes[i].type = parsed;
+                g_BasicShapes[i].name = GetBasicShapeTypeName(parsed);
+            }
+
+            auto loadShapeVec = [&](const char* key, Vector3 SavedBasicShape::* member)
+            {
+                const auto* values = TryGetArray("Startup", key);
+                if (!values)
+                    return;
+                const size_t count = (std::min)(values->size(), g_BasicShapes.size());
+                for (size_t i = 0; i < count; ++i)
+                {
+                    Vector3 parsed = g_BasicShapes[i].*member;
+                    if (!ParseVector3((*values)[i], parsed))
+                    {
+                        warn("Startup", key, (*values)[i]);
+                        continue;
+                    }
+                    g_BasicShapes[i].*member = parsed;
+                }
+            };
+            loadShapeVec("BasicShapeLocation", &SavedBasicShape::location);
+            loadShapeVec("BasicShapeRotation", &SavedBasicShape::rotationEuler);
+            loadShapeVec("BasicShapeScale", &SavedBasicShape::scale);
+
+            if (const auto* names = TryGetArray("Startup", "BasicShapeName"))
+            {
+                const size_t count = (std::min)(names->size(), g_BasicShapes.size());
+                for (size_t i = 0; i < count; ++i)
+                {
+                    if (!(*names)[i].empty())
+                        g_BasicShapes[i].name = (*names)[i];
+                }
+            }
+        }
     }
 
     void ConfigCache::SaveDiff() const
@@ -874,6 +1079,138 @@ namespace ElysiaRenderer
         emitVecArray("ModelLocation", &SavedModelTransform::location, Vector3::Zero);
         emitVecArray("ModelRotation", &SavedModelTransform::rotationEuler, Vector3::Zero);
         emitVecArray("ModelScale", &SavedModelTransform::scale, Vector3::One);
+
+        if (g_HasExplicitDirectionalLights || !g_DirectionalLights.empty())
+        {
+            auto emitLightArray = [&](const char* key, const std::vector<std::string>& live)
+            {
+                const std::vector<std::string>* baseline = TryGetBaselineArray("Startup", key);
+                if (baseline != nullptr && *baseline == live)
+                    return;
+
+                begin("Startup");
+                if (live.empty())
+                {
+                    out << "." << key << "=\n";
+                    return;
+                }
+                for (size_t i = 0; i < live.size(); ++i)
+                    out << (i == 0 ? "." : "+") << key << "=" << live[i] << "\n";
+            };
+
+            std::vector<std::string> names;
+            std::vector<std::string> locations;
+            std::vector<std::string> rotations;
+            std::vector<std::string> colors;
+            std::vector<std::string> intensities;
+            std::vector<std::string> sourceAngles;
+            std::vector<std::string> atmosphereSuns;
+            std::vector<std::string> castShadows;
+            std::vector<std::string> shadowTypes;
+            std::vector<std::string> shadowQualities;
+            std::vector<std::string> shadowBiases;
+            std::vector<std::string> shadowSlopeBiases;
+            std::vector<std::string> shadowMaxSlopeBiases;
+            std::vector<std::string> shadowRadii;
+            std::vector<std::string> shadowDistances;
+            std::vector<std::string> shadowTaas;
+            names.reserve(g_DirectionalLights.size());
+            locations.reserve(g_DirectionalLights.size());
+            rotations.reserve(g_DirectionalLights.size());
+            colors.reserve(g_DirectionalLights.size());
+            intensities.reserve(g_DirectionalLights.size());
+            sourceAngles.reserve(g_DirectionalLights.size());
+            atmosphereSuns.reserve(g_DirectionalLights.size());
+            castShadows.reserve(g_DirectionalLights.size());
+            shadowTypes.reserve(g_DirectionalLights.size());
+            shadowQualities.reserve(g_DirectionalLights.size());
+            shadowBiases.reserve(g_DirectionalLights.size());
+            shadowSlopeBiases.reserve(g_DirectionalLights.size());
+            shadowMaxSlopeBiases.reserve(g_DirectionalLights.size());
+            shadowRadii.reserve(g_DirectionalLights.size());
+            shadowDistances.reserve(g_DirectionalLights.size());
+            shadowTaas.reserve(g_DirectionalLights.size());
+            for (const auto& light : g_DirectionalLights)
+            {
+                names.push_back(light.name);
+                locations.push_back(FormatVector3(light.location));
+                rotations.push_back(FormatVector3(light.rotationEuler));
+                colors.push_back(FormatVector3(light.color));
+                intensities.push_back(FormatFloat(light.intensity));
+                sourceAngles.push_back(FormatFloat(light.sourceAngleDegrees));
+                atmosphereSuns.push_back(light.atmosphereSun ? "true" : "false");
+                castShadows.push_back(light.shadow.EnableShadow ? "true" : "false");
+                shadowTypes.push_back(NameOf(light.shadow.shadowType, kShadowTypes));
+                shadowQualities.push_back(NameOf(light.shadow.shadowQuality, kShadowQualities));
+                shadowBiases.push_back(FormatFloat(light.shadow.shadowDepthBias));
+                shadowSlopeBiases.push_back(FormatFloat(light.shadow.shadowSlopeDepthBias));
+                shadowMaxSlopeBiases.push_back(FormatFloat(light.shadow.shadowMaxSlopeDepthBias));
+                shadowRadii.push_back(FormatFloat(light.shadow.shadowRadius));
+                shadowDistances.push_back(FormatFloat(light.shadow.shadowDistance));
+                shadowTaas.push_back(light.shadow.EnableTAA ? "true" : "false");
+            }
+
+            emitLightArray("DirectionalLightName", names);
+            emitLightArray("DirectionalLightLocation", locations);
+            emitLightArray("DirectionalLightRotation", rotations);
+            emitLightArray("DirectionalLightColor", colors);
+            emitLightArray("DirectionalLightIntensity", intensities);
+            emitLightArray("DirectionalLightSourceAngle", sourceAngles);
+            emitLightArray("DirectionalLightAtmosphereSun", atmosphereSuns);
+            emitLightArray("DirectionalLightCastShadows", castShadows);
+            emitLightArray("DirectionalLightShadowType", shadowTypes);
+            emitLightArray("DirectionalLightShadowQuality", shadowQualities);
+            emitLightArray("DirectionalLightShadowBias", shadowBiases);
+            emitLightArray("DirectionalLightShadowSlopeBias", shadowSlopeBiases);
+            emitLightArray("DirectionalLightShadowMaxSlopeBias", shadowMaxSlopeBiases);
+            emitLightArray("DirectionalLightShadowRadius", shadowRadii);
+            emitLightArray("DirectionalLightShadowDistance", shadowDistances);
+            emitLightArray("DirectionalLightShadowTAA", shadowTaas);
+        }
+
+        if (g_HasExplicitBasicShapes || !g_BasicShapes.empty())
+        {
+            auto emitShapeArray = [&](const char* key, const std::vector<std::string>& live)
+            {
+                const std::vector<std::string>* baseline = TryGetBaselineArray("Startup", key);
+                if (baseline != nullptr && *baseline == live)
+                    return;
+
+                begin("Startup");
+                if (live.empty())
+                {
+                    out << "." << key << "=\n";
+                    return;
+                }
+                for (size_t i = 0; i < live.size(); ++i)
+                    out << (i == 0 ? "." : "+") << key << "=" << live[i] << "\n";
+            };
+
+            std::vector<std::string> types;
+            std::vector<std::string> names;
+            std::vector<std::string> locations;
+            std::vector<std::string> rotations;
+            std::vector<std::string> scales;
+            types.reserve(g_BasicShapes.size());
+            names.reserve(g_BasicShapes.size());
+            locations.reserve(g_BasicShapes.size());
+            rotations.reserve(g_BasicShapes.size());
+            scales.reserve(g_BasicShapes.size());
+            for (const auto& shape : g_BasicShapes)
+            {
+                types.push_back(NameOf(shape.type, kBasicShapeTypes));
+                names.push_back(shape.name);
+                locations.push_back(FormatVector3(shape.location));
+                rotations.push_back(FormatVector3(shape.rotationEuler));
+                scales.push_back(FormatVector3(shape.scale));
+            }
+
+            emitShapeArray("BasicShapeType", types);
+            emitShapeArray("BasicShapeName", names);
+            emitShapeArray("BasicShapeLocation", locations);
+            emitShapeArray("BasicShapeRotation", rotations);
+            emitShapeArray("BasicShapeScale", scales);
+        }
 
         emitVector("Light", "Color", data.lightColor);
         emitVector("Light", "Direction", data.lightDir);

@@ -96,6 +96,8 @@ namespace ElysiaRenderer
                                                         uint32_t Width,
                                                         uint32_t Height)
     {
+        const bool bFirstSizeResources = !m_bSizeDependentResourcesReady;
+
         m_Width = std::floor(Width * UserData::GetInstance().taaParameter.sampleRate);
         m_Height = std::floor(Height * UserData::GetInstance().taaParameter.sampleRate);
 
@@ -178,13 +180,18 @@ namespace ElysiaRenderer
             .pDisplayRT = m_pDisplayRT
         };
 
-        PSOManager::GetInstance().BeginPrecacheBatch();
+        if (bFirstSizeResources)
+            PSOManager::GetInstance().BeginPrecacheBatch();
         for (auto& pass : m_passes)
         {
             pass->Setup(passData);
         }
-        PrecacheKeywordCombinations();
-        PSOManager::GetInstance().WaitPrecacheBatch();
+        if (bFirstSizeResources)
+        {
+            PrecacheKeywordCombinations();
+            PSOManager::GetInstance().WaitPrecacheBatch();
+            m_bSizeDependentResourcesReady = true;
+        }
     }
 
     void Renderer::OnDestroyWindowSizeDependentResources()
@@ -218,6 +225,11 @@ namespace ElysiaRenderer
         QueryPerformanceCounter(&cpuStart);
 
         LightManager::GetInstance().Update(frameContext);
+        if (LightManager::GetInstance().ConsumeShadowLayoutDirty())
+        {
+            OnUpdateDisplayDependentResources(nullptr);
+            RefreshShadowDependentResources();
+        }
         SerializeUserData();
 
         OnUpdateConstantBuffer(frameContext.renderList);

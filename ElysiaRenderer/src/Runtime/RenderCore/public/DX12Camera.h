@@ -105,10 +105,9 @@ namespace ElysiaRenderer
         {
             return m_speed;
         }
-        void SetCameraSpeed(float speed) noexcept
-        {
-            m_speed = speed;
-        }
+        void SetCameraSpeed(float speed) noexcept;
+        // UE: Speed += Speed * factor. factor +0.1 scroll up, -0.1 scroll down.
+        void AdjustCameraSpeed(float relativeFactor) noexcept;
 
         void SetXRotation(float xRotation)
         {
@@ -134,9 +133,35 @@ namespace ElysiaRenderer
         void Move(const Vector3& direction, float deltaTime) noexcept;
         void SyncFromTransform();
 
+        // World-space look direction. Matches Move(): +Z in the camera's rotation.
+        Vector3 GetWorldForwardDir() const noexcept;
+
+        // UE FViewportCameraTransform::LookAt. F and Alt-orbit both use this pivot.
+        void SetLookAtLocation(const Vector3& lookAt) noexcept;
+        const Vector3& GetLookAtLocation() const noexcept { return m_lookAt; }
+        bool HasLookAt() const noexcept { return m_bHasLookAt; }
+
+        // UE FEditorViewportClient::FocusViewportOnBox (perspective branch).
+        void FocusViewportOnBox(const BoundingBox& box) noexcept;
+        // UE ToggleOrbitCamera(true) then InputAxisForOrbit rotation mode.
+        void BeginOrbitCamera() noexcept;
+        void OrbitCamera(float yawDelta, float pitchDelta) noexcept;
+
     private:
+        // Matches UE FEditorViewportCameraSpeedSettings AbsoluteMin/Max.
+        static constexpr float kMinCameraSpeed = 0.0001f;
+        static constexpr float kMaxCameraSpeed = 10000.0f;
+        // UE EditorViewportClient MinimumFocusRadius is 10 cm.
+        static constexpr float kMinimumFocusRadius = 0.1f;
+        // UE OrbitConstants::IntialLookAtDistance is 1024 cm.
+        static constexpr float kInitialLookAtDistance = 10.0f;
+
         float m_speed = 2.f;
         float m_yaw = 0.0f;
         float m_pitch = 0.0f;
+
+        Vector3 m_lookAt = Vector3::Zero;
+        bool m_bHasLookAt = false;
+        float m_orbitDistance = kInitialLookAtDistance;
     };
 }

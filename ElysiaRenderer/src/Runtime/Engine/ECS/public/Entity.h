@@ -1,5 +1,6 @@
 #pragma once
 #include "Transform.h"
+#include "LightComponent.h"
 #include "Runtime/Core/public/BufferUtility.h"
 #include "Runtime/RenderCore/public/DX12Camera.h"
 
@@ -24,10 +25,17 @@ namespace ElysiaEngine
         eastl::string name = "";
         Transform transform;
         std::unique_ptr<MeshRenderer> pMeshRenderer = nullptr;
+        std::unique_ptr<LightComponent> pLight = nullptr;
         DX12Camera* pAttachedCamera = nullptr;
         // Index into g_ModelPaths / g_ModelTransforms for the root entity of a
         // loaded model. -1 for mesh children and anything not spawned from Startup.
         int sourceModelIndex = -1;
+        // Index into g_DirectionalLights for a spawned directional light. -1 otherwise.
+        int sourceLightIndex = -1;
+        // Index into g_BasicShapes for a placed Cube/Sphere/Plane root. -1 otherwise.
+        int sourceShapeIndex = -1;
+        // BasicShapeType. Valid when sourceShapeIndex >= 0.
+        uint8_t sourceShapeType = 0;
 
         ~Entity();
         Entity(eastl::string n);

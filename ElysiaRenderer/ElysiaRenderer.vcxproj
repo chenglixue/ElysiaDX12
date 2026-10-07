@@ -237,6 +237,7 @@
     <ClInclude Include="src\Editor\public\IMGUIHelper.h" />
     <ClInclude Include="src\Editor\public\OutputLogPanel.h" />
     <ClInclude Include="src\Editor\public\UI.h" />
+    <ClInclude Include="src\Editor\public\EditorIcons.h" />
     <ClInclude Include="src\Editor\public\UserData.h" />
     <ClInclude Include="dxc\inc\d3d12shader.h" />
     <ClInclude Include="dxc\inc\dxcapi.h" />
@@ -290,6 +291,7 @@
     <ClInclude Include="src\Runtime\Developer\public\Benchmark.h" />
     <ClInclude Include="src\Runtime\Developer\public\GPUTimestamps.h" />
     <ClInclude Include="src\Runtime\Engine\ECS\public\Entity.h" />
+    <ClInclude Include="src\Runtime\Engine\ECS\public\LightComponent.h" />
     <ClInclude Include="src\Runtime\Engine\ECS\public\Transform.h" />
     <ClInclude Include="src\Runtime\Engine\public\ElysiaFrame.h" />
     <ClInclude Include="src\Runtime\Engine\public\FrameContext.h" />
@@ -528,6 +530,7 @@
     <ClCompile Include="src\Editor\private\IMGUIHelper.cpp" />
     <ClCompile Include="src\Editor\private\OutputLogPanel.cpp" />
     <ClCompile Include="src\Editor\private\UI.cpp" />
+    <ClCompile Include="src\Editor\private\EditorIcons.cpp" />
     <ClCompile Include="src\Editor\private\UserData.cpp" />
     <ClCompile Include="src\Programs\private\Containers.cpp" />
     <ClCompile Include="src\Programs\private\Helper.cpp" />

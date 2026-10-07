@@ -32,6 +32,9 @@ namespace ElysiaRenderer
 		void FlushMaterialEdits();
 		
 		std::shared_ptr<ElysiaModel::LoadedModel> LoadStaticModel(const std::wstring& filePath, float scale);
+		// Procedural UE BasicShapes stand-in. One GPU model per type, kept alive
+		// for the process so placing/deleting actors does not rebuild buffers.
+		std::shared_ptr<ElysiaModel::LoadedModel> GetOrCreateBasicShape(uint8_t type);
 		
 	private:
 		DX12Device* m_pDevice = nullptr;
@@ -40,6 +43,7 @@ namespace ElysiaRenderer
 		
 		std::mutex m_mutex;
 		std::unordered_map<size_t, std::weak_ptr<ElysiaModel::LoadedModel>> m_modelCache;
+		std::shared_ptr<ElysiaModel::LoadedModel> m_basicShapes[3];
 		
 		std::unique_ptr<ElysiaModel::LoadedModel> LoadModelFromDisk(const std::wstring& filePath, bool bInvertTexcoordY, bool bImportMeshes,
 			bool bImportSkeletons, bool bImportAnimations, float scale);

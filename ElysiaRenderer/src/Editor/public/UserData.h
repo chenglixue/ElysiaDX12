@@ -74,6 +74,74 @@ namespace ElysiaRenderer
     };
     extern std::vector<SavedModelTransform> g_ModelTransforms;
 
+    // Parallel to scene directional-light entities. Restored from [Startup]
+    // DirectionalLight* arrays. Missing arrays mean "migrate the legacy [Light]
+    // singleton into one actor" on first load.
+    struct SavedDirectionalLight
+    {
+        std::string name = "Directional Light";
+        Vector3 location = Vector3::Zero;
+        Vector3 rotationEuler = Vector3::Zero; // pitch, yaw, roll in degrees
+        Vector3 color = Vector3::One;
+        float intensity = 1.f;
+        float sourceAngleDegrees = 0.5357f;
+        bool atmosphereSun = true;
+        // Per-actor shadow, same fields as ULightComponent / CascadedShadowMaps.
+        // Missing ini arrays fall back to the global [Shadow] spawn template.
+        ShadowParameter shadow{};
+    };
+    extern std::vector<SavedDirectionalLight> g_DirectionalLights;
+    // True when [Startup] DirectionalLightLocation was present (including an
+    // explicit empty list). False means spawn the legacy [Light] singleton.
+    extern bool g_HasExplicitDirectionalLights;
+    // True after LoadScene has spawned light actors (or decided there are none).
+    // SerializeUserData only rewrites g_DirectionalLights once this is set, so a
+    // mid-load save cannot wipe the restored list.
+    extern bool g_DirectionalLightsSpawned;
+
+    // UE Place Actors / Shapes: Cube, Sphere, Plane (Cylinder/Cone are not placed).
+    enum class BasicShapeType : uint8_t
+    {
+        Cube = 0,
+        Sphere = 1,
+        Plane = 2
+    };
+
+    inline const char* GetBasicShapeTypeName(BasicShapeType type)
+    {
+        switch (type)
+        {
+        case BasicShapeType::Sphere:
+            return "Sphere";
+        case BasicShapeType::Plane:
+            return "Plane";
+        default:
+            return "Cube";
+        }
+    }
+
+    inline bool IsValidBasicShapeType(BasicShapeType type)
+    {
+        return type == BasicShapeType::Cube ||
+               type == BasicShapeType::Sphere ||
+               type == BasicShapeType::Plane;
+    }
+
+    // Parallel to placed basic-shape root entities. Restored from [Startup]
+    // BasicShape* arrays. Missing arrays mean "no shapes" on first load and
+    // must not write empty arrays until the user actually places one.
+    struct SavedBasicShape
+    {
+        std::string name = "Cube";
+        BasicShapeType type = BasicShapeType::Cube;
+        Vector3 location = Vector3::Zero;
+        Vector3 rotationEuler = Vector3::Zero; // pitch, yaw, roll in degrees
+        Vector3 scale = Vector3::One;
+    };
+    extern std::vector<SavedBasicShape> g_BasicShapes;
+    extern bool g_HasExplicitBasicShapes;
+    extern bool g_BasicShapesSpawned;
+
     class UserData
     {
     public:

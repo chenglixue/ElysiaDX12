@@ -17,6 +17,7 @@
 #define DEBUG_BLOOM 5
 #define DEBUG_VELOCITY 6
 #define DEBUG_GI 7
+#define DEBUG_LIGHTING_ONLY 20
 
 cbuffer PassConstant : register(b0, perPassSpace)
 {
@@ -119,6 +120,18 @@ PSOutput PS(PSInput i)
 
     FDecodeGBufferData GBufferData = GetDecodeGBufferData(screenUV);
 
+    // UE VMI_LightingOnly: replace albedo with LightingOnlyBrightness (0.3) and drop specular/emissive.
+    if (g_DebugMode == DEBUG_LIGHTING_ONLY)
+    {
+        const float3 lightingOnlyAlbedo = 0.3f;
+        GBufferData.BaseColor = lightingOnlyAlbedo;
+        GBufferData.Metallic = 0.0f;
+        GBufferData.Specular = 0.0f;
+        GBufferData.DiffuseColor = lightingOnlyAlbedo;
+        GBufferData.SpecularColor = 0.0f;
+        GBufferData.SceneColor = 0.0f;
+    }
+
     float3 positionWS = ComputeWorldSpacePosition(screenUV, GBufferData.Depth, viewProjMatrix_I);
 
     FInputParams inputParam = (FInputParams)0;
@@ -149,36 +162,36 @@ PSOutput PS(PSInput i)
     float3 IBL = 0.f;
     if (blendWeight > 0)
     {
-        float3 IBL = SampleDDGI(inputParam.PositionWS,
-                                inputParam.NormalWS,
-                                DDGIGetSurfaceBias(inputParam.NormalWS,
-                                                   inputParam.ScreenVector,
-                                                   g_ProbeNormalBias,
-                                                   g_ProbeViewBias),
-                                g_GridOrigin,
-                                g_GridSpacing,
-                                g_GridDimensions,
-                                g_DDGIEncodingGamma,
-                                g_IrradianceTexSize,
-                                g_IrradianceTexIndex,
-                                g_DistanceTexSize,
-                                g_DistanceTexIndex,
-                                g_ProbeOffsetsIndex,
-                                g_ProbeStatesIndex,
-                                WarpLinearSampler
-                         ) * g_AmbientTint * g_AmbientIntensity * blendWeight;
+        IBL = SampleDDGI(inputParam.PositionWS,
+                         inputParam.NormalWS,
+                         DDGIGetSurfaceBias(inputParam.NormalWS,
+                                            inputParam.ScreenVector,
+                                            g_ProbeNormalBias,
+                                            g_ProbeViewBias),
+                         g_GridOrigin,
+                         g_GridSpacing,
+                         g_GridDimensions,
+                         g_DDGIEncodingGamma,
+                         g_IrradianceTexSize,
+                         g_IrradianceTexIndex,
+                         g_DistanceTexSize,
+                         g_DistanceTexIndex,
+                         g_ProbeOffsetsIndex,
+                         g_ProbeStatesIndex,
+                         WarpLinearSampler
+                  ) * g_AmbientTint * g_AmbientIntensity * blendWeight;
         IBL *= (GBufferData.DiffuseColor.rgb) / PI;
         lighting += float4(IBL, 1.f) * AO;
     }
     // IBL += GetIBL(inputParam, GBufferData, mainLightData.toLight, g_AmbientIntensity, g_AmbientTint);
-    lighting.rgb += (GBufferData.SceneColor + IBL) * AO;
+    // IBL is already in lighting; only add emission here so Lit does not double GI.
+    lighting.rgb += GBufferData.SceneColor * AO;
 
     switch (g_DebugMode)
     {
     case DEBUG_GI:
-        o.target0.rgb = (IBL);
+        o.target0 = float4(IBL, 1.f);
         return o;
-        break;
     }
     o.target0 = lighting;
     return o;

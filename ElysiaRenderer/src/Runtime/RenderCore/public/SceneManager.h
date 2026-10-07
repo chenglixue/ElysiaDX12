@@ -1,6 +1,7 @@
 #pragma once
 #include "Programs/public/IManager.h"
 #include "RenderItem.h"
+#include "Runtime/Engine/ECS/public/LightComponent.h"
 
 namespace ElysiaModel
 {
@@ -15,6 +16,7 @@ namespace ElysiaEngine
 namespace ElysiaRenderer
 {
     using namespace ElysiaEngine;
+    enum class BasicShapeType : uint8_t;
 
     class SceneManager : IManager, IUpdate
     {
@@ -45,8 +47,19 @@ namespace ElysiaRenderer
                                       const Vector3& position,
                                       const Quaternion& rotation = Quaternion::Identity,
                                       const Vector3& scale = Vector3::One);
+        Entity* SpawnDirectionalLight();
+        Entity* SpawnBasicShape(BasicShapeType type);
+        Entity* FindMainDirectionalLight() const;
+        void SetAtmosphereSun(Entity* pLightEntity);
+        void DestroyRootEntity(Entity* pEntity);
         void CollectRenderItems();
         void ClearScene();
+
+        // UE EWorldType::Editor vs EWorldType::PIE. Play snapshots the live
+        // scene (CreatePIEWorldByDuplication analog) and restores it on Stop.
+        bool IsPlaying() const;
+        void BeginPlay();
+        void EndPlay();
 
         void UpdateEntities();
         std::vector<std::unique_ptr<Entity>>& GetEntities()
@@ -77,8 +90,26 @@ namespace ElysiaRenderer
         void UpdateEntity(const std::unique_ptr<Entity>& pEntity);
         void CollectRenderItem(const std::unique_ptr<Entity>& pEntity,
                                BoundingFrustum& boundingFrustum);
+        void SpawnSavedDirectionalLights();
+        void SpawnSavedBasicShapes();
+        void CapturePlaySnapshot(Entity& entity);
+
+        enum class WorldMode : uint8_t
+        {
+            Editor = 0,
+            Play = 1
+        };
+        struct PlayEntitySnapshot
+        {
+            Entity* pEntity = nullptr;
+            Transform transform{};
+            LightComponent light{};
+            bool bHasLight = false;
+        };
 
         ElysiaCore::DX12Device* m_pDevice = nullptr;
+        WorldMode m_worldMode = WorldMode::Editor;
+        std::vector<PlayEntitySnapshot> m_playSnapshots;
         static std::unique_ptr<SceneManager> m_instance;
         static std::once_flag m_initInstanceFlag;
 

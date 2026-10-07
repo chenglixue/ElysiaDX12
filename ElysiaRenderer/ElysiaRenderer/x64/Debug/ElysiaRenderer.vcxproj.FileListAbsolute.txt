@@ -1,0 +1,3 @@
+D:\DX12\ElysiaDX12\ElysiaRenderer\x64\Debug\WinPixEventRuntime.dll
+D:\DX12\ElysiaDX12\ElysiaRenderer\x64\Debug\D3D12\D3D12Core.dll
+D:\DX12\ElysiaDX12\ElysiaRenderer\x64\Debug\D3D12\D3D12SDKLayers.dll

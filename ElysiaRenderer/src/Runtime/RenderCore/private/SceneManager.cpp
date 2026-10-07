@@ -9,8 +9,12 @@
 #include "Runtime/Core/public/DX12UploadContext.h"
 #include "Runtime/Resource/Model/public/LoadedModel.h"
 #include "Runtime/Resource/Model/public/ModelManager.h"
+#include "Programs/public/Helper.h"
 #include "Programs/public/Log.h"
 #include "Runtime/Engine/ECS/public/Entity.h"
+#include "Runtime/Engine/ECS/public/LightComponent.h"
+
+#include <algorithm>
 
 namespace ElysiaRenderer
 {
@@ -94,6 +98,9 @@ namespace ElysiaRenderer
                     nextOriginX = position.x + loadedModel->aabbMax.x + kModelGap;
                 isFirstModel = false;
             }
+
+            SpawnSavedDirectionalLights();
+            SpawnSavedBasicShapes();
         }
         if (loadStage == 7)
         {
@@ -174,6 +181,300 @@ namespace ElysiaRenderer
         }
 
         return pParent;
+    }
+
+    namespace
+    {
+        constexpr float kLightActorExtent = 0.25f;
+
+        std::string MakeUniqueActorName(const std::string& baseName,
+                                        const std::vector<std::unique_ptr<Entity>>& entities)
+        {
+            for (int n = 1;; ++n)
+            {
+                const std::string name = (n == 1)
+                                             ? baseName
+                                             : (baseName + " " + std::to_string(n));
+                bool used = false;
+                for (const auto& entity : entities)
+                {
+                    if (entity && entity->name == name.c_str())
+                    {
+                        used = true;
+                        break;
+                    }
+                }
+                if (!used)
+                    return name;
+            }
+        }
+
+        std::string MakeUniqueDirectionalLightName(const std::vector<std::unique_ptr<Entity>>& entities)
+        {
+            return MakeUniqueActorName("Directional Light", entities);
+        }
+
+        Entity* CreateShapeEntity(const SavedBasicShape& saved)
+        {
+            auto pModel = ModelManager::GetInstance().GetOrCreateBasicShape(
+                static_cast<uint8_t>(saved.type));
+            if (!pModel)
+                return nullptr;
+
+            Transform rotation;
+            rotation.SetEulerDegrees(saved.rotationEuler);
+            Entity* pEntity = SceneManager::GetInstance().CreateEntityFromModel(
+                pModel,
+                saved.location,
+                rotation.rotation,
+                saved.scale);
+            if (!pEntity)
+                return nullptr;
+
+            pEntity->name = ToEastl(saved.name);
+            pEntity->sourceShapeType = static_cast<uint8_t>(saved.type);
+            return pEntity;
+        }
+
+        Entity* CreateLightEntity(const SavedDirectionalLight& saved)
+        {
+            auto pEntity = std::make_unique<Entity>(ToEastl(saved.name));
+            pEntity->transform.position = saved.location;
+            pEntity->transform.SetEulerDegrees(saved.rotationEuler);
+            pEntity->transform.scale = Vector3::One;
+            pEntity->pLight = std::make_unique<LightComponent>();
+            pEntity->pLight->type = LightComponent::Type::Directional;
+            pEntity->pLight->color = saved.color;
+            pEntity->pLight->intensity = saved.intensity;
+            pEntity->pLight->sourceAngleDegrees = saved.sourceAngleDegrees;
+            pEntity->pLight->bAtmosphereSun = saved.atmosphereSun;
+            pEntity->pLight->shadow = saved.shadow;
+            pEntity->SetLocalAABB(Vector3(-kLightActorExtent, -kLightActorExtent, -kLightActorExtent),
+                                  Vector3(kLightActorExtent, kLightActorExtent, kLightActorExtent));
+            pEntity->UpdateWorldAABB();
+            Entity* ptr = pEntity.get();
+            SceneManager::GetInstance().AddEntity(std::move(pEntity));
+            return ptr;
+        }
+    }
+
+    void SceneManager::SpawnSavedDirectionalLights()
+    {
+        if (g_HasExplicitDirectionalLights)
+        {
+            for (size_t i = 0; i < g_DirectionalLights.size(); ++i)
+            {
+                Entity* pEntity = CreateLightEntity(g_DirectionalLights[i]);
+                pEntity->sourceLightIndex = static_cast<int>(i);
+            }
+        }
+        else
+        {
+            const auto& data = UserData::GetInstance();
+            SavedDirectionalLight migrated;
+            migrated.name = "Directional Light";
+            migrated.location = Vector3::Zero;
+            Transform rotation;
+            rotation.rotation = RotationFromLightDirection(data.lightDir);
+            migrated.rotationEuler = rotation.GetEulerDegrees();
+            migrated.color = data.lightColor;
+            migrated.intensity = data.lightIntensity;
+            migrated.sourceAngleDegrees = data.lightSourceAngleDegrees;
+            migrated.atmosphereSun = true;
+            migrated.shadow = data.shadowParameter;
+            Entity* pEntity = CreateLightEntity(migrated);
+            pEntity->sourceLightIndex = 0;
+            g_HasExplicitDirectionalLights = true;
+        }
+
+        g_DirectionalLightsSpawned = true;
+    }
+
+    Entity* SceneManager::SpawnDirectionalLight()
+    {
+        if (IsPlaying())
+            return nullptr;
+
+        const auto& data = UserData::GetInstance();
+        SavedDirectionalLight desc;
+        desc.name = MakeUniqueDirectionalLightName(m_entities);
+        desc.color = data.lightColor;
+        desc.intensity = data.lightIntensity;
+        desc.sourceAngleDegrees = data.lightSourceAngleDegrees;
+        desc.shadow = data.shadowParameter;
+        desc.atmosphereSun = FindMainDirectionalLight() == nullptr;
+
+        if (DX12Camera* pCamera = CameraManager::GetInstance().GetMainCamera())
+            desc.location = pCamera->GetPosition() + pCamera->GetForwardDir() * 3.f;
+
+        if (Entity* pMain = FindMainDirectionalLight())
+        {
+            Transform rotation;
+            rotation.rotation = RotationFromLightDirection(GetDirectionalLightDirection(pMain->transform));
+            desc.rotationEuler = rotation.GetEulerDegrees();
+            desc.color = pMain->pLight->color;
+            desc.intensity = pMain->pLight->intensity;
+            desc.sourceAngleDegrees = pMain->pLight->sourceAngleDegrees;
+            desc.shadow = pMain->pLight->shadow;
+        }
+        else
+        {
+            Transform rotation;
+            rotation.rotation = RotationFromLightDirection(data.lightDir);
+            desc.rotationEuler = rotation.GetEulerDegrees();
+        }
+
+        Entity* pEntity = CreateLightEntity(desc);
+        pEntity->sourceLightIndex = static_cast<int>(g_DirectionalLights.size());
+        g_HasExplicitDirectionalLights = true;
+        g_DirectionalLightsSpawned = true;
+        return pEntity;
+    }
+
+    void SceneManager::SpawnSavedBasicShapes()
+    {
+        if (g_HasExplicitBasicShapes)
+        {
+            for (size_t i = 0; i < g_BasicShapes.size(); ++i)
+            {
+                Entity* pEntity = CreateShapeEntity(g_BasicShapes[i]);
+                if (!pEntity)
+                    continue;
+                pEntity->sourceShapeIndex = static_cast<int>(i);
+            }
+        }
+
+        g_BasicShapesSpawned = true;
+    }
+
+    Entity* SceneManager::SpawnBasicShape(BasicShapeType type)
+    {
+        if (IsPlaying() || !IsValidBasicShapeType(type))
+            return nullptr;
+
+        SavedBasicShape desc;
+        desc.type = type;
+        desc.name = MakeUniqueActorName(GetBasicShapeTypeName(type), m_entities);
+        desc.scale = Vector3::One;
+
+        if (DX12Camera* pCamera = CameraManager::GetInstance().GetMainCamera())
+            desc.location = pCamera->GetPosition() + pCamera->GetForwardDir() * 3.f;
+
+        Entity* pEntity = CreateShapeEntity(desc);
+        if (!pEntity)
+            return nullptr;
+
+        pEntity->sourceShapeIndex = static_cast<int>(g_BasicShapes.size());
+        g_HasExplicitBasicShapes = true;
+        g_BasicShapesSpawned = true;
+        CollectRenderItems();
+        return pEntity;
+    }
+
+    Entity* SceneManager::FindMainDirectionalLight() const
+    {
+        Entity* pFirst = nullptr;
+        for (const auto& entity : m_entities)
+        {
+            if (!entity || !entity->pLight)
+                continue;
+            if (entity->pLight->type != LightComponent::Type::Directional)
+                continue;
+            if (!pFirst)
+                pFirst = entity.get();
+            if (entity->pLight->bAtmosphereSun)
+                return entity.get();
+        }
+        return pFirst;
+    }
+
+    void SceneManager::SetAtmosphereSun(Entity* pLightEntity)
+    {
+        if (!pLightEntity || !pLightEntity->pLight || IsPlaying())
+            return;
+
+        for (auto& entity : m_entities)
+        {
+            if (!entity || !entity->pLight)
+                continue;
+            entity->pLight->bAtmosphereSun = (entity.get() == pLightEntity);
+        }
+    }
+
+    void SceneManager::DestroyRootEntity(Entity* pEntity)
+    {
+        if (!pEntity || IsPlaying())
+            return;
+
+        if (SelectionManager::GetInstance().GetSelected() == pEntity)
+            SelectionManager::GetInstance().Clear();
+
+        auto it = std::find_if(m_entities.begin(),
+                               m_entities.end(),
+                               [pEntity](const std::unique_ptr<Entity>& candidate)
+                               {
+                                   return candidate.get() == pEntity;
+                               });
+        if (it != m_entities.end())
+            m_entities.erase(it);
+
+        if (CameraManager::GetInstance().GetMainCamera())
+            CollectRenderItems();
+    }
+
+    bool SceneManager::IsPlaying() const
+    {
+        return m_worldMode == WorldMode::Play;
+    }
+
+    void SceneManager::CapturePlaySnapshot(Entity& entity)
+    {
+        PlayEntitySnapshot snapshot;
+        snapshot.pEntity = &entity;
+        snapshot.transform = entity.transform;
+        if (entity.pLight)
+        {
+            snapshot.light = *entity.pLight;
+            snapshot.bHasLight = true;
+        }
+        m_playSnapshots.push_back(snapshot);
+        for (auto& child : entity.GetChildren())
+        {
+            if (child)
+                CapturePlaySnapshot(*child);
+        }
+    }
+
+    void SceneManager::BeginPlay()
+    {
+        if (m_worldMode == WorldMode::Play)
+            return;
+
+        m_playSnapshots.clear();
+        for (auto& entity : m_entities)
+        {
+            if (entity)
+                CapturePlaySnapshot(*entity);
+        }
+        m_worldMode = WorldMode::Play;
+    }
+
+    void SceneManager::EndPlay()
+    {
+        if (m_worldMode != WorldMode::Play)
+            return;
+
+        for (const auto& snapshot : m_playSnapshots)
+        {
+            if (!snapshot.pEntity)
+                continue;
+            snapshot.pEntity->transform = snapshot.transform;
+            if (snapshot.bHasLight && snapshot.pEntity->pLight)
+                *snapshot.pEntity->pLight = snapshot.light;
+            snapshot.pEntity->OnTransformChanged();
+        }
+        m_playSnapshots.clear();
+        m_worldMode = WorldMode::Editor;
     }
 
     void SceneManager::CollectRenderItems()

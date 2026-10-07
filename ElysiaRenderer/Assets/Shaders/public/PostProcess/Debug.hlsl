@@ -75,6 +75,14 @@ GIData Elysia_DDGI_LoadRayData(uint readIndex)
 #define DEBUG_ROUGHNESS 12
 // Shadow map depth, rendered from the light's point of view
 #define DEBUG_SHADOW_MAP 13
+#define DEBUG_SPECULAR 14
+#define DEBUG_WORLD_TANGENT 15
+#define DEBUG_SCENE_DEPTH 16
+#define DEBUG_OPACITY 17
+#define DEBUG_PRE_TONEMAP_HDR 18
+#define DEBUG_POST_TONEMAP_HDR 19
+#define DEBUG_LIGHTING_ONLY 20
+#define DEBUG_SHADING_MODEL 21
 
 struct VSInput
 {
@@ -219,6 +227,14 @@ PSInput VS(VSInput i, UINT vertexID : SV_VertexID, uint instanceID : SV_Instance
     case DEBUG_METALLIC:
     case DEBUG_ROUGHNESS:
     case DEBUG_NORMAL:
+    case DEBUG_SPECULAR:
+    case DEBUG_WORLD_TANGENT:
+    case DEBUG_SCENE_DEPTH:
+    case DEBUG_OPACITY:
+    case DEBUG_PRE_TONEMAP_HDR:
+    case DEBUG_POST_TONEMAP_HDR:
+    case DEBUG_LIGHTING_ONLY:
+    case DEBUG_SHADING_MODEL:
         o.uv = float2((vertexID << 1) & 2, vertexID & 2);
         o.positionCS = float4(o.uv.x * 2.0f - 1.0f, 1.0f - o.uv.y * 2.0f, 0.0f, 1.0f);
 
@@ -286,6 +302,48 @@ PSOutput PS(PSInput i)
     {
         float4 albedo = SampleTexture2D(GBuffer1Index, screenUV, ClampPointSampler);
         o.target0 = albedo.r;
+        break;
+    }
+    case DEBUG_SPECULAR:
+    {
+        float specular = SampleTexture2D(GBuffer1Index, screenUV, ClampPointSampler).g;
+        o.target0 = specular;
+        break;
+    }
+    case DEBUG_WORLD_TANGENT:
+    {
+        float3 tangent = SampleTangentWS(screenUV, ClampPointSampler);
+        o.target0 = float4(tangent, 1.f);
+        break;
+    }
+    case DEBUG_SCENE_DEPTH:
+    {
+        // Reversed-Z device depth is near-white; show linear eye depth so structure reads.
+        float rawDepth = SampleTexture2D(OpaqueDepthIndex, screenUV, ClampPointSampler).r;
+        float3 viewPos = ComputeViewSpacePosition(screenUV, rawDepth, projMatrix_I);
+        float eyeDepth = abs(viewPos.z);
+        float vis = eyeDepth / (eyeDepth + 100.0f);
+        o.target0 = vis;
+        break;
+    }
+    case DEBUG_OPACITY:
+    {
+        float opacity = SampleTexture2D(GBuffer4Index, screenUV, ClampPointSampler).a;
+        o.target0 = opacity;
+        break;
+    }
+    case DEBUG_PRE_TONEMAP_HDR:
+    case DEBUG_POST_TONEMAP_HDR:
+    {
+        float3 hdr = SampleTexture2D(g_TargetTexIndex, screenUV, ClampLinearSampler);
+        o.target0 = float4(hdr, 1.f);
+        break;
+    }
+    case DEBUG_SHADING_MODEL:
+    {
+        float packed = SampleTexture2D(GBuffer0Index, screenUV, ClampPointSampler).a;
+        uint shadingModelID = DecodeMaterialFlags(packed);
+        o.target0 = float4(GetShadingModelColor(shadingModelID), 1.f);
         break;
     }
     case DEBUG_GIPROBE:

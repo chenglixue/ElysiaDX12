@@ -9,7 +9,7 @@ namespace ElysiaEngine
 namespace ElysiaRenderer
 {
     // Single source of truth for the editor selection state.
-    // Scene Hierarchy / Inspector / Viewport all share this state:
+    // Outliner / Details / Viewport all share this state:
     // a write from any view (tree click / viewport click) updates the others.
     //
     // Viewport picking follows the UE HitProxy scheme:
