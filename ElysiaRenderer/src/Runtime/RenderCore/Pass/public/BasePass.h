@@ -3,6 +3,33 @@
 #include "Runtime/Core/public/ShaderUtility.h"
 #include "Runtime/Engine/public/FrameContext.h"
 
+// One list expands to enum PassID + ShaderPass table.
+// Usage:
+//   #define FOO_PASS_LIST(X) \
+//       X(MyPass, "public\\Foo.hlsl", true, Main)
+//   class FooPass : public BasePass {
+//       DECLARE_SHADER_PASSES(FOO_PASS_LIST, FOO_PASS_COUNT)
+//   };
+#define SHADER_PASS_ENUM(id, ...) id,
+#define SHADER_PASS_DATA(id, file, isCS, entry) \
+    { \
+        .Name = #id, \
+        .FilePath = L"Shaders\\" L##file, \
+        .IsComputeShader = isCS, \
+        .ComputeEntryPoint = L#entry \
+    },
+#define DECLARE_SHADER_PASSES(LIST, COUNT) \
+    enum PassID \
+    { \
+        LIST(SHADER_PASS_ENUM) \
+        COUNT \
+    }; \
+    static inline const ShaderPass PassData[] = \
+    { \
+        LIST(SHADER_PASS_DATA) \
+    }; \
+    static_assert(sizeof(PassData) / sizeof(PassData[0]) == COUNT)
+
 namespace ElysiaCore
 {
     class DX12GraphicsContext;

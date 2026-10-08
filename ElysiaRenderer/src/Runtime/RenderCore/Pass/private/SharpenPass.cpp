@@ -40,7 +40,7 @@ namespace ElysiaRenderer
         m_renderWidth = m_displaySize.x;
         m_renderHeight = m_displaySize.y;
 
-        m_shaderPasses.assign(std::begin(m_PassData), std::end(m_PassData));
+        m_shaderPasses.assign(std::begin(PassData), std::end(PassData));
         if (!m_pMaterial)
         {
             m_pMaterial = std::make_unique<Material>(m_pDevice, m_shaderPasses);
@@ -52,7 +52,7 @@ namespace ElysiaRenderer
         if (!m_pMaterial)
             return;
 
-        for (UINT i = 0; i < TAA_PASS_COUNT; ++i)
+        for (UINT i = 0; i < SHARPEN_PASS_COUNT; ++i)
         {
             std::vector<std::wstring> enableKeywords{};
 

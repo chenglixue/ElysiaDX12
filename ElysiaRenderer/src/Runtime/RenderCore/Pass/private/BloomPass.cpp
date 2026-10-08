@@ -72,7 +72,7 @@ namespace ElysiaRenderer
                                                                                         + std::to_wstring(i));
         }
 
-        m_shaderPasses.assign(std::begin(m_PassData), std::end(m_PassData));
+        m_shaderPasses.assign(std::begin(PassData), std::end(PassData));
         if (!m_pMaterial)
         {
             m_pMaterial = std::make_unique<Material>(m_pDevice, m_shaderPasses);

@@ -14,18 +14,6 @@ namespace ElysiaRenderer
     using namespace CAULDRON_DX12;
     using namespace ElysiaHelper;
 
-#define AO_PASS_LIST \
-PASS(Deinterleaved_Depth_PASS,          "public\\PostProcess\\AO\\CS_LayeredAO.hlsl",               true, DeinterleaveMain)\
-PASS(AO_HIZ_PASS,                       "public\\PostProcess\\AO\\CS_AOHIZNormal.hlsl",             true, AOHIZNormal)\
-PASS(Deinterleaved_AO_PASS,             "public\\PostProcess\\AO\\CS_LayeredAO.hlsl",               true, CalcBaseAO)\
-PASS(Generate_AO_Importance_PASS,       "public\\PostProcess\\AO\\CS_GenerateAOImportance.hlsl",    true, GenerateAOImportance)\
-PASS(Post_AO_Importance_A,              "public\\PostProcess\\AO\\CS_GenerateAOImportance.hlsl",    true, PostAOImportanceA)\
-PASS(Post_AO_Importance_B,              "public\\PostProcess\\AO\\CS_GenerateAOImportance.hlsl",    true, PostAOImportanceB)\
-PASS(Calc_AO_PASS,                      "public\\PostProcess\\AO\\CS_LayeredAO.hlsl",               true, LayeredHBAOMain)\
-PASS(Deinterleaved_Blur_PASS,           "public\\PostProcess\\AO\\CS_AOEdgeSensitiveBlur.hlsl",     true, AOEdgeSensitiveBlur)\
-PASS(AO_Reinterleave_PASS,              "public\\PostProcess\\AO\\CS_LayeredAO.hlsl",               true, ReinterleaveMain)\
-PASS(AO_TAA_PASS,                       "public\\PostProcess\\CS_AOTAA.hlsl",                       true, TAA)
-
     class AOPass : public BasePass
     {
     public:
@@ -84,25 +72,19 @@ PASS(AO_TAA_PASS,                       "public\\PostProcess\\CS_AOTAA.hlsl",   
         std::vector<UINT> m_DeinterleavedBlurIndices;
         TextureManager::Handle m_blueNoise;
 
-        enum PassID
-        {
-#define PASS(id, file, isCS, entry) id,
-            AO_PASS_LIST
-#undef PASS
-            AO_PASS_COUNT
-        };
-        static inline const ShaderPass m_PassData[] =
-        {
-#define PASS(id, file, isCS, entry) \
-{ \
-.Name = #id, \
-.FilePath = L"Shaders\\" L##file, \
-.IsComputeShader = isCS, \
-.ComputeEntryPoint = L#entry \
-},
-            AO_PASS_LIST
-#undef PASS
-        };
+#define AO_PASS_LIST(X) \
+        X(Deinterleaved_Depth_PASS,          "public\\PostProcess\\AO\\CS_LayeredAO.hlsl",               true, DeinterleaveMain) \
+        X(AO_HIZ_PASS,                       "public\\PostProcess\\AO\\CS_AOHIZNormal.hlsl",             true, AOHIZNormal) \
+        X(Deinterleaved_AO_PASS,             "public\\PostProcess\\AO\\CS_LayeredAO.hlsl",               true, CalcBaseAO) \
+        X(Generate_AO_Importance_PASS,       "public\\PostProcess\\AO\\CS_GenerateAOImportance.hlsl",    true, GenerateAOImportance) \
+        X(Post_AO_Importance_A,              "public\\PostProcess\\AO\\CS_GenerateAOImportance.hlsl",    true, PostAOImportanceA) \
+        X(Post_AO_Importance_B,              "public\\PostProcess\\AO\\CS_GenerateAOImportance.hlsl",    true, PostAOImportanceB) \
+        X(Calc_AO_PASS,                      "public\\PostProcess\\AO\\CS_LayeredAO.hlsl",               true, LayeredHBAOMain) \
+        X(Deinterleaved_Blur_PASS,           "public\\PostProcess\\AO\\CS_AOEdgeSensitiveBlur.hlsl",     true, AOEdgeSensitiveBlur) \
+        X(AO_Reinterleave_PASS,              "public\\PostProcess\\AO\\CS_LayeredAO.hlsl",               true, ReinterleaveMain) \
+        X(AO_TAA_PASS,                       "public\\PostProcess\\CS_AOTAA.hlsl",                       true, TAA)
+        DECLARE_SHADER_PASSES(AO_PASS_LIST, AO_PASS_COUNT);
+#undef AO_PASS_LIST
 
         struct ShaderIDs
         {
@@ -181,6 +163,7 @@ PASS(AO_TAA_PASS,                       "public\\PostProcess\\CS_AOTAA.hlsl",   
             static inline size_t g_ActiveLayerIndex = PropertyToID(L"g_ActiveLayerIndex");
             static inline size_t g_SobolSequence = PropertyToID(L"g_SobolSequence");
         };
+
         struct TAAData
         {
             static inline Matrix Pre_View_M;

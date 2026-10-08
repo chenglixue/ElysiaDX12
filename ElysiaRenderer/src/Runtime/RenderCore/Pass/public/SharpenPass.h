@@ -6,9 +6,6 @@ namespace ElysiaRenderer
 {
     class SharpenPass : public BasePass
     {
-#define SHARPEN_PASS_LIST \
-PASS(CAS_PASS,          "public\\PostProcess\\Sharpen\\CS_CAS.hlsl",               true,  CAS)
-
     public:
         struct RenderTextureIDs
         {
@@ -26,27 +23,10 @@ PASS(CAS_PASS,          "public\\PostProcess\\Sharpen\\CS_CAS.hlsl",            
         virtual void Dispose() override;
 
     private:
-#pragma region Pass
-        enum PassID
-        {
-#define PASS(id, file, isCS, entry) id,
-            SHARPEN_PASS_LIST
-#undef PASS
-            TAA_PASS_COUNT
-        };
-        static inline const ShaderPass m_PassData[] =
-        {
-#define PASS(id, file, isCS, entry) \
-{ \
-.Name = #id, \
-.FilePath = L"Shaders\\" L##file, \
-.IsComputeShader = isCS, \
-.ComputeEntryPoint = L#entry \
-},
-            SHARPEN_PASS_LIST
-#undef PASS
-        };
-#pragma endregion
+#define SHARPEN_PASS_LIST(X) \
+        X(CAS_PASS,          "public\\PostProcess\\Sharpen\\CS_CAS.hlsl",               true,  CAS)
+        DECLARE_SHADER_PASSES(SHARPEN_PASS_LIST, SHARPEN_PASS_COUNT);
+#undef SHARPEN_PASS_LIST
         UINT m_renderWidth;
         UINT m_renderHeight;
 

@@ -6,9 +6,6 @@ namespace ElysiaRenderer
 {
     class RenderTexture;
 
-#define SKYBOX_PASS_LIST \
-    PASS(Draw_SKY_BOX_PASS, "public\\Skybox.hlsl")
-
     class SkyboxPass : public BasePass
     {
     public:
@@ -36,25 +33,10 @@ namespace ElysiaRenderer
             static inline size_t worldMatrix = PropertyToID(L"worldMatrix");
         };
 
-#pragma region Pass
-        enum PassID
-        {
-#define PASS(id, file) id,
-            SKYBOX_PASS_LIST
-#undef PASS
-            SKYBOX_PASS_COUNT
-        };
-        static inline const ShaderPass m_PassData[] =
-        {
-#define PASS(id, file) \
-{ \
-.Name = #id, \
-.FilePath = L"Shaders\\" L##file, \
-},
-            SKYBOX_PASS_LIST
-#undef PASS
-        };
-#pragma endregion
+#define SKYBOX_PASS_LIST(X) \
+        X(Draw_SKY_BOX_PASS, "public\\Skybox.hlsl", false, PS)
+        DECLARE_SHADER_PASSES(SKYBOX_PASS_LIST, SKYBOX_PASS_COUNT);
+#undef SKYBOX_PASS_LIST
 
 
         static constexpr uint64 NumVertices = 8;

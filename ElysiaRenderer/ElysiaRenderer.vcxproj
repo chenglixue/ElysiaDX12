@@ -1,950 +1,1033 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\Microsoft.Direct3D.D3D12.1.618.5\build\native\Microsoft.Direct3D.D3D12.props" Condition="Exists('..\packages\Microsoft.Direct3D.D3D12.1.618.5\build\native\Microsoft.Direct3D.D3D12.props')" />
-  <Import Project="..\packages\Vcpkg.Nuget.1.5.0\build\Vcpkg.Nuget.props" Condition="Exists('..\packages\Vcpkg.Nuget.1.5.0\build\Vcpkg.Nuget.props')" />
-  <ItemGroup Label="ProjectConfigurations">
-    <ProjectConfiguration Include="Debug|Win32">
-      <Configuration>Debug</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release|Win32">
-      <Configuration>Release</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Debug|x64">
-      <Configuration>Debug</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release|x64">
-      <Configuration>Release</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
-  </ItemGroup>
-  <PropertyGroup Label="Globals">
-    <VCProjectVersion>17.0</VCProjectVersion>
-    <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{c9c2448f-f51a-49ac-bf15-2d641ae9c0f9}</ProjectGuid>
-    <RootNamespace>ElysiaRenderer</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-  </PropertyGroup>
-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
-    <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
-    <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
-  </PropertyGroup>
-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
-  <ImportGroup Label="ExtensionSettings">
-  </ImportGroup>
-  <ImportGroup Label="Shared">
-  </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(ProjectDir);$(ProjectDir)/lib;$(ProjectDir)/src;$(ProjectDir)/Include;$(ProjectDir)Assets\Shaders;$(IncludePath;$(SolutionDir)packages\boost.1.87.0\lib\native\include;</IncludePath>
-    <LibraryPath>$(ProjectDir)/lib/AMD/libs/AGS;$(ProjectDir)/lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(ProjectDir);$(ProjectDir)/lib;$(ProjectDir)/src;$(ProjectDir)/Include;$(ProjectDir)Assets\Shaders;$(IncludePath;$(SolutionDir)packages\boost.1.87.0\lib\native\include;</IncludePath>
-    <LibraryPath>$(ProjectDir)/lib/AMD/libs/AGS;$(ProjectDir)/lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
-    <IntDir>$(Platform)\$(Configuration)\</IntDir>
-  </PropertyGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
-      <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>true</ConformanceMode>
-    </ClCompile>
-    <Link>
-      <SubSystem>Console</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-    </Link>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>true</ConformanceMode>
-    </ClCompile>
-    <Link>
-      <SubSystem>Console</SubSystem>
-      <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <OptimizeReferences>true</OptimizeReferences>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-    </Link>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
-      <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;USE_PIX;PROFILE;PROFILE_BUILD;DBG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc\include;$(ProjectDir);$(ProjectDir)\include;$(ProjectDir)\lib;$(ProjectDir)\src;$(SolutionDir)packages\boost.1.87.0\lib\native\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <DisableSpecificWarnings>5033;4819;4018;%(DisableSpecificWarnings)</DisableSpecificWarnings>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <AdditionalOptions>/FS</AdditionalOptions>
-      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-    </ClCompile>
-    <Link>
-      <SubSystem>Windows</SubSystem>
-      <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
-      <AdditionalDependencies>d3d12.lib;dxcompiler.lib;dxgi.lib;assimp-vc143-mt.lib;amd_ags_x64.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc\lib\spectre\x64;$(ProjectDir)dxc\lib\x64;$(ProjectDir)lib\Assimp\Environment;$(ProjectDir)lib\AMD\libs\AGS;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <EntryPointSymbol>
-      </EntryPointSymbol>
-    </Link>
-    <PostBuildEvent>
-      <Command>xcopy $(ProjectDir)Assets $(TargetDir) /Y /E</Command>
-    </PostBuildEvent>
-    <PreBuildEvent>
-      <Command>
-      </Command>
-    </PreBuildEvent>
-    <CustomBuildStep>
-      <Command>
-      </Command>
-      <Outputs>
-      </Outputs>
-    </CustomBuildStep>
-    <FxCompile>
-      <ShaderModel>6.0</ShaderModel>
-      <AdditionalIncludeDirectories>
-      </AdditionalIncludeDirectories>
-    </FxCompile>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <SDLCheck>false</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_WINDOWS;USE_PIX;PROFILE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc\include;$(ProjectDir);$(ProjectDir)\include;$(ProjectDir)\lib;$(ProjectDir)\src;$(SolutionDir)packages\boost.1.87.0\lib\native\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <WholeProgramOptimization>true</WholeProgramOptimization>
-      <Optimization>MaxSpeed</Optimization>
-      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
-      <BufferSecurityCheck>false</BufferSecurityCheck>
-      <AdditionalOptions>/FS</AdditionalOptions>
-    </ClCompile>
-    <Link>
-      <SubSystem>Windows</SubSystem>
-      <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <OptimizeReferences>true</OptimizeReferences>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc\lib\spectre\x64;$(ProjectDir)dxc\lib\x64;$(ProjectDir)lib\Assimp\Environment;$(ProjectDir)lib\AMD\libs\AGS;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>d3d12.lib;d3dcompiler.lib;dxcompiler.lib;dxgi.lib;assimp-vc143-mt.lib;amd_ags_x64.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <GenerateMapFile>true</GenerateMapFile>
-    </Link>
-    <PostBuildEvent>
-      <Command>xcopy $(ProjectDir)Assets $(TargetDir) /Y /E
+    <Import Project="..\packages\Microsoft.Direct3D.D3D12.1.618.5\build\native\Microsoft.Direct3D.D3D12.props" Condition="Exists('..\packages\Microsoft.Direct3D.D3D12.1.618.5\build\native\Microsoft.Direct3D.D3D12.props')"/>
+    <Import Project="..\packages\Vcpkg.Nuget.1.5.0\build\Vcpkg.Nuget.props" Condition="Exists('..\packages\Vcpkg.Nuget.1.5.0\build\Vcpkg.Nuget.props')"/>
+    <ItemGroup Label="ProjectConfigurations">
+        <ProjectConfiguration Include="Debug|Win32">
+            <Configuration>Debug</Configuration>
+            <Platform>Win32</Platform>
+        </ProjectConfiguration>
+        <ProjectConfiguration Include="Release|Win32">
+            <Configuration>Release</Configuration>
+            <Platform>Win32</Platform>
+        </ProjectConfiguration>
+        <ProjectConfiguration Include="Debug|x64">
+            <Configuration>Debug</Configuration>
+            <Platform>x64</Platform>
+        </ProjectConfiguration>
+        <ProjectConfiguration Include="Release|x64">
+            <Configuration>Release</Configuration>
+            <Platform>x64</Platform>
+        </ProjectConfiguration>
+    </ItemGroup>
+    <PropertyGroup Label="Globals">
+        <VCProjectVersion>17.0</VCProjectVersion>
+        <Keyword>Win32Proj</Keyword>
+        <ProjectGuid>{c9c2448f-f51a-49ac-bf15-2d641ae9c0f9}</ProjectGuid>
+        <RootNamespace>ElysiaRenderer</RootNamespace>
+        <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    </PropertyGroup>
+    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props"/>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+        <ConfigurationType>Application</ConfigurationType>
+        <UseDebugLibraries>true</UseDebugLibraries>
+        <PlatformToolset>v143</PlatformToolset>
+        <CharacterSet>Unicode</CharacterSet>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+        <ConfigurationType>Application</ConfigurationType>
+        <UseDebugLibraries>false</UseDebugLibraries>
+        <PlatformToolset>v143</PlatformToolset>
+        <WholeProgramOptimization>true</WholeProgramOptimization>
+        <CharacterSet>Unicode</CharacterSet>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+        <ConfigurationType>Application</ConfigurationType>
+        <UseDebugLibraries>true</UseDebugLibraries>
+        <PlatformToolset>v143</PlatformToolset>
+        <CharacterSet>Unicode</CharacterSet>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+        <ConfigurationType>Application</ConfigurationType>
+        <UseDebugLibraries>false</UseDebugLibraries>
+        <PlatformToolset>v143</PlatformToolset>
+        <WholeProgramOptimization>true</WholeProgramOptimization>
+        <CharacterSet>Unicode</CharacterSet>
+    </PropertyGroup>
+    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props"/>
+    <ImportGroup Label="ExtensionSettings">
+    </ImportGroup>
+    <ImportGroup Label="Shared">
+    </ImportGroup>
+    <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+        <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform"/>
+    </ImportGroup>
+    <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+        <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform"/>
+    </ImportGroup>
+    <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+        <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform"/>
+    </ImportGroup>
+    <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+        <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform"/>
+    </ImportGroup>
+    <PropertyGroup Label="UserMacros"/>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+        <IncludePath>$(ProjectDir);$(ProjectDir)/lib;$(ProjectDir)/src;$(ProjectDir)/Include;$(ProjectDir)Assets\Shaders;$(IncludePath;$(SolutionDir)packages\boost.1.87.0\lib\native\include;</IncludePath>
+        <LibraryPath>$(ProjectDir)/lib/AMD/libs/AGS;$(ProjectDir)/lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+        <IncludePath>$(ProjectDir);$(ProjectDir)/lib;$(ProjectDir)/src;$(ProjectDir)/Include;$(ProjectDir)Assets\Shaders;$(IncludePath;$(SolutionDir)packages\boost.1.87.0\lib\native\include;</IncludePath>
+        <LibraryPath>$(ProjectDir)/lib/AMD/libs/AGS;$(ProjectDir)/lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
+        <IntDir>$(Platform)\$(Configuration)\</IntDir>
+    </PropertyGroup>
+    <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+        <ClCompile>
+            <WarningLevel>Level3</WarningLevel>
+            <SDLCheck>true</SDLCheck>
+            <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+            <ConformanceMode>true</ConformanceMode>
+        </ClCompile>
+        <Link>
+            <SubSystem>Console</SubSystem>
+            <GenerateDebugInformation>true</GenerateDebugInformation>
+        </Link>
+    </ItemDefinitionGroup>
+    <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+        <ClCompile>
+            <WarningLevel>Level3</WarningLevel>
+            <FunctionLevelLinking>true</FunctionLevelLinking>
+            <IntrinsicFunctions>true</IntrinsicFunctions>
+            <SDLCheck>true</SDLCheck>
+            <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+            <ConformanceMode>true</ConformanceMode>
+        </ClCompile>
+        <Link>
+            <SubSystem>Console</SubSystem>
+            <EnableCOMDATFolding>true</EnableCOMDATFolding>
+            <OptimizeReferences>true</OptimizeReferences>
+            <GenerateDebugInformation>true</GenerateDebugInformation>
+        </Link>
+    </ItemDefinitionGroup>
+    <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+        <ClCompile>
+            <WarningLevel>Level3</WarningLevel>
+            <SDLCheck>true</SDLCheck>
+            <PreprocessorDefinitions>_DEBUG;_CONSOLE;USE_PIX;PROFILE;PROFILE_BUILD;DBG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+            <ConformanceMode>true</ConformanceMode>
+            <LanguageStandard>stdcpp20</LanguageStandard>
+            <AdditionalIncludeDirectories>C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc\include;$(ProjectDir);$(ProjectDir)\include;$(ProjectDir)\lib;$(ProjectDir)\src;$(SolutionDir)packages\boost.1.87.0\lib\native\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+            <DisableSpecificWarnings>5033;4819;4018;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+            <PrecompiledHeader>Use</PrecompiledHeader>
+            <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+            <AdditionalOptions>/FS</AdditionalOptions>
+            <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+        </ClCompile>
+        <Link>
+            <SubSystem>Windows</SubSystem>
+            <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
+            <AdditionalDependencies>d3d12.lib;dxcompiler.lib;dxgi.lib;assimp-vc143-mt.lib;amd_ags_x64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+            <AdditionalLibraryDirectories>C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc\lib\spectre\x64;$(ProjectDir)dxc\lib\x64;$(ProjectDir)lib\Assimp\Environment;$(ProjectDir)lib\AMD\libs\AGS;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+            <EntryPointSymbol>
+            </EntryPointSymbol>
+        </Link>
+        <PostBuildEvent>
+            <Command>xcopy $(ProjectDir)Assets $(TargetDir) /Y /E</Command>
+        </PostBuildEvent>
+        <PreBuildEvent>
+            <Command>
+            </Command>
+        </PreBuildEvent>
+        <CustomBuildStep>
+            <Command>
+            </Command>
+            <Outputs>
+            </Outputs>
+        </CustomBuildStep>
+        <FxCompile>
+            <ShaderModel>6.0</ShaderModel>
+            <AdditionalIncludeDirectories>
+            </AdditionalIncludeDirectories>
+        </FxCompile>
+    </ItemDefinitionGroup>
+    <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+        <ClCompile>
+            <WarningLevel>Level3</WarningLevel>
+            <FunctionLevelLinking>true</FunctionLevelLinking>
+            <IntrinsicFunctions>true</IntrinsicFunctions>
+            <SDLCheck>false</SDLCheck>
+            <PreprocessorDefinitions>NDEBUG;_WINDOWS;USE_PIX;PROFILE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+            <ConformanceMode>true</ConformanceMode>
+            <PrecompiledHeader>Use</PrecompiledHeader>
+            <LanguageStandard>stdcpp20</LanguageStandard>
+            <AdditionalIncludeDirectories>C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc\include;$(ProjectDir);$(ProjectDir)\include;$(ProjectDir)\lib;$(ProjectDir)\src;$(SolutionDir)packages\boost.1.87.0\lib\native\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+            <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+            <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+            <WholeProgramOptimization>true</WholeProgramOptimization>
+            <Optimization>MaxSpeed</Optimization>
+            <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+            <BufferSecurityCheck>false</BufferSecurityCheck>
+            <AdditionalOptions>/FS</AdditionalOptions>
+        </ClCompile>
+        <Link>
+            <SubSystem>Windows</SubSystem>
+            <EnableCOMDATFolding>true</EnableCOMDATFolding>
+            <OptimizeReferences>true</OptimizeReferences>
+            <GenerateDebugInformation>true</GenerateDebugInformation>
+            <AdditionalLibraryDirectories>C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc\lib\spectre\x64;$(ProjectDir)dxc\lib\x64;$(ProjectDir)lib\Assimp\Environment;$(ProjectDir)lib\AMD\libs\AGS;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+            <AdditionalDependencies>d3d12.lib;d3dcompiler.lib;dxcompiler.lib;dxgi.lib;assimp-vc143-mt.lib;amd_ags_x64.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+            <GenerateMapFile>true</GenerateMapFile>
+        </Link>
+        <PostBuildEvent>
+            <Command>xcopy $(ProjectDir)Assets $(TargetDir) /Y /E
                 xcopy $(ProjectDir)bin\*.dll $(TargetDir) /Y /E
             </Command>
-    </PostBuildEvent>
-  </ItemDefinitionGroup>
-  <ItemGroup>
-    <None Include="Assets\Shaders\private\BloomCommon.hlsli">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="Assets\Shaders\private\CASCommon.hlsli">
-      <FileType>Document</FileType>
-    </None>
-    <ClInclude Include="Assets\Shaders\private\DDGICommon.hlsli" />
-    <None Include="Assets\Shaders\private\TAACommon.hlsli">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="Assets\Shaders\private\ShadowConst.hlsli">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="Assets\Shaders\private\OctahedralCommon.hlsli">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="Assets\Shaders\private\SSSR\SSSRCommon.hlsli">
-      <FileType>Document</FileType>
-    </None>
-    <ClInclude Include="dxc\inc\d3dx12.h" />
-    <ClInclude Include="lib\AMD\libs\AGS\amd_ags.h" />
-    <ClInclude Include="lib\AMD\libs\d3d12x\d3dx12.h" />
-    <ClInclude Include="lib\AMD\libs\DXC\inc\d3d12shader.h" />
-    <ClInclude Include="lib\AMD\libs\DXC\inc\dxcapi.h" />
-    <ClInclude Include="lib\AMD\libs\json\json.h" />
-    <ClInclude Include="lib\AMD\libs\vectormath\common.hpp" />
-    <ClInclude Include="lib\AMD\libs\vectormath\scalar\matrix.hpp" />
-    <ClInclude Include="lib\AMD\libs\vectormath\scalar\quaternion.hpp" />
-    <ClInclude Include="lib\AMD\libs\vectormath\scalar\vector.hpp" />
-    <ClInclude Include="lib\AMD\libs\vectormath\scalar\vectormath.hpp" />
-    <ClInclude Include="lib\AMD\libs\vectormath\sse\boolinvec.hpp" />
-    <ClInclude Include="lib\AMD\libs\vectormath\sse\floatinvec.hpp" />
-    <ClInclude Include="lib\AMD\libs\vectormath\sse\internal.hpp" />
-    <ClInclude Include="lib\AMD\libs\vectormath\sse\matrix.hpp" />
-    <ClInclude Include="lib\AMD\libs\vectormath\sse\quaternion.hpp" />
-    <ClInclude Include="lib\AMD\libs\vectormath\sse\vecidx.hpp" />
-    <ClInclude Include="lib\AMD\libs\vectormath\sse\vector.hpp" />
-    <ClInclude Include="lib\AMD\libs\vectormath\sse\vectormath.hpp" />
-    <ClInclude Include="lib\AMD\libs\vectormath\vec2d.hpp" />
-    <ClInclude Include="lib\AMD\libs\vectormath\vectormath.hpp" />
-    <ClInclude Include="lib\AMD\libs\VulkanMemoryAllocator\vk_mem_alloc.h" />
-    <ClInclude Include="lib\AMD\libs\WinPixEventRuntime\pix3.h" />
-    <ClInclude Include="lib\AMD\libs\WinPixEventRuntime\pix3_win.h" />
-    <ClInclude Include="lib\AMD\libs\WinPixEventRuntime\PIXEvents.h" />
-    <ClInclude Include="lib\AMD\libs\WinPixEventRuntime\PIXEventsCommon.h" />
-    <ClInclude Include="lib\stb\stb_image.h" />
-    <ClInclude Include="lib\stb\stb_image_write.h" />
-    <ClInclude Include="src\Editor\public\ConfigCache.h" />
-    <ClInclude Include="src\Editor\public\IMGUIDrawer.h" />
-    <ClInclude Include="src\Editor\public\IMGUIHelper.h" />
-    <ClInclude Include="src\Editor\public\OutputLogPanel.h" />
-    <ClInclude Include="src\Editor\public\UI.h" />
-    <ClInclude Include="src\Editor\public\EditorIcons.h" />
-    <ClInclude Include="src\Editor\public\UserData.h" />
-    <ClInclude Include="dxc\inc\d3d12shader.h" />
-    <ClInclude Include="dxc\inc\dxcapi.h" />
-    <ClInclude Include="src\Programs\public\BoundingBox.h" />
-    <ClInclude Include="src\Programs\public\Common.h" />
-    <ClInclude Include="src\Programs\public\Containers.h" />
-    <ClInclude Include="src\Programs\public\DebugUtility.h" />
-    <ClInclude Include="src\Programs\public\Hash.h" />
-    <ClInclude Include="src\Programs\public\Helper.h" />
-    <ClInclude Include="src\Programs\public\IManager.h" />
-    <ClInclude Include="src\Programs\public\IUpdate.h" />
-    <ClInclude Include="src\Programs\public\Log.h" />
-    <ClInclude Include="src\Programs\public\LogHistory.h" />
-    <ClInclude Include="src\Programs\public\Math.h" />
-    <ClInclude Include="src\Programs\public\PIXHelper.h" />
-    <ClInclude Include="src\Programs\public\RenderHelper.h" />
-    <ClInclude Include="src\Programs\public\SBTHelper.h" />
-    <ClInclude Include="src\Programs\public\SobolSequenceGenerator.h" />
-    <ClInclude Include="src\Programs\public\UserMarker.h" />
-    <ClInclude Include="src\Runtime\Core\public\BufferUtility.h" />
-    <ClInclude Include="src\Runtime\Core\public\ContextUtility.h" />
-    <ClInclude Include="src\Runtime\Core\public\DX12BufferResource.h" />
-    <ClInclude Include="src\Runtime\Core\public\DX12ComputeContext.h" />
-    <ClInclude Include="src\Runtime\Core\public\DX12Context.h" />
-    <ClInclude Include="src\Runtime\Core\public\DX12DescriptorHeap.h" />
-    <ClInclude Include="src\Runtime\Core\public\DX12DescriptorHeapHandle.h" />
-    <ClInclude Include="src\Runtime\Core\public\DX12Device.h" />
-    <ClInclude Include="src\Runtime\Core\public\DX12GPUResource.h" />
-    <ClInclude Include="src\Runtime\Core\public\DX12GraphicsContext.h" />
-    <ClInclude Include="src\Runtime\Core\public\DX12PipelineState.h" />
-    <ClInclude Include="src\Runtime\Core\public\DX12Queue.h" />
-    <ClInclude Include="src\Runtime\Core\public\DX12QueueManager.h" />
-    <ClInclude Include="src\Runtime\Core\public\DX12RenderPassDescriptorHeap.h" />
-    <ClInclude Include="src\Runtime\Core\public\DX12RootSignature.h" />
-    <ClInclude Include="src\Runtime\Core\public\DX12Shader.h" />
-    <ClInclude Include="src\Runtime\Core\public\DX12StagingDescriptorHeap.h" />
-    <ClInclude Include="src\Runtime\Core\public\DX12TextureBuffer.h" />
-    <ClInclude Include="src\Runtime\Core\public\DX12UploadContext.h" />
-    <ClInclude Include="src\Runtime\Core\public\PipelineResourceSpace.h" />
-    <ClInclude Include="src\Runtime\Core\public\PipelineResourceUtility.h" />
-    <ClInclude Include="src\Runtime\Core\public\PipelineStateUtility.h" />
-    <ClInclude Include="src\Runtime\Core\public\PSOHelper.h" />
-    <ClInclude Include="src\Runtime\Core\public\ShaderBytecodeCache.h" />
-    <ClInclude Include="src\Runtime\Core\public\ShaderCompileOptions.h" />
-    <ClInclude Include="src\Runtime\Core\public\ShaderKeywordSet.h" />
-    <ClInclude Include="src\Runtime\Core\public\ShaderKeywordSpace.h" />
-    <ClInclude Include="src\Runtime\Core\public\ShaderUtility.h" />
-    <ClInclude Include="src\Runtime\Core\public\SwapChain.h" />
-    <ClInclude Include="src\Runtime\Core\public\TextureUtility.h" />
-    <ClInclude Include="src\Runtime\Core\public\UploadRingBuffer.h" />
-    <ClInclude Include="src\Runtime\Developer\public\Benchmark.h" />
-    <ClInclude Include="src\Runtime\Developer\public\GPUTimestamps.h" />
-    <ClInclude Include="src\Runtime\Engine\ECS\public\Entity.h" />
-    <ClInclude Include="src\Runtime\Engine\ECS\public\LightComponent.h" />
-    <ClInclude Include="src\Runtime\Engine\ECS\public\Transform.h" />
-    <ClInclude Include="src\Runtime\Engine\public\ElysiaFrame.h" />
-    <ClInclude Include="src\Runtime\Engine\public\FrameContext.h" />
-    <ClInclude Include="src\Runtime\Engine\public\FrameworkWindows.h" />
-    <ClInclude Include="src\Runtime\Engine\public\ImGuiUtility.h" />
-    <ClInclude Include="src\Runtime\RenderCore\public\AOUtility.h" />
-    <ClInclude Include="src\Runtime\RenderCore\public\BakeManager.h" />
-    <ClInclude Include="src\Runtime\RenderCore\public\BindlessTextureManager.h" />
-    <ClInclude Include="src\Runtime\RenderCore\public\BloomUtility.h" />
-    <ClInclude Include="src\Runtime\RenderCore\public\BufferManager.h" />
-    <ClInclude Include="src\Runtime\RenderCore\public\CameraManager.h" />
-    <ClInclude Include="src\Runtime\RenderCore\public\CASUtility.h" />
-    <ClInclude Include="src\Runtime\RenderCore\public\CBVParameter.h" />
-    <ClInclude Include="src\Runtime\RenderCore\public\DX12Camera.h" />
-    <ClInclude Include="src\Runtime\RenderCore\public\DX12Light.h" />
-    <ClInclude Include="src\Runtime\RenderCore\public\DX12Shadow.h" />
-    <ClInclude Include="src\Runtime\RenderCore\public\GIUtility.h" />
-    <ClInclude Include="src\Runtime\RenderCore\public\HairUtility.h" />
-    <ClInclude Include="src\Runtime\RenderCore\public\LightManager.h" />
-    <ClInclude Include="src\Runtime\RenderCore\public\LightUtility.h" />
-    <ClInclude Include="src\Runtime\RenderCore\public\Material.h" />
-    <ClInclude Include="src\Runtime\RenderCore\public\MaterialParams.h" />
-    <ClInclude Include="src\Runtime\RenderCore\public\MeshRenderer.h" />
-    <ClInclude Include="src\Runtime\RenderCore\Pass\public\AOPass.h" />
-    <ClInclude Include="src\Runtime\RenderCore\Pass\public\BakePass.h" />
-    <ClInclude Include="src\Runtime\RenderCore\Pass\public\BasePass.h" />
-    <ClInclude Include="src\Runtime\RenderCore\Pass\public\BloomPass.h" />
-    <ClInclude Include="src\Runtime\RenderCore\Pass\public\DebugPass.h" />
-    <ClInclude Include="src\Runtime\RenderCore\Pass\public\FinalBlitPass.h" />
-    <ClInclude Include="src\Runtime\RenderCore\Pass\public\GBufferPass.h" />
-    <ClInclude Include="src\Runtime\RenderCore\Pass\public\GIPass.h" />
-    <ClInclude Include="src\Runtime\RenderCore\Pass\public\OpaquePass.h" />
-    <ClInclude Include="src\Runtime\RenderCore\Pass\public\PreDrawPass.h" />
-    <ClInclude Include="src\Runtime\RenderCore\Pass\public\RenderPassData.h" />
-    <ClInclude Include="src\Runtime\RenderCore\Pass\public\SelectionOutlinePass.h" />
-    <ClInclude Include="src\Runtime\RenderCore\Pass\public\ShadowPass.h" />
-    <ClInclude Include="src\Runtime\RenderCore\Pass\public\ShadowProjectionPass.h" />
-    <ClInclude Include="src\Runtime\RenderCore\Pass\public\SharpenPass.h" />
-    <ClInclude Include="src\Runtime\RenderCore\Pass\public\SkyboxPass.h" />
-    <ClInclude Include="src\Runtime\RenderCore\Pass\public\SSSRPass.h" />
-    <ClInclude Include="src\Runtime\RenderCore\Pass\public\TAAPass.h" />
-    <ClInclude Include="src\Runtime\RenderCore\Pass\public\TonemapPass.h" />
-    <ClInclude Include="src\Runtime\RenderCore\Pass\public\UIPass.h" />
-    <ClInclude Include="src\Runtime\RenderCore\public\PSOManager.h" />
-    <ClInclude Include="src\Runtime\RenderCore\public\PSOPrecache.h" />
-    <ClInclude Include="src\Runtime\RenderCore\public\Renderer.h" />
-    <ClInclude Include="src\Runtime\RenderCore\public\RenderItem.h" />
-    <ClInclude Include="src\Runtime\RenderCore\public\RenderResource.h" />
-    <ClInclude Include="src\Runtime\RenderCore\public\RenderPassResourceManager.h" />
-    <ClInclude Include="src\Runtime\RenderCore\public\RenderTargetManager.h" />
-    <ClInclude Include="src\Runtime\RenderCore\public\RenderTexture.h" />
-    <ClInclude Include="src\Runtime\RenderCore\public\RenderTextureUtility.h" />
-    <ClInclude Include="src\Runtime\RenderCore\public\SceneManager.h" />
-    <ClInclude Include="src\Runtime\RenderCore\public\SelectionManager.h" />
-    <ClInclude Include="src\Runtime\RenderCore\public\ShaderVariantManager.h" />
-    <ClInclude Include="src\Runtime\RenderCore\public\ShadowUtility.h" />
-    <ClInclude Include="src\Runtime\RenderCore\public\SSSRUtility.h" />
-    <ClInclude Include="src\Runtime\RenderCore\public\SubsurfaceScatterUtility.h" />
-    <ClInclude Include="src\Runtime\RenderCore\public\TAAUtility.h" />
-    <ClInclude Include="src\Runtime\RenderCore\public\TextureManager.h" />
-    <ClInclude Include="src\Runtime\RenderCore\public\TonemapUtility.h" />
-    <ClInclude Include="src\Runtime\Resource\public\File.h" />
-    <ClInclude Include="src\Runtime\Resource\Model\public\AssimpLoader.h" />
-    <ClInclude Include="src\Runtime\Resource\Model\public\LoadedModel.h" />
-    <ClInclude Include="src\Runtime\Resource\Model\public\MaterialOverrides.h" />
-    <ClInclude Include="src\Runtime\Resource\Model\public\ModelCache.h" />
-    <ClInclude Include="src\Runtime\Resource\Model\public\ModelImporter.h" />
-    <ClInclude Include="src\Runtime\Resource\Model\public\ModelManager.h" />
-    <ClInclude Include="src\Runtime\Resource\Model\public\SharedTypes.h" />
-    <ClInclude Include="src\Runtime\Resource\public\Serialization.h" />
-    <ClInclude Include="src\ThirdParty\ColorConversion.h" />
-    <ClInclude Include="src\ThirdParty\D3D12MemoryAllocator\D3D12MemAlloc.h" />
-    <ClInclude Include="src\ThirdParty\d3dx12_resource_helpers.h" />
-    <ClInclude Include="src\ThirdParty\DxgiFormatHelper.h" />
-    <ClInclude Include="src\ThirdParty\DXTex\BC.h" />
-    <ClInclude Include="src\ThirdParty\DXTex\BCDirectCompute.h" />
-    <ClInclude Include="src\ThirdParty\DXTex\DDS.h" />
-    <ClInclude Include="src\ThirdParty\DXTex\DirectXTex.h" />
-    <ClInclude Include="src\ThirdParty\DXTex\DirectXTex.inl" />
-    <ClInclude Include="src\ThirdParty\DXTex\DirectXTexP.h" />
-    <ClInclude Include="src\ThirdParty\DXTex\Filters.h" />
-    <ClInclude Include="src\ThirdParty\DXTex\scoped.h" />
-    <ClInclude Include="src\ThirdParty\ffx_a.h" />
-    <ClInclude Include="src\ThirdParty\ffx_lpm.h" />
-    <ClInclude Include="src\ThirdParty\FreesyncHDR.h" />
-    <ClInclude Include="src\ThirdParty\GLTF\json.hpp" />
-    <ClInclude Include="src\ThirdParty\GLTF\stb_image_write.h" />
-    <ClInclude Include="src\ThirdParty\GLTF\tiny_gltf.h" />
-    <ClInclude Include="src\ThirdParty\imgui\imconfig.h" />
-    <ClInclude Include="src\ThirdParty\imgui\imgui.h" />
-    <ClInclude Include="src\ThirdParty\imgui\imgui_impl_dx12.h" />
-    <ClInclude Include="src\ThirdParty\imgui\imgui_impl_win32.h" />
-    <ClInclude Include="src\ThirdParty\imgui\imgui_internal.h" />
-    <ClInclude Include="src\ThirdParty\imgui\imstb_rectpack.h" />
-    <ClInclude Include="src\ThirdParty\imgui\imstb_textedit.h" />
-    <ClInclude Include="src\ThirdParty\imgui\imstb_truetype.h" />
-    <ClInclude Include="src\ThirdParty\ImGuizmo\ImGuizmo.h" />
-    <ClInclude Include="src\ThirdParty\Metalib.h" />
-    <ClInclude Include="src\ThirdParty\Misc.h" />
-    <ClInclude Include="src\ThirdParty\stb_image.h" />
-    <ClInclude Include="src\ThirdParty\WinPixEventRuntime\pix3.h" />
-    <ClInclude Include="src\ThirdParty\WinPixEventRuntime\pix3_win.h" />
-    <ClInclude Include="src\ThirdParty\WinPixEventRuntime\PIXEvents.h" />
-    <ClInclude Include="src\ThirdParty\WinPixEventRuntime\PIXEventsCommon.h" />
-    <ClInclude Include="src\ThirdParty\WinPixEventRuntime\PIXEventsLegacy.h" />
-    <ClInclude Include="stdafx.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <CopyFileToFolders Include="dxc\bin\x64\dxil.dll">
-      <FileType>Document</FileType>
-      <DeploymentContent>true</DeploymentContent>
-    </CopyFileToFolders>
-    <None Include="Assets\Shaders\public\PostProcess\AO\CS_AOEdgeSensitiveBlur.hlsl">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="Assets\Shaders\public\PostProcess\AO\CS_AOHIZNormal.hlsl">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="Assets\Shaders\public\PostProcess\AO\CS_GenerateAOImportance.hlsl">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="Assets\Shaders\public\PostProcess\AO\CS_LayeredAO.hlsl">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="Assets\Shaders\public\PostProcess\Bloom\Bloom.hlsl">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="Assets\Shaders\public\PostProcess\CS_Bilateral_Blur.hlsl">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="dxc\bin\x64\dxcompiler.dll" />
-    <None Include="Assets\Shaders\private\Light.hlsli">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
-    </None>
-    <None Include="Assets\Shaders\private\Macros.hlsli">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
-    </None>
-    <None Include="Assets\Shaders\private\Math.hlsli">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
-    </None>
-    <None Include="Assets\Shaders\private\SharedCommon.hlsli">
-      <FileType>Document</FileType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
-    </None>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Assets\Shaders\public\CS_Tonemap.hlsl">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="Assets\Shaders\public\CS_SSAO.hlsl">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="Assets\Shaders\public\CopyTexture.hlsl">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="Assets\Shaders\public\PostProcess\CS_Debug.hlsl">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="Assets\Shaders\private\SSAOCommon.hlsli">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="Assets\Shaders\public\PostProcess\CS_AOTAA.hlsl">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="Assets\Shaders\public\PostProcess\CS_AO.hlsl">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="Assets\Shaders\public\Warmup\CS_Warmup.hlsl">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="Assets\Shaders\public\Warmup\Warmup.hlsl">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="Assets\Shaders\public\PostProcess\AO\CS_PrepareDepth.hlsl">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="Assets\Shaders\public\PostProcess\Debug.hlsl">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="Assets\Shaders\public\GI\CS_DDGI.hlsl">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="Assets\Shaders\public\GI\DDGI_Library.hlsl">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="Assets\Shaders\public\GI\Irradiance.hlsl">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="Assets\Shaders\public\GI\CS_RrobeOffset.hlsl">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="Assets\Shaders\public\GI\CS_DDGILighting.hlsl">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="Assets\Shaders\public\GI\CS_RayFilter.hlsl">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="Assets\Shaders\public\PostProcess\TAA\CS_TAA.hlsl">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="Assets\Shaders\public\PostProcess\Sharpen\CS_CAS.hlsl">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="Assets\Shaders\public\CS_GBufferCulling.hlsl">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="Assets\Shaders\public\CS_GBufferHIZ.hlsl">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="Assets\Shaders\public\CS_ScreenSpaceShadow.hlsl">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="Assets\Shaders\public\PreGen\CS_PreIntegrateSSS.hlsl">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="Assets\Shaders\public\PreGen\CS_SHCoefficients.hlsl">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="Assets\Shaders\private\HairBsdf.hlsli">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="Assets\Shaders\public\PostProcess\SSSR\CS_TileClassify.hlsl">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="Assets\Shaders\public\CS_CalcSobolNoise.hlsl">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="Assets\Shaders\public\PostProcess\SSSR\CS_Intersect.hlsl">
-      <FileType>Document</FileType>
-    </None>
-    <ClCompile Include="src\Editor\private\ConfigCache.cpp" />
-    <ClCompile Include="src\Editor\private\IMGUIDrawer.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="src\Editor\private\IMGUIHelper.cpp" />
-    <ClCompile Include="src\Editor\private\OutputLogPanel.cpp" />
-    <ClCompile Include="src\Editor\private\UI.cpp" />
-    <ClCompile Include="src\Editor\private\EditorIcons.cpp" />
-    <ClCompile Include="src\Editor\private\UserData.cpp" />
-    <ClCompile Include="src\Programs\private\Containers.cpp" />
-    <ClCompile Include="src\Programs\private\Helper.cpp" />
-    <ClCompile Include="src\Programs\private\Log.cpp" />
-    <ClCompile Include="src\Programs\private\LogHistory.cpp" />
-    <ClCompile Include="src\Programs\private\PIXHelper.cpp" />
-    <ClCompile Include="src\Programs\private\RenderHelper.cpp" />
-    <ClCompile Include="src\Programs\private\SBTHelper.cpp" />
-    <ClCompile Include="src\Programs\private\SobolSequenceGenerator.cpp" />
-    <ClCompile Include="src\Programs\private\UserMarker.cpp" />
-    <ClCompile Include="src\Runtime\Core\private\DX12BufferResource.cpp" />
-    <ClCompile Include="src\Runtime\Core\private\DX12ComputeContext.cpp" />
-    <ClCompile Include="src\Runtime\Core\private\DX12Context.cpp" />
-    <ClCompile Include="src\Runtime\Core\private\DX12DescriptorHeap.cpp" />
-    <ClCompile Include="src\Runtime\Core\private\DX12Device.cpp" />
-    <ClCompile Include="src\Runtime\Core\private\DX12GPUResource.cpp" />
-    <ClCompile Include="src\Runtime\Core\private\DX12GraphicsContext.cpp" />
-    <ClCompile Include="src\Runtime\Core\private\DX12PipelineState.cpp" />
-    <ClCompile Include="src\Runtime\Core\private\DX12Queue.cpp" />
-    <ClCompile Include="src\Runtime\Core\private\DX12QueueManager.cpp" />
-    <ClCompile Include="src\Runtime\Core\private\DX12RenderPassDescriptorHeap.cpp" />
-    <ClCompile Include="src\Runtime\Core\private\DX12RootSignature.cpp" />
-    <ClCompile Include="src\Runtime\Core\private\DX12Shader.cpp" />
-    <ClCompile Include="src\Runtime\Core\private\DX12StagingDescriptorHeap.cpp" />
-    <ClCompile Include="src\Runtime\Core\private\DX12TextureBuffer.cpp" />
-    <ClCompile Include="src\Runtime\Core\private\DX12UploadContext.cpp" />
-    <ClCompile Include="src\Runtime\Core\private\PipelineResourceSpace.cpp" />
-    <ClCompile Include="src\Runtime\Core\private\PipelineStateUtility.cpp" />
-    <ClCompile Include="src\Runtime\Core\private\PSOHelper.cpp" />
-    <ClCompile Include="src\Runtime\Core\private\ShaderBytecodeCache.cpp" />
-    <ClCompile Include="src\Runtime\Core\private\ShaderCompileOptions.cpp" />
-    <ClCompile Include="src\Runtime\Core\private\ShaderKeywordSet.cpp" />
-    <ClCompile Include="src\Runtime\Core\private\ShaderKeywordSpace.cpp" />
-    <ClCompile Include="src\Runtime\Core\private\ShaderUtility.cpp" />
-    <ClCompile Include="src\Runtime\Core\private\SwapChain.cpp" />
-    <ClCompile Include="src\Runtime\Core\private\UploadRingBuffer.cpp" />
-    <ClCompile Include="src\Runtime\Developer\private\Benchmark.cpp" />
-    <ClCompile Include="src\Runtime\Developer\private\GPUTimestamps.cpp" />
-    <ClCompile Include="src\Runtime\Engine\ECS\private\Entity.cpp" />
-    <ClCompile Include="src\Runtime\Engine\ECS\private\Transform.cpp" />
-    <ClCompile Include="src\Runtime\Engine\private\ElysiaFrame.cpp" />
-    <ClCompile Include="src\Runtime\Engine\private\FrameContext.cpp" />
-    <ClCompile Include="src\Runtime\Engine\private\FrameworkWindows.cpp" />
-    <ClCompile Include="src\Runtime\Engine\private\ImGuiUtility.cpp" />
-    <ClCompile Include="src\Runtime\RenderCore\private\BakeManager.cpp" />
-    <ClCompile Include="src\Runtime\RenderCore\private\BindlessTextureManager.cpp" />
-    <ClCompile Include="src\Runtime\RenderCore\private\BufferManager.cpp" />
-    <ClCompile Include="src\Runtime\RenderCore\private\CameraManager.cpp" />
-    <ClCompile Include="src\Runtime\RenderCore\private\DX12Camera.cpp" />
-    <ClCompile Include="src\Runtime\RenderCore\private\DX12Light.cpp" />
-    <ClCompile Include="src\Runtime\RenderCore\private\DX12Shadow.cpp" />
-    <ClCompile Include="src\Runtime\RenderCore\private\GIUtility.cpp" />
-    <ClCompile Include="src\Runtime\RenderCore\private\HairUtility.cpp" />
-    <ClCompile Include="src\Runtime\RenderCore\private\LightManager.cpp" />
-    <ClCompile Include="src\Runtime\RenderCore\private\Material.cpp" />
-    <ClCompile Include="src\Runtime\RenderCore\private\MaterialParams.cpp" />
-    <ClCompile Include="src\Runtime\RenderCore\private\MeshRenderer.cpp" />
-    <ClCompile Include="src\Runtime\RenderCore\Pass\private\AOPass.cpp" />
-    <ClCompile Include="src\Runtime\RenderCore\Pass\private\BakePass.cpp" />
-    <ClCompile Include="src\Runtime\RenderCore\Pass\private\BasePass.cpp" />
-    <ClCompile Include="src\Runtime\RenderCore\Pass\private\BloomPass.cpp" />
-    <ClCompile Include="src\Runtime\RenderCore\Pass\private\DebugPass.cpp" />
-    <ClCompile Include="src\Runtime\RenderCore\Pass\private\FinalBlitPass.cpp" />
-    <ClCompile Include="src\Runtime\RenderCore\Pass\private\GBufferPass.cpp" />
-    <ClCompile Include="src\Runtime\RenderCore\Pass\private\GIPass.cpp" />
-    <ClCompile Include="src\Runtime\RenderCore\Pass\private\OpaquePass.cpp" />
-    <ClCompile Include="src\Runtime\RenderCore\Pass\private\PreDrawPass.cpp" />
-    <ClCompile Include="src\Runtime\RenderCore\Pass\private\ShadowPass.cpp" />
-    <ClCompile Include="src\Runtime\RenderCore\Pass\private\ShadowProjectionPass.cpp" />
-    <ClCompile Include="src\Runtime\RenderCore\Pass\private\SharpenPass.cpp" />
-    <ClCompile Include="src\Runtime\RenderCore\Pass\private\SkyboxPass.cpp" />
-    <ClCompile Include="src\Runtime\RenderCore\Pass\private\SSSRPass.cpp" />
-    <ClCompile Include="src\Runtime\RenderCore\Pass\private\TAAPass.cpp" />
-    <ClCompile Include="src\Runtime\RenderCore\Pass\private\TonemapPass.cpp" />
-    <ClCompile Include="src\Runtime\RenderCore\Pass\private\SelectionOutlinePass.cpp" />
-    <ClCompile Include="src\Runtime\RenderCore\Pass\private\UIPass.cpp" />
-    <ClCompile Include="src\Runtime\RenderCore\private\PSOManager.cpp" />
-    <ClCompile Include="src\Runtime\RenderCore\private\PSOPrecache.cpp" />
-    <ClCompile Include="src\Runtime\RenderCore\private\Renderer.cpp" />
-    <ClCompile Include="src\Runtime\RenderCore\private\RenderItem.cpp" />
-    <ClCompile Include="src\Runtime\RenderCore\private\RenderResource.cpp" />
-    <ClCompile Include="src\Runtime\RenderCore\private\RenderPassResourceManager.cpp" />
-    <ClCompile Include="src\Runtime\RenderCore\private\RenderTargetManager.cpp" />
-    <ClCompile Include="src\Runtime\RenderCore\private\RenderTexture.cpp" />
-    <ClCompile Include="src\Runtime\RenderCore\private\SceneManager.cpp" />
-    <ClCompile Include="src\Runtime\RenderCore\private\SelectionManager.cpp" />
-    <ClCompile Include="src\Runtime\RenderCore\private\ShaderVariantManager.cpp" />
-    <ClCompile Include="src\Runtime\RenderCore\private\TextureManager.cpp" />
-    <ClCompile Include="src\Runtime\Resource\private\File.cpp" />
-    <ClCompile Include="src\Runtime\Resource\Model\private\AssimpLoader.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="src\Runtime\Resource\Model\private\MaterialOverrides.cpp" />
-    <ClCompile Include="src\Runtime\Resource\Model\private\ModelCache.cpp" />
-    <ClCompile Include="src\Runtime\Resource\Model\private\ModelImporter.cpp" />
-    <ClCompile Include="src\Runtime\Resource\Model\private\ModelManager.cpp" />
-    <ClCompile Include="src\Runtime\Resource\Model\private\SharedTypes.cpp" />
-    <ClCompile Include="src\ThirdParty\ColorConversion.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="src\ThirdParty\D3D12MemoryAllocator\D3D12MemAlloc.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="src\ThirdParty\d3dx12_resource_helpers.cpp" />
-    <ClCompile Include="src\ThirdParty\DxgiFormatHelper.cpp" />
-    <ClCompile Include="src\ThirdParty\DXTex\BC.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="src\ThirdParty\DXTex\BC4BC5.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="src\ThirdParty\DXTex\BC6HBC7.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="src\ThirdParty\DXTex\BCDirectCompute.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="src\ThirdParty\DXTex\DirectXTexCompress.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="src\ThirdParty\DXTex\DirectXTexCompressGPU.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="src\ThirdParty\DXTex\DirectXTexConvert.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="src\ThirdParty\DXTex\DirectXTexD3D12.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="src\ThirdParty\DXTex\DirectXTexDDS.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="src\ThirdParty\DXTex\DirectXTexFlipRotate.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="src\ThirdParty\DXTex\DirectXTexImage.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="src\ThirdParty\DXTex\DirectXTexMipmaps.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="src\ThirdParty\DXTex\DirectXTexMisc.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="src\ThirdParty\DXTex\DirectXTexNormalMaps.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="src\ThirdParty\DXTex\DirectXTexPMAlpha.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="src\ThirdParty\DXTex\DirectXTexTGA.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="src\ThirdParty\DXTex\DirectXTexUtil.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="src\ThirdParty\DXTex\DirectXTexWIC.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="src\ThirdParty\EASTL\allocator_eastl.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="src\ThirdParty\EASTL\atomic.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="src\ThirdParty\EASTL\fixed_pool.cpp" />
-    <ClCompile Include="src\ThirdParty\EASTL\hashtable.cpp" />
-    <ClCompile Include="src\ThirdParty\EASTL\intrusive_list.cpp" />
-    <ClCompile Include="src\ThirdParty\EASTL\numeric_limits.cpp" />
-    <ClCompile Include="src\ThirdParty\EASTL\red_black_tree.cpp" />
-    <ClCompile Include="src\ThirdParty\EASTL\string.cpp" />
-    <ClCompile Include="src\ThirdParty\EASTL\thread_support.cpp" />
-    <ClCompile Include="src\ThirdParty\FreesyncHDR.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="src\ThirdParty\imgui\imgui.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="src\ThirdParty\imgui\imgui_demo.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="src\ThirdParty\imgui\imgui_draw.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="src\ThirdParty\imgui\imgui_impl_dx12.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="src\ThirdParty\imgui\imgui_impl_win32.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="src\ThirdParty\imgui\imgui_tables.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="src\ThirdParty\imgui\imgui_widgets.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="src\ThirdParty\ImGuizmo\ImGuizmo.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <AdditionalIncludeDirectories>$(ProjectDir)src\ThirdParty\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-    </ClCompile>
-    <ClCompile Include="src\ThirdParty\Misc.cpp" />
-    <ClCompile Include="src\ThirdParty\stb_image.cpp" />
-    <ClCompile Include="src\ThirdParty\xxhash.cpp" />
-    <ClCompile Include="stdafx.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="Assets\Tex\cubemap0.dds" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Assets\Shaders\private\BRDF.hlsl">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="Assets\Shaders\private\Common.hlsl">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="Assets\Shaders\private\Light.hlsl">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="Assets\Shaders\private\LightCommon.hlsl">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="Assets\Shaders\private\ShadingCommon.hlsl">
-      <FileType>Document</FileType>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Assets\Shaders\private\Transform.hlsli">
-      <FileType>Document</FileType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Assets\Shaders\private\ShadingModel.hlsl">
-      <FileType>Document</FileType>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Assets\Shaders\private\EnergyPreservation.hlsl">
-      <FileType>Document</FileType>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Assets\Shaders\private\AreaLightCommon.hlsl">
-      <FileType>Document</FileType>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Assets\Shaders\private\LightAccumulator.hlsl">
-      <FileType>Document</FileType>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Assets\Shaders\public\Skybox.hlsl">
-      <FileType>Document</FileType>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Assets\Shaders\private\MonteCarlo.hlsl">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="Assets\Shaders\private\Random.hlsl">
-      <FileType>Document</FileType>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Assets\Shaders\private\AmbientCubemap.hlsl">
-      <FileType>Document</FileType>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Assets\Shaders\public\Shadow.hlsl">
-      <FileType>Document</FileType>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Assets\Shaders\public\PBR.hlsl">
-      <FileType>Document</FileType>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Assets\Shaders\private\ShadowCommon.hlsl">
-      <FileType>Document</FileType>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Assets\Shaders\public\GBuffer.hlsl">
-      <FileType>Document</FileType>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Assets\Shaders\public\Opaque.hlsl">
-      <FileType>Document</FileType>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Assets\Shaders\public\Blit.hlsl">
-      <FileType>Document</FileType>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Assets\Shaders\private\Color.hlsl">
-      <FileType>Document</FileType>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Assets\Shaders\public\TonemapPass.hlsl">
-      <FileType>Document</FileType>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Assets\Shaders\private\DeferredCommon.hlsl">
-      <FileType>Document</FileType>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Assets\Shaders\public\FullScreenTriangle.hlsl">
-      <FileType>Document</FileType>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Assets\Shaders\public\SSAO.hlsl">
-      <FileType>Document</FileType>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="..\x64\Debug\Saved\Config\Windows\Engine.ini" />
-    <Content Include="Assets\Config\BaseEngine.ini" />
-    <Content Include="Assets\Config\DefaultEngine.ini" />
-    <Content Include="Assets\Shaders\public\PostProcess\CS_TwoTwoMinHIZ.hlsl" />
-    <Content Include="lib\AMD\libs\AGS\amd_ags_x64.dll" />
-    <Content Include="lib\AMD\libs\AGS\amd_ags_x64.lib" />
-    <Content Include="lib\AMD\libs\AGS\CMakeLists.txt" />
-    <Content Include="lib\AMD\libs\AGS\license.txt" />
-    <Content Include="lib\AMD\libs\d3d12x\CMakeLists.txt" />
-    <Content Include="lib\AMD\libs\d3d12x\license.txt" />
-    <Content Include="lib\AMD\libs\DXC\bin\dxc.exe" />
-    <Content Include="lib\AMD\libs\DXC\bin\dxcompiler.dll" />
-    <Content Include="lib\AMD\libs\DXC\bin\dxil.dll" />
-    <Content Include="lib\AMD\libs\DXC\bin\x64\dxc.exe" />
-    <Content Include="lib\AMD\libs\DXC\bin\x64\dxcompiler.dll" />
-    <Content Include="lib\AMD\libs\DXC\bin\x64\dxil.dll" />
-    <Content Include="lib\AMD\libs\DXC\CMakeLists.txt" />
-    <Content Include="lib\AMD\libs\DXC\lib\x64\dxcompiler.lib" />
-    <Content Include="lib\AMD\libs\json\CMakeLists.txt" />
-    <Content Include="lib\AMD\libs\json\License.txt" />
-    <Content Include="lib\AMD\libs\vectormath\CMakeLists.txt" />
-    <Content Include="lib\AMD\libs\vectormath\docs\VectorMath-Library-Overview.pdf" />
-    <Content Include="lib\AMD\libs\vectormath\LICENSE.txt" />
-    <Content Include="lib\AMD\libs\vectormath\README.md" />
-    <Content Include="lib\AMD\libs\VulkanMemoryAllocator\CMakeLists.txt" />
-    <Content Include="lib\AMD\libs\VulkanMemoryAllocator\license.txt" />
-    <Content Include="lib\AMD\libs\WinPixEventRuntime\CMakeLists.txt" />
-    <Content Include="lib\AMD\libs\WinPixEventRuntime\WinPixEventRuntime.dll" />
-    <Content Include="lib\AMD\libs\WinPixEventRuntime\WinPixEventRuntime.lib" />
-    <Content Include="lib\stb\CMakeLists.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Assets\Shaders\public\PostProcess\CS_TwoTwoMinHIZ.hlsl">
-      <FileType>Document</FileType>
-    </None>
-  </ItemGroup>
-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <ImportGroup Label="ExtensionTargets">
-    <Import Project="..\packages\boost.1.87.0\build\boost.targets" Condition="Exists('..\packages\boost.1.87.0\build\boost.targets')" />
-    <Import Project="..\packages\directxtk12_desktop_win10.2025.7.10.1\build\native\directxtk12_desktop_win10.targets" Condition="Exists('..\packages\directxtk12_desktop_win10.2025.7.10.1\build\native\directxtk12_desktop_win10.targets')" />
-    <Import Project="..\packages\WinPixEventRuntime.1.0.240308001\build\WinPixEventRuntime.targets" Condition="Exists('..\packages\WinPixEventRuntime.1.0.240308001\build\WinPixEventRuntime.targets')" />
-    <Import Project="..\packages\Microsoft.Direct3D.D3D12.1.618.5\build\native\Microsoft.Direct3D.D3D12.targets" Condition="Exists('..\packages\Microsoft.Direct3D.D3D12.1.618.5\build\native\Microsoft.Direct3D.D3D12.targets')" />
-  </ImportGroup>
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them. For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\packages\boost.1.87.0\build\boost.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost.1.87.0\build\boost.targets'))" />
-    <Error Condition="!Exists('..\packages\directxtk12_desktop_win10.2025.7.10.1\build\native\directxtk12_desktop_win10.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\directxtk12_desktop_win10.2025.7.10.1\build\native\directxtk12_desktop_win10.targets'))" />
-    <Error Condition="!Exists('..\packages\Vcpkg.Nuget.1.5.0\build\Vcpkg.Nuget.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Vcpkg.Nuget.1.5.0\build\Vcpkg.Nuget.props'))" />
-    <Error Condition="!Exists('..\packages\WinPixEventRuntime.1.0.240308001\build\WinPixEventRuntime.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\WinPixEventRuntime.1.0.240308001\build\WinPixEventRuntime.targets'))" />
-    <Error Condition="!Exists('..\packages\Microsoft.Direct3D.D3D12.1.618.5\build\native\Microsoft.Direct3D.D3D12.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Direct3D.D3D12.1.618.5\build\native\Microsoft.Direct3D.D3D12.props'))" />
-    <Error Condition="!Exists('..\packages\Microsoft.Direct3D.D3D12.1.618.5\build\native\Microsoft.Direct3D.D3D12.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Direct3D.D3D12.1.618.5\build\native\Microsoft.Direct3D.D3D12.targets'))" />
-  </Target>
-  <Target Name="RemoveMissingAgilitySdkPdbs" BeforeTargets="AssignTargetPaths">
+        </PostBuildEvent>
+    </ItemDefinitionGroup>
     <ItemGroup>
-      <_MissingAgilityPdb Include="@(Content)" Condition="'%(Extension)' == '.pdb' AND ('%(Filename)' == 'D3D12Core' OR '%(Filename)' == 'D3D12SDKLayers')" />
-      <Content Remove="@(_MissingAgilityPdb)" />
+        <None Include="Assets\Shaders\private\BloomCommon.hlsli">
+            <FileType>Document</FileType>
+        </None>
+        <None Include="Assets\Shaders\private\CASCommon.hlsli">
+            <FileType>Document</FileType>
+        </None>
+        <ClInclude Include="Assets\Shaders\private\DDGICommon.hlsli"/>
+        <None Include="Assets\Shaders\private\TAACommon.hlsli">
+            <FileType>Document</FileType>
+        </None>
+        <None Include="Assets\Shaders\private\ShadowConst.hlsli">
+            <FileType>Document</FileType>
+        </None>
+        <None Include="Assets\Shaders\private\OctahedralCommon.hlsli">
+            <FileType>Document</FileType>
+        </None>
+        <None Include="Assets\Shaders\private\SSSR\SSSRCommon.hlsli">
+            <FileType>Document</FileType>
+        </None>
+        <ClInclude Include="Assets\Shaders\public\PostProcess\AutoExposure\AutoExpostureCommon.hlsli"/>
+        <ClInclude Include="dxc\inc\d3dx12.h"/>
+        <ClInclude Include="lib\AMD\libs\AGS\amd_ags.h"/>
+        <ClInclude Include="lib\AMD\libs\d3d12x\d3dx12.h"/>
+        <ClInclude Include="lib\AMD\libs\DXC\inc\d3d12shader.h"/>
+        <ClInclude Include="lib\AMD\libs\DXC\inc\dxcapi.h"/>
+        <ClInclude Include="lib\AMD\libs\json\json.h"/>
+        <ClInclude Include="lib\AMD\libs\vectormath\common.hpp"/>
+        <ClInclude Include="lib\AMD\libs\vectormath\scalar\matrix.hpp"/>
+        <ClInclude Include="lib\AMD\libs\vectormath\scalar\quaternion.hpp"/>
+        <ClInclude Include="lib\AMD\libs\vectormath\scalar\vector.hpp"/>
+        <ClInclude Include="lib\AMD\libs\vectormath\scalar\vectormath.hpp"/>
+        <ClInclude Include="lib\AMD\libs\vectormath\sse\boolinvec.hpp"/>
+        <ClInclude Include="lib\AMD\libs\vectormath\sse\floatinvec.hpp"/>
+        <ClInclude Include="lib\AMD\libs\vectormath\sse\internal.hpp"/>
+        <ClInclude Include="lib\AMD\libs\vectormath\sse\matrix.hpp"/>
+        <ClInclude Include="lib\AMD\libs\vectormath\sse\quaternion.hpp"/>
+        <ClInclude Include="lib\AMD\libs\vectormath\sse\vecidx.hpp"/>
+        <ClInclude Include="lib\AMD\libs\vectormath\sse\vector.hpp"/>
+        <ClInclude Include="lib\AMD\libs\vectormath\sse\vectormath.hpp"/>
+        <ClInclude Include="lib\AMD\libs\vectormath\vec2d.hpp"/>
+        <ClInclude Include="lib\AMD\libs\vectormath\vectormath.hpp"/>
+        <ClInclude Include="lib\AMD\libs\VulkanMemoryAllocator\vk_mem_alloc.h"/>
+        <ClInclude Include="lib\AMD\libs\WinPixEventRuntime\pix3.h"/>
+        <ClInclude Include="lib\AMD\libs\WinPixEventRuntime\pix3_win.h"/>
+        <ClInclude Include="lib\AMD\libs\WinPixEventRuntime\PIXEvents.h"/>
+        <ClInclude Include="lib\AMD\libs\WinPixEventRuntime\PIXEventsCommon.h"/>
+        <ClInclude Include="lib\stb\stb_image.h"/>
+        <ClInclude Include="lib\stb\stb_image_write.h"/>
+        <ClInclude Include="src\Editor\public\ConfigCache.h"/>
+        <ClInclude Include="src\Editor\public\IMGUIDrawer.h"/>
+        <ClInclude Include="src\Editor\public\IMGUIHelper.h"/>
+        <ClInclude Include="src\Editor\public\OutputLogPanel.h"/>
+        <ClInclude Include="src\Editor\public\UI.h"/>
+        <ClInclude Include="src\Editor\public\EditorIcons.h"/>
+        <ClInclude Include="src\Editor\public\UserData.h"/>
+        <ClInclude Include="dxc\inc\d3d12shader.h"/>
+        <ClInclude Include="dxc\inc\dxcapi.h"/>
+        <ClInclude Include="src\Programs\public\BoundingBox.h"/>
+        <ClInclude Include="src\Programs\public\Common.h"/>
+        <ClInclude Include="src\Programs\public\Containers.h"/>
+        <ClInclude Include="src\Programs\public\DebugUtility.h"/>
+        <ClInclude Include="src\Programs\public\Hash.h"/>
+        <ClInclude Include="src\Programs\public\Helper.h"/>
+        <ClInclude Include="src\Programs\public\IManager.h"/>
+        <ClInclude Include="src\Programs\public\IUpdate.h"/>
+        <ClInclude Include="src\Programs\public\Log.h"/>
+        <ClInclude Include="src\Programs\public\LogHistory.h"/>
+        <ClInclude Include="src\Programs\public\Math.h"/>
+        <ClInclude Include="src\Programs\public\PIXHelper.h"/>
+        <ClInclude Include="src\Programs\public\RenderHelper.h"/>
+        <ClInclude Include="src\Programs\public\SBTHelper.h"/>
+        <ClInclude Include="src\Programs\public\SobolSequenceGenerator.h"/>
+        <ClInclude Include="src\Programs\public\UserMarker.h"/>
+        <ClInclude Include="src\Runtime\Core\public\BufferUtility.h"/>
+        <ClInclude Include="src\Runtime\Core\public\ContextUtility.h"/>
+        <ClInclude Include="src\Runtime\Core\public\DX12BufferResource.h"/>
+        <ClInclude Include="src\Runtime\Core\public\DX12ComputeContext.h"/>
+        <ClInclude Include="src\Runtime\Core\public\DX12Context.h"/>
+        <ClInclude Include="src\Runtime\Core\public\DX12DescriptorHeap.h"/>
+        <ClInclude Include="src\Runtime\Core\public\DX12DescriptorHeapHandle.h"/>
+        <ClInclude Include="src\Runtime\Core\public\DX12Device.h"/>
+        <ClInclude Include="src\Runtime\Core\public\DX12GPUResource.h"/>
+        <ClInclude Include="src\Runtime\Core\public\DX12GraphicsContext.h"/>
+        <ClInclude Include="src\Runtime\Core\public\DX12PipelineState.h"/>
+        <ClInclude Include="src\Runtime\Core\public\DX12Queue.h"/>
+        <ClInclude Include="src\Runtime\Core\public\DX12QueueManager.h"/>
+        <ClInclude Include="src\Runtime\Core\public\DX12RenderPassDescriptorHeap.h"/>
+        <ClInclude Include="src\Runtime\Core\public\DX12RootSignature.h"/>
+        <ClInclude Include="src\Runtime\Core\public\DX12Shader.h"/>
+        <ClInclude Include="src\Runtime\Core\public\DX12StagingDescriptorHeap.h"/>
+        <ClInclude Include="src\Runtime\Core\public\DX12TextureBuffer.h"/>
+        <ClInclude Include="src\Runtime\Core\public\DX12UploadContext.h"/>
+        <ClInclude Include="src\Runtime\Core\public\PipelineResourceSpace.h"/>
+        <ClInclude Include="src\Runtime\Core\public\PipelineResourceUtility.h"/>
+        <ClInclude Include="src\Runtime\Core\public\PipelineStateUtility.h"/>
+        <ClInclude Include="src\Runtime\Core\public\PSOHelper.h"/>
+        <ClInclude Include="src\Runtime\Core\public\ShaderBytecodeCache.h"/>
+        <ClInclude Include="src\Runtime\Core\public\ShaderCompileOptions.h"/>
+        <ClInclude Include="src\Runtime\Core\public\ShaderKeywordSet.h"/>
+        <ClInclude Include="src\Runtime\Core\public\ShaderKeywordSpace.h"/>
+        <ClInclude Include="src\Runtime\Core\public\ShaderUtility.h"/>
+        <ClInclude Include="src\Runtime\Core\public\SwapChain.h"/>
+        <ClInclude Include="src\Runtime\Core\public\TextureUtility.h"/>
+        <ClInclude Include="src\Runtime\Core\public\UploadRingBuffer.h"/>
+        <ClInclude Include="src\Runtime\Developer\public\Benchmark.h"/>
+        <ClInclude Include="src\Runtime\Developer\public\GPUTimestamps.h"/>
+        <ClInclude Include="src\Runtime\Engine\ECS\public\Entity.h"/>
+        <ClInclude Include="src\Runtime\Engine\ECS\public\LightComponent.h"/>
+        <ClInclude Include="src\Runtime\Engine\ECS\public\Transform.h"/>
+        <ClInclude Include="src\Runtime\Engine\public\ElysiaFrame.h"/>
+        <ClInclude Include="src\Runtime\Engine\public\FrameContext.h"/>
+        <ClInclude Include="src\Runtime\Engine\public\FrameworkWindows.h"/>
+        <ClInclude Include="src\Runtime\Engine\public\ImGuiUtility.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\Pass\public\AutoExposurePass.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\public\AOUtility.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\public\BakeManager.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\public\BindlessTextureManager.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\public\BloomUtility.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\public\BufferManager.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\public\CameraManager.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\public\CASUtility.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\public\CBVParameter.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\public\DX12Camera.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\public\DX12Light.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\public\DX12Shadow.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\public\GIUtility.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\public\HairUtility.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\public\LightManager.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\public\LightUtility.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\public\Material.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\public\MaterialParams.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\public\MeshRenderer.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\Pass\public\AOPass.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\Pass\public\BakePass.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\Pass\public\BasePass.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\Pass\public\BloomPass.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\Pass\public\DebugPass.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\Pass\public\FinalBlitPass.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\Pass\public\GBufferPass.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\Pass\public\GIPass.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\Pass\public\OpaquePass.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\Pass\public\PreDrawPass.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\Pass\public\RenderPassData.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\Pass\public\SelectionOutlinePass.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\Pass\public\ShadowPass.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\Pass\public\ShadowProjectionPass.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\Pass\public\SharpenPass.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\Pass\public\SkyboxPass.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\Pass\public\SSSRPass.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\Pass\public\TAAPass.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\Pass\public\TonemapPass.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\Pass\public\UIPass.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\public\PSOManager.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\public\PSOPrecache.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\public\Renderer.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\public\RenderItem.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\public\RenderResource.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\public\RenderPassResourceManager.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\public\RenderTargetManager.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\public\RenderTexture.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\public\RenderTextureUtility.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\public\SceneManager.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\public\SelectionManager.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\public\ShaderVariantManager.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\public\ShadowUtility.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\public\SSSRUtility.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\public\SubsurfaceScatterUtility.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\public\TAAUtility.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\public\TextureManager.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\public\TonemapUtility.h"/>
+        <ClInclude Include="src\Runtime\Resource\public\File.h"/>
+        <ClInclude Include="src\Runtime\Resource\Model\public\AssimpLoader.h"/>
+        <ClInclude Include="src\Runtime\Resource\Model\public\LoadedModel.h"/>
+        <ClInclude Include="src\Runtime\Resource\Model\public\MaterialOverrides.h"/>
+        <ClInclude Include="src\Runtime\Resource\Model\public\ModelCache.h"/>
+        <ClInclude Include="src\Runtime\Resource\Model\public\ModelImporter.h"/>
+        <ClInclude Include="src\Runtime\Resource\Model\public\ModelManager.h"/>
+        <ClInclude Include="src\Runtime\Resource\Model\public\SharedTypes.h"/>
+        <ClInclude Include="src\Runtime\Resource\public\Serialization.h"/>
+        <ClInclude Include="src\ThirdParty\ColorConversion.h"/>
+        <ClInclude Include="src\ThirdParty\D3D12MemoryAllocator\D3D12MemAlloc.h"/>
+        <ClInclude Include="src\ThirdParty\d3dx12_resource_helpers.h"/>
+        <ClInclude Include="src\ThirdParty\DxgiFormatHelper.h"/>
+        <ClInclude Include="src\ThirdParty\DXTex\BC.h"/>
+        <ClInclude Include="src\ThirdParty\DXTex\BCDirectCompute.h"/>
+        <ClInclude Include="src\ThirdParty\DXTex\DDS.h"/>
+        <ClInclude Include="src\ThirdParty\DXTex\DirectXTex.h"/>
+        <ClInclude Include="src\ThirdParty\DXTex\DirectXTex.inl"/>
+        <ClInclude Include="src\ThirdParty\DXTex\DirectXTexP.h"/>
+        <ClInclude Include="src\ThirdParty\DXTex\Filters.h"/>
+        <ClInclude Include="src\ThirdParty\DXTex\scoped.h"/>
+        <ClInclude Include="src\ThirdParty\ffx_a.h"/>
+        <ClInclude Include="src\ThirdParty\ffx_lpm.h"/>
+        <ClInclude Include="src\ThirdParty\FreesyncHDR.h"/>
+        <ClInclude Include="src\ThirdParty\GLTF\json.hpp"/>
+        <ClInclude Include="src\ThirdParty\GLTF\stb_image_write.h"/>
+        <ClInclude Include="src\ThirdParty\GLTF\tiny_gltf.h"/>
+        <ClInclude Include="src\ThirdParty\imgui\imconfig.h"/>
+        <ClInclude Include="src\ThirdParty\imgui\imgui.h"/>
+        <ClInclude Include="src\ThirdParty\imgui\imgui_impl_dx12.h"/>
+        <ClInclude Include="src\ThirdParty\imgui\imgui_impl_win32.h"/>
+        <ClInclude Include="src\ThirdParty\imgui\imgui_internal.h"/>
+        <ClInclude Include="src\ThirdParty\imgui\imstb_rectpack.h"/>
+        <ClInclude Include="src\ThirdParty\imgui\imstb_textedit.h"/>
+        <ClInclude Include="src\ThirdParty\imgui\imstb_truetype.h"/>
+        <ClInclude Include="src\ThirdParty\ImGuizmo\ImGuizmo.h"/>
+        <ClInclude Include="src\ThirdParty\Metalib.h"/>
+        <ClInclude Include="src\ThirdParty\Misc.h"/>
+        <ClInclude Include="src\ThirdParty\stb_image.h"/>
+        <ClInclude Include="src\ThirdParty\WinPixEventRuntime\pix3.h"/>
+        <ClInclude Include="src\ThirdParty\WinPixEventRuntime\pix3_win.h"/>
+        <ClInclude Include="src\ThirdParty\WinPixEventRuntime\PIXEvents.h"/>
+        <ClInclude Include="src\ThirdParty\WinPixEventRuntime\PIXEventsCommon.h"/>
+        <ClInclude Include="src\ThirdParty\WinPixEventRuntime\PIXEventsLegacy.h"/>
+        <ClInclude Include="stdafx.h"/>
     </ItemGroup>
-  </Target>
+    <ItemGroup>
+        <CopyFileToFolders Include="dxc\bin\x64\dxil.dll">
+            <FileType>Document</FileType>
+            <DeploymentContent>true</DeploymentContent>
+        </CopyFileToFolders>
+        <None Include="Assets\Shaders\public\PostProcess\AO\CS_AOEdgeSensitiveBlur.hlsl">
+            <FileType>Document</FileType>
+        </None>
+        <None Include="Assets\Shaders\public\PostProcess\AO\CS_AOHIZNormal.hlsl">
+            <FileType>Document</FileType>
+        </None>
+        <None Include="Assets\Shaders\public\PostProcess\AO\CS_GenerateAOImportance.hlsl">
+            <FileType>Document</FileType>
+        </None>
+        <None Include="Assets\Shaders\public\PostProcess\AO\CS_LayeredAO.hlsl">
+            <FileType>Document</FileType>
+        </None>
+        <None Include="Assets\Shaders\public\PostProcess\Bloom\Bloom.hlsl">
+            <FileType>Document</FileType>
+        </None>
+        <None Include="Assets\Shaders\public\PostProcess\CS_Bilateral_Blur.hlsl">
+            <FileType>Document</FileType>
+        </None>
+        <None Include="dxc\bin\x64\dxcompiler.dll"/>
+        <None Include="Assets\Shaders\private\Light.hlsli">
+            <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+        </None>
+        <None Include="Assets\Shaders\private\Macros.hlsli">
+            <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+        </None>
+        <None Include="Assets\Shaders\private\Math.hlsli">
+            <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+        </None>
+        <None Include="Assets\Shaders\private\SharedCommon.hlsli">
+            <FileType>Document</FileType>
+            <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+        </None>
+        <None Include="packages.config"/>
+    </ItemGroup>
+    <ItemGroup>
+        <None Include="Assets\Shaders\public\CS_Tonemap.hlsl">
+            <FileType>Document</FileType>
+        </None>
+        <None Include="Assets\Shaders\public\CS_SSAO.hlsl">
+            <FileType>Document</FileType>
+        </None>
+        <None Include="Assets\Shaders\public\CopyTexture.hlsl">
+            <FileType>Document</FileType>
+        </None>
+        <None Include="Assets\Shaders\public\PostProcess\CS_Debug.hlsl">
+            <FileType>Document</FileType>
+        </None>
+        <None Include="Assets\Shaders\private\SSAOCommon.hlsli">
+            <FileType>Document</FileType>
+        </None>
+        <None Include="Assets\Shaders\public\PostProcess\CS_AOTAA.hlsl">
+            <FileType>Document</FileType>
+        </None>
+        <None Include="Assets\Shaders\public\PostProcess\CS_AO.hlsl">
+            <FileType>Document</FileType>
+        </None>
+        <None Include="Assets\Shaders\public\Warmup\CS_Warmup.hlsl">
+            <FileType>Document</FileType>
+        </None>
+        <None Include="Assets\Shaders\public\Warmup\Warmup.hlsl">
+            <FileType>Document</FileType>
+        </None>
+        <None Include="Assets\Shaders\public\PostProcess\AO\CS_PrepareDepth.hlsl">
+            <FileType>Document</FileType>
+        </None>
+        <None Include="Assets\Shaders\public\PostProcess\Debug.hlsl">
+            <FileType>Document</FileType>
+        </None>
+        <None Include="Assets\Shaders\public\GI\CS_DDGI.hlsl">
+            <FileType>Document</FileType>
+        </None>
+        <None Include="Assets\Shaders\public\GI\DDGI_Library.hlsl">
+            <FileType>Document</FileType>
+        </None>
+        <None Include="Assets\Shaders\public\GI\Irradiance.hlsl">
+            <FileType>Document</FileType>
+        </None>
+        <None Include="Assets\Shaders\public\GI\CS_RrobeOffset.hlsl">
+            <FileType>Document</FileType>
+        </None>
+        <None Include="Assets\Shaders\public\GI\CS_DDGILighting.hlsl">
+            <FileType>Document</FileType>
+        </None>
+        <None Include="Assets\Shaders\public\GI\CS_RayFilter.hlsl">
+            <FileType>Document</FileType>
+        </None>
+        <None Include="Assets\Shaders\public\PostProcess\TAA\CS_TAA.hlsl">
+            <FileType>Document</FileType>
+        </None>
+        <None Include="Assets\Shaders\public\PostProcess\Sharpen\CS_CAS.hlsl">
+            <FileType>Document</FileType>
+        </None>
+        <None Include="Assets\Shaders\public\CS_GBufferCulling.hlsl">
+            <FileType>Document</FileType>
+        </None>
+        <None Include="Assets\Shaders\public\CS_GBufferHIZ.hlsl">
+            <FileType>Document</FileType>
+        </None>
+        <None Include="Assets\Shaders\public\CS_ScreenSpaceShadow.hlsl">
+            <FileType>Document</FileType>
+        </None>
+        <None Include="Assets\Shaders\public\PreGen\CS_PreIntegrateSSS.hlsl">
+            <FileType>Document</FileType>
+        </None>
+        <None Include="Assets\Shaders\public\PreGen\CS_SHCoefficients.hlsl">
+            <FileType>Document</FileType>
+        </None>
+        <None Include="Assets\Shaders\private\HairBsdf.hlsli">
+            <FileType>Document</FileType>
+        </None>
+        <None Include="Assets\Shaders\public\PostProcess\SSSR\CS_TileClassify.hlsl">
+            <FileType>Document</FileType>
+        </None>
+        <None Include="Assets\Shaders\public\CS_CalcSobolNoise.hlsl">
+            <FileType>Document</FileType>
+        </None>
+        <None Include="Assets\Shaders\public\PostProcess\SSSR\CS_Intersect.hlsl">
+            <FileType>Document</FileType>
+        </None>
+        <None Include="Assets\Shaders\public\PostProcess\AutoExposure\CS_AutoExposure.hlsl"/>
+        <ClCompile Include="src\Editor\private\ConfigCache.cpp"/>
+        <ClCompile Include="src\Editor\private\IMGUIDrawer.cpp">
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+        </ClCompile>
+        <ClCompile Include="src\Editor\private\IMGUIHelper.cpp"/>
+        <ClCompile Include="src\Editor\private\OutputLogPanel.cpp"/>
+        <ClCompile Include="src\Editor\private\UI.cpp"/>
+        <ClCompile Include="src\Editor\private\EditorIcons.cpp"/>
+        <ClCompile Include="src\Editor\private\UserData.cpp"/>
+        <ClCompile Include="src\Programs\private\Containers.cpp"/>
+        <ClCompile Include="src\Programs\private\Helper.cpp"/>
+        <ClCompile Include="src\Programs\private\Log.cpp"/>
+        <ClCompile Include="src\Programs\private\LogHistory.cpp"/>
+        <ClCompile Include="src\Programs\private\PIXHelper.cpp"/>
+        <ClCompile Include="src\Programs\private\RenderHelper.cpp"/>
+        <ClCompile Include="src\Programs\private\SBTHelper.cpp"/>
+        <ClCompile Include="src\Programs\private\SobolSequenceGenerator.cpp"/>
+        <ClCompile Include="src\Programs\private\UserMarker.cpp"/>
+        <ClCompile Include="src\Runtime\Core\private\DX12BufferResource.cpp"/>
+        <ClCompile Include="src\Runtime\Core\private\DX12ComputeContext.cpp"/>
+        <ClCompile Include="src\Runtime\Core\private\DX12Context.cpp"/>
+        <ClCompile Include="src\Runtime\Core\private\DX12DescriptorHeap.cpp"/>
+        <ClCompile Include="src\Runtime\Core\private\DX12Device.cpp"/>
+        <ClCompile Include="src\Runtime\Core\private\DX12GPUResource.cpp"/>
+        <ClCompile Include="src\Runtime\Core\private\DX12GraphicsContext.cpp"/>
+        <ClCompile Include="src\Runtime\Core\private\DX12PipelineState.cpp"/>
+        <ClCompile Include="src\Runtime\Core\private\DX12Queue.cpp"/>
+        <ClCompile Include="src\Runtime\Core\private\DX12QueueManager.cpp"/>
+        <ClCompile Include="src\Runtime\Core\private\DX12RenderPassDescriptorHeap.cpp"/>
+        <ClCompile Include="src\Runtime\Core\private\DX12RootSignature.cpp"/>
+        <ClCompile Include="src\Runtime\Core\private\DX12Shader.cpp"/>
+        <ClCompile Include="src\Runtime\Core\private\DX12StagingDescriptorHeap.cpp"/>
+        <ClCompile Include="src\Runtime\Core\private\DX12TextureBuffer.cpp"/>
+        <ClCompile Include="src\Runtime\Core\private\DX12UploadContext.cpp"/>
+        <ClCompile Include="src\Runtime\Core\private\PipelineResourceSpace.cpp"/>
+        <ClCompile Include="src\Runtime\Core\private\PipelineStateUtility.cpp"/>
+        <ClCompile Include="src\Runtime\Core\private\PSOHelper.cpp"/>
+        <ClCompile Include="src\Runtime\Core\private\ShaderBytecodeCache.cpp"/>
+        <ClCompile Include="src\Runtime\Core\private\ShaderCompileOptions.cpp"/>
+        <ClCompile Include="src\Runtime\Core\private\ShaderKeywordSet.cpp"/>
+        <ClCompile Include="src\Runtime\Core\private\ShaderKeywordSpace.cpp"/>
+        <ClCompile Include="src\Runtime\Core\private\ShaderUtility.cpp"/>
+        <ClCompile Include="src\Runtime\Core\private\SwapChain.cpp"/>
+        <ClCompile Include="src\Runtime\Core\private\UploadRingBuffer.cpp"/>
+        <ClCompile Include="src\Runtime\Developer\private\Benchmark.cpp"/>
+        <ClCompile Include="src\Runtime\Developer\private\GPUTimestamps.cpp"/>
+        <ClCompile Include="src\Runtime\Engine\ECS\private\Entity.cpp"/>
+        <ClCompile Include="src\Runtime\Engine\ECS\private\Transform.cpp"/>
+        <ClCompile Include="src\Runtime\Engine\private\ElysiaFrame.cpp"/>
+        <ClCompile Include="src\Runtime\Engine\private\FrameContext.cpp"/>
+        <ClCompile Include="src\Runtime\Engine\private\FrameworkWindows.cpp"/>
+        <ClCompile Include="src\Runtime\Engine\private\ImGuiUtility.cpp"/>
+        <ClCompile Include="src\Runtime\RenderCore\Pass\private\AutoExposurePass.cpp">
+            <AdditionalIncludeDirectories>D:\SDK\DX12\ElysiaDX12\packages\Microsoft.Direct3D.D3D12.1.618.5\build\native\include;D:\SDK\DX12\ElysiaDX12\packages\Microsoft.Direct3D.D3D12.1.618.5\build\native\include\d3dx12;D:\SDK\DX12\ElysiaDX12\packages\Microsoft.Direct3D.D3D12.1.618.5\build\native\;D:\SDK\DX12\ElysiaDX12\packages\WinPixEventRuntime.1.0.240308001\build\..\Include\WinPixEventRuntime;D:\SDK\DX12\ElysiaDX12\packages\directxtk12_desktop_win10.2025.7.10.1\build\native\..\..\include;D:\SDK\DX12\ElysiaDX12\packages\boost.1.87.0\build\..\lib\native\include\;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc\include;D:\SDK\DX12\ElysiaDX12\ElysiaRenderer\;D:\SDK\DX12\ElysiaDX12\ElysiaRenderer\\include;D:\SDK\DX12\ElysiaDX12\ElysiaRenderer\\lib;D:\SDK\DX12\ElysiaDX12\ElysiaRenderer\\src;D:\SDK\DX12\ElysiaDX12\packages\boost.1.87.0\lib\native\include;;D:\SDK\DX12\ElysiaDX12\packages\Vcpkg.Nuget.1.5.0\vcpkg_bin\installed\x64-windows\include
+            </AdditionalIncludeDirectories>
+            <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+            <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+            <Optimization>Disabled</Optimization>
+            <SupportJustMyCode>true</SupportJustMyCode>
+            <AssemblerOutput>NoListing</AssemblerOutput>
+            <AssemblerListingLocation>x64\Debug\</AssemblerListingLocation>
+            <UndefineAllPreprocessorDefinitions>false</UndefineAllPreprocessorDefinitions>
+            <BrowseInformation>false</BrowseInformation>
+            <BrowseInformationFile>x64\Debug\</BrowseInformationFile>
+            <CompileAs>Default</CompileAs>
+            <UseDynamicDebugging>false</UseDynamicDebugging>
+            <ConformanceMode>true</ConformanceMode>
+            <DiagnosticsFormat>Column</DiagnosticsFormat>
+            <DisableLanguageExtensions>false</DisableLanguageExtensions>
+            <ErrorReporting>Prompt</ErrorReporting>
+            <ExpandAttributedSource>false</ExpandAttributedSource>
+            <ExceptionHandling>Sync</ExceptionHandling>
+            <EnableASAN>false</EnableASAN>
+            <EnableFuzzer>false</EnableFuzzer>
+            <EnableFiberSafeOptimizations>false</EnableFiberSafeOptimizations>
+            <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+            <EnableVectorLength>NotSet</EnableVectorLength>
+            <FloatingPointModel>Precise</FloatingPointModel>
+            <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
+            <GenerateModuleDependencies>false</GenerateModuleDependencies>
+            <GenerateSourceDependencies>false</GenerateSourceDependencies>
+            <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>
+            <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+            <IntrinsicFunctions>false</IntrinsicFunctions>
+            <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
+            <LanguageStandard>stdcpp20</LanguageStandard>
+            <LanguageStandard_C>Default</LanguageStandard_C>
+            <MinimalRebuild>false</MinimalRebuild>
+            <ModuleDependenciesFile>x64\Debug\</ModuleDependenciesFile>
+            <ModuleOutputFile>x64\Debug\</ModuleOutputFile>
+            <OmitDefaultLibName>false</OmitDefaultLibName>
+            <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
+            <WholeProgramOptimization>false</WholeProgramOptimization>
+            <ObjectFileName>x64\Debug\</ObjectFileName>
+            <CallingConvention>Cdecl</CallingConvention>
+            <ProgramDataBaseFileName>x64\Debug\vc143.pdb</ProgramDataBaseFileName>
+            <PrecompiledHeader>Use</PrecompiledHeader>
+            <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
+            <PrecompiledHeaderOutputFile>x64\Debug\ElysiaRenderer.pch</PrecompiledHeaderOutputFile>
+            <PreprocessToFile>false</PreprocessToFile>
+            <PreprocessKeepComments>false</PreprocessKeepComments>
+            <PreprocessSuppressLineNumbers>false</PreprocessSuppressLineNumbers>
+            <RemoveUnreferencedCodeData>true</RemoveUnreferencedCodeData>
+            <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+            <ShowIncludes>false</ShowIncludes>
+            <SourceDependenciesFile>x64\Debug\</SourceDependenciesFile>
+            <SuppressStartupBanner>true</SuppressStartupBanner>
+            <BufferSecurityCheck>true</BufferSecurityCheck>
+            <SmallerTypeCheck>false</SmallerTypeCheck>
+            <SpectreMitigation>false</SpectreMitigation>
+            <StructMemberAlignment>Default</StructMemberAlignment>
+            <TrackerLogDirectory>x64\Debug\ElysiaRenderer.tlog\</TrackerLogDirectory>
+            <TranslateIncludes>false</TranslateIncludes>
+            <MinimalRebuildFromTracking>true</MinimalRebuildFromTracking>
+            <TreatWarningAsError>false</TreatWarningAsError>
+            <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+            <UseFullPaths>true</UseFullPaths>
+            <WarningLevel>Level3</WarningLevel>
+            <XMLDocumentationFileName>x64\Debug\</XMLDocumentationFileName>
+            <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+            <IntelJCCErratum>false</IntelJCCErratum>
+            <BuildStlModules>false</BuildStlModules>
+            <TreatAngleIncludeAsExternal>false</TreatAngleIncludeAsExternal>
+            <ExternalWarningLevel>InheritWarningLevel</ExternalWarningLevel>
+            <TreatExternalTemplatesAsInternal>true</TreatExternalTemplatesAsInternal>
+            <DisableAnalyzeExternal>false</DisableAnalyzeExternal>
+            <PreprocessorDefinitions>HAS_DIRECTXTK12;_DEBUG;_CONSOLE;USE_PIX;PROFILE;PROFILE_BUILD;DBG;_UNICODE;UNICODE;</PreprocessorDefinitions>
+            <SDLCheck>true</SDLCheck>
+            <DisableSpecificWarnings>5033;4819;4018;</DisableSpecificWarnings>
+            <AdditionalOptions>/FS</AdditionalOptions>
+            <LinkCompiled>true</LinkCompiled>
+        </ClCompile>
+        <ClCompile Include="src\Runtime\RenderCore\private\BakeManager.cpp"/>
+        <ClCompile Include="src\Runtime\RenderCore\private\BindlessTextureManager.cpp"/>
+        <ClCompile Include="src\Runtime\RenderCore\private\BufferManager.cpp"/>
+        <ClCompile Include="src\Runtime\RenderCore\private\CameraManager.cpp"/>
+        <ClCompile Include="src\Runtime\RenderCore\private\DX12Camera.cpp"/>
+        <ClCompile Include="src\Runtime\RenderCore\private\DX12Light.cpp"/>
+        <ClCompile Include="src\Runtime\RenderCore\private\DX12Shadow.cpp"/>
+        <ClCompile Include="src\Runtime\RenderCore\private\GIUtility.cpp"/>
+        <ClCompile Include="src\Runtime\RenderCore\private\HairUtility.cpp"/>
+        <ClCompile Include="src\Runtime\RenderCore\private\LightManager.cpp"/>
+        <ClCompile Include="src\Runtime\RenderCore\private\Material.cpp"/>
+        <ClCompile Include="src\Runtime\RenderCore\private\MaterialParams.cpp"/>
+        <ClCompile Include="src\Runtime\RenderCore\private\MeshRenderer.cpp"/>
+        <ClCompile Include="src\Runtime\RenderCore\Pass\private\AOPass.cpp"/>
+        <ClCompile Include="src\Runtime\RenderCore\Pass\private\BakePass.cpp"/>
+        <ClCompile Include="src\Runtime\RenderCore\Pass\private\BasePass.cpp"/>
+        <ClCompile Include="src\Runtime\RenderCore\Pass\private\BloomPass.cpp"/>
+        <ClCompile Include="src\Runtime\RenderCore\Pass\private\DebugPass.cpp"/>
+        <ClCompile Include="src\Runtime\RenderCore\Pass\private\FinalBlitPass.cpp"/>
+        <ClCompile Include="src\Runtime\RenderCore\Pass\private\GBufferPass.cpp"/>
+        <ClCompile Include="src\Runtime\RenderCore\Pass\private\GIPass.cpp"/>
+        <ClCompile Include="src\Runtime\RenderCore\Pass\private\OpaquePass.cpp"/>
+        <ClCompile Include="src\Runtime\RenderCore\Pass\private\PreDrawPass.cpp"/>
+        <ClCompile Include="src\Runtime\RenderCore\Pass\private\ShadowPass.cpp"/>
+        <ClCompile Include="src\Runtime\RenderCore\Pass\private\ShadowProjectionPass.cpp"/>
+        <ClCompile Include="src\Runtime\RenderCore\Pass\private\SharpenPass.cpp"/>
+        <ClCompile Include="src\Runtime\RenderCore\Pass\private\SkyboxPass.cpp"/>
+        <ClCompile Include="src\Runtime\RenderCore\Pass\private\SSSRPass.cpp"/>
+        <ClCompile Include="src\Runtime\RenderCore\Pass\private\TAAPass.cpp"/>
+        <ClCompile Include="src\Runtime\RenderCore\Pass\private\TonemapPass.cpp"/>
+        <ClCompile Include="src\Runtime\RenderCore\Pass\private\SelectionOutlinePass.cpp"/>
+        <ClCompile Include="src\Runtime\RenderCore\Pass\private\UIPass.cpp"/>
+        <ClCompile Include="src\Runtime\RenderCore\private\PSOManager.cpp"/>
+        <ClCompile Include="src\Runtime\RenderCore\private\PSOPrecache.cpp"/>
+        <ClCompile Include="src\Runtime\RenderCore\private\Renderer.cpp"/>
+        <ClCompile Include="src\Runtime\RenderCore\private\RenderItem.cpp"/>
+        <ClCompile Include="src\Runtime\RenderCore\private\RenderResource.cpp"/>
+        <ClCompile Include="src\Runtime\RenderCore\private\RenderPassResourceManager.cpp"/>
+        <ClCompile Include="src\Runtime\RenderCore\private\RenderTargetManager.cpp"/>
+        <ClCompile Include="src\Runtime\RenderCore\private\RenderTexture.cpp"/>
+        <ClCompile Include="src\Runtime\RenderCore\private\SceneManager.cpp"/>
+        <ClCompile Include="src\Runtime\RenderCore\private\SelectionManager.cpp"/>
+        <ClCompile Include="src\Runtime\RenderCore\private\ShaderVariantManager.cpp"/>
+        <ClCompile Include="src\Runtime\RenderCore\private\TextureManager.cpp"/>
+        <ClCompile Include="src\Runtime\Resource\private\File.cpp"/>
+        <ClCompile Include="src\Runtime\Resource\Model\private\AssimpLoader.cpp">
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+        </ClCompile>
+        <ClCompile Include="src\Runtime\Resource\Model\private\MaterialOverrides.cpp"/>
+        <ClCompile Include="src\Runtime\Resource\Model\private\ModelCache.cpp"/>
+        <ClCompile Include="src\Runtime\Resource\Model\private\ModelImporter.cpp"/>
+        <ClCompile Include="src\Runtime\Resource\Model\private\ModelManager.cpp"/>
+        <ClCompile Include="src\Runtime\Resource\Model\private\SharedTypes.cpp"/>
+        <ClCompile Include="src\ThirdParty\ColorConversion.cpp">
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+        </ClCompile>
+        <ClCompile Include="src\ThirdParty\D3D12MemoryAllocator\D3D12MemAlloc.cpp">
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+        </ClCompile>
+        <ClCompile Include="src\ThirdParty\d3dx12_resource_helpers.cpp"/>
+        <ClCompile Include="src\ThirdParty\DxgiFormatHelper.cpp"/>
+        <ClCompile Include="src\ThirdParty\DXTex\BC.cpp">
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+        </ClCompile>
+        <ClCompile Include="src\ThirdParty\DXTex\BC4BC5.cpp">
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+        </ClCompile>
+        <ClCompile Include="src\ThirdParty\DXTex\BC6HBC7.cpp">
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+        </ClCompile>
+        <ClCompile Include="src\ThirdParty\DXTex\BCDirectCompute.cpp">
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+        </ClCompile>
+        <ClCompile Include="src\ThirdParty\DXTex\DirectXTexCompress.cpp">
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+        </ClCompile>
+        <ClCompile Include="src\ThirdParty\DXTex\DirectXTexCompressGPU.cpp">
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+        </ClCompile>
+        <ClCompile Include="src\ThirdParty\DXTex\DirectXTexConvert.cpp">
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+        </ClCompile>
+        <ClCompile Include="src\ThirdParty\DXTex\DirectXTexD3D12.cpp">
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+        </ClCompile>
+        <ClCompile Include="src\ThirdParty\DXTex\DirectXTexDDS.cpp">
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+        </ClCompile>
+        <ClCompile Include="src\ThirdParty\DXTex\DirectXTexFlipRotate.cpp">
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+        </ClCompile>
+        <ClCompile Include="src\ThirdParty\DXTex\DirectXTexImage.cpp">
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+        </ClCompile>
+        <ClCompile Include="src\ThirdParty\DXTex\DirectXTexMipmaps.cpp">
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+        </ClCompile>
+        <ClCompile Include="src\ThirdParty\DXTex\DirectXTexMisc.cpp">
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+        </ClCompile>
+        <ClCompile Include="src\ThirdParty\DXTex\DirectXTexNormalMaps.cpp">
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+        </ClCompile>
+        <ClCompile Include="src\ThirdParty\DXTex\DirectXTexPMAlpha.cpp">
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+        </ClCompile>
+        <ClCompile Include="src\ThirdParty\DXTex\DirectXTexTGA.cpp">
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+        </ClCompile>
+        <ClCompile Include="src\ThirdParty\DXTex\DirectXTexUtil.cpp">
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+        </ClCompile>
+        <ClCompile Include="src\ThirdParty\DXTex\DirectXTexWIC.cpp">
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+        </ClCompile>
+        <ClCompile Include="src\ThirdParty\EASTL\allocator_eastl.cpp">
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+        </ClCompile>
+        <ClCompile Include="src\ThirdParty\EASTL\atomic.cpp">
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+        </ClCompile>
+        <ClCompile Include="src\ThirdParty\EASTL\fixed_pool.cpp"/>
+        <ClCompile Include="src\ThirdParty\EASTL\hashtable.cpp"/>
+        <ClCompile Include="src\ThirdParty\EASTL\intrusive_list.cpp"/>
+        <ClCompile Include="src\ThirdParty\EASTL\numeric_limits.cpp"/>
+        <ClCompile Include="src\ThirdParty\EASTL\red_black_tree.cpp"/>
+        <ClCompile Include="src\ThirdParty\EASTL\string.cpp"/>
+        <ClCompile Include="src\ThirdParty\EASTL\thread_support.cpp"/>
+        <ClCompile Include="src\ThirdParty\FreesyncHDR.cpp">
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+        </ClCompile>
+        <ClCompile Include="src\ThirdParty\imgui\imgui.cpp">
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+        </ClCompile>
+        <ClCompile Include="src\ThirdParty\imgui\imgui_demo.cpp">
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+        </ClCompile>
+        <ClCompile Include="src\ThirdParty\imgui\imgui_draw.cpp">
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+        </ClCompile>
+        <ClCompile Include="src\ThirdParty\imgui\imgui_impl_dx12.cpp">
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+        </ClCompile>
+        <ClCompile Include="src\ThirdParty\imgui\imgui_impl_win32.cpp">
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+        </ClCompile>
+        <ClCompile Include="src\ThirdParty\imgui\imgui_tables.cpp">
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+        </ClCompile>
+        <ClCompile Include="src\ThirdParty\imgui\imgui_widgets.cpp">
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+        </ClCompile>
+        <ClCompile Include="src\ThirdParty\ImGuizmo\ImGuizmo.cpp">
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+            <AdditionalIncludeDirectories>$(ProjectDir)src\ThirdParty\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+        </ClCompile>
+        <ClCompile Include="src\ThirdParty\Misc.cpp"/>
+        <ClCompile Include="src\ThirdParty\stb_image.cpp"/>
+        <ClCompile Include="src\ThirdParty\xxhash.cpp"/>
+        <ClCompile Include="stdafx.cpp">
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+            <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+        </ClCompile>
+    </ItemGroup>
+    <ItemGroup>
+        <Image Include="Assets\Tex\cubemap0.dds"/>
+    </ItemGroup>
+    <ItemGroup>
+        <None Include="Assets\Shaders\private\BRDF.hlsl">
+            <FileType>Document</FileType>
+        </None>
+        <None Include="Assets\Shaders\private\Common.hlsl">
+            <FileType>Document</FileType>
+        </None>
+        <None Include="Assets\Shaders\private\Light.hlsl">
+            <FileType>Document</FileType>
+        </None>
+        <None Include="Assets\Shaders\private\LightCommon.hlsl">
+            <FileType>Document</FileType>
+        </None>
+        <None Include="Assets\Shaders\private\ShadingCommon.hlsl">
+            <FileType>Document</FileType>
+        </None>
+    </ItemGroup>
+    <ItemGroup>
+        <None Include="Assets\Shaders\private\Transform.hlsli">
+            <FileType>Document</FileType>
+            <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+        </None>
+    </ItemGroup>
+    <ItemGroup>
+        <None Include="Assets\Shaders\private\ShadingModel.hlsl">
+            <FileType>Document</FileType>
+        </None>
+    </ItemGroup>
+    <ItemGroup>
+        <None Include="Assets\Shaders\private\EnergyPreservation.hlsl">
+            <FileType>Document</FileType>
+        </None>
+    </ItemGroup>
+    <ItemGroup>
+        <None Include="Assets\Shaders\private\AreaLightCommon.hlsl">
+            <FileType>Document</FileType>
+        </None>
+    </ItemGroup>
+    <ItemGroup>
+        <None Include="Assets\Shaders\private\LightAccumulator.hlsl">
+            <FileType>Document</FileType>
+        </None>
+    </ItemGroup>
+    <ItemGroup>
+        <None Include="Assets\Shaders\public\Skybox.hlsl">
+            <FileType>Document</FileType>
+        </None>
+    </ItemGroup>
+    <ItemGroup>
+        <None Include="Assets\Shaders\private\MonteCarlo.hlsl">
+            <FileType>Document</FileType>
+        </None>
+        <None Include="Assets\Shaders\private\Random.hlsl">
+            <FileType>Document</FileType>
+        </None>
+    </ItemGroup>
+    <ItemGroup>
+        <None Include="Assets\Shaders\private\AmbientCubemap.hlsl">
+            <FileType>Document</FileType>
+        </None>
+    </ItemGroup>
+    <ItemGroup>
+        <None Include="Assets\Shaders\public\Shadow.hlsl">
+            <FileType>Document</FileType>
+        </None>
+    </ItemGroup>
+    <ItemGroup>
+        <None Include="Assets\Shaders\public\PBR.hlsl">
+            <FileType>Document</FileType>
+        </None>
+    </ItemGroup>
+    <ItemGroup>
+        <None Include="Assets\Shaders\private\ShadowCommon.hlsl">
+            <FileType>Document</FileType>
+        </None>
+    </ItemGroup>
+    <ItemGroup>
+        <None Include="Assets\Shaders\public\GBuffer.hlsl">
+            <FileType>Document</FileType>
+        </None>
+    </ItemGroup>
+    <ItemGroup>
+        <None Include="Assets\Shaders\public\Opaque.hlsl">
+            <FileType>Document</FileType>
+        </None>
+    </ItemGroup>
+    <ItemGroup>
+        <None Include="Assets\Shaders\public\Blit.hlsl">
+            <FileType>Document</FileType>
+        </None>
+    </ItemGroup>
+    <ItemGroup>
+        <None Include="Assets\Shaders\private\Color.hlsl">
+            <FileType>Document</FileType>
+        </None>
+    </ItemGroup>
+    <ItemGroup>
+        <None Include="Assets\Shaders\public\TonemapPass.hlsl">
+            <FileType>Document</FileType>
+        </None>
+    </ItemGroup>
+    <ItemGroup>
+        <None Include="Assets\Shaders\private\DeferredCommon.hlsl">
+            <FileType>Document</FileType>
+        </None>
+    </ItemGroup>
+    <ItemGroup>
+        <None Include="Assets\Shaders\public\FullScreenTriangle.hlsl">
+            <FileType>Document</FileType>
+        </None>
+    </ItemGroup>
+    <ItemGroup>
+        <None Include="Assets\Shaders\public\SSAO.hlsl">
+            <FileType>Document</FileType>
+        </None>
+    </ItemGroup>
+    <ItemGroup>
+        <Content Include="..\x64\Debug\Saved\Config\Windows\Engine.ini"/>
+        <Content Include="Assets\Config\BaseEngine.ini"/>
+        <Content Include="Assets\Config\DefaultEngine.ini"/>
+        <Content Include="Assets\Shaders\public\PostProcess\CS_TwoTwoMinHIZ.hlsl"/>
+        <Content Include="lib\AMD\libs\AGS\amd_ags_x64.dll"/>
+        <Content Include="lib\AMD\libs\AGS\amd_ags_x64.lib"/>
+        <Content Include="lib\AMD\libs\AGS\CMakeLists.txt"/>
+        <Content Include="lib\AMD\libs\AGS\license.txt"/>
+        <Content Include="lib\AMD\libs\d3d12x\CMakeLists.txt"/>
+        <Content Include="lib\AMD\libs\d3d12x\license.txt"/>
+        <Content Include="lib\AMD\libs\DXC\bin\dxc.exe"/>
+        <Content Include="lib\AMD\libs\DXC\bin\dxcompiler.dll"/>
+        <Content Include="lib\AMD\libs\DXC\bin\dxil.dll"/>
+        <Content Include="lib\AMD\libs\DXC\bin\x64\dxc.exe"/>
+        <Content Include="lib\AMD\libs\DXC\bin\x64\dxcompiler.dll"/>
+        <Content Include="lib\AMD\libs\DXC\bin\x64\dxil.dll"/>
+        <Content Include="lib\AMD\libs\DXC\CMakeLists.txt"/>
+        <Content Include="lib\AMD\libs\DXC\lib\x64\dxcompiler.lib"/>
+        <Content Include="lib\AMD\libs\json\CMakeLists.txt"/>
+        <Content Include="lib\AMD\libs\json\License.txt"/>
+        <Content Include="lib\AMD\libs\vectormath\CMakeLists.txt"/>
+        <Content Include="lib\AMD\libs\vectormath\docs\VectorMath-Library-Overview.pdf"/>
+        <Content Include="lib\AMD\libs\vectormath\LICENSE.txt"/>
+        <Content Include="lib\AMD\libs\vectormath\README.md"/>
+        <Content Include="lib\AMD\libs\VulkanMemoryAllocator\CMakeLists.txt"/>
+        <Content Include="lib\AMD\libs\VulkanMemoryAllocator\license.txt"/>
+        <Content Include="lib\AMD\libs\WinPixEventRuntime\CMakeLists.txt"/>
+        <Content Include="lib\AMD\libs\WinPixEventRuntime\WinPixEventRuntime.dll"/>
+        <Content Include="lib\AMD\libs\WinPixEventRuntime\WinPixEventRuntime.lib"/>
+        <Content Include="lib\stb\CMakeLists.txt"/>
+    </ItemGroup>
+    <ItemGroup>
+        <None Include="Assets\Shaders\public\PostProcess\CS_TwoTwoMinHIZ.hlsl">
+            <FileType>Document</FileType>
+        </None>
+    </ItemGroup>
+    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets"/>
+    <ImportGroup Label="ExtensionTargets">
+        <Import Project="..\packages\boost.1.87.0\build\boost.targets" Condition="Exists('..\packages\boost.1.87.0\build\boost.targets')"/>
+        <Import Project="..\packages\directxtk12_desktop_win10.2025.7.10.1\build\native\directxtk12_desktop_win10.targets" Condition="Exists('..\packages\directxtk12_desktop_win10.2025.7.10.1\build\native\directxtk12_desktop_win10.targets')"/>
+        <Import Project="..\packages\WinPixEventRuntime.1.0.240308001\build\WinPixEventRuntime.targets" Condition="Exists('..\packages\WinPixEventRuntime.1.0.240308001\build\WinPixEventRuntime.targets')"/>
+        <Import Project="..\packages\Microsoft.Direct3D.D3D12.1.618.5\build\native\Microsoft.Direct3D.D3D12.targets" Condition="Exists('..\packages\Microsoft.Direct3D.D3D12.1.618.5\build\native\Microsoft.Direct3D.D3D12.targets')"/>
+    </ImportGroup>
+    <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+        <PropertyGroup>
+            <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them. For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+        </PropertyGroup>
+        <Error Condition="!Exists('..\packages\boost.1.87.0\build\boost.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost.1.87.0\build\boost.targets'))"/>
+        <Error Condition="!Exists('..\packages\directxtk12_desktop_win10.2025.7.10.1\build\native\directxtk12_desktop_win10.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\directxtk12_desktop_win10.2025.7.10.1\build\native\directxtk12_desktop_win10.targets'))"/>
+        <Error Condition="!Exists('..\packages\Vcpkg.Nuget.1.5.0\build\Vcpkg.Nuget.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Vcpkg.Nuget.1.5.0\build\Vcpkg.Nuget.props'))"/>
+        <Error Condition="!Exists('..\packages\WinPixEventRuntime.1.0.240308001\build\WinPixEventRuntime.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\WinPixEventRuntime.1.0.240308001\build\WinPixEventRuntime.targets'))"/>
+        <Error Condition="!Exists('..\packages\Microsoft.Direct3D.D3D12.1.618.5\build\native\Microsoft.Direct3D.D3D12.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Direct3D.D3D12.1.618.5\build\native\Microsoft.Direct3D.D3D12.props'))"/>
+        <Error Condition="!Exists('..\packages\Microsoft.Direct3D.D3D12.1.618.5\build\native\Microsoft.Direct3D.D3D12.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Direct3D.D3D12.1.618.5\build\native\Microsoft.Direct3D.D3D12.targets'))"/>
+    </Target>
+    <Target Name="RemoveMissingAgilitySdkPdbs" BeforeTargets="AssignTargetPaths">
+        <ItemGroup>
+            <_MissingAgilityPdb Include="@(Content)" Condition="'%(Extension)' == '.pdb' AND ('%(Filename)' == 'D3D12Core' OR '%(Filename)' == 'D3D12SDKLayers')"/>
+            <Content Remove="@(_MissingAgilityPdb)"/>
+        </ItemGroup>
+    </Target>
 </Project>

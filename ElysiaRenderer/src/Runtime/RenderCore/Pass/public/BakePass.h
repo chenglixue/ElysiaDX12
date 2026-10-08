@@ -10,13 +10,6 @@ namespace ElysiaRenderer
     class BakePass : public BasePass
     {
     public:
-#define BAKE_PASS_LIST \
-        PASS(CS_CALC_SOBOL_NOISE,           "public\\CS_CalcSobolNoise.hlsl",              true,  CalcSobolNoise)\
-        PASS(CS_PRE_INTEGRATE_SSS,          "public\\PreGen\\CS_PreIntegrateSSS.hlsl",     true,  PreIntegrateSSS)\
-        PASS(CS_INTEGRATE_SSS_NDF,          "public\\PreGen\\CS_PreIntegrateSSS.hlsl",     true,  IntegrateSSSNDF)\
-        PASS(CS_TEMP_SH_Coefficients,       "public\\PreGen\\CS_SHCoefficients.hlsl",      true,  CalcTempSHCoefficients)\
-        PASS(CS_SH_Coefficients,            "public\\PreGen\\CS_SHCoefficients.hlsl",      true,  CalcSHCoefficients)
-
         struct RenderTextureIDs
         {
             static inline size_t PreIntegrateSSSLUTID = PropertyToID(L"Pre Integrate SSS LUT");
@@ -34,28 +27,14 @@ namespace ElysiaRenderer
         virtual void Dispose() override;
 
     private:
-#pragma region Pass
-        enum PassID
-        {
-#define PASS(id, file, isCS, entry) id,
-            BAKE_PASS_LIST
-#undef PASS
-            BAKE_PASS_COUNT
-        };
-
-        static inline const ShaderPass m_PassData[] =
-        {
-#define PASS(id, file, isCS, entry) \
-{ \
-.Name = #id, \
-.FilePath = L"Shaders\\" L##file, \
-.IsComputeShader = isCS, \
-.ComputeEntryPoint = L#entry \
-},
-            BAKE_PASS_LIST
-#undef PASS
-        };
-#pragma endregion
+#define BAKE_PASS_LIST(X) \
+        X(CS_CALC_SOBOL_NOISE,           "public\\CS_CalcSobolNoise.hlsl",              true,  CalcSobolNoise) \
+        X(CS_PRE_INTEGRATE_SSS,          "public\\PreGen\\CS_PreIntegrateSSS.hlsl",     true,  PreIntegrateSSS) \
+        X(CS_INTEGRATE_SSS_NDF,          "public\\PreGen\\CS_PreIntegrateSSS.hlsl",     true,  IntegrateSSSNDF) \
+        X(CS_TEMP_SH_Coefficients,       "public\\PreGen\\CS_SHCoefficients.hlsl",      true,  CalcTempSHCoefficients) \
+        X(CS_SH_Coefficients,            "public\\PreGen\\CS_SHCoefficients.hlsl",      true,  CalcSHCoefficients)
+        DECLARE_SHADER_PASSES(BAKE_PASS_LIST, BAKE_PASS_COUNT);
+#undef BAKE_PASS_LIST
 
         UINT m_displayWidth;
         UINT m_displayHeight;

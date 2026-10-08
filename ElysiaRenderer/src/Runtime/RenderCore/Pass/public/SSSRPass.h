@@ -22,33 +22,12 @@ namespace ElysiaRenderer
         virtual void Dispose() override;
 
     private:
-#define SSSR_PASS_LIST \
-    PASS(SSSR_TILE_CLASSIFY_PASS,           "public\\PostProcess\\SSSR\\CS_TileClassify.hlsl",              true,  TileClassify)\
-    PASS(SSSR_INTERSECT_ARGS_PASS,          "public\\PostProcess\\SSSR\\CS_TileClassify.hlsl",              true,  DoIntersectArgs)\
-    PASS(SSSR_INTERSECT_PASS,               "public\\PostProcess\\SSSR\\CS_Intersect.hlsl",                 true,  DoIntersect)
-
-#pragma region Pass
-        enum PassID
-        {
-#define PASS(id, file, isCS, entry) id,
-            SSSR_PASS_LIST
-#undef PASS
-            SSSR_PASS_COUNT
-        };
-
-        static inline const ShaderPass m_PassData[] =
-        {
-#define PASS(id, file, isCS, entry) \
-{ \
-.Name = #id, \
-.FilePath = L"Shaders\\" L##file, \
-.IsComputeShader = isCS, \
-.ComputeEntryPoint = L#entry \
-},
-            SSSR_PASS_LIST
-#undef PASS
-        };
-#pragma endregion
+#define SSSR_PASS_LIST(X) \
+        X(SSSR_TILE_CLASSIFY_PASS,           "public\\PostProcess\\SSSR\\CS_TileClassify.hlsl",              true,  TileClassify) \
+        X(SSSR_INTERSECT_ARGS_PASS,          "public\\PostProcess\\SSSR\\CS_TileClassify.hlsl",              true,  DoIntersectArgs) \
+        X(SSSR_INTERSECT_PASS,               "public\\PostProcess\\SSSR\\CS_Intersect.hlsl",                 true,  DoIntersect)
+        DECLARE_SHADER_PASSES(SSSR_PASS_LIST, SSSR_PASS_COUNT);
+#undef SSSR_PASS_LIST
 
         UINT m_displayWidth;
         UINT m_displayHeight;

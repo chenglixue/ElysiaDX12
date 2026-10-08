@@ -81,7 +81,7 @@ namespace ElysiaRenderer
         m_cameraWidth = std::floor(m_displaySize.x * UserData::GetInstance().taaParameter.sampleRate);
         m_cameraHeight = std::floor(m_displaySize.y * UserData::GetInstance().taaParameter.sampleRate);
 
-        m_shaderPasses.assign(std::begin(m_PassData), std::end(m_PassData));
+        m_shaderPasses.assign(std::begin(PassData), std::end(PassData));
         if (!m_pMaterial)
         {
             m_pMaterial = std::make_unique<Material>(m_pDevice, m_shaderPasses);

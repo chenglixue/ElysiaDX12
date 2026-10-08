@@ -4,13 +4,6 @@
 
 namespace ElysiaRenderer
 {
-#define BLOOM_PASS_LIST \
-    PASS(BLOOM_FIRST_DOWN_SAMPLE_PASS,          "public\\PostProcess\\Bloom\\Bloom.hlsl",               true,  BloomKarisDownSample)\
-    PASS(BLOOM_WEIGHT_DOWN_SAMPLE_PASS,         "public\\PostProcess\\Bloom\\Bloom.hlsl",               true,  BloomWeightedDownSample)\
-    PASS(BLOOM_3X3TENT_UP_SAMPLE,               "public\\PostProcess\\Bloom\\Bloom.hlsl",               true,  Bloom3x3TentUpSample)\
-    PASS(BLOOM_BLEND_SCENE_COLOR,               "public\\PostProcess\\Bloom\\Bloom.hlsl",               true,  BloomBlendSceneColor)\
-    PASS(COPY_RT,                               "public\\PostProcess\\Bloom\\Bloom.hlsl",               true,  CopyRT)
-
     class BloomPass : public BasePass
     {
     public:
@@ -32,27 +25,14 @@ namespace ElysiaRenderer
         virtual void Dispose() override;
 
     private:
-#pragma region Pass
-        enum PassID
-        {
-#define PASS(id, file, isCS, entry) id,
-            BLOOM_PASS_LIST
-#undef PASS
-            BLOOM_PASS_COUNT
-        };
-        static inline const ShaderPass m_PassData[] =
-        {
-#define PASS(id, file, isCS, entry) \
-{ \
-.Name = #id, \
-.FilePath = L"Shaders\\" L##file, \
-.IsComputeShader = isCS, \
-.ComputeEntryPoint = L#entry \
-},
-            BLOOM_PASS_LIST
-#undef PASS
-        };
-#pragma endregion
+#define BLOOM_PASS_LIST(X) \
+        X(BLOOM_FIRST_DOWN_SAMPLE_PASS,          "public\\PostProcess\\Bloom\\Bloom.hlsl",               true,  BloomKarisDownSample) \
+        X(BLOOM_WEIGHT_DOWN_SAMPLE_PASS,         "public\\PostProcess\\Bloom\\Bloom.hlsl",               true,  BloomWeightedDownSample) \
+        X(BLOOM_3X3TENT_UP_SAMPLE,               "public\\PostProcess\\Bloom\\Bloom.hlsl",               true,  Bloom3x3TentUpSample) \
+        X(BLOOM_BLEND_SCENE_COLOR,               "public\\PostProcess\\Bloom\\Bloom.hlsl",               true,  BloomBlendSceneColor) \
+        X(COPY_RT,                               "public\\PostProcess\\Bloom\\Bloom.hlsl",               true,  CopyRT)
+        DECLARE_SHADER_PASSES(BLOOM_PASS_LIST, BLOOM_PASS_COUNT);
+#undef BLOOM_PASS_LIST
 
         UINT m_cameraWidth;
         UINT m_cameraHeight;

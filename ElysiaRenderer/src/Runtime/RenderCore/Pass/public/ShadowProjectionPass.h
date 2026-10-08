@@ -8,10 +8,6 @@ namespace ElysiaRenderer
 
     class ShadowProjectionPass : public BasePass
     {
-#define SHADOW_PROJECTION_PASS_LIST \
-PASS(SHADOW_PROJECTION_PASS,                "public\\CS_ScreenSpaceShadow.hlsl",               true,  ScreenSpaceShadow)\
-PASS(SHADOW_TAA_PASS,                       "public\\CS_ScreenSpaceShadow.hlsl",               true,  ShadowTAA)
-
     public:
         struct RenderTextureIDs
         {
@@ -34,27 +30,11 @@ PASS(SHADOW_TAA_PASS,                       "public\\CS_ScreenSpaceShadow.hlsl",
         virtual void Dispose() override;
 
     private:
-#pragma region Pass
-        enum PassID
-        {
-#define PASS(id, file, isCS, entry) id,
-            SHADOW_PROJECTION_PASS_LIST
-#undef PASS
-            SHADOW_PROJECTION_PASS_COUNT
-        };
-        static inline const ShaderPass m_PassData[] =
-        {
-#define PASS(id, file, isCS, entry) \
-{ \
-.Name = #id, \
-.FilePath = L"Shaders\\" L##file, \
-.IsComputeShader = isCS, \
-.ComputeEntryPoint = L#entry \
-},
-            SHADOW_PROJECTION_PASS_LIST
-#undef PASS
-        };
-#pragma endregion
+#define SHADOW_PROJECTION_PASS_LIST(X) \
+        X(SHADOW_PROJECTION_PASS,                "public\\CS_ScreenSpaceShadow.hlsl",               true,  ScreenSpaceShadow) \
+        X(SHADOW_TAA_PASS,                       "public\\CS_ScreenSpaceShadow.hlsl",               true,  ShadowTAA)
+        DECLARE_SHADER_PASSES(SHADOW_PROJECTION_PASS_LIST, SHADOW_PROJECTION_PASS_COUNT);
+#undef SHADOW_PROJECTION_PASS_LIST
         UINT m_displayWidth;
         UINT m_displayHeight;
         UINT m_shadowMaskWidth;

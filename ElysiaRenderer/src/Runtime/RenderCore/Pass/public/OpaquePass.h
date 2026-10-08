@@ -8,9 +8,6 @@ namespace ElysiaRenderer
 
     class OpaquePass : public BasePass
     {
-#define OPAQUE_LIGHT_PASS_LIST \
-PASS(DRAW_LIGHT_PASS,         "public\\Opaque.hlsl", false, PS)
-
     public:
         OpaquePass();
         virtual ~OpaquePass() override;
@@ -22,27 +19,10 @@ PASS(DRAW_LIGHT_PASS,         "public\\Opaque.hlsl", false, PS)
         virtual void Dispose() override;
 
     private:
-#pragma region Pass
-        enum PassID
-        {
-#define PASS(id, file, isCS, entry) id,
-            OPAQUE_LIGHT_PASS_LIST
-#undef PASS
-            OPAQUE_LIGHT_PASS_COUNT
-        };
-        static inline const ShaderPass m_PassData[] =
-        {
-#define PASS(id, file, isCS, entry) \
-{ \
-.Name = #id, \
-.FilePath = L"Shaders\\" L##file, \
-.IsComputeShader = isCS, \
-.ComputeEntryPoint = L#entry \
-},
-            OPAQUE_LIGHT_PASS_LIST
-#undef PASS
-        };
-#pragma endregion
+#define OPAQUE_LIGHT_PASS_LIST(X) \
+        X(DRAW_LIGHT_PASS,         "public\\Opaque.hlsl", false, PS)
+        DECLARE_SHADER_PASSES(OPAQUE_LIGHT_PASS_LIST, OPAQUE_LIGHT_PASS_COUNT);
+#undef OPAQUE_LIGHT_PASS_LIST
         struct ShaderIDs
         {
             static inline size_t g_DebugMode = PropertyToID(L"g_DebugMode");

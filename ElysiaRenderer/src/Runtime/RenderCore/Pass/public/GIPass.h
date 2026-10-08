@@ -14,14 +14,6 @@ namespace ElysiaRenderer
     using namespace CAULDRON_DX12;
     using namespace ElysiaHelper;
 
-#define GI_PASS_LIST \
-    PASS(RELOCATE_PROBES_PASS,          "public\\GI\\CS_DDGI.hlsl",               true,  RelocateProbes)\
-    PASS(CLEAR_PROBE_OFFSET_PASS,       "public\\GI\\CS_DDGI.hlsl",               true,  ClearProbeOffsetBuffer)\
-    PASS(PROBE_IRRADIANCE_BLENDING,     "public\\GI\\CS_DDGI.hlsl",               true,  ProbeIrradianceBlending)\
-    PASS(PROBE_DEPTH_BLENDING,          "public\\GI\\CS_DDGI.hlsl",               true,  ProbeDepthBlending)\
-    PASS(UPDATE_PROBE_STATES,           "public\\GI\\CS_DDGI.hlsl",               true,  UpdateProbeStates)\
-    PASS(RESET_PROBE_STATES,            "public\\GI\\CS_DDGI.hlsl",               true,  ResetProbeStates)\
-    PASS(RESET_PROBE_OFFSET_INDEX,      "public\\GI\\CS_RrobeOffset.hlsl",        true,  ResetProbeOffsetIndex)
     class GIPass : public BasePass
     {
     public:
@@ -117,28 +109,16 @@ namespace ElysiaRenderer
         virtual void UpdatePipeline() override;
 
     private:
-#pragma region PASS
-        enum PassID
-        {
-#define PASS(id, file, isCS, entry) id,
-            GI_PASS_LIST
-#undef PASS
-            GI_PASS_COUNT
-        };
-        static inline const ShaderPass m_PassData[] =
-        {
-#define PASS(id, file, isCS, entry) \
-{ \
-.Name = #id, \
-.FilePath = L"Shaders\\" L##file, \
-.IsComputeShader = isCS, \
-.ComputeEntryPoint = L#entry \
-},
-            GI_PASS_LIST
-#undef PASS
-        };
-
-#pragma endregion
+#define GI_PASS_LIST(X) \
+        X(RELOCATE_PROBES_PASS,          "public\\GI\\CS_DDGI.hlsl",               true,  RelocateProbes) \
+        X(CLEAR_PROBE_OFFSET_PASS,       "public\\GI\\CS_DDGI.hlsl",               true,  ClearProbeOffsetBuffer) \
+        X(PROBE_IRRADIANCE_BLENDING,     "public\\GI\\CS_DDGI.hlsl",               true,  ProbeIrradianceBlending) \
+        X(PROBE_DEPTH_BLENDING,          "public\\GI\\CS_DDGI.hlsl",               true,  ProbeDepthBlending) \
+        X(UPDATE_PROBE_STATES,           "public\\GI\\CS_DDGI.hlsl",               true,  UpdateProbeStates) \
+        X(RESET_PROBE_STATES,            "public\\GI\\CS_DDGI.hlsl",               true,  ResetProbeStates) \
+        X(RESET_PROBE_OFFSET_INDEX,      "public\\GI\\CS_RrobeOffset.hlsl",        true,  ResetProbeOffsetIndex)
+        DECLARE_SHADER_PASSES(GI_PASS_LIST, GI_PASS_COUNT);
+#undef GI_PASS_LIST
 
         static constexpr float k_GoldenAngle = 2.39996322972865332f;
         static constexpr auto Max_RenderItem_Count = 10240;

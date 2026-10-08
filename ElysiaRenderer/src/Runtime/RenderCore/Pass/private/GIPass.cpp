@@ -241,7 +241,7 @@ namespace ElysiaRenderer
                GenerateRelocationLUT(m_gridSpacing).data(),
                sizeof(Vector4) * 256);
 
-        m_shaderPasses.assign(std::begin(m_PassData), std::end(m_PassData));
+        m_shaderPasses.assign(std::begin(PassData), std::end(PassData));
         if (!m_pMaterial)
         {
             m_pMaterial = std::make_unique<Material>(m_pDevice, m_shaderPasses);
@@ -654,7 +654,7 @@ namespace ElysiaRenderer
             return;
 
         auto passID = RESET_PROBE_STATES;
-        auto passName = m_PassData[passID].Name.c_str();
+        auto passName = PassData[passID].Name.c_str();
         auto& passData = m_pMaterial->GetPassData(passID);
         PIXHelper pix(m_pCommand->GetCommandList(), passName);
 
@@ -685,7 +685,7 @@ namespace ElysiaRenderer
     void GIPass::ResetProbeStates()
     {
         auto passID = RESET_PROBE_STATES;
-        auto passName = m_PassData[passID].Name.c_str();
+        auto passName = PassData[passID].Name.c_str();
         auto& passData = m_pMaterial->GetPassData(passID);
         PIXHelper pix(m_pCommand->GetCommandList(), passName);
 
@@ -714,7 +714,7 @@ namespace ElysiaRenderer
     void GIPass::UpdateProbeStates()
     {
         auto passID = UPDATE_PROBE_STATES;
-        auto passName = m_PassData[passID].Name.c_str();
+        auto passName = PassData[passID].Name.c_str();
         auto& passData = m_pMaterial->GetPassData(passID);
         PIXHelper pix(m_pCommand->GetCommandList(), passName);
 
@@ -907,7 +907,7 @@ namespace ElysiaRenderer
     {
         // auto passID = PassID(RESET_COUNTER);
         // auto& passData = m_pMaterial->GetPassData(passID);
-        // auto passName = m_PassData[passID].Name.c_str();
+        // auto passName = PassData[passID].Name.c_str();
         // PIXHelper pix(m_pCommand->GetCommandList(), passName);
         //
         // PipelineInfo pipelineStateData{};
@@ -933,7 +933,7 @@ namespace ElysiaRenderer
     {
         // auto passID = PassID(RAY_COMPACTION);
         // auto& passData = m_pMaterial->GetPassData(passID);
-        // auto passName = m_PassData[passID].Name.c_str();
+        // auto passName = PassData[passID].Name.c_str();
         // PIXHelper pix(m_pCommand->GetCommandList(), passName);
         //
         // PipelineInfo pipelineStateData{};
@@ -1001,7 +1001,7 @@ namespace ElysiaRenderer
     {
         // auto passID = PassID(CALC_INDIRECT_ARGS);
         // auto& passData = m_pMaterial->GetPassData(passID);
-        // auto passName = m_PassData[passID].Name.c_str();
+        // auto passName = PassData[passID].Name.c_str();
         // PIXHelper pix(m_pCommand->GetCommandList(), passName);
         //
         // PipelineInfo pipelineStateData{};
@@ -1031,7 +1031,7 @@ namespace ElysiaRenderer
     {
         // auto passID = PassID(DDGI_SHADING);
         // auto& passData = m_pMaterial->GetPassData(passID);
-        // auto passName = m_PassData[passID].Name.c_str();
+        // auto passName = PassData[passID].Name.c_str();
         // PIXHelper pix(m_pCommand->GetCommandList(), passName);
         //
         // PipelineInfo pipelineStateData{};
@@ -1137,7 +1137,7 @@ namespace ElysiaRenderer
         // static bool hasClear = false;
         //
         // auto passID = CLEAR_PROBE_OFFSET_PASS;
-        // auto passName = m_PassData[passID].Name.c_str();
+        // auto passName = PassData[passID].Name.c_str();
         // auto& passData = m_pMaterial->GetPassData(passID);
         // PIXHelper pix(m_pCommand->GetCommandList(), passName);
         //
@@ -1166,7 +1166,7 @@ namespace ElysiaRenderer
     void GIPass::RelocateProbes()
     {
         auto passID = RELOCATE_PROBES_PASS;
-        auto passName = m_PassData[passID].Name.c_str();
+        auto passName = PassData[passID].Name.c_str();
         auto& passData = m_pMaterial->GetPassData(passID);
         PIXHelper pix(m_pCommand->GetCommandList(), passName);
 
@@ -1228,7 +1228,7 @@ namespace ElysiaRenderer
     void GIPass::ProbeBlendIrradiance()
     {
         auto passID = PROBE_IRRADIANCE_BLENDING;
-        auto passName = m_PassData[passID].Name.c_str();
+        auto passName = PassData[passID].Name.c_str();
         auto& passData = m_pMaterial->GetPassData(passID);
         PIXHelper pix(m_pCommand->GetCommandList(), passName);
 
@@ -1292,7 +1292,7 @@ namespace ElysiaRenderer
     void GIPass::ProbeBlendDepth()
     {
         auto passID = PROBE_DEPTH_BLENDING;
-        auto passName = m_PassData[passID].Name.c_str();
+        auto passName = PassData[passID].Name.c_str();
         auto& passData = m_pMaterial->GetPassData(passID);
         PIXHelper pix(m_pCommand->GetCommandList(), passName);
 

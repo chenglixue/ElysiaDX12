@@ -9,13 +9,6 @@ namespace ElysiaCore
 
 namespace ElysiaRenderer
 {
-#define GBUFFER_PASS_LIST \
-    PASS(DRAW_GBUFFER_PASS,         "public\\GBuffer.hlsl",             false, PS)\
-    PASS(CS_GBuffer_COPY_DEPTH,     "public\\CS_GBufferHIZ.hlsl",       true,  GBuffer_Copy_Depth)\
-    PASS(CS_GBuffer_HIZ,            "public\\CS_GBufferHIZ.hlsl",       true,  GBuffer_HIZ)\
-    PASS(CS_CLEAR_COUNTER_BUFFER,   "public\\CS_GBufferCulling.hlsl",   true,  ClearCounterBuffer)\
-    PASS(CS_GBUFFER_CULLING_PASS,   "public\\CS_GBufferCulling.hlsl",   true,  Gbuffer_Culling)
-
     class GBufferPass : public BasePass
     {
     public:
@@ -54,28 +47,14 @@ namespace ElysiaRenderer
         virtual void Dispose() override;
 
     private:
-#pragma region Pass
-        enum PassID
-        {
-#define PASS(id, file, isCS, entry) id,
-            GBUFFER_PASS_LIST
-#undef PASS
-            GBUFFER_PASS_COUNT
-        };
-
-        static inline const ShaderPass m_PassData[] =
-        {
-#define PASS(id, file, isCS, entry) \
-{ \
-.Name = #id, \
-.FilePath = L"Shaders\\" L##file, \
-.IsComputeShader = isCS, \
-.ComputeEntryPoint = L#entry \
-},
-            GBUFFER_PASS_LIST
-#undef PASS
-        };
-#pragma endregion
+#define GBUFFER_PASS_LIST(X) \
+        X(DRAW_GBUFFER_PASS,         "public\\GBuffer.hlsl",             false, PS) \
+        X(CS_GBuffer_COPY_DEPTH,     "public\\CS_GBufferHIZ.hlsl",       true,  GBuffer_Copy_Depth) \
+        X(CS_GBuffer_HIZ,            "public\\CS_GBufferHIZ.hlsl",       true,  GBuffer_HIZ) \
+        X(CS_CLEAR_COUNTER_BUFFER,   "public\\CS_GBufferCulling.hlsl",   true,  ClearCounterBuffer) \
+        X(CS_GBUFFER_CULLING_PASS,   "public\\CS_GBufferCulling.hlsl",   true,  Gbuffer_Culling)
+        DECLARE_SHADER_PASSES(GBUFFER_PASS_LIST, GBUFFER_PASS_COUNT);
+#undef GBUFFER_PASS_LIST
         static constexpr auto Max_RenderItem_Count = 1024;
         int m_HIZMipmapCount;
 

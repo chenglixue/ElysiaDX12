@@ -4,9 +4,6 @@
 
 namespace ElysiaRenderer
 {
-#define TAA_PASS_LIST \
-PASS(TAA_PASS,          "public\\PostProcess\\TAA\\CS_TAA.hlsl",               true,  TAA)\
-PASS(COPY_PASS,          "public\\PostProcess\\TAA\\CS_TAA.hlsl",               true,  CopyRT)
     class TAAPass : public BasePass
     {
     public:
@@ -26,27 +23,11 @@ PASS(COPY_PASS,          "public\\PostProcess\\TAA\\CS_TAA.hlsl",               
         virtual void Dispose() override;
 
     private:
-#pragma region Pass
-        enum PassID
-        {
-#define PASS(id, file, isCS, entry) id,
-            TAA_PASS_LIST
-#undef PASS
-            TAA_PASS_COUNT
-        };
-        static inline const ShaderPass m_PassData[] =
-        {
-#define PASS(id, file, isCS, entry) \
-{ \
-.Name = #id, \
-.FilePath = L"Shaders\\" L##file, \
-.IsComputeShader = isCS, \
-.ComputeEntryPoint = L#entry \
-},
-            TAA_PASS_LIST
-#undef PASS
-        };
-#pragma endregion
+#define TAA_PASS_LIST(X) \
+        X(TAA_PASS,          "public\\PostProcess\\TAA\\CS_TAA.hlsl",               true,  TAA) \
+        X(COPY_PASS,         "public\\PostProcess\\TAA\\CS_TAA.hlsl",               true,  CopyRT)
+        DECLARE_SHADER_PASSES(TAA_PASS_LIST, TAA_PASS_COUNT);
+#undef TAA_PASS_LIST
         UINT m_downSampleWidth;
         UINT m_downSampleHeight;
         UINT m_TAAWidth;
