@@ -181,6 +181,9 @@ namespace ElysiaRenderer
         m_pMaterial->SetFloat(ShaderIDs::g_MaxAverageLuminance, p.maxAverageLuminance, passID);
         m_pMaterial->SetFloat(ShaderIDs::g_MiddleGrey, p.middleGrey, passID);
         m_pMaterial->SetFloat(ShaderIDs::g_ExposureCompensationEV, p.exposureCompensation, passID);
+        m_pMaterial->SetFloat(ShaderIDs::g_ExposureSpeedUp, p.speedUp, passID);
+        m_pMaterial->SetFloat(ShaderIDs::g_ExposureSpeedDown, p.speedDown, passID);
+        m_pMaterial->SetFloat(ShaderIDs::g_ExponentialTransitionDistance, p.exponentialTransitionDistance, passID);
         m_pMaterial->SetUINT(ShaderIDs::g_PreExposureEnable, UsePreExposure(p) ? 1u : 0u, passID);
     }
 

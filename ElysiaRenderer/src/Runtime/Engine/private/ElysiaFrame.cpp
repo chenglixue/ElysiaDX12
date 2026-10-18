@@ -1248,6 +1248,9 @@ namespace ElysiaEngine
                 }
                 ImGui::SliderFloat("Exposure Compensation", &ae.exposureCompensation, -8.0f, 8.0f);
                 ImGui::SliderFloat("Middle Grey", &ae.middleGrey, 0.01f, 1.0f);
+                ImGui::SliderFloat("Speed Up", &ae.speedUp, 0.02f, 20.0f);
+                ImGui::SliderFloat("Speed Down", &ae.speedDown, 0.02f, 20.0f);
+                ImGui::SliderFloat("Exponential Transition Distance", &ae.exponentialTransitionDistance, 0.0f, 8.0f);
                 ImGui::Separator();
                 ImGui::Checkbox("Visualize HDR (Eye Adaptation)", &ae.visualizeHDR);
                 ElysiaRenderer::EnumCombo("Visualize Debug Type", &ae.visualizeDebugType);

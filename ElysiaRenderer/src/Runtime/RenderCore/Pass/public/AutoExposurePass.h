@@ -75,6 +75,9 @@ namespace ElysiaRenderer
             static inline size_t g_MaxAverageLuminance = PropertyToID(L"g_MaxAverageLuminance");
             static inline size_t g_MiddleGrey = PropertyToID(L"g_MiddleGrey");
             static inline size_t g_ExposureCompensationEV = PropertyToID(L"g_ExposureCompensationEV");
+            static inline size_t g_ExposureSpeedUp = PropertyToID(L"g_ExposureSpeedUp");
+            static inline size_t g_ExposureSpeedDown = PropertyToID(L"g_ExposureSpeedDown");
+            static inline size_t g_ExponentialTransitionDistance = PropertyToID(L"g_ExponentialTransitionDistance");
             static inline size_t g_PreExposureEnable = PropertyToID(L"g_PreExposureEnable");
         };
 

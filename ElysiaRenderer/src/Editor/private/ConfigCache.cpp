@@ -697,6 +697,9 @@ namespace ElysiaRenderer
         setFloat("AutoExposure", "MaxAverageLuminance", data.autoExposureParameter.maxAverageLuminance);
         setFloat("AutoExposure", "ExposureCompensation", data.autoExposureParameter.exposureCompensation);
         setFloat("AutoExposure", "MiddleGrey", data.autoExposureParameter.middleGrey);
+        setFloat("AutoExposure", "SpeedUp", data.autoExposureParameter.speedUp);
+        setFloat("AutoExposure", "SpeedDown", data.autoExposureParameter.speedDown);
+        setFloat("AutoExposure", "ExponentialTransitionDistance", data.autoExposureParameter.exponentialTransitionDistance);
         setBool("AutoExposure", "VisualizeHDR", data.autoExposureParameter.visualizeHDR);
         setEnum("AutoExposure", "VisualizeDebugType", data.autoExposureParameter.visualizeDebugType,
                 kAutoExposureVisualizeTypes);
@@ -1346,6 +1349,9 @@ namespace ElysiaRenderer
         emitFloat("AutoExposure", "MaxAverageLuminance", data.autoExposureParameter.maxAverageLuminance);
         emitFloat("AutoExposure", "ExposureCompensation", data.autoExposureParameter.exposureCompensation);
         emitFloat("AutoExposure", "MiddleGrey", data.autoExposureParameter.middleGrey);
+        emitFloat("AutoExposure", "SpeedUp", data.autoExposureParameter.speedUp);
+        emitFloat("AutoExposure", "SpeedDown", data.autoExposureParameter.speedDown);
+        emitFloat("AutoExposure", "ExponentialTransitionDistance", data.autoExposureParameter.exponentialTransitionDistance);
         emitBool("AutoExposure", "VisualizeHDR", data.autoExposureParameter.visualizeHDR);
         emitEnum("AutoExposure", "VisualizeDebugType", data.autoExposureParameter.visualizeDebugType,
                  kAutoExposureVisualizeTypes);

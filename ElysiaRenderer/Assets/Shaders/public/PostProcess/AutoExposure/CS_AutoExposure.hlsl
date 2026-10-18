@@ -23,6 +23,9 @@ cbuffer PassConstant : register(b0, perPassSpace)
     float g_MaxAverageLuminance;
     float g_MiddleGrey;
     float g_ExposureCompensationEV;
+    float g_ExposureSpeedUp;
+    float g_ExposureSpeedDown;
+    float g_ExponentialTransitionDistance;
     UINT g_PreExposureEnable;
 }
 
