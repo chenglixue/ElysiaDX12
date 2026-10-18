@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "BasePass.h"
 #include "Runtime/RenderCore/public/RenderResource.h"
 
@@ -45,6 +45,8 @@ namespace ElysiaRenderer
             static inline size_t g_DestTextureIndex = PropertyToID(L"g_DestTextureIndex");
             static inline size_t g_DestSize = PropertyToID(L"g_DestSize");
             static inline size_t g_LocalExposure = PropertyToID(L"g_LocalExposure");
+            static inline size_t g_ExposureScaleBufferIndex = PropertyToID(L"g_ExposureScaleBufferIndex");
+            static inline size_t g_AutoExposureEnable = PropertyToID(L"g_AutoExposureEnable");
             static inline size_t g_BloomTexIndex = PropertyToID(L"g_BloomTexIndex");
             static inline size_t g_BloomIntensity = PropertyToID(L"g_BloomIntensity");
         };

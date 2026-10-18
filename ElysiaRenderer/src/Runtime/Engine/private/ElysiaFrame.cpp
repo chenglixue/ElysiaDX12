@@ -7,6 +7,7 @@
 #include "Editor/public/IMGUIDrawer.h"
 #include "Editor/public/IMGUIHelper.h"
 #include "Editor/public/UserData.h"
+#include "Runtime/RenderCore/public/AutoExposureUtility.h"
 #include "Runtime/Core/public/DX12GraphicsContext.h"
 #include "Runtime/Core/public/DX12RenderPassDescriptorHeap.h"
 #include "Runtime/Core/public/DX12StagingDescriptorHeap.h"
@@ -842,6 +843,7 @@ namespace ElysiaEngine
         const ImVec2 imageOrigin = ImGui::GetItemRectMin();
 
         DrawViewportGizmo(imageOrigin, imageSize);
+        DrawAutoExposureDebugOverlay(imageOrigin, imageSize);
 
         if (m_bShowShadowFrustum && !SceneManager::GetInstance().IsPlaying())
         {
@@ -1211,6 +1213,38 @@ namespace ElysiaEngine
                 ImGui::SliderFloat("Shoulder Contrast", &pUserData.hdrParameter.ShoulderContrast, 1.0f, 1.2f);
                 ImGui::SliderFloat3("Saturation", (float*)&pUserData.hdrParameter.Saturation, 0.0f, 2.0f);
                 ImGui::SliderFloat3("Crosstalk", (float*)&pUserData.hdrParameter.Crosstalk, 0.0f, 1.0f);
+            }
+
+            if (ImGui::CollapsingHeader("Auto Exposure"))
+            {
+                auto& ae = pUserData.autoExposureParameter;
+                ImGui::Checkbox("Enable Auto Exposure", &ae.enable);
+                ImGui::SliderFloat("Low Percent", &ae.lowPercent, 0.0f, 1.0f);
+                ImGui::SliderFloat("High Percent", &ae.highPercent, 0.0f, 1.0f);
+                ImGui::SliderFloat("Histogram Min EV100", &ae.minLogLuminance, -16.0f, 0.0f);
+                ImGui::SliderFloat("Histogram Max EV100", &ae.maxLogLuminance, 0.0f, 20.0f);
+                float minBrightnessEV = AutoExposureLuminanceToEV100(ae.minAverageLuminance);
+                float maxBrightnessEV = AutoExposureLuminanceToEV100(ae.maxAverageLuminance);
+                if (ImGui::SliderFloat("Min EV100", &minBrightnessEV, -16.0f, 20.0f))
+                {
+                    ae.minAverageLuminance = AutoExposureEV100ToLuminance(minBrightnessEV);
+                }
+                if (ImGui::SliderFloat("Max EV100", &maxBrightnessEV, -16.0f, 20.0f))
+                {
+                    ae.maxAverageLuminance = AutoExposureEV100ToLuminance(maxBrightnessEV);
+                }
+                ImGui::SliderFloat("Exposure Compensation", &ae.exposureCompensation, -8.0f, 8.0f);
+                ImGui::SliderFloat("Middle Grey", &ae.middleGrey, 0.01f, 1.0f);
+                ImGui::Separator();
+                ImGui::Checkbox("Visualize HDR (Eye Adaptation)", &ae.visualizeHDR);
+                ElysiaRenderer::EnumCombo("Visualize Debug Type", &ae.visualizeDebugType);
+                if (ae.visualizeDebugType == AutoExposureVisualizeDebugType::Luminance)
+                {
+                    ImGui::SliderFloat("Visualize Luminance Scale",
+                                       &ae.visualizeLuminanceScale,
+                                       0.01f,
+                                       16.0f);
+                }
             }
 
             if (ImGui::CollapsingHeader("AO"))
@@ -2061,6 +2095,112 @@ namespace ElysiaEngine
                                      cornersScreen[2].y + cornersScreen[3].y) * 0.25f);
             pDrawList->AddCircleFilled(nearCenter, 3.0f, nearColor);
         }
+    }
+
+    void ElysiaFrame::DrawAutoExposureDebugOverlay(const ImVec2& imageOrigin, const ImVec2& imageSize)
+    {
+        const auto& ae = UserData::GetInstance().autoExposureParameter;
+        if (!ae.visualizeHDR || imageSize.x <= 0.0f || imageSize.y <= 0.0f)
+            return;
+
+        auto* pDisplayRT = m_pRenderer ? m_pRenderer->GetDisplayRT() : nullptr;
+        if (pDisplayRT == nullptr)
+            return;
+
+        const float dispW = static_cast<float>(pDisplayRT->GetWidth());
+        const float dispH = static_cast<float>(pDisplayRT->GetHeight());
+        if (dispW <= 0.0f || dispH <= 0.0f)
+            return;
+
+        using namespace AutoExposureVisualize;
+        ImDrawList* dl = ImGui::GetWindowDrawList();
+        dl->PushClipRect(imageOrigin,
+                         ImVec2(imageOrigin.x + imageSize.x, imageOrigin.y + imageSize.y),
+                         true);
+
+        auto toIm = [&](float px, float py)
+        {
+            return ImVec2(imageOrigin.x + px / dispW * imageSize.x,
+                          imageOrigin.y + py / dispH * imageSize.y);
+        };
+
+        auto shadowText = [&](ImVec2 pos, ImU32 color, const char* text)
+        {
+            dl->AddText(ImVec2(pos.x + 1.0f, pos.y + 1.0f), IM_COL32(0, 0, 0, 200), text);
+            dl->AddText(pos, color, text);
+        };
+
+        const ImU32 white = IM_COL32(255, 255, 255, 255);
+        const ImU32 blue = IM_COL32(76, 76, 255, 255);
+        const ImU32 coral = IM_COL32(255, 76, 76, 255);
+
+        float x = static_cast<float>(StatsOriginX);
+        float y = static_cast<float>(StatsOriginY);
+        const float yStep = static_cast<float>(StatsLineHeight);
+        const float col = static_cast<float>(StatsColumnWidth);
+
+        shadowText(toIm(x, y), white, "HDR Histogram (EV100)");
+        y += yStep + static_cast<float>(HistogramHeight) + 32.0f;
+
+        shadowText(toIm(x, y), white, "Auto Exposure Method:");
+        shadowText(toIm(x + col, y), white, "Histogram");
+        y += yStep;
+
+        char line[128];
+        std::snprintf(line, sizeof(line), "%g%% .. %g%%", ae.lowPercent * 100.0f, ae.highPercent * 100.0f);
+        shadowText(toIm(x, y), white, "Percent Low/High:");
+        shadowText(toIm(x + col, y), white, line);
+        y += yStep;
+
+        std::snprintf(line, sizeof(line), "%.1f .. %.1f",
+                      AutoExposureLuminanceToEV100(ae.minAverageLuminance),
+                      AutoExposureLuminanceToEV100(ae.maxAverageLuminance));
+        shadowText(toIm(x, y), white, "EV100 Min/Max");
+        shadowText(toIm(x + col, y), blue, line);
+        y += yStep;
+
+        std::snprintf(line, sizeof(line), "%.1f .. %.1f", ae.minLogLuminance, ae.maxLogLuminance);
+        shadowText(toIm(x, y), white, "Histogram EV100 Min/Max:");
+        shadowText(toIm(x + col, y), blue, line);
+        y += yStep;
+
+        std::snprintf(line, sizeof(line), "%.3g", ae.exposureCompensation);
+        shadowText(toIm(x, y), white, "Exposure Compensation:");
+        shadowText(toIm(x + col, y), coral, line);
+        y += yStep;
+
+        std::snprintf(line, sizeof(line), "%.3g", ae.middleGrey);
+        shadowText(toIm(x, y), white, "Middle Grey:");
+        shadowText(toIm(x + col, y), white, line);
+        y += yStep;
+
+        const char* debugName = "Scene Color";
+        if (ae.visualizeDebugType == AutoExposureVisualizeDebugType::HistogramDebug)
+            debugName = "Histogram Debug";
+        else if (ae.visualizeDebugType == AutoExposureVisualizeDebugType::Luminance)
+            debugName = "Luminance";
+        shadowText(toIm(x, y), white, "Visualize Debug Type:");
+        shadowText(toIm(x + col, y), white, debugName);
+
+        const float meterX = dispW * 0.5f - 10.0f;
+        const float meterY = dispH * 0.5f - 40.0f;
+        shadowText(toIm(meterX, meterY), white, "Luminance meter");
+
+        const float histLeft = static_cast<float>(HistogramMarginX + HistogramTickInsetX);
+        const float histWidth = dispW - static_cast<float>(HistogramMarginX * 2 + HistogramTickInsetWidth);
+        const float histTickY = dispH - static_cast<float>(HistogramMarginBottom) + yStep;
+        if (histWidth > 8.0f)
+        {
+            for (int i = 0; i <= 4; ++i)
+            {
+                const float t = static_cast<float>(i) / 4.0f;
+                const float ev = ae.minLogLuminance + (ae.maxLogLuminance - ae.minLogLuminance) * t;
+                std::snprintf(line, sizeof(line), "%.2g", ev);
+                shadowText(toIm(histLeft + t * histWidth - 5.0f, histTickY), coral, line);
+            }
+        }
+
+        dl->PopClipRect();
     }
 
     void ElysiaFrame::DrawViewportGizmo(const ImVec2& imageOrigin, const ImVec2& imageSize)

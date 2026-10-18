@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "../public/TonemapPass.h"
 
 #include "Runtime/Core/public/DX12GraphicsContext.h"
@@ -24,6 +24,7 @@
 #include "Programs/public/PIXHelper.h"
 #define A_CPU 1
 #include "../public/BloomPass.h"
+#include "../public/AutoExposurePass.h"
 #include "src/ThirdParty/ffx_a.h"
 A_STATIC AF1 fs2S;
 A_STATIC AF1 hdr10S;
@@ -303,6 +304,14 @@ namespace ElysiaRenderer
                                  m_pDisplayRT->GetResourceHeapIndex());
             m_pMaterial->SetFloat(ShaderIDs::g_LocalExposure,
                                   UserData::GetInstance().hdrParameter.localExposure);
+            m_pMaterial->SetUINT(ShaderIDs::g_AutoExposureEnable,
+                                 UserData::GetInstance().autoExposureParameter.enable ? 1u : 0u);
+            UINT autoExposureSrv = 0;
+            if (AutoExposurePass::m_pExposureScaleBuffer)
+            {
+                autoExposureSrv = AutoExposurePass::m_pExposureScaleBuffer->GetResourceHeapIndex();
+            }
+            m_pMaterial->SetUINT(ShaderIDs::g_ExposureScaleBufferIndex, autoExposureSrv);
             m_pMaterial->SetUINT(ShaderIDs::g_BloomTexIndex,
                                  RenderTargetManager::GetInstance().GetRenderTexture(RenderResource::GetInstance().
                                                                                      GetPropertyName(

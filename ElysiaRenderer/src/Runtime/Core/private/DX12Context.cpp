@@ -111,6 +111,9 @@ namespace ElysiaCore
                                  D3D12_RESOURCE_STATES newState,
                                  bool isFlush)
     {
+        if (!resource)
+            return;
+
         if (m_numQueuedBarriers >= MAX_QUEUED_BARRIERS)
         {
             FlushBarrier();
@@ -136,6 +139,13 @@ namespace ElysiaCore
         {
             FlushBarrier();
         }
+    }
+
+    void DX12Context::AddBarrier(const BufferHandle& buffer,
+                                 D3D12_RESOURCE_STATES newState,
+                                 bool isFlush)
+    {
+        AddBarrier(buffer.get(), newState, isFlush);
     }
 
     void DX12Context::AddBarrier(DX12GPUResource& resource,

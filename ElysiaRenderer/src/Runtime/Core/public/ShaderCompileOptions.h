@@ -25,27 +25,31 @@ namespace ElysiaCore
         void SetEntry(const std::wstring& entry) { m_entry = entry; }
         void SetTarget(const std::wstring& target) { m_target = target; }
 
-        // --- Macros ---------------------------------------------------
+        // --- Macros / defines (DXC -DNAME=value). Same name overwrites. ---
+        void SetDefine(const std::wstring& name);
+        void SetDefine(const std::wstring& name, int value);
+        void SetDefine(const std::wstring& name, const std::wstring& value);
+
         void AddMacro(const std::wstring& name)
         {
-            m_macros.emplace_back(name, L"1");
+            SetDefine(name);
         }
 
         void AddMacro(const std::wstring& name, int value)
         {
-            m_macros.emplace_back(name, std::to_wstring(value));
+            SetDefine(name, value);
         }
 
         void AddMacro(const std::wstring& name, float value)
         {
             std::wstringstream ss;
             ss << value;
-            m_macros.emplace_back(name, ss.str());
+            SetDefine(name, ss.str());
         }
 
         void AddMacro(const std::wstring& name, const std::wstring& value)
         {
-            m_macros.emplace_back(name, value);
+            SetDefine(name, value);
         }
 
         // --- Include Paths --------------------------------------------
@@ -83,6 +87,23 @@ namespace ElysiaCore
 
         // Because LPCWSTR must point to persistent strings
         mutable std::vector<std::wstring> m_tempStrings;
+    };
+
+    // UE FShaderCompilerEnvironment::SetDefine for one shader type.
+    // These are always-on compile constants (tile size, histogram bins), not
+    // permutation keywords. Apply once per ShaderPass before CreateShader.
+    class ShaderCompilationEnvironment
+    {
+    public:
+        void SetDefine(std::wstring name);
+        void SetDefine(std::wstring name, int value);
+        void SetDefine(std::wstring name, std::wstring value);
+
+        void ApplyTo(ShaderCompileOptions& options) const;
+        const std::vector<ShaderMacro>& GetDefines() const { return m_defines; }
+
+    private:
+        std::vector<ShaderMacro> m_defines;
     };
 }
 

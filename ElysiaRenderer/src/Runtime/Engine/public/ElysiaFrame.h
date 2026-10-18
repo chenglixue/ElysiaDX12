@@ -135,6 +135,8 @@ namespace ElysiaEngine
         // Editor overlay: unprojects the shadow camera's 8 frustum corners and
         // draws the 12 edges through the main camera (no GPU work).
         void DrawShadowFrustumOverlay(const ImVec2& imageOrigin, const ImVec2& imageSize);
+        // UE VisualizeHDR canvas: stats + histogram EV ticks over the viewport image.
+        void DrawAutoExposureDebugOverlay(const ImVec2& imageOrigin, const ImVec2& imageSize);
         // UE row 3: Viewport toolbar (Move / Rotate / Scale / snap). Viewport menu bar, not over the image.
         void DrawGizmoToolbar();
         // UE viewport toolbar right: Camera Speed number + dropdown slider.

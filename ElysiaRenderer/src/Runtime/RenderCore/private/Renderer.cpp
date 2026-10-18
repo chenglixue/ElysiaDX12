@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "../public/Renderer.h"
 
 #include <dxgidebug.h>
@@ -25,6 +25,8 @@
 #include "Runtime/RenderCore/Pass/public/UIPass.h"
 #include "Runtime/RenderCore/Pass/public/FinalBlitPass.h"
 #include "Runtime/RenderCore/Pass/public/BloomPass.h"
+#include "Runtime/RenderCore/Pass/public/AutoExposurePass.h"
+#include "Runtime/RenderCore/Pass/public/AutoExposureVisualizePass.h"
 
 #include "../public/RenderTargetManager.h"
 #include "../public/TonemapUtility.h"
@@ -84,10 +86,12 @@ namespace ElysiaRenderer
         AddPass<SSSRPass>();
         AddPass<TAAPass>();
         AddPass<BloomPass>();
+        AddPass<AutoExposurePass>();
         AddPass<TonemapPass>();
         AddPass<SharpenPass>();
         AddPass<SelectionOutlinePass>();
         AddPass<DebugPass>();
+        AddPass<AutoExposureVisualizePass>();
         AddPass<UIPass>();
         AddPass<FinalBlitPass>();
     }

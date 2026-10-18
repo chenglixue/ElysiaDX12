@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <string>
 #include <vector>
 
@@ -9,6 +9,7 @@
 #include "Runtime/RenderCore/public/AOUtility.h"
 #include "Programs/public/DebugUtility.h"
 #include "Runtime/RenderCore/public/BloomUtility.h"
+#include "Runtime/RenderCore/public/AutoExposureUtility.h"
 #include "Runtime/RenderCore/public/CASUtility.h"
 #include "Runtime/RenderCore/public/GIUtility.h"
 #include "Runtime/RenderCore/public/TAAUtility.h"
@@ -199,6 +200,7 @@ namespace ElysiaRenderer
         int mipmapLevel = 0;
         int instanceID = 0;
 
+        AutoExposureParameter autoExposureParameter{};
         BloomParameter bloomParameter{};
         TAAParameter taaParameter{};
         SharpenParameter sharpenParameter{};
@@ -231,6 +233,7 @@ namespace ElysiaRenderer
                                                     debugMode,
                                                     mipmapLevel,
                                                     instanceID,
+                                                    autoExposureParameter,
                                                     bloomParameter,
                                                     taaParameter,
                                                     sharpenParameter,

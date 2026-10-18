@@ -26,6 +26,7 @@ namespace ElysiaCore
     struct ShaderCreateDesc
     {
         std::vector<ShaderStageDesc> stages;
+        ShaderCompilationEnvironment Environment;
     };
 
 
@@ -40,6 +41,8 @@ namespace ElysiaCore
         D3D12_RASTERIZER_DESC RasterizerDesc;
         D3D12_BLEND_DESC BlendDesc;
         D3D12_DEPTH_STENCIL_DESC DepthStencilDesc;
+        // Compile-time -D macros for this pass (UE ModifyCompilationEnvironment).
+        ShaderCompilationEnvironment Environment;
     };
 
     struct PragmaKeywordGroup

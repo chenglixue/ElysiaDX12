@@ -286,6 +286,13 @@ namespace ElysiaRenderer
             {DebugDownOrUp::Up, "Up"},
         };
 
+        const EnumName<AutoExposureVisualizeDebugType> kAutoExposureVisualizeTypes[] =
+        {
+            {AutoExposureVisualizeDebugType::SceneColor, "SceneColor"},
+            {AutoExposureVisualizeDebugType::HistogramDebug, "HistogramDebug"},
+            {AutoExposureVisualizeDebugType::Luminance, "Luminance"},
+        };
+
         const EnumName<Jitter::Type> kJitterTypes[] =
         {
             {Jitter::Type::Default, "Default"},
@@ -679,6 +686,20 @@ namespace ElysiaRenderer
         setInt("Debug", "MipmapLevel", data.mipmapLevel);
         setInt("Debug", "InstanceID", data.instanceID);
         setBool("Debug", "EnableHIZ", data.EnableHIZ);
+
+        setBool("AutoExposure", "Enable", data.autoExposureParameter.enable);
+        setFloat("AutoExposure", "LowPercent", data.autoExposureParameter.lowPercent);
+        setFloat("AutoExposure", "HighPercent", data.autoExposureParameter.highPercent);
+        setFloat("AutoExposure", "HistogramLogMin", data.autoExposureParameter.minLogLuminance);
+        setFloat("AutoExposure", "HistogramLogMax", data.autoExposureParameter.maxLogLuminance);
+        setFloat("AutoExposure", "MinAverageLuminance", data.autoExposureParameter.minAverageLuminance);
+        setFloat("AutoExposure", "MaxAverageLuminance", data.autoExposureParameter.maxAverageLuminance);
+        setFloat("AutoExposure", "ExposureCompensation", data.autoExposureParameter.exposureCompensation);
+        setFloat("AutoExposure", "MiddleGrey", data.autoExposureParameter.middleGrey);
+        setBool("AutoExposure", "VisualizeHDR", data.autoExposureParameter.visualizeHDR);
+        setEnum("AutoExposure", "VisualizeDebugType", data.autoExposureParameter.visualizeDebugType,
+                kAutoExposureVisualizeTypes);
+        setFloat("AutoExposure", "VisualizeLuminanceScale", data.autoExposureParameter.visualizeLuminanceScale);
 
         setBool("Bloom", "Enable", data.bloomParameter.enable);
         setFloat("Bloom", "Radius", data.bloomParameter.radius);
@@ -1304,6 +1325,20 @@ namespace ElysiaRenderer
         emitInt("Debug", "MipmapLevel", data.mipmapLevel);
         emitInt("Debug", "InstanceID", data.instanceID);
         emitBool("Debug", "EnableHIZ", data.EnableHIZ);
+
+        emitBool("AutoExposure", "Enable", data.autoExposureParameter.enable);
+        emitFloat("AutoExposure", "LowPercent", data.autoExposureParameter.lowPercent);
+        emitFloat("AutoExposure", "HighPercent", data.autoExposureParameter.highPercent);
+        emitFloat("AutoExposure", "HistogramLogMin", data.autoExposureParameter.minLogLuminance);
+        emitFloat("AutoExposure", "HistogramLogMax", data.autoExposureParameter.maxLogLuminance);
+        emitFloat("AutoExposure", "MinAverageLuminance", data.autoExposureParameter.minAverageLuminance);
+        emitFloat("AutoExposure", "MaxAverageLuminance", data.autoExposureParameter.maxAverageLuminance);
+        emitFloat("AutoExposure", "ExposureCompensation", data.autoExposureParameter.exposureCompensation);
+        emitFloat("AutoExposure", "MiddleGrey", data.autoExposureParameter.middleGrey);
+        emitBool("AutoExposure", "VisualizeHDR", data.autoExposureParameter.visualizeHDR);
+        emitEnum("AutoExposure", "VisualizeDebugType", data.autoExposureParameter.visualizeDebugType,
+                 kAutoExposureVisualizeTypes);
+        emitFloat("AutoExposure", "VisualizeLuminanceScale", data.autoExposureParameter.visualizeLuminanceScale);
 
         emitBool("Bloom", "Enable", data.bloomParameter.enable);
         emitFloat("Bloom", "Radius", data.bloomParameter.radius);

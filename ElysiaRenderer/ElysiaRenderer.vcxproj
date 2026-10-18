@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <Import Project="..\packages\Microsoft.Direct3D.D3D12.1.618.5\build\native\Microsoft.Direct3D.D3D12.props" Condition="Exists('..\packages\Microsoft.Direct3D.D3D12.1.618.5\build\native\Microsoft.Direct3D.D3D12.props')"/>
     <Import Project="..\packages\Vcpkg.Nuget.1.5.0\build\Vcpkg.Nuget.props" Condition="Exists('..\packages\Vcpkg.Nuget.1.5.0\build\Vcpkg.Nuget.props')"/>
@@ -188,6 +188,9 @@
         <None Include="Assets\Shaders\private\BloomCommon.hlsli">
             <FileType>Document</FileType>
         </None>
+        <None Include="Assets\Shaders\private\AutoExposureCommon.hlsli">
+            <FileType>Document</FileType>
+        </None>
         <None Include="Assets\Shaders\private\CASCommon.hlsli">
             <FileType>Document</FileType>
         </None>
@@ -204,7 +207,6 @@
         <None Include="Assets\Shaders\private\SSSR\SSSRCommon.hlsli">
             <FileType>Document</FileType>
         </None>
-        <ClInclude Include="Assets\Shaders\public\PostProcess\AutoExposure\AutoExpostureCommon.hlsli"/>
         <ClInclude Include="dxc\inc\d3dx12.h"/>
         <ClInclude Include="lib\AMD\libs\AGS\amd_ags.h"/>
         <ClInclude Include="lib\AMD\libs\d3d12x\d3dx12.h"/>
@@ -299,10 +301,12 @@
         <ClInclude Include="src\Runtime\Engine\public\FrameworkWindows.h"/>
         <ClInclude Include="src\Runtime\Engine\public\ImGuiUtility.h"/>
         <ClInclude Include="src\Runtime\RenderCore\Pass\public\AutoExposurePass.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\Pass\public\AutoExposureVisualizePass.h"/>
         <ClInclude Include="src\Runtime\RenderCore\public\AOUtility.h"/>
         <ClInclude Include="src\Runtime\RenderCore\public\BakeManager.h"/>
         <ClInclude Include="src\Runtime\RenderCore\public\BindlessTextureManager.h"/>
-        <ClInclude Include="src\Runtime\RenderCore\public\BloomUtility.h"/>
+        <ClInclude Include="src\Runtime\RenderCore\public\AutoExposureUtility.h"/>
+    <ClInclude Include="src\Runtime\RenderCore\public\BloomUtility.h"/>
         <ClInclude Include="src\Runtime\RenderCore\public\BufferManager.h"/>
         <ClInclude Include="src\Runtime\RenderCore\public\CameraManager.h"/>
         <ClInclude Include="src\Runtime\RenderCore\public\CASUtility.h"/>
@@ -526,6 +530,7 @@
             <FileType>Document</FileType>
         </None>
         <None Include="Assets\Shaders\public\PostProcess\AutoExposure\CS_AutoExposure.hlsl"/>
+        <None Include="Assets\Shaders\public\PostProcess\AutoExposure\CS_AutoExposureVisualize.hlsl"/>
         <ClCompile Include="src\Editor\private\ConfigCache.cpp"/>
         <ClCompile Include="src\Editor\private\IMGUIDrawer.cpp">
             <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
@@ -578,86 +583,8 @@
         <ClCompile Include="src\Runtime\Engine\private\FrameContext.cpp"/>
         <ClCompile Include="src\Runtime\Engine\private\FrameworkWindows.cpp"/>
         <ClCompile Include="src\Runtime\Engine\private\ImGuiUtility.cpp"/>
-        <ClCompile Include="src\Runtime\RenderCore\Pass\private\AutoExposurePass.cpp">
-            <AdditionalIncludeDirectories>D:\SDK\DX12\ElysiaDX12\packages\Microsoft.Direct3D.D3D12.1.618.5\build\native\include;D:\SDK\DX12\ElysiaDX12\packages\Microsoft.Direct3D.D3D12.1.618.5\build\native\include\d3dx12;D:\SDK\DX12\ElysiaDX12\packages\Microsoft.Direct3D.D3D12.1.618.5\build\native\;D:\SDK\DX12\ElysiaDX12\packages\WinPixEventRuntime.1.0.240308001\build\..\Include\WinPixEventRuntime;D:\SDK\DX12\ElysiaDX12\packages\directxtk12_desktop_win10.2025.7.10.1\build\native\..\..\include;D:\SDK\DX12\ElysiaDX12\packages\boost.1.87.0\build\..\lib\native\include\;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.16.27023\atlmfc\include;D:\SDK\DX12\ElysiaDX12\ElysiaRenderer\;D:\SDK\DX12\ElysiaDX12\ElysiaRenderer\\include;D:\SDK\DX12\ElysiaDX12\ElysiaRenderer\\lib;D:\SDK\DX12\ElysiaDX12\ElysiaRenderer\\src;D:\SDK\DX12\ElysiaDX12\packages\boost.1.87.0\lib\native\include;;D:\SDK\DX12\ElysiaDX12\packages\Vcpkg.Nuget.1.5.0\vcpkg_bin\installed\x64-windows\include
-            </AdditionalIncludeDirectories>
-            <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-            <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
-            <Optimization>Disabled</Optimization>
-            <SupportJustMyCode>true</SupportJustMyCode>
-            <AssemblerOutput>NoListing</AssemblerOutput>
-            <AssemblerListingLocation>x64\Debug\</AssemblerListingLocation>
-            <UndefineAllPreprocessorDefinitions>false</UndefineAllPreprocessorDefinitions>
-            <BrowseInformation>false</BrowseInformation>
-            <BrowseInformationFile>x64\Debug\</BrowseInformationFile>
-            <CompileAs>Default</CompileAs>
-            <UseDynamicDebugging>false</UseDynamicDebugging>
-            <ConformanceMode>true</ConformanceMode>
-            <DiagnosticsFormat>Column</DiagnosticsFormat>
-            <DisableLanguageExtensions>false</DisableLanguageExtensions>
-            <ErrorReporting>Prompt</ErrorReporting>
-            <ExpandAttributedSource>false</ExpandAttributedSource>
-            <ExceptionHandling>Sync</ExceptionHandling>
-            <EnableASAN>false</EnableASAN>
-            <EnableFuzzer>false</EnableFuzzer>
-            <EnableFiberSafeOptimizations>false</EnableFiberSafeOptimizations>
-            <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
-            <EnableVectorLength>NotSet</EnableVectorLength>
-            <FloatingPointModel>Precise</FloatingPointModel>
-            <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
-            <GenerateModuleDependencies>false</GenerateModuleDependencies>
-            <GenerateSourceDependencies>false</GenerateSourceDependencies>
-            <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>
-            <InlineFunctionExpansion>Default</InlineFunctionExpansion>
-            <IntrinsicFunctions>false</IntrinsicFunctions>
-            <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
-            <LanguageStandard>stdcpp20</LanguageStandard>
-            <LanguageStandard_C>Default</LanguageStandard_C>
-            <MinimalRebuild>false</MinimalRebuild>
-            <ModuleDependenciesFile>x64\Debug\</ModuleDependenciesFile>
-            <ModuleOutputFile>x64\Debug\</ModuleOutputFile>
-            <OmitDefaultLibName>false</OmitDefaultLibName>
-            <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
-            <WholeProgramOptimization>false</WholeProgramOptimization>
-            <ObjectFileName>x64\Debug\</ObjectFileName>
-            <CallingConvention>Cdecl</CallingConvention>
-            <ProgramDataBaseFileName>x64\Debug\vc143.pdb</ProgramDataBaseFileName>
-            <PrecompiledHeader>Use</PrecompiledHeader>
-            <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
-            <PrecompiledHeaderOutputFile>x64\Debug\ElysiaRenderer.pch</PrecompiledHeaderOutputFile>
-            <PreprocessToFile>false</PreprocessToFile>
-            <PreprocessKeepComments>false</PreprocessKeepComments>
-            <PreprocessSuppressLineNumbers>false</PreprocessSuppressLineNumbers>
-            <RemoveUnreferencedCodeData>true</RemoveUnreferencedCodeData>
-            <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
-            <ShowIncludes>false</ShowIncludes>
-            <SourceDependenciesFile>x64\Debug\</SourceDependenciesFile>
-            <SuppressStartupBanner>true</SuppressStartupBanner>
-            <BufferSecurityCheck>true</BufferSecurityCheck>
-            <SmallerTypeCheck>false</SmallerTypeCheck>
-            <SpectreMitigation>false</SpectreMitigation>
-            <StructMemberAlignment>Default</StructMemberAlignment>
-            <TrackerLogDirectory>x64\Debug\ElysiaRenderer.tlog\</TrackerLogDirectory>
-            <TranslateIncludes>false</TranslateIncludes>
-            <MinimalRebuildFromTracking>true</MinimalRebuildFromTracking>
-            <TreatWarningAsError>false</TreatWarningAsError>
-            <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
-            <UseFullPaths>true</UseFullPaths>
-            <WarningLevel>Level3</WarningLevel>
-            <XMLDocumentationFileName>x64\Debug\</XMLDocumentationFileName>
-            <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-            <IntelJCCErratum>false</IntelJCCErratum>
-            <BuildStlModules>false</BuildStlModules>
-            <TreatAngleIncludeAsExternal>false</TreatAngleIncludeAsExternal>
-            <ExternalWarningLevel>InheritWarningLevel</ExternalWarningLevel>
-            <TreatExternalTemplatesAsInternal>true</TreatExternalTemplatesAsInternal>
-            <DisableAnalyzeExternal>false</DisableAnalyzeExternal>
-            <PreprocessorDefinitions>HAS_DIRECTXTK12;_DEBUG;_CONSOLE;USE_PIX;PROFILE;PROFILE_BUILD;DBG;_UNICODE;UNICODE;</PreprocessorDefinitions>
-            <SDLCheck>true</SDLCheck>
-            <DisableSpecificWarnings>5033;4819;4018;</DisableSpecificWarnings>
-            <AdditionalOptions>/FS</AdditionalOptions>
-            <LinkCompiled>true</LinkCompiled>
-        </ClCompile>
+        <ClCompile Include="src\Runtime\RenderCore\Pass\private\AutoExposurePass.cpp"/>
+        <ClCompile Include="src\Runtime\RenderCore\Pass\private\AutoExposureVisualizePass.cpp"/>
         <ClCompile Include="src\Runtime\RenderCore\private\BakeManager.cpp"/>
         <ClCompile Include="src\Runtime\RenderCore\private\BindlessTextureManager.cpp"/>
         <ClCompile Include="src\Runtime\RenderCore\private\BufferManager.cpp"/>

@@ -3,6 +3,60 @@
 
 namespace ElysiaCore
 {
+    namespace
+    {
+        void UpsertMacro(std::vector<ShaderMacro>& macros, std::wstring name, std::wstring value)
+        {
+            for (auto& macro : macros)
+            {
+                if (macro.Name == name)
+                {
+                    macro.Value = std::move(value);
+                    return;
+                }
+            }
+            macros.emplace_back(std::move(name), std::move(value));
+        }
+    }
+
+    void ShaderCompileOptions::SetDefine(const std::wstring& name)
+    {
+        SetDefine(name, std::wstring(L"1"));
+    }
+
+    void ShaderCompileOptions::SetDefine(const std::wstring& name, int value)
+    {
+        SetDefine(name, std::to_wstring(value));
+    }
+
+    void ShaderCompileOptions::SetDefine(const std::wstring& name, const std::wstring& value)
+    {
+        UpsertMacro(m_macros, name, value);
+    }
+
+    void ShaderCompilationEnvironment::SetDefine(std::wstring name)
+    {
+        SetDefine(std::move(name), std::wstring(L"1"));
+    }
+
+    void ShaderCompilationEnvironment::SetDefine(std::wstring name, int value)
+    {
+        SetDefine(std::move(name), std::to_wstring(value));
+    }
+
+    void ShaderCompilationEnvironment::SetDefine(std::wstring name, std::wstring value)
+    {
+        UpsertMacro(m_defines, std::move(name), std::move(value));
+    }
+
+    void ShaderCompilationEnvironment::ApplyTo(ShaderCompileOptions& options) const
+    {
+        for (const auto& macro : m_defines)
+        {
+            options.SetDefine(macro.Name, macro.Value);
+        }
+    }
+
     const std::vector<LPCWSTR> ShaderCompileOptions::BuildArguments() const
     {
         std::vector<LPCWSTR> args

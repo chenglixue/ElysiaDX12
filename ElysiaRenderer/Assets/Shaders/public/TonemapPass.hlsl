@@ -1,4 +1,4 @@
-#include "private\Color.hlsl"
+﻿#include "private\Color.hlsl"
 #include "private/BloomCommon.hlsli"
 
 #pragma Vertex VS
@@ -28,6 +28,8 @@ cbuffer PassConstant : register(b0, perPassSpace)
     UINT tonemapMode;
     UINT g_BloomTexIndex;
     float g_LocalExposure;
+    UINT g_ExposureScaleBufferIndex;
+    UINT g_AutoExposureEnable;
     float g_BloomIntensity;
     bool u_shoulder;
     bool u_con;
@@ -90,12 +92,20 @@ PSInput VS(UINT vertexID : SV_VertexID)
 PSOutput PS(PSInput i)
 {
     PSOutput o = (PSOutput)0;
+    
+    StructuredBuffer<float4> exposureTex = ResourceDescriptorHeap[g_ExposureScaleBufferIndex];
 
     float4 color = SampleTexture2D(blitterTextureIndex, i.uv, ClampLinearSampler);
     float4 bloomColor = float4(SampleTexture2D(g_BloomTexIndex, i.uv, ClampLinearSampler).rgb, 1.f) * g_BloomIntensity *
                         rcp((float)BLOOM_MIPMAP_COUNT);
     float4 finalColor = bloomColor + color;
-    finalColor *= g_LocalExposure;
+    float autoExposureScale = 1.0f;
+    if (g_AutoExposureEnable != 0)
+    {
+        autoExposureScale = exposureTex[0].r;
+        // autoExposureScale = LoadTexture2D(g_AutoExposureTexIndex, int2(0, 0)).r;
+    }
+    finalColor *= g_LocalExposure * autoExposureScale;
 
     switch (tonemapMode)
     {

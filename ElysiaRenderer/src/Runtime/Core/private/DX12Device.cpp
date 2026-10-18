@@ -327,6 +327,7 @@ namespace ElysiaCore
         compileOptions.EnableDebug(false);
         compileOptions.SetOptLevel(3);
 #endif
+        shaderCreateDesc.Environment.ApplyTo(compileOptions);
 
         ComPtr<IDxcUtils> pUtils;
         ComPtr<IDxcCompiler3> pCompiler;

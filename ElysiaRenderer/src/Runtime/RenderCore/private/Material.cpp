@@ -67,6 +67,7 @@ namespace ElysiaRenderer
                     }
                 };
             }
+            desc.Environment = shaderPasses[passID].Environment;
 
             newPassData.pShader = std::move(m_pDevice->CreateShader(desc));
             if (!shaderPasses[passID].IsComputeShader)

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Source Files">
@@ -634,6 +634,15 @@
     <ClInclude Include="src\ThirdParty\GLTF\tiny_gltf.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Runtime\RenderCore\public\AutoExposureUtility.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Runtime\RenderCore\Pass\public\AutoExposurePass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Runtime\RenderCore\Pass\public\AutoExposureVisualizePass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="src\Runtime\RenderCore\public\BloomUtility.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -736,6 +745,7 @@
     <None Include="Assets\Shaders\public\GI\CS_RayFilter.hlsl" />
     <None Include="Assets\Shaders\public\PostProcess\Bloom\Bloom.hlsl" />
     <None Include="Assets\Shaders\private\BloomCommon.hlsli" />
+    <None Include="Assets\Shaders\private\AutoExposureCommon.hlsli" />
     <None Include="Assets\Shaders\public\PostProcess\TAA\CS_TAA.hlsl" />
     <None Include="Assets\Shaders\private\TAACommon.hlsli" />
     <None Include="Assets\Shaders\public\PostProcess\Sharpen\CS_CAS.hlsl" />
@@ -752,6 +762,8 @@
     <None Include="Assets\Shaders\private\SSSR\SSSRCommon.hlsli" />
     <None Include="Assets\Shaders\public\CS_CalcSobolNoise.hlsl" />
     <None Include="Assets\Shaders\public\PostProcess\SSSR\CS_Intersect.hlsl" />
+    <None Include="Assets\Shaders\public\PostProcess\AutoExposure\CS_AutoExposure.hlsl" />
+    <None Include="Assets\Shaders\public\PostProcess\AutoExposure\CS_AutoExposureVisualize.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -797,6 +809,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Runtime\RenderCore\Pass\private\BloomPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Runtime\RenderCore\Pass\private\AutoExposurePass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Runtime\RenderCore\Pass\private\AutoExposureVisualizePass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Runtime\RenderCore\Pass\private\FinalBlitPass.cpp">

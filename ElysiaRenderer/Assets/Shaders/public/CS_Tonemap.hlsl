@@ -1,4 +1,4 @@
-#include "private\Color.hlsl"
+﻿#include "private\Color.hlsl"
 #include "private\BloomCommon.hlsli"
 
 #define Neutral 0
@@ -21,6 +21,8 @@ cbuffer PassConstant : register(b0, perPassSpace)
     UINT tonemapMode;
     UINT g_BloomTexIndex;
     float g_LocalExposure;
+    UINT g_ExposureScaleBufferIndex;
+    UINT g_AutoExposureEnable;
     float g_BloomIntensity;
     bool u_shoulder;
     bool u_con;
@@ -52,10 +54,16 @@ void Tonemap(uint3 dispatchThreadID: SV_DispatchThreadID)
     float2 screenUV = ((float2)dispatchThreadID.xy + 0.5f) * g_DestSize.zw;
 
     RWTexture2D<float4> o = ResourceDescriptorHeap[g_DestTextureIndex];
+    StructuredBuffer<float4> exposureScaleBuffer = ResourceDescriptorHeap[g_ExposureScaleBufferIndex];
     float4 finalColor = LoadTexture2D(g_DestTextureIndex, dispatchThreadID.xy);
     float4 bloomColor = SampleTexture2D(g_BloomTexIndex, screenUV, ClampLinearSampler);
     finalColor += bloomColor * g_BloomIntensity * rcp((float)BLOOM_MIPMAP_COUNT);
-    finalColor *= g_LocalExposure;
+    float autoExposureScale = 1.0f;
+    if (g_AutoExposureEnable != 0)
+    {
+        autoExposureScale = exposureScaleBuffer[0].r;
+    }
+    finalColor *= g_LocalExposure * autoExposureScale;
 
     switch (tonemapMode)
     {
