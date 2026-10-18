@@ -64,6 +64,8 @@ cbuffer PassConstant : register(b0, perPassSpace)
     bool g_EnableTRT;
 
     UINT g_SHCoefficientsBufferIndex;
+    UINT g_PreExposureScaleBufferIndex;
+    UINT g_PreExposureEnable;
 }
 
 
@@ -73,6 +75,14 @@ cbuffer PassConstant : register(b0, perPassSpace)
 #include <private\LightCommon.hlsl>
 #include <private\Light.hlsl>
 #include <public\GI\Irradiance.hlsl>
+
+float GetPreExposureScale()
+{
+    if (g_PreExposureEnable == 0)
+        return 1.0f;
+    RWStructuredBuffer<float2> PreExposureScaleBuffer = ResourceDescriptorHeap[g_PreExposureScaleBufferIndex];
+    return PreExposureScaleBuffer[0].g;
+}
 
 struct PSInput
 {
@@ -193,6 +203,8 @@ PSOutput PS(PSInput i)
         o.target0 = float4(IBL, 1.f);
         return o;
     }
-    o.target0 = lighting;
+    
+    float PreExposureScale = GetPreExposureScale();
+    o.target0 = lighting * PreExposureScale;
     return o;
 }

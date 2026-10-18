@@ -30,6 +30,8 @@ namespace ElysiaRenderer
             static inline size_t viewProjMatrix_I = PropertyToID(L"viewProjMatrix_I");
             static inline size_t pre_viewProjMatrix = PropertyToID(L"pre_viewProjMatrix");
             static inline size_t jitterViewProjMatrix = PropertyToID(L"jitterViewProjMatrix");
+            static inline size_t g_PreExposureScaleBufferIndex = PropertyToID(L"g_PreExposureScaleBufferIndex");
+            static inline size_t g_PreExposureEnable = PropertyToID(L"g_PreExposureEnable");
             static inline size_t worldMatrix = PropertyToID(L"worldMatrix");
         };
 

@@ -21,6 +21,7 @@
 #include <stdint.h>
 
 #include "Editor/public/UserData.h"
+#include "Runtime/RenderCore/public/AutoExposureUtility.h"
 #include "Programs/public/PIXHelper.h"
 #define A_CPU 1
 #include "../public/BloomPass.h"
@@ -306,6 +307,8 @@ namespace ElysiaRenderer
                                   UserData::GetInstance().hdrParameter.localExposure);
             m_pMaterial->SetUINT(ShaderIDs::g_AutoExposureEnable,
                                  UserData::GetInstance().autoExposureParameter.enable ? 1u : 0u);
+            m_pMaterial->SetUINT(ShaderIDs::g_PreExposureEnable,
+                                 UsePreExposure(UserData::GetInstance().autoExposureParameter) ? 1u : 0u);
             UINT autoExposureSrv = 0;
             if (AutoExposurePass::m_pExposureScaleBuffer)
             {
@@ -319,8 +322,9 @@ namespace ElysiaRenderer
                                                                                      + std::to_wstring(0))->
                                                                     GetUAVResourceHeapIndex());
             m_pMaterial->SetFloat(ShaderIDs::g_BloomIntensity,
-                                  UserData::GetInstance().bloomParameter.intensity,
-                                  passID);
+                                  UserData::GetInstance().bloomParameter.intensity);
+            m_pMaterial->SetUINT(ShaderIDs::g_PreExposureScaleBufferIndex,
+                             RenderPassResourceManager::GetInstance().Get<AutoExposureData>().pPreExposureBuffer->GetUAVResourceHeapIndex());
 
             auto& passData = m_pMaterial->GetPassData(ShaderPasseIDs::TonemapPassID);
             SetSpaceResource(passData, PER_FRAME_SPACE);

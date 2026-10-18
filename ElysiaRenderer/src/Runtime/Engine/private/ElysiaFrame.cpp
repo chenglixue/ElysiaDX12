@@ -276,12 +276,24 @@ namespace ElysiaEngine
                     if (isFiniteBox(sceneAABB))
                         lookAt = Vector3(sceneAABB.Center.x, sceneAABB.Center.y, sceneAABB.Center.z);
                 }
+                const bool restoreCamera = g_CameraPose.valid;
                 CameraManager::GetInstance().CreateMainCamera(
-                    lookAt,
+                    restoreCamera ? g_CameraPose.location : lookAt,
                     static_cast<float>(m_Width) / static_cast<float>(m_Height),
                     AMD_PI_OVER_4,
                     0.1f,
                     1000.f);
+                if (restoreCamera)
+                {
+                    auto* camera = dynamic_cast<FirstPersonCamera*>(
+                        CameraManager::GetInstance().GetMainCamera());
+                    if (camera)
+                    {
+                        camera->SetXRotation(g_CameraPose.pitch);
+                        camera->SetYRotation(g_CameraPose.yaw);
+                        camera->UpdateFrustum();
+                    }
+                }
             }
 
             // Bootstrap RTs so 3D can run before the first Viewport layout.
@@ -1219,6 +1231,7 @@ namespace ElysiaEngine
             {
                 auto& ae = pUserData.autoExposureParameter;
                 ImGui::Checkbox("Enable Auto Exposure", &ae.enable);
+                ImGui::Checkbox("Enable Pre-Exposure", &ae.enablePreExposure);
                 ImGui::SliderFloat("Low Percent", &ae.lowPercent, 0.0f, 1.0f);
                 ImGui::SliderFloat("High Percent", &ae.highPercent, 0.0f, 1.0f);
                 ImGui::SliderFloat("Histogram Min EV100", &ae.minLogLuminance, -16.0f, 0.0f);

@@ -16,6 +16,7 @@ cbuffer PassConstant : register(b0, perPassSpace)
     UINT g_CurrTexIndex;
     UINT g_SourceTexIndex;
     UINT g_DestTexIndex;
+    UINT g_PreExposureScaleBufferIndex;
 
     float g_StaticBlendWeight;
     float g_DynamicBlendWeight;
@@ -25,6 +26,15 @@ cbuffer PassConstant : register(b0, perPassSpace)
     float2 g_Jitter;
     float2 g_HistoryJitter;
     float2 g_JitterPixels;
+    UINT g_PreExposureEnable;
+}
+
+float GetHistoryPreExposureScale()
+{
+    RWStructuredBuffer<float2> PreExposureScaleBuffer = ResourceDescriptorHeap[g_PreExposureScaleBufferIndex];
+    float historyPre = max(PreExposureScaleBuffer[0].r, 1e-5f);
+    float currentPre = (g_PreExposureEnable != 0) ? PreExposureScaleBuffer[0].g : 1.0f;
+    return currentPre / historyPre;
 }
 
 // groupshared float4 g_LDSColorDepth[TILE_PIXELS];
@@ -56,6 +66,8 @@ void TAA(uint3 id : SV_DispatchThreadID)
     UINT2 writePos = id.xy;
     if (writePos.x >= g_TAATexSize.x || writePos.y >= g_TAATexSize.y)
         return;
+    
+    float HistoryPreExposureScale = GetHistoryPreExposureScale();
 
     if (g_UpScaleFactor == 1)
     {
@@ -64,7 +76,7 @@ void TAA(uint3 id : SV_DispatchThreadID)
 
         float2 velocity = Elysia_Sample_Velocity(closetUV);
         float2 preUV = screenUV - velocity;
-        float3 historyColor = CatmullRomSample(g_HistoryTexIndex, preUV, g_TAATexSize.zw);
+        float3 historyColor = CatmullRomSample(g_HistoryTexIndex, preUV, g_TAATexSize.zw) * HistoryPreExposureScale;
         historyColor = ReinhardTonemap(historyColor);
         historyColor = TransformRGB2YCoCg(historyColor);
 
@@ -113,7 +125,7 @@ void TAA(uint3 id : SV_DispatchThreadID)
             Elysia_Save_TAA(g_DestTexIndex, writePos, finalRGB);
             return;
         }
-        float3 historyColor = CatmullRomSample(g_HistoryTexIndex, preUV, g_TAATexSize.zw);
+        float3 historyColor = CatmullRomSample(g_HistoryTexIndex, preUV, g_TAATexSize.zw) * HistoryPreExposureScale;
         historyColor = max(0.0f, historyColor);
         historyColor = ReinhardTonemap(historyColor);
         historyColor = TransformRGB2YCoCg(historyColor);

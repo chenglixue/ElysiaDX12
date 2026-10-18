@@ -12,6 +12,16 @@ cbuffer PassConstant : register(b0, perPassSpace)
     Matrix viewProjMatrix;
     Matrix pre_viewProjMatrix;
     Matrix jitterViewProjMatrix;
+    UINT g_PreExposureScaleBufferIndex;
+    UINT g_PreExposureEnable;
+}
+
+float GetPreExposureScale()
+{
+    if (g_PreExposureEnable == 0)
+        return 1.0f;
+    RWStructuredBuffer<float2> PreExposureScaleBuffer = ResourceDescriptorHeap[g_PreExposureScaleBufferIndex];
+    return PreExposureScaleBuffer[0].g;
 }
 
 struct VSInput
@@ -56,7 +66,7 @@ PSOutput PS(PSInput i)
     float2 currNDCPos = i.currNonJitterPosCS.xy / i.currNonJitterPosCS.w;
     float2 currScreenUV = currNDCPos.xy * 0.5f * float2(1.f, -1.f) + 0.5f;
 
-    o.target0 = SampleTextureCube(SkyboxTexIndex, i.uv.xyz, WarpLinearSampler);
+    o.target0 = SampleTextureCube(SkyboxTexIndex, i.uv.xyz, WarpLinearSampler) * GetPreExposureScale();
     o.Veloctiy = currScreenUV - preScreenUV;
     return o;
 }

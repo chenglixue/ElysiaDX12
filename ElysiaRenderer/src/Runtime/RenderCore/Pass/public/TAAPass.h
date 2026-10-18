@@ -46,6 +46,8 @@ namespace ElysiaRenderer
             static inline size_t g_CurrTexIndex = PropertyToID(L"g_CurrTexIndex");
             static inline size_t g_SourceTexIndex = PropertyToID(L"g_SourceTexIndex");
             static inline size_t g_DestTexIndex = PropertyToID(L"g_DestTexIndex");
+            static inline size_t g_PreExposureScaleBufferIndex = PropertyToID(L"g_PreExposureScaleBufferIndex");
+            static inline size_t g_PreExposureEnable = PropertyToID(L"g_PreExposureEnable");
 
             static inline size_t viewProjMatrix_I = PropertyToID(L"viewProjMatrix_I");
             static inline size_t pre_viewProjMatrix = PropertyToID(L"pre_viewProjMatrix");

@@ -75,6 +75,17 @@ namespace ElysiaRenderer
     };
     extern std::vector<SavedModelTransform> g_ModelTransforms;
 
+    // Editor camera. Restored from [Camera] before the viewport camera is created.
+    // Pitch and yaw are radians, matching FirstPersonCamera.
+    struct SavedCameraPose
+    {
+        Vector3 location = Vector3::Zero;
+        float pitch = 0.0f;
+        float yaw = 0.0f;
+        bool valid = false;
+    };
+    extern SavedCameraPose g_CameraPose;
+
     // Parallel to scene directional-light entities. Restored from [Startup]
     // DirectionalLight* arrays. Missing arrays mean "migrate the legacy [Light]
     // singleton into one actor" on first load.

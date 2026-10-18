@@ -42,6 +42,11 @@ namespace ElysiaRenderer
         RenderTexture* pShadowCastRT = nullptr;
         RenderTexture* pShadowMaskRT = nullptr;
     };
+    
+    struct AutoExposureData
+    {
+        BufferHandle pPreExposureBuffer = nullptr;
+    };
 
     class RenderPassResourceManager : public IManager
     {

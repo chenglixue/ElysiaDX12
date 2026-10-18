@@ -29,7 +29,9 @@ cbuffer PassConstant : register(b0, perPassSpace)
     UINT g_BloomTexIndex;
     float g_LocalExposure;
     UINT g_ExposureScaleBufferIndex;
+    UINT g_PreExposureScaleBufferIndex;
     UINT g_AutoExposureEnable;
+    UINT g_PreExposureEnable;
     float g_BloomIntensity;
     bool u_shoulder;
     bool u_con;
@@ -89,6 +91,12 @@ PSInput VS(UINT vertexID : SV_VertexID)
     return o;
 }
 
+float GetOneOverPreExposureScale()
+{
+    RWStructuredBuffer<float2> PreExposureScaleBuffer = ResourceDescriptorHeap[g_PreExposureScaleBufferIndex];
+    return rcp(max(PreExposureScaleBuffer[0].r, 1e-5f));
+}
+
 PSOutput PS(PSInput i)
 {
     PSOutput o = (PSOutput)0;
@@ -100,12 +108,12 @@ PSOutput PS(PSInput i)
                         rcp((float)BLOOM_MIPMAP_COUNT);
     float4 finalColor = bloomColor + color;
     float autoExposureScale = 1.0f;
+    float OneOverPreExposureScale = 1.f;
     if (g_AutoExposureEnable != 0)
-    {
         autoExposureScale = exposureTex[0].r;
-        // autoExposureScale = LoadTexture2D(g_AutoExposureTexIndex, int2(0, 0)).r;
-    }
-    finalColor *= g_LocalExposure * autoExposureScale;
+    if (g_PreExposureEnable != 0)
+        OneOverPreExposureScale = GetOneOverPreExposureScale();
+    finalColor *= g_LocalExposure * autoExposureScale * OneOverPreExposureScale;
 
     switch (tonemapMode)
     {

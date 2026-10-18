@@ -5,6 +5,7 @@
 #include "Runtime/RenderCore/public/TAAUtility.h"
 
 #include "Editor/public/UserData.h"
+#include "Runtime/RenderCore/public/AutoExposureUtility.h"
 #include "Programs/public/PIXHelper.h"
 #include "Editor/public/IMGUIHelper.h"
 
@@ -20,6 +21,7 @@
 #include "Runtime/RenderCore/public/RenderTexture.h"
 #include "Runtime/RenderCore/public/Material.h"
 #include "Runtime/RenderCore/public/PSOManager.h"
+#include "Runtime/RenderCore/public/RenderPassResourceManager.h"
 #include "Runtime/RenderCore/public/RenderTargetManager.h"
 #include "Runtime/RenderCore/public/ShaderVariantManager.h"
 
@@ -136,6 +138,11 @@ namespace ElysiaRenderer
                                  passID);
             m_pMaterial->SetUINT(ShaderIDs::g_CurrTexIndex, m_pCameraColorRT->GetUAVResourceHeapIndex(), passID);
             m_pMaterial->SetUINT(ShaderIDs::g_DestTexIndex, m_TAARTs[m_writeIndex]->GetUAVResourceHeapIndex(), passID);
+            m_pMaterial->SetUINT(ShaderIDs::g_PreExposureScaleBufferIndex, 
+                RenderPassResourceManager::GetInstance().Get<AutoExposureData>().pPreExposureBuffer->GetUAVResourceHeapIndex(), passID);
+            m_pMaterial->SetUINT(ShaderIDs::g_PreExposureEnable,
+                                 UsePreExposure(UserData::GetInstance().autoExposureParameter) ? 1u : 0u,
+                                 passID);
             m_pMaterial->SetFloat4(ShaderIDs::g_TAATexSize,
                                    GetScreenSize(m_TAAWidth, m_TAAHeight),
                                    passID);

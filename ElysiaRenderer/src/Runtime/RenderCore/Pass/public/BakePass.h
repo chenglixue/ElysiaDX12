@@ -46,6 +46,7 @@ namespace ElysiaRenderer
         Vector4 m_SHCoefficientsTempCount;
         EnvironmentData m_GIData{};
         SubsurfaceScatterData m_subsurfaceScatterData{};
+       
         BufferHandle m_pSHCoefficientsTempBuffer = nullptr;
         RenderTexture* m_pSobolNoiseTex = nullptr;
 

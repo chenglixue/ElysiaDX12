@@ -50,13 +50,6 @@ uint LuminanceToHistogramBin(float Luminance, float EVScale, float EVBias)
     return (uint)(BinPos * (HISTOGRAM_SIZE - 1));
 }
 
-// uint LuminanceToHistogramBin(float luminance, float histogramScale, float histogramBias)
-// {
-//     float logL = log2(max(luminance, 1e-5f));
-//     float bin = saturate(ComputeHistogramBinFromLuminance(logL, histogramScale, histogramBias));
-//     return (uint)(bin * (HISTOGRAM_SIZE - 1));
-// }
-
 // UE PostProcessVisualizeHDR.usf Colorize: 0=cold (blue) .. 0.5=green .. 1=hot (red).
 float3 AutoExposureColorize(float x)
 {

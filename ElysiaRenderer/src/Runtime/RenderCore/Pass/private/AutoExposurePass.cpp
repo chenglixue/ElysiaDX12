@@ -18,6 +18,7 @@
 #include "Runtime/RenderCore/public/RenderTargetManager.h"
 #include "Runtime/RenderCore/public/ShaderVariantManager.h"
 #include "Runtime/RenderCore/public/AutoExposureUtility.h"
+#include "Runtime/RenderCore/public/RenderPassResourceManager.h"
 
 namespace ElysiaRenderer
 {
@@ -47,6 +48,11 @@ namespace ElysiaRenderer
         {
             BufferManager::GetInstance().DestoryBuffer(m_pExposureScaleBuffer);
             m_pExposureScaleBuffer.reset();
+        }
+        if (m_pPreExposureBuffer)
+        {
+            BufferManager::GetInstance().DestoryBuffer(m_pPreExposureBuffer);
+            m_pPreExposureBuffer.reset();
         }
         m_pHistogramRT = nullptr;
         m_pHDRSnapshotRT = nullptr;
@@ -86,6 +92,19 @@ namespace ElysiaRenderer
             m_pDisplayRT->GetFormat(),
             true,
             RenderResource::GetInstance().GetPropertyName(RenderTextureIDs::AutoExposureHdrSnapshotRTID));
+        
+        // x = history pre-exposure, y = current pre-exposure. First frame both are 1.
+        const Vector2 preExposureInit(1.0f, 1.0f);
+        m_pPreExposureBuffer = BufferManager::GetInstance().CreateVertexBuffer(BufferCreationDesc{
+            .name = RenderResource::GetInstance().GetPropertyName(RenderTextureIDs::AutoExposurePreScaleRTID),
+            .stride = sizeof(Vector2),
+            .size = sizeof(Vector2),
+            .viewFlags = GPUResourceFlags::UAV | GPUResourceFlags::SRV,
+            .accessFlags = BufferAccessFlags::GPUOnly,
+            .InitData = &preExposureInit,
+        });
+        m_autoExposureData.pPreExposureBuffer = m_pPreExposureBuffer;
+        RenderPassResourceManager::GetInstance().Create<AutoExposureData>(&m_autoExposureData);
 
         m_shaderPasses.assign(std::begin(PassData), std::end(PassData));
         for (auto& pass : m_shaderPasses)
@@ -144,6 +163,9 @@ namespace ElysiaRenderer
         m_pMaterial->SetUINT(ShaderIDs::g_ExposureBufferScaleIndex,
                              m_pExposureScaleBuffer->GetUAVResourceHeapIndex(),
                              passID);
+        m_pMaterial->SetUINT(ShaderIDs::g_PreExposureScaleBufferIndex,
+                             RenderPassResourceManager::GetInstance().Get<AutoExposureData>().pPreExposureBuffer->GetUAVResourceHeapIndex(),
+                             passID);
         m_pMaterial->SetUINT(ShaderIDs::g_HistogramTexIndex,
                              m_pHistogramRT->GetUAVResourceHeapIndex(),
                              passID);
@@ -159,6 +181,7 @@ namespace ElysiaRenderer
         m_pMaterial->SetFloat(ShaderIDs::g_MaxAverageLuminance, p.maxAverageLuminance, passID);
         m_pMaterial->SetFloat(ShaderIDs::g_MiddleGrey, p.middleGrey, passID);
         m_pMaterial->SetFloat(ShaderIDs::g_ExposureCompensationEV, p.exposureCompensation, passID);
+        m_pMaterial->SetUINT(ShaderIDs::g_PreExposureEnable, UsePreExposure(p) ? 1u : 0u, passID);
     }
 
     void AutoExposurePass::DoClearHistogram()
@@ -231,6 +254,24 @@ namespace ElysiaRenderer
         m_pCommand->AddBarrier(m_pHistogramRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
     }
 
+    void AutoExposurePass::DoResetPreExposure()
+    {
+        auto passID = RESET_PRE_EXPOSURE_PASS;
+        auto& passData = m_pMaterial->GetPassData(passID);
+        PIXHelper pix(m_pCommand->GetCommandList(), passData.Name.c_str());
+
+        PipelineInfo pipelineStateData{};
+        pipelineStateData.m_pipelineStateObject = passData.pPipelineStateObject;
+        m_pCommand->SetPipeline(pipelineStateData);
+        SetSpaceResource(passData, PER_FRAME_SPACE);
+
+        m_pCommand->AddBarrier(m_pPreExposureBuffer, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+        BindCommonParams(passID);
+        SetSpaceResource(passData, PER_PASS_SPACE);
+        m_pCommand->Dispatch(1, 1, 1);
+        m_pCommand->AddUAVBarrier(m_pPreExposureBuffer);
+    }
+
     void AutoExposurePass::DoSnapshotHdr()
     {
         if (!m_pDisplayRT)
@@ -258,6 +299,8 @@ namespace ElysiaRenderer
     void AutoExposurePass::Render(FrameContext& context)
     {
         const auto& ae = UserData::GetInstance().autoExposureParameter;
+        if (!UsePreExposure(ae))
+            DoResetPreExposure();
         if (!WantsAutoExposureHistogram(ae))
             return;
 

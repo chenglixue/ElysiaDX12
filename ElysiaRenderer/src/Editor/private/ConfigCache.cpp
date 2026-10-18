@@ -688,6 +688,7 @@ namespace ElysiaRenderer
         setBool("Debug", "EnableHIZ", data.EnableHIZ);
 
         setBool("AutoExposure", "Enable", data.autoExposureParameter.enable);
+        setBool("AutoExposure", "EnablePreExposure", data.autoExposureParameter.enablePreExposure);
         setFloat("AutoExposure", "LowPercent", data.autoExposureParameter.lowPercent);
         setFloat("AutoExposure", "HighPercent", data.autoExposureParameter.highPercent);
         setFloat("AutoExposure", "HistogramLogMin", data.autoExposureParameter.minLogLuminance);
@@ -946,6 +947,15 @@ namespace ElysiaRenderer
                         g_BasicShapes[i].name = (*names)[i];
                 }
             }
+        }
+
+        std::string cameraLocation;
+        if (TryGet("Camera", "Location", cameraLocation) &&
+            ParseVector3(cameraLocation, g_CameraPose.location))
+        {
+            setFloat("Camera", "Pitch", g_CameraPose.pitch);
+            setFloat("Camera", "Yaw", g_CameraPose.yaw);
+            g_CameraPose.valid = true;
         }
     }
 
@@ -1327,6 +1337,7 @@ namespace ElysiaRenderer
         emitBool("Debug", "EnableHIZ", data.EnableHIZ);
 
         emitBool("AutoExposure", "Enable", data.autoExposureParameter.enable);
+        emitBool("AutoExposure", "EnablePreExposure", data.autoExposureParameter.enablePreExposure);
         emitFloat("AutoExposure", "LowPercent", data.autoExposureParameter.lowPercent);
         emitFloat("AutoExposure", "HighPercent", data.autoExposureParameter.highPercent);
         emitFloat("AutoExposure", "HistogramLogMin", data.autoExposureParameter.minLogLuminance);
@@ -1359,6 +1370,13 @@ namespace ElysiaRenderer
 
         emitFloat("SSSR", "RoughnessThreshold", data.sssrParameter.roughnessThreshold);
         emitInt("SSSR", "SamplesPerQuad", static_cast<int>(data.sssrParameter.samplesPerQuad));
+
+        if (g_CameraPose.valid)
+        {
+            emitVector("Camera", "Location", g_CameraPose.location);
+            emitFloat("Camera", "Pitch", g_CameraPose.pitch);
+            emitFloat("Camera", "Yaw", g_CameraPose.yaw);
+        }
 
         const std::filesystem::path saved = ExeDirectory() / "Saved" / "Config" / "Windows" / "Engine.ini";
         std::error_code ec;

@@ -42,6 +42,9 @@ namespace ElysiaRenderer
     struct AutoExposureParameter
     {
         bool enable = true;
+        // Bake last frame's exposure into Scene Color. Off keeps metering and tonemap,
+        // but does not premultiply lighting, sky, or TAA history.
+        bool enablePreExposure = true;
 
         // Fraction of histogram mass to skip from dark / keep up to from dark (UE Low/High Percent as 0..1).
         // Defaults match UE 4.25+ Histogram Low 10% / High 90%.
@@ -75,6 +78,11 @@ namespace ElysiaRenderer
     inline bool WantsAutoExposureHistogram(const AutoExposureParameter& p)
     {
         return p.enable || p.visualizeHDR;
+    }
+
+    inline bool UsePreExposure(const AutoExposureParameter& p)
+    {
+        return p.enable && p.enablePreExposure;
     }
 
     // UE EV100 <-> luminance with LuminanceMax = 1 (unitless / lens attenuation 0.78).

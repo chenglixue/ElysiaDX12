@@ -55,6 +55,8 @@ namespace ElysiaRenderer
 
             static inline size_t g_SHCoefficientsBufferIndex = PropertyToID(L"g_SHCoefficientsBufferIndex");
             static inline size_t g_SobolNoiseTexIndex = PropertyToID(L"g_SobolNoiseTexIndex");
+            static inline size_t g_PreExposureScaleBufferIndex = PropertyToID(L"g_PreExposureScaleBufferIndex");
+            static inline size_t g_PreExposureEnable = PropertyToID(L"g_PreExposureEnable");
         };
 
         UINT m_cameraWidth;

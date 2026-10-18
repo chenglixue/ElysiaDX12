@@ -5,6 +5,8 @@
 
 #include "Runtime/Engine/ECS/public/Entity.h"
 #include "Runtime/Engine/ECS/public/LightComponent.h"
+#include "Runtime/RenderCore/public/CameraManager.h"
+#include "Runtime/RenderCore/public/DX12Camera.h"
 #include "Runtime/RenderCore/public/SceneManager.h"
 
 namespace ElysiaRenderer
@@ -13,6 +15,7 @@ namespace ElysiaRenderer
     std::unique_ptr<UserData> UserData::m_instance;
     std::vector<std::wstring> g_ModelPaths;
     std::vector<SavedModelTransform> g_ModelTransforms;
+    SavedCameraPose g_CameraPose;
     std::vector<SavedDirectionalLight> g_DirectionalLights;
     bool g_HasExplicitDirectionalLights = false;
     bool g_DirectionalLightsSpawned = false;
@@ -101,6 +104,18 @@ namespace ElysiaRenderer
                     g_HasExplicitBasicShapes = true;
                     g_BasicShapes = std::move(rebuilt);
                 }
+            }
+        }
+
+        if (!SceneManager::GetInstance().IsPlaying())
+        {
+            auto* camera = dynamic_cast<FirstPersonCamera*>(CameraManager::GetInstance().GetMainCamera());
+            if (camera)
+            {
+                g_CameraPose.location = camera->GetPosition();
+                g_CameraPose.pitch = camera->GetXRotation();
+                g_CameraPose.yaw = camera->GetYRotation();
+                g_CameraPose.valid = true;
             }
         }
 

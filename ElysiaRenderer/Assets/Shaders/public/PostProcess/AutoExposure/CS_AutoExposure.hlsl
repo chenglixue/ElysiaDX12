@@ -10,6 +10,7 @@ cbuffer PassConstant : register(b0, perPassSpace)
     UINT g_SourceTexIndex;
     UINT g_HistogramBufferIndex;
     UINT g_ExposureScaleBufferIndex;
+    UINT g_PreExposureScaleBufferIndex;
     UINT g_HistogramTexIndex;
     Vector4 g_SourceSize;
 
@@ -22,6 +23,7 @@ cbuffer PassConstant : register(b0, perPassSpace)
     float g_MaxAverageLuminance;
     float g_MiddleGrey;
     float g_ExposureCompensationEV;
+    UINT g_PreExposureEnable;
 }
 
 CLEAR_HISTOGRAM_THREAD_GROUP
@@ -32,6 +34,14 @@ void ClearHistogram(uint3 dispatchThreadID : SV_DispatchThreadID)
 }
 
 groupshared uint GSLocalHistogram[HISTOGRAM_SIZE];
+
+float GetOneOverPreExposureScale()
+{
+    if (g_PreExposureEnable == 0)
+        return 1.0f;
+    RWStructuredBuffer<float2> PreExposureScaleBuffer = ResourceDescriptorHeap[g_PreExposureScaleBufferIndex];
+    return rcp(PreExposureScaleBuffer[0].g);
+}
 
 BUILD_HISTOGRAM_THREAD_GROUP
 void BuildHistogram(uint3 DispatchThreadID : SV_DispatchThreadID, uint GroupIndex : SV_GroupIndex)
@@ -49,7 +59,8 @@ void BuildHistogram(uint3 DispatchThreadID : SV_DispatchThreadID, uint GroupInde
     uint2 SourceSize = (uint2)g_SourceSize.xy;
     if (SamplePos.x < SourceSize.x && SamplePos.y < SourceSize.y)
     {
-        float3 SourceColor = LoadTexture2D(g_SourceTexIndex, SamplePos);
+        float OneOverPreExposureScale = GetOneOverPreExposureScale();
+        float3 SourceColor = LoadTexture2D(g_SourceTexIndex, SamplePos) * OneOverPreExposureScale;
         float Luminance = AutoExposureLuminance(SourceColor);
         uint BinIndex = LuminanceToHistogramBin(Luminance, g_HistogramScale, g_HistogramBias);
         InterlockedAdd(GSLocalHistogram[BinIndex], 1);
@@ -81,12 +92,42 @@ void BuildHistogram(uint3 DispatchThreadID : SV_DispatchThreadID, uint GroupInde
 
 groupshared uint GSGlobalHistogram[HISTOGRAM_SIZE];
 
+// r = scale with EV, g = scale without EV, b = avg lum, a = middleGrey * exp2(EV)
+void UpdateExposureScaleBuffer(RWStructuredBuffer<float4> ExposureScaleBuffer, 
+    float ExposureScale, float ExposureScaleWithoutEV, float AvgLuminance, float MiddleGreyLuminance)
+{
+    ExposureScaleBuffer[0] = float4(ExposureScale, ExposureScaleWithoutEV, AvgLuminance, MiddleGreyLuminance);
+}
+void UpdateHistoryPreExposureScaleBuffer(RWStructuredBuffer<float2> PreExposureScaleBuffer)
+{
+    PreExposureScaleBuffer[0].r = PreExposureScaleBuffer[0].g;
+}
+void UpdateCurrPreExposureScaleBuffer(RWStructuredBuffer<float2> PreExposureScaleBuffer, float NewExposureScale)
+{
+    PreExposureScaleBuffer[0].g = NewExposureScale;
+}
+void ApplyPreExposureUpdate(RWStructuredBuffer<float2> PreExposureScaleBuffer, float newScale)
+{
+    if (g_PreExposureEnable == 0)
+        return;
+    UpdateHistoryPreExposureScaleBuffer(PreExposureScaleBuffer);
+    UpdateCurrPreExposureScaleBuffer(PreExposureScaleBuffer, newScale);
+}
+
+[numthreads(1, 1, 1)]
+void ResetPreExposure()
+{
+    RWStructuredBuffer<float2> PreExposureScaleBuffer = ResourceDescriptorHeap[g_PreExposureScaleBufferIndex];
+    PreExposureScaleBuffer[0] = float2(1.0f, 1.0f);
+}
+
 COMPUTE_EXPOSURE_THREAD_GROUP
 void ComputeExposure(uint groupIndex : SV_GroupIndex)
 {
     RWStructuredBuffer<uint> HistogramBuffer = ResourceDescriptorHeap[g_HistogramBufferIndex];
     RWTexture2D<UINT> HistogramRT = ResourceDescriptorHeap[g_HistogramTexIndex];
     RWStructuredBuffer<float4> ExposureScaleBuffer = ResourceDescriptorHeap[g_ExposureScaleBufferIndex];
+    RWStructuredBuffer<float2> PreExposureScaleBuffer = ResourceDescriptorHeap[g_PreExposureScaleBufferIndex];
     
     if (groupIndex < HISTOGRAM_SIZE)
     {
@@ -111,6 +152,7 @@ void ComputeExposure(uint groupIndex : SV_GroupIndex)
     if (SumBin < 1.f)
     {
         ExposureScaleBuffer[0] = float4(1.f, 1.f, 0.f, MiddleGreyLuminance);
+        ApplyPreExposureUpdate(PreExposureScaleBuffer, 1.f);
         return;
     }
     
@@ -139,18 +181,19 @@ void ComputeExposure(uint groupIndex : SV_GroupIndex)
     if (TotalCount < 1.f)
     {
         ExposureScaleBuffer[0] = float4(1.f, 1.f, 0.f, MiddleGreyLuminance);
+        ApplyPreExposureUpdate(PreExposureScaleBuffer, 1.f);
         return;
     }
     
-    float AverEV = TotalEv * rcp(max(TotalCount, 1e-5));
-    float AverLuminance = ComputeLuminanceFromLogLuminance(AverEV);
-    float ClampAverLuminance = clamp(AverLuminance, g_MinAverageLuminance, g_MaxAverageLuminance);
+    float AvgEV = TotalEv * rcp(max(TotalCount, 1e-5));
+    float AvgLuminance = ComputeLuminanceFromLogLuminance(AvgEV);
+    float ClampAverLuminance = clamp(AvgLuminance, g_MinAverageLuminance, g_MaxAverageLuminance);
     
     float ExposureScale = MiddleGreyLuminance / max(ClampAverLuminance, 1e-5);
     float ExposureScaleWithoutEV = g_MiddleGrey * rcp(max(ClampAverLuminance, 1e-5));
     
-    // r = scale with EV, g = scale without EV, b = avg lum, a = middleGrey * exp2(EV)
-    ExposureScaleBuffer[0] = float4(ExposureScale, ExposureScaleWithoutEV, AverLuminance, MiddleGreyLuminance);
+    UpdateExposureScaleBuffer(ExposureScaleBuffer, ExposureScale, ExposureScaleWithoutEV, AvgLuminance, MiddleGreyLuminance);
+    ApplyPreExposureUpdate(PreExposureScaleBuffer, ExposureScale);
 }
 
 // CLEAR_HISTOGRAM_THREAD_GROUP

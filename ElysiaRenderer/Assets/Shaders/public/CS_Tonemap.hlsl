@@ -22,7 +22,9 @@ cbuffer PassConstant : register(b0, perPassSpace)
     UINT g_BloomTexIndex;
     float g_LocalExposure;
     UINT g_ExposureScaleBufferIndex;
+    UINT g_PreExposureScaleBufferIndex;
     UINT g_AutoExposureEnable;
+    UINT g_PreExposureEnable;
     float g_BloomIntensity;
     bool u_shoulder;
     bool u_con;
@@ -48,6 +50,12 @@ uint4 LpmFilterCtl(uint i)
 
 #include "private/ffx_lpm.h"
 
+float GetOneOverPreExposureScale()
+{
+    RWStructuredBuffer<float2> PreExposureScaleBuffer = ResourceDescriptorHeap[g_PreExposureScaleBufferIndex];
+    return rcp(max(PreExposureScaleBuffer[0].r, 1e-5f));
+}
+
 [numthreads(8, 8, 1)]
 void Tonemap(uint3 dispatchThreadID: SV_DispatchThreadID)
 {
@@ -59,11 +67,12 @@ void Tonemap(uint3 dispatchThreadID: SV_DispatchThreadID)
     float4 bloomColor = SampleTexture2D(g_BloomTexIndex, screenUV, ClampLinearSampler);
     finalColor += bloomColor * g_BloomIntensity * rcp((float)BLOOM_MIPMAP_COUNT);
     float autoExposureScale = 1.0f;
+    float OneOverPreExposureScale = 1.f;
     if (g_AutoExposureEnable != 0)
-    {
         autoExposureScale = exposureScaleBuffer[0].r;
-    }
-    finalColor *= g_LocalExposure * autoExposureScale;
+    if (g_PreExposureEnable != 0)
+        OneOverPreExposureScale = GetOneOverPreExposureScale();
+    finalColor *= g_LocalExposure * autoExposureScale * OneOverPreExposureScale;
 
     switch (tonemapMode)
     {
