@@ -71,13 +71,17 @@ namespace ElysiaRenderer
             .accessFlags = BufferAccessFlags::GPUOnly,
         });
         
-        m_pExposureScaleBuffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc{
+        // .r = scale with EV, .g = scale without EV, .b = avg lum, .a = middleGrey * exp2(EV)
+        const Vector4 exposureInit(1.0f, 1.0f, 0.0f, 0.18f);
+        m_pExposureScaleBuffer = BufferManager::GetInstance().CreateVertexBuffer(BufferCreationDesc{
             .name = RenderResource::GetInstance().GetPropertyName(RenderTextureIDs::AutoExposureScaleRTID),
             .stride = EXPOSURE_ELEMENT_SIZE,
             .size = EXPOSURE_ELEMENT_SIZE,
             .viewFlags = GPUResourceFlags::UAV | GPUResourceFlags::SRV,
-            .accessFlags = BufferAccessFlags::GPUOnly
+            .accessFlags = BufferAccessFlags::GPUOnly,
+            .InitData = &exposureInit,
             });
+        m_snapExposure = true;
 
         m_pHistogramRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(
             HISTOGRAM_SIZE,
@@ -184,7 +188,9 @@ namespace ElysiaRenderer
         m_pMaterial->SetFloat(ShaderIDs::g_ExposureSpeedUp, p.speedUp, passID);
         m_pMaterial->SetFloat(ShaderIDs::g_ExposureSpeedDown, p.speedDown, passID);
         m_pMaterial->SetFloat(ShaderIDs::g_ExponentialTransitionDistance, p.exponentialTransitionDistance, passID);
+        m_pMaterial->SetFloat(ShaderIDs::g_DeltaTime, m_deltaTime, passID);
         m_pMaterial->SetUINT(ShaderIDs::g_PreExposureEnable, UsePreExposure(p) ? 1u : 0u, passID);
+        m_pMaterial->SetFloat(ShaderIDs::g_ForceTarget, m_snapExposure ? 1.0f : 0.0f, passID);
     }
 
     void AutoExposurePass::DoClearHistogram()
@@ -245,6 +251,7 @@ namespace ElysiaRenderer
         m_pCommand->AddBarrier(m_pHistogramBuffer, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
         m_pCommand->AddBarrier(m_pExposureScaleBuffer, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
         m_pCommand->AddBarrier(m_pHistogramRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+        m_pCommand->AddBarrier(m_pPreExposureBuffer, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
         BindCommonParams(passID);
         SetSpaceResource(passData, PER_PASS_SPACE);
@@ -252,9 +259,11 @@ namespace ElysiaRenderer
         m_pCommand->Dispatch(1, 1, 1);
         m_pCommand->AddUAVBarrier(m_pExposureScaleBuffer, false);
         m_pCommand->AddUAVBarrier(m_pHistogramRT, false);
+        m_pCommand->AddUAVBarrier(m_pPreExposureBuffer, false);
 
         m_pCommand->AddBarrier(m_pExposureScaleBuffer, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
         m_pCommand->AddBarrier(m_pHistogramRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+        m_snapExposure = false;
     }
 
     void AutoExposurePass::DoResetPreExposure()
@@ -301,6 +310,8 @@ namespace ElysiaRenderer
 
     void AutoExposurePass::Render(FrameContext& context)
     {
+        m_deltaTime = context.deltaTime;
+
         const auto& ae = UserData::GetInstance().autoExposureParameter;
         if (!UsePreExposure(ae))
             DoResetPreExposure();

@@ -708,18 +708,18 @@ namespace ElysiaEngine
         m_frameIndex ++;
         m_frameID = (m_frameID + 1) % ElysiaHelper::NUM_FRAMES_IN_FLIGHT;
 
+        m_pDevice->BeginFrame(m_frameID);
+
+        double timeNow = MillisecondsNow();
+        m_deltaTime = timeNow - m_lastFrameTime;
+        m_lastFrameTime = timeNow;
+
         FrameContext frameContext
         {
             .frameID = m_frameID,
             .frameIndex = m_frameIndex,
+            .deltaTime = (float)(m_deltaTime * 0.001),
         };
-
-        m_pDevice->BeginFrame(m_frameID);
-
-        // Get timings
-        double timeNow = MillisecondsNow();
-        m_deltaTime = (float)(timeNow - m_lastFrameTime);
-        m_lastFrameTime = timeNow;
 
         return frameContext;
     }

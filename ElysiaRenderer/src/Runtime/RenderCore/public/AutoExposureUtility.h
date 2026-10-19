@@ -38,8 +38,8 @@ namespace ElysiaRenderer
         constexpr int StatsColumnWidth = 250;
     }
 
-    // UE-style Histogram Auto Exposure. Temporal smoothing parameters are wired
-    // through, but ComputeExposure still applies the target scale immediately.
+    // UE-style Histogram Auto Exposure. ComputeExposure adapts toward the
+    // target scale in f-stops using Speed Up / Speed Down.
     struct AutoExposureParameter
     {
         bool enable = true;
@@ -70,8 +70,8 @@ namespace ElysiaRenderer
         // Middle grey target (UE 4.25+: 18%).
         float middleGrey = 0.18f;
 
-        // Temporal eye adaptation, in f-stops per second. Not applied yet.
-        // UE defaults: Speed Up 3, Speed Down 1.
+        // Temporal eye adaptation, in f-stops per second.
+        // UE defaults: Speed Up 3 (dark -> bright), Speed Down 1 (bright -> dark).
         // ExponentialTransitionDistance is r.EyeAdaptation.ExponentialTransitionDistance (1.5 stops).
         float speedUp = 3.0f;
         float speedDown = 1.0f;
@@ -125,6 +125,9 @@ namespace ElysiaRenderer
                                                     maxAverageLuminance,
                                                     exposureCompensation,
                                                     middleGrey,
+                                                    speedUp,
+                                                    speedDown,
+                                                    exponentialTransitionDistance,
                                                     visualizeHDR,
                                                     visualizeDebugType,
                                                     visualizeLuminanceScale)

@@ -44,6 +44,8 @@ namespace ElysiaRenderer
     private:
         UINT m_displayWidth = 0;
         UINT m_displayHeight = 0;
+        float m_deltaTime = 1.0f / 60.0f;
+        bool m_snapExposure = true;
 
         BufferHandle m_pHistogramBuffer;
         BufferHandle m_pPreExposureBuffer;
@@ -78,7 +80,9 @@ namespace ElysiaRenderer
             static inline size_t g_ExposureSpeedUp = PropertyToID(L"g_ExposureSpeedUp");
             static inline size_t g_ExposureSpeedDown = PropertyToID(L"g_ExposureSpeedDown");
             static inline size_t g_ExponentialTransitionDistance = PropertyToID(L"g_ExponentialTransitionDistance");
+            static inline size_t g_DeltaTime = PropertyToID(L"g_DeltaTime");
             static inline size_t g_PreExposureEnable = PropertyToID(L"g_PreExposureEnable");
+            static inline size_t g_ForceTarget = PropertyToID(L"g_ForceTarget");
         };
 
         void BindCommonParams(PassID passID);

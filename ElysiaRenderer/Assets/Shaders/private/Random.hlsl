@@ -598,13 +598,13 @@ float4 VoronoiNoise3D_ALU(float3 v, int Quality, bool bTiling, float RepeatSize,
     // quality level 3: do a 3x3x3 search
     if (Quality == 3)
     {
-        [UNROLL(3)]
+        [unroll(3)]
         for (offset.x = -1; offset.x <= 1; ++offset.x)
         {
-            [UNROLL(3)]
+            [unroll(3)]
             for (offset.y = -1; offset.y <= 1; ++offset.y)
             {
-                [UNROLL(3)]
+                [unroll(3)]
                 for (offset.z = -1; offset.z <= 1; ++offset.z)
                 {
                     p = offset + VoronoiCornerSample(NoiseTileWrap(iv2 + offset, bTiling, RepeatSize), Quality);
@@ -617,13 +617,13 @@ float4 VoronoiNoise3D_ALU(float3 v, int Quality, bool bTiling, float RepeatSize,
     // everybody else searches a base 2x2x2 neighborhood
     else
     {
-        [UNROLL(2)]
+        [unroll(2)]
         for (offset.x = 0; offset.x <= 1; ++offset.x)
         {
-            [UNROLL(2)]
+            [unroll(2)]
             for (offset.y = 0; offset.y <= 1; ++offset.y)
             {
-                [UNROLL(2)]
+                [unroll(2)]
                 for (offset.z = 0; offset.z <= 1; ++offset.z)
                 {
                     p = offset + VoronoiCornerSample(NoiseTileWrap(iv + offset, bTiling, RepeatSize), Quality);
@@ -645,13 +645,13 @@ float4 VoronoiNoise3D_ALU(float3 v, int Quality, bool bTiling, float RepeatSize,
     // quality level 4: add extra sets of four cells in each direction
     if (Quality >= 4)
     {
-        [UNROLL(2)]
+        [unroll(2)]
         for (offset.x = -1; offset.x <= 2; offset.x += 3)
         {
-            [UNROLL(2)]
+            [unroll(2)]
             for (offset.y = 0; offset.y <= 1; ++offset.y)
             {
-                [UNROLL(2)]
+                [unroll(2)]
                 for (offset.z = 0; offset.z <= 1; ++offset.z)
                 {
                     // along x axis
@@ -721,12 +721,12 @@ float4 ComputeSimplexWeights3D(float3 OrthogonalPos, out float3 PosA, out float3
     float GB = OrthogonalPos.y - OrthogonalPos.z;
 
     ret.b =
-        min(max(0, RG), max(0, RB))      // X
-        + min(max(0, -RG), max(0, GB))   // Y
+        min(max(0, RG), max(0, RB)) // X
+        + min(max(0, -RG), max(0, GB)) // Y
         + min(max(0, -RB), max(0, -GB)); // Z
 
     ret.a =
-        min(max(0, -RG), max(0, -RB))  // X
+        min(max(0, -RG), max(0, -RB)) // X
         + min(max(0, RG), max(0, -GB)) // Y
         + min(max(0, RB), max(0, GB)); // Z
 
@@ -741,14 +741,17 @@ float2 SkewSimplex(float2 In)
 {
     return In + dot(In, (sqrt(3.0f) - 1.0f) * 0.5f);
 }
+
 float2 UnSkewSimplex(float2 In)
 {
     return In - dot(In, (3.0f - sqrt(3.0f)) / 6.0f);
 }
+
 float3 SkewSimplex(float3 In)
 {
     return In + dot(In, 1.0 / 3.0f);
 }
+
 float3 UnSkewSimplex(float3 In)
 {
     return In - dot(In, 1.0 / 6.0f);
@@ -762,6 +765,7 @@ inline uint3 hash_int(uint3 x)
     x = ((x >> 8) ^ x.yzx) * k;
     return (x);
 }
+
 inline uint4 hash_int(uint4 x)
 {
     const uint k = 1103515245;
@@ -770,6 +774,7 @@ inline uint4 hash_int(uint4 x)
     x = ((x >> 8) ^ x.yzwx) * k;
     return (x);
 }
+
 inline uint2 hash_int(uint2 x)
 {
     const uint k = 1103515245;

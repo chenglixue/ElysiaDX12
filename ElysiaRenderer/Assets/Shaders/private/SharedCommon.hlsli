@@ -30,6 +30,11 @@
 #define Shading_Model_ID_Clear_Coat 7
 #define Shading_Model_ID_Two_Sided_Foliage 8
 
+#define UNROLL [unroll]
+#define LOOP [loop]
+#define BRANCH [branch]
+#define FLATTEN [flatten]
+
 #define Vector2  float2
 #define Vector3  float3
 #define Vector4  float4

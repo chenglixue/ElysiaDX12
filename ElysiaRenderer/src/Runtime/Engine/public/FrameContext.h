@@ -14,6 +14,7 @@ namespace ElysiaEngine
     {
         UINT frameID;
         UINT64 frameIndex;
+        float deltaTime = 1.0f / 60.0f; // seconds
         std::vector<ElysiaRenderer::RenderItem> renderList;
         std::function<void()> buildUI;
         ElysiaRenderer::DX12Camera* pCamera;

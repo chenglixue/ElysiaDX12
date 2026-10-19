@@ -50,6 +50,49 @@ uint LuminanceToHistogramBin(float Luminance, float EVScale, float EVBias)
     return (uint)(BinPos * (HISTOGRAM_SIZE - 1));
 }
 
+// UE ComputeEyeAdaptation: adapt in log2 (f-stop) space.
+// Far from target: linear at Speed stops/s. Nearer than StartDistance: exponential.
+float AutoExposureExponentialAdapt(float Current, float Target, float FrameTime, float Speed, float M)
+{
+    float Factor = 1.0f - exp2(-FrameTime * Speed);
+    return Current + (Target - Current) * Factor * M;
+}
+
+float AutoExposureLinearAdapt(float Current, float Target, float FrameTime, float Speed)
+{
+    float Offset = FrameTime * Speed;
+    return (Current < Target) ? min(Target, Current + Offset) : max(Target, Current - Offset);
+}
+
+float AutoExposureExponentialM(float Speed, float StartDistance)
+{
+    const float kFrameTimeEps = 1.0f / 60.0f;
+    float StartTime = StartDistance / max(Speed, 1e-3f);
+    float Denom = (1.0f - exp2(-kFrameTimeEps * Speed)) * StartTime;
+    return kFrameTimeEps / max(Denom, 1e-5f);
+}
+
+// OldExposure / TargetExposure are scene brightness relative to middle grey (avgLum / middleGrey), not the multiply scale.
+float AutoExposureAdapt(float OldExposure, float TargetExposure, float FrameTime,
+                        float SpeedUp, float SpeedDown, float StartDistance, float ForceTarget)
+{
+    OldExposure = max(OldExposure, 1e-5f);
+    TargetExposure = max(TargetExposure, 1e-5f);
+    FrameTime = clamp(FrameTime, 1e-4f, 0.1f);
+
+    float LogTarget = log2(TargetExposure);
+    float LogOld = log2(OldExposure);
+    float LogDiff = LogTarget - LogOld;
+    float Speed = max((LogDiff > 0.0f) ? SpeedUp : SpeedDown, 0.0f);
+    float M = AutoExposureExponentialM(Speed, StartDistance);
+
+    float LogExp = AutoExposureExponentialAdapt(LogOld, LogTarget, FrameTime, Speed, M);
+    float LogLin = AutoExposureLinearAdapt(LogOld, LogTarget, FrameTime, Speed);
+    float LogAdapted = abs(LogDiff) > StartDistance ? LogLin : LogExp;
+    float Adapted = exp2(LogAdapted);
+    return lerp(Adapted, TargetExposure, saturate(ForceTarget));
+}
+
 // UE PostProcessVisualizeHDR.usf Colorize: 0=cold (blue) .. 0.5=green .. 1=hot (red).
 float3 AutoExposureColorize(float x)
 {
