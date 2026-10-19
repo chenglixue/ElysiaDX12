@@ -33,6 +33,8 @@ namespace ElysiaRenderer
 
         virtual void Configure() override;
         virtual void Render(FrameContext& context) override;
+        // Graphics-queue init. Must run before lighting reads the pre-exposure buffer.
+        void EnsureInitialExposure();
         virtual void Dispose() override;
         virtual void UpdatePipeline() override;
 
@@ -46,6 +48,7 @@ namespace ElysiaRenderer
         UINT m_displayHeight = 0;
         float m_deltaTime = 1.0f / 60.0f;
         bool m_snapExposure = true;
+        bool m_exposureInitialized = false;
 
         BufferHandle m_pHistogramBuffer;
         BufferHandle m_pPreExposureBuffer;
@@ -57,7 +60,8 @@ namespace ElysiaRenderer
         X(CLEAR_HISTOGRAM_PASS,  "public\\PostProcess\\AutoExposure\\CS_AutoExposure.hlsl", true, ClearHistogram) \
         X(BUILD_HISTOGRAM_PASS,  "public\\PostProcess\\AutoExposure\\CS_AutoExposure.hlsl", true, BuildHistogram) \
         X(COMPUTE_EXPOSURE_PASS, "public\\PostProcess\\AutoExposure\\CS_AutoExposure.hlsl", true, ComputeExposure) \
-        X(RESET_PRE_EXPOSURE_PASS, "public\\PostProcess\\AutoExposure\\CS_AutoExposure.hlsl", true, ResetPreExposure)
+        X(RESET_PRE_EXPOSURE_PASS, "public\\PostProcess\\AutoExposure\\CS_AutoExposure.hlsl", true, ResetPreExposure) \
+        X(INIT_EXPOSURE_PASS, "public\\PostProcess\\AutoExposure\\CS_AutoExposure.hlsl", true, InitExposureState)
         DECLARE_SHADER_PASSES(AUTO_EXPOSURE_PASS_LIST, AUTO_EXPOSURE_PASS_COUNT);
 #undef AUTO_EXPOSURE_PASS_LIST
 
@@ -90,6 +94,7 @@ namespace ElysiaRenderer
         void DoBuildHistogram();
         void DoComputeExposure();
         void DoResetPreExposure();
+        void DoInitExposureState();
         void DoSnapshotHdr();
     };
 }

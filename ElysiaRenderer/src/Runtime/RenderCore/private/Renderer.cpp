@@ -251,6 +251,8 @@ namespace ElysiaRenderer
 
         for (auto& pass : m_passes)
         {
+            if (auto* autoExposure = dynamic_cast<AutoExposurePass*>(pass.get()))
+                autoExposure->EnsureInitialExposure();
             pass->Render(frameContext);
         }
 

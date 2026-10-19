@@ -152,6 +152,7 @@ bool ComputeExposureSetup(UINT GroupIndex,
     {
         HistogramRT[UINT2(GroupIndex, 0)] = GSGlobalHistogram[GroupIndex] = HistogramBuffer[GroupIndex];
     }
+    GroupMemoryBarrierWithGroupSync();
 
     if (GroupIndex > 0)
     {
@@ -242,10 +243,18 @@ float4 ComputeTemporalSmooth(float AvgLuminance, float OldExposureScaleWithoutEV
 
 
 RESET_PRE_EXPOSURE_THREAD_GROUP
-
 void ResetPreExposure()
 {
     RWStructuredBuffer<float2> PreExposureScaleBuffer = ResourceDescriptorHeap[g_PreExposureScaleBufferIndex];
+    PreExposureScaleBuffer[0] = float2(1.0f, 1.0f);
+}
+
+RESET_PRE_EXPOSURE_THREAD_GROUP
+void InitExposureState()
+{
+    RWStructuredBuffer<float4> ExposureScaleBuffer = ResourceDescriptorHeap[g_ExposureScaleBufferIndex];
+    RWStructuredBuffer<float2> PreExposureScaleBuffer = ResourceDescriptorHeap[g_PreExposureScaleBufferIndex];
+    ExposureScaleBuffer[0] = float4(1.0f, 1.0f, 0.0f, max(g_MiddleGrey, 0.18f));
     PreExposureScaleBuffer[0] = float2(1.0f, 1.0f);
 }
 
@@ -284,73 +293,3 @@ void ComputeExposure(uint GroupIndex : SV_GroupIndex)
                               ExposureData.a);
     ApplyPreExposureUpdate(PreExposureScaleBuffer, ExposureData.r);
 }
-
-// CLEAR_HISTOGRAM_THREAD_GROUP
-// void ComputeExposure(uint groupIndex : SV_GroupIndex)
-// {
-//     RWStructuredBuffer<uint> HistogramBuffer = ResourceDescriptorHeap[g_HistogramBufferIndex];
-//     RWStructuredBuffer<float4> ExposureScaleBuffer = ResourceDescriptorHeap[g_ExposureScaleBufferIndex];
-//     RWTexture2D<float> histogramTex = ResourceDescriptorHeap[g_HistogramTexIndex];
-//
-//     GSGlobalHistogram[groupIndex] = HistogramBuffer[groupIndex];
-//     GroupMemoryBarrierWithGroupSync();
-//
-//     if (groupIndex < HISTOGRAM_SIZE)
-//     {
-//         histogramTex[uint2(groupIndex, 0)] = (float)GSGlobalHistogram[groupIndex];
-//     }
-//
-//     if (groupIndex != 0)
-//     {
-//         return;
-//     }
-//
-//     float middleGrey = max(g_MiddleGrey, 1e-4f);
-//     float expComp = exp2(g_ExposureCompensationEV);
-//     float biasOnly = middleGrey * expComp;
-//
-//     float histSum = 0.0f;
-//     [unroll]
-//     for (uint i = 0; i < HISTOGRAM_SIZE; ++i)
-//     {
-//         histSum += (float)GSGlobalHistogram[i];
-//     }
-//     if (histSum < 1.0f)
-//     {
-//         // r = scale with EV, g = scale without EV, b = avg lum, a = middleGrey * exp2(EV)
-//         ExposureScaleBuffer[0] = float4(1.0f, 1.0f, 0.0f, biasOnly);
-//         return;
-//     }
-//
-//     float minFractionSum = histSum * saturate(g_LowPercent);
-//     float maxFractionSum = histSum * saturate(max(g_HighPercent, g_LowPercent));
-//
-//     float2 sumWithoutOutliers = 0.0f;
-//
-//     [unroll]
-//     for (uint b = 0; b < HISTOGRAM_SIZE; ++b)
-//     {
-//         float localValue = (float)GSGlobalHistogram[b];
-//
-//         float sub = min(localValue, minFractionSum);
-//         localValue -= sub;
-//         minFractionSum -= sub;
-//         maxFractionSum -= sub;
-//
-//         localValue = min(localValue, maxFractionSum);
-//         maxFractionSum -= localValue;
-//
-//         float histogramPos = (float)b / (float)(HISTOGRAM_SIZE - 1);
-//         float logL = ComputeLogLuminanceFromHistogramPosition(histogramPos, g_HistogramScale, g_HistogramBias);
-//         sumWithoutOutliers += float2(logL, 1.0f) * localValue;
-//     }
-//
-//     float avgLogL = sumWithoutOutliers.x / max(sumWithoutOutliers.y, 1e-4f);
-//     float avgLum = exp2(avgLogL);
-//     float clampedLum = clamp(avgLum, g_MinAverageLuminance, g_MaxAverageLuminance);
-//
-//     float scaleWithoutBias = middleGrey / max(clampedLum, 1e-4f);
-//     float exposureScale = expComp * scaleWithoutBias;
-//
-//     ExposureScaleBuffer[0] = float4(exposureScale, scaleWithoutBias, avgLum, biasOnly);
-// }

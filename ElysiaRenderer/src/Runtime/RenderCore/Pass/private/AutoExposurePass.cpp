@@ -72,14 +72,14 @@ namespace ElysiaRenderer
         });
         
         // .r = scale with EV, .g = scale without EV, .b = avg lum, .a = middleGrey * exp2(EV)
-        const Vector4 exposureInit(1.0f, 1.0f, 0.0f, 0.18f);
-        m_pExposureScaleBuffer = BufferManager::GetInstance().CreateVertexBuffer(BufferCreationDesc{
+        // Do not upload from the copy queue. EndFrame runs that upload after graphics
+        // has already moved the buffer to UAV, which the copy queue rejects.
+        m_pExposureScaleBuffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc{
             .name = RenderResource::GetInstance().GetPropertyName(RenderTextureIDs::AutoExposureScaleRTID),
             .stride = EXPOSURE_ELEMENT_SIZE,
             .size = EXPOSURE_ELEMENT_SIZE,
             .viewFlags = GPUResourceFlags::UAV | GPUResourceFlags::SRV,
             .accessFlags = BufferAccessFlags::GPUOnly,
-            .InitData = &exposureInit,
             });
         m_snapExposure = true;
 
@@ -98,15 +98,14 @@ namespace ElysiaRenderer
             RenderResource::GetInstance().GetPropertyName(RenderTextureIDs::AutoExposureHdrSnapshotRTID));
         
         // x = history pre-exposure, y = current pre-exposure. First frame both are 1.
-        const Vector2 preExposureInit(1.0f, 1.0f);
-        m_pPreExposureBuffer = BufferManager::GetInstance().CreateVertexBuffer(BufferCreationDesc{
+        m_pPreExposureBuffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc{
             .name = RenderResource::GetInstance().GetPropertyName(RenderTextureIDs::AutoExposurePreScaleRTID),
             .stride = sizeof(Vector2),
             .size = sizeof(Vector2),
             .viewFlags = GPUResourceFlags::UAV | GPUResourceFlags::SRV,
             .accessFlags = BufferAccessFlags::GPUOnly,
-            .InitData = &preExposureInit,
         });
+        m_exposureInitialized = false;
         m_autoExposureData.pPreExposureBuffer = m_pPreExposureBuffer;
         RenderPassResourceManager::GetInstance().Create<AutoExposureData>(&m_autoExposureData);
 
@@ -264,6 +263,36 @@ namespace ElysiaRenderer
         m_pCommand->AddBarrier(m_pExposureScaleBuffer, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
         m_pCommand->AddBarrier(m_pHistogramRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
         m_snapExposure = false;
+    }
+
+    void AutoExposurePass::EnsureInitialExposure()
+    {
+        if (m_exposureInitialized || !m_pCommand || !m_pMaterial ||
+            !m_pExposureScaleBuffer || !m_pPreExposureBuffer)
+            return;
+
+        DoInitExposureState();
+        m_exposureInitialized = true;
+    }
+
+    void AutoExposurePass::DoInitExposureState()
+    {
+        auto passID = INIT_EXPOSURE_PASS;
+        auto& passData = m_pMaterial->GetPassData(passID);
+        PIXHelper pix(m_pCommand->GetCommandList(), passData.Name.c_str());
+
+        PipelineInfo pipelineStateData{};
+        pipelineStateData.m_pipelineStateObject = passData.pPipelineStateObject;
+        m_pCommand->SetPipeline(pipelineStateData);
+        SetSpaceResource(passData, PER_FRAME_SPACE);
+
+        m_pCommand->AddBarrier(m_pExposureScaleBuffer, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, false);
+        m_pCommand->AddBarrier(m_pPreExposureBuffer, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+        BindCommonParams(passID);
+        SetSpaceResource(passData, PER_PASS_SPACE);
+        m_pCommand->Dispatch(1, 1, 1);
+        m_pCommand->AddUAVBarrier(m_pExposureScaleBuffer, false);
+        m_pCommand->AddUAVBarrier(m_pPreExposureBuffer);
     }
 
     void AutoExposurePass::DoResetPreExposure()
