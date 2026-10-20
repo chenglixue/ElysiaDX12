@@ -111,6 +111,50 @@ namespace ElysiaRenderer
             return true;
         }
 
+        bool ParseCurveKeys(const std::string& text,
+                            std::vector<AutoExposureCompensationCurveKey>& out)
+        {
+            out.clear();
+            size_t start = 0;
+            while (start <= text.size())
+            {
+                const size_t semi = text.find(';', start);
+                const std::string token = Trim(text.substr(
+                    start,
+                    semi == std::string::npos ? std::string::npos : semi - start));
+                start = semi == std::string::npos ? text.size() + 1 : semi + 1;
+                if (token.empty())
+                    continue;
+
+                const size_t comma = token.find(',');
+                if (comma == std::string::npos)
+                    return false;
+
+                AutoExposureCompensationCurveKey key;
+                if (!ParseFloat(token.substr(0, comma), key.ev100) ||
+                    !ParseFloat(Trim(token.substr(comma + 1)), key.bias))
+                    return false;
+                if (static_cast<int>(out.size()) >= kAutoExposureCompensationCurveMaxKeys)
+                    break;
+                out.push_back(key);
+            }
+            return true;
+        }
+
+        std::string FormatCurveKeys(const std::vector<AutoExposureCompensationCurveKey>& keys)
+        {
+            std::string text;
+            for (size_t i = 0; i < keys.size(); ++i)
+            {
+                if (i != 0)
+                    text += ';';
+                text += FormatFloat(keys[i].ev100);
+                text += ',';
+                text += FormatFloat(keys[i].bias);
+            }
+            return text;
+        }
+
         bool ParseInt(const std::string& text, int& out)
         {
             char* end = nullptr;
@@ -696,6 +740,19 @@ namespace ElysiaRenderer
         setFloat("AutoExposure", "MinAverageLuminance", data.autoExposureParameter.minAverageLuminance);
         setFloat("AutoExposure", "MaxAverageLuminance", data.autoExposureParameter.maxAverageLuminance);
         setFloat("AutoExposure", "ExposureCompensation", data.autoExposureParameter.exposureCompensation);
+        setBool("AutoExposure", "ExposureCompensationCurve",
+                data.autoExposureParameter.exposureCompensationCurveEnable);
+        {
+            std::string curveText;
+            if (TryGet("AutoExposure", "ExposureCompensationCurveKeys", curveText))
+            {
+                std::vector<AutoExposureCompensationCurveKey> keys;
+                if (ParseCurveKeys(curveText, keys))
+                    data.autoExposureParameter.exposureCompensationCurveKeys = std::move(keys);
+                else
+                    warn("AutoExposure", "ExposureCompensationCurveKeys", curveText);
+            }
+        }
         setFloat("AutoExposure", "MiddleGrey", data.autoExposureParameter.middleGrey);
         setFloat("AutoExposure", "SpeedUp", data.autoExposureParameter.speedUp);
         setFloat("AutoExposure", "SpeedDown", data.autoExposureParameter.speedDown);
@@ -978,6 +1035,20 @@ namespace ElysiaRenderer
             out << "[" << section << "]\n";
         };
 
+        auto emitString = [&](const char* section, const char* key, const std::string& live)
+        {
+            std::string baseline;
+            if (!TryGetBaseline(section, key, baseline))
+            {
+                begin(section);
+                out << key << "=" << live << "\n";
+                return;
+            }
+            if (baseline == live)
+                return;
+            begin(section);
+            out << key << "=" << live << "\n";
+        };
         auto emitBool = [&](const char* section, const char* key, bool live)
         {
             std::string baseline;
@@ -1348,6 +1419,10 @@ namespace ElysiaRenderer
         emitFloat("AutoExposure", "MinAverageLuminance", data.autoExposureParameter.minAverageLuminance);
         emitFloat("AutoExposure", "MaxAverageLuminance", data.autoExposureParameter.maxAverageLuminance);
         emitFloat("AutoExposure", "ExposureCompensation", data.autoExposureParameter.exposureCompensation);
+        emitBool("AutoExposure", "ExposureCompensationCurve",
+                 data.autoExposureParameter.exposureCompensationCurveEnable);
+        emitString("AutoExposure", "ExposureCompensationCurveKeys",
+                   FormatCurveKeys(data.autoExposureParameter.exposureCompensationCurveKeys));
         emitFloat("AutoExposure", "MiddleGrey", data.autoExposureParameter.middleGrey);
         emitFloat("AutoExposure", "SpeedUp", data.autoExposureParameter.speedUp);
         emitFloat("AutoExposure", "SpeedDown", data.autoExposureParameter.speedDown);

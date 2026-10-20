@@ -1247,6 +1247,86 @@ namespace ElysiaEngine
                     ae.maxAverageLuminance = AutoExposureEV100ToLuminance(maxBrightnessEV);
                 }
                 ImGui::SliderFloat("Exposure Compensation", &ae.exposureCompensation, -8.0f, 8.0f);
+                if (ImGui::Checkbox("Exposure Compensation Curve", &ae.exposureCompensationCurveEnable) &&
+                    ae.exposureCompensationCurveEnable &&
+                    ae.exposureCompensationCurveKeys.empty())
+                {
+                    ae.exposureCompensationCurveKeys.push_back(
+                        {kAutoExposureCompensationCurveMinEV, 0.0f});
+                    ae.exposureCompensationCurveKeys.push_back(
+                        {kAutoExposureCompensationCurveMaxEV, 0.0f});
+                }
+                if (ae.exposureCompensationCurveEnable)
+                {
+                    ImGui::TextUnformatted("X: scene EV100 (log2(average / middle grey)). Y: extra stops.");
+                    float curvePlot[kAutoExposureCompensationCurveSamples];
+                    float plotMin = 0.0f;
+                    float plotMax = 0.0f;
+                    const float curveSpan = kAutoExposureCompensationCurveMaxEV -
+                                            kAutoExposureCompensationCurveMinEV;
+                    for (int i = 0; i < kAutoExposureCompensationCurveSamples; ++i)
+                    {
+                        const float ev = kAutoExposureCompensationCurveMinEV +
+                                         curveSpan * (static_cast<float>(i) /
+                                                      (kAutoExposureCompensationCurveSamples - 1));
+                        curvePlot[i] = EvalAutoExposureCompensationCurveBias(
+                            ae.exposureCompensationCurveKeys,
+                            ev);
+                        plotMin = std::min(plotMin, curvePlot[i]);
+                        plotMax = std::max(plotMax, curvePlot[i]);
+                    }
+                    if (plotMax - plotMin < 0.5f)
+                    {
+                        plotMin -= 0.5f;
+                        plotMax += 0.5f;
+                    }
+                    ImGui::PlotLines("##ExposureCompensationCurve",
+                                     curvePlot,
+                                     kAutoExposureCompensationCurveSamples,
+                                     0,
+                                     "bias (EV)",
+                                     plotMin,
+                                     plotMax,
+                                     ImVec2(0.0f, 72.0f));
+
+                    if (!ImGui::IsAnyItemActive())
+                    {
+                        std::stable_sort(ae.exposureCompensationCurveKeys.begin(),
+                                         ae.exposureCompensationCurveKeys.end(),
+                                         [](const AutoExposureCompensationCurveKey& a,
+                                            const AutoExposureCompensationCurveKey& b)
+                                         {
+                                             return a.ev100 < b.ev100;
+                                         });
+                    }
+
+                    int removeKey = -1;
+                    const int keyCount = static_cast<int>(ae.exposureCompensationCurveKeys.size());
+                    for (int keyIndex = 0; keyIndex < keyCount; ++keyIndex)
+                    {
+                        auto& key = ae.exposureCompensationCurveKeys[keyIndex];
+                        ImGui::PushID(keyIndex);
+                        ImGui::SetNextItemWidth(120.0f);
+                        ImGui::DragFloat("EV100", &key.ev100, 0.05f, -16.0f, 24.0f, "%.2f");
+                        ImGui::SameLine();
+                        ImGui::SetNextItemWidth(120.0f);
+                        ImGui::DragFloat("Bias", &key.bias, 0.01f, -8.0f, 8.0f, "%.2f");
+                        ImGui::SameLine();
+                        if (ImGui::SmallButton("Remove"))
+                            removeKey = keyIndex;
+                        ImGui::PopID();
+                    }
+                    if (removeKey >= 0)
+                    {
+                        ae.exposureCompensationCurveKeys.erase(
+                            ae.exposureCompensationCurveKeys.begin() + removeKey);
+                    }
+                    if (keyCount < kAutoExposureCompensationCurveMaxKeys &&
+                        ImGui::Button("Add Key"))
+                    {
+                        ae.exposureCompensationCurveKeys.push_back({0.0f, 0.0f});
+                    }
+                }
                 ImGui::SliderFloat("Middle Grey", &ae.middleGrey, 0.01f, 1.0f);
                 ImGui::SliderFloat("Speed Up", &ae.speedUp, 0.02f, 20.0f);
                 ImGui::SliderFloat("Speed Down", &ae.speedDown, 0.02f, 20.0f);
@@ -2182,6 +2262,19 @@ namespace ElysiaEngine
 
         std::snprintf(line, sizeof(line), "%.3g", ae.exposureCompensation);
         shadowText(toIm(x, y), white, "Exposure Compensation:");
+        shadowText(toIm(x + col, y), coral, line);
+        y += yStep;
+
+        if (ae.exposureCompensationCurveEnable)
+        {
+            std::snprintf(line, sizeof(line), "%d keys",
+                          static_cast<int>(ae.exposureCompensationCurveKeys.size()));
+        }
+        else
+        {
+            std::snprintf(line, sizeof(line), "off");
+        }
+        shadowText(toIm(x, y), white, "Compensation Curve:");
         shadowText(toIm(x + col, y), coral, line);
         y += yStep;
 

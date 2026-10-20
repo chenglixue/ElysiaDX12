@@ -87,6 +87,9 @@ namespace ElysiaRenderer
             static inline size_t g_DeltaTime = PropertyToID(L"g_DeltaTime");
             static inline size_t g_PreExposureEnable = PropertyToID(L"g_PreExposureEnable");
             static inline size_t g_ForceTarget = PropertyToID(L"g_ForceTarget");
+            static inline size_t g_ExposureCompensationCurve = PropertyToID(L"g_ExposureCompensationCurve");
+            static inline size_t g_ExposureCompensationCurveScale = PropertyToID(L"g_ExposureCompensationCurveScale");
+            static inline size_t g_ExposureCompensationCurveBias = PropertyToID(L"g_ExposureCompensationCurveBias");
         };
 
         void BindCommonParams(PassID passID);

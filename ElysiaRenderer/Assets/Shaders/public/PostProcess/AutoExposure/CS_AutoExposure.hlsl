@@ -1,6 +1,10 @@
 #include "private\Common.hlsl"
 #include "private\AutoExposureCommon.hlsli"
 
+#ifndef EXPOSURE_COMPENSATION_CURVE_SAMPLES
+#define EXPOSURE_COMPENSATION_CURVE_SAMPLES 64
+#endif
+
 #define CLEAR_HISTOGRAM_THREAD_GROUP [numthreads(HISTOGRAM_SIZE, 1, 1)]
 #define BUILD_HISTOGRAM_THREAD_GROUP [numthreads(BUILD_HISTOGRAM_THREAD_GROUP_SIZE, BUILD_HISTOGRAM_THREAD_GROUP_SIZE, 1)]
 #define COMPUTE_EXPOSURE_THREAD_GROUP [numthreads(HISTOGRAM_SIZE, 1, 1)]
@@ -30,6 +34,13 @@ cbuffer PassConstant : register(b0, perPassSpace)
     float g_DeltaTime;
     UINT g_PreExposureEnable;
     float g_ForceTarget;
+
+    // UE ExposureCompensationCurveLUT, packed as float4 because HLSL float[]
+    // has a 16-byte stride and the pass uploader writes tightly packed floats.
+    // Each lane is exp2(bias). Scale/Bias map scene EV100 onto texel centers.
+    float g_ExposureCompensationCurveScale;
+    float g_ExposureCompensationCurveBias;
+    float4 g_ExposureCompensationCurve[EXPOSURE_COMPENSATION_CURVE_SAMPLES / 4];
 }
 
 // --------------------------------------------------------------------------------------- Clear Histogram ---------------------------------------------------------------------------------------
@@ -108,7 +119,7 @@ void BuildHistogram(uint3 DispatchThreadID : SV_DispatchThreadID, uint GroupInde
 // --------------------------------------------------------------------------------------- Compute Exposure ---------------------------------------------------------------------------------------
 groupshared uint GSGlobalHistogram[HISTOGRAM_SIZE];
 
-// r = scale with EV, g = scale without EV, b = avg lum, a = middleGrey * exp2(EV)
+// r = final scale, g = scale without constant EV, b = avg lum, a = middleGrey * compensation
 void UpdateExposureScaleBuffer(RWStructuredBuffer<float4> ExposureScaleBuffer,
                                float ExposureScale,
                                float ExposureScaleWithoutEV,
@@ -205,16 +216,46 @@ float ComputeAvgLuminance(UINT SumBin)
     return AvgLuminance;
 }
 
+float ExposureCompensationCurveAt(uint index)
+{
+    float4 lane = g_ExposureCompensationCurve[index >> 2];
+    uint channel = index & 3;
+    if (channel == 0)
+        return lane.x;
+    if (channel == 1)
+        return lane.y;
+    if (channel == 2)
+        return lane.z;
+    return lane.w;
+}
+
+// UE EyeAdaptationCommon curve sample. X is log2(average / middleGrey): with
+// LuminanceMax = 1 that is the saturation EV100 of this frame's meter.
+float SampleExposureCompensationCurve(float averageLuminance, float middleGrey)
+{
+    float ev100 = log2(max(averageLuminance, 1e-8f) / max(middleGrey, 1e-5f));
+    float u = ev100 * g_ExposureCompensationCurveScale + g_ExposureCompensationCurveBias;
+    float coord = clamp(u * EXPOSURE_COMPENSATION_CURVE_SAMPLES - 0.5f,
+                        0.0f,
+                        EXPOSURE_COMPENSATION_CURVE_SAMPLES - 1.0f);
+    uint i0 = (uint)coord;
+    uint i1 = min(i0 + 1u, (uint)EXPOSURE_COMPENSATION_CURVE_SAMPLES - 1u);
+    float t = coord - float(i0);
+    return lerp(ExposureCompensationCurveAt(i0), ExposureCompensationCurveAt(i1), t);
+}
+
 // UE EyeAdaptationCommon: adapt scene brightness relative to middle grey (avg / middleGrey)
 // in log2 (f-stop) space, then invert back to multiply scale.
-// .r = scale with EV, .g = scale without EV (history), .b = avg lum, .a = middleGrey * exp2(EV)
+// The curve scale is divided out of history, so a curve change eases instead of popping.
+// Constant Exposure Compensation stays outside that history and applies immediately.
+// .r = final scale, .g = scale without constant EV, .b = avg lum, .a = middleGrey * compensation
 float4 ComputeTemporalSmooth(float AvgLuminance, float OldExposureScaleWithoutEV)
 {
     float MiddleGrey = max(g_MiddleGrey, 1e-5);
     float TargetAvg = clamp(AvgLuminance, g_MinAverageLuminance, g_MaxAverageLuminance);
-    // lumanice intensity
     float TargetExposure = TargetAvg / MiddleGrey;
-    float OldExposure = rcp(max(OldExposureScaleWithoutEV, 1e-5));
+    float CurveScale = SampleExposureCompensationCurve(AvgLuminance, MiddleGrey);
+    float OldExposure = CurveScale * rcp(max(OldExposureScaleWithoutEV, 1e-5));
 
     float ForceTarget = g_ForceTarget;
     if (OldExposureScaleWithoutEV <= 1e-5)
@@ -233,10 +274,10 @@ float4 ComputeTemporalSmooth(float AvgLuminance, float OldExposureScaleWithoutEV
                              g_MinAverageLuminance / MiddleGrey,
                              g_MaxAverageLuminance / MiddleGrey);
 
-    float ExposureScaleWithoutEV = rcp(max(SmoothedExposure, 1e-5));
+    float ExposureScaleWithoutEV = CurveScale * rcp(max(SmoothedExposure, 1e-5));
     float EC = ComputeLuminanceFromLogLuminance(g_ExposureCompensationEV);
     float ExposureScale = ExposureScaleWithoutEV * EC;
-    float MiddleGreyLuminance = MiddleGrey * EC;
+    float MiddleGreyLuminance = MiddleGrey * EC * CurveScale;
 
     return float4(ExposureScale, ExposureScaleWithoutEV, AvgLuminance, MiddleGreyLuminance);
 }

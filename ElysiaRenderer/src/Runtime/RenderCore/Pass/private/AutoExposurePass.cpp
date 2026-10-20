@@ -71,7 +71,7 @@ namespace ElysiaRenderer
             .accessFlags = BufferAccessFlags::GPUOnly,
         });
         
-        // .r = scale with EV, .g = scale without EV, .b = avg lum, .a = middleGrey * exp2(EV)
+        // .r = final scale, .g = scale without constant EV, .b = avg lum, .a = middleGrey * compensation
         // Do not upload from the copy queue. EndFrame runs that upload after graphics
         // has already moved the buffer to UAV, which the copy queue rejects.
         m_pExposureScaleBuffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc{
@@ -115,6 +115,8 @@ namespace ElysiaRenderer
             pass.Environment.SetDefine(L"HISTOGRAM_SIZE", static_cast<int>(HISTOGRAM_SIZE));
             pass.Environment.SetDefine(L"BUILD_HISTOGRAM_THREAD_GROUP_SIZE",
                                        static_cast<int>(BUILD_HISTOGRAM_THREAD_GROUP_SIZE));
+            pass.Environment.SetDefine(L"EXPOSURE_COMPENSATION_CURVE_SAMPLES",
+                                       kAutoExposureCompensationCurveSamples);
         }
         
         if (!m_pMaterial)
@@ -184,6 +186,24 @@ namespace ElysiaRenderer
         m_pMaterial->SetFloat(ShaderIDs::g_MaxAverageLuminance, p.maxAverageLuminance, passID);
         m_pMaterial->SetFloat(ShaderIDs::g_MiddleGrey, p.middleGrey, passID);
         m_pMaterial->SetFloat(ShaderIDs::g_ExposureCompensationEV, p.exposureCompensation, passID);
+
+        float curveScale = 0.0f;
+        float curveBias = 0.0f;
+        ComputeAutoExposureCompensationCurveScaleBias(curveScale, curveBias);
+        float curveSamples[kAutoExposureCompensationCurveSamples];
+        BakeAutoExposureCompensationCurve(p, curveSamples, kAutoExposureCompensationCurveSamples);
+        std::vector<Vector4> curveLut;
+        curveLut.reserve(kAutoExposureCompensationCurveSamples / 4);
+        for (int i = 0; i < kAutoExposureCompensationCurveSamples; i += 4)
+        {
+            curveLut.emplace_back(curveSamples[i],
+                                  curveSamples[i + 1],
+                                  curveSamples[i + 2],
+                                  curveSamples[i + 3]);
+        }
+        m_pMaterial->SetVector4Array(ShaderIDs::g_ExposureCompensationCurve, curveLut, passID);
+        m_pMaterial->SetFloat(ShaderIDs::g_ExposureCompensationCurveScale, curveScale, passID);
+        m_pMaterial->SetFloat(ShaderIDs::g_ExposureCompensationCurveBias, curveBias, passID);
         m_pMaterial->SetFloat(ShaderIDs::g_ExposureSpeedUp, p.speedUp, passID);
         m_pMaterial->SetFloat(ShaderIDs::g_ExposureSpeedDown, p.speedDown, passID);
         m_pMaterial->SetFloat(ShaderIDs::g_ExponentialTransitionDistance, p.exponentialTransitionDistance, passID);
