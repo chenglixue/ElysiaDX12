@@ -17,9 +17,9 @@ Duration ：0.53ms
 
 ## COD Bloom
 
-![](https://pic1.imgdb.cn/item/69dca0c5f26639441e6a7ab3.png)Duration ：0.26ms
+![](https://pic1.imgdb.cn/item/69dca0c5f26639441e6a7ab3.png)Duration ：0.06ms
 
-![](https://pic1.imgdb.cn/item/69dca5bef26639441e6aaaa4.png)
+![](https://beeimg.us.ci/temp/6ad8e9d88daf5.png)
 
 ## TAAU
 
@@ -36,8 +36,16 @@ Duration ：0.22ms
 
 ![](https://pic1.imgdb.cn/item/69dca504f26639441e6aa8f0.png)
 
-#          Pre Integrate SSS
+##          Pre Integrate SSS
 
 ![](https://pic1.imgdb.cn/item/69f8214bb681ce9bfd1da4f8.png)
 
 ![](https://pic1.imgdb.cn/item/69f82154b681ce9bfd1da4fa.png)
+
+## Histogram Auto Exposure
+
+![](https://beeimg.us.ci/temp/6ad8e886751a6.png)
+
+Duration ：0.02ms
+
+![](https://beeimg.us.ci/temp/6ad8e9994edb0.png)
