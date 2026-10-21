@@ -48,6 +48,8 @@ namespace ElysiaRenderer
             static inline size_t g_ExposureScaleBufferIndex = PropertyToID(L"g_ExposureScaleBufferIndex");
             static inline size_t g_AutoExposureEnable = PropertyToID(L"g_AutoExposureEnable");
             static inline size_t g_PreExposureEnable = PropertyToID(L"g_PreExposureEnable");
+            static inline size_t g_FusionEnable = PropertyToID(L"g_FusionEnable");
+            static inline size_t g_FusionTexIndex = PropertyToID(L"g_FusionTexIndex");
             static inline size_t g_BloomTexIndex = PropertyToID(L"g_BloomTexIndex");
             static inline size_t g_BloomIntensity = PropertyToID(L"g_BloomIntensity");
             

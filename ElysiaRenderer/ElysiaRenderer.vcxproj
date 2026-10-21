@@ -422,6 +422,9 @@
         <None Include="Assets\Shaders\public\PostProcess\AO\CS_LayeredAO.hlsl">
             <FileType>Document</FileType>
         </None>
+        <None Include="Assets\Shaders\public\PostProcess\LocalExposure\CS_LocalExposureFusion.hlsl">
+            <FileType>Document</FileType>
+        </None>
         <None Include="Assets\Shaders\public\PostProcess\Bloom\Bloom.hlsl">
             <FileType>Document</FileType>
         </None>
@@ -584,6 +587,7 @@
         <ClCompile Include="src\Runtime\Engine\private\FrameworkWindows.cpp"/>
         <ClCompile Include="src\Runtime\Engine\private\ImGuiUtility.cpp"/>
         <ClCompile Include="src\Runtime\RenderCore\Pass\private\AutoExposurePass.cpp"/>
+        <ClCompile Include="src\Runtime\RenderCore\Pass\private\LocalExposureFusionPass.cpp"/>
         <ClCompile Include="src\Runtime\RenderCore\Pass\private\AutoExposureVisualizePass.cpp"/>
         <ClCompile Include="src\Runtime\RenderCore\private\BakeManager.cpp"/>
         <ClCompile Include="src\Runtime\RenderCore\private\BindlessTextureManager.cpp"/>

@@ -26,6 +26,8 @@ cbuffer PassConstant : register(b0, perPassSpace)
     UINT g_PreExposureScaleBufferIndex;
     UINT g_AutoExposureEnable;
     UINT g_PreExposureEnable;
+    UINT g_FusionEnable;
+    UINT g_FusionTexIndex;
     float g_BloomIntensity;
     bool u_shoulder;
     bool u_con;
@@ -79,6 +81,14 @@ void Tonemap(uint3 dispatchThreadID: SV_DispatchThreadID)
     if (g_PreExposureEnable != 0)
         OneOverPreExposureScale = GetOneOverPreExposureScale();
     finalColor *= g_LocalExposure * autoExposureScale * OneOverPreExposureScale;
+    if (g_FusionEnable != 0)
+    {
+        float lum = max(dot(finalColor.rgb, float3(0.2126f, 0.7152f, 0.0722f)), 1e-5f);
+        float fusion = SampleTexture2D(g_FusionTexIndex, screenUV, ClampLinearSampler).r;
+        fusion = min(max(fusion, 0.0f), 0.999f);
+        float fusedLum = (fusion * fusion) / max(1.0f - fusion * fusion, 1e-5f);
+        finalColor.rgb *= fusedLum / lum;
+    }
 
     switch (tonemapMode)
     {

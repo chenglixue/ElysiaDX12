@@ -85,6 +85,12 @@ namespace ElysiaRenderer
         // but does not premultiply lighting, sky, or TAA history.
         bool enablePreExposure = true;
 
+        // UE Local Exposure Method = Fusion. Off leaves the image unchanged.
+        // Contrast scales of 1 make the three exposures identical.
+        bool fusionEnable = false;
+        float fusionHighlightContrast = 0.8f;
+        float fusionShadowContrast = 1.25f;
+
         // Fraction of histogram mass to skip from dark / keep up to from dark (UE Low/High Percent as 0..1).
         // Defaults match UE 4.25+ Histogram Low 10% / High 90%.
         float lowPercent = 0.10f;
@@ -255,5 +261,8 @@ namespace ElysiaRenderer
                                                     exponentialTransitionDistance,
                                                     visualizeHDR,
                                                     visualizeDebugType,
-                                                    visualizeLuminanceScale)
+                                                    visualizeLuminanceScale,
+                                                    fusionEnable,
+                                                    fusionHighlightContrast,
+                                                    fusionShadowContrast)
 }

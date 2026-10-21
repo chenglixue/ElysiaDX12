@@ -1218,7 +1218,7 @@ namespace ElysiaEngine
                 ElysiaRenderer::EnumCombo("Color space", &pUserData.hdrParameter.colorSpace);
 
                 ImGui::Checkbox("Shoulder", &pUserData.hdrParameter.bShoulder);
-                ImGui::SliderFloat("Local Exposure", &pUserData.hdrParameter.localExposure, 0.0f, 5.f);
+                ImGui::SliderFloat("HDR Local Exposure", &pUserData.hdrParameter.localExposure, 0.0f, 5.f);
                 ImGui::SliderFloat("Soft Gap", &pUserData.hdrParameter.SoftGap, 0.0f, 0.5f);
                 ImGui::SliderFloat("HDR Max", &pUserData.hdrParameter.HdrMax, 8.0f, 2048.0f);
                 ImGui::SliderFloat("LPM Exposure", &pUserData.hdrParameter.LpmExposure, 3.0f, 11.0f);
@@ -1342,6 +1342,14 @@ namespace ElysiaEngine
                                        0.01f,
                                        16.0f);
                 }
+            }
+
+            if (ImGui::CollapsingHeader("Local Exposure"))
+            {
+                auto& ae = pUserData.autoExposureParameter;
+                ImGui::Checkbox("Enable Fusion", &ae.fusionEnable);
+                ImGui::SliderFloat("Highlight Contrast", &ae.fusionHighlightContrast, 0.0f, 2.0f);
+                ImGui::SliderFloat("Shadow Contrast", &ae.fusionShadowContrast, 0.0f, 4.0f);
             }
 
             if (ImGui::CollapsingHeader("AO"))

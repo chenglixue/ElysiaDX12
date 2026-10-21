@@ -739,6 +739,9 @@ namespace ElysiaRenderer
 
         setBool("AutoExposure", "Enable", data.autoExposureParameter.enable);
         setBool("AutoExposure", "EnablePreExposure", data.autoExposureParameter.enablePreExposure);
+        setBool("AutoExposure", "FusionEnable", data.autoExposureParameter.fusionEnable);
+        setFloat("AutoExposure", "FusionHighlightContrast", data.autoExposureParameter.fusionHighlightContrast);
+        setFloat("AutoExposure", "FusionShadowContrast", data.autoExposureParameter.fusionShadowContrast);
         setFloat("AutoExposure", "LowPercent", data.autoExposureParameter.lowPercent);
         setFloat("AutoExposure", "HighPercent", data.autoExposureParameter.highPercent);
         setFloat("AutoExposure", "HistogramLogMin", data.autoExposureParameter.minLogLuminance);
@@ -1423,6 +1426,9 @@ namespace ElysiaRenderer
 
         emitBool("AutoExposure", "Enable", data.autoExposureParameter.enable);
         emitBool("AutoExposure", "EnablePreExposure", data.autoExposureParameter.enablePreExposure);
+        emitBool("AutoExposure", "FusionEnable", data.autoExposureParameter.fusionEnable);
+        emitFloat("AutoExposure", "FusionHighlightContrast", data.autoExposureParameter.fusionHighlightContrast);
+        emitFloat("AutoExposure", "FusionShadowContrast", data.autoExposureParameter.fusionShadowContrast);
         emitFloat("AutoExposure", "LowPercent", data.autoExposureParameter.lowPercent);
         emitFloat("AutoExposure", "HighPercent", data.autoExposureParameter.highPercent);
         emitFloat("AutoExposure", "HistogramLogMin", data.autoExposureParameter.minLogLuminance);

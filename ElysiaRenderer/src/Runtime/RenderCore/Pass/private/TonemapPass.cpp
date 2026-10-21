@@ -26,6 +26,7 @@
 #define A_CPU 1
 #include "../public/BloomPass.h"
 #include "../public/AutoExposurePass.h"
+#include "../public/LocalExposureFusionPass.h"
 #include "src/ThirdParty/ffx_a.h"
 A_STATIC AF1 fs2S;
 A_STATIC AF1 hdr10S;
@@ -325,6 +326,16 @@ namespace ElysiaRenderer
                                   UserData::GetInstance().bloomParameter.intensity);
             m_pMaterial->SetUINT(ShaderIDs::g_PreExposureScaleBufferIndex,
                              RenderPassResourceManager::GetInstance().Get<AutoExposureData>().pPreExposureBuffer->GetUAVResourceHeapIndex());
+            const bool fusionOn = UserData::GetInstance().autoExposureParameter.fusionEnable;
+            m_pMaterial->SetUINT(ShaderIDs::g_FusionEnable, fusionOn ? 1u : 0u);
+            UINT fusionSrv = 0;
+            if (fusionOn)
+            {
+                if (auto* fusion = RenderTargetManager::GetInstance().GetRenderTexture(
+                        RenderResource::GetInstance().GetPropertyName(LocalExposureFusionPass::RenderTextureIDs::ResultRTID) + L"0"))
+                    fusionSrv = fusion->GetSRVResourceHeapIndex();
+            }
+            m_pMaterial->SetUINT(ShaderIDs::g_FusionTexIndex, fusionSrv);
             m_pMaterial->SetFloat(ShaderIDs::g_FilmSlope,
                                   UserData::GetInstance().hdrParameter.filmSlope);
             m_pMaterial->SetFloat(ShaderIDs::g_FilmToe,

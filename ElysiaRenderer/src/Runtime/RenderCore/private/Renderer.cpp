@@ -26,6 +26,7 @@
 #include "Runtime/RenderCore/Pass/public/FinalBlitPass.h"
 #include "Runtime/RenderCore/Pass/public/BloomPass.h"
 #include "Runtime/RenderCore/Pass/public/AutoExposurePass.h"
+#include "Runtime/RenderCore/Pass/public/LocalExposureFusionPass.h"
 #include "Runtime/RenderCore/Pass/public/AutoExposureVisualizePass.h"
 
 #include "../public/RenderTargetManager.h"
@@ -87,6 +88,7 @@ namespace ElysiaRenderer
         AddPass<TAAPass>();
         AddPass<BloomPass>();
         AddPass<AutoExposurePass>();
+        AddPass<LocalExposureFusionPass>();
         AddPass<TonemapPass>();
         AddPass<SharpenPass>();
         AddPass<SelectionOutlinePass>();
