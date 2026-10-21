@@ -10,6 +10,7 @@ namespace ElysiaRenderer
         struct RenderTextureIDs
         {
             static inline size_t BloomRTID = PropertyToID(L"Bloom RT");
+            static inline size_t HalfResSceneRTID = PropertyToID(L"Half Res Scene RT");
             static inline size_t BloomDownSampleRTID = PropertyToID(L"Bloom Down Sample RT");
             static inline size_t BloomUpSampleRTID = PropertyToID(L"Bloom Up Sample RT");
         };
@@ -40,6 +41,7 @@ namespace ElysiaRenderer
         UINT m_displayHeight;
         static const UINT m_mipmapCount = 6;
         std::array<UINT2, m_mipmapCount> m_mipmapResolutions{};
+        RenderTexture* m_pHalfResSceneRT = nullptr;
         std::array<RenderTexture*, m_mipmapCount> m_downSampleRTs{};
         std::array<RenderTexture*, m_mipmapCount> m_upSampleRTs{};
 
@@ -55,6 +57,7 @@ namespace ElysiaRenderer
             static inline size_t g_TargetMipLevel = PropertyToID(L"g_TargetMipLevel");
         };
 
+        void DoHalfResSceneDownsample();
         void DoBloomFirstDownSample();
         void DoBloomWeightDownSample();
         void DoCopyLastDownSampleRT2LastUpSampleRT();

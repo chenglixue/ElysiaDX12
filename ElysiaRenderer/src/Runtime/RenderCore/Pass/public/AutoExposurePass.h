@@ -25,6 +25,7 @@ namespace ElysiaRenderer
             static inline size_t AutoExposurePreScaleRTID = PropertyToID(L"Auto Exposure Pre Scale RT");
             static inline size_t AutoExposureHistogramRTID = PropertyToID(L"Auto Exposure Histogram RT");
             static inline size_t AutoExposureHdrSnapshotRTID = PropertyToID(L"Auto Exposure HDR Snapshot RT");
+            static inline size_t HalfResSceneRTID = PropertyToID(L"Half Res Scene RT");
         };
 
     public:
@@ -41,11 +42,16 @@ namespace ElysiaRenderer
         // Shared with Tonemap / VisualizeHDR. Bindless SRV via GetResourceHeapIndex().
         static inline BufferHandle m_pExposureScaleBuffer;
 
-        BufferHandle GetExposureScaleBuffer() const { return m_pExposureScaleBuffer; }
+        BufferHandle GetExposureScaleBuffer() const
+        {
+            return m_pExposureScaleBuffer;
+        }
 
     private:
-        UINT m_displayWidth = 0;
-        UINT m_displayHeight = 0;
+        UINT m_displayWidth;
+        UINT m_displayHeight;
+        UINT m_halfWidth;
+        UINT m_halfHeight;
         float m_deltaTime = 1.0f / 60.0f;
         bool m_snapExposure = true;
         bool m_exposureInitialized = false;
@@ -68,11 +74,13 @@ namespace ElysiaRenderer
         struct ShaderIDs
         {
             static inline size_t g_SourceTexIndex = PropertyToID(L"g_SourceTexIndex");
+            static inline size_t g_HalfResSourceTexIndex = PropertyToID(L"g_HalfResSourceTexIndex");
             static inline size_t g_HistogramBufferIndex = PropertyToID(L"g_HistogramBufferIndex");
             static inline size_t g_ExposureBufferScaleIndex = PropertyToID(L"g_ExposureScaleBufferIndex");
             static inline size_t g_PreExposureScaleBufferIndex = PropertyToID(L"g_PreExposureScaleBufferIndex");
             static inline size_t g_HistogramTexIndex = PropertyToID(L"g_HistogramTexIndex");
             static inline size_t g_SourceSize = PropertyToID(L"g_SourceSize");
+            static inline size_t g_HalfSize = PropertyToID(L"g_HalfSize");
             static inline size_t g_HistogramScale = PropertyToID(L"g_HistogramScale");
             static inline size_t g_HistogramBias = PropertyToID(L"g_HistogramBias");
             static inline size_t g_LowPercent = PropertyToID(L"g_LowPercent");

@@ -38,10 +38,19 @@ namespace ElysiaRenderer
     {
         m_displayWidth = (UINT)m_displaySize.x;
         m_displayHeight = (UINT)m_displaySize.y;
+        // Shared half-res SceneColor (bilinear). Bloom Karis samples this instead of full DisplayRT.
         m_cameraWidth = (UINT)m_displaySize.x >> 1;
-        m_cameraHeight = (UINT)m_displaySize.x >> 1;
+        m_cameraHeight = (UINT)m_displaySize.y >> 1;
 
-        m_mipmapResolutions[0] = UINT2(m_cameraWidth, m_cameraHeight);
+        m_pHalfResSceneRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(
+            m_cameraWidth,
+            m_cameraHeight,
+            DXGI_FORMAT_R11G11B10_FLOAT,
+            true,
+            RenderResource::GetInstance().GetPropertyName(RenderTextureIDs::HalfResSceneRTID));
+
+        // Bloom mip0 is quarter-res: Karis downsamples half-res -> quarter-res.
+        m_mipmapResolutions[0] = UINT2((m_cameraWidth + 1) >> 1, (m_cameraHeight + 1) >> 1);
         for (UINT i = 1; i < m_mipmapCount; ++i)
         {
             UINT lastWidth = m_mipmapResolutions[i - 1].x;
@@ -102,16 +111,56 @@ namespace ElysiaRenderer
     }
     void BloomPass::Render(FrameContext& context)
     {
-        if (!UserData::GetInstance().bloomParameter.enable)
-            return;
         PIXHelper pix(m_pCommand->GetCommandList(), "Bloom Pass");
         m_pCamera = context.pCamera;
         m_pGPUTimer = context.pGPUTimer;
+
+        // Always build shared half-res so AE can meter from the same RT even if bloom is off.
+        DoHalfResSceneDownsample();
+
+        if (!UserData::GetInstance().bloomParameter.enable)
+            return;
 
         DoBloomFirstDownSample();
         DoBloomWeightDownSample();
         DoCopyLastDownSampleRT2LastUpSampleRT();
         DoBloom3x3TentUpSample();
+    }
+
+    void BloomPass::DoHalfResSceneDownsample()
+    {
+        auto passID = COPY_RT;
+        auto& passData = m_pMaterial->GetPassData(passID);
+        auto passName = "HalfResSceneDownsample";
+        PIXHelper pix(m_pCommand->GetCommandList(), passName);
+
+        PipelineInfo pipelineStateData{};
+        pipelineStateData.m_pipelineStateObject = passData.pPipelineStateObject;
+        m_pCommand->SetPipeline(pipelineStateData);
+        SetSpaceResource(passData, PER_FRAME_SPACE);
+
+        m_pCommand->AddBarrier(m_pDisplayRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, false);
+        m_pCommand->AddBarrier(m_pHalfResSceneRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+        {
+            m_pMaterial->SetUINT(ShaderIDs::g_SourceTextureIndex,
+                                 m_pDisplayRT->GetUAVResourceHeapIndex(),
+                                 passID);
+            m_pMaterial->SetUINT(ShaderIDs::g_DestTextureIndexID,
+                                 m_pHalfResSceneRT->GetUAVResourceHeapIndex(),
+                                 passID);
+            m_pMaterial->SetFloat4(ShaderIDs::g_DestSize,
+                                   GetScreenSize(m_cameraWidth, m_cameraHeight),
+                                   passID);
+            SetSpaceResource(passData, PER_PASS_SPACE);
+
+            auto threadGroupSize = passData.GetKernelThreadGroupSizes();
+            m_pCommand->Dispatch(CeilDivide(m_cameraWidth, threadGroupSize.x),
+                                 CeilDivide(m_cameraHeight, threadGroupSize.y),
+                                 threadGroupSize.z);
+            m_pCommand->AddUAVBarrier(m_pHalfResSceneRT, false);
+        }
+        m_pCommand->AddBarrier(m_pHalfResSceneRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("Bloom/") + passName).c_str());
     }
 
     void BloomPass::DoBloomFirstDownSample()
@@ -129,13 +178,13 @@ namespace ElysiaRenderer
         m_pCommand->AddBarrier(m_downSampleRTs[0], D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
         {
             m_pMaterial->SetUINT(ShaderIDs::g_SourceTextureIndex,
-                                 m_pDisplayRT->GetUAVResourceHeapIndex(),
+                                 m_pHalfResSceneRT->GetUAVResourceHeapIndex(),
                                  passID);
             m_pMaterial->SetUINT(ShaderIDs::g_DestTextureIndexID,
                                  m_downSampleRTs[0]->GetUAVResourceHeapIndex(),
                                  passID);
             m_pMaterial->SetFloat4(ShaderIDs::g_SourceSize,
-                                   GetScreenSize(m_displayWidth, m_displayHeight),
+                                   GetScreenSize(m_cameraWidth, m_cameraHeight),
                                    passID);
             m_pMaterial->SetFloat4(ShaderIDs::g_DestSize,
                                    GetScreenSize(m_mipmapResolutions[0].x, m_mipmapResolutions[0].y),

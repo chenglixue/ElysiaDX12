@@ -13,11 +13,13 @@
 cbuffer PassConstant : register(b0, perPassSpace)
 {
     UINT g_SourceTexIndex;
+    UINT g_HalfResSourceTexIndex;
     UINT g_HistogramBufferIndex;
     UINT g_ExposureScaleBufferIndex;
     UINT g_PreExposureScaleBufferIndex;
     UINT g_HistogramTexIndex;
     Vector4 g_SourceSize;
+    Vector4 g_HalfSize;
 
     float g_HistogramScale;
     float g_HistogramBias;
@@ -82,11 +84,11 @@ void BuildHistogram(uint3 DispatchThreadID : SV_DispatchThreadID, uint GroupInde
     }
     GroupMemoryBarrierWithGroupSync();
 
-    uint2 SourceSize = (uint2)g_SourceSize.xy;
+    uint2 SourceSize = (uint2)g_HalfSize.xy;
     if (SamplePos.x < SourceSize.x && SamplePos.y < SourceSize.y)
     {
         float OneOverPreExposureScale = GetOneOverPreExposureScale();
-        float3 SourceColor = LoadTexture2D(g_SourceTexIndex, SamplePos) * OneOverPreExposureScale;
+        float3 SourceColor = LoadTexture2D(g_HalfResSourceTexIndex, SamplePos) * OneOverPreExposureScale;
         float Luminance = AutoExposureLuminance(SourceColor);
         uint BinIndex = LuminanceToHistogramBin(Luminance, g_HistogramScale, g_HistogramBias);
         InterlockedAdd(GSLocalHistogram[BinIndex], 1);
@@ -98,22 +100,6 @@ void BuildHistogram(uint3 DispatchThreadID : SV_DispatchThreadID, uint GroupInde
     {
         InterlockedAdd(HistogramBuffer[GroupIndex], GSLocalHistogram[GroupIndex]);
     }
-
-    // uint2 SourceSize = (uint2)g_SourceSize.xy;
-    // if (dispatchThreadID.x < SourceSize.x && dispatchThreadID.y < SourceSize.y)
-    // {
-    //     float3 SourceColor = LoadTexture2D(g_SourceTexIndex, dispatchThreadID.xy).rgb;
-    //     float Luminance = AutoExposureLuminance(SourceColor);
-    //     uint bin = LuminanceToHistogramBin(Luminance, g_HistogramScale, g_HistogramBias);
-    //     InterlockedAdd(gsLocalHistogram[bin], 1);
-    // }
-    //
-    // GroupMemoryBarrierWithGroupSync();
-    //
-    // if (groupIndex < HISTOGRAM_SIZE)
-    // {
-    //     InterlockedAdd(histogram[groupIndex], gsLocalHistogram[groupIndex]);
-    // }
 }
 
 

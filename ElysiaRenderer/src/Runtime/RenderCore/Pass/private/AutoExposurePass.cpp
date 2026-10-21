@@ -23,7 +23,7 @@
 namespace ElysiaRenderer
 {
     static constexpr UINT HISTOGRAM_SIZE = kAutoExposureHistogramSize;
-    static constexpr UINT BUILD_HISTOGRAM_THREAD_GROUP_SIZE = 32;
+    static constexpr UINT BUILD_HISTOGRAM_THREAD_GROUP_SIZE = 16;
     static constexpr UINT HISTOGRAM_ELEMENT_SIZE = sizeof(UINT);
     static constexpr UINT EXPOSURE_ELEMENT_SIZE = sizeof(float) * 4;
 
@@ -62,6 +62,8 @@ namespace ElysiaRenderer
     {
         m_displayWidth = (UINT)m_displaySize.x;
         m_displayHeight = (UINT)m_displaySize.y;
+        m_halfWidth = UINT(m_displayWidth) >> 1;
+        m_halfHeight = UINT(m_displayHeight) >> 1;
 
         m_pHistogramBuffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc{
             .name = L"Auto Exposure Histogram Buffer",
@@ -159,8 +161,13 @@ namespace ElysiaRenderer
                                               histogramScale,
                                               histogramBias);
 
-        m_pMaterial->SetUINT(ShaderIDs::g_SourceTexIndex,
-                             m_pDisplayRT->GetSRVResourceHeapIndex(),
+        const auto HalfResSceneTex = RenderTargetManager::GetInstance().GetRenderTexture(
+            RenderTextureIDs::HalfResSceneRTID);
+        if (!HalfResSceneTex->IsValid())
+            return;
+
+        m_pMaterial->SetUINT(ShaderIDs::g_HalfResSourceTexIndex,
+                             HalfResSceneTex->GetSRVResourceHeapIndex(),
                              passID);
         m_pMaterial->SetUINT(ShaderIDs::g_HistogramBufferIndex,
                              m_pHistogramBuffer->GetUAVResourceHeapIndex(),
@@ -175,8 +182,8 @@ namespace ElysiaRenderer
         m_pMaterial->SetUINT(ShaderIDs::g_HistogramTexIndex,
                              m_pHistogramRT->GetUAVResourceHeapIndex(),
                              passID);
-        m_pMaterial->SetFloat4(ShaderIDs::g_SourceSize,
-                               GetScreenSize(m_displayWidth, m_displayHeight),
+        m_pMaterial->SetFloat4(ShaderIDs::g_HalfSize,
+                               GetScreenSize(m_halfWidth, m_halfHeight),
                                passID);
 
         m_pMaterial->SetFloat(ShaderIDs::g_HistogramScale, histogramScale, passID);
@@ -249,15 +256,18 @@ namespace ElysiaRenderer
         m_pCommand->SetPipeline(pipelineStateData);
         SetSpaceResource(passData, PER_FRAME_SPACE);
 
-        m_pCommand->AddBarrier(m_pDisplayRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, false);
+        const auto HalfResSceneRT = RenderTargetManager::GetInstance().GetRenderTexture(
+            RenderTextureIDs::HalfResSceneRTID);
+
+        m_pCommand->AddBarrier(HalfResSceneRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, false);
         m_pCommand->AddBarrier(m_pHistogramBuffer, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
         BindCommonParams(passID);
         SetSpaceResource(passData, PER_PASS_SPACE);
 
         auto threadGroupSize = passData.GetKernelThreadGroupSizes();
-        m_pCommand->Dispatch(CeilDivide(m_displayWidth, threadGroupSize.x),
-                             CeilDivide(m_displayHeight, threadGroupSize.y),
+        m_pCommand->Dispatch(CeilDivide(m_halfWidth, threadGroupSize.x),
+                             CeilDivide(m_halfHeight, threadGroupSize.y),
                              threadGroupSize.z);
         m_pCommand->AddUAVBarrier(m_pHistogramBuffer);
         m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("Auto Exposure/") + passName).c_str());
