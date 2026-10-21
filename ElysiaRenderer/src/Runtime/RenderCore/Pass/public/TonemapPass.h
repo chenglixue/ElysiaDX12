@@ -52,6 +52,11 @@ namespace ElysiaRenderer
             static inline size_t g_BloomIntensity = PropertyToID(L"g_BloomIntensity");
             
             static inline size_t g_PreExposureScaleBufferIndex = PropertyToID(L"g_PreExposureScaleBufferIndex");
+            static inline size_t g_FilmSlope = PropertyToID(L"g_FilmSlope");
+            static inline size_t g_FilmToe = PropertyToID(L"g_FilmToe");
+            static inline size_t g_FilmShoulder = PropertyToID(L"g_FilmShoulder");
+            static inline size_t g_FilmBlackClip = PropertyToID(L"g_FilmBlackClip");
+            static inline size_t g_FilmWhiteClip = PropertyToID(L"g_FilmWhiteClip");
         };
 
         DXGI_FORMAT m_cameraColorFormat = DXGI_FORMAT_UNKNOWN;

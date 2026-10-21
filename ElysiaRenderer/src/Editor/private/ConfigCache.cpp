@@ -265,6 +265,7 @@ namespace ElysiaRenderer
             {TonemapMode::ACESFilm, "ACESFilm"},
             {TonemapMode::Uncharted2, "Uncharted2"},
             {TonemapMode::DX11DSK, "DX11DSK"},
+            {TonemapMode::Filmic, "Filmic"},
         };
 
         const EnumName<ColorSpace> kColorSpaces[] =
@@ -690,6 +691,11 @@ namespace ElysiaRenderer
         setFloat("HDR", "Exposure", data.hdrParameter.LpmExposure);
         setFloat("HDR", "Contrast", data.hdrParameter.Contrast);
         setFloat("HDR", "ShoulderContrast", data.hdrParameter.ShoulderContrast);
+        setFloat("HDR", "FilmSlope", data.hdrParameter.filmSlope);
+        setFloat("HDR", "FilmToe", data.hdrParameter.filmToe);
+        setFloat("HDR", "FilmShoulder", data.hdrParameter.filmShoulder);
+        setFloat("HDR", "FilmBlackClip", data.hdrParameter.filmBlackClip);
+        setFloat("HDR", "FilmWhiteClip", data.hdrParameter.filmWhiteClip);
         setVector("HDR", "Saturation", data.hdrParameter.Saturation);
         setVector("HDR", "Crosstalk", data.hdrParameter.Crosstalk);
 
@@ -1369,6 +1375,11 @@ namespace ElysiaRenderer
         emitFloat("HDR", "Exposure", data.hdrParameter.LpmExposure);
         emitFloat("HDR", "Contrast", data.hdrParameter.Contrast);
         emitFloat("HDR", "ShoulderContrast", data.hdrParameter.ShoulderContrast);
+        emitFloat("HDR", "FilmSlope", data.hdrParameter.filmSlope);
+        emitFloat("HDR", "FilmToe", data.hdrParameter.filmToe);
+        emitFloat("HDR", "FilmShoulder", data.hdrParameter.filmShoulder);
+        emitFloat("HDR", "FilmBlackClip", data.hdrParameter.filmBlackClip);
+        emitFloat("HDR", "FilmWhiteClip", data.hdrParameter.filmWhiteClip);
         emitVector("HDR", "Saturation", data.hdrParameter.Saturation);
         emitVector("HDR", "Crosstalk", data.hdrParameter.Crosstalk);
 

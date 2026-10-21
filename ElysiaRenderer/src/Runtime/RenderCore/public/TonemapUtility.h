@@ -28,7 +28,8 @@ namespace ElysiaRenderer
         AMD,
         ACESFilm,
         Uncharted2,
-        DX11DSK
+        DX11DSK,
+        Filmic
     };
     NLOHMANN_JSON_SERIALIZE_ENUM(TonemapMode,
                                  {
@@ -43,7 +44,9 @@ namespace ElysiaRenderer
                                  {TonemapMode::Uncharted2,
                                  "Uncharted2"},
                                  {TonemapMode::DX11DSK,
-                                 "DX11DSK"}
+                                 "DX11DSK"},
+                                 {TonemapMode::Filmic,
+                                 "Filmic"}
                                  })
 
     struct HDRParameter
@@ -64,6 +67,12 @@ namespace ElysiaRenderer
         float ShoulderContrast; // Shoulder shaping, 1.0 = no change (fast path).
         Vector3 Saturation;     // A per channel adjustment, use <0 decrease, 0=no change, >0 increase.
         Vector3 Crosstalk;      // One channel must be 1.0, the rest can be <= 1.0 but not zero.
+        // UE5.8 FPostProcessSettings Film defaults (ACES set in Scene.cpp)
+        float filmSlope = 0.88f;
+        float filmToe = 0.55f;
+        float filmShoulder = 0.26f;
+        float filmBlackClip = 0.0f;
+        float filmWhiteClip = 0.04f;
     };
     NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(HDRParameter,
                                                     IsUseHDR,
@@ -79,7 +88,12 @@ namespace ElysiaRenderer
                                                     Contrast,
                                                     ShoulderContrast,
                                                     Saturation,
-                                                    Crosstalk)
+                                                    Crosstalk,
+                                                    filmSlope,
+                                                    filmToe,
+                                                    filmShoulder,
+                                                    filmBlackClip,
+                                                    filmWhiteClip)
 
     /*enum class DisplayMode : UINT
     {

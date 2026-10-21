@@ -325,6 +325,16 @@ namespace ElysiaRenderer
                                   UserData::GetInstance().bloomParameter.intensity);
             m_pMaterial->SetUINT(ShaderIDs::g_PreExposureScaleBufferIndex,
                              RenderPassResourceManager::GetInstance().Get<AutoExposureData>().pPreExposureBuffer->GetUAVResourceHeapIndex());
+            m_pMaterial->SetFloat(ShaderIDs::g_FilmSlope,
+                                  UserData::GetInstance().hdrParameter.filmSlope);
+            m_pMaterial->SetFloat(ShaderIDs::g_FilmToe,
+                                  UserData::GetInstance().hdrParameter.filmToe);
+            m_pMaterial->SetFloat(ShaderIDs::g_FilmShoulder,
+                                  UserData::GetInstance().hdrParameter.filmShoulder);
+            m_pMaterial->SetFloat(ShaderIDs::g_FilmBlackClip,
+                                  UserData::GetInstance().hdrParameter.filmBlackClip);
+            m_pMaterial->SetFloat(ShaderIDs::g_FilmWhiteClip,
+                                  UserData::GetInstance().hdrParameter.filmWhiteClip);
 
             auto& passData = m_pMaterial->GetPassData(ShaderPasseIDs::TonemapPassID);
             SetSpaceResource(passData, PER_FRAME_SPACE);

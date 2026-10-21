@@ -181,7 +181,7 @@ float3 AMDTonemapper(float3 color)
 {
     static float hdrMax = 16.0; // How much HDR range before clipping. HDR modes likely need this pushed up to say 25.0.
     static float contrast = 2.0; // Use as a baseline to tune the amount of contrast the tonemapper has.
-    static float shoulder = 1.0; // Likely don�t need to mess with this factor, unless matching existing tonemapper is not working well..
+    static float shoulder = 1.0; // Likely don?t need to mess with this factor, unless matching existing tonemapper is not working well..
     static float midIn = 0.18; // most games will have a {0.0 to 1.0} range for LDR so midIn should be 0.18.
     static float midOut = 0.18; // Use for LDR. For HDR10 10:10:10:2 use maybe 0.18/25.0 to start. For scRGB, I forget what a good starting point is, need to re-calculate.
 
@@ -249,6 +249,63 @@ float3 ApplyscRGBScale(float3 color, float minLuminancePerNits, float maxLuminan
 {
     color.xyz = (color.xyz * (maxLuminancePerNits - minLuminancePerNits)) + float3(minLuminancePerNits, minLuminancePerNits, minLuminancePerNits);
     return color;
+}
+
+
+// UE5.8 Filmic (FilmToneMap) - Plan A: log S-curve in linear RGB (no AP1 LUT).
+// Defaults match FPostProcessSettings ACES Film values in Scene.cpp:
+// Slope=0.88, Toe=0.55, Shoulder=0.26, BlackClip=0, WhiteClip=0.04
+float3 FilmToneMap(float3 LinearColor,
+                   float FilmSlope,
+                   float FilmToe,
+                   float FilmShoulder,
+                   float FilmBlackClip,
+                   float FilmWhiteClip)
+{
+    // Rec.709 luma stand-in for UE's AP1_RGB2Y desat (Plan A).
+    const float3 LumaWeights = float3(0.2126, 0.7152, 0.0722);
+
+    float3 WorkingColor = max(LinearColor, 0.0.xxx);
+    WorkingColor = lerp(dot(WorkingColor, LumaWeights).xxx, WorkingColor, 0.96);
+
+    const float ToeScale = 1.0 + FilmBlackClip - FilmToe;
+    const float ShoulderScale = 1.0 + FilmWhiteClip - FilmShoulder;
+
+    const float InMatch = 0.18;
+    const float OutMatch = 0.18;
+
+    float ToeMatch;
+    if (FilmToe > 0.8)
+    {
+        ToeMatch = (1.0 - FilmToe - OutMatch) / FilmSlope + log10(InMatch);
+    }
+    else
+    {
+        const float bt = (OutMatch + FilmBlackClip) / ToeScale - 1.0;
+        ToeMatch = log10(InMatch) - 0.5 * log((1.0 + bt) / (1.0 - bt)) * (ToeScale / FilmSlope);
+    }
+
+    float StraightMatch = (1.0 - FilmToe) / FilmSlope - ToeMatch;
+    float ShoulderMatch = FilmShoulder / FilmSlope - StraightMatch;
+
+    float3 LogColor = log10(max(WorkingColor, 1e-4.xxx));
+    float3 StraightColor = FilmSlope * (LogColor + StraightMatch);
+
+    float3 ToeColor = (-FilmBlackClip) + (2.0 * ToeScale) /
+        (1.0 + exp((-2.0 * FilmSlope / ToeScale) * (LogColor - ToeMatch)));
+    float3 ShoulderColor = (1.0 + FilmWhiteClip) - (2.0 * ShoulderScale) /
+        (1.0 + exp((2.0 * FilmSlope / ShoulderScale) * (LogColor - ShoulderMatch)));
+
+    ToeColor = LogColor < ToeMatch ? ToeColor : StraightColor;
+    ShoulderColor = LogColor > ShoulderMatch ? ShoulderColor : StraightColor;
+
+    float3 t = saturate((LogColor - ToeMatch) / (ShoulderMatch - ToeMatch));
+    t = ShoulderMatch < ToeMatch ? (1.0 - t) : t;
+    t = (3.0 - 2.0 * t) * t * t;
+    float3 ToneColor = lerp(ToeColor, ShoulderColor, t);
+
+    ToneColor = lerp(dot(ToneColor, LumaWeights).xxx, ToneColor, 0.93);
+    return max(ToneColor, 0.0.xxx);
 }
 
 

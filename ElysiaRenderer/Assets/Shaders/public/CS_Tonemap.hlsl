@@ -1,4 +1,4 @@
-﻿#include "private\Color.hlsl"
+#include "private\Color.hlsl"
 #include "private\BloomCommon.hlsli"
 
 #define Neutral 0
@@ -7,6 +7,7 @@
 #define ACESFilm 3
 #define Uncharted2 4
 #define DX11DSK 5
+#define Filmic 6
 
 #define DISPLAYMODE_SDR 0
 #define DISPLAYMODE_FSHDR_Gamma22 1
@@ -35,6 +36,11 @@ cbuffer PassConstant : register(b0, perPassSpace)
     UINT u_displayMode;
     matrix u_inputToOutputMatrix;
     uint4 u_ctl[24];
+    float g_FilmSlope;
+    float g_FilmToe;
+    float g_FilmShoulder;
+    float g_FilmBlackClip;
+    float g_FilmWhiteClip;
 }
 
 #define A_GPU 1
@@ -108,7 +114,17 @@ void Tonemap(uint3 dispatchThreadID: SV_DispatchThreadID)
     }
     case DX11DSK:
     {
-        finalColor.rgb = DX11DSKTone(finalColor);
+        finalColor.rgb = DX11DSKTone(finalColor.rgb);
+        break;
+    }
+    case Filmic:
+    {
+        finalColor.rgb = FilmToneMap(finalColor.rgb,
+                                     g_FilmSlope,
+                                     g_FilmToe,
+                                     g_FilmShoulder,
+                                     g_FilmBlackClip,
+                                     g_FilmWhiteClip);
         break;
     }
     }
