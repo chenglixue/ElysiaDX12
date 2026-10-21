@@ -26,7 +26,7 @@ namespace ElysiaRenderer
     static constexpr UINT BUILD_HISTOGRAM_THREAD_GROUP_SIZE = 32;
     static constexpr UINT HISTOGRAM_ELEMENT_SIZE = sizeof(UINT);
     static constexpr UINT EXPOSURE_ELEMENT_SIZE = sizeof(float) * 4;
-    
+
     AutoExposurePass::AutoExposurePass()
         : BasePass()
     {
@@ -70,7 +70,7 @@ namespace ElysiaRenderer
             .viewFlags = GPUResourceFlags::UAV | GPUResourceFlags::SRV,
             .accessFlags = BufferAccessFlags::GPUOnly,
         });
-        
+
         // .r = final scale, .g = scale without constant EV, .b = avg lum, .a = middleGrey * compensation
         // Do not upload from the copy queue. EndFrame runs that upload after graphics
         // has already moved the buffer to UAV, which the copy queue rejects.
@@ -80,7 +80,7 @@ namespace ElysiaRenderer
             .size = EXPOSURE_ELEMENT_SIZE,
             .viewFlags = GPUResourceFlags::UAV | GPUResourceFlags::SRV,
             .accessFlags = BufferAccessFlags::GPUOnly,
-            });
+        });
         m_snapExposure = true;
 
         m_pHistogramRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(
@@ -96,7 +96,7 @@ namespace ElysiaRenderer
             m_pDisplayRT->GetFormat(),
             true,
             RenderResource::GetInstance().GetPropertyName(RenderTextureIDs::AutoExposureHdrSnapshotRTID));
-        
+
         // x = history pre-exposure, y = current pre-exposure. First frame both are 1.
         m_pPreExposureBuffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc{
             .name = RenderResource::GetInstance().GetPropertyName(RenderTextureIDs::AutoExposurePreScaleRTID),
@@ -118,7 +118,7 @@ namespace ElysiaRenderer
             pass.Environment.SetDefine(L"EXPOSURE_COMPENSATION_CURVE_SAMPLES",
                                        kAutoExposureCompensationCurveSamples);
         }
-        
+
         if (!m_pMaterial)
         {
             m_pMaterial = std::make_unique<Material>(m_pDevice, m_shaderPasses);
@@ -169,7 +169,8 @@ namespace ElysiaRenderer
                              m_pExposureScaleBuffer->GetUAVResourceHeapIndex(),
                              passID);
         m_pMaterial->SetUINT(ShaderIDs::g_PreExposureScaleBufferIndex,
-                             RenderPassResourceManager::GetInstance().Get<AutoExposureData>().pPreExposureBuffer->GetUAVResourceHeapIndex(),
+                             RenderPassResourceManager::GetInstance().Get<AutoExposureData>().pPreExposureBuffer->
+                                                                      GetUAVResourceHeapIndex(),
                              passID);
         m_pMaterial->SetUINT(ShaderIDs::g_HistogramTexIndex,
                              m_pHistogramRT->GetUAVResourceHeapIndex(),
@@ -209,6 +210,7 @@ namespace ElysiaRenderer
         m_pMaterial->SetFloat(ShaderIDs::g_ExponentialTransitionDistance, p.exponentialTransitionDistance, passID);
         m_pMaterial->SetFloat(ShaderIDs::g_DeltaTime, m_deltaTime, passID);
         m_pMaterial->SetUINT(ShaderIDs::g_PreExposureEnable, UsePreExposure(p) ? 1u : 0u, passID);
+        m_pMaterial->SetUINT(ShaderIDs::g_WriteHistogramTex, p.visualizeHDR ? 1u : 0u, passID);
         m_pMaterial->SetFloat(ShaderIDs::g_ForceTarget, m_snapExposure ? 1.0f : 0.0f, passID);
     }
 
@@ -216,7 +218,8 @@ namespace ElysiaRenderer
     {
         auto passID = CLEAR_HISTOGRAM_PASS;
         auto& passData = m_pMaterial->GetPassData(passID);
-        PIXHelper pix(m_pCommand->GetCommandList(), passData.Name.c_str());
+        auto passName = passData.Name.c_str();
+        PIXHelper pix(m_pCommand->GetCommandList(), passName);
 
         PipelineInfo pipelineStateData{};
         pipelineStateData.m_pipelineStateObject = passData.pPipelineStateObject;
@@ -230,13 +233,16 @@ namespace ElysiaRenderer
 
         m_pCommand->Dispatch(1, 1, 1);
         m_pCommand->AddUAVBarrier(m_pHistogramBuffer);
+
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("Auto Exposure/") + passName).c_str());
     }
 
     void AutoExposurePass::DoBuildHistogram()
     {
         auto passID = BUILD_HISTOGRAM_PASS;
         auto& passData = m_pMaterial->GetPassData(passID);
-        PIXHelper pix(m_pCommand->GetCommandList(), passData.Name.c_str());
+        auto passName = passData.Name.c_str();
+        PIXHelper pix(m_pCommand->GetCommandList(), passName);
 
         PipelineInfo pipelineStateData{};
         pipelineStateData.m_pipelineStateObject = passData.pPipelineStateObject;
@@ -254,22 +260,27 @@ namespace ElysiaRenderer
                              CeilDivide(m_displayHeight, threadGroupSize.y),
                              threadGroupSize.z);
         m_pCommand->AddUAVBarrier(m_pHistogramBuffer);
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("Auto Exposure/") + passName).c_str());
     }
 
     void AutoExposurePass::DoComputeExposure()
     {
         auto passID = COMPUTE_EXPOSURE_PASS;
         auto& passData = m_pMaterial->GetPassData(passID);
-        PIXHelper pix(m_pCommand->GetCommandList(), passData.Name.c_str());
+        auto passName = passData.Name.c_str();
+        PIXHelper pix(m_pCommand->GetCommandList(), passName);
 
         PipelineInfo pipelineStateData{};
         pipelineStateData.m_pipelineStateObject = passData.pPipelineStateObject;
         m_pCommand->SetPipeline(pipelineStateData);
         SetSpaceResource(passData, PER_FRAME_SPACE);
 
+        const bool writeHistogramTex = UserData::GetInstance().autoExposureParameter.visualizeHDR;
+
         m_pCommand->AddBarrier(m_pHistogramBuffer, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
         m_pCommand->AddBarrier(m_pExposureScaleBuffer, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-        m_pCommand->AddBarrier(m_pHistogramRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+        if (writeHistogramTex)
+            m_pCommand->AddBarrier(m_pHistogramRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
         m_pCommand->AddBarrier(m_pPreExposureBuffer, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
         BindCommonParams(passID);
@@ -277,12 +288,16 @@ namespace ElysiaRenderer
 
         m_pCommand->Dispatch(1, 1, 1);
         m_pCommand->AddUAVBarrier(m_pExposureScaleBuffer, false);
-        m_pCommand->AddUAVBarrier(m_pHistogramRT, false);
+        if (writeHistogramTex)
+            m_pCommand->AddUAVBarrier(m_pHistogramRT, false);
         m_pCommand->AddUAVBarrier(m_pPreExposureBuffer, false);
 
         m_pCommand->AddBarrier(m_pExposureScaleBuffer, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
-        m_pCommand->AddBarrier(m_pHistogramRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+        if (writeHistogramTex)
+            m_pCommand->AddBarrier(m_pHistogramRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
         m_snapExposure = false;
+
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("Auto Exposure/") + passName).c_str());
     }
 
     void AutoExposurePass::EnsureInitialExposure()
@@ -355,6 +370,9 @@ namespace ElysiaRenderer
         PIXHelper pix(m_pCommand->GetCommandList(), "AutoExposure HDR Snapshot");
         m_pCommand->CopyTexture(m_pDisplayRT, m_pHDRSnapshotRT);
         m_pCommand->AddBarrier(m_pHDRSnapshotRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(),
+                                  (std::string("Auto Exposure/") + "AutoExposure HDR Snapshot").c_str());
     }
 
     void AutoExposurePass::Render(FrameContext& context)

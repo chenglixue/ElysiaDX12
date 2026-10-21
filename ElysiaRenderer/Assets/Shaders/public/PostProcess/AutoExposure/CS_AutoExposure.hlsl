@@ -33,6 +33,7 @@ cbuffer PassConstant : register(b0, perPassSpace)
     float g_ExponentialTransitionDistance;
     float g_DeltaTime;
     UINT g_PreExposureEnable;
+    UINT g_WriteHistogramTex;
     float g_ForceTarget;
 
     // UE ExposureCompensationCurveLUT, packed as float4 because HLSL float[]
@@ -161,7 +162,12 @@ bool ComputeExposureSetup(UINT GroupIndex,
 {
     if (GroupIndex < HISTOGRAM_SIZE)
     {
-        HistogramRT[UINT2(GroupIndex, 0)] = GSGlobalHistogram[GroupIndex] = HistogramBuffer[GroupIndex];
+        GSGlobalHistogram[GroupIndex] = HistogramBuffer[GroupIndex];
+        // Debug viz only: skip UAV write when visualizeHDR is off.
+        if (g_WriteHistogramTex != 0)
+        {
+            HistogramRT[UINT2(GroupIndex, 0)] = GSGlobalHistogram[GroupIndex];
+        }
     }
     GroupMemoryBarrierWithGroupSync();
 

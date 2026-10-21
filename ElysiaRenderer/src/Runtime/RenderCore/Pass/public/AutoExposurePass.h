@@ -86,6 +86,7 @@ namespace ElysiaRenderer
             static inline size_t g_ExponentialTransitionDistance = PropertyToID(L"g_ExponentialTransitionDistance");
             static inline size_t g_DeltaTime = PropertyToID(L"g_DeltaTime");
             static inline size_t g_PreExposureEnable = PropertyToID(L"g_PreExposureEnable");
+            static inline size_t g_WriteHistogramTex = PropertyToID(L"g_WriteHistogramTex");
             static inline size_t g_ForceTarget = PropertyToID(L"g_ForceTarget");
             static inline size_t g_ExposureCompensationCurve = PropertyToID(L"g_ExposureCompensationCurve");
             static inline size_t g_ExposureCompensationCurveScale = PropertyToID(L"g_ExposureCompensationCurveScale");
