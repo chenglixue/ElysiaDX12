@@ -36,6 +36,15 @@ namespace ElysiaRenderer
         virtual void Render(FrameContext& context) override;
         // Graphics-queue init. Must run before lighting reads the pre-exposure buffer.
         void EnsureInitialExposure();
+
+        // Last completed GPU readback for the Visualize HDR overlay. One to two frames behind.
+        struct DebugStats
+        {
+            float averageSceneLuminance = 0.0f;
+            float preExposure = 1.0f;
+            bool valid = false;
+        };
+        static const DebugStats& GetDebugStats();
         virtual void Dispose() override;
         virtual void UpdatePipeline() override;
 
@@ -55,7 +64,9 @@ namespace ElysiaRenderer
         float m_deltaTime = 1.0f / 60.0f;
         bool m_snapExposure = true;
         bool m_exposureInitialized = false;
+        bool m_debugReadbackPending[ElysiaHelper::NUM_FRAMES_IN_FLIGHT]{};
 
+        BufferHandle m_pDebugReadback;
         BufferHandle m_pHistogramBuffer;
         BufferHandle m_pPreExposureBuffer;
         RenderTexture* m_pHistogramRT = nullptr;
@@ -108,5 +119,7 @@ namespace ElysiaRenderer
         void DoResetPreExposure();
         void DoInitExposureState();
         void DoSnapshotHdr();
+        void PullDebugReadback(UINT frameID);
+        void CopyDebugReadback(UINT frameID);
     };
 }

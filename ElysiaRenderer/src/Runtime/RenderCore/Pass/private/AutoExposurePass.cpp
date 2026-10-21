@@ -54,6 +54,11 @@ namespace ElysiaRenderer
             BufferManager::GetInstance().DestoryBuffer(m_pPreExposureBuffer);
             m_pPreExposureBuffer.reset();
         }
+        if (m_pDebugReadback)
+        {
+            BufferManager::GetInstance().DestoryBuffer(m_pDebugReadback);
+            m_pDebugReadback.reset();
+        }
         m_pHistogramRT = nullptr;
         m_pHDRSnapshotRT = nullptr;
     }
@@ -108,6 +113,11 @@ namespace ElysiaRenderer
             .accessFlags = BufferAccessFlags::GPUOnly,
         });
         m_exposureInitialized = false;
+        for (bool& pending : m_debugReadbackPending)
+            pending = false;
+        m_pDebugReadback = BufferManager::GetInstance().CreateReadBackBuffer(
+            sizeof(float) * 8 * ElysiaHelper::NUM_FRAMES_IN_FLIGHT,
+            "Auto Exposure Debug Readback");
         m_autoExposureData.pPreExposureBuffer = m_pPreExposureBuffer;
         RenderPassResourceManager::GetInstance().Create<AutoExposureData>(&m_autoExposureData);
 
@@ -385,15 +395,81 @@ namespace ElysiaRenderer
                                   (std::string("Auto Exposure/") + "AutoExposure HDR Snapshot").c_str());
     }
 
+    namespace
+    {
+        AutoExposurePass::DebugStats g_autoExposureDebugStats;
+
+        struct ExposureDebugSlot
+        {
+            float exposure[4];
+            float preExposure[2];
+            float pad[2];
+        };
+        static_assert(sizeof(ExposureDebugSlot) == sizeof(float) * 8, "readback slot must stay 32 bytes");
+    }
+
+    const AutoExposurePass::DebugStats& AutoExposurePass::GetDebugStats()
+    {
+        return g_autoExposureDebugStats;
+    }
+
+    void AutoExposurePass::PullDebugReadback(UINT frameID)
+    {
+        if (!m_pDebugReadback || frameID >= ElysiaHelper::NUM_FRAMES_IN_FLIGHT ||
+            !m_debugReadbackPending[frameID])
+            return;
+
+        auto* resource = m_pDebugReadback->GetResource().Get();
+        if (!resource)
+            return;
+
+        const UINT64 slotBytes = sizeof(ExposureDebugSlot);
+        ExposureDebugSlot* slots = nullptr;
+        const D3D12_RANGE readRange{frameID * slotBytes, (frameID + 1) * slotBytes};
+        if (FAILED(resource->Map(0, &readRange, reinterpret_cast<void**>(&slots))) || !slots)
+            return;
+
+        const ExposureDebugSlot& slot = slots[frameID];
+        g_autoExposureDebugStats.averageSceneLuminance = slot.exposure[2];
+        g_autoExposureDebugStats.preExposure = slot.preExposure[0];
+        g_autoExposureDebugStats.valid = true;
+
+        const D3D12_RANGE writeRange{0, 0};
+        resource->Unmap(0, &writeRange);
+    }
+
+    void AutoExposurePass::CopyDebugReadback(UINT frameID)
+    {
+        if (!m_pCommand || !m_pDebugReadback || !m_pExposureScaleBuffer || !m_pPreExposureBuffer ||
+            frameID >= ElysiaHelper::NUM_FRAMES_IN_FLIGHT)
+            return;
+
+        const UINT64 slotBytes = sizeof(ExposureDebugSlot);
+        const UINT64 dest = frameID * slotBytes;
+
+        m_pCommand->AddBarrier(m_pExposureScaleBuffer, D3D12_RESOURCE_STATE_COPY_SOURCE, false);
+        m_pCommand->AddBarrier(m_pPreExposureBuffer, D3D12_RESOURCE_STATE_COPY_SOURCE);
+        m_pCommand->CopyBufferRegion(*m_pDebugReadback, dest, *m_pExposureScaleBuffer, 0, sizeof(float) * 4);
+        m_pCommand->CopyBufferRegion(*m_pDebugReadback, dest + sizeof(float) * 4, *m_pPreExposureBuffer, 0,
+                                     sizeof(float) * 2);
+        m_pCommand->AddBarrier(m_pExposureScaleBuffer, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, false);
+        m_pCommand->AddBarrier(m_pPreExposureBuffer, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+        m_debugReadbackPending[frameID] = true;
+    }
+
     void AutoExposurePass::Render(FrameContext& context)
     {
         m_deltaTime = context.deltaTime;
+        PullDebugReadback(context.frameID);
 
         const auto& ae = UserData::GetInstance().autoExposureParameter;
         if (!UsePreExposure(ae))
             DoResetPreExposure();
         if (!WantsAutoExposureHistogram(ae))
+        {
+            CopyDebugReadback(context.frameID);
             return;
+        }
 
         PIXHelper pix(m_pCommand->GetCommandList(), "Auto Exposure Pass");
         m_pCamera = context.pCamera;
@@ -402,6 +478,7 @@ namespace ElysiaRenderer
         DoClearHistogram();
         DoBuildHistogram();
         DoComputeExposure();
+        CopyDebugReadback(context.frameID);
         if (ae.visualizeHDR)
             DoSnapshotHdr();
 

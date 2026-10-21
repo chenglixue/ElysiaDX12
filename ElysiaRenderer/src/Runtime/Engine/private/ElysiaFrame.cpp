@@ -28,6 +28,7 @@
 #include "Runtime/RenderCore/public/DX12Camera.h"
 #include "Runtime/RenderCore/public/RenderPassResourceManager.h"
 #include "Runtime/RenderCore/public/RenderTexture.h"
+#include "Runtime/RenderCore/Pass/public/AutoExposurePass.h"
 #include "Runtime/RenderCore/Pass/public/GBufferPass.h"
 #include "Runtime/RenderCore/Pass/public/GIPass.h"
 #include "ThirdParty/imgui/imgui_internal.h"
@@ -2257,6 +2258,23 @@ namespace ElysiaEngine
 
         std::snprintf(line, sizeof(line), "%.1f .. %.1f", ae.minLogLuminance, ae.maxLogLuminance);
         shadowText(toIm(x, y), white, "Histogram EV100 Min/Max:");
+        shadowText(toIm(x + col, y), blue, line);
+        y += yStep;
+
+        const auto& exposureStats = AutoExposurePass::GetDebugStats();
+        float averageSceneEV100 = 0.0f;
+        if (exposureStats.valid && exposureStats.averageSceneLuminance > 0.0f)
+        {
+            averageSceneEV100 = AutoExposureLuminanceToEV100(exposureStats.averageSceneLuminance) +
+                                std::log2(1.0f / 0.18f);
+        }
+        std::snprintf(line, sizeof(line), "%.3g", averageSceneEV100);
+        shadowText(toIm(x, y), white, "Average Scene EV100:");
+        shadowText(toIm(x + col, y), white, line);
+        y += yStep;
+
+        std::snprintf(line, sizeof(line), "%.5g", exposureStats.valid ? exposureStats.preExposure : 1.0f);
+        shadowText(toIm(x, y), white, "PreExposure Value:");
         shadowText(toIm(x + col, y), blue, line);
         y += yStep;
 
