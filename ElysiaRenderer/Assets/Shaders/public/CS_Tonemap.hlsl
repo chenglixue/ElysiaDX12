@@ -119,12 +119,15 @@ void Tonemap(uint3 dispatchThreadID: SV_DispatchThreadID)
     }
     case Filmic:
     {
-        finalColor.rgb = FilmToneMap(finalColor.rgb,
+        // UE: tonemap in AP1 (ACEScg), then back to linear sRGB.
+        float3 colorAP1 = mul(sRGB_2_AP1, finalColor.rgb);
+        float3 toneAP1 = FilmToneMap(colorAP1,
                                      g_FilmSlope,
                                      g_FilmToe,
                                      g_FilmShoulder,
                                      g_FilmBlackClip,
                                      g_FilmWhiteClip);
+        finalColor.rgb = max(mul(AP1_2_sRGB, toneAP1), 0.0.xxx);
         break;
     }
     }

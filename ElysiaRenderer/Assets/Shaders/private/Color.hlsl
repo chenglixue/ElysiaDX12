@@ -252,21 +252,34 @@ float3 ApplyscRGBScale(float3 color, float minLuminancePerNits, float maxLuminan
 }
 
 
-// UE5.8 Filmic (FilmToneMap) - Plan A: log S-curve in linear RGB (no AP1 LUT).
+// ACEScg (AP1) working space, matches UE ACES.ush (Bradford D65<->D60).
+// Row-major: mul(M, rgb).
+static const float3x3 sRGB_2_AP1 = float3x3(
+    0.6131914784, 0.3395120887, 0.0473663311,
+    0.0702069044, 0.9163358171, 0.0134500113,
+    0.0206188714, 0.1095672944, 0.8696067475);
+
+static const float3x3 AP1_2_sRGB = float3x3(
+     1.7047909232, -0.6216896649, -0.0832421765,
+    -0.1302635695,  1.1408284319, -0.0105496513,
+    -0.0240088270, -0.1289996262,  1.1532480162);
+
+// AP1 luminance (row 2 of AP1_2_XYZ), UE AP1_RGB2Y.
+static const float3 AP1_RGB2Y = float3(0.2722287168, 0.6740817658, 0.0536895174);
+
+// UE5.8 Filmic (FilmToneMap): input and output are linear AP1 (ACEScg), same as UE.
+// Caller converts sRGB -> AP1 before and AP1 -> sRGB after.
 // Defaults match FPostProcessSettings ACES Film values in Scene.cpp:
 // Slope=0.88, Toe=0.55, Shoulder=0.26, BlackClip=0, WhiteClip=0.04
-float3 FilmToneMap(float3 LinearColor,
+float3 FilmToneMap(float3 ColorAP1,
                    float FilmSlope,
                    float FilmToe,
                    float FilmShoulder,
                    float FilmBlackClip,
                    float FilmWhiteClip)
 {
-    // Rec.709 luma stand-in for UE's AP1_RGB2Y desat (Plan A).
-    const float3 LumaWeights = float3(0.2126, 0.7152, 0.0722);
-
-    float3 WorkingColor = max(LinearColor, 0.0.xxx);
-    WorkingColor = lerp(dot(WorkingColor, LumaWeights).xxx, WorkingColor, 0.96);
+    float3 WorkingColor = max(ColorAP1, 0.0.xxx);
+    WorkingColor = lerp(dot(WorkingColor, AP1_RGB2Y).xxx, WorkingColor, 0.96);
 
     const float ToeScale = 1.0 + FilmBlackClip - FilmToe;
     const float ShoulderScale = 1.0 + FilmWhiteClip - FilmShoulder;
@@ -304,7 +317,7 @@ float3 FilmToneMap(float3 LinearColor,
     t = (3.0 - 2.0 * t) * t * t;
     float3 ToneColor = lerp(ToeColor, ShoulderColor, t);
 
-    ToneColor = lerp(dot(ToneColor, LumaWeights).xxx, ToneColor, 0.93);
+    ToneColor = lerp(dot(ToneColor, AP1_RGB2Y).xxx, ToneColor, 0.93);
     return max(ToneColor, 0.0.xxx);
 }
 
