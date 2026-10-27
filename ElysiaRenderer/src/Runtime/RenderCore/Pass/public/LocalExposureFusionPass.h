@@ -24,8 +24,8 @@ namespace ElysiaRenderer
         virtual void UpdatePipeline() override;
         virtual void Dispose() override;
 
-        UINT GetLevelCount() const { return m_levelCount; }
-        RenderTexture* GetResultRT() const { return m_levelCount > 0 ? m_resultRTs[0] : nullptr; }
+        UINT GetLevelCount() const;
+        RenderTexture* GetResultRT() const;
 
     private:
 #define LOCAL_EXPOSURE_FUSION_PASS_LIST(X) \

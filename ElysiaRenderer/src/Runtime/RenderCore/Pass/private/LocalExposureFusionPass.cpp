@@ -17,6 +17,18 @@
 
 namespace ElysiaRenderer
 {
+    constexpr int FUSION_GROUP_SIZE = 8;
+
+    UINT LocalExposureFusionPass::GetLevelCount() const
+    {
+        return m_levelCount;
+    }
+
+    RenderTexture* LocalExposureFusionPass::GetResultRT() const
+    {
+        return m_levelCount > 0 ? m_resultRTs[0] : nullptr;
+    }
+
     LocalExposureFusionPass::LocalExposureFusionPass()
     {
     }
@@ -53,19 +65,37 @@ namespace ElysiaRenderer
             const UINT h = m_levelSize[level].y;
             const std::wstring suffix = std::to_wstring(level);
             m_lumRTs[level] = RenderTargetManager::GetInstance().CreateRWRenderTexture(
-                w, h, DXGI_FORMAT_R16G16B16A16_FLOAT, true,
+                w,
+                h,
+                DXGI_FORMAT_R16G16B16A16_FLOAT,
+                true,
                 RenderResource::GetInstance().GetPropertyName(RenderTextureIDs::LumRTID) + suffix);
             m_weightRTs[level] = RenderTargetManager::GetInstance().CreateRWRenderTexture(
-                w, h, DXGI_FORMAT_R16G16B16A16_FLOAT, true,
+                w,
+                h,
+                DXGI_FORMAT_R16G16B16A16_FLOAT,
+                true,
                 RenderResource::GetInstance().GetPropertyName(RenderTextureIDs::WeightRTID) + suffix);
             m_resultRTs[level] = RenderTargetManager::GetInstance().CreateRWRenderTexture(
-                w, h, DXGI_FORMAT_R32_FLOAT, true,
+                w,
+                h,
+                DXGI_FORMAT_R32_FLOAT,
+                true,
                 RenderResource::GetInstance().GetPropertyName(RenderTextureIDs::ResultRTID) + suffix);
         }
 
         m_shaderPasses.assign(std::begin(PassData), std::end(PassData));
+
+        for (auto& shaderPass : m_shaderPasses)
+        {
+            shaderPass.Environment.SetDefine(L"GROUP_SIZE", FUSION_GROUP_SIZE);
+
+        }
+
         if (!m_pMaterial)
+        {
             m_pMaterial = std::make_unique<Material>(m_pDevice, m_shaderPasses);
+        }
         UpdatePipeline();
     }
 
@@ -81,7 +111,9 @@ namespace ElysiaRenderer
             auto variantManager = passData.pShader->GetVariantManager();
             passData.pCurrVariantData = &variantManager->GetOrCompileVariantByNames({});
             passData.pPipelineStateObject = PSOManager::GetInstance().GetComputePipelineState(
-                m_pDevice, m_pMaterial.get(), passID);
+                m_pDevice,
+                m_pMaterial.get(),
+                passID);
         }
     }
 
@@ -100,9 +132,11 @@ namespace ElysiaRenderer
         const auto& ae = UserData::GetInstance().autoExposureParameter;
         m_pCommand->AddBarrier(m_pDisplayRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, false);
         m_pCommand->AddBarrier(m_lumRTs[0], D3D12_RESOURCE_STATE_UNORDERED_ACCESS, false);
-        m_pCommand->AddBarrier(m_weightRTs[0], D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
         if (AutoExposurePass::m_pExposureScaleBuffer)
-            m_pCommand->AddBarrier(AutoExposurePass::m_pExposureScaleBuffer, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, false);
+            m_pCommand->AddBarrier(AutoExposurePass::m_pExposureScaleBuffer,
+                                   D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,
+                                   false);
+        m_pCommand->AddBarrier(m_weightRTs[0], D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
         m_pMaterial->SetFloat4(ShaderIDs::g_DestSize, GetScreenSize(m_levelSize[0].x, m_levelSize[0].y), passID);
         m_pMaterial->SetFloat4(ShaderIDs::g_SourceSize, GetScreenSize(m_levelSize[0].x, m_levelSize[0].y), passID);
@@ -114,7 +148,8 @@ namespace ElysiaRenderer
             exposureSrv = AutoExposurePass::m_pExposureScaleBuffer->GetResourceHeapIndex();
         m_pMaterial->SetUINT(ShaderIDs::g_ExposureScaleBufferIndex, exposureSrv, passID);
         m_pMaterial->SetUINT(ShaderIDs::g_PreExposureScaleBufferIndex,
-                             RenderPassResourceManager::GetInstance().Get<AutoExposureData>().pPreExposureBuffer->GetUAVResourceHeapIndex(),
+                             RenderPassResourceManager::GetInstance().Get<AutoExposureData>().pPreExposureBuffer->
+                                                                      GetUAVResourceHeapIndex(),
                              passID);
         m_pMaterial->SetUINT(ShaderIDs::g_AutoExposureEnable, ae.enable ? 1u : 0u, passID);
         m_pMaterial->SetUINT(ShaderIDs::g_PreExposureEnable, UsePreExposure(ae) ? 1u : 0u, passID);
@@ -129,8 +164,9 @@ namespace ElysiaRenderer
                              group.z);
         m_pCommand->AddUAVBarrier(m_lumRTs[0], false);
         m_pCommand->AddUAVBarrier(m_weightRTs[0]);
-        
-        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("Local Exposure Fusion/") + passName).c_str());
+
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(),
+                                  (std::string("Local Exposure Fusion/") + passName).c_str());
     }
 
     void LocalExposureFusionPass::DispatchDownsample(UINT level)
@@ -143,8 +179,12 @@ namespace ElysiaRenderer
         {
             m_pCommand->AddBarrier(source, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, false);
             m_pCommand->AddBarrier(dest, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-            m_pMaterial->SetFloat4(ShaderIDs::g_DestSize, GetScreenSize(m_levelSize[level].x, m_levelSize[level].y), passID);
-            m_pMaterial->SetFloat4(ShaderIDs::g_SourceSize, GetScreenSize(m_levelSize[level - 1].x, m_levelSize[level - 1].y), passID);
+            m_pMaterial->SetFloat4(ShaderIDs::g_DestSize,
+                                   GetScreenSize(m_levelSize[level].x, m_levelSize[level].y),
+                                   passID);
+            m_pMaterial->SetFloat4(ShaderIDs::g_SourceSize,
+                                   GetScreenSize(m_levelSize[level - 1].x, m_levelSize[level - 1].y),
+                                   passID);
             m_pMaterial->SetUINT(sourceIndexId, source->GetSRVResourceHeapIndex(), passID);
             m_pMaterial->SetUINT(destIndexId, dest->GetUAVResourceHeapIndex(), passID);
             SetSpaceResource(passData, PER_PASS_SPACE);
@@ -159,7 +199,10 @@ namespace ElysiaRenderer
         m_pCommand->SetPipeline(pipelineStateData);
         SetSpaceResource(passData, PER_FRAME_SPACE);
         downsample(m_lumRTs[level - 1], m_lumRTs[level], ShaderIDs::g_SourceTexIndex, ShaderIDs::g_DestLumTexIndex);
-        downsample(m_weightRTs[level - 1], m_weightRTs[level], ShaderIDs::g_SourceTexIndex, ShaderIDs::g_DestLumTexIndex);
+        downsample(m_weightRTs[level - 1],
+                   m_weightRTs[level],
+                   ShaderIDs::g_SourceTexIndex,
+                   ShaderIDs::g_DestLumTexIndex);
     }
 
     void LocalExposureFusionPass::DispatchBlend(UINT level)
@@ -184,14 +227,20 @@ namespace ElysiaRenderer
         }
         m_pCommand->AddBarrier(m_resultRTs[level], D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
-        m_pMaterial->SetFloat4(ShaderIDs::g_DestSize, GetScreenSize(m_levelSize[level].x, m_levelSize[level].y), passID);
+        m_pMaterial->SetFloat4(ShaderIDs::g_DestSize,
+                               GetScreenSize(m_levelSize[level].x, m_levelSize[level].y),
+                               passID);
         m_pMaterial->SetUINT(ShaderIDs::g_LumTexIndex, m_lumRTs[level]->GetSRVResourceHeapIndex(), passID);
         m_pMaterial->SetUINT(ShaderIDs::g_WeightTexIndex, m_weightRTs[level]->GetSRVResourceHeapIndex(), passID);
         m_pMaterial->SetUINT(ShaderIDs::g_IsCoarsest, coarsest ? 1u : 0u, passID);
         if (!coarsest)
         {
-            m_pMaterial->SetUINT(ShaderIDs::g_CoarseLumTexIndex, m_lumRTs[level + 1]->GetSRVResourceHeapIndex(), passID);
-            m_pMaterial->SetUINT(ShaderIDs::g_CoarseResultTexIndex, m_resultRTs[level + 1]->GetSRVResourceHeapIndex(), passID);
+            m_pMaterial->SetUINT(ShaderIDs::g_CoarseLumTexIndex,
+                                 m_lumRTs[level + 1]->GetSRVResourceHeapIndex(),
+                                 passID);
+            m_pMaterial->SetUINT(ShaderIDs::g_CoarseResultTexIndex,
+                                 m_resultRTs[level + 1]->GetSRVResourceHeapIndex(),
+                                 passID);
         }
         m_pMaterial->SetUINT(ShaderIDs::g_DestResultTexIndex, m_resultRTs[level]->GetUAVResourceHeapIndex(), passID);
         SetSpaceResource(passData, PER_PASS_SPACE);
@@ -211,30 +260,33 @@ namespace ElysiaRenderer
 
         PIXHelper pix(m_pCommand->GetCommandList(), "Local Exposure Fusion");
         m_pGPUTimer = context.pGPUTimer;
+
         DispatchSetup();
         {
             auto passID = FUSION_DOWNSAMPLE_PASS;
             auto& passData = m_pMaterial->GetPassData(passID);
             auto passName = passData.Name.c_str();
             PIXHelper tempPix(m_pCommand->GetCommandList(), passName);
-            
+
             for (UINT level = 1; level < m_levelCount; ++level)
                 DispatchDownsample(level);
-            
-            m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("Local Exposure Fusion/") + passName).c_str());
+
+            m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(),
+                                      (std::string("Local Exposure Fusion/") + passName).c_str());
         }
-        
+
         {
             auto passID = FUSION_BLEND_PASS;
             auto& passData = m_pMaterial->GetPassData(passID);
             auto passName = passData.Name.c_str();
             PIXHelper tempPix(m_pCommand->GetCommandList(), passName);
-            
+
             for (int level = (int)m_levelCount - 1; level >= 0; --level)
                 DispatchBlend((UINT)level);
-            
-            m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("Local Exposure Fusion/") + passName).c_str());
+
+            m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(),
+                                      (std::string("Local Exposure Fusion/") + passName).c_str());
         }
-        
+
     }
 }
