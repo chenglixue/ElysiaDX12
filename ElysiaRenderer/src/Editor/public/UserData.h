@@ -218,6 +218,11 @@ namespace ElysiaRenderer
         SSSRParameter sssrParameter{};
 
         bool EnableHIZ = true;
+        // UE Level Viewport G: Game View. Session only, not written to Engine.ini.
+        // bGameViewShowWidget: first selection after entering Game View brings the
+        // transform widget and selection outline back. G again leaves Game View.
+        bool bGameView = false;
+        bool bGameViewShowWidget = true;
 
         NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(UserData,
                                                     lightColor,

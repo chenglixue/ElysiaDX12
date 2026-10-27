@@ -94,6 +94,8 @@ namespace ElysiaEngine
         // UE SLevelViewport immersive: Viewport overlays the whole editor window.
         // Not OS exclusive/borderless fullscreen (that is Alt+Enter).
         bool m_bViewportImmersive = false;
+        // Selection when Game View was entered. A later selection shows the widget.
+        Entity* m_gameViewTrackedSelection = nullptr;
         // Toolbar View Mode while a Render Settings overlay (GIProbe, Bloom, ...) is active.
         ElysiaRenderer::DebugMode m_lastViewportViewMode = ElysiaRenderer::DebugMode::None;
 

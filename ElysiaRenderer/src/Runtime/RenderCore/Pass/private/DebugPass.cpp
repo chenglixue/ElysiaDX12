@@ -504,7 +504,8 @@ namespace ElysiaRenderer
         m_pCommand->AddBarrier(m_pDisplayRT,
                                D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
-        if (UserData::GetInstance().GIParameter.enableLine)
+        if (UserData::GetInstance().GIParameter.enableLine &&
+            !UserData::GetInstance().bGameView)
         {
             {
                 std::vector<std::wstring> enableKeywords{};

@@ -143,7 +143,8 @@ namespace ElysiaRenderer
         ResolvePendingPick(context.renderList);
 
         ElysiaEngine::Entity* pSelected = SelectionManager::GetInstance().GetSelected();
-        if (pSelected)
+        if (pSelected &&
+            (!UserData::GetInstance().bGameView || UserData::GetInstance().bGameViewShowWidget))
         {
             DrawMask(context, pSelected);
             DrawOutline(context, pSelected);
@@ -438,6 +439,8 @@ namespace ElysiaRenderer
             }
 
             SelectionManager::GetInstance().ResolvePick(pHitEntity);
+            if (pHitEntity != nullptr && UserData::GetInstance().bGameView)
+                UserData::GetInstance().bGameViewShowWidget = true;
         }
         else
         {

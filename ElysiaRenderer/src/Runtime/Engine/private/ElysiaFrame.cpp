@@ -484,6 +484,19 @@ namespace ElysiaEngine
             ToggleViewportImmersive();
         }
 
+        // UE FLevelViewportCommands::ToggleGameView: G. Hides the transform
+        // widget, selection outline, and editor debug overlays.
+        if (!bPlaying && !io.WantTextInput && !bPopupOpen &&
+            !io.KeyCtrl && !io.KeyShift && !io.KeyAlt &&
+            ImGui::IsKeyPressed(ImGuiKey_G, false))
+        {
+            auto& userData = UserData::GetInstance();
+            userData.bGameView = !userData.bGameView;
+            // Enter: hide the widget. Leave: show it again, same as UE ShowWidget.
+            userData.bGameViewShowWidget = !userData.bGameView;
+            m_gameViewTrackedSelection = SelectionManager::GetInstance().GetSelected();
+        }
+
         // UE ShouldOrbitCamera: Alt && !Ctrl && !Shift && !flight look && !ortho.
         // UE IsOrbitRotationMode: LMB && !MMB && !RMB.
         const bool bAltOrbitChord =
@@ -858,7 +871,8 @@ namespace ElysiaEngine
         DrawViewportGizmo(imageOrigin, imageSize);
         DrawAutoExposureDebugOverlay(imageOrigin, imageSize);
 
-        if (m_bShowShadowFrustum && !SceneManager::GetInstance().IsPlaying())
+        if (m_bShowShadowFrustum && !SceneManager::GetInstance().IsPlaying() &&
+            !UserData::GetInstance().bGameView)
         {
             DrawShadowFrustumOverlay(imageOrigin, imageSize);
         }
@@ -1829,7 +1843,9 @@ namespace ElysiaEngine
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(3.0f, 0.0f));
 
         const bool bPlaying = SceneManager::GetInstance().IsPlaying();
-        ImGui::BeginDisabled(bPlaying);
+        const auto& userData = UserData::GetInstance();
+        const bool bHideGizmo = userData.bGameView && !userData.bGameViewShowWidget;
+        ImGui::BeginDisabled(bPlaying || bHideGizmo);
 
         if (icons.Button(EditorIcon::Move, "##GizmoMove", "Move (W)",
                          m_gizmoOperation == ImGuizmo::TRANSLATE))
@@ -2343,6 +2359,14 @@ namespace ElysiaEngine
         if (SceneManager::GetInstance().IsPlaying())
             return;
 
+        auto& userData = UserData::GetInstance();
+        // UE FEditorViewportClient::bShowWidget. Game View starts with the
+        // transform widget hidden. A later selection turns it back on
+        // (SLevelViewport::OnActorSelectionChanged). While it is hidden,
+        // Manipulate is not called, so ImGuizmo's last hover or drag must
+        // not swallow the click — UE re-picks the actor under the axis.
+        const bool bWidgetHidden = userData.bGameView && !userData.bGameViewShowWidget;
+
         // Viewport click picking: LMB on the image selects the entity, syncing
         // Outliner and Details. The transform gizmo owns the mouse
         // while hovered or dragged, so picking stands down.
@@ -2350,11 +2374,13 @@ namespace ElysiaEngine
         const bool bMouseOnImage =
             mousePos.x >= imageOrigin.x && mousePos.x < imageOrigin.x + imageSize.x &&
             mousePos.y >= imageOrigin.y && mousePos.y < imageOrigin.y + imageSize.y;
+        const bool bGizmoOwnsClick = !bWidgetHidden &&
+            (ImGuizmo::IsOver() || ImGuizmo::IsUsing());
         if (imageSize.x > 0.0f && imageSize.y > 0.0f &&
             bMouseOnImage &&
             ImGui::IsMouseClicked(ImGuiMouseButton_Left) &&
             !ImGui::GetIO().KeyAlt && !m_bOrbiting &&
-            !ImGuizmo::IsOver() && !ImGuizmo::IsUsing())
+            !bGizmoOwnsClick)
         {
             const Vector2 viewportUV((mousePos.x - imageOrigin.x) / imageSize.x,
                                      (mousePos.y - imageOrigin.y) / imageSize.y);
@@ -2362,6 +2388,22 @@ namespace ElysiaEngine
         }
 
         Entity* pSelected = SelectionManager::GetInstance().GetSelected();
+        // Outliner (and any other selection write) this frame. Viewport hits
+        // land a frame later in SelectionOutlinePass::ResolvePendingPick.
+        if (userData.bGameView && pSelected != m_gameViewTrackedSelection)
+        {
+            m_gameViewTrackedSelection = pSelected;
+            if (pSelected != nullptr)
+                userData.bGameViewShowWidget = true;
+        }
+        if (userData.bGameView && !userData.bGameViewShowWidget)
+        {
+            // Drop a drag that was in progress when G was pressed.
+            ImGuizmo::Enable(false);
+            m_bGizmoWasUsing = false;
+            return;
+        }
+
         auto* pCamera = CameraManager::GetInstance().GetMainCamera();
         if (pSelected == nullptr || pCamera == nullptr)
         {

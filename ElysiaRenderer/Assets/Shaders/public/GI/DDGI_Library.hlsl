@@ -111,8 +111,8 @@ void GenerateRayMain()
     if (packRayData.hitDist < 0.f)
     {
         TextureCube<float4> skyboxTex = ResourceDescriptorHeap[g_SkyboxTexIndex];
-        float3 skyRadiance = skyboxTex.SampleLevel(g_WarpLinearSampler, WorldRayDirection(), 0).rgb;
-        DDGI_Store_Probe_RAY_MISS(GIDataBuffer, writeIndex, 0);
+        float3 skyRadiance = skyboxTex.SampleLevel(g_WarpLinearSampler, rayDesc.Direction, 0).rgb;
+        DDGI_Store_Probe_RAY_MISS(GIDataBuffer, writeIndex, skyRadiance);
         return;
     }
 

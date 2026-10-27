@@ -61,15 +61,15 @@ float GlobalExposureScale()
     return exposure[0].r;
 }
 
-bool IsThreadOutWorkArea(UINT2 ThreadPos, float4 AreaSize)
+bool IsThreadOutWorkArea(UINT2 ThreadPos, float4 AreaSize) 
 {
     BRANCH
     if (ThreadPos.x >= AreaSize.x || ThreadPos.y >= AreaSize.y || ThreadPos.x < 0 || ThreadPos.y < 0)
     {
-        return false;
+        return true;
     }
 
-    return true;
+    return false;
 }
 
 float3 SetupGetLuminances(float3 SceneColor)
@@ -129,58 +129,38 @@ void FusionSetup(UINT3 ID : SV_DispatchThreadID)
     SetupSaveLuminance(SavePos, SceneTonemaps, SceneWeights);
 }
 
-// FUSION_SETUP_THREAD_GROUP
-// void FusionSetup(uint3 id : SV_DispatchThreadID)
-// {
-//     uint2 pixel = id.xy;
-//     if (pixel.x >= (uint)g_DestSize.x || pixel.y >= (uint)g_DestSize.y)
-//         return;
-//
-//     float3 sceneColor = LoadTexture2D(g_SourceTexIndex, pixel).rgb;
-//     float lum = Rec709Luminance(sceneColor) * OneOverPreExposure() * GlobalExposureScale();
-//     float baseValue = FusionTonemap(lum);
-//     float highlightValue = FusionTonemap(lum * g_HighlightContrast);
-//     float shadowValue = FusionTonemap(lum * g_ShadowContrast);
-//
-//     float3 weights = float3(
-//         FusionWeight(baseValue, g_TargetLuminance),
-//         FusionWeight(highlightValue, g_TargetLuminance),
-//         FusionWeight(shadowValue, g_TargetLuminance));
-//     weights *= rcp(max(dot(weights, 1.0f), 1e-5f));
-//
-//     RWTexture2D<float4> lumTex = ResourceDescriptorHeap[g_DestLumTexIndex];
-//     RWTexture2D<float4> weightTex = ResourceDescriptorHeap[g_DestWeightTexIndex];
-//     lumTex[pixel] = float4(baseValue, highlightValue, shadowValue, 0.0f);
-//     weightTex[pixel] = float4(weights, 0.0f);
-// }
-
 // --------------------------------------------------------------------------------------- Fusion Downsample ---------------------------------------------------------------------------------------
 FUSION_DOWNSAMPLE_THREAD_GROUP
-void FusionDownsample(uint3 id : SV_DispatchThreadID)
+void FusionDownsample(uint3 ID : SV_DispatchThreadID)
 {
-    uint2 pixel = id.xy;
-    if (pixel.x >= (uint)g_DestSize.x || pixel.y >= (uint)g_DestSize.y)
-        return;
-
-    float3 sum = 0.0f;
-    float weight = 0.0f;
-    [unroll]
-    for (uint y = 0; y < 2; ++y)
+    UINT2 ReadPos = ID.xy * 2;
+    UINT2 WritePos = ID.xy;
+    
+    BRANCH
+    if (IsThreadOutWorkArea(WritePos, g_DestSize))
     {
-        [unroll]
-        for (uint x = 0; x < 2; ++x)
+        return;
+    }
+    
+    float TotalWeight = 0.f;
+    float3 TotalValue = 0.f;
+    for (UINT i = 0;i < 2; ++i)
+    {
+        for (UINT j = 0; j < 2; ++j)
         {
-            uint2 sourcePixel = pixel * 2 + uint2(x, y);
-            if (sourcePixel.x < (uint)g_SourceSize.x && sourcePixel.y < (uint)g_SourceSize.y)
+            UINT2 SamplePos = ReadPos.xy + UINT2(i, j);
+            if (SamplePos.x < g_SourceSize.x && SamplePos.y < g_SourceSize.y)
             {
-                sum += LoadTexture2D(g_SourceTexIndex, sourcePixel).rgb;
-                weight += 1.0f;
+                float3 SampleValue = LoadTexture2D(g_SourceTexIndex, SamplePos);
+                TotalWeight += 1.f;
+                TotalValue += SampleValue;
             }
         }
     }
-
-    RWTexture2D<float4> dest = ResourceDescriptorHeap[g_DestLumTexIndex];
-    dest[pixel] = float4(sum * rcp(max(weight, 1.0f)), 0.0f);
+    
+    float3 Result = TotalValue * rcp(max(TotalWeight, 1e-5f));
+    RWTexture2D<float3> OutputTex = ResourceDescriptorHeap[g_DestLumTexIndex];
+    OutputTex[WritePos] = Result;
 }
 
 FUSION_BLEND_THREAD_GROUP
