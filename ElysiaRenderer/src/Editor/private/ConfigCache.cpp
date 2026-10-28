@@ -338,6 +338,17 @@ namespace ElysiaRenderer
             {AutoExposureVisualizeDebugType::Luminance, "Luminance"},
         };
 
+        const EnumName<LocalExposureVisualizationMode> kLocalExposureVisualizationModeNames[] =
+        {
+            {LocalExposureVisualizationMode::Overview, "Overview"},
+            {LocalExposureVisualizationMode::LocalExposure, "LocalExposure"},
+            {LocalExposureVisualizationMode::Thresholds, "Thresholds"},
+            {LocalExposureVisualizationMode::FusionBase, "FusionBase"},
+            {LocalExposureVisualizationMode::FusionShadows, "FusionShadows"},
+            {LocalExposureVisualizationMode::FusionHighlights, "FusionHighlights"},
+            {LocalExposureVisualizationMode::FusionWeights, "FusionWeights"},
+        };
+
         const EnumName<Jitter::Type> kJitterTypes[] =
         {
             {Jitter::Type::Default, "Default"},
@@ -770,6 +781,14 @@ namespace ElysiaRenderer
         setEnum("AutoExposure", "VisualizeDebugType", data.autoExposureParameter.visualizeDebugType,
                 kAutoExposureVisualizeTypes);
         setFloat("AutoExposure", "VisualizeLuminanceScale", data.autoExposureParameter.visualizeLuminanceScale);
+        setBool("AutoExposure", "VisualizeLocalExposure", data.autoExposureParameter.visualizeLocalExposure);
+        setEnum("AutoExposure", "LocalExposureVisualizationMode",
+                data.autoExposureParameter.localExposureVisualizationMode,
+                kLocalExposureVisualizationModeNames);
+        setFloat("AutoExposure", "LocalExposureHighlightThreshold",
+                 data.autoExposureParameter.localExposureHighlightThreshold);
+        setFloat("AutoExposure", "LocalExposureShadowThreshold",
+                 data.autoExposureParameter.localExposureShadowThreshold);
 
         setBool("Bloom", "Enable", data.bloomParameter.enable);
         setFloat("Bloom", "Radius", data.bloomParameter.radius);
@@ -1448,6 +1467,14 @@ namespace ElysiaRenderer
         emitEnum("AutoExposure", "VisualizeDebugType", data.autoExposureParameter.visualizeDebugType,
                  kAutoExposureVisualizeTypes);
         emitFloat("AutoExposure", "VisualizeLuminanceScale", data.autoExposureParameter.visualizeLuminanceScale);
+        emitBool("AutoExposure", "VisualizeLocalExposure", data.autoExposureParameter.visualizeLocalExposure);
+        emitEnum("AutoExposure", "LocalExposureVisualizationMode",
+                 data.autoExposureParameter.localExposureVisualizationMode,
+                 kLocalExposureVisualizationModeNames);
+        emitFloat("AutoExposure", "LocalExposureHighlightThreshold",
+                  data.autoExposureParameter.localExposureHighlightThreshold);
+        emitFloat("AutoExposure", "LocalExposureShadowThreshold",
+                  data.autoExposureParameter.localExposureShadowThreshold);
 
         emitBool("Bloom", "Enable", data.bloomParameter.enable);
         emitFloat("Bloom", "Radius", data.bloomParameter.radius);

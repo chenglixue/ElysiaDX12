@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "../public/DebugPass.h"
+#include "../public/LocalExposureVisualizePass.h"
 
 #include "../public/BloomPass.h"
 #include "../public/GBufferPass.h"
@@ -70,6 +71,14 @@ namespace ElysiaRenderer
 
     void DebugPass::Render(FrameContext& context)
     {
+        // The fusion debug view replaces the viewport. Keep the post-tonemap image
+        // and skip buffer visualization, which would otherwise overwrite it.
+        if (UserData::GetInstance().autoExposureParameter.visualizeLocalExposure)
+        {
+            LocalExposureVisualizePass::CaptureSceneColor(m_pCommand, m_pDisplayRT);
+            return;
+        }
+
         UpdatePipeline();
         PIXHelper pix(m_pCommand->GetCommandList(), "Debug Pass");
         m_pCamera = context.pCamera;

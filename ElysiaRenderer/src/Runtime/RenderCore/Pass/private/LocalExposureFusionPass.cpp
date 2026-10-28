@@ -7,6 +7,7 @@
 #include "Runtime/Core/public/DX12GraphicsContext.h"
 #include "Runtime/Core/public/DX12Shader.h"
 #include "Runtime/RenderCore/public/AutoExposureUtility.h"
+#include "Runtime/RenderCore/public/RenderTexture.h"
 #include "Runtime/RenderCore/public/Material.h"
 #include "Runtime/RenderCore/public/PSOManager.h"
 #include "Runtime/RenderCore/public/RenderPassResourceManager.h"
@@ -115,6 +116,26 @@ namespace ElysiaRenderer
                 m_pMaterial.get(),
                 passID);
         }
+    }
+
+    void LocalExposureFusionPass::CaptureHdrSnapshot()
+    {
+        if (!m_pDisplayRT || m_pDisplayRT->GetWidth() < 1 || m_pDisplayRT->GetHeight() < 1)
+            return;
+
+        RenderTexture* pSnapshot = RenderTargetManager::GetInstance().CreateRWRenderTexture(
+            m_pDisplayRT->GetWidth(),
+            m_pDisplayRT->GetHeight(),
+            m_pDisplayRT->GetFormat(),
+            true,
+            RenderResource::GetInstance().GetPropertyName(RenderTextureIDs::HdrSnapshotRTID));
+        if (!pSnapshot)
+            return;
+
+        const D3D12_RESOURCE_STATES displayState = m_pDisplayRT->GetTexture()->GetUsageState();
+        m_pCommand->CopyTexture(m_pDisplayRT, pSnapshot);
+        m_pCommand->AddBarrier(pSnapshot, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, false);
+        m_pCommand->AddBarrier(m_pDisplayRT, displayState);
     }
 
     void LocalExposureFusionPass::DispatchSetup()
@@ -255,11 +276,15 @@ namespace ElysiaRenderer
 
     void LocalExposureFusionPass::Render(FrameContext& context)
     {
-        if (!UserData::GetInstance().autoExposureParameter.fusionEnable || m_levelCount == 0 || !m_pDisplayRT)
+        const auto& ae = UserData::GetInstance().autoExposureParameter;
+        if (!WantsLocalExposureFusion(ae) || m_levelCount == 0 || !m_pDisplayRT)
             return;
 
         PIXHelper pix(m_pCommand->GetCommandList(), "Local Exposure Fusion");
         m_pGPUTimer = context.pGPUTimer;
+
+        if (ae.visualizeLocalExposure)
+            CaptureHdrSnapshot();
 
         DispatchSetup();
         {
