@@ -26,6 +26,7 @@ namespace ElysiaRenderer
             static inline int MaskPassID = -1;
             static inline int OutlinePassID = -1;
             static inline int PickPassID = -1;
+            static inline int WireframePassID = -1;
         };
 
         struct ShaderIDs
@@ -49,6 +50,7 @@ namespace ElysiaRenderer
         bool m_bPickResolvePending = false;
         std::vector<ElysiaEngine::Entity*> m_PickEntityLUT;
 
+        void DrawWireframe(ElysiaEngine::FrameContext& context);
         void DrawMask(ElysiaEngine::FrameContext& context, ElysiaEngine::Entity* pSelected);
         void DrawOutline(ElysiaEngine::FrameContext& context, ElysiaEngine::Entity* pSelected);
         void RenderPick(ElysiaEngine::FrameContext& context, const Vector2& viewportUV);

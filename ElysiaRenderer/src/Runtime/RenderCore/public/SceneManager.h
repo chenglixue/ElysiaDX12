@@ -48,8 +48,10 @@ namespace ElysiaRenderer
                                       const Quaternion& rotation = Quaternion::Identity,
                                       const Vector3& scale = Vector3::One);
         Entity* SpawnDirectionalLight();
+        Entity* SpawnSkyLight();
         Entity* SpawnBasicShape(BasicShapeType type);
         Entity* FindMainDirectionalLight() const;
+        Entity* FindActiveSkyLight() const;
         void SetAtmosphereSun(Entity* pLightEntity);
         void DestroyRootEntity(Entity* pEntity);
         void CollectRenderItems();
@@ -91,6 +93,7 @@ namespace ElysiaRenderer
         void CollectRenderItem(const std::unique_ptr<Entity>& pEntity,
                                BoundingFrustum& boundingFrustum);
         void SpawnSavedDirectionalLights();
+        void SpawnSavedSkyLights();
         void SpawnSavedBasicShapes();
         void CapturePlaySnapshot(Entity& entity);
 

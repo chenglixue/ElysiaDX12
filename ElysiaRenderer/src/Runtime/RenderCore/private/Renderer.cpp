@@ -43,6 +43,7 @@
 #include "Runtime/Engine/ECS/public/Entity.h"
 #include "Runtime/RenderCore/Pass/public/ShadowProjectionPass.h"
 #include "Runtime/RenderCore/Pass/public/SSSRPass.h"
+#include "Runtime/RenderCore/Pass/public/SSGIPass.h"
 #include "Runtime/RenderCore/public/PSOManager.h"
 
 extern "C"
@@ -85,6 +86,7 @@ namespace ElysiaRenderer
         AddPass<ShadowProjectionPass>();
         AddPass<OpaquePass>();
         AddPass<SkyboxPass>();
+        AddPass<SSGIPass>();
         AddPass<SSSRPass>();
         AddPass<TAAPass>();
         AddPass<BloomPass>();

@@ -128,6 +128,7 @@ namespace ElysiaEngine
         void DrawTransformComponent(Entity* entity);
         void DrawLightComponent(Entity* entity);
         void PlaceDirectionalLight();
+        void PlaceSkyLight();
         void PlaceBasicShape(ElysiaRenderer::BasicShapeType type);
         void StartPlay();
         void StopPlay();

@@ -22,7 +22,8 @@ namespace ElysiaEngine
     {
         enum class Type : uint8_t
         {
-            Directional = 0
+            Directional = 0,
+            Sky = 1
         };
 
         Type type = Type::Directional;
@@ -30,6 +31,13 @@ namespace ElysiaEngine
         // ULightComponentBase::LightColor / Intensity (Category = Light).
         Vector3 color = Vector3::One;
         float intensity = 1.f;
+        // USkyLightComponent::bLowerHemisphereIsBlack / LowerHemisphereColor.
+        bool bLowerHemisphereIsBlack = true;
+        Vector3 lowerHemisphereColor = Vector3::Zero;
+        // ULightComponentBase::IndirectLightingIntensity.
+        float indirectLightingIntensity = 1.f;
+        // ULightComponentBase::bAffectsWorld.
+        bool bAffectsWorld = true;
         // UDirectionalLightComponent::LightSourceAngle (Category = Light, degrees).
         float sourceAngleDegrees = 0.5357f;
         // UDirectionalLightComponent::bAtmosphereSunLight (Category = AtmosphereAndCloud).

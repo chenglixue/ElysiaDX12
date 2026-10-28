@@ -27,7 +27,8 @@ namespace ElysiaRenderer
         PreTonemapHDR,
         PostTonemapHDR,
         LightingOnly,
-        ShadingModel
+        ShadingModel,
+        Wireframe
     };
     NLOHMANN_JSON_SERIALIZE_ENUM(DebugMode,
                                  {
@@ -52,7 +53,8 @@ namespace ElysiaRenderer
                                  {DebugMode::PreTonemapHDR, "PreTonemapHDR"},
                                  {DebugMode::PostTonemapHDR, "PostTonemapHDR"},
                                  {DebugMode::LightingOnly, "LightingOnly"},
-                                 {DebugMode::ShadingModel, "ShadingModel"}
+                                 {DebugMode::ShadingModel, "ShadingModel"},
+                                 {DebugMode::Wireframe, "Wireframe"}
                                  })
 
     struct BufferVisualizationEntry
@@ -145,6 +147,7 @@ namespace ElysiaRenderer
         return mode == DebugMode::None ||
                mode == DebugMode::Emission ||
                mode == DebugMode::LightingOnly ||
+               mode == DebugMode::Wireframe ||
                IsBufferVisualizationMode(mode) ||
                IsShadowVisualizationMode(mode) ||
                IsGIVisualizationMode(mode);
@@ -168,6 +171,8 @@ namespace ElysiaRenderer
             return "Unlit";
         if (mode == DebugMode::LightingOnly)
             return "Lighting Only";
+        if (mode == DebugMode::Wireframe)
+            return "Wireframe";
         if (const char* label = ModeListLabel(kBufferVisualizationModes,
                                               sizeof(kBufferVisualizationModes) / sizeof(kBufferVisualizationModes[0]),
                                               mode))

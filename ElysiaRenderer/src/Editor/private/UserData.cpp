@@ -19,6 +19,9 @@ namespace ElysiaRenderer
     std::vector<SavedDirectionalLight> g_DirectionalLights;
     bool g_HasExplicitDirectionalLights = false;
     bool g_DirectionalLightsSpawned = false;
+    std::vector<SavedSkyLight> g_SkyLights;
+    bool g_HasExplicitSkyLights = false;
+    bool g_SkyLightsSpawned = false;
     std::vector<SavedBasicShape> g_BasicShapes;
     bool g_HasExplicitBasicShapes = false;
     bool g_BasicShapesSpawned = false;
@@ -63,7 +66,7 @@ namespace ElysiaRenderer
                 g_HasExplicitDirectionalLights = true;
                 for (const auto& entity : entities)
                 {
-                    if (!entity || !entity->pLight)
+                    if (!entity || !entity->pLight || entity->pLight->type != ElysiaEngine::LightComponent::Type::Directional)
                         continue;
 
                     SavedDirectionalLight savedLight;
@@ -77,6 +80,30 @@ namespace ElysiaRenderer
                     savedLight.shadow = entity->pLight->shadow;
                     entity->sourceLightIndex = static_cast<int>(g_DirectionalLights.size());
                     g_DirectionalLights.push_back(std::move(savedLight));
+                }
+            }
+
+            if (g_SkyLightsSpawned)
+            {
+                g_SkyLights.clear();
+                g_HasExplicitSkyLights = true;
+                for (const auto& entity : entities)
+                {
+                    if (!entity || !entity->pLight || entity->pLight->type != ElysiaEngine::LightComponent::Type::Sky)
+                        continue;
+
+                    SavedSkyLight savedLight;
+                    savedLight.name = entity->name.c_str();
+                    savedLight.location = entity->transform.position;
+                    savedLight.rotationEuler = entity->transform.GetEulerDegrees();
+                    savedLight.color = entity->pLight->color;
+                    savedLight.intensity = entity->pLight->intensity;
+                    savedLight.indirectLightingIntensity = entity->pLight->indirectLightingIntensity;
+                    savedLight.lowerHemisphereIsBlack = entity->pLight->bLowerHemisphereIsBlack;
+                    savedLight.lowerHemisphereColor = entity->pLight->lowerHemisphereColor;
+                    savedLight.affectsWorld = entity->pLight->bAffectsWorld;
+                    entity->sourceLightIndex = static_cast<int>(g_SkyLights.size());
+                    g_SkyLights.push_back(std::move(savedLight));
                 }
             }
 

@@ -125,6 +125,7 @@ namespace ElysiaRenderer
         {
         case DebugMode::None:
         case DebugMode::LightingOnly:
+        case DebugMode::Wireframe:
         case DebugMode::GI:
         {
             // Lit / Lighting Only / GI Scene are produced by Opaque. Leave DisplayRT as-is.

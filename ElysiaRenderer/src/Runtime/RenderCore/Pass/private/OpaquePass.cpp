@@ -19,6 +19,9 @@
 
 #include "Runtime/RenderCore/public/PSOManager.h"
 #include "Runtime/RenderCore/public/CameraManager.h"
+#include "Runtime/RenderCore/public/SceneManager.h"
+#include "Runtime/Engine/ECS/public/Entity.h"
+#include "Runtime/Engine/ECS/public/LightComponent.h"
 #include "Runtime/RenderCore/public/AutoExposureUtility.h"
 #include "Runtime/RenderCore/public/RenderPassResourceManager.h"
 #include "Runtime/RenderCore/public/RenderTargetManager.h"
@@ -149,6 +152,32 @@ namespace ElysiaRenderer
         m_pMaterial->SetFloat(ShaderIDs::g_AmbientIntensity,
                               UserData::GetInstance().AmbientCubemapIntensity,
                               passID);
+        {
+            UINT skyEnable = 0;
+            Vector3 skyColor = Vector3::One;
+            Vector3 lowerColor = Vector3::Zero;
+            float skyIntensity = 1.f;
+            float skyIndirect = 1.f;
+            UINT lowerHemisphere = 1;
+            if (ElysiaEngine::Entity* pSky = SceneManager::GetInstance().FindActiveSkyLight())
+            {
+                if (pSky->pLight)
+                {
+                    skyEnable = 1;
+                    skyColor = pSky->pLight->color;
+                    lowerColor = pSky->pLight->lowerHemisphereColor;
+                    skyIntensity = pSky->pLight->intensity;
+                    skyIndirect = pSky->pLight->indirectLightingIntensity;
+                    lowerHemisphere = pSky->pLight->bLowerHemisphereIsBlack ? 1u : 0u;
+                }
+            }
+            m_pMaterial->SetUINT(ShaderIDs::g_SkyLightEnable, skyEnable, passID);
+            m_pMaterial->SetFloat(ShaderIDs::g_SkyLightIntensity, skyIntensity, passID);
+            m_pMaterial->SetFloat(ShaderIDs::g_SkyLightIndirect, skyIndirect, passID);
+            m_pMaterial->SetFloat3(ShaderIDs::g_SkyLightColor, skyColor, passID);
+            m_pMaterial->SetFloat3(ShaderIDs::g_SkyLightLowerColor, lowerColor, passID);
+            m_pMaterial->SetUINT(ShaderIDs::g_SkyLightLowerHemisphere, lowerHemisphere, passID);
+        }
         m_pMaterial->SetUINT(ShaderIDs::g_DebugMode,
                              static_cast<UINT>(UserData::GetInstance().debugMode));
         m_pMaterial->SetUINT(ShaderIDs::g_ShadowMaskTexIndex,

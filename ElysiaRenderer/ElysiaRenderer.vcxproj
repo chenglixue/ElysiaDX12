@@ -427,6 +427,9 @@
         <None Include="Assets\Shaders\public\PostProcess\LocalExposure\CS_LocalExposureFusion.hlsl">
             <FileType>Document</FileType>
         </None>
+        <None Include="Assets\Shaders\public\PostProcess\SSGI\CS_SSGI.hlsl">
+            <FileType>Document</FileType>
+        </None>
         <None Include="Assets\Shaders\public\PostProcess\LocalExposure\CS_LocalExposureVisualize.hlsl">
             <FileType>Document</FileType>
         </None>
@@ -593,6 +596,7 @@
         <ClCompile Include="src\Runtime\Engine\private\ImGuiUtility.cpp"/>
         <ClCompile Include="src\Runtime\RenderCore\Pass\private\AutoExposurePass.cpp"/>
         <ClCompile Include="src\Runtime\RenderCore\Pass\private\LocalExposureFusionPass.cpp"/>
+        <ClCompile Include="src\Runtime\RenderCore\Pass\private\SSGIPass.cpp"/>
         <ClCompile Include="src\Runtime\RenderCore\Pass\private\LocalExposureVisualizePass.cpp"/>
         <ClCompile Include="src\Runtime\RenderCore\Pass\private\AutoExposureVisualizePass.cpp"/>
         <ClCompile Include="src\Runtime\RenderCore\private\BakeManager.cpp"/>

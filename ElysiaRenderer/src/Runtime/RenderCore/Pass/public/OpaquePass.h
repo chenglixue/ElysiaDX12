@@ -54,6 +54,12 @@ namespace ElysiaRenderer
             static inline size_t g_EnableTRT = PropertyToID(L"g_EnableTRT");
 
             static inline size_t g_SHCoefficientsBufferIndex = PropertyToID(L"g_SHCoefficientsBufferIndex");
+            static inline size_t g_SkyLightEnable = PropertyToID(L"g_SkyLightEnable");
+            static inline size_t g_SkyLightIntensity = PropertyToID(L"g_SkyLightIntensity");
+            static inline size_t g_SkyLightIndirect = PropertyToID(L"g_SkyLightIndirect");
+            static inline size_t g_SkyLightColor = PropertyToID(L"g_SkyLightColor");
+            static inline size_t g_SkyLightLowerColor = PropertyToID(L"g_SkyLightLowerColor");
+            static inline size_t g_SkyLightLowerHemisphere = PropertyToID(L"g_SkyLightLowerHemisphere");
             static inline size_t g_SobolNoiseTexIndex = PropertyToID(L"g_SobolNoiseTexIndex");
             static inline size_t g_PreExposureScaleBufferIndex = PropertyToID(L"g_PreExposureScaleBufferIndex");
             static inline size_t g_PreExposureEnable = PropertyToID(L"g_PreExposureEnable");

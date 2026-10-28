@@ -17,6 +17,7 @@
 #include "Runtime/RenderCore/public/Material.h"
 #include "Runtime/RenderCore/public/HairUtility.h"
 #include "Runtime/RenderCore/public/SSSRUtility.h"
+#include "Runtime/RenderCore/public/SSGIUtility.h"
 #include "Runtime/RenderCore/public/SubsurfaceScatterUtility.h"
 
 namespace DirectX
@@ -110,6 +111,23 @@ namespace ElysiaRenderer
     // SerializeUserData only rewrites g_DirectionalLights once this is set, so a
     // mid-load save cannot wipe the restored list.
     extern bool g_DirectionalLightsSpawned;
+
+    // Parallel to scene sky-light entities. Missing arrays mean none are spawned.
+    struct SavedSkyLight
+    {
+        std::string name = "Sky Light";
+        Vector3 location = Vector3::Zero;
+        Vector3 rotationEuler = Vector3::Zero;
+        Vector3 color = Vector3::One;
+        float intensity = 1.f;
+        float indirectLightingIntensity = 1.f;
+        bool lowerHemisphereIsBlack = true;
+        Vector3 lowerHemisphereColor = Vector3::Zero;
+        bool affectsWorld = true;
+    };
+    extern std::vector<SavedSkyLight> g_SkyLights;
+    extern bool g_HasExplicitSkyLights;
+    extern bool g_SkyLightsSpawned;
 
     // UE Place Actors / Shapes: Cube, Sphere, Plane (Cylinder/Cone are not placed).
     enum class BasicShapeType : uint8_t
@@ -216,6 +234,7 @@ namespace ElysiaRenderer
         TAAParameter taaParameter{};
         SharpenParameter sharpenParameter{};
         SSSRParameter sssrParameter{};
+        SSGIParameter ssgiParameter{};
 
         bool EnableHIZ = true;
         // UE Level Viewport G: Game View. Session only, not written to Engine.ini.
@@ -254,6 +273,7 @@ namespace ElysiaRenderer
                                                     taaParameter,
                                                     sharpenParameter,
                                                     sssrParameter,
+                                                    ssgiParameter,
                                                     EnableHIZ)
 
     private:

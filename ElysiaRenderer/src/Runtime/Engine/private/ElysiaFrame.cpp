@@ -990,6 +990,12 @@ namespace ElysiaEngine
 
         ImGui::End();
     }
+    void ElysiaFrame::PlaceSkyLight()
+    {
+        Entity* pLight = SceneManager::GetInstance().SpawnSkyLight();
+        if (pLight)
+            SelectionManager::GetInstance().Select(pLight);
+    }
     void ElysiaFrame::PlaceDirectionalLight()
     {
         if (SceneManager::GetInstance().IsPlaying())
@@ -1080,6 +1086,8 @@ namespace ElysiaEngine
                     ImGui::BeginDisabled(bPlaying);
                     if (ImGui::MenuItem("Directional Light"))
                         PlaceDirectionalLight();
+                    if (ImGui::MenuItem("Sky Light"))
+                        PlaceSkyLight();
                     if (ImGui::BeginMenu("Shapes"))
                     {
                         if (ImGui::MenuItem("Cube"))
@@ -1422,6 +1430,17 @@ namespace ElysiaEngine
                 }
             }
 
+            if (ImGui::CollapsingHeader("SSGI"))
+            {
+                auto& ssgi = pUserData.ssgiParameter;
+                ImGui::Checkbox("Enable SSGI", &ssgi.enable);
+                ImGui::SliderFloat("Intensity", &ssgi.intensity, 0.0f, 4.0f);
+                ImGui::SliderFloat("Max Distance", &ssgi.maxDistance, 0.1f, 200.0f);
+                ImGui::SliderFloat("Thickness", &ssgi.thickness, 0.001f, 20.0f);
+                ImGui::SliderFloat("Self Bias", &ssgi.selfBias, 0.0f, 2.0f);
+                ImGui::SliderFloat("History Weight", &ssgi.historyWeight, 0.0f, 0.98f);
+            }
+
             if (ImGui::CollapsingHeader("AO"))
             {
                 ImGui::Checkbox("Is Enable AO", &pUserData.aoParameter.IsEnableAO);
@@ -1727,6 +1746,28 @@ namespace ElysiaEngine
 
         LightComponent& light = *entity->pLight;
         auto& scene = SceneManager::GetInstance();
+
+        if (light.type == LightComponent::Type::Sky)
+        {
+            if (ImGui::CollapsingHeader("Light", ImGuiTreeNodeFlags_DefaultOpen))
+            {
+                ImGui::SliderFloat("Intensity", &light.intensity, 0.f, 20.f, "%.3f");
+                ImGui::ColorEdit3("Light Color", (float*)&light.color);
+                ImGui::SliderFloat("Indirect Lighting Intensity",
+                                   &light.indirectLightingIntensity,
+                                   0.f,
+                                   6.f,
+                                   "%.3f");
+                ImGui::Checkbox("Affects World", &light.bAffectsWorld);
+                ImGui::TextDisabled("Source is the current skybox cubemap. Scene capture is not implemented.");
+            }
+            if (ImGui::CollapsingHeader("Sky Light", ImGuiTreeNodeFlags_DefaultOpen))
+            {
+                ImGui::Checkbox("Lower Hemisphere Is Solid Color", &light.bLowerHemisphereIsBlack);
+                ImGui::ColorEdit3("Lower Hemisphere Color", (float*)&light.lowerHemisphereColor);
+            }
+            return;
+        }
 
         auto writeThroughIfMain = [&]()
         {
@@ -2086,6 +2127,8 @@ namespace ElysiaEngine
             icon = EditorIcon::Unlit;
         else if (displayMode == DebugMode::LightingOnly)
             icon = EditorIcon::LightingOnly;
+        else if (displayMode == DebugMode::Wireframe)
+            icon = EditorIcon::Count;
         else if (IsBufferVisualizationMode(displayMode))
             icon = EditorIcon::BufferVisualization;
         else if (IsShadowVisualizationMode(displayMode))
@@ -2147,6 +2190,7 @@ namespace ElysiaEngine
 
         modeRow(EditorIcon::Lit, "Lit", DebugMode::None);
         modeRow(EditorIcon::Unlit, "Unlit", DebugMode::Emission);
+        modeRow(EditorIcon::Count, "Wireframe", DebugMode::Wireframe);
         modeRow(EditorIcon::LightingOnly, "Lighting Only", DebugMode::LightingOnly);
 
         auto visSubmenu = [&](const char* id, EditorIcon menuIcon, const char* title, bool parentOn,

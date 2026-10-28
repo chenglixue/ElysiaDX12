@@ -100,6 +100,7 @@ namespace ElysiaRenderer
             }
 
             SpawnSavedDirectionalLights();
+            SpawnSavedSkyLights();
             SpawnSavedBasicShapes();
         }
         if (loadStage == 7)
@@ -329,6 +330,82 @@ namespace ElysiaRenderer
         g_HasExplicitDirectionalLights = true;
         g_DirectionalLightsSpawned = true;
         return pEntity;
+    }
+
+    void SceneManager::SpawnSavedSkyLights()
+    {
+        if (g_HasExplicitSkyLights)
+        {
+            for (size_t i = 0; i < g_SkyLights.size(); ++i)
+            {
+                const SavedSkyLight& saved = g_SkyLights[i];
+                auto pEntity = std::make_unique<Entity>(ToEastl(saved.name));
+                pEntity->transform.position = saved.location;
+                pEntity->transform.SetEulerDegrees(saved.rotationEuler);
+                pEntity->transform.scale = Vector3::One;
+                pEntity->pLight = std::make_unique<LightComponent>();
+                pEntity->pLight->type = LightComponent::Type::Sky;
+                pEntity->pLight->color = saved.color;
+                pEntity->pLight->intensity = saved.intensity;
+                pEntity->pLight->indirectLightingIntensity = saved.indirectLightingIntensity;
+                pEntity->pLight->bLowerHemisphereIsBlack = saved.lowerHemisphereIsBlack;
+                pEntity->pLight->lowerHemisphereColor = saved.lowerHemisphereColor;
+                pEntity->pLight->bAffectsWorld = saved.affectsWorld;
+                pEntity->SetLocalAABB(Vector3(-kLightActorExtent, -kLightActorExtent, -kLightActorExtent),
+                                      Vector3(kLightActorExtent, kLightActorExtent, kLightActorExtent));
+                pEntity->UpdateWorldAABB();
+                pEntity->sourceLightIndex = static_cast<int>(i);
+                AddEntity(std::move(pEntity));
+            }
+        }
+
+        g_SkyLightsSpawned = true;
+    }
+
+    Entity* SceneManager::SpawnSkyLight()
+    {
+        if (IsPlaying())
+            return nullptr;
+
+        SavedSkyLight desc;
+        desc.name = MakeUniqueActorName("Sky Light", m_entities);
+        if (DX12Camera* pCamera = CameraManager::GetInstance().GetMainCamera())
+            desc.location = pCamera->GetPosition() + pCamera->GetForwardDir() * 3.f;
+
+        auto pEntity = std::make_unique<Entity>(ToEastl(desc.name));
+        pEntity->transform.position = desc.location;
+        pEntity->transform.scale = Vector3::One;
+        pEntity->pLight = std::make_unique<LightComponent>();
+        pEntity->pLight->type = LightComponent::Type::Sky;
+        pEntity->pLight->color = desc.color;
+        pEntity->pLight->intensity = desc.intensity;
+        pEntity->pLight->indirectLightingIntensity = desc.indirectLightingIntensity;
+        pEntity->pLight->bLowerHemisphereIsBlack = desc.lowerHemisphereIsBlack;
+        pEntity->pLight->lowerHemisphereColor = desc.lowerHemisphereColor;
+        pEntity->pLight->bAffectsWorld = desc.affectsWorld;
+        pEntity->SetLocalAABB(Vector3(-kLightActorExtent, -kLightActorExtent, -kLightActorExtent),
+                              Vector3(kLightActorExtent, kLightActorExtent, kLightActorExtent));
+        pEntity->UpdateWorldAABB();
+        pEntity->sourceLightIndex = static_cast<int>(g_SkyLights.size());
+        g_HasExplicitSkyLights = true;
+        g_SkyLightsSpawned = true;
+        Entity* ptr = pEntity.get();
+        AddEntity(std::move(pEntity));
+        return ptr;
+    }
+
+    Entity* SceneManager::FindActiveSkyLight() const
+    {
+        Entity* pFound = nullptr;
+        for (const auto& entity : m_entities)
+        {
+            if (!entity || !entity->pLight || entity->pLight->type != LightComponent::Type::Sky)
+                continue;
+            if (!entity->pLight->bAffectsWorld)
+                continue;
+            pFound = entity.get();
+        }
+        return pFound;
     }
 
     void SceneManager::SpawnSavedBasicShapes()

@@ -323,6 +323,7 @@ namespace ElysiaRenderer
             {DebugMode::PostTonemapHDR, "PostTonemapHDR"},
             {DebugMode::LightingOnly, "LightingOnly"},
             {DebugMode::ShadingModel, "ShadingModel"},
+            {DebugMode::Wireframe, "Wireframe"},
         };
 
         const EnumName<DebugDownOrUp> kBloomDirections[] =
@@ -807,6 +808,13 @@ namespace ElysiaRenderer
         setBool("Sharpen", "Enable", data.sharpenParameter.enable);
         setFloat("Sharpen", "Amount", data.sharpenParameter.sharpen);
 
+        setBool("SSGI", "Enable", data.ssgiParameter.enable);
+        setFloat("SSGI", "Intensity", data.ssgiParameter.intensity);
+        setFloat("SSGI", "MaxDistance", data.ssgiParameter.maxDistance);
+        setFloat("SSGI", "Thickness", data.ssgiParameter.thickness);
+        setFloat("SSGI", "SelfBias", data.ssgiParameter.selfBias);
+        setFloat("SSGI", "HistoryWeight", data.ssgiParameter.historyWeight);
+
         setFloat("SSSR", "RoughnessThreshold", data.sssrParameter.roughnessThreshold);
         int samplesPerQuad = static_cast<int>(data.sssrParameter.samplesPerQuad);
         setInt("SSSR", "SamplesPerQuad", samplesPerQuad);
@@ -987,6 +995,84 @@ namespace ElysiaRenderer
             else if (!g_DirectionalLights.empty())
             {
                 g_DirectionalLights[0].atmosphereSun = true;
+            }
+        }
+
+        const auto* skyLocations = TryGetArray("Startup", "SkyLightLocation");
+        g_HasExplicitSkyLights = skyLocations != nullptr;
+        g_SkyLights.clear();
+        if (skyLocations)
+        {
+            g_SkyLights.resize(skyLocations->size());
+            for (size_t i = 0; i < skyLocations->size(); ++i)
+            {
+                if (!ParseVector3((*skyLocations)[i], g_SkyLights[i].location))
+                    warn("Startup", "SkyLightLocation", (*skyLocations)[i]);
+            }
+
+            auto loadSkyVec = [&](const char* key, Vector3 SavedSkyLight::* member)
+            {
+                const auto* values = TryGetArray("Startup", key);
+                if (!values)
+                    return;
+                const size_t count = (std::min)(values->size(), g_SkyLights.size());
+                for (size_t i = 0; i < count; ++i)
+                {
+                    Vector3 parsed = g_SkyLights[i].*member;
+                    if (!ParseVector3((*values)[i], parsed))
+                        warn("Startup", key, (*values)[i]);
+                    g_SkyLights[i].*member = parsed;
+                }
+            };
+            auto loadSkyFloat = [&](const char* key, float SavedSkyLight::* member)
+            {
+                const auto* values = TryGetArray("Startup", key);
+                if (!values)
+                    return;
+                const size_t count = (std::min)(values->size(), g_SkyLights.size());
+                for (size_t i = 0; i < count; ++i)
+                {
+                    float parsed = g_SkyLights[i].*member;
+                    if (!ParseFloat((*values)[i], parsed))
+                        warn("Startup", key, (*values)[i]);
+                    g_SkyLights[i].*member = parsed;
+                }
+            };
+            loadSkyVec("SkyLightRotation", &SavedSkyLight::rotationEuler);
+            loadSkyVec("SkyLightColor", &SavedSkyLight::color);
+            loadSkyVec("SkyLightLowerHemisphereColor", &SavedSkyLight::lowerHemisphereColor);
+            loadSkyFloat("SkyLightIntensity", &SavedSkyLight::intensity);
+            loadSkyFloat("SkyLightIndirectLightingIntensity", &SavedSkyLight::indirectLightingIntensity);
+            if (const auto* names = TryGetArray("Startup", "SkyLightName"))
+            {
+                const size_t count = (std::min)(names->size(), g_SkyLights.size());
+                for (size_t i = 0; i < count; ++i)
+                {
+                    if (!(*names)[i].empty())
+                        g_SkyLights[i].name = (*names)[i];
+                }
+            }
+            if (const auto* flags = TryGetArray("Startup", "SkyLightLowerHemisphereIsBlack"))
+            {
+                const size_t count = (std::min)(flags->size(), g_SkyLights.size());
+                for (size_t i = 0; i < count; ++i)
+                {
+                    bool parsed = g_SkyLights[i].lowerHemisphereIsBlack;
+                    if (!ParseBool((*flags)[i], parsed))
+                        warn("Startup", "SkyLightLowerHemisphereIsBlack", (*flags)[i]);
+                    g_SkyLights[i].lowerHemisphereIsBlack = parsed;
+                }
+            }
+            if (const auto* flags = TryGetArray("Startup", "SkyLightAffectsWorld"))
+            {
+                const size_t count = (std::min)(flags->size(), g_SkyLights.size());
+                for (size_t i = 0; i < count; ++i)
+                {
+                    bool parsed = g_SkyLights[i].affectsWorld;
+                    if (!ParseBool((*flags)[i], parsed))
+                        warn("Startup", "SkyLightAffectsWorld", (*flags)[i]);
+                    g_SkyLights[i].affectsWorld = parsed;
+                }
             }
         }
 
@@ -1301,6 +1387,57 @@ namespace ElysiaRenderer
             emitLightArray("DirectionalLightShadowTAA", shadowTaas);
         }
 
+        if (g_HasExplicitSkyLights || !g_SkyLights.empty())
+        {
+            auto emitSkyArray = [&](const char* key, const std::vector<std::string>& live)
+            {
+                const std::vector<std::string>* baseline = TryGetBaselineArray("Startup", key);
+                if (baseline != nullptr && *baseline == live)
+                    return;
+
+                begin("Startup");
+                if (live.empty())
+                {
+                    out << "." << key << "=\n";
+                    return;
+                }
+                for (size_t i = 0; i < live.size(); ++i)
+                    out << (i == 0 ? "." : "+") << key << "=" << live[i] << "\n";
+            };
+
+            std::vector<std::string> names;
+            std::vector<std::string> locations;
+            std::vector<std::string> rotations;
+            std::vector<std::string> colors;
+            std::vector<std::string> intensities;
+            std::vector<std::string> indirects;
+            std::vector<std::string> lowerFlags;
+            std::vector<std::string> lowerColors;
+            std::vector<std::string> affects;
+            names.reserve(g_SkyLights.size());
+            for (const auto& light : g_SkyLights)
+            {
+                names.push_back(light.name);
+                locations.push_back(FormatVector3(light.location));
+                rotations.push_back(FormatVector3(light.rotationEuler));
+                colors.push_back(FormatVector3(light.color));
+                intensities.push_back(FormatFloat(light.intensity));
+                indirects.push_back(FormatFloat(light.indirectLightingIntensity));
+                lowerFlags.push_back(light.lowerHemisphereIsBlack ? "true" : "false");
+                lowerColors.push_back(FormatVector3(light.lowerHemisphereColor));
+                affects.push_back(light.affectsWorld ? "true" : "false");
+            }
+            emitSkyArray("SkyLightName", names);
+            emitSkyArray("SkyLightLocation", locations);
+            emitSkyArray("SkyLightRotation", rotations);
+            emitSkyArray("SkyLightColor", colors);
+            emitSkyArray("SkyLightIntensity", intensities);
+            emitSkyArray("SkyLightIndirectLightingIntensity", indirects);
+            emitSkyArray("SkyLightLowerHemisphereIsBlack", lowerFlags);
+            emitSkyArray("SkyLightLowerHemisphereColor", lowerColors);
+            emitSkyArray("SkyLightAffectsWorld", affects);
+        }
+
         if (g_HasExplicitBasicShapes || !g_BasicShapes.empty())
         {
             auto emitShapeArray = [&](const char* key, const std::vector<std::string>& live)
@@ -1492,6 +1629,13 @@ namespace ElysiaRenderer
 
         emitBool("Sharpen", "Enable", data.sharpenParameter.enable);
         emitFloat("Sharpen", "Amount", data.sharpenParameter.sharpen);
+
+        emitBool("SSGI", "Enable", data.ssgiParameter.enable);
+        emitFloat("SSGI", "Intensity", data.ssgiParameter.intensity);
+        emitFloat("SSGI", "MaxDistance", data.ssgiParameter.maxDistance);
+        emitFloat("SSGI", "Thickness", data.ssgiParameter.thickness);
+        emitFloat("SSGI", "SelfBias", data.ssgiParameter.selfBias);
+        emitFloat("SSGI", "HistoryWeight", data.ssgiParameter.historyWeight);
 
         emitFloat("SSSR", "RoughnessThreshold", data.sssrParameter.roughnessThreshold);
         emitInt("SSSR", "SamplesPerQuad", static_cast<int>(data.sssrParameter.samplesPerQuad));

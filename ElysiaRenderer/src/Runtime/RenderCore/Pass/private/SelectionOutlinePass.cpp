@@ -89,6 +89,11 @@ namespace ElysiaRenderer
                 .Name = "Selection Pick Pass",
                 .FilePath = L"Shaders\\public\\Editor\\SelectionPick.hlsl",
             },
+            ShaderPass
+            {
+                .Name = "Selection Wireframe Pass",
+                .FilePath = L"Shaders\\public\\Editor\\SelectionWireframe.hlsl",
+            },
         };
 
         if (!m_pMaterial)
@@ -99,6 +104,7 @@ namespace ElysiaRenderer
         ShaderPassIDs::MaskPassID = m_pMaterial->FindPassIndex("Selection Mask Pass");
         ShaderPassIDs::OutlinePassID = m_pMaterial->FindPassIndex("Selection Outline Pass");
         ShaderPassIDs::PickPassID = m_pMaterial->FindPassIndex("Selection Pick Pass");
+        ShaderPassIDs::WireframePassID = m_pMaterial->FindPassIndex("Selection Wireframe Pass");
 
         // RTs match CameraColorRT/CameraDepthRT resolution (TAA upscale scale).
         // RenderTargetManager caches by name and recreates on window resize.
@@ -142,6 +148,9 @@ namespace ElysiaRenderer
         // safely reuse the readback buffer below.
         ResolvePendingPick(context.renderList);
 
+        if (UserData::GetInstance().debugMode == DebugMode::Wireframe)
+            DrawWireframe(context);
+
         ElysiaEngine::Entity* pSelected = SelectionManager::GetInstance().GetSelected();
         if (pSelected &&
             (!UserData::GetInstance().bGameView || UserData::GetInstance().bGameViewShowWidget))
@@ -156,6 +165,63 @@ namespace ElysiaRenderer
         {
             RenderPick(context, pickUV);
         }
+    }
+
+    void SelectionOutlinePass::DrawWireframe(ElysiaEngine::FrameContext& context)
+    {
+        auto passID = ShaderPassIDs::WireframePassID;
+        if (passID < 0 || !m_pDisplayRT || !m_pCameraDepthRT)
+            return;
+
+        auto& passData = m_pMaterial->GetPassData(passID);
+        if (!passData.pPipelineStateObject)
+            return;
+
+        PIXHelper pix(m_pCommand->GetCommandList(), "Wireframe Overlay");
+
+        PipelineInfo pipelineStateData{};
+        pipelineStateData.m_pipelineStateObject = passData.pPipelineStateObject;
+        pipelineStateData.m_renderTargets = {m_pDisplayRT->GetTexture()};
+        m_pCommand->SetPipeline(pipelineStateData);
+
+        m_pCommand->AddBarrier(m_pDisplayRT, D3D12_RESOURCE_STATE_RENDER_TARGET, false);
+        m_pCommand->AddBarrier(m_pCameraDepthRT, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+
+        m_pCommand->SetDefaultViewportAndScissor(ElysiaHelper::UINT2(m_displaySize));
+        m_pCommand->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+        m_pMaterial->SetMatrix(ShaderIDs::g_ViewProjMatrix,
+                               GetJitteredViewProj(m_pCamera, m_displaySize),
+                               passID);
+        m_pMaterial->SetFloat4(ShaderIDs::g_ScreenSize,
+                               GetScreenSize(m_displaySize.x, m_displaySize.y),
+                               passID);
+        m_pMaterial->SetUINT(ShaderIDs::g_DepthTexIndex,
+                             m_pCameraDepthRT->GetSRVResourceHeapIndex(),
+                             passID);
+
+        for (auto& renderItem : context.renderList)
+        {
+            if (!renderItem.pAssociatedEntity || !renderItem.pAssociatedEntity->pMeshRenderer)
+                continue;
+            if (!renderItem.pAssociatedEntity->pMeshRenderer->m_pModel)
+                continue;
+
+            const auto& model = *renderItem.pAssociatedEntity->pMeshRenderer->m_pModel;
+            auto vertexView = model.vertexBufferView;
+            auto indexView = model.indexBufferView;
+            m_pCommand->SetVertexBuffer(0, 1, vertexView);
+            m_pCommand->SetIndexBuffer(indexView);
+            m_pMaterial->SetMatrix(ShaderIDs::g_WorldMatrix, renderItem.worldMatrix, passID);
+            SetSpaceResource(passData, PER_PASS_SPACE);
+            m_pCommand->DrawInstanced(renderItem.indexCount, 1, renderItem.startIndex,
+                                      renderItem.baseVertex, 0);
+        }
+
+        m_pCommand->AddBarrier(m_pDisplayRT, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, false);
+        m_pCommand->AddBarrier(m_pCameraDepthRT,
+                               D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE |
+                               D3D12_RESOURCE_STATE_DEPTH_READ);
     }
 
     void SelectionOutlinePass::DrawMask(ElysiaEngine::FrameContext& context,
@@ -489,5 +555,6 @@ namespace ElysiaRenderer
         updatePassVariant(ShaderPassIDs::MaskPassID, MaskRTFormat);
         updatePassVariant(ShaderPassIDs::OutlinePassID, m_pDisplayRT->GetFormat());
         updatePassVariant(ShaderPassIDs::PickPassID, PickRTFormat);
+        updatePassVariant(ShaderPassIDs::WireframePassID, m_pDisplayRT->GetFormat());
     }
 }

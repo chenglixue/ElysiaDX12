@@ -164,24 +164,29 @@ void FusionDownsample(uint3 ID : SV_DispatchThreadID)
 }
 
 FUSION_BLEND_THREAD_GROUP
-void FusionBlend(uint3 id : SV_DispatchThreadID)
+void FusionBlend(uint3 ID : SV_DispatchThreadID)
 {
-    uint2 pixel = id.xy;
-    if (pixel.x >= (uint)g_DestSize.x || pixel.y >= (uint)g_DestSize.y)
-        return;
-
-    float3 weights = LoadTexture2D(g_WeightTexIndex, pixel).rgb;
-    weights *= rcp(max(dot(weights, 1.0f), 1e-5f));
-    float3 luminance = LoadTexture2D(g_LumTexIndex, pixel).rgb;
-    float coarseResult = 0.0f;
-
-    if (g_IsCoarsest == 0)
-    {
-        float2 uv = ((float2)pixel + 0.5f) * g_DestSize.zw;
-        luminance -= SampleTexture2D(g_CoarseLumTexIndex, uv, ClampLinearSampler).rgb;
-        coarseResult = SampleTexture2D(g_CoarseResultTexIndex, uv, ClampLinearSampler).r;
-    }
-
-    RWTexture2D<float> dest = ResourceDescriptorHeap[g_DestResultTexIndex];
-    dest[pixel] = coarseResult + dot(luminance, weights);
+    UINT 
 }
+// FUSION_BLEND_THREAD_GROUP
+// void FusionBlend(uint3 id : SV_DispatchThreadID)
+// {
+//     uint2 pixel = id.xy;
+//     if (pixel.x >= (uint)g_DestSize.x || pixel.y >= (uint)g_DestSize.y)
+//         return;
+//
+//     float3 weights = LoadTexture2D(g_WeightTexIndex, pixel).rgb;
+//     weights *= rcp(max(dot(weights, 1.0f), 1e-5f));
+//     float3 luminance = LoadTexture2D(g_LumTexIndex, pixel).rgb;
+//     float coarseResult = 0.0f;
+//
+//     if (g_IsCoarsest == 0)
+//     {
+//         float2 uv = ((float2)pixel + 0.5f) * g_DestSize.zw;
+//         luminance -= SampleTexture2D(g_CoarseLumTexIndex, uv, ClampLinearSampler).rgb;
+//         coarseResult = SampleTexture2D(g_CoarseResultTexIndex, uv, ClampLinearSampler).r;
+//     }
+//
+//     RWTexture2D<float> dest = ResourceDescriptorHeap[g_DestResultTexIndex];
+//     dest[pixel] = coarseResult + dot(luminance, weights);
+// }

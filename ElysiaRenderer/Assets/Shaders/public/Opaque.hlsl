@@ -66,6 +66,12 @@ cbuffer PassConstant : register(b0, perPassSpace)
     UINT g_SHCoefficientsBufferIndex;
     UINT g_PreExposureScaleBufferIndex;
     UINT g_PreExposureEnable;
+    UINT g_SkyLightEnable;
+    float g_SkyLightIntensity;
+    float g_SkyLightIndirect;
+    float3 g_SkyLightColor;
+    float3 g_SkyLightLowerColor;
+    UINT g_SkyLightLowerHemisphere;
 }
 
 
@@ -192,6 +198,18 @@ PSOutput PS(PSInput i)
                   ) * g_AmbientTint * g_AmbientIntensity * blendWeight;
         IBL *= (GBufferData.DiffuseColor.rgb) / PI;
         lighting += float4(IBL, 1.f) * AO;
+    }
+    if (g_SkyLightEnable != 0)
+    {
+        float3 skyIrradiance = CalcIrradiance(inputParam.NormalWS);
+        if (g_SkyLightLowerHemisphere != 0)
+        {
+            float down = saturate(-inputParam.NormalWS.y);
+            skyIrradiance = lerp(skyIrradiance, g_SkyLightLowerColor, down);
+        }
+        float3 skyDiffuse = skyIrradiance * g_SkyLightColor * g_SkyLightIntensity * g_SkyLightIndirect;
+        skyDiffuse *= GBufferData.DiffuseColor;
+        lighting.rgb += skyDiffuse * AO;
     }
     // IBL += GetIBL(inputParam, GBufferData, mainLightData.toLight, g_AmbientIntensity, g_AmbientTint);
     // IBL is already in lighting; only add emission here so Lit does not double GI.
