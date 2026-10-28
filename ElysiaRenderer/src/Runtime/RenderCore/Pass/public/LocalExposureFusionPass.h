@@ -14,6 +14,8 @@ namespace ElysiaRenderer
             static inline size_t LumRTID = PropertyToID(L"Local Exposure Fusion Lum RT");
             static inline size_t WeightRTID = PropertyToID(L"Local Exposure Fusion Weight RT");
             static inline size_t ResultRTID = PropertyToID(L"Local Exposure Fusion Result RT");
+            // Pre-tonemap DisplayRT. Captured only while the fusion debug view is open.
+            static inline size_t HdrSnapshotRTID = PropertyToID(L"Local Exposure HDR Snapshot RT");
         };
 
         LocalExposureFusionPass();
@@ -63,6 +65,7 @@ namespace ElysiaRenderer
         std::array<RenderTexture*, kLevelCount> m_weightRTs{};
         std::array<RenderTexture*, kLevelCount> m_resultRTs{};
 
+        void CaptureHdrSnapshot();
         void DispatchSetup();
         void DispatchDownsample(UINT level);
         void DispatchBlend(UINT level);

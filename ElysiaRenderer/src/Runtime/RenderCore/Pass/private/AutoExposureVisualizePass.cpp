@@ -146,7 +146,9 @@ namespace ElysiaRenderer
 
     void AutoExposureVisualizePass::Render(FrameContext& context)
     {
-        if (!UserData::GetInstance().autoExposureParameter.visualizeHDR)
+        const auto& ae = UserData::GetInstance().autoExposureParameter;
+        // Local exposure visualization runs next and replaces this image.
+        if (!ae.visualizeHDR || ae.visualizeLocalExposure)
             return;
 
         PIXHelper pix(m_pCommand->GetCommandList(), "Auto Exposure Visualize");

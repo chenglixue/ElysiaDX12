@@ -326,7 +326,8 @@ namespace ElysiaRenderer
                                   UserData::GetInstance().bloomParameter.intensity);
             m_pMaterial->SetUINT(ShaderIDs::g_PreExposureScaleBufferIndex,
                              RenderPassResourceManager::GetInstance().Get<AutoExposureData>().pPreExposureBuffer->GetUAVResourceHeapIndex());
-            const bool fusionOn = UserData::GetInstance().autoExposureParameter.fusionEnable;
+            // Visualize also applies fusion, so the overview background is the fused image.
+            const bool fusionOn = WantsLocalExposureFusion(UserData::GetInstance().autoExposureParameter);
             m_pMaterial->SetUINT(ShaderIDs::g_FusionEnable, fusionOn ? 1u : 0u);
             UINT fusionSrv = 0;
             if (fusionOn)

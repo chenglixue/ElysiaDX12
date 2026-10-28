@@ -21,6 +21,104 @@ namespace ElysiaRenderer
                                  {AutoExposureVisualizeDebugType::Luminance, "Luminance"}
                                  })
 
+    // UE r.LocalExposure.VisualizationMode. Values match the cvar.
+    // Bilateral-only modes (3 Base Luminance, 4 Detail Luminance, 5 Valid Lookup)
+    // are omitted: this renderer implements Fusion only.
+    enum class LocalExposureVisualizationMode : UINT
+    {
+        Overview = 0,
+        LocalExposure = 1,
+        Thresholds = 2,
+        FusionBase = 6,
+        FusionShadows = 7,
+        FusionHighlights = 8,
+        FusionWeights = 9
+    };
+
+    static_assert(static_cast<UINT>(LocalExposureVisualizationMode::Overview) == 0);
+    static_assert(static_cast<UINT>(LocalExposureVisualizationMode::LocalExposure) == 1);
+    static_assert(static_cast<UINT>(LocalExposureVisualizationMode::Thresholds) == 2);
+    static_assert(static_cast<UINT>(LocalExposureVisualizationMode::FusionBase) == 6);
+    static_assert(static_cast<UINT>(LocalExposureVisualizationMode::FusionShadows) == 7);
+    static_assert(static_cast<UINT>(LocalExposureVisualizationMode::FusionHighlights) == 8);
+    static_assert(static_cast<UINT>(LocalExposureVisualizationMode::FusionWeights) == 9);
+
+    NLOHMANN_JSON_SERIALIZE_ENUM(LocalExposureVisualizationMode,
+                                 {
+                                 {LocalExposureVisualizationMode::Overview, "Overview"},
+                                 {LocalExposureVisualizationMode::LocalExposure, "LocalExposure"},
+                                 {LocalExposureVisualizationMode::Thresholds, "Thresholds"},
+                                 {LocalExposureVisualizationMode::FusionBase, "FusionBase"},
+                                 {LocalExposureVisualizationMode::FusionShadows, "FusionShadows"},
+                                 {LocalExposureVisualizationMode::FusionHighlights, "FusionHighlights"},
+                                 {LocalExposureVisualizationMode::FusionWeights, "FusionWeights"}
+                                 })
+
+    struct LocalExposureVisualizationEntry
+    {
+        LocalExposureVisualizationMode mode;
+        const char* label;
+    };
+
+    // Cvar help text, in the order shown by the Local Exposure panel.
+    inline constexpr LocalExposureVisualizationEntry kLocalExposureVisualizationModes[] =
+    {
+        {LocalExposureVisualizationMode::Overview, "Overview"},
+        {LocalExposureVisualizationMode::LocalExposure, "Local Exposure"},
+        {LocalExposureVisualizationMode::Thresholds, "Thresholds"},
+        {LocalExposureVisualizationMode::FusionBase, "Fusion - Base Exposure"},
+        {LocalExposureVisualizationMode::FusionShadows, "Fusion - Shadows"},
+        {LocalExposureVisualizationMode::FusionHighlights, "Fusion - Highlights"},
+        {LocalExposureVisualizationMode::FusionWeights, "Fusion - Weights"},
+    };
+
+    // UE overview tiles, index = column + row * 4. Keep in sync with
+    // CS_LocalExposureVisualize.hlsl OverviewMode.
+    struct LocalExposureOverviewTile
+    {
+        UINT column;
+        UINT row;
+        LocalExposureVisualizationMode mode;
+    };
+
+    inline constexpr LocalExposureOverviewTile kLocalExposureOverviewTiles[] =
+    {
+        {0, 0, LocalExposureVisualizationMode::LocalExposure},
+        {3, 0, LocalExposureVisualizationMode::Thresholds},
+        {0, 3, LocalExposureVisualizationMode::FusionShadows},
+        {1, 3, LocalExposureVisualizationMode::FusionBase},
+        {2, 3, LocalExposureVisualizationMode::FusionHighlights},
+        {3, 3, LocalExposureVisualizationMode::FusionWeights},
+    };
+
+    inline bool IsLocalExposureVisualizationMode(LocalExposureVisualizationMode mode)
+    {
+        for (const LocalExposureVisualizationEntry& entry : kLocalExposureVisualizationModes)
+        {
+            if (entry.mode == mode)
+                return true;
+        }
+        return false;
+    }
+
+    inline LocalExposureVisualizationMode SanitizeLocalExposureVisualizationMode(
+        LocalExposureVisualizationMode mode)
+    {
+        return IsLocalExposureVisualizationMode(mode)
+                   ? mode
+                   : LocalExposureVisualizationMode::LocalExposure;
+    }
+
+    inline const char* GetLocalExposureVisualizationLabel(LocalExposureVisualizationMode mode)
+    {
+        for (const LocalExposureVisualizationEntry& entry : kLocalExposureVisualizationModes)
+        {
+            if (entry.mode == mode)
+                return entry.label;
+        }
+        return "Local Exposure";
+    }
+
     // Shared by C++ dispatch/buffer size and HLSL via ShaderPass.Environment.SetDefine.
     constexpr int kAutoExposureHistogramSize = 64;
 
@@ -133,11 +231,27 @@ namespace ElysiaRenderer
         bool visualizeHDR = false;
         AutoExposureVisualizeDebugType visualizeDebugType = AutoExposureVisualizeDebugType::SceneColor;
         float visualizeLuminanceScale = 1.0f;
+
+        // UE ShowFlag.VisualizeLocalExposure + r.LocalExposure.VisualizationMode.
+        // While on, fusion is evaluated and applied so the view matches the buffers.
+        bool visualizeLocalExposure = false;
+        LocalExposureVisualizationMode localExposureVisualizationMode =
+            LocalExposureVisualizationMode::Overview;
+        // Log2 stops from middle grey. Used by the Thresholds view only.
+        // UE defaults these to 0, which stripes every pixel on that side of middle grey.
+        float localExposureHighlightThreshold = 0.0f;
+        float localExposureShadowThreshold = 0.0f;
     };
 
     inline bool WantsAutoExposureHistogram(const AutoExposureParameter& p)
     {
         return p.enable || p.visualizeHDR;
+    }
+
+    // Fusion pyramid is needed when the image uses it, and while the debug view is open.
+    inline bool WantsLocalExposureFusion(const AutoExposureParameter& p)
+    {
+        return p.fusionEnable || p.visualizeLocalExposure;
     }
 
     inline bool UsePreExposure(const AutoExposureParameter& p)
@@ -262,6 +376,10 @@ namespace ElysiaRenderer
                                                     visualizeHDR,
                                                     visualizeDebugType,
                                                     visualizeLuminanceScale,
+                                                    visualizeLocalExposure,
+                                                    localExposureVisualizationMode,
+                                                    localExposureHighlightThreshold,
+                                                    localExposureShadowThreshold,
                                                     fusionEnable,
                                                     fusionHighlightContrast,
                                                     fusionShadowContrast)

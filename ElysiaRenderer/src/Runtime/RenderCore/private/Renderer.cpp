@@ -28,6 +28,7 @@
 #include "Runtime/RenderCore/Pass/public/AutoExposurePass.h"
 #include "Runtime/RenderCore/Pass/public/LocalExposureFusionPass.h"
 #include "Runtime/RenderCore/Pass/public/AutoExposureVisualizePass.h"
+#include "Runtime/RenderCore/Pass/public/LocalExposureVisualizePass.h"
 
 #include "../public/RenderTargetManager.h"
 #include "../public/TonemapUtility.h"
@@ -94,6 +95,7 @@ namespace ElysiaRenderer
         AddPass<SelectionOutlinePass>();
         AddPass<DebugPass>();
         AddPass<AutoExposureVisualizePass>();
+        AddPass<LocalExposureVisualizePass>();
         AddPass<UIPass>();
         AddPass<FinalBlitPass>();
     }

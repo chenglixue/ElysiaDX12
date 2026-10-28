@@ -139,6 +139,8 @@ namespace ElysiaEngine
         void DrawShadowFrustumOverlay(const ImVec2& imageOrigin, const ImVec2& imageSize);
         // UE VisualizeHDR canvas: stats + histogram EV ticks over the viewport image.
         void DrawAutoExposureDebugOverlay(const ImVec2& imageOrigin, const ImVec2& imageSize);
+        // UE VisualizeLocalExposure overview: yellow tile labels over the 4x4 grid.
+        void DrawLocalExposureDebugOverlay(const ImVec2& imageOrigin, const ImVec2& imageSize);
         // UE row 3: Viewport toolbar (Move / Rotate / Scale / snap). Viewport menu bar, not over the image.
         void DrawGizmoToolbar();
         // UE viewport toolbar right: Camera Speed number + dropdown slider.

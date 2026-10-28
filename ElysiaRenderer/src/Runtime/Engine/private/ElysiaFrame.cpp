@@ -870,6 +870,7 @@ namespace ElysiaEngine
 
         DrawViewportGizmo(imageOrigin, imageSize);
         DrawAutoExposureDebugOverlay(imageOrigin, imageSize);
+        DrawLocalExposureDebugOverlay(imageOrigin, imageSize);
 
         if (m_bShowShadowFrustum && !SceneManager::GetInstance().IsPlaying() &&
             !UserData::GetInstance().bGameView)
@@ -1364,6 +1365,61 @@ namespace ElysiaEngine
                 ImGui::Checkbox("Enable Fusion", &ae.fusionEnable);
                 ImGui::SliderFloat("Highlight Contrast", &ae.fusionHighlightContrast, 0.0f, 2.0f);
                 ImGui::SliderFloat("Shadow Contrast", &ae.fusionShadowContrast, 0.0f, 4.0f);
+                ImGui::Separator();
+                ImGui::Checkbox("Visualize Local Exposure", &ae.visualizeLocalExposure);
+                if (ImGui::IsItemHovered())
+                {
+                    ImGui::SetTooltip(
+                        "UE Show -> Visualize -> Local Exposure. "
+                        "While on, fusion is applied so the view matches the buffers.");
+                }
+
+                ae.localExposureVisualizationMode =
+                    SanitizeLocalExposureVisualizationMode(ae.localExposureVisualizationMode);
+                const char* preview = GetLocalExposureVisualizationLabel(ae.localExposureVisualizationMode);
+                if (ImGui::BeginCombo("Visualization Mode", preview))
+                {
+                    for (const LocalExposureVisualizationEntry& entry : kLocalExposureVisualizationModes)
+                    {
+                        const bool selected = ae.localExposureVisualizationMode == entry.mode;
+                        if (ImGui::Selectable(entry.label, selected))
+                            ae.localExposureVisualizationMode = entry.mode;
+                        if (selected)
+                            ImGui::SetItemDefaultFocus();
+                    }
+                    ImGui::EndCombo();
+                }
+                if (ImGui::IsItemHovered())
+                {
+                    ImGui::SetTooltip(
+                        "r.LocalExposure.VisualizationMode. "
+                        "Bilateral modes 3-5 are not available.");
+                }
+
+                const bool showThresholds =
+                    ae.localExposureVisualizationMode == LocalExposureVisualizationMode::Overview ||
+                    ae.localExposureVisualizationMode == LocalExposureVisualizationMode::Thresholds;
+                if (ae.visualizeLocalExposure && showThresholds)
+                {
+                    ImGui::SliderFloat("Highlight Threshold",
+                                       &ae.localExposureHighlightThreshold,
+                                       0.0f,
+                                       4.0f);
+                    if (ImGui::IsItemHovered())
+                    {
+                        ImGui::SetTooltip(
+                            "Log2 stops from middle grey. 0 stripes every pixel brighter than that.");
+                    }
+                    ImGui::SliderFloat("Shadow Threshold",
+                                       &ae.localExposureShadowThreshold,
+                                       0.0f,
+                                       4.0f);
+                    if (ImGui::IsItemHovered())
+                    {
+                        ImGui::SetTooltip(
+                            "Log2 stops from middle grey. 0 stripes every pixel darker than that.");
+                    }
+                }
             }
 
             if (ImGui::CollapsingHeader("AO"))
@@ -2221,7 +2277,7 @@ namespace ElysiaEngine
     void ElysiaFrame::DrawAutoExposureDebugOverlay(const ImVec2& imageOrigin, const ImVec2& imageSize)
     {
         const auto& ae = UserData::GetInstance().autoExposureParameter;
-        if (!ae.visualizeHDR || imageSize.x <= 0.0f || imageSize.y <= 0.0f)
+        if (!ae.visualizeHDR || ae.visualizeLocalExposure || imageSize.x <= 0.0f || imageSize.y <= 0.0f)
             return;
 
         auto* pDisplayRT = m_pRenderer ? m_pRenderer->GetDisplayRT() : nullptr;
@@ -2349,6 +2405,71 @@ namespace ElysiaEngine
                 std::snprintf(line, sizeof(line), "%.2g", ev);
                 shadowText(toIm(histLeft + t * histWidth - 5.0f, histTickY), coral, line);
             }
+        }
+
+        dl->PopClipRect();
+    }
+
+    void ElysiaFrame::DrawLocalExposureDebugOverlay(const ImVec2& imageOrigin, const ImVec2& imageSize)
+    {
+        const auto& ae = UserData::GetInstance().autoExposureParameter;
+        if (!ae.visualizeLocalExposure ||
+            ae.localExposureVisualizationMode != LocalExposureVisualizationMode::Overview ||
+            imageSize.x <= 0.0f || imageSize.y <= 0.0f)
+            return;
+
+        auto* pDisplayRT = m_pRenderer ? m_pRenderer->GetDisplayRT() : nullptr;
+        if (pDisplayRT == nullptr)
+            return;
+
+        const float dispW = static_cast<float>(pDisplayRT->GetWidth());
+        const float dispH = static_cast<float>(pDisplayRT->GetHeight());
+        const float tileW = std::floor(dispW / 4.0f);
+        const float tileH = std::floor(dispH / 4.0f);
+        if (tileW < 8.0f || tileH < 8.0f)
+            return;
+
+        ImDrawList* dl = ImGui::GetWindowDrawList();
+        dl->PushClipRect(imageOrigin,
+                         ImVec2(imageOrigin.x + imageSize.x, imageOrigin.y + imageSize.y),
+                         true);
+
+        auto toIm = [&](float px, float py)
+        {
+            return ImVec2(imageOrigin.x + px / dispW * imageSize.x,
+                          imageOrigin.y + py / dispH * imageSize.y);
+        };
+        auto shadowText = [&](ImVec2 pos, const char* text)
+        {
+            const ImU32 yellow = IM_COL32(255, 255, 0, 255);
+            dl->AddText(ImVec2(pos.x + 1.0f, pos.y + 1.0f), IM_COL32(0, 0, 0, 220), text);
+            dl->AddText(pos, yellow, text);
+        };
+
+        char localLabel[96];
+        char thresholdLabel[96];
+        std::snprintf(localLabel,
+                      sizeof(localLabel),
+                      "Local Exposure (H=%.2f / S=%.2f)",
+                      ae.fusionHighlightContrast,
+                      ae.fusionShadowContrast);
+        std::snprintf(thresholdLabel,
+                      sizeof(thresholdLabel),
+                      "Thresholds (H=%.2f / S=%.2f)",
+                      ae.localExposureHighlightThreshold,
+                      ae.localExposureShadowThreshold);
+
+        for (const LocalExposureOverviewTile& tile : kLocalExposureOverviewTiles)
+        {
+            const char* text = GetLocalExposureVisualizationLabel(tile.mode);
+            if (tile.mode == LocalExposureVisualizationMode::LocalExposure)
+                text = localLabel;
+            else if (tile.mode == LocalExposureVisualizationMode::Thresholds)
+                text = thresholdLabel;
+
+            const float x = 8.0f + static_cast<float>(tile.column) * tileW;
+            const float y = (static_cast<float>(tile.row) + 1.0f) * tileH - 19.0f;
+            shadowText(toIm(x, y), text);
         }
 
         dl->PopClipRect();
