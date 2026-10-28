@@ -72,15 +72,18 @@ void Tonemap(uint3 dispatchThreadID: SV_DispatchThreadID)
     RWTexture2D<float4> o = ResourceDescriptorHeap[g_DestTextureIndex];
     StructuredBuffer<float4> exposureScaleBuffer = ResourceDescriptorHeap[g_ExposureScaleBufferIndex];
     float4 finalColor = LoadTexture2D(g_DestTextureIndex, dispatchThreadID.xy);
-    float4 bloomColor = SampleTexture2D(g_BloomTexIndex, screenUV, ClampLinearSampler);
-    finalColor += bloomColor * g_BloomIntensity * rcp((float)BLOOM_MIPMAP_COUNT);
+    float3 bloom = SampleTexture2D(g_BloomTexIndex, screenUV, ClampLinearSampler).rgb;
+    bloom *= g_BloomIntensity * rcp((float)BLOOM_MIPMAP_COUNT);
     float autoExposureScale = 1.0f;
     float OneOverPreExposureScale = 1.f;
     if (g_AutoExposureEnable != 0)
         autoExposureScale = exposureScaleBuffer[0].r;
     if (g_PreExposureEnable != 0)
         OneOverPreExposureScale = GetOneOverPreExposureScale();
-    finalColor *= g_LocalExposure * autoExposureScale * OneOverPreExposureScale;
+    // UE PostProcessTonemap.usf: local exposure scales scene color only.
+    // Bloom is added after, with the same pre-exposure undo and global exposure.
+    float exposureScale = g_LocalExposure * autoExposureScale * OneOverPreExposureScale;
+    finalColor.rgb *= exposureScale;
     if (g_FusionEnable != 0)
     {
         float lum = max(dot(finalColor.rgb, float3(0.2126f, 0.7152f, 0.0722f)), 1e-5f);
@@ -89,6 +92,7 @@ void Tonemap(uint3 dispatchThreadID: SV_DispatchThreadID)
         float fusedLum = (fusion * fusion) / max(1.0f - fusion * fusion, 1e-5f);
         finalColor.rgb *= fusedLum / lum;
     }
+    finalColor.rgb += bloom * exposureScale;
 
     switch (tonemapMode)
     {
