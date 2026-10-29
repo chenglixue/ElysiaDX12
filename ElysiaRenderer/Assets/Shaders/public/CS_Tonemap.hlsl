@@ -80,8 +80,7 @@ void Tonemap(uint3 dispatchThreadID: SV_DispatchThreadID)
         autoExposureScale = exposureScaleBuffer[0].r;
     if (g_PreExposureEnable != 0)
         OneOverPreExposureScale = GetOneOverPreExposureScale();
-    // UE PostProcessTonemap.usf: local exposure scales scene color only.
-    // Bloom is added after, with the same pre-exposure undo and global exposure.
+    
     float exposureScale = g_LocalExposure * autoExposureScale * OneOverPreExposureScale;
     finalColor.rgb *= exposureScale;
     if (g_FusionEnable != 0)
