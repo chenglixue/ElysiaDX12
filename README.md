@@ -44,20 +44,26 @@ Duration ：0.22ms
 
 ## Histogram Auto Exposure
 
-![](https://beeimg.us.ci/temp/6ad8e886751a6.png)
+After：
+
+[![Snipaste_2026-11-01_21-59-04](https://bee-reg-ab.imagency.cn/mr/202611/01/6ae745bf5da09.png)](https://bee-reg-ab.imagency.cn/mr/202611/01/6ae745bf5da09.png)
+
+Befor：
+
+[![Snipaste_2026-11-01_21-59-04](https://bee-reg-ab.imagency.cn/mr/202611/01/6ae745bf5da09.png)](https://bee-reg-ab.imagency.cn/mr/202611/01/6ae745bf5da09.png)
 
 Duration ：0.02ms
 
-![](https://beeimg.us.ci/temp/6ad8e9994edb0.png)
+![Snipaste_2026-11-01_22-03-18](https://bee-reg-ab.imagency.cn/mr/202611/01/6ae746add95bf.png)
 
 ## Local Tonemap Fusion
 
 After：
 
-![](https://beeimg.us.ci/temp/6ae73e2c853ed.png)
+![Snipaste_2026-11-01_21-26-21](https://bee-reg-ab.imagency.cn/mr/202611/01/6ae743e61eae6.png)
 
 Befor：
-![](https://beeimg.us.ci/temp/6ae73e1f50362.png)
+![Snipaste_2026-11-01_21-26-31](https://bee-reg-ab.imagency.cn/mr/202611/01/6ae744da4fefd.png)
 
 Duration：
-![](https://beeimg.us.ci/temp/6ae741941c33a.png)
+![Snipaste_2026-11-01_21-26-31](https://bee-reg-ab.imagency.cn/mr/202611/01/6ae744da4fefd.png)
