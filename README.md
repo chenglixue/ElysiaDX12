@@ -49,3 +49,15 @@ Duration ：0.22ms
 Duration ：0.02ms
 
 ![](https://beeimg.us.ci/temp/6ad8e9994edb0.png)
+
+## Local Tonemap Fusion
+
+After：
+
+![](https://beeimg.us.ci/temp/6ae73e2c853ed.png)
+
+Befor：
+![](https://beeimg.us.ci/temp/6ae73e1f50362.png)
+
+Duration：
+![](https://beeimg.us.ci/temp/6ae741941c33a.png)
