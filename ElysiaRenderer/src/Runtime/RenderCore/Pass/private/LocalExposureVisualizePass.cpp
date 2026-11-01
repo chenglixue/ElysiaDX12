@@ -85,7 +85,9 @@ namespace ElysiaRenderer
 
     void LocalExposureVisualizePass::DoVisualize()
     {
-        const auto& ae = UserData::GetInstance().autoExposureParameter;
+        const auto& userData = UserData::GetInstance();
+        const auto& ae = userData.autoExposureParameter;
+        const auto& hdr = userData.hdrParameter;
         auto& names = RenderResource::GetInstance();
         auto& rtm = RenderTargetManager::GetInstance();
 
@@ -170,6 +172,12 @@ namespace ElysiaRenderer
         m_pMaterial->SetFloat(ShaderIDs::g_ShadowThreshold,
                               std::max(ae.localExposureShadowThreshold, 0.0f),
                               passID);
+        m_pMaterial->SetUINT(ShaderIDs::g_TonemapMode, (UINT)hdr.tonemapMode, passID);
+        m_pMaterial->SetFloat(ShaderIDs::g_FilmSlope, hdr.filmSlope, passID);
+        m_pMaterial->SetFloat(ShaderIDs::g_FilmToe, hdr.filmToe, passID);
+        m_pMaterial->SetFloat(ShaderIDs::g_FilmShoulder, hdr.filmShoulder, passID);
+        m_pMaterial->SetFloat(ShaderIDs::g_FilmBlackClip, hdr.filmBlackClip, passID);
+        m_pMaterial->SetFloat(ShaderIDs::g_FilmWhiteClip, hdr.filmWhiteClip, passID);
         SetSpaceResource(passData, PER_PASS_SPACE);
 
         auto group = passData.GetKernelThreadGroupSizes();

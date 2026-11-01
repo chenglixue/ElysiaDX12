@@ -59,6 +59,12 @@ namespace ElysiaRenderer
             static inline size_t g_MiddleGrey = PropertyToID(L"g_MiddleGrey");
             static inline size_t g_HighlightThreshold = PropertyToID(L"g_HighlightThreshold");
             static inline size_t g_ShadowThreshold = PropertyToID(L"g_ShadowThreshold");
+            static inline size_t g_TonemapMode = PropertyToID(L"g_TonemapMode");
+            static inline size_t g_FilmSlope = PropertyToID(L"g_FilmSlope");
+            static inline size_t g_FilmToe = PropertyToID(L"g_FilmToe");
+            static inline size_t g_FilmShoulder = PropertyToID(L"g_FilmShoulder");
+            static inline size_t g_FilmBlackClip = PropertyToID(L"g_FilmBlackClip");
+            static inline size_t g_FilmWhiteClip = PropertyToID(L"g_FilmWhiteClip");
         };
 
         void DoVisualize();

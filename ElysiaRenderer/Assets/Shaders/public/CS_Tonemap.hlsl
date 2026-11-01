@@ -1,5 +1,6 @@
 #include "private\Color.hlsl"
 #include "private\BloomCommon.hlsli"
+#include "private\FusionTonemap.hlsli"
 
 #define Neutral 0
 #define LMP 1
@@ -87,8 +88,13 @@ void Tonemap(uint3 dispatchThreadID: SV_DispatchThreadID)
     {
         float lum = max(dot(finalColor.rgb, float3(0.2126f, 0.7152f, 0.0722f)), 1e-5f);
         float fusion = SampleTexture2D(g_FusionTexIndex, screenUV, ClampLinearSampler).r;
-        fusion = min(max(fusion, 0.0f), 0.999f);
-        float fusedLum = (fusion * fusion) / max(1.0f - fusion * fusion, 1e-5f);
+        float fusedLum = FusionDecodeLuminance(fusion,
+                                               tonemapMode,
+                                               g_FilmSlope,
+                                               g_FilmToe,
+                                               g_FilmShoulder,
+                                               g_FilmBlackClip,
+                                               g_FilmWhiteClip);
         finalColor.rgb *= fusedLum / lum;
     }
     finalColor.rgb += bloom * exposureScale;

@@ -1,4 +1,5 @@
 #include "private\Common.hlsl"
+#include "private\FusionTonemap.hlsli"
 
 // UE PostProcessVisualizeLocalExposure.usf, Fusion permutation.
 // r.LocalExposure.VisualizationMode. Bilateral modes 3, 4 and 5 are not produced.
@@ -30,6 +31,12 @@ cbuffer PassConstant : register(b0, perPassSpace)
     float g_MiddleGrey;
     float g_HighlightThreshold;
     float g_ShadowThreshold;
+    UINT g_TonemapMode;
+    float g_FilmSlope;
+    float g_FilmToe;
+    float g_FilmShoulder;
+    float g_FilmBlackClip;
+    float g_FilmWhiteClip;
 }
 
 float Rec709Luminance(float3 color)
@@ -43,14 +50,6 @@ float OneOverPreExposure()
         return 1.0f;
     RWStructuredBuffer<float2> preExposure = ResourceDescriptorHeap[g_PreExposureScaleBufferIndex];
     return rcp(max(preExposure[0].r, 1e-5f));
-}
-
-// Same curve as FusionTonemap / the tonemap fusion apply: sqrt(L / (1 + L)).
-float FusionInverseTonemap(float tonemapped)
-{
-    tonemapped = min(max(tonemapped, 0.0f), 0.999f);
-    float squared = tonemapped * tonemapped;
-    return squared / max(1.0f - squared, 1e-5f);
 }
 
 float DiagonalStripes(float2 screenPos, float thickness)
@@ -106,7 +105,13 @@ float3 VisualizeMode(int mode, float2 uv, float2 patternPos, float3 sceneColor)
         weights = SampleTexture2D_LOD(g_WeightTexIndex, uv, ClampLinearSampler, 0).rgb;
         fusionVal = SampleTexture2D_LOD(g_FusionTexIndex, uv, ClampLinearSampler, 0).r;
         float exposedLum = Rec709Luminance(hdr * exposureScale);
-        localExposure = FusionInverseTonemap(fusionVal) / exposedLum;
+        localExposure = FusionDecodeLuminance(fusionVal,
+                                              g_TonemapMode,
+                                              g_FilmSlope,
+                                              g_FilmToe,
+                                              g_FilmShoulder,
+                                              g_FilmBlackClip,
+                                              g_FilmWhiteClip) / exposedLum;
     }
 
     if (mode == VIS_LOCAL_EXPOSURE)

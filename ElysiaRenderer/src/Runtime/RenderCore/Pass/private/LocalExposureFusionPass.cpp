@@ -20,6 +20,19 @@ namespace ElysiaRenderer
 {
     constexpr int FUSION_GROUP_SIZE = 8;
 
+    // floor(log2(short side)) + 1, then clamped to the default level count.
+    UINT FusionLevelLimit(UINT width, UINT height)
+    {
+        UINT shortSide = std::min(width, height);
+        UINT floorLog2 = 0;
+        while (shortSide > 1)
+        {
+            shortSide >>= 1;
+            ++floorLog2;
+        }
+        return std::min(LocalExposureFusionPass::kLevelCount, floorLog2 + 1);
+    }
+
     UINT LocalExposureFusionPass::GetLevelCount() const
     {
         return m_levelCount;
@@ -50,7 +63,8 @@ namespace ElysiaRenderer
         if (width < 1 || height < 1)
             return;
 
-        for (UINT level = 0; level < kLevelCount; ++level)
+        const UINT levelLimit = FusionLevelLimit(width, height);
+        for (UINT level = 0; level < levelLimit; ++level)
         {
             m_levelSize[level] = UINT2(std::max(width, 1u), std::max(height, 1u));
             ++m_levelCount;
@@ -150,7 +164,9 @@ namespace ElysiaRenderer
         m_pCommand->SetPipeline(pipelineStateData);
         SetSpaceResource(passData, PER_FRAME_SPACE);
 
-        const auto& ae = UserData::GetInstance().autoExposureParameter;
+        const auto& userData = UserData::GetInstance();
+        const auto& ae = userData.autoExposureParameter;
+        const auto& hdr = userData.hdrParameter;
         m_pCommand->AddBarrier(m_pDisplayRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, false);
         m_pCommand->AddBarrier(m_lumRTs[0], D3D12_RESOURCE_STATE_UNORDERED_ACCESS, false);
         if (AutoExposurePass::m_pExposureScaleBuffer)
@@ -177,6 +193,12 @@ namespace ElysiaRenderer
         m_pMaterial->SetFloat(ShaderIDs::g_HighlightContrast, ae.fusionHighlightContrast, passID);
         m_pMaterial->SetFloat(ShaderIDs::g_ShadowContrast, ae.fusionShadowContrast, passID);
         m_pMaterial->SetFloat(ShaderIDs::g_TargetLuminance, 0.5f, passID);
+        m_pMaterial->SetUINT(ShaderIDs::g_TonemapMode, (UINT)hdr.tonemapMode, passID);
+        m_pMaterial->SetFloat(ShaderIDs::g_FilmSlope, hdr.filmSlope, passID);
+        m_pMaterial->SetFloat(ShaderIDs::g_FilmToe, hdr.filmToe, passID);
+        m_pMaterial->SetFloat(ShaderIDs::g_FilmShoulder, hdr.filmShoulder, passID);
+        m_pMaterial->SetFloat(ShaderIDs::g_FilmBlackClip, hdr.filmBlackClip, passID);
+        m_pMaterial->SetFloat(ShaderIDs::g_FilmWhiteClip, hdr.filmWhiteClip, passID);
         SetSpaceResource(passData, PER_PASS_SPACE);
 
         auto group = passData.GetKernelThreadGroupSizes();

@@ -7,7 +7,9 @@ namespace ElysiaRenderer
     class LocalExposureFusionPass : public BasePass
     {
     public:
-        static const UINT kLevelCount = 6;
+        // UE r.LocalExposure.ExposureFusion.NumLevels. The built pyramid is
+        // min(kLevelCount, floor(log2(short side)) + 1).
+        static const UINT kLevelCount = 16;
 
         struct RenderTextureIDs
         {
@@ -57,6 +59,12 @@ namespace ElysiaRenderer
             static inline size_t g_HighlightContrast = PropertyToID(L"g_HighlightContrast");
             static inline size_t g_ShadowContrast = PropertyToID(L"g_ShadowContrast");
             static inline size_t g_TargetLuminance = PropertyToID(L"g_TargetLuminance");
+            static inline size_t g_TonemapMode = PropertyToID(L"g_TonemapMode");
+            static inline size_t g_FilmSlope = PropertyToID(L"g_FilmSlope");
+            static inline size_t g_FilmToe = PropertyToID(L"g_FilmToe");
+            static inline size_t g_FilmShoulder = PropertyToID(L"g_FilmShoulder");
+            static inline size_t g_FilmBlackClip = PropertyToID(L"g_FilmBlackClip");
+            static inline size_t g_FilmWhiteClip = PropertyToID(L"g_FilmWhiteClip");
         };
 
         UINT m_levelCount = 0;

@@ -1,4 +1,5 @@
 #include "private\Common.hlsl"
+#include "private\FusionTonemap.hlsli"
 
 #define FUSION_SETUP_THREAD_GROUP [numthreads(GROUP_SIZE, GROUP_SIZE, 1)]
 #define FUSION_DOWNSAMPLE_THREAD_GROUP [numthreads(GROUP_SIZE, GROUP_SIZE, 1)]
@@ -24,6 +25,12 @@ cbuffer PassConstant : register(b0, perPassSpace)
     float g_HighlightContrast;
     float g_ShadowContrast;
     float g_TargetLuminance;
+    UINT g_TonemapMode;
+    float g_FilmSlope;
+    float g_FilmToe;
+    float g_FilmShoulder;
+    float g_FilmBlackClip;
+    float g_FilmWhiteClip;
 }
 
 // --------------------------------------------------------------------------------------- Fusion Setup ---------------------------------------------------------------------------------------
@@ -34,8 +41,13 @@ float Rec709Luminance(float3 color)
 
 float FusionTonemap(float lum)
 {
-    lum = max(lum, 0.0f);
-    return sqrt(lum / (1.0f + lum));
+    return FusionEncodeLuminance(lum,
+                                 g_TonemapMode,
+                                 g_FilmSlope,
+                                 g_FilmToe,
+                                 g_FilmShoulder,
+                                 g_FilmBlackClip,
+                                 g_FilmWhiteClip);
 }
 
 float FusionWeight(float value, float target)
