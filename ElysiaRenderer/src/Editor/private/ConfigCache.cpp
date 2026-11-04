@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 
 #include "../public/ConfigCache.h"
 #include "../public/UserData.h"
@@ -324,12 +324,28 @@ namespace ElysiaRenderer
             {DebugMode::LightingOnly, "LightingOnly"},
             {DebugMode::ShadingModel, "ShadingModel"},
             {DebugMode::Wireframe, "Wireframe"},
+            {DebugMode::SSSRHIZ, "SSSRHIZ"},
+            {DebugMode::SSSRTileClassify, "SSSRTileClassify"},
+            {DebugMode::SSSR, "SSSR"},
         };
 
         const EnumName<DebugDownOrUp> kBloomDirections[] =
         {
             {DebugDownOrUp::Down, "Down"},
             {DebugDownOrUp::Up, "Up"},
+        };
+
+        const EnumName<SSSRTileClassifyDebugView> kSSSRTileClassifyDebugViews[] =
+        {
+            {SSSRTileClassifyDebugView::Classification, "Classification"},
+            {SSSRTileClassifyDebugView::CopyFlags, "CopyFlags"},
+        };
+
+        const EnumName<SSSRDebugTarget> kSSSRDebugTargets[] =
+        {
+            {SSSRDebugTarget::None, "None"},
+            {SSSRDebugTarget::HIZ, "HIZ"},
+            {SSSRDebugTarget::TileClassify, "TileClassify"},
         };
 
         const EnumName<AutoExposureVisualizeDebugType> kAutoExposureVisualizeTypes[] =
@@ -745,6 +761,7 @@ namespace ElysiaRenderer
         setVector("GI", "ProbeGroupOrigin", data.GIParameter.probeGroupOrigin);
 
         setEnum("Debug", "Mode", data.debugMode, kDebugModes);
+        NormalizeSSSRDebugMode(data.debugMode, data.sssrParameter);
         setInt("Debug", "MipmapLevel", data.mipmapLevel);
         setInt("Debug", "InstanceID", data.instanceID);
         setBool("Debug", "EnableHIZ", data.EnableHIZ);
@@ -821,6 +838,9 @@ namespace ElysiaRenderer
         if (samplesPerQuad < 0)
             samplesPerQuad = 0;
         data.sssrParameter.samplesPerQuad = static_cast<UINT>(samplesPerQuad);
+        setEnum("SSSR", "DebugTarget", data.sssrParameter.debugTarget, kSSSRDebugTargets);
+        setEnum("SSSR", "TileClassifyDebugView", data.sssrParameter.tileClassifyDebugView, kSSSRTileClassifyDebugViews);
+        NormalizeSSSRDebugMode(data.debugMode, data.sssrParameter);
 
         if (const auto* paths = TryGetArray("Startup", "ModelPath"))
         {
@@ -1639,6 +1659,8 @@ namespace ElysiaRenderer
 
         emitFloat("SSSR", "RoughnessThreshold", data.sssrParameter.roughnessThreshold);
         emitInt("SSSR", "SamplesPerQuad", static_cast<int>(data.sssrParameter.samplesPerQuad));
+        emitEnum("SSSR", "DebugTarget", data.sssrParameter.debugTarget, kSSSRDebugTargets);
+        emitEnum("SSSR", "TileClassifyDebugView", data.sssrParameter.tileClassifyDebugView, kSSSRTileClassifyDebugViews);
 
         if (g_CameraPose.valid)
         {

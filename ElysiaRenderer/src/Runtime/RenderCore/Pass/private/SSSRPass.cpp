@@ -21,6 +21,10 @@
 
 namespace ElysiaRenderer
 {
+    static constexpr int SSSR_SPD_GROUP_SIZE = 8;
+    static constexpr int SSSR_TILE_CLASSIFY_GROUP_SIZE = 8;
+    static constexpr int SSSR_INTERSECT_ARGS_GROUP_SIZE = 1;
+    
     SSSRPass::SSSRPass()
     {
 
@@ -42,6 +46,20 @@ namespace ElysiaRenderer
         m_displayHeight = (UINT)m_displaySize.y;
         m_cameraWidth = std::floor(m_displaySize.x * UserData::GetInstance().taaParameter.sampleRate);
         m_cameraHeight = std::floor(m_displaySize.y * UserData::GetInstance().taaParameter.sampleRate);
+        m_HIZWidth = m_cameraWidth;
+        m_HIZHeight = m_cameraHeight;
+        
+        m_HIZMipmapCount = UINT(std::floor(std::log2(std::max(
+                               m_HIZWidth,
+                               m_HIZHeight)))) + 1;
+        
+        m_pHIZRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(
+            m_cameraWidth,
+            m_cameraHeight,
+            DXGI_FORMAT_R32_FLOAT,
+            true,
+            m_HIZMipmapCount,
+            RenderResource::GetInstance().GetPropertyName(RenderTextureIDs::HIZRTID));
 
         uint32_t elementSize = 4;
         m_pRayCounterBuffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc
@@ -69,6 +87,13 @@ namespace ElysiaRenderer
             true,
             L"SSSR Intersection Output RT");
 
+        m_pTileClassifyDebugRT = RenderTargetManager::GetInstance().CreateRWRenderTexture(
+            m_cameraWidth,
+            m_cameraHeight,
+            DXGI_FORMAT_R8G8B8A8_UNORM,
+            true,
+            RenderResource::GetInstance().GetPropertyName(RenderTextureIDs::TileClassifyDebugRTID));
+
         m_pIntersectionIndirectArgsBuffer = BufferManager::GetInstance().CreateBuffer(BufferCreationDesc
         {
             .name = L"SSSR Intersection Args Buffer",
@@ -87,6 +112,15 @@ namespace ElysiaRenderer
             "SSSR Intersection Args Read Back Buffer");
 
         m_shaderPasses.assign(std::begin(PassData), std::end(PassData));
+        m_shaderPasses[SSSR_COPY_PASS].Environment.SetDefine(L"SSSR_SPD_GROUP_SIZE", SSSR_SPD_GROUP_SIZE);
+        m_shaderPasses[SSSR_SPD_PASS].Environment.SetDefine(L"SSSR_SPD_GROUP_SIZE", SSSR_SPD_GROUP_SIZE);
+        m_shaderPasses[SSSR_TILE_CLASSIFY_PASS].Environment.SetDefine(L"SSSR_TILE_CLASSIFY_GROUP_SIZE", SSSR_TILE_CLASSIFY_GROUP_SIZE);
+        m_shaderPasses[SSSR_INTERSECT_ARGS_PASS].Environment.SetDefine(L"SSSR_INTERSECT_ARGS_GROUP_SIZE", SSSR_INTERSECT_ARGS_GROUP_SIZE);
+        for (auto shaderPass : m_shaderPasses)
+        {
+            // shaderPass.Environment.SetDefine(L"", );
+        }
+        
         if (!m_pMaterial)
         {
             m_pMaterial = std::make_unique<Material>(m_pDevice, m_shaderPasses);
@@ -137,17 +171,130 @@ namespace ElysiaRenderer
 
     void SSSRPass::Render(FrameContext& context)
     {
-        if (!UserData::GetInstance().bloomParameter.enable)
-            return;
+        // if (!UserData::GetInstance().bloomParameter.enable)
+        //     return;
         m_pCamera = context.pCamera;
         m_pGPUTimer = context.pGPUTimer;
         m_frameIndex = context.frameIndex;
 
-        // DoTileClassify();
-        // DoIntersectionArgs();
+        DoSPD();
+        DoTileClassify();
+        DoIntersectionArgs();
         // DoIntersection();
     }
 
+    void SSSRPass::BindCommon(UINT passID)
+    {
+        m_pMaterial->SetMatrix(ShaderIDs::viewMatrix, m_pCamera->GetViewMat(), passID);
+        m_pMaterial->SetMatrix(ShaderIDs::viewMatrix_I,
+                               m_pCamera->GetViewMat().Invert(),
+                               passID);
+        m_pMaterial->SetMatrix(ShaderIDs::projMatrix, m_pCamera->GetProjMat(), passID);
+        m_pMaterial->SetMatrix(ShaderIDs::projMatrix_I,
+                               m_pCamera->GetProjMat().Invert(),
+                               passID);
+        m_pMaterial->SetMatrix(ShaderIDs::viewProjMatrix,
+                               m_pCamera->GetViewMat() * m_pCamera->GetProjMat(),
+                               passID);
+        m_pMaterial->SetMatrix(ShaderIDs::viewProjMatrix_I,
+                               (m_pCamera->GetViewMat() * m_pCamera->GetProjMat()).Invert(),
+                               passID);
+        
+        m_pMaterial->SetUINT(ShaderIDs::g_RayCounterBufferIndex,
+                                 m_pRayCounterBuffer->GetUAVResourceHeapIndex(),
+                                 passID);
+        m_pMaterial->SetUINT(ShaderIDs::g_RayListBufferIndex,
+                             m_pRayListBuffer->GetUAVResourceHeapIndex(),
+                             passID);
+        m_pMaterial->SetUINT(ShaderIDs::g_IntersectionOutputTexIndex,
+                             m_pIntersectionOutputRT->GetUAVResourceHeapIndex(),
+                             passID);
+    }
+    
+    void SSSRPass::DoSPD()
+    {
+        auto CopyCameraDepthToSPD = [&]()
+        {
+            auto passID = SSSR_COPY_PASS;
+            auto& passData = m_pMaterial->GetPassData(passID);
+            auto passName = passData.Name.c_str();
+            PIXHelper pix(m_pCommand->GetCommandList(), passName);
+            
+            PipelineInfo pipelineStateData{};
+            pipelineStateData.m_pipelineStateObject = passData.pPipelineStateObject;
+            m_pCommand->SetPipeline(pipelineStateData);
+            SetSpaceResource(passData, PER_FRAME_SPACE);
+            
+            m_pCommand->AddBarrier(m_pHIZRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+            {
+                m_pMaterial->SetUINT(ShaderIDs::g_TargetTexIndex,
+                                      m_pHIZRT->GetUAVResourceHeapIndex(0),
+                                      passID);
+                m_pMaterial->SetFloat4(ShaderIDs::g_TargetSize,
+                                   GetScreenSize(m_HIZWidth, m_HIZHeight),
+                                   passID);
+                
+                SetSpaceResource(passData, PER_PASS_SPACE);
+                
+                auto threadGroupSize = passData.GetKernelThreadGroupSizes();
+                m_pCommand->Dispatch(CeilDivide(m_HIZWidth, threadGroupSize.x),
+                                     CeilDivide(m_HIZHeight, threadGroupSize.y),
+                                     1);
+            }
+            m_pCommand->AddBarrier(m_pHIZRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+            m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("SSSR/") + passName).c_str());
+        };
+        
+        CopyCameraDepthToSPD();
+        
+        auto passID = SSSR_SPD_PASS;
+        auto& passData = m_pMaterial->GetPassData(passID);
+        auto passName = passData.Name.c_str();
+        PIXHelper pix(m_pCommand->GetCommandList(), passName);
+        
+        PipelineInfo pipelineStateData{};
+        pipelineStateData.m_pipelineStateObject = passData.pPipelineStateObject;
+        m_pCommand->SetPipeline(pipelineStateData);
+        SetSpaceResource(passData, PER_FRAME_SPACE);
+        
+        m_pCommand->AddBarrier(m_pHIZRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+        
+        UINT64 currWidth = m_HIZWidth;
+        UINT64 currHeight = m_HIZHeight;
+        
+        for (UINT i = 1; i < m_HIZMipmapCount; ++i)
+        {
+            auto lastWidth = currWidth;
+            auto lastHeight = currHeight;
+            currWidth = MathHelper::Max(UINT64(1), (currWidth + 1) >> 1);
+            currHeight = MathHelper::Max(UINT64(1), (currHeight + 1) >> 1);
+            
+            m_pMaterial->SetUINT(ShaderIDs::g_SourceTexIndex,
+                                   m_pHIZRT->GetUAVResourceHeapIndex(i - 1),
+                                   passID);
+            m_pMaterial->SetUINT(ShaderIDs::g_TargetTexIndex,
+                                  m_pHIZRT->GetUAVResourceHeapIndex(i),
+                                  passID);
+            m_pMaterial->SetFloat4(ShaderIDs::g_TargetSize,
+                                   GetScreenSize(currWidth, currHeight),
+                                   passID);
+            m_pMaterial->SetFloat4(ShaderIDs::g_SourceSize,
+                                   GetScreenSize(lastWidth, lastHeight),
+                                   passID);
+            
+            SetSpaceResource(passData, PER_PASS_SPACE);
+
+            auto threadGroupSize = passData.GetKernelThreadGroupSizes();
+            m_pCommand->Dispatch(CeilDivide(currWidth, threadGroupSize.x),
+                                 CeilDivide(currHeight, threadGroupSize.y),
+                                 1);
+            m_pCommand->AddUAVBarrier(m_pHIZRT);
+        }
+        m_pCommand->AddBarrier(m_pHIZRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+        
+        m_pGPUTimer->GetTimeStamp(m_pCommand->GetCommandList(), (std::string("SSSR/") + passName).c_str());
+    }
+    
     void SSSRPass::DoTileClassify()
     {
         auto passID = SSSR_TILE_CLASSIFY_PASS;
@@ -160,41 +307,34 @@ namespace ElysiaRenderer
         m_pCommand->SetPipeline(pipelineStateData);
         SetSpaceResource(passData, PER_FRAME_SPACE);
 
+        const auto& sssrParam = UserData::GetInstance().sssrParameter;
+        const bool writeClassifyDebug =
+            IsSSSRTileClassifyDebugActive(UserData::GetInstance().debugMode, sssrParam);
+
         m_pCommand->AddBarrier(*m_pRayCounterBuffer, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, false);
         m_pCommand->AddBarrier(*m_pRayListBuffer, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, false);
         m_pCommand->AddBarrier(m_pIntersectionOutputRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+        if (writeClassifyDebug)
+            m_pCommand->AddBarrier(m_pTileClassifyDebugRT, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
         {
-            m_pMaterial->SetMatrix(ShaderIDs::viewMatrix, m_pCamera->GetViewMat(), passID);
-            m_pMaterial->SetMatrix(ShaderIDs::viewMatrix_I,
-                                   m_pCamera->GetViewMat().Invert(),
-                                   passID);
-            m_pMaterial->SetMatrix(ShaderIDs::projMatrix, m_pCamera->GetProjMat(), passID);
-            m_pMaterial->SetMatrix(ShaderIDs::projMatrix_I,
-                                   m_pCamera->GetProjMat().Invert(),
-                                   passID);
-            m_pMaterial->SetMatrix(ShaderIDs::viewProjMatrix,
-                                   m_pCamera->GetViewMat() * m_pCamera->GetProjMat(),
-                                   passID);
-            m_pMaterial->SetMatrix(ShaderIDs::viewProjMatrix_I,
-                                   (m_pCamera->GetViewMat() * m_pCamera->GetProjMat()).Invert(),
-                                   passID);
+            BindCommon(passID);
 
-            m_pMaterial->SetUINT(ShaderIDs::g_RayCounterBufferIndex,
-                                 m_pRayCounterBuffer->GetUAVResourceHeapIndex(),
-                                 passID);
-            m_pMaterial->SetUINT(ShaderIDs::g_RayListBufferIndex,
-                                 m_pRayListBuffer->GetUAVResourceHeapIndex(),
-                                 passID);
-            m_pMaterial->SetUINT(ShaderIDs::g_IntersectionOutputTexIndex,
-                                 m_pIntersectionOutputRT->GetUAVResourceHeapIndex(),
-                                 passID);
-
-            m_pMaterial->SetFloat4(ShaderIDs::g_DestSize, GetScreenSize(m_cameraWidth, m_cameraHeight), passID);
+            m_pMaterial->SetFloat4(ShaderIDs::g_TargetSize, GetScreenSize(m_cameraWidth, m_cameraHeight), passID);
             m_pMaterial->SetFloat(ShaderIDs::g_RoughnessThreshold,
-                                  UserData::GetInstance().sssrParameter.roughnessThreshold,
+                                  sssrParam.roughnessThreshold,
                                   passID);
             m_pMaterial->SetUINT(ShaderIDs::g_SamplesPerQuad,
-                                 UserData::GetInstance().sssrParameter.samplesPerQuad,
+                                 sssrParam.samplesPerQuad,
+                                 passID);
+            // Always bind a valid UAV index; the shader skips writes when the view
+            // sentinel is SSSR_TILE_CLASSIFY_DEBUG_DISABLED (0xFFFFFFFF).
+            m_pMaterial->SetUINT(ShaderIDs::g_TileClassifyDebugTexIndex,
+                                 m_pTileClassifyDebugRT->GetUAVResourceHeapIndex(),
+                                 passID);
+            m_pMaterial->SetUINT(ShaderIDs::g_TileClassifyDebugView,
+                                 writeClassifyDebug
+                                     ? static_cast<UINT>(sssrParam.tileClassifyDebugView)
+                                     : 0xFFFFFFFFu,
                                  passID);
             SetSpaceResource(passData, PER_PASS_SPACE);
 
@@ -206,6 +346,8 @@ namespace ElysiaRenderer
         m_pCommand->AddBarrier(*m_pRayCounterBuffer, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, false);
         m_pCommand->AddBarrier(*m_pRayListBuffer, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, false);
         m_pCommand->AddBarrier(m_pIntersectionOutputRT, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+        if (writeClassifyDebug)
+            m_pCommand->AddBarrier(m_pTileClassifyDebugRT, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
         // m_pCommand->AddBarrier(*m_pRayCounterBuffer, D3D12_RESOURCE_STATE_COPY_SOURCE);
         // m_pCommand->GetCommandList()->CopyResource(m_pRayCounterReadBackBuffer->GetResource().Get(),

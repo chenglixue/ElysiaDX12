@@ -3,8 +3,10 @@
 
 namespace ElysiaRenderer
 {
-    template <typename EnumType>
-    bool EnumCombo(const char* label, EnumType* current_value)
+    // Optional DescFn: callable const char*(EnumType). When provided, hovering an item
+    // (and the combo itself, for the current value) shows its description as a tooltip.
+    template <typename EnumType, typename DescFn = std::nullptr_t>
+    bool EnumCombo(const char* label, EnumType* current_value, DescFn desc_fn = nullptr)
     {
         // 确保传入的类型是枚举
         static_assert(std::is_enum_v<EnumType>, "EnumType must be an enum.");
@@ -15,6 +17,8 @@ namespace ElysiaRenderer
         auto current_name = magic_enum::enum_name(*current_value);
         // magic_enum 返回的是 string_view，可能不以 '\0' 结尾，所以转为 std::string
         std::string preview_str(current_name);
+
+        constexpr bool has_desc = !std::is_null_pointer_v<DescFn>;
 
         if (ImGui::BeginCombo(label, preview_str.c_str()))
         {
@@ -33,6 +37,15 @@ namespace ElysiaRenderer
                     value_changed = true;
                 }
 
+                if constexpr (has_desc)
+                {
+                    if (ImGui::IsItemHovered())
+                    {
+                        if (const char* desc = desc_fn(value))
+                            ImGui::SetTooltip("%s", desc);
+                    }
+                }
+
                 // 如果当前项被选中，让滚动条默认聚焦在这一项
                 if (is_selected)
                 {
@@ -40,6 +53,15 @@ namespace ElysiaRenderer
                 }
             }
             ImGui::EndCombo();
+        }
+        else if constexpr (has_desc)
+        {
+            // Closed combo: hovering shows the description of the current value.
+            if (ImGui::IsItemHovered())
+            {
+                if (const char* desc = desc_fn(*current_value))
+                    ImGui::SetTooltip("%s", desc);
+            }
         }
 
         return value_changed;

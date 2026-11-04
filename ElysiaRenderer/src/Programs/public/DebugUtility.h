@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Helper.h"
 
 namespace ElysiaRenderer
@@ -28,7 +28,10 @@ namespace ElysiaRenderer
         PostTonemapHDR,
         LightingOnly,
         ShadingModel,
-        Wireframe
+        Wireframe,
+        SSSRHIZ,
+        SSSRTileClassify,
+        SSSR
     };
     NLOHMANN_JSON_SERIALIZE_ENUM(DebugMode,
                                  {
@@ -54,7 +57,10 @@ namespace ElysiaRenderer
                                  {DebugMode::PostTonemapHDR, "PostTonemapHDR"},
                                  {DebugMode::LightingOnly, "LightingOnly"},
                                  {DebugMode::ShadingModel, "ShadingModel"},
-                                 {DebugMode::Wireframe, "Wireframe"}
+                                 {DebugMode::Wireframe, "Wireframe"},
+                                 {DebugMode::SSSRHIZ, "SSSRHIZ"},
+                                 {DebugMode::SSSRTileClassify, "SSSRTileClassify"},
+                                 {DebugMode::SSSR, "SSSR"}
                                  })
 
     struct BufferVisualizationEntry
@@ -99,6 +105,7 @@ namespace ElysiaRenderer
     inline constexpr DebugMode kDebugOverlayModes[] =
     {
         DebugMode::Bloom,
+        DebugMode::SSSR,
     };
 
     inline bool ModeListContains(const BufferVisualizationEntry* entries, size_t count, DebugMode mode)

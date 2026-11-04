@@ -542,6 +542,7 @@
         </None>
         <None Include="Assets\Shaders\public\PostProcess\AutoExposure\CS_AutoExposure.hlsl"/>
         <None Include="Assets\Shaders\public\PostProcess\AutoExposure\CS_AutoExposureVisualize.hlsl"/>
+        <None Include="Assets\Shaders\public\PostProcess\SSSR\CS_SPD.hlsl" />
         <ClCompile Include="src\Editor\private\ConfigCache.cpp"/>
         <ClCompile Include="src\Editor\private\IMGUIDrawer.cpp">
             <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>

@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "../public/DebugPass.h"
 #include "../public/LocalExposureVisualizePass.h"
 
@@ -6,6 +6,7 @@
 #include "../public/GBufferPass.h"
 #include "../public/GIPass.h"
 #include "../public/ShadowProjectionPass.h"
+#include "../public/SSSRPass.h"
 #include "Editor/public/UserData.h"
 #include "Programs/public/PIXHelper.h"
 #include "Runtime/Core/public/DX12GraphicsContext.h"
@@ -212,6 +213,76 @@ namespace ElysiaRenderer
             {
                 m_pMaterial->SetFloat4(ShaderIDs::g_TargetSize,
                                        GetScreenSize(renderSize),
+                                       passID);
+                SetSpaceResource(passData, PER_PASS_SPACE);
+                m_pCommand->DrawFullScreenTriangle();
+            }
+            m_pCommand->AddBarrier(m_pDisplayRT,
+                                   D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+            break;
+        }
+        // Unified SSSR debug. Legacy SSSRHIZ / SSSRTileClassify forward here so old
+        // sessions still visualize before NormalizeSSSRDebugMode runs.
+        case DebugMode::SSSR:
+        case DebugMode::SSSRHIZ:
+        case DebugMode::SSSRTileClassify:
+        {
+            const DebugMode mode = UserData::GetInstance().debugMode;
+            const SSSRParameter& sssr = UserData::GetInstance().sssrParameter;
+            SSSRDebugTarget target = sssr.debugTarget;
+            if (mode == DebugMode::SSSRHIZ)
+                target = SSSRDebugTarget::HIZ;
+            else if (mode == DebugMode::SSSRTileClassify)
+                target = SSSRDebugTarget::TileClassify;
+            if (target == SSSRDebugTarget::None)
+                break;
+
+            if (target == SSSRDebugTarget::HIZ)
+            {
+                RenderTexture* pHIZ = RenderTargetManager::GetInstance().GetRenderTexture(
+                    RenderResource::GetInstance().GetPropertyName(SSSRPass::RenderTextureIDs::HIZRTID));
+                if (pHIZ == nullptr)
+                    break;
+
+                // Reuse the existing HLSL DEBUG_SSSR_HIZ path (enum value 23).
+                m_pMaterial->SetUINT(ShaderIDs::g_DebugMode,
+                                     static_cast<UINT>(DebugMode::SSSRHIZ),
+                                     passID);
+                m_pCommand->AddBarrier(pHIZ, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+                m_pMaterial->SetUINT(ShaderIDs::g_TargetTexIndex,
+                                     pHIZ->GetSRVResourceHeapIndex(),
+                                     passID);
+                int hizMip = sssr.debugMip;
+                if (hizMip < 0)
+                    hizMip = 0;
+                m_pMaterial->SetUINT(ShaderIDs::g_MipmapLevel,
+                                     static_cast<UINT>(hizMip),
+                                     passID);
+                m_pMaterial->SetUINT(ShaderIDs::g_SSSRHIZValidate,
+                                     sssr.debugValidate ? 1u : 0u,
+                                     passID);
+            }
+            else // TileClassify
+            {
+                RenderTexture* pClassifyDebug = RenderTargetManager::GetInstance().GetRenderTexture(
+                    RenderResource::GetInstance().GetPropertyName(SSSRPass::RenderTextureIDs::TileClassifyDebugRTID));
+                if (pClassifyDebug == nullptr)
+                    break;
+
+                // Reuse the existing HLSL DEBUG_SSSR_TILE_CLASSIFY path (enum value 24).
+                m_pMaterial->SetUINT(ShaderIDs::g_DebugMode,
+                                     static_cast<UINT>(DebugMode::SSSRTileClassify),
+                                     passID);
+                m_pCommand->AddBarrier(pClassifyDebug, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+                m_pMaterial->SetUINT(ShaderIDs::g_TargetTexIndex,
+                                     pClassifyDebug->GetSRVResourceHeapIndex(),
+                                     passID);
+            }
+
+            m_pCommand->AddBarrier(m_pDisplayRT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+            {
+                m_pMaterial->SetFloat4(ShaderIDs::g_TargetSize,
+                                       GetScreenSize(m_displaySize),
                                        passID);
                 SetSpaceResource(passData, PER_PASS_SPACE);
                 m_pCommand->DrawFullScreenTriangle();

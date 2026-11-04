@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "../public/ElysiaFrame.h"
 
 
@@ -538,7 +538,7 @@ namespace ElysiaEngine
             ImGui::IsKeyDown(ImGuiKey_A) || ImGui::IsKeyDown(ImGuiKey_D) ||
             ImGui::IsKeyDown(ImGuiKey_E) || ImGui::IsKeyDown(ImGuiKey_Q);
 
-        // UE ViewportCameraSpeedMouseWheelInteraction: mouse button down → ±10%.
+        // UE ViewportCameraSpeedMouseWheelInteraction: mouse button down 鈫?卤10%.
         // Also while actually flying (WASD) so Play without RMB still works.
         if (!io.WantTextInput && io.MouseWheel != 0.0f && m_bViewportHovered &&
             (bMouseHeld || bWasdHeld))
@@ -550,17 +550,17 @@ namespace ElysiaEngine
         {
             Vector3 moveDir = Vector3::Zero;
             if (ImGui::IsKeyDown(ImGuiKey_W))
-                moveDir.z += 1.0f; // 前
+                moveDir.z += 1.0f; // 鍓?
             if (ImGui::IsKeyDown(ImGuiKey_S))
-                moveDir.z -= 1.0f; // 后
+                moveDir.z -= 1.0f; // 鍚?
             if (ImGui::IsKeyDown(ImGuiKey_A))
-                moveDir.x -= 1.0f; // 左
+                moveDir.x -= 1.0f; // 宸?
             if (ImGui::IsKeyDown(ImGuiKey_D))
-                moveDir.x += 1.0f; // 右
+                moveDir.x += 1.0f; // 鍙?
             if (ImGui::IsKeyDown(ImGuiKey_E))
-                moveDir.y += 1.0f; // 上 (可选)
+                moveDir.y += 1.0f; // 涓?(鍙€?
             if (ImGui::IsKeyDown(ImGuiKey_Q))
-                moveDir.y -= 1.0f; // 下 (可选)
+                moveDir.y -= 1.0f; // 涓?(鍙€?
             if (moveDir != Vector3::Zero)
             {
                 moveDir.Normalize();
@@ -971,7 +971,7 @@ namespace ElysiaEngine
         // }
         // else
         // {
-        //     strcpy_s(nameBuffer, "None"); // 如果没有选中物体，赋予默认值
+        //     strcpy_s(nameBuffer, "None"); // 濡傛灉娌℃湁閫変腑鐗╀綋锛岃祴浜堥粯璁ゅ€?
         // }
         // if (ImGui::InputText("##ObjectName", nameBuffer, sizeof(nameBuffer)))
         // {
@@ -982,7 +982,7 @@ namespace ElysiaEngine
 
         const bool bPlaying = SceneManager::GetInstance().IsPlaying();
         if (bPlaying)
-            ImGui::TextDisabled("Playing — scene edits are discarded on Stop.");
+            ImGui::TextDisabled("Playing 鈥?scene edits are discarded on Stop.");
         ImGui::BeginDisabled(bPlaying);
         DrawTransformComponent(pSelectedObject);
         DrawLightComponent(pSelectedObject);
@@ -1135,12 +1135,22 @@ namespace ElysiaEngine
                 if (ImGui::BeginCombo("Debug Overlay", overlayPreview))
                 {
                     if (ImGui::Selectable("Off", !overlayOn))
+                    {
+                        if (pUserData.debugMode == DebugMode::SSSR)
+                            pUserData.sssrParameter.debugTarget = SSSRDebugTarget::None;
                         pUserData.debugMode = m_lastViewportViewMode;
+                    }
                     for (DebugMode overlay : kDebugOverlayModes)
                     {
                         const std::string name(magic_enum::enum_name(overlay));
                         if (ImGui::Selectable(name.c_str(), pUserData.debugMode == overlay))
+                        {
                             pUserData.debugMode = overlay;
+                            // Nested target defaults to HIZ when enabling from the overlay.
+                            if (overlay == DebugMode::SSSR &&
+                                pUserData.sssrParameter.debugTarget == SSSRDebugTarget::None)
+                                pUserData.sssrParameter.debugTarget = SSSRDebugTarget::HIZ;
+                        }
                     }
                     ImGui::EndCombo();
                 }
@@ -1173,6 +1183,26 @@ namespace ElysiaEngine
                 ElysiaRenderer::EnumCombo("Bloom Mode", &pUserData.bloomParameter.debugMode);
                 ImGui::SliderInt("Bloom  Mipmap Level", &pUserData.bloomParameter.mipmap, 0, 5);
 
+            }
+            if (pUserData.debugMode == DebugMode::SSSR)
+            {
+                auto& sssrOverlay = pUserData.sssrParameter;
+                if (ElysiaRenderer::EnumCombo("SSSR Debug Target", &sssrOverlay.debugTarget))
+                {
+                    if (sssrOverlay.debugTarget == SSSRDebugTarget::None)
+                        pUserData.debugMode = m_lastViewportViewMode;
+                }
+                if (sssrOverlay.debugTarget == SSSRDebugTarget::HIZ)
+                {
+                    ImGui::SliderInt("HIZ Mip", &sssrOverlay.debugMip, 0, 12);
+                    ImGui::Checkbox("Validate Against Parent", &sssrOverlay.debugValidate);
+                }
+                else if (sssrOverlay.debugTarget == SSSRDebugTarget::TileClassify)
+                {
+                    ElysiaRenderer::EnumCombo("Tile Classify View",
+                                              &sssrOverlay.tileClassifyDebugView,
+                                              &ElysiaRenderer::GetSSSRTileClassifyDebugViewDescription);
+                }
             }
         }
 
@@ -1441,6 +1471,60 @@ namespace ElysiaEngine
                 ImGui::SliderFloat("History Weight", &ssgi.historyWeight, 0.0f, 0.98f);
             }
 
+            if (ImGui::CollapsingHeader("SSSR"))
+            {
+                auto& sssr = pUserData.sssrParameter;
+
+                ImGui::SliderFloat("Roughness Threshold", &sssr.roughnessThreshold, 0.0f, 1.0f);
+                int samplesPerQuad = static_cast<int>(sssr.samplesPerQuad);
+                if (ImGui::SliderInt("Samples Per Quad", &samplesPerQuad, 1, 4))
+                {
+                    if (samplesPerQuad == 3)
+                        samplesPerQuad = 2;
+                    sssr.samplesPerQuad = static_cast<UINT>(samplesPerQuad);
+                }
+                ImGui::TextDisabled("1 / 2 / 4 rays per 2x2. 3 snaps to 2.");
+
+                // Legacy SSSRHIZ / SSSRTileClassify → SSSR + debugTarget.
+                ElysiaRenderer::NormalizeSSSRDebugMode(pUserData.debugMode, sssr);
+
+                if (ElysiaRenderer::EnumCombo("Debug Target", &sssr.debugTarget))
+                {
+                    if (sssr.debugTarget == SSSRDebugTarget::None)
+                    {
+                        if (pUserData.debugMode == DebugMode::SSSR ||
+                            pUserData.debugMode == DebugMode::SSSRHIZ ||
+                            pUserData.debugMode == DebugMode::SSSRTileClassify)
+                            pUserData.debugMode = m_lastViewportViewMode;
+                    }
+                    else
+                    {
+                        pUserData.debugMode = DebugMode::SSSR;
+                    }
+                }
+
+                // Keep mode consistent with None (e.g. after ini load of SSSR + None).
+                if (sssr.debugTarget == SSSRDebugTarget::None &&
+                    pUserData.debugMode == DebugMode::SSSR)
+                {
+                    pUserData.debugMode = m_lastViewportViewMode;
+                }
+
+                if (sssr.debugTarget == SSSRDebugTarget::HIZ)
+                {
+                    ImGui::SliderInt("HIZ Mip", &sssr.debugMip, 0, 12);
+                    ImGui::Checkbox("Validate Against Parent", &sssr.debugValidate);
+                    ImGui::TextDisabled("Off: raw device depth of this mip.");
+                    ImGui::TextDisabled("On: green matches. Red is farther than the parent 2x2 min. Blue is closer. Magenta means this mip does not exist.");
+                }
+                else if (sssr.debugTarget == SSSRDebugTarget::TileClassify)
+                {
+                    ElysiaRenderer::EnumCombo("Tile Classify View",
+                                              &sssr.tileClassifyDebugView,
+                                              &ElysiaRenderer::GetSSSRTileClassifyDebugViewDescription);
+                }
+            }
+
             if (ImGui::CollapsingHeader("AO"))
             {
                 ImGui::Checkbox("Is Enable AO", &pUserData.aoParameter.IsEnableAO);
@@ -1510,7 +1594,7 @@ namespace ElysiaEngine
                 ImGui::TableSetupColumn("Time (us)", ImGuiTableColumnFlags_WidthFixed, 100.0f);
                 ImGui::TableHeadersRow();
 
-                // 临时按前缀分组
+                // 涓存椂鎸夊墠缂€鍒嗙粍
                 std::map<std::string, std::vector<TimeStamp>> categorizedTimes;
                 for (const auto& ts : m_pRenderer->GetTimingValues())
                 {
@@ -1518,10 +1602,10 @@ namespace ElysiaEngine
                     std::string category = (pos != std::string::npos) ? ts.m_label.substr(0, pos) : "Uncategorized";
                     std::string passName = (pos != std::string::npos) ? ts.m_label.substr(pos + 1) : ts.m_label;
 
-                    categorizedTimes[category].push_back({passName, ts.m_microseconds}); // 伪代码构造
+                    categorizedTimes[category].push_back({passName, ts.m_microseconds}); // 浼唬鐮佹瀯閫?
                 }
 
-                // 渲染分类树
+                // 娓叉煋鍒嗙被鏍?
                 for (const auto& [category, passes] : categorizedTimes)
                 {
                     float categoryTotalTime = 0.0f;
@@ -1531,11 +1615,11 @@ namespace ElysiaEngine
                     ImGui::TableNextRow();
                     ImGui::TableSetColumnIndex(0);
 
-                    // 分类节点（粗体或不同颜色提示）
+                    // 鍒嗙被鑺傜偣锛堢矖浣撴垨涓嶅悓棰滆壊鎻愮ず锛?
                     bool nodeOpen = ImGui::TreeNodeEx(category.c_str(), ImGuiTreeNodeFlags_SpanFullWidth);
 
                     ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%.2f", categoryTotalTime); // 显示该类别的总耗时
+                    ImGui::Text("%.2f", categoryTotalTime); // 鏄剧ず璇ョ被鍒殑鎬昏€楁椂
 
                     if (nodeOpen)
                     {
@@ -1543,7 +1627,7 @@ namespace ElysiaEngine
                         {
                             ImGui::TableNextRow();
                             ImGui::TableSetColumnIndex(0);
-                            ImGui::Text("  %s", ts.m_label.c_str()); // 缩进表示层级
+                            ImGui::Text("  %s", ts.m_label.c_str()); // 缂╄繘琛ㄧず灞傜骇
 
                             ImVec4 color = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
                             if (ts.m_microseconds > 2000.0f)
@@ -1568,20 +1652,20 @@ namespace ElysiaEngine
         if (!entity)
             return;
 
-        // 1. 准备节点标志
+        // 1. 鍑嗗鑺傜偣鏍囧織
         ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow |
                                    ImGuiTreeNodeFlags_SpanAvailWidth;
 
-        // 如果被选中，加上高亮标志
+        // 濡傛灉琚€変腑锛屽姞涓婇珮浜爣蹇?
         if (SelectionManager::GetInstance().GetSelected() == entity)
             flags |= ImGuiTreeNodeFlags_Selected;
 
-        // 如果没有子节点，标记为叶子节点（不显示箭头）
+        // 濡傛灉娌℃湁瀛愯妭鐐癸紝鏍囪涓哄彾瀛愯妭鐐癸紙涓嶆樉绀虹澶达級
         bool hasChildren = !entity->GetChildren().empty();
         if (!hasChildren)
             flags |= ImGuiTreeNodeFlags_Leaf;
 
-        // 2. 渲染节点
+        // 2. 娓叉煋鑺傜偣
         // Viewport picking: force-open the ancestor chain so the selected node
         // becomes visible and can be scrolled to below.
         if (SelectionManager::GetInstance().IsScrollTargetAncestor(entity))
@@ -1589,10 +1673,10 @@ namespace ElysiaEngine
             ImGui::SetNextItemOpen(true, ImGuiCond_Always);
         }
 
-        // 使用指针作为唯一 ID，节点显示名称
+        // 浣跨敤鎸囬拡浣滀负鍞竴 ID锛岃妭鐐规樉绀哄悕绉?
         bool opened = ImGui::TreeNodeEx((void*)entity, flags, entity->name.c_str());
 
-        // 3. 处理点击交互
+        // 3. 澶勭悊鐐瑰嚮浜や簰
         if (ImGui::IsItemClicked() && !SceneManager::GetInstance().IsPlaying())
         {
             SelectionManager::GetInstance().Select(entity);
@@ -1606,14 +1690,14 @@ namespace ElysiaEngine
             ImGui::SetScrollHereY(0.5f);
         }
 
-        // 4. 如果节点被展开，递归绘制子节点
+        // 4. 濡傛灉鑺傜偣琚睍寮€锛岄€掑綊缁樺埗瀛愯妭鐐?
         if (opened)
         {
-            for (auto& child : entity->GetChildren()) // 假设 children 存储的是原始指针或 smart ptr
+            for (auto& child : entity->GetChildren()) // 鍋囪 children 瀛樺偍鐨勬槸鍘熷鎸囬拡鎴?smart ptr
             {
                 DrawEntityNode(child.get());
             }
-            ImGui::TreePop(); // 必须与打开的节点配对
+            ImGui::TreePop(); // 蹇呴』涓庢墦寮€鐨勮妭鐐归厤瀵?
         }
     }
     void ElysiaFrame::DrawTransformComponent(Entity* entity)
@@ -2529,7 +2613,7 @@ namespace ElysiaEngine
         // transform widget hidden. A later selection turns it back on
         // (SLevelViewport::OnActorSelectionChanged). While it is hidden,
         // Manipulate is not called, so ImGuizmo's last hover or drag must
-        // not swallow the click — UE re-picks the actor under the axis.
+        // not swallow the click 鈥?UE re-picks the actor under the axis.
         const bool bWidgetHidden = userData.bGameView && !userData.bGameViewShowWidget;
 
         // Viewport click picking: LMB on the image selects the entity, syncing

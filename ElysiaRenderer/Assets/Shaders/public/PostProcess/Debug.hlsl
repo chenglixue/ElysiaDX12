@@ -41,6 +41,7 @@ cbuffer PassConstant : register(b0, perPassSpace)
     UINT g_MipmapLevel;
     // xy = panel origin in target pixels, zw = panel size in pixels
     Vector4 g_ShadowMapInset;
+    UINT g_SSSRHIZValidate;
 }
 
 struct AABBInstanceData
@@ -83,6 +84,8 @@ GIData Elysia_DDGI_LoadRayData(uint readIndex)
 #define DEBUG_POST_TONEMAP_HDR 19
 #define DEBUG_LIGHTING_ONLY 20
 #define DEBUG_SHADING_MODEL 21
+#define DEBUG_SSSR_HIZ 23
+#define DEBUG_SSSR_TILE_CLASSIFY 24
 
 struct VSInput
 {
@@ -235,6 +238,8 @@ PSInput VS(VSInput i, UINT vertexID : SV_VertexID, uint instanceID : SV_Instance
     case DEBUG_POST_TONEMAP_HDR:
     case DEBUG_LIGHTING_ONLY:
     case DEBUG_SHADING_MODEL:
+    case DEBUG_SSSR_HIZ:
+    case DEBUG_SSSR_TILE_CLASSIFY:
     case 22: // DebugMode::Wireframe. The pass does not draw this mode.
         o.uv = float2((vertexID << 1) & 2, vertexID & 2);
         o.positionCS = float4(o.uv.x * 2.0f - 1.0f, 1.0f - o.uv.y * 2.0f, 0.0f, 1.0f);
@@ -321,10 +326,11 @@ PSOutput PS(PSInput i)
     {
         // Reversed-Z device depth is near-white; show linear eye depth so structure reads.
         float rawDepth = SampleTexture2D(OpaqueDepthIndex, screenUV, ClampPointSampler).r;
+        float LinearDepth01 = Linear01Depth(rawDepth, g_ZBufferParams);
         float3 viewPos = ComputeViewSpacePosition(screenUV, rawDepth, projMatrix_I);
         float eyeDepth = abs(viewPos.z);
         float vis = eyeDepth / (eyeDepth + 100.0f);
-        o.target0 = vis;
+        o.target0 = LinearDepth01;
         break;
     }
     case DEBUG_OPACITY:
@@ -413,6 +419,63 @@ PSOutput PS(PSInput i)
         float2 distanceToEdge = min(insetUV, 1.0f - insetUV) * insetSize;
         float border = (distanceToEdge.x < 1.5f || distanceToEdge.y < 1.5f) ? 0.0f : 1.0f;
         o.target0.rgb = float3(value, value, value) * border;
+        break;
+    }
+    case DEBUG_SSSR_HIZ:
+    {
+        Texture2D<float> hiz = ResourceDescriptorHeap[g_TargetTexIndex];
+        uint fullWidth, fullHeight, mipCount;
+        hiz.GetDimensions(0, fullWidth, fullHeight, mipCount);
+        if (g_MipmapLevel >= mipCount || fullWidth == 0 || fullHeight == 0)
+        {
+            o.target0 = float4(1, 0, 1, 1);
+            break;
+        }
+
+        uint mipWidth, mipHeight, levelCount;
+        hiz.GetDimensions(g_MipmapLevel, mipWidth, mipHeight, levelCount);
+        uint2 texel = min(uint2(i.uv * float2(mipWidth, mipHeight)), uint2(mipWidth - 1, mipHeight - 1));
+        float depth = hiz.Load(int3(texel, g_MipmapLevel));
+        depth = Linear01Depth(depth, g_ZBufferParams);
+
+        if (g_SSSRHIZValidate == 0)
+        {
+            o.target0 = float4(depth.xxx, 1);
+            break;
+        }
+
+        float expected = depth;
+        if (g_MipmapLevel == 0)
+        {
+            expected = LoadTexture2D(OpaqueDepthIndex, int2(texel)).r;
+        }
+        else
+        {
+            uint parentWidth, parentHeight, parentLevels;
+            hiz.GetDimensions(g_MipmapLevel - 1, parentWidth, parentHeight, parentLevels);
+            uint2 parentMax = uint2(parentWidth, parentHeight) - 1;
+            uint2 parentBase = texel * 2;
+            float d00 = hiz.Load(int3(min(parentBase, parentMax), g_MipmapLevel - 1));
+            float d10 = hiz.Load(int3(min(parentBase + uint2(1, 0), parentMax), g_MipmapLevel - 1));
+            float d01 = hiz.Load(int3(min(parentBase + uint2(0, 1), parentMax), g_MipmapLevel - 1));
+            float d11 = hiz.Load(int3(min(parentBase + uint2(1, 1), parentMax), g_MipmapLevel - 1));
+            expected = min(min(d00, d10), min(d01, d11));
+        }
+
+        float error = depth - expected;
+        if (abs(error) <= 1e-5)
+            o.target0 = float4(0, 1, 0, 1);
+        else if (error > 0)
+            o.target0 = float4(1, 0, 0, 1);
+        else
+            o.target0 = float4(0, 0, 1, 1);
+        break;
+    }
+    case DEBUG_SSSR_TILE_CLASSIFY:
+    {
+        // Colors are authored in CS_TileClassify (Classification / CopyFlags views).
+        float3 classifyDebug = SampleTexture2D(g_TargetTexIndex, i.uv, ClampPointSampler).rgb;
+        o.target0 = float4(classifyDebug, 1);
         break;
     }
     }

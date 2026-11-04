@@ -3,7 +3,6 @@
 
 #define GROUP_SIZE 8
 
-
 cbuffer PassConstant : register(b0, perPassSpace)
 {
     Matrix viewMatrix;
@@ -13,7 +12,7 @@ cbuffer PassConstant : register(b0, perPassSpace)
     Matrix viewProjMatrix;
     Matrix viewProjMatrix_I;
 
-    float4 g_DestSize;
+    float4 g_TargetSize;
     float g_RoughnessThreshold;
     uint g_SamplesPerQuad;
     UINT g_MostDetailedMip;
@@ -51,8 +50,8 @@ void DoIntersect(uint2 groupID : SV_GroupID,
     bool copyDiagonal;
     UnpackRayData(packData, rayPos, copyHorizontal, copyVertical, copyDiagonal);
 
-    const UINT2 screenSize = g_DestSize.xy;
-    const float2 screenUV = ((float2)rayPos + 0.5f) * g_DestSize.zw;
+    const UINT2 screenSize = g_TargetSize.xy;
+    const float2 screenUV = ((float2)rayPos + 0.5f) * g_TargetSize.zw;
 
     float3 normalWS = GetNormalWS(screenUV);
     float roughness = GetRoughness(screenUV);
