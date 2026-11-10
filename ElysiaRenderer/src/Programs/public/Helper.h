@@ -111,7 +111,23 @@ __debugbreak(); \
 
     inline void AssertError(const char* errorMessage)
     {
-        assert((errorMessage, false));
+        if (errorMessage == nullptr)
+            errorMessage = "Unknown AssertError";
+
+        FILE* file = nullptr;
+        _wfopen_s(&file, L"D:\\DX12\\ElysiaDX12\\assert-error.txt", L"w, ccs=UTF-8");
+        if (file)
+        {
+            fwprintf(file, L"%hs\n", errorMessage);
+            fclose(file);
+        }
+
+        OutputDebugStringA("AssertError: ");
+        OutputDebugStringA(errorMessage);
+        OutputDebugStringA("\n");
+        Log::Error("%s", errorMessage);
+
+        assert(false && errorMessage);
     }
 
     inline void ShowErrorMessage(const std::wstring& message)

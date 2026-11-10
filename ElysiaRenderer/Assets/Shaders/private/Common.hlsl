@@ -103,11 +103,11 @@ float4 GatherAlphaTexture2D(UINT textureIndex, float2 uv, UINT samplerStateIndex
     return SampleTex.GatherAlpha(Sampler, uv, offset);
 }
 
-float4 LoadTexture2D(UINT textureIndex, int2 coord)
+float4 LoadTexture2D(UINT textureIndex, int2 coord, UINT MipmapLevel = 0)
 {
     Texture2D<float4> SampleTex = ResourceDescriptorHeap[textureIndex];
 
-    return SampleTex.Load(int3(coord, 0));
+    return SampleTex.Load(int3(coord, MipmapLevel));
 }
 
 float3 GetTexture2DDimensions(UINT textureIndex)

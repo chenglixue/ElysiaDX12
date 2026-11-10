@@ -652,35 +652,28 @@ namespace ElysiaCore
             return UINT_MAX;
         }
 
-        bool isContiguous = true;
-        size_t size = m_freeReservedDescriptorIndices.size();
-        UINT lastVal = m_freeReservedDescriptorIndices.back();
+        auto& freeList = m_freeReservedDescriptorIndices;
+        std::sort(freeList.begin(), freeList.end());
 
-        if (m_freeReservedDescriptorIndices[size - count] != (lastVal - count + 1))
+        // Prefer a high-end block (same packing as before), but accept any
+        // contiguous run. The old path only tested the highest `count` free
+        // indices, so a hole near the top aborted even when a valid block existed.
+        for (size_t i = freeList.size() - count; ; --i)
         {
-            isContiguous = false;
-        }
-
-        if (!isContiguous)
-        {
-            std::sort(m_freeReservedDescriptorIndices.begin(),
-                      m_freeReservedDescriptorIndices.end());
-
-            lastVal = m_freeReservedDescriptorIndices.back();
-            if (m_freeReservedDescriptorIndices[size - count] != (lastVal - count + 1))
+            if (freeList[i + count - 1] == freeList[i] + count - 1)
             {
-                ElysiaHelper::AssertError(
-                    "Heap Fragmentation: Cannot find contiguous block for Mipmaps!");
-                return UINT_MAX;
+                const UINT baseIndex = freeList[i];
+                freeList.erase(freeList.begin() + static_cast<std::ptrdiff_t>(i),
+                               freeList.begin() + static_cast<std::ptrdiff_t>(i + count));
+                return baseIndex;
             }
+            if (i == 0)
+                break;
         }
 
-        UINT baseIndex = lastVal - count + 1;
-
-        m_freeReservedDescriptorIndices.resize(size - count);
-
-        return baseIndex;
-
+        ElysiaHelper::AssertError(
+            "Heap Fragmentation: Cannot find contiguous block for Mipmaps!");
+        return UINT_MAX;
     }
     void DX12Device::FreeContiguousReservedDescriptorIndices(UINT baseIndex, UINT count)
     {

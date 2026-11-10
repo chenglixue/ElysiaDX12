@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "../public/DebugPass.h"
 #include "../public/LocalExposureVisualizePass.h"
 
@@ -260,6 +260,23 @@ namespace ElysiaRenderer
                                      passID);
                 m_pMaterial->SetUINT(ShaderIDs::g_SSSRHIZValidate,
                                      sssr.debugValidate ? 1u : 0u,
+                                     passID);
+            }
+            else if (target == SSSRDebugTarget::Intersection)
+            {
+                RenderTexture* pIntersection = RenderTargetManager::GetInstance().GetRenderTexture(
+                    RenderResource::GetInstance().GetPropertyName(SSSRPass::RenderTextureIDs::IntersectionOutputRTID));
+                if (pIntersection == nullptr)
+                    break;
+
+                // Shader-only path (not a persisted DebugMode). Matches DEBUG_SSSR_INTERSECTION in Debug.hlsl.
+                // Multiplies radiance by confidence so IBL fallbacks (alpha 0) stay black.
+                m_pMaterial->SetUINT(ShaderIDs::g_DebugMode,
+                                     26u,
+                                     passID);
+                m_pCommand->AddBarrier(pIntersection, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+                m_pMaterial->SetUINT(ShaderIDs::g_TargetTexIndex,
+                                     pIntersection->GetSRVResourceHeapIndex(),
                                      passID);
             }
             else // TileClassify

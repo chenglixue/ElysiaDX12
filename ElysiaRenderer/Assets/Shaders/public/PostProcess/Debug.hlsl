@@ -86,6 +86,7 @@ GIData Elysia_DDGI_LoadRayData(uint readIndex)
 #define DEBUG_SHADING_MODEL 21
 #define DEBUG_SSSR_HIZ 23
 #define DEBUG_SSSR_TILE_CLASSIFY 24
+#define DEBUG_SSSR_INTERSECTION 26
 
 struct VSInput
 {
@@ -240,6 +241,7 @@ PSInput VS(VSInput i, UINT vertexID : SV_VertexID, uint instanceID : SV_Instance
     case DEBUG_SHADING_MODEL:
     case DEBUG_SSSR_HIZ:
     case DEBUG_SSSR_TILE_CLASSIFY:
+    case DEBUG_SSSR_INTERSECTION:
     case 22: // DebugMode::Wireframe. The pass does not draw this mode.
         o.uv = float2((vertexID << 1) & 2, vertexID & 2);
         o.positionCS = float4(o.uv.x * 2.0f - 1.0f, 1.0f - o.uv.y * 2.0f, 0.0f, 1.0f);
@@ -476,6 +478,16 @@ PSOutput PS(PSInput i)
         // Colors are authored in CS_TileClassify (Classification / CopyFlags views).
         float3 classifyDebug = SampleTexture2D(g_TargetTexIndex, i.uv, ClampPointSampler).rgb;
         o.target0 = float4(classifyDebug, 1);
+        break;
+    }
+    case DEBUG_SSSR_INTERSECTION:
+    {
+        // Alpha is hit confidence. Classify stores IBL fallbacks at alpha 0;
+        // only actual SSR hits should appear in this view. Misses stay black.
+        float4 reflection = SampleTexture2D(g_TargetTexIndex, i.uv, ClampPointSampler);
+        float confidence = saturate(reflection.a);
+        float3 color = max(reflection.rgb, 0.0f) * confidence;
+        o.target0 = float4(color, 1);
         break;
     }
     }

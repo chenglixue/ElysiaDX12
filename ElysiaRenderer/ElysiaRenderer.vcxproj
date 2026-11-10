@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <Import Project="..\packages\Microsoft.Direct3D.D3D12.1.618.5\build\native\Microsoft.Direct3D.D3D12.props" Condition="Exists('..\packages\Microsoft.Direct3D.D3D12.1.618.5\build\native\Microsoft.Direct3D.D3D12.props')"/>
     <Import Project="..\packages\Vcpkg.Nuget.1.5.0\build\Vcpkg.Nuget.props" Condition="Exists('..\packages\Vcpkg.Nuget.1.5.0\build\Vcpkg.Nuget.props')"/>
@@ -538,6 +538,9 @@
             <FileType>Document</FileType>
         </None>
         <None Include="Assets\Shaders\public\PostProcess\SSSR\CS_Intersect.hlsl">
+            <FileType>Document</FileType>
+        </None>
+        <None Include="Assets\Shaders\public\PostProcess\SSSR\CS_Composite.hlsl">
             <FileType>Document</FileType>
         </None>
         <None Include="Assets\Shaders\public\PostProcess\AutoExposure\CS_AutoExposure.hlsl"/>

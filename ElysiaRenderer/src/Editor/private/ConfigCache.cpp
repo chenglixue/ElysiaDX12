@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 
 #include "../public/ConfigCache.h"
 #include "../public/UserData.h"
@@ -346,6 +346,7 @@ namespace ElysiaRenderer
             {SSSRDebugTarget::None, "None"},
             {SSSRDebugTarget::HIZ, "HIZ"},
             {SSSRDebugTarget::TileClassify, "TileClassify"},
+            {SSSRDebugTarget::Intersection, "Intersection"},
         };
 
         const EnumName<AutoExposureVisualizeDebugType> kAutoExposureVisualizeTypes[] =
@@ -832,12 +833,16 @@ namespace ElysiaRenderer
         setFloat("SSGI", "SelfBias", data.ssgiParameter.selfBias);
         setFloat("SSGI", "HistoryWeight", data.ssgiParameter.historyWeight);
 
+        setBool("SSSR", "Enable", data.sssrParameter.enable);
         setFloat("SSSR", "RoughnessThreshold", data.sssrParameter.roughnessThreshold);
         int samplesPerQuad = static_cast<int>(data.sssrParameter.samplesPerQuad);
         setInt("SSSR", "SamplesPerQuad", samplesPerQuad);
-        if (samplesPerQuad < 0)
-            samplesPerQuad = 0;
-        data.sssrParameter.samplesPerQuad = static_cast<UINT>(samplesPerQuad);
+        data.sssrParameter.samplesPerQuad = ClampSSSRSamplesPerQuad(samplesPerQuad);
+        int maxRaySteps = static_cast<int>(data.sssrParameter.maxRaySteps);
+        setInt("SSSR", "MaxRaySteps", maxRaySteps);
+        data.sssrParameter.maxRaySteps = ClampSSSRMaxRaySteps(maxRaySteps);
+        setFloat("SSSR", "Thickness", data.sssrParameter.thickness);
+        setFloat("SSSR", "Intensity", data.sssrParameter.intensity);
         setEnum("SSSR", "DebugTarget", data.sssrParameter.debugTarget, kSSSRDebugTargets);
         setEnum("SSSR", "TileClassifyDebugView", data.sssrParameter.tileClassifyDebugView, kSSSRTileClassifyDebugViews);
         NormalizeSSSRDebugMode(data.debugMode, data.sssrParameter);
@@ -1657,8 +1662,12 @@ namespace ElysiaRenderer
         emitFloat("SSGI", "SelfBias", data.ssgiParameter.selfBias);
         emitFloat("SSGI", "HistoryWeight", data.ssgiParameter.historyWeight);
 
+        emitBool("SSSR", "Enable", data.sssrParameter.enable);
         emitFloat("SSSR", "RoughnessThreshold", data.sssrParameter.roughnessThreshold);
         emitInt("SSSR", "SamplesPerQuad", static_cast<int>(data.sssrParameter.samplesPerQuad));
+        emitInt("SSSR", "MaxRaySteps", static_cast<int>(data.sssrParameter.maxRaySteps));
+        emitFloat("SSSR", "Thickness", data.sssrParameter.thickness);
+        emitFloat("SSSR", "Intensity", data.sssrParameter.intensity);
         emitEnum("SSSR", "DebugTarget", data.sssrParameter.debugTarget, kSSSRDebugTargets);
         emitEnum("SSSR", "TileClassifyDebugView", data.sssrParameter.tileClassifyDebugView, kSSSRTileClassifyDebugViews);
 

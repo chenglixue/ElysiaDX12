@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "Programs/public/DebugUtility.h"
 
 namespace ElysiaRenderer
@@ -9,13 +9,15 @@ namespace ElysiaRenderer
         None = 0,
         HIZ = 1,
         TileClassify = 2,
+        Intersection = 3,
     };
 
     NLOHMANN_JSON_SERIALIZE_ENUM(SSSRDebugTarget,
                                  {
                                  {SSSRDebugTarget::None, "None"},
                                  {SSSRDebugTarget::HIZ, "HIZ"},
-                                 {SSSRDebugTarget::TileClassify, "TileClassify"}
+                                 {SSSRDebugTarget::TileClassify, "TileClassify"},
+                                 {SSSRDebugTarget::Intersection, "Intersection"}
                                  })
 
     // Sub-views for SSSRDebugTarget::TileClassify. Append only — values are persisted.
@@ -39,6 +41,17 @@ namespace ElysiaRenderer
         }
     }
 
+    inline const char* GetSSSRDebugTargetDescription(SSSRDebugTarget target)
+    {
+        switch (target)
+        {
+        case SSSRDebugTarget::Intersection:
+            return "Viewport shows only screen-space reflections.\nHits show reflected radiance. Misses and environment fallbacks are black.";
+        default:
+            return nullptr;
+        }
+    }
+
     NLOHMANN_JSON_SERIALIZE_ENUM(SSSRTileClassifyDebugView,
                                  {
                                  {SSSRTileClassifyDebugView::Classification, "Classification"},
@@ -47,8 +60,12 @@ namespace ElysiaRenderer
 
     struct SSSRParameter
     {
-        float roughnessThreshold = 1;
+        bool enable = true;
+        float roughnessThreshold = 0.4f;
         UINT samplesPerQuad = 1;
+        UINT maxRaySteps = 128;
+        float thickness = 0.5f;
+        float intensity = 1.0f;
         int debugMip = 0;
         bool debugValidate = false;
         SSSRDebugTarget debugTarget = SSSRDebugTarget::None;
@@ -56,12 +73,34 @@ namespace ElysiaRenderer
     };
 
     NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(SSSRParameter,
+                                                    enable,
                                                     roughnessThreshold,
                                                     samplesPerQuad,
+                                                    maxRaySteps,
+                                                    thickness,
+                                                    intensity,
                                                     debugMip,
                                                     debugValidate,
                                                     debugTarget,
                                                     tileClassifyDebugView)
+
+    inline UINT ClampSSSRSamplesPerQuad(int samples)
+    {
+        if (samples >= 4)
+            return 4;
+        if (samples >= 2)
+            return 2;
+        return 1;
+    }
+
+    inline UINT ClampSSSRMaxRaySteps(int steps)
+    {
+        if (steps < 1)
+            return 1;
+        if (steps > 1024)
+            return 1024;
+        return static_cast<UINT>(steps);
+    }
 
     // Migrate legacy DebugMode::SSSRHIZ / SSSRTileClassify into DebugMode::SSSR + debugTarget.
     // Idempotent. Old enum numeric values remain for append-only JSON / ini compatibility.
@@ -83,5 +122,17 @@ namespace ElysiaRenderer
     {
         return (debugMode == DebugMode::SSSR && sssr.debugTarget == SSSRDebugTarget::TileClassify) ||
                debugMode == DebugMode::SSSRTileClassify;
+    }
+
+    inline bool IsSSSRIntersectionDebugActive(DebugMode debugMode, const SSSRParameter& sssr)
+    {
+        return debugMode == DebugMode::SSSR && sssr.debugTarget == SSSRDebugTarget::Intersection;
+    }
+
+    inline bool IsSSSRDebugActive(DebugMode debugMode, const SSSRParameter& sssr)
+    {
+        if (debugMode == DebugMode::SSSRHIZ || debugMode == DebugMode::SSSRTileClassify)
+            return true;
+        return debugMode == DebugMode::SSSR && sssr.debugTarget != SSSRDebugTarget::None;
     }
 }

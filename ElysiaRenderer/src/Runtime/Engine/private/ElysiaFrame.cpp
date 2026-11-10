@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "../public/ElysiaFrame.h"
 
 
@@ -1187,7 +1187,9 @@ namespace ElysiaEngine
             if (pUserData.debugMode == DebugMode::SSSR)
             {
                 auto& sssrOverlay = pUserData.sssrParameter;
-                if (ElysiaRenderer::EnumCombo("SSSR Debug Target", &sssrOverlay.debugTarget))
+                if (ElysiaRenderer::EnumCombo("SSSR Debug Target",
+                                              &sssrOverlay.debugTarget,
+                                              &ElysiaRenderer::GetSSSRDebugTargetDescription))
                 {
                     if (sssrOverlay.debugTarget == SSSRDebugTarget::None)
                         pUserData.debugMode = m_lastViewportViewMode;
@@ -1475,20 +1477,24 @@ namespace ElysiaEngine
             {
                 auto& sssr = pUserData.sssrParameter;
 
+                ImGui::Checkbox("Enable SSSR", &sssr.enable);
+                ImGui::SliderFloat("Intensity", &sssr.intensity, 0.0f, 4.0f);
                 ImGui::SliderFloat("Roughness Threshold", &sssr.roughnessThreshold, 0.0f, 1.0f);
+                int maxRaySteps = static_cast<int>(sssr.maxRaySteps);
+                if (ImGui::SliderInt("Max Ray Steps", &maxRaySteps, 1, 1024))
+                    sssr.maxRaySteps = ClampSSSRMaxRaySteps(maxRaySteps);
+                ImGui::SliderFloat("Thickness", &sssr.thickness, 0.001f, 20.0f);
                 int samplesPerQuad = static_cast<int>(sssr.samplesPerQuad);
                 if (ImGui::SliderInt("Samples Per Quad", &samplesPerQuad, 1, 4))
-                {
-                    if (samplesPerQuad == 3)
-                        samplesPerQuad = 2;
-                    sssr.samplesPerQuad = static_cast<UINT>(samplesPerQuad);
-                }
+                    sssr.samplesPerQuad = ClampSSSRSamplesPerQuad(samplesPerQuad);
                 ImGui::TextDisabled("1 / 2 / 4 rays per 2x2. 3 snaps to 2.");
 
                 // Legacy SSSRHIZ / SSSRTileClassify → SSSR + debugTarget.
                 ElysiaRenderer::NormalizeSSSRDebugMode(pUserData.debugMode, sssr);
 
-                if (ElysiaRenderer::EnumCombo("Debug Target", &sssr.debugTarget))
+                if (ElysiaRenderer::EnumCombo("Debug Target",
+                                              &sssr.debugTarget,
+                                              &ElysiaRenderer::GetSSSRDebugTargetDescription))
                 {
                     if (sssr.debugTarget == SSSRDebugTarget::None)
                     {

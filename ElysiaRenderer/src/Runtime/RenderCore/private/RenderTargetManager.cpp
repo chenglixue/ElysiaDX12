@@ -204,7 +204,8 @@ namespace ElysiaRenderer
         if (m_renderTextures.contains(nameHash))
         {
             auto RT = GetRenderTexture(nameHash);
-            if (width == RT->GetWidth() && height == RT->GetHeight() && format == RT->GetFormat())
+            if (width == RT->GetWidth() && height == RT->GetHeight() && format == RT->GetFormat() &&
+                mipmapCount == RT->GetResource()->GetDesc().MipLevels)
             {
                 return RT;
             }

@@ -263,6 +263,15 @@ float3 SampleNormalWS(float2 uv, UINT samplerIndex)
     return decodeNormalWS;
 }
 
+float3 LoadNormalWS(UINT2 SamplePos)
+{
+    float3 encodeNormalWS = LoadTexture2D(SamplePos, GBuffer3Index);
+    float3 decodeNormalWS = DecodeNormal(encodeNormalWS);
+    decodeNormalWS = normalize(decodeNormalWS);
+
+    return decodeNormalWS;
+}
+
 float3 SampleTangentWS(float2 uv, UINT samplerIndex)
 {
     float3 encodeNormalWS = SampleTexture2D(GBuffer2Index, uv, samplerIndex);
@@ -286,6 +295,11 @@ float SampleRoughness(float2 uv)
 //    float4 positionWS = mul(positionCS, viewProjMatrix_I);
 //    return positionWS.xyz / positionWS.w;
 //}
+
+float4 TransformNormalFromWSToVS(float3 NormalWS, float4x4 ViewMat)
+{
+    return normalize(mul(float4(NormalWS, 0.f), ViewMat));
+}
 
 float4 ComputeClipSpacePosition(float2 screenUV, float rawDepth)
 {
@@ -322,6 +336,28 @@ float3 ComputeViewSpacePosition(float2 screenUV, float rawDepth, Matrix projMatr
     float4 positionCS = ComputeClipSpacePosition(screenUV, rawDepth);
     float4 viewPos = mul(positionCS, projMatrix_I);
     return viewPos.xyz / viewPos.w;
+}
+
+float3 InvProjectPosition(float3 coord, float4x4 mat) {
+    coord.y = (1 - coord.y);
+    coord.xy = 2 * coord.xy - 1;
+    float4 projected = mul(mat, float4(coord, 1));
+    projected.xyz /= projected.w;
+    return projected.xyz;
+}
+
+float3 ProjectPosition(float3 origin, float4x4 mat) 
+{
+    float4 projected = mul(mat, float4(origin, 1));
+    projected.xyz /= projected.w;
+    projected.xy = 0.5 * projected.xy + 0.5;
+    projected.y = (1 - projected.y);
+    return projected.xyz;
+}
+
+float3 ProjectDirection(float3 origin, float3 direction, float3 screen_space_origin, float4x4 mat) {
+    float3 offsetted = ProjectPosition(origin + direction, mat);
+    return offsetted - screen_space_origin;
 }
 
 // Z buffer to linear 0..1 depth (0 at camera position, 1 at far plane).

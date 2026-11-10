@@ -1,4 +1,4 @@
-﻿#include "private\ShadingCommon.hlsl"
+#include "private\ShadingCommon.hlsl"
 #include "private/SSSR/SSSRCommon.hlsli"
 
 cbuffer PassConstant : register(b0, perPassSpace)
@@ -20,6 +20,7 @@ cbuffer PassConstant : register(b0, perPassSpace)
     UINT g_IntersectionArgsBufferIndex;
     UINT g_TileClassifyDebugTexIndex;
     UINT g_TileClassifyDebugView;
+    
 }
 
 #ifndef SSSR_TILE_CLASSIFY_GROUP_SIZE
@@ -30,12 +31,17 @@ cbuffer PassConstant : register(b0, perPassSpace)
 #define SSSR_INTERSECT_ARGS_GROUP_SIZE 1
 #endif
 
+#ifndef SSSR_INTERSECT_GROUP_SIZE
+#define SSSR_INTERSECT_GROUP_SIZE 8
+#endif
+
 #define SSSR_TILE_CLASSIFY_THREAD_GROUP [numthreads(SSSR_TILE_CLASSIFY_GROUP_SIZE, SSSR_TILE_CLASSIFY_GROUP_SIZE, 1)]
 #define SSSR_INTERSECT_ARGS_THREAD_GROUP [numthreads(SSSR_INTERSECT_ARGS_GROUP_SIZE, SSSR_INTERSECT_ARGS_GROUP_SIZE, 1)]
+#define SSSR_INTERSECT_THREAD_COUNT (SSSR_INTERSECT_GROUP_SIZE * SSSR_INTERSECT_GROUP_SIZE)
 
 #define SSSR_TILE_CLASSIFY_DEBUG_CLASSIFICATION 0
 #define SSSR_TILE_CLASSIFY_DEBUG_COPY_FLAGS 1
-// Sentinel from SSSRPass when TileClassify debug is off — skip UAV writes.
+// Sentinel from SSSRPass when TileClassify debug is off - skip UAV writes.
 #define SSSR_TILE_CLASSIFY_DEBUG_DISABLED 0xFFFFFFFFu
 
 float GetRoughness(UINT2 LoadPos)
@@ -46,17 +52,6 @@ float GetRoughness(UINT2 LoadPos)
 float GetSceneDepth(UINT2 LoadPos)
 {
     return LoadTexture2D(OpaqueDepthIndex, LoadPos).r;
-}
-
-bool IsThreadOutWorkArea(UINT2 ThreadPos, float4 AreaSize)
-{
-    BRANCH
-    if (ThreadPos.x >= AreaSize.x || ThreadPos.y >= AreaSize.y)
-    {
-        return true;
-    }
-
-    return false;
 }
 
 bool IsDepthMatch(float Linear01SceneDepth)
@@ -115,7 +110,9 @@ void SampleEnvironment(UINT2 ReadPos, float Roughness)
     float4 specularIBL = SampleTextureCube_LOD(SkyboxTexIndex, R, ClampLinearSampler, lod);
 
     RWTexture2D<float4> IntersectionOutputTex = ResourceDescriptorHeap[g_IntersectionOutputTexIndex];
-    IntersectionOutputTex[ReadPos] = specularIBL;
+    // Alpha 0: this is an IBL fallback already present in deferred lighting.
+    // Composite only adds intersection results with confidence > 0.
+    IntersectionOutputTex[ReadPos] = float4(specularIBL.rgb, 0.0f);
 }
 
 void WriteTileClassifyDebug(UINT2 WritePos,
@@ -170,7 +167,7 @@ void TileClassify(UINT2 ReadPos, UINT2 WritePos, UINT2 GroupThreadID)
     float SceneDepth = GetSceneDepth(ReadPos);
     float Linear01SceneDepth = Linear01Depth(SceneDepth, g_ZBufferParams);
 
-    bool bOutWorkArea = IsThreadOutWorkArea(ReadPos, g_TargetSize);
+    bool bOutWorkArea = SSSR_IsThreadOutWorkArea(ReadPos, g_TargetSize);
     bool bDepthMatch = IsDepthMatch(Linear01SceneDepth);
     bool bRoughnessMatch = IsRoughnessMatch(Roughness);
 
@@ -224,6 +221,14 @@ void TileClassify(UINT2 ReadPos, UINT2 WritePos, UINT2 GroupThreadID)
     }
 }
 
+[numthreads(1, 1, 1)]
+void ClearRayCounter()
+{
+    RWStructuredBuffer<UINT> RayCounterBuffer = ResourceDescriptorHeap[g_RayCounterBufferIndex];
+    RayCounterBuffer[0] = 0;
+    RayCounterBuffer[1] = 0;
+}
+
 SSSR_TILE_CLASSIFY_THREAD_GROUP
 void DoTileClassify(UINT3 ID : SV_DispatchThreadID,
     UINT2 groupID : SV_GroupID,
@@ -242,7 +247,7 @@ SSSR_INTERSECT_ARGS_THREAD_GROUP
 void DoIntersectArgs(UINT3 ID : SV_DispatchThreadID)
 {
     BRANCH
-    if (any(ID) > 1)
+    if (any(ID != 0))
     {
         return;
     }
@@ -252,7 +257,7 @@ void DoIntersectArgs(UINT3 ID : SV_DispatchThreadID)
     
     UINT RayCount = RayCounterBuffer[0];
     
-    IntersectionArgsBuffer[0] = (RayCount + 63) * rcp(64);
+    IntersectionArgsBuffer[0] = (RayCount + (SSSR_INTERSECT_THREAD_COUNT - 1u)) / SSSR_INTERSECT_THREAD_COUNT;
     IntersectionArgsBuffer[1] = 1;
     IntersectionArgsBuffer[2] = 1;
     
